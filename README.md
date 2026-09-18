@@ -93,6 +93,11 @@ and layered validation loop is still in development.
 
 The requirement-by-requirement evidence audit is in
 [docs/REQUIREMENTS_AUDIT.md](docs/REQUIREMENTS_AUDIT.md).
+The architecture review and v2 identity/provenance design are in
+[docs/IR_DESIGN_V2.md](docs/IR_DESIGN_V2.md), with the staged migration plan in
+[docs/IR_MIGRATION.md](docs/IR_MIGRATION.md). The isolated schema foundation is
+under `scar/ir/v2/`; it is report/schema-only and is not connected to the v1
+planner or any optimization backend yet.
 The decomposition contract that defines the graph layers, source-line labels,
 and LeWM mapping is in
 [docs/PROGRAM_DECOMPOSITION.md](docs/PROGRAM_DECOMPOSITION.md).

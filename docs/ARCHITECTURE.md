@@ -8,6 +8,14 @@ directory safely; each process writes its own `metadata.<pid>.json` record.
 When supported it also writes `torch-profiler.<pid>.json`. The `analyze` command adds
 `report.json` and a machine-readable `graph.json`.
 
+The v1 graph remains the compatibility evidence graph. The architecture review
+in [IR_DESIGN_V2.md](IR_DESIGN_V2.md) separates three future layers: a
+Semantic Graph of operation definitions and value slots, an Execution Evidence
+Graph of observed instances/materializations, and an Optimization IR of
+replaceable regions and alternatives. The initial schema-only foundation lives
+under `scar/ir/v2/`; it is intentionally isolated from the existing detector
+and planner until identity/provenance migration is complete.
+
 `analyze --link-source path.py-or-project` adds that file or project's static
 graph and links dynamic
 events by observed absolute path and source line. When a loaded CodeID

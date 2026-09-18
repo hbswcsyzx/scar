@@ -1,5 +1,18 @@
 # Current evidence and remaining work
 
+## Architecture review and IR v2 foundation
+
+The architecture review is recorded in [IR_DESIGN_V2.md](IR_DESIGN_V2.md) and
+[IR_MIGRATION.md](IR_MIGRATION.md). The first M1 foundation is now implemented
+in `scar/ir/v2/`: typed identities separate logical versions, provenance,
+objects, allocations, regions and materializations; semantic definitions are
+separate from dynamic instances; and value/semantic/evidence validators reject
+unknown references, provenance-output mismatches and cyclic ancestry. The
+micro-fixture suite is `tests/unit/test_ir_v2.py`. This is a schema-level result
+only. The existing v1 trace, static graph, detectors and planner are
+intentionally not wired to v2 yet, and no new optimization backend was added
+in this phase.
+
 SCAR is a generic Python/PyTorch/GPU execution optimizer. Its intended scope is
 avoidable work across computation, representation, memory, transfer, state,
 control, ordering and external interaction. LeWM is an external testcase.
@@ -7,7 +20,7 @@ No core analysis imports its adapter or branches on its names.
 
 This is an active prototype, not a completion claim for `../init.md`.
 
-The current generic SCAR regression suite has 142 passing tests. The separate
+The current generic SCAR regression suite has 150 passing tests. The separate
 `/home/zyf/AAA/scar-testcases/lewm` project has its own passing adapter test;
 no LeWM adapter or test remains in the SCAR source tree. Candidate reports
 now contain explicit proof obligations for applicability, legality and cost;
@@ -87,7 +100,7 @@ silently treated as KEEP. Evidence is in
 Nested ordinary Python calls and returns now retain the nearest active outer
 loop scope in their metadata (`loop_parent_invocation_id`, target offset and
 iteration). This keeps the K control view intact when a loop body crosses a
-user-function boundary; the new regression is covered by the 142-test suite.
+user-function boundary; the new regression is covered by the 150-test suite.
 A fresh generic PyTorch loop smoke confirmed this at runtime: three module
 calls and three observed back-edge markers produced two post-back-edge module
 records with the propagated outer scope, seven `loop_controls` edges, and
