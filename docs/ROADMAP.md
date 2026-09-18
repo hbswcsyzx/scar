@@ -79,6 +79,27 @@ or synchronization overhead costs more than the measured saving.
   a negative graph fact requires complete evidence and cannot be inferred from
   a missing edge.
 
+### Phase 0.5: top-down semantic closure (current next stage)
+
+Before accepting another transformation, SCAR must close the gap exposed by
+the LeWM rejection audit:
+
+* reconstruct dynamic control regions and summarize child effects upward;
+* represent candidate placement separately from leaf detection, so a stable
+  input at an outer scope can produce a composite-region hoisting hypothesis;
+* normalize logical value provenance across object, storage, view, transform and
+  materialization boundaries;
+* collect literal provenance across local imports and treat package
+  initialization as a separate effect contract;
+* distinguish `PROVEN_BLOCKER` from `EVIDENCE_GAP` in every report;
+* measure region-level cost and validate a proposed placement before any backend
+  is allowed to transform it.
+
+The current implementation is report-only: `audit-rejections`,
+`analyze --topdown-out`, and `constants` add evidence and do not change a
+workload. No new backend is selected from this phase. The real LeWM evidence
+for this phase is documented in `docs/REJECTION_AUDIT.md`.
+
 ### Phase 1: one complete safe transformation
 
 Exact reuse requires an explicit reviewed value-purity declaration. It has

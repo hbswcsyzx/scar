@@ -12,7 +12,9 @@ from pathlib import Path
 
 from scar.analysis import (dead_expression_candidates, detect, graph_candidates,
                            graph_liveness, graph_loop_candidates,
-                           loop_invariant_candidates, summarize_action_inventory)
+                           loop_invariant_candidates, summarize_action_inventory,
+                           topdown_report, constant_report)
+from scar.analysis.rejection_audit import audit_path
 from scar.ir import (ProgramGraph, add_correspondences, from_project, from_source,
                      link_events, summarize_correspondence)
 from scar.planner import plan, plan_candidates, select_candidates
@@ -122,6 +124,13 @@ def _analyze(args) -> int:
               "action_inventory": action_inventory,
               "liveness": [x.as_dict() for x in liveness],
               "summary": {"kinds": {}, "labels": {}}}
+    topdown = None
+    if args.topdown_out:
+        topdown = topdown_report(program_graph, all_candidates)
+        topdown_path = Path(args.topdown_out).resolve()
+        topdown_path.parent.mkdir(parents=True, exist_ok=True)
+        topdown_path.write_text(json.dumps(topdown, indent=2, default=str))
+        report["topdown"] = topdown
     for event in graph.events:
         report["summary"]["kinds"][event.kind] = report["summary"]["kinds"].get(event.kind, 0) + 1
         for label in event.labels:
@@ -162,6 +171,11 @@ def _analyze(args) -> int:
         "liveness": dict(Counter(item.status for item in liveness)),
         "policy": report["policy"], "transformation_applied": False,
     }
+    if topdown is not None:
+        summary["topdown"] = {
+            "path": str(Path(args.topdown_out).resolve()),
+            "counts": topdown["counts"],
+        }
     # Keep the default trace-local location stable even when a report is
     # redirected elsewhere.  A caller doing batch analysis can provide an
     # explicit summary path rather than silently overwriting a global
@@ -205,6 +219,30 @@ def _model(args) -> int:
     return 0
 
 
+def _audit_rejections(args) -> int:
+    """Explain rejection causes without rerunning or mutating a workload."""
+    result = audit_path(args.report)
+    output = json.dumps(result, indent=2, default=str)
+    if args.out:
+        destination = Path(args.out).resolve()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(output + "\n")
+    print(output)
+    return 0
+
+
+def _constants(args) -> int:
+    """Collect cross-module literal provenance without importing the target."""
+    result = constant_report(args.source, project_root=args.project_root)
+    output = json.dumps(result, indent=2, default=str)
+    if args.out:
+        destination = Path(args.out).resolve()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(output + "\n")
+    print(output)
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="scar")
     sub = parser.add_subparsers(dest="subcommand", required=True)
@@ -231,6 +269,8 @@ def main(argv=None) -> int:
                          help="write the recursive operation/data graph projection")
     analyze.add_argument("--summary-out",
                          help="write the machine-readable summary to this path")
+    analyze.add_argument("--topdown-out",
+                         help="write a top-down dynamic region/placement report")
     analyze.add_argument("--memory-budget-bytes", type=int,
                          help="reject transformations exceeding this memory budget")
     analyze.add_argument("--closed-world", action="store_true",
@@ -243,6 +283,18 @@ def main(argv=None) -> int:
     model.add_argument("--out", required=True)
     model.add_argument("--report", help="write conservative static candidate report")
     model.set_defaults(func=_model)
+    audit = sub.add_parser("audit-rejections",
+                           help="explain proof and evidence blockers in an analysis report")
+    audit.add_argument("report", help="JSON report produced by scar analyze")
+    audit.add_argument("--out", help="optional path for the audit JSON")
+    audit.set_defaults(func=_audit_rejections)
+    constants = sub.add_parser("constants",
+                               help="find literal values reached through local imports")
+    constants.add_argument("source", help="Python source file to inspect")
+    constants.add_argument("--project-root",
+                          help="root containing the source and local packages")
+    constants.add_argument("--out", help="optional path for the constant provenance JSON")
+    constants.set_defaults(func=_constants)
     micro = sub.add_parser("optimize-micro", help="run generic exact reuse experiment")
     micro.add_argument("--loops", type=int, default=30)
     micro.add_argument("--repetitions", type=int, default=5)

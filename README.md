@@ -57,6 +57,20 @@ python -m scar.cli analyze artifacts/traces/demo \
   --out artifacts/reports/demo.json \
   --summary-out artifacts/reports/demo.summary.json
 
+# Explain each rejected candidate as a proven blocker or an evidence gap.
+python -m scar.cli audit-rejections artifacts/reports/demo.json \
+  --out artifacts/reports/demo.rejection-audit.json
+
+# Build a report-only top-down dynamic region placement view. This does not
+# apply a transformation.
+python -m scar.cli analyze artifacts/traces/demo \
+  --topdown-out artifacts/reports/demo.topdown.json
+
+# Resolve local imported literal constants without importing the target.
+python -m scar.cli constants path/to/program.py \
+  --project-root path/to/project \
+  --out artifacts/reports/program.constants.json
+
 # Optionally join a source file or whole Python project to runtime events by
 # exact path/line and loaded function span.
 python -m scar.cli analyze artifacts/traces/demo \
@@ -98,6 +112,10 @@ The architecture review and v2 identity/provenance design are in
 [docs/IR_MIGRATION.md](docs/IR_MIGRATION.md). The isolated schema foundation is
 under `scar/ir/v2/`; it is report/schema-only and is not connected to the v1
 planner or any optimization backend yet.
+The rejection audit and top-down region work are documented in
+[docs/REJECTION_AUDIT.md](docs/REJECTION_AUDIT.md). They explain why a repeated
+leaf is not automatically a legal optimization and record the first generic
+cross-module constant provenance pass.
 The decomposition contract that defines the graph layers, source-line labels,
 and LeWM mapping is in
 [docs/PROGRAM_DECOMPOSITION.md](docs/PROGRAM_DECOMPOSITION.md).

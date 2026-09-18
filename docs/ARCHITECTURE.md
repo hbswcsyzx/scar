@@ -42,6 +42,16 @@ are recorded separately from legality rejections. Missing saved-work or
 guard/lookup measurements remain unknown and reject acceptance.
 `scar.backends` contains transformations and fallback paths.
 
+`scar.analysis.rejection_audit` is a read-only projection over a completed
+analysis report. It separates a proven blocker such as an observed intervening
+write from an evidence gap such as an incomplete effect or cost contract.
+`scar.analysis.topdown` reconstructs the dynamic control tree and summarizes
+child reads/writes/effect completeness upward. It reports where a composite
+region might be placed; it does not select or apply a backend. The constant
+provenance pass resolves local imported literal definitions without importing
+the target program, and keeps package initialization equivalence as an
+explicit UNKNOWN obligation.
+
 `scar.planner.selection` is the graph simplification decision layer. It merges
 event-level and graph-level candidates into one auditable set and classifies
 each as `TRANSFORM`, `REJECT`, `UNKNOWN`, or `KEEP`. Only a cost-accepted
