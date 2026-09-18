@@ -149,6 +149,25 @@ class ConstantDefinition:
 
 
 @dataclass(slots=True)
+class ModuleEffectSummary:
+    """Top-level initialization facts for one locally indexed module."""
+
+    module: str
+    source: str | None
+    status: str
+    effects: tuple[dict[str, Any], ...] = ()
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "module": self.module,
+            "source": self.source,
+            "status": self.status,
+            "effects": [dict(item) for item in self.effects],
+            "evidence": "Inferred top-level source scan",
+        }
+
+
+@dataclass(slots=True)
 class ConstantUse:
     source: str
     line: int
@@ -158,6 +177,7 @@ class ConstantUse:
     import_module: str
     import_line: int
     dependency_chain: tuple[str, ...] = ()
+    module_effects: tuple[ModuleEffectSummary, ...] = ()
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, Any]:
@@ -170,6 +190,7 @@ class ConstantUse:
             "import_module": self.import_module,
             "import_line": self.import_line,
             "dependency_chain": list(self.dependency_chain),
+            "module_effects": [item.as_dict() for item in self.module_effects],
             "metadata": self.metadata,
             "evidence": "Inferred literal provenance",
         }
@@ -212,6 +233,86 @@ def _index_definitions(root: Path) -> dict[str, ConstantDefinition]:
                     line=int(getattr(statement, "lineno", 1) or 1), value=value,
                 )
     return definitions
+
+
+def _module_sources(root: Path) -> dict[str, Path]:
+    result: dict[str, Path] = {}
+    for path in _all_sources(root):
+        result.setdefault(_module_name(path, root), path)
+    return result
+
+
+def _effect_item(kind: str, node: ast.AST, source: str, *, status: str = "UNKNOWN") -> dict[str, Any]:
+    try:
+        text = ast.unparse(node)
+    except (AttributeError, ValueError):
+        text = type(node).__name__
+    return {"kind": kind, "line": int(getattr(node, "lineno", 1) or 1),
+            "source": source, "text": text, "status": status}
+
+
+def _module_effect_summary(module: str, source: Path | None) -> ModuleEffectSummary:
+    if source is None:
+        return ModuleEffectSummary(module, None, "UNKNOWN", (
+            {"kind": "module_source_missing", "status": "UNKNOWN"},))
+    try:
+        tree = ast.parse(source.read_text(), filename=str(source))
+    except (OSError, UnicodeError, SyntaxError):
+        return ModuleEffectSummary(module, str(source), "UNKNOWN", (
+            {"kind": "module_parse_failed", "status": "UNKNOWN"},))
+    effects: list[dict[str, Any]] = []
+    for node in tree.body:
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant):
+            continue
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            effects.append(_effect_item("import", node, str(source)))
+            continue
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            # A plain definition does not execute the body during import, but
+            # decorators and default expressions do execute at module import.
+            if node.decorator_list or getattr(node, "args", None) and (
+                    node.args.defaults or node.args.kw_defaults):
+                effects.append(_effect_item("definition_initialization", node, str(source)))
+            continue
+        if isinstance(node, (ast.Assign, ast.AnnAssign)):
+            value = node.value if isinstance(node, ast.AnnAssign) else node.value
+            known, _ = _literal(value, {}) if value is not None else (False, None)
+            has_attribute_target = any(isinstance(target, (ast.Attribute, ast.Subscript))
+                                       for target in (
+                                           [node.target] if isinstance(node, ast.AnnAssign)
+                                           else node.targets))
+            if has_attribute_target:
+                effects.append(_effect_item("state_or_external_write", node, str(source)))
+            elif not known:
+                effects.append(_effect_item("dynamic_assignment", node, str(source)))
+            continue
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
+            effects.append(_effect_item("top_level_call", node, str(source)))
+            continue
+        if isinstance(node, (ast.If, ast.Try, ast.For, ast.AsyncFor, ast.While,
+                             ast.With, ast.AsyncWith, ast.Match)):
+            effects.append(_effect_item("dynamic_top_level_control", node, str(source)))
+            continue
+        effects.append(_effect_item("opaque_top_level_statement", node, str(source)))
+    return ModuleEffectSummary(
+        module=module, source=str(source),
+        status="PROVEN_PURE" if not effects else "UNKNOWN",
+        effects=tuple(effects),
+    )
+
+
+def _effects_for_use(use: ConstantUse, module_sources: dict[str, Path]) -> tuple[ModuleEffectSummary, ...]:
+    modules: list[str] = []
+    # Include package parents because importing a.b.c executes a, a.b and
+    # a.b.c initializers in order.
+    parts = use.import_module.split(".")
+    for size in range(1, len(parts) + 1):
+        modules.append(".".join(parts[:size]))
+    definition_parts = use.definition.module.split(".")
+    for size in range(1, len(definition_parts) + 1):
+        modules.append(".".join(definition_parts[:size]))
+    return tuple(_module_effect_summary(module, module_sources.get(module))
+                 for module in dict.fromkeys(modules))
 
 
 def _attribute_parts(node: ast.AST) -> list[str] | None:
@@ -306,6 +407,9 @@ def find_constant_uses(source: str | Path, *, project_root: str | Path | None = 
             import_module=module_attr.rsplit(".", 1)[0], import_line=import_line,
             dependency_chain=(module_attr, definition.qualified_name),
         ))
+    module_sources = _module_sources(root)
+    for use in uses:
+        use.module_effects = _effects_for_use(use, module_sources)
     return sorted(uses, key=lambda item: (item.line, item.expression))
 
 
@@ -314,6 +418,13 @@ def constant_candidates(uses: Iterable[ConstantUse]) -> list[Opportunity]:
     result: list[Opportunity] = []
     for index, use in enumerate(uses):
         source_id = f"{use.source}:{use.line}:{use.definition.qualified_name}"
+        effect_status = ("PROVEN" if use.module_effects and
+                         all(item.status == "PROVEN_PURE" for item in use.module_effects)
+                         else "UNKNOWN")
+        effect_reason = ("all indexed module initializers are syntactically literal"
+                         if effect_status == "PROVEN" else
+                         "one or more imported module initializers contain calls, imports, "
+                         "dynamic control or state writes")
         result.append(Opportunity(
             kind="ConstantProvenanceCandidate", code_id=source_id,
             evidence="Inferred", applicability="literal_imported_value",
@@ -333,8 +444,10 @@ def constant_candidates(uses: Iterable[ConstantUse]) -> list[Opportunity]:
                                "line": use.definition.line}),
                 proof("import_effects_preserved", "legality",
                       "removing the package import preserves initialization and external effects",
-                      ProofStatus.UNKNOWN, evidence="UNKNOWN",
-                      reason="module/package initialization was not proven effect-free"),
+                      ProofStatus.PROVEN if effect_status == "PROVEN" else ProofStatus.UNKNOWN,
+                      evidence="Inferred" if effect_status == "PROVEN" else "UNKNOWN",
+                      reason=effect_reason,
+                      details={"module_effects": [item.as_dict() for item in use.module_effects]}),
                 proof("replacement_validated", "legality",
                       "the inlined value preserves the complete program result and visible state",
                       ProofStatus.UNKNOWN, evidence="UNKNOWN",
@@ -357,5 +470,5 @@ def constant_report(source: str | Path, *, project_root: str | Path | None = Non
     }
 
 
-__all__ = ["ConstantDefinition", "ConstantUse", "find_constant_uses",
+__all__ = ["ConstantDefinition", "ConstantUse", "ModuleEffectSummary", "find_constant_uses",
            "constant_candidates", "constant_report"]

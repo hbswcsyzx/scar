@@ -116,4 +116,23 @@ def test_constant_provenance_resolves_local_import_without_importing_it(tmp_path
     assert uses[0].definition.value == {"mean": [1.0, 2.0], "std": [3.0, 4.0]}
     candidate = constant_candidates(uses)[0]
     assert candidate.proof_obligations[0].status == ProofStatus.PROVEN
+    # The literal itself is statically known, but importing this module also
+    # executes the unresolved ``make_value()`` assignment.  Inlining the
+    # value therefore cannot silently remove the module initialization.
     assert candidate.proof_obligations[1].status == ProofStatus.UNKNOWN
+
+
+def test_constant_provenance_marks_literal_only_import_chain_pure(tmp_path):
+    package = tmp_path / "pure_pkg"
+    package.mkdir()
+    (package / "__init__.py").write_text("\n")
+    (package / "constants.py").write_text(
+        "VALUE = {'mean': [1.0, 2.0], 'std': [3.0, 4.0]}\n"
+    )
+    source = tmp_path / "program.py"
+    source.write_text("import pure_pkg.constants as constants\nx = constants.VALUE\n")
+    candidate = constant_candidates(
+        find_constant_uses(source, project_root=tmp_path)
+    )[0]
+    assert candidate.proof_obligations[0].status == ProofStatus.PROVEN
+    assert candidate.proof_obligations[1].status == ProofStatus.PROVEN

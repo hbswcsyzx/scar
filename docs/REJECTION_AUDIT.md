@@ -117,9 +117,9 @@ region summary。它不改变 candidate，也不执行 transform。
 
 ```text
 dynamic regions: 45,888
-placements:       2,544
+placements:       2,528
 PROPOSED:             0
-UNKNOWN:          2,544
+UNKNOWN:          2,528
 ```
 
 主要原因：
@@ -156,6 +156,11 @@ stable_pretraining.data.dataset_stats.ImageNet
 {"mean": [0.485, 0.456, 0.406],
  "std": [0.229, 0.224, 0.225]}
 ```
+
+进一步的顶层初始化扫描显示：`stable_pretraining` 根模块有 23 个顶层
+effect 记录，`stable_pretraining.data` 有 16 个，真正保存这些数字的
+`dataset_stats` 模块本身是 `PROVEN_PURE`。因此当前阻塞点确实是 package
+初始化，而不是常量值解析。
 
 这已经是一个通用的 `ConstantProvenanceCandidate`，不是 LeWM 特判。它仍然
 没有被自动删除，因为 `import stable_pretraining` 的初始化可能注册

@@ -7,8 +7,8 @@ from .inventory import summarize_action_inventory
 from .static_candidates import dead_expression_candidates
 from .rejection_audit import audit_candidates, audit_path, audit_report
 from .topdown import DynamicRegionIndex, PlacementEvidence, RegionSummary, topdown_report
-from .constants import (ConstantDefinition, ConstantUse, constant_candidates,
-                        constant_report, find_constant_uses)
+from .constants import (ConstantDefinition, ConstantUse, ModuleEffectSummary,
+                        constant_candidates, constant_report, find_constant_uses)
 
 __all__ = ["detect", "same_logical_version", "consumer_counts", "graph_liveness",
            "graph_candidates", "graph_loop_candidates", "dead_expression_candidates"]
@@ -16,7 +16,7 @@ __all__.append("summarize_action_inventory")
 __all__ += ["audit_candidates", "audit_report", "audit_path"]
 __all__ += ["RegionSummary", "PlacementEvidence", "DynamicRegionIndex", "topdown_report"]
 __all__ += ["ConstantDefinition", "ConstantUse", "find_constant_uses",
-            "constant_candidates", "constant_report"]
+            "ModuleEffectSummary", "constant_candidates", "constant_report"]
 from .synchronization import synchronization_candidates
 from .memory import allocation_candidates
 from .static_candidates import loop_invariant_candidates

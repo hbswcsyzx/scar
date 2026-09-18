@@ -29,7 +29,7 @@ No core analysis imports its adapter or branches on its names.
 
 This is an active prototype, not a completion claim for `../init.md`.
 
-The current generic SCAR regression suite has 153 passing tests. The separate
+The current generic SCAR regression suite has 155 passing tests. The separate
 `/home/zyf/AAA/scar-testcases/lewm` project has its own passing adapter test;
 no LeWM adapter or test remains in the SCAR source tree. Candidate reports
 now contain explicit proof obligations for applicability, legality and cost;
@@ -109,7 +109,7 @@ silently treated as KEEP. Evidence is in
 Nested ordinary Python calls and returns now retain the nearest active outer
 loop scope in their metadata (`loop_parent_invocation_id`, target offset and
 iteration). This keeps the K control view intact when a loop body crosses a
-user-function boundary; the new regression is covered by the 153-test suite.
+user-function boundary; the new regression is covered by the 155-test suite.
 A fresh generic PyTorch loop smoke confirmed this at runtime: three module
 calls and three observed back-edge markers produced two post-back-edge module
 records with the propagated outer scope, seven `loop_controls` edges, and
