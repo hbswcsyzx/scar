@@ -138,6 +138,10 @@ UNKNOWN:          2,528
 
 ## 4. stable-pretraining 常量案例
 
+这个案例的模型审查见 [CONSTANT_PROVENANCE_AUDIT.md](CONSTANT_PROVENANCE_AUDIT.md)。
+其中区分了“保留 import 的值替换”和“值替换加 import 删除”；当前候选还没有把
+这两个不同的 transformation 明确分开。
+
 SCAR 的静态 constant provenance pass 已经不依赖包名规则地识别出：
 
 ```python
