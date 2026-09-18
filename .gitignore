@@ -1,0 +1,26 @@
+# Python build and cache outputs
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Packaging outputs
+build/
+dist/
+*.egg-info/
+
+# SCAR runtime traces, profiler dumps and large experiment graphs
+artifacts/traces/
+artifacts/reports/
+artifacts/experiments/
+artifacts/baseline/*
+!artifacts/baseline/environment.md
+!artifacts/baseline/pip-freeze.txt
+
+# Local editor and environment files
+.venv/
+.env
+.DS_Store

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scar"
+version = "0.1.0"
+description = "State-Control-Action-Resource execution analysis and optimization prototype"
+requires-python = ">=3.10"
+dependencies = ["torch>=2.0", "numpy>=1.24"]
+
+[project.scripts]
+scar = "scar.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["scar*"]
+
+[tool.setuptools]
+py-modules = ["sitecustomize"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
