@@ -113,7 +113,7 @@ def main() -> int:
         for item in criteria)
     markdown = (
         "# SCAR G1 gate report\n\n"
-        f"Status: **{status}**  \n"
+        f"Status: **{status}**\n\n"
         f"Revision: `{revision}`\n\n"
         "| Criterion | Status | Evidence |\n"
         "| --- | --- | --- |\n"

@@ -2,14 +2,17 @@
 
 ## Architecture review and IR v2 foundation
 
-G1 is now in progress under `NEXT_PHASE_PLAN.md`. Typed package/module/source/
+G1 passed under `NEXT_PHASE_PLAN.md`. Typed package/module/source/
 slot/contract/resource/measurement identities, typed SG and EEG relations,
 cross-graph correspondence records, and the first report-only Optimization IR
 are implemented. OIR now represents an original fallback plus constant
 substitution, residual effects, loop-region motion and residency alternatives;
 it refuses a selected rewrite with missing proof, instructions or validation.
-This is still a schema result: serialization round-trip and the generated G1
-gate report remain pending, and no detector/backend consumes OIR yet.
+Deterministic JSON round-trip, v1 trace/analyze compatibility, workload-name
+independence and the no-detector/backend-wiring constraint passed the generated
+gate. The machine-readable evidence is `artifacts/reports/gates/g1.json`.
+This remains a schema result: G2 source-to-SG and G3 trace-to-EEG are next, and
+no detector/backend consumes OIR yet.
 
 The architecture review is recorded in [IR_DESIGN_V2.md](IR_DESIGN_V2.md) and
 [IR_MIGRATION.md](IR_MIGRATION.md). The first M1 foundation is now implemented

@@ -103,11 +103,11 @@ G2 和 G3 在 G1 完成后可以并行开发，但 G4 只能在两者可用后�
 
 ### 验收
 
-- [ ] `CURRENT_CODE_AUDIT.md` 能从代码逐项核对；
-- [ ] `NEXT_PHASE_PLAN.md` 有有序依赖和硬性验收门；
-- [ ] README/ROADMAP 指向本计划；
-- [ ] 完整测试仍通过；
-- [ ] 单独 commit 并推送，作为后续迁移基线。
+- [x] `CURRENT_CODE_AUDIT.md` 能从代码逐项核对；
+- [x] `NEXT_PHASE_PLAN.md` 有有序依赖和硬性验收门；
+- [x] README/ROADMAP 指向本计划；
+- [x] 完整测试仍通过；
+- [x] 单独 commit 并推送，作为后续迁移基线。
 
 ## 5. G1 — 完整 v2 core schema
 
@@ -158,14 +158,14 @@ PlanInstruction
 
 ### 验收 G1
 
-- [ ] 不同 ID 类型不能因 string 相同而混用；
-- [ ] dangling reference、cycle、非法 region boundary 被 validator 拒绝；
-- [ ] OIR 能表示 constant substitution、import residualization、loop hoist、
+- [x] 不同 ID 类型不能因 string 相同而混用；
+- [x] dangling reference、cycle、非法 region boundary 被 validator 拒绝；
+- [x] OIR 能表示 constant substitution、import residualization、loop hoist、
   residency 四种 plan fixture，但不执行它们；
-- [ ] 每个 alternative 同时含原始 NO-OP；
-- [ ] serialization 重复运行 byte-for-byte 相同；
-- [ ] 单元测试覆盖正例和非法 schema 反例；
-- [ ] v1 CLI 行为和 JSON reader 不退化。
+- [x] 每个 alternative 同时含原始 NO-OP；
+- [x] serialization 重复运行 byte-for-byte 相同；
+- [x] 单元测试覆盖正例和非法 schema 反例；
+- [x] v1 CLI 行为和 JSON reader 不退化。
 
 ## 6. G2 — Python source 到 Semantic Graph
 
