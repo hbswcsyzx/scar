@@ -1,24 +1,43 @@
 # Current evidence and remaining work
 
-## Architecture review and IR v2 foundation
+## Latest autonomous acceptance: G2 and G3
 
-G1 passed under `NEXT_PHASE_PLAN.md`. Typed package/module/source/
-slot/contract/resource/measurement identities, typed SG and EEG relations,
-cross-graph correspondence records, and the first report-only Optimization IR
-are implemented. OIR now represents an original fallback plus constant
-substitution, residual effects, loop-region motion and residency alternatives;
-it refuses a selected rewrite with missing proof, instructions or validation.
-Deterministic JSON round-trip, v1 trace/analyze compatibility, workload-name
-independence and the no-detector/backend-wiring constraint passed the generated
-gate. The machine-readable evidence is `artifacts/reports/gates/g1.json`.
-The original gate report overstated its coverage. A counterexample audit and
-repair on 2026-09-22 added malformed-codec, graph-cycle, boundary and cross-graph
-checks. The authoritative recheck is
-`artifacts/reports/gates/g1-verified.json` (136 collected cases, all passed),
-bound to commit `aff0c20` and tested-file hashes. See
-[GATE_EXECUTION.md](GATE_EXECUTION.md). This remains a schema result; automatic
-semantic proof construction is not established by hand-built plan fixtures.
-G2 source-to-SG and G3 trace-to-EEG now follow without user approval.
+At implementation commit `1af7d14`, G2 passed 23 collected acceptance cases,
+G3 passed 16, and the full regression suite passed 340 tests (one existing
+fork/thread warning). Reports are under `artifacts/reports/gates/`:
+`g2-verified.json`, `g3-verified.json`, `g2-g3-regression.json`.
+
+The nonexecuting frontend builds typed operations, lexical value flow and
+control regions. It conservatively preserves unsupported syntax and dynamic
+calls as opaque boundaries. Static may-flow is not SSA, purity, consumer
+closure or logical equivalence. `model-v2 --project-root` selects the entire
+source tree, not only entrypoint-reachable files.
+
+Real external LeWM source pressure: 581 files, 501,160 source atoms all owned,
+469,343 operation definitions, 2,060,031 edges; valid graph in 247.741 seconds,
+peak RSS 2,422,252 KiB. This includes vendored/local project code. The first
+attempt exposed quadratic registry membership checks and was terminated;
+the corrected implementation has a structural scaling regression test.
+
+Archived LeWM trace pressure: all 45,888 records accounted for, including 14
+calls with missing returns; 543 actual memcpy events remain distinct from
+561 host transfer calls and 175 aggregate measurements. Conversion took
+45.430 seconds, peak RSS 832,080 KiB. Reports `g2-source-pressure.json` and
+`g3-runtime-pressure.json` bind implementation/input hashes and scope.
+These are SCAR conversion measurements, not a new workload run or speedup.
+
+G4 now follows automatically: logical provenance and bounded, opt-in exact
+checkpoints, under [PROVENANCE_REGISTRY.md](PROVENANCE_REGISTRY.md).
+No new detector/backend was added. v2 still does not select a LeWM rewrite.
+
+## G1 foundation recheck
+
+The initial G1 report overstated coverage. Counterexample-driven repairs added
+strict decoding, graph/region boundary validation and individual test evidence.
+The corrected `g1-verified.json` records 136 passing cases at `aff0c20`.
+See [GATE_EXECUTION.md](GATE_EXECUTION.md). Schema checks cannot establish the
+truth of arbitrary externally asserted proofs; semantic proof construction
+remains a separate stage.
 
 The architecture review is recorded in [IR_DESIGN_V2.md](IR_DESIGN_V2.md) and
 [IR_MIGRATION.md](IR_MIGRATION.md). The first M1 foundation is now implemented
@@ -47,7 +66,7 @@ No core analysis imports its adapter or branches on its names.
 
 This is an active prototype, not a completion claim for `../init.md`.
 
-The current generic SCAR regression suite has 155 passing tests. The separate
+The pre-migration generic regression baseline had 155 passing tests. The separate
 `/home/zyf/AAA/scar-testcases/lewm` project has its own passing adapter test;
 no LeWM adapter or test remains in the SCAR source tree. Candidate reports
 now contain explicit proof obligations for applicability, legality and cost;

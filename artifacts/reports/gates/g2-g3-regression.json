@@ -1,0 +1,12 @@
+{
+  "schema": "scar.regression-report",
+  "revision": "1af7d14",
+  "command": "conda run -n lewm python -m pytest -q",
+  "result": "PASS",
+  "passed": 340,
+  "duration_seconds": 34.87,
+  "warnings": [
+    "Existing fork-from-multithreaded-process DeprecationWarning in tests/unit/test_call_stack.py:109"
+  ],
+  "scope": "Whole repository test suite at G2/G3 implementation; no LeWM performance claim"
+}

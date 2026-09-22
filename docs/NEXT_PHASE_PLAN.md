@@ -193,13 +193,13 @@ Frontend 的目标是完整表示，而不是声称完整理解。每个可执�
 
 ### 验收 G2
 
-- [ ] fixture 的每个可执行 source atom 都有 SG owner；
-- [ ] import→module-init→attribute→index→consumer 的值路径可查询；
-- [ ] unresolved call 产生有输入输出/effect boundary 的 opaque op；
-- [ ] 跨函数参数/返回值和跨本地模块 import def-use 可查询；
-- [ ] branch/loop/exception control edge 有正反例；
-- [ ] 不执行目标程序也能构图；
-- [ ] 没有任何 workload 名称规则。
+- [x] fixture 的每个可执行 source atom 都有 SG owner；
+- [x] import→module-init→attribute→index→consumer 的值路径可查询；
+- [x] unresolved call 产生有输入输出/effect boundary 的 opaque op；
+- [x] 跨函数参数/返回值和跨本地模块 import def-use 可查询；
+- [x] branch/loop/exception control edge 有正反例；
+- [x] 不执行目标程序也能构图；
+- [x] 没有任何 workload 名称规则。
 
 ## 7. G3 — v1 trace 到 Execution Evidence Graph
 
@@ -216,12 +216,12 @@ Frontend 的目标是完整表示，而不是声称完整理解。每个可执�
 
 ### 验收 G3
 
-- [ ] 现有 generic trace 可完整 normalize，原始 event 数可守恒核对；
-- [ ] 现有 LeWM trace 无需重跑即可 normalize；
-- [ ] operation nesting、same-stream order、copy、allocation、barrier 均有 typed edge；
-- [ ] 不把 `.to()` 调用计为物理 copy，不把 `expand()` 计为完整 allocation；
-- [ ] raw→EEG→JSON 重复运行结果确定；
-- [ ] normalizer 不产生 optimization candidate。
+- [x] 现有 generic trace 可完整 normalize，原始 event 数可守恒核对；
+- [x] 现有 LeWM trace 无需重跑即可 normalize；
+- [x] operation nesting、same-stream order、copy、allocation、barrier 均有 typed edge；
+- [x] 不把 `.to()` 调用计为物理 copy，不把 `expand()` 计为完整 allocation；
+- [x] raw→EEG→JSON 重复运行结果确定；
+- [x] normalizer 不产生 optimization candidate。
 
 ## 8. G4 — Logical value 与 provenance registry
 
