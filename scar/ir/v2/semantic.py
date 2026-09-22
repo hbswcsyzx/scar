@@ -429,11 +429,12 @@ class SemanticGraph:
             if module.initializer is not None and module.initializer not in self.definitions:
                 errors.append(f"module {module.id.wire} references unknown initializer")
         for definition in self.definitions.values():
-            missing = set(definition.input_slots + definition.output_slots
-                          + definition.state_slots) - set(self.slots)
+            missing = {slot for slot in definition.input_slots + definition.output_slots
+                       + definition.state_slots if slot not in self.slots}
             errors.extend(f"definition {definition.id.wire} references unknown slot {slot.wire}"
                           for slot in sorted(missing, key=lambda item: item.wire))
-            unknown_atoms = set(definition.source_atoms) - set(self.source_atoms)
+            unknown_atoms = {atom for atom in definition.source_atoms
+                             if atom not in self.source_atoms}
             errors.extend(f"definition {definition.id.wire} references unknown source {atom.wire}"
                           for atom in sorted(unknown_atoms, key=lambda item: item.wire))
             if definition.parent_id is not None and definition.parent_id not in self.definitions:
@@ -504,7 +505,7 @@ class SemanticGraph:
         return report
 
     def to_dict(self) -> dict[str, Any]:
-        self.assert_valid()
+        validation = self.assert_valid()
 
         def ordered(mapping):
             return [mapping[key].as_dict() for key in sorted(
@@ -517,7 +518,7 @@ class SemanticGraph:
             "definitions": ordered(self.definitions), "slots": ordered(self.slots),
             "controls": ordered(self.controls), "contracts": ordered(self.contracts),
             "effects": ordered(self.effects), "resources": ordered(self.resources),
-            "edges": ordered(self.edges), "validation": self.validate(),
+            "edges": ordered(self.edges), "validation": validation,
         }
 
 

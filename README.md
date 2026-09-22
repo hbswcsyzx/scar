@@ -71,6 +71,16 @@ python -m scar.cli constants path/to/program.py \
   --project-root path/to/project \
   --out artifacts/reports/program.constants.json
 
+# Build the v2 semantic graph without executing source. project-root scans all
+# selected Python files; it does not assert they are reachable from the entry.
+python -m scar.cli model-v2 path/to/program.py --project-root path/to/project \
+  --out artifacts/reports/semantic.json
+
+# Convert archived raw events to a separate v2 execution evidence graph.
+# Aggregates remain measurements; missing returns and opaque events stay visible.
+python -m scar.cli normalize artifacts/traces/demo \
+  --out artifacts/reports/evidence-v2.json
+
 # Optionally join a source file or whole Python project to runtime events by
 # exact path/line and loaded function span.
 python -m scar.cli analyze artifacts/traces/demo \
@@ -110,8 +120,8 @@ The requirement-by-requirement evidence audit is in
 The architecture review and v2 identity/provenance design are in
 [docs/IR_DESIGN_V2.md](docs/IR_DESIGN_V2.md), with the staged migration plan in
 [docs/IR_MIGRATION.md](docs/IR_MIGRATION.md). The isolated schema foundation is
-under `scar/ir/v2/`; it is report/schema-only and is not connected to the v1
-planner or any optimization backend yet.
+under `scar/ir/v2/`; `model-v2` and `normalize` populate the semantic and evidence
+graphs. These v2 commands do not yet select or execute optimization plans.
 The code-level architecture audit is in
 [docs/CURRENT_CODE_AUDIT.md](docs/CURRENT_CODE_AUDIT.md). Its gated execution
 plan is [docs/NEXT_PHASE_PLAN.md](docs/NEXT_PHASE_PLAN.md). These two documents

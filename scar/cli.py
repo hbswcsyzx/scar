@@ -283,6 +283,17 @@ def main(argv=None) -> int:
     model.add_argument("--out", required=True)
     model.add_argument("--report", help="write conservative static candidate report")
     model.set_defaults(func=_model)
+    model_v2 = sub.add_parser("model-v2", help="build the versioned semantic graph without executing source")
+    model_v2.add_argument("source")
+    model_v2.add_argument("--project-root")
+    model_v2.add_argument("--out", required=True)
+    model_v2.add_argument("--report", help="semantic coverage and unresolved-boundary report")
+    model_v2.set_defaults(func=_model_v2)
+    normalize = sub.add_parser("normalize", help="normalize existing raw trace into IR v2 evidence")
+    normalize.add_argument("trace")
+    normalize.add_argument("--out", required=True)
+    normalize.add_argument("--report", help="raw record conservation and ambiguity report")
+    normalize.set_defaults(func=_normalize_v2)
     audit = sub.add_parser("audit-rejections",
                            help="explain proof and evidence blockers in an analysis report")
     audit.add_argument("report", help="JSON report produced by scar analyze")
@@ -303,6 +314,38 @@ def main(argv=None) -> int:
     micro.set_defaults(func=lambda a: (print(json.dumps(optimize(a.loops, a.repetitions, a.warmup, a.work_factor), indent=2)) or 0))
     args = parser.parse_args(argv)
     return args.func(args)
+
+
+def _write_document(path, document):
+    target = Path(path).resolve()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("w") as handle:
+        json.dump(document, handle, sort_keys=True, ensure_ascii=False, allow_nan=False)
+        handle.write("\n")
+    return target
+
+
+def _model_v2(args) -> int:
+    from scar.ir.frontend_v2 import build_semantic
+    result = build_semantic(Path(args.source), project_root=args.project_root)
+    document = result.graph.to_dict()
+    validation = document["validation"]
+    out = _write_document(args.out, document)
+    report = _write_document(args.report or str(out) + ".coverage.json", result.coverage)
+    print(json.dumps({"schema": result.graph.SCHEMA, "out": str(out),
+                      "report": str(report), "validation": validation}))
+    return 0
+
+
+def _normalize_v2(args) -> int:
+    from scar.trace.normalize_v2 import normalize_trace
+    result = normalize_trace(args.trace)
+    validation = result.bundle.assert_valid()
+    out = _write_document(args.out, result.bundle.to_dict())
+    report = _write_document(args.report or str(out) + ".coverage.json", result.coverage)
+    print(json.dumps({"schema": result.bundle.SCHEMA, "out": str(out),
+                      "report": str(report), "valid": validation["valid"]}))
+    return 0
 
 
 if __name__ == "__main__":

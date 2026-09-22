@@ -1,0 +1,62 @@
+{
+  "gate": "G2",
+  "scope": "Nonexecuting Python frontend: source coverage, lexical value flow and explicit opaque boundaries. Static may-flow is not logical equivalence or a purity proof.",
+  "limitations": [
+    "SSA, exception feasibility, dynamic dispatch, default binding and library purity proofs remain unresolved and explicit.",
+    "No rewrite or performance improvement is established by source coverage."
+  ],
+  "criteria": [
+    {
+      "id": "source_atom_coverage",
+      "tests": [
+        "tests/unit/test_frontend_v2.py::test_every_executable_atom_has_owner_including_explicit_opaque_syntax"
+      ]
+    },
+    {
+      "id": "import_attribute_index_consumer_path",
+      "tests": [
+        "tests/unit/test_frontend_v2.py::test_local_import_attribute_index_consumer_value_path_is_queryable",
+        "tests/unit/test_frontend_v2_adversarial.py::test_relative_import_alias_and_reexport_preserve_value_path"
+      ]
+    },
+    {
+      "id": "opaque_data_and_effect_boundary",
+      "tests": [
+        "tests/unit/test_frontend_v2.py::test_unresolved_call_has_data_and_effect_boundary"
+      ]
+    },
+    {
+      "id": "cross_function_data_and_lexical_scope",
+      "tests": [
+        "tests/unit/test_frontend_v2.py::test_cross_function_actual_formal_return_result_paths_are_queryable",
+        "tests/unit/test_frontend_v2_adversarial.py"
+      ]
+    },
+    {
+      "id": "control_and_merges",
+      "tests": [
+        "tests/unit/test_frontend_v2.py::test_branch_loop_exception_control_and_merge_are_explicit"
+      ]
+    },
+    {
+      "id": "nonexecution_and_public_cli",
+      "tests": [
+        "tests/unit/test_frontend_v2.py::test_frontend_never_executes_target_and_excludes_environment_sources",
+        "tests/integration/test_v2_entries.py::test_model_v2_cli_does_not_execute_source"
+      ]
+    },
+    {
+      "id": "generic_deterministic_identity",
+      "tests": [
+        "tests/unit/test_frontend_v2.py::test_generic_source_model_has_no_workload_name_dependency",
+        "tests/unit/test_frontend_v2.py::test_content_versioned_ids_and_serialization_are_deterministic"
+      ]
+    },
+    {
+      "id": "validation_scaling",
+      "tests": [
+        "tests/unit/test_frontend_v2.py::test_frontend_validation_does_not_rescan_global_registries_per_operation"
+      ]
+    }
+  ]
+}

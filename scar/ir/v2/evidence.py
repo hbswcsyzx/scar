@@ -148,6 +148,7 @@ class EvidenceRelation(str, Enum):
     ESCAPES = "escapes"
     HAPPENS_BEFORE = "happens_before"
     CONTROLS_INSTANCE = "controls_instance"
+    OBSERVED_CONTROL = "observed_control"
     USES_STORAGE = "uses_storage"
     MEASURED_BY = "measured_by"
     USES_RESOURCE = "uses_resource"
@@ -177,6 +178,9 @@ _EVIDENCE_RELATION_ENDPOINTS = {
         (source, target) for source in _EVENT_NODES for target in _EVENT_NODES},
     EvidenceRelation.CONTROLS_INSTANCE: {
         (source, _E.OPERATION_INSTANCE) for source in _EVENT_NODES},
+    # A line/back-edge event was observed inside an invocation. This is
+    # ownership, not a claim that it controls the already-running invocation.
+    EvidenceRelation.OBSERVED_CONTROL: {(_E.OPERATION_INSTANCE, _E.CONTROL_EVENT)},
     EvidenceRelation.USES_STORAGE: {
         (source, target) for source in (_E.OPERATION_INSTANCE, _E.MATERIALIZATION, _E.OBJECT)
         for target in (_E.ALLOCATION, _E.STORAGE_REGION)},
@@ -217,7 +221,7 @@ class EvidenceGraph:
     """Normalized execution records; no optimization selection is performed."""
 
     SCHEMA = "scar.ir.v2.evidence"
-    SCHEMA_VERSION = 2
+    SCHEMA_VERSION = 3
 
     def __init__(self) -> None:
         self.instances: dict[OperationInstanceID, OperationInstance] = {}

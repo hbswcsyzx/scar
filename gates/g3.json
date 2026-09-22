@@ -1,0 +1,57 @@
+{
+  "gate": "G3",
+  "scope": "Offline raw-record normalization to v2: conservation, observations, clock separation and runtime resource evidence. Actual archived trace results are recorded separately in g3-runtime-pressure.json.",
+  "limitations": [
+    "Value IDs are provisional snapshot identities; semantic provenance is G4.",
+    "Unobserved return/state/alias evidence remains incomplete.",
+    "This measures conversion cost, not LeWM performance."
+  ],
+  "criteria": [
+    {
+      "id": "raw_record_conservation",
+      "tests": [
+        "tests/unit/test_trace_normalize_v2.py::test_unknown_event_and_invalid_lines_have_exact_recoverable_coverage",
+        "tests/unit/test_trace_normalize_v2.py::test_malformed_nested_records_are_accounted_without_aborting_the_trace"
+      ]
+    },
+    {
+      "id": "invocations_and_incomplete_pairing",
+      "tests": [
+        "tests/unit/test_trace_normalize_v2.py::test_python_pairing_namespaces_process_thread_and_invocation",
+        "tests/unit/test_trace_normalize_v2.py::test_missing_duplicate_and_orphan_calls_remain_unmatched",
+        "tests/unit/test_trace_normalize_v2.py::test_mismatched_return_code_or_clock_never_closes_a_call"
+      ]
+    },
+    {
+      "id": "typed_control_and_runtime_resources",
+      "tests": [
+        "tests/unit/test_trace_normalize_v2.py::test_parent_edges_and_control_observations_do_not_invent_extra_calls",
+        "tests/unit/test_trace_normalize_v2.py::test_explicit_memory_event_has_typed_storage_edge_without_guessed_free_pairing",
+        "tests/unit/test_trace_normalize_v2.py::test_effect_writes_are_observations_and_empty_effects_do_not_imply_purity"
+      ]
+    },
+    {
+      "id": "clock_domains_and_stream_order",
+      "tests": [
+        "tests/unit/test_trace_normalize_v2.py::test_host_completed_spans_and_kineto_start_times_keep_separate_clocks",
+        "tests/unit/test_trace_normalize_v2.py::test_same_stream_order_requires_matching_process_clock_device_context_stream",
+        "tests/unit/test_trace_normalize_v2.py::test_overlapping_or_tied_gpu_timestamps_do_not_invent_stream_order"
+      ]
+    },
+    {
+      "id": "physical_evidence_is_not_a_source_call",
+      "tests": [
+        "tests/unit/test_trace_normalize_v2.py::test_to_and_expand_are_not_physical_copy_or_allocation_events",
+        "tests/unit/test_trace_normalize_v2.py::test_aggregate_profile_rows_are_measurements_not_invocations_or_allocations",
+        "tests/unit/test_trace_normalize_v2.py::test_legacy_version_alias_and_content_hash_do_not_prove_logical_equality"
+      ]
+    },
+    {
+      "id": "deterministic_roundtrip_and_cli",
+      "tests": [
+        "tests/unit/test_trace_normalize_v2.py::test_normalization_is_deterministic_roundtrips_and_never_creates_candidates",
+        "tests/integration/test_v2_entries.py::test_normalize_cli_preserves_aggregate_without_fabricating_invocations"
+      ]
+    }
+  ]
+}
