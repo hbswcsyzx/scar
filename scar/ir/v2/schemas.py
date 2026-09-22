@@ -37,6 +37,7 @@ def optimization_context(
         contracts=frozenset(semantic.contracts),
         source_atoms=frozenset(semantic.source_atoms),
         measurements=frozenset(evidence.measurements),
+        value_slots=frozenset(semantic.slots),
     )
 
 

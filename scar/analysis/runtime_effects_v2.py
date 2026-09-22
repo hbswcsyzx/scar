@@ -14,7 +14,7 @@ from typing import Any
 
 from scar.ir.v2 import (
     Completeness, EffectTarget, EffectTargetKind, EvidenceClaim, EvidenceKind,
-    EvidenceNodeKind, EvidenceRelation, IRBundle,
+    EvidenceNodeKind, EvidenceRelation, IRBundle, OperationInstanceID,
 )
 from .effects_v2 import (
     EffectClosureEngine, EffectCoverage, EffectDimension, EffectOccurrence,
@@ -26,6 +26,7 @@ from .effects_v2 import (
 class RuntimeEffectsResult:
     engine: EffectClosureEngine
     coverage: dict[str, Any]
+    instance_scopes: dict[OperationInstanceID, str]
 
 
 _COLLECTIONS = tuple(EffectDimension(name) for name in (
@@ -262,7 +263,7 @@ def ingest_runtime_effects(bundle: IRBundle, *, namespace="runtime-effects") -> 
                   "Aggregates remain measurements; hook and child observations are not independent costs.",
                   "No source/runtime correspondence, pure contract, backend or transformation is inferred.",
               ]}
-    return RuntimeEffectsResult(engine, report)
+    return RuntimeEffectsResult(engine, report, instance_scopes)
 
 
 __all__ = ["RuntimeEffectsResult", "ingest_runtime_effects"]

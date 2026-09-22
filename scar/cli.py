@@ -302,6 +302,16 @@ def main(argv=None) -> int:
                             help="select only entry and trace-referenced files within project root")
     inspect_v2.add_argument("--out", required=True)
     inspect_v2.set_defaults(func=_inspect_v2)
+    regions_v2 = sub.add_parser("regions-v2", help="build scoped, recursively expandable regions without selecting rewrites")
+    regions_v2.add_argument("source", help="Python source for semantic view, trace directory/JSONL for execution view")
+    regions_v2.add_argument("--view", choices=("semantic", "execution"), default="semantic")
+    regions_v2.add_argument("--project-root")
+    regions_v2.add_argument("--root-id", action="append", default=[], help="exact typed operation identity; repeat to select roots")
+    regions_v2.add_argument("--scope", help="explicit runtime observation scope")
+    regions_v2.add_argument("--max-depth", type=int, default=0)
+    regions_v2.add_argument("--root-limit", type=int, default=8)
+    regions_v2.add_argument("--out", required=True, help="JSON report; use .gz for compressed output")
+    regions_v2.set_defaults(func=_regions_v2)
     audit = sub.add_parser("audit-rejections",
                            help="explain proof and evidence blockers in an analysis report")
     audit.add_argument("report", help="JSON report produced by scar analyze")
@@ -361,6 +371,27 @@ def _inspect_v2(args) -> int:
     report = inspect_program(args.source, args.trace, project_root=args.project_root,
                              runtime_sources=args.runtime_sources)
     output = _write_document(args.out, report)
+    print(json.dumps({"out": str(output), "summary": report["summary"]}))
+    return 0
+
+
+def _regions_v2(args) -> int:
+    from scar.analysis.region_report_v2 import report_regions
+    report = report_regions(args.source, view=args.view, project_root=args.project_root,
+                            root_ids=tuple(args.root_id), max_depth=args.max_depth,
+                            root_limit=args.root_limit, scope=args.scope)
+    output = Path(args.out).resolve()
+    if output.suffix == ".gz":
+        import gzip
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with output.open("wb") as destination, gzip.GzipFile(
+                fileobj=destination, mode="wb", mtime=0, filename="") as compressed:
+            encoder = json.JSONEncoder(sort_keys=True, ensure_ascii=False, allow_nan=False)
+            for chunk in encoder.iterencode(report):
+                compressed.write(chunk.encode())
+            compressed.write(b"\n")
+    else:
+        _write_document(output, report)
     print(json.dumps({"out": str(output), "summary": report["summary"]}))
     return 0
 

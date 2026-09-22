@@ -1,6 +1,6 @@
 # G6：区域构造、来源回溯与跨层依赖
 
-状态：**Proposed**。G5 验收后实施，不解除 backend 冻结。
+状态：**Implemented，待 G6 独立验收**。G5 已通过，不解除 backend 冻结。
 
 ## 1. 建模决策
 
@@ -84,3 +84,39 @@ transform 生成派生值。共同祖先不是 exact equality，也不是 loop i
 - deterministic JSON；所有 region 只有 NO-OP，零 backend invocation。
 
 通过后自动进入 G7 report-only 图化简，不请求用户阶段验收。
+
+## 7. 已实现 API 与实际限制
+
+```bash
+scar regions-v2 /project/program.py --view semantic --max-depth 1 --out /tmp/source-regions.json.gz
+scar regions-v2 /path/to/trace --view execution --root-limit 8 --max-depth 0 --out /tmp/runtime-regions.json.gz
+```
+
+默认选取单个观察范围中最大的已观察调用子树，至多八个 root；相同时按稳定 ID
+排序。报告列出全部可选 scope、选中 root、成员数量和未展开子项。原始图完整
+保留，这个投影不代表 whole-program 优化分析已完成。
+
+`RegionInventory.region(members, ...)` 接受显式非连续成员；`build_regions`
+按父→子构造。`RegionConstruction` 与 OIR region identity 一一对应，记录
+scoped effects、跨界依赖和每一类边界缺口。静态端口引用真实 ValueSlotID；
+动态端口引用版本/物化；控制依赖可引用外部 definition 或 invocation。
+
+OIR schema 2 显式读取并升级旧 schema 1。旧 schema 意外允许的 value 型
+ORDERING port 会被拒绝，而不会被静默解释为新含义。构造校验会根据原始
+图重新检查投影，删除已知依赖/端口/效果记录不能以“没有 dangling ref”蒙混通过。
+
+当前 source data ports 是保守的可能输入/输出集合，可能包含内部临时值。
+这避免通过 reads-minus-writes 丢失先读后写依赖，但不是精确 SSA interface。
+未有 operation 归属的数据↔数据 alias 边仍可在原图查询，区域标记 alias
+缺口，不能声称完整 alias closure。G7 需要进一步的绑定版本与操作语义。
+
+`RegionQueries.origin_for_region(...)` 把 G4 显式 binding 与真实 execution
+region 关联；第八层→第三层 fixture 使用受验证 producer 见证。共同来源、
+输入/输出捕获和 materialization producer 不会自动变成 logical producer。
+`motion(...)` 返回 REPORT_ONLY、已知边界依赖变化和七类待证义务。它既不改图，
+也不宣布允许 MOVE。没有 capture 时不会在 LeWM 旧 trace 中杜撰这些见证。
+
+`compare_regions(...)` 分别输出成员重叠与效果/数据依赖。对比预算耗尽、未知
+alias、开放终点或效果覆盖不足时保留可能冲突。纯读集合使用线性筛选避免
+无用的全配对扫描。已知共同 target 与实际 storage-region overlap 可提供
+明确依赖证据；不同 descriptor 字符串不是 disjoint 的普适证明。

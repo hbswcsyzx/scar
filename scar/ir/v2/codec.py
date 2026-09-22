@@ -1,7 +1,7 @@
 """Strict JSON decoders for the IR v2 graph bundle."""
 from __future__ import annotations
 
-from dataclasses import MISSING, fields, is_dataclass
+from dataclasses import MISSING, dataclass, fields, is_dataclass
 from enum import Enum
 from functools import lru_cache, wraps
 import json
@@ -629,8 +629,48 @@ def _value_pattern(data: dict[str, Any] | None) -> ValuePattern | None:
         tuple((item["name"], item["value"]) for item in data.get("constraints", ())))
 
 
+@dataclass(frozen=True)
+class _RegionPortV1:
+    """Wire fields from OIR schema 1; new payloads cannot masquerade as v1."""
+
+    port_id: str
+    kind: RegionPortKind
+    name: str
+    value: ValuePattern | None = None
+    control: ControlRegionID | None = None
+    resource: ResourceID | None = None
+    required: bool = True
+
+
+class _OptimizationDocumentV1:
+    SCHEMA = OptimizationGraph.SCHEMA
+    SCHEMA_VERSION = 1
+
+
+def _upgrade_optimization_document_v1(data):
+    """Validate legacy wire shape, then add empty new fields without mutation.
+
+    No value, effect or slot identity is synthesized. Payloads invalid under
+    current kind semantics remain rejected; in particular a legacy ORDERING
+    value pattern needs an explicit control/resource/effect representation.
+    """
+    if (not isinstance(data, dict) or data.get("schema") != OptimizationGraph.SCHEMA
+            or type(data.get("schema_version")) is not int or data["schema_version"] != 1):
+        return data
+    _document(data, _OptimizationDocumentV1, {
+        "ports": _RegionPortV1, "regions": OptimizationRegion,
+        "alternatives": PlanAlternative, "plans": PlanSelection,
+    })
+    if any(item["kind"] == RegionPortKind.EFFECT.value for item in data.get("ports", ())):
+        raise ValueError("schema_version 1 has no effect port kind")
+    return {**data, "schema_version": OptimizationGraph.SCHEMA_VERSION,
+            "ports": [{**item, "slot": None, "effect": None, "operation": None}
+                      for item in data.get("ports", ())]}
+
+
 @_decoder
 def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
+    data = _upgrade_optimization_document_v1(data)
     _document(data, OptimizationGraph, {
         "ports": RegionPort, "regions": OptimizationRegion,
         "alternatives": PlanAlternative, "plans": PlanSelection,
@@ -640,7 +680,12 @@ def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
         node = RegionPort(
             item["port_id"], RegionPortKind(item["kind"]), item["name"],
             _value_pattern(item.get("value")), _id(item.get("control"), ControlRegionID),
-            _id(item.get("resource"), ResourceID), item.get("required", True))
+            _id(item.get("resource"), ResourceID), item.get("required", True),
+            _id(item.get("slot"), ValueSlotID),
+            EffectTarget(EffectTargetKind(item["effect"]["kind"]), item["effect"]["reference"])
+            if item.get("effect") is not None else None,
+            _id(item["operation"], OperationDefinitionID if item["operation"]["kind"] == "opdef"
+                else OperationInstanceID) if item.get("operation") is not None else None)
         graph.ports[node.port_id] = node
     for item in data.get("regions", ()):
         node = OptimizationRegion(

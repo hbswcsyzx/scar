@@ -11,11 +11,13 @@ from typing import Any
 import math
 
 from .common import ProofClaim, ProofStatus, SourceReference
+from .contracts import EffectTarget, EffectTargetKind
 from ._validation import mapping_errors, record_errors, cycle_errors
 from .ids import (
     ContractID,
     ControlRegionID,
     EffectSummaryID,
+    LogicalValueID,
     MaterializationID,
     MeasurementID,
     OperationDefinitionID,
@@ -27,6 +29,7 @@ from .ids import (
     ResourceID,
     SourceAtomID,
     ValueVersionID,
+    ValueSlotID,
 )
 
 
@@ -48,6 +51,7 @@ class RegionPortKind(str, Enum):
     RESOURCE = "resource"
     ESCAPE = "escape"
     ORDERING = "ordering"
+    EFFECT = "effect"
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,20 +85,33 @@ class RegionPort:
     control: ControlRegionID | None = None
     resource: ResourceID | None = None
     required: bool = True
+    slot: ValueSlotID | None = None
+    effect: EffectTarget | None = None
+    operation: OperationDefinitionID | OperationInstanceID | None = None
 
     def __post_init__(self) -> None:
         if not self.port_id or not self.name:
             raise ValueError("region port ID and name are required")
-        populated = sum(item is not None for item in (self.value, self.control, self.resource))
+        payloads = {"value": self.value, "control": self.control, "resource": self.resource,
+                    "slot": self.slot, "effect": self.effect, "operation": self.operation}
+        populated = sum(item is not None for item in payloads.values())
         if populated != 1:
-            raise ValueError("region port must reference exactly one value, control or resource")
-        if self.kind is RegionPortKind.CONTROL and self.control is None:
-            raise ValueError("control port requires a control reference")
-        if self.kind is RegionPortKind.RESOURCE and self.resource is None:
-            raise ValueError("resource port requires a resource reference")
-        if self.kind in {RegionPortKind.INPUT, RegionPortKind.OUTPUT,
-                         RegionPortKind.STATE, RegionPortKind.ESCAPE} and self.value is None:
-            raise ValueError("data/state/escape port requires a value pattern")
+            raise ValueError("region port must reference exactly one value, slot, effect, control, resource or operation")
+        allowed = {
+            RegionPortKind.INPUT: {"value", "slot"},
+            RegionPortKind.OUTPUT: {"value", "slot"},
+            RegionPortKind.STATE: {"value", "slot", "effect"},
+            RegionPortKind.ESCAPE: {"value", "slot", "effect"},
+            RegionPortKind.CONTROL: {"control", "operation"},
+            RegionPortKind.RESOURCE: {"resource"},
+            RegionPortKind.ORDERING: {"control", "resource", "effect", "operation"},
+            RegionPortKind.EFFECT: {"effect"},
+        }
+        if not isinstance(self.kind, RegionPortKind):
+            raise ValueError("region port kind must be typed")
+        actual = next(name for name, value in payloads.items() if value is not None)
+        if actual not in allowed[self.kind]:
+            raise ValueError(f"{self.kind.value} port does not permit {actual} payload")
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -103,6 +120,9 @@ class RegionPort:
             "control": self.control.as_dict() if self.control else None,
             "resource": self.resource.as_dict() if self.resource else None,
             "required": self.required,
+            "slot": self.slot.as_dict() if self.slot else None,
+            "effect": self.effect.as_dict() if self.effect else None,
+            "operation": self.operation.as_dict() if self.operation else None,
         }
 
 
@@ -465,13 +485,14 @@ class OptimizationContext:
     contracts: frozenset[ContractID] = frozenset()
     source_atoms: frozenset[SourceAtomID] = frozenset()
     measurements: frozenset[MeasurementID] = frozenset()
+    value_slots: frozenset[ValueSlotID] = frozenset()
 
 
 class OptimizationGraph:
     """Validated report-only replacement regions and alternatives."""
 
     SCHEMA = "scar.ir.v2.optimization"
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = 2
 
     def __init__(self, context: OptimizationContext) -> None:
         self.context = context
@@ -534,7 +555,7 @@ class OptimizationGraph:
                     raise ValueError("REWRITE alternative has no validation request")
         self.plans[plan.id] = plan
 
-    def _region_errors(self, region: OptimizationRegion) -> list[str]:
+    def _region_errors(self, region: OptimizationRegion, *, check_ports=True) -> list[str]:
         errors: list[str] = []
         for definition in region.definitions:
             if definition not in self.context.definitions:
@@ -557,22 +578,51 @@ class OptimizationGraph:
                 errors.append(f"region references unknown measurement {measurement.wire}")
         for port_id in region.ports:
             port = self.ports.get(port_id)
-            if port is None:
-                continue
-            if port.control is not None and port.control not in self.context.controls:
-                errors.append(f"port {port_id} references unknown control {port.control.wire}")
-            if port.resource is not None and port.resource not in self.context.resources:
-                errors.append(f"port {port_id} references unknown resource {port.resource.wire}")
-            if port.value:
-                for version in port.value.versions:
-                    if version not in self.context.value_versions:
-                        errors.append(f"port {port_id} references unknown version {version.wire}")
-                for provenance in port.value.provenance:
-                    if provenance not in self.context.provenance:
-                        errors.append(f"port {port_id} references unknown provenance {provenance.wire}")
-                for materialization in port.value.materializations:
-                    if materialization not in self.context.materializations:
-                        errors.append(f"port {port_id} references unknown materialization {materialization.wire}")
+            if port is not None and check_ports:
+                errors.extend(self._port_errors(port))
+        return errors
+
+    def _port_errors(self, port: RegionPort) -> list[str]:
+        errors = []
+        prefix = f"port {port.port_id} references unknown"
+        if port.control is not None and port.control not in self.context.controls:
+            errors.append(f"{prefix} control {port.control.wire}")
+        if port.resource is not None and port.resource not in self.context.resources:
+            errors.append(f"{prefix} resource {port.resource.wire}")
+        if port.slot is not None and port.slot not in self.context.value_slots:
+            errors.append(f"{prefix} slot {port.slot.wire}")
+        if port.operation is not None:
+            registry = (self.context.definitions if isinstance(port.operation, OperationDefinitionID)
+                        else self.context.instances)
+            if port.operation not in registry:
+                errors.append(f"{prefix} operation {port.operation.wire}")
+        if port.value:
+            for version in port.value.versions:
+                if version not in self.context.value_versions:
+                    errors.append(f"{prefix} version {version.wire}")
+            for provenance in port.value.provenance:
+                if provenance not in self.context.provenance:
+                    errors.append(f"{prefix} provenance {provenance.wire}")
+            for materialization in port.value.materializations:
+                if materialization not in self.context.materializations:
+                    errors.append(f"{prefix} materialization {materialization.wire}")
+        if port.effect:
+            target = port.effect
+            if target.kind is EffectTargetKind.VALUE_SLOT:
+                if (not target.reference.startswith("slot:") or not target.reference[5:]
+                        or ValueSlotID(target.reference[5:]) not in self.context.value_slots):
+                    errors.append(f"{prefix} effect value slot {target.reference}")
+            elif target.kind is EffectTargetKind.VALUE_VERSION:
+                try:
+                    logical, number = target.reference[3:].rsplit("@v", 1)
+                    version = ValueVersionID(LogicalValueID(logical), int(number))
+                except (ValueError, TypeError):
+                    version = None
+                if version is None or version.wire != target.reference or version not in self.context.value_versions:
+                    errors.append(f"{prefix} effect value version {target.reference}")
+            # Other targets identify domains (file, environment, object, ...).
+            # Their occurrence/scope binding is validated by RegionConstruction,
+            # not invented as another reference registry inside this bundle.
         return errors
 
     def _validate_alternative_context(self, alternative: PlanAlternative) -> None:
@@ -629,11 +679,15 @@ class OptimizationGraph:
         if errors:
             return {"schema": self.SCHEMA, "schema_version": self.SCHEMA_VERSION,
                     "valid": False, "errors": errors, "counts": {}}
+        for port in self.ports.values():
+            errors.extend(self._port_errors(port))
+        original_counts = {}
+        for alternative in self.alternatives.values():
+            if alternative.original:
+                original_counts[alternative.region] = original_counts.get(alternative.region, 0) + 1
         for region in self.regions.values():
-            errors.extend(self._region_errors(region))
-            originals = [item for item in self.alternatives.values()
-                         if item.region == region.id and item.original]
-            if len(originals) != 1:
+            errors.extend(self._region_errors(region, check_ports=False))
+            if original_counts.get(region.id, 0) != 1:
                 errors.append(f"region {region.id.wire} requires exactly one original alternative")
             if region.parent is not None and region.parent not in self.regions:
                 errors.append(f"region {region.id.wire} has unknown parent")

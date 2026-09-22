@@ -1,0 +1,45 @@
+{
+  "gate": "G6",
+  "scope": "Typed and scoped report-only optimization regions, recursive views, witnessed logical origins, proposed dependency motion and conservative conflict queries. No backend, automatic hoist or workload speedup.",
+  "limitations": [
+    "Static lexical containment is not observed execution. Runtime invocation subsets never inherit whole-definition effect completeness.",
+    "Known data ports are a conservative superset; unclosed consumers/aliases and unattached data-data alias ownership remain explicit gaps.",
+    "Origin queries need explicit G4 bindings and scoped producer evidence; archived provisional captures do not acquire equality or origin proofs.",
+    "Motion computes known boundary cuts and obligations only; dominance, zero-iteration behavior, state/autograd/readiness and profitability remain separate obligations.",
+    "CLI defaults to at most eight selected roots and depth zero; unexpanded/omitted nodes never mean dead work.",
+    "Structural overlap, possible shared state and closed-scope effect independence are separate query results, not permission to combine rewrites."
+  ],
+  "criteria": [
+    {
+      "id": "typed_interface_domains_and_oir_schema_migration",
+      "tests": [
+        "tests/unit/test_region_ports_v2.py"
+      ]
+    },
+    {
+      "id": "recursive_membership_boundaries_coverage_and_omission_validation",
+      "tests": [
+        "tests/unit/test_regions_v2.py"
+      ]
+    },
+    {
+      "id": "eighth_layer_to_third_origin_and_motion_dependencies",
+      "tests": [
+        "tests/unit/test_region_queries_v2.py"
+      ]
+    },
+    {
+      "id": "membership_overlap_scoped_state_alias_and_budget",
+      "tests": [
+        "tests/unit/test_region_conflicts_v2.py",
+        "tests/unit/test_region_conflicts_adversarial.py"
+      ]
+    },
+    {
+      "id": "public_cli_bounded_scope_no_target_execution_or_backend",
+      "tests": [
+        "tests/integration/test_regions_cli_v2.py"
+      ]
+    }
+  ]
+}
