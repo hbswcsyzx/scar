@@ -312,6 +312,13 @@ def main(argv=None) -> int:
     regions_v2.add_argument("--root-limit", type=int, default=8)
     regions_v2.add_argument("--out", required=True, help="JSON report; use .gz for compressed output")
     regions_v2.set_defaults(func=_regions_v2)
+    semantics_v2 = sub.add_parser("semantics-v2", help="extract ordered source semantics and bounded constant facts without executing the target")
+    semantics_v2.add_argument("source")
+    semantics_v2.add_argument("--project-root")
+    semantics_v2.add_argument("--max-nodes", type=int, default=10000)
+    semantics_v2.add_argument("--max-int-bits", type=int, default=4096)
+    semantics_v2.add_argument("--out", required=True, help="JSON report, optionally ending in .gz")
+    semantics_v2.set_defaults(func=_semantics_v2)
     audit = sub.add_parser("audit-rejections",
                            help="explain proof and evidence blockers in an analysis report")
     audit.add_argument("report", help="JSON report produced by scar analyze")
@@ -371,6 +378,35 @@ def _inspect_v2(args) -> int:
     report = inspect_program(args.source, args.trace, project_root=args.project_root,
                              runtime_sources=args.runtime_sources)
     output = _write_document(args.out, report)
+    print(json.dumps({"out": str(output), "summary": report["summary"]}))
+    return 0
+
+
+def _compressed_document(output, report):
+    output = Path(output).resolve()
+    if output.suffix == ".gz":
+        import gzip
+        import io
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with output.open("wb") as destination, gzip.GzipFile(
+                fileobj=destination, mode="wb", mtime=0, filename="") as compressed:
+            with io.TextIOWrapper(compressed, encoding="utf-8") as text:
+                json.dump(report, text, sort_keys=True, ensure_ascii=True, allow_nan=False)
+                text.write("\n")
+    else:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with output.open("w", encoding="utf-8") as text:
+            json.dump(report, text, sort_keys=True, ensure_ascii=True, allow_nan=False)
+            text.write("\n")
+    return output
+
+
+def _semantics_v2(args) -> int:
+    from scar.analysis.constants_v2 import EvaluationBudget
+    from scar.analysis.semantics_report_v2 import report_semantics
+    report = report_semantics(args.source, project_root=args.project_root,
+                              budget=EvaluationBudget(max_nodes=args.max_nodes, max_int_bits=args.max_int_bits))
+    output = _compressed_document(args.out, report)
     print(json.dumps({"out": str(output), "summary": report["summary"]}))
     return 0
 

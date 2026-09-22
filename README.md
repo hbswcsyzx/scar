@@ -94,6 +94,11 @@ python -m scar.cli regions-v2 path/to/program.py --view semantic --max-depth 1 \
 python -m scar.cli regions-v2 artifacts/traces/demo --view execution \
   --root-limit 8 --max-depth 0 --out artifacts/reports/runtime-regions.json.gz
 
+# Build ordered source semantics and bounded builtin constant facts.
+# Execution contracts remain explicit; this does not approve a source rewrite.
+python -m scar.cli semantics-v2 path/to/program.py \
+  --out artifacts/reports/source-semantics.json.gz
+
 # Optionally join a source file or whole Python project to runtime events by
 # exact path/line and loaded function span.
 python -m scar.cli analyze artifacts/traces/demo \

@@ -1,0 +1,19 @@
+{
+  "gate": "G7.1",
+  "scope": "Source-version-bound typed computational semantics, per-use local bindings and bounded builtin constant type/content facts. This preparatory subgate does not accept G7 rewrite families, remove imports, select plans, invoke backends or measure workload speedup.",
+  "limitations": [
+    "Exact source bindings require explicit fresh/ordinary namespace and external-mutation preconditions; these remain required contracts, not observed facts.",
+    "Exact binding propagation is restricted to supported straight-line scope; parameters, branch/loop merges, imports, descriptors, mutable containers and opaque dispatch retain concrete gaps.",
+    "Constant facts establish builtin type/content under the semantic model, not object identity, effect freedom, control coverage or profitability.",
+    "Source overlay authenticity requires replay; a structurally valid overlay or recomputed constant proof alone does not attest the target source.",
+    "Evaluation budgets bound constant reasoning, not AST parsing and graph validation; module loading and user function execution are forbidden.",
+    "No runtime LogicalVersion is fabricated for a static binding or expression. G7.2-G7.4 remain required before the G7 parent gate can pass."
+  ],
+  "criteria": [
+    {"id": "typed_static_identity_literal_codec_scope_and_preconditions", "tests": ["tests/unit/test_semantics_schema_v2.py"]},
+    {"id": "source_operand_order_per_use_binding_and_snapshot_replay", "tests": ["tests/unit/test_source_semantics_v2.py"]},
+    {"id": "independent_effect_control_namespace_and_forgery_counterexamples", "tests": ["tests/unit/test_source_semantics_adversarial.py"]},
+    {"id": "fixed_builtin_derivations_resource_budgets_and_report_recomputation", "tests": ["tests/unit/test_constants_v2.py"]},
+    {"id": "public_nonexecuting_deterministic_semantics_command", "tests": ["tests/integration/test_semantics_cli_v2.py"]}
+  ]
+}
