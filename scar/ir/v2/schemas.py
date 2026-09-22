@@ -144,5 +144,15 @@ class IRBundle:
             "validation": self.validate(),
         }
 
+    @classmethod
+    def from_dict(cls, document: dict[str, Any]) -> "IRBundle":
+        from .codec import bundle_from_dict
+        return bundle_from_dict(document)
+
+    @classmethod
+    def from_json(cls, payload: str) -> "IRBundle":
+        from .codec import bundle_from_json
+        return bundle_from_json(payload)
+
 
 __all__ = ["IRBundle", "canonical_json", "optimization_context"]

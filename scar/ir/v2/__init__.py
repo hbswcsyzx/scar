@@ -118,6 +118,7 @@ from .optimization import (
     ValueSubstitution,
 )
 from .schemas import IRBundle, canonical_json, optimization_context
+from .codec import bundle_from_dict, bundle_from_json
 
 __all__ = [
     "ContractID", "ControlRegionID", "CorrespondenceID", "EffectSummaryID",
@@ -147,4 +148,5 @@ __all__ = [
     "ResidualEffect", "TransformDelta", "TransformKind", "ValidationRequest",
     "ValuePattern", "ValueSubstitution", "IRBundle", "canonical_json",
     "optimization_context",
+    "bundle_from_dict", "bundle_from_json",
 ]

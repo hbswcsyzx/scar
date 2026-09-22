@@ -232,6 +232,10 @@ def test_report_only_constant_substitution_plan_has_original_and_fallback():
     assert document["plans"][0]["disposition"] == "REWRITE"
     assert document["alternatives"][1]["fallback"]["wire"] == original_id.wire
     assert canonical_json(graph) == canonical_json(graph)
+    bundle = IRBundle(semantic, evidence, values, optimization=graph)
+    encoded = canonical_json(bundle)
+    decoded = IRBundle.from_json(encoded)
+    assert canonical_json(decoded) == encoded
 
 
 def test_rewrite_plan_rejects_unknown_proof_and_dangling_region_members():
