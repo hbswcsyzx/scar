@@ -339,16 +339,21 @@ class ValueGraph:
 
     def to_dict(self) -> dict[str, Any]:
         self.assert_valid()
+        ordered = lambda mapping: [mapping[key].as_dict() for key in sorted(
+            mapping, key=lambda item: item.wire)]
         return {
             "schema": self.SCHEMA,
             "schema_version": self.SCHEMA_VERSION,
-            "logical_values": [item.as_dict() for item in self.logical_values.values()],
-            "versions": [item.as_dict() for item in self.versions.values()],
-            "provenance": [item.as_dict() for item in self.provenance.values()],
-            "allocations": [item.as_dict() for item in self.allocations.values()],
-            "regions": [item.as_dict() for item in self.regions.values()],
-            "materializations": [item.as_dict() for item in self.materializations.values()],
-            "bindings": [item.as_dict() for item in self.bindings],
+            "logical_values": ordered(self.logical_values),
+            "versions": ordered(self.versions),
+            "provenance": ordered(self.provenance),
+            "allocations": ordered(self.allocations),
+            "regions": ordered(self.regions),
+            "materializations": ordered(self.materializations),
+            "bindings": [item.as_dict() for item in sorted(
+                self.bindings,
+                key=lambda item: (item.object_id.wire, item.value_version.wire,
+                                  item.relation.value))],
             "validation": self.validate(),
         }
 

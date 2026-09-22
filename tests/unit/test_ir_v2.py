@@ -24,6 +24,7 @@ from scar.ir.v2 import (
     ValueGraph,
     ValueObservation,
     ValueSlot,
+    ValueSlotID,
     ValueVersion,
     ValueVersionID,
 )
@@ -176,12 +177,14 @@ def test_semantic_and_evidence_graphs_keep_definition_and_instance_distinct():
                                 OperationKind.METHOD, "prepare",
                                 parent_id=definition.id)
     semantic.add_definition(child)
-    semantic.add_slot(ValueSlot("input:observation", "observation", "input",
+    input_slot = ValueSlotID("input:observation")
+    output_slot = ValueSlotID("output:action")
+    semantic.add_slot(ValueSlot(input_slot, "observation", "input",
                                 owner=definition.id))
-    semantic.add_slot(ValueSlot("output:action", "action", "output",
+    semantic.add_slot(ValueSlot(output_slot, "action", "output",
                                 owner=definition.id))
-    definition.input_slots = ("input:observation",)
-    definition.output_slots = ("output:action",)
+    definition.input_slots = (input_slot,)
+    definition.output_slots = (output_slot,)
     assert semantic.assert_valid()["valid"]
     assert semantic.children_of(definition.id) == (child,)
     assert semantic.descendants_of(definition.id) == (child,)

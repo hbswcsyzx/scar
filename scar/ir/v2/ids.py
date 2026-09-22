@@ -34,6 +34,22 @@ class LogicalValueID(Identifier):
     prefix = "lv"
 
 
+class PackageID(Identifier):
+    prefix = "package"
+
+
+class ModuleID(Identifier):
+    prefix = "module"
+
+
+class SourceAtomID(Identifier):
+    prefix = "source"
+
+
+class ValueSlotID(Identifier):
+    prefix = "slot"
+
+
 class ProvenanceID(Identifier):
     prefix = "prov"
 
@@ -70,6 +86,34 @@ class OptimizationRegionID(Identifier):
     prefix = "optregion"
 
 
+class EffectSummaryID(Identifier):
+    prefix = "effect"
+
+
+class ContractID(Identifier):
+    prefix = "contract"
+
+
+class ResourceID(Identifier):
+    prefix = "resource"
+
+
+class MeasurementID(Identifier):
+    prefix = "measurement"
+
+
+class CorrespondenceID(Identifier):
+    prefix = "correspondence"
+
+
+class PlanAlternativeID(Identifier):
+    prefix = "alternative"
+
+
+class PlanID(Identifier):
+    prefix = "plan"
+
+
 @dataclass(frozen=True, slots=True)
 class ValueVersionID:
     """A semantic version independent of object identity and storage."""
@@ -96,8 +140,11 @@ class ValueVersionID:
 
 
 __all__ = [
-    "Identifier", "LogicalValueID", "ProvenanceID", "ObjectID",
+    "Identifier", "PackageID", "ModuleID", "SourceAtomID", "ValueSlotID",
+    "LogicalValueID", "ProvenanceID", "ObjectID",
     "StorageAllocationID", "StorageRegionID", "MaterializationID",
     "OperationDefinitionID", "OperationInstanceID", "ControlRegionID",
-    "OptimizationRegionID", "ValueVersionID",
+    "OptimizationRegionID", "EffectSummaryID", "ContractID", "ResourceID",
+    "MeasurementID", "CorrespondenceID", "PlanAlternativeID", "PlanID",
+    "ValueVersionID",
 ]
