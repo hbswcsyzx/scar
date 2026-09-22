@@ -36,7 +36,27 @@ def main():
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     manifest = json.loads(args.manifest.read_text())
-    criteria = manifest["criteria"]
+    criteria = manifest.get("criteria")
+    if (not isinstance(criteria, list) or not criteria
+            or any(not isinstance(row, dict) or not row.get("id")
+                   or not isinstance(row.get("tests"), list) or not row["tests"]
+                   or any(not isinstance(node, str) or not node for node in row["tests"])
+                   for row in criteria)
+            or len({row["id"] for row in criteria}) != len(criteria)):
+        code_hash, hashes = fingerprint()
+        revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        report = {"schema": "scar.gate-report", "schema_version": 2,
+                  "gate": manifest.get("gate"), "status": "FAIL",
+                  "revision": revision, "source_sha256": code_hash, "tested_files": hashes,
+                  "errors": ["manifest requires nonempty unique criteria and test selectors"]}
+        out = args.out or ROOT / "artifacts/reports/gates/invalid-manifest.json"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(report, indent=2) + "\n")
+        out.with_suffix(".md").write_text(
+            f"# Gate manifest failure\n\nStatus: **FAIL**\n\nRevision: `{revision}`\n\n"
+            + "\n".join(report["errors"]) + "\n")
+        print(json.dumps(report))
+        return 1
     nodes = sorted({node for row in criteria for node in row["tests"]})
     code_hash, hashes = fingerprint()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
@@ -56,10 +76,17 @@ def main():
     for row in criteria:
         evidence = []
         for node in row["tests"]:
-            file, _, test = node.partition("::")
+            parts = node.split("::")
+            file = parts[0]
+            test = parts[-1] if len(parts) > 1 else ""
             classname = file.removesuffix(".py").replace("/", ".")
-            matched = [case for case in cases if case["class"] == classname
-                       and (not test or case["name"] == test or case["name"].startswith(test + "["))]
+            if len(parts) > 2:
+                classname += "." + ".".join(parts[1:-1])
+            matched = [case for case in cases if (
+                (case["class"] == classname and
+                 (not test or case["name"] == test or case["name"].startswith(test + "[")))
+                or (not test and case["class"].startswith(classname + "."))
+                or (test and case["class"] == classname + "." + test))]
             evidence.append({"node": node, "cases": matched,
                              "status": "PASS" if matched and all(case["status"] == "PASS"
                                                                   for case in matched) else "FAIL"})
