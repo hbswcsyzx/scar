@@ -4,8 +4,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+import re
 
 from .common import EvidenceClaim
+from ._validation import cycle_errors, mapping_errors, record_errors
 from .contracts import MeasurementRecord
 from .ids import (
     Identifier,
@@ -40,6 +42,14 @@ class OperationInstance:
     end_ns: int | None = None
     status: EvidenceStatus = EvidenceStatus.OBSERVED
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if self.start_ns is not None and self.start_ns < 0:
+            raise ValueError("instance start time cannot be negative")
+        if self.end_ns is not None and self.end_ns < 0:
+            raise ValueError("instance end time cannot be negative")
+        if self.start_ns is not None and self.end_ns is not None and self.end_ns < self.start_ns:
+            raise ValueError("instance ends before it starts")
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -143,6 +153,40 @@ class EvidenceRelation(str, Enum):
     USES_RESOURCE = "uses_resource"
 
 
+_E = EvidenceNodeKind
+_DATA_NODES = (_E.VALUE_OBSERVATION, _E.VALUE_VERSION, _E.MATERIALIZATION,
+               _E.OBJECT, _E.ALLOCATION, _E.STORAGE_REGION)
+_EVENT_NODES = (_E.OPERATION_INSTANCE, _E.CONTROL_EVENT)
+_EVIDENCE_RELATION_ENDPOINTS = {
+    # A definition is owned by SG, so instance_of is stored in
+    # OperationInstance.definition / CorrespondenceGraph, not as an EEG edge.
+    EvidenceRelation.INSTANCE_OF: set(),
+    **{relation: {(_E.OPERATION_INSTANCE, target) for target in _DATA_NODES}
+       for relation in (EvidenceRelation.OBSERVED_READ, EvidenceRelation.OBSERVED_WRITE,
+                        EvidenceRelation.PRODUCES)},
+    EvidenceRelation.MATERIALIZES: {
+        (source, _E.MATERIALIZATION) for source in (_E.OPERATION_INSTANCE, _E.VALUE_VERSION)},
+    EvidenceRelation.ALIASES: {(source, target) for source in (
+        _E.OBJECT, _E.STORAGE_REGION, _E.MATERIALIZATION) for target in (
+            _E.OBJECT, _E.STORAGE_REGION, _E.MATERIALIZATION)},
+    EvidenceRelation.OVERWRITES: {(_E.OPERATION_INSTANCE, target) for target in _DATA_NODES},
+    EvidenceRelation.ESCAPES: {
+        (source, target) for source in _DATA_NODES
+        for target in (_E.OPERATION_INSTANCE, _E.OBJECT, _E.RESOURCE)},
+    EvidenceRelation.HAPPENS_BEFORE: {
+        (source, target) for source in _EVENT_NODES for target in _EVENT_NODES},
+    EvidenceRelation.CONTROLS_INSTANCE: {
+        (source, _E.OPERATION_INSTANCE) for source in _EVENT_NODES},
+    EvidenceRelation.USES_STORAGE: {
+        (source, target) for source in (_E.OPERATION_INSTANCE, _E.MATERIALIZATION, _E.OBJECT)
+        for target in (_E.ALLOCATION, _E.STORAGE_REGION)},
+    EvidenceRelation.MEASURED_BY: {
+        (source, _E.MEASUREMENT) for source in EvidenceNodeKind if source is not _E.MEASUREMENT},
+    EvidenceRelation.USES_RESOURCE: {
+        (source, _E.RESOURCE) for source in (_E.OPERATION_INSTANCE, _E.MATERIALIZATION, _E.ALLOCATION)},
+}
+
+
 @dataclass(frozen=True, slots=True)
 class EvidenceEdge:
     edge_id: str
@@ -154,6 +198,10 @@ class EvidenceEdge:
     def __post_init__(self) -> None:
         if not self.edge_id:
             raise ValueError("evidence edge ID is required")
+        if self.relation is EvidenceRelation.INSTANCE_OF:
+            raise ValueError("instance_of belongs in OperationInstance.definition or correspondence")
+        if (self.source.kind, self.target.kind) not in _EVIDENCE_RELATION_ENDPOINTS[self.relation]:
+            raise ValueError(f"invalid endpoints for evidence relation {self.relation.value}")
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -257,10 +305,35 @@ class EvidenceGraph:
 
     def validate(self) -> dict[str, Any]:
         errors: list[str] = []
+        for mapping, key_type, record_type, name, key_field in (
+            (self.instances, OperationInstanceID, OperationInstance, "instances", "id"),
+            (self.observations, str, ValueObservation, "observations", "observation_id"),
+            (self.measurements, MeasurementID, MeasurementRecord, "measurements", "id"),
+            (self.edges, str, EvidenceEdge, "edges", "edge_id"),
+        ):
+            errors.extend(mapping_errors(mapping, key_type, record_type, name, key_field))
+        errors.extend(record_errors(self.control_events, set[str], "control_events"))
+        errors.extend(record_errors(self.external_references, set[tuple[EvidenceNodeKind, str]],
+                                    "external_references"))
+        if errors:
+            return self._validation_report(errors)
+        for kind, wire in sorted(self.external_references, key=lambda item: (item[0].value, item[1])):
+            expected = _TYPED_EVIDENCE_ENDPOINTS.get(kind)
+            if kind in (_E.OPERATION_INSTANCE, _E.VALUE_OBSERVATION, _E.CONTROL_EVENT, _E.MEASUREMENT):
+                errors.append(f"external reference {wire} has EEG-owned kind {kind.value}")
+            elif expected is ValueVersionID:
+                if re.fullmatch(r"lv:.+@v(?:0|[1-9][0-9]*)", wire) is None:
+                    errors.append(f"external reference {wire} is not a value version wire ID")
+            elif expected is None or not wire.startswith(expected.prefix + ":") or not wire[len(expected.prefix) + 1:]:
+                errors.append(f"external reference {wire} has wrong ID kind for {kind.value}")
+        if "" in self.control_events:
+            errors.append("control event ID cannot be empty")
         for instance in self.instances.values():
             if instance.parent is not None and instance.parent not in self.instances:
                 errors.append(f"instance {instance.id.wire} references unknown parent")
         for observation in self.observations.values():
+            if not observation.observation_id:
+                errors.append("observation ID cannot be empty")
             if observation.operation is not None and observation.operation not in self.instances:
                 errors.append(f"observation {observation.observation_id} references unknown operation")
         for edge in self.edges.values():
@@ -268,6 +341,18 @@ class EvidenceGraph:
                 errors.append(f"edge {edge.edge_id} has unknown source")
             if not self._endpoint_exists(edge.target):
                 errors.append(f"edge {edge.edge_id} has unknown target")
+        errors.extend(cycle_errors(
+            ((item.parent, item.id) for item in self.instances.values() if item.parent is not None),
+            "operation instance ancestry"))
+        errors.extend(cycle_errors(
+            (((edge.source.kind, edge.source.wire), (edge.target.kind, edge.target.wire))
+             for edge in self.edges.values()
+             if edge.relation is EvidenceRelation.HAPPENS_BEFORE), "happens-before relation"))
+        # Parentage is containment, not completion order: never combine parent
+        # edges with happens-before edges to invent a temporal relation.
+        return self._validation_report(errors)
+
+    def _validation_report(self, errors: list[str]) -> dict[str, Any]:
         return {"schema": self.SCHEMA, "schema_version": self.SCHEMA_VERSION,
                 "valid": not errors, "errors": errors,
                 "counts": {"instances": len(self.instances),

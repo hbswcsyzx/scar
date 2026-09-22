@@ -63,6 +63,10 @@ Observed、Inferred、Proposed、Implemented、Verified、Rejected 保持分离�
 每个阶段必须通过本文件的验收门。未通过时只修复该阶段，不开启后续 detector
 或 backend。每个 gate 产出机器可读 validation report。
 
+验收、修复、报告、commit 和 push 均由开发代理自行完成。用户不承担阶段审批。
+执行规范见 [GATE_EXECUTION.md](GATE_EXECUTION.md)；每个通过的阶段应立即推进
+下一个满足依赖的阶段。
+
 ### 2.5 Terminal decision
 
 proof 内部允许 UNKNOWN；用户可执行计划的终态只能是：

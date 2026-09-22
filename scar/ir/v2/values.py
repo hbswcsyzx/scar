@@ -5,6 +5,8 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any
 
+from ._validation import cycle_errors, mapping_errors, record_errors
+
 from .ids import (
     MaterializationID,
     ObjectID,
@@ -116,6 +118,11 @@ class StorageAllocation:
 
 @dataclass(slots=True)
 class StorageRegion:
+    """A strided view: offset and strides count dtype elements, not bytes.
+
+    Zero strides represent broadcast views.  Negative strides are allowed for
+    CPU/NumPy views when the complete addressed interval fits the allocation.
+    """
     id: StorageRegionID
     allocation: StorageAllocationID
     offset: int
@@ -257,6 +264,10 @@ class ValueGraph:
             parent = pending.pop()
             if parent in found:
                 continue
+            if parent == version:
+                raise ValueError("cyclic value-version ancestry")
+            if parent not in self.versions:
+                raise ValueError(f"unknown parent version: {parent.wire}")
             found.add(parent)
             pending.extend(self.versions[parent].parent_versions)
         return tuple(sorted(found, key=lambda item: item.wire))
@@ -269,7 +280,21 @@ class ValueGraph:
 
     def validate(self) -> dict[str, Any]:
         errors: list[str] = []
+        for mapping, key_type, record_type, name in (
+            (self.logical_values, LogicalValueID, LogicalValue, "logical_values"),
+            (self.versions, ValueVersionID, ValueVersion, "versions"),
+            (self.provenance, ProvenanceID, ProvenanceRecord, "provenance"),
+            (self.allocations, StorageAllocationID, StorageAllocation, "allocations"),
+            (self.regions, StorageRegionID, StorageRegion, "regions"),
+            (self.materializations, MaterializationID, Materialization, "materializations"),
+        ):
+            errors.extend(mapping_errors(mapping, key_type, record_type, name))
+        errors.extend(record_errors(self.bindings, list[ObjectBinding], "bindings"))
+        if errors:
+            return self._validation_report(errors)
         for version in self.versions.values():
+            if version.id.logical_value not in self.logical_values:
+                errors.append(f"version {version.id.wire} references unknown logical value")
             for parent in version.parent_versions:
                 if parent not in self.versions:
                     errors.append(f"version {version.id.wire} has unknown parent {parent.wire}")
@@ -281,40 +306,95 @@ class ValueGraph:
                 errors.append(
                     f"version {version.id.wire} is not an output of {version.provenance_id.wire}")
         for record in self.provenance.values():
+            if not record.outputs:
+                errors.append(f"provenance {record.id.wire} has no output versions")
+            if record.relation is ProvenanceRelation.ORIGIN and record.inputs:
+                errors.append(f"origin provenance {record.id.wire} cannot have input versions")
             for item in record.inputs + record.outputs:
                 if item not in self.versions:
                     errors.append(f"provenance {record.id.wire} references unknown version {item.wire}")
-        # A provenance DAG must not contain a cycle.  Cycles would make a
-        # version appear to derive from itself and invalidate lifetime and
-        # invalidation reasoning.
-        visiting: set[ValueVersionID] = set()
-        visited: set[ValueVersionID] = set()
-
-        def visit(version_id: ValueVersionID) -> None:
-            if version_id in visiting:
-                errors.append(f"cyclic value-version ancestry at {version_id.wire}")
-                return
-            if version_id in visited or version_id not in self.versions:
-                return
-            visiting.add(version_id)
-            for parent in self.versions[version_id].parent_versions:
-                visit(parent)
-            visiting.remove(version_id)
-            visited.add(version_id)
-
-        for version_id in self.versions:
-            visit(version_id)
+            for output in record.outputs:
+                version = self.versions.get(output)
+                if version is None:
+                    continue
+                # Physical materialization can preserve an existing logical
+                # version.  It is not a new semantic producer or ancestry edge.
+                if record.relation is ProvenanceRelation.MATERIALIZE and output in record.inputs:
+                    continue
+                if version.provenance_id != record.id:
+                    errors.append(f"provenance {record.id.wire} output {output.wire} has inconsistent producer")
+                if set(version.parent_versions) != set(record.inputs):
+                    errors.append(f"provenance {record.id.wire} inputs disagree with output ancestry")
+                if record.relation is ProvenanceRelation.MUTATE and not any(
+                    parent.logical_value == output.logical_value and parent.version < output.version
+                    for parent in record.inputs
+                ):
+                    errors.append(f"mutation {record.id.wire} must advance the same logical value")
+        errors.extend(cycle_errors(
+            ((parent, version.id) for version in self.versions.values()
+             for parent in version.parent_versions), "value-version ancestry"))
+        for allocation in self.allocations.values():
+            if allocation.nbytes is not None and allocation.nbytes < 0:
+                errors.append(f"allocation {allocation.id.wire} has negative nbytes")
+            if not allocation.device:
+                errors.append(f"allocation {allocation.id.wire} has no device")
         for region in self.regions.values():
             if region.allocation not in self.allocations:
                 errors.append(f"region {region.id.wire} references unknown allocation {region.allocation.wire}")
+            errors.extend(self._region_errors(region))
         for materialization in self.materializations.values():
             if materialization.value_version not in self.versions:
                 errors.append(f"materialization {materialization.id.wire} references unknown version")
             if materialization.region is not None and materialization.region not in self.regions:
                 errors.append(f"materialization {materialization.id.wire} references unknown region")
+            region = self.regions.get(materialization.region)
+            if region is not None and materialization.device != region.device:
+                errors.append(f"materialization {materialization.id.wire} device disagrees with region")
+            if not materialization.representation or not materialization.device:
+                errors.append(f"materialization {materialization.id.wire} requires representation and device")
         for binding in self.bindings:
             if binding.value_version not in self.versions:
                 errors.append(f"binding references unknown version {binding.value_version.wire}")
+        return self._validation_report(errors)
+
+    def _region_errors(self, region: StorageRegion) -> list[str]:
+        errors = []
+        if region.offset < 0 or any(size < 0 for size in region.shape):
+            errors.append(f"region {region.id.wire} offset and shape must be non-negative")
+        if len(region.shape) != len(region.strides):
+            errors.append(f"region {region.id.wire} shape and strides must have equal rank")
+        if not region.dtype or not region.device or not region.layout:
+            errors.append(f"region {region.id.wire} requires dtype, device and layout")
+        allocation = self.allocations.get(region.allocation)
+        if allocation is not None and region.device != allocation.device:
+            errors.append(f"region {region.id.wire} device disagrees with allocation")
+        if errors or allocation is None or region.layout != "strided":
+            return errors
+        # Empty tensors address no elements.  Nonempty views, including scalars
+        # and zero/negative strides, use the extrema of the address expression.
+        if any(size == 0 for size in region.shape):
+            return errors
+        minimum = region.offset + sum(min(0, (size - 1) * stride)
+                                      for size, stride in zip(region.shape, region.strides))
+        maximum = region.offset + sum(max(0, (size - 1) * stride)
+                                      for size, stride in zip(region.shape, region.strides))
+        if minimum < 0:
+            errors.append(f"region {region.id.wire} addresses before its allocation")
+        dtype = region.dtype.removeprefix("torch.").removeprefix("numpy.")
+        widths = {
+            "bool": 1, "uint8": 1, "int8": 1,
+            "int16": 2, "uint16": 2, "float16": 2, "bfloat16": 2, "half": 2,
+            "int32": 4, "uint32": 4, "float32": 4, "float": 4, "complex32": 4,
+            "int64": 8, "uint64": 8, "float64": 8, "double": 8, "complex64": 8,
+            "complex128": 16,
+        }
+        width = widths.get(dtype)
+        # Unknown dtype sizes remain unknown; they never imply a proved bound.
+        if width is not None and allocation.nbytes is not None and (maximum + 1) * width > allocation.nbytes:
+            errors.append(f"region {region.id.wire} addresses beyond allocation nbytes")
+        return errors
+
+    def _validation_report(self, errors: list[str]) -> dict[str, Any]:
         return {
             "schema": self.SCHEMA,
             "schema_version": self.SCHEMA_VERSION,

@@ -1,0 +1,35 @@
+{
+  "gate": "G1",
+  "scope": "Typed IR structure, boundary integrity and exact JSON round-trip; all plans are fixtures, no automatic simplification is claimed.",
+  "limitations": [
+    "Semantic proof construction and region inference are later gates; PROVEN records are supplied declarations in these fixtures.",
+    "Literal substitutions currently accept finite JSON literals only; tuple, bytes and non-string-key mappings are rejected to prevent type loss.",
+    "INSTANCE_OF is represented by OperationInstance.definition and correspondence records.",
+    "No new backend, transformation or LeWM speedup is tested by this gate."
+  ],
+  "criteria": [
+    {"id": "identity_and_cross_graph_integrity", "tests": [
+      "tests/unit/test_ir_v2.py",
+      "tests/unit/test_ir_v2_optimization.py::test_typed_ids_cannot_be_interchanged",
+      "tests/unit/test_ir_v2_optimization.py::test_bundle_validates_cross_graph_references_and_is_deterministic",
+      "tests/unit/test_ir_v2_boundary_validation.py::test_materialization_cannot_observe_another_version"
+    ]},
+    {"id": "cycles_relations_and_mutable_records", "tests": [
+      "tests/unit/test_ir_v2_graph_validation.py"
+    ]},
+    {"id": "replacement_boundaries_and_noop", "tests": [
+      "tests/unit/test_ir_v2_boundary_validation.py",
+      "tests/unit/test_ir_v2_optimization.py::test_rewrite_plan_rejects_unknown_proof_and_dangling_region_members"
+    ]},
+    {"id": "four_report_only_plan_forms", "tests": [
+      "tests/unit/test_ir_v2_optimization.py::test_report_only_constant_substitution_plan_has_original_and_fallback",
+      "tests/unit/test_ir_v2_optimization.py::test_oir_represents_import_residual_loop_move_and_residency_without_backend"
+    ]},
+    {"id": "strict_deterministic_codec", "tests": [
+      "tests/unit/test_ir_v2_codec_validation.py"
+    ]},
+    {"id": "v1_trace_analyze_compatibility", "tests": [
+      "tests/integration/test_trace.py::test_trace_and_analysis"
+    ]}
+  ]
+}

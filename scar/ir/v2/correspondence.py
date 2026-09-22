@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any
 
 from .common import EvidenceClaim
+from ._validation import mapping_errors
 from .ids import (
     CorrespondenceID,
     OperationDefinitionID,
@@ -46,6 +47,14 @@ class CorrespondenceRecord:
         elif self.kind is CorrespondenceKind.SLOT_VERSION:
             if self.value_slot is None or self.value_version is None:
                 raise ValueError("slot-version correspondence needs both endpoints")
+        allowed = {
+            CorrespondenceKind.DEFINITION_INSTANCE: {"definition", "instance"},
+            CorrespondenceKind.SOURCE_INSTANCE: {"source_atom", "instance"},
+            CorrespondenceKind.SLOT_VERSION: {"value_slot", "value_version"},
+        }[self.kind]
+        for name in ("definition", "instance", "source_atom", "value_slot", "value_version"):
+            if name not in allowed and getattr(self, name) is not None:
+                raise ValueError(f"{name} is not an endpoint of {self.kind.value}")
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -89,8 +98,10 @@ class CorrespondenceGraph:
         return errors
 
     def validate(self) -> dict[str, Any]:
+        errors = mapping_errors(self.records, CorrespondenceID, CorrespondenceRecord,
+                                "correspondence.records")
         return {"schema": self.SCHEMA, "schema_version": self.SCHEMA_VERSION,
-                "valid": True, "errors": [],
+                "valid": not errors, "errors": errors,
                 "counts": {"records": len(self.records)}}
 
     def to_dict(self) -> dict[str, Any]:

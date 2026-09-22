@@ -66,6 +66,9 @@ class IRBundle:
         errors: list[str] = []
         for name, report in reports.items():
             errors.extend(f"{name}: {item}" for item in report["errors"])
+        if errors:
+            return {"schema": self.SCHEMA, "schema_version": self.SCHEMA_VERSION,
+                    "valid": False, "errors": errors, "graphs": reports}
 
         for instance in self.evidence.instances.values():
             if instance.definition not in self.semantic.definitions:
@@ -82,6 +85,10 @@ class IRBundle:
                 errors.append(
                     f"observation {observation.observation_id} references unknown "
                     f"materialization {observation.materialization.wire}")
+            elif observation.materialization is not None:
+                materialization = self.values.materializations[observation.materialization]
+                if materialization.value_version != observation.version:
+                    errors.append(f"observation {observation.observation_id} materialization version mismatch")
         for provenance in self.values.provenance.values():
             if provenance.producer is not None and provenance.producer not in self.evidence.instances:
                 errors.append(
@@ -103,9 +110,10 @@ class IRBundle:
             EvidenceNodeKind.STORAGE_REGION: self.values.regions,
             EvidenceNodeKind.RESOURCE: self.semantic.resources,
         }
+        external_wires = {kind: {item.wire for item in owners}
+                          for kind, owners in external_owners.items()}
         for kind, wire in self.evidence.external_references:
-            owners = external_owners.get(kind)
-            if owners is None or not any(item.wire == wire for item in owners):
+            if wire not in external_wires.get(kind, set()):
                 errors.append(f"evidence external reference {kind.value}:{wire} is unknown")
         if self.correspondence is not None:
             errors.extend(self.correspondence.validate_references(
@@ -114,6 +122,21 @@ class IRBundle:
             expected = optimization_context(self.semantic, self.evidence, self.values)
             if self.optimization.context != expected:
                 errors.append("optimization context does not match SG/EEG/ValueGraph")
+            for port in self.optimization.ports.values():
+                if not port.value:
+                    continue
+                for mid in port.value.materializations:
+                    materialization = self.values.materializations.get(mid)
+                    if (materialization and port.value.versions
+                            and materialization.value_version not in port.value.versions):
+                        errors.append(f"port {port.port_id} materialization version mismatch")
+            for alternative in self.optimization.alternatives.values():
+                for instruction in alternative.instructions:
+                    if instruction.source is None:
+                        continue
+                    atom = self.semantic.source_atoms.get(instruction.source.atom_id)
+                    if atom is None or atom.reference != instruction.source:
+                        errors.append(f"instruction {instruction.instruction_id} source reference mismatch")
 
         return {
             "schema": self.SCHEMA,

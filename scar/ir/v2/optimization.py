@@ -8,8 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+import math
 
 from .common import ProofClaim, ProofStatus, SourceReference
+from ._validation import mapping_errors, record_errors, cycle_errors
 from .ids import (
     ContractID,
     ControlRegionID,
@@ -90,6 +92,9 @@ class RegionPort:
             raise ValueError("control port requires a control reference")
         if self.kind is RegionPortKind.RESOURCE and self.resource is None:
             raise ValueError("resource port requires a resource reference")
+        if self.kind in {RegionPortKind.INPUT, RegionPortKind.OUTPUT,
+                         RegionPortKind.STATE, RegionPortKind.ESCAPE} and self.value is None:
+            raise ValueError("data/state/escape port requires a value pattern")
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -160,6 +165,25 @@ class LiteralValue:
     """Explicit wrapper so the Python value ``None`` is a valid literal."""
 
     value: Any
+
+    def __post_init__(self) -> None:
+        # This schema revision supports JSON literals only. Reject values whose
+        # Python type would be silently changed by JSON (tuple, bytes, int keys).
+        def check(value):
+            if value is None or type(value) in (str, bool, int):
+                return
+            if type(value) is float and math.isfinite(value):
+                return
+            if type(value) is list:
+                for child in value:
+                    check(child)
+                return
+            if type(value) is dict and all(type(key) is str for key in value):
+                for child in value.values():
+                    check(child)
+                return
+            raise ValueError("literal must be a finite JSON value with string dictionary keys")
+        check(self.value)
 
     def as_dict(self) -> dict[str, Any]:
         return {"value": self.value}
@@ -553,6 +577,20 @@ class OptimizationGraph:
 
     def _validate_alternative_context(self, alternative: PlanAlternative) -> None:
         delta = alternative.delta
+        region = self.regions.get(alternative.region)
+        if region is None:
+            raise ValueError("alternative references unknown region")
+        # Region members are explicit, including members of any contained
+        # region which the builder intends to replace as part of this boundary.
+        if set(delta.removed_definitions) - set(region.definitions):
+            raise ValueError("delta deletes definitions outside target region boundary")
+        if set(delta.removed_instances) - set(region.instances):
+            raise ValueError("delta deletes instances outside target region boundary")
+        if alternative.cost_request and alternative.cost_request.scope != region.id:
+            raise ValueError("cost request scope must match alternative region")
+        if (alternative.validation_request and region.contract
+                and alternative.validation_request.contract != region.contract):
+            raise ValueError("validation contract must match region contract")
         for definition in delta.removed_definitions:
             if definition not in self.context.definitions:
                 raise ValueError(f"delta references unknown definition {definition.wire}")
@@ -571,6 +609,8 @@ class OptimizationGraph:
             if (move.from_control not in self.context.controls
                     or move.to_control not in self.context.controls):
                 raise ValueError("move references unknown control region")
+            if move.region != region.id:
+                raise ValueError("move must target the alternative region")
         for residual in alternative.residual_effects:
             if residual.effect not in self.context.effects:
                 raise ValueError(f"residual references unknown effect {residual.effect.wire}")
@@ -579,7 +619,16 @@ class OptimizationGraph:
             raise ValueError("validation request references unknown contract")
 
     def validate(self) -> dict[str, Any]:
-        errors: list[str] = []
+        errors = record_errors(self.context, OptimizationContext, "optimization.context")
+        errors += mapping_errors(self.ports, str, RegionPort, "optimization.ports", "port_id")
+        errors += mapping_errors(self.regions, OptimizationRegionID, OptimizationRegion,
+                                 "optimization.regions")
+        errors += mapping_errors(self.alternatives, PlanAlternativeID, PlanAlternative,
+                                 "optimization.alternatives")
+        errors += mapping_errors(self.plans, PlanID, PlanSelection, "optimization.plans")
+        if errors:
+            return {"schema": self.SCHEMA, "schema_version": self.SCHEMA_VERSION,
+                    "valid": False, "errors": errors, "counts": {}}
         for region in self.regions.values():
             errors.extend(self._region_errors(region))
             originals = [item for item in self.alternatives.values()
@@ -589,6 +638,10 @@ class OptimizationGraph:
             if region.parent is not None and region.parent not in self.regions:
                 errors.append(f"region {region.id.wire} has unknown parent")
         for alternative in self.alternatives.values():
+            try:
+                alternative.__post_init__()
+            except (ValueError, TypeError) as exc:
+                errors.append(f"alternative {alternative.id.wire}: {exc}")
             if alternative.region not in self.regions:
                 errors.append(f"alternative {alternative.id.wire} has unknown region")
             if (not alternative.original and alternative.fallback is None):
@@ -611,11 +664,32 @@ class OptimizationGraph:
                 if missing:
                     errors.append(
                         f"instruction {instruction.instruction_id} has unknown dependencies")
+            dependency_map = {item.instruction_id: set(item.depends_on)
+                              for item in alternative.instructions}
+            # Dependency cycles are invalid even when all referenced IDs exist.
+            pending = dict(dependency_map)
+            while pending:
+                ready = {key for key, deps in pending.items() if not (deps & pending.keys())}
+                if not ready:
+                    errors.append(f"alternative {alternative.id.wire} has cyclic instruction dependencies")
+                    break
+                for key in ready:
+                    del pending[key]
         for plan in self.plans.values():
+            try:
+                plan.__post_init__()
+            except (ValueError, TypeError) as exc:
+                errors.append(f"plan {plan.id.wire}: {exc}")
             if plan.region not in self.regions:
                 errors.append(f"plan {plan.id.wire} has unknown region")
             if plan.selected is not None and plan.selected not in self.alternatives:
                 errors.append(f"plan {plan.id.wire} has unknown selected alternative")
+            if plan.selected in self.alternatives:
+                chosen = self.alternatives[plan.selected]
+                if chosen.region != plan.region:
+                    errors.append(f"plan {plan.id.wire} selected alternative belongs to another region")
+                if plan.disposition is PlanDisposition.KEEP and not chosen.original:
+                    errors.append(f"plan {plan.id.wire} KEEP must select original")
             if plan.disposition is PlanDisposition.REWRITE and plan.selected in self.alternatives:
                 selected = self.alternatives[plan.selected]
                 if (selected.original or not selected.proofs
@@ -625,24 +699,8 @@ class OptimizationGraph:
                         or selected.validation_request is None):
                     errors.append(f"plan {plan.id.wire} selects an incomplete rewrite")
 
-        visiting: set[OptimizationRegionID] = set()
-        visited: set[OptimizationRegionID] = set()
-
-        def visit_region(region_id: OptimizationRegionID) -> None:
-            if region_id in visiting:
-                errors.append(f"cyclic optimization-region ancestry at {region_id.wire}")
-                return
-            if region_id in visited or region_id not in self.regions:
-                return
-            visiting.add(region_id)
-            parent = self.regions[region_id].parent
-            if parent is not None:
-                visit_region(parent)
-            visiting.remove(region_id)
-            visited.add(region_id)
-
-        for region_id in self.regions:
-            visit_region(region_id)
+        errors += cycle_errors(((item.id, item.parent) for item in self.regions.values()
+                                if item.parent is not None), "optimization-region ancestry")
         return {
             "schema": self.SCHEMA, "schema_version": self.SCHEMA_VERSION,
             "valid": not errors, "errors": errors,

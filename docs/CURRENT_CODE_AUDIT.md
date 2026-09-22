@@ -55,11 +55,11 @@ warning 来自 Python 对多线程进程中 `os.fork()` 的弃用提示。它不
 
 | 能力 | 状态 | 代码证据 | 准确含义 |
 | --- | --- | --- | --- |
-| v1 source coverage | Verified | `scar/ir/source.py`、`scar/ir/graph.py` | AST、物理行、保守 CFG/Name 读写；覆盖语法不等于理解语义 |
+| v1 source coverage | Verified | `scar/ir/static.py`、`scar/ir/graph.py` | AST、物理行、保守 CFG/Name 读写；覆盖语法不等于理解语义 |
 | Python/Torch trace | Verified | `scar/trace/` | call/return、module、部分 C-call、Torch profiler 和资源记录 |
 | CUDA evidence | Partial | `scar/trace/cuda.py`、Kineto 记录 | kernel/memcpy/barrier/stream 可观测；并非总能绑定到逻辑值 |
 | v1 mixed graph | Implemented | `ProgramGraph` | K/Σ/A/R/Q/M 投影和部分依赖；混合了静态、动态和推理命名空间 |
-| proof ledger | Implemented | `scar/analysis/proofs.py`、planner | 能区分 PROVEN/DISPROVEN/UNKNOWN；尚未形成区域证明树 |
+| proof ledger | Implemented | `scar/ir/proofs.py`、planner | 能区分 PROVEN/DISPROVEN/UNKNOWN；尚未形成区域证明树 |
 | candidate discovery | Implemented | `scar/analysis/` | 重复、物化、同步、loop 等信号；候选不是修改方案 |
 | v2 value identity | Schema-only | `scar/ir/v2/values.py` | 概念和校验存在，真实 trace 尚未填充 |
 | v2 semantic graph | Schema-only | `scar/ir/v2/semantic.py` | definitions/slots/control 容器存在，缺少完整 typed relations/frontend |
@@ -364,7 +364,7 @@ tie-break 生成确定性计划。
 - trace 中有 45,894 Actions 和 1,465 个 detector opportunities；
 - 该次运行选择 0 个 transform；
 - 另一份全项目 graph 构建记录有 834,790 nodes / 1,628,494 edges，耗时
-  404.10 s、峰值 RSS 约 4.54 GiB；
+  404.10 s、峰值 RSS 4,539,492 KiB（约 4.33 GiB）；
 - resource-sampled run 的 GPU 利用率平均 0.74%、峰值 23%，这是插桩运行证据。
 
 ### Inferred

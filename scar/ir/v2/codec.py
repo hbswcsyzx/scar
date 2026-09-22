@@ -1,8 +1,13 @@
 """Strict JSON decoders for the IR v2 graph bundle."""
 from __future__ import annotations
 
+from dataclasses import MISSING, fields, is_dataclass
+from enum import Enum
+from functools import lru_cache, wraps
 import json
-from typing import Any, TypeVar
+import math
+from types import UnionType
+from typing import Any, TypeVar, Union, get_args, get_origin, get_type_hints
 
 from .common import (
     Completeness,
@@ -121,9 +126,156 @@ from .values import (
 I = TypeVar("I", bound=Identifier)
 
 
+def _json_value(value: Any, path: str = "document") -> None:
+    """Reject data that canonical JSON cannot represent, including NaN/Inf."""
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if not isinstance(key, str):
+                raise ValueError(f"{path}: JSON object keys must be strings")
+            _json_value(child, f"{path}.{key}")
+    elif isinstance(value, (list, tuple)):
+        for index, child in enumerate(value):
+            _json_value(child, f"{path}[{index}]")
+    elif type(value) is float:
+        if not math.isfinite(value):
+            raise ValueError(f"{path}: non-finite JSON number")
+    elif value is not None and type(value) not in (str, int, bool):
+        raise ValueError(f"{path}: unsupported JSON value {type(value).__name__}")
+
+
+@lru_cache(maxsize=None)
+def _record_schema(cls):
+    return fields(cls), get_type_hints(cls)
+
+
+def _wire_type(value: Any, expected: Any, path: str) -> None:
+    """Validate wire shapes before tuple conversion or truthiness can hide errors."""
+    if expected is Any:
+        return
+    origin, arguments = get_origin(expected), get_args(expected)
+    if origin in (Union, UnionType):
+        for alternative in arguments:
+            try:
+                _wire_type(value, alternative, path)
+                return
+            except ValueError:
+                pass
+        raise ValueError(f"{path}: does not match {expected}")
+    if origin is tuple:
+        if not isinstance(value, (list, tuple)):
+            raise ValueError(f"{path}: expected array")
+        if len(arguments) == 2 and arguments[1] is Ellipsis:
+            for index, child in enumerate(value):
+                _wire_type(child, arguments[0], f"{path}[{index}]")
+        else:
+            if len(value) != len(arguments):
+                raise ValueError(f"{path}: incorrect array length")
+            for index, (child, child_type) in enumerate(zip(value, arguments)):
+                _wire_type(child, child_type, f"{path}[{index}]")
+        return
+    if origin is dict:
+        if not isinstance(value, dict):
+            raise ValueError(f"{path}: expected object")
+        for key, child in value.items():
+            _wire_type(key, arguments[0], f"{path}.key")
+            _wire_type(child, arguments[1], f"{path}.{key}")
+        return
+    if isinstance(expected, type) and issubclass(expected, Identifier):
+        if expected is Identifier:
+            # Endpoint-specific decoding checks the exact identifier namespace.
+            if not isinstance(value, dict) or set(value) != {"kind", "value", "wire"}:
+                raise ValueError(f"{path}: expected identifier object")
+            if any(not isinstance(value[key], str) or not value[key]
+                   for key in ("kind", "value", "wire")):
+                raise ValueError(f"{path}: identifier fields must be non-empty strings")
+        else:
+            _required_id(value, expected)
+        return
+    if expected is ValueVersionID:
+        _required_version(value)
+        return
+    if isinstance(expected, type) and issubclass(expected, Enum):
+        if not isinstance(value, str):
+            raise ValueError(f"{path}: expected enum string")
+        expected(value)
+        return
+    if is_dataclass(expected):
+        _record(value, expected, path)
+        return
+    valid = type(value) in (int, float) if expected is float else type(value) is expected
+    if not valid:
+        raise ValueError(f"{path}: expected {expected.__name__}")
+
+
+def _record(data: Any, cls: type, path: str) -> None:
+    if not isinstance(data, dict):
+        raise ValueError(f"{path}: expected {cls.__name__} object")
+    members, hints = _record_schema(cls)
+    unknown = set(data) - {item.name for item in members}
+    if unknown:
+        raise ValueError(f"{path}: unknown fields {sorted(unknown)}")
+    for member in members:
+        if member.name not in data:
+            if member.default is MISSING and member.default_factory is MISSING:
+                raise ValueError(f"{path}: missing required field {member.name}")
+            continue
+        value = data[member.name]
+        if cls is ValuePattern and member.name == "constraints":
+            if not isinstance(value, (list, tuple)):
+                raise ValueError(f"{path}.constraints: expected array")
+            for constraint in value:
+                if not isinstance(constraint, dict) or set(constraint) != {"name", "value"}:
+                    raise ValueError(f"{path}.constraints: expected name/value object")
+                _wire_type(constraint, dict[str, str], f"{path}.constraints")
+        else:
+            _wire_type(value, hints[member.name], f"{path}.{member.name}")
+
+
+def _document(data: Any, cls: type, collections: dict[str, type],
+              extra_fields: tuple[str, ...] = ()) -> None:
+    if not isinstance(data, dict) or data.get("schema") != cls.SCHEMA:
+        raise ValueError(f"not a {cls.__name__} document")
+    version = data.get("schema_version")
+    if type(version) is not int or version != cls.SCHEMA_VERSION:
+        raise ValueError(f"{cls.SCHEMA}: unsupported schema_version {version!r}; "
+                         f"expected {cls.SCHEMA_VERSION}")
+    unknown = set(data) - {"schema", "schema_version", "validation", *collections, *extra_fields}
+    if unknown:
+        raise ValueError(f"{cls.SCHEMA}: unknown fields {sorted(unknown)}")
+    _json_value(data)
+    for name, record_type in collections.items():
+        records = data.get(name, ())
+        if not isinstance(records, (list, tuple)):
+            raise ValueError(f"{cls.SCHEMA}.{name}: expected array")
+        seen = set()
+        for index, record in enumerate(records):
+            path = f"{cls.SCHEMA}.{name}[{index}]"
+            _record(record, record_type, path)
+            identity_key = next((key for key in ("id", "slot_id", "edge_id",
+                                "observation_id", "port_id") if key in record), None)
+            if identity_key is not None:
+                identity = json.dumps(record[identity_key], sort_keys=True)
+                if identity in seen:
+                    raise ValueError(f"{path}: duplicate {identity_key} {identity}")
+                seen.add(identity)
+
+
+def _decoder(function):
+    """Expose one stable error type for invalid input, also under python -O."""
+    @wraps(function)
+    def decode(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except (KeyError, TypeError, AttributeError, RecursionError) as error:
+            raise ValueError(f"invalid {function.__name__} document: {error}") from error
+    return decode
+
+
 def _id(data: dict[str, Any] | None, cls: type[I]) -> I | None:
     if data is None:
         return None
+    if not isinstance(data, dict) or set(data) != {"kind", "value", "wire"}:
+        raise ValueError(f"expected {cls.prefix} identifier object")
     if data.get("kind") != cls.prefix:
         raise ValueError(f"expected {cls.prefix} ID, got {data.get('kind')}")
     result = cls(data["value"])
@@ -134,13 +286,18 @@ def _id(data: dict[str, Any] | None, cls: type[I]) -> I | None:
 
 def _required_id(data: dict[str, Any], cls: type[I]) -> I:
     result = _id(data, cls)
-    assert result is not None
+    if result is None:
+        raise ValueError(f"required {cls.prefix} ID cannot be null")
     return result
 
 
 def _version(data: dict[str, Any] | None) -> ValueVersionID | None:
     if data is None:
         return None
+    if not isinstance(data, dict) or set(data) != {"logical_value", "version", "wire"}:
+        raise ValueError("expected value-version identifier object")
+    if type(data["version"]) is not int:
+        raise ValueError("value-version version must be an integer")
     result = ValueVersionID(
         _required_id(data["logical_value"], LogicalValueID), data["version"])
     if data.get("wire") != result.wire:
@@ -150,7 +307,8 @@ def _version(data: dict[str, Any] | None) -> ValueVersionID | None:
 
 def _required_version(data: dict[str, Any]) -> ValueVersionID:
     result = _version(data)
-    assert result is not None
+    if result is None:
+        raise ValueError("required value-version ID cannot be null")
     return result
 
 
@@ -194,9 +352,15 @@ def _effect_summary(data: dict[str, Any]) -> EffectSummary:
         evidence=tuple(_evidence(item) for item in data.get("evidence", ())))
 
 
+@_decoder
 def semantic_from_dict(data: dict[str, Any]) -> SemanticGraph:
-    if data.get("schema") != SemanticGraph.SCHEMA:
-        raise ValueError("not a SemanticGraph document")
+    _document(data, SemanticGraph, {
+        "packages": PackageDefinition, "modules": ModuleDefinition,
+        "source_atoms": SourceAtom, "controls": ControlRegion,
+        "effects": EffectSummary, "resources": ResourceRequirement,
+        "contracts": ContractDefinition, "definitions": OperationDefinition,
+        "slots": ValueSlot, "edges": SemanticEdge,
+    })
     graph = SemanticGraph()
     for item in data.get("packages", ()):
         node = PackageDefinition(_required_id(item["id"], PackageID), item["name"],
@@ -293,9 +457,14 @@ def semantic_from_dict(data: dict[str, Any]) -> SemanticGraph:
     return graph
 
 
+@_decoder
 def values_from_dict(data: dict[str, Any]) -> ValueGraph:
-    if data.get("schema") != ValueGraph.SCHEMA:
-        raise ValueError("not a ValueGraph document")
+    _document(data, ValueGraph, {
+        "logical_values": LogicalValue, "versions": ValueVersion,
+        "provenance": ProvenanceRecord, "allocations": StorageAllocation,
+        "regions": StorageRegion, "materializations": Materialization,
+        "bindings": ObjectBinding,
+    })
     graph = ValueGraph()
     for item in data.get("logical_values", ()):
         node = LogicalValue(_required_id(item["id"], LogicalValueID),
@@ -374,9 +543,12 @@ def _evidence_endpoint(data: dict[str, Any]) -> EvidenceEndpoint:
     return EvidenceEndpoint(kind, _required_id(reference, cls))
 
 
+@_decoder
 def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
-    if data.get("schema") != EvidenceGraph.SCHEMA:
-        raise ValueError("not an EvidenceGraph document")
+    _document(data, EvidenceGraph, {
+        "instances": OperationInstance, "observations": ValueObservation,
+        "measurements": MeasurementRecord, "edges": EvidenceEdge,
+    }, extra_fields=("control_events", "external_references"))
     graph = EvidenceGraph()
     for item in data.get("instances", ()):
         node = OperationInstance(
@@ -402,9 +574,21 @@ def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
             item.get("instrumented", True),
             tuple(_evidence(value) for value in item.get("evidence", ())))
         graph.measurements[node.id] = node
-    graph.control_events.update(data.get("control_events", ()))
-    for item in data.get("external_references", ()):
-        graph.external_references.add((EvidenceNodeKind(item["kind"]), item["wire"]))
+    control_events = data.get("control_events", ())
+    _wire_type(control_events, tuple[str, ...], "control_events")
+    for control_event in control_events:
+        if not control_event or control_event in graph.control_events:
+            raise ValueError("control_events must contain unique non-empty IDs")
+        graph.control_events.add(control_event)
+    references = data.get("external_references", ())
+    _wire_type(references, tuple[dict[str, str], ...], "external_references")
+    for item in references:
+        if set(item) != {"kind", "wire"} or not item["wire"]:
+            raise ValueError("external reference requires kind and non-empty wire")
+        reference = (EvidenceNodeKind(item["kind"]), item["wire"])
+        if reference in graph.external_references:
+            raise ValueError(f"duplicate external reference {reference}")
+        graph.external_references.add(reference)
     for item in data.get("edges", ()):
         edge = EvidenceEdge(
             item["edge_id"], EvidenceRelation(item["relation"]),
@@ -415,9 +599,9 @@ def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
     return graph
 
 
+@_decoder
 def correspondence_from_dict(data: dict[str, Any]) -> CorrespondenceGraph:
-    if data.get("schema") != CorrespondenceGraph.SCHEMA:
-        raise ValueError("not a CorrespondenceGraph document")
+    _document(data, CorrespondenceGraph, {"records": CorrespondenceRecord})
     graph = CorrespondenceGraph()
     for item in data.get("records", ()):
         node = CorrespondenceRecord(
@@ -445,9 +629,12 @@ def _value_pattern(data: dict[str, Any] | None) -> ValuePattern | None:
         tuple((item["name"], item["value"]) for item in data.get("constraints", ())))
 
 
+@_decoder
 def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
-    if data.get("schema") != OptimizationGraph.SCHEMA:
-        raise ValueError("not an OptimizationGraph document")
+    _document(data, OptimizationGraph, {
+        "ports": RegionPort, "regions": OptimizationRegion,
+        "alternatives": PlanAlternative, "plans": PlanSelection,
+    })
     graph = OptimizationGraph(context)
     for item in data.get("ports", ()):
         node = RegionPort(
@@ -513,15 +700,16 @@ def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
                 _required_id(cost_data["scope"], OptimizationRegionID),
                 tuple(cost_data["metrics"]), MeasurementMode(cost_data["mode"]),
                 cost_data.get("warmup", 0), cost_data.get("repetitions", 1))
-            if cost_data else None,
+            if cost_data is not None else None,
             ValidationRequest(
                 _required_id(validation_data["contract"], ContractID),
                 tuple(validation_data["levels"]), tuple(validation_data["snapshots"]),
                 validation_data.get("clean_benchmark", True))
-            if validation_data else None,
+            if validation_data is not None else None,
             tuple(PlanInstruction(
                 value["instruction_id"], InstructionKind(value["kind"]),
-                value["target"], _source(value["source"]) if value.get("source") else None,
+                value["target"], _source(value["source"])
+                if value.get("source") is not None else None,
                 value.get("replacement"), value.get("rationale", ""),
                 tuple(value.get("depends_on", ())))
                 for value in item.get("instructions", ())),
@@ -539,11 +727,12 @@ def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
     return graph
 
 
+@_decoder
 def bundle_from_dict(data: dict[str, Any]):
     from .schemas import IRBundle, optimization_context
 
-    if data.get("schema") != IRBundle.SCHEMA:
-        raise ValueError("not an IRBundle document")
+    _document(data, IRBundle, {}, extra_fields=(
+        "semantic", "evidence", "values", "correspondence", "optimization"))
     semantic = semantic_from_dict(data["semantic"])
     evidence = evidence_from_dict(data["evidence"])
     values = values_from_dict(data["values"])
@@ -557,8 +746,23 @@ def bundle_from_dict(data: dict[str, Any]):
     return bundle
 
 
+def _unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object key {key!r}")
+        result[key] = value
+    return result
+
+
+def _invalid_constant(value):
+    raise ValueError(f"non-finite JSON number {value}")
+
+
+@_decoder
 def bundle_from_json(payload: str):
-    document = json.loads(payload)
+    document = json.loads(payload, object_pairs_hook=_unique_object,
+                          parse_constant=_invalid_constant)
     if not isinstance(document, dict):
         raise ValueError("IR bundle JSON must contain an object")
     return bundle_from_dict(document)

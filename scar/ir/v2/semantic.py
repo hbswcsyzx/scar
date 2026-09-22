@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any
 
 from .common import EvidenceClaim, SourceReference
+from ._validation import cycle_errors, mapping_errors
 from .contracts import ContractDefinition, EffectSummary, ResourceRequirement
 from .ids import (
     ContractID,
@@ -242,6 +243,43 @@ class SemanticRelation(str, Enum):
     LOWERS_TO = "lowers_to"
 
 
+# Relations have a direction and a domain/range.  Existing endpoints alone do
+# not make an edge meaningful (for example, a resource cannot call a package).
+_S = SemanticNodeKind
+_SEMANTIC_RELATION_ENDPOINTS = {
+    SemanticRelation.CONTAINS: {
+        (_S.PACKAGE, _S.PACKAGE), (_S.PACKAGE, _S.MODULE),
+        (_S.MODULE, _S.OPERATION), (_S.MODULE, _S.VALUE_SLOT),
+        (_S.MODULE, _S.CONTROL), (_S.OPERATION, _S.OPERATION),
+        (_S.OPERATION, _S.VALUE_SLOT), (_S.OPERATION, _S.CONTROL),
+        (_S.CONTROL, _S.CONTROL), (_S.CONTROL, _S.OPERATION),
+    },
+    SemanticRelation.CALLS: {(_S.OPERATION, _S.OPERATION)},
+    SemanticRelation.CONTROLS: {
+        (source, target) for source in (_S.OPERATION, _S.CONTROL)
+        for target in (_S.OPERATION, _S.CONTROL)},
+    **{relation: {(_S.OPERATION, _S.VALUE_SLOT)} for relation in (
+        SemanticRelation.READS_SLOT, SemanticRelation.WRITES_SLOT,
+        SemanticRelation.CONSUMES, SemanticRelation.PRODUCES)},
+    SemanticRelation.MAY_RAISE: {(_S.OPERATION, _S.EFFECT), (_S.OPERATION, _S.CONTROL)},
+    SemanticRelation.INITIALIZES_MODULE: {(_S.OPERATION, _S.MODULE)},
+    SemanticRelation.IMPORTS: {
+        (source, target) for source in (_S.OPERATION, _S.MODULE)
+        for target in (_S.MODULE, _S.PACKAGE)},
+    SemanticRelation.REEXPORTS: {
+        (_S.MODULE, target) for target in (_S.MODULE, _S.OPERATION, _S.VALUE_SLOT)},
+    SemanticRelation.ACCESSES_ATTRIBUTE: {
+        (_S.OPERATION, target) for target in (_S.MODULE, _S.OPERATION, _S.VALUE_SLOT)},
+    SemanticRelation.HAS_CONTRACT: {(_S.OPERATION, _S.CONTRACT), (_S.MODULE, _S.CONTRACT)},
+    SemanticRelation.HAS_EFFECT: {(_S.OPERATION, _S.EFFECT), (_S.MODULE, _S.EFFECT)},
+    SemanticRelation.REQUIRES_RESOURCE: {(_S.OPERATION, _S.RESOURCE)},
+    SemanticRelation.HAS_SOURCE: {
+        (source, _S.SOURCE_ATOM) for source in (
+            _S.PACKAGE, _S.MODULE, _S.OPERATION, _S.CONTROL, _S.VALUE_SLOT)},
+    SemanticRelation.LOWERS_TO: {(_S.OPERATION, _S.OPERATION)},
+}
+
+
 @dataclass(frozen=True, slots=True)
 class SemanticEdge:
     edge_id: str
@@ -253,6 +291,8 @@ class SemanticEdge:
     def __post_init__(self) -> None:
         if not self.edge_id:
             raise ValueError("semantic edge ID is required")
+        if (self.source.kind, self.target.kind) not in _SEMANTIC_RELATION_ENDPOINTS[self.relation]:
+            raise ValueError(f"invalid endpoints for semantic relation {self.relation.value}")
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -355,14 +395,34 @@ class SemanticGraph:
     def descendants_of(self, definition: OperationDefinitionID) -> tuple[OperationDefinition, ...]:
         result: list[OperationDefinition] = []
         pending = list(self.children_of(definition))
+        visited = {definition}
         while pending:
             child = pending.pop(0)
+            if child.id in visited:
+                raise ValueError("cyclic operation definition ancestry")
+            visited.add(child.id)
             result.append(child)
             pending.extend(self.children_of(child.id))
         return tuple(result)
 
     def validate(self) -> dict[str, Any]:
         errors: list[str] = []
+        registries = (
+            (self.packages, PackageID, PackageDefinition, "packages", "id"),
+            (self.modules, ModuleID, ModuleDefinition, "modules", "id"),
+            (self.source_atoms, SourceAtomID, SourceAtom, "source_atoms", "id"),
+            (self.definitions, OperationDefinitionID, OperationDefinition, "definitions", "id"),
+            (self.slots, ValueSlotID, ValueSlot, "slots", "slot_id"),
+            (self.controls, ControlRegionID, ControlRegion, "controls", "id"),
+            (self.contracts, ContractID, ContractDefinition, "contracts", "id"),
+            (self.effects, EffectSummaryID, EffectSummary, "effects", "id"),
+            (self.resources, ResourceID, ResourceRequirement, "resources", "id"),
+            (self.edges, str, SemanticEdge, "edges", "edge_id"),
+        )
+        for mapping, key_type, record_type, name, key_field in registries:
+            errors.extend(mapping_errors(mapping, key_type, record_type, name, key_field))
+        if errors:
+            return self._validation_report(errors)
         for module in self.modules.values():
             if module.package is not None and module.package not in self.packages:
                 errors.append(f"module {module.id.wire} references unknown package")
@@ -387,6 +447,21 @@ class SemanticGraph:
             for resource in definition.resource_requirements:
                 if resource not in self.resources:
                     errors.append(f"definition {definition.id.wire} references unknown resource")
+            for slot_id in definition.input_slots + definition.output_slots + definition.state_slots:
+                slot = self.slots.get(slot_id)
+                if slot is not None and slot.owner is not None and slot.owner != definition.id:
+                    errors.append(f"definition {definition.id.wire} references slot owned by another definition")
+        for slot in self.slots.values():
+            if slot.owner is not None and slot.owner not in self.definitions:
+                errors.append(f"slot {slot.slot_id.wire} references unknown owner")
+        for control in self.controls.values():
+            if control.parent_id is not None and control.parent_id not in self.controls:
+                errors.append(f"control {control.id.wire} references unknown parent")
+            if control.owner is not None and control.owner not in self.definitions:
+                errors.append(f"control {control.id.wire} references unknown owner")
+            for atom in control.source_atoms:
+                if atom not in self.source_atoms:
+                    errors.append(f"control {control.id.wire} references unknown source")
         for contract in self.contracts.values():
             for slot in contract.required_outputs:
                 if slot not in self.slots:
@@ -396,6 +471,19 @@ class SemanticGraph:
                 errors.append(f"edge {edge.edge_id} has unknown source")
             if not self._endpoint_exists(edge.target):
                 errors.append(f"edge {edge.edge_id} has unknown target")
+        containment = [(item.parent_id, item.id) for item in self.definitions.values()
+                       if item.parent_id is not None]
+        containment += [(item.parent_id, item.id) for item in self.controls.values()
+                        if item.parent_id is not None]
+        containment += [(edge.source.id, edge.target.id) for edge in self.edges.values()
+                        if edge.relation is SemanticRelation.CONTAINS]
+        errors.extend(cycle_errors(containment, "semantic containment / ancestry"))
+        errors.extend(cycle_errors(
+            ((edge.source.id, edge.target.id) for edge in self.edges.values()
+             if edge.relation is SemanticRelation.LOWERS_TO), "semantic lowering"))
+        return self._validation_report(errors)
+
+    def _validation_report(self, errors: list[str]) -> dict[str, Any]:
         return {
             "schema": self.SCHEMA, "schema_version": self.SCHEMA_VERSION,
             "valid": not errors, "errors": errors,
