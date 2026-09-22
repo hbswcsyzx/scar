@@ -1,6 +1,6 @@
 # G4：逻辑值、来源与物理表示 registry
 
-状态：**Proposed — 实施设计，尚未通过 G4**。
+状态：**Implemented — 正在执行 G4 验收，结果以 gate report 为准**。
 
 依赖：[NEXT_PHASE_PLAN.md](NEXT_PHASE_PLAN.md) 的 G2、G3 验收完成后进入实现。
 本文不增加 detector、backend 或源码变换。验收结果以独立 G4 report 为准。
@@ -313,3 +313,37 @@ G4 通过不代表 LeWM 已优化，也不代表任意 Python 程序的所有写
 
 G4 完成的是身份、来源和有效性设施。G5 才组合程序范围内的 effect closure、
 consumer boundary 与 contract；G6/G7 才利用这些事实构造 region 和修改计划。
+
+## 11. 当前实现入口与实际边界
+
+- `scar/ir/provenance.py`：typed registry、逻辑来源、绑定区间、独立 allocation
+  生命周期、有效性及 equality ledger；支持严格 JSON 保存与恢复。
+- `scar/trace/values_v2.py`：`TensorObserver` 的显式 Tensor 捕获，使用弱引用
+  见证对象/storage 生命周期，常规 `observe` 不读取内容或 `_version`。
+- `scar/trace/checkpoint.py`：`CheckpointStore` 只在 `enroll` 时复制受预算限制
+  的独立 CPU checkpoint；比较时先进行 shape/dtype/prefix 过滤，然后按需分块
+  扫描全部 bit。跨 store ID、释放和预算均有独立测试。
+
+```python
+from scar.trace.values_v2 import TensorObserver
+
+observer = TensorObserver(checkpoint_bytes=1024 * 1024)
+handle = observer.observe(x)       # 描述信息；开放写入范围仍 NEEDS_VERIFICATION
+checkpoint = observer.enroll(x)    # 显式选择此时刻；不能认证以前的捕获
+# 调用方在采样/比较窗口中负责排除并发写入
+result = observer.verify(checkpoint, x)
+observer.release(checkpoint)
+```
+
+`deepcopy` / `copy_to` 是调用方显式选择的 provenance 采集包装器：执行实际复制，
+通过受预算约束的比较记录关系，不替换原程序计算。GPU 内容比较默认关闭，需
+`allow_cuda=True`；同步和比较成本会记录。并非所有 copy 都已被自动拦截。
+常规 descriptor 捕获也不推断未观察的原地修改；checkpoint 发现差异或明确的
+write witness 才会推进版本。重复对同一个旧 checkpoint 比较不等于捕获每次写入。
+
+`attach_observation` 保存显式 attestation，`validate_references` 校验 SG slot / EEG
+observation 是否存在。它保留 G3 的历史 capture identity，不以旧 object/storage
+字符串自动合并逻辑值。自动跨图匹配的证据强度与 effect closure 由 G5 完成。
+
+性能脚本 `scripts/measure_provenance_capture.py` 分开测量属性读取、已注册 Tensor
+的 metadata capture 和显式精确比较。该结果只是采集成本，不能当作优化加速比。

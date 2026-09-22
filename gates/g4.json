@@ -1,0 +1,23 @@
+{
+  "gate": "G4",
+  "scope": "Typed descriptor provenance, scoped materialization validity, opt-in tensor observations and bounded at-time checkpoints. This is identity infrastructure, not automatic whole-program proof or optimization.",
+  "limitations": [
+    "Open native/NumPy/ctypes aliases remain NEEDS_VERIFICATION until an observed write or explicit at-time comparison; no universal write interception.",
+    "Bitwise checkpoint equality is scoped to capture/comparison under write exclusion, not future stability or autograd/effect equivalence.",
+    "Cross-copy provenance collectors are opt-in; archived provisional trace identities are preserved rather than retrospectively certified.",
+    "Large/unknown-stride overlap is conservative; exact checkpoint reads have explicit byte, entry and temporary-work bounds.",
+    "Actual CUDA acceptance is required; the gate runner treats skipped hardware tests as failures. No LeWM speedup is measured here."
+  ],
+  "criteria": [
+    {"id": "foreign_write_invalidates_prior_version", "tests": ["tests/unit/test_tensor_observer_v2.py::test_numpy_foreign_write_outside_prefix_advances_observed_version", "tests/unit/test_provenance_adversarial.py::test_late_enrollment_cannot_retroactively_prove_an_old_prefix_capture"]},
+    {"id": "inference_without_torch_version", "tests": ["tests/unit/test_tensor_observer_v2.py::test_inference_tensor_tracks_without_reading_torch_version"]},
+    {"id": "allocation_lifetime_not_address", "tests": ["tests/unit/test_provenance_adversarial.py::test_ended_allocation_cannot_be_resurrected_by_reusing_its_address", "tests/unit/test_tensor_observer_v2.py::test_descriptor_rebinding_does_not_fabricate_old_allocation_write"]},
+    {"id": "view_geometry_and_byte_overlap", "tests": ["tests/unit/test_tensor_observer_v2.py::test_expanded_view_retains_real_allocation_and_zero_strides", "tests/unit/test_provenance_adversarial.py::test_small_interleaved_regions_are_disjoint_but_large_unknown_overlap_is_retained", "tests/unit/test_provenance_adversarial.py::test_overlap_compares_byte_addresses_across_different_dtypes"]},
+    {"id": "deepcopy_independent_mutable_lineage", "tests": ["tests/unit/test_tensor_observer_v2.py::test_real_deepcopy_forks_mutable_lineage_and_preserves_source"]},
+    {"id": "actual_cuda_materialization_and_noop", "tests": ["tests/unit/test_tensor_observer_v2.py::test_real_cuda_materializations_keep_value_until_copy_is_written", "tests/unit/test_tensor_observer_v2.py::test_same_device_to_is_not_a_new_materialization", "tests/unit/test_value_checkpoint.py::test_cuda_is_explicit_and_sync_transfer_cost_is_measured"]},
+    {"id": "semantic_transform_is_new_value", "tests": ["tests/unit/test_tensor_observer_v2.py::test_same_shape_semantic_transform_is_a_new_value"]},
+    {"id": "mutation_escape_scope_and_ledger", "tests": ["tests/unit/test_provenance_registry.py", "tests/unit/test_provenance_adversarial.py"]},
+    {"id": "bounded_explicit_checkpoint", "tests": ["tests/unit/test_value_checkpoint.py", "tests/unit/test_tensor_observer_v2.py::test_regular_observation_copies_no_values_or_proves_future_stability", "tests/unit/test_tensor_observer_v2.py::test_observer_and_checkpoint_do_not_retain_source_tensor"]},
+    {"id": "external_graph_references_without_legacy_merge", "tests": ["tests/integration/test_provenance_bridge.py"]}
+  ]
+}
