@@ -112,6 +112,11 @@ The architecture review and v2 identity/provenance design are in
 [docs/IR_MIGRATION.md](docs/IR_MIGRATION.md). The isolated schema foundation is
 under `scar/ir/v2/`; it is report/schema-only and is not connected to the v1
 planner or any optimization backend yet.
+The code-level architecture audit is in
+[docs/CURRENT_CODE_AUDIT.md](docs/CURRENT_CODE_AUDIT.md). Its gated execution
+plan is [docs/NEXT_PHASE_PLAN.md](docs/NEXT_PHASE_PLAN.md). These two documents
+are the authoritative order for the semantic IR migration; new detectors and
+backends stay frozen until the report-only Optimization IR gate passes.
 The rejection audit and top-down region work are documented in
 [docs/REJECTION_AUDIT.md](docs/REJECTION_AUDIT.md). They explain why a repeated
 leaf is not automatically a legal optimization and record the first generic

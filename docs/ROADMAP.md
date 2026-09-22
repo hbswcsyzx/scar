@@ -1,5 +1,11 @@
 # SCAR roadmap and scope
 
+> **Planning authority (2026-09-22):** the implementation audit is
+> [CURRENT_CODE_AUDIT.md](CURRENT_CODE_AUDIT.md), and the ordered development
+> gates are [NEXT_PHASE_PLAN.md](NEXT_PHASE_PLAN.md). The phase descriptions
+> below preserve the prototype history. When their ordering differs, the
+> gated plan is authoritative.
+
 SCAR is a **generic execution optimizer**, not a LeWM optimizer. A workload
 adapter can supply a command, input fixture, and validator; it cannot be
 imported by core analysis or select an optimization based on a model name.
