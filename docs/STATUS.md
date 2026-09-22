@@ -11,8 +11,14 @@ it refuses a selected rewrite with missing proof, instructions or validation.
 Deterministic JSON round-trip, v1 trace/analyze compatibility, workload-name
 independence and the no-detector/backend-wiring constraint passed the generated
 gate. The machine-readable evidence is `artifacts/reports/gates/g1.json`.
-This remains a schema result: G2 source-to-SG and G3 trace-to-EEG are next, and
-no detector/backend consumes OIR yet.
+The original gate report overstated its coverage. A counterexample audit and
+repair on 2026-09-22 added malformed-codec, graph-cycle, boundary and cross-graph
+checks. The authoritative recheck is
+`artifacts/reports/gates/g1-verified.json` (136 collected cases, all passed),
+bound to commit `aff0c20` and tested-file hashes. See
+[GATE_EXECUTION.md](GATE_EXECUTION.md). This remains a schema result; automatic
+semantic proof construction is not established by hand-built plan fixtures.
+G2 source-to-SG and G3 trace-to-EEG now follow without user approval.
 
 The architecture review is recorded in [IR_DESIGN_V2.md](IR_DESIGN_V2.md) and
 [IR_MIGRATION.md](IR_MIGRATION.md). The first M1 foundation is now implemented
