@@ -1,5 +1,6 @@
 """Record bounded G6 region construction costs and exact input/code revisions."""
 import argparse
+import faulthandler
 import gzip
 import hashlib
 import io
@@ -38,8 +39,15 @@ def main():
     code_hash, files = fingerprint()
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     started = time.perf_counter()
-    document = report_regions(args.trace, view="execution", root_limit=args.root_limit,
-                              max_depth=args.max_depth)
+    # This is a diagnostic analysis run, not a clean workload benchmark. A
+    # stack snapshot makes an unexpectedly slow conversion auditable without
+    # installing or attaching another profiler to a running process.
+    faulthandler.dump_traceback_later(120, repeat=True)
+    try:
+        document = report_regions(args.trace, view="execution", root_limit=args.root_limit,
+                                  max_depth=args.max_depth)
+    finally:
+        faulthandler.cancel_dump_traceback_later()
     analysis_seconds = time.perf_counter() - started
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open("wb") as destination, gzip.GzipFile(

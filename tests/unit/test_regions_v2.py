@@ -359,3 +359,77 @@ def test_known_control_resource_exception_escape_and_data_interfaces_preserved()
     record, = inventory.constructions.values()
     assert all(item.port_ids for item in record.dependencies)
     assert inventory.assert_valid()["valid"]
+
+
+class _CountedTuple(tuple):
+    def __new__(cls, values):
+        result = super().__new__(cls, values)
+        result.iterations = 0
+        result.membership_queries = 0
+        return result
+
+    def __iter__(self):
+        self.iterations += 1
+        return super().__iter__()
+
+    def __contains__(self, item):
+        self.membership_queries += 1
+        return super().__contains__(item)
+
+
+@pytest.mark.parametrize("size", [8, 32])
+def test_dependency_and_effect_validation_index_ports_once_per_region(tmp_path, size):
+    """A larger boundary must not rescan its port tuple per edge or effect."""
+    bundle = source_bundle(tmp_path, "\n".join(f"v{index} = {index}" for index in range(size)))
+    engine = EffectClosureEngine(bundle.semantic)
+    engine.add_scope(ObservationScope("scope", "entry", None, "run", ScopeMode.ALL_PATHS, "source"))
+    definition = next(iter(bundle.semantic.definitions))
+    for index in range(size):
+        engine.add_occurrence(EffectOccurrence(f"effect:{index}", definition, EffectDimension.WRITES,
+            EffectTarget(EffectTargetKind.OBJECT, f"state:{index}"), "scope", None, CLAIM))
+    inventory = build_regions(bundle, max_depth=0, effects=engine)
+    region, = inventory.graph.regions.values()
+    construction = inventory.constructions[region.id]
+    assert len(construction.dependencies) > size
+    assert len(construction.effect_links) >= size
+    ports = _CountedTuple(region.ports)
+    region.ports = ports
+    assert inventory.assert_valid()["valid"]
+    # A constant number of complete schema/projection passes is allowed.
+    # One tuple iteration per dependency would exceed this bound even at 8.
+    assert ports.iterations <= 10
+    assert ports.membership_queries == 0
+
+
+@pytest.mark.parametrize("size", [8, 32])
+def test_wide_region_hierarchy_batches_sibling_and_parent_membership_indexes(tmp_path, monkeypatch, size):
+    """Do not repeatedly sort sibling prefixes or scan parent membership."""
+    import scar.analysis.regions_v2 as regions_module
+    from scar.ir.v2 import OptimizationGraph, OptimizationRegionID
+    bundle = source_bundle(tmp_path, "\n".join(f"v{index} = {index}" for index in range(size)))
+    original_ordered, original_add = regions_module._ordered, OptimizationGraph.add_region
+    child_items, parent_members = [], []
+    def counted_ordered(values):
+        values = tuple(values)
+        if values and isinstance(values[0], OptimizationRegionID):
+            child_items.append(len(values))
+        return original_ordered(values)
+    def counted_add(self, region):
+        original_add(self, region)
+        if region.parent is None:
+            region.definitions = _CountedTuple(region.definitions)
+            parent_members.append(region.definitions)
+    monkeypatch.setattr(regions_module, "_ordered", counted_ordered)
+    monkeypatch.setattr(OptimizationGraph, "add_region", counted_add)
+    inventory = build_regions(bundle, max_depth=1)
+    assert len(inventory.graph.regions) > size
+    # Initial build plus omission-check reconstruction: two complete sibling
+    # lists, as opposed to a triangular sum of sibling prefixes.
+    assert sum(child_items) <= 2 * len(inventory.graph.regions)
+    assert all(values.iterations <= 10 for values in parent_members)
+    root = next(region for region in inventory.graph.regions.values() if region.parent is None)
+    children = _CountedTuple(inventory.constructions[root.id].children)
+    inventory.constructions[root.id] = replace(inventory.constructions[root.id], children=children)
+    assert inventory.assert_valid()["valid"]
+    assert children.membership_queries == 0
+    assert children.iterations <= 5

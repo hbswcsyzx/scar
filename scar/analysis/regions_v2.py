@@ -205,6 +205,8 @@ class RegionInventory:
         self._observations = defaultdict(list)
         self._occurrences = defaultdict(list)
         self._batching = False
+        self._batch_members = {}
+        self._batch_children = defaultdict(list)
         for key, node in self._nodes.items():
             parent = node.parent_id if self.view is RegionView.SEMANTIC else node.parent
             self._children[parent].append(key)
@@ -275,7 +277,10 @@ class RegionInventory:
             if parent not in self.constructions:
                 raise ValueError("unknown region parent")
             outer = self.graph.regions[parent]
-            outer_members = outer.definitions if self.view is RegionView.SEMANTIC else outer.instances
+            if self._batching:
+                outer_members = self._batch_members[parent]
+            else:
+                outer_members = set(outer.definitions if self.view is RegionView.SEMANTIC else outer.instances)
             if not member_set.issubset(outer_members):
                 raise ValueError("child membership must be a subset of its parent")
         rid = OptimizationRegionID(_digest(self.view.value, self.scope, granularity.value,
@@ -430,13 +435,30 @@ class RegionInventory:
         pending = _ordered(child for member in direct for child in self._children.get(member, ())
                            if child in member_set and child not in direct)
         self.constructions[rid] = replace(self.constructions[rid], unexpanded_children=pending)
+        if self._batching:
+            self._batch_members[rid] = member_set
         if parent is not None:
-            outer = self.constructions[parent]
-            self.constructions[parent] = replace(outer, children=_ordered(outer.children + (rid,)),
-                                                  unexpanded_children=tuple(item for item in outer.unexpanded_children if item not in roots))
+            if self._batching:
+                self._batch_children[parent].append(rid)
+            else:
+                outer = self.constructions[parent]
+                self.constructions[parent] = replace(outer, children=_ordered(outer.children + (rid,)),
+                                                      unexpanded_children=tuple(item for item in outer.unexpanded_children if item not in roots))
         if not self._batching:
             self._attach_effect_closure((rid,))
         return rid
+
+    def _finish_batch(self):
+        """Finalize sibling lists once instead of copying them for every child."""
+        for parent, additions in self._batch_children.items():
+            outer = self.constructions[parent]
+            expanded = {root for child in additions for root in self.constructions[child].roots}
+            self.constructions[parent] = replace(
+                outer, children=_ordered(outer.children + tuple(additions)),
+                unexpanded_children=tuple(item for item in outer.unexpanded_children if item not in expanded))
+        self._batch_children.clear()
+        self._batch_members.clear()
+        self._batching = False
 
     def _attach_effect_closure(self, identities):
         if self.effects is None or self.view is not RegionView.SEMANTIC:
@@ -459,19 +481,29 @@ class RegionInventory:
 
     def validate(self):
         errors = list(self.graph.validate()["errors"])
+        if errors:
+            return {"valid": False, "errors": errors}
         if self.graph.context != optimization_context(self.bundle.semantic, self.bundle.evidence, self.bundle.values):
             errors.append("inventory context no longer matches its source graphs")
         if set(self.graph.regions) != set(self.constructions):
             errors.append("construction/optimization region identity mismatch")
+        typed_errors = {key: record_errors(item, RegionConstruction, "construction")
+                        for key, item in self.constructions.items()}
+        # These indexes belong to this validation call only. The source graphs
+        # and inventories are mutable and are rechecked on the next call.
+        member_index = {key: set(region.definitions if self.view is RegionView.SEMANTIC else region.instances)
+                        for key, region in self.graph.regions.items()}
+        port_index = {key: set(region.ports) for key, region in self.graph.regions.items()}
+        child_index = {key: set(item.children) for key, item in self.constructions.items() if not typed_errors[key]}
         certified = {}
         candidates = [key for key, item in self.constructions.items()
-                      if isinstance(item, RegionConstruction) and item.effects_closed]
+                      if not typed_errors[key] and item.effects_closed]
         if candidates and self.effects is not None and self.view is RegionView.SEMANTIC:
             summaries = self.effects.boundaries((self.graph.regions[key].definitions, self.scope)
                                                for key in candidates if key in self.graph.regions)
             certified = dict(zip((key for key in candidates if key in self.graph.regions), summaries))
         for key, construction in self.constructions.items():
-            typed = record_errors(construction, RegionConstruction, "construction")
+            typed = typed_errors[key]
             errors.extend(typed)
             if typed:
                 continue
@@ -486,7 +518,8 @@ class RegionInventory:
                 errors.append("mixed source/execution region views")
             if construction.view is RegionView.EXECUTION and construction.mode is not ScopeMode.DYNAMIC_PATH:
                 errors.append("execution region cannot prove ALL_PATHS")
-            members = set(region.definitions if construction.view is RegionView.SEMANTIC else region.instances)
+            members = member_index[key]
+            region_ports = port_index[key]
             if not construction.roots or not set(construction.roots).issubset(members) or not set(construction.direct_members).issubset(members):
                 errors.append("construction roots/direct members outside region")
             if not set(construction.unexpanded_children).issubset(members) or set(construction.unexpanded_children) & set(construction.direct_members):
@@ -498,9 +531,9 @@ class RegionInventory:
                 nested = self.graph.regions.get(child)
                 if nested is None or nested.parent != key:
                     errors.append("construction child/parent mismatch")
-                elif not set(nested.definitions if construction.view is RegionView.SEMANTIC else nested.instances).issubset(members):
+                elif not member_index[child].issubset(members):
                     errors.append("construction child members outside parent")
-            if region.parent is not None and (region.parent not in self.constructions or key not in self.constructions[region.parent].children):
+            if region.parent is not None and key not in child_index.get(region.parent, set()):
                 errors.append("construction parent missing child")
             graph = self.bundle.semantic if construction.view is RegionView.SEMANTIC else self.bundle.evidence
             for dependency in construction.dependencies:
@@ -511,7 +544,7 @@ class RegionInventory:
                     errors.append("dependency lacks matching original edge evidence")
                 if (_member(dependency.source) in members) == (_member(dependency.target) in members):
                     errors.append("dependency does not cross membership boundary")
-                if not set(dependency.port_ids).issubset(region.ports):
+                if not set(dependency.port_ids).issubset(region_ports):
                     errors.append("dependency references unknown region port")
             occurrences = {item.id: item for item in construction.effect_occurrences}
             if len(occurrences) != len(construction.effect_occurrences):
@@ -524,7 +557,7 @@ class RegionInventory:
                     errors.append("effect occurrence lacks matching ledger evidence")
             for link in construction.effect_links:
                 occurrence, port = occurrences.get(link.occurrence_id), self.graph.ports.get(link.port_id)
-                if (occurrence is None or port is None or link.port_id not in region.ports or
+                if (occurrence is None or port is None or link.port_id not in region_ports or
                     port.effect != occurrence.target or link.scope != occurrence.scope or
                     link.instance != occurrence.instance or link.evidence != occurrence.evidence):
                     errors.append("invalid scoped port/effect occurrence link")
@@ -571,7 +604,7 @@ class RegionInventory:
                 if rebuilt != key:
                     return ["region identity does not match scoped membership/roots"]
                 pending.extend(sorted(children[key], key=lambda item: item.wire, reverse=True))
-            expected._batching = False
+            expected._finish_batch()
             expected._attach_effect_closure(expected.constructions)
             errors = []
             if expected.constructions != self.constructions:
@@ -713,7 +746,7 @@ def build_regions(bundle: IRBundle, *, view="semantic", roots=None, max_depth=No
                                else "invocation " + root.wire)
         if max_depth is None or depth < max_depth:
             stack.extend((child, rid, depth + 1) for child in reversed(inventory._children.get(root, ())))
-    inventory._batching = False
+    inventory._finish_batch()
     inventory._attach_effect_closure(inventory.constructions)
     inventory.assert_valid()
     return inventory
