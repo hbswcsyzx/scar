@@ -307,12 +307,15 @@ equivalence、approximate。shape/prefix 只作为 cheap filter；详细比较�
 
 ### 验收 G6
 
-- [ ] region input/output/state/control/resource/effect ports 完整；
-- [ ] composite region 可递归展开且 member identity 不丢失；
-- [ ] 第八层 consumer 可沿 provenance 回溯到第三层 origin；
-- [ ] region 上移时能计算跨越边界的新增/删除依赖；
-- [ ] overlap/nesting/conflict 可查询；
-- [ ] region builder 仍不选择 backend。
+- [x] 已知 region input/output/state/control/resource/effect ports 完整保留；语义闭合缺口显式；
+- [x] composite region 可递归展开且 member identity 不丢失；
+- [x] 第八层 consumer 在有明确 binding/producer 证据时可沿 provenance 回溯到第三层 origin；
+- [x] region 上移查询能计算已知跨越边界的新增/删除依赖，保留合法性义务；
+- [x] overlap/nesting/conflict 可查询；
+- [x] region builder 仍不选择 backend。
+
+自行验收与实测成本见 [G6_ACCEPTANCE.md](G6_ACCEPTANCE.md)。G7 按
+[GRAPH_SIMPLIFICATION.md](GRAPH_SIMPLIFICATION.md) 的子节点继续。
 
 ## 11. G7 — 通用 report-only 图化简器
 

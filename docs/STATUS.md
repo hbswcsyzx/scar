@@ -1,6 +1,32 @@
 # Current evidence and remaining work
 
-## Latest autonomous acceptance: G5
+## Latest autonomous acceptance: G6
+
+At `4451372`, all 160 G6 mapped cases and 685 repository tests passed, with
+two existing warnings and no skips. Typed composite regions retain definitions,
+invocations, source slots, data/effect/control/resource interfaces and NO-OP.
+Origin, proposed motion and conflict queries preserve their proof obligations.
+See [G6_ACCEPTANCE.md](G6_ACCEPTANCE.md).
+
+Archived LeWM pressure at `2a29ed4` accounted for 45,888 input records and
+selected one observed subtree with 21,874 invocations. One top-level region
+has 133,477 conservative ports, six open boundary facets and zero selected
+transformations. Analysis took 278.724 seconds (299.109 with report writing),
+peak RSS 1,385,388 KiB. The 14,383,421-byte gzip report and exact hashes are
+versioned. Other clock/thread scopes were disclosed rather than merged.
+
+The first pressure attempt was terminated after 333 seconds. Structural
+counterexamples drove repairs for repeated port scans, sibling assembly,
+wide explicit membership and repeated ancestor walks. Scope corruption now
+returns an invalid report. The final public-API fixes are separately tested;
+the recorded real pressure remains bound to its actual earlier revision.
+Repeated full validation and large conservative interfaces still cost minutes.
+
+G6 does not prove effect/control/alias closure from absent edges. G7 proceeds
+under [GRAPH_SIMPLIFICATION.md](GRAPH_SIMPLIFICATION.md), beginning with typed
+source semantics and per-use bindings. No LeWM rewrite or speedup is verified.
+
+## Previous autonomous acceptance: G5
 
 Implementation `4a0ae57` passed all 112 mapped G5 cases; full regression passed
 525 tests (two existing warnings, no skips). The public `scar inspect-v2`

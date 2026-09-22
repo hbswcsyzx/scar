@@ -87,6 +87,13 @@ python -m scar.cli inspect-v2 path/to/program.py --project-root path/to/project 
   --trace artifacts/traces/demo --runtime-sources \
   --out artifacts/reports/inspection-v2.json
 
+# Build bounded recursive region views and preserve known boundary dependencies.
+# Omitted/unexpanded regions never mean dead work. Only NO-OP is emitted at G6.
+python -m scar.cli regions-v2 path/to/program.py --view semantic --max-depth 1 \
+  --out artifacts/reports/source-regions.json.gz
+python -m scar.cli regions-v2 artifacts/traces/demo --view execution \
+  --root-limit 8 --max-depth 0 --out artifacts/reports/runtime-regions.json.gz
+
 # Optionally join a source file or whole Python project to runtime events by
 # exact path/line and loaded function span.
 python -m scar.cli analyze artifacts/traces/demo \

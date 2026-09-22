@@ -1,0 +1,15 @@
+{
+  "schema": "scar.pressure-attempt",
+  "status": "Rejected",
+  "revision": "8d9ab51",
+  "command": "conda run -n lewm python scripts/measure_regions_v2.py artifacts/traces/lewm_resource_global_latest --root-limit 8 --max-depth 0 --out artifacts/reports/gates/g6-lewm-regions.json.gz",
+  "observed": {
+    "elapsed_at_last_sample_seconds": 333,
+    "cpu_percent": 99.8,
+    "rss_kib": 910988,
+    "output_complete": false
+  },
+  "inferred_cause": "RegionInventory.validate repeatedly constructs full region port sets for dependency subset checks and scans port tuples for every effect link; quadratic structural validation. No stack sampling was available.",
+  "action": "Terminated only the owned SCAR analysis process PID1456508, verified command immediately before termination. Original LeWM was not executing.",
+  "next": "Replace repeated membership scans with per-region indexes, add structural complexity regression, rerun gate and real pressure."
+}

@@ -1,6 +1,7 @@
 # G6：区域构造、来源回溯与跨层依赖
 
-状态：**Implemented，待 G6 独立验收**。G5 已通过，不解除 backend 冻结。
+状态：**Verified（已知接口构造与查询范围）**。G6 gate 160 项、整仓 685 项通过；
+真实输入成本与限制见 [G6_ACCEPTANCE.md](G6_ACCEPTANCE.md)。不解除 backend 冻结。
 
 ## 1. 建模决策
 
