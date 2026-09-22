@@ -1,0 +1,86 @@
+{
+  "schema": "scar.gate-report",
+  "schema_version": 1,
+  "gate": "G1",
+  "status": "PASS",
+  "revision": "212d1551c0a5678ce79a7ae45ecafb091995b700",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "criteria": [
+    {
+      "id": "typed_id_and_reference_validation",
+      "status": "PASS",
+      "evidence": "test_typed_ids_cannot_be_interchanged and graph validators"
+    },
+    {
+      "id": "report_only_oir_fixtures",
+      "status": "PASS",
+      "evidence": "constant substitution, import residual, loop move, residency fixtures"
+    },
+    {
+      "id": "original_fallback_and_rewrite_proof",
+      "status": "PASS",
+      "evidence": "OIR rejects dangling references and unproven selected rewrites"
+    },
+    {
+      "id": "deterministic_json_round_trip",
+      "status": "PASS",
+      "evidence": "IRBundle canonical JSON decode/encode equality"
+    },
+    {
+      "id": "v1_cli_compatibility",
+      "status": "PASS",
+      "evidence": "existing trace plus analyze integration test"
+    },
+    {
+      "id": "workload_independence",
+      "status": "PASS",
+      "evidence": {
+        "workload_specific_files": []
+      }
+    },
+    {
+      "id": "no_detector_or_backend_wiring",
+      "status": "PASS",
+      "evidence": {
+        "v2_consumers": []
+      }
+    }
+  ],
+  "commands": {
+    "schema_tests": {
+      "command": [
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "-m",
+        "pytest",
+        "tests/unit/test_ir_v2.py",
+        "tests/unit/test_ir_v2_optimization.py",
+        "-q"
+      ],
+      "returncode": 0,
+      "duration_seconds": 0.699449,
+      "stdout": ".............                                                            [100%]\n13 passed in 0.10s\n",
+      "stderr": ""
+    },
+    "compatibility_test": {
+      "command": [
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "-m",
+        "pytest",
+        "tests/integration/test_trace.py::test_trace_and_analysis",
+        "-q"
+      ],
+      "returncode": 0,
+      "duration_seconds": 14.54519,
+      "stdout": ".                                                                        [100%]\n1 passed in 14.02s\n",
+      "stderr": ""
+    }
+  },
+  "scope": "IR schema and report-only plan representation",
+  "explicitly_not_verified": [
+    "source-to-SG frontend",
+    "trace-to-EEG normalizer",
+    "candidate detection through OIR",
+    "backend application",
+    "LeWM transformation or speedup"
+  ]
+}
