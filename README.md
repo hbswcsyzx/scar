@@ -81,6 +81,12 @@ python -m scar.cli model-v2 path/to/program.py --project-root path/to/project \
 python -m scar.cli normalize artifacts/traces/demo \
   --out artifacts/reports/evidence-v2.json
 
+# Inspect code-only correspondence and scoped effect-preservation requirements.
+# This reads source + archived trace, does not execute the target or select rewrites.
+python -m scar.cli inspect-v2 path/to/program.py --project-root path/to/project \
+  --trace artifacts/traces/demo --runtime-sources \
+  --out artifacts/reports/inspection-v2.json
+
 # Optionally join a source file or whole Python project to runtime events by
 # exact path/line and loaded function span.
 python -m scar.cli analyze artifacts/traces/demo \

@@ -1,6 +1,42 @@
 # Current evidence and remaining work
 
-## Latest autonomous acceptance: G4
+## Latest autonomous acceptance: G5
+
+Implementation `4a0ae57` passed all 112 mapped G5 cases; full regression passed
+525 tests (two existing warnings, no skips). The public `scar inspect-v2`
+command connects source-code witnesses, runtime effect evidence and explicit
+preservation policies without executing or modifying the target.
+
+Archived LeWM pressure: 84 explicitly selected Python files and 45,888 raw
+records. Exact code-object witnesses joined 34 definitions / 2,041 instances;
+222 definitions did not reproduce the stored digest, 6 lacked needed evidence,
+and 70 were outside selected source coverage. A mismatch is not proof the source
+changed: missing compilation/loader context can also explain it. No globals,
+closure or value identity follows from a code-only join.
+
+The effect-removal diagnostic queried 332 definition/scope boundaries: **16
+KEEP, 316 CONTRACT, zero selected transformations**. It retained 80 return escape
+effects, 543 physical-copy writes and 360 barrier effects. All three runtime
+scopes remain open. These counts are diagnostic region queries, not the old
+candidate counts or a measured reduction in LeWM work.
+
+Offline analysis took 207.179 seconds, peak RSS 1,166,036 KiB. Inputs and code
+hashes stayed unchanged. Full evidence is saved locally as
+`artifacts/reports/gates/g5-lewm-inspection.json`; its deterministic gzip archive
+(5,164,158 bytes) and pressure/gate reports are versioned. The uncompressed
+122,748,547-byte report repeats request/source information; reference-table
+compaction remains a reporting efficiency limitation, not evidence of a
+lightweight analysis. No tensor value payloads were added.
+
+G5 also repaired a G3 defect: paired returns previously lost escape/callback
+metadata. Six focused tests now preserve separate return-boundary evidence;
+return callbacks still do not prove exception absence. Import-effect tests use
+explicit generic contracts and do not claim automatic arbitrary import purity.
+
+G6 proceeds automatically under [REGION_BUILDER.md](REGION_BUILDER.md). LeWM
+remains unchanged, and no LeWM transformation or speedup has been verified.
+
+## Previous autonomous acceptance: G4
 
 Implementation `a473f1a` passed 71 G4 gate cases; the repository regression
 suite passed 413 tests (two warnings, no skipped tests). Typed provenance and

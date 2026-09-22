@@ -1,6 +1,6 @@
 # G5：源码对应、副作用闭包与可执行的补证据请求
 
-状态：**Implemented，待独立 gate 验收**。本文定义
+状态：**Verified（G5 范围）**。实现 `4a0ae57` 通过 112 项 gate 测试与 525 项整仓回归。本文定义
 [NEXT_PHASE_PLAN.md](NEXT_PHASE_PLAN.md) 中 G5 的实施边界和验收案例。
 G5 不增加 detector/backend，不产生目标源码改动；通过情况以 gate report 为准。
 

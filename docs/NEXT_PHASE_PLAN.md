@@ -273,12 +273,12 @@ equivalence、approximate。shape/prefix 只作为 cheap filter；详细比较�
 
 ### 验收 G5
 
-- [ ] 任意 composite region 的 boundary reads/writes/effects 可查询；
-- [ ] “未观察到 consumer”在开放 scope 下不会变成 dead；
-- [ ] callback/escape、hidden module state、random operation 阻止错误 pure summary；
-- [ ] import module initialization effect 能被保留、证明 dead 或提出具体请求；
-- [ ] 同一输入下不同 Q profile 可得到不同且可解释的合法性结论；
-- [ ] planner-facing 结果无裸 UNKNOWN：转为 KEEP/INSTRUMENT/CONTRACT。
+- [x] 任意 composite region 的 boundary reads/writes/effects 可查询；
+- [x] “未观察到 consumer”在开放 scope 下不会变成 dead；
+- [x] callback/escape、hidden module state、random operation 阻止错误 pure summary；
+- [x] import module initialization effect 能被保留、证明 dead 或提出具体请求；
+- [x] 同一输入下不同 Q profile 可得到不同且可解释的合法性结论；
+- [x] planner-facing 结果无裸 UNKNOWN：转为 KEEP/INSTRUMENT/CONTRACT。
 
 ## 10. G6 — Optimization IR region builder
 
