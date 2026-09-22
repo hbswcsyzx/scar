@@ -271,7 +271,8 @@ class RegionInventory:
         roots = _ordered(members if roots is None else roots)
         direct = _ordered(members if direct_members is None else direct_members)
         member_set = set(members)
-        if not roots or not set(roots).issubset(member_set) or not set(direct).issubset(member_set):
+        direct_set = set(direct)
+        if not roots or not set(roots).issubset(member_set) or not direct_set.issubset(member_set):
             raise ValueError("region roots/direct members must belong to membership")
         if parent is not None:
             if parent not in self.constructions:
@@ -433,7 +434,7 @@ class RegionInventory:
             dependencies=tuple(sorted(dependencies, key=lambda item: item.id)), coverage=coverage,
             gaps=tuple(gaps), effect_occurrences=occurrences, effect_links=tuple(links))
         pending = _ordered(child for member in direct for child in self._children.get(member, ())
-                           if child in member_set and child not in direct)
+                           if child in member_set and child not in direct_set)
         self.constructions[rid] = replace(self.constructions[rid], unexpanded_children=pending)
         if self._batching:
             self._batch_members[rid] = member_set
@@ -481,6 +482,16 @@ class RegionInventory:
 
     def validate(self):
         errors = list(self.graph.validate()["errors"])
+        if errors:
+            return {"valid": False, "errors": errors}
+        errors.extend(record_errors(self.scope, str, "inventory.scope"))
+        errors.extend(record_errors(self.scopes, dict[str, ObservationScope], "inventory.scopes"))
+        if errors:
+            return {"valid": False, "errors": errors}
+        if self.scope not in self.scopes:
+            errors.append("selected inventory scope is missing")
+        if any(key != scope.id for key, scope in self.scopes.items()):
+            errors.append("inventory scope key/identity mismatch")
         if errors:
             return {"valid": False, "errors": errors}
         if self.graph.context != optimization_context(self.bundle.semantic, self.bundle.evidence, self.bundle.values):
@@ -726,12 +737,18 @@ def build_regions(bundle: IRBundle, *, view="semantic", roots=None, max_depth=No
     # Redundant nested roots are a caller error: silently duplicating hierarchy
     # would give one operation two apparent execution contexts.
     selected_set = set(selected)
+    # This set belongs only to this preflight. Once an ancestor path has been
+    # checked against the fixed selection, sibling roots can reuse that check.
+    checked_ancestors = set()
     for root in selected:
         node = inventory._nodes[root]
         parent = node.parent_id if inventory.view is RegionView.SEMANTIC else node.parent
         while parent is not None:
             if parent in selected_set:
                 raise ValueError("selected roots must not contain ancestor/descendant duplicates")
+            if parent in checked_ancestors:
+                break
+            checked_ancestors.add(parent)
             node = inventory._nodes[parent]
             parent = node.parent_id if inventory.view is RegionView.SEMANTIC else node.parent
     stack = [(root, None, 0) for root in reversed(selected)]

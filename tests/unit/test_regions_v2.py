@@ -433,3 +433,97 @@ def test_wide_region_hierarchy_batches_sibling_and_parent_membership_indexes(tmp
     assert inventory.assert_valid()["valid"]
     assert children.membership_queries == 0
     assert children.iterations <= 5
+
+
+@pytest.mark.parametrize("size", [16, 64])
+def test_explicit_wide_region_indexes_direct_members_once(monkeypatch, size):
+    """The public composite-region API defaults every member to direct."""
+    import scar.analysis.regions_v2 as regions_module
+    semantic = SemanticGraph()
+    root = OperationDefinitionID("root")
+    semantic.add_definition(OperationDefinition(root, OperationKind.FUNCTION, "root"))
+    for index in range(size):
+        identity = OperationDefinitionID(f"child:{index}")
+        semantic.add_definition(OperationDefinition(identity, OperationKind.OPERATOR,
+                                                    "child", parent_id=root))
+    inventory = RegionInventory(IRBundle(semantic, EvidenceGraph(), ValueGraph()))
+    original = regions_module._ordered
+    ordered_sequences = []
+
+    def counted_ordered(values):
+        result = _CountedTuple(original(values))
+        ordered_sequences.append(result)
+        return result
+
+    monkeypatch.setattr(regions_module, "_ordered", counted_ordered)
+    region = inventory.region(tuple(semantic.definitions))
+    assert set(inventory.constructions[region].direct_members) == set(semantic.definitions)
+    assert inventory.constructions[region].unexpanded_children == ()
+    assert inventory.assert_valid()["valid"]
+    assert all(sequence.membership_queries == 0 for sequence in ordered_sequences)
+
+
+@pytest.mark.parametrize("size", [16, 64])
+def test_explicit_leaf_roots_share_ancestor_preflight_work(monkeypatch, size):
+    """Only inspect a common unselected ancestor path once per build."""
+    class CountedDefinition(OperationDefinition):
+        parent_reads = 0
+
+        def __getattribute__(self, name):
+            if name == "parent_id":
+                CountedDefinition.parent_reads += 1
+            return super().__getattribute__(name)
+
+    semantic, parent = SemanticGraph(), None
+    for index in range(size):
+        identity = OperationDefinitionID(f"ancestor:{index}")
+        semantic.add_definition(CountedDefinition(identity, OperationKind.FUNCTION,
+                                                  "ancestor", parent_id=parent))
+        parent = identity
+    leaves = []
+    for index in range(size):
+        identity = OperationDefinitionID(f"leaf:{index}")
+        semantic.add_definition(CountedDefinition(identity, OperationKind.OPERATOR,
+                                                  "leaf", parent_id=parent))
+        leaves.append(identity)
+    marks = {}
+    original_init, original_region = RegionInventory.__init__, RegionInventory.region
+
+    def measured_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        marks.setdefault("after_input_index", CountedDefinition.parent_reads)
+
+    def measured_region(self, *args, **kwargs):
+        marks.setdefault("after_root_preflight", CountedDefinition.parent_reads)
+        return original_region(self, *args, **kwargs)
+
+    monkeypatch.setattr(RegionInventory, "__init__", measured_init)
+    monkeypatch.setattr(RegionInventory, "region", measured_region)
+    inventory = build_regions(IRBundle(semantic, EvidenceGraph(), ValueGraph()),
+                              roots=leaves, max_depth=0)
+    assert len(inventory.graph.regions) == size
+    assert marks["after_root_preflight"] - marks["after_input_index"] <= 2 * size
+    # Memoization is local: a different later selection must still detect that
+    # its explicitly selected parent is an ancestor of an explicitly selected leaf.
+    with pytest.raises(ValueError, match="ancestor/descendant"):
+        build_regions(inventory.bundle, roots=(parent, leaves[-1]), max_depth=0)
+
+
+@pytest.mark.parametrize("corruption", ["record_type", "record_field", "missing", "key_identity"])
+def test_mutated_observation_scope_returns_invalid_report_instead_of_crashing(corruption):
+    bundle, (root, _, _) = runtime_bundle()
+    inventory = build_regions(bundle, view="execution", roots=(root,), max_depth=0)
+    scope = inventory.scopes[inventory.scope]
+    if corruption == "record_type":
+        inventory.scopes[inventory.scope] = object()
+    elif corruption == "record_field":
+        inventory.scopes[inventory.scope] = replace(scope, mode="not-a-ScopeMode")
+    elif corruption == "missing":
+        inventory.scopes.clear()
+    else:
+        inventory.scopes[inventory.scope] = replace(scope, id="different-scope")
+    report = inventory.validate()
+    assert not report["valid"]
+    assert any("scope" in error.lower() for error in report["errors"])
+    with pytest.raises(ValueError, match="invalid region inventory"):
+        inventory.assert_valid()
