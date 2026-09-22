@@ -1,0 +1,13 @@
+{
+  "schema": "scar.regression-report",
+  "revision": "a473f1a",
+  "command": "conda run -n lewm python -m pytest -q",
+  "result": "PASS",
+  "passed": 413,
+  "duration_seconds": 35.38,
+  "warnings": [
+    "Existing fork/thread DeprecationWarning",
+    "Quantized tensor creation deprecation in unsupported-layout negative test"
+  ],
+  "scope": "Full repository regression, not workload performance"
+}

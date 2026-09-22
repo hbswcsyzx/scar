@@ -1,6 +1,30 @@
 # Current evidence and remaining work
 
-## Latest autonomous acceptance: G2 and G3
+## Latest autonomous acceptance: G4
+
+Implementation `a473f1a` passed 71 G4 gate cases; the repository regression
+suite passed 413 tests (two warnings, no skipped tests). Typed provenance and
+validity ledgers, generation-aware allocation identities, branch-on-write
+copies, alias invalidation, strict serialization, explicit observation
+attachments and bounded checkpoints are implemented. See
+[PROVENANCE_REGISTRY.md](PROVENANCE_REGISTRY.md).
+
+Real CUDA checkpoint experiment: RTX 4090, PyTorch 2.13.0+cu132 / CUDA 13.2,
+65,536 float32 elements (256 KiB), 2 warmups, 7 repetitions. Median actual warm
+`TensorObserver.observe` was 18.683 microseconds; explicit bitwise comparison
+including CUDA synchronization/transfer was 2.801 milliseconds. Full min/max,
+variance, source hashes and budget/release checks are in
+`artifacts/reports/gates/g4-checkpoint-pressure.json`. This is capture overhead,
+not workload acceleration; expensive checks stay explicit and budgeted.
+
+Ordinary observations do not copy tensor contents. Foreign writes without
+write evidence remain NEEDS_VERIFICATION. Exact comparisons establish only
+capture-time content equality. Copy collectors and SG/EEG attachments are
+opt-in; old trace tokens never retroactively certify value equivalence.
+No LeWM rewrite or speedup is established. G5 now proceeds under
+[EFFECT_CLOSURE.md](EFFECT_CLOSURE.md), without a user approval checkpoint.
+
+## Previous acceptance: G2 and G3
 
 At implementation commit `1af7d14`, G2 passed 23 collected acceptance cases,
 G3 passed 16, and the full regression suite passed 340 tests (one existing
@@ -26,7 +50,7 @@ calls with missing returns; 543 actual memcpy events remain distinct from
 `g3-runtime-pressure.json` bind implementation/input hashes and scope.
 These are SCAR conversion measurements, not a new workload run or speedup.
 
-G4 now follows automatically: logical provenance and bounded, opt-in exact
+The following G4 design introduced logical provenance and bounded, opt-in exact
 checkpoints, under [PROVENANCE_REGISTRY.md](PROVENANCE_REGISTRY.md).
 No new detector/backend was added. v2 still does not select a LeWM rewrite.
 

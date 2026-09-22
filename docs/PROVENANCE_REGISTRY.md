@@ -1,6 +1,6 @@
 # G4：逻辑值、来源与物理表示 registry
 
-状态：**Implemented — 正在执行 G4 验收，结果以 gate report 为准**。
+状态：**Verified — G4 于实现版本 `a473f1a` 通过；范围见 `g4-verified.json`**。
 
 依赖：[NEXT_PHASE_PLAN.md](NEXT_PHASE_PLAN.md) 的 G2、G3 验收完成后进入实现。
 本文不增加 detector、backend 或源码变换。验收结果以独立 G4 report 为准。

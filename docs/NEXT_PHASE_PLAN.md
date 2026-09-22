@@ -247,14 +247,14 @@ equivalence、approximate。shape/prefix 只作为 cheap filter；详细比较�
 
 ### 验收 G4
 
-- [ ] `torch.from_numpy` 外部 NumPy 写入产生新版本/失效；
-- [ ] inference tensor 不依赖 `_version` 作为唯一依据；
-- [ ] allocator 地址复用产生不同 allocation identity；
-- [ ] view/expand 正确共享 region/stride 语义；
-- [ ] deepcopy 是不同 object/storage，并保留 provenance；
-- [ ] CPU↔GPU copy 可绑定同一 value version 的不同 materialization；
-- [ ] semantic transform 产生新 logical value，而不是伪装成相同内容；
-- [ ] mutation、alias、escape 都有反例测试。
+- [x] `torch.from_numpy` 外部 NumPy 写入产生新版本/失效；
+- [x] inference tensor 不依赖 `_version` 作为唯一依据；
+- [x] allocator 地址复用产生不同 allocation identity；
+- [x] view/expand 正确共享 region/stride 语义；
+- [x] deepcopy 是不同 object/storage，并保留 provenance；
+- [x] CPU↔GPU copy 可绑定同一 value version 的不同 materialization；
+- [x] semantic transform 产生新 logical value，而不是伪装成相同内容；
+- [x] mutation、alias、escape 都有反例测试。
 
 ## 9. G5 — Correspondence、effect closure 与 Q contract
 
