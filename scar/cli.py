@@ -294,6 +294,14 @@ def main(argv=None) -> int:
     normalize.add_argument("--out", required=True)
     normalize.add_argument("--report", help="raw record conservation and ambiguity report")
     normalize.set_defaults(func=_normalize_v2)
+    inspect_v2 = sub.add_parser("inspect-v2", help="join source/runtime evidence and report scoped effect requirements")
+    inspect_v2.add_argument("source")
+    inspect_v2.add_argument("--trace", required=True)
+    inspect_v2.add_argument("--project-root")
+    inspect_v2.add_argument("--runtime-sources", action="store_true",
+                            help="select only entry and trace-referenced files within project root")
+    inspect_v2.add_argument("--out", required=True)
+    inspect_v2.set_defaults(func=_inspect_v2)
     audit = sub.add_parser("audit-rejections",
                            help="explain proof and evidence blockers in an analysis report")
     audit.add_argument("report", help="JSON report produced by scar analyze")
@@ -345,6 +353,15 @@ def _normalize_v2(args) -> int:
     report = _write_document(args.report or str(out) + ".coverage.json", result.coverage)
     print(json.dumps({"schema": result.bundle.SCHEMA, "out": str(out),
                       "report": str(report), "valid": validation["valid"]}))
+    return 0
+
+
+def _inspect_v2(args) -> int:
+    from scar.analysis.inspection_v2 import inspect_program
+    report = inspect_program(args.source, args.trace, project_root=args.project_root,
+                             runtime_sources=args.runtime_sources)
+    output = _write_document(args.out, report)
+    print(json.dumps({"out": str(output), "summary": report["summary"]}))
     return 0
 
 

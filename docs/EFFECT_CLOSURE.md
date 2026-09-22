@@ -1,15 +1,16 @@
 # G5：源码对应、副作用闭包与可执行的补证据请求
 
-状态：**Proposed**。本文定义 [NEXT_PHASE_PLAN.md](NEXT_PHASE_PLAN.md) 中 G5
-的实施边界和验收案例，不代表 G5 已实现或通过验收。G4 验证结果以其独立
-report 为准。G5 不增加 detector/backend，不产生源码改动。
+状态：**Implemented，待独立 gate 验收**。本文定义
+[NEXT_PHASE_PLAN.md](NEXT_PHASE_PLAN.md) 中 G5 的实施边界和验收案例。
+G5 不增加 detector/backend，不产生目标源码改动；通过情况以 gate report 为准。
 
 ## 1. 本 Gate 要交付什么
 
 输入是 G2 Semantic Graph、G3 Execution Evidence Graph、G4 ValueGraph/registry，
 以及明确的观察范围与 Q 合同。输出是：
 
-1. 有版本证据的 source definition ↔ runtime instance ↔ value slot 对应关系；
+1. 有版本证据的 source definition ↔ runtime instance 对应关系；
+   value slot/version 仍使用 G4 显式 binding API，本 gate 不自动推断它们；
 2. 对调用者给定的 operation 集合，计算边界读写、escape、外部效果和覆盖缺口；
 3. 每个缺口对应具体位置、缺失事实以及采集/合同请求。
 
@@ -63,10 +64,13 @@ status: VERIFIED | AMBIGUOUS | MISMATCH | MISSING
 ```
 
 `offline_compile_match` 只编译已有源码快照，递归检查 nested CodeType，不执行
-module、不 import 被分析程序。只有编译环境一致且实际 CodeType hash 相等，
-才能把该快照连接到加载代码。必须使用采集时原始 `co_filename`；CodeID 中的
-规范化路径不能替代它。编译失败、缺少 flags、不同 Python 版本或 hash 不同
-时保留候选，提出具体请求，不尝试“忽略差异后算相等”。
+module、不 import 被分析程序。只有实际 CodeType hash 完全相等，才能把
+该快照连接到加载代码。允许尝试本解释器的显式 flags/optimize/filename 组合；
+缺少原采集编译上下文不会否定一次精确 hash 匹配，但报告必须保留实际尝试
+的上下文，不能声称恢复了原 loader。CodeID 的规范化路径只是 filename 候选，
+若实际 co_filename 不同导致 hash 不匹配，不能忽略该差异。
+旧 marshal hash 还受 nested code 引用标记影响；实现尝试明确保留 code tree
+的序列化方式，不归一化 hash。编译失败或不能复现 hash 时保留候选与具体请求。
 
 新 collector 可以在 loader 获取源码并编译的同一次受观察操作中记录对应见证。
 仅在 call hook 中同时读文件和 code hash 仍不足以证明文件就是加载来源。
@@ -143,7 +147,9 @@ UNKNOWN。PRESENT 可以与 PARTIAL/UNKNOWN coverage 同时存在。
 
 ## 6. Consumer closure 与 effect liveness
 
-Backward slice 沿 source def-use、有效 binding interval 与 G4 provenance 回溯。
+当前 residual backward slice 沿显式 effect dependencies/order 回溯。
+通用 value slice 沿 source def-use、有效 binding interval 与 G4 provenance 的
+连接由 G6 实现；不能把当前 effect slice 称为完整 value provenance 推导。
 Forward closure 跟随所有适用 consumers、materializations、alias、escape 和
 控制/异常出口，直到观察范围明确的终点。cross-device readiness 和 clock
 不完整时保留 ordering gap。
@@ -204,7 +210,8 @@ G5 消除的是“只有 UNKNOWN，没有原因和下一步”的最终报告。
 必要合同 CONTRACT，其次可采集缺口 INSTRUMENT，否则保留当前 opaque 边界 KEEP。
 不要因为有一个容易补的事实，就隐藏另一个已知无法保持的效果。
 
-请求示例（结构为 Proposed，字段需落到上述 typed records）：
+未来 loader-bound collector 请求示例（Proposed；该 collector 当前未实现，
+实际输出为 CONTRACT，不能声称现有 scar trace 能完成此请求）：
 
 ```json
 {
@@ -227,7 +234,7 @@ INSTRUMENT 是可审查工作项，不是默认开启全程序 line trace 或保
 
 ## 9. 实施顺序与验收案例
 
-| 子阶段 | 窄范围交付 | 指名验收案例，尚未实现 |
+| 子阶段 | 窄范围交付 | 指名验收案例，最终以 gates/g5.json 为准 |
 | --- | --- | --- |
 | G5.1 | scope/coverage/request/target policy 类型与严格 codec | `test_effect_presence_does_not_imply_complete_coverage`、`test_unknown_facets_default_to_preserve`、非法范围/引用反例 |
 | G5.2 | source witness 与候选 join，不重写 runtime stubs | `test_source_edit_after_import_does_not_join_by_path`、`test_compile_context_mismatch_requests_witness`、`test_nested_code_join_never_executes_module`、`test_ambiguous_lambda_locations_keep_all_candidates` |
@@ -243,3 +250,24 @@ import initialization、lazy attribute 和源码版本改变。随后把同一�
 
 每个子阶段写清测试与限制，G5 独立 gate report 逐项登记。达到这些标准后才
 进入 G6 region builder；G5 的通过不等于 LeWM 已有可信变换或加速结果。
+
+## 10. 已实现入口与已发现的证据损失
+
+```bash
+scar inspect-v2 /external/project/main.py --project-root /external/project --trace /path/to/archived-trace --runtime-sources --out /tmp/inspection.json
+```
+
+`--runtime-sources` 仅选择 entry 与 trace 引用的 root 内文件，避免重复构建
+整个 vendored tree；它不是全路径覆盖。默认使用全局 preserve Q。报告含
+code-only join、effect assessments、required-effect 原始证据索引和缺口请求，
+不选择变换。支持 `build_semantic_files` 显式文件集合。
+
+审查发现原 G3 合并 call/return 后丢失 return boundary 的 escape/callback
+元数据。此次修复为独立 return_boundary，并保留 raw reference/digest。事件
+数量守恒不足以证明所有证据完整，新增逐字段反例验证。Python profiler 的
+return 回调可能对应异常退出，因此始终不据此证明 may_raise=NONE。
+
+v1 Torch dispatch 的后缀写入启发式仅转换为 Inferred may-write；旧 token
+相同不会成为跨事件逻辑值相等。物理 memcpy、barrier 与 host wrapper 分开。
+目前没有覆盖任意 Python 所有效果的 collector，真实旧 trace 的开放范围
+依然会有 CONTRACT/KEEP；报告明确位置和缺失字段，不杜撰重跑入口或纯度。

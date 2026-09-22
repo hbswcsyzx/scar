@@ -1,0 +1,69 @@
+{
+  "gate": "G5",
+  "scope": "Read-only code-object correspondence, scoped composite effect queries, explicit Q policies and actionable evidence requests. No value equivalence, whole-program purity or transformation is inferred.",
+  "limitations": [
+    "Exact loaded-code hashes establish code_object_only correspondence; globals, closure, loader and parameter identity require separate evidence.",
+    "All-path effect closure is possible only with explicit reviewed coverage; legacy dynamic traces remain open, and narrow target coverage is never promoted.",
+    "G4 slot/provenance bindings stay explicit; generic automatic value slicing is part of G6.",
+    "The import fixture supplies explicit module-init effect contracts; no automatic arbitrary import purity proof is claimed.",
+    "No new detector/backend or target rewrite; satisfied effect removal is only one future proof obligation.",
+    "Missing collector support or argv/cwd/environment remains a concrete CONTRACT request; no invented rerun command."
+  ],
+  "criteria": [
+    {
+      "id": "source_loaded_code_witness_and_ambiguity",
+      "tests": [
+        "tests/unit/test_correspondence_v2.py"
+      ]
+    },
+    {
+      "id": "composite_boundary_coverage_and_residual_dependencies",
+      "tests": [
+        "tests/unit/test_effects_v2.py"
+      ]
+    },
+    {
+      "id": "q_profiles_and_concrete_requests",
+      "tests": [
+        "tests/unit/test_contracts_v2.py"
+      ]
+    },
+    {
+      "id": "scope_domain_and_wire_counterexamples",
+      "tests": [
+        "tests/unit/test_contracts_v2_adversarial.py",
+        "tests/unit/test_record_codec.py"
+      ]
+    },
+    {
+      "id": "raw_return_escape_and_exception_preservation",
+      "tests": [
+        "tests/unit/test_return_effect_evidence.py"
+      ]
+    },
+    {
+      "id": "runtime_evidence_not_purity_or_alias_proof",
+      "tests": [
+        "tests/unit/test_runtime_effects_v2.py"
+      ]
+    },
+    {
+      "id": "import_constant_consumer_cannot_erase_init_effects",
+      "tests": [
+        "tests/integration/test_import_effect_boundary_v2.py"
+      ]
+    },
+    {
+      "id": "bounded_explicit_source_selection",
+      "tests": [
+        "tests/unit/test_frontend_selection_v2.py"
+      ]
+    },
+    {
+      "id": "public_inspection_end_to_end_no_execution_or_rewrite",
+      "tests": [
+        "tests/integration/test_inspection_v2.py"
+      ]
+    }
+  ]
+}

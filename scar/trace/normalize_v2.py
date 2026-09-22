@@ -32,7 +32,7 @@ _KNOWN = {"python_call", "python_return", "python_c_call", "cuda_barrier"} | _CO
 _VALUE_FIELDS = {
     "type", "shape", "dtype", "device", "offset", "strides", "representation",
     "input_path", "state_role", "object_id", "storage_id", "logical_version",
-    "content_fingerprint",
+    "content_fingerprint", "callable_code_id", "closure_names", "callable_capture",
 }
 
 
@@ -234,13 +234,19 @@ class _Normalizer:
             "logical_tensor_mapping", "mapping_confidence", "matched_transfer_event_index",
             "loop_instance", "loop_iteration", "loop_target_offset", "outcome",
             "same_object", "device_transition", "input_capture", "contract_read_capture",
-            "pure_contract", "contract_state_stable") if key in metadata}
+            "pure_contract", "contract_state_stable", "callable_inputs", "callable_capture",
+            "returned_callables", "return_escape_evidence") if key in metadata}
         known_metadata.update({"raw_reference": entry["raw_reference"], "raw_sha256": entry["sha256"],
                                "raw_kind": kind, "legacy_invocation_id": record.get("invocation_id"),
                                "timestamp_semantics": timing, "collector": "scar.v1",
                                "effects_complete": False, "legacy_effect": record.get("effect", {}),
                                "labels": record.get("labels", []), "resource_snapshot": resource,
                                "completion": "missing_return" if kind == "python_call" else "observed_span" if end is not None else "point_only"})
+        if kind in {"python_call", "unmatched_python_return"}:
+            # CPython profiling reports a return even when a Python frame
+            # unwinds with an exception.  The v1 collector's outcome label is
+            # retained, but cannot prove exception-free completion.
+            known_metadata["unknown_exception_status"] = True
         if kind == "transfer":
             known_metadata["physical_copy"] = False if metadata.get("physical") is False else "UNKNOWN"
         elif kind == "cuda_memcpy":
@@ -388,6 +394,22 @@ class _Normalizer:
         self.edge(ir.EvidenceRelation.USES_STORAGE, ir.EvidenceNodeKind.OPERATION_INSTANCE,
                   operation.id, ir.EvidenceNodeKind.ALLOCATION, allocation, entry)
 
+    @staticmethod
+    def return_boundary(record, entry):
+        """Keep exit-boundary evidence separate from the entry read snapshot.
+
+        An escape set marked KNOWN by the old collector covers only values
+        captured at return.  It does not close all effects of the invocation.
+        """
+        metadata = record.get("metadata", {})
+        return {"raw_reference": entry["raw_reference"], "raw_sha256": entry["sha256"],
+                "collector": "scar.v1", "raw_kind": "python_return",
+                "legacy_effect": record.get("effect", {}),
+                "returned_callables": metadata.get("returned_callables", []),
+                "return_escape_evidence": metadata.get("return_escape_evidence", "UNKNOWN"),
+                "outcome": metadata.get("outcome", "unknown"),
+                "unknown_exception_status": True, "effects_complete": False}
+
     def finish(self):
         paired = set()
         for key, calls in self.calls.items():
@@ -410,12 +432,15 @@ class _Normalizer:
             if not valid:
                 self.issue(entry, "return has no unique compatible call", "unmatched")
                 orphan = dict(record, kind="unmatched_python_return")
-                self.instance(orphan, entry)
+                operation = self.instance(orphan, entry)
+                operation.metadata["return_boundary"] = self.return_boundary(record, entry)
                 continue
             paired.add(operation.id)
             operation.end_ns = end
             operation.metadata.update({"completion": "paired_return", "return_reference": entry["raw_reference"],
-                                       "outcome": metadata.get("outcome", "unknown")})
+                                       "outcome": metadata.get("outcome", "unknown"),
+                                       "unknown_exception_status": True,
+                                       "return_boundary": self.return_boundary(record, entry)})
             entry["normalized"].append({"kind": "operation_instance", "id": operation.id.wire})
             for index, snapshot in enumerate(record.get("outputs", [])):
                 self.snapshot(snapshot, "outputs", index, operation, entry)

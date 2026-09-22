@@ -804,4 +804,33 @@ def build_semantic(source: Path | str, project_root: Path | str | None = None) -
     return _Frontend(paths, root).build()
 
 
-__all__ = ["EXCLUDED_DIRECTORIES", "FrontendResult", "build_semantic"]
+def build_semantic_files(paths, project_root: Path | str) -> FrontendResult:
+    """Build only explicit source files, preserving imports outside this scope.
+
+    Relative filenames are relative to project_root.  This performs no import
+    traversal and makes no entry-reachability claim; callers select their own
+    source inventory.  IDs are the same as in a whole-project build for the same
+    root and source content.
+    """
+    root = Path(project_root).resolve()
+    if not root.is_dir():
+        raise ValueError("project_root must be an existing directory")
+    if isinstance(paths, (str, Path)):
+        raise ValueError("paths must be an explicit iterable of Python files")
+    selected = set()
+    for item in paths:
+        path = Path(item)
+        path = (root / path).resolve() if not path.is_absolute() else path.resolve()
+        if not path.is_relative_to(root):
+            raise ValueError("selected source must be within project_root")
+        if not path.is_file() or path.suffix != ".py":
+            raise ValueError("selected source must be an existing Python file")
+        selected.add(path)
+    if not selected:
+        raise ValueError("no explicit Python source files selected")
+    result = _Frontend(sorted(selected), root).build()
+    result.coverage["selection_scope"] = "explicit_files_not_reachability"
+    return result
+
+
+__all__ = ["EXCLUDED_DIRECTORIES", "FrontendResult", "build_semantic", "build_semantic_files"]
