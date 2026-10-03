@@ -13,7 +13,7 @@
     {"id": "whole_statement_fragment_membership_source_snapshot_strict_replay_and_tamper", "tests": ["tests/unit/test_source_fragments_v2.py"]},
     {"id": "closed_local_statement_binding_identity_builtin_totality_and_explicit_observer_conditions", "tests": ["tests/unit/test_local_statement_semantics_v2.py"]},
     {"id": "six_fixed_motion_obligations_positive_all_paths_and_negative_control_effect_alias_q_delta_cases", "tests": ["tests/unit/test_static_motion_ledger_v2.py"]},
-    {"id": "core_type_identity_schema4_roundtrip_and_mixed_delta_rejection", "tests": ["tests/unit/test_static_motion_codec_v2.py", "tests/unit/test_static_optimization_v2.py"]},
+    {"id": "core_type_identity_schema4_roundtrip_and_mixed_delta_rejection", "tests": ["tests/unit/test_static_motion_codec_v2.py", "tests/unit/test_static_optimization_v2.py", "tests/unit/test_region_ports_v2.py"]},
     {"id": "existing_fixed_ledger_guards_and_recompute_cannot_be_bypassed_by_new_motion", "tests": ["tests/unit/test_proof_ledger_v2.py", "tests/unit/test_proof_ledger_adversarial_v2.py"]},
     {"id": "public_query_measurement_is_nonexecuting_report_only_and_independently_replayable", "tests": ["tests/integration/test_static_motion_measurement_v2.py"]}
   ]

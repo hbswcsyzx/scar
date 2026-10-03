@@ -1,5 +1,13 @@
 # SCAR program decomposition
 
+Current architecture: [IR_DESIGN_V2.md](IR_DESIGN_V2.md). The v2 core separates
+operation definitions (SG), actual operation instances (EEG), and replaceable
+regions/deltas (OIR), joined through typed ports, versions and evidence. Data
+and control are first-class entities; Action labels are observation dimensions,
+not the only node kind or the universal optimization unit. See [STATUS.md](STATUS.md)
+for implementation and proof coverage. The `ProgramGraph` interfaces and
+examples below describe the retained v1 projection/capture path.
+
 SCAR models a program as a graph of orthogonal facts. The decomposition is
 fixed before an optimization rule is considered. A physical source line can
 produce several AST nodes and several labels; it must never be forced into one

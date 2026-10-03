@@ -1,5 +1,27 @@
 # SCAR execution model
 
+## Current architecture and implementation boundary
+
+The six dimensions below remain observation coordinates. The current v2 core
+separates Semantic Graph (operation definitions and semantic ports), Execution
+Evidence Graph (actual instances and observations), and Optimization IR
+(replaceable regions, exact deltas and proof/cost alternatives). Typed value,
+provenance, effect, source-control and correspondence records connect them.
+See [IR_DESIGN_V2.md](IR_DESIGN_V2.md) and [STATUS.md](STATUS.md).
+
+`LogicalValueID` names a lineage; `ValueVersionID` names one version;
+`ProvenanceID` records derivation inputs; `Materialization` records a physical
+representation. Python object and allocation/view identities are independent.
+Copies do not establish equal versions without evidence, and transforms do
+not become copies merely because they share a source. These are v2 entities;
+not every archived tensor or operation is already uniquely connected to them.
+
+The detailed `ProgramGraph`, `StorageVersionRegistry` and opt-in backend APIs
+below describe the retained v1 capture/runtime implementation. They are not
+the v2 authority for logical identity or automatic proof. New source-motion
+proofs use complete source fragments and fixed replayed obligations, with
+precise Q; [STATIC_MOTION.md](STATIC_MOTION.md) defines their narrow scope.
+
 SCAR records six orthogonal dimensions:
 
 * **K / Control**: source code identities, calls, loops, branches, dispatch and

@@ -1,5 +1,9 @@
 # SCAR 的职责与逻辑流程
 
+当前架构和实现范围分别见 [IR_DESIGN_V2.md](IR_DESIGN_V2.md) 与
+[STATUS.md](STATUS.md)。本阶段输出可重算的分析和精确修改指导，不修改目标源文件。
+后文明确标为 v1 的 capture/backend 接口保留兼容，不代表 v2 已连通完整自动优化。
+
 ## 1. SCAR 要解决什么问题
 
 SCAR 的职责是面向**任意真实程序执行过程**，自动发现可以避免的工作，并在证据足够时决定如何处理。目标不是把程序简单分成“计算”和“IO”，也不是针对某个模型写规则。
@@ -17,10 +21,11 @@ SCAR 的检测器是通用的。PyTorch 和 NVIDIA GPU 是 v0.1 的运行范围�
 
 ## 2. “任何代码都要分类”应该怎样理解
 
-SCAR 对程序建立两种互补的图：
+SCAR v2 对程序建立三种职责不同、通过 typed correspondence 连接的图：
 
-1. **静态图**：从源码得到 CodeID、函数、表达式、控制和数据候选，覆盖每个物理 Python 行。它回答“这里可能是什么”。
-2. **动态执行图**：从实际运行得到 InvocationID、对象、storage、逻辑版本、实际 device/stream、时间和副作用。它回答“这里实际发生了什么”。
+1. **Semantic Graph**：广义 OperationDefinition、输入输出槽、有序操作数、局部绑定和控制结构，绑定源码版本。
+2. **Execution Evidence Graph**：真实 OperationInstance、read/write、对象/版本观察、kernel、copy、sync 和资源测量。
+3. **Optimization IR**：可递归展开的替换区域、边界接口、精确 delta、Q、证明义务、成本、冲突与 fallback。
 
 静态分类不是动态事实。比如 AST 可以看出一行包含调用，但不能证明调用纯净、没有 callback、没有异常或没有隐藏写入。动态 trace 也不能看到所有未来分支。SCAR 用图把两种证据连接起来，并保留证据来源和未知状态。
 
@@ -42,7 +47,7 @@ SCAR 对程序建立两种互补的图：
 
 每个动作还必须记录 effect：`reads`、`writes`、`allocates`、`frees`、`aliases`、`escapes`、`rng_effect`、`may_raise`、`external_effect` 和 `ordering_effect`。没有证据时使用 `UNKNOWN`，不能把空列表误当作没有副作用。
 
-## 3. 六层程序模型
+## 3. 六个正交视角与独立数据身份
 
 SCAR 的内部模型是 `<K, Σ, A, R, Q, M>`：
 
@@ -60,10 +65,18 @@ SCAR 的内部模型是 `<K, Σ, A, R, Q, M>`：
 - ObjectID 是 Python 对象身份，不是数据内容身份；
 - StorageID 是底层分配/存储身份，必须考虑 view、alias 和地址复用；
 - Region 是 storage、offset、shape、stride、dtype 的几何区域；
-- LogicalVersion 表示一个逻辑数据被写到了哪个版本；
+- LogicalValueID 标识逻辑 lineage，ValueVersionID 标识其某个版本；
+- ProvenanceID 记录生成/变换的输入和状态来源，不能由内容 hash 代替；
 - 一个逻辑版本可以有 NVMe、DRAM、pinned host 和 HBM 等多个 Materialization。
 
-SCAR 不把 `Tensor._version` 当作通用正确性基础。运行时维护自己的 storage epoch/logical epoch；Torch dispatch 观察到的写入会推进 epoch，外部 buffer 写入可以通过显式 API 报告。即使外部写没有被观察，输入的轻量指纹和缓存首份精确快照仍会提供保守兜底。
+LogicalValue/version 不依赖 storage 命名；同对象可以有新版本，不同对象可以在
+有 copy provenance 证明时表示同版本。同 storage 的多个 view 保留各自 Region。
+普通 transform 通常产生新的 derived value；不同表示等价也需要明确的关系证据。
+
+SCAR 不把 `Tensor._version` 当作通用正确性基础。v2 registry 保留独立 logical
+lineage、版本和物理 materialization，foreign writes 未被闭合时仍需要验证。
+v1 runtime guard 的 storage epoch、前缀和显式完整比较只是兼容路径，不自动
+为 v2 生成跨调用 logical equality 或 identity 证明。
 
 Tensor 不一定应该保持不变。循环中的状态、优化器参数、候选 action、RNG
 和环境观测本来就可能每次迭代改变。SCAR 只把“同一个 logical version”视为
@@ -77,16 +90,15 @@ Q contract 验证。v0.1 不会把“变化变小”自动当作“可以停止�
 ## 4. 从 trace 到决策的完整流程
 
 ```text
-静态源码图 ─┐
-            ├─ CodeID/InvocationID/Σ/A/R/Q/M 合并 ─> Opportunity
-动态执行图 ─┘                                  ↓
-                                      Applicability
-                                      Legality / Guard
-                                      Cost
-                                      Backend
-                                      Validation
-                                                   ↓
-                          TRANSFORM / REJECT / UNKNOWN / KEEP
+Program → Semantic Graph
+             ↕ typed correspondence
+          Execution Evidence
+             ↓ region interfaces + provenance + evidence references
+          Optimization IR
+             ↓ fixed proof obligations / Q / guards
+          Cost-aware plan → precise modification guidance
+             ↓ later transformation/validation stage
+          Backend → layered validation → clean measurement
 ```
 
 每一个候选都必须经过以下阶段：
@@ -108,9 +120,13 @@ Q contract 验证。v0.1 不会把“变化变小”自动当作“可以停止�
 
 ## 5. 面向用户的操作/数据图
 
-底层 `ProgramGraph` 保留 K/Σ/A/R/Q/M 的全部节点，因为证明副作用和成本
-需要这些维度。它同时提供 `operation_view()` / `write_operation_json()` 的
-投影，作为更直观的化简输入：
+v2 的 OperationDefinition 可沿 children 下降，实际调用由独立 Instance 表达；
+数据是 ValueSlot/LogicalValue/Version/Materialization 的一等实体。人读的视图
+可以把它们折叠为 operation 之间的数据边；证明层必须保留完整身份与端口。
+静态定义、真实实例和优化 region 不混成同一个 Action 节点。
+
+保留的 v1 `ProgramGraph` 另提供 `operation_view()` / `write_operation_json()`
+投影，供读取旧报告：
 
 ```text
 operation(function/op) ──reads──> data(State/LogicalVersion/Region)
@@ -136,7 +152,7 @@ scar analyze trace-dir --operation-out operation.graph.json
 当前 v0.1 的候选分析同时使用完整证据图和这个 operation/data 投影：投影
 让化简目标清楚，完整图负责检查资源、合同、测量、别名和不确定性。
 
-## 6. “标准模块”是什么
+## 6. v1 opt-in backend 的“标准模块”是什么
 
 “标准模块”不是类名包含 `Linear`，也不是 `.eval()` 就等于纯函数。它是 SCAR 针对某个库版本审核过的**精确类合同**：
 
@@ -149,7 +165,7 @@ scar analyze trace-dir --operation-out operation.graph.json
 
 因此标准模块是一个可审计的 library contract，不是 LeWM 规则，也不是对任意自定义模块的猜测。自定义模块保持原执行并在报告中说明原因，未来可以通过显式 contract 扩展。
 
-## 7. 高效的 Tensor guard
+## 7. v1 高效的 Tensor guard 与 v2 证据范围
 
 SCAR 不在每次迭代保存完整 Tensor 数值。runtime reuse backend 使用两级 guard：
 
@@ -162,6 +178,9 @@ SCAR 不在每次迭代保存完整 Tensor 数值。runtime reuse backend 使用
 
 这个策略实现了“先便宜筛选，只有 shape 和前缀相同才细查”，同时没有把少量样本误当成完整正确性证明。
 
+v2 常规观察不复制 tensor 数值；exact checkpoint 独立 opt-in、受预算约束，只能
+证明该 capture 时刻的内容。历史 event 和跨层等价仍需独立连接与 guard。
+
 ## 8. 如何解释“1,465 个候选全部拒绝”
 
 早期报告中的 `candidate.decision="rejected"` 是检测器的历史字段，含义混合了“已证实不合法/不划算”和“当时信息不足”。它不能单独代表最终简化结果。
@@ -173,7 +192,11 @@ SCAR 不在每次迭代保存完整 Tensor 数值。runtime reuse backend 使用
 - `simplification_decisions` / `authoritative_dispositions`：规划器最终的 `TRANSFORM/REJECT/UNKNOWN/KEEP`；
 - `action_inventory`：程序中所有动态 Action 按 family 的覆盖和处置。
 
-在已有 LeWM trace 上，Observed 是 45,894 个动作和真实 CUDA copy/resource 记录；统一规划结果是 1,571 个 `UNKNOWN`、959 个 `REJECT`、0 个 `TRANSFORM`。这说明旧 detector 找到了重复形状，但绝大多数缺少安全证明或成本证明，不能安全自动改写；它不是说程序中不存在可避免工作，也不是 SCAR 的最终目标已经完成。
+早期 v1 planner 归档给出 1,571 个 `UNKNOWN`、959 个 `REJECT`、0 个
+`TRANSFORM`；它们不是原始 event 数。后续独立审计在既有 LeWM trace 上统计
+960 个 intervening-write blocker 和 1,568 条 evidence-gap record，分析单位不同
+不能当作同一候选总数相加。真实 trace 输入共 45,888 条记录。
+这些记录不证明 LeWM 没有可避免工作，也不表示 SCAR 已完成自动化简。
 
 ## 9. 当前 LeWM 证据边界
 
