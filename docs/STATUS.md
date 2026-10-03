@@ -1,6 +1,31 @@
 # Current evidence and remaining work
 
-## Latest autonomous acceptance: G6
+## Latest autonomous acceptance: G7.1
+
+Implementation `d5fe9cb` passed all 163 mapped G7.1 cases and 848 repository
+tests, with two existing warnings and no skips. Ordered operation semantics,
+per-use local bindings, exact typed literals, source replay and bounded builtin
+constant derivations are connected. See [G7_1_ACCEPTANCE.md](G7_1_ACCEPTANCE.md).
+
+Eight explicitly selected LeWM source files were analyzed independently:
+9,340 SG operations, 6,636 computational records, and 2,704 retained unmodeled
+operations. There are 1,116 conditional constant facts, including 89 derived
+operations beyond direct literals; these are not approved optimization counts.
+Analysis took 22.955 seconds, peak RSS 116,568 KiB. Exact implementation/input
+hashes and the 2,948,824-byte compressed report are archived. All hashes were
+rechecked during acceptance archival on 2026-10-03; this is the original
+measurement, not a new run.
+
+Required source execution and builtin/floating-environment conditions remain
+explicit and unaccepted. Independent verification ceilings now prevent an
+imported report from raising its own recomputation budget. Finalizer and mapping
+expansion counterexamples prevent stale binding proofs.
+
+The G7 parent gate still requires graph rewrite rules, a checked proof ledger,
+precise modification plans and external pressure. G7.2 proceeds autonomously;
+no target source change, LeWM rewrite or workload speedup is verified.
+
+## Previous autonomous acceptance: G6
 
 At `4451372`, all 160 G6 mapped cases and 685 repository tests passed, with
 two existing warnings and no skips. Typed composite regions retain definitions,
