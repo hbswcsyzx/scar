@@ -50,6 +50,18 @@ class ValueSlotID(Identifier):
     prefix = "slot"
 
 
+class StaticValueID(Identifier):
+    prefix = "static_value"
+
+
+class StaticBindingID(Identifier):
+    prefix = "static_binding"
+
+
+class BindingUseID(Identifier):
+    prefix = "binding_use"
+
+
 class ProvenanceID(Identifier):
     prefix = "prov"
 
@@ -141,6 +153,7 @@ class ValueVersionID:
 
 __all__ = [
     "Identifier", "PackageID", "ModuleID", "SourceAtomID", "ValueSlotID",
+    "StaticValueID", "StaticBindingID", "BindingUseID",
     "LogicalValueID", "ProvenanceID", "ObjectID",
     "StorageAllocationID", "StorageRegionID", "MaterializationID",
     "OperationDefinitionID", "OperationInstanceID", "ControlRegionID",

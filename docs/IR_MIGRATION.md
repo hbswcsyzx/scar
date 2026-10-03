@@ -2,6 +2,11 @@
 
 状态：**审查和迁移计划**。
 
+实施状态以 [STATUS.md](STATUS.md) 与逐 gate 验收报告为准。下文保留原迁移审查。
+G7.2 当前补充的是独立 source semantics overlay、静态替换及条件 import provenance；
+不把静态 binding 当动态 LogicalVersion，也不合并 SG、EEG 和 OIR。具体 schema
+与跨图关联决定见 [G7_2_DESIGN.md](G7_2_DESIGN.md)。
+
 本文件说明当前代码中哪些部分可以保留、哪些部分需要重构，以及如何在不
 破坏已有 trace 的情况下建立 Semantic Graph、Execution Evidence Graph 和
 Optimization IR。当前阶段不删除现有代码，也不实现新的 optimization backend。

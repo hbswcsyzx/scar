@@ -19,6 +19,7 @@ from scar.ir.semantics_v2 import (
     BindingStatus, BindingUse, BindingUseID, DispatchKind, ImportSpec, Opcode,
     OperandUse, OperationSemantics, PythonLiteral, SemanticGap, SourceSemanticsGraph,
     SourceSnapshot, StaticBinding, StaticBindingID, StaticValue, StaticValueID,
+    BoundaryKind, ImportForm, SemanticBoundary,
 )
 from scar.ir.v2 import OperationKind, SemanticGraph
 from scar.ir.v2.semantic import SemanticRelation
@@ -41,6 +42,7 @@ class _Block:
     kind: str
     env: dict = field(default_factory=dict)
     position: int = 0
+    candidates: dict = field(default_factory=dict)
 
     def tick(self):
         self.position += 1
@@ -64,11 +66,15 @@ class _Extractor:
         self.primary = defaultdict(list)
         self.reads, self.writes = defaultdict(set), defaultdict(set)
         self.gaps = []
+        self.boundaries = []
         self.epochs = defaultdict(int)
         self.builtin = {}  # Exact builtin *type* hints, never equality proofs.
         self.release_safe = {}  # Dropping an owned reference cannot call user finalizers.
         self.open_namespaces = set()
         self.block_serial = defaultdict(int)
+        self.modules_by_name = defaultdict(list)
+        for module in semantic.modules.values():
+            self.modules_by_name[module.name].append(module)
         self.path = None
         for atom in semantic.source_atoms.values():
             r = atom.reference
@@ -91,8 +97,14 @@ class _Extractor:
         self.block_serial[scope] += 1
         return _Block(scope, f"{scope.wire}:{tag}:{serial}", kind, dict(env or {}))
 
-    def barrier(self, block, reason, operation=None, source=None):
+    def barrier(self, block, reason, operation=None, source=None, *, kind=BoundaryKind.OPAQUE):
+        # These candidate links explain what would be available if the
+        # boundary's invalidation obligations were discharged. They never
+        # participate in G7.1 EXACT binding or builtin constant evaluation.
+        block.candidates.update(block.env)
         block.env.clear()
+        self.boundaries.append(SemanticBoundary(kind, block.scope, block.key,
+            block.tick(), reason, operation, source))
         # Source write counts cannot prove absence after code that can insert
         # arbitrary namespace entries (including objects with finalizers).
         self.open_namespaces.add(block.scope)
@@ -198,6 +210,8 @@ class _Extractor:
                 self.gap("Name use has no unique lexical slot.", operation=definition.id, source=reference)
                 return self.emit(pair, block, Opcode.OPAQUE)
             slot = next(iter(slots))
+            if self.semantic.slots[slot].name != node.id:
+                raise ValueError("Name read slot disagrees with fingerprinted source identifier")
             reaching = (block.env[slot],) if slot in block.env else ()
             binding = self.result.bindings[reaching[0]] if reaching else None
             exact = (binding is not None and binding.scope == block.scope and
@@ -205,9 +219,14 @@ class _Extractor:
                      self.semantic.slots[slot].owner == block.scope)
             uid = BindingUseID(_key("use", definition.id.wire))
             position = block.tick()
+            candidate = self.result.bindings.get(block.candidates.get(slot))
+            conditional = ((candidate.id,) if not exact and candidate is not None
+                           and (candidate.scope, candidate.block) == (block.scope, block.key)
+                           and block.kind in {"module", "function"}
+                           and self.semantic.slots[slot].owner == block.scope else ())
             self.result.uses[uid] = BindingUse(uid, definition.id, slot, block.scope,
                 block.key, position, reaching, BindingStatus.EXACT if exact else BindingStatus.UNRESOLVED,
-                reference)
+                reference, conditional_reaching=conditional)
             if not exact:
                 self.gap("Use has no unique preceding definition in this straight-line scope.",
                          operation=definition.id, use=uid, source=reference,
@@ -271,12 +290,14 @@ class _Extractor:
             receiver, index = self.expr(node.value, block), self.expr(node.slice, block)
             value = self.emit(pair, block, Opcode.INDEX, (("receiver", 0, receiver), ("index", 1, index)))
             if self.builtin.get(receiver) not in {"tuple", "list", "str", "bytes"} or self.builtin.get(index) not in {"int", "bool"}:
-                self.barrier(block, "Index dispatch is not proven builtin.", definition.id, reference)
+                self.barrier(block, "Index dispatch is not proven builtin.", definition.id, reference,
+                             kind=BoundaryKind.INDEX)
             return value
         if isinstance(node, ast.Attribute):
             receiver = self.expr(node.value, block)
             value = self.emit(pair, block, Opcode.ATTRIBUTE, (("receiver", 0, receiver),), attribute=node.attr)
-            self.barrier(block, "Attribute lookup may invoke a descriptor or lazy module attribute.", definition.id, reference)
+            self.barrier(block, "Attribute lookup may invoke a descriptor or lazy module attribute.", definition.id, reference,
+                         kind=BoundaryKind.ATTRIBUTE)
             return value
         if isinstance(node, ast.Call):
             operands = [("callee", 0, self.expr(node.func, block))]
@@ -288,7 +309,8 @@ class _Extractor:
                     self.barrier(block, "Keyword mapping expansion can mutate bindings before later arguments.",
                                  definition.id, reference)
             value = self.emit(pair, block, Opcode.CALL, operands)
-            self.barrier(block, "Opaque call may mutate accessible state or bindings.", definition.id, reference)
+            self.barrier(block, "Opaque call may mutate accessible state or bindings.", definition.id, reference,
+                         kind=BoundaryKind.CALL)
             return value
         # These expressions have path-, iteration-, suspension- or binding-
         # sensitive evaluation. Their independent children stay in isolated
@@ -315,6 +337,8 @@ class _Extractor:
             slots = self.writes.get(definition.id, set())
             if len(slots) == 1 and assigned is not None:
                 slot = next(iter(slots))
+                if self.semantic.slots[slot].name != target.id:
+                    raise ValueError("Name assignment slot disagrees with fingerprinted source identifier")
                 self.bind_slot(slot, definition.id, assigned, block, reference)
             else:
                 self.barrier(block, "Assignment has no single destination slot.", definition.id, reference)
@@ -334,13 +358,15 @@ class _Extractor:
                               self.semantic.slots[slot].direction == "input")))
         if replacing_unknown:
             self.barrier(block, "Overwriting a possibly finalizable value may mutate bindings, including the destination.",
-                         definition, reference)
+                         definition, reference, kind=BoundaryKind.REBIND)
         epoch = self.epochs[slot]
         self.epochs[slot] += 1
         binding = StaticBindingID(_key("binding", definition.wire, slot.wire, epoch))
         position = self.result.operations[definition].position
         self.result.bindings[binding] = StaticBinding(binding, slot, definition, value, block.scope,
                                                     block.key, position, epoch, reference)
+        if self.semantic.slots[slot].owner == block.scope and block.kind in {"module", "function"}:
+            block.candidates[slot] = binding
         if replacing_unknown:
             return
         if self.semantic.slots[slot].owner == block.scope and block.kind in {"module", "function"}:
@@ -356,12 +382,20 @@ class _Extractor:
                 continue
             definition, reference = pair
             self.barrier(block, "Loader, module initialization, cache and lazy export semantics are unproven.",
-                         definition.id, reference)
+                         definition.id, reference, kind=BoundaryKind.IMPORT)
+            bound_name = alias.asname or (alias.name.split(".")[0] if isinstance(node, ast.Import) else alias.name)
+            bound_module_name = (alias.name if alias.asname else alias.name.split(".")[0]) if isinstance(node, ast.Import) else None
+            bound_modules = self.modules_by_name.get(bound_module_name, ())
             spec = ImportSpec(requested=alias.name if isinstance(node, ast.Import) else node.module or "",
                               symbol=None if isinstance(node, ast.Import) else alias.name,
-                              relative_level=0 if isinstance(node, ast.Import) else node.level)
+                              relative_level=0 if isinstance(node, ast.Import) else node.level,
+                              form=ImportForm.MODULE if isinstance(node, ast.Import) else ImportForm.FROM,
+                              bound_name=bound_name, asname=alias.asname,
+                              bound_module=bound_modules[0].id if len(bound_modules) == 1 else None)
             value = self.emit(pair, block, Opcode.IMPORT, import_spec=spec)
             for slot in self.writes.get(definition.id, ()):
+                if self.semantic.slots[slot].name != bound_name:
+                    raise ValueError("Import binding slot disagrees with fingerprinted source alias")
                 self.bind_slot(slot, definition.id, value, block, reference)
 
     def function(self, node, block):
@@ -402,19 +436,19 @@ class _Extractor:
                 self.expr(node.test, block)
                 for name, body in (("if", node.body), ("else", node.orelse)):
                     self.statements(body, self.block(block.scope, block.kind, name, block.env))
-                self.barrier(block, "Conditional reaching-definition merge is unresolved.")
+                self.barrier(block, "Conditional reaching-definition merge is unresolved.", kind=BoundaryKind.CONTROL)
             elif isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
                 test_block = self.block(block.scope, block.kind, "loop-test") if isinstance(node, ast.While) else block
                 self.expr(node.test if isinstance(node, ast.While) else node.iter, test_block)
                 for name, body in (("loop", node.body), ("loop-else", node.orelse)):
                     self.statements(body, self.block(block.scope, block.kind, name))
-                self.barrier(block, "Loop-carried bindings and zero-trip behavior are unresolved.")
+                self.barrier(block, "Loop-carried bindings and zero-trip behavior are unresolved.", kind=BoundaryKind.CONTROL)
             elif isinstance(node, (ast.Try, getattr(ast, "TryStar", ast.Try))):
                 for name, body in (("try", node.body), ("try-else", node.orelse), ("finally", node.finalbody)):
                     self.statements(body, self.block(block.scope, block.kind, name))
                 for handler in node.handlers:
                     self.statements(handler.body, self.block(block.scope, block.kind, "except"))
-                self.barrier(block, "Exceptional control and reaching-definition merge are unresolved.")
+                self.barrier(block, "Exceptional control and reaching-definition merge are unresolved.", kind=BoundaryKind.CONTROL)
             elif isinstance(node, (ast.Pass, ast.Global, ast.Nonlocal)):
                 continue
             elif isinstance(node, ast.ClassDef):
@@ -475,6 +509,7 @@ class _Extractor:
                          required_fact="Keep original SG operation; add semantics before treating its result or effects as known.")
         self.result.unmodeled_operations = tuple(sorted(unmodeled, key=lambda item: item.wire))
         self.result.gaps = tuple(self.gaps)
+        self.result.boundaries = tuple(self.boundaries)
         self.result.assert_valid(self.semantic)
         return self.result
 

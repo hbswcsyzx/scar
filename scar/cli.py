@@ -19,7 +19,6 @@ from scar.ir import (ProgramGraph, add_correspondences, from_project, from_sourc
                      link_events, summarize_correspondence)
 from scar.planner import plan, plan_candidates, select_candidates
 from scar.trace.reader import load
-from scar.workloads.micro import optimize
 
 
 def _trace(args) -> int:
@@ -319,6 +318,13 @@ def main(argv=None) -> int:
     semantics_v2.add_argument("--max-int-bits", type=int, default=4096)
     semantics_v2.add_argument("--out", required=True, help="JSON report, optionally ending in .gz")
     semantics_v2.set_defaults(func=_semantics_v2)
+    import_values_v2 = sub.add_parser("import-values-v2", help="follow typed local import/export value paths without executing or deleting imports")
+    import_values_v2.add_argument("source")
+    import_values_v2.add_argument("--project-root")
+    import_values_v2.add_argument("--max-nodes", type=int, default=10000)
+    import_values_v2.add_argument("--max-int-bits", type=int, default=4096)
+    import_values_v2.add_argument("--out", required=True, help="JSON report, optionally ending in .gz")
+    import_values_v2.set_defaults(func=_import_values_v2)
     audit = sub.add_parser("audit-rejections",
                            help="explain proof and evidence blockers in an analysis report")
     audit.add_argument("report", help="JSON report produced by scar analyze")
@@ -336,9 +342,15 @@ def main(argv=None) -> int:
     micro.add_argument("--repetitions", type=int, default=5)
     micro.add_argument("--warmup", type=int, default=1)
     micro.add_argument("--work-factor", type=int, default=1)
-    micro.set_defaults(func=lambda a: (print(json.dumps(optimize(a.loops, a.repetitions, a.warmup, a.work_factor), indent=2)) or 0))
+    micro.set_defaults(func=_optimize_micro)
     args = parser.parse_args(argv)
     return args.func(args)
+
+
+def _optimize_micro(args) -> int:
+    from scar.workloads.micro import optimize
+    print(json.dumps(optimize(args.loops, args.repetitions, args.warmup, args.work_factor), indent=2))
+    return 0
 
 
 def _write_document(path, document):
@@ -408,6 +420,18 @@ def _semantics_v2(args) -> int:
                               budget=EvaluationBudget(max_nodes=args.max_nodes, max_int_bits=args.max_int_bits))
     output = _compressed_document(args.out, report)
     print(json.dumps({"out": str(output), "summary": report["summary"]}))
+    return 0
+
+
+def _import_values_v2(args) -> int:
+    from scar.analysis.constants_v2 import EvaluationBudget
+    from scar.analysis.import_report_v2 import report_import_values
+    report = report_import_values(args.source, project_root=args.project_root,
+        budget=EvaluationBudget(max_nodes=args.max_nodes, max_int_bits=args.max_int_bits))
+    output = _compressed_document(args.out, report)
+    summary = {key: value for key, value in report["summary"].items() if key != "targets"}
+    summary["target_count"] = len(report["summary"].get("targets", ()))
+    print(json.dumps({"out": str(output), "summary": summary, "decision": report["decision"]}))
     return 0
 
 

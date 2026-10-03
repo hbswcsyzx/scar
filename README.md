@@ -99,6 +99,12 @@ python -m scar.cli regions-v2 artifacts/traces/demo --view execution \
 python -m scar.cli semantics-v2 path/to/program.py \
   --out artifacts/reports/source-semantics.json.gz
 
+# Follow a generic import/re-export/attribute/index value path without execution.
+# Value substitution conditions do not authorize deleting initialization effects.
+python -m scar.cli import-values-v2 testcases/static_imports/program.py \
+  --project-root testcases/static_imports \
+  --out artifacts/reports/import-values.json.gz
+
 # Optionally join a source file or whole Python project to runtime events by
 # exact path/line and loaded function span.
 python -m scar.cli analyze artifacts/traces/demo \

@@ -24,6 +24,9 @@ from .ids import (
     LogicalValueID,
     ResourceID,
     SourceAtomID,
+    StaticBindingID,
+    StaticValueID,
+    BindingUseID,
     StorageAllocationID,
     StorageRegionID,
     ValueSlotID,
@@ -111,12 +114,16 @@ from .optimization import (
     RegionPort,
     RegionPortKind,
     ResidualEffect,
+    StaticBindingInfo,
+    StaticValueInfo,
+    StaticValueSubstitution,
     TransformDelta,
     TransformKind,
     ValidationRequest,
     ValuePattern,
     ValueSubstitution,
 )
+from ..literals import LiteralKind, PythonLiteral
 from .schemas import IRBundle, canonical_json, optimization_context
 from .codec import bundle_from_dict, bundle_from_json
 
@@ -125,7 +132,8 @@ __all__ = [
     "MaterializationID", "MeasurementID", "ModuleID", "ObjectID",
     "OperationDefinitionID", "OperationInstanceID", "OptimizationRegionID",
     "PackageID", "PlanAlternativeID", "PlanID", "ProvenanceID",
-    "LogicalValueID", "ResourceID", "SourceAtomID", "StorageAllocationID",
+    "LogicalValueID", "ResourceID", "SourceAtomID", "StaticValueID",
+    "StaticBindingID", "BindingUseID", "StorageAllocationID",
     "StorageRegionID", "ValueSlotID", "ValueVersionID", "BindingRelation",
     "EquivalenceClaim", "LogicalValue", "Materialization", "ObjectBinding",
     "ProvenanceRecord", "ProvenanceRelation", "StorageAllocation",
@@ -146,7 +154,9 @@ __all__ = [
     "PlanAlternative", "PlanDisposition", "PlanInstruction", "PlanSelection",
     "RegionGranularity", "RegionMove", "RegionPort", "RegionPortKind",
     "ResidualEffect", "TransformDelta", "TransformKind", "ValidationRequest",
-    "ValuePattern", "ValueSubstitution", "IRBundle", "canonical_json",
+    "ValuePattern", "ValueSubstitution", "StaticValueSubstitution",
+    "StaticValueInfo", "StaticBindingInfo", "LiteralKind", "PythonLiteral",
+    "IRBundle", "canonical_json",
     "optimization_context",
     "bundle_from_dict", "bundle_from_json",
 ]

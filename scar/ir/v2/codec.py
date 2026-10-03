@@ -65,6 +65,8 @@ from .ids import (
     ProvenanceID,
     ResourceID,
     SourceAtomID,
+    StaticBindingID,
+    StaticValueID,
     StorageAllocationID,
     StorageRegionID,
     ValueSlotID,
@@ -88,12 +90,14 @@ from .optimization import (
     RegionPort,
     RegionPortKind,
     ResidualEffect,
+    StaticValueSubstitution,
     TransformDelta,
     TransformKind,
     ValidationRequest,
     ValuePattern,
     ValueSubstitution,
 )
+from ..literals import LiteralKind, PythonLiteral
 from .semantic import (
     ControlRegion,
     ModuleDefinition,
@@ -211,6 +215,8 @@ def _record(data: Any, cls: type, path: str) -> None:
     if not isinstance(data, dict):
         raise ValueError(f"{path}: expected {cls.__name__} object")
     members, hints = _record_schema(cls)
+    if cls is TransformDelta and "static_substitutions" not in data:
+        raise ValueError(f"{path}: missing required field static_substitutions")
     unknown = set(data) - {item.name for item in members}
     if unknown:
         raise ValueError(f"{path}: unknown fields {sorted(unknown)}")
@@ -331,6 +337,15 @@ def _source(data: dict[str, Any]) -> SourceReference:
         _required_id(data["atom_id"], SourceAtomID), data["path"],
         data["fingerprint"], data["start_line"], data["end_line"],
         data.get("start_column", 0), data.get("end_column"))
+
+
+def _python_literal(data: dict[str, Any]) -> PythonLiteral:
+    if not isinstance(data, dict) or set(data) != {"kind", "payload", "items"}:
+        raise ValueError("python_literal: expected exact kind/payload/items fields")
+    _record(data, PythonLiteral, "python_literal")
+    return PythonLiteral(
+        LiteralKind(data["kind"]), data.get("payload"),
+        tuple(_python_literal(item) for item in data.get("items", ())))
 
 
 def _effect_set(data: dict[str, Any]) -> EffectSet:
@@ -647,6 +662,42 @@ class _OptimizationDocumentV1:
     SCHEMA_VERSION = 1
 
 
+@dataclass(frozen=True)
+class _TransformDeltaV2:
+    """Exact transform-delta fields before static substitutions were added."""
+
+    removed_definitions: tuple[OperationDefinitionID, ...] = ()
+    removed_instances: tuple[OperationInstanceID, ...] = ()
+    substitutions: tuple[ValueSubstitution, ...] = ()
+    moves: tuple[RegionMove, ...] = ()
+    added_operations: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class _PlanAlternativeV2:
+    """Plan alternative with the strict schema-2 delta shape."""
+
+    id: PlanAlternativeID
+    region: OptimizationRegionID
+    label: str
+    transform: TransformKind
+    delta: _TransformDeltaV2
+    original: bool = False
+    proofs: tuple[ProofClaim, ...] = ()
+    guards: tuple[GuardSpec, ...] = ()
+    invalidations: tuple[InvalidationSpec, ...] = ()
+    residual_effects: tuple[ResidualEffect, ...] = ()
+    cost_request: CostRequest | None = None
+    validation_request: ValidationRequest | None = None
+    instructions: tuple[PlanInstruction, ...] = ()
+    fallback: PlanAlternativeID | None = None
+
+
+class _OptimizationDocumentV2:
+    SCHEMA = OptimizationGraph.SCHEMA
+    SCHEMA_VERSION = 2
+
+
 def _upgrade_optimization_document_v1(data):
     """Validate legacy wire shape, then add empty new fields without mutation.
 
@@ -659,18 +710,38 @@ def _upgrade_optimization_document_v1(data):
         return data
     _document(data, _OptimizationDocumentV1, {
         "ports": _RegionPortV1, "regions": OptimizationRegion,
-        "alternatives": PlanAlternative, "plans": PlanSelection,
+        "alternatives": _PlanAlternativeV2, "plans": PlanSelection,
     })
     if any(item["kind"] == RegionPortKind.EFFECT.value for item in data.get("ports", ())):
         raise ValueError("schema_version 1 has no effect port kind")
-    return {**data, "schema_version": OptimizationGraph.SCHEMA_VERSION,
+    return {**data, "schema_version": _OptimizationDocumentV2.SCHEMA_VERSION,
             "ports": [{**item, "slot": None, "effect": None, "operation": None}
                       for item in data.get("ports", ())]}
+
+
+def _upgrade_optimization_document_v2(data):
+    """Add the empty schema-3 static-substitution collection to strict v2 data."""
+    if (not isinstance(data, dict) or data.get("schema") != OptimizationGraph.SCHEMA
+            or type(data.get("schema_version")) is not int or data["schema_version"] != 2):
+        return data
+    _document(data, _OptimizationDocumentV2, {
+        "ports": RegionPort, "regions": OptimizationRegion,
+        "alternatives": _PlanAlternativeV2, "plans": PlanSelection,
+    })
+    return {
+        **data,
+        "schema_version": OptimizationGraph.SCHEMA_VERSION,
+        "alternatives": [
+            {**item, "delta": {**item["delta"], "static_substitutions": []}}
+            for item in data.get("alternatives", ())
+        ],
+    }
 
 
 @_decoder
 def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
     data = _upgrade_optimization_document_v1(data)
+    data = _upgrade_optimization_document_v2(data)
     _document(data, OptimizationGraph, {
         "ports": RegionPort, "regions": OptimizationRegion,
         "alternatives": PlanAlternative, "plans": PlanSelection,
@@ -723,7 +794,13 @@ def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
                 _required_id(value["from_control"], ControlRegionID),
                 _required_id(value["to_control"], ControlRegionID))
                 for value in delta_data.get("moves", ())),
-            tuple(delta_data.get("added_operations", ())))
+            tuple(delta_data.get("added_operations", ())),
+            tuple(StaticValueSubstitution(
+                _required_id(value["static_value"], StaticValueID),
+                _required_id(value["operation"], OperationDefinitionID),
+                _source(value["source"]), _python_literal(value["literal"]),
+                _id(value.get("binding"), StaticBindingID))
+                for value in delta_data.get("static_substitutions", ())))
         cost_data = item.get("cost_request")
         validation_data = item.get("validation_request")
         node = PlanAlternative(
@@ -772,21 +849,61 @@ def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
     return graph
 
 
+class _BundleDocumentV1:
+    SCHEMA = "scar.ir.v2.bundle"
+    SCHEMA_VERSION = 1
+
+
+def _upgrade_bundle_document_v1(data):
+    """Add the optional static-semantics graph to legacy bundle-v1 data."""
+    if (not isinstance(data, dict) or data.get("schema") != _BundleDocumentV1.SCHEMA
+            or type(data.get("schema_version")) is not int or data["schema_version"] != 1):
+        return data
+    _document(data, _BundleDocumentV1, {}, extra_fields=(
+        "semantic", "evidence", "values", "correspondence", "optimization"))
+    for required in ("semantic", "evidence", "values"):
+        if required not in data:
+            raise ValueError(f"bundle schema_version 1 missing field {required}")
+    optimization = data.get("optimization")
+    if optimization is not None and (
+            not isinstance(optimization, dict)
+            or optimization.get("schema") != OptimizationGraph.SCHEMA
+            or type(optimization.get("schema_version")) is not int
+            or optimization["schema_version"] not in (1, 2)):
+        raise ValueError("bundle schema_version 1 cannot contain a newer optimization document")
+    return {**data, "schema_version": 2, "source_semantics": None}
+
+
 @_decoder
 def bundle_from_dict(data: dict[str, Any]):
     from .schemas import IRBundle, optimization_context
 
+    data = _upgrade_bundle_document_v1(data)
     _document(data, IRBundle, {}, extra_fields=(
-        "semantic", "evidence", "values", "correspondence", "optimization"))
+        "semantic", "evidence", "values", "correspondence", "optimization",
+        "source_semantics"))
+    for required in ("semantic", "evidence", "values"):
+        if required not in data:
+            raise ValueError(f"bundle missing field {required}")
+    if "source_semantics" not in data:
+        raise ValueError("bundle missing field source_semantics")
     semantic = semantic_from_dict(data["semantic"])
     evidence = evidence_from_dict(data["evidence"])
     values = values_from_dict(data["values"])
+    source_semantics = None
+    if data.get("source_semantics") is not None:
+        from ..semantics_v2 import SourceSemanticsGraph
+
+        source_semantics = SourceSemanticsGraph.from_dict(
+            data["source_semantics"], semantic)
     correspondence = (correspondence_from_dict(data["correspondence"])
                       if data.get("correspondence") is not None else None)
     optimization = (optimization_from_dict(
-        data["optimization"], optimization_context(semantic, evidence, values))
+        data["optimization"], optimization_context(
+            semantic, evidence, values, source_semantics))
         if data.get("optimization") is not None else None)
-    bundle = IRBundle(semantic, evidence, values, correspondence, optimization)
+    bundle = IRBundle(semantic, evidence, values, correspondence, optimization,
+                      source_semantics)
     bundle.assert_valid()
     return bundle
 

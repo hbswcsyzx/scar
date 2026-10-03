@@ -17,109 +17,21 @@ from dataclasses import dataclass, field
 from enum import Enum
 import json
 import re
-import struct
 from typing import ClassVar
 
 from .record_codec import decode, encode, loads
+from .literals import LiteralKind, PythonLiteral
 from .v2._validation import cycle_errors, mapping_errors, record_errors
 from .v2.common import SourceReference
-from .v2.ids import Identifier, ModuleID, OperationDefinitionID, ValueSlotID
+from .v2.ids import (
+    BindingUseID,
+    ModuleID,
+    OperationDefinitionID,
+    StaticBindingID,
+    StaticValueID,
+    ValueSlotID,
+)
 from .v2.semantic import SemanticGraph
-
-
-class StaticValueID(Identifier):
-    prefix = "static_value"
-
-
-class StaticBindingID(Identifier):
-    prefix = "static_binding"
-
-
-class BindingUseID(Identifier):
-    prefix = "binding_use"
-
-
-class LiteralKind(str, Enum):
-    NONE = "none"
-    BOOL = "bool"
-    INT = "int"
-    FLOAT64 = "float64"
-    STR = "str"
-    BYTES = "bytes"
-    TUPLE = "tuple"
-    ELLIPSIS = "ellipsis"
-
-
-@dataclass(frozen=True, slots=True)
-class PythonLiteral:
-    """Exact builtin type/content, including float bits; never identity proof.
-
-    Integers use canonical decimal strings and bytes use lowercase hexadecimal.
-    Floats use big-endian IEEE754 binary64 hex, preserving signed zero/NaN bits.
-    Mutable list/dict/set constructions are operation recipes, never literals.
-    """
-    kind: LiteralKind
-    payload: str | bool | None = None
-    items: tuple[PythonLiteral, ...] = ()
-
-    def __post_init__(self) -> None:
-        if not isinstance(self.kind, LiteralKind):
-            raise TypeError("literal kind must be LiteralKind")
-        if type(self.items) is not tuple or any(type(x) is not PythonLiteral for x in self.items):
-            raise TypeError("literal items must be a tuple of PythonLiteral")
-        if self.kind is not LiteralKind.TUPLE and self.items:
-            raise ValueError("only tuple literals contain items")
-        if self.kind in (LiteralKind.NONE, LiteralKind.ELLIPSIS, LiteralKind.TUPLE):
-            if self.payload is not None:
-                raise ValueError("this literal kind has no scalar payload")
-        elif self.kind is LiteralKind.BOOL:
-            if type(self.payload) is not bool:
-                raise ValueError("bool literal requires a bool payload")
-        elif type(self.payload) is not str:
-            raise ValueError("literal requires a string payload")
-        elif self.kind is LiteralKind.INT and not re.fullmatch(r"0|-?[1-9][0-9]*", self.payload):
-            raise ValueError("integer payload must be canonical decimal")
-        elif self.kind is LiteralKind.FLOAT64 and not re.fullmatch(r"[0-9a-f]{16}", self.payload):
-            raise ValueError("float64 payload must be 16 lowercase hexadecimal digits")
-        elif self.kind is LiteralKind.BYTES and not re.fullmatch(r"(?:[0-9a-f]{2})*", self.payload):
-            raise ValueError("bytes payload must be canonical hexadecimal")
-
-    @classmethod
-    def from_python(cls, value) -> PythonLiteral:
-        if value is None:
-            return cls(LiteralKind.NONE)
-        if value is Ellipsis:
-            return cls(LiteralKind.ELLIPSIS)
-        kind = type(value)
-        if kind is bool:
-            return cls(LiteralKind.BOOL, value)
-        if kind is int:
-            return cls(LiteralKind.INT, str(value))
-        if kind is float:
-            return cls(LiteralKind.FLOAT64, struct.pack(">d", value).hex())
-        if kind is str:
-            return cls(LiteralKind.STR, value)
-        if kind is bytes:
-            return cls(LiteralKind.BYTES, value.hex())
-        if kind is tuple:
-            return cls(LiteralKind.TUPLE, items=tuple(cls.from_python(item) for item in value))
-        raise TypeError(f"unsupported immutable literal type: {kind.__name__}")
-
-    def to_python(self):
-        self.__post_init__()
-        if self.kind is LiteralKind.NONE:
-            return None
-        if self.kind is LiteralKind.ELLIPSIS:
-            return Ellipsis
-        if self.kind is LiteralKind.TUPLE:
-            return tuple(item.to_python() for item in self.items)
-        if self.kind is LiteralKind.INT:
-            return int(self.payload)
-        if self.kind is LiteralKind.FLOAT64:
-            return struct.unpack(">d", bytes.fromhex(self.payload))[0]
-        if self.kind is LiteralKind.BYTES:
-            return bytes.fromhex(self.payload)
-        return self.payload
 
 
 class Opcode(str, Enum):
@@ -172,6 +84,21 @@ class BindingStatus(str, Enum):
     UNRESOLVED = "unresolved"
 
 
+class ImportForm(str, Enum):
+    MODULE = "module"
+    FROM = "from"
+
+
+class BoundaryKind(str, Enum):
+    IMPORT = "import"
+    ATTRIBUTE = "attribute"
+    INDEX = "index"
+    CALL = "call"
+    CONTROL = "control"
+    REBIND = "rebind"
+    OPAQUE = "opaque"
+
+
 class SourceExecutionPrecondition(str, Enum):
     """Required contracts for this source abstraction, never accepted facts.
 
@@ -222,6 +149,10 @@ class ImportSpec:
     module: ModuleID | None = None
     symbol: str | None = None
     relative_level: int = 0
+    form: ImportForm | None = None
+    bound_name: str | None = None
+    asname: str | None = None
+    bound_module: ModuleID | None = None
 
     def __post_init__(self) -> None:
         _nonnegative(self.relative_level, "relative level")
@@ -229,6 +160,17 @@ class ImportSpec:
             raise ValueError("import requires a requested module or relative level")
         if self.symbol == "":
             raise ValueError("import symbol must be nonempty when present")
+        expected = ImportForm.FROM if self.symbol is not None else ImportForm.MODULE
+        if self.form is None:
+            object.__setattr__(self, "form", expected)
+        elif self.form is not expected:
+            raise ValueError("import form and symbol disagree")
+        if self.form is ImportForm.MODULE and self.relative_level:
+            raise ValueError("module import cannot be relative")
+        if self.bound_name == "" or self.asname == "":
+            raise ValueError("bound name and alias must be nonempty when present")
+        if self.form is ImportForm.FROM and self.bound_module is not None:
+            raise ValueError("from import binds an export, not the module")
 
 
 @dataclass(frozen=True, slots=True)
@@ -311,6 +253,7 @@ class BindingUse:
     reaching: tuple[StaticBindingID, ...]
     status: BindingStatus
     source: SourceReference
+    conditional_reaching: tuple[StaticBindingID, ...] = ()
 
     def __post_init__(self) -> None:
         if not self.block:
@@ -322,6 +265,27 @@ class BindingUse:
             raise ValueError("EXACT use requires one reaching binding")
         if self.status is BindingStatus.AMBIGUOUS and len(self.reaching) < 2:
             raise ValueError("AMBIGUOUS use requires at least two reaching bindings")
+        if len(set(self.conditional_reaching)) != len(self.conditional_reaching):
+            raise ValueError("duplicate conditional reaching binding")
+        if self.status is BindingStatus.EXACT and self.conditional_reaching:
+            raise ValueError("EXACT cannot carry conditional bindings")
+
+
+@dataclass(frozen=True, slots=True)
+class SemanticBoundary:
+    """Potential invalidation; retaining a candidate is never proof it survived."""
+    kind: BoundaryKind
+    scope: OperationDefinitionID
+    block: str
+    position: int
+    reason: str
+    operation: OperationDefinitionID | None = None
+    source: SourceReference | None = None
+
+    def __post_init__(self) -> None:
+        if not self.block or not self.reason:
+            raise ValueError("boundary block and reason are required")
+        _nonnegative(self.position, "boundary position")
 
 
 @dataclass(frozen=True, slots=True)
@@ -347,9 +311,10 @@ class SourceSemanticsGraph:
     gaps: tuple[SemanticGap, ...] = ()
     unmodeled_operations: tuple[OperationDefinitionID, ...] = ()
     required_preconditions: tuple[SourceExecutionPrecondition, ...] = tuple(SourceExecutionPrecondition)
+    boundaries: tuple[SemanticBoundary, ...] = ()
 
     SCHEMA: ClassVar[str] = "scar.source-semantics.v2"
-    SCHEMA_VERSION: ClassVar[int] = 1
+    SCHEMA_VERSION: ClassVar[int] = 2
 
     def validate(self, semantic: SemanticGraph | None = None) -> dict:
         errors = record_errors(self, SourceSemanticsGraph, "source_semantics")
@@ -408,6 +373,9 @@ class SourceSemanticsGraph:
             if (op.import_spec is not None and op.import_spec.module is not None
                     and semantic is not None and op.import_spec.module not in semantic.modules):
                 errors.append(f"{label}: missing semantic imported module")
+            if (op.import_spec is not None and op.import_spec.bound_module is not None
+                    and semantic is not None and op.import_spec.bound_module not in semantic.modules):
+                errors.append(f"{label}: missing semantic bound module")
             if op.result is not None:
                 value = self.values.get(op.result)
                 if value is None or value.producer != op.operation or value.scope != op.scope:
@@ -473,13 +441,20 @@ class SourceSemanticsGraph:
             op = self.operations.get(use.operation)
             if op is None or op.binding_use != use.id or (op.scope, op.block, op.position, op.source) != (use.scope, use.block, use.position, use.source):
                 errors.append(f"{label}: use/operation location mismatch")
-            for identifier in use.reaching:
+            for identifier in (*use.reaching, *use.conditional_reaching):
                 binding = self.bindings.get(identifier)
                 if binding is None:
                     errors.append(f"{label}: missing reaching binding")
                     continue
                 if binding.slot != use.slot:
                     errors.append(f"{label}: reaching binding slot mismatch")
+                if identifier in use.conditional_reaching:
+                    if (binding.scope, binding.block) != (use.scope, use.block) or binding.position > use.position:
+                        errors.append(f"{label}: conditional binding requires same-scope/block nonfuture definition")
+                    key = (use.slot, use.scope, use.block)
+                    count = bisect_right(history_positions.get(key, ()), use.position)
+                    if not count or histories[key][count - 1].id != binding.id:
+                        errors.append(f"{label}: conditional binding is not latest preceding definition")
                 if use.status is BindingStatus.EXACT:
                     if (binding.scope, binding.block) != (use.scope, use.block) or binding.position > use.position:
                         errors.append(f"{label}: EXACT requires same-scope/block nonfuture binding")
@@ -502,6 +477,20 @@ class SourceSemanticsGraph:
                 errors.append("semantic gap references missing binding use")
             if gap.source is not None:
                 source(gap.source, "semantic gap")
+        boundary_keys = set()
+        for boundary in self.boundaries:
+            definition(boundary.scope, "semantic boundary")
+            if boundary.operation is not None:
+                definition(boundary.operation, "semantic boundary")
+                op = self.operations.get(boundary.operation)
+                if op is not None and boundary.source is not None and op.source != boundary.source:
+                    errors.append("boundary operation scope/source mismatch")
+            if boundary.source is not None:
+                source(boundary.source, "semantic boundary")
+            key = (boundary.scope, boundary.block, boundary.position)
+            if key in boundary_keys:
+                errors.append("duplicate semantic boundary position")
+            boundary_keys.add(key)
         errors.extend(cycle_errors(arcs, "static value dependency"))
         return self._report(errors, semantic is not None)
 
@@ -510,7 +499,7 @@ class SourceSemanticsGraph:
                 "semantic_references_checked": semantic_checked,
                 "source_replay_checked": False,
                 "counts": {name: len(getattr(self, name)) if isinstance(getattr(self, name), (dict, tuple)) else None
-                           for name in ("sources", "operations", "values", "bindings", "uses", "gaps", "unmodeled_operations")}}
+                           for name in ("sources", "operations", "values", "bindings", "uses", "gaps", "unmodeled_operations", "boundaries")}}
 
     def assert_valid(self, semantic: SemanticGraph | None = None) -> dict:
         result = self.validate(semantic)
@@ -528,11 +517,36 @@ class SourceSemanticsGraph:
                                 key=lambda item: json.dumps(item, sort_keys=True))
         result["unmodeled_operations"] = [encode(item) for item in sorted(self.unmodeled_operations, key=str)]
         result["required_preconditions"] = sorted(item.value for item in self.required_preconditions)
+        result["boundaries"] = [encode(item) for item in sorted(self.boundaries,
+            key=lambda item: (item.scope.wire, item.block, item.position))]
         return result
 
     @classmethod
     def from_dict(cls, document: dict, semantic: SemanticGraph | None = None) -> SourceSemanticsGraph:
-        names = ("sources", "operations", "values", "bindings", "uses", "gaps", "unmodeled_operations", "required_preconditions")
+        names = ("sources", "operations", "values", "bindings", "uses", "gaps", "unmodeled_operations", "required_preconditions", "boundaries")
+        if type(document) is dict and type(document.get("schema_version")) is int and document["schema_version"] == 1:
+            old_names = set(names) - {"boundaries"}
+            if set(document) != {"schema", "schema_version", *old_names} or document.get("schema") != cls.SCHEMA:
+                raise ValueError("legacy source semantics document fields mismatch")
+            # Decode the old record shape strictly before adding new syntax
+            # fields; a migrated graph still needs AST replay to attest source.
+            from copy import deepcopy
+            document = deepcopy(document)
+            for name in old_names:
+                if type(document[name]) is not list:
+                    raise ValueError(f"legacy {name} must be an array")
+            for use in document["uses"]:
+                if type(use) is not dict or set(use) != {"id", "operation", "slot", "scope", "block", "position", "reaching", "status", "source"}:
+                    raise ValueError("legacy binding use fields mismatch")
+                use["conditional_reaching"] = []
+            for op in document["operations"]:
+                spec = op.get("import_spec") if type(op) is dict else None
+                if spec is not None:
+                    if type(spec) is not dict or set(spec) != {"requested", "module", "symbol", "relative_level"}:
+                        raise ValueError("legacy import spec fields mismatch")
+                    spec.update(form="from" if spec["symbol"] is not None else "module",
+                                bound_name=None, asname=None, bound_module=None)
+            document.update(schema_version=cls.SCHEMA_VERSION, boundaries=[])
         if type(document) is not dict or set(document) != {"schema", "schema_version", *names}:
             raise ValueError("source semantics document fields mismatch")
         if document["schema"] != cls.SCHEMA or type(document["schema_version"]) is not int or document["schema_version"] != cls.SCHEMA_VERSION:
@@ -555,6 +569,7 @@ class SourceSemanticsGraph:
         result.gaps = decode(tuple[SemanticGap, ...], document["gaps"])
         result.unmodeled_operations = decode(tuple[OperationDefinitionID, ...], document["unmodeled_operations"])
         result.required_preconditions = decode(tuple[SourceExecutionPrecondition, ...], document["required_preconditions"])
+        result.boundaries = decode(tuple[SemanticBoundary, ...], document["boundaries"])
         result.assert_valid(semantic)
         return result
 
@@ -572,4 +587,5 @@ StaticSemanticsGraph = SourceSemanticsGraph
 __all__ = ["StaticValueID", "StaticBindingID", "BindingUseID", "LiteralKind",
            "PythonLiteral", "Opcode", "PythonOpcode", "DispatchKind", "BindingStatus", "SourceExecutionPrecondition",
            "SourceSnapshot", "OperandUse", "ImportSpec", "OperationSemantics", "StaticValue",
-           "StaticBinding", "BindingUse", "SemanticGap", "SourceSemanticsGraph", "StaticSemanticsGraph"]
+           "StaticBinding", "BindingUse", "SemanticGap", "SourceSemanticsGraph", "StaticSemanticsGraph",
+           "ImportForm", "BoundaryKind", "SemanticBoundary"]

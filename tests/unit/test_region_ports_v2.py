@@ -94,7 +94,7 @@ def test_semantic_and_effect_ports_roundtrip_without_fabricating_dynamic_values(
     assert graph.context.value_slots == frozenset((slot,))
     before_values = ir.canonical_json(bundle.values)
     document = bundle.to_dict()
-    assert document["optimization"]["schema_version"] == 2
+    assert document["optimization"]["schema_version"] == 3
     restored = ir.IRBundle.from_json(ir.canonical_json(document))
     assert ir.canonical_json(restored) == ir.canonical_json(bundle)
     assert ir.canonical_json(restored.values) == before_values
@@ -135,6 +135,8 @@ def _legacy_document():
     document = bundle.to_dict()
     legacy = document["optimization"]
     legacy["schema_version"] = 1
+    for alternative in legacy["alternatives"]:
+        alternative["delta"].pop("static_substitutions")
     for port in legacy["ports"]:
         del port["slot"]
         del port["effect"]
@@ -147,7 +149,7 @@ def test_schema_one_reader_explicitly_upgrades_only_legacy_fields_without_mutati
     before = deepcopy(document)
     bundle = ir.IRBundle.from_dict(document)
     assert document == before
-    assert bundle.optimization.to_dict()["schema_version"] == 2
+    assert bundle.optimization.to_dict()["schema_version"] == 3
     assert bundle.optimization.ports["input"].slot is None
     assert bundle.optimization.ports["input"].effect is None
     assert bundle.optimization.ports["input"].value is not None

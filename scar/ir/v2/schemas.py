@@ -3,13 +3,21 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import json
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from .correspondence import CorrespondenceGraph
 from .evidence import EvidenceGraph, EvidenceNodeKind
-from .optimization import OptimizationContext, OptimizationGraph
+from .optimization import (
+    OptimizationContext,
+    OptimizationGraph,
+    StaticBindingInfo,
+    StaticValueInfo,
+)
 from .semantic import SemanticGraph
 from .values import ValueGraph
+
+if TYPE_CHECKING:
+    from ..semantics_v2 import SourceSemanticsGraph
 
 
 def canonical_json(document: Any) -> str:
@@ -23,8 +31,26 @@ def optimization_context(
     semantic: SemanticGraph,
     evidence: EvidenceGraph,
     values: ValueGraph,
+    source_semantics: SourceSemanticsGraph | None = None,
 ) -> OptimizationContext:
     """Create the exact external-reference universe accepted by an OIR graph."""
+    static_values = {}
+    static_bindings = {}
+    if source_semantics is not None:
+        # Delayed import avoids loading semantics_v2 while the v2 package is
+        # still initializing (semantics_v2 itself uses v2 validation helpers).
+        from ..semantics_v2 import SourceSemanticsGraph
+
+        if type(source_semantics) is not SourceSemanticsGraph:
+            raise TypeError("source_semantics must be SourceSemanticsGraph or None")
+        static_values = {
+            identifier: StaticValueInfo(value.producer, value.source, value.external)
+            for identifier, value in source_semantics.values.items()
+        }
+        static_bindings = {
+            identifier: StaticBindingInfo(binding.value, binding.definition, binding.source)
+            for identifier, binding in source_semantics.bindings.items()
+        }
     return OptimizationContext(
         definitions=frozenset(semantic.definitions),
         instances=frozenset(evidence.instances),
@@ -38,6 +64,8 @@ def optimization_context(
         source_atoms=frozenset(semantic.source_atoms),
         measurements=frozenset(evidence.measurements),
         value_slots=frozenset(semantic.slots),
+        static_values=static_values,
+        static_bindings=static_bindings,
     )
 
 
@@ -50,9 +78,10 @@ class IRBundle:
     values: ValueGraph
     correspondence: CorrespondenceGraph | None = None
     optimization: OptimizationGraph | None = None
+    source_semantics: SourceSemanticsGraph | None = None
 
     SCHEMA = "scar.ir.v2.bundle"
-    SCHEMA_VERSION = 1
+    SCHEMA_VERSION = 2
 
     def validate(self) -> dict[str, Any]:
         reports = {
@@ -62,6 +91,16 @@ class IRBundle:
         }
         if self.optimization is not None:
             reports["optimization"] = self.optimization.validate()
+        if self.source_semantics is not None:
+            from ..semantics_v2 import SourceSemanticsGraph
+
+            if type(self.source_semantics) is SourceSemanticsGraph:
+                reports["source_semantics"] = self.source_semantics.validate(self.semantic)
+            else:
+                reports["source_semantics"] = {
+                    "schema": "scar.source-semantics.v2", "valid": False,
+                    "errors": ["source_semantics must be SourceSemanticsGraph"],
+                }
         if self.correspondence is not None:
             reports["correspondence"] = self.correspondence.validate()
         errors: list[str] = []
@@ -120,9 +159,10 @@ class IRBundle:
             errors.extend(self.correspondence.validate_references(
                 self.semantic, self.evidence, self.values))
         if self.optimization is not None:
-            expected = optimization_context(self.semantic, self.evidence, self.values)
+            expected = optimization_context(
+                self.semantic, self.evidence, self.values, self.source_semantics)
             if self.optimization.context != expected:
-                errors.append("optimization context does not match SG/EEG/ValueGraph")
+                errors.append("optimization context does not match bundle graphs")
             for port in self.optimization.ports.values():
                 if not port.value:
                     continue
@@ -132,6 +172,37 @@ class IRBundle:
                             and materialization.value_version not in port.value.versions):
                         errors.append(f"port {port.port_id} materialization version mismatch")
             for alternative in self.optimization.alternatives.values():
+                if self.source_semantics is not None:
+                    static_values = self.source_semantics.values
+                    static_operations = self.source_semantics.operations
+                    static_bindings = self.source_semantics.bindings
+                    for substitution in alternative.delta.static_substitutions:
+                        static_value = static_values.get(substitution.static_value)
+                        if static_value is None:
+                            errors.append(
+                                f"static substitution references unknown static value "
+                                f"{substitution.static_value.wire}")
+                            continue
+                        operation = static_operations.get(substitution.operation)
+                        if (static_value.external or static_value.producer != substitution.operation
+                                or static_value.source != substitution.source):
+                            errors.append(
+                                f"static substitution {substitution.static_value.wire} "
+                                "does not match its static value producer/source")
+                        if (operation is None or operation.result != substitution.static_value
+                                or operation.source != substitution.source):
+                            errors.append(
+                                f"static substitution {substitution.static_value.wire} "
+                                "does not match source operation semantics")
+                        if substitution.binding is not None:
+                            binding = static_bindings.get(substitution.binding)
+                            if (binding is None
+                                    or binding.value != substitution.static_value
+                                    or binding.definition != substitution.operation
+                                    or binding.source != substitution.source):
+                                errors.append(
+                                    f"static substitution {substitution.static_value.wire} "
+                                    "does not match replacement binding")
                 for instruction in alternative.instructions:
                     if instruction.source is None:
                         continue
@@ -165,6 +236,8 @@ class IRBundle:
             if self.correspondence is not None else None,
             "optimization": self.optimization.to_dict()
             if self.optimization is not None else None,
+            "source_semantics": self.source_semantics.to_dict()
+            if self.source_semantics is not None else None,
             "validation": self.validate(),
         }
 

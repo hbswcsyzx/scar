@@ -85,3 +85,20 @@ scar semantics-v2 /project/program.py --max-int-bits 4096 --max-nodes 10000 \
 验收由开发代理运行 `gates/g7_1.json`，保存报告并提交、推送。下一子节点 G7.2
 连接四类差量规则与固定证明义务；完成 G7.3 修改指导、G7.4 外部压力后，才可能
 通过 G7 总门。
+
+## G7.2 的连接扩展（实施中）
+
+静态 ID 移到 `ir/v2/ids.py`，精确字面量移到独立的 `ir/literals.py`；旧导入路径
+继续 re-export 同一个类型。source overlay schema 2 添加 SemanticBoundary 与
+conditional_reaching，区分精确绑定和跨边界的来源候选。ImportSpec 保存 form、
+alias、本地名称及 root/完整模块的实际绑定区别。
+
+IRBundle schema 2 可携带独立 source_semantics。OIR schema 3 的
+StaticValueSubstitution 校验 producer/source/binding/region 的完整关联，
+不借用动态版本 ID。旧版本严格迁移，只增加空信息，不补造来源或合法性。
+
+`scar import-values-v2` 沿本地 source 候选、re-export、attribute、immutable index
+推导有条件的值路径。报告保存 SG、overlay、逐跳来源和具体前提；不执行目标。
+字面量本身的“替换为相同字面量”不是工作化简，不能作为修改指导凑数。
+文件树选择与可达 import closure 分开报告。具体接口和证明范围见
+[G7_2_DESIGN.md](G7_2_DESIGN.md)。

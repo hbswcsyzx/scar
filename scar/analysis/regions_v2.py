@@ -197,7 +197,8 @@ class RegionInventory:
             raise ValueError("execution region cannot claim an ALL_PATHS scope")
         self.scope = scope
         self.scopes = {scope: observation_scope}
-        self.graph = OptimizationGraph(optimization_context(bundle.semantic, bundle.evidence, bundle.values))
+        self.graph = OptimizationGraph(optimization_context(
+            bundle.semantic, bundle.evidence, bundle.values, bundle.source_semantics))
         self.constructions: dict[OptimizationRegionID, RegionConstruction] = {}
         self._nodes = bundle.semantic.definitions if self.view is RegionView.SEMANTIC else bundle.evidence.instances
         self._children = defaultdict(list)
@@ -494,7 +495,8 @@ class RegionInventory:
             errors.append("inventory scope key/identity mismatch")
         if errors:
             return {"valid": False, "errors": errors}
-        if self.graph.context != optimization_context(self.bundle.semantic, self.bundle.evidence, self.bundle.values):
+        if self.graph.context != optimization_context(
+                self.bundle.semantic, self.bundle.evidence, self.bundle.values, self.bundle.source_semantics):
             errors.append("inventory context no longer matches its source graphs")
         if set(self.graph.regions) != set(self.constructions):
             errors.append("construction/optimization region identity mismatch")
@@ -658,7 +660,8 @@ class RegionInventory:
             raise ValueError("scope does not match supplied effect ledger")
         result.scopes = {item.id: item for item in scopes}
         from scar.ir.v2.codec import optimization_from_dict
-        result.graph = optimization_from_dict(document["graph"], optimization_context(bundle.semantic, bundle.evidence, bundle.values))
+        result.graph = optimization_from_dict(document["graph"], optimization_context(
+            bundle.semantic, bundle.evidence, bundle.values, bundle.source_semantics))
         if type(document["constructions"]) is not list:
             raise ValueError("constructions must be an array")
         for payload in document["constructions"]:

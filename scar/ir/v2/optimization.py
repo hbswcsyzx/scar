@@ -13,6 +13,7 @@ import math
 from .common import ProofClaim, ProofStatus, SourceReference
 from .contracts import EffectTarget, EffectTargetKind
 from ._validation import mapping_errors, record_errors, cycle_errors
+from ..literals import PythonLiteral
 from .ids import (
     ContractID,
     ControlRegionID,
@@ -28,6 +29,8 @@ from .ids import (
     ProvenanceID,
     ResourceID,
     SourceAtomID,
+    StaticBindingID,
+    StaticValueID,
     ValueVersionID,
     ValueSlotID,
 )
@@ -233,6 +236,38 @@ class ValueSubstitution:
 
 
 @dataclass(frozen=True, slots=True)
+class StaticValueSubstitution:
+    """A source-level rewrite; optional binding names the binding being rewritten."""
+
+    static_value: StaticValueID
+    operation: OperationDefinitionID
+    source: SourceReference
+    literal: PythonLiteral
+    binding: StaticBindingID | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.static_value, StaticValueID):
+            raise TypeError("static_value must be StaticValueID")
+        if not isinstance(self.operation, OperationDefinitionID):
+            raise TypeError("operation must be OperationDefinitionID")
+        if not isinstance(self.source, SourceReference):
+            raise TypeError("source must be SourceReference")
+        if not isinstance(self.literal, PythonLiteral):
+            raise TypeError("literal must be PythonLiteral")
+        if self.binding is not None and not isinstance(self.binding, StaticBindingID):
+            raise TypeError("binding must be StaticBindingID or None")
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "static_value": self.static_value.as_dict(),
+            "operation": self.operation.as_dict(),
+            "source": self.source.as_dict(),
+            "literal": self.literal.as_dict(),
+            "binding": self.binding.as_dict() if self.binding else None,
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class RegionMove:
     region: OptimizationRegionID
     from_control: ControlRegionID
@@ -251,11 +286,13 @@ class TransformDelta:
     substitutions: tuple[ValueSubstitution, ...] = ()
     moves: tuple[RegionMove, ...] = ()
     added_operations: tuple[str, ...] = ()
+    static_substitutions: tuple[StaticValueSubstitution, ...] = ()
 
     @property
     def is_empty(self) -> bool:
         return not any((self.removed_definitions, self.removed_instances,
-                        self.substitutions, self.moves, self.added_operations))
+                        self.substitutions, self.moves, self.added_operations,
+                        self.static_substitutions))
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -266,6 +303,8 @@ class TransformDelta:
             "substitutions": [item.as_dict() for item in self.substitutions],
             "moves": [item.as_dict() for item in self.moves],
             "added_operations": sorted(self.added_operations),
+            "static_substitutions": [item.as_dict()
+                                      for item in self.static_substitutions],
         }
 
 
@@ -473,6 +512,28 @@ class PlanSelection:
 
 
 @dataclass(frozen=True, slots=True)
+class StaticValueInfo:
+    """Static value facts needed to join an OIR proposal to its source model."""
+
+    producer: OperationDefinitionID | None
+    source: SourceReference
+    external: bool
+
+    def __post_init__(self) -> None:
+        if self.external != (self.producer is None):
+            raise ValueError("external static values have no producer")
+
+
+@dataclass(frozen=True, slots=True)
+class StaticBindingInfo:
+    """The value, definition and span selected by a static binding."""
+
+    value: StaticValueID
+    definition: OperationDefinitionID
+    source: SourceReference
+
+
+@dataclass(frozen=True, slots=True)
 class OptimizationContext:
     definitions: frozenset[OperationDefinitionID] = frozenset()
     instances: frozenset[OperationInstanceID] = frozenset()
@@ -486,13 +547,15 @@ class OptimizationContext:
     source_atoms: frozenset[SourceAtomID] = frozenset()
     measurements: frozenset[MeasurementID] = frozenset()
     value_slots: frozenset[ValueSlotID] = frozenset()
+    static_values: dict[StaticValueID, StaticValueInfo] = field(default_factory=dict)
+    static_bindings: dict[StaticBindingID, StaticBindingInfo] = field(default_factory=dict)
 
 
 class OptimizationGraph:
     """Validated report-only replacement regions and alternatives."""
 
     SCHEMA = "scar.ir.v2.optimization"
-    SCHEMA_VERSION = 2
+    SCHEMA_VERSION = 3
 
     def __init__(self, context: OptimizationContext) -> None:
         self.context = context
@@ -653,6 +716,43 @@ class OptimizationGraph:
             if (substitution.replacement_version is not None
                     and substitution.replacement_version not in self.context.value_versions):
                 raise ValueError("substitution replacement version is unknown")
+        substituted_static_values = set()
+        for substitution in delta.static_substitutions:
+            if substitution.static_value in substituted_static_values:
+                raise ValueError(
+                    f"duplicate static value substitution {substitution.static_value.wire}")
+            substituted_static_values.add(substitution.static_value)
+            static_value = self.context.static_values.get(substitution.static_value)
+            if static_value is None:
+                raise ValueError(
+                    f"substitution references unknown static value {substitution.static_value.wire}")
+            if static_value.external or static_value.producer is None:
+                raise ValueError("external static values cannot be substituted")
+            if static_value.producer != substitution.operation:
+                raise ValueError("static substitution operation does not match value producer")
+            if static_value.source != substitution.source:
+                raise ValueError("static substitution source does not match value producer span")
+            if substitution.operation not in self.context.definitions:
+                raise ValueError("static substitution references unknown operation")
+            if substitution.operation not in region.definitions:
+                raise ValueError("static substitution operation is outside target region boundary")
+            if substitution.source.atom_id not in self.context.source_atoms:
+                raise ValueError("static substitution references unknown source atom")
+            if substitution.source.atom_id not in region.source_atoms:
+                raise ValueError("static substitution source is outside target region boundary")
+            if substitution.binding is not None:
+                binding = self.context.static_bindings.get(substitution.binding)
+                if binding is None:
+                    raise ValueError(
+                        f"static substitution references unknown binding {substitution.binding.wire}")
+                if binding.value != substitution.static_value:
+                    raise ValueError("static substitution binding refers to another value")
+                if binding.definition != substitution.operation:
+                    raise ValueError("static substitution binding definition does not match operation")
+                if binding.source != substitution.source:
+                    raise ValueError("static substitution binding source does not match source span")
+                if binding.definition not in region.definitions:
+                    raise ValueError("static substitution binding is outside target region boundary")
         for move in delta.moves:
             if move.region not in self.regions:
                 raise ValueError(f"move references unknown region {move.region.wire}")
