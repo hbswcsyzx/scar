@@ -286,6 +286,38 @@ class _Extractor:
             if not safe:
                 self.barrier(block, "Unary/truth dispatch is not proven builtin.", definition.id, reference)
             return value
+        if isinstance(node, ast.Compare):
+            if (len(node.ops) == 1 and len(node.comparators) == 1
+                    and type(node.ops[0]) in {ast.Is, ast.IsNot}):
+                left = self.expr(node.left, block)
+                right = self.expr(node.comparators[0], block)
+                opcode = Opcode.IS if type(node.ops[0]) is ast.Is else Opcode.IS_NOT
+                # Python identity comparison has no user dispatch. This rule
+                # covers only the primitive; operand evaluation happened above
+                # and may itself call user code or have arbitrary effects.
+                return self.emit(pair, block, opcode,
+                    (("left", 0, left), ("right", 1, right)), builtin="bool")
+
+            # Equality, ordering, membership and chained comparison have
+            # user-dispatch and/or conditional evaluation semantics. Keep the
+            # expression opaque and isolate its possible operands; never call
+            # __eq__ (or another user comparison method) during extraction.
+            operands = []
+            children = (node.left, *node.comparators)
+            for index, child in enumerate(children):
+                nested = self.block(block.scope, block.kind, "unsupported-comparison-operand")
+                operands.append(("possible_operand", index, self.expr(child, nested)))
+            if len(node.ops) > 1:
+                reason = ("Unsupported comparison (chained): later operands are conditionally "
+                          "evaluated, and comparison operators may dispatch to user code.")
+            else:
+                reason = ("Unsupported comparison (non-identity): equality, membership and "
+                          "ordering may dispatch to user code.")
+            value = self.emit(pair, block, Opcode.OPAQUE, operands)
+            self.barrier(block, reason, definition.id, reference,
+                         kind=(BoundaryKind.COMPARISON_SHORT_CIRCUIT if len(node.ops) > 1
+                               else BoundaryKind.COMPARISON_DISPATCH))
+            return value
         if isinstance(node, ast.Subscript):
             receiver, index = self.expr(node.value, block), self.expr(node.slice, block)
             value = self.emit(pair, block, Opcode.INDEX, (("receiver", 0, receiver), ("index", 1, index)))

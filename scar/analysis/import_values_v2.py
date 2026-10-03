@@ -1210,6 +1210,8 @@ class _Resolver:
                 sm.BoundaryKind.CALL: (ImportConditionKind.CALL_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
                 sm.BoundaryKind.CONTROL: (ImportConditionKind.CONTROL_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
                 sm.BoundaryKind.OPAQUE: (ImportConditionKind.OPAQUE_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
+                sm.BoundaryKind.COMPARISON_DISPATCH: (ImportConditionKind.OPAQUE_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
+                sm.BoundaryKind.COMPARISON_SHORT_CIRCUIT: (ImportConditionKind.CONTROL_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
             }
             kind, status = kind_map[boundary.kind]
             result.append(self._condition(kind, status, boundary.reason,
@@ -1249,6 +1251,8 @@ class _Resolver:
                 sm.BoundaryKind.CALL: (ImportConditionKind.CALL_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
                 sm.BoundaryKind.CONTROL: (ImportConditionKind.CONTROL_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
                 sm.BoundaryKind.OPAQUE: (ImportConditionKind.OPAQUE_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
+                sm.BoundaryKind.COMPARISON_DISPATCH: (ImportConditionKind.OPAQUE_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
+                sm.BoundaryKind.COMPARISON_SHORT_CIRCUIT: (ImportConditionKind.CONTROL_BOUNDARY, ImportConditionStatus.SOURCE_BLOCKER),
             }
             kind, status = mapping[boundary.kind]
             conditions.append(self._condition(kind, status, boundary.reason,

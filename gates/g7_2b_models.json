@@ -1,0 +1,20 @@
+{
+  "gate": "G7.2b-models",
+  "scope": "G7.2b Step 1 only: typed invocation-slot connections, source-replayed control/insertion models and fixed identity primitive semantics. This foundation gate does not accept G7.2b positive REUSE/MOTION or parent G7.",
+  "limitations": [
+    "Formal ports, actual reads, object/storage identity and logical versions remain distinct; an interface is not complete hidden-state or consumer closure.",
+    "READ records are one sample per distinct slot, not a history of every read within a composite call. Registry guards describe the current event, not every earlier event.",
+    "The current provenance registry has no Python object-only bool output representation; tensor storage is never fabricated for that purpose.",
+    "Structured control-flow is bounded syntax evidence. Unsupported exception, context manager, iteration, suspension or class initialization behavior remains explicit; structural candidates do not authorize MOVE.",
+    "A primitive identity certificate covers the is/is not operator itself and excludes operand evaluation, enclosing function effects and optimization legality.",
+    "Q/runtime/debug/resource boundaries are required conditions, not accepted facts. REUSE/MOTION positive ledger proofs, guards/fallback, precise deltas and cost decisions remain pending.",
+    "Source analysis and measurements do not execute or rewrite the target and are not workload acceleration evidence."
+  ],
+  "criteria": [
+    {"id": "invocation_formal_actual_slot_registry_interval_scope_and_current_guard_join", "tests": ["tests/unit/test_invocation_bindings_v2.py", "tests/unit/test_frontend_read_interfaces_v2.py"]},
+    {"id": "source_replayed_control_insertion_zero_trip_exception_and_query_boundaries", "tests": ["tests/unit/test_control_flow_v2.py"]},
+    {"id": "fixed_identity_primitive_semantics_excludes_operand_dispatch_and_rejects_stale_forged_documents", "tests": ["tests/unit/test_primitive_semantics_v2.py"]},
+    {"id": "new_comparison_boundaries_are_preserved_by_existing_import_analysis", "tests": ["tests/unit/test_comparison_import_boundaries_v2.py"]},
+    {"id": "public_nonexecuting_proof_models_roundtrip_source_invalidation_and_no_gpu_startup", "tests": ["tests/integration/test_source_proof_models_cli_v2.py"]}
+  ]
+}

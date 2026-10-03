@@ -46,6 +46,8 @@ class Opcode(str, Enum):
     NEG = "neg"
     INVERT = "invert"
     NOT = "not"
+    IS = "is"
+    IS_NOT = "is_not"
     ADD = "add"
     SUB = "sub"
     MUL = "mul"
@@ -95,6 +97,8 @@ class BoundaryKind(str, Enum):
     INDEX = "index"
     CALL = "call"
     CONTROL = "control"
+    COMPARISON_DISPATCH = "comparison_dispatch"
+    COMPARISON_SHORT_CIRCUIT = "comparison_short_circuit"
     REBIND = "rebind"
     OPAQUE = "opaque"
 

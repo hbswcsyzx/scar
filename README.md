@@ -105,6 +105,11 @@ python -m scar.cli import-values-v2 testcases/static_imports/program.py \
   --project-root testcases/static_imports \
   --out artifacts/reports/import-values.json.gz
 
+# Build separate source control/insertion and primitive identity models.
+# These are proof inputs; no REUSE/MOTION legality or rewrite is approved here.
+python -m scar.cli proof-models-v2 testcases/proof_models/program.py \
+  --out artifacts/reports/proof-models.json.gz
+
 # Optionally join a source file or whole Python project to runtime events by
 # exact path/line and loaded function span.
 python -m scar.cli analyze artifacts/traces/demo \

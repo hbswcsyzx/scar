@@ -142,6 +142,10 @@ class OperationDefinition:
         for members, expected, label in typed_groups:
             if any(not isinstance(item, expected) for item in members):
                 raise TypeError(f"operation {label} references must use {expected.__name__}")
+        for role in ("input_slots", "output_slots", "state_slots"):
+            members = getattr(self, role)
+            if len(set(members)) != len(members):
+                raise ValueError(f"operation {role} must not repeat a formal slot")
         if self.parent_id is not None and not isinstance(self.parent_id, OperationDefinitionID):
             raise TypeError("parent_id must be OperationDefinitionID")
         if self.control_region is not None and not isinstance(self.control_region, ControlRegionID):

@@ -325,6 +325,11 @@ def main(argv=None) -> int:
     import_values_v2.add_argument("--max-int-bits", type=int, default=4096)
     import_values_v2.add_argument("--out", required=True, help="JSON report, optionally ending in .gz")
     import_values_v2.set_defaults(func=_import_values_v2)
+    proof_models = sub.add_parser("proof-models-v2", help="build source control and primitive proof models without approving rewrites")
+    proof_models.add_argument("source")
+    proof_models.add_argument("--project-root")
+    proof_models.add_argument("--out", required=True, help="JSON report, optionally ending in .gz")
+    proof_models.set_defaults(func=_proof_models_v2)
     audit = sub.add_parser("audit-rejections",
                            help="explain proof and evidence blockers in an analysis report")
     audit.add_argument("report", help="JSON report produced by scar analyze")
@@ -432,6 +437,18 @@ def _import_values_v2(args) -> int:
     summary = {key: value for key, value in report["summary"].items() if key != "targets"}
     summary["target_count"] = len(report["summary"].get("targets", ()))
     print(json.dumps({"out": str(output), "summary": summary, "decision": report["decision"]}))
+    return 0
+
+
+def _proof_models_v2(args) -> int:
+    from scar.analysis.proof_models_report_v2 import report_source_proof_models
+    result = report_source_proof_models(Path(args.source).resolve(), project_root=args.project_root)
+    output = _compressed_document(args.out, result)
+    summary = {**result["summary"], "primitive_semantics": {
+        key: value for key, value in result["summary"]["primitive_semantics"].items()
+        if key not in {"certificates", "gaps"}}}
+    print(json.dumps({"report": str(output), "summary": summary,
+                      "decision": result["decision"]}))
     return 0
 
 

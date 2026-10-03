@@ -1,6 +1,6 @@
 # G7.2b：先补证明所需实体，再打开正向 REUSE / MOTION
 
-状态：**规划完成，尚未验收**。依据 `603819d` 的代码和三个 Luna max 子代理的
+状态：**Step 1 已实现，正在独立验收；G7.2b 尚未验收**。依据 `603819d` 的代码和三个 Luna max 子代理的
 独立只读审查。G7.2a 已归档；本阶段不添加 backend，不改目标源文件。
 
 ## 1. 为什么当前两个家族全部拒绝
@@ -29,6 +29,9 @@ NOT_YET_SUPPORTED。它们缺少的不是一个“批准”开关：
 1. invocation slot overlay：独立 typed record，不把 metadata/role 推猜为已观察
    slot。检查完整 slot 清单、instance definition、registry 的实际 binding interval、
    version/materialization/object、scope/clock 与 evidence，保留缺项状态。
+   definition.input_slots 是本操作拥有的 formal 接口；READS_SLOT 指向实际读取的
+   源槽，可能属于另一操作。两者不能混填。overlay 用单独 READ role 连接实际
+   读取，精确核对 READS_SLOT；有序/重复操作数仍由 source overlay 表达。
 2. source control-flow overlay：source replay 后构造有限 Python AST 控制骨架，
    entry/exit、顺序、分支和循环路径分开。语句可抛异常时保留异常连接/未解析 handler
    缺口；unsupported construct 不落成普通顺序边。插入点绑定实际 suite 和 statement。
@@ -38,6 +41,10 @@ NOT_YET_SUPPORTED。它们缺少的不是一个“批准”开关：
 
 本 step 的测试只验结构、源码重算和有效性查询，不宣称正向 REUSE/MOTION 已成立。
 overlay 与 SG/EEG/value graph 并列，不因“有这张图”就成为优化许可。
+`gates/g7_2b_models.json` 单独检查这些模型输入；它不代替下面的正向证明验收。
+`proof-models-v2` 保存控制图、精确 source insertion anchor 和原语证书，不输出
+优化审批。Python bool/object-only 输出仍需非 tensor 的真实 materialization 模型；
+当前 registry 的 tensor region 不能为正例伪造该输出。
 
 ### Step 2 — 差量、义务与正向证明
 
