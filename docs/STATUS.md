@@ -1,6 +1,23 @@
 # Current evidence and remaining work
 
-## Latest autonomous acceptance: G7.2a
+## Latest autonomous acceptance: G7.2b Step 1 models
+
+Implementation `c7f68ce` passed 55 mapped gate cases and 995 repository tests
+(two existing warnings, no skips). Typed invocation-to-slot bindings, separate
+source control/insertion graphs and fixed identity primitive semantics now
+provide proof inputs. See [G7_2B_MODELS_ACCEPTANCE.md](G7_2B_MODELS_ACCEPTANCE.md).
+
+The external CEM source produced 11 lexical scopes, 420 control nodes, 514
+edges, 245 insertion points and seven body/backedge/zero-exit paths. It retains
+24 control gaps and one operator-only identity certificate. Analysis took
+13.901 seconds (14.684 including write), current executable VmHWM 76,948 KiB.
+Strict decoding and current source replays passed; LeWM remains unchanged.
+
+This accepts Step 1 foundations only. Positive REUSE/MOTION, exact source
+deltas, object-only identity evidence and full G7.2b acceptance remain pending.
+There is no selected LeWM rewrite or verified workload acceleration.
+
+## Previous autonomous acceptance: G7.2a
 
 Implementation `141390e` plus measurement fix `603819d` passed 162 mapped
 cases and 940 repository tests (two existing warnings, no skips). Static

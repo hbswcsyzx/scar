@@ -1,7 +1,9 @@
 # G7.2b：先补证明所需实体，再打开正向 REUSE / MOTION
 
-状态：**Step 1 已实现，正在独立验收；G7.2b 尚未验收**。依据 `603819d` 的代码和三个 Luna max 子代理的
+状态：**Step 1 模型基础已验收；G7.2b 正向证明尚未验收**。依据 `603819d` 的代码和三个 Luna max 子代理的
 独立只读审查。G7.2a 已归档；本阶段不添加 backend，不改目标源文件。
+Step 1 的实现、55 项 gate、995 项回归和外部源实测见
+[G7_2B_MODELS_ACCEPTANCE.md](G7_2B_MODELS_ACCEPTANCE.md)。继续执行 Step 2。
 
 ## 1. 为什么当前两个家族全部拒绝
 

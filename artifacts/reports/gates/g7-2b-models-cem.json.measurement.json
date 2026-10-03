@@ -1,0 +1,176 @@
+{
+  "analysis_seconds": 13.901190640870482,
+  "decision": {
+    "applied": false,
+    "cost_status": "PENDING",
+    "legality_status": "NOT_EVALUATED",
+    "selection_status": "NOT_SELECTED"
+  },
+  "executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "peak_rss_kib": 76948,
+  "peak_rss_source": "linux_proc_self_VmHWM",
+  "project_root": null,
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "recorded_utc": "2026-10-03T15:26:28.858776+00:00",
+  "report": "/home/zyf/AAA/scar/artifacts/reports/gates/g7-2b-models-cem.json.gz",
+  "report_bytes": 741873,
+  "report_sha256": "b131bf7b243f42c9704b376d716961ee71471bc5afc1ae412eba047cd9e22315",
+  "revision": "c7f68ce2474a3d995c410465def12ee19c86f48d",
+  "schema": "scar.source-proof-models-measurement",
+  "schema_version": 1,
+  "scope": "One SCAR source model analysis and report write, not target execution, optimization legality or speedup.",
+  "seconds_including_write": 14.683521203231066,
+  "source": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/solver/cem.py",
+  "source_fingerprints": {
+    "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/solver/cem.py": "sha256:a6662e7f1f2c6ecaf0a8527255d531aa05ed583339aabdf2798d0206382ef51b"
+  },
+  "status": "Observed",
+  "summary": {
+    "control_flow": {
+      "edge_kinds": {
+        "exception_propagation": 24,
+        "if_false": 5,
+        "if_true": 5,
+        "loop_backedge": 7,
+        "loop_body": 7,
+        "loop_else": 7,
+        "loop_zero_exit": 7,
+        "may_raise": 105,
+        "return": 7,
+        "sequence": 338,
+        "unknown_continuation": 2
+      },
+      "edges": 514,
+      "gap_kinds": {
+        "branch_feasibility": 5,
+        "class_namespace": 2,
+        "deferred_scope": 9,
+        "try_semantics": 1,
+        "user_iteration": 7
+      },
+      "gaps": 24,
+      "insertions": 245,
+      "nodes": 420,
+      "schema": "scar.source-control-flow.v2",
+      "schema_version": 1,
+      "scopes": 11,
+      "sources": 1,
+      "status": "CONSTRUCTION_ONLY",
+      "suites": 35,
+      "unsupported_reasons": {
+        "Class-body execution and custom namespace semantics are not modeled as a suite.": 1,
+        "Class-body execution and custom namespace semantics are not modeled.": 1,
+        "Function execution is deferred; no call edge is inferred from its declaration.": 9,
+        "Iterator construction/next may run user code, raise, or have side effects.": 7,
+        "Predicate truth is not evaluated; both branches remain possible, including literal True/False.": 5,
+        "Try/except/else/finally dispatch and exception state are not modeled; continuation is unknown.": 1
+      }
+    },
+    "files": 1,
+    "primitive_semantics": {
+      "certificate_count": 1,
+      "certificates": [
+        {
+          "coverage": "OPERATOR_ONLY",
+          "effects": [
+            "NO_AUTOGRAD_EDGE",
+            "NO_RNG_ACCESS",
+            "NO_USER_DISPATCH",
+            "NO_WRITES"
+          ],
+          "inputs": [
+            {
+              "index": 0,
+              "role": "left",
+              "value": "static_value:f5027e2ecf7a12fc00256185b4b35ac6"
+            },
+            {
+              "index": 1,
+              "role": "right",
+              "value": "static_value:2dafa0434e100339aa5aabbb5630bb7d"
+            }
+          ],
+          "opcode": "is",
+          "operation": "opdef:op:0cf092b80dc7064ff75f2351",
+          "output_type": "BOOL",
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:ecf2e0e10447efc266a8c9ec",
+              "wire": "source:atom:ecf2e0e10447efc266a8c9ec"
+            },
+            "end_column": 30,
+            "end_line": 104,
+            "fingerprint": "sha256:a6662e7f1f2c6ecaf0a8527255d531aa05ed583339aabdf2798d0206382ef51b",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/solver/cem.py",
+            "start_column": 15,
+            "start_line": 104
+          }
+        }
+      ],
+      "gap_count": 4,
+      "gaps": [
+        {
+          "kind": "BLOCKED_COMPARISON",
+          "operation": "opdef:op:1890eed44cab4762630f3fd9",
+          "reason": "Unsupported comparison (non-identity): equality, membership and ordering may dispatch to user code.",
+          "required_fact": "Model comparison dispatch and its exact result semantics without executing user code."
+        },
+        {
+          "kind": "BLOCKED_COMPARISON",
+          "operation": "opdef:op:2e814b699f84f421d0aab804",
+          "reason": "Unsupported comparison (non-identity): equality, membership and ordering may dispatch to user code.",
+          "required_fact": "Model comparison dispatch and its exact result semantics without executing user code."
+        },
+        {
+          "kind": "BLOCKED_COMPARISON",
+          "operation": "opdef:op:caa5e5b9098dba47830a68a8",
+          "reason": "Unsupported comparison (non-identity): equality, membership and ordering may dispatch to user code.",
+          "required_fact": "Model comparison dispatch and its exact result semantics without executing user code."
+        },
+        {
+          "kind": "BLOCKED_COMPARISON",
+          "operation": "opdef:op:ffbeb6c20c7e25053ee33d2e",
+          "reason": "Unsupported comparison (non-identity): equality, membership and ordering may dispatch to user code.",
+          "required_fact": "Model comparison dispatch and its exact result semantics without executing user code."
+        }
+      ],
+      "observation_boundaries": [
+        "DEBUGGER_TRACING",
+        "FRAME_TRACING",
+        "RESOURCE_OBSERVATION",
+        "EXCEPTION_OBSERVATION"
+      ],
+      "rule_id": "python.identity_comparison",
+      "rule_version": "scar.primitive-semantics.v1",
+      "runtime_requirements": [
+        "TARGET_PYTHON_IDENTITY_SEMANTICS_MATCH"
+      ],
+      "runtime_scope": {
+        "implementation": "cpython",
+        "version": [
+          3,
+          14,
+          7
+        ]
+      },
+      "schema": "scar.primitive-semantics",
+      "schema_version": 1,
+      "semantic_digest": "29d2d121e47efd7678b706975a5a1d5650cdfb3769e2c4147a9fc584be51a06c",
+      "source_preconditions": [
+        "fresh_module_namespace",
+        "no_external_namespace_mutation",
+        "standard_function_locals"
+      ],
+      "source_replay": "VALID",
+      "source_semantics_digest": "e75ca9acb16f2eaaeb2c03d1a17ce175e71e755079cb77f1c26f266e7d18dd04",
+      "target_count": 5,
+      "usage": {
+        "nodes": 5,
+        "output_bytes": 5930,
+        "steps": 7,
+        "work": 7
+      }
+    }
+  }
+}

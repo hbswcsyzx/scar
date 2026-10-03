@@ -12,8 +12,11 @@ the local package use `PYTHONPATH=. python scripts/<name>.py`, after activating
 use `/proc/self/status` VmHWM for the current executable and disclose getrusage
 separately, because the latter can retain a launcher's pre-exec high-water mark.
 
-The minimum quality gate is `python -m pytest -q` followed by a trace of a
-real workload. Reports must separate `Observed`, `Inferred`, `Proposed`,
+The minimum quality gate is `python -m pytest -q` and the phase's mapped gate.
+Runtime collector/backend changes also require a real workload trace; source-only
+model changes require fixed source replay and external source pressure. They do
+not need to rerun target execution merely to report source facts.
+Reports must separate `Observed`, `Inferred`, `Proposed`,
 `Implemented`, `Verified`, and `Rejected` claims. A performance result with no
 wall-clock improvement is recorded as `not profitable` and does not become an
 automatic transformation.

@@ -1,0 +1,225 @@
+{
+  "analysis_seconds": 1.1521462849341333,
+  "decision": {
+    "applied": false,
+    "cost_status": "PENDING",
+    "legality_status": "NOT_EVALUATED",
+    "selection_status": "NOT_SELECTED"
+  },
+  "executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "peak_rss_kib": 31524,
+  "peak_rss_source": "linux_proc_self_VmHWM",
+  "project_root": null,
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "recorded_utc": "2026-10-03T15:25:52.578569+00:00",
+  "report": "/home/zyf/AAA/scar/artifacts/reports/gates/g7-2b-models-example.json.gz",
+  "report_bytes": 67947,
+  "report_sha256": "d293497d2e63a2014648970965b242be5cc075ff2ea46be140b6f3d466537c33",
+  "revision": "c7f68ce2474a3d995c410465def12ee19c86f48d",
+  "schema": "scar.source-proof-models-measurement",
+  "schema_version": 1,
+  "scope": "One SCAR source model analysis and report write, not target execution, optimization legality or speedup.",
+  "seconds_including_write": 1.2243469790555537,
+  "source": "/home/zyf/AAA/scar/testcases/proof_models/program.py",
+  "source_fingerprints": {
+    "/home/zyf/AAA/scar/testcases/proof_models/program.py": "sha256:4b90614f058aa94c695a37dc5e0fd950ac1c43edccfabad2604bd8f0958133b9"
+  },
+  "status": "Observed",
+  "summary": {
+    "control_flow": {
+      "edge_kinds": {
+        "break": 1,
+        "continue": 1,
+        "exception_propagation": 6,
+        "if_false": 2,
+        "if_true": 2,
+        "loop_backedge": 1,
+        "loop_body": 1,
+        "loop_else": 1,
+        "loop_zero_exit": 1,
+        "may_raise": 16,
+        "raise": 1,
+        "return": 1,
+        "sequence": 58,
+        "unknown_continuation": 1
+      },
+      "edges": 93,
+      "gap_kinds": {
+        "branch_feasibility": 2,
+        "deferred_scope": 1,
+        "try_semantics": 1,
+        "user_iteration": 1
+      },
+      "gaps": 5,
+      "insertions": 44,
+      "nodes": 78,
+      "schema": "scar.source-control-flow.v2",
+      "schema_version": 1,
+      "scopes": 2,
+      "sources": 1,
+      "status": "CONSTRUCTION_ONLY",
+      "suites": 8,
+      "unsupported_reasons": {
+        "Function execution is deferred; no call edge is inferred from its declaration.": 1,
+        "Iterator construction/next may run user code, raise, or have side effects.": 1,
+        "Predicate truth is not evaluated; both branches remain possible, including literal True/False.": 2,
+        "Try/except/else/finally dispatch and exception state are not modeled; continuation is unknown.": 1
+      }
+    },
+    "files": 1,
+    "primitive_semantics": {
+      "certificate_count": 3,
+      "certificates": [
+        {
+          "coverage": "OPERATOR_ONLY",
+          "effects": [
+            "NO_AUTOGRAD_EDGE",
+            "NO_RNG_ACCESS",
+            "NO_USER_DISPATCH",
+            "NO_WRITES"
+          ],
+          "inputs": [
+            {
+              "index": 0,
+              "role": "left",
+              "value": "static_value:9a05d572b04cd12b462697860418c11c"
+            },
+            {
+              "index": 1,
+              "role": "right",
+              "value": "static_value:f61514984cb10afa7578b711bc32abd5"
+            }
+          ],
+          "opcode": "is_not",
+          "operation": "opdef:op:2d4d0705aa1eedbf64821434",
+          "output_type": "BOOL",
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:3f582933bf1cae6a9f556bec",
+              "wire": "source:atom:3f582933bf1cae6a9f556bec"
+            },
+            "end_column": 33,
+            "end_line": 9,
+            "fingerprint": "sha256:4b90614f058aa94c695a37dc5e0fd950ac1c43edccfabad2604bd8f0958133b9",
+            "path": "/home/zyf/AAA/scar/testcases/proof_models/program.py",
+            "start_column": 16,
+            "start_line": 9
+          }
+        },
+        {
+          "coverage": "OPERATOR_ONLY",
+          "effects": [
+            "NO_AUTOGRAD_EDGE",
+            "NO_RNG_ACCESS",
+            "NO_USER_DISPATCH",
+            "NO_WRITES"
+          ],
+          "inputs": [
+            {
+              "index": 0,
+              "role": "left",
+              "value": "static_value:e2fa8ca23289dc8fac67925c0d19028e"
+            },
+            {
+              "index": 1,
+              "role": "right",
+              "value": "static_value:e5122ce7e8eb6f44901929ca6c0f6f4e"
+            }
+          ],
+          "opcode": "is",
+          "operation": "opdef:op:5004f1fa28a13f16848e7225",
+          "output_type": "BOOL",
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:9d7dd06e2a515e42e8093394",
+              "wire": "source:atom:9d7dd06e2a515e42e8093394"
+            },
+            "end_column": 28,
+            "end_line": 15,
+            "fingerprint": "sha256:4b90614f058aa94c695a37dc5e0fd950ac1c43edccfabad2604bd8f0958133b9",
+            "path": "/home/zyf/AAA/scar/testcases/proof_models/program.py",
+            "start_column": 16,
+            "start_line": 15
+          }
+        },
+        {
+          "coverage": "OPERATOR_ONLY",
+          "effects": [
+            "NO_AUTOGRAD_EDGE",
+            "NO_RNG_ACCESS",
+            "NO_USER_DISPATCH",
+            "NO_WRITES"
+          ],
+          "inputs": [
+            {
+              "index": 0,
+              "role": "left",
+              "value": "static_value:0e766e0c2367f795eac4e0be8c38dff2"
+            },
+            {
+              "index": 1,
+              "role": "right",
+              "value": "static_value:fbe2c579fedfc2077234bfb00180e383"
+            }
+          ],
+          "opcode": "is",
+          "operation": "opdef:op:cb09bf647d67a1212ca33cf2",
+          "output_type": "BOOL",
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:cf19154da43e15b3c11c8bae",
+              "wire": "source:atom:cf19154da43e15b3c11c8bae"
+            },
+            "end_column": 24,
+            "end_line": 8,
+            "fingerprint": "sha256:4b90614f058aa94c695a37dc5e0fd950ac1c43edccfabad2604bd8f0958133b9",
+            "path": "/home/zyf/AAA/scar/testcases/proof_models/program.py",
+            "start_column": 11,
+            "start_line": 8
+          }
+        }
+      ],
+      "gap_count": 0,
+      "gaps": [],
+      "observation_boundaries": [
+        "DEBUGGER_TRACING",
+        "FRAME_TRACING",
+        "RESOURCE_OBSERVATION",
+        "EXCEPTION_OBSERVATION"
+      ],
+      "rule_id": "python.identity_comparison",
+      "rule_version": "scar.primitive-semantics.v1",
+      "runtime_requirements": [
+        "TARGET_PYTHON_IDENTITY_SEMANTICS_MATCH"
+      ],
+      "runtime_scope": {
+        "implementation": "cpython",
+        "version": [
+          3,
+          14,
+          7
+        ]
+      },
+      "schema": "scar.primitive-semantics",
+      "schema_version": 1,
+      "semantic_digest": "6ac58c541153d7ecd5c6f68d9bcceb9fe458f0bae896dd690805148ec7307957",
+      "source_preconditions": [
+        "fresh_module_namespace",
+        "no_external_namespace_mutation",
+        "standard_function_locals"
+      ],
+      "source_replay": "VALID",
+      "source_semantics_digest": "0518cad1a5198fba526583837b4093cd1afc4da8031d6730ad9f9c7167d25ce9",
+      "target_count": 3,
+      "usage": {
+        "nodes": 3,
+        "output_bytes": 6180,
+        "steps": 9,
+        "work": 9
+      }
+    }
+  }
+}
