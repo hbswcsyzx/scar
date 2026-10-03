@@ -8,6 +8,10 @@ provenance; it does not select or apply an optimization backend.
 from .ids import (
     ContractID,
     ControlRegionID,
+    ControlFlowSuiteID,
+    ControlFlowNodeID,
+    ControlFlowEdgeID,
+    InsertionPointID,
     CorrespondenceID,
     EffectSummaryID,
     MaterializationID,
@@ -39,6 +43,7 @@ from .common import (
     ProofClaim,
     ProofStatus,
     SourceReference,
+    SourceVersion,
 )
 from .contracts import (
     ContractDefinition,
@@ -117,6 +122,8 @@ from .optimization import (
     StaticBindingInfo,
     StaticValueInfo,
     StaticValueSubstitution,
+    SourceFragment,
+    StaticSourceMove,
     TransformDelta,
     TransformKind,
     ValidationRequest,
@@ -159,4 +166,6 @@ __all__ = [
     "IRBundle", "canonical_json",
     "optimization_context",
     "bundle_from_dict", "bundle_from_json",
+    "ControlFlowSuiteID", "ControlFlowNodeID", "ControlFlowEdgeID", "InsertionPointID",
+    "SourceVersion", "SourceFragment", "StaticSourceMove",
 ]

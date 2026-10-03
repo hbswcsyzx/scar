@@ -123,7 +123,7 @@ def test_static_substitution_roundtrips_with_real_value_operation_span_and_bindi
     encoded = ir.canonical_json(bundle)
     document = bundle.to_dict()
     assert document["schema_version"] == 2
-    assert document["optimization"]["schema_version"] == 3
+    assert document["optimization"]["schema_version"] == 4
     restored = ir.IRBundle.from_json(encoded)
     actual = restored.optimization.alternatives[ir.PlanAlternativeID("static-rewrite")]
     restored_substitution = actual.delta.static_substitutions[0]
@@ -224,6 +224,7 @@ def _legacy_bundle(bundle, optimization_version):
     optimization["schema_version"] = optimization_version
     for alternative in optimization["alternatives"]:
         alternative["delta"].pop("static_substitutions")
+        alternative["delta"].pop("static_moves")
     if optimization_version == 1:
         for port in optimization["ports"]:
             for key in ("slot", "effect", "operation"):
@@ -239,12 +240,13 @@ def test_legacy_bundle_and_optimization_schemas_upgrade_without_mutating_input(o
     restored = ir.IRBundle.from_dict(document)
     assert document == before
     assert restored.source_semantics is None
-    assert restored.optimization.to_dict()["schema_version"] == 3
+    assert restored.optimization.to_dict()["schema_version"] == 4
     assert restored.to_dict()["schema_version"] == 2
 
 
 @pytest.mark.parametrize("version,field", ((1, "source_semantics"), (1, "static_substitutions"),
-                                             (2, "static_substitutions")))
+                                             (2, "static_substitutions"),
+                                             (1, "static_moves"), (2, "static_moves")))
 def test_legacy_versions_reject_smuggled_new_fields_even_when_empty(version, field):
     bundle, *_ = _bundle()
     document = _legacy_bundle(bundle, version)
@@ -265,7 +267,7 @@ def test_legacy_bundle_cannot_wrap_a_newer_optimization_schema():
         ir.IRBundle.from_dict(document)
 
 
-@pytest.mark.parametrize("field", ("source_semantics", "static_substitutions"))
+@pytest.mark.parametrize("field", ("source_semantics", "static_substitutions", "static_moves"))
 def test_current_schema_requires_its_new_fields(field):
     bundle, *_ = _bundle()
     document = bundle.to_dict()
@@ -274,6 +276,23 @@ def test_current_schema_requires_its_new_fields(field):
     else:
         document["optimization"]["alternatives"][0]["delta"].pop(field)
     with pytest.raises(ValueError, match="missing (required )?field"):
+        ir.IRBundle.from_dict(document)
+
+
+def test_schema_three_migrates_empty_source_moves_without_mutating_or_accepting_smuggling():
+    bundle, *_ = _bundle()
+    document = bundle.to_dict()
+    document["optimization"]["schema_version"] = 3
+    for alternative in document["optimization"]["alternatives"]:
+        alternative["delta"].pop("static_moves")
+    before = deepcopy(document)
+    restored = ir.IRBundle.from_dict(document)
+    assert before == document
+    assert restored.optimization.to_dict()["schema_version"] == 4
+    assert all(not alternative.delta.static_moves
+               for alternative in restored.optimization.alternatives.values())
+    document["optimization"]["alternatives"][0]["delta"]["static_moves"] = []
+    with pytest.raises(ValueError, match="unknown fields"):
         ir.IRBundle.from_dict(document)
 
 

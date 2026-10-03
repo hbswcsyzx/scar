@@ -9,8 +9,9 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 import math
+import re
 
-from .common import ProofClaim, ProofStatus, SourceReference
+from .common import ProofClaim, ProofStatus, SourceReference, SourceVersion
 from .contracts import EffectTarget, EffectTargetKind
 from ._validation import mapping_errors, record_errors, cycle_errors
 from ..literals import PythonLiteral
@@ -33,6 +34,9 @@ from .ids import (
     StaticValueID,
     ValueVersionID,
     ValueSlotID,
+    ControlFlowNodeID,
+    ControlFlowSuiteID,
+    InsertionPointID,
 )
 
 
@@ -280,6 +284,43 @@ class RegionMove:
 
 
 @dataclass(frozen=True, slots=True)
+class SourceFragment:
+    """Complete source statement membership, independently replayed by its reader."""
+
+    statement: ControlFlowNodeID
+    suite: ControlFlowSuiteID
+    scope: OperationDefinitionID
+    source: SourceReference
+    source_version: SourceVersion
+    operation_ids: tuple[OperationDefinitionID, ...]
+    text_digest: str
+
+    def __post_init__(self) -> None:
+        if (self.source.path != self.source_version.path
+                or self.source.fingerprint != self.source_version.fingerprint):
+            raise ValueError("source fragment span and version differ")
+        if (not self.operation_ids or len(set(self.operation_ids)) != len(self.operation_ids)
+                or tuple(sorted(self.operation_ids, key=lambda item: item.wire)) != self.operation_ids):
+            raise ValueError("source fragment needs unique, canonical complete operation IDs")
+        if not re.fullmatch(r"sha256:[0-9a-f]{64}", self.text_digest):
+            raise ValueError("source fragment requires canonical text digest")
+
+    def as_dict(self) -> dict[str, Any]:
+        from ..record_codec import encode
+        return encode(self)
+
+
+@dataclass(frozen=True, slots=True)
+class StaticSourceMove:
+    fragment: SourceFragment
+    insertion: InsertionPointID
+
+    def as_dict(self) -> dict[str, Any]:
+        from ..record_codec import encode
+        return encode(self)
+
+
+@dataclass(frozen=True, slots=True)
 class TransformDelta:
     removed_definitions: tuple[OperationDefinitionID, ...] = ()
     removed_instances: tuple[OperationInstanceID, ...] = ()
@@ -287,12 +328,13 @@ class TransformDelta:
     moves: tuple[RegionMove, ...] = ()
     added_operations: tuple[str, ...] = ()
     static_substitutions: tuple[StaticValueSubstitution, ...] = ()
+    static_moves: tuple[StaticSourceMove, ...] = ()
 
     @property
     def is_empty(self) -> bool:
         return not any((self.removed_definitions, self.removed_instances,
                         self.substitutions, self.moves, self.added_operations,
-                        self.static_substitutions))
+                        self.static_substitutions, self.static_moves))
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -305,6 +347,7 @@ class TransformDelta:
             "added_operations": sorted(self.added_operations),
             "static_substitutions": [item.as_dict()
                                       for item in self.static_substitutions],
+            "static_moves": [item.as_dict() for item in self.static_moves],
         }
 
 
@@ -555,7 +598,7 @@ class OptimizationGraph:
     """Validated report-only replacement regions and alternatives."""
 
     SCHEMA = "scar.ir.v2.optimization"
-    SCHEMA_VERSION = 3
+    SCHEMA_VERSION = 4
 
     def __init__(self, context: OptimizationContext) -> None:
         self.context = context
@@ -690,6 +733,9 @@ class OptimizationGraph:
 
     def _validate_alternative_context(self, alternative: PlanAlternative) -> None:
         delta = alternative.delta
+        if delta.static_moves and any((delta.removed_definitions, delta.removed_instances,
+                delta.substitutions, delta.static_substitutions, delta.moves, delta.added_operations)):
+            raise ValueError("static source moves cannot mix unrelated transform changes")
         region = self.regions.get(alternative.region)
         if region is None:
             raise ValueError("alternative references unknown region")
@@ -761,6 +807,22 @@ class OptimizationGraph:
                 raise ValueError("move references unknown control region")
             if move.region != region.id:
                 raise ValueError("move must target the alternative region")
+        statements = set()
+        for move in delta.static_moves:
+            fragment = move.fragment
+            if fragment.statement in statements:
+                raise ValueError("duplicate moved source statement")
+            statements.add(fragment.statement)
+            if fragment.scope not in self.context.definitions:
+                raise ValueError("source move references unknown lexical scope")
+            if set(fragment.operation_ids) - set(region.definitions):
+                raise ValueError("source move contains operations outside target region")
+            if set(fragment.operation_ids) - self.context.definitions:
+                raise ValueError("source move references unknown operations")
+            if fragment.source.atom_id not in region.source_atoms:
+                raise ValueError("source move source is outside target region boundary")
+            # Statement membership and insertion existence require the independent
+            # source CFG replay in the fixed ledger, not an OIR shape check.
         for residual in alternative.residual_effects:
             if residual.effect not in self.context.effects:
                 raise ValueError(f"residual references unknown effect {residual.effect.wire}")
@@ -890,4 +952,5 @@ __all__ = [
     "PlanInstruction", "PlanSelection", "RegionGranularity", "RegionMove",
     "RegionPort", "RegionPortKind", "ResidualEffect", "TransformDelta",
     "TransformKind", "ValidationRequest", "ValuePattern", "ValueSubstitution",
+    "SourceFragment", "StaticSourceMove",
 ]

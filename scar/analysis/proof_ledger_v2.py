@@ -13,6 +13,7 @@ import json
 from typing import Any
 
 from scar.analysis.constants_v2 import (
+    BuiltinRuntime,
     ConstantRuntimeRequirement,
     ConstantStatus,
     EvaluationBudget,
@@ -29,6 +30,10 @@ from scar.analysis.effects_v2 import (
 from scar.analysis.region_queries_v2 import MotionQuery, RegionQueries
 from scar.analysis.regions_v2 import RegionInventory, RegionView
 from scar.analysis.source_semantics_v2 import validate_source_semantics
+from scar.analysis.control_flow_v2 import validate_source_control_flow
+from scar.ir.control_flow_v2 import (
+    SourceControlFlowGraph, ControlFlowBudget,
+)
 from scar.ir import semantics_v2 as sm
 from scar.ir.record_codec import decode, encode, loads
 from scar.ir.v2 import (
@@ -48,7 +53,7 @@ from scar.ir.v2._validation import cycle_errors, record_errors
 from scar.ir.v2.optimization import StaticValueSubstitution
 
 
-RULE_VERSION = "scar.proof-ledger.v2.1"
+RULE_VERSION = "scar.proof-ledger.v2.2"
 SCHEMA = "scar.proof-ledger.v2"
 SCHEMA_VERSION = 1
 
@@ -78,6 +83,25 @@ class QPredicate(str, Enum):
     RESOURCE_FAILURE_UNOBSERVED = "resource_failure_unobserved"
     EFFECT_COVERAGE_ACCEPTED = "effect_coverage_accepted"
     SCOPE_CLOSURE_ACCEPTED = "scope_closure_accepted"
+    FRAME_NAMESPACE_OBSERVATION_UNOBSERVED = "frame_namespace_observation_unobserved"
+    TRACE_EVENT_ORDER_UNOBSERVED = "trace_event_order_unobserved"
+    REFERENCE_COUNT_OBSERVATION_UNOBSERVED = "reference_count_observation_unobserved"
+    ASYNC_INTERRUPTION_UNOBSERVED = "async_interruption_unobserved"
+
+
+def static_motion_q_subject(predicate: QPredicate,
+                            statement: OperationDefinitionID,
+                            source: sm.SourceReference) -> str:
+    """Bind a conditional statement observation to its source and rule version."""
+    if type(predicate) is not QPredicate or type(statement) is not OperationDefinitionID:
+        raise TypeError("static motion Q subject needs typed predicate and statement")
+    if type(source) is not sm.SourceReference:
+        raise TypeError("static motion Q subject needs exact source reference")
+    payload = {"rule": RULE_VERSION, "predicate": predicate.value,
+               "statement": statement.wire, "source": encode(source),
+               "runtime": (encode(BuiltinRuntime.current())
+                           if predicate is QPredicate.TARGET_RUNTIME_MATCH else None)}
+    return "static-motion:" + predicate.value + ":" + _digest(payload)
 
 
 @dataclass(frozen=True)
@@ -177,6 +201,8 @@ class ProofContext:
     effect_engine: EffectClosureEngine | None = None
     source_texts: dict[str, str] | None = None
     verification_budget: EvaluationBudget = EvaluationBudget()
+    source_control_flow: SourceControlFlowGraph | None = None
+    control_verification_budget: ControlFlowBudget = ControlFlowBudget()
 
 
 @dataclass(frozen=True)
@@ -313,6 +339,9 @@ def _validate_context(context: ProofContext, request: ProofRequest) -> dict[str,
     if type(context.verification_budget) is not EvaluationBudget:
         raise TypeError("verification_budget must be EvaluationBudget")
     context.verification_budget.__post_init__()
+    if type(context.control_verification_budget) is not ControlFlowBudget:
+        raise TypeError("control_verification_budget must be ControlFlowBudget")
+    context.control_verification_budget.__post_init__()
     context_errors = record_errors(context.q, ProofQ, "proof_context.q")
     context_errors.extend(record_errors(request, ProofRequest, "proof_request"))
     if context_errors:
@@ -330,6 +359,12 @@ def _validate_context(context: ProofContext, request: ProofRequest) -> dict[str,
         context.bundle.semantic, sources=context.source_texts)
     if not source_report["valid"]:
         raise ValueError("source replay failed: " + "; ".join(source_report["errors"]))
+    if context.source_control_flow is not None:
+        checked = validate_source_control_flow(context.source_control_flow,
+            context.bundle.semantic, context.source_semantics, sources=context.source_texts,
+            verification_budget=context.control_verification_budget)
+        if not checked["valid"]:
+            raise ValueError("source control replay failed: " + "; ".join(checked["errors"]))
     context.inventory.assert_valid()
     if context.inventory.bundle is not context.bundle:
         raise ValueError("region inventory must refer to the supplied IRBundle object")
@@ -379,6 +414,8 @@ def _context_hashes(context: ProofContext, request: ProofRequest) -> dict[str, s
         "evidence": bundle.evidence.to_dict(),
         "values": bundle.values.to_dict(),
         "effects": context.effect_engine.to_dict() if context.effect_engine else None,
+        "source_control_flow": (context.source_control_flow.to_dict()
+                                if context.source_control_flow is not None else None),
     }
     inventory = context.inventory
     region_value = {
@@ -415,6 +452,8 @@ def _region_members(context: ProofContext, region: OptimizationRegionID):
 def _validate_request_shape(context: ProofContext, request: ProofRequest) -> None:
     region = _region_members(context, request.region)
     delta = request.delta
+    if request.family is not ProofFamily.MOTION and delta.static_moves:
+        raise ValueError("source moves belong only to MOTION requests")
     if request.family is ProofFamily.CONSTANT:
         if not delta.static_substitutions:
             raise ValueError("CONSTANT requires actual static_substitutions in TransformDelta")
@@ -459,7 +498,8 @@ def _validate_request_shape(context: ProofContext, request: ProofRequest) -> Non
         if context.inventory.view is RegionView.EXECUTION and delta.removed_definitions:
             raise ValueError("execution DEAD region requires removed instances")
     elif request.family is ProofFamily.REUSE:
-        if delta.static_substitutions or delta.substitutions or delta.moves or delta.added_operations:
+        if (delta.removed_definitions or delta.static_substitutions or delta.substitutions
+                or delta.moves or delta.added_operations):
             raise ValueError("REUSE delta contains unrelated transform changes")
         removed = set(delta.removed_instances)
         if not removed:
@@ -472,6 +512,20 @@ def _validate_request_shape(context: ProofContext, request: ProofRequest) -> Non
     else:
         if delta.static_substitutions or delta.substitutions or delta.removed_definitions or delta.removed_instances or delta.added_operations:
             raise ValueError("MOTION delta contains unrelated transform changes")
+        if delta.static_moves:
+            if delta.moves or request.motion_query is not None:
+                raise ValueError("static source MOTION cannot mix dynamic movement or queries")
+            if len(delta.static_moves) != 1:
+                raise ValueError("first static MOTION rule supports exactly one moved statement")
+            move = delta.static_moves[0]
+            if context.inventory.view is not RegionView.SEMANTIC or region.instances:
+                raise ValueError("static MOTION requires a semantic-only region")
+            if set(move.fragment.operation_ids) != set(region.definitions):
+                raise ValueError("static MOTION region must exactly account for the full statement")
+            if context.source_control_flow is not None:
+                if move.insertion not in context.source_control_flow.insertions:
+                    raise ValueError("static MOTION references unknown source insertion")
+            return
         if not delta.moves:
             raise ValueError("MOTION requires actual region moves in TransformDelta")
         if any(item.region != request.region for item in delta.moves):
@@ -979,6 +1033,240 @@ def _reuse_obligations(context: ProofContext, request: ProofRequest):
     return tuple(obligations)
 
 
+_MOTION_NAMES = (
+    "all_inputs_state_available_at_target",
+    "control_dominance_and_zero_iteration",
+    "effects_rng_exceptions_and_ordering",
+    "alias_lifetime_readiness_autograd_hooks",
+    "consumer_call_control_closure",
+    "precise_insertion_point_and_delta",
+)
+
+
+def _static_motion_obligations(context: ProofContext, request: ProofRequest):
+    """Recompute one complete local alias statement move, without changing CFG.
+
+    The raw all-paths graph retains its conservative MAY_RAISE edges. Complete
+    statement rules separately describe their ordinary behavior under explicit
+    runtime/resource/interruption/observation Q conditions. No NORMAL query or
+    stored certificate status discharges those conditions.
+    """
+    from scar.analysis.control_flow_v2 import query_dominance
+    from scar.analysis.source_fragments_v2 import validate_source_fragment
+    from scar.analysis.local_statement_semantics_v2 import (
+        derive_local_statement_semantics, StatementKind, RequiredCondition,
+    )
+    from scar.ir.control_flow_v2 import InsertionKind, NodeKind, QueryMode, QueryStatus
+
+    move, = request.delta.static_moves
+    fragment = move.fragment
+    subject = fragment.statement.wire
+    cfg = context.source_control_flow
+    refs = (_ref("source_move", subject, move),)
+    facts = {name: (ProofStatus.UNKNOWN, "source control and complete statement facts are missing")
+             for name in _MOTION_NAMES}
+    conditions = ()
+    supported = False
+    if cfg is not None:
+        checked = validate_source_fragment(fragment, context.bundle.semantic,
+            context.source_semantics, cfg, sources=context.source_texts,
+            verification_budget=context.control_verification_budget)
+        if not checked["valid"]:
+            raise ValueError("source fragment replay failed: " + "; ".join(checked["errors"]))
+        insertion = cfg.insertions[move.insertion]
+        if (insertion.suite != fragment.suite
+                or insertion.version != fragment.source_version):
+            facts["precise_insertion_point_and_delta"] = (
+                ProofStatus.DISPROVEN, "source insertion is outside the original lexical suite/version")
+        else:
+            report = derive_local_statement_semantics(context.bundle.semantic,
+                context.source_semantics, cfg, fragment.suite,
+                source_texts=context.source_texts, budget=context.verification_budget,
+                control_budget=context.control_verification_budget)
+            certificates = tuple(report.certificates)
+            closure = {"certificates": [encode(item) for item in certificates],
+                       "gaps": [encode(item) for item in report.gaps],
+                       "coverage": report.coverage.value,
+                       "required_conditions": [item.value for item in report.required_conditions]}
+            refs += (_ref("source_control_flow", fragment.suite.wire, cfg.to_dict()),
+                     _ref("local_statement_closure", fragment.scope.wire, closure))
+            statements = sorted((node for node in cfg.nodes.values()
+                if node.suite == fragment.suite and node.kind is NodeKind.STATEMENT
+                and node.source is not None), key=lambda node: (
+                    node.source.start_line, node.source.start_column,
+                    node.source.end_line, node.source.end_column or 0))
+            by_operation = {certificate.statement: certificate for certificate in certificates}
+            node_certificates = {node.id: by_operation.get(node.operations[0])
+                                 for node in statements if len(node.operations) == 1}
+            moved = node_certificates.get(fragment.statement)
+            supported = (report.coverage.value == "SUPPORTED" and not report.gaps
+                         and len(node_certificates) == len(statements)
+                         and all(node_certificates.values())
+                         and moved is not None and moved.kind is StatementKind.ASSIGN_ALIAS)
+            if not supported:
+                message = "whole function is outside the closed local-statement subset, or moved statement is not an exact alias"
+                if report.gaps:
+                    message += ": " + "; ".join(item.reason for item in report.gaps)
+                facts = {name: (ProofStatus.UNKNOWN, message) for name in _MOTION_NAMES}
+            else:
+                indexes = {node.id: index for index, node in enumerate(statements)}
+                old_index = indexes[fragment.statement]
+                if insertion.kind is InsertionKind.ENTRY:
+                    target_index = 0
+                elif insertion.anchor in indexes:
+                    target_index = indexes[insertion.anchor] + (
+                        1 if insertion.kind is InsertionKind.AFTER else 0)
+                else:
+                    raise ValueError("source insertion has no unique complete statement anchor")
+                before = target_index < old_index
+                crossed = tuple(node_certificates[node.id]
+                                for node in statements[target_index:old_index]) if before else ()
+                precise = before and bool(crossed)
+                facts["precise_insertion_point_and_delta"] = (
+                    ProofStatus.PROVEN if precise else ProofStatus.DISPROVEN,
+                    "one whole alias assignment moves once to an earlier standalone source insertion"
+                    if precise else "request is not a strict upward move across a statement")
+
+                # Namespace and source execution requirements remain declared Q.
+                accepted = []
+                missing = []
+                for precondition in report.required_source_preconditions:
+                    assumption = context.q.assumption(QPredicate.SOURCE_PRECONDITION,
+                                                       precondition.value)
+                    if assumption is None:
+                        missing.append("source:" + precondition.value)
+                    else:
+                        accepted.append(assumption)
+                required = {
+                    RequiredCondition.TARGET_PYTHON_RUNTIME_MATCH: (QPredicate.TARGET_RUNTIME_MATCH,),
+                    RequiredCondition.RESOURCE_FAILURE_UNOBSERVED: (QPredicate.RESOURCE_FAILURE_UNOBSERVED,),
+                    RequiredCondition.ASYNC_INTERRUPT_UNOBSERVED: (QPredicate.ASYNC_INTERRUPTION_UNOBSERVED,),
+                    RequiredCondition.FRAME_AND_BINDING_TIMING_UNOBSERVED: (
+                        QPredicate.FRAME_NAMESPACE_OBSERVATION_UNOBSERVED,
+                        QPredicate.TRACE_EVENT_ORDER_UNOBSERVED),
+                    RequiredCondition.REFCOUNT_AND_FINALIZER_OBSERVATION_UNOBSERVED: (
+                        QPredicate.REFERENCE_COUNT_OBSERVATION_UNOBSERVED,),
+                }
+                for requirement in report.required_conditions:
+                    predicates = required.get(requirement)
+                    if predicates is None:
+                        missing.append("unsupported statement condition:" + requirement.value)
+                        continue
+                    for certificate in certificates:
+                        if requirement not in certificate.required_conditions:
+                            continue
+                        for predicate in predicates:
+                            q_subject = static_motion_q_subject(predicate,
+                                certificate.statement, certificate.source)
+                            assumption = context.q.assumption(predicate, q_subject)
+                            if assumption is None:
+                                missing.append(q_subject)
+                            else:
+                                accepted.append(assumption)
+                conditions = tuple(sorted(set(accepted),
+                    key=lambda item: (item.predicate.value, item.subject)))
+                q_complete = not missing
+
+                written = {certificate.written_binding: node
+                           for node in statements
+                           if (certificate := node_certificates[node.id]).written_binding is not None}
+                availability = bool(moved.read_bindings) and precise
+                availability_unknown = False
+                dominance_reports = []
+                for binding_id in moved.read_bindings:
+                    source_node = written.get(binding_id)
+                    if source_node is None or indexes[source_node.id] >= target_index:
+                        availability = False
+                        continue
+                    dominance = query_dominance(cfg, fragment.suite,
+                        source_node.id, insertion.node, mode=QueryMode.ALL_PATHS,
+                        budget=context.control_verification_budget)
+                    dominance_reports.append(dominance)
+                    if dominance.status is not QueryStatus.CANDIDATE:
+                        if dominance.status is QueryStatus.NOT_DOMINATED:
+                            availability = False
+                        else:
+                            availability_unknown = True
+                refs += tuple(_ref("all_paths_availability", subject + ":" + str(index), item)
+                              for index, item in enumerate(dominance_reports))
+                facts["all_inputs_state_available_at_target"] = (
+                    ProofStatus.DISPROVEN if not availability else
+                    ProofStatus.PROVEN if q_complete and not availability_unknown else ProofStatus.UNKNOWN,
+                    "every alias input is the same exact existing local binding, defined before the target on all represented paths"
+                    if availability else "an alias source binding is unavailable at the new insertion")
+
+                target_dominance = query_dominance(cfg, fragment.suite,
+                    insertion.node, fragment.statement, mode=QueryMode.ALL_PATHS,
+                    budget=context.control_verification_budget)
+                refs += (_ref("all_paths_move_control", subject, target_dominance),)
+                control = (precise and target_dominance.status is QueryStatus.CANDIDATE
+                           and cfg.suites[fragment.suite].complete)
+                facts["control_dominance_and_zero_iteration"] = (
+                    ProofStatus.PROVEN if control and q_complete else ProofStatus.UNKNOWN,
+                    "no branch, loop or suspension in the source-closed suite; target dominates the original statement in ALL_PATHS; early-execution exception routes remain conditional"
+                    if control else "all-path source control or exact upward placement is unresolved")
+
+                moved_slot = moved.written_slot
+                conflicts = any(moved_slot == certificate.written_slot or
+                    moved.written_binding in certificate.read_bindings
+                    for certificate in crossed)
+                # A static source rule does not override contradictory or unjoined
+                # independently collected effects supplied by the caller.
+                has_unjoined_effects = context.effect_engine is not None
+                effect_closed = bool(crossed) and not conflicts and not has_unjoined_effects
+                facts["effects_rng_exceptions_and_ordering"] = (
+                    ProofStatus.DISPROVEN if conflicts else
+                    ProofStatus.PROVEN if effect_closed and q_complete else ProofStatus.UNKNOWN,
+                    "each complete crossed statement is independently source-derived with first local stores, fixed builtin behavior and no user dispatch/RNG/external ordering; raw MAY_RAISE edges are retained under explicit resource/async/observation conditions"
+                    if effect_closed else "crossed binding dependency or supplied effect evidence is not closed by this narrow source rule")
+                facts["alias_lifetime_readiness_autograd_hooks"] = (
+                    ProofStatus.PROVEN if availability and q_complete else ProofStatus.UNKNOWN,
+                    "assignment carries the existing exact local object identity once; all values have source-derived immutable builtin origins, first destination binding and no tensor/autograd/user hook semantics; earlier reference/frame visibility is explicitly conditional")
+
+                consumers = [use for use in context.source_semantics.uses.values()
+                             if moved.written_binding in use.reaching
+                             or moved.written_binding in use.conditional_reaching]
+                read_ids = {read.use for certificate in certificates
+                            for read in certificate.ordered_reads}
+                consumer_closed = all(use.scope == fragment.scope
+                    and use.status is sm.BindingStatus.EXACT
+                    and use.reaching == (moved.written_binding,)
+                    and use.id in read_ids and not use.conditional_reaching
+                    for use in consumers)
+                for use in consumers:
+                    owner_nodes = [node for node in statements if node.source
+                        and (node.source.start_line, node.source.start_column)
+                        <= (use.source.start_line, use.source.start_column)
+                        and (use.source.end_line, use.source.end_column or 0)
+                        <= (node.source.end_line, node.source.end_column or 0)]
+                    if len(owner_nodes) != 1 or indexes[owner_nodes[0].id] <= old_index:
+                        consumer_closed = False
+                facts["consumer_call_control_closure"] = (
+                    ProofStatus.PROVEN if consumer_closed and q_complete else ProofStatus.UNKNOWN,
+                    "all actual alias reads belong to certified later statements in this closed lexical scope; no callback, nested scope or opaque consumer is inferred absent from trace"
+                    if consumer_closed else "alias consumer/escape sites are not exactly closed")
+                if missing:
+                    missing_reason = "; missing precise Q conditions: " + ", ".join(sorted(set(missing)))
+                    facts = {name: (status, reason + missing_reason)
+                             for name, (status, reason) in facts.items()}
+
+    obligations = []
+    previous = None
+    evidence = (EvidenceClaim(EvidenceKind.INFERRED,
+        ("fixed-rule:" + RULE_VERSION,), scope=context.scope),)
+    for name in _MOTION_NAMES:
+        status, reason = facts[name]
+        if status is ProofStatus.PROVEN and previous is not None and previous.status is not ProofStatus.PROVEN:
+            status = ProofStatus.UNKNOWN
+            reason += "; an earlier required premise is not proven"
+        obligation = _new_obligation(request.family, name, subject, status,
+            dependencies=(previous.id,) if previous else (), evidence=evidence,
+            model_references=refs, conditions=conditions, reason=reason)
+        obligations.append(obligation)
+        previous = obligation
+    return tuple(obligations), supported
+
+
 def _motion_obligations(context: ProofContext, request: ProofRequest):
     family = request.family
     query = request.motion_query
@@ -1040,12 +1328,14 @@ def _check_obligation_dag(obligations):
         raise ValueError("cyclic proof premises: " + "; ".join(cycles))
 
 
-def _outcome(family, obligations):
+def _outcome(family, obligations, *, static_motion_supported=False):
     statuses = {item.status for item in obligations}
-    if family in {ProofFamily.REUSE, ProofFamily.MOTION}:
+    if family is ProofFamily.REUSE:
         return ProofOutcome.NOT_YET_SUPPORTED
     if ProofStatus.DISPROVEN in statuses:
         return ProofOutcome.ILLEGAL
+    if family is ProofFamily.MOTION and not static_motion_supported:
+        return ProofOutcome.NOT_YET_SUPPORTED
     if ProofStatus.UNKNOWN in statuses:
         return ProofOutcome.NEEDS_CONTRACT
     return ProofOutcome.CONDITIONALLY_LEGAL
@@ -1055,16 +1345,20 @@ def derive_proof_ledger(context: ProofContext, request: ProofRequest) -> ProofLe
     """Derive the fixed obligation set and statuses from current typed models."""
     hashes = _validate_context(context, request)
     _validate_request_shape(context, request)
+    static_motion_supported = False
     if request.family is ProofFamily.CONSTANT:
         obligations = _constant_obligations(context, request)
     elif request.family is ProofFamily.DEAD:
         obligations = _dead_obligations(context, request)
     elif request.family is ProofFamily.REUSE:
         obligations = _reuse_obligations(context, request)
+    elif request.delta.static_moves:
+        obligations, static_motion_supported = _static_motion_obligations(context, request)
     else:
         obligations = _motion_obligations(context, request)
     _check_obligation_dag(obligations)
-    return ProofLedger(request.family, _outcome(request.family, obligations),
+    return ProofLedger(request.family, _outcome(request.family, obligations,
+        static_motion_supported=static_motion_supported),
         RULE_VERSION, request.region, context.scope, request.delta,
         hashes["request_digest"], hashes["source_hash"], hashes["model_hash"],
         hashes["q_hash"], hashes["region_hash"], hashes["scope_hash"], obligations)
@@ -1093,4 +1387,5 @@ __all__ = [
     "ProofObligation", "ProofLedger", "derive_proof_ledger",
     "validate_proof_ledger", "target_runtime_q_subject",
     "dead_effect_coverage_q_subject", "dead_scope_closure_q_subject",
+    "static_motion_q_subject",
 ]

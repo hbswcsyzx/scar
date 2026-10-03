@@ -42,9 +42,9 @@ guarded candidate. It must reject a LeWM region when its effects or logical
 versions are unknown; it must never pattern match a LeWM class, function, goal,
 or model name.
 
-## Observed from the latest generic trace
+## Observed from the archived generic trace
 
-The fresh one-episode run contained 45,888 events, 20,820 module calls,
+The archived one-episode run contained 45,888 events, 20,820 module calls,
 22,457 CUDA kernels, 543 physical CUDA memcpy activities and 360 CUDA barriers.
 The graph contained 210,581 nodes and 545,653 edges, including 14,609 observed
 producer-to-consumer dependencies, 12,635 overwrites, 80 escapes and 41,342
@@ -60,6 +60,33 @@ intervening-write indices. Every candidate was rejected because the trace did
 not prove complete effects, lifetime/ordering, consumer behavior or measured
 guard cost. These are observations about this run, not claims that LeWM has no
 optimization opportunity.
+
+## Latest source-model pressure, separate from workload execution
+
+The accepted G7.2b Step 1 analysis selected the external CEM source only. It
+produced 11 lexical scopes, 35 suites, 420 control nodes, 514 edges and 245
+source insertion points. Seven loop body/backedge/zero-exit paths are retained,
+with 24 explicit control gaps. The `actions is None` primitive at line 104 has
+an operator-only certificate; operand producers and enclosing methods are not
+certified pure or reusable. Source replay passed without changing LeWM.
+
+Analysis took 13.901 seconds (14.684 with report writing), peak VmHWM 76,948
+KiB. This is source-analysis cost, not a new runtime profile or a speedup. See
+[G7_2B_MODELS_ACCEPTANCE.md](G7_2B_MODELS_ACCEPTANCE.md) for hashes and scope.
+
+### Entity roles required by the model
+
+| Workload concept | Generic representation | Reuse boundary |
+| --- | --- | --- |
+| goal / observation | LogicalValue lineage and ValueVersion, with independently connected objects, storage regions and materializations | Constancy follows from producer/write/lifetime evidence, not the variable name |
+| raw image → normalized tensor → embedding | Distinct derived values with Provenance inputs and transform/model-state dependencies | Normalize/encode are operations, not physical copies; unchanged input alone does not close module effects |
+| CPU copy → GPU copy | Multiple Materializations of a version when copy lineage and readiness are proven | Actual memcpy and alias/mutation evidence are needed; `.to()` alone is insufficient |
+| sampled action population | New produced versions depending on distribution state and RNG | Changing samples, distribution updates or autograd state cannot be cached as unchanged inputs |
+| CEM iteration | ControlRegion with dynamic iteration instances, backedge and zero-exit relations | Loop hoist requires stronger control/invariance/exception proofs than straight-line motion |
+
+These are modeling requirements, not claims that every real trace value has
+already been uniquely joined. Logical provenance remains incomplete in the
+archived trace. No LeWM transform or acceleration has been verified.
 
 ## Simplification lessons
 

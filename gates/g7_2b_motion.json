@@ -1,0 +1,20 @@
+{
+  "gate": "G7.2b-motion",
+  "scope": "Partial Step 2: one exact, source-replayed local alias assignment can move upward in one closed straight-line function under precise declared Q. This does not accept REUSE, loop hoisting, parent G7, target rewrites or LeWM speedup.",
+  "limitations": [
+    "Positive legality is conditional on explicit runtime, resource, async, frame, trace and reference-count observations; Q remains DECLARED, not measured absence.",
+    "The closed body admits first local immutable builtin bindings, finite fixed builtin constants, exact aliases and a final return. Calls, tensors, branches, loops, handlers, mutable values and rebinding remain unsupported.",
+    "Source fragments cover complete statements and precise insertion anchors; OIR membership alone does not authorize motion. Fixed ledger replay retains raw MAY_RAISE edges and uses ALL_PATHS queries.",
+    "Old schemas migrate strictly with empty static_moves; reports cannot synthesize proof authority, raise verification budgets, select or apply a rewrite.",
+    "The measurement entrypoint checks a caller-selected query; it is not a new detector or backend. Default Q is empty. Analysis measurements are not target workload performance.",
+    "Object-only identity evidence and positive REUSE remain pending. No LeWM source or environment is changed."
+  ],
+  "criteria": [
+    {"id": "whole_statement_fragment_membership_source_snapshot_strict_replay_and_tamper", "tests": ["tests/unit/test_source_fragments_v2.py"]},
+    {"id": "closed_local_statement_binding_identity_builtin_totality_and_explicit_observer_conditions", "tests": ["tests/unit/test_local_statement_semantics_v2.py"]},
+    {"id": "six_fixed_motion_obligations_positive_all_paths_and_negative_control_effect_alias_q_delta_cases", "tests": ["tests/unit/test_static_motion_ledger_v2.py"]},
+    {"id": "core_type_identity_schema4_roundtrip_and_mixed_delta_rejection", "tests": ["tests/unit/test_static_motion_codec_v2.py", "tests/unit/test_static_optimization_v2.py"]},
+    {"id": "existing_fixed_ledger_guards_and_recompute_cannot_be_bypassed_by_new_motion", "tests": ["tests/unit/test_proof_ledger_v2.py", "tests/unit/test_proof_ledger_adversarial_v2.py"]},
+    {"id": "public_query_measurement_is_nonexecuting_report_only_and_independently_replayable", "tests": ["tests/integration/test_static_motion_measurement_v2.py"]}
+  ]
+}

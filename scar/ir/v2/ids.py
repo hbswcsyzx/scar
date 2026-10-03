@@ -160,4 +160,21 @@ __all__ = [
     "OptimizationRegionID", "EffectSummaryID", "ContractID", "ResourceID",
     "MeasurementID", "CorrespondenceID", "PlanAlternativeID", "PlanID",
     "ValueVersionID",
+    "ControlFlowSuiteID", "ControlFlowNodeID", "ControlFlowEdgeID", "InsertionPointID",
 ]
+
+
+class ControlFlowSuiteID(Identifier):
+    prefix = "source_suite"
+
+
+class ControlFlowNodeID(Identifier):
+    prefix = "source_cfg_node"
+
+
+class ControlFlowEdgeID(Identifier):
+    prefix = "source_cfg_edge"
+
+
+class InsertionPointID(Identifier):
+    prefix = "source_insertion"

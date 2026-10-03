@@ -8,9 +8,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+import re
 from typing import Any
 
 from .ids import SourceAtomID
+
+
+@dataclass(frozen=True, slots=True)
+class SourceVersion:
+    """The decoded source snapshot used by semantic and control overlays."""
+
+    path: str
+    fingerprint: str
+
+    def __post_init__(self) -> None:
+        if not self.path or not re.fullmatch(r"sha256:[0-9a-f]{64}", self.fingerprint):
+            raise ValueError("source version requires a path and canonical SHA256 fingerprint")
 
 
 class EvidenceKind(str, Enum):
@@ -132,5 +145,5 @@ class ExtensionData:
 
 __all__ = [
     "Completeness", "EvidenceClaim", "EvidenceKind", "ExtensionData",
-    "ProofClaim", "ProofStatus", "SourceReference",
+    "ProofClaim", "ProofStatus", "SourceReference", "SourceVersion",
 ]

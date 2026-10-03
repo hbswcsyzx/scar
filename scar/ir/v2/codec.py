@@ -91,6 +91,7 @@ from .optimization import (
     RegionPortKind,
     ResidualEffect,
     StaticValueSubstitution,
+    StaticSourceMove,
     TransformDelta,
     TransformKind,
     ValidationRequest,
@@ -215,8 +216,10 @@ def _record(data: Any, cls: type, path: str) -> None:
     if not isinstance(data, dict):
         raise ValueError(f"{path}: expected {cls.__name__} object")
     members, hints = _record_schema(cls)
-    if cls is TransformDelta and "static_substitutions" not in data:
-        raise ValueError(f"{path}: missing required field static_substitutions")
+    if cls is TransformDelta:
+        for name in ("static_substitutions", "static_moves"):
+            if name not in data:
+                raise ValueError(f"{path}: missing required field {name}")
     unknown = set(data) - {item.name for item in members}
     if unknown:
         raise ValueError(f"{path}: unknown fields {sorted(unknown)}")
@@ -698,6 +701,21 @@ class _OptimizationDocumentV2:
     SCHEMA_VERSION = 2
 
 
+@dataclass(frozen=True)
+class _TransformDeltaV3(_TransformDeltaV2):
+    static_substitutions: tuple[StaticValueSubstitution, ...] = ()
+
+
+@dataclass(frozen=True)
+class _PlanAlternativeV3(_PlanAlternativeV2):
+    delta: _TransformDeltaV3
+
+
+class _OptimizationDocumentV3:
+    SCHEMA = OptimizationGraph.SCHEMA
+    SCHEMA_VERSION = 3
+
+
 def _upgrade_optimization_document_v1(data):
     """Validate legacy wire shape, then add empty new fields without mutation.
 
@@ -730,7 +748,7 @@ def _upgrade_optimization_document_v2(data):
     })
     return {
         **data,
-        "schema_version": OptimizationGraph.SCHEMA_VERSION,
+        "schema_version": _OptimizationDocumentV3.SCHEMA_VERSION,
         "alternatives": [
             {**item, "delta": {**item["delta"], "static_substitutions": []}}
             for item in data.get("alternatives", ())
@@ -738,10 +756,30 @@ def _upgrade_optimization_document_v2(data):
     }
 
 
+def _upgrade_optimization_document_v3(data):
+    """Migrate strict v3 data with no synthesized source movement or proofs."""
+    if (not isinstance(data, dict) or data.get("schema") != OptimizationGraph.SCHEMA
+            or type(data.get("schema_version")) is not int or data["schema_version"] != 3):
+        return data
+    _document(data, _OptimizationDocumentV3, {
+        "ports": RegionPort, "regions": OptimizationRegion,
+        "alternatives": _PlanAlternativeV3, "plans": PlanSelection,
+    })
+    return {**data, "schema_version": OptimizationGraph.SCHEMA_VERSION,
+            "alternatives": [{**item, "delta": {**item["delta"], "static_moves": []}}
+                             for item in data.get("alternatives", ())]}
+
+
+def _decode_source_move(data):
+    from ..record_codec import decode
+    return decode(StaticSourceMove, data)
+
+
 @_decoder
 def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
     data = _upgrade_optimization_document_v1(data)
     data = _upgrade_optimization_document_v2(data)
+    data = _upgrade_optimization_document_v3(data)
     _document(data, OptimizationGraph, {
         "ports": RegionPort, "regions": OptimizationRegion,
         "alternatives": PlanAlternative, "plans": PlanSelection,
@@ -800,7 +838,8 @@ def optimization_from_dict(data: dict[str, Any], context) -> OptimizationGraph:
                 _required_id(value["operation"], OperationDefinitionID),
                 _source(value["source"]), _python_literal(value["literal"]),
                 _id(value.get("binding"), StaticBindingID))
-                for value in delta_data.get("static_substitutions", ())))
+                for value in delta_data.get("static_substitutions", ())),
+            tuple(_decode_source_move(value) for value in delta_data.get("static_moves", ())))
         cost_data = item.get("cost_request")
         validation_data = item.get("validation_request")
         node = PlanAlternative(

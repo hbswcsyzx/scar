@@ -1,9 +1,11 @@
 # SCAR IR v2：面向语义的程序执行世界模型
 
-状态：**架构审查提案**。
+状态：**已采用的架构设计；实现范围逐 gate 验证**。
 
-本文不增加 detector，不增加 optimization backend，也不承诺当前代码已经
-实现 v2。它回答一个更基础的问题：SCAR 要在未来覆盖重复计算、重复解析、
+本文不增加 detector，不增加 optimization backend。G1—G7.2b 已逐步实现
+typed graphs、source/evidence、provenance、regions 和部分固定证明；它不表示
+本文所有能力已完成，当前验收与缺口以 [STATUS.md](STATUS.md) 为准。
+它回答一个更基础的问题：SCAR 要在未来覆盖重复计算、重复解析、
 materialization、buffer、prefetch、fusion、capture/replay、KV/cache、循环
 不变量和收敛提前终止，应该把程序和执行表示成什么。
 

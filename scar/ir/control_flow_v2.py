@@ -16,24 +16,11 @@ from typing import Any
 
 from .record_codec import decode, encode, loads
 from .v2._validation import cycle_errors, mapping_errors, record_errors
-from .v2.common import SourceReference
-from .v2.ids import Identifier, OperationDefinitionID, ControlRegionID
-
-
-class ControlFlowSuiteID(Identifier):
-    prefix = "source_suite"
-
-
-class ControlFlowNodeID(Identifier):
-    prefix = "source_cfg_node"
-
-
-class ControlFlowEdgeID(Identifier):
-    prefix = "source_cfg_edge"
-
-
-class InsertionPointID(Identifier):
-    prefix = "source_insertion"
+from .v2.common import SourceReference, SourceVersion
+from .v2.ids import (
+    OperationDefinitionID, ControlRegionID, ControlFlowSuiteID,
+    ControlFlowNodeID, ControlFlowEdgeID, InsertionPointID,
+)
 
 
 class SuiteKind(str, Enum):
@@ -113,16 +100,6 @@ class QueryStatus(str, Enum):
     NOT_MUST_EXECUTE = "not_must_execute"
     UNREACHABLE = "unreachable"
     UNKNOWN = "unknown"
-
-
-@dataclass(frozen=True, slots=True)
-class SourceVersion:
-    path: str
-    fingerprint: str
-
-    def __post_init__(self) -> None:
-        if not self.path or not re.fullmatch(r"sha256:[0-9a-f]{64}", self.fingerprint):
-            raise ValueError("source version requires a path and canonical SHA256 fingerprint")
 
 
 @dataclass(frozen=True, slots=True)
