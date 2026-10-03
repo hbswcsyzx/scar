@@ -1,0 +1,371 @@
+{
+  "assumptions": [
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "async_interruption_unobserved",
+      "subject": "static-motion:async_interruption_unobserved:3ad01e634a70b265b14dc0d2d6cb28d20ff52f5e2f7b1075674d33038fb8c642"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "async_interruption_unobserved",
+      "subject": "static-motion:async_interruption_unobserved:8fd7eb214bfa8f46ef023ba1013edd9c754a1398b2b2430fa3f6213f5d51e89b"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "async_interruption_unobserved",
+      "subject": "static-motion:async_interruption_unobserved:923519542ddeac1e148dc7c3eb57ddcf60115b13885768de145fab3ee6c780cf"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "async_interruption_unobserved",
+      "subject": "static-motion:async_interruption_unobserved:9a417ba4fee3547d83bd67cec7f815d35852cc6c7a884273e1fae160d060a50b"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "frame_namespace_observation_unobserved",
+      "subject": "static-motion:frame_namespace_observation_unobserved:02175123ded0239642f7b7cc92468cb5624df4242014d29168a931f47fa4bff0"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "frame_namespace_observation_unobserved",
+      "subject": "static-motion:frame_namespace_observation_unobserved:0911cd39cd91b121d0704a3424219317964634f917b28047795a43ba1f007d37"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "frame_namespace_observation_unobserved",
+      "subject": "static-motion:frame_namespace_observation_unobserved:6a5eb572e32240585a710185b94990f194825553e39c034ea0e2c382890eeb89"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "frame_namespace_observation_unobserved",
+      "subject": "static-motion:frame_namespace_observation_unobserved:991d8eaa4809624bcfa7329404c72e8086a351d547ef046e3eb77a589ec87de0"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "reference_count_observation_unobserved",
+      "subject": "static-motion:reference_count_observation_unobserved:362727debbe63c0193b8c4145fe67abbe7dcd7a814bec40427fb2b76d13c820e"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "reference_count_observation_unobserved",
+      "subject": "static-motion:reference_count_observation_unobserved:73205e6218f8daae7b61a0f995002b47f47f342a86e874df3654235797f98895"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "reference_count_observation_unobserved",
+      "subject": "static-motion:reference_count_observation_unobserved:98411e26a8fbb5dde8d4f4985f47669805f811ad12154659fe94098d035569db"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "reference_count_observation_unobserved",
+      "subject": "static-motion:reference_count_observation_unobserved:d1efcfcbc52cd4e8c312382de60e3bd2d40309c943bb4de4d707b983f8115d26"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "resource_failure_unobserved",
+      "subject": "static-motion:resource_failure_unobserved:1bc4ba3b66973df07700612fad692eb2060d0fd762697d8f50c95037840bd85e"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "resource_failure_unobserved",
+      "subject": "static-motion:resource_failure_unobserved:2c7c3f8626f9c836f566cd70f0aa05d7c6af9d8e3c8e2725bd5a64eb471139f4"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "resource_failure_unobserved",
+      "subject": "static-motion:resource_failure_unobserved:736473740853541238a4c7533b0cb0abe9550cf79b7fc3c79bdf40dc48df061d"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "resource_failure_unobserved",
+      "subject": "static-motion:resource_failure_unobserved:e6749d61d408e03118833e4cedafea1052db82a4f3d34658a1df6bc052fc5b9a"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "source_precondition",
+      "subject": "no_external_namespace_mutation"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "source_precondition",
+      "subject": "standard_function_locals"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "target_runtime_match",
+      "subject": "static-motion:target_runtime_match:11cc17381d4b54a61b13ca6516862e7d5bdbebc46ff9ae04cff17b49ff4ff221"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "target_runtime_match",
+      "subject": "static-motion:target_runtime_match:4eff29e1fa0caffc2688832a9d0de178e528a1a9cc80eaf996a71052d5086a34"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "target_runtime_match",
+      "subject": "static-motion:target_runtime_match:cb9c1b446c6ea2b65af226bf53309a591b0fdb552cecdc6a5b9cd81f64b5f923"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "target_runtime_match",
+      "subject": "static-motion:target_runtime_match:df8a4b60df6ae7398995b0399894d0e8697cfa427c61a2e561085a290318a517"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "trace_event_order_unobserved",
+      "subject": "static-motion:trace_event_order_unobserved:32899a791ecb90d12af9d699755d68c805a7d16d4a434a591c7a949d2fe3df11"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "trace_event_order_unobserved",
+      "subject": "static-motion:trace_event_order_unobserved:884c4bdad09035e95fe83bd0d6c256067d5dc0ab33d7fe9bd05fa696da813441"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "trace_event_order_unobserved",
+      "subject": "static-motion:trace_event_order_unobserved:b2a5897b9eada1ebc39e0029c9c4ea6a0667ca4de52072ace6b4cbae34af09c2"
+    },
+    {
+      "evidence": {
+        "assumptions": [],
+        "confidence": null,
+        "kind": "Declared",
+        "references": [
+          "synthetic-fixture-policy:/home/zyf/AAA/scar/testcases/source_motion/README.md",
+          "sha256:dd9dd9ad3880887a16d02058ceaf5aa4753e5d49dd8777e704f08bc6561c7956"
+        ],
+        "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+      },
+      "predicate": "trace_event_order_unobserved",
+      "subject": "static-motion:trace_event_order_unobserved:d88b9852af1e9ab95f33c9cc03a756af941dc6eae4a0e551752dc8cf7b8fe5f2"
+    }
+  ],
+  "contracts": [],
+  "effect_policy": null,
+  "scope": "region-scope:ee436a7fc0827b0b153f24c6de97100e"
+}

@@ -1,6 +1,6 @@
 # 精确源码上移：当前证明范围
 
-状态：实现已接入，独立验收见 `G7_2B_MOTION_ACCEPTANCE.md`（归档后创建）。
+状态：实现与窄范围验收已完成，见 [G7_2B_MOTION_ACCEPTANCE.md](G7_2B_MOTION_ACCEPTANCE.md)。
 这是 G7.2b 的窄 MOTION 能力，不是 REUSE、循环 hoist、backend 或 LeWM 优化。
 
 ## 模型先于规则

@@ -3,6 +3,10 @@
 状态：**Verified，限于模型连接、固定源码重放和结构查询**。
 G7.2b 的正向 REUSE/MOTION、G7 总门和 LeWM 优化尚未通过。
 
+以上是本节点验收时的范围。后续窄 MOTION 已单独验收，见
+[G7_2B_MOTION_ACCEPTANCE.md](G7_2B_MOTION_ACCEPTANCE.md)；它不会追溯改变本报告
+的 Step 1 测试、测量或证据等级，完整 G7.2b 和 LeWM 优化仍未完成。
+
 实现提交：`c7f68ce2474a3d995c410465def12ee19c86f48d`。
 专项 gate **55 项通过**，完整回归 **995 项通过**，两项既有警告，无失败或跳过。
 两份报告绑定相同源码摘要

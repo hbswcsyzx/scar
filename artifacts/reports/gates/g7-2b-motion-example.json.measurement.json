@@ -1,0 +1,38 @@
+{
+  "analysis_seconds": 0.8749390481971204,
+  "decision": {
+    "applied": false,
+    "cost_status": "PENDING",
+    "legality_status": "CONDITIONALLY_LEGAL",
+    "selection_status": "NOT_SELECTED"
+  },
+  "executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "peak_rss_kib": 30796,
+  "peak_rss_source": "linux_proc_self_VmHWM",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "q_input_sha256": "c0526f7f8c90dad65f195e8d42ec11cb34c178f67a20eb531d6361af165a36dd",
+  "recorded_utc": "2026-10-03T16:39:47.162264+00:00",
+  "report": "/home/zyf/AAA/scar/artifacts/reports/gates/g7-2b-motion-example.json.gz",
+  "report_bytes": 18161,
+  "report_sha256": "d37b70ad21247c72ee3bb5d873be24f1759070d55d454d001a1a427003e2e3bc",
+  "revision": "750639f91c812f096f360f0c0b4ee761e5d2a7ae",
+  "schema": "scar.static-motion-proof-measurement",
+  "schema_version": 1,
+  "scope": "One caller-selected static query under explicit Q; no import, target execution, rewrite selection or workload speedup.",
+  "seconds_including_write": 0.8971364959143102,
+  "source": "/home/zyf/AAA/scar/testcases/source_motion/program.py",
+  "source_sha256": "84b6c519e953fc3f818aa3a444c3319109e310ee84d0ba372e0474e535ed4d35",
+  "status": "Observed",
+  "summary": {
+    "obligations": {
+      "alias_lifetime_readiness_autograd_hooks": "PROVEN",
+      "all_inputs_state_available_at_target": "PROVEN",
+      "consumer_call_control_closure": "PROVEN",
+      "control_dominance_and_zero_iteration": "PROVEN",
+      "effects_rng_exceptions_and_ordering": "PROVEN",
+      "precise_insertion_point_and_delta": "PROVEN"
+    },
+    "outcome": "CONDITIONALLY_LEGAL",
+    "q_assumptions": 26
+  }
+}

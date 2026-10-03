@@ -4,6 +4,11 @@
 
 起点：`CURRENT_CODE_AUDIT.md` 记录的 2026-09-22 架构基线。
 
+2026-10-03 进展：G1—G6、G7.1、G7.2a 和 G7.2b 模型基础已归档；G7.2b 的窄
+MOTION 已通过 179 项 gate / 1,064 项回归，但 REUSE、完整 G7.2b 和 G7 总门未
+完成。按 [G7_2B_PLAN.md](G7_2B_PLAN.md) 继续当前依赖链；验收报告与测量范围见
+[STATUS.md](STATUS.md)。没有 LeWM 变换或已验证加速比。
+
 目标：把 SCAR 从 evidence profiler + candidate detector 推进为能输出确定、
 可审计、AI 可执行修改指导的 semantic-aware execution optimization system。
 

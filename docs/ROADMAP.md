@@ -6,6 +6,11 @@
 > below preserve the prototype history. When their ordering differs, the
 > gated plan is authoritative.
 
+Current model authority is [IR_DESIGN_V2.md](IR_DESIGN_V2.md); accepted progress
+is recorded in [STATUS.md](STATUS.md). G7.2b now has model foundations and one
+narrow conditional static MOTION proof; positive REUSE and the parent gate
+remain pending under [G7_2B_PLAN.md](G7_2B_PLAN.md).
+
 SCAR is a **generic execution optimizer**, not a LeWM optimizer. A workload
 adapter can supply a command, input fixture, and validator; it cannot be
 imported by core analysis or select an optimization based on a model name.

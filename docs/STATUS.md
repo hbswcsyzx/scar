@@ -1,6 +1,32 @@
 # Current evidence and remaining work
 
-## Latest autonomous acceptance: G7.2b Step 1 models
+## Latest autonomous acceptance: G7.2b narrow static MOTION
+
+Implementation `1cf6965`, with legacy-fixture repair `750639f`, passed **179**
+mapped cases and **1,064** repository tests (two existing warnings, no skips).
+Whole source statements, first-local bindings, precise insertion anchors,
+source control and scoped Q now connect to six fixed recomputable MOTION
+obligations. See [G7_2B_MOTION_ACCEPTANCE.md](G7_2B_MOTION_ACCEPTANCE.md).
+
+One explicitly queried external straight-line alias assignment yields
+NEEDS_CONTRACT with default empty Q; under the synthetic fixture's 26 precise
+DECLARED conditions, all six obligations replay as PROVEN and the ledger is
+CONDITIONALLY_LEGAL. It remains NOT_SELECTED, cost PENDING and applied=false.
+Analysis took 0.875 seconds (0.897 with write), peak VmHWM 30,796 KiB. This is
+analysis overhead, not target execution or workload speedup.
+
+Raw MAY_RAISE edges remain; queries use ALL_PATHS. Branches, loops, handlers,
+mutable values, calls, rebinding and unavailable inputs cannot use this narrow
+rule. Initial legacy schema fixture failures and subsequent repair are archived.
+Both external reports strictly replay against unchanged inputs and current
+models; LeWM remains unchanged. No detector or backend was added.
+
+This accepts the narrow MOTION part of Step 2 only. Object-only identity,
+operand-site/event evidence and positive REUSE remain pending; full G7.2b,
+import-to-CONSTANT ledger guidance and parent G7 remain incomplete. There is
+still no selected LeWM rewrite or verified LeWM acceleration.
+
+## Previous autonomous acceptance: G7.2b Step 1 models
 
 Implementation `c7f68ce` passed 55 mapped gate cases and 995 repository tests
 (two existing warnings, no skips). Typed invocation-to-slot bindings, separate
@@ -13,9 +39,10 @@ edges, 245 insertion points and seven body/backedge/zero-exit paths. It retains
 13.901 seconds (14.684 including write), current executable VmHWM 76,948 KiB.
 Strict decoding and current source replays passed; LeWM remains unchanged.
 
-This accepts Step 1 foundations only. Positive REUSE/MOTION, exact source
-deltas, object-only identity evidence and full G7.2b acceptance remain pending.
-There is no selected LeWM rewrite or verified workload acceleration.
+This accepted Step 1 foundations only. The subsequent narrow static source
+delta/MOTION acceptance is recorded above; positive REUSE, object-only
+identity and full G7.2b remain pending. There is no selected LeWM rewrite or
+verified workload acceleration.
 
 ## Previous autonomous acceptance: G7.2a
 

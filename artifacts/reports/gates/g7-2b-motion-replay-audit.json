@@ -1,0 +1,39 @@
+{
+  "gate_duration_seconds": 37.088,
+  "lewm_worktree_clean": true,
+  "regression_duration_seconds": 97.37152476841584,
+  "reports": [
+    {
+      "applied": false,
+      "obligations": {
+        "alias_lifetime_readiness_autograd_hooks": "UNKNOWN",
+        "all_inputs_state_available_at_target": "UNKNOWN",
+        "consumer_call_control_closure": "UNKNOWN",
+        "control_dominance_and_zero_iteration": "UNKNOWN",
+        "effects_rng_exceptions_and_ordering": "UNKNOWN",
+        "precise_insertion_point_and_delta": "UNKNOWN"
+      },
+      "outcome": "NEEDS_CONTRACT",
+      "replayed": true,
+      "report": "g7-2b-motion-no-q.json.gz"
+    },
+    {
+      "applied": false,
+      "obligations": {
+        "alias_lifetime_readiness_autograd_hooks": "PROVEN",
+        "all_inputs_state_available_at_target": "PROVEN",
+        "consumer_call_control_closure": "PROVEN",
+        "control_dominance_and_zero_iteration": "PROVEN",
+        "effects_rng_exceptions_and_ordering": "PROVEN",
+        "precise_insertion_point_and_delta": "PROVEN"
+      },
+      "outcome": "CONDITIONALLY_LEGAL",
+      "replayed": true,
+      "report": "g7-2b-motion-example.json.gz"
+    }
+  ],
+  "revision": "750639f91c812f096f360f0c0b4ee761e5d2a7ae",
+  "schema": "scar.motion-acceptance-audit",
+  "source_sha256": "9f829755b8908fae9f9ecc1649eb81595ba89dd7250e5f5896ee3658a685d80c",
+  "status": "Verified"
+}

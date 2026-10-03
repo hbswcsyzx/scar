@@ -1,14 +1,19 @@
 # G7.2b：先补证明所需实体，再打开正向 REUSE / MOTION
 
-状态：**Step 1 模型基础已验收；G7.2b 正向证明尚未验收**。依据 `603819d` 的代码和三个 Luna max 子代理的
+状态：**Step 1 模型基础与 Step 2 的窄 MOTION 已验收；REUSE / 完整 G7.2b 未验收**。
+MOTION 179 项 gate、1,064 项回归、外部条件证明与首次失败记录见
+[G7_2B_MOTION_ACCEPTANCE.md](G7_2B_MOTION_ACCEPTANCE.md)。继续 Step 2 的 object-only
+身份、operand-site/event 与窄 REUSE；不新增 backend、不修改目标源文件。
+最初规划依据 `603819d` 的代码和三个 Luna max 子代理的
 独立只读审查。G7.2a 已归档；本阶段不添加 backend，不改目标源文件。
 Step 1 的实现、55 项 gate、995 项回归和外部源实测见
-[G7_2B_MODELS_ACCEPTANCE.md](G7_2B_MODELS_ACCEPTANCE.md)。继续执行 Step 2。
+[G7_2B_MODELS_ACCEPTANCE.md](G7_2B_MODELS_ACCEPTANCE.md)。
 
 ## 1. 为什么当前两个家族全部拒绝
 
-不是候选数量问题。当前四项 REUSE 与六项 MOTION 义务均为 UNKNOWN，终态固定为
-NOT_YET_SUPPORTED。它们缺少的不是一个“批准”开关：
+不是候选数量问题。规划开始时四项 REUSE 与六项 MOTION 义务均为 UNKNOWN，终态
+固定为 NOT_YET_SUPPORTED。现在同一闭合直线函数的完整 alias 赋值可在精确 Q 下
+通过 MOTION；一般动态 MOTION/循环上移与 REUSE 仍未支持。它们缺少的不是一个“批准”开关：
 
 | 必要事实 | 当前缺口 | 要进入的模型 |
 | --- | --- | --- |
