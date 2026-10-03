@@ -1,6 +1,27 @@
 # Current evidence and remaining work
 
-## Latest autonomous acceptance: G7.1
+## Latest autonomous acceptance: G7.2a
+
+Implementation `141390e` plus measurement fix `603819d` passed 162 mapped
+cases and 940 repository tests (two existing warnings, no skips). Static
+source/OIR identities, typed conditional binding boundaries, generic import
+value provenance and fixed recomputable CONSTANT/semantic DEAD ledgers are
+connected. See [G7_2A_ACCEPTANCE.md](G7_2A_ACCEPTANCE.md).
+
+The three-file generic external testcase derives the final RHS as conditional
+int(7), retaining import, re-export, attribute and two index steps. Five
+nonliteral conditional guidance records remain NOT_SELECTED/PENDING; import
+deletion is NOT_PROVEN. Analysis took 0.646 seconds, including write 0.702
+seconds; current executable VmHWM was 29,312 KiB, gzip report 37,959 bytes.
+This is analysis overhead, not target execution or workload speedup.
+
+G7.2a is partial acceptance. REUSE/MOTION positive witnesses and execution
+instance DEAD remain unsupported; import facts are not yet bridged into the
+CONSTANT ledger. G7.2b proceeds under [G7_2B_PLAN.md](G7_2B_PLAN.md), before
+G7.3 precise composite plans and G7.4 external pressure. No LeWM source change,
+selected rewrite or measured acceleration has been verified.
+
+## Previous autonomous acceptance: G7.1
 
 Implementation `d5fe9cb` passed all 163 mapped G7.1 cases and 848 repository
 tests, with two existing warnings and no skips. Ordered operation semantics,

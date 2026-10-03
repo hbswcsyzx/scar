@@ -1,0 +1,311 @@
+{
+  "analysis_seconds": 0.6461959378793836,
+  "decision": {
+    "applied": false,
+    "cost_status": "PENDING",
+    "import_deletion": "NOT_PROVEN",
+    "selection_status": "NOT_SELECTED"
+  },
+  "getrusage_maxrss_kib": 1855252,
+  "peak_rss_kib": 29312,
+  "peak_rss_source": "linux_proc_self_VmHWM",
+  "project_root": "/home/zyf/AAA/scar/testcases/static_imports",
+  "recorded_utc": "2026-10-03T14:11:53.683107+00:00",
+  "report": "/home/zyf/AAA/scar/artifacts/reports/gates/g7-2a-import-example.json.gz",
+  "report_bytes": 37959,
+  "report_sha256": "9c8b27c37328346016cbb7d6e674441ff9a3626541d91a1d544cb9f9d85aedb3",
+  "revision": "603819d6e3069a142f0b5244c79cd3dfcd12572f",
+  "schema": "scar.import-values-measurement",
+  "schema_version": 1,
+  "scope": "One SCAR source analysis and report write; target never executed, no workload speedup measurement.",
+  "seconds_including_write": 0.7022143718786538,
+  "source": "/home/zyf/AAA/scar/testcases/static_imports/program.py",
+  "source_fingerprints": {
+    "/home/zyf/AAA/scar/testcases/static_imports/arith_data/__init__.py": "sha256:5c012b3931c0f150a67e8760a9ab43296bb47f39190180174041294a7122d48e",
+    "/home/zyf/AAA/scar/testcases/static_imports/arith_data/values.py": "sha256:19ec55ef371090e43d03989f39a8863421f6b997cdeb5920ba2837ef35dc4836",
+    "/home/zyf/AAA/scar/testcases/static_imports/program.py": "sha256:d08be40b0fa0f7b42d2f721e8b82a429a017707d7ccb6b68f5b8d53b4ea1425f"
+  },
+  "status": "Observed",
+  "summary": {
+    "applied": false,
+    "boundary_kinds": {
+      "attribute": 1,
+      "call": 1,
+      "import": 2,
+      "index": 2,
+      "opaque": 1,
+      "rebind": 3
+    },
+    "conditional_binding_uses": 1,
+    "contract_count": 2,
+    "counts": {
+      "BLOCKED": 1,
+      "CONDITIONAL": 5,
+      "EXACT_BUILTIN_LITERAL": 12,
+      "UNRESOLVED": 3
+    },
+    "files": 3,
+    "guidance_count": 5,
+    "guidance_policy": {
+      "applied": false,
+      "cost_status": "PENDING",
+      "import_deletion": "NOT_PROVEN",
+      "selection_status": "NOT_SELECTED"
+    },
+    "omitted_targets": 1,
+    "provenance_count": 17,
+    "rule_version": "scar.import-values.v1",
+    "schema": "scar.import-values",
+    "schema_version": 1,
+    "selected_transformations": 0,
+    "semantic_boundaries": 10,
+    "semantic_digest": "d6a0efebab00e7ca2054aecd2888c42314a349f05c7f632673f87d4e0c366fb6",
+    "source_replay": "NOT_CHECKED",
+    "source_semantics_digest": "302c5b6c18f00b4868705e5f1a018669d9aa285fceddb1008b02d722d26e9412",
+    "targets": [
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "8",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:01596872a852d4e9bff635bce95f3a88"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "'External source-analysis testcase; SCAR must not execute this program.'",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:0a6fd83e4cb6755137815e418a947a9a"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "((2, 7), (3, 8))",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:12575fb2a6ba3a145947b24358a02f44"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "3",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:1af6267710f30d56d2b4a81c0c45195e"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "0",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:45689aeab785b5d906eaf40cbc09ae1b"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "'This testcase is for nonexecuting analysis only'",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:47e47d17c0501417dd326d7e08a43014"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "2",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:482d8b19e595358eb38b03f00a93782b"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "1",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:616369271e180ea064a70cefed330cf0"
+      },
+      {
+        "condition_kinds": [
+          "ATTRIBUTE_BOUNDARY",
+          "BUILTIN_INDEX",
+          "DYNAMIC_REBINDING",
+          "EXTERNAL_NAMESPACE_MUTATION",
+          "IMPORT_CACHE_STATE",
+          "INDEX_BOUNDARY",
+          "LAZY_MODULE_ATTRIBUTE",
+          "MODULE_EXPORT_NAMESPACE",
+          "MODULE_INITIALIZATION_COMPLETE",
+          "MODULE_INITIALIZATION_EFFECTS",
+          "MODULE_TYPE_AND_ATTRIBUTE_LOOKUP",
+          "PACKAGE_INITIALIZATION_ORDER",
+          "REBIND_BOUNDARY",
+          "SOURCE_FILE_SELECTION",
+          "SOURCE_REPLAY",
+          "STANDARD_IMPORT_HOOKS",
+          "SUBMODULE_ATTRIBUTE_BINDING"
+        ],
+        "gap_reasons": [],
+        "literal": "(2, 7)",
+        "status": "CONDITIONAL",
+        "value": "static_value:61d17fe834896ac19561828b9bc7a475"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [
+          "READ has neither an EXACT nor a typed conditional reaching binding."
+        ],
+        "literal": null,
+        "status": "UNRESOLVED",
+        "value": "static_value:63bf27c7f66f69e84e783989d279759c"
+      },
+      {
+        "condition_kinds": [
+          "ATTRIBUTE_BOUNDARY",
+          "DYNAMIC_REBINDING",
+          "EXTERNAL_NAMESPACE_MUTATION",
+          "IMPORT_CACHE_STATE",
+          "LAZY_MODULE_ATTRIBUTE",
+          "MODULE_EXPORT_NAMESPACE",
+          "MODULE_INITIALIZATION_COMPLETE",
+          "MODULE_INITIALIZATION_EFFECTS",
+          "MODULE_TYPE_AND_ATTRIBUTE_LOOKUP",
+          "PACKAGE_INITIALIZATION_ORDER",
+          "REBIND_BOUNDARY",
+          "SOURCE_FILE_SELECTION",
+          "SOURCE_REPLAY",
+          "STANDARD_IMPORT_HOOKS",
+          "SUBMODULE_ATTRIBUTE_BINDING"
+        ],
+        "gap_reasons": [],
+        "literal": "((2, 7), (3, 8))",
+        "status": "CONDITIONAL",
+        "value": "static_value:795c282183affc278a2db6144e843161"
+      },
+      {
+        "condition_kinds": [
+          "ATTRIBUTE_BOUNDARY",
+          "BUILTIN_INDEX",
+          "DYNAMIC_REBINDING",
+          "EXTERNAL_NAMESPACE_MUTATION",
+          "IMPORT_CACHE_STATE",
+          "INDEX_BOUNDARY",
+          "LAZY_MODULE_ATTRIBUTE",
+          "MODULE_EXPORT_NAMESPACE",
+          "MODULE_INITIALIZATION_COMPLETE",
+          "MODULE_INITIALIZATION_EFFECTS",
+          "MODULE_TYPE_AND_ATTRIBUTE_LOOKUP",
+          "PACKAGE_INITIALIZATION_ORDER",
+          "REBIND_BOUNDARY",
+          "SOURCE_FILE_SELECTION",
+          "SOURCE_REPLAY",
+          "STANDARD_IMPORT_HOOKS",
+          "SUBMODULE_ATTRIBUTE_BINDING"
+        ],
+        "gap_reasons": [],
+        "literal": "7",
+        "status": "CONDITIONAL",
+        "value": "static_value:83fd2ea665c8c27590cf85dbd47c9a2b"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "7",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:852ef39d388c83cf36732151a1324660"
+      },
+      {
+        "condition_kinds": [
+          "EXTERNAL_NAMESPACE_MUTATION",
+          "IMPORT_CACHE_STATE",
+          "MODULE_INITIALIZATION_COMPLETE",
+          "MODULE_INITIALIZATION_EFFECTS",
+          "PACKAGE_INITIALIZATION_ORDER",
+          "SOURCE_FILE_SELECTION",
+          "SOURCE_REPLAY",
+          "STANDARD_IMPORT_HOOKS",
+          "SUBMODULE_ATTRIBUTE_BINDING"
+        ],
+        "gap_reasons": [],
+        "literal": null,
+        "status": "UNRESOLVED",
+        "value": "static_value:8f8aeb92387d722287d65745c8f16162"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "(2, 7)",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:912f4934e5957c7267590c0fe44e513c"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "(3, 8)",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:aee043d1a130d3c3e24a23e686b3e59e"
+      },
+      {
+        "condition_kinds": [],
+        "gap_reasons": [],
+        "literal": "((2, 7), (3, 8))",
+        "status": "EXACT_BUILTIN_LITERAL",
+        "value": "static_value:b46a065363fd218fe72b426df9943b8c"
+      },
+      {
+        "condition_kinds": [
+          "ATTRIBUTE_BOUNDARY",
+          "BUILTIN_INDEX",
+          "DYNAMIC_REBINDING",
+          "EXTERNAL_NAMESPACE_MUTATION",
+          "IMPORT_CACHE_STATE",
+          "INDEX_BOUNDARY",
+          "LAZY_MODULE_ATTRIBUTE",
+          "MODULE_EXPORT_NAMESPACE",
+          "MODULE_INITIALIZATION_COMPLETE",
+          "MODULE_INITIALIZATION_EFFECTS",
+          "MODULE_TYPE_AND_ATTRIBUTE_LOOKUP",
+          "PACKAGE_INITIALIZATION_ORDER",
+          "REBIND_BOUNDARY",
+          "SOURCE_FILE_SELECTION",
+          "SOURCE_REPLAY",
+          "STANDARD_IMPORT_HOOKS",
+          "SUBMODULE_ATTRIBUTE_BINDING"
+        ],
+        "gap_reasons": [],
+        "literal": "7",
+        "status": "CONDITIONAL",
+        "value": "static_value:c611829cb2f81f69082a728997dd4ae2"
+      },
+      {
+        "condition_kinds": [
+          "EXTERNAL_NAMESPACE_MUTATION",
+          "IMPORT_CACHE_STATE",
+          "MODULE_EXPORT_NAMESPACE",
+          "MODULE_INITIALIZATION_COMPLETE",
+          "MODULE_INITIALIZATION_EFFECTS",
+          "MODULE_TYPE_AND_ATTRIBUTE_LOOKUP",
+          "PACKAGE_INITIALIZATION_ORDER",
+          "SOURCE_FILE_SELECTION",
+          "SOURCE_REPLAY",
+          "STANDARD_IMPORT_HOOKS"
+        ],
+        "gap_reasons": [],
+        "literal": "((2, 7), (3, 8))",
+        "status": "CONDITIONAL",
+        "value": "static_value:d06150bd119b1aed2fbde4fdd617aba2"
+      },
+      {
+        "condition_kinds": [
+          "CALL_BOUNDARY"
+        ],
+        "gap_reasons": [
+          "User call, opaque operation or user-defined dispatch blocks static import value resolution."
+        ],
+        "literal": null,
+        "status": "BLOCKED",
+        "value": "static_value:d1c4d43abbaa459099ee4f2d75e6c54e"
+      }
+    ],
+    "usage": {
+      "nodes": 21,
+      "output_bytes": 441926,
+      "steps": 191,
+      "work": 131
+    }
+  }
+}
