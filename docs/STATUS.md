@@ -2,6 +2,11 @@
 
 ## Current priority: core program graph review (2026-10-13)
 
+[PROGRAM_TYPES.md](PROGRAM_TYPES.md) distinguishes structural entity types,
+composable operation behaviors and dependency relations. SCAR models program
+execution, not human interpretation of payloads: saving video and tensor data
+uses the same encoding/state-write building blocks. This is a design clarification.
+
 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) proposes four top-level semantic node families:
 Operation, Value, StateLocation and Region. Values have typed data/reference/
 state-version variants; input/output are port roles. Ordered uses, control,
