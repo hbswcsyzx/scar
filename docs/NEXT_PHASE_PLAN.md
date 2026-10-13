@@ -9,9 +9,11 @@ MOTION 已通过 179 项 gate / 1,064 项回归，但 REUSE、完整 G7.2b 和 G
 完成。按 [G7_2B_PLAN.md](G7_2B_PLAN.md) 继续当前依赖链；验收报告与测量范围见
 [STATUS.md](STATUS.md)。没有 LeWM 变换或已验证加速比。
 
-2026-10-13 设计复查：下一节点按 [G7_2B_EVIDENCE_PLAN.md](G7_2B_EVIDENCE_PLAN.md)
-先接通实际对象引用、有序 operand occurrence、primitive 与返回使用的证据链。
-精确 consumer 替换差量和未来 guard 单独设计，不与证据采集混作一个验收门。
+2026-10-13 更新：宏观审计发现统一状态位置、状态版本和程序目标边界仍缺失。
+当前优先按 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) 执行 N0—N4：节点/边审查
+→ 语义核心/接口 → 前端统一图 → 依赖闭包与子图化简 → 证据/OIR 连接。
+这是原 G7 路线的必要前置修正。引用采集草稿单独存档，未合并 main；不以窄
+`is` 采集为程序语义核心的前置，不继续扩大 collector/backend。
 
 目标：把 SCAR 从 evidence profiler + candidate detector 推进为能输出确定、
 可审计、AI 可执行修改指导的 semantic-aware execution optimization system。
@@ -88,6 +90,10 @@ proof 内部允许 UNKNOWN；用户可执行计划的终态只能是：
 后两者必须包含缺失事实、采集位置和重跑入口。
 
 ## 3. 总体里程碑
+
+下表保留原 gate 历史。G1—G6 的既有通过只覆盖其验收范围，不表示统一程序
+语义已经完备。当前先完成 CORE_GRAPH_MODEL 中 N0—N4，再继续尚未满足的 G7
+及后续 gate；新阶段同样由开发代理自行验收、记录并提交。
 
 | Gate | 里程碑 | 主要产物 | 进入条件 |
 | --- | --- | --- | --- |

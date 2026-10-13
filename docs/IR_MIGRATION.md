@@ -2,6 +2,12 @@
 
 状态：**审查和迁移计划**。
 
+2026-10-13 当前迁移优先级由 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) §7—8
+修订：保留 source semantics、CFG/effects、provenance 和 EEG 证据，先建立
+Operation/Value/StateLocation/Region 统一语义接口。输入输出槽不等于值，
+state_slots 不等于完整状态转移，OIR Region 不能创造缺失的程序依赖。
+N1—N4 将逐门实现与验收，不一次推倒旧 collector，也不先增加新 backend。
+
 实施状态以 [STATUS.md](STATUS.md) 与逐 gate 验收报告为准。下文保留原迁移审查。
 G7.2 当前补充的是独立 source semantics overlay、静态替换及条件 import provenance；
 不把静态 binding 当动态 LogicalVersion，也不合并 SG、EEG 和 OIR。具体 schema

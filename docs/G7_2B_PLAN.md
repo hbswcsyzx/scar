@@ -1,6 +1,9 @@
 # G7.2b：先补证明所需实体，再打开正向 REUSE / MOTION
 
 状态：**Step 1 模型基础与 Step 2 的窄 MOTION 已验收；REUSE / 完整 G7.2b 未验收**。
+2026-10-13 宏观审查后的优先级：先完成 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)
+的节点、状态与依赖闭包 N0—N4，再恢复本计划剩余的 proof/delta 工作。
+以下步骤保留原规划历史；引用采集草稿已单独存档，未进入 main。
 MOTION 179 项 gate、1,064 项回归、外部条件证明与首次失败记录见
 [G7_2B_MOTION_ACCEPTANCE.md](G7_2B_MOTION_ACCEPTANCE.md)。继续 Step 2 的 object-only
 身份、operand-site/event 与窄 REUSE；不新增 backend、不修改目标源文件。

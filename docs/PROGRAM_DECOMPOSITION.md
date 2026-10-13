@@ -1,5 +1,11 @@
 # SCAR program decomposition
 
+The latest node/edge decision is [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md):
+Operation, Value, StateLocation and Region. Value has typed data, reference and
+state-version variants; ports encode input/output roles. Control and effects
+are explicit dependencies. This unified core is proposed, not already supplied
+by the v1 decomposition below or by v2's reserved state_slots.
+
 Current architecture: [IR_DESIGN_V2.md](IR_DESIGN_V2.md). The v2 core separates
 operation definitions (SG), actual operation instances (EEG), and replaceable
 regions/deltas (OIR), joined through typed ports, versions and evidence. Data

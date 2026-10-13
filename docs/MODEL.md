@@ -1,5 +1,15 @@
 # SCAR execution model
 
+## Program semantics first (2026-10-13 decision)
+
+[CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) now defines the intended semantic
+core: Operation, Value, StateLocation and Region, with typed data/reference/
+state-version values and explicit use/control/effect/boundary relations. Input
+and output are port roles; constants are value origins. This unified core is
+not yet implemented. Existing state_slots and observation labels do not
+constitute a general state-transition model. The six dimensions below remain
+views, not a mutually exclusive taxonomy of program nodes.
+
 ## Current architecture and implementation boundary
 
 The six dimensions below remain observation coordinates. The current v2 core

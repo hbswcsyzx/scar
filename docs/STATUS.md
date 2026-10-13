@@ -1,16 +1,26 @@
 # Current evidence and remaining work
 
-## Current work: reviewed captured-slice evidence plan (2026-10-13)
+## Current priority: core program graph review (2026-10-13)
 
-The next G7.2b subgate is defined in
-[G7_2B_EVIDENCE_PLAN.md](G7_2B_EVIDENCE_PLAN.md). It connects actual object
-references, ordered operand occurrences, primitive execution and precise return
-uses. Incomplete drafts are being narrowed after independent review; they have
-not passed acceptance. Repeated observation must not create a fictitious new
-materialization. Historical evidence does not establish a future reuse guard.
-OIR consumer substitution and positive REUSE remain separate pending work.
+[CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) specifies four semantic node kinds:
+Operation, Value, StateLocation and Region. Values have typed data/reference/
+state-version variants; input/output are port roles. Ordered uses, control,
+state conflicts, effects and region boundaries define what simplification must
+preserve. This is a reviewed design, not an implemented unified semantic graph.
 
-No new backend, selected LeWM transformation or verified acceleration is claimed.
+The code audit found no general StateLocation/StateVersion model; state_slots
+is largely a reserved interface, and actual computation/value connections live
+in an optional source overlay. More trace collection cannot replace these
+missing semantics. N1–N4 now precede the pending G7 proof/plan work.
+
+The incomplete reference collector is archived, not merged into main, on
+[wip/reference-evidence-20261013](https://github.com/hbswcsyzx/scar/tree/wip/reference-evidence-20261013)
+at `2e08b4c`. At frozen implementation `0b90f38`, 80 component checks passed and
+one integration test failed; this is not a gate or full regression acceptance.
+The profile/monitoring combination did not yield the required instruction
+stream. No valid positive capture or measurement is claimed for that draft.
+
+No new backend, selected LeWM transformation or verified acceleration exists.
 
 ## Latest autonomous acceptance: G7.2b narrow static MOTION
 

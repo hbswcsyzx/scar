@@ -1,8 +1,14 @@
 # G7.2b 下一节点：先接通引用、操作数与返回使用的证据链
 
 日期：2026-10-13。基线：`d5fa963`，已在 `origin/main`。
-状态：**设计审查完成，待实现与自行验收**。这是 G7.2b 的独立证据子门，
-不是完整 G7.2b，也不是正向 REUSE 审批。
+状态：**历史子门规划，已暂停并存档草稿，未通过验收**。后续宏观审查发现
+更根本的状态/依赖模型缺口，执行顺序以 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)
+的 N0—N4 为准。本切片不是建立统一程序语义的必要前置。
+
+实测纠正：下面原规划中 profile + monitoring 可共同提供完整指令证据的假设
+未成立；CPython 3.14.7 后续探针显示启用 profile 会丢失所需 INSTRUCTION。
+替代探针不等于 collector 已完成。完整 WIP、80 项组件通过及 1 项集成失败见
+[存档分支](https://github.com/hbswcsyzx/scar/tree/wip/reference-evidence-20261013)。
 
 ## 1. 为什么调整原来的执行顺序
 

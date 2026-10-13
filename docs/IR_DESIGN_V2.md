@@ -2,6 +2,11 @@
 
 状态：**已采用的架构设计；实现范围逐 gate 验证**。
 
+2026-10-13 修订：核心节点与依赖的最新决定见
+[CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)。其 Operation/Value/StateLocation/Region、
+强类型状态版本、区域边界与控制/效果规则优先于本文早期实体清单。当前 v2
+主要具备结构和证据容器，并未实现该统一语义核心；新 collector 不能替代它。
+
 本文不增加 detector，不增加 optimization backend。G1—G7.2b 已逐步实现
 typed graphs、source/evidence、provenance、regions 和部分固定证明；它不表示
 本文所有能力已完成，当前验收与缺口以 [STATUS.md](STATUS.md) 为准。
@@ -392,7 +397,7 @@ ValueVersionID。若 cast/normalize 改变了语义值，则产生新的 Logical
 
 | 操作 | 默认 v2 表达 | 不能直接做的事 |
 | --- | --- | --- |
-| exact view/reshape | 同一 ValueVersion；新 StorageRegion/view provenance | 不能据此假设独立 storage |
+| view/reshape | 显式视图/选择器及值定义；可共享可变位置/storage；具体等价需合同 | 不能默认同一逻辑值、独立 storage 或相同 shape/身份 |
 | exact device copy | 同一 ValueVersion；新 Materialization | 不能把 `.to()` 当成物理 copy 证据 |
 | `deepcopy` 不可变值 | 新 ObjectID，可共享同一版本的 exact-content claim | 不能保证未来写入仍同步 |
 | `deepcopy` 可变对象 | 新 LogicalValueID，`copy` provenance 指向源版本 | 不能把两个 object 永久合并 |
