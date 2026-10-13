@@ -2,6 +2,11 @@
 
 状态：**执行计划**
 
+最新节点：N1 实现 `8179cca` 已通过 93 项 gate 和 1,157 项回归；验收见
+[N1_ACCEPTANCE.md](N1_ACCEPTANCE.md)。下一步执行
+[N2_IMPLEMENTATION_PLAN.md](N2_IMPLEMENTATION_PLAN.md)，复用已有源码/算子/CFG
+记录构造新图，补参数、合流、调用和来源对应。
+
 起点：`CURRENT_CODE_AUDIT.md` 记录的 2026-09-22 架构基线。
 
 2026-10-03 进展：G1—G6、G7.1、G7.2a 和 G7.2b 模型基础已归档；G7.2b 的窄

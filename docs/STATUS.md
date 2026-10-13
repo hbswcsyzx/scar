@@ -1,5 +1,23 @@
 # Current evidence and remaining work
 
+## Latest autonomous acceptance: N1 program types and dependency core (2026-10-13)
+
+Implementation `8179cca` passed **93** gate cases and **1,157** repository tests
+(two existing warnings, no failures or skips). Typed values, state locations,
+operations and regions now have exact uses, bounded synchronous control,
+state progression, call/exit interfaces and strict JSON validation. The public
+`scar check-program` entry validates supplied graphs without executing them.
+
+Independent tests first exposed two invalid-call acceptance bugs; these were
+fixed and the resulting 27 adversarial checks are included in the gate. See
+[N1_ACCEPTANCE.md](N1_ACCEPTANCE.md) and [PROGRAM_CORE_API.md](PROGRAM_CORE_API.md).
+The complete examples are manually constructed IR. Automatic source recovery,
+general exception calls, GPU readiness, autograd and optimization approval are
+not established by this acceptance. No LeWM transform or speedup is verified.
+
+Next: [N2_IMPLEMENTATION_PLAN.md](N2_IMPLEMENTATION_PLAN.md), adapting existing
+source/opcode/CFG records with explicit parameter, merge and call bindings.
+
 ## Current priority: core program graph review (2026-10-13)
 
 [PROGRAM_TYPES.md](PROGRAM_TYPES.md) distinguishes structural entity types,
@@ -11,16 +29,17 @@ uses the same encoding/state-write building blocks. This is a design clarificati
 Operation, Value, StateLocation and Region. Values have typed data/reference/
 state-version variants; input/output are port roles. Ordered uses, control,
 state conflicts, effects and region boundaries define what simplification must
-preserve. This is a reviewed design, not an implemented unified semantic graph
-or a proof that four families cover all program semantics. The
+preserve. N1 now implements the bounded structural core; source recovery and
+broader coverage remain pending. Four families are not a completeness proof. The
 [N0 review](N0_CORE_GRAPH_REVIEW.md) accepts scoped design consistency only.
 [LeWM source stress cases](LEWM_SEMANTIC_COVERAGE_REVIEW.md) distinguish entity
 classification from actual operation rules, dependency queries and proof.
 
-The code audit found no general StateLocation/StateVersion model; state_slots
+The pre-N1 code audit found no general StateLocation/StateVersion model; state_slots
 is largely a reserved interface, and actual computation/value connections live
 in an optional source overlay. More trace collection cannot replace these
-missing semantics. N1–N4 now precede the pending G7 proof/plan work.
+missing semantics. N1 has addressed the declared-graph core; N2–N4 precede the
+pending G7 proof/plan work.
 
 The incomplete reference collector is archived, not merged into main, on
 [wip/reference-evidence-20261013](https://github.com/hbswcsyzx/scar/tree/wip/reference-evidence-20261013)

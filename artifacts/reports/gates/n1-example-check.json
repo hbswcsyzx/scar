@@ -1,0 +1,24 @@
+{
+  "schema": "scar.program-graph-check",
+  "schema_version": 1,
+  "input": "/home/zyf/AAA/scar/examples/program_graphs/branch_state.json",
+  "scope": "declared graph structure and dependencies",
+  "source_recovery": false,
+  "transformation_authorized": false,
+  "status": "WELL_FORMED",
+  "errors": [],
+  "counts": {
+    "regions": 1,
+    "blocks": 3,
+    "operations": 7,
+    "values": 14,
+    "locations": 2,
+    "uses": 20,
+    "value_kinds": {
+      "DATA": 5,
+      "REFERENCE": 1,
+      "STATE": 8
+    },
+    "declared_incomplete_effects": 3
+  }
+}

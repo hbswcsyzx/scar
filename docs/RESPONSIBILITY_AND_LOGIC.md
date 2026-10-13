@@ -7,7 +7,8 @@
 2026-10-13 核心决定见 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)：先用四类语义
 节点和明确的值/状态/控制/效果关系建模整个程序，再对具有完整接口的子图
 进行等价化简。输入输出是端口角色，K/Σ/A/R/Q/M 是视角；不能以分类标签和
-trace 数量代替完整依赖模型。统一语义核心仍待 N1—N4 实现。
+trace 数量代替完整依赖模型。N1 已实现并验收有限同步图；源码恢复和优化连接
+仍待 N2—N4，具体边界见 [N1_ACCEPTANCE.md](N1_ACCEPTANCE.md)。
 
 当前架构和实现范围分别见 [IR_DESIGN_V2.md](IR_DESIGN_V2.md) 与
 [STATUS.md](STATUS.md)。本阶段输出可重算的分析和精确修改指导，不修改目标源文件。
