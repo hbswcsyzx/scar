@@ -1,0 +1,38 @@
+{
+  "schema": "scar.design-review.node-family-scope",
+  "schema_version": 1,
+  "recorded_utc": "2026-10-13T03:36:40.356702+00:00",
+  "base_revision": "22d8bb8a4ca01a38b8488c71aad5d359b47ffa3c",
+  "status": "DESIGN_SCOPE_CLARIFIED",
+  "question": "Do four semantic node families establish complete LeWM modeling?",
+  "answer": "No. Proposed structural families do not establish operation semantics or coverage.",
+  "historical_n0_snapshot_hashes_verified": true,
+  "family_completeness_proven": false,
+  "unified_core_implemented": false,
+  "new_runtime_measurement": false,
+  "tests_rerun": false,
+  "source_review_scope": "Selected external source files, not all LeWM or its dependency closure",
+  "independent_reviewer": "semantic_node_review",
+  "specific_open_semantics": [
+    "GPU host-return versus device-ready completion",
+    "autograd connections and mode scopes",
+    "container and partial-write state transitions",
+    "per-operation dispatch and effect rules"
+  ],
+  "document_hashes": {
+    "docs/CORE_GRAPH_MODEL.md": "ad032df3941de870f5eb6642cb8f6f84218ffa8cf07158b417a2671433ce09c0",
+    "docs/LEWM_SEMANTIC_COVERAGE_REVIEW.md": "f691f353dbce148c7651a4441c306a76a94db4aaf01268179b25ded160780507",
+    "docs/N0_CORE_GRAPH_REVIEW.md": "521494aa38731fb26322a38e7b2d41dd5c27b50af3a604c321b6aafadc7f9ef6",
+    "docs/STATUS.md": "7b1fae0e78eee854d78d2738b244561e7a16fa016ba8ab87cf5e10e77297a829",
+    "docs/LEWM_MODEL.md": "de080bfea6475a79b0e44042ebfb559602938030ed82345c2bc4ad3b7b165b90"
+  },
+  "external_source_hashes": {
+    "eval.py": "6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+    "stable-worldmodel/stable_worldmodel/solver/cem.py": "a6662e7f1f2c6ecaf0a8527255d531aa05ed583339aabdf2798d0206382ef51b",
+    "stable-worldmodel/stable_worldmodel/solver/gd.py": "823370564886e01ba50520171f6058437f34f204367d94a9db4119d748de6942",
+    "stable-worldmodel/stable_worldmodel/policy.py": "4967e7e3d5b20eb7a1d0b00e5d60fd701cce1c750ae7ec4a9b02529b9366db22",
+    "stable-worldmodel/stable_worldmodel/wm/lewm/lewm.py": "f29797b1ed2b90b4977f38a953d251e8be8df6c8cfe7b59bb4c00bfd609f0d8f"
+  },
+  "core_unchanged_from_d5fa963": true,
+  "lewm_worktree_clean": true
+}

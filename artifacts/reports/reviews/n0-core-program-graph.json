@@ -1,0 +1,271 @@
+{
+  "archive": {
+    "accepted": false,
+    "branch": "wip/reference-evidence-20261013",
+    "commit": "2e08b4c3336a25222e3eb5d85b29989dde8b942d",
+    "component_tests_passed": 80,
+    "implementation": "0b90f38",
+    "integration_tests_failed": 1
+  },
+  "design": {
+    "constant": "Literal origin or separately proved constant fact; a fact never rewrites its producer",
+    "dependencies": [
+      "ordered value uses",
+      "state content and conflicts",
+      "typed control paths",
+      "external effects and ordering"
+    ],
+    "independent_reviews": [
+      {
+        "agent": "semantic_node_review",
+        "result": "mandatory corrections resolved; design accepted only"
+      },
+      {
+        "agent": "reuse_design_review",
+        "result": "mandatory corrections resolved; design accepted only"
+      }
+    ],
+    "input_output": "Typed region port roles",
+    "node_kinds": [
+      "Operation",
+      "Value",
+      "StateLocation",
+      "Region"
+    ],
+    "resolved_review_findings": [
+      "Reference referent identity is independent of location/selector",
+      "Reference metadata reads depend on state",
+      "Static definitions and dynamic occurrences are different",
+      "Constant facts preserve the original producer until explicit replacement",
+      "Overwrite kills content dependence, not necessary ordering",
+      "Definitions must be available on each incoming path",
+      "Initial source subset and declared-contract positives are disclosed"
+    ],
+    "value_variants": [
+      "DataValue",
+      "ReferenceValue",
+      "StateVersionValue"
+    ]
+  },
+  "environment": {
+    "executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]"
+  },
+  "implemented_unified_core": false,
+  "new_backend": false,
+  "next": [
+    "N1 semantic schema and complete-program IR fixtures",
+    "N2 bounded frontend adapters",
+    "N3 dependency closure and subgraph modification guidance",
+    "N4 execution evidence and OIR connection"
+  ],
+  "observed": {
+    "classes_in_audited_sources": {
+      "scar/analysis/effects_v2.py": [
+        "EffectDimension",
+        "ScopeMode",
+        "ClosureState",
+        "ObservationScope",
+        "EffectOccurrence",
+        "EffectCoverage",
+        "OperationEffects",
+        "EffectGap",
+        "BoundarySummary",
+        "ConsumerClosure",
+        "ResidualSlice",
+        "EffectClosureEngine"
+      ],
+      "scar/ir/control_flow_v2.py": [
+        "SuiteKind",
+        "NodeKind",
+        "EdgeKind",
+        "GapKind",
+        "InsertionKind",
+        "QueryMode",
+        "QueryStatus",
+        "ControlFlowBudget",
+        "ControlFlowSuite",
+        "ControlFlowNode",
+        "ControlFlowEdge",
+        "ControlFlowGap",
+        "InsertionPoint",
+        "DominanceRequest",
+        "DominanceReport",
+        "ReachabilityRequest",
+        "ReachabilityReport",
+        "MustExecuteRequest",
+        "MustExecuteReport",
+        "SourceControlFlowGraph"
+      ],
+      "scar/ir/semantics_v2.py": [
+        "Opcode",
+        "DispatchKind",
+        "BindingStatus",
+        "ImportForm",
+        "BoundaryKind",
+        "SourceExecutionPrecondition",
+        "SourceSnapshot",
+        "OperandUse",
+        "ImportSpec",
+        "OperationSemantics",
+        "StaticValue",
+        "StaticBinding",
+        "BindingUse",
+        "SemanticBoundary",
+        "SemanticGap",
+        "SourceSemanticsGraph"
+      ],
+      "scar/ir/v2/evidence.py": [
+        "EvidenceStatus",
+        "OperationInstance",
+        "ValueObservation",
+        "EvidenceNodeKind",
+        "EvidenceEndpoint",
+        "EvidenceRelation",
+        "EvidenceEdge",
+        "EvidenceGraph"
+      ],
+      "scar/ir/v2/optimization.py": [
+        "RegionGranularity",
+        "RegionPortKind",
+        "ValuePattern",
+        "RegionPort",
+        "OptimizationRegion",
+        "TransformKind",
+        "LiteralValue",
+        "ValueSubstitution",
+        "StaticValueSubstitution",
+        "RegionMove",
+        "SourceFragment",
+        "StaticSourceMove",
+        "TransformDelta",
+        "ResidualEffect",
+        "GuardSpec",
+        "InvalidationSpec",
+        "MeasurementMode",
+        "CostRequest",
+        "ValidationRequest",
+        "InstructionKind",
+        "PlanInstruction",
+        "PlanAlternative",
+        "PlanDisposition",
+        "PlanSelection",
+        "StaticValueInfo",
+        "StaticBindingInfo",
+        "OptimizationContext",
+        "OptimizationGraph"
+      ],
+      "scar/ir/v2/semantic.py": [
+        "OperationKind",
+        "PackageDefinition",
+        "ModuleDefinition",
+        "SourceAtom",
+        "ValueSlot",
+        "OperationDefinition",
+        "ControlRegion",
+        "SemanticNodeKind",
+        "SemanticEndpoint",
+        "SemanticRelation",
+        "SemanticEdge",
+        "SemanticGraph"
+      ],
+      "scar/ir/v2/values.py": [
+        "ProvenanceRelation",
+        "EquivalenceClaim",
+        "BindingRelation",
+        "LogicalValue",
+        "ValueVersion",
+        "ProvenanceRecord",
+        "StorageAllocation",
+        "StorageRegion",
+        "Materialization",
+        "ObjectBinding",
+        "ValueGraph"
+      ]
+    },
+    "core_unchanged_from_last_accepted_implementation": true,
+    "lewm_worktree_clean": true,
+    "semantic_node_kinds": [
+      "package",
+      "module",
+      "source_atom",
+      "operation",
+      "value_slot",
+      "control",
+      "contract",
+      "effect",
+      "resource"
+    ],
+    "source_fingerprints": {
+      "docs/CORE_GRAPH_MODEL.md": "4a3d37c3fc925b46d8807cc22f79e91b942cc30962b38f558e59dba01f169466",
+      "scar/analysis/effects_v2.py": "e47e56d9d6d23eff502f58072c811f2f640072e5a850ebdeac0f80b5f3db43c1",
+      "scar/ir/control_flow_v2.py": "d31fed629ff80fb80294343bb1904c9375c5a976d3073e274c6e4b6c5a52e92e",
+      "scar/ir/semantics_v2.py": "f938bc3635b50e2a4a1efe29b5e364f82ff274931bd2f857beab71e93969a9a2",
+      "scar/ir/v2/evidence.py": "dba2dffc93e0f7dba0f5a0196c1f802e909644106c9380426fdf1472dc3a61c5",
+      "scar/ir/v2/optimization.py": "4e981786c52d9bbc50cb76f8b469153d035692daed2c2941e27b3e7fea8dcdc5",
+      "scar/ir/v2/semantic.py": "9d0af8a2b4a868df00388ccb910cdabdc93066aad7ff0e593d1c8d0e969885ab",
+      "scar/ir/v2/values.py": "2c4ab8a69d46ef312f454c487329150cd7f3f4a12819e51bf8a8ae218210f259"
+    },
+    "state_slots_references": [
+      {
+        "line": 379,
+        "path": "scar/analysis/regions_v2.py",
+        "text": "(RegionPortKind.STATE, definition.state_slots)):"
+      },
+      {
+        "line": 396,
+        "path": "scar/ir/invocation_bindings_v2.py",
+        "text": "for slot in definition.state_slots)"
+      },
+      {
+        "line": 511,
+        "path": "scar/ir/invocation_bindings_v2.py",
+        "text": "InvocationRole.STATE: set(definition.state_slots),"
+      },
+      {
+        "line": 438,
+        "path": "scar/ir/v2/codec.py",
+        "text": "tuple(_required_id(value, ValueSlotID) for value in item.get(\"state_slots\", ())),"
+      },
+      {
+        "line": 129,
+        "path": "scar/ir/v2/semantic.py",
+        "text": "state_slots: tuple[ValueSlotID, ...] = ()"
+      },
+      {
+        "line": 138,
+        "path": "scar/ir/v2/semantic.py",
+        "text": "(self.input_slots + self.output_slots + self.state_slots, ValueSlotID, \"slot\"),"
+      },
+      {
+        "line": 145,
+        "path": "scar/ir/v2/semantic.py",
+        "text": "for role in (\"input_slots\", \"output_slots\", \"state_slots\"):"
+      },
+      {
+        "line": 163,
+        "path": "scar/ir/v2/semantic.py",
+        "text": "\"state_slots\": [item.as_dict() for item in self.state_slots],"
+      },
+      {
+        "line": 437,
+        "path": "scar/ir/v2/semantic.py",
+        "text": "+ definition.state_slots if slot not in self.slots}"
+      },
+      {
+        "line": 455,
+        "path": "scar/ir/v2/semantic.py",
+        "text": "for slot_id in definition.input_slots + definition.output_slots + definition.state_slots:"
+      }
+    ]
+  },
+  "recorded_utc": "2026-10-13T03:29:39.332369+00:00",
+  "review": "N0",
+  "revision": "22d8bb8a4ca01a38b8488c71aad5d359b47ffa3c",
+  "schema": "scar.design-review.core-program-graph",
+  "schema_version": 1,
+  "scope": "Read-only code audit and semantic design review. No implementation/runtime acceptance of N1-N4.",
+  "selected_lewm_transformations": 0,
+  "status": "DESIGN_REVIEW_ACCEPTED",
+  "verified_lewm_speedup": null
+}

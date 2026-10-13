@@ -2,11 +2,15 @@
 
 ## Current priority: core program graph review (2026-10-13)
 
-[CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) specifies four semantic node kinds:
+[CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) proposes four top-level semantic node families:
 Operation, Value, StateLocation and Region. Values have typed data/reference/
 state-version variants; input/output are port roles. Ordered uses, control,
 state conflicts, effects and region boundaries define what simplification must
-preserve. This is a reviewed design, not an implemented unified semantic graph.
+preserve. This is a reviewed design, not an implemented unified semantic graph
+or a proof that four families cover all program semantics. The
+[N0 review](N0_CORE_GRAPH_REVIEW.md) accepts scoped design consistency only.
+[LeWM source stress cases](LEWM_SEMANTIC_COVERAGE_REVIEW.md) distinguish entity
+classification from actual operation rules, dependency queries and proof.
 
 The code audit found no general StateLocation/StateVersion model; state_slots
 is largely a reserved interface, and actual computation/value connections live

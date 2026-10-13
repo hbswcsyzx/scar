@@ -11,7 +11,9 @@ to represent when fed the unmodified LeWM command.
   dispatch, environment step and policy call.
 * **State (Σ):** pixels, actions, goals, latent tensors, model parameters and
   buffers, RNG state, dataset rows, environment state, and each logical data
-  version. A view is a Region over storage; it is not a new content identity.
+  version. A view has a reference, access selector and possible shared storage
+  region; it need not preserve the same logical value or object identity.
+  A storage region is distinct from a semantic program Region.
 * **Action (A):** encoder/predictor/value calls (`VAL`), reshape/cast/layout
   (`REP`), allocation and release (`MEM`), copies (`XFER`), module and solver
   dispatch (`CTRL`), synchronization (`ORDER`), dataset/video/logging (`IO`).
