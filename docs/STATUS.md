@@ -1,5 +1,21 @@
 # Current evidence and remaining work
 
+## Disk maintenance and automatic-modeling scope (2026-10-13)
+
+SCAR-generated large artifacts were losslessly archived with decompressed
+SHA256 verification. Cleanup freed **27.863 GiB**; the workspace is about
+**1.4 GiB**. Source, tracked reports, Git history and LeWM were preserved.
+Trace readers now accept gzip archives automatically; 26 relevant checks
+passed. An archived real LeWM trace yielded its 45,888 events through the
+ordinary directory entry in 2.308 seconds, without writing another large graph.
+See [ARTIFACT_RETENTION.md](ARTIFACT_RETENTION.md).
+
+Complete automatic decomposition of LeWM into the new core is still pending.
+Manual IR exists as test fixtures, not the intended workload workflow.
+[N2_IMPLEMENTATION_PLAN.md](N2_IMPLEMENTATION_PLAN.md) now explicitly requires
+automatic construction and coverage reports without manually repairing the
+workload graph, with parameter/merge/call/state/source links verified separately.
+
 ## Latest autonomous acceptance: N1 program types and dependency core (2026-10-13)
 
 Implementation `8179cca` passed **93** gate cases and **1,157** repository tests

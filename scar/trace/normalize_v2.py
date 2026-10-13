@@ -509,17 +509,17 @@ def normalize_records(records: Iterable[dict[str, Any]], *, source: str = "memor
 
 def normalize_trace(path: str | Path, *, namespace: str | None = None) -> NormalizationResult:
     """Read each physical JSONL line once per pass, retaining malformed lines."""
-    path = Path(path).resolve()
-    if path.is_dir():
-        path = path / "events.jsonl"
+    from .files import open_binary, resolve
+
+    path = resolve(Path(path).resolve(), default_name="events.jsonl")
     if namespace is None:
         digest = hashlib.sha256()
-        with path.open("rb") as stream:
+        with open_binary(path) as stream:
             for chunk in iter(lambda: stream.read(1024 * 1024), b""):
                 digest.update(chunk)
         namespace = "trace:" + digest.hexdigest()
     normalizer = _Normalizer(str(path), namespace)
-    with path.open("rb") as stream:
+    with open_binary(path) as stream:
         for line, raw in enumerate(stream, 1):
             try:
                 record = json.loads(raw, object_pairs_hook=_unique_object,

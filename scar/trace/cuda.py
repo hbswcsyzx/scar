@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from scar.ir import Effect, Event
+from .files import open_text
 
 
 def correlate_transfer_states(transfer_records, physical_events) -> dict[str, int]:
@@ -72,7 +73,8 @@ def profiler_activities(path: str | Path, process_id: int):
     prove which logical tensor was copied. That mapping remains unknown.
     Kineto timestamps are retained in their own clock domain.
     """
-    records = json.loads(Path(path).read_text()).get("traceEvents", [])
+    with open_text(path) as stream:
+        records = json.load(stream).get("traceEvents", [])
     runtime = {event.get("args", {}).get("correlation"): event for event in records
                if event.get("cat") in {"cuda_runtime", "cuda_driver"}
                and event.get("args", {}).get("correlation") is not None}
