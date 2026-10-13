@@ -1,0 +1,22 @@
+{
+  "schema": "scar.maintenance.compressed-trace-read",
+  "source": "/home/zyf/AAA/scar/artifacts/traces/lewm_resource_global_latest",
+  "reader": "scar.trace.reader.load",
+  "source_is_archived": true,
+  "events": 45888,
+  "kinds": {
+    "python_call": 493,
+    "python_return": 479,
+    "transfer": 561,
+    "module_call": 20820,
+    "cuda_memcpy": 543,
+    "cuda_barrier": 360,
+    "cuda_kernel": 22457,
+    "torch_op": 175
+  },
+  "elapsed_seconds": 2.308,
+  "peak_rss_KiB": 244940,
+  "automatic_source_modeling": false,
+  "new_profiling_run": false,
+  "persisted_graph": false
+}

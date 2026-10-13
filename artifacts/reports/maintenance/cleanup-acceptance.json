@@ -1,0 +1,26 @@
+{
+  "schema": "scar.maintenance.acceptance",
+  "schema_version": 1,
+  "revision": "5422355b06889ccf52ea5051916122bc2c5094b1",
+  "recorded_utc": "2026-10-13T09:57:37.321544+00:00",
+  "scope": "Lossless archive maintenance and compressed trace ingestion; not automatic source modeling",
+  "tests_passed": 26,
+  "file_sha256": {
+    "scar/trace/files.py": "cc0dee95dde97b488272e4b23ccb23df9cd84fca98fe5c2bb05003e8dad6e8b0",
+    "scar/trace/reader.py": "a36b508f5a4744570af2b9b095ffce9045b4a3c83e5e0dc90d4f6a3359c2d8b3",
+    "scar/trace/normalize_v2.py": "7733fb9b02a8f657d2413a982a3203ee2d3dee7d532400118ca7b1902538b2a5",
+    "scar/trace/cuda.py": "6a52696d7c1c472832cc8c50b8e69f8eac3573b01a714702cfa4fe0ad433c1f4",
+    "tests/unit/test_compressed_trace_artifacts.py": "1a767fbb5aa527f0ca693d0e5994c7bcd3d3aeda89af747565f7e8d70480d722",
+    "tests/unit/test_trace_normalize_v2.py": "98114d5d504d6a17a3ef13490955ab5a3ec5f9c46791339100d5e134b97bda3d",
+    "tests/unit/test_cuda_activities.py": "a3c2e8a19c6c798efd9bf51ee8d1356215e51326bdb2f7516972ef424cec1f82"
+  },
+  "archives_verified": 61,
+  "freed_allocated_bytes": 29918093312,
+  "lewm_clean": true,
+  "source_graph_automatic_lewm_complete": false,
+  "new_profiling_run": false,
+  "verified_lewm_speedup": null,
+  "first_test_collection_failed": "pytest reserved parameter name request; corrected to input_form",
+  "junit": "artifacts/reports/maintenance/compressed-ingestion-tests.xml",
+  "real_trace_read": "artifacts/reports/maintenance/compressed-lewm-read.json"
+}
