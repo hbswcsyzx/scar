@@ -1,0 +1,21 @@
+{
+  "components": {
+    "failed": 0,
+    "passed": 80
+  },
+  "executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "integration": {
+    "failed": 1,
+    "passed": 0,
+    "reason": "Paused collector still references removed PROFILE_CALL enum; initial earlier draft also failed to obtain instruction events with sys.setprofile."
+  },
+  "lewm_speedup": null,
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "reports": {
+    "artifacts/reports/wip/reference-evidence-components.xml": "f121f8ef44ce6b45410a0cb0ec1a58b28fbff9d7bd2b2ca5392248576a1f659b",
+    "artifacts/reports/wip/reference-evidence-integration-failure.xml": "3f920dadfbdf4e4b500f2634e124199b7e556a2d720d6386f9f9971ed370da5e"
+  },
+  "revision": "0b90f38e6253bb6a0f36c15756efecb190e1768d",
+  "scope": "WIP archival only; no evidence gate acceptance; no full regression",
+  "selected_transformations": 0
+}

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.662" timestamp="2026-10-13T03:14:02.993438+00:00" hostname="gpu1"><testcase classname="tests.integration.test_identity_evidence_v2" name="test_real_calls_connect_exact_return_occurrences_to_existing_regions" time="0.379"><failure message="AttributeError: type object 'IdentityRuntimeEventKind' has no attribute 'PROFILE_CALL'">def test_real_calls_connect_exact_return_occurrences_to_existing_regions():
+        namespace, code = load_fixture()
+        left, right = Box(), Box()
+        observer = IdentityExecutionObserver(namespace["relate"])
+        try:
+&gt;           assert observer.call(left, left) is True
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_identity_evidence_v2.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scar/trace/identity_v2.py:214: in call
+    failure = self._validate_attempt(attempt, result)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.trace.identity_v2.IdentityExecutionObserver object at 0x7afcd6712cf0&gt;
+attempt = _Attempt(number=0, thread_id=135226397259584, raw_events=[IdentityRuntimeEvent(event_id='identity:identity-execution:6...erence=None, monitor_return_reference='identity:identity-execution:69912ff1e57d412f820ca6372ebef0e2:attempt:0:event:1')
+actual_result = True
+
+    def _validate_attempt(self, attempt: _Attempt, actual_result: Any) -&gt; list[str]:
+        errors = list(attempt.failure)
+        if self.function.__code__ is not self._code:
+            errors.append("function code object changed during target call")
+        if sys.getprofile() is not None or sys.gettrace() is not None:
+            errors.append("profile/trace hooks remain active after cleanup")
+        expected_count = len(self._expected_instructions)
+        if attempt.profile_call_reference is None:
+            errors.append("target profile call was not observed")
+        if attempt.monitor_start_reference is None or attempt.monitor_start_event is None:
+            errors.append("target PY_START was not observed")
+        if attempt.instruction_index != expected_count:
+            errors.append("monitoring instruction stream was incomplete")
+        if attempt.profile_return_reference is None or attempt.profile_return_result is None:
+            errors.append("successful profile return was not observed")
+        if attempt.monitor_return_reference is None or attempt.monitor_return_result is None:
+            errors.append("successful monitoring PY_RETURN was not observed")
+        if (attempt.operator_event is None or attempt.operator_event_reference is None):
+            errors.append("IS_OP instruction event was not observed")
+        if attempt.return_instruction_event is None:
+            errors.append("RETURN_VALUE instruction event was not observed")
+        if attempt.return_event is None or attempt.result_handle is None or not attempt.result_observation_id:
+            errors.append("actual result reference was not observed")
+        if type(actual_result) is not bool:
+            errors.append("actual target result is not an exact Python bool")
+        elif (attempt.monitor_return_result is not None
+              and PythonBoolSingleton.from_actual(actual_result) is not attempt.monitor_return_result):
+            errors.append("wrapper result differs from observed target bool")
+        if attempt.instruction_index == expected_count and attempt.raw_events:
+            offsets = [event.offset for event in attempt.raw_events
+                       if event.kind is IdentityRuntimeEventKind.MONITOR_INSTRUCTION]
+            if offsets != [item.offset for item in self._expected_instructions]:
+                errors.append("monitoring instruction offsets are extra, missing, or out of order")
+        if any(event.thread_id != attempt.thread_id for event in attempt.raw_events):
+            errors.append("runtime callback stream contains a foreign-thread event")
+        if any(event.code_id != self._code_id for event in attempt.raw_events):
+            errors.append("runtime callback stream changed code identity")
+        if self.function.__code__ is not self._code:
+            errors.append("target code object no longer matches source witness")
+        expected_refs = {attempt.profile_call_reference, attempt.monitor_start_reference,
+                         attempt.profile_return_reference, attempt.monitor_return_reference}
+        if None in expected_refs:
+            errors.append("runtime event references are incomplete")
+        # The runtime hook order was experimentally checked on the supported
+        # interpreter.  This exact event-kind sequence rejects missing, extra,
+        # or reordered callbacks before a public sample is made.
+&gt;       expected_kinds = [IdentityRuntimeEventKind.PROFILE_CALL,
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                          IdentityRuntimeEventKind.MONITOR_START]
+E       AttributeError: type object 'IdentityRuntimeEventKind' has no attribute 'PROFILE_CALL'
+
+scar/trace/identity_v2.py:602: AttributeError</failure></testcase></testsuite></testsuites>

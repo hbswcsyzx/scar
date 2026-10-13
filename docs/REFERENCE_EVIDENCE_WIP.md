@@ -22,6 +22,12 @@
 21 tests、occurrence query 18 tests 通过。这些是不同命令的局部结果，不能称为
 mapped gate 或整仓回归。存档时的实际复查和未通过集成记录随分支归档。
 
+在冻结提交 `0b90f38` 的存档复查中，上述组件合并执行为 **80 passed**。
+唯一重跑的集成用例为 **1 failed**：暂停重写后的 collector 仍引用已从记录
+enum 移除的 PROFILE_CALL，抛出 AttributeError。这是未完成迁移，不能包装成
+有效采集器。没有重跑整仓测试。原始 XML 与实现版本见
+`artifacts/reports/wip/reference-evidence-archive.json`。
+
 ## 实际失败与证据纠正
 
 第一次集成测试 `test_real_calls_connect_exact_return_occurrences_to_existing_regions`
