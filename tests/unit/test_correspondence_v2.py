@@ -5,9 +5,11 @@ from dataclasses import replace
 from pathlib import Path
 from types import CodeType
 
+import pytest
+
 from scar.analysis.correspondence_v2 import (
     CodeSourceWitness, CompileContext, JoinReason, JoinStatus, SourceJoinRequest,
-    build_correspondence,
+    build_correspondence, reproduce_code_source_witness,
 )
 from scar.ir.frontend_v2 import build_semantic
 from scar.ir.ids import CodeID
@@ -260,3 +262,32 @@ def test_matching_function_code_does_not_certify_changed_global_bindings(tmp_pat
     assert "no slot-version/effect/value equality inferred" in result.report["scope"]
     record = next(iter(result.graph.records.values()))
     assert any("globals/closure/effects not certified" in text for text in record.evidence.assumptions)
+
+
+def test_public_code_source_witness_reuses_exact_loaded_code_match(tmp_path):
+    text = "def compute(left, right):\n    return left is right\n"
+    path, source, codes = _source(tmp_path, text)
+    witnesses = reproduce_code_source_witness(source, codes[1])
+
+    assert witnesses
+    assert all(isinstance(item, CodeSourceWitness) for item in witnesses)
+    assert all(item.loaded_code_id == CodeID.from_code(codes[1]).key() for item in witnesses)
+    assert all(item.compiled_code_digest == CodeID.from_code(codes[1]).version for item in witnesses)
+    assert all(item.compile_filename == str(path) for item in witnesses)
+    assert all(item.as_dict()["original_compile_context_attested"] is False
+               for item in witnesses)
+
+
+def test_public_code_source_witness_rejects_source_or_code_mismatch(tmp_path):
+    text = "def compute(value):\n    return value + 1\n"
+    path, source, codes = _source(tmp_path, text)
+    changed_code = list(_codes(compile(
+        "def compute(value):\n    return value + 2\n", str(path), "exec",
+        dont_inherit=True)))[1]
+
+    with pytest.raises(ValueError, match="no exact loaded-code reproduction"):
+        reproduce_code_source_witness(source, changed_code,
+                                      source_texts={str(path): text})
+    path.write_text("def compute(value):\n    return value + 3\n")
+    with pytest.raises(ValueError, match="fingerprint"):
+        reproduce_code_source_witness(source, codes[1])

@@ -175,6 +175,74 @@ def _qualname(graph: SemanticGraph, definition: OperationDefinition) -> str | No
     return parent_name + separator + name
 
 
+def reproduce_code_source_witness(
+    source_graph: SemanticGraph,
+    code: CodeType,
+    *,
+    source_texts: Mapping[str, str] | None = None,
+    compile_contexts: tuple[CompileContext, ...] | None = None,
+) -> tuple[CodeSourceWitness, ...]:
+    """Reproduce one loaded ``CodeType`` against a graph's source snapshot.
+
+    This is the small public counterpart to ``build_correspondence`` for
+    collectors that already hold a callable/code object.  It reuses the same
+    source reader, compile cache, nested-code walk and unmodified marshal hash
+    used by that joiner.  A matching path or qualname alone is never accepted.
+    All exact compile hypotheses are returned in deterministic order; their
+    settings reproduce the bytes but do not attest the original loader context.
+    """
+    if type(source_graph) is not SemanticGraph or type(code) is not CodeType:
+        raise TypeError("SemanticGraph and CodeType are required")
+    source_graph.assert_valid()
+    contexts = tuple(dict.fromkeys(compile_contexts if compile_contexts is not None else (
+        CompileContext(optimize=0), CompileContext(optimize=1), CompileContext(optimize=2))))
+    if not contexts or any(type(item) is not CompileContext for item in contexts):
+        raise ValueError("at least one typed CompileContext is required")
+    if source_texts is not None and not isinstance(source_texts, Mapping):
+        raise TypeError("source_texts must map source paths to decoded text")
+    supplied = {}
+    for path, text in (source_texts or {}).items():
+        if type(path) is not str or type(text) is not str:
+            raise ValueError("source_texts must map string paths to strings")
+        normalized = _path(path)
+        if normalized in supplied:
+            raise ValueError("source_texts contains duplicate normalized paths")
+        supplied[normalized] = text
+
+    loaded = CodeID.from_code(code)
+    source_path = _path(loaded.source)
+    fingerprints = set()
+    for atom in source_graph.source_atoms.values():
+        if _path(atom.reference.path) == source_path:
+            fingerprints.add(atom.reference.fingerprint)
+    for module in source_graph.modules.values():
+        if module.path and _path(module.path) == source_path and module.fingerprint:
+            fingerprints.add(module.fingerprint)
+    if len(fingerprints) != 1:
+        raise ValueError("loaded code path does not identify one fingerprinted source snapshot")
+    if source_path in supplied:
+        text = supplied[source_path]
+    else:
+        with tokenize.open(source_path) as stream:
+            text = stream.read()
+    source = _Source(source_path, text, fingerprints)
+    if source.expected != {source.fingerprint}:
+        raise ValueError("source snapshot fingerprint differs from semantic graph")
+    witnesses = []
+    for context in contexts:
+        compiled, attempted = source.compile(code.co_filename, context)
+        if any(digest == loaded.version and qualname == loaded.qualname
+               and first_line == loaded.line for digest, qualname, first_line in compiled):
+            witnesses.append(CodeSourceWitness(
+                source_path, source.fingerprint, loaded.key(), loaded.version,
+                code.co_filename, context, loaded.qualname, loaded.line))
+    if not witnesses:
+        tried = ", ".join(
+            f"optimize={item.optimize},flags={item.flags}" for item in contexts)
+        raise ValueError("no exact loaded-code reproduction for source snapshot (" + tried + ")")
+    return tuple(witnesses)
+
+
 class _Source:
     def __init__(self, path, text, fingerprints):
         self.path, self.text = path, text
@@ -390,4 +458,5 @@ def build_correspondence(
 
 
 __all__ = ["CompileContext", "CodeSourceWitness", "JoinStatus", "JoinReason",
-           "SourceJoinRequest", "CorrespondenceResult", "build_correspondence"]
+           "SourceJoinRequest", "CorrespondenceResult", "build_correspondence",
+           "reproduce_code_source_witness"]
