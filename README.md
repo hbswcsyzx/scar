@@ -17,6 +17,12 @@ The detector is workload independent. LeWM launch/validation metadata lives in
 the separate sibling testcase project `../scar-testcases/lewm`; it is not part
 of the SCAR source tree or wheel.
 
+The current development priority is the [program type and dependency core](docs/PROGRAM_TYPES.md).
+Its bounded synchronous IR has typed values, state locations, exact uses and
+region/control interfaces. `check-program` validates a supplied IR document;
+it does not recover Python source or authorize an optimization. See the
+[N1 implementation plan](docs/N1_IMPLEMENTATION_PLAN.md) for scope and gates.
+
 The graph pass includes loop membership: with `--lines`, observed bytecode
 back-edges become `loop_controls` edges and can produce a
 `GraphLoopInvariantCandidate`. Missing line or loop evidence stays UNKNOWN;
@@ -28,6 +34,10 @@ SCAR never infers a loop rewrite from repeated record order.
 cd ~/AAA/scar
 conda activate lewm
 python -m pytest -q
+
+# Validate the complete manual input/branch/state/normal-or-exception example.
+python -m scar.cli check-program examples/program_graphs/branch_state.json \
+  --out artifacts/reports/program-check.json
 
 # Trace any command in a child process. The command is not modified.
 python -m scar.cli trace --out artifacts/traces/demo -- \

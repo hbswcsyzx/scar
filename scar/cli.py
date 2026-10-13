@@ -288,6 +288,10 @@ def main(argv=None) -> int:
     model_v2.add_argument("--out", required=True)
     model_v2.add_argument("--report", help="semantic coverage and unresolved-boundary report")
     model_v2.set_defaults(func=_model_v2)
+    check_program = sub.add_parser("check-program", help="validate a typed program graph JSON without executing it")
+    check_program.add_argument("graph", help="scar.program-graph JSON document")
+    check_program.add_argument("--out", help="optional structural validation report")
+    check_program.set_defaults(func=_check_program)
     normalize = sub.add_parser("normalize", help="normalize existing raw trace into IR v2 evidence")
     normalize.add_argument("trace")
     normalize.add_argument("--out", required=True)
@@ -356,6 +360,39 @@ def _optimize_micro(args) -> int:
     from scar.workloads.micro import optimize
     print(json.dumps(optimize(args.loops, args.repetitions, args.warmup, args.work_factor), indent=2))
     return 0
+
+
+def _check_program(args) -> int:
+    from scar.ir.program.codec import loads as load_program
+    from scar.ir.program.model import value_type
+
+    source = Path(args.graph)
+    report = {"schema": "scar.program-graph-check", "schema_version": 1,
+              "input": str(source.resolve()), "scope": "declared graph structure and dependencies",
+              "source_recovery": False, "transformation_authorized": False}
+    if args.out and Path(args.out).resolve() == source.resolve():
+        report.update(status="INVALID", errors=["report path must differ from input graph"])
+        print(json.dumps(report, ensure_ascii=False))
+        return 2
+    try:
+        graph = load_program(source.read_text(encoding="utf-8"))
+    except (OSError, ValueError, TypeError) as exc:
+        report.update(status="INVALID", errors=[str(exc)])
+    else:
+        report.update(status="WELL_FORMED", errors=[], counts={
+            "regions": len(graph.regions), "blocks": sum(len(r.blocks) for r in graph.regions),
+            "operations": len(graph.operations), "values": len(graph.values),
+            "locations": len(graph.locations), "uses": sum(len(op.uses) for op in graph.operations),
+            "value_kinds": dict(Counter(value_type(value).kind.value for value in graph.values)),
+            "declared_incomplete_effects": sum(not op.effects_complete for op in graph.operations),
+        })
+    payload = json.dumps(report, ensure_ascii=False, indent=2)
+    if args.out:
+        destination = Path(args.out)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(payload + "\n", encoding="utf-8")
+    print(payload)
+    return 0 if report["status"] == "WELL_FORMED" else 2
 
 
 def _write_document(path, document):
