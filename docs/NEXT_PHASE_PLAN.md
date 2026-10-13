@@ -9,6 +9,10 @@ MOTION 已通过 179 项 gate / 1,064 项回归，但 REUSE、完整 G7.2b 和 G
 完成。按 [G7_2B_PLAN.md](G7_2B_PLAN.md) 继续当前依赖链；验收报告与测量范围见
 [STATUS.md](STATUS.md)。没有 LeWM 变换或已验证加速比。
 
+2026-10-13 设计复查：下一节点按 [G7_2B_EVIDENCE_PLAN.md](G7_2B_EVIDENCE_PLAN.md)
+先接通实际对象引用、有序 operand occurrence、primitive 与返回使用的证据链。
+精确 consumer 替换差量和未来 guard 单独设计，不与证据采集混作一个验收门。
+
 目标：把 SCAR 从 evidence profiler + candidate detector 推进为能输出确定、
 可审计、AI 可执行修改指导的 semantic-aware execution optimization system。
 

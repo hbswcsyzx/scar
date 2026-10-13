@@ -1,5 +1,17 @@
 # Current evidence and remaining work
 
+## Current work: reviewed captured-slice evidence plan (2026-10-13)
+
+The next G7.2b subgate is defined in
+[G7_2B_EVIDENCE_PLAN.md](G7_2B_EVIDENCE_PLAN.md). It connects actual object
+references, ordered operand occurrences, primitive execution and precise return
+uses. Incomplete drafts are being narrowed after independent review; they have
+not passed acceptance. Repeated observation must not create a fictitious new
+materialization. Historical evidence does not establish a future reuse guard.
+OIR consumer substitution and positive REUSE remain separate pending work.
+
+No new backend, selected LeWM transformation or verified acceleration is claimed.
+
 ## Latest autonomous acceptance: G7.2b narrow static MOTION
 
 Implementation `1cf6965`, with legacy-fixture repair `750639f`, passed **179**

@@ -4,6 +4,9 @@
 MOTION 179 项 gate、1,064 项回归、外部条件证明与首次失败记录见
 [G7_2B_MOTION_ACCEPTANCE.md](G7_2B_MOTION_ACCEPTANCE.md)。继续 Step 2 的 object-only
 身份、operand-site/event 与窄 REUSE；不新增 backend、不修改目标源文件。
+2026-10-13 复查后，先执行独立的 [引用与 occurrence 证据门](G7_2B_EVIDENCE_PLAN.md)，
+再设计精确 consumer 改接差量和正向 REUSE。历史样本成立不等于未来 guard 成立；
+本次不以实现草稿为约束，也不修改 REUSE 的终态来获得正例。
 最初规划依据 `603819d` 的代码和三个 Luna max 子代理的
 独立只读审查。G7.2a 已归档；本阶段不添加 backend，不改目标源文件。
 Step 1 的实现、55 项 gate、995 项回归和外部源实测见
