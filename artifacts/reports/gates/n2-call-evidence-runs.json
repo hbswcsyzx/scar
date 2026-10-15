@@ -1,0 +1,302 @@
+{
+  "schema": "scar.external-call-capture-evidence",
+  "schema_version": 1,
+  "runs": [
+    {
+      "name": "n2_call_edges_lewm_20261015",
+      "capture_metadata": {
+        "schema": "scar.call-edge-trace",
+        "schema_version": 1,
+        "process_id": 350745,
+        "project_root": "/home/zyf/AAA/le-wm",
+        "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+        "limits": {
+          "max_events": 100000,
+          "max_bytes": 64000000,
+          "max_codes": 4096,
+          "max_values": 64,
+          "max_path": 16,
+          "max_references": 8192
+        },
+        "events": 61450,
+        "event_attempts": 100000,
+        "invocations": 30728,
+        "invocation_attempts": 69277,
+        "codes": 620,
+        "bytes": 63999900,
+        "dropped_events": 53601,
+        "dropped_codes": 29783,
+        "unknown_exits": 65,
+        "suspended_exits": 55,
+        "open_invocations": 6,
+        "active_frames": 0,
+        "errors": [
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError",
+          "ValueError"
+        ],
+        "path_gaps": 8640,
+        "io_failed": false,
+        "wall_ns": 122651070027,
+        "scope": "initial process and newly profiled threads; native calls/child processes/existing threads not complete",
+        "reference_contents_observed": false,
+        "callable_environment_established": false
+      },
+      "invocation": {
+        "command": [
+          "/home/zyf/miniconda3/envs/lewm/bin/python",
+          "-m",
+          "scar.cli",
+          "trace",
+          "--calls-only",
+          "--project-root",
+          "/home/zyf/AAA/le-wm",
+          "--out",
+          "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_20261015",
+          "--resources",
+          "--resource-interval",
+          "0.25",
+          "--",
+          "/home/zyf/miniconda3/envs/lewm/bin/python",
+          "run_inference.py",
+          "--config-name=pusht",
+          "policy=pusht/weights.pt",
+          "eval.num_eval=1",
+          "eval.eval_budget=25",
+          "eval.goal_offset_steps=25",
+          "cache_dir=/gpu4-share/data/byx/lewm_data",
+          "hydra.job.chdir=False"
+        ],
+        "cwd": "/home/zyf/AAA/le-wm",
+        "environment": {
+          "PYTHONPATH": "/home/zyf/AAA/scar",
+          "LEWM_CHECKPOINT_ROOT": "/gpu4-share/data/byx/lewm_data",
+          "LEWM_OUTPUT_ROOT": "/home/zyf/AAA/scar/artifacts/experiments/n2_call_edges_lewm_20261015/outputs"
+        },
+        "lewm_revision_before": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+        "lewm_status_before": "",
+        "capture_source_sha256": {
+          "scar/trace/call_edges.py": "3f5c4f7ddb7abddfcf1f21f4547cd0db61f065d81004c767c62aa618e8872d9a",
+          "scar/trace/code_snapshot.py": "3a00de3ef3dbac1e0ceca379f89dc501e95f9256dc59d77b318cc6f9f4c332cb",
+          "scar/cli.py": "85a0e33fecb0a2e04f68d258c9c91e18a3a8a6bdf4cb2958222169230c5a6655",
+          "sitecustomize.py": "9108208f365dbe5af71ba44c4ce230070e78ad0fcf12ec58aa7ed058eb66457d"
+        },
+        "instrumented": true,
+        "transformation_applied": false,
+        "returncode": 0,
+        "wrapper_wall_s": 125.70958394277841,
+        "lewm_revision_after": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+        "lewm_status_after": ""
+      },
+      "run": {
+        "command": [
+          "/home/zyf/miniconda3/envs/lewm/bin/python",
+          "run_inference.py",
+          "--config-name=pusht",
+          "policy=pusht/weights.pt",
+          "eval.num_eval=1",
+          "eval.eval_budget=25",
+          "eval.goal_offset_steps=25",
+          "cache_dir=/gpu4-share/data/byx/lewm_data",
+          "hydra.job.chdir=False"
+        ],
+        "returncode": 0,
+        "wall_s": 125.56708450149745
+      },
+      "resources": {
+        "enabled": true,
+        "status": "Observed",
+        "pid": 350745,
+        "sample_count": 392,
+        "interval_s": 0.25,
+        "started_ns": 4646627133750456,
+        "ended_ns": 4646749803080873,
+        "cpu_utilization_percent": {
+          "average": 1.8996299246666717,
+          "peak": 22.953476675683323
+        },
+        "gpu_utilization_percent": {
+          "average": 1.9005102040816326,
+          "peak": 15.0
+        },
+        "gpu_memory_used_mib": {
+          "peak": 1954.0,
+          "average": 1530.3545918367347
+        },
+        "gpu_count_observed": 1,
+        "evidence": "Observed"
+      },
+      "raw_files": {
+        "call-events": {
+          "logical_path": "artifacts/traces/n2_call_edges_lewm_20261015/call-events.350745.jsonl",
+          "gzip_path": "artifacts/traces/n2_call_edges_lewm_20261015/call-events.350745.jsonl.gz",
+          "raw_bytes": 63839492,
+          "raw_sha256": "e094a66db2023fc40bb94b9daa73a5baf760bc6da37c3b589f40307d3054c7a2",
+          "compressed_bytes": 2494853
+        },
+        "call-codes": {
+          "logical_path": "artifacts/traces/n2_call_edges_lewm_20261015/call-codes.350745.jsonl",
+          "gzip_path": "artifacts/traces/n2_call_edges_lewm_20261015/call-codes.350745.jsonl.gz",
+          "raw_bytes": 160408,
+          "raw_sha256": "d4a0ce2750a9ac1d86c4ca1004fa5524c782d17ccbd04fa1ca335b88fbfc6535",
+          "compressed_bytes": 39013
+        }
+      }
+    },
+    {
+      "name": "n2_call_edges_lewm_retry_20261015",
+      "capture_metadata": {
+        "schema": "scar.call-edge-trace",
+        "schema_version": 1,
+        "process_id": 353869,
+        "project_root": "/home/zyf/AAA/le-wm",
+        "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+        "limits": {
+          "max_events": 250000,
+          "max_bytes": 192000000,
+          "max_codes": 4096,
+          "max_values": 64,
+          "max_path": 16,
+          "max_references": 8192
+        },
+        "events": 168638,
+        "event_attempts": 168638,
+        "invocations": 84319,
+        "invocation_attempts": 84319,
+        "codes": 850,
+        "bytes": 160150081,
+        "dropped_events": 0,
+        "dropped_codes": 0,
+        "unknown_exits": 65,
+        "suspended_exits": 4021,
+        "open_invocations": 0,
+        "active_frames": 0,
+        "errors": [],
+        "path_gaps": 0,
+        "io_failed": false,
+        "wall_ns": 110428115854,
+        "scope": "initial process and newly profiled threads; native calls/child processes/existing threads not complete",
+        "reference_contents_observed": false,
+        "callable_environment_established": false
+      },
+      "invocation": {
+        "command": [
+          "/home/zyf/miniconda3/envs/lewm/bin/python",
+          "-m",
+          "scar.cli",
+          "trace",
+          "--calls-only",
+          "--project-root",
+          "/home/zyf/AAA/le-wm",
+          "--out",
+          "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015",
+          "--max-call-events",
+          "250000",
+          "--max-call-bytes",
+          "192000000",
+          "--resources",
+          "--resource-interval",
+          "0.25",
+          "--",
+          "/home/zyf/miniconda3/envs/lewm/bin/python",
+          "run_inference.py",
+          "--config-name=pusht",
+          "policy=pusht/weights.pt",
+          "eval.num_eval=1",
+          "eval.eval_budget=25",
+          "eval.goal_offset_steps=25",
+          "cache_dir=/gpu4-share/data/byx/lewm_data",
+          "hydra.job.chdir=False"
+        ],
+        "cwd": "/home/zyf/AAA/le-wm",
+        "environment": {
+          "PYTHONPATH": "/home/zyf/AAA/scar",
+          "LEWM_CHECKPOINT_ROOT": "/gpu4-share/data/byx/lewm_data",
+          "LEWM_OUTPUT_ROOT": "/home/zyf/AAA/scar/artifacts/experiments/n2_call_edges_lewm_retry_20261015/outputs"
+        },
+        "lewm_revision_before": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+        "lewm_status_before": "",
+        "capture_source_sha256": {
+          "scar/trace/call_edges.py": "3f5c4f7ddb7abddfcf1f21f4547cd0db61f065d81004c767c62aa618e8872d9a",
+          "scar/trace/code_snapshot.py": "3a00de3ef3dbac1e0ceca379f89dc501e95f9256dc59d77b318cc6f9f4c332cb",
+          "scar/cli.py": "85a0e33fecb0a2e04f68d258c9c91e18a3a8a6bdf4cb2958222169230c5a6655",
+          "sitecustomize.py": "9108208f365dbe5af71ba44c4ce230070e78ad0fcf12ec58aa7ed058eb66457d"
+        },
+        "instrumented": true,
+        "transformation_applied": false,
+        "retry_reason": "first run reached 64 MB evidence budget; no target or collector change",
+        "returncode": 0,
+        "wrapper_wall_s": 113.11200203094631,
+        "lewm_revision_after": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+        "lewm_status_after": ""
+      },
+      "run": {
+        "command": [
+          "/home/zyf/miniconda3/envs/lewm/bin/python",
+          "run_inference.py",
+          "--config-name=pusht",
+          "policy=pusht/weights.pt",
+          "eval.num_eval=1",
+          "eval.eval_budget=25",
+          "eval.goal_offset_steps=25",
+          "cache_dir=/gpu4-share/data/byx/lewm_data",
+          "hydra.job.chdir=False"
+        ],
+        "returncode": 0,
+        "wall_s": 112.96049458440393
+      },
+      "resources": {
+        "enabled": true,
+        "status": "Observed",
+        "pid": 353869,
+        "sample_count": 348,
+        "interval_s": 0.25,
+        "started_ns": 4646831647688324,
+        "ended_ns": 4646942094850034,
+        "cpu_utilization_percent": {
+          "average": 2.2443142769864743,
+          "peak": 24.595769889573567
+        },
+        "gpu_utilization_percent": {
+          "average": 2.1494252873563218,
+          "peak": 8.0
+        },
+        "gpu_memory_used_mib": {
+          "peak": 1954.0,
+          "average": 1571.1091954022988
+        },
+        "gpu_count_observed": 1,
+        "evidence": "Observed"
+      },
+      "raw_files": {
+        "call-events": {
+          "logical_path": "artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl",
+          "raw_sha256": "d07f14ac7289651f8467c8cb391f5ff355f2c2bce2541a44fc9cffbeea0701d2",
+          "raw_bytes": 159925490
+        },
+        "call-codes": {
+          "logical_path": "artifacts/traces/n2_call_edges_lewm_retry_20261015/call-codes.353869.jsonl",
+          "raw_sha256": "b0d057bbfc282d5e0c91a565ef1163674cbe6c422d8bfde801344961d081f43d",
+          "raw_bytes": 224591
+        }
+      }
+    }
+  ],
+  "offline_analysis_status": "RUNNING",
+  "whole_program_dependency_graph_complete": false,
+  "transformation_applied": false,
+  "clean_speedup_verified": false
+}

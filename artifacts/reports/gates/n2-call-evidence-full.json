@@ -1,0 +1,13 @@
+{
+  "schema": "scar.full-regression-evidence",
+  "schema_version": 1,
+  "revision": "bedcd2dfa8536a5251c49e5b8b883196207f9a03",
+  "source_sha256": "b6971561d685dbdc6b4a5b8bddda034dc6b324a1b57ad1d397538c1d4af328dd",
+  "current_source_matches_frozen_gate": true,
+  "tests": 1694,
+  "failures": 0,
+  "skips": 0,
+  "warnings": 3,
+  "duration_s": 154.52,
+  "command": "python -m pytest -q --junitxml=artifacts/reports/gates/n2-call-evidence-full.xml"
+}

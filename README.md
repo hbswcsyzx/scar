@@ -54,6 +54,13 @@ See [current automation scope](docs/AUTOMATION_STATUS_20261015.md),
 [function interfaces](docs/N2_FUNCTION_INTERFACES.md) and
 [the next connection gates](docs/N2_CALL_COMPOSITION_PLAN.md).
 
+New bounded [call evidence](docs/N2_CALL_EVIDENCE_ACCEPTANCE.md) records actual
+caller instruction positions, per-invocation entries/exits and weak reference
+epochs without Tensor snapshots or Torch hooks. It automatically links source
+and available core calls. Queries explicitly stop at unproved actual/formal
+binding; the complete cross-layer dependency gate remains unmet. Whole-program
+LeWM recovery, automatic simplification guidance and a speedup remain pending.
+
 The graph pass includes loop membership: with `--lines`, observed bytecode
 back-edges become `loop_controls` edges and can produce a
 `GraphLoopInvariantCandidate`. Missing line or loop evidence stays UNKNOWN;
@@ -86,6 +93,14 @@ python -m scar.cli check-source-program artifacts/reports/source-program.json.gz
 # Trace any command in a child process. The command is not modified.
 python -m scar.cli trace --out artifacts/traces/demo -- \
   python -m scar.workloads.micro pure --loops 8
+
+# Record Python call-site metadata; this mode does not collect the Torch trace.
+python -m scar.cli trace --calls-only --project-root path/to/project \
+  --out artifacts/traces/calls -- python path/to/project/entry.py
+python -m scar.cli link-calls artifacts/traces/calls \
+  --project-root path/to/project --inventory artifacts/reports/inventory.json.gz \
+  --out artifacts/reports/calls.json.gz
+python -m scar.cli check-call-links artifacts/reports/calls.json.gz
 
 # Optional expensive control detail: user lines and observed loop back-edges.
 python -m scar.cli trace --lines --out artifacts/traces/line-demo -- \

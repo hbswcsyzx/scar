@@ -1,5 +1,27 @@
 # Current evidence and remaining work
 
+## Current bounded component: N2.call-evidence (2026-10-15)
+
+Frozen `bedcd2d` passed **659 mapped tests** and **1,694 repository tests**
+(three documented warnings, no failures or skips).
+New `trace --calls-only` automatically records immediate caller positions,
+bounded frame paths, invocation entries/exits and lifetime-scoped reference
+identities. Offline source/core/call linking and strict replay retain concrete
+boundaries. No workload graph or business-name rule is supplied.
+
+Independent audit found and fixed closed-parent/recursive-parent misjoins,
+unverified collector metadata and false source-argument provenance for bound
+methods/partials/defaults. Queries now stop with `ARGUMENT_ROUTING_UNVERIFIED`;
+the full N2.call-edges E4 dependency route is **still unmet**.
+
+The original LeWM command was run twice without target edits. The first hit
+the default 64MB budget. The retry succeeded and recorded 168,638 events,
+84,319 Python entries (including suspended-code segments), 850 code descriptors,
+and zero dropped events/codes, unmatched entries or path gaps. Its offline
+source/core linking and replay are in progress; no complete dependency graph,
+transformation or clean A/B speedup is claimed. See
+[component evidence and remaining obligations](N2_CALL_EVIDENCE_ACCEPTANCE.md).
+
 ## Latest autonomous acceptance: N2.function-interfaces (2026-10-15)
 
 Frozen implementation `cfad419` passed **504 mapped cases** and **1,552 repository
