@@ -302,6 +302,22 @@ def main(argv=None) -> int:
     check_source_program.add_argument("report", help="source graph report JSON or JSON.gz")
     check_source_program.add_argument("--max-operations", type=int, default=10000, help="independent verifier construction ceiling")
     check_source_program.set_defaults(func=_check_source_program)
+    inventory_program = sub.add_parser("inventory-program", help="discover local source dependencies and automatically inventory/lower available function bodies")
+    inventory_program.add_argument("source", help="entry Python file")
+    inventory_program.add_argument("--project-root", help="filesystem boundary; inferred source roots remain distinct from runtime sys.path")
+    inventory_program.add_argument("--source-root", action="append", default=[], help="explicit local source root; repeat for candidate contexts")
+    inventory_program.add_argument("--out", required=True, help="compact source/body report JSON, optionally .gz")
+    inventory_program.set_defaults(func=_inventory_program)
+    check_inventory = sub.add_parser("check-inventory", help="rebuild a source inventory from current files and discovery context")
+    check_inventory.add_argument("report", help="inventory report JSON or JSON.gz")
+    check_inventory.set_defaults(func=_check_inventory)
+    for command in (inventory_program, check_inventory):
+        command.add_argument("--max-files", type=int, default=128)
+        command.add_argument("--max-bytes", type=int, default=8_000_000)
+        command.add_argument("--max-directories", type=int, default=4096)
+        command.add_argument("--max-lowered-bodies", type=int, default=256)
+        command.add_argument("--max-operations", type=int, default=10000, help="aggregate core operation ceiling across all body reports")
+        command.add_argument("--max-call-witnesses", type=int, default=4096, help="aggregate conditional call-target witness ceiling")
     normalize = sub.add_parser("normalize", help="normalize existing raw trace into IR v2 evidence")
     normalize.add_argument("trace")
     normalize.add_argument("--out", required=True)
@@ -437,6 +453,47 @@ def _check_source_program(args) -> int:
         return 2
     print(json.dumps({"status": "REPLAYED", "summary": result.summary(),
                       "transformation_authorized": False}))
+    return 0
+
+
+def _inventory_limits(args):
+    return {name: getattr(args, name) for name in
+            ("max_files", "max_bytes", "max_directories", "max_lowered_bodies", "max_operations", "max_call_witnesses")}
+
+
+def _inventory_program(args) -> int:
+    from scar.analysis.program_inventory import inventory_program
+
+    output = Path(args.out).resolve()
+    try:
+        if not (output.name.endswith(".json") or output.name.endswith(".json.gz")):
+            raise ValueError("inventory report must end in .json or .json.gz")
+        result = inventory_program(args.source, project_root=args.project_root,
+                                   source_roots=args.source_root, **_inventory_limits(args))
+        for file in result.discovery.files:
+            source = Path(file.snapshot.path)
+            if output == source or (output.exists() and source.samefile(output)):
+                raise ValueError("report must differ from every discovered source")
+        _compressed_document(output, result.to_dict())
+    except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
+        return 2
+    print(json.dumps({"status": "INVENTORIED", "out": str(output), "summary": result.summary()}))
+    return 0
+
+
+def _check_inventory(args) -> int:
+    from scar.analysis.program_inventory import ProgramInventory
+    from scar.ir.record_codec import loads as strict_loads
+    from scar.trace.files import open_text
+
+    try:
+        with open_text(args.report) as stream:
+            result = ProgramInventory.from_dict(strict_loads(stream.read()), **_inventory_limits(args))
+    except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
+        return 2
+    print(json.dumps({"status": "REPLAYED", "summary": result.summary(), "transformation_authorized": False}))
     return 0
 
 

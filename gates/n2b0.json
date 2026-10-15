@@ -1,0 +1,21 @@
+{
+  "gate": "N2.b0",
+  "scope": "From one source entry and project boundary automatically discover local import candidates, inventory physical file snapshots and execution scopes, retain every parsed source atom with its coverage status, connect conditional source-call witnesses and attempt bounded body lowering with shared per-file preparation. This is a source-candidate overlay plus selected core body graphs, not a unified whole-program execution model or optimization proof.",
+  "limitations": [
+    "Inferred or explicit source roots are candidate contexts, not verified sys.path or Python loader results. External/unavailable source, dynamic execution, star exports, namespace ambiguity and discovery budgets remain explicit boundaries.",
+    "Every parsed file is inventoried, including deferred import syntax and unexecuted branches; this does not establish runtime reachability. Annotation timing/thunk scopes remain unverified.",
+    "Core body construction remains bounded by N2.a syntax. Loops, handlers, complex state writes, defaults/decorators and full dynamic binding are not established by the inventory. File preparation failures retain concrete diagnostics, never complete coverage claims.",
+    "Call candidates require typed binding/import witnesses and unaccepted conditions. Core callee remains unconfirmed; no purity or import-deletion proof follows.",
+    "The aggregate operation budget charges failed construction and candidate rollback. Shared legacy contexts are persisted as digests and can be rebuilt from source; body graphs retain source correspondence.",
+    "No new detector/backend, target source rewrite, selected LeWM transformation or workload acceleration is introduced."
+  ],
+  "criteria": [
+    {"id": "automatic_import_candidate_scope_parent_initialization_cycles_aliases_roots_and_bounds", "tests": ["tests/unit/test_source_discovery.py"]},
+    {"id": "automatic_definition_interfaces_phases_all_syntax_locations_and_multi_body_graphs", "tests": ["tests/unit/test_program_inventory.py"]},
+    {"id": "independent_scope_identity_shared_preparation_failed_work_budgets_and_binding_witnesses", "tests": ["tests/unit/test_program_inventory_adversarial.py"]},
+    {"id": "reexport_paths_stay_bounded_and_witness_budgets_do_not_erase_import_edges", "tests": ["tests/unit/test_import_witness_scaling.py"]},
+    {"id": "public_one_entry_discovery_compressed_persistence_strict_replay_and_source_protection", "tests": ["tests/integration/test_program_inventory_cli.py"]},
+    {"id": "n2a_automatic_source_completion_and_persistence_compatibility", "tests": ["tests/unit/test_source_program_lowering.py", "tests/unit/test_source_lowering_review.py", "tests/unit/test_program_completion_records.py", "tests/unit/test_program_completions_adversarial.py", "tests/integration/test_source_program_cli.py"]},
+    {"id": "n1_core_record_control_state_and_wire_compatibility", "tests": ["tests/unit/test_program_records.py", "tests/unit/test_program_graph.py", "tests/unit/test_program_graph_adversarial.py", "tests/integration/test_program_graph_roundtrip.py", "tests/integration/test_check_program_cli.py"]}
+  ]
+}

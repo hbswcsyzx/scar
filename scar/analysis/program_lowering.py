@@ -37,6 +37,7 @@ from scar.ir.record_codec import encode
 from scar.ir.semantics_v2 import Opcode, SourceExecutionPrecondition
 from scar.ir.v2._validation import record_errors
 from scar.ir.v2.common import EvidenceKind
+from scar.ir.v2.common import SourceReference
 
 
 _ASSUMPTIONS = (
@@ -136,6 +137,33 @@ class SourceProgram:
         return result
 
 
+@dataclass(frozen=True)
+class LoweredSourceBody:
+    """Body and correspondence, interpreted in its shared PreparedSource."""
+    graph: ProgramGraph | None
+    metadata: LoweringMetadata
+    operations_emitted: int
+
+
+@dataclass(frozen=True)
+class PreparedSource:
+    path: Path
+    root: Path
+    text: str
+    semantic: object
+    semantics: object
+    control: object
+    tree: ast.Module
+    symbol_tables: dict
+
+    def lower(self, entry, *, source: SourceReference | None = None, max_operations=10000):
+        _check_arguments(entry, max_operations)
+        builder = _Builder(self.path, entry, self.text, self.semantic, self.semantics,
+                           self.control, max_operations, selected_source=source,
+                           tree=self.tree, symbol_tables=self.symbol_tables)
+        return builder.run()
+
+
 def _canonical(document):
     return json.dumps(document, ensure_ascii=False, sort_keys=True,
                       separators=(",", ":"), allow_nan=False)
@@ -154,18 +182,14 @@ class _Cursor:
 
 
 class _Builder:
-    def __init__(self, path, entry, text, semantic, semantics, control, max_operations):
+    def __init__(self, path, entry, text, semantic, semantics, control, max_operations,
+                 selected_source=None, tree=None, symbol_tables=None):
         self.path, self.entry, self.text = path, entry, text
         self.semantic, self.semantics, self.control = semantic, semantics, control
         self.max_operations = max_operations
         self.snapshot = semantics.sources[str(path)]
-        self.tree = ast.parse(text, filename=str(path))
-        self.symbol_tables = {}
-        def collect_tables(table):
-            self.symbol_tables[(table.get_name(), table.get_lineno())] = table
-            for child in table.get_children():
-                collect_tables(child)
-        collect_tables(symtable.symtable(text, str(path), "exec"))
+        self.tree = tree if tree is not None else ast.parse(text, filename=str(path))
+        self.symbol_tables = symbol_tables if symbol_tables is not None else _symbol_tables(text, path)
         self.atoms = {_span_atom(atom): atom.reference for atom in semantic.source_atoms.values()
                       if atom.reference.path == str(path)}
         self.by_atom = defaultdict(list)
@@ -176,8 +200,21 @@ class _Builder:
             self.old_by_atom[operation.source.atom_id].append(operation)
         self.slots = {(slot.owner, slot.name): slot.slot_id for slot in semantic.slots.values()}
         self.functions = {}
+        self.function_candidates = defaultdict(list)
         self._collect_functions(self.tree.body)
+        if selected_source is not None:
+            if selected_source.path != str(path) or selected_source.fingerprint != self.snapshot.fingerprint:
+                raise ValueError("selected definition source differs from prepared snapshot")
+            selected = [node for node in ast.walk(self.tree)
+                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+                        and self.source(node) == selected_source]
+            if len(selected) != 1:
+                raise ValueError("selected source must identify exactly one function definition")
+            self.functions[entry] = selected[0]
+        elif len(self.function_candidates.get(entry, ())) > 1:
+            raise ValueError("ambiguous function entry; source-position identity is required")
         self.regions, self.operations, self.values = [], [], []
+        self.operations_emitted = 0
         self.values_by_id = {}
         self.operation_links, self.value_links, self.use_links = [], [], []
         self.targets, self.gaps = [], []
@@ -194,6 +231,7 @@ class _Builder:
         for node in statements:
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 name = prefix + node.name
+                self.function_candidates[name].append(node)
                 self.functions[name] = node
             elif isinstance(node, ast.ClassDef):
                 self._collect_functions(node.body, prefix + node.name + ".")
@@ -272,8 +310,9 @@ class _Builder:
         return use
 
     def emit(self, cursor, operation, node, role, old=None):
-        if len(self.operations) >= self.max_operations:
+        if self.operations_emitted >= self.max_operations:
             raise _Unsupported(GapKind.BUDGET, node, "program operation budget exceeded")
+        self.operations_emitted += 1
         self.operations.append(operation)
         self.block_operations[cursor.block].append(operation.id)
         self.operation_links.append(OperationSource(operation.id, self.source(node), role,
@@ -345,7 +384,7 @@ class _Builder:
                 raise _Unsupported(GapKind.UNBOUND_LOCAL, node, "local has no definition on every incoming path: " + node.id)
             self.gap(GapKind.EFFECT_SUMMARY, node, "global/builtin name lookup remains an effectful source operation")
             cursor, value, _ = self.invoke(cursor, node, (), old=old)
-            if node.id in self.functions:
+            if node.id in self.functions and len(self.function_candidates[node.id]) == 1:
                 self.reference_candidates[value] = node.id
             return cursor, value
 
@@ -582,7 +621,7 @@ class _Builder:
         metadata = LoweringMetadata(self.entry, self.snapshot, tuple(self.operation_links),
                                    tuple(self.value_links), tuple(self.targets), tuple(self.gaps),
                                    _ASSUMPTIONS, tuple(self.use_links))
-        return SourceProgram(graph, metadata, self.semantic, self.semantics, self.control)
+        return LoweredSourceBody(graph, metadata, self.operations_emitted)
 
     def candidate_bindings(self, operation, region, function, node):
         """Conditional interface correspondence, never confirmation of a target."""
@@ -629,22 +668,49 @@ def _span_atom(atom):
     return atom.kind, r.start_line, r.end_line, r.start_column, r.end_column
 
 
-def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000) -> SourceProgram:
+def _check_arguments(entry, max_operations):
     if type(entry) is not str or not entry:
         raise ValueError("entry must be a nonempty function-body name")
     if type(max_operations) is not int or max_operations < 1 or max_operations > 100000:
         raise ValueError("max_operations must be an integer in [1, 100000]")
+
+
+def prepare_source(path: str | Path, *, project_root=None) -> PreparedSource:
+    """Prepare immutable source text and shared source layers once per file.
+
+    Body graphs use the selected root's source namespace. Inventory persistence
+    retains this context once; standalone lower_source keeps its historical
+    per-file namespace and report format.
+    """
     path = Path(path).resolve()
+    root = Path(project_root).resolve() if project_root is not None else path.parent
     if path.stat().st_size > 4_000_000:
         raise ValueError("source exceeds the existing 4 MB control-model input budget")
     with tokenize.open(path) as stream:
         text = stream.read()
-    semantic = build_semantic_files((path,), path.parent).graph
     sources = {str(path): text}
+    semantic = build_semantic_files((path,), root, sources=sources).graph
     semantics = extract_source_semantics(semantic, sources=sources)
     control = build_source_control_flow(semantic, semantics, sources=sources)
-    builder = _Builder(path, entry, text, semantic, semantics, control, max_operations)
-    return builder.run()
+    tree = ast.parse(text, filename=str(path))
+    return PreparedSource(path, root, text, semantic, semantics, control, tree, _symbol_tables(text, path))
+
+
+def _symbol_tables(text, path):
+    tables = {}
+    def collect(table):
+        tables[(table.get_name(), table.get_lineno())] = table
+        for child in table.get_children():
+            collect(child)
+    collect(symtable.symtable(text, str(path), "exec"))
+    return tables
+
+
+def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000) -> SourceProgram:
+    _check_arguments(entry, max_operations)
+    context = prepare_source(path)
+    body = context.lower(entry, max_operations=max_operations)
+    return SourceProgram(body.graph, body.metadata, context.semantic, context.semantics, context.control)
 
 
 def validate_source_program(result: SourceProgram, *, max_operations: int = 10000):
@@ -681,4 +747,5 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
     return {"valid": True, "errors": []}
 
 
-__all__ = ["SourceProgram", "lower_source", "validate_source_program"]
+__all__ = ["SourceProgram", "PreparedSource", "LoweredSourceBody", "prepare_source",
+           "lower_source", "validate_source_program"]

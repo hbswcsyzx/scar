@@ -37,6 +37,21 @@ _K = SemanticNodeKind
 _R = SemanticRelation
 
 
+def source_reference(path: Path, root: Path, fingerprint: str, index: int,
+                     node: ast.AST) -> SourceReference:
+    """Canonical AST-atom identity shared by source discovery and the frontend.
+
+    The root is part of the source namespace through the relative path; callers
+    must retain that context alongside reports. No import/runtime identity is
+    implied by an AST reference.
+    """
+    relative = path.relative_to(root)
+    payload = f"{relative}:{fingerprint}:{index}:{type(node).__name__}"
+    atom_id = SourceAtomID("atom:" + hashlib.sha256(payload.encode()).hexdigest()[:24])
+    return SourceReference(atom_id, str(path), fingerprint, node.lineno,
+                           node.end_lineno or node.lineno, node.col_offset, node.end_col_offset)
+
+
 @dataclass
 class FrontendResult:
     graph: SemanticGraph
@@ -136,10 +151,11 @@ class _Bindings(ast.NodeVisitor):
 
 
 class _Frontend:
-    def __init__(self, paths: list[Path], root: Path) -> None:
+    def __init__(self, paths: list[Path], root: Path, sources=None) -> None:
         self.graph = SemanticGraph()
         self.root = root
         self.paths = paths
+        self.supplied_sources = sources
         self.trees: dict[str, ast.Module] = {}
         self.texts: dict[str, str] = {}
         self.fingerprints: dict[str, str] = {}
@@ -274,8 +290,11 @@ class _Frontend:
             if (self.root / "__init__.py").is_file():
                 parts.insert(0, self.root.name)
             name = ".".join(parts) or self.root.name
-            with tokenize.open(path) as source_file:
-                text = source_file.read()
+            if self.supplied_sources is None:
+                with tokenize.open(path) as source_file:
+                    text = source_file.read()
+            else:
+                text = self.supplied_sources[str(path)]
             tree = ast.parse(text, filename=str(path), type_comments=True)
             fingerprint = "sha256:" + hashlib.sha256(text.encode()).hexdigest()
             self.trees[name], self.texts[name] = tree, text
@@ -283,9 +302,8 @@ class _Frontend:
             for index, node in enumerate(ast.walk(tree)):
                 if isinstance(node, (ast.stmt, ast.expr, ast.arg, ast.alias, ast.keyword,
                                      ast.ExceptHandler)) and hasattr(node, "lineno"):
-                    atom_id = SourceAtomID(self.key("atom", f"{relative}:{fingerprint}:{index}:{type(node).__name__}"))
-                    reference = SourceReference(atom_id, str(path), fingerprint, node.lineno,
-                        node.end_lineno or node.lineno, node.col_offset, node.end_col_offset)
+                    reference = source_reference(path, self.root, fingerprint, index, node)
+                    atom_id = reference.atom_id
                     # File content digest + AST position identify the atom.
                     # Re-dumping every subtree would revisit the same source
                     # repeatedly and can be quadratic on deeply nested syntax.
@@ -804,7 +822,7 @@ def build_semantic(source: Path | str, project_root: Path | str | None = None) -
     return _Frontend(paths, root).build()
 
 
-def build_semantic_files(paths, project_root: Path | str) -> FrontendResult:
+def build_semantic_files(paths, project_root: Path | str, *, sources=None) -> FrontendResult:
     """Build only explicit source files, preserving imports outside this scope.
 
     Relative filenames are relative to project_root.  This performs no import
@@ -828,9 +846,14 @@ def build_semantic_files(paths, project_root: Path | str) -> FrontendResult:
         selected.add(path)
     if not selected:
         raise ValueError("no explicit Python source files selected")
-    result = _Frontend(sorted(selected), root).build()
+    if sources is not None:
+        if (type(sources) is not dict or set(sources) != {str(path) for path in selected}
+                or any(type(text) is not str for text in sources.values())):
+            raise ValueError("sources must supply exactly the selected decoded source snapshots")
+        sources = dict(sources)
+    result = _Frontend(sorted(selected), root, sources).build()
     result.coverage["selection_scope"] = "explicit_files_not_reachability"
     return result
 
 
-__all__ = ["EXCLUDED_DIRECTORIES", "FrontendResult", "build_semantic", "build_semantic_files"]
+__all__ = ["EXCLUDED_DIRECTORIES", "FrontendResult", "build_semantic", "build_semantic_files", "source_reference"]
