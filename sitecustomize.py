@@ -3,8 +3,12 @@ import os
 
 if os.environ.get("SCAR_TRACE_DIR"):
     try:
-        from scar.trace.inject import install
-        install()
+        if os.environ.get('SCAR_TRACE_CALL_EDGES') == '1':
+            from scar.trace.call_edges import install
+            install(os.environ['SCAR_TRACE_DIR'],os.environ['SCAR_CALL_PROJECT_ROOT'])
+        else:
+            from scar.trace.inject import install
+            install()
     except Exception as _scar_error:
         # A profiler must never make the target program fail to start.
         if os.environ.get("SCAR_TRACE_DEBUG"):

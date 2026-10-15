@@ -28,6 +28,19 @@ def _trace(args) -> int:
     project_root = str(Path(__file__).resolve().parents[1])
     env["SCAR_TRACE_DIR"] = str(out)
     env["SCAR_TRACE_DEBUG"] = "1"
+    env.pop('SCAR_TRACE_CALL_EDGES',None)
+    env.pop('SCAR_CALL_TRACE_OWNER_PID',None)
+    if getattr(args,"calls_only",False):
+        if args.lines:
+            raise SystemExit("calls-only does not collect line tracing; use a separate trace")
+        if any(out.glob('call-events.*.jsonl*')) or any(out.glob('call-codes.*.jsonl*')):
+            raise SystemExit("calls-only requires a fresh output directory")
+        env['SCAR_TRACE_CALL_EDGES'] = '1'
+        env['SCAR_CALL_PROJECT_ROOT'] = str(Path(args.project_root or Path.cwd()).resolve())
+        env['SCAR_CALL_MAX_EVENTS'] = str(args.max_call_events)
+        env['SCAR_CALL_MAX_BYTES'] = str(args.max_call_bytes)
+        if args.max_call_events < 1 or args.max_call_bytes < 1:
+            raise SystemExit("call budgets must be positive")
     if args.lines:
         env["SCAR_TRACE_LINES"] = "1"
     if args.resources:
@@ -253,6 +266,10 @@ def main(argv=None) -> int:
                        help="sample traced-process CPU and nvidia-smi GPU resources")
     trace.add_argument("--resource-interval", type=float, default=0.1,
                        help="resource sampling interval in seconds (with --resources)")
+    trace.add_argument('--calls-only',action='store_true',help='record bounded Python call sites and reference identities without Torch hooks or tensor values')
+    trace.add_argument('--project-root',help='source boundary for lightweight call-site recording; defaults to target cwd')
+    trace.add_argument('--max-call-events',type=int,default=100000)
+    trace.add_argument('--max-call-bytes',type=int,default=64000000)
     trace.add_argument("command", nargs=argparse.REMAINDER)
     trace.set_defaults(func=_trace)
     optimize_cmd = sub.add_parser("optimize", help="run a command with generic opt-in backends")
@@ -312,7 +329,28 @@ def main(argv=None) -> int:
     check_inventory = sub.add_parser("check-inventory", help="rebuild a source inventory from current files and discovery context")
     check_inventory.add_argument("report", help="inventory report JSON or JSON.gz")
     check_inventory.set_defaults(func=_check_inventory)
-    for command in (inventory_program, check_inventory):
+    call_links = sub.add_parser('link-calls',help='link recorded Python call sites and references to source and optional core inventory')
+    call_links.add_argument('trace')
+    call_links.add_argument('--project-root',required=True)
+    call_links.add_argument('--inventory',help='source inventory to strictly verify and link')
+    call_links.add_argument('--out',required=True)
+    call_links.set_defaults(func=_link_calls_cli)
+    check_call_links = sub.add_parser('check-call-links',help='strictly replay call/source/core links against trace, source and inventory')
+    check_call_links.add_argument('report')
+    check_call_links.set_defaults(func=_check_call_links_cli)
+    query_call_refs = sub.add_parser('query-call-refs',help='replay a call report and traverse one invocation reference path')
+    query_call_refs.add_argument('report')
+    query_call_refs.add_argument('--process',type=int,required=True)
+    query_call_refs.add_argument('--thread',type=int,required=True)
+    query_call_refs.add_argument('--invocation',type=int,required=True)
+    query_call_refs.set_defaults(func=_query_call_refs_cli)
+    for command in (call_links,check_call_links,query_call_refs):
+        command.add_argument('--max-call-trace-bytes',type=int,default=128000000)
+        command.add_argument('--max-call-trace-events',type=int,default=100000)
+        command.add_argument('--max-call-trace-codes',type=int,default=8192)
+        command.add_argument('--max-call-source-files',type=int,default=256)
+        command.add_argument('--max-call-source-bytes',type=int,default=16000000)
+    for command in (inventory_program, check_inventory,call_links,check_call_links,query_call_refs):
         command.add_argument("--max-files", type=int, default=128)
         command.add_argument("--max-bytes", type=int, default=8_000_000)
         command.add_argument("--max-directories", type=int, default=4096)
@@ -533,6 +571,111 @@ def _check_inventory(args) -> int:
         return 2
     print(json.dumps({"status": "REPLAYED", "summary": result.summary(), "transformation_authorized": False,
                       "analysis_measurements": _inventory_analysis_measurements(result)}))
+    return 0
+
+
+def _call_budget(args):
+    from scar.ir.program.call_edges import CallEdgeBudget
+    return CallEdgeBudget(max_raw_bytes=args.max_call_trace_bytes,max_events=args.max_call_trace_events,
+        max_codes=args.max_call_trace_codes,max_source_files=args.max_call_source_files,
+        max_source_bytes=args.max_call_source_bytes)
+
+
+def _call_json(path):
+    from scar.trace.files import open_binary
+    def unique(pairs):
+        result={}
+        for name,value in pairs:
+            if name in result:
+                raise ValueError('duplicate JSON field: '+name)
+            result[name]=value
+        return result
+    with open_binary(path) as stream:
+        raw=stream.read(256000001)
+    if len(raw)>256000000:
+        raise ValueError('call report exceeds independent 256 MB read ceiling')
+    def reject(value):
+        raise ValueError('nonfinite JSON value: '+value)
+    return json.loads(raw.decode('utf-8'),object_pairs_hook=unique,parse_constant=reject)
+
+
+def _call_inventory_input(path,args,expected=None):
+    import hashlib
+    from scar.analysis.program_inventory import ProgramInventory
+    from scar.trace.files import resolve
+    actual=resolve(Path(path).resolve())
+    with actual.open('rb') as stream:
+        digest=hashlib.file_digest(stream,'sha256').hexdigest()
+    if expected is not None and digest!=expected:
+        raise ValueError('call report inventory file differs from its bound input')
+    inventory=ProgramInventory.from_dict(_call_json(actual),**_inventory_limits(args),
+        runtime_verification_budget=_runtime_inventory_budget(args),max_compile_attempts=args.max_compile_attempts,
+        context_verification_budget=_context_inventory_budget(args))
+    return inventory,{'path':str(actual),'sha256':digest}
+
+
+def _call_report_input(path,args):
+    from scar.analysis.call_edges import CallEdgeReport
+    document=_call_json(path)
+    if (type(document) is not dict or set(document)!={'schema','schema_version','inventory','analysis'}
+            or document['schema']!='scar.call-links-envelope' or type(document['schema_version']) is not int
+            or document['schema_version']!=1):
+        raise ValueError('call report envelope fields/schema mismatch')
+    inventory=None
+    binding=document['inventory']
+    if binding is not None:
+        if type(binding) is not dict or set(binding)!={'path','sha256'}:
+            raise ValueError('call report inventory binding fields mismatch')
+        inventory,_=_call_inventory_input(binding['path'],args,binding['sha256'])
+    return CallEdgeReport.from_dict(document['analysis'],inventory=inventory,verification_budget=_call_budget(args))
+
+
+def _link_calls_cli(args):
+    from scar.analysis.call_edges import link_calls
+    try:
+        inventory,binding=_call_inventory_input(args.inventory,args) if args.inventory else (None,None)
+        report=link_calls(args.trace,project_root=args.project_root,inventory=inventory,budget=_call_budget(args))
+        output=Path(args.out).resolve()
+        if not (output.name.endswith('.json') or output.name.endswith('.json.gz')):
+            raise ValueError('call report must end in .json or .json.gz')
+        protected=list(Path(args.trace).resolve().iterdir())
+        if binding is not None:
+            protected.append(Path(binding['path']))
+        if inventory is not None:
+            protected.extend(Path(f.snapshot.path) for f in inventory.files)
+        if any(output==p.resolve() or output.exists() and p.exists() and output.samefile(p) for p in protected):
+            raise ValueError('call report must differ from trace, source and inventory inputs')
+        if output.exists() and _call_json(output).get('schema')!='scar.call-links-envelope':
+            raise ValueError('refusing to overwrite a non-call-report output')
+        _compressed_document(output,{'schema':'scar.call-links-envelope','schema_version':1,
+                                    'inventory':binding,'analysis':report.to_dict()})
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
+        print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
+        return 2
+    print(json.dumps({'status':'LINKED','summary':report.summary(),'out':str(output),'transformation_authorized':False}))
+    return 0
+
+
+def _check_call_links_cli(args):
+    try:
+        report=_call_report_input(args.report,args)
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
+        print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
+        return 2
+    print(json.dumps({'status':'REPLAYED','summary':report.summary(),'transformation_authorized':False}))
+    return 0
+
+
+def _query_call_refs_cli(args):
+    from scar.ir.program.call_edges import InvocationKey
+    from scar.ir.record_codec import encode
+    try:
+        report=_call_report_input(args.report,args)
+        query=report.trace_reference(InvocationKey(args.process,args.thread,args.invocation))
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
+        print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
+        return 2
+    print(json.dumps({'status':'REFERENCE_QUERY','query':encode(query),'transformation_authorized':False}))
     return 0
 
 

@@ -24,6 +24,10 @@ def fingerprint():
              *ROOT.joinpath("tests").rglob("*.py"),
              *ROOT.joinpath("scripts").rglob("*.py"),
              *ROOT.joinpath("gates").glob("*.json"), ROOT / "pyproject.toml"]
+    # The installed startup hook selects the actual collector. A frozen trace
+    # gate must include this root module as well as the scar package.
+    if ROOT.joinpath("sitecustomize.py").is_file():
+        paths.append(ROOT / "sitecustomize.py")
     digests = {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
                for path in sorted(paths)}
     combined = hashlib.sha256(json.dumps(digests, sort_keys=True).encode()).hexdigest()

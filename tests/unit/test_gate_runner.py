@@ -130,6 +130,20 @@ def test_gate_source_mutation_invalidates_successful_test_results(gate_repo):
     assert report["tested_files"]["scar/example.py"] == hashlib.sha256(b"VALUE = 1\n").hexdigest()
 
 
+def test_gate_collector_startup_hook_mutation_invalidates_results(gate_repo):
+    hook = gate_repo / "sitecustomize.py"
+    hook.write_text("SCAR_HOOK_VERSION = 1\n")
+    result, report = run_gate(
+        gate_repo,
+        "from pathlib import Path\ndef test_hook():\n"
+        "    Path('sitecustomize.py').write_text('SCAR_HOOK_VERSION = 2\\n')\n")
+    assert result.returncode != 0
+    assert report["status"] == "FAIL"
+    assert report["source_unchanged_during_test"] is False
+    assert report["tested_files"]["sitecustomize.py"] == hashlib.sha256(
+        b"SCAR_HOOK_VERSION = 1\n").hexdigest()
+
+
 def test_gate_parametrized_selector_accounts_for_every_case(gate_repo):
     result, report = run_gate(
         gate_repo,
