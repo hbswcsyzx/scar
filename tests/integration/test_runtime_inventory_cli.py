@@ -30,7 +30,7 @@ def test_cli_dynamic_sources_and_unobserved_branch_are_replayable(runtime_projec
     assert built.returncode == 0, built.stdout + built.stderr
     with gzip.open(output, "rt") as stream:
         document = json.load(stream)
-    assert document["schema_version"] == 4 and document["expansion"] and document["interfaces"]
+    assert document["schema_version"] == 5 and document["expansion"] and document["interfaces"]
     paths = {file["snapshot"]["path"] for file in document["files"]}
     assert paths == {str(entry), str(payload), str(root / "helper.py"), str(root / "dormant.py")}
     assert document["target_executed"] is False

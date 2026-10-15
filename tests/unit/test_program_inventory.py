@@ -57,7 +57,7 @@ def test_inventory_schema_and_independent_reconstruction(tmp_path):
     """)
     document = result.to_dict()
     assert document["schema"] == "scar.program-inventory"
-    assert document["schema_version"] == 4
+    assert document["schema_version"] == 5
     assert document["runtime_scope"] is None
     assert document["interfaces"]["bodies"]
     json.dumps(document, allow_nan=False)

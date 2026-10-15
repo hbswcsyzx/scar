@@ -313,12 +313,24 @@ def main(argv=None) -> int:
     model_program.add_argument("source", help="Python source file, read without importing or executing it")
     model_program.add_argument("--entry", required=True, help="qualified function body, for example Class.method")
     model_program.add_argument("--max-operations", type=int, default=10000)
+    model_program.add_argument("--max-report-bytes", type=int, default=256000000,
+                               help="independent uncompressed output byte ceiling")
+    model_program.add_argument("--body-profile", choices=("frame", "legacy"), default="frame",
+                               help="conditional frame lifetime model (default), or historical v1 lowering")
     model_program.add_argument("--out", required=True, help="source-linked graph report, optionally ending in .gz")
     model_program.set_defaults(func=_model_program)
     check_source_program = sub.add_parser("check-source-program", help="strictly replay an automatic source graph against current source")
     check_source_program.add_argument("report", help="source graph report JSON or JSON.gz")
     check_source_program.add_argument("--max-operations", type=int, default=10000, help="independent verifier construction ceiling")
+    check_source_program.add_argument("--max-report-bytes", type=int, default=256000000,
+                                      help="independent decompressed input byte ceiling")
     check_source_program.set_defaults(func=_check_source_program)
+    query_frame = sub.add_parser("query-frame-refs", help="replay a source program and follow conditional return reference paths")
+    query_frame.add_argument("report", help="bound-frame source program JSON or JSON.gz")
+    query_frame.add_argument("--max-operations", type=int, default=10000)
+    query_frame.add_argument("--max-reference-steps", type=int, default=4096)
+    query_frame.add_argument("--max-report-bytes", type=int, default=256000000)
+    query_frame.set_defaults(func=_query_frame_references)
     inventory_program = sub.add_parser("inventory-program", help="discover local source dependencies and automatically inventory/lower available function bodies")
     inventory_program.add_argument("source", help="entry Python file")
     inventory_program.add_argument("--project-root", help="filesystem boundary; inferred source roots remain distinct from runtime sys.path")
@@ -476,14 +488,17 @@ def _check_program(args) -> int:
 
 def _model_program(args) -> int:
     from scar.analysis.program_lowering import lower_source
+    from scar.ir.program.functions import BodyLoweringProfile
 
     source, output = Path(args.source).resolve(), Path(args.out).resolve()
     try:
         if source == output or (output.exists() and source.samefile(output)):
             raise ValueError("report path must differ from source")
-        result = lower_source(source, args.entry, max_operations=args.max_operations)
+        profile = (BodyLoweringProfile.BOUND_FRAME if args.body_profile == "frame"
+                   else BodyLoweringProfile.LEGACY)
+        result = lower_source(source, args.entry, max_operations=args.max_operations, profile=profile)
         document = result.to_dict()
-        _compressed_document(output, document)
+        _write_call_document(output, document, max_bytes=args.max_report_bytes)
     except (OSError, ValueError, TypeError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)],
                           "transformation_authorized": False}))
@@ -495,17 +510,29 @@ def _model_program(args) -> int:
 
 def _check_source_program(args) -> int:
     from scar.analysis.program_lowering import SourceProgram
-    from scar.trace.files import open_text
-
     try:
-        with open_text(args.report) as stream:
-            result = SourceProgram.from_dict(json.load(stream), max_operations=args.max_operations)
+        result = SourceProgram.from_dict(_call_json(args.report, max_bytes=args.max_report_bytes),
+                                         max_operations=args.max_operations)
     except (OSError, ValueError, TypeError, KeyError, AttributeError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)],
                           "transformation_authorized": False}))
         return 2
     print(json.dumps({"status": "REPLAYED", "summary": result.summary(),
                       "transformation_authorized": False}))
+    return 0
+
+
+def _query_frame_references(args) -> int:
+    from scar.analysis.frame_queries import query_return_references
+    try:
+        document = _call_json(args.report, max_bytes=args.max_report_bytes)
+        report = query_return_references(document, max_operations=args.max_operations,
+                                         max_reference_steps=args.max_reference_steps)
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, SyntaxError, RecursionError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)],
+                          "transformation_authorized": False}))
+        return 2
+    print(json.dumps(report, ensure_ascii=True))
     return 0
 
 

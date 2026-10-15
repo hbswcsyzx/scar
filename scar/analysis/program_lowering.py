@@ -20,10 +20,13 @@ from scar.analysis.source_semantics_v2 import validate_source_semantics
 from scar.ir.program.codec import dumps as dump_graph
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
+from scar.ir.program.frames import (
+    FrameBind, FrameDiscard, FrameEnter, FrameExit, FrameFormal, FrameModel,
+)
 from scar.ir.program.model import (
-    Behavior, Block, BlockArgument, CompletionResult, CompletionSignature,
+    AccessMode, Behavior, Block, BlockArgument, CompletionResult, CompletionSignature,
     CompletionSuccessor, DataValue, ExitKind, ExitPort, LiteralOrigin, Operation,
-    ProgramGraph, ReferenceValue, Region, Stability, StateLocation,
+    OperationResult, ProgramGraph, ReferenceValue, Region, Stability, StateAccess, StateLocation,
     StateVersionValue, Successor, Terminator, TerminatorKind, Use, UseRole,
     ValueKind, ValueType,
 )
@@ -63,6 +66,9 @@ class SourceProgram:
     semantic: object
     semantics: object
     control: object
+    profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY
+    interface: BodyEntryInterface | None = None
+    frame: FrameModel | None = None
 
     def summary(self):
         """Separate declaration/link counts from program and effect coverage."""
@@ -86,7 +92,9 @@ class SourceProgram:
                 "parsed_source_atoms": len(self.semantic.source_atoms),
             },
             "gap_counts": dict(sorted(Counter(gap.kind.value for gap in self.metadata.gaps).items())),
-            "source_selection": "one file parsed; selected body and available same-file call candidates lowered",
+            "source_selection": ("one file parsed; selected bound-frame body only; candidate calls remain interfaces"
+                                 if self.profile is BodyLoweringProfile.BOUND_FRAME else
+                                 "one file parsed; selected body and available same-file call candidates lowered"),
             "whole_program_coverage_established": False,
             "fine_grained_state_effects_established": False,
             "runtime_target_verified": False,
@@ -94,8 +102,8 @@ class SourceProgram:
         }
 
     def to_dict(self):
-        return {
-            "schema": "scar.source-program", "schema_version": 1,
+        document = {
+            "schema": "scar.source-program", "schema_version": 1 if self.profile is BodyLoweringProfile.LEGACY else 2,
             "status": ("UNSUPPORTED" if self.graph is None else
                        "LOWERED_WITH_GAPS" if self.metadata.gaps else "LOWERED"),
             "scope": "selected synchronous function bodies, conservative completion/effect model",
@@ -106,6 +114,10 @@ class SourceProgram:
             "summary": self.summary(),
             "runtime_target_verified": False, "transformation_authorized": False,
         }
+        if self.profile is not BodyLoweringProfile.LEGACY:
+            document.update(profile=self.profile.value, interface=encode(self.interface),
+                            frame=encode(self.frame))
+        return document
 
     @classmethod
     def from_dict(cls, document, *, max_operations=10000):
@@ -118,17 +130,29 @@ class SourceProgram:
         expected_fields = {"schema", "schema_version", "status", "scope", "metadata",
                            "graph", "semantic", "semantics", "control", "summary", "runtime_target_verified",
                            "transformation_authorized"}
-        if type(document) is not dict or set(document) != expected_fields:
+        if type(document) is not dict:
             raise ValueError("source program fields mismatch")
-        if (document["schema"] != "scar.source-program" or type(document["schema_version"]) is not int
-                or document["schema_version"] != 1):
+        version = document.get("schema_version")
+        if type(version) is not int or version not in (1, 2):
             raise ValueError("source program schema/version mismatch")
+        if version == 2:
+            expected_fields |= {"profile", "interface", "frame"}
+        if set(document) != expected_fields or document["schema"] != "scar.source-program":
+            raise ValueError("source program fields mismatch")
+        profile = BodyLoweringProfile.LEGACY
+        interface = frame = None
+        if version == 2:
+            profile = BodyLoweringProfile(document["profile"])
+            if profile is not BodyLoweringProfile.BOUND_FRAME:
+                raise ValueError("source-program v2 requires the bound-frame profile")
+            interface = decode(BodyEntryInterface, document["interface"]) if document["interface"] is not None else None
+            frame = FrameModel.from_dict(document["frame"]) if document["frame"] is not None else None
         metadata = decode(LoweringMetadata, document["metadata"])
         semantic = semantic_from_dict(document["semantic"])
         semantics = SourceSemanticsGraph.from_dict(document["semantics"], semantic)
         control = SourceControlFlowGraph.from_dict(document["control"])
         graph = load_graph(_canonical(document["graph"])) if document["graph"] is not None else None
-        result = cls(graph, metadata, semantic, semantics, control)
+        result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame)
         if _canonical(result.to_dict()) != _canonical(document):
             raise ValueError("source program scope/status/authority or canonical fields differ")
         checked = validate_source_program(result, max_operations=max_operations)
@@ -144,6 +168,7 @@ class LoweredSourceBody:
     metadata: LoweringMetadata
     operations_emitted: int
     interface: BodyEntryInterface | None = None
+    frame: FrameModel | None = None
 
 
 @dataclass(frozen=True)
@@ -193,9 +218,11 @@ class _Builder:
         self.expand_candidates = expand_candidates
         if type(profile) is not BodyLoweringProfile:
             raise ValueError("body lowering needs an explicit profile")
-        if profile is BodyLoweringProfile.BOUND_FORMALS and expand_candidates:
+        if profile is not BodyLoweringProfile.LEGACY and expand_candidates:
             raise ValueError("bound-formal bodies require root-only expansion")
         self.profile, self.interface = profile, None
+        self.frame = None
+        self.frame_transitions = []
         self.path, self.entry, self.text = path, entry, text
         self.semantic, self.semantics, self.control = semantic, semantics, control
         self.max_operations = max_operations
@@ -362,6 +389,11 @@ class _Builder:
         return normal, value, operation_id
 
     def finish_exit(self, cursor, node, value, kind):
+        frame_operation = frame_uses = None
+        if self.profile is BodyLoweringProfile.BOUND_FRAME:
+            frame_operation, frame_uses = self.frame_step(
+                cursor, node, ((value, node, "held-payload", 0, None),),
+                role=SourceRole.RETURN if kind is ExitKind.NORMAL else SourceRole.EXCEPTION)
         operation_id = self.fresh(OperationID, "exit")
         uses = (self.use(operation_id, value, node, "result", 0),
                 self.use(operation_id, cursor.state, node, "state", 0))
@@ -370,6 +402,34 @@ class _Builder:
                               terminator=Terminator(term_kind, exit=kind.value.lower(),
                                                     values=tuple(u.id for u in uses)))
         self.emit(cursor, operation, node, SourceRole.RETURN if kind is ExitKind.NORMAL else SourceRole.EXCEPTION)
+        if frame_operation is not None:
+            self.frame_transitions.append(FrameExit(frame_operation, self.source(node),
+                                                    operation_id, frame_uses[0].id))
+
+    def frame_step(self, cursor, node, references, *, role):
+        """Conditional nonthrowing frame transition; unknown effects may diverge.
+
+        This does not add a second binding or a runtime reference count action.
+        It makes the frame's existing hold changes depend on the coarse world.
+        FrameRules retains the unproved interposition and lifetime conditions.
+        """
+        operation_id = self.fresh(OperationID, "frame-transition")
+        references = tuple(self.use(operation_id, value, child, use_role, index,
+                                    semantic_value=static)
+                           for value, child, use_role, index, static in references)
+        before = self.use(operation_id, cursor.state, node, "state", 0)
+        after = StateVersionValue(self.fresh(ValueID, "frame-world"), self.function_context,
+                                  OperationResult(operation_id, 0), self.world)
+        self.add_value(after)
+        self.link_value(after, node, SourceRole.STATE)
+        operation = Operation(
+            operation_id, "frame-lifetime", (Behavior.READ, Behavior.WRITE, Behavior.MEMORY),
+            references + (before,), results=(after.id,),
+            accesses=(StateAccess(self.world, before.id, AccessMode.READ_WRITE, after.id),),
+            effects_complete=False)
+        self.emit(cursor, operation, node, role)
+        cursor.state = after.id
+        return operation_id, references
 
     def literal(self, node, value):
         try:
@@ -437,7 +497,14 @@ class _Builder:
     def store(self, target, value, cursor):
         if not isinstance(target, ast.Name):
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, target, "only ordinary local name assignment is connected")
-        if target.id in cursor.env:
+        if self.profile is BodyLoweringProfile.BOUND_FRAME:
+            slot = self.slots.get((self.function_definition.id, target.id))
+            if slot is None:
+                raise _Unsupported(GapKind.SOURCE_MAPPING, target, "missing ordinary local source slot")
+            operation, uses = self.frame_step(cursor, target,
+                ((value, target, "assigned", 0, None),), role=SourceRole.LOCAL_BINDING)
+            self.frame_transitions.append(FrameBind(operation, self.source(target), slot, uses[0].id))
+        elif target.id in cursor.env:
             cursor, _, _ = self.invoke(cursor, target,
                 ((cursor.env[target.id], target, "previous", 0, None),
                  (value, target, "assigned", 0, None)), role=SourceRole.LOCAL_BINDING, result_type=None)
@@ -461,6 +528,8 @@ class _Builder:
     def statements(self, statements, cursor):
         for node in statements:
             if cursor is None:
+                if self.profile is BodyLoweringProfile.BOUND_FRAME:
+                    self.check_frame_statements((node,))
                 # Preserve source diagnostics rather than claiming dead code.
                 self.gap(GapKind.SOURCE_COVERAGE, node, "statement follows a closed return path; not lowered as executed work")
                 continue
@@ -468,7 +537,11 @@ class _Builder:
                 cursor, value = self.expr(node.value, cursor)
                 cursor = self.store(node.targets[0], value, cursor)
             elif isinstance(node, ast.Expr):
-                cursor, _ = self.expr(node.value, cursor)
+                cursor, value = self.expr(node.value, cursor)
+                if self.profile is BodyLoweringProfile.BOUND_FRAME:
+                    operation, uses = self.frame_step(cursor, node,
+                        ((value, node.value, "discarded-temporary", 0, None),), role=SourceRole.EXPRESSION)
+                    self.frame_transitions.append(FrameDiscard(operation, self.source(node), uses[0].id))
             elif isinstance(node, ast.Pass):
                 continue
             elif isinstance(node, ast.Return):
@@ -477,8 +550,11 @@ class _Builder:
                 else:
                     cursor, value = self.expr(node.value, cursor)
                 self.gap(GapKind.FRAME_EFFECT, node, "frame/reference-release effects remain conservative at return")
-                cursor, returned, _ = self.invoke(cursor, node,
-                    ((value, node.value or node, "return", 0, None),), role=SourceRole.RETURN)
+                if self.profile is BodyLoweringProfile.BOUND_FRAME:
+                    returned = value
+                else:
+                    cursor, returned, _ = self.invoke(cursor, node,
+                        ((value, node.value or node, "return", 0, None),), role=SourceRole.RETURN)
                 self.finish_exit(cursor, node, returned, ExitKind.NORMAL)
                 cursor = None
             elif isinstance(node, ast.If):
@@ -514,10 +590,29 @@ class _Builder:
                 raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "statement is not yet connected: " + type(node).__name__)
         return cursor
 
+    def check_frame_statements(self, statements):
+        """Reject unsupported frame/control syntax, including closed paths.
+
+        This profile is a whole-body source rule. Keeping an unreachable
+        lifetime construct as a coverage gap must not imply that it was modeled.
+        Historical profiles preserve their original coverage behavior.
+        """
+        for node in statements:
+            if isinstance(node, ast.If):
+                self.check_frame_statements(node.body)
+                self.check_frame_statements(node.orelse)
+            elif isinstance(node, ast.Assign):
+                if len(node.targets) != 1 or not isinstance(node.targets[0], ast.Name):
+                    raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
+                                       "frame profile requires single ordinary local Name assignment")
+            elif not isinstance(node, (ast.Return, ast.Expr, ast.Pass)):
+                raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
+                                   "whole frame profile does not model " + type(node).__name__)
+
     def function(self, name, root):
         node = self.functions[name]
         definition = self.definition(node)
-        self.function_context = RegionID(_key("function-body", definition.id.wire))
+        self.function_context = self.region_id(definition)
         self.serial = 0
         self.function_definition = definition
         self.reference_candidates = {}
@@ -539,7 +634,7 @@ class _Builder:
         if any(isinstance(child, (ast.Yield, ast.YieldFrom)) for child in body_nodes(node.body)):
             raise _Unsupported(GapKind.UNSUPPORTED_SIGNATURE, node,
                                "generator invocation/suspension requires a distinct completion and lifetime model")
-        if self.profile is BodyLoweringProfile.BOUND_FORMALS:
+        if self.profile is not BodyLoweringProfile.LEGACY:
             from scar.analysis.function_interfaces import formal_nodes
             parameters = [argument for argument, _ in formal_nodes(node)]
         else:
@@ -571,28 +666,65 @@ class _Builder:
         self.link_value(state, node, SourceRole.STATE)
         self.block_arguments[cursor.block] = tuple(args)
         entry = cursor.block
-        if self.profile is BodyLoweringProfile.BOUND_FORMALS:
-            self.interface = BodyEntryInterface(definition.id, self.function_context, tuple(ports), state.id)
+        if self.profile is not BodyLoweringProfile.LEGACY:
+            self.interface = BodyEntryInterface(definition.id, self.function_context, tuple(ports), state.id,
+                                                self.profile)
+        if self.profile is BodyLoweringProfile.BOUND_FRAME:
+            operation, uses = self.frame_step(cursor, node,
+                tuple((port.value, parameter, "bound-formal", index, None)
+                      for index, (port, parameter) in enumerate(zip(ports, parameters))), role=SourceRole.PARAMETER)
+            self.frame_transitions.append(FrameEnter(operation, self.source(node),
+                tuple(FrameFormal(port.slot, use.id) for port, use in zip(ports, uses))))
+            self.gap(GapKind.FRAME_EFFECT, node,
+                     "frame lifetime condition is unproved; finalizer/external effects, retention and noncompletion remain unknown")
         self.gap(GapKind.CODE_VERSION, node, "source body version is bound; live function object/code and definition-time effects remain unobserved")
-        cursor = self.statements(node.body, cursor)
+        statements = node.body
+        if (self.profile is BodyLoweringProfile.BOUND_FRAME and statements
+                and isinstance(statements[0], ast.Expr) and isinstance(statements[0].value, ast.Constant)
+                and type(statements[0].value.value) is str):
+            # A leading function docstring initializes declaration metadata;
+            # it is not evaluated/discarded on each call of this Python body.
+            statements = statements[1:]
+        cursor = self.statements(statements, cursor)
         if cursor is not None:
             implicit = self.literal(node, None)
-            cursor, value, _ = self.invoke(cursor, node,
-                ((implicit, node, "return", 0, None),), role=SourceRole.RETURN)
+            if self.profile is BodyLoweringProfile.BOUND_FRAME:
+                value = implicit
+            else:
+                cursor, value, _ = self.invoke(cursor, node,
+                    ((implicit, node, "return", 0, None),), role=SourceRole.RETURN)
             self.finish_exit(cursor, node, value, ExitKind.NORMAL)
         blocks = tuple(Block(block, self.block_arguments[block], tuple(self.block_operations[block]))
                        for block in self.function_blocks)
-        region = Region(self.function_context, name, entry, blocks,
-                        (ExitPort("normal", ExitKind.NORMAL, (_REF, self.state_type)),
-                         ExitPort("raise", ExitKind.RAISE, (_REF, self.state_type))), parent=root)
+        exits = (ExitPort("normal", ExitKind.NORMAL, (_REF, self.state_type)),
+                 ExitPort("raise", ExitKind.RAISE, (_REF, self.state_type)))
+        if self.profile is BodyLoweringProfile.BOUND_FRAME:
+            # A local/reference-only body need not have an exceptional edge.
+            # Incomplete effects and possible noncompletion are still explicit
+            # frame obligations, never a fabricated replacement exception.
+            body_operations = {item for block in blocks for item in block.operations}
+            completed = {operation.terminator.kind for operation in self.operations
+                         if operation.id in body_operations
+                         and operation.terminator is not None}
+            exits = tuple(port for port in exits
+                          if (TerminatorKind.RETURN if port.kind is ExitKind.NORMAL else TerminatorKind.RAISE)
+                          in completed)
+        region = Region(self.function_context, name, entry, blocks, exits, parent=root)
         self.regions.append(region)
+        if self.profile is BodyLoweringProfile.BOUND_FRAME:
+            self.frame = FrameModel(definition.id, region.id, self.source(node), tuple(self.frame_transitions))
         return region.id
+
+    def region_id(self, definition):
+        if self.profile is BodyLoweringProfile.BOUND_FRAME:
+            return RegionID(_key("function-body", definition.id.wire, self.profile.value))
+        return RegionID(_key("function-body", definition.id.wire))
 
     def run(self):
         if self.entry not in self.functions:
             raise ValueError("entry must name a selected function body")
         root_node = self.functions[self.entry]
-        root_id = RegionID(_key("function-body", self.definition(root_node).id.wire))
+        root_id = self.region_id(self.definition(root_node))
         try:
             self.function(self.entry, None)
             # Expand only referenced source candidates, not unrelated modules.
@@ -618,7 +750,7 @@ class _Builder:
             regions = {region.id: region for region in self.regions}
             for operation, callee, name, node in self.pending_targets:
                 definition = self.definition(self.functions[name]) if name in self.functions else None
-                candidate = RegionID(_key("function-body", definition.id.wire)) if definition else None
+                candidate = self.region_id(definition) if definition else None
                 candidate = candidate if candidate in available else None
                 arguments, results = (), ()
                 if candidate is not None:
@@ -632,6 +764,9 @@ class _Builder:
             graph = ProgramGraph(root_id, tuple(self.regions), tuple(self.operations), tuple(self.values),
                                  (StateLocation(self.world, "coarse Python/external world", stability=Stability.UNKNOWN),))
             require_valid(graph)
+            if self.frame is not None:
+                from scar.ir.program.frame_validation import require_valid_frame_model
+                require_valid_frame_model(self.frame, graph, interface=self.interface, semantic=self.semantic)
         except _Unsupported as error:
             self.gap(error.kind, error.node, error.detail)
             graph = None
@@ -642,14 +777,15 @@ class _Builder:
             self.use_links.clear()
             self.targets.clear()
             self.interface = None
+            self.frame = None
         metadata = LoweringMetadata(self.entry, self.snapshot, tuple(self.operation_links),
                                    tuple(self.value_links), tuple(self.targets), tuple(self.gaps),
                                    _ASSUMPTIONS, tuple(self.use_links))
-        return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface)
+        return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface, self.frame)
 
     def candidate_bindings(self, operation, region, function, node):
         """Conditional interface correspondence, never confirmation of a target."""
-        if self.profile is BodyLoweringProfile.BOUND_FORMALS:
+        if self.profile is not BodyLoweringProfile.LEGACY:
             return (), ()
         parameters = function.args.posonlyargs + function.args.args
         entry = next(block for block in region.blocks if block.id == region.entry)
@@ -730,11 +866,16 @@ def _symbol_tables(text, path):
     return tables
 
 
-def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000) -> SourceProgram:
+def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000,
+                 profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY) -> SourceProgram:
     _check_arguments(entry, max_operations)
+    if type(profile) is not BodyLoweringProfile or profile not in (BodyLoweringProfile.LEGACY, BodyLoweringProfile.BOUND_FRAME):
+        raise ValueError("standalone source program needs LEGACY or BOUND_FRAME_V1 profile")
     context = prepare_source(path)
-    body = context.lower(entry, max_operations=max_operations)
-    return SourceProgram(body.graph, body.metadata, context.semantic, context.semantics, context.control)
+    body = context.lower(entry, max_operations=max_operations,
+                         expand_candidates=profile is BodyLoweringProfile.LEGACY, profile=profile)
+    return SourceProgram(body.graph, body.metadata, context.semantic, context.semantics, context.control,
+                         profile, body.interface, body.frame)
 
 
 def validate_source_program(result: SourceProgram, *, max_operations: int = 10000):
@@ -742,6 +883,20 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
     try:
         if type(result) is not SourceProgram:
             raise ValueError("expected SourceProgram")
+        if type(result.profile) is not BodyLoweringProfile or result.profile not in (BodyLoweringProfile.LEGACY, BodyLoweringProfile.BOUND_FRAME):
+            raise ValueError("unsupported standalone source lowering profile")
+        if result.profile is BodyLoweringProfile.LEGACY:
+            if result.interface is not None or result.frame is not None:
+                raise ValueError("historical source-program v1 has no bound-frame overlay")
+        elif result.graph is None:
+            if result.interface is not None or result.frame is not None:
+                raise ValueError("unsupported source body has no frame/interface links")
+        else:
+            from scar.ir.program.frame_validation import require_valid_frame_model
+            if result.interface is None or result.interface.profile is not result.profile:
+                raise ValueError("frame source program needs its matching body interface")
+            require_valid_frame_model(result.frame, result.graph, interface=result.interface,
+                                      semantic=result.semantic)
         errors = record_errors(result.metadata, LoweringMetadata, "metadata")
         if errors:
             return {"valid": False, "errors": errors}
@@ -763,7 +918,8 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             if {(link.operation, link.use) for link in result.metadata.use_links} != {
                     (op.id, use.id) for op in ops.values() for use in op.uses}:
                 raise ValueError("source use correspondence is incomplete")
-        rebuilt = lower_source(result.metadata.source.path, result.metadata.entry, max_operations=max_operations)
+        rebuilt = lower_source(result.metadata.source.path, result.metadata.entry,
+                               max_operations=max_operations, profile=result.profile)
         if _canonical(result.to_dict()) != _canonical(rebuilt.to_dict()):
             raise ValueError("program graph or typed source correspondence differs from source replay")
     except (ValueError, TypeError, KeyError, AttributeError, OSError, SyntaxError, RecursionError) as error:
