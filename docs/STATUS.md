@@ -1,5 +1,25 @@
 # Current evidence and remaining work
 
+## In progress: N2.b0 entry-driven source discovery (2026-10-15)
+
+Implementation `f21eb53` adds `scar inventory-program entry.py --project-root ...`
+and strict `scar check-inventory` replay. Local import candidates, definitions,
+execution phases, coverage gaps and bounded core-body attempts are generated
+without a user-supplied function list. Its frozen **267** gate tests passed;
+the full external acceptance has not passed yet.
+
+The first unchanged-LeWM source check was stopped after **919.862 seconds**
+because SCAR repeatedly reconstructed and validated the same source layers.
+It produced no final inventory and is retained as an incomplete attempt.
+Generic schema caching and a same-snapshot construction path are being checked;
+public untrusted-graph replay remains mandatory. These are analyzer costs,
+not LeWM workload timings.
+
+Automatic whole-LeWM modeling, precise mutable-state/call links, optimization
+guidance and workload acceleration remain incomplete. See
+[AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md), [N2B0_PLAN.md](N2B0_PLAN.md)
+and the proposed [N2B1_PLAN.md](N2B1_PLAN.md).
+
 ## Latest autonomous acceptance: N2.a automatic function source lowering (2026-10-15)
 
 Frozen implementation `429e87e` passed **204** gate cases, including the 93 N1

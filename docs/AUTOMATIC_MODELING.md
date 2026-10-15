@@ -1,7 +1,9 @@
 # 自动建图：实际能力与验收路径
 
 日期：2026-10-15。N2.a 有限函数体门已通过，见 [N2A_ACCEPTANCE.md](N2A_ACCEPTANCE.md)；
-完整 LeWM 自动建模尚未验收。
+N2.b0 已实现入口驱动的自动范围与接口清单，完整外部验收仍在进行。
+完整 LeWM 自动建模尚未验收。最新边界、难点和后续验收见
+[AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md)。
 
 ## 用户输入与自动化边界
 
@@ -9,7 +11,21 @@
 建立图和报告。用户不需要为每个 Tensor 填类型，不需要手工制作 IR，不需要
 给某个 workload 补节点、连边或 pure 标记。手工 IR 仅用于独立测试校验器。
 
-当前可运行入口是**指定一个源码函数体**，不是任意运行命令的全程序恢复：
+新增的入口只要求源码入口和项目边界，不要求函数列表：
+
+```bash
+conda activate lewm
+scar inventory-program /path/to/project/entry.py --project-root /path/to/project \
+  --out inventory.json.gz
+scar check-inventory inventory.json.gz
+```
+
+它自动发现本地候选源码、枚举定义/调用/覆盖缺口，并共享每文件准备结果，
+自动尝试有限 body 构图。候选文件图与独立 body 图尚未合成完整程序图；
+详细报告含义见 [PROGRAM_INVENTORY.md](PROGRAM_INVENTORY.md)。
+任意运行命令、动态 loader 和运行配置到完整执行模型的连接仍未完成。
+
+旧入口仍可用于**指定一个源码函数体**的诊断：
 
 ```bash
 conda activate lewm
@@ -46,6 +62,7 @@ Python host 返回不代表 GPU kernel 已完成。自动分类、依赖恢复�
 | 顺序 | 缺口与实现方向 | 自验要求 |
 | --- | --- | --- |
 | N2.a | 自动函数体连接、公用命令、严格持久化与完成方式 | 自动源码正例；作用域、分支、异常、重绑定和报告篡改反例；外部压力报告 |
+| N2.b0 | 自动 import 范围、定义接口、全部可执行源码位置清单、批量 body 尝试 | 无逐函数输入；重导出/歧义/遮蔽/预算/动态边界；压缩报告严格重放和外部入口压力 |
 | N2.b | for/while、零次路径、回边、break/continue/else、循环携带定义；随后 try/with 的退出 | 循环值/状态逐前驱绑定；异常和 finally 不可丢；不把一次 trace 当全部路径 |
 | N2.b | 属性/下标读写、容器与对象状态、alias；将粗 world 细分为可核对位置 | 同引用内容变化、view/共享写、部分覆盖、未知 alias 冲突反例 |
 | N2.c | defaults/decorators/导入初始化、跨文件调用、动态 dispatch 与入口依赖范围 | 定义时与调用时操作分离；目标重绑定、初始化残余效果；自动覆盖清单 |

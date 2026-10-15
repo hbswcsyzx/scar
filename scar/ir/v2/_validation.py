@@ -18,48 +18,110 @@ def _hints(cls: type) -> dict:
     return get_type_hints(cls)
 
 
-def record_errors(value: Any, expected: Any, path: str) -> list[str]:
-    """Check a typed record, including nested records and post-init invariants."""
+_ANY_PLAN = 0
+_UNION_PLAN = 1
+_CONTAINER_PLAN = 2
+_INT_PLAN = 3
+_FLOAT_PLAN = 4
+_INSTANCE_PLAN = 5
+
+
+@lru_cache(maxsize=None)
+def _cached_type_plan(expected: Any) -> tuple:
+    """Cache type structure only; values and validation results stay uncached."""
+    return _build_type_plan(expected)
+
+
+def _type_plan(expected: Any) -> tuple:
+    try:
+        return _cached_type_plan(expected)
+    except TypeError:
+        # record_errors historically lets isinstance/get_origin diagnose an
+        # unusual unhashable ``expected`` value. Keep that path uncached.
+        try:
+            hash(expected)
+        except TypeError:
+            return _build_type_plan(expected)
+        raise
+
+
+def _build_type_plan(expected: Any) -> tuple:
     if expected is Any:
-        return []
+        return (_ANY_PLAN,)
     origin, args = get_origin(expected), get_args(expected)
     if origin in (Union, UnionType):
-        if any(not record_errors(value, choice, path) for choice in args):
-            return []
-        return [f"{path} has invalid type or value for {expected}"]
+        return (_UNION_PLAN, expected, tuple(_type_plan(choice) for choice in args))
     if origin in (tuple, list, set, frozenset, dict):
+        return (_CONTAINER_PLAN, origin, args,
+                tuple(_type_plan(argument) for argument in args))
+    if expected is int:
+        return (_INT_PLAN,)
+    if expected is float:
+        return (_FLOAT_PLAN,)
+    return (_INSTANCE_PLAN, expected)
+
+
+@lru_cache(maxsize=None)
+def _dataclass_schema(cls: type) -> tuple[tuple[str, tuple], ...]:
+    hints = _hints(cls)
+    return tuple((item.name, _type_plan(hints[item.name])) for item in fields(cls))
+
+
+def record_errors(value: Any, expected: Any, path: str) -> list[str]:
+    """Check a typed record, including nested records and post-init invariants."""
+    return _record_errors(value, _type_plan(expected), path)
+
+
+def _record_errors(value: Any, plan: tuple, path: str) -> list[str]:
+    kind = plan[0]
+    if kind == _ANY_PLAN:
+        return []
+    if kind == _UNION_PLAN:
+        if any(not _record_errors(value, choice, path) for choice in plan[2]):
+            return []
+        return [f"{path} has invalid type or value for {plan[1]}"]
+    if kind == _CONTAINER_PLAN:
+        origin, args, child_plans = plan[1:]
         if not isinstance(value, origin):
             return [f"{path} must be {origin.__name__}"]
         errors: list[str] = []
         if origin is dict:
             for key, item in value.items():
-                errors.extend(record_errors(key, args[0], f"{path}.key"))
-                errors.extend(record_errors(item, args[1], f"{path}[{key!s}]"))
+                errors.extend(_record_errors(key, child_plans[0], f"{path}.key"))
+                errors.extend(_record_errors(item, child_plans[1], f"{path}[{key!s}]"))
         elif origin is tuple and not (len(args) == 2 and args[1] is Ellipsis):
             if len(value) != len(args):
                 return [f"{path} must contain {len(args)} fields"]
             for index, (item, item_type) in enumerate(zip(value, args)):
-                errors.extend(record_errors(item, item_type, f"{path}[{index}]"))
+                errors.extend(_record_errors(item, child_plans[index], f"{path}[{index}]"))
         else:
             for index, item in enumerate(value):
-                errors.extend(record_errors(item, args[0], f"{path}[{index}]"))
+                errors.extend(_record_errors(item, child_plans[0], f"{path}[{index}]"))
         return errors
     # Python bool subclasses int, but a true/false value is never a count or ID.
-    if expected is int:
+    if kind == _INT_PLAN:
+        expected = int
         good_type = type(value) is int
-    elif expected is float:
+    elif kind == _FLOAT_PLAN:
+        expected = float
         good_type = type(value) in (float, int)
     else:
+        expected = plan[1]
         good_type = isinstance(value, expected)
     if not good_type:
         return [f"{path} must be {getattr(expected, '__name__', expected)}"]
     if not is_dataclass(value):
         return []
     errors = []
-    hints = _hints(type(value))
-    for item in fields(value):
-        errors.extend(record_errors(getattr(value, item.name), hints[item.name],
-                                    f"{path}.{item.name}"))
+    if isinstance(value, type):
+        # Preserve dataclasses.fields(value)'s behavior for a dataclass class
+        # passed as a value (rather than an instance).
+        hints = _hints(type(value))
+        schema = tuple((item.name, _type_plan(hints[item.name])) for item in fields(value))
+    else:
+        schema = _dataclass_schema(type(value))
+    for name, field_plan in schema:
+        errors.extend(_record_errors(getattr(value, name), field_plan, f"{path}.{name}"))
     if not errors and hasattr(value, "__post_init__"):
         try:
             value.__post_init__()

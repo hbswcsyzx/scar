@@ -15,9 +15,8 @@ from pathlib import Path
 import symtable
 import tokenize
 
-from scar.analysis.control_flow_v2 import build_source_control_flow, validate_source_control_flow
-from scar.analysis.source_semantics_v2 import extract_source_semantics, validate_source_semantics
-from scar.ir.frontend_v2 import build_semantic_files
+from scar.analysis.control_flow_v2 import _build_generated_source_layers, validate_source_control_flow
+from scar.analysis.source_semantics_v2 import validate_source_semantics
 from scar.ir.program.codec import dumps as dump_graph
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.model import (
@@ -689,9 +688,7 @@ def prepare_source(path: str | Path, *, project_root=None) -> PreparedSource:
     with tokenize.open(path) as stream:
         text = stream.read()
     sources = {str(path): text}
-    semantic = build_semantic_files((path,), root, sources=sources).graph
-    semantics = extract_source_semantics(semantic, sources=sources)
-    control = build_source_control_flow(semantic, semantics, sources=sources)
+    semantic, semantics, control = _build_generated_source_layers((path,), root, sources=sources)
     tree = ast.parse(text, filename=str(path))
     return PreparedSource(path, root, text, semantic, semantics, control, tree, _symbol_tables(text, path))
 

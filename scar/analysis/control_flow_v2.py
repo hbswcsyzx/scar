@@ -693,6 +693,34 @@ def _load_source_texts(semantic, source_semantics, sources, budget):
     return result
 
 
+def _build_generated_source_layers(paths, root, *, sources,
+                                   budget: ControlFlowBudget = ControlFlowBudget()):
+    """Generate all source layers from one caller-owned decoded snapshot.
+
+    This private construction path accepts source, never a purportedly verified
+    graph. The public graph-input builder below still independently replays its
+    supplied semantics. Re-extracting the semantics just generated here would
+    repeat the same source analysis without checking an independent claim.
+    """
+    from scar.ir.frontend_v2 import build_semantic_files
+    from scar.analysis.source_semantics_v2 import extract_source_semantics
+
+    if type(budget) is not ControlFlowBudget:
+        raise TypeError("budget must be ControlFlowBudget")
+    budget.__post_init__()
+    semantic = build_semantic_files(paths, root, sources=sources).graph
+    source_semantics = extract_source_semantics(semantic, sources=sources)
+    texts = _load_source_texts(semantic, source_semantics, sources, budget)
+    builder = _Builder(semantic, source_semantics, texts,
+                       {path: SourceVersion(path, _fingerprint(text)) for path, text in texts.items()},
+                       budget)
+    try:
+        control = builder.build()
+    except RecursionError as exc:
+        raise ValueError("source control-flow nesting exceeds interpreter construction limit") from exc
+    return semantic, source_semantics, control
+
+
 def build_source_control_flow(semantic: SemanticGraph, source_semantics,
                               *, sources: dict[str, str] | None = None,
                               budget: ControlFlowBudget = ControlFlowBudget()) -> SourceControlFlowGraph:

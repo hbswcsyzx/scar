@@ -15,6 +15,8 @@
     {"id": "independent_scope_identity_shared_preparation_failed_work_budgets_and_binding_witnesses", "tests": ["tests/unit/test_program_inventory_adversarial.py"]},
     {"id": "reexport_paths_stay_bounded_and_witness_budgets_do_not_erase_import_edges", "tests": ["tests/unit/test_import_witness_scaling.py"]},
     {"id": "public_one_entry_discovery_compressed_persistence_strict_replay_and_source_protection", "tests": ["tests/integration/test_program_inventory_cli.py"]},
+    {"id": "validation_schema_caching_preserves_live_values_errors_subtypes_and_post_init", "tests": ["tests/unit/test_record_validation_compatibility.py"]},
+    {"id": "generated_snapshot_layers_match_defensive_construction_and_keep_budgets_replay", "tests": ["tests/unit/test_source_preparation_equivalence.py"]},
     {"id": "n2a_automatic_source_completion_and_persistence_compatibility", "tests": ["tests/unit/test_source_program_lowering.py", "tests/unit/test_source_lowering_review.py", "tests/unit/test_program_completion_records.py", "tests/unit/test_program_completions_adversarial.py", "tests/integration/test_source_program_cli.py"]},
     {"id": "n1_core_record_control_state_and_wire_compatibility", "tests": ["tests/unit/test_program_records.py", "tests/unit/test_program_graph.py", "tests/unit/test_program_graph_adversarial.py", "tests/integration/test_program_graph_roundtrip.py", "tests/integration/test_check_program_cli.py"]}
   ]
