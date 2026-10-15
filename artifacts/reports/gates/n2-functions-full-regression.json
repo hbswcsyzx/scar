@@ -1,0 +1,29 @@
+{
+  "schema": "scar.frozen-regression",
+  "status": "PASS",
+  "revision": "cfad419df03c14d9f7e38869929b4ee451fe6f62",
+  "source_sha256": "c92e3a4681fde28297eb7723119589796b2eb542ce74d333002a4afb71e6cef4",
+  "worktree_status": "",
+  "source_unchanged": true,
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "--tb=short",
+    "--junitxml=/home/zyf/AAA/scar/artifacts/reports/gates/n2-functions-full-regression.xml"
+  ],
+  "returncode": 0,
+  "wall_seconds": 129.97673747781664,
+  "suite": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "1552",
+    "time": "128.384",
+    "timestamp": "2026-10-15T19:40:01.804304+00:00",
+    "hostname": "gpu1"
+  },
+  "xml_sha256": "8519dd684ecbe755ea72e9148ef5d44b4399300b460b3ee8c6702f0c5aa10208"
+}

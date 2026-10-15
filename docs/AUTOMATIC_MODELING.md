@@ -1,5 +1,12 @@
 # 自动建图：实际能力与验收路径
 
+当前默认v4的函数接口门已有限验收：504 gate / 1,552回归，原始LeWM来源
+构图与重放通过。44个局部body、6个运行来源core连接（仅1个精确见证）仍未
+形成完整调用链；197份条件计划与已有core调用没有交集。
+最新事实与连接计划见 [AUTOMATION_STATUS_20261015.md](AUTOMATION_STATUS_20261015.md)
+和 [N2_FUNCTION_INTERFACES_ACCEPTANCE.md](N2_FUNCTION_INTERFACES_ACCEPTANCE.md)。
+以下保留各前置门的历史范围。
+
 日期：2026-10-15。N2.a 有限函数体门已通过，见 [N2A_ACCEPTANCE.md](N2A_ACCEPTANCE.md)；
 N2.b0 的入口驱动自动范围与接口清单已有限验收，见
 [N2B0_ACCEPTANCE.md](N2B0_ACCEPTANCE.md)。

@@ -2,6 +2,22 @@
 
 日期：2026-10-15。本文区分实现、测试通过和外部程序验收。
 
+## 最新有限验收：N2.function-interfaces
+
+冻结 `cfad419` 通过504 mapped tests、1,552回归，以及实际历史v1/v2/v3包
+报告重放。默认入口v4自动提取signature、bound body ports和条件绑定；
+无trace不制造运行观察。
+
+原始LeWM入口＋相同归档trace/预算自动构图及严格重放通过：局部body26→44，
+运行来源core连接4→6，只有1个精确代码见证。构图432.895秒、重放458.886秒；
+全部原输入和LeWM Git状态未变。没有新target执行、变换或加速比。
+
+当前197份候选绑定计划与44个已有core body中的110处CALL没有交集：前者
+调用方未成功构图，后者无源码目标候选。因此接下来优先补捕获环境和运行
+callable关系，再接逐调用出口与状态，之后补循环/alias/逻辑来源。
+详见 [验收](N2_FUNCTION_INTERFACES_ACCEPTANCE.md)、
+[现状](AUTOMATION_STATUS_20261015.md)及[下一门](N2_CALL_COMPOSITION_PLAN.md)。
+
 ## 最新有限验收：N2.schedule
 
 冻结 `994f944` 已通过457 gate / 1,505全仓测试；相同入口/trace/预算的外部

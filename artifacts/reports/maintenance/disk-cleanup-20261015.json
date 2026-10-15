@@ -1,0 +1,91 @@
+{
+  "schema": "scar.project-cache-cleanup",
+  "utc": "2026-10-15T19:55:40Z",
+  "removed": [
+    {
+      "path": ".pytest_cache",
+      "file_bytes": 181843,
+      "allocated_bytes": 212992
+    },
+    {
+      "path": "__pycache__",
+      "file_bytes": 2350,
+      "allocated_bytes": 12288
+    },
+    {
+      "path": "scar/__pycache__",
+      "file_bytes": 56843,
+      "allocated_bytes": 69632
+    },
+    {
+      "path": "scar/analysis/__pycache__",
+      "file_bytes": 1398447,
+      "allocated_bytes": 1486848
+    },
+    {
+      "path": "scar/backends/__pycache__",
+      "file_bytes": 54608,
+      "allocated_bytes": 73728
+    },
+    {
+      "path": "scar/ir/__pycache__",
+      "file_bytes": 612136,
+      "allocated_bytes": 688128
+    },
+    {
+      "path": "scar/ir/program/__pycache__",
+      "file_bytes": 215934,
+      "allocated_bytes": 245760
+    },
+    {
+      "path": "scar/ir/v2/__pycache__",
+      "file_bytes": 683246,
+      "allocated_bytes": 733184
+    },
+    {
+      "path": "scar/planner/__pycache__",
+      "file_bytes": 23279,
+      "allocated_bytes": 36864
+    },
+    {
+      "path": "scar/trace/__pycache__",
+      "file_bytes": 192485,
+      "allocated_bytes": 221184
+    },
+    {
+      "path": "scar/validate/__pycache__",
+      "file_bytes": 10685,
+      "allocated_bytes": 20480
+    },
+    {
+      "path": "scar/workloads/__pycache__",
+      "file_bytes": 9661,
+      "allocated_bytes": 20480
+    },
+    {
+      "path": "scripts/__pycache__",
+      "file_bytes": 29081,
+      "allocated_bytes": 40960
+    },
+    {
+      "path": "tests/fixtures/__pycache__",
+      "file_bytes": 22644,
+      "allocated_bytes": 32768
+    },
+    {
+      "path": "tests/integration/__pycache__",
+      "file_bytes": 290824,
+      "allocated_bytes": 323584
+    },
+    {
+      "path": "tests/unit/__pycache__",
+      "file_bytes": 3866919,
+      "allocated_bytes": 4071424
+    }
+  ],
+  "removed_allocated_bytes": 8290304,
+  "scope": "SCAR untracked generated Python/pytest caches only",
+  "lewm_modified": false,
+  "shared_caches_modified": false,
+  "trace_or_reports_deleted": false
+}

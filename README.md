@@ -45,11 +45,14 @@ and unobserved static branches. See the [N2.entry report](docs/N2_ENTRY_ACCEPTAN
 and [next interface and scheduling plan](docs/N2_SIGNATURE_PLAN.md). These links
 do not establish a complete execution graph, pure effects or a LeWM speedup.
 
-Trace-augmented inventories now use a global body demand queue with root-only
-lowering and demand-driven call witnesses. Prepared source contexts use bounded
-private temporary storage; new v3 reports keep the task ledger, while v1/v2
-reports retain their original replay behavior. Measured scope and remaining
-interfaces are in the [N2.schedule report](docs/N2_SCHEDULING_ACCEPTANCE.md).
+Inventories use a global body demand queue with root-only lowering and
+demand-driven call witnesses. Prepared contexts use bounded private storage.
+Default v4 reports separate definition work, conditional argument binding and
+bound-formal body ports; without a trace, runtime scope is null. Historical
+v1/v2/v3 reports retain their original lowering and replay behavior.
+See [current automation scope](docs/AUTOMATION_STATUS_20261015.md),
+[function interfaces](docs/N2_FUNCTION_INTERFACES.md) and
+[the next connection gates](docs/N2_CALL_COMPOSITION_PLAN.md).
 
 The graph pass includes loop membership: with `--lines`, observed bytecode
 back-edges become `loop_controls` edges and can produce a

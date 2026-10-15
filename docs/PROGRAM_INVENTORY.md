@@ -96,9 +96,10 @@ scar check-inventory runtime-inventory.json.gz
 调用按 CodeID 和精确进程身份去重，保留次数及首末行锚点。不导入或执行目标，
 不保存新的 Tensor 数值。未观察的静态候选仍保留。
 
-N2.entry 的历史有 trace 报告是 v2；N2.schedule 新报告为 v3，增加 typed
-expansion 需求/计费账；runtime_scope 保留。无 trace 保持 v1。旧v2按原始
-调度算法重放，不悄悄改成全局单根策略。来源候选
+历史无trace报告为v1，N2.entry有trace报告为v2，N2.schedule全局调度报告为v3。
+当前默认v4（有/无trace）采用全局单根策略，增加独立函数interfaces；无trace
+的runtime_scope为null，不制造观察。v1/v2/v3保留各自原调度和LEGACY body规则。
+来源候选
 与当前源码版本核对分开：只有原始代码摘要精确复现才有 code-only witness，
 未匹配可能来自缺少编译上下文或旧 marshal 引用布局，不能断言源码一定改变。
 默认离线尝试 local Python、flags=0、optimize=0/1/2，filename 来自观察假设，
@@ -131,6 +132,18 @@ root，候选 body 由队列去重安排；各 body 尚未合并为完整程序�
 CLI 的 `analysis_measurements` 单独记录本次分析成本，不包含 Tensor 数值，
 不作为源码/图重放身份。当前实现与验收状态见
 [N2_SCHEDULING_PLAN.md](N2_SCHEDULING_PLAN.md)。
+
+## 函数接口与调用绑定
+
+v4自动提取五种formal，按显式slot对应bound body入口引用，world单列。
+默认值/decorator求值与应用继续保留在外层定义阶段，不因body存在而消失。
+条件绑定计划覆盖显式actual、DEFAULT_STATE和包含空容器的variadic pack。
+它不执行defaults/展开，不确认运行callee，不把绑定前异常接成body异常。
+旧CallTarget的arguments/results均不生成；独立overlay与body图严格重放。
+
+有计划并不表示其actual已有core UseID：调用者body未构建时只保留source定位。
+不同body的world也没有因文件ID不同而被证明独立。细节和有限自验见
+[N2_FUNCTION_INTERFACES.md](N2_FUNCTION_INTERFACES.md)。
 
 ## 剩余依赖
 

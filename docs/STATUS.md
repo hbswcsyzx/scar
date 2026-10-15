@@ -1,5 +1,35 @@
 # Current evidence and remaining work
 
+## Latest autonomous acceptance: N2.function-interfaces (2026-10-15)
+
+Frozen implementation `cfad419` passed **504 mapped cases** and **1,552 repository
+tests** (two existing warnings). Default v4 inventory separates definition-time
+work, conditional argument binding and bound-formal body ports. Actual historical
+v1/v2/v3 packages generated reports that the current public CLI replayed;
+legacy lowering behavior is preserved. No manual workload graph is supplied.
+
+The same raw LeWM entry, archived real trace and budgets produced 151 files,
+2,217 definitions and 10,235 calls. Core bodies increased **26 to 44**, runtime
+source/core links **4 to 6**; only **one** has an exact code witness. Of the 17
+previous signature blockers, two now have bodies; the other 15 expose seven
+closure/cell and eight syntax blockers. Generation/replay took **432.895 /
+458.886 s**, peak RSS **347,120 / 812,896 KiB**. Source, trace and clean target
+Git state remained unchanged. These are analysis costs, not LeWM acceleration.
+
+Automatic connectivity audit exposes the next gap: all 197 candidate binding
+plans belong to unsupported or budget-deferred callers. All 110 calls inside
+the 44 existing core bodies lack source target candidates. Their intersection
+is zero; 478 planned actuals have no core UseID. No missing eligible use was
+found, but neither group forms a connected call/body/return/effect graph.
+
+See [N2_FUNCTION_INTERFACES_ACCEPTANCE.md](N2_FUNCTION_INTERFACES_ACCEPTANCE.md),
+[the current automation scope](AUTOMATION_STATUS_20261015.md) and
+[the next connection gates](N2_CALL_COMPOSITION_PLAN.md). Next: captured
+environment and callable evidence, per-call exits/state mapping, then loops and
+fine operation effects/provenance. No new backend, LeWM transform or verified
+speedup. Project cache cleanup reclaimed another 8,290,304 allocated bytes;
+compressed evidence and target/shared environments were preserved.
+
 ## Latest autonomous acceptance: N2.schedule (2026-10-15)
 
 Implementation `994f944` passed **457 mapped cases** and **1,505 repository

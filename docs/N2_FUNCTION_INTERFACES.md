@@ -1,6 +1,7 @@
 # N2.signature 实施协议：函数接口、绑定计划和 body
 
-日期：2026-10-15。状态：**实现中，尚未验收**。父计划
+日期：2026-10-15。状态：**有限验收通过**，见
+[N2_FUNCTION_INTERFACES_ACCEPTANCE.md](N2_FUNCTION_INTERFACES_ACCEPTANCE.md)。父计划
 [N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md)；前置 `9b5bba8`。
 
 ## 三个不同阶段

@@ -1,0 +1,17 @@
+[
+  {
+    "path": "artifacts/reports/gates/n2-functions-development-initial.xml.gz",
+    "raw_sha256": "88555d5630cc882e6316d0af1b2434d3039b5c7578c1909bbec095e05e5f241e",
+    "raw_bytes": 15707
+  },
+  {
+    "path": "artifacts/reports/gates/n2-functions-development-integration.xml.gz",
+    "raw_sha256": "4bf68d470b5c3ca292e1623e3b873306f2bd38b56b7e1bde68ac85b517c9c04a",
+    "raw_bytes": 15621
+  },
+  {
+    "path": "artifacts/reports/gates/n2-functions-development-repaired.xml.gz",
+    "raw_sha256": "609e124319723cc470b1daa5910a9535eb0d3215f486173732e9cdcccd02b899",
+    "raw_bytes": 6473
+  }
+]
