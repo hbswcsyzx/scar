@@ -1,0 +1,30 @@
+         32594482 function calls (30716657 primitive calls) in 16.910 seconds
+
+   Ordered by: cumulative time
+   List reduced from 564 to 22 due to restriction <22>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000   16.941   16.941 program_lowering.py:678(prepare_source)
+1860990/109631    5.824    0.000   15.182    0.000 _validation.py:21(record_errors)
+        1    0.001    0.001   12.943   12.943 control_flow_v2.py:696(build_source_control_flow)
+      145    0.197    0.001   12.362    0.085 _validation.py:71(mapping_errors)
+       10    0.052    0.005   10.402    1.040 semantic.py:412(validate)
+        8    0.000    0.000    9.227    1.153 semantics_v2.py:508(assert_valid)
+        8    0.037    0.005    9.227    1.153 semantics_v2.py:323(validate)
+        6    0.000    0.000    6.284    1.047 semantic.py:505(assert_valid)
+        1    0.004    0.004    5.959    5.959 source_semantics_v2.py:555(validate_source_semantics)
+        2    0.001    0.000    5.483    2.741 source_semantics_v2.py:549(extract_source_semantics)
+        1    0.004    0.004    4.282    4.282 control_flow_v2.py:547(build)
+        2    0.001    0.001    3.437    1.718 source_semantics_v2.py:512(run)
+        4    0.004    0.001    3.056    0.764 semantics_v2.py:514(to_dict)
+552110/537824    0.286    0.000    2.918    0.000 _validation.py:27(<genexpr>)
+ 14393417    2.632    0.000    2.632    0.000 {built-in method builtins.isinstance}
+  1836830    1.446    0.000    2.502    0.000 typing.py:2495(get_origin)
+  1836830    1.441    0.000    2.462    0.000 typing.py:2525(get_args)
+        1    0.000    0.000    2.259    2.259 control_flow_v2.py:525(assert_valid)
+        1    0.008    0.008    2.259    2.259 control_flow_v2.py:262(validate)
+        2    0.000    0.000    2.229    1.115 semantic.py:511(to_dict)
+  1432883    0.977    0.000    1.489    0.000 dataclasses.py:1477(is_dataclass)
+   467307    0.916    0.000    1.425    0.000 dataclasses.py:1454(fields)
+
+

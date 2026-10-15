@@ -1,0 +1,24 @@
+{
+  "schema": "scar.analysis-attempt",
+  "revision": "f21eb53",
+  "status": "ABORTED_FOR_ANALYZER_OVERHEAD",
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "scar.cli",
+    "inventory-program",
+    "/home/zyf/AAA/le-wm/run_inference.py",
+    "--project-root",
+    "/home/zyf/AAA/le-wm",
+    "--max-files",
+    "256",
+    "--out",
+    "/home/zyf/AAA/scar/artifacts/reports/gates/n2b0-lewm-inventory.json.gz"
+  ],
+  "process": "    PID     ELAPSED %CPU   RSS STAT COMMAND\n 199461       15:19 99.8 164840 R   /home/zyf/miniconda3/envs/lewm/bin/python -m scar.cli inventory-program /home/zyf/AAA/le-wm/run_inference.py --project-root /home/zyf/AAA/le-wm --max-files 256 --out /home/zyf/AAA/scar/artifacts/reports/gates/n2b0-lewm-inventory.json.gz\n",
+  "reason": "Separate cProfile of prepare_source on the same source scope found 1,860,990 record_errors calls / 32,594,482 calls for one 154-line source file; optimize generic schema validation before rerunning identical scope. No target workload executed.",
+  "diagnostic": "n2b0-prepare-diagnostic.txt",
+  "signal": "SIGTERM",
+  "utc": "2026-10-15T17:26:40Z",
+  "runtime_speedup_claim": false
+}

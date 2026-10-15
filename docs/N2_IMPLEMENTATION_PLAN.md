@@ -1,12 +1,20 @@
 # N2：从源码记录构造程序类型与依赖图
 
 状态：N2.a 有限函数体门已冻结验收，见 [N2A_ACCEPTANCE.md](N2A_ACCEPTANCE.md)；
+N2.b0 的入口范围与接口清单也已有限验收，见 [N2B0_ACCEPTANCE.md](N2B0_ACCEPTANCE.md)；
 完整 N2 尚未完成。允许按反例调整模型，调整须同步
 类型、构图规则、测试和报告。N2 不新增 backend，不改外部 testcase 源码。
 
 当前自动化能力、公共命令与后续自验要求见
 [AUTOMATIC_MODELING.md](AUTOMATIC_MODELING.md)。完成方式和源码连接的实现协议见
 [N2_COMPLETION_AND_LOWERING.md](N2_COMPLETION_AND_LOWERING.md)。
+
+N2.b0 外部清单已显示两个必须先处理的连接问题：动态执行的入口源码不在
+import 闭包内；按文件导入距离安排的 256 次 body 预算覆盖不到多数函数。
+后续将通用运行代码/加载证据接回候选源码范围，并沿入口调用/use 接口安排
+展开预算，不能用手工文件列表替代。签名/定义时接口与函数体分离，循环设计
+见 [N2B1_PLAN.md](N2B1_PLAN.md)；当前仅为提案。实测范围与优先级见
+[AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md)。
 
 使用目标：用户提供程序入口/运行命令，SCAR 自动拆解、抽象、建图和报告。
 手工 IR 只用于测试校验器及反例；它不能成为实际 workload 的输入要求。

@@ -29,10 +29,14 @@ normal/exceptional completions and conditional same-file call interfaces without
 manual IR. It does **not** recover the complete LeWM program or prove a rewrite.
 See [automatic modeling scope and roadmap](docs/AUTOMATIC_MODELING.md).
 
-The next integration, [source inventory](docs/PROGRAM_INVENTORY.md), starts from
+The [source inventory](docs/PROGRAM_INVENTORY.md) starts from
 one file, discovers local import candidates and automatically inventories and
 attempts available function bodies. Source scopes and conditional call
 witnesses remain separate from verified runtime targets and optimization proof.
+The current automation boundary, measured external coverage and next acceptance
+steps are recorded in [AUTOMATION_PROGRESS.md](docs/AUTOMATION_PROGRESS.md).
+The bounded inventory passed the [N2.b0 gate](docs/N2B0_ACCEPTANCE.md), including
+an unchanged external-source run and replay; whole-program modeling is pending.
 
 The graph pass includes loop membership: with `--lines`, observed bytecode
 back-edges become `loop_controls` edges and can produce a
@@ -46,20 +50,16 @@ cd ~/AAA/scar
 conda activate lewm
 python -m pytest -q
 
-# Validate the complete manual input/branch/state/normal-or-exception example.
-python -m scar.cli check-program examples/program_graphs/branch_state.json \
-  --out artifacts/reports/program-check.json
+# Discover candidate dependencies and attempt bodies without a function list.
+python -m scar.cli inventory-program path/to/project/entry.py \
+  --project-root path/to/project --out artifacts/reports/inventory.json.gz
+python -m scar.cli check-inventory artifacts/reports/inventory.json.gz
 
 # Automatically build a function graph from source, without importing it.
 # Unsupported bodies return 3 and save a located diagnostic with graph=null.
 python -m scar.cli model-program path/to/program.py --entry Class.method \
   --out artifacts/reports/source-program.json.gz
 python -m scar.cli check-source-program artifacts/reports/source-program.json.gz
-
-# Discover candidate dependencies and attempt bodies without a function list.
-python -m scar.cli inventory-program path/to/project/entry.py \
-  --project-root path/to/project --out artifacts/reports/inventory.json.gz
-python -m scar.cli check-inventory artifacts/reports/inventory.json.gz
 
 # Trace any command in a child process. The command is not modified.
 python -m scar.cli trace --out artifacts/traces/demo -- \

@@ -1,0 +1,32 @@
+{
+  "revision": "f21eb53",
+  "source": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/lewm.py",
+  "measurement": "SCAR prepare_source, not LeWM execution",
+  "warmup": 0,
+  "repetitions": 3,
+  "seconds": [
+    4.110075127333403,
+    4.1075972048565745,
+    3.9342417512089014
+  ],
+  "median": 4.1075972048565745,
+  "min": 3.9342417512089014,
+  "max": 4.110075127333403,
+  "digests": [
+    [
+      "1eff538e010502d6037876e3833eeeda2fcf85c8f1d08bb6371656e04945cb21",
+      "354266e04844c52baba27195c6cc2d4a325f539f89b0eb2bc083515b858a8393",
+      "9b859af6636917ac88cc689ece19ea6109e9b1b2970305e4ee3b048aca167abc"
+    ],
+    [
+      "1eff538e010502d6037876e3833eeeda2fcf85c8f1d08bb6371656e04945cb21",
+      "354266e04844c52baba27195c6cc2d4a325f539f89b0eb2bc083515b858a8393",
+      "9b859af6636917ac88cc689ece19ea6109e9b1b2970305e4ee3b048aca167abc"
+    ],
+    [
+      "1eff538e010502d6037876e3833eeeda2fcf85c8f1d08bb6371656e04945cb21",
+      "354266e04844c52baba27195c6cc2d4a325f539f89b0eb2bc083515b858a8393",
+      "9b859af6636917ac88cc689ece19ea6109e9b1b2970305e4ee3b048aca167abc"
+    ]
+  ]
+}

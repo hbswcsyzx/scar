@@ -1,0 +1,32 @@
+{
+  "schema": "scar.regression-receipt",
+  "revision": "a6ed118ecea0e5fd0b59d513c558822d2053abd0",
+  "source_sha256": "5242b0a9676d22f1e54e617ac5357ff0e9334c5266e361da71ab7908ac0fc706",
+  "matches_frozen_gate": true,
+  "worktree_status": "",
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "--junitxml=artifacts/reports/gates/n2b0-full-regression.xml"
+  ],
+  "suite": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "1406",
+    "time": "97.914",
+    "timestamp": "2026-10-15T17:33:19.585806+00:00",
+    "hostname": "gpu1"
+  },
+  "warnings": 2,
+  "warnings_kind": [
+    "existing multi-threaded fork deprecation",
+    "existing quantized tensor deprecation"
+  ],
+  "xml_sha256": "6f01e0ce01b66eee70af661842ba8d303185a17732653b09d2e13261ca1ec597",
+  "status": "PASS",
+  "archived_junit": "artifacts/reports/gates/n2b0-full-regression.xml.gz"
+}

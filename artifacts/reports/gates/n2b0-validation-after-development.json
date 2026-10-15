@@ -1,0 +1,33 @@
+{
+  "measurement": "SCAR prepare_source, not LeWM execution",
+  "warmup": 0,
+  "repetitions": 3,
+  "seconds": [
+    1.1885874550789595,
+    1.1131450673565269,
+    1.1130173206329346
+  ],
+  "median": 1.1131450673565269,
+  "min": 1.1130173206329346,
+  "max": 1.1885874550789595,
+  "digests": [
+    [
+      "1eff538e010502d6037876e3833eeeda2fcf85c8f1d08bb6371656e04945cb21",
+      "354266e04844c52baba27195c6cc2d4a325f539f89b0eb2bc083515b858a8393",
+      "9b859af6636917ac88cc689ece19ea6109e9b1b2970305e4ee3b048aca167abc"
+    ],
+    [
+      "1eff538e010502d6037876e3833eeeda2fcf85c8f1d08bb6371656e04945cb21",
+      "354266e04844c52baba27195c6cc2d4a325f539f89b0eb2bc083515b858a8393",
+      "9b859af6636917ac88cc689ece19ea6109e9b1b2970305e4ee3b048aca167abc"
+    ],
+    [
+      "1eff538e010502d6037876e3833eeeda2fcf85c8f1d08bb6371656e04945cb21",
+      "354266e04844c52baba27195c6cc2d4a325f539f89b0eb2bc083515b858a8393",
+      "9b859af6636917ac88cc689ece19ea6109e9b1b2970305e4ee3b048aca167abc"
+    ]
+  ],
+  "same_graphs_as_f21eb53": true,
+  "before_median": 4.1075972048565745,
+  "local_ratio": 3.690082564540495
+}

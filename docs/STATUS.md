@@ -1,26 +1,41 @@
 # Current evidence and remaining work
 
-## In progress: N2.b0 entry-driven source discovery (2026-10-15)
+## Latest autonomous acceptance: N2.b0 entry-driven source inventory (2026-10-15)
 
-Implementation `f21eb53` adds `scar inventory-program entry.py --project-root ...`
+Implementation `f21eb53`, with efficiency repair `a6ed118`, adds `scar inventory-program entry.py --project-root ...`
 and strict `scar check-inventory` replay. Local import candidates, definitions,
 execution phases, coverage gaps and bounded core-body attempts are generated
-without a user-supplied function list. Its frozen **267** gate tests passed;
-the full external acceptance has not passed yet.
+without a user-supplied function list. The final frozen implementation passed
+**336 gate tests** and **1,406 repository tests** (two existing warnings, no
+failures or skips).
 
 The first unchanged-LeWM source check was stopped after **919.862 seconds**
 because SCAR repeatedly reconstructed and validated the same source layers.
 It produced no final inventory and is retained as an incomplete attempt.
-Generic schema caching and a same-snapshot construction path are being checked;
-public untrusted-graph replay remains mandatory. These are analyzer costs,
-not LeWM workload timings.
+Generic schema caching and a same-snapshot construction path reduced redundant
+analysis; public untrusted-graph replay remains mandatory.
+
+The same source scope then produced 143 files, 2,122 definitions and 9,674
+source calls in **401.595 seconds**, peak RSS **293,052 KiB**. Strict current
+source replay passed in **405.052 seconds**, peak RSS **689,104 KiB**. All 143
+source snapshots and LeWM Git HEAD/clean status were unchanged. These are
+analyzer costs, not LeWM workload timings.
+
+Only 16 of 256 attempted function bodies produced core graphs with gaps;
+240 were unsupported, 1,307 functions exceeded the body-attempt budget and
+559 definitions need other scope interfaces. The 115,723 coverage records
+include just 163 source atoms connected to core graphs. Dynamic exec/compile,
+unavailable external dependencies and unresolved call/state effects remain
+explicit boundaries. This accepts bounded source inventory, not a full model.
 
 Automatic whole-LeWM modeling, precise mutable-state/call links, optimization
-guidance and workload acceleration remain incomplete. See
-[AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md), [N2B0_PLAN.md](N2B0_PLAN.md)
+guidance and workload acceleration remain incomplete. Next: connect observed
+code loading to the source scope, prioritize expansion by entry/call/use
+dependencies, then fill signature, loop and state interfaces. See
+[N2B0_ACCEPTANCE.md](N2B0_ACCEPTANCE.md), [AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md)
 and the proposed [N2B1_PLAN.md](N2B1_PLAN.md).
 
-## Latest autonomous acceptance: N2.a automatic function source lowering (2026-10-15)
+## Previous autonomous acceptance: N2.a automatic function source lowering (2026-10-15)
 
 Frozen implementation `429e87e` passed **204** gate cases, including the 93 N1
 compatibility cases, and **1,274** repository tests (two existing warnings,

@@ -1,7 +1,8 @@
 # 自动建图：实际能力与验收路径
 
 日期：2026-10-15。N2.a 有限函数体门已通过，见 [N2A_ACCEPTANCE.md](N2A_ACCEPTANCE.md)；
-N2.b0 已实现入口驱动的自动范围与接口清单，完整外部验收仍在进行。
+N2.b0 的入口驱动自动范围与接口清单已有限验收，见
+[N2B0_ACCEPTANCE.md](N2B0_ACCEPTANCE.md)。
 完整 LeWM 自动建模尚未验收。最新边界、难点和后续验收见
 [AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md)。
 

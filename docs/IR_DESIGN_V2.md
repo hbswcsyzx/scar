@@ -5,7 +5,11 @@
 2026-10-13 修订：核心节点与依赖的最新决定见
 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)。其 Operation/Value/StateLocation/Region、
 强类型状态版本、区域边界与控制/效果规则优先于本文早期实体清单。当前 v2
-主要具备结构和证据容器，并未实现该统一语义核心；新 collector 不能替代它。
+早期实现主要具备结构和证据容器；新 collector 不能替代统一核心。
+2026-10-15 补充：N1 已实现有限类型与依赖核心，N2.a 支持有限函数体自动构图；
+N2.b0 自动生成入口候选范围、接口与覆盖清单。完整程序依赖恢复仍未完成。
+以下审查中的混合 ProgramGraph 指早期实现，当前能力以 [STATUS.md](STATUS.md)
+和 [AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md) 为准。
 
 本文不增加 detector，不增加 optimization backend。G1—G7.2b 已逐步实现
 typed graphs、source/evidence、provenance、regions 和部分固定证明；它不表示
@@ -60,7 +64,8 @@ Program source / library contract
        Plan alternatives
 ```
 
-原始 evidence 是唯一的事实来源。Semantic Graph 和 Optimization IR 都必须
+运行发生事实以原始运行 evidence 为依据；静态结构由源码快照及明确规则核对，
+合同中的声明保留 DECLARED 来源，不能混成运行事实。Semantic Graph 和 Optimization IR 都必须
 保留 provenance、evidence status 和 UNKNOWN，不能因为 projection 或 pattern
 match 而升级证据。
 

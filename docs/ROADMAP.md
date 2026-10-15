@@ -7,6 +7,9 @@
 > N1 implements the bounded typed dependency core; N2.a adds automatic selected
 > function source lowering. Whole-program recovery is incomplete. See
 > [AUTOMATIC_MODELING.md](AUTOMATIC_MODELING.md) and [N2A_ACCEPTANCE.md](N2A_ACCEPTANCE.md).
+> N2.b0 adds automatic entry-driven source inventory; measured coverage and
+> remaining entry/load/call/state connections are documented in
+> [AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md).
 
 > **Planning authority (2026-09-22):** the implementation audit is
 > [CURRENT_CODE_AUDIT.md](CURRENT_CODE_AUDIT.md), and the ordered development
