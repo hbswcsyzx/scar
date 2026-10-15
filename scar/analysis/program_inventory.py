@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import ast
 from collections import Counter, defaultdict, deque
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 import hashlib
 import json
 from pathlib import Path
@@ -21,6 +21,7 @@ from scar.analysis.runtime_inventory import (
 )
 from scar.analysis.runtime_sources import read_runtime_trace, resolve_runtime_seeds
 from scar.ir.program.runtime_sources import RuntimeTraceBudget
+from scar.ir.program.expansion import ContextStoreBudget, ExpansionMeasurements, ExpansionSchedule
 from scar.ir.program.codec import dumps as dump_graph
 from scar.ir.program.model import LiteralOrigin
 from scar.ir.program.discovery import DiscoveryRootMode, SourceDiscovery
@@ -65,6 +66,8 @@ class ProgramInventory:
     files: tuple[FileInventory, ...]
     budget: InventoryBudget
     runtime_scope: RuntimeScope | None = None
+    expansion: ExpansionSchedule | None = None
+    analysis_measurements: ExpansionMeasurements | None = field(default=None, compare=False)
 
     def summary(self):
         bodies = [body for file in self.files for body in file.bodies]
@@ -90,11 +93,19 @@ class ProgramInventory:
         }
         if self.runtime_scope is not None:
             summary["runtime"] = self.runtime_scope.summary()
+        if self.expansion is not None:
+            summary["expansion"] = {
+                "demand_kinds": dict(sorted(Counter(entry.kind.value for entry in self.expansion.entries).items())),
+                "attempted": sum(entry.attempted for entry in self.expansion.entries),
+                "operation_budget_charged": sum(entry.operation_budget_charged for entry in self.expansion.entries),
+                "unknown_construction_costs": sum(not entry.construction_cost_known for entry in self.expansion.entries),
+                "unavailable_contexts": len(self.expansion.unavailable_contexts),
+            }
         return summary
 
     def to_dict(self):
         document = {
-            "schema": "scar.program-inventory", "schema_version": 2 if self.runtime_scope is not None else 1,
+            "schema": "scar.program-inventory", "schema_version": 3 if self.expansion is not None else 2 if self.runtime_scope is not None else 1,
             "scope": "source-discovered candidate files, scoped interfaces and bounded automatic body lowering",
             "discovery": encode(self.discovery), "files": [_file_document(file) for file in self.files],
             "budget": encode(self.budget), "summary": self.summary(),
@@ -102,22 +113,27 @@ class ProgramInventory:
         }
         if self.runtime_scope is not None:
             document["runtime_scope"] = encode(self.runtime_scope)
+        if self.expansion is not None:
+            document["expansion"] = encode(self.expansion)
         return document
 
     @classmethod
     def from_dict(cls, document, *, max_files=128, max_bytes=8_000_000, max_directories=4096,
                   max_lowered_bodies=256, max_operations=10000, max_call_witnesses=4096,
-                  runtime_verification_budget=RuntimeTraceBudget(), max_compile_attempts=1024):
+                  runtime_verification_budget=RuntimeTraceBudget(), max_compile_attempts=1024,
+                  context_verification_budget=ContextStoreBudget()):
         if type(document) is not dict:
             raise ValueError("inventory fields mismatch")
         version = document.get("schema_version")
-        if type(version) is not int or version not in (1, 2):
+        if type(version) is not int or version not in (1, 2, 3):
             raise ValueError("inventory schema/version mismatch")
         expected_fields = {
                 "schema", "schema_version", "scope", "discovery", "files", "budget", "summary",
                 "target_executed", "transformation_authorized"}
-        if version == 2:
+        if version >= 2:
             expected_fields.add("runtime_scope")
+        if version == 3:
+            expected_fields.add("expansion")
         if set(document) != expected_fields:
             raise ValueError("inventory fields mismatch")
         if document["schema"] != "scar.program-inventory":
@@ -130,8 +146,11 @@ class ProgramInventory:
                 raise ValueError("report exceeds independent verifier budget: " + field)
         discovery = decode(SourceDiscovery, document["discovery"])
         roots = discovery.source_roots if discovery.root_mode is DiscoveryRootMode.DECLARED else ()
+        if version == 3:
+            expansion = decode(ExpansionSchedule, document["expansion"])
+            _check_context_budget(expansion.budget, context_verification_budget)
         runtime_options = {}
-        if version == 2:
+        if version >= 2:
             runtime = decode(RuntimeScope, document["runtime_scope"])
             check_runtime_ceiling(runtime.trace.budget, runtime_verification_budget)
             check_compile_limit(max_compile_attempts)
@@ -141,7 +160,10 @@ class ProgramInventory:
             if encode(current_trace) != encode(runtime.trace):
                 raise ValueError("runtime trace differs from its bound raw evidence replay")
             runtime_options = {"runtime": current_trace,
-                               "max_compile_attempts": runtime.max_compile_attempts}
+                               "max_compile_attempts": runtime.max_compile_attempts,
+                               "global_expansion": version == 3}
+        if version == 3:
+            runtime_options["context_budget"] = expansion.budget
         rebuilt = _inventory_from_inputs(discovery.entry, project_root=discovery.project_root,
                                          source_roots=roots, budget=requested, **runtime_options)
         if _canonical(rebuilt.to_dict()) != _canonical(document):
@@ -156,6 +178,17 @@ def _check_budget(budget):
             raise ValueError("inventory budget must contain positive integers: " + name)
     if budget.max_operations > 100000:
         raise ValueError("operation budget exceeds core construction ceiling")
+
+
+def _check_context_budget(requested, ceiling=None):
+    if type(requested) is not ContextStoreBudget:
+        raise TypeError("context budget must be a ContextStoreBudget")
+    requested.__post_init__()
+    if ceiling is not None:
+        _check_context_budget(ceiling)
+        for field in requested.__dataclass_fields__:
+            if getattr(requested, field) > getattr(ceiling, field):
+                raise ValueError("report exceeds independent context verifier budget: " + field)
 
 
 def _unsupported(node):
@@ -369,8 +402,6 @@ class _Inventory:
         for node in self.context.tree.body:
             self.walk(node, self.module, ExecutionPhase.MODULE_INITIALIZATION, "")
         preferred = self.runtime_builder.bind(self.context) if self.runtime_builder is not None else frozenset()
-        linked, candidates = set(), {}
-        supported = set()
         for definition in sorted(self.definitions, key=lambda definition: definition.id not in preferred):
             if definition.kind not in (DefinitionKind.FUNCTION, DefinitionKind.ASYNC_FUNCTION):
                 self.bodies.append(BodyInventory(definition.id, BodyStatus.NOT_ATTEMPTED, None, None,
@@ -396,27 +427,17 @@ class _Inventory:
             self.bodies.append(BodyInventory(definition.id,
                 BodyStatus.LOWERED_WITH_GAPS if graph else BodyStatus.UNSUPPORTED, graph, metadata, reason,
                 result.operations_emitted))
-            if graph is not None:
-                supported.add(definition.id)
-                linked.update(link.source.atom_id for link in (*metadata.operation_links, *metadata.value_links, *metadata.use_links))
-                op_sources = {link.operation:link for link in metadata.operation_links}
-                for target in metadata.call_targets:
-                    link = op_sources[target.operation]
-                    if link.semantic_operation is not None and target.source_definition is not None:
-                        candidates[link.semantic_operation] = (target.source_definition,)
-        self.definitions = [replace(definition, body_supported=definition.id in supported) for definition in self.definitions]
-        by_id = {definition.id:definition for definition in self.definitions}
-        self.calls = [replace(call, candidates=candidates.get(call.operation, ()),
-            candidate_witnesses=tuple(CallCandidateWitness(identifier, by_id[identifier].source, (),
-                (CandidateCondition.SOURCE_BINDING_REACHES_READ, CandidateCondition.SOURCE_BODY_MATCHES_LIVE_CALLABLE,
-                 CandidateCondition.NO_EXTERNAL_NAMESPACE_MUTATION))
-                for identifier in candidates.get(call.operation, ()) if identifier in by_id)) for call in self.calls]
-        self.coverage = [replace(entry, status=CoverageStatus.CONNECTED,
-            reason="source atom connected to a generated body graph; dynamic effects/target may remain unknown")
-            if entry.source.atom_id in linked and entry.status is not CoverageStatus.UNSUPPORTED
-            and entry.phase is not ExecutionPhase.ANNOTATION
-            and entry.ast_kind not in {"FunctionDef", "AsyncFunctionDef", "ClassDef", "Lambda"} else entry
-            for entry in self.coverage]
+        return _attach_bodies(self.snapshot(), tuple(self.bodies))
+
+    def index(self):
+        """Publish only lightweight source structure; do not lower a body."""
+        for node in self.context.tree.body:
+            self.walk(node, self.module, ExecutionPhase.MODULE_INITIALIZATION, "")
+        if self.runtime_builder is not None:
+            self.runtime_builder.bind(self.context)
+        return self.snapshot()
+
+    def snapshot(self):
         # A source atom receives exactly one execution-owner/phase inventory.
         expected = {atom.id for atom in self.context.semantic.source_atoms.values()}
         actual = [entry.source.atom_id for entry in self.coverage]
@@ -429,17 +450,58 @@ class _Inventory:
                              tuple(self.implicit))
 
 
+def _body_connections(bodies):
+    linked, candidates, supported = set(), {}, set()
+    for body in bodies:
+        if body.graph is None:
+            continue
+        supported.add(body.definition)
+        metadata = body.metadata
+        linked.update(link.source.atom_id for link in (*metadata.operation_links, *metadata.value_links, *metadata.use_links))
+        op_sources = {link.operation:link for link in metadata.operation_links}
+        for target in metadata.call_targets:
+            link = op_sources[target.operation]
+            if link.semantic_operation is not None and target.source_definition is not None:
+                candidates[link.semantic_operation] = (target.source_definition,)
+    return linked, candidates, supported
+
+
+def _attach_bodies(file, bodies, *, call_witnesses=None):
+    linked, candidates, supported = _body_connections(bodies)
+    definitions = tuple(replace(definition, body_supported=definition.id in supported) for definition in file.definitions)
+    by_id = {definition.id:definition for definition in definitions}
+    if call_witnesses is None:
+        call_witnesses = {call.operation:tuple(CallCandidateWitness(identifier, by_id[identifier].source, (),
+            (CandidateCondition.SOURCE_BINDING_REACHES_READ, CandidateCondition.SOURCE_BODY_MATCHES_LIVE_CALLABLE,
+             CandidateCondition.NO_EXTERNAL_NAMESPACE_MUTATION))
+            for identifier in candidates.get(call.operation, ()) if identifier in by_id) for call in file.calls}
+    calls = tuple(replace(call, candidate_witnesses=call_witnesses.get(call.operation, ()),
+                          candidates=tuple(dict.fromkeys(w.definition for w in call_witnesses.get(call.operation, ()))))
+                  for call in file.calls)
+    coverage = tuple(replace(entry, status=CoverageStatus.CONNECTED,
+        reason="source atom connected to a generated body graph; dynamic effects/target may remain unknown")
+        if entry.source.atom_id in linked and entry.status is not CoverageStatus.UNSUPPORTED
+        and entry.phase is not ExecutionPhase.ANNOTATION
+        and entry.ast_kind not in {"FunctionDef", "AsyncFunctionDef", "ClassDef", "Lambda"} else entry
+        for entry in file.coverage)
+    return replace(file, definitions=definitions, calls=calls, coverage=coverage, bodies=bodies)
+
+
 def inventory_program(entry, *, project_root=None, source_roots=(), max_files=128, max_bytes=8_000_000,
                       max_directories=4096, max_lowered_bodies=256, max_operations=10000, max_call_witnesses=4096,
-                      runtime_trace=None, runtime_budget=RuntimeTraceBudget(), max_compile_attempts=1024):
+                      runtime_trace=None, runtime_budget=RuntimeTraceBudget(), max_compile_attempts=1024,
+                      context_budget=ContextStoreBudget()):
     budget = InventoryBudget(max_files, max_bytes, max_directories, max_lowered_bodies, max_operations, max_call_witnesses)
     _check_budget(budget)
+    _check_context_budget(context_budget)
     trace = read_runtime_trace(runtime_trace, budget=runtime_budget) if runtime_trace is not None else None
     return _inventory_from_inputs(entry, project_root=project_root, source_roots=source_roots,
-                                  budget=budget, runtime=trace, max_compile_attempts=max_compile_attempts)
+                                  budget=budget, runtime=trace, max_compile_attempts=max_compile_attempts,
+                                  context_budget=context_budget)
 
 
-def _inventory_from_inputs(entry, *, project_root, source_roots, budget, runtime=None, max_compile_attempts=1024):
+def _inventory_from_inputs(entry, *, project_root, source_roots, budget, runtime=None, max_compile_attempts=1024,
+                           global_expansion=True, context_budget=ContextStoreBudget()):
     """Construct from raw-source settings and observations read by the adapter.
 
     Public report replay re-reads the bound trace before calling here. This
@@ -458,6 +520,12 @@ def _inventory_from_inputs(entry, *, project_root, source_roots, budget, runtime
         paths = available_paths(seeds)
         discovery = _discover_sources_from_entries(entry, additional_entries=paths, **limits)
         runtime_builder = RuntimeScopeBuilder(runtime, seeds, max_compile_attempts)
+    if runtime_builder is not None and global_expansion:
+        from scar.analysis.program_expansion import expand_inventory
+        _check_context_budget(context_budget)
+        files, expansion, measurements = expand_inventory(discovery, runtime_builder, budget, context_budget,
+                                            _ordered_files(discovery, runtime_paths=paths))
+        return ProgramInventory(discovery, files, budget, runtime_builder.finish(), expansion, measurements)
     files = []
     remaining_bodies, remaining_operations = budget.max_lowered_bodies, budget.max_operations
     for file in _ordered_files(discovery, runtime_paths=paths):
@@ -505,88 +573,119 @@ def _ordered_files(discovery, *, runtime_paths=()):
 
 def _link_import_calls(discovery, files, *, max_witnesses=4096):
     """Conditional source witnesses, never lookup by a global function name."""
-    by_path = {file.snapshot.path:file for file in files}
-    edges = defaultdict(list)
-    for dependency in discovery.imports:
-        edges[dependency.source.path].append(dependency)
+    linker = _CallLinker(discovery, files, max_witnesses)
+    return linker.finish()
 
-    exports = {}
-    def export(path, symbol):
+
+class _CallLinker:
+    """Shared resolver with demand-driven admission to one witness budget."""
+    def __init__(self, discovery, files, max_witnesses):
+        self.files = files
+        self.by_path = {file.snapshot.path:file for file in files}
+        self.edges = defaultdict(list)
+        for dependency in discovery.imports:
+            self.edges[dependency.source.path].append(dependency)
+        self.exports, self.linked = {}, {}
+        self.issues = defaultdict(list)
+        self.max_witnesses = self.remaining = max_witnesses
+
+    def export(self, path, symbol):
         key = (path, symbol)
-        if key in exports:
-            return exports[key]
+        if key in self.exports:
+            return self.exports[key]
         pending = deque([(path, symbol, ())])
         seen, found = set(), {}
-        while pending and len(found) <= max_witnesses:
+        while pending and len(found) <= self.max_witnesses:
             current, name, through = pending.popleft()
-            if (current, name) in seen or current not in by_path:
+            if (current, name) in seen or current not in self.by_path:
                 continue
             seen.add((current, name))
-            for definition in by_path[current].definitions:
+            for definition in self.by_path[current].definitions:
                 if (definition.lexical_owner is None and definition.name == name
                         and definition.kind in (DefinitionKind.FUNCTION, DefinitionKind.ASYNC_FUNCTION, DefinitionKind.CLASS)):
                     found.setdefault(definition.id, (definition, through))
-                    if len(found) > max_witnesses:
+                    if len(found) > self.max_witnesses:
                         break
-            for edge in edges[current]:
+            for edge in self.edges[current]:
                 if edge.deferred or edge.owner_qualname != "<module>" or edge.bound_name != name or edge.symbol is None:
                     continue
                 for candidate in edge.candidates:
                     if not candidate.namespace and candidate.role.value == "REQUESTED_MODULE":
                         pending.append((candidate.path, edge.symbol, (*through, edge.source)))
-        exports[key] = tuple(found.values())
-        return exports[key]
+        self.exports[key] = tuple(found.values())
+        return self.exports[key]
 
-    linked = []
-    remaining = max_witnesses
-    for file in files:
-        calls = []
-        issues = list(file.gaps)
-        for call in file.calls:
-            witnesses = list(call.candidate_witnesses)
-            if remaining == 0:
-                if call.import_bindings or witnesses:
-                    issues.append(InventoryIssue(file.snapshot.path,
-                        "call-candidate witness budget exhausted; source-call expansion not attempted", call.source))
-                calls.append(replace(call, candidates=(), candidate_witnesses=()))
+    def imported(self, call):
+        for binding in call.import_bindings:
+            # An unaliased `import p.child` binds p, not p.child.
+            if binding.symbol is None and "." in binding.requested and binding.asname is None:
                 continue
-            def imported_witnesses():
-                for binding in call.import_bindings:
-                    # An unaliased `import p.child` binds p, not p.child.
-                    if binding.symbol is None and "." in binding.requested and binding.asname is None:
+            for edge in self.edges[binding.source.path]:
+                if (edge.source != binding.source or edge.bound_name != binding.bound_name
+                        or edge.requested != binding.requested or edge.symbol != binding.symbol):
+                    continue
+                for candidate in edge.candidates:
+                    if candidate.namespace or candidate.role.value == "PARENT_NAMESPACE":
                         continue
-                    for edge in edges[binding.source.path]:
-                        if (edge.source != binding.source or edge.bound_name != binding.bound_name
-                                or edge.requested != binding.requested or edge.symbol != binding.symbol):
-                            continue
-                        for candidate in edge.candidates:
-                            if candidate.namespace or candidate.role.value == "PARENT_NAMESPACE":
-                                continue
-                            if binding.symbol is not None and candidate.role.value == "REQUESTED_MODULE" and not call.attribute_path:
-                                symbol = binding.symbol
-                            elif len(call.attribute_path) == 1 and (binding.symbol is None or candidate.role.value == "FROM_SUBMODULE"):
-                                symbol = call.attribute_path[0]
-                            else:
-                                continue
-                            for definition, through in export(candidate.path, symbol):
-                                yield CallCandidateWitness(definition.id, definition.source,
-                                    (edge.source, *through), tuple(CandidateCondition))
+                    if binding.symbol is not None and candidate.role.value == "REQUESTED_MODULE" and not call.attribute_path:
+                        symbol = binding.symbol
+                    elif len(call.attribute_path) == 1 and (binding.symbol is None or candidate.role.value == "FROM_SUBMODULE"):
+                        symbol = call.attribute_path[0]
+                    else:
+                        continue
+                    for definition, through in self.export(candidate.path, symbol):
+                        yield CallCandidateWitness(definition.id, definition.source,
+                            (edge.source, *through), tuple(CandidateCondition))
+
+    def link(self, call):
+        if call.operation in self.linked:
+            return self.linked[call.operation]
+        remaining = self.remaining
+        witnesses = list(call.candidate_witnesses)
+        if remaining == 0:
+            if call.import_bindings or witnesses:
+                self.issues[call.source.path].append(InventoryIssue(call.source.path,
+                    "call-candidate witness budget exhausted; source-call expansion not attempted", call.source))
+            witnesses = ()
+        else:
             unique = dict.fromkeys(witnesses[:remaining + 1])
-            for witness in imported_witnesses():
+            for witness in self.imported(call):
                 unique.setdefault(witness, None)
                 if len(unique) > remaining:
                     break
             witnesses = tuple(unique)
             if len(witnesses) > remaining:
-                issues.append(InventoryIssue(file.snapshot.path,
-                    "call-candidate witness budget exhausted; additional source candidates were not retained",
-                    call.source))
+                self.exhausted(call)
                 witnesses = witnesses[:remaining]
-            remaining -= len(witnesses)
-            calls.append(replace(call, candidates=tuple(dict.fromkeys(witness.definition for witness in witnesses)),
-                                 candidate_witnesses=witnesses))
-        linked.append(replace(file, calls=tuple(calls), gaps=tuple(issues)))
-    return tuple(linked)
+            self.remaining -= len(witnesses)
+        result = replace(call, candidates=tuple(dict.fromkeys(w.definition for w in witnesses)),
+                         candidate_witnesses=tuple(witnesses))
+        self.linked[call.operation] = result
+        return result
+
+    def exhausted(self, call):
+        self.issues[call.source.path].append(InventoryIssue(call.source.path,
+            "call-candidate witness budget exhausted; additional source candidates were not retained", call.source))
+
+    def admit(self, call, witness):
+        current = self.link(call)
+        if witness in current.candidate_witnesses:
+            return True
+        if not self.remaining:
+            self.exhausted(call)
+            return False
+        self.remaining -= 1
+        witnesses = (*current.candidate_witnesses, witness)
+        self.linked[call.operation] = replace(current, candidate_witnesses=witnesses,
+                                            candidates=tuple(dict.fromkeys(w.definition for w in witnesses)))
+        return True
+
+    def finish(self):
+        result = []
+        for file in self.files:
+            calls = tuple(self.link(call) for call in file.calls)
+            result.append(replace(file, calls=calls, gaps=(*file.gaps, *self.issues[file.snapshot.path])))
+        return tuple(result)
 
 
 __all__ = ["ProgramInventory", "inventory_program"]

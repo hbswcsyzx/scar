@@ -95,17 +95,17 @@ def test_replay_rejects_dangling_or_misdirected_runtime_definition_links(runtime
 def test_failed_file_clears_definition_links_but_retains_spent_code_witness_work(runtime_project, monkeypatch):
     baseline = with_trace(runtime_project)
     payload = runtime_project[2]
-    original = inventory._Inventory.run
+    original = inventory._Inventory.index
     completed = []
 
     def fail_after_inventory(self):
         result = original(self)
         if self.context.path == payload:
             completed.append(result)
-            raise ValueError("review: fail after code witnesses and body construction")
+            raise ValueError("review: fail after code witnesses and file indexing")
         return result
 
-    monkeypatch.setattr(inventory._Inventory, "run", fail_after_inventory)
+    monkeypatch.setattr(inventory._Inventory, "index", fail_after_inventory)
     result = with_trace(runtime_project)
     assert len(completed) == 1
     scope = result.runtime_scope

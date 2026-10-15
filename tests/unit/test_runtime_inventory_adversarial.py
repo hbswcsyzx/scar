@@ -106,7 +106,7 @@ def test_real_runtime_seed_expands_import_closure_and_keeps_unobserved_static_br
     assert any(edge.source.path == str(payload) and edge.requested == "helper"
                for edge in result.discovery.imports)
     document = result.to_dict()
-    assert document["schema_version"] == 2 and document["runtime_scope"]
+    assert document["schema_version"] == 3 and document["runtime_scope"] and document["expansion"]
     assert document["target_executed"] is False
     assert document["summary"]["runtime_reachability_established"] is False
     assert document["transformation_authorized"] is False

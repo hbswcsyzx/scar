@@ -324,6 +324,8 @@ def main(argv=None) -> int:
         command.add_argument("--max-trace-line-bytes", type=int, default=2_000_000)
         command.add_argument("--max-runtime-codes", type=int, default=4096, help="runtime code/process observation group ceiling")
         command.add_argument("--max-compile-attempts", type=int, default=1024, help="offline code reproduction trial ceiling")
+        command.add_argument("--max-context-bytes", type=int, default=128_000_000, help="private prepared-context compressed write ceiling")
+        command.add_argument("--max-context-record-bytes", type=int, default=64_000_000, help="private prepared-context uncompressed per-record ceiling")
     normalize = sub.add_parser("normalize", help="normalize existing raw trace into IR v2 evidence")
     normalize.add_argument("trace")
     normalize.add_argument("--out", required=True)
@@ -475,6 +477,16 @@ def _runtime_inventory_budget(args):
                               max_codes=args.max_runtime_codes)
 
 
+def _context_inventory_budget(args):
+    from scar.ir.program.expansion import ContextStoreBudget
+    return ContextStoreBudget(args.max_context_bytes, args.max_context_record_bytes)
+
+
+def _inventory_analysis_measurements(result):
+    from scar.ir.record_codec import encode
+    return encode(result.analysis_measurements) if result.analysis_measurements is not None else None
+
+
 def _inventory_program(args) -> int:
     from scar.analysis.program_inventory import inventory_program
 
@@ -485,7 +497,8 @@ def _inventory_program(args) -> int:
         result = inventory_program(args.source, project_root=args.project_root,
                                    source_roots=args.source_root, **_inventory_limits(args),
                                    runtime_trace=args.trace, runtime_budget=_runtime_inventory_budget(args),
-                                   max_compile_attempts=args.max_compile_attempts)
+                                   max_compile_attempts=args.max_compile_attempts,
+                                   context_budget=_context_inventory_budget(args))
         for file in result.discovery.files:
             source = Path(file.snapshot.path)
             if output == source or (output.exists() and source.samefile(output)):
@@ -500,7 +513,8 @@ def _inventory_program(args) -> int:
     except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
         return 2
-    print(json.dumps({"status": "INVENTORIED", "out": str(output), "summary": result.summary()}))
+    print(json.dumps({"status": "INVENTORIED", "out": str(output), "summary": result.summary(),
+                      "analysis_measurements": _inventory_analysis_measurements(result)}))
     return 0
 
 
@@ -512,11 +526,13 @@ def _check_inventory(args) -> int:
     try:
         with open_text(args.report) as stream:
             result = ProgramInventory.from_dict(strict_loads(stream.read()), **_inventory_limits(args),
-                runtime_verification_budget=_runtime_inventory_budget(args), max_compile_attempts=args.max_compile_attempts)
+                runtime_verification_budget=_runtime_inventory_budget(args), max_compile_attempts=args.max_compile_attempts,
+                context_verification_budget=_context_inventory_budget(args))
     except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
         return 2
-    print(json.dumps({"status": "REPLAYED", "summary": result.summary(), "transformation_authorized": False}))
+    print(json.dumps({"status": "REPLAYED", "summary": result.summary(), "transformation_authorized": False,
+                      "analysis_measurements": _inventory_analysis_measurements(result)}))
     return 0
 
 

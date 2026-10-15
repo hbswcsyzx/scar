@@ -155,11 +155,13 @@ class PreparedSource:
     tree: ast.Module
     symbol_tables: dict
 
-    def lower(self, entry, *, source: SourceReference | None = None, max_operations=10000):
+    def lower(self, entry, *, source: SourceReference | None = None, max_operations=10000,
+              expand_candidates=True):
         _check_arguments(entry, max_operations)
         builder = _Builder(self.path, entry, self.text, self.semantic, self.semantics,
                            self.control, max_operations, selected_source=source,
-                           tree=self.tree, symbol_tables=self.symbol_tables)
+                           tree=self.tree, symbol_tables=self.symbol_tables,
+                           expand_candidates=expand_candidates)
         return builder.run()
 
 
@@ -182,7 +184,10 @@ class _Cursor:
 
 class _Builder:
     def __init__(self, path, entry, text, semantic, semantics, control, max_operations,
-                 selected_source=None, tree=None, symbol_tables=None):
+                 selected_source=None, tree=None, symbol_tables=None, expand_candidates=True):
+        if type(expand_candidates) is not bool:
+            raise ValueError("expand_candidates must be an exact boolean")
+        self.expand_candidates = expand_candidates
         self.path, self.entry, self.text = path, entry, text
         self.semantic, self.semantics, self.control = semantic, semantics, control
         self.max_operations = max_operations
@@ -575,7 +580,7 @@ class _Builder:
             expanded = {self.entry}
             index = 0
             failed_candidates = set()
-            while index < len(self.pending_targets):
+            while self.expand_candidates and index < len(self.pending_targets):
                 _, _, name, _ = self.pending_targets[index]
                 index += 1
                 if name is None or name in expanded or name in failed_candidates:

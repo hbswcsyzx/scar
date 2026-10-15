@@ -30,7 +30,7 @@ def test_cli_dynamic_sources_and_unobserved_branch_are_replayable(runtime_projec
     assert built.returncode == 0, built.stdout + built.stderr
     with gzip.open(output, "rt") as stream:
         document = json.load(stream)
-    assert document["schema_version"] == 2
+    assert document["schema_version"] == 3 and document["expansion"]
     paths = {file["snapshot"]["path"] for file in document["files"]}
     assert paths == {str(entry), str(payload), str(root / "helper.py"), str(root / "dormant.py")}
     assert document["target_executed"] is False
@@ -56,4 +56,21 @@ def test_cli_runtime_inventory_cannot_overwrite_trace_or_discovered_source(runti
     process = run("inventory-program", entry, "--project-root", root, "--trace", trace, "--out", output)
     assert process.returncode == 2, process.stdout + process.stderr
     assert target.read_bytes() == before
+    assert not marker.exists()
+
+
+def test_cli_context_store_limits_and_independent_replay_ceiling(runtime_project, tmp_path):
+    root, entry, _, trace, marker = runtime_project
+    output = tmp_path / "limited.json.gz"
+    built = run("inventory-program", entry, "--project-root", root, "--trace", trace,
+                "--out", output, "--max-context-bytes", 8_000_000,
+                "--max-context-record-bytes", 8_000_000)
+    assert built.returncode == 0, built.stdout + built.stderr
+    checked = run("check-inventory", output, "--max-context-bytes", 8_000_000,
+                  "--max-context-record-bytes", 8_000_000)
+    assert checked.returncode == 0, checked.stdout + checked.stderr
+    for option in ("--max-context-bytes", "--max-context-record-bytes"):
+        rejected = run("check-inventory", output, option, 7_000_000)
+        assert rejected.returncode == 2
+        assert "independent context verifier budget" in rejected.stdout
     assert not marker.exists()

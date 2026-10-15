@@ -96,7 +96,9 @@ scar check-inventory runtime-inventory.json.gz
 调用按 CodeID 和精确进程身份去重，保留次数及首末行锚点。不导入或执行目标，
 不保存新的 Tensor 数值。未观察的静态候选仍保留。
 
-有 trace 的报告是 v2，增加 typed runtime_scope；无 trace 保持 v1。来源候选
+N2.entry 的历史有 trace 报告是 v2；N2.schedule 新报告为 v3，增加 typed
+expansion 需求/计费账；runtime_scope 保留。无 trace 保持 v1。旧v2按原始
+调度算法重放，不悄悄改成全局单根策略。来源候选
 与当前源码版本核对分开：只有原始代码摘要精确复现才有 code-only witness，
 未匹配可能来自缺少编译上下文或旧 marshal 引用布局，不能断言源码一定改变。
 默认离线尝试 local Python、flags=0、optimize=0/1/2，filename 来自观察假设，
@@ -112,6 +114,23 @@ CLI 提供 `--max-trace-bytes`、`--max-trace-records`、`--max-trace-line-bytes
 `--max-runtime-codes`、`--max-compile-attempts`。验证器独立设置 ceiling；报告
 不能扩大它。重放先重新读取并核对 trace，再从当前源码重新发现/构建/核对。
 相对、生成、非规范、界外、链接和缺失源码都保留具体边界。
+
+## 全局 body 需求调度（N2.schedule）
+
+新 v3 先索引全部发现源码，再按观察定义、条件调用候选、其余定义安排共享
+body/operation 预算。调用见证也沿需求延迟分配。每个函数体任务只构造当前
+root，候选 body 由队列去重安排；各 body 尚未合并为完整程序图。
+
+每文件 prepare 一次；进程自己的有界私有上下文暂存结束即清理，不进入报告。
+`--max-context-bytes` 默认128,000,000压缩写入字节，
+`--max-context-record-bytes` 默认64,000,000单记录原始字节；验证器独立设限。
+上下文不可用保留轻量索引和代码见证，对应 body 留下具体状态。未知构造异常
+消耗剩余操作额度并将精确成本标为未知；失败不能退还已花的分析预算。
+
+`expansion` 不是新的程序节点，不证明 live callee、纯性、值相等或可化简。
+CLI 的 `analysis_measurements` 单独记录本次分析成本，不包含 Tensor 数值，
+不作为源码/图重放身份。当前实现与验收状态见
+[N2_SCHEDULING_PLAN.md](N2_SCHEDULING_PLAN.md)。
 
 ## 剩余依赖
 
