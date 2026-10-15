@@ -6,7 +6,7 @@
   "implementation": "72aaf54a74fbc923f5c92329817347bf6cfecc53",
   "merge_revision": "13a049dc2f407941675bb0fef66acd7d6c706c52",
   "source_sha256": "c8de5831ed8afb1378ba41fd7b2373de599fd818520d03970b1ec04665666d7c",
-  "f4_status": "RUNNING",
+  "f4_status": "REPLAYED",
   "whole_program_complete": false,
   "actual_formal_provenance_established": false,
   "transformation_authorized": false,
@@ -46,6 +46,27 @@
     "artifacts/reports/gates/n2-frame-f4-launch.json": {
       "bytes": 1024,
       "sha256": "2be34f4ce86897386dd610bc2dd94a56c1cb63e23dfef9e6eb147f75bc1e8bb2"
+    },
+    "artifacts/reports/gates/n2-frame-f4.json": {
+      "bytes": 50481,
+      "sha256": "426baf97ce3440d34206e7ec852502d1d9b21ba239baf347525e955cd5b12a29"
+    },
+    "artifacts/reports/gates/n2-frame-f4.time": {
+      "bytes": 909,
+      "sha256": "9a3f2e1f68dc9312838be2f7ef7672250f53c867b214cafe04be1ed0245016f1"
+    },
+    "artifacts/reports/gates/n2-frame-f4-coverage.json": {
+      "bytes": 15597,
+      "sha256": "d88248527ee3ca65173360d22f0891dcb5efb7e2e28fdd8d807914c32373ab0d"
+    },
+    "artifacts/reports/gates/n2-frame-f4-coverage.py": {
+      "bytes": 3132,
+      "sha256": "45fc591284e498b873a724b72bf021431aef5d9c72ee5640c82f8656941a6017"
+    },
+    "artifacts/experiments/n2_frame_source_f4/real/inventory.json.gz": {
+      "bytes": 7461986,
+      "sha256": "131429da427b5bdf3e3f86a780d0144ac673c19cb25d451d5794e53debbb7ac5",
+      "storage": "local compressed full report"
     }
   }
 }

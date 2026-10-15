@@ -8,7 +8,10 @@ raw-source frame bodies preserve returned references with separate lifecycle
 world state. SourceProgram v2, default inventory v5 and conditional path queries
 retain strict replay; real historical v1–v4 inventory and v4 call reports replay.
 The source fingerprint is `c8de5831ed8afb1378ba41fd7b2373de599fd818520d03970b1ec04665666d7c`.
-F4 is running on the unchanged LeWM entry and archived trace with equal budgets.
+F4 also replayed the unchanged LeWM entry/trace under equal budgets: 151 files,
+2,217 definitions and all 44 bodies retained; 443.066s generation / 451.106s replay,
+peak RSS 1,100,892KiB. Target Git, source snapshots, raw trace and frozen SCAR hashes
+remained unchanged. These are analysis costs, not workload acceleration.
 No cross-call actual/formal proof, whole-program graph, transform or speedup.
 See [C0 acceptance](N2_FRAME_ACCEPTANCE.md).
 

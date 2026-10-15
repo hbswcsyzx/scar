@@ -16,8 +16,8 @@ SCAR 要自动建立可穿过调用层级、返回至正确调用点的依赖关
 - 自动推导的细粒度 location/footprint/alias 及 provenance。
 
 不能因为 body 图有效、源码目标匹配或绑定计划完整，就填入确定 callee。
-当前 return 建模也含 opaque 操作；`return x` 尚不能一般地穿透为输出引用
-身份等于输入引用，更不能据此删除 frame 清理效果。
+旧return断点已由C0的新profile修复：body内可保留原payload引用及独立frame
+效果，跨调用实际绑定/环境与world映射仍未闭合；旧profile按历史路径重放。
 
 ## 建模约束
 
@@ -59,11 +59,12 @@ fixture 自动构图、独立反例、版本/预算篡改重放、冻结回归�
 只在真实结构连接建立后，再将已实现的规则接到具体化简指导。
 
 C0已按[Frame生命周期方案](N2_FRAME_LIFETIME_PLAN.md)实施并完成F0–F3有限
-前端门，863项mapped/全仓1,898项通过；F4外部来源复验仍在运行。
+前端门，863项mapped/全仓1,898项通过；F4同输入外部来源复验亦已REPLAYED。
 详见[C0验收](N2_FRAME_ACCEPTANCE.md)。真实新调用证据的
 [逐项审计](N2_CALL_CONNECTION_AUDIT.md)另指出：9个已观察core调用点只有1个
 可经核验runtime父链到现有body，且wrapper效果与实际绑定均未证。C0之后还需
 将新code见证接入需求展开及库边界规则，不能以局部引用查询代替完整连接。
+细化后的独立calls-demand及C1/C2门见[N2_CALL_BINDING_PLAN.md](N2_CALL_BINDING_PLAN.md)。
 
 ## LeWM 外部核验口径
 

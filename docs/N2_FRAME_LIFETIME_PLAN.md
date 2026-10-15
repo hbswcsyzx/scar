@@ -1,6 +1,6 @@
 # C0：返回引用与 frame 生命周期依赖
 
-日期：2026-10-15。状态：**Implemented，冻结自验中；外部 F4 尚未验收**。
+日期：2026-10-15。状态：**F0–F4 有限范围 Verified；完整调用连接未完成**。
 
 本文件细化 [N2_CALL_COMPOSITION_PLAN.md](N2_CALL_COMPOSITION_PLAN.md) 的 C0。
 下文保留设计与验收要求；当前实现见 [N2_FRAME_IMPLEMENTATION.md](N2_FRAME_IMPLEMENTATION.md)，

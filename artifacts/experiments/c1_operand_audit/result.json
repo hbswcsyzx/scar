@@ -1,0 +1,7150 @@
+{
+  "schema": "scar.experiment.c1-operand-audit",
+  "schema_version": 1,
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "process_id": 413484,
+  "thread_id": 124528543246144,
+  "probe_sha256": "5db001fa8f71b96a3c5c4131e2829d04ba65686166673aacfb2a9ae36d70d891",
+  "sources": [
+    {
+      "path": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+      "sha256": "3526a802a31cb49ff308320f2604629860ce88748051f898031dd6ef70790704"
+    },
+    {
+      "path": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/entry_fixture.py",
+      "sha256": "8af8e4e31e76466a5891288d94a1b8ffaf1c759f70821f31ad5463e85bf042b4"
+    }
+  ],
+  "headers": [
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/include/python3.14/cpython/monitoring.h",
+      "sha256": "3e16adb49c7610afde5fe9b2f276474468ce1518a0beea578aa7f4cf823152a4",
+      "matches": [
+        {
+          "line": 68,
+          "text": "_PyMonitoring_FireCallEvent(PyMonitoringState *state, PyObject *codelike, int32_t offset,"
+        },
+        {
+          "line": 69,
+          "text": "                            PyObject* callable, PyObject *arg0);"
+        },
+        {
+          "line": 161,
+          "text": "                           PyObject* callable, PyObject *arg0)"
+        },
+        {
+          "line": 165,
+          "text": "        _PyMonitoring_FireCallEvent(state, codelike, offset, callable, arg0));"
+        }
+      ]
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/include/python3.14/internal/pycore_instruments.h",
+      "sha256": "2bf0f0e935f7115a6f612037d762ab2dfd4a47bcda7b8ffefc44d237af120fab",
+      "matches": [
+        {
+          "line": 45,
+          "text": "_Py_call_instrumentation_instruction("
+        }
+      ]
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/include/python3.14/internal/pycore_interpframe_structs.h",
+      "sha256": "d7ace72c1da1346aca19f4fa0fb55a4e0356217f8df25a834e7540e24672f4f2",
+      "matches": [
+        {
+          "line": 11,
+          "text": "#ifndef Py_BUILD_CORE"
+        },
+        {
+          "line": 12,
+          "text": "#  error \"this header requires Py_BUILD_CORE define\""
+        },
+        {
+          "line": 33,
+          "text": "    _PyStackRef f_funcobj; /* Deferred or strong reference. Only valid if not on C stack */"
+        },
+        {
+          "line": 39,
+          "text": "    _PyStackRef *stackpointer;"
+        },
+        {
+          "line": 53,
+          "text": "    _PyStackRef localsplus[1];"
+        }
+      ]
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/include/python3.14/internal/pycore_opcode_metadata.h",
+      "sha256": "f05e0e93806a1e78452d9e6c8c1b9a3019879895ebe03d6f1e93f2111f1abf2a",
+      "matches": [
+        {
+          "line": 1109,
+          "text": "    [CALL_BOUND_METHOD_EXACT_ARGS] = { true, INSTR_FMT_IBC00, HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_EXIT_FLAG | HAS_ESCAPES_FLAG },"
+        },
+        {
+          "line": 1130,
+          "text": "    [CALL_PY_EXACT_ARGS] = { true, INSTR_FMT_IBC00, HAS_ARG_FLAG | HAS_DEOPT_FLAG | HAS_EXIT_FLAG },"
+        },
+        {
+          "line": 1358,
+          "text": "    [CALL_BOUND_METHOD_EXACT_ARGS] = { .nuops = 10, .uops = { { _CHECK_PEP_523, OPARG_SIMPLE, 1 }, { _CHECK_CALL_BOUND_METHOD_EXACT_ARGS, OPARG_SIMPLE, 1 }, { _INIT_CALL_BOUND_METHOD_EXACT_ARGS, OPARG_SIMPLE, 1 }, { _CHECK_FUNCTION_VERSION, 2, 1 }, { _CHECK_FUNCTION_EXACT_ARGS, OPARG_SIMPLE, 3 }, { _CHECK_STACK_SPACE, OPARG_SIMPLE, 3 }, { _CHECK_RECURSION_REMAINING, OPARG_SIMPLE, 3 }, { _INIT_CALL_PY_EXACT_ARGS, OPARG_SIMPLE, 3 }, { _SAVE_RETURN_OFFSET, OPARG_SAVE_RETURN_OFFSET, 3 }, { _PUSH_FRAME, OPARG_SIMPLE, 3 } } },"
+        },
+        {
+          "line": 1377,
+          "text": "    [CALL_PY_EXACT_ARGS] = { .nuops = 8, .uops = { { _CHECK_PEP_523, OPARG_SIMPLE, 1 }, { _CHECK_FUNCTION_VERSION, 2, 1 }, { _CHECK_FUNCTION_EXACT_ARGS, OPARG_SIMPLE, 3 }, { _CHECK_STACK_SPACE, OPARG_SIMPLE, 3 }, { _CHECK_RECURSION_REMAINING, OPARG_SIMPLE, 3 }, { _INIT_CALL_PY_EXACT_ARGS, OPARG_SIMPLE, 3 }, { _SAVE_RETURN_OFFSET, OPARG_SAVE_RETURN_OFFSET, 3 }, { _PUSH_FRAME, OPARG_SIMPLE, 3 } } },"
+        }
+      ]
+    },
+    {
+      "path": "/home/zyf/miniconda3/envs/lewm/include/python3.14/cpython/pyframe.h",
+      "sha256": "eaa5beafeddc74f8b6bb4becd4639842534bfbb34ea5d30d67befa320beb34c1",
+      "matches": [
+        {
+          "line": 18,
+          "text": "PyAPI_FUNC(int) PyFrame_GetLasti(PyFrameObject *frame);"
+        },
+        {
+          "line": 19,
+          "text": "PyAPI_FUNC(PyObject*) PyFrame_GetVar(PyFrameObject *frame, PyObject *name);"
+        },
+        {
+          "line": 20,
+          "text": "PyAPI_FUNC(PyObject*) PyFrame_GetVarString(PyFrameObject *frame, const char *name);"
+        }
+      ]
+    }
+  ],
+  "disassembly_before": {
+    "name_call": [
+      {
+        "offset": 0,
+        "opcode": "RESUME_CHECK",
+        "argument": ""
+      },
+      {
+        "offset": 2,
+        "opcode": "LOAD_FAST_BORROW",
+        "argument": "fn"
+      },
+      {
+        "offset": 4,
+        "opcode": "PUSH_NULL",
+        "argument": ""
+      },
+      {
+        "offset": 6,
+        "opcode": "LOAD_FAST_BORROW",
+        "argument": "value"
+      },
+      {
+        "offset": 8,
+        "opcode": "CALL",
+        "argument": ""
+      },
+      {
+        "offset": 16,
+        "opcode": "RETURN_VALUE",
+        "argument": ""
+      }
+    ],
+    "attr_call": [
+      {
+        "offset": 0,
+        "opcode": "RESUME_CHECK",
+        "argument": ""
+      },
+      {
+        "offset": 2,
+        "opcode": "LOAD_FAST_BORROW",
+        "argument": "receiver"
+      },
+      {
+        "offset": 4,
+        "opcode": "LOAD_ATTR_METHOD_WITH_VALUES",
+        "argument": "method + NULL|self"
+      },
+      {
+        "offset": 24,
+        "opcode": "LOAD_FAST_BORROW",
+        "argument": "value"
+      },
+      {
+        "offset": 26,
+        "opcode": "CALL",
+        "argument": ""
+      },
+      {
+        "offset": 34,
+        "opcode": "RETURN_VALUE",
+        "argument": ""
+      }
+    ]
+  },
+  "profile_instruction_compatibility": [
+    {
+      "order": "monitor_only",
+      "events": [
+        {
+          "kind": "INSTRUCTION",
+          "offset": 2
+        },
+        {
+          "kind": "INSTRUCTION",
+          "offset": 4
+        },
+        {
+          "kind": "INSTRUCTION",
+          "offset": 6
+        },
+        {
+          "kind": "INSTRUCTION",
+          "offset": 8
+        },
+        {
+          "kind": "CALL",
+          "offset": 8
+        },
+        {
+          "kind": "INSTRUCTION",
+          "offset": 16
+        }
+      ],
+      "instruction_count": 5,
+      "call_count": 1
+    },
+    {
+      "order": "monitor_then_profile",
+      "events": [
+        {
+          "kind": "PROFILE",
+          "function": "name_call",
+          "event": "call"
+        },
+        {
+          "kind": "CALL",
+          "offset": 8
+        },
+        {
+          "kind": "PROFILE",
+          "function": "identity",
+          "event": "call"
+        },
+        {
+          "kind": "PROFILE",
+          "function": "identity",
+          "event": "return"
+        },
+        {
+          "kind": "PROFILE",
+          "function": "name_call",
+          "event": "return"
+        }
+      ],
+      "instruction_count": 0,
+      "call_count": 1
+    },
+    {
+      "order": "profile_then_monitor",
+      "events": [
+        {
+          "kind": "PROFILE",
+          "function": "name_call",
+          "event": "call"
+        },
+        {
+          "kind": "INSTRUCTION",
+          "offset": 2
+        },
+        {
+          "kind": "INSTRUCTION",
+          "offset": 4
+        },
+        {
+          "kind": "INSTRUCTION",
+          "offset": 6
+        },
+        {
+          "kind": "INSTRUCTION",
+          "offset": 8
+        },
+        {
+          "kind": "CALL",
+          "offset": 8
+        },
+        {
+          "kind": "PROFILE",
+          "function": "identity",
+          "event": "call"
+        },
+        {
+          "kind": "PROFILE",
+          "function": "identity",
+          "event": "return"
+        },
+        {
+          "kind": "INSTRUCTION",
+          "offset": 16
+        },
+        {
+          "kind": "PROFILE",
+          "function": "name_call",
+          "event": "return"
+        }
+      ],
+      "instruction_count": 5,
+      "call_count": 1
+    }
+  ],
+  "disassembly_after": {
+    "name_call": [
+      {
+        "offset": 0,
+        "opcode": "INSTRUMENTED_RESUME",
+        "argument": ""
+      },
+      {
+        "offset": 2,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      },
+      {
+        "offset": 4,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      },
+      {
+        "offset": 6,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      },
+      {
+        "offset": 8,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      },
+      {
+        "offset": 16,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      }
+    ],
+    "attr_call": [
+      {
+        "offset": 0,
+        "opcode": "INSTRUMENTED_RESUME",
+        "argument": ""
+      },
+      {
+        "offset": 2,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      },
+      {
+        "offset": 4,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      },
+      {
+        "offset": 24,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      },
+      {
+        "offset": 26,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      },
+      {
+        "offset": 34,
+        "opcode": "INSTRUMENTED_INSTRUCTION",
+        "argument": ""
+      }
+    ]
+  },
+  "aliases": {
+    "raw_default_alias": {
+      "attempt": 6,
+      "normalized": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 2,
+        "owner": 1,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      },
+      "parameters": {
+        "self": "ref:12",
+        "value": "ref:12"
+      },
+      "boundary": "ADAPTER_DEFAULT_PACK_OR_KEYWORD_STATE_WOULD_BE_REQUIRED"
+    },
+    "name_bound_alias": {
+      "attempt": 18,
+      "normalized": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 14,
+        "owner": 3,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:13",
+          "exact_type": "method",
+          "function": {
+            "ref": "ref:11",
+            "exact_type": "function",
+            "code": {
+              "ref": "ref:3",
+              "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+              "qualname": "raw_target",
+              "first_line": 5,
+              "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+              "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+            },
+            "positional_formals": [
+              "self",
+              "value"
+            ],
+            "keyword_only": 0,
+            "variadic": false,
+            "defaults": [
+              "ref:12"
+            ],
+            "closure_names": []
+          },
+          "receiver": "ref:12"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      },
+      "parameters": {
+        "self": "ref:12",
+        "value": "ref:12"
+      },
+      "boundary": "RAW_CALLEE_IS_ADAPTER_OR_OTHER_CALLABLE"
+    },
+    "optimized_attr_bound_alias": {
+      "attempt": 30,
+      "normalized": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": null,
+      "parameters": {
+        "self": "ref:12",
+        "value": "ref:12"
+      },
+      "boundary": "CALLEE_RESULT_NOT_EXPOSED_BY_PUBLIC_INSTRUCTION_EVENT"
+    },
+    "partial_alias": {
+      "attempt": 42,
+      "normalized": {
+        "ref": "ref:14",
+        "exact_type": "partial",
+        "function": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "args": [
+          "ref:12"
+        ],
+        "keyword_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 38,
+        "owner": 7,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:14",
+          "exact_type": "partial",
+          "function": {
+            "ref": "ref:11",
+            "exact_type": "function",
+            "code": {
+              "ref": "ref:3",
+              "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+              "qualname": "raw_target",
+              "first_line": 5,
+              "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+              "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+            },
+            "positional_formals": [
+              "self",
+              "value"
+            ],
+            "keyword_only": 0,
+            "variadic": false,
+            "defaults": [
+              "ref:12"
+            ],
+            "closure_names": []
+          },
+          "args": [
+            "ref:12"
+          ],
+          "keyword_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      },
+      "parameters": {
+        "self": "ref:12",
+        "value": "ref:12"
+      },
+      "boundary": "RAW_CALLEE_IS_ADAPTER_OR_OTHER_CALLABLE"
+    }
+  },
+  "conditional_paths": {
+    "two_file_distinct": [
+      {
+        "from": {
+          "owner": 11,
+          "formal": "value"
+        },
+        "path": [
+          {
+            "destination": {
+              "owner": 11,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 10,
+              "load_event": 56,
+              "name": "value",
+              "position": [
+                4,
+                4,
+                20,
+                25
+              ],
+              "formal_origin": "value"
+            }
+          },
+          {
+            "destination": {
+              "owner": 10,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 9,
+              "load_event": 51,
+              "name": "left",
+              "position": [
+                7,
+                7,
+                18,
+                22
+              ],
+              "formal_origin": "left"
+            }
+          }
+        ],
+        "endpoint": {
+          "owner": 9,
+          "name": "left"
+        },
+        "status": "CONDITIONAL",
+        "unconditional_verified": false
+      },
+      {
+        "from": {
+          "owner": 13,
+          "formal": "value"
+        },
+        "path": [
+          {
+            "destination": {
+              "owner": 13,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 12,
+              "load_event": 72,
+              "name": "value",
+              "position": [
+                4,
+                4,
+                20,
+                25
+              ],
+              "formal_origin": "value"
+            }
+          },
+          {
+            "destination": {
+              "owner": 12,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 9,
+              "load_event": 67,
+              "name": "right",
+              "position": [
+                8,
+                8,
+                19,
+                24
+              ],
+              "formal_origin": "right"
+            }
+          }
+        ],
+        "endpoint": {
+          "owner": 9,
+          "name": "right"
+        },
+        "status": "CONDITIONAL",
+        "unconditional_verified": false
+      }
+    ],
+    "two_file_shared": [
+      {
+        "from": {
+          "owner": 16,
+          "formal": "value"
+        },
+        "path": [
+          {
+            "destination": {
+              "owner": 16,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 15,
+              "load_event": 92,
+              "name": "value",
+              "position": [
+                4,
+                4,
+                20,
+                25
+              ],
+              "formal_origin": "value"
+            }
+          },
+          {
+            "destination": {
+              "owner": 15,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 14,
+              "load_event": 87,
+              "name": "left",
+              "position": [
+                7,
+                7,
+                18,
+                22
+              ],
+              "formal_origin": "left"
+            }
+          }
+        ],
+        "endpoint": {
+          "owner": 14,
+          "name": "left"
+        },
+        "status": "CONDITIONAL",
+        "unconditional_verified": false
+      },
+      {
+        "from": {
+          "owner": 18,
+          "formal": "value"
+        },
+        "path": [
+          {
+            "destination": {
+              "owner": 18,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 17,
+              "load_event": 108,
+              "name": "value",
+              "position": [
+                4,
+                4,
+                20,
+                25
+              ],
+              "formal_origin": "value"
+            }
+          },
+          {
+            "destination": {
+              "owner": 17,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 14,
+              "load_event": 103,
+              "name": "right",
+              "position": [
+                8,
+                8,
+                19,
+                24
+              ],
+              "formal_origin": "right"
+            }
+          }
+        ],
+        "endpoint": {
+          "owner": 14,
+          "name": "right"
+        },
+        "status": "CONDITIONAL",
+        "unconditional_verified": false
+      }
+    ]
+  },
+  "observed": [
+    "raw FunctionType and Name-bound MethodType have identical normalized CALL callable/arg0 and entry parameter references",
+    "pre-LOAD namespace observations distinguish raw function from Name-bound method",
+    "optimized LOAD_ATTR reports normalized function plus receiver but does not expose its result operand",
+    "exact partial remains visible as partial at CALL in this fixture",
+    "global and local rebinding during argument evaluation leaves the previously loaded callable selected",
+    "INSTRUCTION supplies code/offset, without an evaluated operand or full argument vector",
+    "on fresh code objects monitor-then-profile loses INSTRUCTION callbacks, whereas profile-then-monitor preserves INSTRUCTION/CALL/profile delivery"
+  ],
+  "inferred": [
+    "a versioned LOAD rule plus pre-load observation can construct conditional operand occurrences under explicit noninterposition conditions",
+    "a raw FunctionType with all fixed formals supplied by explicit captured Name loads admits positional routes without consuming defaults",
+    "route origin is instruction/source occurrence and actual index; equal object references only check consistency"
+  ],
+  "unsupported_scope": [
+    "unconditional binding provenance",
+    "arbitrary LOAD_ATTR/descriptor result",
+    "adapter/partial/receiver insertion",
+    "default-state consumption",
+    "stars/keywords/packing",
+    "fused loads without a validated suboperand rule",
+    "native calls and child processes",
+    "incorrect observer installation order or missing per-instruction records",
+    "contents/effects/purity or permission to transform"
+  ],
+  "observer_scope": "single process/thread; bounded tiny fixtures; strong fixture references affect lifetimes; no application or LeWM execution",
+  "conditions": [
+    {
+      "condition": "NO_FRAME_INTERPOSITION",
+      "status": "UNKNOWN"
+    },
+    {
+      "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+      "status": "UNKNOWN"
+    },
+    {
+      "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+      "status": "UNKNOWN"
+    }
+  ],
+  "events": [
+    {
+      "index": 1,
+      "case": "raw_default_alias",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 1,
+      "parent": null,
+      "code": "ref:5",
+      "qualname": "name_call",
+      "parameters": {
+        "fn": "ref:11",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 2,
+      "case": "raw_default_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 1,
+      "code": "ref:5",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "fn",
+      "position": [
+        3,
+        3,
+        11,
+        13
+      ],
+      "namespace_observation": {
+        "event": 2,
+        "owner": 1,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 3,
+      "case": "raw_default_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 1,
+      "code": "ref:5",
+      "offset": 4,
+      "opcode": "PUSH_NULL",
+      "argument": null,
+      "position": [
+        3,
+        3,
+        11,
+        13
+      ]
+    },
+    {
+      "index": 4,
+      "case": "raw_default_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 1,
+      "code": "ref:5",
+      "offset": 6,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        3,
+        3,
+        14,
+        19
+      ],
+      "namespace_observation": {
+        "event": 4,
+        "owner": 1,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          14,
+          19
+        ],
+        "offset": 6,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 5,
+      "case": "raw_default_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 1,
+      "code": "ref:5",
+      "offset": 8,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        3,
+        3,
+        11,
+        20
+      ]
+    },
+    {
+      "index": 6,
+      "case": "raw_default_alias",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 1,
+      "code": "ref:5",
+      "offset": 8,
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 7,
+      "case": "raw_default_alias",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 2,
+      "parent": 1,
+      "code": "ref:3",
+      "qualname": "raw_target",
+      "parameters": {
+        "self": "ref:12",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 8,
+      "case": "raw_default_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 2,
+      "code": "ref:3",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "self",
+      "position": [
+        6,
+        6,
+        11,
+        15
+      ],
+      "namespace_observation": {
+        "event": 8,
+        "owner": 2,
+        "name": "self",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          6,
+          6,
+          11,
+          15
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 9,
+      "case": "raw_default_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 2,
+      "code": "ref:3",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        6,
+        6,
+        4,
+        15
+      ]
+    },
+    {
+      "index": 10,
+      "case": "raw_default_alias",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 2,
+      "code": "ref:3",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 11,
+      "case": "raw_default_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 1,
+      "code": "ref:5",
+      "offset": 16,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        3,
+        3,
+        4,
+        20
+      ]
+    },
+    {
+      "index": 12,
+      "case": "raw_default_alias",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 1,
+      "code": "ref:5",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 13,
+      "case": "name_bound_alias",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 3,
+      "parent": null,
+      "code": "ref:5",
+      "qualname": "name_call",
+      "parameters": {
+        "fn": "ref:13",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 14,
+      "case": "name_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 3,
+      "code": "ref:5",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "fn",
+      "position": [
+        3,
+        3,
+        11,
+        13
+      ],
+      "namespace_observation": {
+        "event": 14,
+        "owner": 3,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:13",
+          "exact_type": "method",
+          "function": {
+            "ref": "ref:11",
+            "exact_type": "function",
+            "code": {
+              "ref": "ref:3",
+              "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+              "qualname": "raw_target",
+              "first_line": 5,
+              "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+              "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+            },
+            "positional_formals": [
+              "self",
+              "value"
+            ],
+            "keyword_only": 0,
+            "variadic": false,
+            "defaults": [
+              "ref:12"
+            ],
+            "closure_names": []
+          },
+          "receiver": "ref:12"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 15,
+      "case": "name_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 3,
+      "code": "ref:5",
+      "offset": 4,
+      "opcode": "PUSH_NULL",
+      "argument": null,
+      "position": [
+        3,
+        3,
+        11,
+        13
+      ]
+    },
+    {
+      "index": 16,
+      "case": "name_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 3,
+      "code": "ref:5",
+      "offset": 6,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        3,
+        3,
+        14,
+        19
+      ],
+      "namespace_observation": {
+        "event": 16,
+        "owner": 3,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          14,
+          19
+        ],
+        "offset": 6,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 17,
+      "case": "name_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 3,
+      "code": "ref:5",
+      "offset": 8,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        3,
+        3,
+        11,
+        20
+      ]
+    },
+    {
+      "index": 18,
+      "case": "name_bound_alias",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 3,
+      "code": "ref:5",
+      "offset": 8,
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 19,
+      "case": "name_bound_alias",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 4,
+      "parent": 3,
+      "code": "ref:3",
+      "qualname": "raw_target",
+      "parameters": {
+        "self": "ref:12",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 20,
+      "case": "name_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 4,
+      "code": "ref:3",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "self",
+      "position": [
+        6,
+        6,
+        11,
+        15
+      ],
+      "namespace_observation": {
+        "event": 20,
+        "owner": 4,
+        "name": "self",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          6,
+          6,
+          11,
+          15
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 21,
+      "case": "name_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 4,
+      "code": "ref:3",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        6,
+        6,
+        4,
+        15
+      ]
+    },
+    {
+      "index": 22,
+      "case": "name_bound_alias",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 4,
+      "code": "ref:3",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 23,
+      "case": "name_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 3,
+      "code": "ref:5",
+      "offset": 16,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        3,
+        3,
+        4,
+        20
+      ]
+    },
+    {
+      "index": 24,
+      "case": "name_bound_alias",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 3,
+      "code": "ref:5",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 25,
+      "case": "optimized_attr_bound_alias",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 5,
+      "parent": null,
+      "code": "ref:6",
+      "qualname": "attr_call",
+      "parameters": {
+        "receiver": "ref:12",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 26,
+      "case": "optimized_attr_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 5,
+      "code": "ref:6",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "receiver",
+      "position": [
+        5,
+        5,
+        11,
+        19
+      ],
+      "namespace_observation": {
+        "event": 26,
+        "owner": 5,
+        "name": "receiver",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          5,
+          5,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 27,
+      "case": "optimized_attr_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 5,
+      "code": "ref:6",
+      "offset": 4,
+      "opcode": "LOAD_ATTR",
+      "argument": "method",
+      "position": [
+        5,
+        5,
+        11,
+        26
+      ]
+    },
+    {
+      "index": 28,
+      "case": "optimized_attr_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 5,
+      "code": "ref:6",
+      "offset": 24,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        5,
+        5,
+        27,
+        32
+      ],
+      "namespace_observation": {
+        "event": 28,
+        "owner": 5,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          5,
+          5,
+          27,
+          32
+        ],
+        "offset": 24,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 29,
+      "case": "optimized_attr_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 5,
+      "code": "ref:6",
+      "offset": 26,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        5,
+        5,
+        11,
+        33
+      ]
+    },
+    {
+      "index": 30,
+      "case": "optimized_attr_bound_alias",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 5,
+      "code": "ref:6",
+      "offset": 26,
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 31,
+      "case": "optimized_attr_bound_alias",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 6,
+      "parent": 5,
+      "code": "ref:3",
+      "qualname": "raw_target",
+      "parameters": {
+        "self": "ref:12",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 32,
+      "case": "optimized_attr_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 6,
+      "code": "ref:3",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "self",
+      "position": [
+        6,
+        6,
+        11,
+        15
+      ],
+      "namespace_observation": {
+        "event": 32,
+        "owner": 6,
+        "name": "self",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          6,
+          6,
+          11,
+          15
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 33,
+      "case": "optimized_attr_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 6,
+      "code": "ref:3",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        6,
+        6,
+        4,
+        15
+      ]
+    },
+    {
+      "index": 34,
+      "case": "optimized_attr_bound_alias",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 6,
+      "code": "ref:3",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 35,
+      "case": "optimized_attr_bound_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 5,
+      "code": "ref:6",
+      "offset": 34,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        5,
+        5,
+        4,
+        33
+      ]
+    },
+    {
+      "index": 36,
+      "case": "optimized_attr_bound_alias",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 5,
+      "code": "ref:6",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 37,
+      "case": "partial_alias",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 7,
+      "parent": null,
+      "code": "ref:5",
+      "qualname": "name_call",
+      "parameters": {
+        "fn": "ref:14",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 38,
+      "case": "partial_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 7,
+      "code": "ref:5",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "fn",
+      "position": [
+        3,
+        3,
+        11,
+        13
+      ],
+      "namespace_observation": {
+        "event": 38,
+        "owner": 7,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:14",
+          "exact_type": "partial",
+          "function": {
+            "ref": "ref:11",
+            "exact_type": "function",
+            "code": {
+              "ref": "ref:3",
+              "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+              "qualname": "raw_target",
+              "first_line": 5,
+              "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+              "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+            },
+            "positional_formals": [
+              "self",
+              "value"
+            ],
+            "keyword_only": 0,
+            "variadic": false,
+            "defaults": [
+              "ref:12"
+            ],
+            "closure_names": []
+          },
+          "args": [
+            "ref:12"
+          ],
+          "keyword_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 39,
+      "case": "partial_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 7,
+      "code": "ref:5",
+      "offset": 4,
+      "opcode": "PUSH_NULL",
+      "argument": null,
+      "position": [
+        3,
+        3,
+        11,
+        13
+      ]
+    },
+    {
+      "index": 40,
+      "case": "partial_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 7,
+      "code": "ref:5",
+      "offset": 6,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        3,
+        3,
+        14,
+        19
+      ],
+      "namespace_observation": {
+        "event": 40,
+        "owner": 7,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          14,
+          19
+        ],
+        "offset": 6,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 41,
+      "case": "partial_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 7,
+      "code": "ref:5",
+      "offset": 8,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        3,
+        3,
+        11,
+        20
+      ]
+    },
+    {
+      "index": 42,
+      "case": "partial_alias",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 7,
+      "code": "ref:5",
+      "offset": 8,
+      "normalized_callable": {
+        "ref": "ref:14",
+        "exact_type": "partial",
+        "function": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "args": [
+          "ref:12"
+        ],
+        "keyword_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 43,
+      "case": "partial_alias",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 8,
+      "parent": 7,
+      "code": "ref:3",
+      "qualname": "raw_target",
+      "parameters": {
+        "self": "ref:12",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 44,
+      "case": "partial_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 8,
+      "code": "ref:3",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "self",
+      "position": [
+        6,
+        6,
+        11,
+        15
+      ],
+      "namespace_observation": {
+        "event": 44,
+        "owner": 8,
+        "name": "self",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          6,
+          6,
+          11,
+          15
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 45,
+      "case": "partial_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 8,
+      "code": "ref:3",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        6,
+        6,
+        4,
+        15
+      ]
+    },
+    {
+      "index": 46,
+      "case": "partial_alias",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 8,
+      "code": "ref:3",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 47,
+      "case": "partial_alias",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 7,
+      "code": "ref:5",
+      "offset": 16,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        3,
+        3,
+        4,
+        20
+      ]
+    },
+    {
+      "index": 48,
+      "case": "partial_alias",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 7,
+      "code": "ref:5",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 49,
+      "case": "two_file_distinct",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 9,
+      "parent": null,
+      "code": "ref:7",
+      "qualname": "run",
+      "parameters": {
+        "left": "ref:15",
+        "right": "ref:16"
+      }
+    },
+    {
+      "index": 50,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 2,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "relay",
+      "position": [
+        7,
+        7,
+        12,
+        17
+      ],
+      "namespace_observation": {
+        "event": 50,
+        "owner": 9,
+        "name": "relay",
+        "namespace": "GLOBAL",
+        "position": [
+          7,
+          7,
+          12,
+          17
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:17",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:2",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "relay",
+            "first_line": 3,
+            "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+            "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 51,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 12,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "left",
+      "position": [
+        7,
+        7,
+        18,
+        22
+      ],
+      "namespace_observation": {
+        "event": 51,
+        "owner": 9,
+        "name": "left",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          7,
+          7,
+          18,
+          22
+        ],
+        "offset": 12,
+        "observed_before_load": {
+          "ref": "ref:15",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 52,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 14,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        7,
+        7,
+        12,
+        23
+      ]
+    },
+    {
+      "index": 53,
+      "case": "two_file_distinct",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 14,
+      "normalized_callable": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:15"
+      }
+    },
+    {
+      "index": 54,
+      "case": "two_file_distinct",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 10,
+      "parent": 9,
+      "code": "ref:2",
+      "qualname": "relay",
+      "parameters": {
+        "value": "ref:15"
+      }
+    },
+    {
+      "index": 55,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 10,
+      "code": "ref:2",
+      "offset": 2,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "identity",
+      "position": [
+        4,
+        4,
+        11,
+        19
+      ],
+      "namespace_observation": {
+        "event": 55,
+        "owner": 10,
+        "name": "identity",
+        "namespace": "GLOBAL",
+        "position": [
+          4,
+          4,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:18",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:1",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "identity",
+            "first_line": 1,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 56,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 10,
+      "code": "ref:2",
+      "offset": 12,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        4,
+        4,
+        20,
+        25
+      ],
+      "namespace_observation": {
+        "event": 56,
+        "owner": 10,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          4,
+          4,
+          20,
+          25
+        ],
+        "offset": 12,
+        "observed_before_load": {
+          "ref": "ref:15",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 57,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 10,
+      "code": "ref:2",
+      "offset": 14,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        4,
+        4,
+        11,
+        26
+      ]
+    },
+    {
+      "index": 58,
+      "case": "two_file_distinct",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 10,
+      "code": "ref:2",
+      "offset": 14,
+      "normalized_callable": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:15"
+      }
+    },
+    {
+      "index": 59,
+      "case": "two_file_distinct",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 11,
+      "parent": 10,
+      "code": "ref:1",
+      "qualname": "identity",
+      "parameters": {
+        "value": "ref:15"
+      }
+    },
+    {
+      "index": 60,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 11,
+      "code": "ref:1",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        2,
+        2,
+        11,
+        16
+      ],
+      "namespace_observation": {
+        "event": 60,
+        "owner": 11,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          2,
+          2,
+          11,
+          16
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:15",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 61,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 11,
+      "code": "ref:1",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        2,
+        2,
+        4,
+        16
+      ]
+    },
+    {
+      "index": 62,
+      "case": "two_file_distinct",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 11,
+      "code": "ref:1",
+      "return_ref": "ref:15",
+      "completion_established": false
+    },
+    {
+      "index": 63,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 10,
+      "code": "ref:2",
+      "offset": 22,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        4,
+        4,
+        4,
+        26
+      ]
+    },
+    {
+      "index": 64,
+      "case": "two_file_distinct",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 10,
+      "code": "ref:2",
+      "return_ref": "ref:15",
+      "completion_established": false
+    },
+    {
+      "index": 65,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 22,
+      "opcode": "STORE_FAST",
+      "argument": "first",
+      "position": [
+        7,
+        7,
+        4,
+        9
+      ]
+    },
+    {
+      "index": 66,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 24,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "relay",
+      "position": [
+        8,
+        8,
+        13,
+        18
+      ],
+      "namespace_observation": {
+        "event": 66,
+        "owner": 9,
+        "name": "relay",
+        "namespace": "GLOBAL",
+        "position": [
+          8,
+          8,
+          13,
+          18
+        ],
+        "offset": 24,
+        "observed_before_load": {
+          "ref": "ref:17",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:2",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "relay",
+            "first_line": 3,
+            "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+            "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 67,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 34,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "right",
+      "position": [
+        8,
+        8,
+        19,
+        24
+      ],
+      "namespace_observation": {
+        "event": 67,
+        "owner": 9,
+        "name": "right",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          8,
+          8,
+          19,
+          24
+        ],
+        "offset": 34,
+        "observed_before_load": {
+          "ref": "ref:16",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 68,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 36,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        8,
+        8,
+        13,
+        25
+      ]
+    },
+    {
+      "index": 69,
+      "case": "two_file_distinct",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 36,
+      "normalized_callable": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:16"
+      }
+    },
+    {
+      "index": 70,
+      "case": "two_file_distinct",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 12,
+      "parent": 9,
+      "code": "ref:2",
+      "qualname": "relay",
+      "parameters": {
+        "value": "ref:16"
+      }
+    },
+    {
+      "index": 71,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 12,
+      "code": "ref:2",
+      "offset": 2,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "identity",
+      "position": [
+        4,
+        4,
+        11,
+        19
+      ],
+      "namespace_observation": {
+        "event": 71,
+        "owner": 12,
+        "name": "identity",
+        "namespace": "GLOBAL",
+        "position": [
+          4,
+          4,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:18",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:1",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "identity",
+            "first_line": 1,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 72,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 12,
+      "code": "ref:2",
+      "offset": 12,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        4,
+        4,
+        20,
+        25
+      ],
+      "namespace_observation": {
+        "event": 72,
+        "owner": 12,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          4,
+          4,
+          20,
+          25
+        ],
+        "offset": 12,
+        "observed_before_load": {
+          "ref": "ref:16",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 73,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 12,
+      "code": "ref:2",
+      "offset": 14,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        4,
+        4,
+        11,
+        26
+      ]
+    },
+    {
+      "index": 74,
+      "case": "two_file_distinct",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 12,
+      "code": "ref:2",
+      "offset": 14,
+      "normalized_callable": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:16"
+      }
+    },
+    {
+      "index": 75,
+      "case": "two_file_distinct",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 13,
+      "parent": 12,
+      "code": "ref:1",
+      "qualname": "identity",
+      "parameters": {
+        "value": "ref:16"
+      }
+    },
+    {
+      "index": 76,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 13,
+      "code": "ref:1",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        2,
+        2,
+        11,
+        16
+      ],
+      "namespace_observation": {
+        "event": 76,
+        "owner": 13,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          2,
+          2,
+          11,
+          16
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:16",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 77,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 13,
+      "code": "ref:1",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        2,
+        2,
+        4,
+        16
+      ]
+    },
+    {
+      "index": 78,
+      "case": "two_file_distinct",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 13,
+      "code": "ref:1",
+      "return_ref": "ref:16",
+      "completion_established": false
+    },
+    {
+      "index": 79,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 12,
+      "code": "ref:2",
+      "offset": 22,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        4,
+        4,
+        4,
+        26
+      ]
+    },
+    {
+      "index": 80,
+      "case": "two_file_distinct",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 12,
+      "code": "ref:2",
+      "return_ref": "ref:16",
+      "completion_established": false
+    },
+    {
+      "index": 81,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 44,
+      "opcode": "STORE_FAST",
+      "argument": "second",
+      "position": [
+        8,
+        8,
+        4,
+        10
+      ]
+    },
+    {
+      "index": 82,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 46,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "first",
+      "position": [
+        9,
+        9,
+        11,
+        16
+      ],
+      "namespace_observation": {
+        "event": 82,
+        "owner": 9,
+        "name": "first",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          9,
+          9,
+          11,
+          16
+        ],
+        "offset": 46,
+        "observed_before_load": {
+          "ref": "ref:15",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 83,
+      "case": "two_file_distinct",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 48,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        9,
+        9,
+        4,
+        16
+      ]
+    },
+    {
+      "index": 84,
+      "case": "two_file_distinct",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 9,
+      "code": "ref:7",
+      "return_ref": "ref:15",
+      "completion_established": false
+    },
+    {
+      "index": 85,
+      "case": "two_file_shared",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 14,
+      "parent": null,
+      "code": "ref:7",
+      "qualname": "run",
+      "parameters": {
+        "left": "ref:12",
+        "right": "ref:12"
+      }
+    },
+    {
+      "index": 86,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 2,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "relay",
+      "position": [
+        7,
+        7,
+        12,
+        17
+      ],
+      "namespace_observation": {
+        "event": 86,
+        "owner": 14,
+        "name": "relay",
+        "namespace": "GLOBAL",
+        "position": [
+          7,
+          7,
+          12,
+          17
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:17",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:2",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "relay",
+            "first_line": 3,
+            "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+            "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 87,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 12,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "left",
+      "position": [
+        7,
+        7,
+        18,
+        22
+      ],
+      "namespace_observation": {
+        "event": 87,
+        "owner": 14,
+        "name": "left",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          7,
+          7,
+          18,
+          22
+        ],
+        "offset": 12,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 88,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 14,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        7,
+        7,
+        12,
+        23
+      ]
+    },
+    {
+      "index": 89,
+      "case": "two_file_shared",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 14,
+      "normalized_callable": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 90,
+      "case": "two_file_shared",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 15,
+      "parent": 14,
+      "code": "ref:2",
+      "qualname": "relay",
+      "parameters": {
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 91,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 15,
+      "code": "ref:2",
+      "offset": 2,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "identity",
+      "position": [
+        4,
+        4,
+        11,
+        19
+      ],
+      "namespace_observation": {
+        "event": 91,
+        "owner": 15,
+        "name": "identity",
+        "namespace": "GLOBAL",
+        "position": [
+          4,
+          4,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:18",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:1",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "identity",
+            "first_line": 1,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 92,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 15,
+      "code": "ref:2",
+      "offset": 12,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        4,
+        4,
+        20,
+        25
+      ],
+      "namespace_observation": {
+        "event": 92,
+        "owner": 15,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          4,
+          4,
+          20,
+          25
+        ],
+        "offset": 12,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 93,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 15,
+      "code": "ref:2",
+      "offset": 14,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        4,
+        4,
+        11,
+        26
+      ]
+    },
+    {
+      "index": 94,
+      "case": "two_file_shared",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 15,
+      "code": "ref:2",
+      "offset": 14,
+      "normalized_callable": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 95,
+      "case": "two_file_shared",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 16,
+      "parent": 15,
+      "code": "ref:1",
+      "qualname": "identity",
+      "parameters": {
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 96,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 16,
+      "code": "ref:1",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        2,
+        2,
+        11,
+        16
+      ],
+      "namespace_observation": {
+        "event": 96,
+        "owner": 16,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          2,
+          2,
+          11,
+          16
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 97,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 16,
+      "code": "ref:1",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        2,
+        2,
+        4,
+        16
+      ]
+    },
+    {
+      "index": 98,
+      "case": "two_file_shared",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 16,
+      "code": "ref:1",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 99,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 15,
+      "code": "ref:2",
+      "offset": 22,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        4,
+        4,
+        4,
+        26
+      ]
+    },
+    {
+      "index": 100,
+      "case": "two_file_shared",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 15,
+      "code": "ref:2",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 101,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 22,
+      "opcode": "STORE_FAST",
+      "argument": "first",
+      "position": [
+        7,
+        7,
+        4,
+        9
+      ]
+    },
+    {
+      "index": 102,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 24,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "relay",
+      "position": [
+        8,
+        8,
+        13,
+        18
+      ],
+      "namespace_observation": {
+        "event": 102,
+        "owner": 14,
+        "name": "relay",
+        "namespace": "GLOBAL",
+        "position": [
+          8,
+          8,
+          13,
+          18
+        ],
+        "offset": 24,
+        "observed_before_load": {
+          "ref": "ref:17",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:2",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "relay",
+            "first_line": 3,
+            "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+            "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 103,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 34,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "right",
+      "position": [
+        8,
+        8,
+        19,
+        24
+      ],
+      "namespace_observation": {
+        "event": 103,
+        "owner": 14,
+        "name": "right",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          8,
+          8,
+          19,
+          24
+        ],
+        "offset": 34,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 104,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 36,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        8,
+        8,
+        13,
+        25
+      ]
+    },
+    {
+      "index": 105,
+      "case": "two_file_shared",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 36,
+      "normalized_callable": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 106,
+      "case": "two_file_shared",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 17,
+      "parent": 14,
+      "code": "ref:2",
+      "qualname": "relay",
+      "parameters": {
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 107,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 17,
+      "code": "ref:2",
+      "offset": 2,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "identity",
+      "position": [
+        4,
+        4,
+        11,
+        19
+      ],
+      "namespace_observation": {
+        "event": 107,
+        "owner": 17,
+        "name": "identity",
+        "namespace": "GLOBAL",
+        "position": [
+          4,
+          4,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:18",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:1",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "identity",
+            "first_line": 1,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 108,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 17,
+      "code": "ref:2",
+      "offset": 12,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        4,
+        4,
+        20,
+        25
+      ],
+      "namespace_observation": {
+        "event": 108,
+        "owner": 17,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          4,
+          4,
+          20,
+          25
+        ],
+        "offset": 12,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 109,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 17,
+      "code": "ref:2",
+      "offset": 14,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        4,
+        4,
+        11,
+        26
+      ]
+    },
+    {
+      "index": 110,
+      "case": "two_file_shared",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 17,
+      "code": "ref:2",
+      "offset": 14,
+      "normalized_callable": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 111,
+      "case": "two_file_shared",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 18,
+      "parent": 17,
+      "code": "ref:1",
+      "qualname": "identity",
+      "parameters": {
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 112,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 18,
+      "code": "ref:1",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        2,
+        2,
+        11,
+        16
+      ],
+      "namespace_observation": {
+        "event": 112,
+        "owner": 18,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          2,
+          2,
+          11,
+          16
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 113,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 18,
+      "code": "ref:1",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        2,
+        2,
+        4,
+        16
+      ]
+    },
+    {
+      "index": 114,
+      "case": "two_file_shared",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 18,
+      "code": "ref:1",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 115,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 17,
+      "code": "ref:2",
+      "offset": 22,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        4,
+        4,
+        4,
+        26
+      ]
+    },
+    {
+      "index": 116,
+      "case": "two_file_shared",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 17,
+      "code": "ref:2",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 117,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 44,
+      "opcode": "STORE_FAST",
+      "argument": "second",
+      "position": [
+        8,
+        8,
+        4,
+        10
+      ]
+    },
+    {
+      "index": 118,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 46,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "first",
+      "position": [
+        9,
+        9,
+        11,
+        16
+      ],
+      "namespace_observation": {
+        "event": 118,
+        "owner": 14,
+        "name": "first",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          9,
+          9,
+          11,
+          16
+        ],
+        "offset": 46,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 119,
+      "case": "two_file_shared",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 48,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        9,
+        9,
+        4,
+        16
+      ]
+    },
+    {
+      "index": 120,
+      "case": "two_file_shared",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 14,
+      "code": "ref:7",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 121,
+      "case": "global_rebind_during_argument",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 19,
+      "parent": null,
+      "code": "ref:9",
+      "qualname": "global_rebind",
+      "parameters": {
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 122,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 2,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "selected",
+      "position": [
+        16,
+        16,
+        11,
+        19
+      ],
+      "namespace_observation": {
+        "event": 122,
+        "owner": 19,
+        "name": "selected",
+        "namespace": "GLOBAL",
+        "position": [
+          16,
+          16,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 123,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 12,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "mutate_selected",
+      "position": [
+        16,
+        16,
+        20,
+        35
+      ],
+      "namespace_observation": {
+        "event": 123,
+        "owner": 19,
+        "name": "mutate_selected",
+        "namespace": "GLOBAL",
+        "position": [
+          16,
+          16,
+          20,
+          35
+        ],
+        "offset": 12,
+        "observed_before_load": {
+          "ref": "ref:19",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:8",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/entry_fixture.py",
+            "qualname": "mutate_selected",
+            "first_line": 11,
+            "bytecode_sha256": "d76eb5c2bb4d7471ec0390c8546f2b89fac82d8822cf7147bbdd9d101e329e94",
+            "positions_sha256": "fe66416141649c0fd55db1ff15ad67b6a8412bc841cebf9d4a2e5e95daab9ff5"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 124,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 22,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        16,
+        16,
+        36,
+        41
+      ],
+      "namespace_observation": {
+        "event": 124,
+        "owner": 19,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          16,
+          16,
+          36,
+          41
+        ],
+        "offset": 22,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 125,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 24,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        16,
+        16,
+        20,
+        42
+      ]
+    },
+    {
+      "index": 126,
+      "case": "global_rebind_during_argument",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 24,
+      "normalized_callable": {
+        "ref": "ref:19",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:8",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/entry_fixture.py",
+          "qualname": "mutate_selected",
+          "first_line": 11,
+          "bytecode_sha256": "d76eb5c2bb4d7471ec0390c8546f2b89fac82d8822cf7147bbdd9d101e329e94",
+          "positions_sha256": "fe66416141649c0fd55db1ff15ad67b6a8412bc841cebf9d4a2e5e95daab9ff5"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 127,
+      "case": "global_rebind_during_argument",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 20,
+      "parent": 19,
+      "code": "ref:8",
+      "qualname": "mutate_selected",
+      "parameters": {
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 128,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 20,
+      "code": "ref:8",
+      "offset": 2,
+      "opcode": "LOAD_GLOBAL",
+      "argument": "replacement",
+      "position": [
+        13,
+        13,
+        15,
+        26
+      ],
+      "namespace_observation": {
+        "event": 128,
+        "owner": 20,
+        "name": "replacement",
+        "namespace": "GLOBAL",
+        "position": [
+          13,
+          13,
+          15,
+          26
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:20",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:4",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "replacement",
+            "first_line": 7,
+            "bytecode_sha256": "cf57c248bf3d5858a1fd91bcb165b0128855c5e9cb0f83bc26bcc77dba3f1a44",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:21"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      }
+    },
+    {
+      "index": 129,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 20,
+      "code": "ref:8",
+      "offset": 12,
+      "opcode": "STORE_GLOBAL",
+      "argument": "selected",
+      "position": [
+        13,
+        13,
+        4,
+        12
+      ]
+    },
+    {
+      "index": 130,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 20,
+      "code": "ref:8",
+      "offset": 14,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "value",
+      "position": [
+        14,
+        14,
+        11,
+        16
+      ],
+      "namespace_observation": {
+        "event": 130,
+        "owner": 20,
+        "name": "value",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          14,
+          14,
+          11,
+          16
+        ],
+        "offset": 14,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 131,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 20,
+      "code": "ref:8",
+      "offset": 16,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        14,
+        14,
+        4,
+        16
+      ]
+    },
+    {
+      "index": 132,
+      "case": "global_rebind_during_argument",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 20,
+      "code": "ref:8",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 133,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 32,
+      "opcode": "CALL",
+      "argument": 1,
+      "position": [
+        16,
+        16,
+        11,
+        43
+      ]
+    },
+    {
+      "index": 134,
+      "case": "global_rebind_during_argument",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 32,
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      }
+    },
+    {
+      "index": 135,
+      "case": "global_rebind_during_argument",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 21,
+      "parent": 19,
+      "code": "ref:3",
+      "qualname": "raw_target",
+      "parameters": {
+        "self": "ref:12",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 136,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 21,
+      "code": "ref:3",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "self",
+      "position": [
+        6,
+        6,
+        11,
+        15
+      ],
+      "namespace_observation": {
+        "event": 136,
+        "owner": 21,
+        "name": "self",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          6,
+          6,
+          11,
+          15
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:12",
+          "exact_type": "Holder"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 137,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 21,
+      "code": "ref:3",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        6,
+        6,
+        4,
+        15
+      ]
+    },
+    {
+      "index": 138,
+      "case": "global_rebind_during_argument",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 21,
+      "code": "ref:3",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 139,
+      "case": "global_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 40,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        16,
+        16,
+        4,
+        43
+      ]
+    },
+    {
+      "index": 140,
+      "case": "global_rebind_during_argument",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 19,
+      "code": "ref:9",
+      "return_ref": "ref:12",
+      "completion_established": false
+    },
+    {
+      "index": 141,
+      "case": "local_rebind_during_argument",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 22,
+      "parent": null,
+      "code": "ref:10",
+      "qualname": "local_rebind",
+      "parameters": {
+        "fn": "ref:11",
+        "other": "ref:20",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 142,
+      "case": "local_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 22,
+      "code": "ref:10",
+      "offset": 2,
+      "opcode": "LOAD_FAST",
+      "argument": "fn",
+      "position": [
+        18,
+        18,
+        11,
+        13
+      ],
+      "namespace_observation": {
+        "event": 142,
+        "owner": 22,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          18,
+          18,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 143,
+      "case": "local_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 22,
+      "code": "ref:10",
+      "offset": 4,
+      "opcode": "PUSH_NULL",
+      "argument": null,
+      "position": [
+        18,
+        18,
+        11,
+        13
+      ]
+    },
+    {
+      "index": 144,
+      "case": "local_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 22,
+      "code": "ref:10",
+      "offset": 6,
+      "opcode": "LOAD_FAST",
+      "argument": "other",
+      "position": [
+        18,
+        18,
+        21,
+        26
+      ],
+      "namespace_observation": {
+        "event": 144,
+        "owner": 22,
+        "name": "other",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          18,
+          18,
+          21,
+          26
+        ],
+        "offset": 6,
+        "observed_before_load": {
+          "ref": "ref:20",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:4",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "replacement",
+            "first_line": 7,
+            "bytecode_sha256": "cf57c248bf3d5858a1fd91bcb165b0128855c5e9cb0f83bc26bcc77dba3f1a44",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:21"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 145,
+      "case": "local_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 22,
+      "code": "ref:10",
+      "offset": 8,
+      "opcode": "COPY",
+      "argument": 1,
+      "position": [
+        18,
+        18,
+        15,
+        26
+      ]
+    },
+    {
+      "index": 146,
+      "case": "local_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 22,
+      "code": "ref:10",
+      "offset": 10,
+      "opcode": "STORE_FAST_LOAD_FAST",
+      "argument": [
+        "fn",
+        "value"
+      ],
+      "position": [
+        18,
+        18,
+        15,
+        17
+      ]
+    },
+    {
+      "index": 147,
+      "case": "local_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 22,
+      "code": "ref:10",
+      "offset": 12,
+      "opcode": "CALL",
+      "argument": 2,
+      "position": [
+        18,
+        18,
+        11,
+        35
+      ]
+    },
+    {
+      "index": 148,
+      "case": "local_rebind_during_argument",
+      "kind": "CALL",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 22,
+      "code": "ref:10",
+      "offset": 12,
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:20"
+      }
+    },
+    {
+      "index": 149,
+      "case": "local_rebind_during_argument",
+      "kind": "FRAME_ENTER",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 23,
+      "parent": 22,
+      "code": "ref:3",
+      "qualname": "raw_target",
+      "parameters": {
+        "self": "ref:20",
+        "value": "ref:12"
+      }
+    },
+    {
+      "index": 150,
+      "case": "local_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 23,
+      "code": "ref:3",
+      "offset": 2,
+      "opcode": "LOAD_FAST_BORROW",
+      "argument": "self",
+      "position": [
+        6,
+        6,
+        11,
+        15
+      ],
+      "namespace_observation": {
+        "event": 150,
+        "owner": 23,
+        "name": "self",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          6,
+          6,
+          11,
+          15
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:20",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:4",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "replacement",
+            "first_line": 7,
+            "bytecode_sha256": "cf57c248bf3d5858a1fd91bcb165b0128855c5e9cb0f83bc26bcc77dba3f1a44",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:21"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      }
+    },
+    {
+      "index": 151,
+      "case": "local_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 23,
+      "code": "ref:3",
+      "offset": 4,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        6,
+        6,
+        4,
+        15
+      ]
+    },
+    {
+      "index": 152,
+      "case": "local_rebind_during_argument",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 23,
+      "code": "ref:3",
+      "return_ref": "ref:20",
+      "completion_established": false
+    },
+    {
+      "index": 153,
+      "case": "local_rebind_during_argument",
+      "kind": "INSTRUCTION",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "owner": 22,
+      "code": "ref:10",
+      "offset": 20,
+      "opcode": "RETURN_VALUE",
+      "argument": null,
+      "position": [
+        18,
+        18,
+        4,
+        35
+      ]
+    },
+    {
+      "index": 154,
+      "case": "local_rebind_during_argument",
+      "kind": "FRAME_RETURN",
+      "process_id": 413484,
+      "thread_id": 124528543246144,
+      "observer": "sys_setprofile_installed_before_monitoring",
+      "owner": 22,
+      "code": "ref:10",
+      "return_ref": "ref:20",
+      "completion_established": false
+    }
+  ],
+  "attempts": [
+    {
+      "event": 6,
+      "owner": 1,
+      "code": "ref:5",
+      "offset": 8,
+      "callee_source": [
+        3,
+        3,
+        11,
+        13
+      ],
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 2,
+        "owner": 1,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      },
+      "actual_loads": [
+        {
+          "event": 4,
+          "owner": 1,
+          "name": "value",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            3,
+            3,
+            14,
+            19
+          ],
+          "offset": 6,
+          "observed_before_load": {
+            "ref": "ref:12",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": "ADAPTER_DEFAULT_PACK_OR_KEYWORD_STATE_WOULD_BE_REQUIRED",
+      "routing_status": "UNSUPPORTED_SCOPE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 2,
+        "event": 7,
+        "code": "ref:3"
+      }
+    },
+    {
+      "event": 18,
+      "owner": 3,
+      "code": "ref:5",
+      "offset": 8,
+      "callee_source": [
+        3,
+        3,
+        11,
+        13
+      ],
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 14,
+        "owner": 3,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:13",
+          "exact_type": "method",
+          "function": {
+            "ref": "ref:11",
+            "exact_type": "function",
+            "code": {
+              "ref": "ref:3",
+              "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+              "qualname": "raw_target",
+              "first_line": 5,
+              "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+              "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+            },
+            "positional_formals": [
+              "self",
+              "value"
+            ],
+            "keyword_only": 0,
+            "variadic": false,
+            "defaults": [
+              "ref:12"
+            ],
+            "closure_names": []
+          },
+          "receiver": "ref:12"
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      },
+      "actual_loads": [
+        {
+          "event": 16,
+          "owner": 3,
+          "name": "value",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            3,
+            3,
+            14,
+            19
+          ],
+          "offset": 6,
+          "observed_before_load": {
+            "ref": "ref:12",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": "RAW_CALLEE_IS_ADAPTER_OR_OTHER_CALLABLE",
+      "routing_status": "UNSUPPORTED_SCOPE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:13",
+        "exact_type": "method",
+        "function": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "receiver": "ref:12"
+      },
+      "entry_handshake": {
+        "owner": 4,
+        "event": 19,
+        "code": "ref:3"
+      }
+    },
+    {
+      "event": 30,
+      "owner": 5,
+      "code": "ref:6",
+      "offset": 26,
+      "callee_source": [
+        5,
+        5,
+        11,
+        26
+      ],
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": null,
+      "actual_loads": [],
+      "boundary": "CALLEE_RESULT_NOT_EXPOSED_BY_PUBLIC_INSTRUCTION_EVENT",
+      "routing_status": "UNSUPPORTED_SCOPE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "entry_handshake": {
+        "owner": 6,
+        "event": 31,
+        "code": "ref:3"
+      }
+    },
+    {
+      "event": 42,
+      "owner": 7,
+      "code": "ref:5",
+      "offset": 8,
+      "callee_source": [
+        3,
+        3,
+        11,
+        13
+      ],
+      "normalized_callable": {
+        "ref": "ref:14",
+        "exact_type": "partial",
+        "function": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "args": [
+          "ref:12"
+        ],
+        "keyword_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 38,
+        "owner": 7,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          3,
+          3,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:14",
+          "exact_type": "partial",
+          "function": {
+            "ref": "ref:11",
+            "exact_type": "function",
+            "code": {
+              "ref": "ref:3",
+              "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+              "qualname": "raw_target",
+              "first_line": 5,
+              "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+              "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+            },
+            "positional_formals": [
+              "self",
+              "value"
+            ],
+            "keyword_only": 0,
+            "variadic": false,
+            "defaults": [
+              "ref:12"
+            ],
+            "closure_names": []
+          },
+          "args": [
+            "ref:12"
+          ],
+          "keyword_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      },
+      "actual_loads": [
+        {
+          "event": 40,
+          "owner": 7,
+          "name": "value",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            3,
+            3,
+            14,
+            19
+          ],
+          "offset": 6,
+          "observed_before_load": {
+            "ref": "ref:12",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": "RAW_CALLEE_IS_ADAPTER_OR_OTHER_CALLABLE",
+      "routing_status": "UNSUPPORTED_SCOPE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:14",
+        "exact_type": "partial",
+        "function": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "args": [
+          "ref:12"
+        ],
+        "keyword_names": []
+      },
+      "entry_handshake": {
+        "owner": 8,
+        "event": 43,
+        "code": "ref:3"
+      }
+    },
+    {
+      "event": 53,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 14,
+      "callee_source": [
+        7,
+        7,
+        12,
+        17
+      ],
+      "normalized_callable": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:15"
+      },
+      "callee_load": {
+        "event": 50,
+        "owner": 9,
+        "name": "relay",
+        "namespace": "GLOBAL",
+        "position": [
+          7,
+          7,
+          12,
+          17
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:17",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:2",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "relay",
+            "first_line": 3,
+            "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+            "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [
+        {
+          "event": 51,
+          "owner": 9,
+          "name": "left",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            7,
+            7,
+            18,
+            22
+          ],
+          "offset": 12,
+          "observed_before_load": {
+            "ref": "ref:15",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": null,
+      "routing_status": "CONDITIONAL_LOAD_AND_BIND_RULE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 10,
+        "event": 54,
+        "code": "ref:2"
+      }
+    },
+    {
+      "event": 58,
+      "owner": 10,
+      "code": "ref:2",
+      "offset": 14,
+      "callee_source": [
+        4,
+        4,
+        11,
+        19
+      ],
+      "normalized_callable": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:15"
+      },
+      "callee_load": {
+        "event": 55,
+        "owner": 10,
+        "name": "identity",
+        "namespace": "GLOBAL",
+        "position": [
+          4,
+          4,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:18",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:1",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "identity",
+            "first_line": 1,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [
+        {
+          "event": 56,
+          "owner": 10,
+          "name": "value",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            4,
+            4,
+            20,
+            25
+          ],
+          "offset": 12,
+          "observed_before_load": {
+            "ref": "ref:15",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": null,
+      "routing_status": "CONDITIONAL_LOAD_AND_BIND_RULE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 11,
+        "event": 59,
+        "code": "ref:1"
+      }
+    },
+    {
+      "event": 69,
+      "owner": 9,
+      "code": "ref:7",
+      "offset": 36,
+      "callee_source": [
+        8,
+        8,
+        13,
+        18
+      ],
+      "normalized_callable": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:16"
+      },
+      "callee_load": {
+        "event": 66,
+        "owner": 9,
+        "name": "relay",
+        "namespace": "GLOBAL",
+        "position": [
+          8,
+          8,
+          13,
+          18
+        ],
+        "offset": 24,
+        "observed_before_load": {
+          "ref": "ref:17",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:2",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "relay",
+            "first_line": 3,
+            "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+            "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [
+        {
+          "event": 67,
+          "owner": 9,
+          "name": "right",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            8,
+            8,
+            19,
+            24
+          ],
+          "offset": 34,
+          "observed_before_load": {
+            "ref": "ref:16",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": null,
+      "routing_status": "CONDITIONAL_LOAD_AND_BIND_RULE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 12,
+        "event": 70,
+        "code": "ref:2"
+      }
+    },
+    {
+      "event": 74,
+      "owner": 12,
+      "code": "ref:2",
+      "offset": 14,
+      "callee_source": [
+        4,
+        4,
+        11,
+        19
+      ],
+      "normalized_callable": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:16"
+      },
+      "callee_load": {
+        "event": 71,
+        "owner": 12,
+        "name": "identity",
+        "namespace": "GLOBAL",
+        "position": [
+          4,
+          4,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:18",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:1",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "identity",
+            "first_line": 1,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [
+        {
+          "event": 72,
+          "owner": 12,
+          "name": "value",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            4,
+            4,
+            20,
+            25
+          ],
+          "offset": 12,
+          "observed_before_load": {
+            "ref": "ref:16",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": null,
+      "routing_status": "CONDITIONAL_LOAD_AND_BIND_RULE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 13,
+        "event": 75,
+        "code": "ref:1"
+      }
+    },
+    {
+      "event": 89,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 14,
+      "callee_source": [
+        7,
+        7,
+        12,
+        17
+      ],
+      "normalized_callable": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 86,
+        "owner": 14,
+        "name": "relay",
+        "namespace": "GLOBAL",
+        "position": [
+          7,
+          7,
+          12,
+          17
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:17",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:2",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "relay",
+            "first_line": 3,
+            "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+            "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [
+        {
+          "event": 87,
+          "owner": 14,
+          "name": "left",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            7,
+            7,
+            18,
+            22
+          ],
+          "offset": 12,
+          "observed_before_load": {
+            "ref": "ref:12",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": null,
+      "routing_status": "CONDITIONAL_LOAD_AND_BIND_RULE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 15,
+        "event": 90,
+        "code": "ref:2"
+      }
+    },
+    {
+      "event": 94,
+      "owner": 15,
+      "code": "ref:2",
+      "offset": 14,
+      "callee_source": [
+        4,
+        4,
+        11,
+        19
+      ],
+      "normalized_callable": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 91,
+        "owner": 15,
+        "name": "identity",
+        "namespace": "GLOBAL",
+        "position": [
+          4,
+          4,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:18",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:1",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "identity",
+            "first_line": 1,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [
+        {
+          "event": 92,
+          "owner": 15,
+          "name": "value",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            4,
+            4,
+            20,
+            25
+          ],
+          "offset": 12,
+          "observed_before_load": {
+            "ref": "ref:12",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": null,
+      "routing_status": "CONDITIONAL_LOAD_AND_BIND_RULE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 16,
+        "event": 95,
+        "code": "ref:1"
+      }
+    },
+    {
+      "event": 105,
+      "owner": 14,
+      "code": "ref:7",
+      "offset": 36,
+      "callee_source": [
+        8,
+        8,
+        13,
+        18
+      ],
+      "normalized_callable": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 102,
+        "owner": 14,
+        "name": "relay",
+        "namespace": "GLOBAL",
+        "position": [
+          8,
+          8,
+          13,
+          18
+        ],
+        "offset": 24,
+        "observed_before_load": {
+          "ref": "ref:17",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:2",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "relay",
+            "first_line": 3,
+            "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+            "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [
+        {
+          "event": 103,
+          "owner": 14,
+          "name": "right",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            8,
+            8,
+            19,
+            24
+          ],
+          "offset": 34,
+          "observed_before_load": {
+            "ref": "ref:12",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": null,
+      "routing_status": "CONDITIONAL_LOAD_AND_BIND_RULE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:17",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:2",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "relay",
+          "first_line": 3,
+          "bytecode_sha256": "1b7242c64cb8281fbe4bdc21e4571fc3bc89c32622d246ccd4d8fcf468be277c",
+          "positions_sha256": "d666178485ac0f09786c7c446dfd6aca1462644df737b130c9b1075bf062bf78"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 17,
+        "event": 106,
+        "code": "ref:2"
+      }
+    },
+    {
+      "event": 110,
+      "owner": 17,
+      "code": "ref:2",
+      "offset": 14,
+      "callee_source": [
+        4,
+        4,
+        11,
+        19
+      ],
+      "normalized_callable": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 107,
+        "owner": 17,
+        "name": "identity",
+        "namespace": "GLOBAL",
+        "position": [
+          4,
+          4,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:18",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:1",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "identity",
+            "first_line": 1,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [
+        {
+          "event": 108,
+          "owner": 17,
+          "name": "value",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            4,
+            4,
+            20,
+            25
+          ],
+          "offset": 12,
+          "observed_before_load": {
+            "ref": "ref:12",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": null,
+      "routing_status": "CONDITIONAL_LOAD_AND_BIND_RULE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:18",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:1",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "identity",
+          "first_line": 1,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 18,
+        "event": 111,
+        "code": "ref:1"
+      }
+    },
+    {
+      "event": 126,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 24,
+      "callee_source": [
+        16,
+        16,
+        20,
+        35
+      ],
+      "normalized_callable": {
+        "ref": "ref:19",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:8",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/entry_fixture.py",
+          "qualname": "mutate_selected",
+          "first_line": 11,
+          "bytecode_sha256": "d76eb5c2bb4d7471ec0390c8546f2b89fac82d8822cf7147bbdd9d101e329e94",
+          "positions_sha256": "fe66416141649c0fd55db1ff15ad67b6a8412bc841cebf9d4a2e5e95daab9ff5"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 123,
+        "owner": 19,
+        "name": "mutate_selected",
+        "namespace": "GLOBAL",
+        "position": [
+          16,
+          16,
+          20,
+          35
+        ],
+        "offset": 12,
+        "observed_before_load": {
+          "ref": "ref:19",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:8",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/entry_fixture.py",
+            "qualname": "mutate_selected",
+            "first_line": 11,
+            "bytecode_sha256": "d76eb5c2bb4d7471ec0390c8546f2b89fac82d8822cf7147bbdd9d101e329e94",
+            "positions_sha256": "fe66416141649c0fd55db1ff15ad67b6a8412bc841cebf9d4a2e5e95daab9ff5"
+          },
+          "positional_formals": [
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [
+        {
+          "event": 124,
+          "owner": 19,
+          "name": "value",
+          "namespace": "FAST_LOCAL",
+          "position": [
+            16,
+            16,
+            36,
+            41
+          ],
+          "offset": 22,
+          "observed_before_load": {
+            "ref": "ref:12",
+            "exact_type": "Holder"
+          },
+          "evaluated_operand_observed": false,
+          "unchanged_formal_slot": true
+        }
+      ],
+      "boundary": null,
+      "routing_status": "CONDITIONAL_LOAD_AND_BIND_RULE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:19",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:8",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/entry_fixture.py",
+          "qualname": "mutate_selected",
+          "first_line": 11,
+          "bytecode_sha256": "d76eb5c2bb4d7471ec0390c8546f2b89fac82d8822cf7147bbdd9d101e329e94",
+          "positions_sha256": "fe66416141649c0fd55db1ff15ad67b6a8412bc841cebf9d4a2e5e95daab9ff5"
+        },
+        "positional_formals": [
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 20,
+        "event": 127,
+        "code": "ref:8"
+      }
+    },
+    {
+      "event": 134,
+      "owner": 19,
+      "code": "ref:9",
+      "offset": 32,
+      "callee_source": [
+        16,
+        16,
+        11,
+        19
+      ],
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:12"
+      },
+      "callee_load": {
+        "event": 122,
+        "owner": 19,
+        "name": "selected",
+        "namespace": "GLOBAL",
+        "position": [
+          16,
+          16,
+          11,
+          19
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": false
+      },
+      "actual_loads": [],
+      "boundary": "ACTUALS_OUTSIDE_EXPLICIT_NAME_LOAD_SCOPE",
+      "routing_status": "UNSUPPORTED_SCOPE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:20",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:4",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "replacement",
+          "first_line": 7,
+          "bytecode_sha256": "cf57c248bf3d5858a1fd91bcb165b0128855c5e9cb0f83bc26bcc77dba3f1a44",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:21"
+        ],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 21,
+        "event": 135,
+        "code": "ref:3"
+      }
+    },
+    {
+      "event": 148,
+      "owner": 22,
+      "code": "ref:10",
+      "offset": 12,
+      "callee_source": [
+        18,
+        18,
+        11,
+        13
+      ],
+      "normalized_callable": {
+        "ref": "ref:11",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:3",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "raw_target",
+          "first_line": 5,
+          "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+          "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:12"
+        ],
+        "closure_names": []
+      },
+      "arg0": {
+        "missing": false,
+        "ref": "ref:20"
+      },
+      "callee_load": {
+        "event": 142,
+        "owner": 22,
+        "name": "fn",
+        "namespace": "FAST_LOCAL",
+        "position": [
+          18,
+          18,
+          11,
+          13
+        ],
+        "offset": 2,
+        "observed_before_load": {
+          "ref": "ref:11",
+          "exact_type": "function",
+          "code": {
+            "ref": "ref:3",
+            "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+            "qualname": "raw_target",
+            "first_line": 5,
+            "bytecode_sha256": "0f5f6c435b8478b4803b91557d6e682c7dfd2efadb3ac2acf4665dde29565585",
+            "positions_sha256": "6812de8147a3ba62b96dd57ad8a7e3c806203c33254e8243c67db43516cc5e3e"
+          },
+          "positional_formals": [
+            "self",
+            "value"
+          ],
+          "keyword_only": 0,
+          "variadic": false,
+          "defaults": [
+            "ref:12"
+          ],
+          "closure_names": []
+        },
+        "evaluated_operand_observed": false,
+        "unchanged_formal_slot": true
+      },
+      "actual_loads": [],
+      "boundary": "ACTUALS_OUTSIDE_EXPLICIT_NAME_LOAD_SCOPE",
+      "routing_status": "UNSUPPORTED_SCOPE",
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "diagnostic_current_name_at_call": {
+        "ref": "ref:20",
+        "exact_type": "function",
+        "code": {
+          "ref": "ref:4",
+          "filename": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+          "qualname": "replacement",
+          "first_line": 7,
+          "bytecode_sha256": "cf57c248bf3d5858a1fd91bcb165b0128855c5e9cb0f83bc26bcc77dba3f1a44",
+          "positions_sha256": "4b1f8b7b75f9b4cb8df8e60e0808cf06b42645355f33604de5e5b0958a1755df"
+        },
+        "positional_formals": [
+          "self",
+          "value"
+        ],
+        "keyword_only": 0,
+        "variadic": false,
+        "defaults": [
+          "ref:21"
+        ],
+        "closure_names": []
+      },
+      "entry_handshake": {
+        "owner": 23,
+        "event": 149,
+        "code": "ref:3"
+      }
+    }
+  ],
+  "minimum_protocol": {
+    "scope": "raw FunctionType; callee LOAD_FAST/LOAD_GLOBAL; fixed positional formals all supplied by explicit FAST_LOCAL Name loads",
+    "registration": "install sys.setprofile before local INSTRUCTION/CALL monitoring; check every required load event exists",
+    "load_record": [
+      "pid",
+      "tid",
+      "invocation",
+      "code_fingerprint",
+      "offset",
+      "opcode",
+      "full_source_span",
+      "namespace_kind",
+      "slot",
+      "occurrence_index",
+      "pre_load_shape",
+      "pre_load_reference",
+      "observation_is_not_stack_result"
+    ],
+    "attempt_record": [
+      "pid",
+      "tid",
+      "caller_invocation",
+      "code_fingerprint",
+      "CALL_offset",
+      "attempt_sequence",
+      "callee_load_occurrence",
+      "actual_load_occurrences_in_position_order",
+      "normalized_callable_reference",
+      "normalized_callable_code",
+      "arg0_or_missing"
+    ],
+    "entry_record": [
+      "pid",
+      "tid",
+      "invocation",
+      "direct_parent_invocation",
+      "entry_code",
+      "parameters",
+      "matched_attempt",
+      "capture_gaps"
+    ],
+    "derivation": "versioned LOAD rule turns a pre-load namespace observation into a conditional operand occurrence; raw-function positional binding maps actual index to formal; observed CALL/entry checks consistency",
+    "identity_policy": "reference equality rejects a contradicted proposed route; it never selects its origin",
+    "state_policy": "default/receiver/partial consumption is a boundary; explicit formal routes do not establish closure/globals/content/effects",
+    "gap_policy": "missing load/CALL/entry, duplicate or ambiguous attempts, truncation, code/source mismatch or a failed reference check stops that route",
+    "production_code_identity": "use existing structural pycode-v2 plus verified current-source snapshot; this independent probe uses within-run code identity and bytecode/position hashes for diagnostics",
+    "result_status": "CONDITIONAL; no unconditionally VERIFIED actual-to-formal provenance"
+  },
+  "conditional_routes": [
+    {
+      "attempt": 53,
+      "actual_index": 0,
+      "source": {
+        "owner": 9,
+        "load_event": 51,
+        "name": "left",
+        "position": [
+          7,
+          7,
+          18,
+          22
+        ],
+        "formal_origin": "left"
+      },
+      "destination": {
+        "owner": 10,
+        "formal": "value"
+      },
+      "reference_consistency": true,
+      "status": "CONDITIONAL",
+      "unconditional_verified": false,
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "contents_or_effects_established": false
+    },
+    {
+      "attempt": 58,
+      "actual_index": 0,
+      "source": {
+        "owner": 10,
+        "load_event": 56,
+        "name": "value",
+        "position": [
+          4,
+          4,
+          20,
+          25
+        ],
+        "formal_origin": "value"
+      },
+      "destination": {
+        "owner": 11,
+        "formal": "value"
+      },
+      "reference_consistency": true,
+      "status": "CONDITIONAL",
+      "unconditional_verified": false,
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "contents_or_effects_established": false
+    },
+    {
+      "attempt": 69,
+      "actual_index": 0,
+      "source": {
+        "owner": 9,
+        "load_event": 67,
+        "name": "right",
+        "position": [
+          8,
+          8,
+          19,
+          24
+        ],
+        "formal_origin": "right"
+      },
+      "destination": {
+        "owner": 12,
+        "formal": "value"
+      },
+      "reference_consistency": true,
+      "status": "CONDITIONAL",
+      "unconditional_verified": false,
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "contents_or_effects_established": false
+    },
+    {
+      "attempt": 74,
+      "actual_index": 0,
+      "source": {
+        "owner": 12,
+        "load_event": 72,
+        "name": "value",
+        "position": [
+          4,
+          4,
+          20,
+          25
+        ],
+        "formal_origin": "value"
+      },
+      "destination": {
+        "owner": 13,
+        "formal": "value"
+      },
+      "reference_consistency": true,
+      "status": "CONDITIONAL",
+      "unconditional_verified": false,
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "contents_or_effects_established": false
+    },
+    {
+      "attempt": 89,
+      "actual_index": 0,
+      "source": {
+        "owner": 14,
+        "load_event": 87,
+        "name": "left",
+        "position": [
+          7,
+          7,
+          18,
+          22
+        ],
+        "formal_origin": "left"
+      },
+      "destination": {
+        "owner": 15,
+        "formal": "value"
+      },
+      "reference_consistency": true,
+      "status": "CONDITIONAL",
+      "unconditional_verified": false,
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "contents_or_effects_established": false
+    },
+    {
+      "attempt": 94,
+      "actual_index": 0,
+      "source": {
+        "owner": 15,
+        "load_event": 92,
+        "name": "value",
+        "position": [
+          4,
+          4,
+          20,
+          25
+        ],
+        "formal_origin": "value"
+      },
+      "destination": {
+        "owner": 16,
+        "formal": "value"
+      },
+      "reference_consistency": true,
+      "status": "CONDITIONAL",
+      "unconditional_verified": false,
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "contents_or_effects_established": false
+    },
+    {
+      "attempt": 105,
+      "actual_index": 0,
+      "source": {
+        "owner": 14,
+        "load_event": 103,
+        "name": "right",
+        "position": [
+          8,
+          8,
+          19,
+          24
+        ],
+        "formal_origin": "right"
+      },
+      "destination": {
+        "owner": 17,
+        "formal": "value"
+      },
+      "reference_consistency": true,
+      "status": "CONDITIONAL",
+      "unconditional_verified": false,
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "contents_or_effects_established": false
+    },
+    {
+      "attempt": 110,
+      "actual_index": 0,
+      "source": {
+        "owner": 17,
+        "load_event": 108,
+        "name": "value",
+        "position": [
+          4,
+          4,
+          20,
+          25
+        ],
+        "formal_origin": "value"
+      },
+      "destination": {
+        "owner": 18,
+        "formal": "value"
+      },
+      "reference_consistency": true,
+      "status": "CONDITIONAL",
+      "unconditional_verified": false,
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "contents_or_effects_established": false
+    },
+    {
+      "attempt": 126,
+      "actual_index": 0,
+      "source": {
+        "owner": 19,
+        "load_event": 124,
+        "name": "value",
+        "position": [
+          16,
+          16,
+          36,
+          41
+        ],
+        "formal_origin": "value"
+      },
+      "destination": {
+        "owner": 20,
+        "formal": "value"
+      },
+      "reference_consistency": true,
+      "status": "CONDITIONAL",
+      "unconditional_verified": false,
+      "conditions": [
+        {
+          "condition": "NO_FRAME_INTERPOSITION",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "status": "UNKNOWN"
+        },
+        {
+          "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+          "status": "UNKNOWN"
+        }
+      ],
+      "contents_or_effects_established": false
+    }
+  ],
+  "unconditional_verified": false,
+  "contents_or_effects_established": false,
+  "transformation_authorized": false,
+  "assertions": {
+    "same_code_same_ref_ambiguity": true,
+    "raw_name_shape_distinguished": true,
+    "two_file_distinct_paths": true,
+    "two_file_shared_paths_not_selected_by_ref": true,
+    "global_and_local_rebinding_counterexamples": true
+  }
+}

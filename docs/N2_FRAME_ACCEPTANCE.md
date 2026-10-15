@@ -1,6 +1,6 @@
 # C0 frame 生命周期：有限前端验收
 
-日期：2026-10-15。状态：**F0–F3 有限范围 Verified；F4 外部来源复验运行中**。
+日期：2026-10-15。状态：**F0–F4 有限范围 Verified**。
 完整 N2.call-edges E4、完整程序依赖闭包及优化合法性仍未通过。
 
 ## 冻结依据
@@ -59,11 +59,20 @@ FrameRules.condition_status仍UNKNOWN，effects incomplete，可能不完成，�
 引用一致不证明内容不变、无效果或允许缓存。actual→formal、receiver、default/cell
 来源仍未证；C0不恢复已撤销的错误参数边。
 
-F4正在从原LeWM入口与已归档真实trace、相同预算重建/重放v5，目录：
-`artifacts/experiments/n2_frame_source_f4/real/`。未完成前不填写覆盖变化或外部通过。
+F4已从原LeWM入口与已归档真实trace、相同预算自动重建/独立重放v5。
+151文件、2,217定义、44个body全部保留；44 ENTER、42 BIND、5 DISCARD、380 EXIT。
+47个正常完成payload中1个直接formal、7个literal、39个block argument（包括opaque
+结果或合流，不能推为纯值）。生成443.066s、重放451.106s、峰RSS1,100,892KiB；
+目标Git仍f70fed8干净，源码、trace和SCAR冻结文件SHA均未变。
+原始结果、命令/预算和SHA见`artifacts/reports/gates/n2-frame-f4.json`与`.time`；
+完整压缩报告留在`artifacts/experiments/n2_frame_source_f4/real/inventory.json.gz`。
+CONNECTED计数736→723：通用AST/FrameModel审计确认18个docstring常量不再虚构为
+call-time值、5个Expr首次有DISCARD对应，所有其它coverage项一致；这不是删除
+LeWM计算或速度收益。旧inventory对docstring的phase仍是粗粒度词法FUNCTION_BODY，
+本门修复body模型，尚未迁移该旧phase分类。coverage差异及可运行audit已归档。
 此前真实calls-only公共重放REPLAYED的84,319次入口/出口是独立证据，不能替代F4。
 
-完成F4后，依[调用组合计划](N2_CALL_COMPOSITION_PLAN.md)推进实际callable/环境
+后续依[调用组合计划](N2_CALL_COMPOSITION_PLAN.md)推进实际callable/环境
 与逐调用绑定/完成/state；接入新运行code见证的需求展开，再闭合循环、细状态及
 provenance，最后从观察根生成化简指导。预算调度OBSERVED_CODE仅是运行来源候选
 优先级；缺失版本或未核验code不会因此成为已证明源码执行。

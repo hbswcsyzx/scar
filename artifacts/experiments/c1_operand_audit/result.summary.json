@@ -1,0 +1,346 @@
+{
+  "schema": "scar.experiment.c1-operand-audit",
+  "schema_version": 1,
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "probe_sha256": "5db001fa8f71b96a3c5c4131e2829d04ba65686166673aacfb2a9ae36d70d891",
+  "sources": [
+    {
+      "path": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/helper_fixture.py",
+      "sha256": "3526a802a31cb49ff308320f2604629860ce88748051f898031dd6ef70790704"
+    },
+    {
+      "path": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/entry_fixture.py",
+      "sha256": "8af8e4e31e76466a5891288d94a1b8ffaf1c759f70821f31ad5463e85bf042b4"
+    }
+  ],
+  "observed": [
+    "raw FunctionType and Name-bound MethodType have identical normalized CALL callable/arg0 and entry parameter references",
+    "pre-LOAD namespace observations distinguish raw function from Name-bound method",
+    "optimized LOAD_ATTR reports normalized function plus receiver but does not expose its result operand",
+    "exact partial remains visible as partial at CALL in this fixture",
+    "global and local rebinding during argument evaluation leaves the previously loaded callable selected",
+    "INSTRUCTION supplies code/offset, without an evaluated operand or full argument vector",
+    "on fresh code objects monitor-then-profile loses INSTRUCTION callbacks, whereas profile-then-monitor preserves INSTRUCTION/CALL/profile delivery"
+  ],
+  "inferred": [
+    "a versioned LOAD rule plus pre-load observation can construct conditional operand occurrences under explicit noninterposition conditions",
+    "a raw FunctionType with all fixed formals supplied by explicit captured Name loads admits positional routes without consuming defaults",
+    "route origin is instruction/source occurrence and actual index; equal object references only check consistency"
+  ],
+  "minimum_protocol": {
+    "scope": "raw FunctionType; callee LOAD_FAST/LOAD_GLOBAL; fixed positional formals all supplied by explicit FAST_LOCAL Name loads",
+    "registration": "install sys.setprofile before local INSTRUCTION/CALL monitoring; check every required load event exists",
+    "load_record": [
+      "pid",
+      "tid",
+      "invocation",
+      "code_fingerprint",
+      "offset",
+      "opcode",
+      "full_source_span",
+      "namespace_kind",
+      "slot",
+      "occurrence_index",
+      "pre_load_shape",
+      "pre_load_reference",
+      "observation_is_not_stack_result"
+    ],
+    "attempt_record": [
+      "pid",
+      "tid",
+      "caller_invocation",
+      "code_fingerprint",
+      "CALL_offset",
+      "attempt_sequence",
+      "callee_load_occurrence",
+      "actual_load_occurrences_in_position_order",
+      "normalized_callable_reference",
+      "normalized_callable_code",
+      "arg0_or_missing"
+    ],
+    "entry_record": [
+      "pid",
+      "tid",
+      "invocation",
+      "direct_parent_invocation",
+      "entry_code",
+      "parameters",
+      "matched_attempt",
+      "capture_gaps"
+    ],
+    "derivation": "versioned LOAD rule turns a pre-load namespace observation into a conditional operand occurrence; raw-function positional binding maps actual index to formal; observed CALL/entry checks consistency",
+    "identity_policy": "reference equality rejects a contradicted proposed route; it never selects its origin",
+    "state_policy": "default/receiver/partial consumption is a boundary; explicit formal routes do not establish closure/globals/content/effects",
+    "gap_policy": "missing load/CALL/entry, duplicate or ambiguous attempts, truncation, code/source mismatch or a failed reference check stops that route",
+    "production_code_identity": "use existing structural pycode-v2 plus verified current-source snapshot; this independent probe uses within-run code identity and bytecode/position hashes for diagnostics",
+    "result_status": "CONDITIONAL; no unconditionally VERIFIED actual-to-formal provenance"
+  },
+  "conditions": [
+    {
+      "condition": "NO_FRAME_INTERPOSITION",
+      "status": "UNKNOWN"
+    },
+    {
+      "condition": "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+      "status": "UNKNOWN"
+    },
+    {
+      "condition": "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+      "status": "UNKNOWN"
+    }
+  ],
+  "unsupported_scope": [
+    "unconditional binding provenance",
+    "arbitrary LOAD_ATTR/descriptor result",
+    "adapter/partial/receiver insertion",
+    "default-state consumption",
+    "stars/keywords/packing",
+    "fused loads without a validated suboperand rule",
+    "native calls and child processes",
+    "incorrect observer installation order or missing per-instruction records",
+    "contents/effects/purity or permission to transform"
+  ],
+  "observer_scope": "single process/thread; bounded tiny fixtures; strong fixture references affect lifetimes; no application or LeWM execution",
+  "assertions": {
+    "same_code_same_ref_ambiguity": true,
+    "raw_name_shape_distinguished": true,
+    "two_file_distinct_paths": true,
+    "two_file_shared_paths_not_selected_by_ref": true,
+    "global_and_local_rebinding_counterexamples": true
+  },
+  "unconditional_verified": false,
+  "contents_or_effects_established": false,
+  "transformation_authorized": false,
+  "counts": {
+    "events": 154,
+    "attempts": 15,
+    "conditional_routes": 9
+  },
+  "installation_matrix": [
+    {
+      "order": "monitor_only",
+      "instruction_count": 5,
+      "call_count": 1
+    },
+    {
+      "order": "monitor_then_profile",
+      "instruction_count": 0,
+      "call_count": 1
+    },
+    {
+      "order": "profile_then_monitor",
+      "instruction_count": 5,
+      "call_count": 1
+    }
+  ],
+  "conditional_paths": {
+    "two_file_distinct": [
+      {
+        "from": {
+          "owner": 11,
+          "formal": "value"
+        },
+        "path": [
+          {
+            "destination": {
+              "owner": 11,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 10,
+              "load_event": 56,
+              "name": "value",
+              "position": [
+                4,
+                4,
+                20,
+                25
+              ],
+              "formal_origin": "value"
+            }
+          },
+          {
+            "destination": {
+              "owner": 10,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 9,
+              "load_event": 51,
+              "name": "left",
+              "position": [
+                7,
+                7,
+                18,
+                22
+              ],
+              "formal_origin": "left"
+            }
+          }
+        ],
+        "endpoint": {
+          "owner": 9,
+          "name": "left"
+        },
+        "status": "CONDITIONAL",
+        "unconditional_verified": false
+      },
+      {
+        "from": {
+          "owner": 13,
+          "formal": "value"
+        },
+        "path": [
+          {
+            "destination": {
+              "owner": 13,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 12,
+              "load_event": 72,
+              "name": "value",
+              "position": [
+                4,
+                4,
+                20,
+                25
+              ],
+              "formal_origin": "value"
+            }
+          },
+          {
+            "destination": {
+              "owner": 12,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 9,
+              "load_event": 67,
+              "name": "right",
+              "position": [
+                8,
+                8,
+                19,
+                24
+              ],
+              "formal_origin": "right"
+            }
+          }
+        ],
+        "endpoint": {
+          "owner": 9,
+          "name": "right"
+        },
+        "status": "CONDITIONAL",
+        "unconditional_verified": false
+      }
+    ],
+    "two_file_shared": [
+      {
+        "from": {
+          "owner": 16,
+          "formal": "value"
+        },
+        "path": [
+          {
+            "destination": {
+              "owner": 16,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 15,
+              "load_event": 92,
+              "name": "value",
+              "position": [
+                4,
+                4,
+                20,
+                25
+              ],
+              "formal_origin": "value"
+            }
+          },
+          {
+            "destination": {
+              "owner": 15,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 14,
+              "load_event": 87,
+              "name": "left",
+              "position": [
+                7,
+                7,
+                18,
+                22
+              ],
+              "formal_origin": "left"
+            }
+          }
+        ],
+        "endpoint": {
+          "owner": 14,
+          "name": "left"
+        },
+        "status": "CONDITIONAL",
+        "unconditional_verified": false
+      },
+      {
+        "from": {
+          "owner": 18,
+          "formal": "value"
+        },
+        "path": [
+          {
+            "destination": {
+              "owner": 18,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 17,
+              "load_event": 108,
+              "name": "value",
+              "position": [
+                4,
+                4,
+                20,
+                25
+              ],
+              "formal_origin": "value"
+            }
+          },
+          {
+            "destination": {
+              "owner": 17,
+              "formal": "value"
+            },
+            "source": {
+              "owner": 14,
+              "load_event": 103,
+              "name": "right",
+              "position": [
+                8,
+                8,
+                19,
+                24
+              ],
+              "formal_origin": "right"
+            }
+          }
+        ],
+        "endpoint": {
+          "owner": 14,
+          "name": "right"
+        },
+        "status": "CONDITIONAL",
+        "unconditional_verified": false
+      }
+    ]
+  },
+  "full_result": {
+    "path": "/home/zyf/AAA/scar/artifacts/experiments/c1_operand_audit/result.json",
+    "sha256": "8487cbe272dcae1d30442893101ea54092b6103d9f0c8a538ee5743187eead93"
+  }
+}

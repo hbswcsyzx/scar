@@ -1,6 +1,7 @@
 # C0 实施：自动返回引用与 frame 生命周期
 
-状态：Implemented，正在自主验收；不是完整 C0/跨调用门通过报告。
+状态：C0 的 F0–F4 有限范围已自主验收，见[N2_FRAME_ACCEPTANCE.md](N2_FRAME_ACCEPTANCE.md)；
+完整跨调用门仍未通过。
 本文件对应 [Frame 生命周期计划](N2_FRAME_LIFETIME_PLAN.md) 的实现。
 不添加 detector/backend，不使用外部 testcase 函数名称规则。
 

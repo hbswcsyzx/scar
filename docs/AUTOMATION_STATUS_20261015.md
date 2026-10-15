@@ -6,8 +6,8 @@
 
 `72aaf54`通过863项mapped与全仓1,898项（零失败/skip）。原始源码自动产生
 ENTER/BIND/DISCARD/EXIT及精确payload/state连接；公共返回引用查询、新v2/v5
-与真实历史包重放已有限验收。F4正复用原LeWM入口、真实归档trace及相同预算，
-尚未给出外部完成结论。没有手工workload图、actual→formal证明或可信加速比。
+与真实历史包重放已有限验收。F4已通过：原LeWM入口、真实归档trace及相同预算，
+151文件/2,217定义/44个body不变；生成443.066s、独立重放451.106s，均为分析成本。没有手工workload图、actual→formal证明或可信加速比。
 详见[C0验收与剩余项](N2_FRAME_ACCEPTANCE.md)。
 
 ## 自动化验收口径
