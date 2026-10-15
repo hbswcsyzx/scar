@@ -1,0 +1,27 @@
+{
+  "schema": "scar.repository-regression",
+  "schema_version": 1,
+  "status": "PASS",
+  "revision": "72aaf54a74fbc923f5c92329817347bf6cfecc53",
+  "source_sha256": "c8de5831ed8afb1378ba41fd7b2373de599fd818520d03970b1ec04665666d7c",
+  "source_unchanged_during_test": true,
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "--junitxml=/home/zyf/AAA/scar/artifacts/reports/gates/n2-frame-full.xml"
+  ],
+  "returncode": 0,
+  "cases": 1898,
+  "counts": {
+    "failure": 0,
+    "error": 0,
+    "skipped": 0
+  },
+  "wall_s": 209.46968201268464,
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "scope": "repository regression, not workload A/B",
+  "whole_program_complete": false,
+  "transformation_authorized": false
+}

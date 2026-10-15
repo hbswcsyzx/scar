@@ -58,8 +58,9 @@ C1 审计须列出已有字段和所缺证据，再设计最小运行采集：�
 fixture 自动构图、独立反例、版本/预算篡改重放、冻结回归和外部来源报告。
 只在真实结构连接建立后，再将已实现的规则接到具体化简指导。
 
-C0审查已收敛为[Frame生命周期方案](N2_FRAME_LIFETIME_PLAN.md)，类型/规则先在
-隔离worktree实施，尚未接入主树或通过自动前端门。真实新调用证据的
+C0已按[Frame生命周期方案](N2_FRAME_LIFETIME_PLAN.md)实施并完成F0–F3有限
+前端门，863项mapped/全仓1,898项通过；F4外部来源复验仍在运行。
+详见[C0验收](N2_FRAME_ACCEPTANCE.md)。真实新调用证据的
 [逐项审计](N2_CALL_CONNECTION_AUDIT.md)另指出：9个已观察core调用点只有1个
 可经核验runtime父链到现有body，且wrapper效果与实际绑定均未证。C0之后还需
 将新code见证接入需求展开及库边界规则，不能以局部引用查询代替完整连接。

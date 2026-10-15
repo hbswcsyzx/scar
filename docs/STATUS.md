@@ -1,5 +1,17 @@
 # Current evidence and remaining work
 
+## Current bounded component: C0 frame lifecycle (2026-10-15)
+
+Frozen `72aaf54` passed **863 mapped tests / 143.949s** and **1,898 repository
+tests / 209.470s** (three documented warnings, no failures/skips). Automatic
+raw-source frame bodies preserve returned references with separate lifecycle
+world state. SourceProgram v2, default inventory v5 and conditional path queries
+retain strict replay; real historical v1–v4 inventory and v4 call reports replay.
+The source fingerprint is `c8de5831ed8afb1378ba41fd7b2373de599fd818520d03970b1ec04665666d7c`.
+F4 is running on the unchanged LeWM entry and archived trace with equal budgets.
+No cross-call actual/formal proof, whole-program graph, transform or speedup.
+See [C0 acceptance](N2_FRAME_ACCEPTANCE.md).
+
 ## Current bounded component: N2.call-evidence (2026-10-15)
 
 Follow-up frozen `677e10f` passed **703 mapped tests** and **1,738 repository

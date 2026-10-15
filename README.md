@@ -47,9 +47,9 @@ do not establish a complete execution graph, pure effects or a LeWM speedup.
 
 Inventories use a global body demand queue with root-only lowering and
 demand-driven call witnesses. Prepared contexts use bounded private storage.
-Default v4 reports separate definition work, conditional argument binding and
-bound-formal body ports; without a trace, runtime scope is null. Historical
-v1/v2/v3 reports retain their original lowering and replay behavior.
+Default v5 reports add conditional frame lifetime and preserve return-reference
+origins alongside definition work and bound-formal ports. Without a trace,
+runtime scope is null; historical v1–v4 retain their original replay behavior.
 See [current automation scope](docs/AUTOMATION_STATUS_20261015.md),
 [function interfaces](docs/N2_FUNCTION_INTERFACES.md) and
 [the next connection gates](docs/N2_CALL_COMPOSITION_PLAN.md).
@@ -60,6 +60,14 @@ epochs without Tensor snapshots or Torch hooks. It automatically links source
 and available core calls. Queries explicitly stop at unproved actual/formal
 binding; the complete cross-layer dependency gate remains unmet. Whole-program
 LeWM recovery, automatic simplification guidance and a speedup remain pending.
+
+Automatic frame construction passed **863 mapped tests** and **1,898 repository
+tests**. `model-program` now defaults to a versioned root-only frame body;
+`query-frame-refs` follows each completion's conditional reference origins while
+retaining unknown state/lifetime effects. The Python `lower_source` API keeps
+its legacy default. See [C0 acceptance](docs/N2_FRAME_ACCEPTANCE.md) and
+[the implementation and commands](docs/N2_FRAME_IMPLEMENTATION.md).
+Whole-program connectivity and LeWM speedup remain unverified.
 
 The graph pass includes loop membership: with `--lines`, observed bytecode
 back-edges become `loop_controls` edges and can produce a

@@ -1,0 +1,51 @@
+{
+  "schema": "scar.frame-evidence-manifest",
+  "schema_version": 1,
+  "local_gate": "PASS",
+  "repository_regression": "PASS",
+  "implementation": "72aaf54a74fbc923f5c92329817347bf6cfecc53",
+  "merge_revision": "13a049dc2f407941675bb0fef66acd7d6c706c52",
+  "source_sha256": "c8de5831ed8afb1378ba41fd7b2373de599fd818520d03970b1ec04665666d7c",
+  "f4_status": "RUNNING",
+  "whole_program_complete": false,
+  "actual_formal_provenance_established": false,
+  "transformation_authorized": false,
+  "files": {
+    "artifacts/reports/gates/n2-frame-attempt1.json": {
+      "bytes": 246886,
+      "sha256": "bc91d851de93dda7533112617b9456be900a4cd960c0cd18d2ea6aa8a5c9bdb1"
+    },
+    "artifacts/reports/gates/n2-frame-attempt1.md": {
+      "bytes": 6629,
+      "sha256": "7a0749afa4b58931d90c3cb3b644a3f6edb9ea142e25ded4ab10b77cd2ae8d56"
+    },
+    "artifacts/reports/gates/n2-frame-verified.json": {
+      "bytes": 244845,
+      "sha256": "d5f4ca1885687c5bf725fe96fc3533509befe67d09c8eabd4328a9e237334487"
+    },
+    "artifacts/reports/gates/n2-frame-verified.md": {
+      "bytes": 6629,
+      "sha256": "56d85b63645ead65edc78ffa37ad366ef555bca742cc74ca4b652497e2b27d89"
+    },
+    "artifacts/reports/gates/n2-frame-full.json": {
+      "bytes": 812,
+      "sha256": "1e661e2cbdc8123c6b377ff06e9dce0c54c2789f30d647d1f49ea1bbf079964c"
+    },
+    "artifacts/reports/gates/n2-frame-full.xml": {
+      "bytes": 286828,
+      "sha256": "96e0f31863e854036131044d8f814cbdaf50aa5a8660a1a12fe68197f4ade2d1"
+    },
+    "artifacts/reports/gates/n2-frame-full.log": {
+      "bytes": 3592,
+      "sha256": "306529c25020c3810788878ddb7e002f5fd6e0c3ec6ddb90d9e7213defc529db"
+    },
+    "artifacts/reports/gates/n2-frame-f4-run.py": {
+      "bytes": 8393,
+      "sha256": "c67477dbc61b62174812642a924a673adb989909827b4068dc1292137abc803a"
+    },
+    "artifacts/reports/gates/n2-frame-f4-launch.json": {
+      "bytes": 1024,
+      "sha256": "2be34f4ce86897386dd610bc2dd94a56c1cb63e23dfef9e6eb147f75bc1e8bb2"
+    }
+  }
+}
