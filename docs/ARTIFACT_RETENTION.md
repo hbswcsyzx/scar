@@ -1,5 +1,12 @@
 # 实验数据与磁盘管理
 
+2026-10-15 跟进清理：41 份未跟踪 JSON/JSONL 经解压 SHA256 一致性校验后
+无损归档；清除项目 Python/pytest 缓存及三份已结束、无活跃进程引用的 SCAR
+测试临时目录，共释放 **107,614,208 分配字节（102.629 MiB）**。没有删除
+tracked 文件、原始事件内容或验收证据，LeWM 仍为原 clean HEAD。
+明细：`artifacts/reports/maintenance/disk-cleanup-followup-20261015.json`。
+本轮释放量与下面历史清理分别统计，不能相加后冒充本轮新结果。
+
 2026-10-13：SCAR 的工作目录此前约占 30 GiB，主要来自逐行 trace 和多个
 未压缩的大图副本。本次清理记录在
 `artifacts/reports/maintenance/disk-cleanup-20261013.json`。
