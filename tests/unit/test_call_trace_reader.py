@@ -195,6 +195,29 @@ def test_sink_failure_propagates_and_collecting_sink_is_rolled_back(tmp_path):
     assert sink.aborted
 
 
+def test_process_budget_rejects_during_directory_enumeration(tmp_path, monkeypatch):
+    root = tmp_path / 'project'
+    root.mkdir()
+    trace = tmp_path / 'trace'
+    trace.mkdir()
+    first, second = [trace / f'call-codes.{pid}.jsonl' for pid in (17, 18)]
+    first.touch()
+    second.touch()
+    original = Path.iterdir
+
+    def limited_entries(path):
+        if path != trace:
+            yield from original(path)
+            return
+        yield first
+        yield second
+        raise AssertionError('reader exhausted directory after its process budget was exceeded')
+
+    monkeypatch.setattr(Path, 'iterdir', limited_entries)
+    with pytest.raises(ValueError, match='process budget'):
+        scan_call_trace(trace, root, CallEdgeBudget(max_processes=1), sink=CollectingCallSink())
+
+
 class _DropSink:
     def __init__(self):
         self.entry_count = self.exit_count = self.parameter_count = 0

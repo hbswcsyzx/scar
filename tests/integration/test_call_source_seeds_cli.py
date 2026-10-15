@@ -145,3 +145,30 @@ def test_seed_report_write_ceiling_leaves_no_partial_replacement(captured, tmp_p
     assert rejected.returncode == 2 and 'write byte ceiling' in rejected.stdout
     assert output.read_bytes() == before if existing else not output.exists()
     assert not list(tmp_path.glob('.scar-call-*'))
+
+
+@pytest.mark.parametrize('command,schema', [('seed-calls', 'scar.call-source-seeds'),
+                                           ('link-calls', 'scar.call-links-envelope')])
+@pytest.mark.parametrize('hardlink', [False, True])
+def test_unresolved_captured_source_is_protected_even_if_it_looks_like_a_report(tmp_path, command, schema, hardlink):
+    project = tmp_path / 'project'
+    project.mkdir()
+    # This dict expression is both valid Python and valid JSON. Python code
+    # filenames need not end in .py; source-budget failure must not hide it.
+    source = project / 'module.json'
+    original = json.dumps({'schema': schema}).encode()
+    source.write_bytes(original)
+    entry = project / 'entry.py'
+    entry.write_text(f'exec(compile(open({str(source)!r}).read(), {str(source)!r}, "exec"), {{}})\n')
+    trace = tmp_path / 'trace'
+    capture = cli('trace', '--calls-only', '--project-root', project, '--out', trace,
+                  '--', sys.executable, entry, cwd=project)
+    assert capture.returncode == 0, capture.stdout + capture.stderr
+    destination = tmp_path / 'source-alias.json' if hardlink else source
+    if hardlink:
+        os.link(source, destination)
+    rejected = cli(command, trace, '--project-root', project, '--out', destination,
+                   '--max-call-source-bytes', 1)
+    assert rejected.returncode == 2, rejected.stdout + rejected.stderr
+    assert 'differ from' in rejected.stdout
+    assert source.read_bytes() == original and destination.read_bytes() == original

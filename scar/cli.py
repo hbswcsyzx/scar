@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 from collections import Counter, defaultdict
+from itertools import chain
 from pathlib import Path
 
 from scar.analysis import (dead_expression_candidates, detect, graph_candidates,
@@ -719,6 +720,24 @@ def _call_report_input(path,args):
     return CallEdgeReport.from_dict(document['analysis'],inventory=inventory,verification_budget=budget)
 
 
+def _call_source_inputs(model):
+    """Protect observed source paths even when offline resolution failed.
+
+    A captured filename is not a source proof, but it must not disappear from
+    overwrite protection when a source budget or canonical-path check fails.
+    Python source filenames can end in .json and contain report-shaped JSON.
+    """
+    paths = {Path(link.snapshot.path) for link in model.code_links if link.snapshot is not None}
+    for capture in model.codes:
+        path = Path(capture.code.filename)
+        if path.is_absolute():
+            paths.add(path)
+        else:
+            paths.add(Path(model.project_root) / path)
+            paths.add(Path.cwd() / path)
+    return sorted(paths, key=str)
+
+
 def _link_calls_cli(args):
     from scar.analysis.call_edges import link_calls
     try:
@@ -729,13 +748,14 @@ def _link_calls_cli(args):
         output=Path(args.out).resolve()
         if not (output.name.endswith('.json') or output.name.endswith('.json.gz')):
             raise ValueError('call report must end in .json or .json.gz')
-        protected=list(Path(args.trace).resolve().iterdir())
+        protected=[]
         if binding is not None:
             protected.append(Path(binding['path']))
         if inventory is not None:
             protected.extend(Path(f.snapshot.path) for f in inventory.files)
-        protected.extend(Path(link.snapshot.path) for link in report.model.code_links if link.snapshot is not None)
-        if any(output==p.resolve() or output.exists() and p.exists() and output.samefile(p) for p in protected):
+        protected.extend(_call_source_inputs(report.model))
+        if any(output==p.resolve() or output.exists() and p.exists() and output.samefile(p)
+               for p in chain(Path(args.trace).resolve().iterdir(), protected)):
             raise ValueError('call report must differ from trace, source and inventory inputs')
         if output.exists() and _call_json(output,max_bytes=report_limit).get('schema')!='scar.call-links-envelope':
             raise ValueError('refusing to overwrite a non-call-report output')
@@ -757,11 +777,10 @@ def _seed_calls_cli(args):
         output = Path(args.out).resolve()
         if not (output.name.endswith('.json') or output.name.endswith('.json.gz')):
             raise ValueError('source seed report must end in .json or .json.gz')
-        protected = list(Path(args.trace).resolve().iterdir())
-        protected.extend(Path(link.snapshot.path) for link in report.model.code_links
-                         if link.snapshot is not None)
+        protected = []
+        protected.extend(_call_source_inputs(report.model))
         if any(output == path.resolve() or output.exists() and path.exists() and output.samefile(path)
-               for path in protected):
+               for path in chain(Path(args.trace).resolve().iterdir(), protected)):
             raise ValueError('source seed report must differ from trace and source inputs')
         if output.exists():
             existing = _call_json(output, max_bytes=report_limit)

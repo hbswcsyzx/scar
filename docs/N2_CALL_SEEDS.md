@@ -50,6 +50,14 @@ python -m scar.cli check-call-seeds artifacts/reports/seeds.json.gz
 而非将新 adapter 与自身比较。该检查发现并阻断了“后续 process descriptor
 提前影响前一 process”缺陷；当前按旧逐进程可见性处理。
 
+独立审查还用通用源码反例复现：Python 文件名可以是 `.json`，内容也能恰好
+是报告 schema 的合法 JSON 表达式。source budget 失败时 `snapshot=None`，
+旧路径保护曾遗漏这个已采集源码，允许报告覆盖输入。两个 CLI 现共用所有
+captured filename 与已核验 snapshot 的保护集合，并检查同文件/hardlink。
+目录枚举也改为流式处理，在发现超出 process 预算时立即拒绝；不将无关目录
+条目整体排序/保留。无关条目仍需要遍历，不声明目录枚举的 CPU 时间上限。
+初轮 191 项通过报告与后来实际失败的四个输出反例均保留，修订版重新验收。
+
 正式门：`gates/n2_call_source_seeds.json`。报告须记录源指纹、实际测试结果、
 旧报告重放，以及同一真实归档 trace 的时间、RSS、报告体积和输入不变证据。
 采集截断、外部源码、descriptor 缺失与不唯一定义仍单列，不假装已建完整图。

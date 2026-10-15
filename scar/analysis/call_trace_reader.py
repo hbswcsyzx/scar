@@ -281,13 +281,16 @@ def scan_call_trace(trace, root, budget, *, sink: CallEventSink) -> CallTraceSca
     _require(trace_path.is_dir(), "call trace must be a directory")
     root_text = str(root)
     families: dict[tuple[int, str], Path] = {}
-    for path in sorted(trace_path.iterdir()):
+    admitted_processes = set()
+    for path in trace_path.iterdir():
         match = _TRACE_PATTERN.fullmatch(path.name)
         if not match:
             continue
         family, process_text, suffix = match.groups()
         _require((family == "meta") == (suffix == "json"), "call trace family has the wrong suffix")
         process = int(process_text)
+        admitted_processes.add(process)
+        _require(len(admitted_processes) <= budget.max_processes, "call trace process budget exceeded")
         key = process, family
         _require(key not in families, "plain and gzip call trace files are ambiguous")
         _require(path.is_file() and not path.is_symlink(), "call trace files must be ordinary retained files")
