@@ -8,8 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from ..v2._validation import cycle_errors, record_errors
+from .ids import UseID
 from .model import (
-    AccessMode, Behavior, BlockArgument, DataValue, ExitKind, FootprintKind,
+    AccessMode, Behavior, BlockArgument, CompletionResult, CompletionSuccessor,
+    DataValue, ExitKind, FootprintKind,
     LiteralOrigin, OperationResult, ProgramGraph, ReferenceValue,
     StateVersionValue, TerminatorKind, UseRole, ValueKind, value_type,
 )
@@ -107,8 +109,8 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                     or producer.results[value.origin.index] != value.id
                     or value.region != block_region.get(operation_block.get(value.origin.operation))):
                 error("result_origin", value.id, "origin does not match owning result")
-        elif not isinstance(value, DataValue):
-            error("literal_type", value.id, "only data values can be literals")
+        elif not isinstance(value, (DataValue, ReferenceValue)):
+            error("literal_type", value.id, "only data and immutable reference values can be literals")
     for block in blocks.values():
         for index, value_id in enumerate(block.arguments):
             value = values.get(value_id)
@@ -159,6 +161,7 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
 
     successors = {block: set() for block in blocks}
     predecessors = {block: set() for block in blocks}
+    incoming_edges = {block: [] for block in blocks}
     terminators = {}
     for block in blocks.values():
         if not block.operations:
@@ -176,29 +179,54 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         terminators[block.id] = final
         if Behavior.CONTROL not in final.behaviors:
             error("control_behavior", final.id, "terminator requires CONTROL")
-        if final.results or final.accesses or final.callee is not None:
+        is_invoke = term.kind is TerminatorKind.INVOKE
+        if (final.results or final.accesses or final.callee is not None) and not is_invoke:
             error("terminator_effect", final.id, "N1 terminators only bind control and interface uses")
         own_uses = {use.id: use for use in final.uses}
         for use in final.uses:
             if isinstance(values[use.value], StateVersionValue) and use.role is not UseRole.STATE_CONTENT:
                 error("control_state_role", use.id, "state carried across control ports retains content dependence")
         bound = ([term.condition] if term.condition is not None else [])
-        bound += [use for edge in term.successors for use in edge.arguments]
+        bound += [use for edge in term.successors for use in edge.arguments if isinstance(use, UseID)]
         bound += list(term.values)
+        if is_invoke:
+            bound += list(final.invoke_arguments)
         if len(set(bound)) != len(bound) or set(bound) != set(own_uses):
             error("control_binding", final.id, "each control input port needs its own exact use")
-        for edge in term.successors:
+        signatures = {signature.kind: signature for signature in final.completions}
+        for edge_index, edge in enumerate(term.successors):
             target = blocks.get(edge.block)
             if target is None or block_region.get(edge.block) != block_region[block.id]:
                 error("control_target", final.id, "successor must belong to same region")
                 continue
             successors[block.id].add(edge.block)
             predecessors[edge.block].add(block.id)
+            incoming_edges[edge.block].append((final.id, edge_index))
             if len(edge.arguments) != len(target.arguments):
                 error("edge_arity", final.id, "successor argument count mismatch")
             for actual, formal in zip(edge.arguments, target.arguments):
-                if actual in own_uses and value_type(values[own_uses[actual].value]) != value_type(values[formal]):
+                if isinstance(actual, CompletionResult):
+                    if not isinstance(edge, CompletionSuccessor) or edge.kind not in signatures:
+                        error("completion_binding", final.id, "produced value requires an invoke completion")
+                        continue
+                    signature = signatures[edge.kind]
+                    if actual.index >= len(signature.types):
+                        error("completion_index", final.id, "produced result index exceeds this completion signature")
+                        continue
+                    if value_type(values[formal]) != signature.types[actual.index]:
+                        error("completion_type", formal, "produced result type differs from target parameter")
+                    ref = values[formal]
+                    if isinstance(ref, ReferenceValue) and (
+                            ref.targets is not None or ref.referent_identity is not None
+                            or ref.selector.kind is not FootprintKind.UNKNOWN):
+                        error("completion_reference_precision", formal,
+                              "produced references need verified summaries before gaining target or identity precision")
+                elif actual in own_uses and value_type(values[own_uses[actual].value]) != value_type(values[formal]):
                     error("edge_type", actual, "successor argument type mismatch")
+            if isinstance(edge, CompletionSuccessor) and edge.kind in signatures:
+                produced = [arg.index for arg in edge.arguments if isinstance(arg, CompletionResult)]
+                if len(set(produced)) != len(produced) or set(produced) != set(range(len(signatures[edge.kind].types))):
+                    error("completion_slots", final.id, "every produced completion slot must bind exactly once")
         if term.kind is TerminatorKind.BRANCH and term.condition in own_uses:
             condition = values[own_uses[term.condition].value]
             if not isinstance(condition, DataValue) or condition.data_type != "builtins.bool":
@@ -215,6 +243,15 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                 for actual, formal in zip(term.values, exit_port.types):
                     if actual in own_uses and value_type(values[own_uses[actual].value]) != formal:
                         error("exit_type", actual, "exit value type mismatch")
+    if issues:
+        return tuple(issues)
+
+    for operation in terminators.values():
+        if operation.terminator.kind is TerminatorKind.INVOKE:
+            for edge in operation.terminator.successors:
+                if len(incoming_edges[edge.block]) != 1:
+                    error("completion_private_target", operation.id,
+                          "each completion must enter its own target with one actual incoming edge")
     if issues:
         return tuple(issues)
 
@@ -357,7 +394,49 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                     if ref.targets is None or not set(ref.targets).issubset(targets):
                         error("incomplete_alias", operation.id, "complete access requires covering possible alias targets")
 
-            if operation.callee is not None:
+            is_invoke = (operation.terminator is not None
+                         and operation.terminator.kind is TerminatorKind.INVOKE)
+            if is_invoke:
+                argument_uses = {uid: own_uses[uid] for uid in operation.invoke_arguments}
+                input_domains = {values[use.value].location for use in argument_uses.values()
+                                 if isinstance(values[use.value], StateVersionValue)}
+                signatures = {signature.kind: signature for signature in operation.completions}
+                for use in argument_uses.values():
+                    if isinstance(values[use.value], StateVersionValue):
+                        consumed_state.add(use.id)
+                for edge in operation.terminator.successors:
+                    produced_domains = []
+                    for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
+                        formal_value = values[formal]
+                        if isinstance(formal_value, StateVersionValue) and isinstance(actual, CompletionResult):
+                            produced_domains.append(formal_value.location)
+                            if formal_value.location not in input_domains:
+                                error("completion_state_input", operation.id,
+                                      "produced state needs the current location as an invoke operand")
+                        elif isinstance(actual, UseID) and isinstance(values[own_uses[actual].value], StateVersionValue):
+                            consumed_state.add(actual)
+                    if not operation.effects_complete and set(produced_domains) != region_domains[block_region[block.id]]:
+                        error("completion_unknown_state", operation.id,
+                              "unknown effects must produce each state domain on both completion paths")
+                if operation.callee is not None:
+                    callee = regions[operation.callee]
+                    formals = blocks[callee.entry].arguments
+                    if len(formals) != len(operation.invoke_arguments):
+                        error("invoke_callee_arity", operation.id, "invoke argument count differs from callee interface")
+                    for actual, formal in zip(operation.invoke_arguments, formals):
+                        actual_value = values[own_uses[actual].value]
+                        if value_type(actual_value) != value_type(values[formal]):
+                            error("invoke_callee_type", actual, "invoke parameter type differs from callee interface")
+                        reference_binding(actual_value, values[formal], actual)
+                    callee_types = {}
+                    for port in callee.exits:
+                        if port.kind in callee_types:
+                            error("invoke_callee_exits", operation.id, "one interface per completion kind is required")
+                        callee_types[port.kind] = port.types
+                    if callee_types != {kind: signature.types for kind, signature in signatures.items()}:
+                        error("invoke_callee_exits", operation.id, "callee completion interfaces differ from invocation")
+
+            if operation.callee is not None and not is_invoke:
                 callee = regions[operation.callee]
                 if Behavior.CONTROL not in operation.behaviors:
                     error("call_behavior", operation.id, "call requires CONTROL")
@@ -412,7 +491,8 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                                       if isinstance(values[use.value], StateVersionValue))
                 for edge in operation.terminator.successors:
                     for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
-                        reference_binding(values[own_uses[actual].value], values[formal], actual)
+                        if isinstance(actual, UseID):
+                            reference_binding(values[own_uses[actual].value], values[formal], actual)
             actual_state_uses = {use.id for use in operation.uses if isinstance(values[use.value], StateVersionValue)}
             if actual_state_uses != consumed_state:
                 error("unaccounted_state_use", operation.id, "state inputs require access, call or control bindings")

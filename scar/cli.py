@@ -292,6 +292,16 @@ def main(argv=None) -> int:
     check_program.add_argument("graph", help="scar.program-graph JSON document")
     check_program.add_argument("--out", help="optional structural validation report")
     check_program.set_defaults(func=_check_program)
+    model_program = sub.add_parser("model-program", help="automatically lower a selected Python function into the typed program core")
+    model_program.add_argument("source", help="Python source file, read without importing or executing it")
+    model_program.add_argument("--entry", required=True, help="qualified function body, for example Class.method")
+    model_program.add_argument("--max-operations", type=int, default=10000)
+    model_program.add_argument("--out", required=True, help="source-linked graph report, optionally ending in .gz")
+    model_program.set_defaults(func=_model_program)
+    check_source_program = sub.add_parser("check-source-program", help="strictly replay an automatic source graph against current source")
+    check_source_program.add_argument("report", help="source graph report JSON or JSON.gz")
+    check_source_program.add_argument("--max-operations", type=int, default=10000, help="independent verifier construction ceiling")
+    check_source_program.set_defaults(func=_check_source_program)
     normalize = sub.add_parser("normalize", help="normalize existing raw trace into IR v2 evidence")
     normalize.add_argument("trace")
     normalize.add_argument("--out", required=True)
@@ -393,6 +403,41 @@ def _check_program(args) -> int:
         destination.write_text(payload + "\n", encoding="utf-8")
     print(payload)
     return 0 if report["status"] == "WELL_FORMED" else 2
+
+
+def _model_program(args) -> int:
+    from scar.analysis.program_lowering import lower_source
+
+    source, output = Path(args.source).resolve(), Path(args.out).resolve()
+    try:
+        if source == output or (output.exists() and source.samefile(output)):
+            raise ValueError("report path must differ from source")
+        result = lower_source(source, args.entry, max_operations=args.max_operations)
+        document = result.to_dict()
+        _compressed_document(output, document)
+    except (OSError, ValueError, TypeError, SyntaxError, RecursionError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)],
+                          "transformation_authorized": False}))
+        return 2
+    print(json.dumps({"status": document["status"], "out": str(output),
+                      "summary": result.summary()}))
+    return 0 if result.graph is not None else 3
+
+
+def _check_source_program(args) -> int:
+    from scar.analysis.program_lowering import SourceProgram
+    from scar.trace.files import open_text
+
+    try:
+        with open_text(args.report) as stream:
+            result = SourceProgram.from_dict(json.load(stream), max_operations=args.max_operations)
+    except (OSError, ValueError, TypeError, KeyError, AttributeError, SyntaxError, RecursionError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)],
+                          "transformation_authorized": False}))
+        return 2
+    print(json.dumps({"status": "REPLAYED", "summary": result.summary(),
+                      "transformation_authorized": False}))
+    return 0
 
 
 def _write_document(path, document):

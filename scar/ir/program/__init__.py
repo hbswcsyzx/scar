@@ -5,7 +5,8 @@ and ``program.queries``. Typed records remain independently importable.
 """
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.model import (
-    AccessMode, Behavior, Block, BlockArgument, DataValue, ExitKind, ExitPort,
+    AccessMode, Behavior, Block, BlockArgument, CompletionResult,
+    CompletionSignature, CompletionSuccessor, DataValue, ExitKind, ExitPort,
     Footprint, FootprintKind, LiteralOrigin, Operation, OperationResult, OrderEdge,
     ProgramGraph, ReferenceValue, Region, Stability, StateAccess, StateLocation,
     StateVersionValue, Successor, Terminator, TerminatorKind, Use, UseRole,
@@ -15,7 +16,8 @@ from scar.ir.program.codec import SCHEMA, SCHEMA_VERSION, dumps, loads
 
 
 __all__ = [
-    "AccessMode", "Behavior", "Block", "BlockArgument", "BlockID", "DataValue",
+    "AccessMode", "Behavior", "Block", "BlockArgument", "BlockID",
+    "CompletionResult", "CompletionSignature", "CompletionSuccessor", "DataValue",
     "ExitKind", "ExitPort", "Footprint", "FootprintKind", "LiteralOrigin",
     "LocationID", "Operation", "OperationID", "OperationResult", "OrderEdge",
     "ProgramGraph", "ReferenceValue", "Region", "RegionID", "SCHEMA",

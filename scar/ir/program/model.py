@@ -176,7 +176,7 @@ class ReferenceValue:
     selector: Footprint = Footprint()
 
     def __post_init__(self) -> None:
-        _value_fields(self.id, self.region, self.origin)
+        _value_fields(self.id, self.region, self.origin, allow_literal=True)
         if self.referent_identity is not None:
             _nonempty_text(self.referent_identity, "ReferenceValue.referent_identity")
         if self.targets is not None:
@@ -186,6 +186,12 @@ class ReferenceValue:
             _unique(self.targets, "ReferenceValue.targets")
         if not isinstance(self.selector, Footprint):
             raise TypeError("ReferenceValue.selector must be Footprint")
+        if isinstance(self.origin, LiteralOrigin) and (
+                self.referent_identity is not None
+                or self.targets != ()
+                or self.selector.kind is not FootprintKind.UNKNOWN):
+            raise ValueError(
+                "literal ReferenceValue requires unknown identity, empty targets, and UNKNOWN selector")
 
 
 @dataclass(frozen=True, slots=True)
@@ -339,6 +345,7 @@ class TerminatorKind(str, Enum):
     BRANCH = "BRANCH"
     RETURN = "RETURN"
     RAISE = "RAISE"
+    INVOKE = "INVOKE"
 
 
 @dataclass(frozen=True, slots=True)
@@ -355,9 +362,47 @@ class Successor:
 
 
 @dataclass(frozen=True, slots=True)
+class CompletionSignature:
+    kind: ExitKind
+    types: tuple[ValueType, ...]
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+            raise TypeError("CompletionSignature.kind must be ExitKind")
+        _tuple(self.types, "CompletionSignature.types")
+        if any(not isinstance(item, ValueType) for item in self.types):
+            raise TypeError("CompletionSignature.types must contain ValueType")
+
+
+@dataclass(frozen=True, slots=True)
+class CompletionResult:
+    index: int
+
+    def __post_init__(self) -> None:
+        _exact_nonnegative_int(self.index, "CompletionResult.index")
+
+
+@dataclass(frozen=True, slots=True)
+class CompletionSuccessor:
+    kind: ExitKind
+    block: BlockID
+    arguments: tuple[UseID | CompletionResult, ...]
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.kind, ExitKind):
+            raise TypeError("CompletionSuccessor.kind must be ExitKind")
+        if not isinstance(self.block, BlockID):
+            raise TypeError("CompletionSuccessor.block must be BlockID")
+        _tuple(self.arguments, "CompletionSuccessor.arguments")
+        if any(not isinstance(item, (UseID, CompletionResult)) for item in self.arguments):
+            raise TypeError(
+                "CompletionSuccessor.arguments must contain UseID or CompletionResult")
+
+
+@dataclass(frozen=True, slots=True)
 class Terminator:
     kind: TerminatorKind
-    successors: tuple[Successor, ...] = ()
+    successors: tuple[Successor | CompletionSuccessor, ...] = ()
     condition: UseID | None = None
     exit: str | None = None
     values: tuple[UseID, ...] = ()
@@ -366,8 +411,8 @@ class Terminator:
         if not isinstance(self.kind, TerminatorKind):
             raise TypeError("Terminator.kind must be TerminatorKind")
         _tuple(self.successors, "Terminator.successors")
-        if any(not isinstance(item, Successor) for item in self.successors):
-            raise TypeError("Terminator.successors must contain Successor")
+        if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
+            raise TypeError("Terminator.successors must contain successor records")
         if self.condition is not None and not isinstance(self.condition, UseID):
             raise TypeError("Terminator.condition must be UseID or None")
         if self.exit is not None:
@@ -376,7 +421,17 @@ class Terminator:
         if any(not isinstance(item, UseID) for item in self.values):
             raise TypeError("Terminator.values must contain UseID")
 
-        if self.kind is TerminatorKind.JUMP:
+        if self.kind is TerminatorKind.INVOKE:
+            if (len(self.successors) != 2
+                    or any(not isinstance(item, CompletionSuccessor) for item in self.successors)
+                    or {item.kind for item in self.successors} != {ExitKind.NORMAL, ExitKind.RAISE}
+                    or self.successors[0].block == self.successors[1].block
+                    or self.condition is not None or self.exit is not None or self.values):
+                raise ValueError(
+                    "INVOKE requires distinct NORMAL and RAISE completion successors and no other terminator payload")
+        elif any(not isinstance(item, Successor) for item in self.successors):
+            raise TypeError("only INVOKE may use CompletionSuccessor")
+        elif self.kind is TerminatorKind.JUMP:
             if len(self.successors) != 1 or self.condition is not None or self.exit is not None or self.values:
                 raise ValueError("JUMP requires one successor and no condition or exit payload")
         elif self.kind is TerminatorKind.BRANCH:
@@ -402,6 +457,8 @@ class Operation:
     terminator: Terminator | None = None
     callee: RegionID | None = None
     call_arguments: tuple[UseID, ...] = ()
+    completions: tuple[CompletionSignature, ...] = ()
+    invoke_arguments: tuple[UseID, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.id, OperationID):
@@ -431,14 +488,39 @@ class Operation:
         _tuple(self.call_arguments, "Operation.call_arguments")
         if any(not isinstance(item, UseID) for item in self.call_arguments):
             raise TypeError("Operation.call_arguments must contain UseID")
+        _tuple(self.completions, "Operation.completions")
+        if any(not isinstance(item, CompletionSignature) for item in self.completions):
+            raise TypeError("Operation.completions must contain CompletionSignature")
+        _tuple(self.invoke_arguments, "Operation.invoke_arguments")
+        if any(not isinstance(item, UseID) for item in self.invoke_arguments):
+            raise TypeError("Operation.invoke_arguments must contain UseID")
 
         uses_by_id = {item.id: item for item in self.uses}
         if len(set(self.call_arguments)) != len(self.call_arguments):
             raise ValueError("Operation.call_arguments must not repeat a use")
         if any(item not in uses_by_id for item in self.call_arguments):
             raise ValueError("Operation.call_arguments must reference its own uses")
-        if self.callee is None and self.call_arguments:
+        if len(set(self.invoke_arguments)) != len(self.invoke_arguments):
+            raise ValueError("Operation.invoke_arguments must not repeat a use")
+        if any(item not in uses_by_id for item in self.invoke_arguments):
+            raise ValueError("Operation.invoke_arguments must reference its own uses")
+        is_invoke = (self.terminator is not None
+                     and self.terminator.kind is TerminatorKind.INVOKE)
+        if is_invoke and self.call_arguments:
+            raise ValueError("INVOKE uses invoke_arguments, not call_arguments")
+        if self.callee is None and self.call_arguments and not is_invoke:
             raise ValueError("call_arguments require a callee")
+        if is_invoke:
+            if self.results or self.accesses:
+                raise ValueError("INVOKE cannot define ordinary results or state accesses")
+            if (len(self.completions) != 2
+                    or {item.kind for item in self.completions} != {ExitKind.NORMAL, ExitKind.RAISE}):
+                raise ValueError("INVOKE requires one NORMAL and one RAISE completion signature")
+        else:
+            if self.completions:
+                raise ValueError("only INVOKE may carry completion signatures")
+            if self.invoke_arguments:
+                raise ValueError("only INVOKE may carry invoke_arguments")
         for access in self.accesses:
             before = uses_by_id.get(access.before)
             if before is None:
@@ -457,7 +539,7 @@ class Operation:
             if self.terminator.condition is not None:
                 terminator_uses.add(self.terminator.condition)
             for successor in self.terminator.successors:
-                terminator_uses.update(successor.arguments)
+                terminator_uses.update(item for item in successor.arguments if isinstance(item, UseID))
             if not terminator_uses <= set(uses_by_id):
                 raise ValueError("terminator operands must reference this operation's uses")
 
@@ -553,8 +635,9 @@ class ProgramGraph:
 
 __all__ = [
     "AccessMode", "Behavior", "Block", "BlockArgument", "DataValue", "ExitKind",
-    "ExitPort", "Footprint", "FootprintKind", "LiteralOrigin", "Operation",
-    "OperationResult", "OrderEdge", "Origin", "ProgramGraph",
+    "CompletionResult", "CompletionSignature", "CompletionSuccessor", "ExitPort",
+    "Footprint", "FootprintKind", "LiteralOrigin", "Operation", "OperationResult",
+    "OrderEdge", "Origin", "ProgramGraph",
     "ReferenceValue", "Region", "Stability", "StateAccess", "StateLocation",
     "StateVersionValue", "Successor", "Terminator", "TerminatorKind", "Use",
     "UseRole", "Value", "ValueKind", "ValueType", "value_type",

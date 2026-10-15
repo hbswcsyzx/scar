@@ -23,6 +23,12 @@ region/control interfaces. `check-program` validates a supplied IR document;
 it does not recover Python source or authorize an optimization. See the
 [N1 implementation plan](docs/N1_IMPLEMENTATION_PLAN.md) for scope and gates.
 
+Automatic source construction is being integrated in N2.a. `model-program`
+connects a selected function's parameters, branch merges, ordered uses,
+normal/exceptional completions and conditional same-file call interfaces without
+manual IR. It does **not** recover the complete LeWM program or prove a rewrite.
+See [automatic modeling scope and roadmap](docs/AUTOMATIC_MODELING.md).
+
 The graph pass includes loop membership: with `--lines`, observed bytecode
 back-edges become `loop_controls` edges and can produce a
 `GraphLoopInvariantCandidate`. Missing line or loop evidence stays UNKNOWN;
@@ -38,6 +44,12 @@ python -m pytest -q
 # Validate the complete manual input/branch/state/normal-or-exception example.
 python -m scar.cli check-program examples/program_graphs/branch_state.json \
   --out artifacts/reports/program-check.json
+
+# Automatically build a function graph from source, without importing it.
+# Unsupported bodies return 3 and save a located diagnostic with graph=null.
+python -m scar.cli model-program path/to/program.py --entry Class.method \
+  --out artifacts/reports/source-program.json.gz
+python -m scar.cli check-source-program artifacts/reports/source-program.json.gz
 
 # Trace any command in a child process. The command is not modified.
 python -m scar.cli trace --out artifacts/traces/demo -- \
