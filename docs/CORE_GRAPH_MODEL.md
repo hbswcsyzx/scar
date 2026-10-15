@@ -2,6 +2,9 @@
 
 日期：2026-10-13。状态：**设计已审查；N1 有限同步核心已实现并验收**。
 自动源码构图与更广的规则仍待 N2—N4，见 [N1_ACCEPTANCE.md](N1_ACCEPTANCE.md)。
+2026-10-15 补充：N2.a 已实现有限函数体自动构图和正常/异常完成边；完整程序
+恢复仍未完成。实现扩展见 [N2_COMPLETION_AND_LOWERING.md](N2_COMPLETION_AND_LOWERING.md)，
+范围与证据见 [N2A_ACCEPTANCE.md](N2A_ACCEPTANCE.md)。
 本文件是后续核心建模的决策依据。它纠正“已有多维标签和图容器，就已完成
 程序语义建模”的表述，不把规划写成现有能力。
 

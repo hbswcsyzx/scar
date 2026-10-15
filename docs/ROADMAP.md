@@ -1,10 +1,12 @@
 # SCAR roadmap and scope
 
-> **Current priority (2026-10-13):** [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)
+> **Current priority (2026-10-15):** [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)
 > defines the reviewed semantic node/edge model and N0–N4 prerequisites.
 > Complete program dependencies and subgraph simplification come before
 > extending the archived reference collector or opening another backend.
-> The unified semantic core is not yet implemented.
+> N1 implements the bounded typed dependency core; N2.a adds automatic selected
+> function source lowering. Whole-program recovery is incomplete. See
+> [AUTOMATIC_MODELING.md](AUTOMATIC_MODELING.md) and [N2A_ACCEPTANCE.md](N2A_ACCEPTANCE.md).
 
 > **Planning authority (2026-09-22):** the implementation audit is
 > [CURRENT_CODE_AUDIT.md](CURRENT_CODE_AUDIT.md), and the ordered development

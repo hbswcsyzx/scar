@@ -23,7 +23,7 @@ region/control interfaces. `check-program` validates a supplied IR document;
 it does not recover Python source or authorize an optimization. See the
 [N1 implementation plan](docs/N1_IMPLEMENTATION_PLAN.md) for scope and gates.
 
-Automatic source construction is being integrated in N2.a. `model-program`
+Bounded automatic source construction passed the [N2.a gate](docs/N2A_ACCEPTANCE.md). `model-program`
 connects a selected function's parameters, branch merges, ordered uses,
 normal/exceptional completions and conditional same-file call interfaces without
 manual IR. It does **not** recover the complete LeWM program or prove a rewrite.

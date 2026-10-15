@@ -1,0 +1,23 @@
+	Command being timed: "python -m pytest -q --junitxml=artifacts/reports/gates/n2a-full-regression.xml"
+	User time (seconds): 137.34
+	System time (seconds): 6.65
+	Percent of CPU this job got: 107%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 2:13.69
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 986688
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 10468
+	Minor (reclaiming a frame) page faults: 1148355
+	Voluntary context switches: 17587
+	Involuntary context switches: 54724
+	Swaps: 0
+	File system inputs: 1131416
+	File system outputs: 9560
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

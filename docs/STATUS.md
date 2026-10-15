@@ -1,5 +1,33 @@
 # Current evidence and remaining work
 
+## Latest autonomous acceptance: N2.a automatic function source lowering (2026-10-15)
+
+Frozen implementation `429e87e` passed **204** gate cases, including the 93 N1
+compatibility cases, and **1,274** repository tests (two existing warnings,
+no failures or skips). `scar model-program file.py --entry Class.method` now
+automatically connects parameters, exact uses, branch merges, normal/raise
+completions and conditional same-file call interfaces. Reports support gzip and
+strict current-source replay through `scar check-source-program`. No manual
+workload graph patches or target execution are required for this bounded mode.
+
+The same command processed original external LeWM sources: `predict` produced
+27 operations, 58 values and 63 uses; `get_cost` is unsupported at Assert line
+129, and `CEMSolver.solve` is unsupported at its definition-time/signature
+interface. All three reports replayed. Analysis including writing took
+5.379/5.188/7.673 seconds, with peak RSS 44,504/43,204/50,644 KiB respectively.
+These are source analysis costs, not workload profiling or speedup.
+
+Whole-program automatic decomposition remains incomplete. The user still selects
+a function entry; loops, cross-file/loaded method targets, fine state effects,
+aliases and execution correspondence are not established. Unknown source
+operations currently use one coarse world state. An effective optimization
+cannot be inferred from structural validity or the presence of a call candidate.
+
+See [N2A_ACCEPTANCE.md](N2A_ACCEPTANCE.md), [AUTOMATIC_MODELING.md](AUTOMATIC_MODELING.md)
+and the updated [N2 plan](N2_IMPLEMENTATION_PLAN.md). Next: automatic scope and
+interface inventory, loop/state bindings, then runtime correspondence and
+checked subgraph guidance. No new backend, LeWM rewrite or verified acceleration.
+
 ## Disk maintenance and automatic-modeling scope (2026-10-13)
 
 SCAR-generated large artifacts were losslessly archived with decompressed
