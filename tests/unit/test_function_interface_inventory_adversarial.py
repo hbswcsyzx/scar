@@ -73,7 +73,7 @@ def test_all_five_formals_map_exact_source_slots_to_bound_entry(all_formals_inve
     entry = next(block for block in region.blocks if block.id == region.entry)
     values = {value.id: value for value in body.graph.values}
     assert interface.region == body.graph.root
-    assert interface.profile is BodyLoweringProfile.BOUND_FORMALS
+    assert interface.profile is BodyLoweringProfile.BOUND_FRAME
     assert entry.arguments == (*tuple(port.value for port in interface.parameters), interface.world)
     for index, (parameter, port) in enumerate(zip(signature.parameters, interface.parameters)):
         assert parameter.slot == port.slot == source_slots[parameter.name]
@@ -128,10 +128,10 @@ def test_conditional_routes_connect_actual_uses_and_pack_plans(all_formals_inven
         assert default_routes[name].argument_indices == ()
 
 
-def test_v4_without_trace_has_no_fabricated_runtime_scope(all_formals_inventory):
+def test_v5_without_trace_has_no_fabricated_runtime_scope(all_formals_inventory):
     result, _, _ = all_formals_inventory
     document = result.to_dict()
-    assert document["schema_version"] == 4
+    assert document["schema_version"] == 5
     assert document["runtime_scope"] is None and result.runtime_scope is None
     assert result.expansion is not None
     assert result.summary()["interfaces"]["live_call_binding_established"] is False

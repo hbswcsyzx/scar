@@ -18,6 +18,7 @@ class ParameterKind(str, Enum):
 class BodyLoweringProfile(str, Enum):
     LEGACY = "LEGACY"
     BOUND_FORMALS = "BOUND_FORMALS_V1"
+    BOUND_FRAME = "BOUND_FRAME_V1"
 
 
 class FunctionKind(str, Enum):
@@ -83,7 +84,7 @@ class BodyEntryInterface:
     profile: BodyLoweringProfile = BodyLoweringProfile.BOUND_FORMALS
 
     def __post_init__(self):
-        if self.profile is not BodyLoweringProfile.BOUND_FORMALS:
+        if self.profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME):
             raise ValueError("bound entry needs the bound-formal profile")
         if len({p.slot for p in self.parameters}) != len(self.parameters) or len({p.value for p in self.parameters}) != len(self.parameters):
             raise ValueError("body formal ports must be unique")
@@ -219,7 +220,7 @@ class FunctionInterfaces:
     profile: BodyLoweringProfile = BodyLoweringProfile.BOUND_FORMALS
 
     def __post_init__(self):
-        if self.profile is not BodyLoweringProfile.BOUND_FORMALS:
+        if self.profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME):
             raise ValueError("function interfaces need a bound-formal profile")
         if len({s.definition for s in self.signatures}) != len(self.signatures):
             raise ValueError("duplicate function signature")
@@ -229,6 +230,8 @@ class FunctionInterfaces:
             raise ValueError("duplicate source candidate binding")
         signatures = {s.definition:s for s in self.signatures}
         for body in self.bodies:
+            if body.profile is not self.profile:
+                raise ValueError("body interfaces must use the enclosing lowering profile")
             if body.definition not in signatures or tuple(p.slot for p in body.parameters) != tuple(p.slot for p in signatures[body.definition].parameters):
                 raise ValueError("body interface must cover the complete signature in order")
         for binding in self.bindings:

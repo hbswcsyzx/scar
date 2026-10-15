@@ -1,9 +1,10 @@
 # C0：返回引用与 frame 生命周期依赖
 
-日期：2026-10-15。状态：**Proposed，实施前审查**。
+日期：2026-10-15。状态：**Implemented，冻结自验中；外部 F4 尚未验收**。
 
 本文件细化 [N2_CALL_COMPOSITION_PLAN.md](N2_CALL_COMPOSITION_PLAN.md) 的 C0。
-下文是待实现、待自主验收的方案，不描述现有能力。沿用
+下文保留设计与验收要求；当前实现见 [N2_FRAME_IMPLEMENTATION.md](N2_FRAME_IMPLEMENTATION.md)，
+不以实现存在代替各门通过。沿用
 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) 的 Operation、Value、StateLocation、Region；
 本门不增加 detector、backend 或工作负载名称规则。
 

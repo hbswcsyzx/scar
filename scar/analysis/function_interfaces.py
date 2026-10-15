@@ -2,7 +2,7 @@
 import ast
 
 from scar.ir.program.functions import (
-    ArgumentKind, BodyEntryInterface, CallArgument, FormalParameter,
+    ArgumentKind, BodyEntryInterface, BodyLoweringProfile, CallArgument, FormalParameter,
     FunctionInterfaceIssue, FunctionInterfaces, FunctionKind, FunctionSignature, ParameterKind,
 )
 from scar.ir.program.model import BlockArgument, ReferenceValue, StateVersionValue
@@ -83,7 +83,11 @@ def validate_body_interface(body, interface, signature):
 
 
 class FunctionInterfaceBuilder:
-    def __init__(self):
+    def __init__(self, *, profile=BodyLoweringProfile.BOUND_FORMALS):
+        if type(profile) is not BodyLoweringProfile or profile not in (
+                BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME):
+            raise ValueError("function interfaces require an explicit bound profile")
+        self.profile = profile
         self.signatures, self.arguments, self.body_interfaces = {}, {}, {}
         self.issues = []
 
@@ -123,6 +127,8 @@ class FunctionInterfaceBuilder:
             return
         if interface is None:
             raise ValueError("bound body needs explicit entry ports")
+        if interface.profile is not self.profile:
+            raise ValueError("body interface profile differs from its inventory")
         signature = self.signatures[body.definition]
         validate_body_interface(body,interface,signature)
         operations = {op.id:op for op in body.graph.operations}
@@ -154,4 +160,4 @@ class FunctionInterfaceBuilder:
                     bindings.append(bind_call(self.signatures.get(target),call=call.operation,target=target,
                                               source=call.source,arguments=self.arguments[call.operation]))
         return FunctionInterfaces(tuple(self.signatures.values()),tuple(self.body_interfaces.values()),
-                                  tuple(bindings),tuple(self.issues))
+                                  tuple(bindings),tuple(self.issues),self.profile)

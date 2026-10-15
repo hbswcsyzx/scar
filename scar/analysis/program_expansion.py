@@ -28,7 +28,8 @@ def _error_reason(error):
     return "private context unavailable: " + type(error).__name__
 
 
-def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered_files, *, interface_model=False):
+def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered_files, *, interface_model=False,
+                     body_profile=None):
     # Local import avoids a module cycle: the source adapter owns FileInventory
     # construction; this module owns only its global analysis work schedule.
     from scar.analysis.program_inventory import (
@@ -36,7 +37,10 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
     )
     from scar.analysis.function_interfaces import FunctionInterfaceBuilder
     from scar.ir.program.functions import BodyLoweringProfile
-    interfaces = FunctionInterfaceBuilder() if interface_model else None
+    from scar.ir.program.frame_validation import require_valid_frame_model
+    selected_profile = body_profile or BodyLoweringProfile.BOUND_FORMALS
+    interfaces = FunctionInterfaceBuilder(profile=selected_profile) if interface_model else None
+    frames = []
     files, unavailable, bodies, issues = [], {}, {}, defaultdict(list)
     with PreparedContextStore(context_budget) as store:
         # Index all files before spending the first body/operation allowance.
@@ -163,7 +167,7 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             cost_known, charged = True, 0
             try:
                 selected = functions[definition]
-                options = {"profile": BodyLoweringProfile.BOUND_FORMALS} if interface_model else {}
+                options = {"profile": selected_profile} if interface_model else {}
                 result = loaded_context.lower(selected.qualname, source=selected.source,
                     max_operations=remaining_operations, expand_candidates=False, **options)
                 charged = result.operations_emitted
@@ -181,7 +185,20 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             else:
                 if interfaces is not None:
                     try:
+                        if selected_profile is BodyLoweringProfile.BOUND_FRAME:
+                            if body.graph is None:
+                                if result.frame is not None:
+                                    raise ValueError("failed body cannot retain frame correspondence")
+                            elif result.frame is None:
+                                raise ValueError("frame body needs explicit frame correspondence")
+                            else:
+                                require_valid_frame_model(result.frame, body.graph, interface=result.interface,
+                                                          semantic=loaded_context.semantic)
+                                if result.frame.definition != body.definition or result.interface.profile is not selected_profile:
+                                    raise ValueError("frame correspondence differs from the selected body/profile")
                         interfaces.record_body(body, result.interface)
+                        if selected_profile is BodyLoweringProfile.BOUND_FRAME and result.frame is not None:
+                            frames.append(result.frame)
                     except (ValueError, TypeError, KeyError) as error:
                         body = BodyInventory(definition, BodyStatus.UNSUPPORTED, None, None,
                             "body interface correspondence failed: " + str(error), charged)
@@ -228,4 +245,4 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             tuple(ContextUnavailable(path, reason) for path, reason in sorted(unavailable.items())))
         measurements = ExpansionMeasurements(store.restore_attempts, store.compressed_payload_bytes_restored,
                                              store.compressed_bytes_written, store.uncompressed_bytes_written)
-        return tuple(final), schedule, measurements, interfaces.finish(final) if interfaces is not None else None
+        return tuple(final), schedule, measurements, interfaces.finish(final) if interfaces is not None else None, tuple(frames)

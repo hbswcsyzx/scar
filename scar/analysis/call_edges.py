@@ -29,7 +29,9 @@ from scar.ir.program.call_edges import (
     NamedReference, ReferenceIdentityGroup, ReferenceIdentityRoute,
     ReferenceOccurrence, ReferenceRole, ReferenceRouteKind, ReferenceTrace,
 )
-from scar.ir.program.model import CompletionResult, ExitKind
+from scar.ir.program.frames import FrameExit as SourceFrameExit
+from scar.ir.program.functions import BodyLoweringProfile
+from scar.ir.program.model import CompletionResult, ExitKind, TerminatorKind
 from scar.ir.program.source import SourceRole
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import Opcode
@@ -300,6 +302,7 @@ class _Sources:
         self.bodies = {body.definition: body for file in inventory.files for body in file.bodies} if inventory else {}
         self.signatures = {signature.definition: signature for signature in inventory.interfaces.signatures} if inventory else {}
         self.ports = {body.definition: body for body in inventory.interfaces.bodies} if inventory else {}
+        self.frames = {frame.definition: frame for frame in inventory.frames} if inventory else {}
         self.core = {}
         for body in self.bodies.values():
             if body.graph is None:
@@ -476,6 +479,46 @@ class _Sources:
                    and (operation is None or link.operation == operation)]
         return (matches[0].use, uses[matches[0].use].value) if len(matches) == 1 else (None, None)
 
+    def return_operand(self, owner, node, reference):
+        interface = self.ports.get(owner)
+        if interface is None or interface.profile is not BodyLoweringProfile.BOUND_FRAME:
+            # Preserve the v4 opaque-return correspondence, including its wire
+            # UseID and ValueID, for complete historical report replay.
+            return self.operand(owner, reference, "return")
+        key = owner, reference, "frame-return-payload", None
+        if key not in self.operand_links:
+            self.operand_links[key] = self._frame_return_operand(owner, node, reference)
+        return self.operand_links[key]
+
+    def _frame_return_operand(self, owner, node, reference):
+        if owner not in self.core or owner not in self.frames:
+            return None, None
+        body, operations, uses, blocks = self.core[owner]
+        frame = self.frames[owner]
+        if frame.region != body.graph.root:
+            return None, None
+        returned_source = self.source(reference.path, node)
+        matches = []
+        for transition in frame.transitions:
+            if not isinstance(transition, SourceFrameExit) or transition.source != returned_source:
+                continue
+            operation = operations.get(transition.completion)
+            held = operations.get(transition.operation)
+            if (operation is None or held is None or operation.terminator is None
+                    or operation.terminator.kind is not TerminatorKind.RETURN
+                    or len(operation.terminator.values) != 2):
+                continue
+            payload = uses.get(operation.terminator.values[0])
+            held_payload = next((use for use in held.uses if use.id == transition.payload), None)
+            if payload is None or held_payload is None or payload.value != held_payload.value:
+                continue
+            links = [link for link in body.metadata.use_links
+                     if link.operation == operation.id and link.use == payload.id
+                     and link.source == returned_source and link.role == "result"]
+            if len(links) == 1:
+                matches.append((payload.id, payload.value))
+        return matches[0] if len(matches) == 1 else (None, None)
+
     def result(self, call_site):
         if call_site.core_operation is None:
             return None
@@ -559,7 +602,7 @@ def _references(edges, sources, collection_metadata):
         if edge.exit is not None:
             node = sources.returned_node(edge.exit, target) if edge.exit_verified else None
             reference = sources.source(target.snapshot.path, node.value) if node is not None else None
-            use, value = sources.operand(target.definition, reference, "return") if reference else (None, None)
+            use, value = sources.return_operand(target.definition, node, reference) if reference else (None, None)
             returned[entry.invocation] = occurrence(edge, edge.exit.anchor, ReferenceRole.RETURN,
                                                     "return", edge.exit.return_ref,
                                                     source=reference, use=use, value=value)
@@ -622,7 +665,7 @@ def _references(edges, sources, collection_metadata):
             if node is None:
                 continue
             reference = sources.source(target.snapshot.path, node.value)
-            use, value = sources.operand(target.definition, reference, "return")
+            use, value = sources.return_operand(target.definition, node, reference)
             result = returned[entry.invocation]
             if isinstance(node.value, ast.Name):
                 local_values = {item.name: item for item in edge.exit.locals}
@@ -756,15 +799,15 @@ class CallEdgeReport:
 def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
     """Read a collector directory and replay exact source/core relationships.
 
-    The public CLI independently replays a supplied v4 inventory before calling
+    The public CLI independently replays a supplied v4/v5 inventory before calling
     here. Its complete canonical document is bound into this report as well.
     """
     _require(isinstance(budget, CallEdgeBudget), "link_calls requires a typed replay budget")
     root = Path(project_root).resolve()
     _require(root.is_dir(), "project root must be a directory")
     if inventory is not None:
-        _require(inventory.to_dict()["schema_version"] == 4 and inventory.interfaces is not None,
-                 "call/core linking requires the bound-formal v4 inventory")
+        _require(inventory.to_dict()["schema_version"] in (4, 5) and inventory.interfaces is not None,
+                 "call/core linking requires a bound-formal v4 or bound-frame v5 inventory")
         _require(inventory.discovery.project_root == str(root), "inventory project root differs from call replay")
     trace_path, files, captures, entries, exits, metadata, trace_issues = _read_trace(trace, root, budget)
     descriptors = {capture.code.key: capture.code for capture in captures}
