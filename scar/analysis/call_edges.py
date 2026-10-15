@@ -17,16 +17,16 @@ import re
 import tokenize
 from types import CodeType
 
+from scar.analysis.call_trace_reader import CollectingCallSink, scan_call_trace
 from scar.analysis.function_interfaces import extract_signature
 from scar.analysis.program_inventory import _Inventory
 from scar.analysis.program_lowering import prepare_source
-from scar.analysis.runtime_sources import _json_object
 from scar.ir.program.call_edges import (
     CallEdgeBudget, CallEdgeCondition, CallEdgeIssue, CallEdgeIssueKind,
-    CallEdgeModel, CallLinkStatus, CallRecordAnchor, CallSiteLink, CallTraceFile,
-    CapturedCode, CapturedSite, CodeCapture, CodeSourceLink, CoreCallObservation,
+    CallEdgeModel, CallLinkStatus, CallRecordAnchor, CallSiteLink,
+    CapturedCode, CapturedSite, CodeSourceLink, CoreCallObservation,
     FrameCallEdge, FrameCompletion, FrameEntry, FrameExit, InvocationKey,
-    NamedReference, ReferenceIdentityGroup, ReferenceIdentityRoute,
+    ReferenceIdentityGroup, ReferenceIdentityRoute,
     ReferenceOccurrence, ReferenceRole, ReferenceRouteKind, ReferenceTrace,
 )
 from scar.ir.program.frames import FrameExit as SourceFrameExit
@@ -36,14 +36,6 @@ from scar.ir.program.source import SourceRole
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import Opcode
 from scar.trace.code_snapshot import describe_code, site
-from scar.trace.files import open_binary
-
-
-_ENTER_FIELDS = {"index", "kind", "process_id", "thread_id", "invocation_id", "code", "parameters",
-                 "parameters_complete", "caller", "caller_invocation_id", "ancestor_invocation_id",
-                 "path", "path_complete", "caller_locals", "caller_locals_complete", "suspended"}
-_EXIT_FIELDS = {"index", "kind", "process_id", "thread_id", "invocation_id", "code", "return_site",
-                "completion", "return_ref", "locals", "locals_complete"}
 
 
 def _canonical(value):
@@ -59,16 +51,6 @@ def _require(condition, detail):
         raise ValueError(detail)
 
 
-def _exact_int(value, name, minimum=0):
-    _require(type(value) is int and value >= minimum, name + " must be an exact integer")
-    return value
-
-
-def _boolean(value, name):
-    _require(type(value) is bool, name + " must be an exact boolean")
-    return value
-
-
 def _issue(kind, detail, anchor=None):
     return CallEdgeIssue(kind, detail, anchor)
 
@@ -77,200 +59,12 @@ def _span(node):
     return node.lineno, node.end_lineno, node.col_offset, node.end_col_offset
 
 
-def _reference(reference, process, index):
-    NamedReference("capture", reference)
-    parts = reference.split(":")
-    _require(int(parts[1]) == process, "reference token belongs to another process")
-    if parts[0] == "snapshot":
-        _require(int(parts[2]) == index, "snapshot token belongs to another event")
-    return reference
-
-
-def _bindings(value, process, index):
-    result = decode(tuple[NamedReference, ...], value)
-    _require(len({item.name for item in result}) == len(result), "captured names must be unique")
-    for item in result:
-        _reference(item.ref, process, index)
-    return result
-
-
 def _read_trace(trace, root, budget):
-    trace = Path(trace).resolve()
-    _require(trace.is_dir(), "call trace must be a directory")
-    families = {}
-    pattern = re.compile(r"call-(codes|events|meta)\.([1-9][0-9]*)\.(jsonl|json)(?:\.gz)?$")
-    for path in sorted(trace.iterdir()):
-        match = pattern.fullmatch(path.name)
-        if not match:
-            continue
-        family, process, suffix = match.groups()
-        _require((family == "meta") == (suffix == "json"), "call trace family has the wrong suffix")
-        key = int(process), family
-        _require(key not in families, "plain and gzip call trace files are ambiguous")
-        _require(path.is_file() and not path.is_symlink(), "call trace files must be ordinary retained files")
-        families[key] = path
-    processes = sorted({process for process, family in families})
-    _require(processes, "call trace has no call-codes/events/meta families")
-    _require(len(processes) <= budget.max_processes, "call trace process budget exceeded")
-    _require(all((process, family) in families for process in processes for family in ("codes", "events", "meta")),
-             "each process requires codes, events and metadata")
-    files, captures, entries, exits, metadata, issues = [], [], [], [], [], []
-    codes, total_bytes, total_lines, references = {}, 0, 0, 0
-    for process in processes:
-        entries_start, exits_start = len(entries), len(exits)
-        process_rows, code_count = [], 0
-        for family in ("codes", "events", "meta"):
-            path = families[process, family]
-            logical = str(path.with_suffix("")) if path.suffix == ".gz" else str(path)
-            digest, file_bytes, line_number, pieces = hashlib.sha256(), 0, 0, []
-            with open_binary(path) as stream:
-                while raw := stream.readline(budget.max_line_bytes + 1):
-                    _require(len(raw) <= budget.max_line_bytes, "call trace line byte budget exceeded")
-                    line_number += 1
-                    total_lines += 1
-                    file_bytes += len(raw)
-                    total_bytes += len(raw)
-                    _require(total_lines <= budget.max_lines and total_bytes <= budget.max_raw_bytes,
-                             "call trace decompressed byte/line budget exceeded")
-                    digest.update(raw)
-                    if family == "meta":
-                        pieces.append(raw)
-                        continue
-                    if not raw.strip():
-                        continue
-                    row = _json_object(raw, path=logical, line_number=line_number)
-                    anchor = CallRecordAnchor(logical, line_number, hashlib.sha256(raw).hexdigest(), row.get("index"))
-                    if family == "codes":
-                        code = decode(CapturedCode, row)
-                        _require(code.key not in codes or codes[code.key] == code, "one fingerprint has conflicting code descriptors")
-                        codes[code.key] = code
-                        captures.append(CodeCapture(code, anchor, process))
-                        code_count += 1
-                        _require(len(captures) <= budget.max_codes, "call trace code budget exceeded")
-                    else:
-                        process_rows.append((row, anchor))
-                        _require(len(entries) + len(exits) + len(process_rows) <= budget.max_events,
-                                 "call trace event budget exceeded")
-            files.append(CallTraceFile(logical, family, process, digest.hexdigest(), file_bytes, line_number))
-            if family == "meta":
-                meta = _json_object(b"".join(pieces), path=logical, line_number=1)
-                _require(meta.get("schema") == "scar.call-edge-trace" and type(meta.get("schema_version")) is int
-                         and meta["schema_version"] == 1, "call collector schema/version mismatch")
-                _require(type(meta.get("process_id")) is int and meta["process_id"] == process,
-                         "collector metadata process disagrees with its filename")
-                _require(meta.get("project_root") == str(root), "collector project root differs from replay")
-                _require(meta.get("reference_contents_observed") is False
-                         and meta.get("callable_environment_established") is False,
-                         "collector metadata cannot certify contents or callable environments")
-                for name in ("events", "invocations", "codes", "bytes", "dropped_events", "dropped_codes",
-                             "unknown_exits", "suspended_exits", "open_invocations"):
-                    _exact_int(meta.get(name), "collector " + name)
-                _require(type(meta.get("errors")) is list and all(type(item) is str for item in meta["errors"]),
-                         "collector errors must be a text array")
-                _require(type(meta.get("limits")) is dict and all(type(value) is int and value > 0
-                                                                 for value in meta["limits"].values()),
-                         "collector limits must be positive integers")
-                _require(meta["codes"] == code_count, "collector code count differs from retained records")
-                _require(meta["events"] == len(process_rows), "collector event count differs from retained records")
-                if "event_attempts" in meta:
-                    attempts = _exact_int(meta["event_attempts"], "collector event_attempts")
-                else:
-                    attempts = meta["events"]
-                if any(meta[name] for name in ("dropped_events", "dropped_codes", "open_invocations")) or meta["errors"]:
-                    issues.append(_issue(CallEdgeIssueKind.TRACE_COLLECTION_GAP,
-                                         "collector reports dropped, failed or still-open frame observations"))
-                metadata.append(meta)
-        previous = -1
-        for row, anchor in process_rows:
-            kind = row.get("kind")
-            _require(kind in ("call_enter", "call_exit"), "unknown call edge event kind")
-            _require(set(row) == (_ENTER_FIELDS if kind == "call_enter" else _EXIT_FIELDS),
-                     "call edge event fields mismatch")
-            index = _exact_int(row["index"], "event index")
-            _require(previous < index <= attempts, "event indices must be increasing within collector attempts")
-            previous = index
-            _require(type(row["process_id"]) is int and row["process_id"] == process,
-                     "event process disagrees with its file")
-            identity = InvocationKey(process, row["thread_id"], row["invocation_id"])
-            _require(type(row["code"]) is str and re.fullmatch(r"pycode-v2:[0-9a-f]{64}", row["code"]),
-                     "event needs a stable captured code key")
-            if kind == "call_enter":
-                def related(value):
-                    return InvocationKey(process, identity.thread_id, value) if value is not None else None
-                path = decode(tuple[CapturedSite, ...], row["path"])
-                caller = decode(CapturedSite | None, row["caller"])
-                _require(len(path) <= budget.max_path, "captured frame path exceeds replay budget")
-                _require(caller == (path[0] if path else None), "caller differs from the immediate path site")
-                caller_id, ancestor = related(row["caller_invocation_id"]), related(row["ancestor_invocation_id"])
-                _require(caller_id is None or len(path) == 1 and caller_id == ancestor
-                         or not path and not row["path_complete"] and ancestor is None,
-                         "a tracked immediate caller cannot skip intervening frames")
-                parameters = _bindings(row["parameters"], process, index)
-                caller_locals = _bindings(row["caller_locals"], process, index)
-                references += len(parameters) + len(caller_locals)
-                entry = FrameEntry(anchor, identity, row["code"], parameters,
-                                   _boolean(row["parameters_complete"], "parameters_complete"), caller,
-                                   caller_id, ancestor, path, _boolean(row["path_complete"], "path_complete"),
-                                   caller_locals, _boolean(row["caller_locals_complete"], "caller_locals_complete"),
-                                   _boolean(row["suspended"], "suspended"))
-                if entry.parameters_complete and entry.code in codes:
-                    _require(tuple(item.name for item in entry.parameters) == codes[entry.code].parameters,
-                             "complete captured formals differ from the code descriptor")
-                entries.append(entry)
-            else:
-                values = _bindings(row["locals"], process, index)
-                references += len(values) + 1
-                exits.append(FrameExit(anchor, identity, row["code"], decode(CapturedSite, row["return_site"]),
-                                       FrameCompletion(row["completion"]), _reference(row["return_ref"], process, index),
-                                       values, _boolean(row["locals_complete"], "locals_complete")))
-            _require(references <= budget.max_references, "captured reference budget exceeded")
-        meta = metadata[-1]
-        process_entries, process_exits = entries[entries_start:], exits[exits_start:]
-        entered = {entry.invocation for entry in process_entries}
-        exited = {exit.invocation for exit in process_exits}
-        _require(exited <= entered, "retained frame exit has no retained entry")
-        _require(meta["invocations"] == len(process_entries), "collector invocation count differs from retained entries")
-        _require(meta["open_invocations"] == len(entered - exited), "collector open count differs from unmatched entries")
-        _require(meta["unknown_exits"] == sum(exit.completion is FrameCompletion.UNKNOWN for exit in process_exits),
-                 "collector unknown completion count differs from retained exits")
-        _require(meta["suspended_exits"] == sum(exit.completion is FrameCompletion.SUSPENDED for exit in process_exits),
-                 "collector suspension count differs from retained exits")
-        actual_bytes = sum(file.raw_bytes for file in files if file.process_id == process and file.family != "meta")
-        _require(meta["bytes"] == actual_bytes, "collector byte count differs from retained code/events")
-        _require(len(process_rows) <= attempts and attempts - len(process_rows) <= meta["dropped_events"],
-                 "collector attempt gaps have no declared dropped events")
-        if "invocation_attempts" in meta:
-            invocations = _exact_int(meta["invocation_attempts"], "collector invocation_attempts")
-            _require(len(process_entries) <= invocations <= len(process_entries) + meta["dropped_events"],
-                     "collector invocation attempt count is inconsistent")
-            _require(all(entry.invocation.invocation_id <= invocations for entry in process_entries),
-                     "retained invocation exceeds attempted invocation IDs")
-        if "active_frames" in meta:
-            active = _exact_int(meta["active_frames"], "collector active_frames")
-            _require(active <= meta["open_invocations"], "active frame count exceeds unmatched retained entries")
-            if not meta["dropped_events"] and not meta["errors"]:
-                _require(active == meta["open_invocations"], "complete collector active/open counts disagree")
-        limits = meta["limits"]
-        _require(all(name in limits for name in ("max_events", "max_bytes", "max_codes", "max_values", "max_path")),
-                 "collector metadata is missing required collection limits")
-        _require(attempts <= limits["max_events"] and actual_bytes <= limits["max_bytes"]
-                 and code_count <= limits["max_codes"], "retained collection exceeds its declared limits")
-        _require(all(len(entry.parameters) <= limits["max_values"] and len(entry.caller_locals) <= limits["max_values"]
-                     and len(entry.path) <= limits["max_path"] for entry in process_entries)
-                 and all(len(exit.locals) <= limits["max_values"] for exit in process_exits),
-                 "retained capture vectors exceed collection limits")
-        if "path_gaps" in meta:
-            gaps = _exact_int(meta["path_gaps"], "collector path_gaps")
-            _require(gaps <= len(process_entries) + meta["dropped_events"], "collector path gap count is inconsistent")
-            _require(gaps or all(entry.path_complete or len(entry.path) == limits["max_path"] for entry in process_entries),
-                     "short incomplete frame path has no declared capture gap")
-        if "io_failed" in meta:
-            _boolean(meta["io_failed"], "collector io_failed")
-            if meta["io_failed"]:
-                issues.append(_issue(CallEdgeIssueKind.TRACE_COLLECTION_GAP, "collector reports an I/O failure"))
-    _require(len({entry.invocation for entry in entries}) == len(entries), "duplicate process/thread/invocation entry")
-    _require(len({exit.invocation for exit in exits}) == len(exits), "duplicate process/thread/invocation exit")
-    return str(trace), tuple(files), tuple(captures), tuple(entries), tuple(exits), tuple(metadata), tuple(issues)
+    """Compatibility adapter over the shared strict streaming decoder."""
+    sink = CollectingCallSink()
+    scanned = scan_call_trace(trace, root, budget, sink=sink)
+    return (scanned.directory, scanned.files, scanned.captures, tuple(sink.entries),
+            tuple(sink.exits), scanned.metadata, scanned.issues)
 
 
 def _nested_codes(code):

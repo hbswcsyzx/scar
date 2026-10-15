@@ -356,7 +356,15 @@ def main(argv=None) -> int:
     query_call_refs.add_argument('--thread',type=int,required=True)
     query_call_refs.add_argument('--invocation',type=int,required=True)
     query_call_refs.set_defaults(func=_query_call_refs_cli)
-    for command in (call_links,check_call_links,query_call_refs):
+    seed_calls = sub.add_parser('seed-calls',help='resolve entered Python codes to compact source seeds without building reference routes')
+    seed_calls.add_argument('trace')
+    seed_calls.add_argument('--project-root',required=True)
+    seed_calls.add_argument('--out',required=True)
+    seed_calls.set_defaults(func=_seed_calls_cli)
+    check_call_seeds = sub.add_parser('check-call-seeds',help='independently rescan compact call seeds against raw trace and current source')
+    check_call_seeds.add_argument('report')
+    check_call_seeds.set_defaults(func=_check_call_seeds_cli)
+    for command in (call_links,check_call_links,query_call_refs,seed_calls,check_call_seeds):
         command.add_argument('--max-call-report-bytes',type=int,default=256000000,
                              help='independent decompressed input/output report ceiling')
         command.add_argument('--max-call-trace-bytes',type=int,default=128000000)
@@ -737,6 +745,47 @@ def _link_calls_cli(args):
         print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
         return 2
     print(json.dumps({'status':'LINKED','summary':report.summary(),'out':str(output),'transformation_authorized':False}))
+    return 0
+
+
+def _seed_calls_cli(args):
+    from scar.analysis.call_seeds import read_call_source_seeds
+    try:
+        budget = _call_budget(args)
+        report_limit = _call_report_limit(args.max_call_report_bytes)
+        report = read_call_source_seeds(args.trace, args.project_root, budget=budget)
+        output = Path(args.out).resolve()
+        if not (output.name.endswith('.json') or output.name.endswith('.json.gz')):
+            raise ValueError('source seed report must end in .json or .json.gz')
+        protected = list(Path(args.trace).resolve().iterdir())
+        protected.extend(Path(link.snapshot.path) for link in report.model.code_links
+                         if link.snapshot is not None)
+        if any(output == path.resolve() or output.exists() and path.exists() and output.samefile(path)
+               for path in protected):
+            raise ValueError('source seed report must differ from trace and source inputs')
+        if output.exists():
+            existing = _call_json(output, max_bytes=report_limit)
+            if type(existing) is not dict or existing.get('schema') != 'scar.call-source-seeds':
+                raise ValueError('refusing to overwrite a non-source-seed-report output')
+        _write_call_document(output, report.to_dict(), report_limit)
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
+        print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
+        return 2
+    print(json.dumps({'status':'SOURCE_SEEDS','summary':report.summary(),
+                      'out':str(output),'transformation_authorized':False}))
+    return 0
+
+
+def _check_call_seeds_cli(args):
+    from scar.analysis.call_seeds import CallSourceSeedReport
+    try:
+        budget = _call_budget(args)
+        document = _call_json(args.report, max_bytes=args.max_call_report_bytes)
+        report = CallSourceSeedReport.from_dict(document, verification_budget=budget)
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
+        print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
+        return 2
+    print(json.dumps({'status':'REPLAYED','summary':report.summary(),'transformation_authorized':False}))
     return 0
 
 
