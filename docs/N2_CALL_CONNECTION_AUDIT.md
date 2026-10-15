@@ -2,7 +2,8 @@
 
 2026-10-15。输入为原 LeWM 命令的新 calls-only 记录与已验收 v4 inventory；
 分析实现 `bedcd2d`，API 严格重放状态 **REPLAYED**。目标程序未被分析器执行
-或修改。新预算/索引实现 `677e10f` 的公共 CLI 完整重放正在执行。
+或修改。新预算/索引实现 `677e10f` 的公共 CLI 完整重放亦为 **REPLAYED**，
+exit 0、773.944s、峰RSS 5,348,072KiB；冻结源码前后SHA一致。
 
 本报告根据 typed ID、代码指纹、调用记录和源码快照自动 join 得到。下面出现
 的外部函数名仅用于解释观测结果，不是 SCAR 的识别或变换规则。
@@ -97,6 +98,11 @@ python -m scar.cli check-call-links \
   --max-call-trace-bytes 256000000 --max-call-trace-events 250000 \
   --max-call-references 2000000
 ```
+
+公开入口实际结果及命令见
+`artifacts/reports/gates/n2-call-connections-public.json` 与同名 `.time`。
+其summary与API一致；这次耗时包含读取、inventory重放及report重放，不能与
+上表单一阶段直接比较，更不是workload加速比。
 
 源码索引修复消除每次返回重复遍历整个AST，正常LIFO退出也不再扫描栈。
 索引与原文件级匹配规则的节点、顺序和歧义条件一致。没有实测热点占比或

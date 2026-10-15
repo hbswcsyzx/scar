@@ -5,7 +5,7 @@
   "api_implementation": "bedcd2dfa8536a5251c49e5b8b883196207f9a03",
   "io_implementation": "677e10f4461cdf47b1cb7839ed3fd1b856f7610e",
   "io_source_sha256": "9d5b8815b0c53c6e2f99a19679fd4bcb967b8d9b30a9decb5c61a17da5ac50c5",
-  "public_replay_status": "RUNNING",
+  "public_replay_status": "REPLAYED",
   "whole_program_complete": false,
   "actual_formal_provenance_established": false,
   "transformation_authorized": false,
@@ -37,6 +37,14 @@
     "artifacts/reports/gates/n2-call-connections-audit.py": {
       "bytes": 7423,
       "sha256": "8eab2191f11f23f512640d40fa496abe14b7bb0968ab9567a037bd9f2fa5aabf"
+    },
+    "artifacts/reports/gates/n2-call-connections-public.json": {
+      "bytes": 2234,
+      "sha256": "385e4a806a750736e89f56ab3889d2ede6feb0da8e44527f90dc31614b9be2c2"
+    },
+    "artifacts/reports/gates/n2-call-connections-public.time": {
+      "bytes": 1040,
+      "sha256": "aa2a873ad8ef4ba77643b4ec7b80c1c26e41b50c1e08a6c5ecbd173f91af1684"
     }
   },
   "trace_compression": [

@@ -9,7 +9,8 @@ failure. Return-position indexing keeps the previous source matching semantics.
 Real API replay passed, with **9 distinct observed core calls out of 110**;
 direct target-body joins remain zero, and one core call reaches existing bodies
 through verified runtime parent chains with intermediary effects unproved.
-The new public CLI is replaying the full report. See
+The public CLI replay also passed (exit 0, 773.944s, peak RSS 5,348,072KiB),
+with the frozen source hashes unchanged. These are offline analysis costs. See
 [call connection audit](N2_CALL_CONNECTION_AUDIT.md) and
 [the next frame lifetime gate](N2_FRAME_LIFETIME_PLAN.md).
 
