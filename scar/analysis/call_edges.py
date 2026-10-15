@@ -286,6 +286,7 @@ class _LightSource:
     snapshot: object
     references: dict
     nodes: dict
+    return_nodes_by_position: dict
 
 
 class _Sources:
@@ -344,10 +345,18 @@ class _Sources:
         references = {(item.ast_kind, item.source.start_line, item.source.end_line,
                        item.source.start_column, item.source.end_column): item.source for item in indexed.coverage}
         nodes = defaultdict(list)
+        return_nodes_by_position = defaultdict(list)
         for node in ast.walk(tree):
             if hasattr(node, "end_lineno"):
                 nodes[_span(node)].append(node)
-        context = _LightSource(path, text, tree, indexed.snapshot, references, dict(nodes))
+            if isinstance(node, ast.Return) and node.value is not None:
+                return_span, value_span = _span(node), _span(node.value)
+                return_nodes_by_position[return_span].append(node)
+                if value_span != return_span:
+                    return_nodes_by_position[value_span].append(node)
+        context = _LightSource(path, text, tree, indexed.snapshot, references, dict(nodes),
+                               {position: tuple(matches)
+                                for position, matches in return_nodes_by_position.items()})
         self.contexts[filename], self.indexes[filename] = context, indexed
         return context
 
@@ -496,8 +505,7 @@ class _Sources:
         if actual.opname not in ("RETURN_VALUE", "RETURN_CONST") or actual.position is None:
             return None
         context = self.contexts[code_link.snapshot.path]
-        matches = [node for node in ast.walk(context.tree) if isinstance(node, ast.Return) and node.value is not None
-                   and actual.position in (_span(node), _span(node.value))]
+        matches = context.return_nodes_by_position.get(actual.position, ())
         return matches[0] if len(matches) == 1 else None
 
 
@@ -775,10 +783,11 @@ def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
         if entering:
             expected_ancestors[observation.invocation] = stack[-1] if stack else None
             stack.append(observation.invocation)
+        elif stack and stack[-1] == observation.invocation:
+            stack.pop()
         elif observation.invocation in stack:
             position = stack.index(observation.invocation)
-            if position != len(stack) - 1:
-                invalid_intervals.update(stack[position:])
+            invalid_intervals.update(stack[position:])
             stack.pop(position)
     incomplete_processes = {meta["process_id"] for meta in metadata
                             if meta["dropped_events"] or meta["dropped_codes"] or meta["errors"] or meta.get("io_failed")}

@@ -345,9 +345,16 @@ def main(argv=None) -> int:
     query_call_refs.add_argument('--invocation',type=int,required=True)
     query_call_refs.set_defaults(func=_query_call_refs_cli)
     for command in (call_links,check_call_links,query_call_refs):
+        command.add_argument('--max-call-report-bytes',type=int,default=256000000,
+                             help='independent decompressed input/output report ceiling')
         command.add_argument('--max-call-trace-bytes',type=int,default=128000000)
+        command.add_argument('--max-call-trace-lines',type=int,default=200000)
+        command.add_argument('--max-call-line-bytes',type=int,default=2000000)
+        command.add_argument('--max-call-processes',type=int,default=128)
         command.add_argument('--max-call-trace-events',type=int,default=100000)
         command.add_argument('--max-call-trace-codes',type=int,default=8192)
+        command.add_argument('--max-call-references',type=int,default=1000000)
+        command.add_argument('--max-call-path',type=int,default=128)
         command.add_argument('--max-call-source-files',type=int,default=256)
         command.add_argument('--max-call-source-bytes',type=int,default=16000000)
     for command in (inventory_program, check_inventory,call_links,check_call_links,query_call_refs):
@@ -576,13 +583,23 @@ def _check_inventory(args) -> int:
 
 def _call_budget(args):
     from scar.ir.program.call_edges import CallEdgeBudget
-    return CallEdgeBudget(max_raw_bytes=args.max_call_trace_bytes,max_events=args.max_call_trace_events,
+    return CallEdgeBudget(max_raw_bytes=args.max_call_trace_bytes,max_lines=args.max_call_trace_lines,
+        max_line_bytes=args.max_call_line_bytes,max_processes=args.max_call_processes,
+        max_events=args.max_call_trace_events,max_references=args.max_call_references,max_path=args.max_call_path,
         max_codes=args.max_call_trace_codes,max_source_files=args.max_call_source_files,
         max_source_bytes=args.max_call_source_bytes)
 
 
-def _call_json(path):
+def _call_report_limit(value):
+    if type(value) is not int or value < 1 or value >= sys.maxsize:
+        raise ValueError('call report byte ceiling must be a positive exact integer below sys.maxsize')
+    return value
+
+
+def _call_json(path, *, max_bytes=256000000):
+    import math
     from scar.trace.files import open_binary
+    max_bytes=_call_report_limit(max_bytes)
     def unique(pairs):
         result={}
         for name,value in pairs:
@@ -591,12 +608,48 @@ def _call_json(path):
             result[name]=value
         return result
     with open_binary(path) as stream:
-        raw=stream.read(256000001)
-    if len(raw)>256000000:
-        raise ValueError('call report exceeds independent 256 MB read ceiling')
+        raw=stream.read(max_bytes+1)
+    if len(raw)>max_bytes:
+        raise ValueError('call report exceeds independent read byte ceiling: '+str(max_bytes))
     def reject(value):
         raise ValueError('nonfinite JSON value: '+value)
-    return json.loads(raw.decode('utf-8'),object_pairs_hook=unique,parse_constant=reject)
+    def finite(value):
+        number=float(value)
+        if not math.isfinite(number):
+            reject(value)
+        return number
+    return json.loads(raw.decode('utf-8'),object_pairs_hook=unique,parse_constant=reject,parse_float=finite)
+
+
+def _write_call_document(output, document, max_bytes):
+    """Bound the raw JSON while writing; a failure preserves any old report."""
+    import gzip
+    import tempfile
+    max_bytes=_call_report_limit(max_bytes)
+    output=Path(output)
+    output.parent.mkdir(parents=True,exist_ok=True)
+    temporary=None
+    try:
+        with tempfile.NamedTemporaryFile(mode='wb',dir=output.parent,prefix='.scar-call-',delete=False) as raw:
+            temporary=Path(raw.name)
+            stream=gzip.GzipFile(fileobj=raw,mode='wb',mtime=0,filename='') if output.suffix=='.gz' else raw
+            try:
+                written=0
+                encoder=json.JSONEncoder(sort_keys=True,ensure_ascii=True,allow_nan=False,separators=(',',':'))
+                for piece in encoder.iterencode(document):
+                    data=piece.encode('utf-8')
+                    written+=len(data)
+                    if written+1>max_bytes:
+                        raise ValueError('call report exceeds independent write byte ceiling: '+str(max_bytes))
+                    stream.write(data)
+                stream.write(b'\n')
+            finally:
+                if stream is not raw:
+                    stream.close()
+        temporary.replace(output)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def _call_inventory_input(path,args,expected=None):
@@ -616,7 +669,8 @@ def _call_inventory_input(path,args,expected=None):
 
 def _call_report_input(path,args):
     from scar.analysis.call_edges import CallEdgeReport
-    document=_call_json(path)
+    budget=_call_budget(args)
+    document=_call_json(path,max_bytes=args.max_call_report_bytes)
     if (type(document) is not dict or set(document)!={'schema','schema_version','inventory','analysis'}
             or document['schema']!='scar.call-links-envelope' or type(document['schema_version']) is not int
             or document['schema_version']!=1):
@@ -627,14 +681,16 @@ def _call_report_input(path,args):
         if type(binding) is not dict or set(binding)!={'path','sha256'}:
             raise ValueError('call report inventory binding fields mismatch')
         inventory,_=_call_inventory_input(binding['path'],args,binding['sha256'])
-    return CallEdgeReport.from_dict(document['analysis'],inventory=inventory,verification_budget=_call_budget(args))
+    return CallEdgeReport.from_dict(document['analysis'],inventory=inventory,verification_budget=budget)
 
 
 def _link_calls_cli(args):
     from scar.analysis.call_edges import link_calls
     try:
+        budget=_call_budget(args)
+        report_limit=_call_report_limit(args.max_call_report_bytes)
         inventory,binding=_call_inventory_input(args.inventory,args) if args.inventory else (None,None)
-        report=link_calls(args.trace,project_root=args.project_root,inventory=inventory,budget=_call_budget(args))
+        report=link_calls(args.trace,project_root=args.project_root,inventory=inventory,budget=budget)
         output=Path(args.out).resolve()
         if not (output.name.endswith('.json') or output.name.endswith('.json.gz')):
             raise ValueError('call report must end in .json or .json.gz')
@@ -643,12 +699,13 @@ def _link_calls_cli(args):
             protected.append(Path(binding['path']))
         if inventory is not None:
             protected.extend(Path(f.snapshot.path) for f in inventory.files)
+        protected.extend(Path(link.snapshot.path) for link in report.model.code_links if link.snapshot is not None)
         if any(output==p.resolve() or output.exists() and p.exists() and output.samefile(p) for p in protected):
             raise ValueError('call report must differ from trace, source and inventory inputs')
-        if output.exists() and _call_json(output).get('schema')!='scar.call-links-envelope':
+        if output.exists() and _call_json(output,max_bytes=report_limit).get('schema')!='scar.call-links-envelope':
             raise ValueError('refusing to overwrite a non-call-report output')
-        _compressed_document(output,{'schema':'scar.call-links-envelope','schema_version':1,
-                                    'inventory':binding,'analysis':report.to_dict()})
+        _write_call_document(output,{'schema':'scar.call-links-envelope','schema_version':1,
+                                    'inventory':binding,'analysis':report.to_dict()},report_limit)
     except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
         print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
         return 2
