@@ -28,12 +28,15 @@ def _error_reason(error):
     return "private context unavailable: " + type(error).__name__
 
 
-def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered_files):
+def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered_files, *, interface_model=False):
     # Local import avoids a module cycle: the source adapter owns FileInventory
     # construction; this module owns only its global analysis work schedule.
     from scar.analysis.program_inventory import (
         _Inventory, _attach_bodies, _body_connections, _CallLinker, prepare_source,
     )
+    from scar.analysis.function_interfaces import FunctionInterfaceBuilder
+    from scar.ir.program.functions import BodyLoweringProfile
+    interfaces = FunctionInterfaceBuilder() if interface_model else None
     files, unavailable, bodies, issues = [], {}, {}, defaultdict(list)
     with PreparedContextStore(context_budget) as store:
         # Index all files before spending the first body/operation allowance.
@@ -46,8 +49,11 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                     raise ValueError("source changed between discovery and preparation")
                 builder = _Inventory(context, 0, 0, runtime_builder=runtime_builder)
                 indexed = builder.index()
+                if interfaces is not None:
+                    interfaces.index_file(context, indexed, builder.nodes)
             except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
-                runtime_builder.file_failed(path)
+                if runtime_builder is not None:
+                    runtime_builder.file_failed(path)
                 indexed = FileInventory(file.snapshot, (), (), (), (),
                     (InventoryIssue(path, "file preparation/inventory failed: " + str(error)),))
             else:
@@ -76,7 +82,7 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                 by_owner[call.execution_owner].append(call)
 
         observations = defaultdict(list)
-        for binding in runtime_builder.bindings.values():
+        for binding in runtime_builder.bindings.values() if runtime_builder is not None else ():
             for definition in binding.candidate_definitions:
                 if definition in functions:
                     observations[definition].append(binding.observation_index)
@@ -117,7 +123,7 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                             enqueue(witness.definition, BodyDemandKind.CANDIDATE_CALL, via_call=call.operation)
                             frontier.append(witness.definition)
 
-        roots = set(runtime_builder.definition_index)
+        roots = set(runtime_builder.definition_index) if runtime_builder is not None else set()
         roots.update(call.execution_owner for file in files if file.snapshot.path == discovery.entry
                      for call in file.calls if call.phase is ExecutionPhase.MODULE_INITIALIZATION)
         expand_owners(sorted(roots, key=lambda key: key.wire))
@@ -157,8 +163,9 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             cost_known, charged = True, 0
             try:
                 selected = functions[definition]
+                options = {"profile": BodyLoweringProfile.BOUND_FORMALS} if interface_model else {}
                 result = loaded_context.lower(selected.qualname, source=selected.source,
-                    max_operations=remaining_operations, expand_candidates=False)
+                    max_operations=remaining_operations, expand_candidates=False, **options)
                 charged = result.operations_emitted
                 if type(charged) is not int or not 0 <= charged <= remaining_operations:
                     raise ValueError("lowerer returned an invalid construction count")
@@ -171,6 +178,14 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                 body = BodyInventory(definition, BodyStatus.UNSUPPORTED, None, None,
                                      "body construction error: " + str(error))
                 issues[path].append(InventoryIssue(path, body.reason, request.source))
+            else:
+                if interfaces is not None:
+                    try:
+                        interfaces.record_body(body, result.interface)
+                    except (ValueError, TypeError, KeyError) as error:
+                        body = BodyInventory(definition, BodyStatus.UNSUPPORTED, None, None,
+                            "body interface correspondence failed: " + str(error), charged)
+                        issues[path].append(InventoryIssue(path, body.reason, request.source))
             remaining_operations -= charged
             bodies[definition] = body
             entries.append(replace(request, attempted=True, construction_operations=body.construction_operations,
@@ -207,9 +222,10 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             result = _attach_bodies(replace(file, gaps=tuple(file_issues)), file_bodies,
                                     call_witnesses=frozen_witnesses)
             final.append(result)
-            runtime_builder.file_emitted(result)
+            if runtime_builder is not None:
+                runtime_builder.file_emitted(result)
         schedule = ExpansionSchedule(context_budget, tuple(entries),
             tuple(ContextUnavailable(path, reason) for path, reason in sorted(unavailable.items())))
         measurements = ExpansionMeasurements(store.restore_attempts, store.compressed_payload_bytes_restored,
                                              store.compressed_bytes_written, store.uncompressed_bytes_written)
-        return tuple(final), schedule, measurements
+        return tuple(final), schedule, measurements, interfaces.finish(final) if interfaces is not None else None

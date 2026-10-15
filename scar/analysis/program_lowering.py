@@ -19,6 +19,7 @@ from scar.analysis.control_flow_v2 import _build_generated_source_layers, valida
 from scar.analysis.source_semantics_v2 import validate_source_semantics
 from scar.ir.program.codec import dumps as dump_graph
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
+from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
 from scar.ir.program.model import (
     Behavior, Block, BlockArgument, CompletionResult, CompletionSignature,
     CompletionSuccessor, DataValue, ExitKind, ExitPort, LiteralOrigin, Operation,
@@ -142,6 +143,7 @@ class LoweredSourceBody:
     graph: ProgramGraph | None
     metadata: LoweringMetadata
     operations_emitted: int
+    interface: BodyEntryInterface | None = None
 
 
 @dataclass(frozen=True)
@@ -156,12 +158,12 @@ class PreparedSource:
     symbol_tables: dict
 
     def lower(self, entry, *, source: SourceReference | None = None, max_operations=10000,
-              expand_candidates=True):
+              expand_candidates=True, profile=BodyLoweringProfile.LEGACY):
         _check_arguments(entry, max_operations)
         builder = _Builder(self.path, entry, self.text, self.semantic, self.semantics,
                            self.control, max_operations, selected_source=source,
                            tree=self.tree, symbol_tables=self.symbol_tables,
-                           expand_candidates=expand_candidates)
+                           expand_candidates=expand_candidates, profile=profile)
         return builder.run()
 
 
@@ -184,10 +186,16 @@ class _Cursor:
 
 class _Builder:
     def __init__(self, path, entry, text, semantic, semantics, control, max_operations,
-                 selected_source=None, tree=None, symbol_tables=None, expand_candidates=True):
+                 selected_source=None, tree=None, symbol_tables=None, expand_candidates=True,
+                 profile=BodyLoweringProfile.LEGACY):
         if type(expand_candidates) is not bool:
             raise ValueError("expand_candidates must be an exact boolean")
         self.expand_candidates = expand_candidates
+        if type(profile) is not BodyLoweringProfile:
+            raise ValueError("body lowering needs an explicit profile")
+        if profile is BodyLoweringProfile.BOUND_FORMALS and expand_candidates:
+            raise ValueError("bound-formal bodies require root-only expansion")
+        self.profile, self.interface = profile, None
         self.path, self.entry, self.text = path, entry, text
         self.semantic, self.semantics, self.control = semantic, semantics, control
         self.max_operations = max_operations
@@ -514,10 +522,14 @@ class _Builder:
         self.function_definition = definition
         self.reference_candidates = {}
         self.function_blocks = []
-        if (isinstance(node, ast.AsyncFunctionDef) or node.decorator_list or node.args.defaults
-                or node.args.kw_defaults or node.args.kwonlyargs or node.args.vararg or node.args.kwarg):
+        if (self.profile is BodyLoweringProfile.LEGACY and
+                (isinstance(node, ast.AsyncFunctionDef) or node.decorator_list or node.args.defaults
+                 or node.args.kw_defaults or node.args.kwonlyargs or node.args.vararg or node.args.kwarg)):
             raise _Unsupported(GapKind.UNSUPPORTED_SIGNATURE, node,
                                "defaults, decorators, async and variadic/keyword-only interfaces need explicit binding rules")
+        if isinstance(node, ast.AsyncFunctionDef):
+            raise _Unsupported(GapKind.UNSUPPORTED_SIGNATURE, node,
+                               "async invocation/suspension requires a distinct completion and lifetime model")
         def body_nodes(statements):
             for child in statements:
                 if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
@@ -527,7 +539,11 @@ class _Builder:
         if any(isinstance(child, (ast.Yield, ast.YieldFrom)) for child in body_nodes(node.body)):
             raise _Unsupported(GapKind.UNSUPPORTED_SIGNATURE, node,
                                "generator invocation/suspension requires a distinct completion and lifetime model")
-        parameters = node.args.posonlyargs + node.args.args
+        if self.profile is BodyLoweringProfile.BOUND_FORMALS:
+            from scar.analysis.function_interfaces import formal_nodes
+            parameters = [argument for argument, _ in formal_nodes(node)]
+        else:
+            parameters = node.args.posonlyargs + node.args.args
         # Python determines scope before execution, including unreachable imports,
         # deletion and exception-handler targets. Reuse compiler symbol analysis.
         table = self.symbol_tables[(node.name, node.lineno)]
@@ -539,7 +555,7 @@ class _Builder:
         # Function entry has parameters followed by the explicit world state.
         state = self.values.pop()
         self.value_links.pop()
-        args = []
+        args, ports = [], []
         cursor.env = {}
         for index, parameter in enumerate(parameters):
             value = ReferenceValue(self.fresh(ValueID, "parameter"), self.function_context,
@@ -549,11 +565,14 @@ class _Builder:
             if slot is None:
                 raise _Unsupported(GapKind.SOURCE_MAPPING, parameter, "missing formal source slot")
             self.link_value(value, parameter, SourceRole.PARAMETER, slot=slot)
+            ports.append(FormalPort(slot, value.id))
         state = StateVersionValue(state.id, state.region, BlockArgument(cursor.block, len(args)), state.location)
         self.add_value(state); args.append(state.id); cursor.state = state.id
         self.link_value(state, node, SourceRole.STATE)
         self.block_arguments[cursor.block] = tuple(args)
         entry = cursor.block
+        if self.profile is BodyLoweringProfile.BOUND_FORMALS:
+            self.interface = BodyEntryInterface(definition.id, self.function_context, tuple(ports), state.id)
         self.gap(GapKind.CODE_VERSION, node, "source body version is bound; live function object/code and definition-time effects remain unobserved")
         cursor = self.statements(node.body, cursor)
         if cursor is not None:
@@ -622,13 +641,16 @@ class _Builder:
             self.value_links.clear()
             self.use_links.clear()
             self.targets.clear()
+            self.interface = None
         metadata = LoweringMetadata(self.entry, self.snapshot, tuple(self.operation_links),
                                    tuple(self.value_links), tuple(self.targets), tuple(self.gaps),
                                    _ASSUMPTIONS, tuple(self.use_links))
-        return LoweredSourceBody(graph, metadata, self.operations_emitted)
+        return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface)
 
     def candidate_bindings(self, operation, region, function, node):
         """Conditional interface correspondence, never confirmation of a target."""
+        if self.profile is BodyLoweringProfile.BOUND_FORMALS:
+            return (), ()
         parameters = function.args.posonlyargs + function.args.args
         entry = next(block for block in region.blocks if block.id == region.entry)
         if (len(node.args) > len(parameters) or len(node.args) + len(node.keywords) != len(parameters)):

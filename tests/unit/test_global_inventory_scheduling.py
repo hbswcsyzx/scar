@@ -283,8 +283,10 @@ def test_v3_schedule_and_source_are_replayed_and_v1_static_inventory_is_unchange
     )
     _write_trace(trace, entry, "observed", 1)
 
-    static = inventory_program(entry, project_root=root, source_roots=(root,))
-    runtime = _inventory(entry, root, trace, max_lowered_bodies=1)
+    static = _inventory_from_inputs(entry, project_root=root, source_roots=(root,),
+                                    budget=InventoryBudget())
+    runtime = _inventory_from_inputs(entry, project_root=root, source_roots=(root,),
+        budget=InventoryBudget(max_lowered_bodies=1), runtime=read_runtime_trace(trace))
 
     assert static.to_dict()["schema_version"] == 1
     assert "expansion" not in static.to_dict()
@@ -338,7 +340,8 @@ def test_v2_dispatch_replays_legacy_local_expansion_while_v3_is_root_only(tmp_pa
     # a comparison against an independently generated historical artifact.
     assert ProgramInventory.from_dict(legacy_document).to_dict() == legacy_document
 
-    global_v3 = _inventory(entry, root, trace, max_lowered_bodies=2)
+    global_v3 = _inventory_from_inputs(entry, project_root=root, source_roots=(root,),
+        budget=budget, runtime=runtime_trace)
     expansions = _expansions_by_path_and_name(global_v3)
     caller_task = expansions[(str(entry), "caller")]
     helper_task = expansions[(str(entry), "helper")]

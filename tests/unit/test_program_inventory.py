@@ -57,7 +57,9 @@ def test_inventory_schema_and_independent_reconstruction(tmp_path):
     """)
     document = result.to_dict()
     assert document["schema"] == "scar.program-inventory"
-    assert document["schema_version"] == 1
+    assert document["schema_version"] == 4
+    assert document["runtime_scope"] is None
+    assert document["interfaces"]["bodies"]
     json.dumps(document, allow_nan=False)
     restored = ProgramInventory.from_dict(
         document, max_files=128, max_bytes=8_000_000, max_directories=4096,

@@ -22,6 +22,7 @@ from scar.analysis.runtime_inventory import (
 from scar.analysis.runtime_sources import read_runtime_trace, resolve_runtime_seeds
 from scar.ir.program.runtime_sources import RuntimeTraceBudget
 from scar.ir.program.expansion import ContextStoreBudget, ExpansionMeasurements, ExpansionSchedule
+from scar.ir.program.functions import FunctionInterfaces
 from scar.ir.program.codec import dumps as dump_graph
 from scar.ir.program.model import LiteralOrigin
 from scar.ir.program.discovery import DiscoveryRootMode, SourceDiscovery
@@ -68,6 +69,7 @@ class ProgramInventory:
     runtime_scope: RuntimeScope | None = None
     expansion: ExpansionSchedule | None = None
     analysis_measurements: ExpansionMeasurements | None = field(default=None, compare=False)
+    interfaces: FunctionInterfaces | None = None
 
     def summary(self):
         bodies = [body for file in self.files for body in file.bodies]
@@ -101,11 +103,19 @@ class ProgramInventory:
                 "unknown_construction_costs": sum(not entry.construction_cost_known for entry in self.expansion.entries),
                 "unavailable_contexts": len(self.expansion.unavailable_contexts),
             }
+        if self.interfaces is not None:
+            summary["interfaces"] = {
+                "signatures": len(self.interfaces.signatures),
+                "bound_bodies": len(self.interfaces.bodies),
+                "binding_statuses": dict(sorted(Counter(b.status.value for b in self.interfaces.bindings).items())),
+                "issues": len(self.interfaces.issues),
+                "live_call_binding_established": False,
+            }
         return summary
 
     def to_dict(self):
         document = {
-            "schema": "scar.program-inventory", "schema_version": 3 if self.expansion is not None else 2 if self.runtime_scope is not None else 1,
+            "schema": "scar.program-inventory", "schema_version": 4 if self.interfaces is not None else 3 if self.expansion is not None else 2 if self.runtime_scope is not None else 1,
             "scope": "source-discovered candidate files, scoped interfaces and bounded automatic body lowering",
             "discovery": encode(self.discovery), "files": [_file_document(file) for file in self.files],
             "budget": encode(self.budget), "summary": self.summary(),
@@ -115,6 +125,11 @@ class ProgramInventory:
             document["runtime_scope"] = encode(self.runtime_scope)
         if self.expansion is not None:
             document["expansion"] = encode(self.expansion)
+        if self.interfaces is not None:
+            if self.expansion is None:
+                raise ValueError("interface reports require global root-only expansion")
+            document["runtime_scope"] = encode(self.runtime_scope)
+            document["interfaces"] = encode(self.interfaces)
         return document
 
     @classmethod
@@ -125,15 +140,17 @@ class ProgramInventory:
         if type(document) is not dict:
             raise ValueError("inventory fields mismatch")
         version = document.get("schema_version")
-        if type(version) is not int or version not in (1, 2, 3):
+        if type(version) is not int or version not in (1, 2, 3, 4):
             raise ValueError("inventory schema/version mismatch")
         expected_fields = {
                 "schema", "schema_version", "scope", "discovery", "files", "budget", "summary",
                 "target_executed", "transformation_authorized"}
         if version >= 2:
             expected_fields.add("runtime_scope")
-        if version == 3:
+        if version >= 3:
             expected_fields.add("expansion")
+        if version == 4:
+            expected_fields.add("interfaces")
         if set(document) != expected_fields:
             raise ValueError("inventory fields mismatch")
         if document["schema"] != "scar.program-inventory":
@@ -146,11 +163,15 @@ class ProgramInventory:
                 raise ValueError("report exceeds independent verifier budget: " + field)
         discovery = decode(SourceDiscovery, document["discovery"])
         roots = discovery.source_roots if discovery.root_mode is DiscoveryRootMode.DECLARED else ()
-        if version == 3:
+        if version >= 3:
             expansion = decode(ExpansionSchedule, document["expansion"])
             _check_context_budget(expansion.budget, context_verification_budget)
         runtime_options = {}
-        if version >= 2:
+        if version == 4:
+            # Decode and validate typed interfaces before expensive source replay.
+            decode(FunctionInterfaces, document["interfaces"])
+            runtime_options["interface_model"] = True
+        if version >= 2 and not (version == 4 and document["runtime_scope"] is None):
             runtime = decode(RuntimeScope, document["runtime_scope"])
             check_runtime_ceiling(runtime.trace.budget, runtime_verification_budget)
             check_compile_limit(max_compile_attempts)
@@ -161,8 +182,9 @@ class ProgramInventory:
                 raise ValueError("runtime trace differs from its bound raw evidence replay")
             runtime_options = {"runtime": current_trace,
                                "max_compile_attempts": runtime.max_compile_attempts,
-                               "global_expansion": version == 3}
-        if version == 3:
+                               "global_expansion": version >= 3,
+                               "interface_model": version == 4}
+        if version >= 3:
             runtime_options["context_budget"] = expansion.budget
         rebuilt = _inventory_from_inputs(discovery.entry, project_root=discovery.project_root,
                                          source_roots=roots, budget=requested, **runtime_options)
@@ -497,17 +519,21 @@ def inventory_program(entry, *, project_root=None, source_roots=(), max_files=12
     trace = read_runtime_trace(runtime_trace, budget=runtime_budget) if runtime_trace is not None else None
     return _inventory_from_inputs(entry, project_root=project_root, source_roots=source_roots,
                                   budget=budget, runtime=trace, max_compile_attempts=max_compile_attempts,
-                                  context_budget=context_budget)
+                                  context_budget=context_budget, interface_model=True)
 
 
 def _inventory_from_inputs(entry, *, project_root, source_roots, budget, runtime=None, max_compile_attempts=1024,
-                           global_expansion=True, context_budget=ContextStoreBudget()):
+                           global_expansion=True, context_budget=ContextStoreBudget(), interface_model=False):
     """Construct from raw-source settings and observations read by the adapter.
 
     Public report replay re-reads the bound trace before calling here. This
     shares that bounded read with construction, without accepting report seeds.
     """
     _check_budget(budget)
+    if type(interface_model) is not bool:
+        raise ValueError("interface_model must be an exact boolean")
+    if interface_model and not global_expansion:
+        raise ValueError("bound interfaces require global root-only expansion")
     runtime_builder, paths = None, ()
     limits = {"project_root": project_root, "source_roots": source_roots,
               "max_files": budget.max_files, "max_bytes": budget.max_bytes,
@@ -520,12 +546,13 @@ def _inventory_from_inputs(entry, *, project_root, source_roots, budget, runtime
         paths = available_paths(seeds)
         discovery = _discover_sources_from_entries(entry, additional_entries=paths, **limits)
         runtime_builder = RuntimeScopeBuilder(runtime, seeds, max_compile_attempts)
-    if runtime_builder is not None and global_expansion:
+    if interface_model or (runtime_builder is not None and global_expansion):
         from scar.analysis.program_expansion import expand_inventory
         _check_context_budget(context_budget)
-        files, expansion, measurements = expand_inventory(discovery, runtime_builder, budget, context_budget,
-                                            _ordered_files(discovery, runtime_paths=paths))
-        return ProgramInventory(discovery, files, budget, runtime_builder.finish(), expansion, measurements)
+        files, expansion, measurements, interfaces = expand_inventory(discovery, runtime_builder, budget, context_budget,
+                                            _ordered_files(discovery, runtime_paths=paths), interface_model=interface_model)
+        return ProgramInventory(discovery, files, budget, runtime_builder.finish() if runtime_builder is not None else None,
+                                expansion, measurements, interfaces)
     files = []
     remaining_bodies, remaining_operations = budget.max_lowered_bodies, budget.max_operations
     for file in _ordered_files(discovery, runtime_paths=paths):

@@ -4,6 +4,7 @@ from enum import Enum
 
 from scar.ir.program.model import ProgramGraph
 from scar.ir.program.source import LoweringMetadata
+from scar.ir.program.functions import ParameterKind
 from scar.ir.semantics_v2 import SourceSnapshot
 from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import BindingUseID, OperationDefinitionID
@@ -33,14 +34,6 @@ class DefinitionInputRole(str, Enum):
     BASE = "BASE"
     METACLASS = "METACLASS"
     CLASS_KEYWORD = "CLASS_KEYWORD"
-
-
-class ParameterKind(str, Enum):
-    POSITIONAL_ONLY = "POSITIONAL_ONLY"
-    POSITIONAL = "POSITIONAL"
-    VAR_POSITIONAL = "VAR_POSITIONAL"
-    KEYWORD_ONLY = "KEYWORD_ONLY"
-    VAR_KEYWORD = "VAR_KEYWORD"
 
 
 class CoverageStatus(str, Enum):
