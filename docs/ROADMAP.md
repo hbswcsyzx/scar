@@ -16,6 +16,11 @@
 > core-region link and all remaining boundaries. Next is global demand scheduling
 > and bound-formal/definition/call interface separation under the proposed
 > [N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md), then loop and state composition.
+> N2.schedule implements the global queue, demand-driven witness admission,
+> root-only lowering and bounded temporary contexts; 457 gate / 1,505 repository
+> tests pass. All 27 previously budget-deferred runtime source candidates were
+> attempted. [N2_SCHEDULING_ACCEPTANCE.md](N2_SCHEDULING_ACCEPTANCE.md) records
+> external replay status. Formal/body/definition/call separation remains next.
 
 > **Planning authority (2026-09-22):** the implementation audit is
 > [CURRENT_CODE_AUDIT.md](CURRENT_CODE_AUDIT.md), and the ordered development

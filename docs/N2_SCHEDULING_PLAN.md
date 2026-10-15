@@ -1,6 +1,8 @@
 # N2.schedule：全局需求调度与单根构图
 
-日期：2026-10-15。状态：**设计确定，实现中，尚未验收。**
+日期：2026-10-15。状态：**有限调度门已验收**。冻结 `994f944` 通过457 gate /
+1,505全仓测试，原外部入口/trace生成与严格重放均通过。实际范围和成本见
+[N2_SCHEDULING_ACCEPTANCE.md](N2_SCHEDULING_ACCEPTANCE.md)。
 前置 `1f39af3`，承接 [N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md) 的 S0。
 
 ## 实际问题与模型

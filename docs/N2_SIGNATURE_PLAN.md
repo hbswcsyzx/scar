@@ -1,6 +1,8 @@
 # N2.signature：分离函数体、定义时状态和调用绑定
 
-日期：2026-10-15。状态：**Proposed；尚未实现或验收。**
+日期：2026-10-15。状态：**S0 已有限验收，含外部严格重放；
+S1–S4 仍为 Proposed，尚未实现或验收。**
+S0实际报告见 [N2_SCHEDULING_ACCEPTANCE.md](N2_SCHEDULING_ACCEPTANCE.md)。
 
 前置是 N2.entry 的运行来源桥接及全局 body 调度。本文规定下一门的模型与验收目标，不表示
 当前已经获得这些能力。循环细节继续见 [N2B1_PLAN.md](N2B1_PLAN.md)。
@@ -95,3 +97,19 @@ S3 不要求本门解决任意 Python dispatch。可以先支持有限规则并�
 静态精确求解。所有构造都应有模型位置；尚未掌握的目标/读写/消费者仍必须
 有具体边界。后续通过通用规则、运行证据和可执行 guard 缩小边界，不能将
 UNKNOWN 改写为 NONE 来制造自动化完成率。
+
+## 6. S1 实施前必须处理的接口事实（Proposed）
+
+`frontend_v2.py` 已为所有参数种类创建 input slot，但旧 `input_slots` 的顺序
+是 posonly/poskw/kwonly 后再 varargs/varkw；不能把它的位置直接当作新的
+调用ABI。新入口应按 ParameterKind 显式对应名称、源码槽和body入口Value，
+不是对任意位置做zip。默认表达式的SourceReference也不是调用时默认对象。
+
+`LoweringMetadata`、`CallTarget` 和 record codec 使用严格字段集合。新增body
+接口或binding状态要选择显式版本化overlay/profile与迁移，不在旧dataclass
+中塞入字段后破坏v1/v2/v3报告，也不把旧空arguments自动解释为绑定成功。
+旧报告重放应保留其原规则，或明确要求重新生成；不能补造新证明。
+
+新增body接口后，`candidate_bindings` 必须先核对完整formal集合。没有kwonly、
+varargs容器、varkw或默认状态的规则时，明确不完整，不允许只映射positional
+子集而看似完整。函数体的bound入口与实际调用成功仍由独立条件连接。

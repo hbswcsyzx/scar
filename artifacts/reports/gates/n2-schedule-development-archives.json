@@ -1,0 +1,42 @@
+[
+  {
+    "logical_path": "artifacts/reports/gates/n2-schedule-development.xml",
+    "physical_path": "artifacts/reports/gates/n2-schedule-development.xml.gz",
+    "raw_sha256": "00438d2ccb70482e5247cb3eadb9d30fb02e49a603cfd1c33fce38261332a918",
+    "raw_bytes": 11371,
+    "gzip_bytes": 2104,
+    "lossless_verified": true
+  },
+  {
+    "logical_path": "artifacts/reports/gates/n2-schedule-store-development.xml",
+    "physical_path": "artifacts/reports/gates/n2-schedule-store-development.xml.gz",
+    "raw_sha256": "c434cc2c5616968f304557ccfa51daff633d0578949a632900150314c8da57ae",
+    "raw_bytes": 9733,
+    "gzip_bytes": 1802,
+    "lossless_verified": true
+  },
+  {
+    "logical_path": "artifacts/reports/gates/n2-schedule-adapter-repaired.xml",
+    "physical_path": "artifacts/reports/gates/n2-schedule-adapter-repaired.xml.gz",
+    "raw_sha256": "7cfe9107e117ce3bb129a7fb60e6e26dadf09d5e0198d8c524d3473a7835947e",
+    "raw_bytes": 5865,
+    "gzip_bytes": 1283,
+    "lossless_verified": true
+  },
+  {
+    "logical_path": "artifacts/reports/gates/n2-schedule-lazy-witness-development.xml",
+    "physical_path": "artifacts/reports/gates/n2-schedule-lazy-witness-development.xml.gz",
+    "raw_sha256": "d8069f5b47abecaa44ccd64c8893409c1ec89014ae070829a697202ff43db1fb",
+    "raw_bytes": 9715,
+    "gzip_bytes": 1819,
+    "lossless_verified": true
+  },
+  {
+    "logical_path": "artifacts/reports/gates/n2-schedule-review-development.xml",
+    "physical_path": "artifacts/reports/gates/n2-schedule-review-development.xml.gz",
+    "raw_sha256": "0fc5c17265b4a56aafc44e1f603311e9b188da418bca0f1ae659140cbda5793c",
+    "raw_bytes": 4376,
+    "gzip_bytes": 1339,
+    "lossless_verified": true
+  }
+]

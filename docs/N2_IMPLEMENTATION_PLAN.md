@@ -7,8 +7,11 @@ N2.b0 的入口范围与接口清单也已有限验收，见 [N2B0_ACCEPTANCE.md
 
 N2.entry 的运行来源桥接也已有限验收：429 gate / 1,477 回归，原外部入口
 自动生成和严格重放通过。实际覆盖见 [N2_ENTRY_ACCEPTANCE.md](N2_ENTRY_ACCEPTANCE.md)。
-只有一个来源候选定义接到核心区域，不能据此接受整个 N2。下一门先按
-[N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md) 处理全局调度与 formal/定义/绑定接口。
+当时只有一个来源候选定义接到核心区域，不能据此接受整个 N2。
+N2.schedule 现已实现全局需求/见证调度、单根构图和有界上下文，457 gate /
+1,505 回归通过；原外部来源27个预算阻断全部尝试，core连接1→4，严格重放
+状态见 [N2_SCHEDULING_ACCEPTANCE.md](N2_SCHEDULING_ACCEPTANCE.md)。下一门按
+[N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md) 处理 formal/定义/绑定接口。
 
 当前自动化能力、公共命令与后续自验要求见
 [AUTOMATIC_MODELING.md](AUTOMATIC_MODELING.md)。完成方式和源码连接的实现协议见
@@ -16,8 +19,9 @@ N2.entry 的运行来源桥接也已有限验收：429 gate / 1,477 回归，原
 
 N2.b0 外部清单已显示两个必须先处理的连接问题：动态执行的入口源码不在
 import 闭包内；按文件导入距离安排的 256 次 body 预算覆盖不到多数函数。
-N2.entry 已将通用运行代码来源接回候选范围；完整 loader 和沿入口调用/use
-接口安排全局预算仍未完成，不能用手工文件列表替代。签名/定义时接口与函数体分离，循环设计
+N2.entry 已将通用运行代码来源接回候选范围；N2.schedule 已沿可用条件调用
+和观察来源安排全局预算。完整 loader、actual/formal/use 和状态闭合仍未完成，
+不能用手工文件列表替代。签名/定义时接口与函数体分离，循环设计
 见 [N2B1_PLAN.md](N2B1_PLAN.md)；当前仅为提案。实测范围与优先级见
 [AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md)。
 

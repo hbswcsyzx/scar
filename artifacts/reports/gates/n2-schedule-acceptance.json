@@ -1,0 +1,236 @@
+{
+  "schema": "scar.autonomous-acceptance",
+  "gate": "N2.schedule",
+  "status": "PASS_BOUNDED_GLOBAL_DEMAND_SCHEDULE",
+  "revision": "994f9443b102787cd3d067ce5a5a1e99143f8729",
+  "source_sha256": "a7a9fd431765e5edffa840aab82d555d20ec66d315c068c6a0f4c92b6cda1073",
+  "gate_cases": 457,
+  "regression_tests": 1505,
+  "previously_budget_deferred_now_statuses": {
+    "UNSUPPORTED": 24,
+    "LOWERED_WITH_GAPS": 3
+  },
+  "source_summary": {
+    "annotation_evaluation_policy_established": false,
+    "body_statuses": {
+      "LOWERED_WITH_GAPS": 26,
+      "NOT_ATTEMPTED": 1961,
+      "UNSUPPORTED": 230
+    },
+    "construction_operations": 1544,
+    "core_operations": 678,
+    "core_values": 1419,
+    "coverage_atoms": 122323,
+    "coverage_statuses": {
+      "CONNECTED": 602,
+      "INVENTORY_ONLY": 107431,
+      "UNSUPPORTED": 14290
+    },
+    "cross_file_call_witnesses": 197,
+    "definitions": 2217,
+    "discovery_gaps": 1083,
+    "expansion": {
+      "attempted": 256,
+      "demand_kinds": {
+        "CANDIDATE_CALL": 7,
+        "OBSERVED_CODE": 36,
+        "REMAINDER": 1593
+      },
+      "operation_budget_charged": 1544,
+      "unavailable_contexts": 0,
+      "unknown_construction_costs": 0
+    },
+    "fine_state_effects_established": false,
+    "implicit_invocations": 518,
+    "inventory_issues": 3198,
+    "runtime": {
+      "all_paths_observed": false,
+      "callable_bindings_established": false,
+      "code_observation_groups": 285,
+      "code_reproduced_groups": 40,
+      "code_source_status": {
+        "MISMATCH": 222,
+        "MISSING": 6,
+        "OUT_OF_SCOPE": 23,
+        "VERIFIED": 34
+      },
+      "compilation_attempts": 252,
+      "core_region_links": 4,
+      "effect_equivalence_established": false,
+      "source_definition_links": 256,
+      "source_selection": {
+        "AVAILABLE_PYTHON": 262,
+        "OUTSIDE_PROJECT": 23
+      },
+      "trace_issues": 0,
+      "trace_records": 45894
+    },
+    "runtime_reachability_established": false,
+    "source_calls": 10235,
+    "source_calls_with_candidates": 197,
+    "source_files": 151,
+    "transformation_authorized": false,
+    "whole_program_graph_established": false
+  },
+  "whole_program_model_established": false,
+  "target_executed_this_gate": false,
+  "transformation_authorized": false,
+  "workload_speedup_verified": false,
+  "evidence_files": [
+    {
+      "path": "artifacts/reports/gates/n2-schedule-verified.json",
+      "sha256": "0bf97a70982ca8812becfa260fb174b00b69a115c760f5fa82bf027a350684c8",
+      "bytes": 143240
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-verified.md",
+      "sha256": "fbef2ba6f40726bf531c8b48f25db5640776a1586f6cfbab111323807340752a",
+      "bytes": 3409
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-full-regression.json",
+      "sha256": "ad22ee9923e455379afc7e612ea969cf3c9f9ca09032fb2afb0ecbc5f771958d",
+      "bytes": 797
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-full-regression.xml.gz",
+      "sha256": "23d2f630929560802a05f94504a22b95788be57dffee0a3e2246f0e75e3bf51c",
+      "bytes": 31786
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-full-regression.stdout.txt",
+      "sha256": "329caf2731da6df7a808050f2846acacb052317c16271a47d886100eefbfa4e3",
+      "bytes": 2841
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-full-regression.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-full-regression.time.txt",
+      "sha256": "7aacb6912c60d27be039c2a824cf0a46c871ae1e9cfa2695b99087b03919565c",
+      "bytes": 853
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-inventory.json.gz",
+      "sha256": "3e1a874314cc785abe4ea9c84828f510f77a37547d24e78369bb6c8e3f4d9c7e",
+      "bytes": 6762897
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-receipt.json",
+      "sha256": "7bb09fc93bd37081686453ccbdea0d97d5c280b5b9524b6a9c1368c72c961042",
+      "bytes": 28843
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-progress.json",
+      "sha256": "5f0f769bb0fbc2b902df110a52e3beabc58f92681b73359831ba092cbb5d7455",
+      "bytes": 5455
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-comparison.json",
+      "sha256": "6b4041f62f49f1d4529db20d624d4216ffad68741f02e2ebc7f2877cf8e0847a",
+      "bytes": 127120
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-legacy-receipt.json",
+      "sha256": "379961a27279a2b80b8b1ba3cf456016e1ff2073aa6e73dd97035386de157df0",
+      "bytes": 3897
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-legacy-v2.json.gz",
+      "sha256": "2185ef3b8bda3244d77c7c118a1d5f3da2a7fe46e688be20d452211e663fcd38",
+      "bytes": 11076
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-legacy-input/entry.py",
+      "sha256": "0028bd5d76b09282747b86614cbe7a8a9c5d7a5c3b8567d595aeb7d32776f791",
+      "bytes": 92
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-legacy-input/events.jsonl",
+      "sha256": "9a80d9683d5678198014e47c4ecc6b3e5f7f3f4d8019bb7fb8da7ab5598009bb",
+      "bytes": 202
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-source-pressure.py",
+      "sha256": "db5fc00a2e7ced32dcc441b3d70f1597f5ae33cb3503cdd6aedb46793fe8864b",
+      "bytes": 5839
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-compare.py",
+      "sha256": "a26dce79299e8e261554676ed4d801872042d6e2ca3f0ea128cf11b1e59e5d3f",
+      "bytes": 5536
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-legacy.py",
+      "sha256": "70adb9f71026ea9bd005b3e702d42cb8f1cdd277af545d8da0b4c70029ab7429",
+      "bytes": 3534
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-finalize.py",
+      "sha256": "a75c59c8abfb7f4c8198b6f0133493ed88ddd51bb5aab9d88feb7185507031d8",
+      "bytes": 4261
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-development-archives.json",
+      "sha256": "6dc6985a2a1c65051971e9a2584bd1d248344019f309c241878d76985ef95a0b",
+      "bytes": 1696
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-analysis.stdout.txt",
+      "sha256": "27df8f28c6d7e46cf314140b5d1e8c2fee7b0036c733fdca1eb041a5c290e3b4",
+      "bytes": 1717
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-analysis.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-analysis.time.txt",
+      "sha256": "afcd725c62979807fc56dcfaea338154bc63700b8fd1d8a89130905a70535b32",
+      "bytes": 1054
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-replay.stdout.txt",
+      "sha256": "4b3b2667c154f9904ab5bf328584d5186e44847f926d94fce1cb24dae8f0f186",
+      "bytes": 1662
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-replay.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lewm-replay.time.txt",
+      "sha256": "c8016e087a9757564200dc7696c9721a7242e625a81bdbf5c3e5239ade85b71e",
+      "bytes": 888
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-development.xml.gz",
+      "sha256": "965b5d7454a865b4fc332367b5cb0179b7737e3071df0cd5fbb6f7c550ac0c14",
+      "bytes": 2104
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-store-development.xml.gz",
+      "sha256": "f736854128a516b29e013cd6adebd8f1b4ad22a9cc8a5fc7304cc034ed0189ec",
+      "bytes": 1802
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-adapter-repaired.xml.gz",
+      "sha256": "40c3bb33d2373eed51027702bd65f7f3290eedbd5ae4d3789e6b38b231b86ee4",
+      "bytes": 1283
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-lazy-witness-development.xml.gz",
+      "sha256": "c992e02de100c851acd3cff6e92c36a59299497b062723ebd1250621f1a5e66a",
+      "bytes": 1819
+    },
+    {
+      "path": "artifacts/reports/gates/n2-schedule-review-development.xml.gz",
+      "sha256": "37a30a5628321c4000d743ebcb6ea96d8d83fd05e2f42e43febc96214aa51e24",
+      "bytes": 1339
+    }
+  ]
+}

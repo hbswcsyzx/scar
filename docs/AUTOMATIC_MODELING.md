@@ -9,8 +9,13 @@ N2.b0 的入口驱动自动范围与接口清单已有限验收，见
 N2.entry 已实现从已有真实 trace 自动补入来源、按 code/process 保存证据、
 持久化源码定义和可用的 core Region 对应；状态与外部覆盖见
 [N2_ENTRY_ACCEPTANCE.md](N2_ENTRY_ACCEPTANCE.md)。无需用户填写动态文件列表。
-完整调用/状态/循环连接仍待完成；下一门先修跨文件全局展开调度并分离函数体
-和定义/调用接口，见 [N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md)。
+完整调用/状态/循环连接仍待完成。后续进展和函数体/定义/调用接口计划见
+[N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md)。
+
+N2.schedule 已实现全局需求/见证调度、单根body和有界私有上下文；457 gate /
+1,505回归通过。原外部来源的27个预算阻断现已全部被尝试，core连接1→4，
+严格外部重放状态见 [N2_SCHEDULING_ACCEPTANCE.md](N2_SCHEDULING_ACCEPTANCE.md)。
+这仍不是完整调用、状态或循环模型；下一步落实绑定后formal/body接口。
 
 ## 用户输入与自动化边界
 

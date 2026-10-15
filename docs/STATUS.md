@@ -1,6 +1,35 @@
 # Current evidence and remaining work
 
-## Latest autonomous acceptance: N2.entry runtime-source bridge (2026-10-15)
+## Latest autonomous acceptance: N2.schedule (2026-10-15)
+
+Implementation `994f944` passed **457 mapped cases** and **1,505 repository
+tests** (two existing warnings). Source indexing now precedes a global body
+demand queue. Witness admission is demand-driven too; each lowering task builds
+only its root. Private bounded contexts avoid repeating full preparation.
+Historical package `b886e40` independently generated a v2 fixture that the
+current public CLI replayed unchanged. New runtime reports use v3; v1/v2 retain
+their original replay algorithms.
+
+The same LeWM entry, trace and budgets generated 151 files and 2,217 definitions
+in **425.783 s**, peak RSS **331,492 KiB**. All 27 previously budget-deferred
+observed function candidates were attempted: **3 gained core graphs with gaps,
+24 exposed concrete unsupported interfaces**. Runtime-source core links rose
+from one to **four**. Only one of those four has an exact code witness; the
+others remain filename/qualname candidates with code mismatch. The unchanged
+scope has fewer total body graphs (41 to 26), so counts alone are not progress.
+
+Strict external replay passed in **450.457 s**, peak RSS **774,604 KiB**; all
+151 source snapshots, trace bytes and LeWM clean Git state remain unchanged.
+This is an analysis measurement, not
+a new LeWM execution or acceleration; this single analysis is about 23 s slower
+than N2.entry. The remaining 32 unsupported observed function candidates include
+17 signature interfaces and three closure/cell interfaces. Next: bound-formal
+body ports separate from definition/call behavior, then loop and state links.
+See [N2_SCHEDULING_ACCEPTANCE.md](N2_SCHEDULING_ACCEPTANCE.md) and
+[N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md). Whole-program recovery and any
+LeWM transformation remain incomplete.
+
+## Previous autonomous acceptance: N2.entry runtime-source bridge (2026-10-15)
 
 Frozen implementation `b886e40` passed **429 mapped gate cases** and **1,477
 repository tests** (two existing warnings). A source entry plus an archived
