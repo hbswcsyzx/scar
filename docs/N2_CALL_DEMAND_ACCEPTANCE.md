@@ -1,6 +1,6 @@
 # D1：真实调用来源自动接入程序展开
 
-日期：2026-10-15。状态：**Implemented；映射门 Verified；全仓与外部复验待完成**。
+日期：2026-10-15。状态：**Verified D1 only**，实现 `2cf4e40`。
 这不是完整程序模型或 LeWM 优化闭环的验收。
 
 ## 自动化输入和输出
@@ -40,13 +40,26 @@ EntryRoot 是真实模块初始化作用域，不伪造普通函数 body。
 - 源指纹：`a64ba352478c1808f6a1a3ed855c37e561898297e2cc3e630f9940505b540747`。
 - 机器报告：`artifacts/reports/gates/n2-call-demand-verified.json`。
 - 门定义：`gates/n2_call_demand.json`。
-- 全仓报告预定：`artifacts/reports/gates/n2-call-demand-full.*`，正在运行。
+- 全仓：**2,193 PASS**，零失败/错误/跳过；pytest 249.54s，进程 251.29s，
+  峰 RSS 1,026,500KiB。3 项已有 warning，无新增 gzip 析构 warning。
 - 原 LeWM 入口、原 calls 记录、256 文件/256 body/10,000 operation 预算的生成与
-  独立重放正在运行，输出在 `artifacts/experiments/n2_call_demand/real/`。
-  同时核对嵌入 seed report 与冻结 D0 完全一致，原始记录与 LeWM Git/源码不变。
+  公共独立重放均通过，输出在 `artifacts/experiments/n2_call_demand/real/`。
+  嵌入 seed report 与冻结 D0 完全一致，原始记录与 LeWM Git/源码不变。
+- 真实结果：150 文件、2,211 定义、10,160 源调用、50 个带缺口的局部 body 图。
+  256 次尝试中 206 个 UNSUPPORTED；1,955 个定义未尝试，含不支持的作用域。
+- 421 个 eligible group 全部接到准确源码定义；**32 CORE_LINKED / 389 INDEXED_WITHOUT_BODY**。
+  后者分为 260 class 定义期作用域、28 closure/cell、2 generator 和 99 个其它函数
+  lowering 边界。161 个普通函数种子全部实际尝试，不能把它们说成 421 个优化点。
+- prepare 151 个不同路径，各 1 次；0 workspace/projection 失败。完整上下文 spool
+  写入 52,232,056 压缩字节，还原 392 次，累计还原 209,975,282 压缩字节。
+- 生成 **602.086s / 355,692KiB** 峰 RSS；重放 **607.542s / 881,800KiB**。
+  压缩报告 7,685,899 字节。分析成本仍高，不能称为分析提速或 LeWM 加速。
 
-真实复验尚无终态，不填写源码/region 数量或时间，不据小程序测试声称 LeWM 已接通。
-回归与离线分析可能并行，耗时只表示该次分析成本，不是 clean A/B 加速数据。
+回归与离线生成有并行，耗时只表示该次分析成本，不是 clean A/B 加速数据。
+与旧 v4 报告共同的 150 个源码 fingerprint 完全一致；旧报告另含 eval.py，其在
+当前 D0 是明确 code mismatch。两份报告用不同 runtime 证据，不做 body 数量提升比。
+真实明细与逐组原因见 `generation-audit.json`，完整结果见
+`artifacts/reports/gates/n2-call-demand-real.json`。
 
 ## 失败、修复与边界
 
@@ -67,8 +80,13 @@ EntryRoot 是真实模块初始化作用域，不伪造普通函数 body。
 
 ## 下一门
 
-本门结束后仍需 C1/C2：准确的 actual→formal→return/raise、receiver/defaults、
+先修复新诊断发现的通用编译上下文缺口：5 个 mismatch 的源码 fingerprint 未变，
+按记录的 future flags 编译可逐字段重现全部 5 个 descriptor；旧零 flags 尝试为 0/5。
+这项 Observed 探针不等于生产 matcher 已修复，需版本分派保留旧报告重放。
+
+随后仍需 C1/C2：准确的 actual→formal→return/raise、receiver/defaults、
 globals/closure/环境与状态依赖，然后补 loop-carried 值、alias/版本及 logical
 provenance，才能反向求出需要保留的最小依赖并给出替换、提升、共享或删除指导。
+详细下一门正反例见 [跨层连接实现计划](N2_CROSS_CALL_IMPLEMENTATION.md)。
 
 没有新增 detector/backend，没有目标程序名称分支，没有新的 LeWM 变换或可信加速比。

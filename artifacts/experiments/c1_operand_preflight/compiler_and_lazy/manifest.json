@@ -1,0 +1,90 @@
+{
+  "files": [
+    {
+      "path": "budget_results.json",
+      "bytes": 1968,
+      "sha256": "33dce1f78ce586a94526747f3c09f5fd7495292ff42092f1d3b0a7a04ecf5f8a"
+    },
+    {
+      "path": "handoff.json",
+      "bytes": 6719,
+      "sha256": "366da1c770642c4f838c51681d17206691aec6f748b7e5068f42f48cf5a163fd"
+    },
+    {
+      "path": "lazy_result.json",
+      "bytes": 66907,
+      "sha256": "5e03008c5103995ac38e2d64ddd0192ec5360dbaaf770b486df26bbd3c4c0cdf"
+    },
+    {
+      "path": "lazy_trials.py",
+      "bytes": 6420,
+      "sha256": "0017638ece94c68ef5373640a336aad5d8b03b5d253b3232d504c8481c89b8fc"
+    },
+    {
+      "path": "probe.py",
+      "bytes": 11053,
+      "sha256": "dde2db3a7f18e613bac24f663ef104d2548cc2e4549c5a7c8a2d783785ce192a"
+    },
+    {
+      "path": "profile_call_lazy-source-476402/entry.py",
+      "bytes": 158,
+      "sha256": "a7640f7c5b73d89ef961af3aa285c602b5da19c4b5b2c0b0d2a2cc9510ea9ac0"
+    },
+    {
+      "path": "profile_call_lazy-source-476402/lazy_helper_476402.py",
+      "bytes": 38,
+      "sha256": "edaaeb1663f87186a7d2b9942f72c68fdfb45038cadc123c80897872606d0c10"
+    },
+    {
+      "path": "profile_call_lazy-trace-476402/call-codes.476402.jsonl",
+      "bytes": 2771,
+      "sha256": "d2ad9a235170d8c476c6ae51a58f90f09a2af0e1a7f75664b056cf3257d55c0a"
+    },
+    {
+      "path": "profile_call_lazy-trace-476402/call-events.476402.jsonl",
+      "bytes": 10439,
+      "sha256": "e9b7f5743b618100716d9926bbc72d84f0f98549a6c9473803bd905074f3cd6f"
+    },
+    {
+      "path": "profile_call_lazy-trace-476402/call-meta.476402.json",
+      "bytes": 968,
+      "sha256": "398ca599219d6f229eaefedc5e775bd66871f70ac4206704f2f01b5115be3da1"
+    },
+    {
+      "path": "py_start_lazy-source-476400/entry.py",
+      "bytes": 158,
+      "sha256": "3d66212384f686f432c61ff64f7fcdb8aafab662a62fb0983316f83dfe4e5b93"
+    },
+    {
+      "path": "py_start_lazy-source-476400/lazy_helper_476400.py",
+      "bytes": 38,
+      "sha256": "edaaeb1663f87186a7d2b9942f72c68fdfb45038cadc123c80897872606d0c10"
+    },
+    {
+      "path": "py_start_lazy-trace-476400/call-codes.476400.jsonl",
+      "bytes": 2751,
+      "sha256": "c24a1f0b81e3dc7e7fa6064f0d31cfda48e983ba9178ce36a61277198bffef78"
+    },
+    {
+      "path": "py_start_lazy-trace-476400/call-events.476400.jsonl",
+      "bytes": 10439,
+      "sha256": "2024fc1a78d2d87bafed7da0459bd2dae59690ce3ee5098e0d6b5c669f6150b3"
+    },
+    {
+      "path": "py_start_lazy-trace-476400/call-meta.476400.json",
+      "bytes": 964,
+      "sha256": "779f644b51e44c3e00df4399cf06bc88ae6476a1dc6414aa695c712b3bbd0940"
+    },
+    {
+      "path": "result.json",
+      "bytes": 24900,
+      "sha256": "1bd4fae828a1fc62b08f082c05b9d616fc6abe5a76f8333f3295d967e74409f2"
+    },
+    {
+      "path": "setup.json",
+      "bytes": 983,
+      "sha256": "d02728f2302930f127fbb91422e4fede2d327ab5d5f750c315ea44e2c780526d"
+    }
+  ],
+  "total_bytes": 147674
+}

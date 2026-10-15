@@ -1,6 +1,6 @@
 # D1：入口优先的自动程序展开
 
-状态：Implemented；303 项映射门通过，全仓与真实归档复验进行中，尚未完成 D1.c。
+状态：Verified D1 only；303 项映射门、2,193 项全仓回归及真实归档公共重放通过。
 前置 D0 见 [紧凑源码见证](N2_CALL_SEEDS.md)，本轮记录见
 [D1 验收进度](N2_CALL_DEMAND_ACCEPTANCE.md)。
 本门直接修复“新真实调用见证没有进入自动展开队列”，不增加 detector/backend。

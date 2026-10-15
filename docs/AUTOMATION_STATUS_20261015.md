@@ -3,8 +3,8 @@
 日期：2026-10-15。**完整自动 LeWM 程序图、可信化简指导及加速闭环尚未完成。**
 已实现的构图流程不要求手工修补 LeWM 图；当前问题是覆盖和连接不完整。
 
-最新开发：v6 已把紧凑调用来源接入自动展开，303 项映射门通过；全仓与原 LeWM
-离线复验进行中，尚未完成 D1.c，暂不替换下表的已验收真实范围。见
+最新开发：v6 已把紧凑调用来源接入自动展开，303 项映射门、2,193 项全仓回归、
+原 LeWM 离线生成和公共重放通过。它只验收来源到局部图，未完成全程序连接。见
 [D1 验收进度](N2_CALL_DEMAND_ACCEPTANCE.md)。
 
 ## 1. 自动化的输入与职责
@@ -25,6 +25,7 @@
 | 真实调用采集 | 84,319 个入口记录、168,638 个事件、850 份 code descriptor；drop/open/path gap 均为 0 | 包含 suspended code 段，不等同于相同数量的完整语义调用；不保存 Tensor 数值 |
 | D0：紧凑来源桥接 | 自动读取全部原始记录，812 个 entered-code 分组中，548 个 code/source 核验通过，421 个具备完整唯一 definition；报告 gzip 266,292 字节 | 259 个 code link INCOMPLETE、5 个 MISMATCH；127 个 VERIFIED code 尚无唯一 definition；421 个是展开种子，不是优化点 |
 | D0 自主验收 | 实现 `39e8f22`，196 项门检查、全仓 2,033 项通过，零失败/错误/跳过；原归档公共独立重放通过 | Source/raw trace、LeWM clean HEAD 均不变；没有新的 LeWM 执行、变换或 clean A/B 加速比 |
+| D1：来源到展开 | 实现 `2cf4e40`，303 门 / 2,193 全仓检查通过；原归档生成和公共重放通过 | 150 文件、2,211 定义、50 局部 body 图；421 种子中32接core、389有具体边界；不是优化许可 |
 
 D0 源指纹：`81d6a6b675055eaa70a8e4dff566107dc3329859e999e7f918050bd983c26909`。
 报告见 [D0 验收](N2_CALL_SEEDS.md)、
@@ -52,9 +53,9 @@ storage 的几何区域不是同一实体。保存视频与保存 Tensor 都可�
 
 ## 4. 尚未接通的具体部分
 
-1. **来源到展开队列。** 主线 D0 已取得 421 个源码种子。开发版 v6 已用独立
-   typed origin 接入新队列，小程序自动端到端及严格重放通过；原 LeWM 复验尚未
-   完成。没有把 call group 序号塞进旧 observation_indices。
+1. **来源到展开队列已有限接通。** v6 用独立 typed origin 接入真实来源，32 个
+   种子接到局部 core；260 class 作用域、28 closure/cell、2 generator 和99其它
+   函数 lowering 边界尚未连成 core。没有把 call group 序号塞进旧 observation_indices。
 2. **实际参数/返回。** 查询仍在 `ARGUMENT_ROUTING_UNVERIFIED` 停止；方法、
    partial、defaults、callee 重绑和绑定前失败不能靠同对象或源码签名推断。
 3. **函数环境与作用域。** 相同 code 可以关联不同 globals/defaults/closure。
@@ -71,6 +72,7 @@ storage 的几何区域不是同一实体。保存视频与保存 Tensor 都可�
 | --- | --- | --- |
 | D1.a | 私有轻量 source-witness index、共享原 ID 规则与有类型需求来源 | 同一原遍历、完整 atom 覆盖、全部 CodeSourceLink 成功/失败记录不变；不重算未消费的完整图摘要，不接受外部 trusted 开关 |
 | D1.b/c | v6 source scope/入口依赖 frontier/body queue；旧 v1–v5 原样重放 | 原始多文件程序自动接通 source→准确 body；入口依赖优先，无关文件不能按名字抢预算；原 LeWM 同入口/trace/预算复验 |
+| R1 | 使用记录的编译上下文，独立保留历史匹配 profile | 5个真实 mismatch 原源码未变，推断future flags已完整重现；生产版本与旧报告重放尚待实现 |
 | C1/C2 | 实际 operand→formal→return/raise 与环境/状态 | 多层跨文件查询回到准确上层 Use；receiver/default/同引用多参数/重绑/闭包/异常反例不误连 |
 | 循环与细状态 | loop-carried 依赖、位置/alias/版本和 logical provenance | 零次/多次循环、原位覆盖、共享 view、foreign write、RNG/autograd 的通用正反例 |
 | 区域化简 | 从观察根反向裁剪依赖，给出具体修改位置、残余效果、条件与成本 | 通用源码自动建图与正反例后，再在原 LeWM 自动产生可检查指导；不靠业务名规则或手工补图 |
@@ -93,3 +95,7 @@ D0 生成 349.361s、峰 RSS 230,564KiB；独立重放 352.998s、峰 RSS 237,71
 本轮清理释放 102.629MiB：41 份文件无损压缩并核对解压 SHA256，清除项目缓存
 及已结束测试临时目录。原始事件内容、源码、报告与 LeWM 环境保留；主项目
 约 1.4GiB。明细见 [磁盘管理](ARTIFACT_RETENTION.md)。
+
+D1 实际分析：生成602.086s/355,692KiB、重放607.542s/881,800KiB，输出gzip7,685,899B。
+prepare151个不同路径各1次，但完整上下文索引/摘要/还原成本仍高。生成与全仓回归
+有重叠，不比较D0/D1墙钟作为提速；它们也不是LeWM执行时间。

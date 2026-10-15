@@ -1,0 +1,32 @@
+[
+  {
+    "command": [
+      "/home/zyf/miniconda3/envs/lewm/bin/python",
+      "/tmp/scar-compile-flags-gV2DZOWN/probe.py",
+      "/home/zyf/AAA/scar/artifacts/experiments/n2_call_source_seeds/real/seeds.json.gz",
+      "--out",
+      "/tmp/scar-compile-flags-gV2DZOWN/compile5.json",
+      "--max-compile-attempts",
+      "5"
+    ],
+    "returncode": 1,
+    "expected_failure": "compile attempt budget exceeded",
+    "output_created": false,
+    "stderr": "Traceback (most recent call last):\n  File \"/tmp/scar-compile-flags-gV2DZOWN/probe.py\", line 192, in <module>\n    main()\n    ~~~~^^\n  File \"/tmp/scar-compile-flags-gV2DZOWN/probe.py\", line 148, in main\n    require(attempts < args.max_compile_attempts, \"compile attempt budget exceeded\")\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scar-compile-flags-gV2DZOWN/probe.py\", line 21, in require\n    raise ValueError(detail)\nValueError: compile attempt budget exceeded\n"
+  },
+  {
+    "command": [
+      "/home/zyf/miniconda3/envs/lewm/bin/python",
+      "/tmp/scar-compile-flags-gV2DZOWN/probe.py",
+      "/home/zyf/AAA/scar/artifacts/experiments/n2_call_source_seeds/real/seeds.json.gz",
+      "--out",
+      "/tmp/scar-compile-flags-gV2DZOWN/source5821.json",
+      "--max-source-bytes",
+      "5821"
+    ],
+    "returncode": 1,
+    "expected_failure": "source byte budget exceeded",
+    "output_created": false,
+    "stderr": "Traceback (most recent call last):\n  File \"/tmp/scar-compile-flags-gV2DZOWN/probe.py\", line 192, in <module>\n    main()\n    ~~~~^^\n  File \"/tmp/scar-compile-flags-gV2DZOWN/probe.py\", line 127, in main\n    require(len(source_raw) <= remaining, \"source byte budget exceeded\")\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/scar-compile-flags-gV2DZOWN/probe.py\", line 21, in require\n    raise ValueError(detail)\nValueError: source byte budget exceeded\n"
+  }
+]
