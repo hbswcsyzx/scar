@@ -1,0 +1,50 @@
+[
+  {
+    "logical_path": "artifacts/reports/gates/n2-entry-integration-development.xml",
+    "physical_path": "artifacts/reports/gates/n2-entry-integration-development.xml.gz",
+    "raw_sha256": "c941683a3bdee4f292de052159d54a798486638b261250398badbad40cbbfaed",
+    "raw_bytes": 11354,
+    "gzip_bytes": 2383,
+    "lossless_verified": true
+  },
+  {
+    "logical_path": "artifacts/reports/gates/n2-entry-public-development.xml",
+    "physical_path": "artifacts/reports/gates/n2-entry-public-development.xml.gz",
+    "raw_sha256": "958eabaebe7067de4796f57c3942b401da9fd5a0641a73ab4d23ac998e2238db",
+    "raw_bytes": 11744,
+    "gzip_bytes": 2354,
+    "lossless_verified": true
+  },
+  {
+    "logical_path": "artifacts/reports/gates/n2-entry-pid-repaired.xml",
+    "physical_path": "artifacts/reports/gates/n2-entry-pid-repaired.xml.gz",
+    "raw_sha256": "d00d3a27cc3ea165e5d3cced07d185a24dccdb8c98f9c0ffdb8c74098656e5af",
+    "raw_bytes": 9945,
+    "gzip_bytes": 1732,
+    "lossless_verified": true
+  },
+  {
+    "logical_path": "artifacts/reports/gates/n2-entry-source-compatibility.xml",
+    "physical_path": "artifacts/reports/gates/n2-entry-source-compatibility.xml.gz",
+    "raw_sha256": "244efe4e56c0aaaea60c74393b810283fe4ef582ede625e0e60e21224cd97ebb",
+    "raw_bytes": 11644,
+    "gzip_bytes": 2115,
+    "lossless_verified": true
+  },
+  {
+    "logical_path": "artifacts/reports/gates/n2-entry-evidence-queries.xml",
+    "physical_path": "artifacts/reports/gates/n2-entry-evidence-queries.xml.gz",
+    "raw_sha256": "94c3eb267fe20f1613c5d78587de9466d61c785e9308fe55586f63ee72849f7e",
+    "raw_bytes": 3132,
+    "gzip_bytes": 751,
+    "lossless_verified": true
+  },
+  {
+    "logical_path": "artifacts/reports/gates/n2-entry-definition-index-development.xml",
+    "physical_path": "artifacts/reports/gates/n2-entry-definition-index-development.xml.gz",
+    "raw_sha256": "cfbbb10ed118dd6c8ed49e79245a5c2d44bc86a4ce54fc168a81f4f6aced1cb7",
+    "raw_bytes": 7306,
+    "gzip_bytes": 1426,
+    "lossless_verified": true
+  }
+]

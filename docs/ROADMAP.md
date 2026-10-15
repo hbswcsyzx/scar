@@ -10,6 +10,12 @@
 > N2.b0 adds automatic entry-driven source inventory; measured coverage and
 > remaining entry/load/call/state connections are documented in
 > [AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md).
+> N2.entry now joins archived runtime code observations to automatic source
+> scope and definition/core links; bounded external generation and replay pass.
+> [N2_ENTRY_ACCEPTANCE.md](N2_ENTRY_ACCEPTANCE.md) records the single observed
+> core-region link and all remaining boundaries. Next is global demand scheduling
+> and bound-formal/definition/call interface separation under the proposed
+> [N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md), then loop and state composition.
 
 > **Planning authority (2026-09-22):** the implementation audit is
 > [CURRENT_CODE_AUDIT.md](CURRENT_CODE_AUDIT.md), and the ordered development

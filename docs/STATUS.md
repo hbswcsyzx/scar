@@ -1,6 +1,38 @@
 # Current evidence and remaining work
 
-## Latest autonomous acceptance: N2.b0 entry-driven source inventory (2026-10-15)
+## Latest autonomous acceptance: N2.entry runtime-source bridge (2026-10-15)
+
+Frozen implementation `b886e40` passed **429 mapped gate cases** and **1,477
+repository tests** (two existing warnings). A source entry plus an archived
+real trace now automatically selects runtime source candidates, expands their
+shared import closure, attempts exact code reproduction, and persists source
+definition/core-region links. No dynamic file/function list or workload graph
+patch was supplied. Pure-source v1 inventory remains compatible.
+
+The unchanged LeWM entry yielded **151 files**, **2,217 definitions** and
+**10,235 source calls**, including eight files absent from the source-only
+inventory. Generation took **402.571 s**, peak RSS **336,224 KiB**; strict
+source/trace replay passed in **423.913 s**, peak RSS **785,256 KiB**. All read
+source snapshots, trace bytes and LeWM clean Git state remained unchanged.
+This is archived evidence analysis, not a new LeWM execution or A/B benchmark.
+
+285 code/process groups produced 34 exact code-plus-definition matches,
+222 mismatches, six missing definition joins and 23 external boundaries.
+Filename/qualname candidates remain separate from exact code witnesses.
+Although 41 bodies have core graphs with gaps, only **one** of the 256
+runtime-source definition candidates links to a core region. 27 candidate
+bodies were deferred by budget; 137 need class/lambda/comprehension interfaces.
+The remaining 83 indexed definitions have no ordinary function body entry.
+
+This accepts bounded source correspondence, **not** whole-program recovery,
+callee/value/effect equivalence or a transformation. Next: global body demand
+scheduling and separate bound-formal body interfaces from definition/call
+behavior; then loops, state and cross-file composition. See
+[N2_ENTRY_ACCEPTANCE.md](N2_ENTRY_ACCEPTANCE.md) and the proposed
+[N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md). No new backend, target changes
+or verified LeWM speedup.
+
+## Previous autonomous acceptance: N2.b0 entry-driven source inventory (2026-10-15)
 
 Implementation `f21eb53`, with efficiency repair `a6ed118`, adds `scar inventory-program entry.py --project-root ...`
 and strict `scar check-inventory` replay. Local import candidates, definitions,

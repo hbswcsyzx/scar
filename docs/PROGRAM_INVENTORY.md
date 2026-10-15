@@ -2,7 +2,8 @@
 
 日期：2026-10-15。N2.b0 已有限验收，范围与冻结证据见
 [N2B0_ACCEPTANCE.md](N2B0_ACCEPTANCE.md)。完整程序模型仍未完成。
-运行来源桥接 N2.entry 的设计和验收要求见 [N2_ENTRY_PLAN.md](N2_ENTRY_PLAN.md)。
+运行来源桥接 N2.entry 的设计见 [N2_ENTRY_PLAN.md](N2_ENTRY_PLAN.md)，
+实际验收和覆盖断点见 [N2_ENTRY_ACCEPTANCE.md](N2_ENTRY_ACCEPTANCE.md)。
 
 ## 公共入口
 

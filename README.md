@@ -38,6 +38,13 @@ steps are recorded in [AUTOMATION_PROGRESS.md](docs/AUTOMATION_PROGRESS.md).
 The bounded inventory passed the [N2.b0 gate](docs/N2B0_ACCEPTANCE.md), including
 an unchanged external-source run and replay; whole-program modeling is pending.
 
+The runtime-source bridge reads existing trace code/process observations to
+automatically extend source discovery, reproduce code objects where possible,
+and persist definition/core-region links. It retains unresolved code versions
+and unobserved static branches. See the [N2.entry report](docs/N2_ENTRY_ACCEPTANCE.md)
+and [next interface and scheduling plan](docs/N2_SIGNATURE_PLAN.md). These links
+do not establish a complete execution graph, pure effects or a LeWM speedup.
+
 The graph pass includes loop membership: with `--lines`, observed bytecode
 back-edges become `loop_controls` edges and can produce a
 `GraphLoopInvariantCandidate`. Missing line or loop evidence stays UNKNOWN;

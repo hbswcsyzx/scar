@@ -1,0 +1,207 @@
+{
+  "schema": "scar.autonomous-acceptance",
+  "gate": "N2.entry",
+  "status": "PASS_BOUNDED_RUNTIME_SOURCE_BRIDGE",
+  "revision": "b886e406380576e1b847df46e4c45a6baf23867a",
+  "source_sha256": "8609a8631db70f4bb810dd3f17d649d4117d8afb57dc04866a7182eb1a4d6790",
+  "gate_cases": 429,
+  "regression_tests": 1477,
+  "external_status": "PASS_RUNTIME_SOURCE_BRIDGE",
+  "source_summary": {
+    "annotation_evaluation_policy_established": false,
+    "body_statuses": {
+      "LOWERED_WITH_GAPS": 41,
+      "NOT_ATTEMPTED": 1961,
+      "UNSUPPORTED": 215
+    },
+    "construction_operations": 1618,
+    "core_operations": 1035,
+    "core_values": 2168,
+    "coverage_atoms": 122323,
+    "coverage_statuses": {
+      "CONNECTED": 920,
+      "INVENTORY_ONLY": 107113,
+      "UNSUPPORTED": 14290
+    },
+    "cross_file_call_witnesses": 197,
+    "definitions": 2217,
+    "discovery_gaps": 1083,
+    "fine_state_effects_established": false,
+    "implicit_invocations": 518,
+    "inventory_issues": 3198,
+    "runtime": {
+      "all_paths_observed": false,
+      "callable_bindings_established": false,
+      "code_observation_groups": 285,
+      "code_reproduced_groups": 40,
+      "code_source_status": {
+        "MISMATCH": 222,
+        "MISSING": 6,
+        "OUT_OF_SCOPE": 23,
+        "VERIFIED": 34
+      },
+      "compilation_attempts": 252,
+      "core_region_links": 1,
+      "effect_equivalence_established": false,
+      "source_definition_links": 256,
+      "source_selection": {
+        "AVAILABLE_PYTHON": 262,
+        "OUTSIDE_PROJECT": 23
+      },
+      "trace_issues": 0,
+      "trace_records": 45894
+    },
+    "runtime_reachability_established": false,
+    "source_calls": 10235,
+    "source_calls_with_candidates": 207,
+    "source_files": 151,
+    "transformation_authorized": false,
+    "whole_program_graph_established": false
+  },
+  "target_executed_this_gate": false,
+  "whole_program_model_established": false,
+  "optimization_authorized": false,
+  "workload_speedup_verified": false,
+  "evidence_files": [
+    {
+      "path": "artifacts/reports/gates/n2-entry-verified.json",
+      "sha256": "9b433a0187ed9c23d5823562881805b671a09650bc761ac682a7ed713400c505",
+      "bytes": 134443
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-verified.md",
+      "sha256": "e382e288b336e6ef509a537e726044104054a68ab80691d57724bc35ced0127b",
+      "bytes": 2784
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-full-regression.json",
+      "sha256": "ad6591b8aa60c9caafa31a48e6a35a20e03494c78067845a2a6cba65f5d601cb",
+      "bytes": 794
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-full-regression.xml.gz",
+      "sha256": "f36ddf5081387e82f57e506889ccdefe716f4014b1dd4275d041cbfc9bc35958",
+      "bytes": 31057
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-full-regression.stdout.txt",
+      "sha256": "5df0f27f114b35a1f5b95f4d7487061b32d1967f1e85960d522f730ed6a8fef7",
+      "bytes": 2841
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-full-regression.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-full-regression.time.txt",
+      "sha256": "567dcbf47803385e521abbb9df1349177dd5c44292e4ae2005efe32ae335bd3b",
+      "bytes": 850
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-receipt.json",
+      "sha256": "67a3d6c9e798abb6b3541a0aa5f3836f931f65017637a7811ea1622dc7d833b8",
+      "bytes": 27679
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-progress.json",
+      "sha256": "40b28cefe41df49788468583822e1bd47b5c8cc873d7baf8f05d511072ae2d54",
+      "bytes": 4569
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-inventory.json.gz",
+      "sha256": "d4d7ea6d745ee67e4d6856d10b14d820183b8251f01b99b9eff06a5eae3c0aba",
+      "bytes": 6916540
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-comparison.json",
+      "sha256": "0b13681d73740cc5a6e92712cc9266868b0c6544a35dc4e08b35df6db2778021",
+      "bytes": 94109
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-trace-development.json",
+      "sha256": "e66ad30d87a4a49f6641db56b77d9948d26f8b86ddb310229654ad2b94647de1",
+      "bytes": 7328
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-source-pressure.py",
+      "sha256": "7806b37faed4479f9549761bfced7a1a8aa11c685ce31efafa471755903d1d07",
+      "bytes": 5838
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-compare.py",
+      "sha256": "e54347f39453880dccad30182ff8a6c1376426257849b00fb35c13a0141062f7",
+      "bytes": 4464
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-finalize.py",
+      "sha256": "e78749d18c35b7b68f6d00d774189129e0d9f795538145537790ceb0ed9c102d",
+      "bytes": 4078
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-development-archives.json",
+      "sha256": "cee19dc104aa00277f040b768553ca6f659e67ced769d2ed324fffc682e4098e",
+      "bytes": 2027
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-analysis.stdout.txt",
+      "sha256": "934a82f7e23f5e145cb068dec298dd4e6aa60140676569e2d4fdd50d837c646a",
+      "bytes": 1307
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-analysis.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-analysis.time.txt",
+      "sha256": "4420ddec12a4400eb23cbf103b7665715e4580d18e8c06c3058c1f8e79c9403e",
+      "bytes": 1051
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-replay.stdout.txt",
+      "sha256": "b0d47a3473524f2a2b1cf1a14b94d2a56b6bfa2253578be9093ff0a11f73ed24",
+      "bytes": 1255
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-replay.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-lewm-replay.time.txt",
+      "sha256": "81294163f575185714ed92d61720e625dbe0e77acffb49b16520617c59d3a05b",
+      "bytes": 885
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-integration-development.xml.gz",
+      "sha256": "f327b770b5d3c94e5570860b9db84ae97832e9d59a9e2483e429189e13747815",
+      "bytes": 2383
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-public-development.xml.gz",
+      "sha256": "2ec9515043ba87e80311ba4c97ecc30e841156bf4b858d8c9625fead61005ad3",
+      "bytes": 2354
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-pid-repaired.xml.gz",
+      "sha256": "1a21fd20280a62a641a971fbc391fa0253057ca07e042c5dbc66012273e255db",
+      "bytes": 1732
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-source-compatibility.xml.gz",
+      "sha256": "db4d0df182b621f0d72e6a77631d669f3c1214d84c67cdaff6028ee18d075591",
+      "bytes": 2115
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-evidence-queries.xml.gz",
+      "sha256": "effe52d7de673f29bd2e969c1f5e132edbb1f3ae099bcb8a26131a601fef2999",
+      "bytes": 751
+    },
+    {
+      "path": "artifacts/reports/gates/n2-entry-definition-index-development.xml.gz",
+      "sha256": "cb3f3b76139ed6cc4c012777c8d4cac9f98232e6b7f6cf630da67e7f71b96758",
+      "bytes": 1426
+    }
+  ]
+}

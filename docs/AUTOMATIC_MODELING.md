@@ -6,6 +6,12 @@ N2.b0 的入口驱动自动范围与接口清单已有限验收，见
 完整 LeWM 自动建模尚未验收。最新边界、难点和后续验收见
 [AUTOMATION_PROGRESS.md](AUTOMATION_PROGRESS.md)。
 
+N2.entry 已实现从已有真实 trace 自动补入来源、按 code/process 保存证据、
+持久化源码定义和可用的 core Region 对应；状态与外部覆盖见
+[N2_ENTRY_ACCEPTANCE.md](N2_ENTRY_ACCEPTANCE.md)。无需用户填写动态文件列表。
+完整调用/状态/循环连接仍待完成；下一门先修跨文件全局展开调度并分离函数体
+和定义/调用接口，见 [N2_SIGNATURE_PLAN.md](N2_SIGNATURE_PLAN.md)。
+
 ## 用户输入与自动化边界
 
 实际使用要求是提供源码/程序入口或运行命令，SCAR 自动识别构造、恢复依赖、
@@ -24,7 +30,8 @@ scar check-inventory inventory.json.gz
 它自动发现本地候选源码、枚举定义/调用/覆盖缺口，并共享每文件准备结果，
 自动尝试有限 body 构图。候选文件图与独立 body 图尚未合成完整程序图；
 详细报告含义见 [PROGRAM_INVENTORY.md](PROGRAM_INVENTORY.md)。
-任意运行命令、动态 loader 和运行配置到完整执行模型的连接仍未完成。
+可选 `--trace /path/to/trace` 自动补充已观察来源；任意运行命令、完整动态 loader
+和运行配置到完整执行模型的连接仍未完成。
 
 旧入口仍可用于**指定一个源码函数体**的诊断：
 
