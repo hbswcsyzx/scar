@@ -1,5 +1,24 @@
 # Current evidence and remaining work
 
+## Latest bounded component: D0 compact source seeds (2026-10-15)
+
+Implementation `39e8f22` passed **196 gate checks / 83.324s** and **2,033 full
+repository tests / 242.28s**, with no failures/errors/skips. Its frozen source
+fingerprint is `81d6a6b675055eaa70a8e4dff566107dc3329859e999e7f918050bd983c26909`.
+The unchanged real LeWM archive yielded 812 entered-code groups, 548 verified
+code/source links and 421 complete unique definition seeds. Public independent
+replay passed; target source/Git and raw trace remained unchanged. The report
+is 266,292 gzip bytes. Generation took 349.361s / 230,564KiB peak RSS; replay
+352.998s / 237,716KiB. Replay overlapped a separate source diagnostic; these are
+analysis costs, not workload benchmarks or LeWM speedup.
+
+The source seeds do not yet enter inventory scheduling, bind actual arguments,
+establish environments/effects, or authorize a transformation. One source profile
+identified unused full-graph digest work in `index→snapshot`. Next: preserve the
+same identity/boundary rules while publishing a thin source index, then typed
+v6 entry-first demand. See [D0 evidence](N2_CALL_SEEDS.md),
+[D1 plan](N2_CALL_DEMAND_PLAN.md) and [current automation](AUTOMATION_STATUS_20261015.md).
+
 ## Current bounded component: C0 frame lifecycle (2026-10-15)
 
 Frozen `72aaf54` passed **863 mapped tests / 143.949s** and **1,898 repository

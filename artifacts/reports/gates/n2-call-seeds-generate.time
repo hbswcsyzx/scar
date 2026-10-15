@@ -1,0 +1,23 @@
+	Command being timed: "/home/zyf/miniconda3/envs/lewm/bin/python -m scar.cli seed-calls /home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015 --project-root /home/zyf/AAA/le-wm --out /home/zyf/AAA/scar/artifacts/experiments/n2_call_source_seeds/real/seeds.json.gz --max-call-trace-bytes 256000000 --max-call-trace-events 250000 --max-call-references 2000000 --max-call-report-bytes 8000000"
+	User time (seconds): 347.53
+	System time (seconds): 1.14
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 5:49.35
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 230564
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 434788
+	Voluntary context switches: 1
+	Involuntary context switches: 132374
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 528
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 0

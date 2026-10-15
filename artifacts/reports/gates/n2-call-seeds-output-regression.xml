@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="2.619" timestamp="2026-10-15T22:39:22.852463+00:00" hostname="gpu1"><testcase classname="tests.integration.test_call_source_seeds_cli" name="test_unresolved_captured_source_is_protected_even_if_it_looks_like_a_report[False-seed-calls-scar.call-source-seeds]" time="0.601"><failure message="AssertionError: {&quot;status&quot;: &quot;SOURCE_SEEDS&quot;, &quot;summary&quot;: {&quot;counts&quot;: {&quot;processes&quot;: 1, &quot;files&quot;: 3, &quot;code_captures&quot;: 4, &quot;entered_code_groups&quot;: 4, &quot;entered_invocations&quot;: 4, &quot;eligible_groups&quot;: 0, &quot;eligible_codes&quot;: 0, &quot;issues&quot;: 0}, &quot;caller_connections_established&quot;: false, &quot;data_connections_established&quot;: false, &quot;effects_established&quot;: false, &quot;function_environment_established&quot;: false, &quot;transformation_authorized&quot;: false}, &quot;out&quot;: &quot;/tmp/scar-d0-output-regression/test_unresolved_captured_sourc0/project/module.json&quot;, &quot;transformation_authorized&quot;: false}&#10;  &#10;assert 0 == 2&#10; +  where 0 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'scar.cli', 'seed-calls', '/tmp/scar-d0-outp...put-regression/test_unresolved_captured_sourc0/project/module.json&quot;, &quot;transformation_authorized&quot;: false}\n', stderr='').returncode">tmp_path = PosixPath('/tmp/scar-d0-output-regression/test_unresolved_captured_sourc0')
+command = 'seed-calls', schema = 'scar.call-source-seeds', hardlink = False
+
+    @pytest.mark.parametrize('command,schema', [('seed-calls', 'scar.call-source-seeds'),
+                                               ('link-calls', 'scar.call-links-envelope')])
+    @pytest.mark.parametrize('hardlink', [False, True])
+    def test_unresolved_captured_source_is_protected_even_if_it_looks_like_a_report(tmp_path, command, schema, hardlink):
+        project = tmp_path / 'project'
+        project.mkdir()
+        # This dict expression is both valid Python and valid JSON. Python code
+        # filenames need not end in .py; source-budget failure must not hide it.
+        source = project / 'module.json'
+        original = json.dumps({'schema': schema}).encode()
+        source.write_bytes(original)
+        entry = project / 'entry.py'
+        entry.write_text(f'exec(compile(open({str(source)!r}).read(), {str(source)!r}, "exec"), {{}})\n')
+        trace = tmp_path / 'trace'
+        capture = cli('trace', '--calls-only', '--project-root', project, '--out', trace,
+                      '--', sys.executable, entry, cwd=project)
+        assert capture.returncode == 0, capture.stdout + capture.stderr
+        destination = tmp_path / 'source-alias.json' if hardlink else source
+        if hardlink:
+            os.link(source, destination)
+        rejected = cli(command, trace, '--project-root', project, '--out', destination,
+                       '--max-call-source-bytes', 1)
+&gt;       assert rejected.returncode == 2, rejected.stdout + rejected.stderr
+E       AssertionError: {"status": "SOURCE_SEEDS", "summary": {"counts": {"processes": 1, "files": 3, "code_captures": 4, "entered_code_groups": 4, "entered_invocations": 4, "eligible_groups": 0, "eligible_codes": 0, "issues": 0}, "caller_connections_established": false, "data_connections_established": false, "effects_established": false, "function_environment_established": false, "transformation_authorized": false}, "out": "/tmp/scar-d0-output-regression/test_unresolved_captured_sourc0/project/module.json", "transformation_authorized": false}
+E         
+E       assert 0 == 2
+E        +  where 0 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'scar.cli', 'seed-calls', '/tmp/scar-d0-outp...put-regression/test_unresolved_captured_sourc0/project/module.json", "transformation_authorized": false}\n', stderr='').returncode
+
+tests/integration/test_call_source_seeds_cli.py:172: AssertionError</failure></testcase><testcase classname="tests.integration.test_call_source_seeds_cli" name="test_unresolved_captured_source_is_protected_even_if_it_looks_like_a_report[False-link-calls-scar.call-links-envelope]" time="0.624"><failure message="AssertionError: {&quot;status&quot;: &quot;LINKED&quot;, &quot;summary&quot;: {&quot;frame_entries&quot;: 4, &quot;frame_exits&quot;: 4, &quot;code_source_statuses&quot;: {&quot;INCOMPLETE&quot;: 4}, &quot;verified_source_call_sites&quot;: 0, &quot;core_call_observations&quot;: 0, &quot;direct_core_call_observations&quot;: 0, &quot;target_body_observations&quot;: 0, &quot;tracked_immediate_callers&quot;: 3, &quot;tracked_ancestors_through_intervening_frames&quot;: 0, &quot;verified_normal_frame_exits&quot;: 0, &quot;reference_occurrences&quot;: 9, &quot;reference_routes&quot;: 0, &quot;issues&quot;: 5, &quot;target_executed_by_linker&quot;: false, &quot;function_environment_established&quot;: false, &quot;contents_or_effects_established&quot;: false, &quot;transformation_authorized&quot;: false}, &quot;out&quot;: &quot;/tmp/scar-d0-output-regression/test_unresolved_captured_sourc1/project/module.json&quot;, &quot;transformation_authorized&quot;: false}&#10;  &#10;assert 0 == 2&#10; +  where 0 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'scar.cli', 'link-calls', '/tmp/scar-d0-outp...put-regression/test_unresolved_captured_sourc1/project/module.json&quot;, &quot;transformation_authorized&quot;: false}\n', stderr='').returncode">tmp_path = PosixPath('/tmp/scar-d0-output-regression/test_unresolved_captured_sourc1')
+command = 'link-calls', schema = 'scar.call-links-envelope', hardlink = False
+
+    @pytest.mark.parametrize('command,schema', [('seed-calls', 'scar.call-source-seeds'),
+                                               ('link-calls', 'scar.call-links-envelope')])
+    @pytest.mark.parametrize('hardlink', [False, True])
+    def test_unresolved_captured_source_is_protected_even_if_it_looks_like_a_report(tmp_path, command, schema, hardlink):
+        project = tmp_path / 'project'
+        project.mkdir()
+        # This dict expression is both valid Python and valid JSON. Python code
+        # filenames need not end in .py; source-budget failure must not hide it.
+        source = project / 'module.json'
+        original = json.dumps({'schema': schema}).encode()
+        source.write_bytes(original)
+        entry = project / 'entry.py'
+        entry.write_text(f'exec(compile(open({str(source)!r}).read(), {str(source)!r}, "exec"), {{}})\n')
+        trace = tmp_path / 'trace'
+        capture = cli('trace', '--calls-only', '--project-root', project, '--out', trace,
+                      '--', sys.executable, entry, cwd=project)
+        assert capture.returncode == 0, capture.stdout + capture.stderr
+        destination = tmp_path / 'source-alias.json' if hardlink else source
+        if hardlink:
+            os.link(source, destination)
+        rejected = cli(command, trace, '--project-root', project, '--out', destination,
+                       '--max-call-source-bytes', 1)
+&gt;       assert rejected.returncode == 2, rejected.stdout + rejected.stderr
+E       AssertionError: {"status": "LINKED", "summary": {"frame_entries": 4, "frame_exits": 4, "code_source_statuses": {"INCOMPLETE": 4}, "verified_source_call_sites": 0, "core_call_observations": 0, "direct_core_call_observations": 0, "target_body_observations": 0, "tracked_immediate_callers": 3, "tracked_ancestors_through_intervening_frames": 0, "verified_normal_frame_exits": 0, "reference_occurrences": 9, "reference_routes": 0, "issues": 5, "target_executed_by_linker": false, "function_environment_established": false, "contents_or_effects_established": false, "transformation_authorized": false}, "out": "/tmp/scar-d0-output-regression/test_unresolved_captured_sourc1/project/module.json", "transformation_authorized": false}
+E         
+E       assert 0 == 2
+E        +  where 0 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'scar.cli', 'link-calls', '/tmp/scar-d0-outp...put-regression/test_unresolved_captured_sourc1/project/module.json", "transformation_authorized": false}\n', stderr='').returncode
+
+tests/integration/test_call_source_seeds_cli.py:172: AssertionError</failure></testcase><testcase classname="tests.integration.test_call_source_seeds_cli" name="test_unresolved_captured_source_is_protected_even_if_it_looks_like_a_report[True-seed-calls-scar.call-source-seeds]" time="0.632"><failure message="AssertionError: {&quot;status&quot;: &quot;SOURCE_SEEDS&quot;, &quot;summary&quot;: {&quot;counts&quot;: {&quot;processes&quot;: 1, &quot;files&quot;: 3, &quot;code_captures&quot;: 4, &quot;entered_code_groups&quot;: 4, &quot;entered_invocations&quot;: 4, &quot;eligible_groups&quot;: 0, &quot;eligible_codes&quot;: 0, &quot;issues&quot;: 0}, &quot;caller_connections_established&quot;: false, &quot;data_connections_established&quot;: false, &quot;effects_established&quot;: false, &quot;function_environment_established&quot;: false, &quot;transformation_authorized&quot;: false}, &quot;out&quot;: &quot;/tmp/scar-d0-output-regression/test_unresolved_captured_sourc2/source-alias.json&quot;, &quot;transformation_authorized&quot;: false}&#10;  &#10;assert 0 == 2&#10; +  where 0 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'scar.cli', 'seed-calls', '/tmp/scar-d0-outp...utput-regression/test_unresolved_captured_sourc2/source-alias.json&quot;, &quot;transformation_authorized&quot;: false}\n', stderr='').returncode">tmp_path = PosixPath('/tmp/scar-d0-output-regression/test_unresolved_captured_sourc2')
+command = 'seed-calls', schema = 'scar.call-source-seeds', hardlink = True
+
+    @pytest.mark.parametrize('command,schema', [('seed-calls', 'scar.call-source-seeds'),
+                                               ('link-calls', 'scar.call-links-envelope')])
+    @pytest.mark.parametrize('hardlink', [False, True])
+    def test_unresolved_captured_source_is_protected_even_if_it_looks_like_a_report(tmp_path, command, schema, hardlink):
+        project = tmp_path / 'project'
+        project.mkdir()
+        # This dict expression is both valid Python and valid JSON. Python code
+        # filenames need not end in .py; source-budget failure must not hide it.
+        source = project / 'module.json'
+        original = json.dumps({'schema': schema}).encode()
+        source.write_bytes(original)
+        entry = project / 'entry.py'
+        entry.write_text(f'exec(compile(open({str(source)!r}).read(), {str(source)!r}, "exec"), {{}})\n')
+        trace = tmp_path / 'trace'
+        capture = cli('trace', '--calls-only', '--project-root', project, '--out', trace,
+                      '--', sys.executable, entry, cwd=project)
+        assert capture.returncode == 0, capture.stdout + capture.stderr
+        destination = tmp_path / 'source-alias.json' if hardlink else source
+        if hardlink:
+            os.link(source, destination)
+        rejected = cli(command, trace, '--project-root', project, '--out', destination,
+                       '--max-call-source-bytes', 1)
+&gt;       assert rejected.returncode == 2, rejected.stdout + rejected.stderr
+E       AssertionError: {"status": "SOURCE_SEEDS", "summary": {"counts": {"processes": 1, "files": 3, "code_captures": 4, "entered_code_groups": 4, "entered_invocations": 4, "eligible_groups": 0, "eligible_codes": 0, "issues": 0}, "caller_connections_established": false, "data_connections_established": false, "effects_established": false, "function_environment_established": false, "transformation_authorized": false}, "out": "/tmp/scar-d0-output-regression/test_unresolved_captured_sourc2/source-alias.json", "transformation_authorized": false}
+E         
+E       assert 0 == 2
+E        +  where 0 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'scar.cli', 'seed-calls', '/tmp/scar-d0-outp...utput-regression/test_unresolved_captured_sourc2/source-alias.json", "transformation_authorized": false}\n', stderr='').returncode
+
+tests/integration/test_call_source_seeds_cli.py:172: AssertionError</failure></testcase><testcase classname="tests.integration.test_call_source_seeds_cli" name="test_unresolved_captured_source_is_protected_even_if_it_looks_like_a_report[True-link-calls-scar.call-links-envelope]" time="0.657"><failure message="AssertionError: {&quot;status&quot;: &quot;LINKED&quot;, &quot;summary&quot;: {&quot;frame_entries&quot;: 4, &quot;frame_exits&quot;: 4, &quot;code_source_statuses&quot;: {&quot;INCOMPLETE&quot;: 4}, &quot;verified_source_call_sites&quot;: 0, &quot;core_call_observations&quot;: 0, &quot;direct_core_call_observations&quot;: 0, &quot;target_body_observations&quot;: 0, &quot;tracked_immediate_callers&quot;: 3, &quot;tracked_ancestors_through_intervening_frames&quot;: 0, &quot;verified_normal_frame_exits&quot;: 0, &quot;reference_occurrences&quot;: 9, &quot;reference_routes&quot;: 0, &quot;issues&quot;: 5, &quot;target_executed_by_linker&quot;: false, &quot;function_environment_established&quot;: false, &quot;contents_or_effects_established&quot;: false, &quot;transformation_authorized&quot;: false}, &quot;out&quot;: &quot;/tmp/scar-d0-output-regression/test_unresolved_captured_sourc3/source-alias.json&quot;, &quot;transformation_authorized&quot;: false}&#10;  &#10;assert 0 == 2&#10; +  where 0 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'scar.cli', 'link-calls', '/tmp/scar-d0-outp...utput-regression/test_unresolved_captured_sourc3/source-alias.json&quot;, &quot;transformation_authorized&quot;: false}\n', stderr='').returncode">tmp_path = PosixPath('/tmp/scar-d0-output-regression/test_unresolved_captured_sourc3')
+command = 'link-calls', schema = 'scar.call-links-envelope', hardlink = True
+
+    @pytest.mark.parametrize('command,schema', [('seed-calls', 'scar.call-source-seeds'),
+                                               ('link-calls', 'scar.call-links-envelope')])
+    @pytest.mark.parametrize('hardlink', [False, True])
+    def test_unresolved_captured_source_is_protected_even_if_it_looks_like_a_report(tmp_path, command, schema, hardlink):
+        project = tmp_path / 'project'
+        project.mkdir()
+        # This dict expression is both valid Python and valid JSON. Python code
+        # filenames need not end in .py; source-budget failure must not hide it.
+        source = project / 'module.json'
+        original = json.dumps({'schema': schema}).encode()
+        source.write_bytes(original)
+        entry = project / 'entry.py'
+        entry.write_text(f'exec(compile(open({str(source)!r}).read(), {str(source)!r}, "exec"), {{}})\n')
+        trace = tmp_path / 'trace'
+        capture = cli('trace', '--calls-only', '--project-root', project, '--out', trace,
+                      '--', sys.executable, entry, cwd=project)
+        assert capture.returncode == 0, capture.stdout + capture.stderr
+        destination = tmp_path / 'source-alias.json' if hardlink else source
+        if hardlink:
+            os.link(source, destination)
+        rejected = cli(command, trace, '--project-root', project, '--out', destination,
+                       '--max-call-source-bytes', 1)
+&gt;       assert rejected.returncode == 2, rejected.stdout + rejected.stderr
+E       AssertionError: {"status": "LINKED", "summary": {"frame_entries": 4, "frame_exits": 4, "code_source_statuses": {"INCOMPLETE": 4}, "verified_source_call_sites": 0, "core_call_observations": 0, "direct_core_call_observations": 0, "target_body_observations": 0, "tracked_immediate_callers": 3, "tracked_ancestors_through_intervening_frames": 0, "verified_normal_frame_exits": 0, "reference_occurrences": 9, "reference_routes": 0, "issues": 5, "target_executed_by_linker": false, "function_environment_established": false, "contents_or_effects_established": false, "transformation_authorized": false}, "out": "/tmp/scar-d0-output-regression/test_unresolved_captured_sourc3/source-alias.json", "transformation_authorized": false}
+E         
+E       assert 0 == 2
+E        +  where 0 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-m', 'scar.cli', 'link-calls', '/tmp/scar-d0-outp...utput-regression/test_unresolved_captured_sourc3/source-alias.json", "transformation_authorized": false}\n', stderr='').returncode
+
+tests/integration/test_call_source_seeds_cli.py:172: AssertionError</failure></testcase></testsuite></testsuites>

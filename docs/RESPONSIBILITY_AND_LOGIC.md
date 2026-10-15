@@ -4,8 +4,8 @@
 操作行为和连接类型，不理解载荷的业务含义。保存视频与保存 tensor 可展开为
 相同的编码/序列化、状态写入等基础操作组合；具体实现和依赖仍明确保留。
 
-2026-10-13 核心决定见 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)：先用四类语义
-节点和明确的值/状态/控制/效果关系建模整个程序，再对具有完整接口的子图
+2026-10-13 核心决定见 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)：先用四类结构
+实体和明确的值/状态/控制/效果关系建模整个程序，再对具有完整接口的子图
 进行等价化简。输入输出是端口角色，K/Σ/A/R/Q/M 是视角；不能以分类标签和
 trace 数量代替完整依赖模型。N1 已实现并验收有限同步图；源码恢复和优化连接
 仍待 N2—N4，具体边界见 [N1_ACCEPTANCE.md](N1_ACCEPTANCE.md)。
@@ -74,7 +74,9 @@ SCAR 的内部模型是 `<K, Σ, A, R, Q, M>`：
 - InvocationID 标识一次真实动态调用；
 - ObjectID 是 Python 对象身份，不是数据内容身份；
 - StorageID 是底层分配/存储身份，必须考虑 view、alias 和地址复用；
-- Region 是 storage、offset、shape、stride、dtype 的几何区域；
+- StorageRegion 是 storage、offset、shape、stride、dtype 的几何区域；旧
+  `scar.ir.entities.Region` 也指这个物理类型，不能与 `scar.ir.program.Region`
+  的程序子图混用；
 - LogicalValueID 标识逻辑 lineage，ValueVersionID 标识其某个版本；
 - ProvenanceID 记录生成/变换的输入和状态来源，不能由内容 hash 代替；
 - 一个逻辑版本可以有 NVMe、DRAM、pinned host 和 HBM 等多个 Materialization。

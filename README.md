@@ -1,11 +1,13 @@
 # SCAR v0.1.0
 
-SCAR means **State · Control · Action · Resource**. It is an execution-driven
-optimizer for real Python/PyTorch programs. Its responsibility is to discover
-avoidable work, establish evidence and guards, estimate whether a change is
-profitable, select a backend, transform execution, and validate the result.
+SCAR means **State · Control · Action · Resource**. It is a prototype for
+automatic program modeling and optimization planning for Python/PyTorch.
+The current task is to recover connected value/state/control dependencies,
+identify avoidable work and produce precise, evidenced modification guidance.
+Complete automatic program recovery and credible LeWM simplification remain
+unfinished. See the [current scope and gates](docs/AUTOMATION_STATUS_20261015.md).
 
-The v0.1 prototype has a deliberately small but real loop:
+The earlier v1 capture/backend experiments exercise this bounded loop:
 
 ```text
 program -> JSONL execution trace -> generic opportunity detector
@@ -68,6 +70,15 @@ retaining unknown state/lifetime effects. The Python `lower_source` API keeps
 its legacy default. See [C0 acceptance](docs/N2_FRAME_ACCEPTANCE.md) and
 [the implementation and commands](docs/N2_FRAME_IMPLEMENTATION.md).
 Whole-program connectivity and LeWM speedup remain unverified.
+
+The [compact source witness bridge](docs/N2_CALL_SEEDS.md) passed **196 gate
+checks and 2,033 repository tests**, plus unchanged-source LeWM trace replay.
+`seed-calls` and `check-call-seeds` automatically resolve entered code groups
+without retaining reference vectors or saving Tensor contents. The real archive
+yielded 421 unique definition seeds; these are not approved optimizations.
+The [next gate](docs/N2_CALL_DEMAND_PLAN.md) connects them to entry-first source
+and body expansion. Actual/formal binding and whole-program connectivity remain
+pending; no LeWM transformation or speedup is claimed.
 
 The graph pass includes loop membership: with `--lines`, observed bytecode
 back-edges become `loop_controls` edges and can produce a
