@@ -1,0 +1,161 @@
+{
+  "schema": "scar.experiment.c1-independent-review",
+  "schema_version": 1,
+  "commands": [
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python /tmp/scar-c1-review-wRpc3wJZ/hook_trials.py",
+      "returncode": 0,
+      "result": "result.json",
+      "independent_process_trials": 8
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python /tmp/scar-c1-review-wRpc3wJZ/probe.py --out /tmp/scar-c1-review-wRpc3wJZ/replay.json",
+      "returncode": 0,
+      "result": "replay.json",
+      "counts": {
+        "events": 154,
+        "attempts": 15,
+        "conditional_routes": 9
+      },
+      "assertions": {
+        "same_code_same_ref_ambiguity": true,
+        "raw_name_shape_distinguished": true,
+        "two_file_distinct_paths": true,
+        "two_file_shared_paths_not_selected_by_ref": true,
+        "global_and_local_rebinding_counterexamples": true
+      }
+    },
+    {
+      "command": "PYTHONDONTWRITEBYTECODE=1 python /tmp/scar-c1-review-wRpc3wJZ/audit_observer.py",
+      "returncode": 0,
+      "result": "audit_observer.json",
+      "observed_audit_events": [
+        {
+          "phase": "getframe",
+          "event": "sys._getframe"
+        },
+        {
+          "phase": "frame_code",
+          "event": "object.__getattr__"
+        },
+        {
+          "phase": "function_code",
+          "event": "object.__getattr__"
+        },
+        {
+          "phase": "function_defaults",
+          "event": "object.__getattr__"
+        },
+        {
+          "phase": "function_kwdefaults",
+          "event": "object.__getattr__"
+        }
+      ]
+    }
+  ],
+  "additional_read_only_checks": [
+    {
+      "check": "local version/public monitoring API names/header signatures",
+      "returncode": 0
+    },
+    {
+      "check": "inline sys._getframe/frame.f_code audit check, then retained standalone audit_observer reproduction",
+      "returncode": 0
+    }
+  ],
+  "observed": [
+    "Eight hook trials each used a separate process and newly compiled caller code.",
+    "monitor_only:5 INSTRUCTION/1 CALL; monitor_then_profile:0 INSTRUCTION/1 CALL/4 PROFILE; profile_then_monitor:5 INSTRUCTION/1 CALL/4 PROFILE.",
+    "Reinstalling the same profile or removing/restoring it preserved delivery in these trials; replacing profile retained INSTRUCTION but changed profile recipient.",
+    "Replacing INSTRUCTION callback kept queried profile/tool/global/local masks unchanged while the original callback lost its five instruction deliveries.",
+    "register_callback changes produced audit events; local mask off/restore produced no matching audit event in this trial, and instruction delivery disappeared/reappeared.",
+    "Exact original probe copied to this directory reproduced 154 events/15 attempts/9 conditional routes and all five assertions.",
+    "sys._getframe, frame.f_code and function.__code__/__defaults__/__kwdefaults__ triggered audit events and therefore can invoke already installed Python audit hooks."
+  ],
+  "inferred_production_protocol": {
+    "session": [
+      "new schema/version",
+      "exact interpreter/build",
+      "rule versions",
+      "pycode-v2/current-source snapshot",
+      "pid/tid",
+      "hook/configuration epoch",
+      "identity policy",
+      "independent ceilings"
+    ],
+    "hook_gap": [
+      "sequence/anchor",
+      "pid/tid",
+      "epoch",
+      "change/configuration observation",
+      "affected pending attempts",
+      "explicit incomplete scope"
+    ],
+    "pre_load": [
+      "caller invocation",
+      "code/offset/canonical opcode/full span",
+      "dynamic occurrence id",
+      "namespace/slot",
+      "exact builtin callable classifier",
+      "reference token",
+      "pre-load observation is not stack result"
+    ],
+    "call_attempt": [
+      "unique attempt id",
+      "direct caller invocation",
+      "call code/offset/span",
+      "callee occurrence",
+      "ordered actual occurrences",
+      "normalized callable/arg0-or-MISSING",
+      "dispatch-time code/layout",
+      "hook epoch/gaps"
+    ],
+    "entry": [
+      "invocation/direct parent",
+      "matched attempt",
+      "actual entered code",
+      "ordered formals/reference observations",
+      "incomplete or mismatch boundaries"
+    ],
+    "completion": [
+      "same invocation/attempt",
+      "normal/unknown/suspended boundary",
+      "return reference/site",
+      "unclosed counts"
+    ],
+    "metadata": [
+      "actual written and attempted counts",
+      "drops/errors/budget truncation",
+      "open attempts/frames",
+      "hook audit/configuration gaps",
+      "all proof/transform authority false"
+    ],
+    "first_supported_rule": "Exact raw FunctionType observed before validated LOAD_FAST/LOAD_GLOBAL, fixed positional explicit FAST_LOCAL Name occurrences supplying every formal, no receiver/default/adapter/packing consumption, synchronous direct entry. Route by occurrence and position; reference equality only rejects inconsistency.",
+    "flow_rule": "Validate the dynamic instruction window for this attempt. Do not choose the latest same-name/span load from the entire invocation, or any same-token occurrence from the trace.",
+    "hook_policy": "Install profile before local CALL/INSTRUCTION configuration; audit profile/callback changes where observed, poll profile/tool/masks, and require every needed occurrence/entry. Configuration equality or audit silence does not certify continuity.",
+    "observation_policy": "Never reevaluate callee/actual AST, call target helpers, enumerate arbitrary user containers, invoke repr/equality/hash/descriptor protocols, or inspect signature via adapters. Exact builtin access only; bound/safe reads and weak lifetime identity, no tensor contents. Audit/frame/namespace interposition remains explicit."
+  },
+  "conditions_unknown": [
+    "NO_FRAME_INTERPOSITION",
+    "NO_UNMODELED_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+    "OBSERVER_CALLBACKS_DO_NOT_REPLACE_VALUES_OR_CONTROL",
+    "observer/audit noninterference and hook continuity outside established records"
+  ],
+  "remaining_boundaries": [
+    "No evaluated value-stack operands or full argument vector are exposed by these callbacks.",
+    "CALL callable/arg0 does not distinguish raw function from hidden receiver normalization; same-code/same-ref/default alias remains ambiguous without pre-load shape.",
+    "LOAD_ATTR/descriptor results, bound/partial/default/keyword/star packing, async/generator/native calls and untracked caller paths remain outside the first binding rule.",
+    "Snapshot tokens are event-local; no cross-event identity or provenance follows from them.",
+    "Function code/layout must be checked at dispatch/entry; load-time layout may have changed during actual evaluation.",
+    "Dynamic first-encounter instrumentation enabled inside a profile callback was not separately tested in this review; startup-configured fresh code is the directly measured case.",
+    "Strong diagnostic references in the original probe affect object lifetimes; production must not copy that identity table.",
+    "No public observer scheme here proves absence of all hook/audit/namespace interference or establishes function environment/content/effects/purity."
+  ],
+  "unconditional_binding_verified": false,
+  "function_environment_established": false,
+  "contents_or_effects_established": false,
+  "transformation_authorized": false,
+  "repository_files_modified": false,
+  "lewm_executed": false,
+  "full_suite_executed": false
+}

@@ -1,0 +1,60 @@
+{
+  "files": [
+    {
+      "name": "audit_observer.json",
+      "bytes": 645,
+      "sha256": "f8f6e1b4478fa3d2cdee9f0ec36e43d5408532847319b50cb40b33d79cccdb24"
+    },
+    {
+      "name": "audit_observer.py",
+      "bytes": 1210,
+      "sha256": "8171fd4bb70899bb88bae9d932320500316f11c758f2892efff0506915998bd5"
+    },
+    {
+      "name": "entry_fixture.py",
+      "bytes": 502,
+      "sha256": "8af8e4e31e76466a5891288d94a1b8ffaf1c759f70821f31ad5463e85bf042b4"
+    },
+    {
+      "name": "handoff.json",
+      "bytes": 7440,
+      "sha256": "ce7f2c9379d14719769eaa9106518fc58170388f7639aafda7b7b258dfda97cf"
+    },
+    {
+      "name": "helper_fixture.py",
+      "bytes": 235,
+      "sha256": "3526a802a31cb49ff308320f2604629860ce88748051f898031dd6ef70790704"
+    },
+    {
+      "name": "hook_trials.py",
+      "bytes": 5610,
+      "sha256": "297685a933589d592c87768e74d9319a16890f96bacd433bc6911f8653dece0c"
+    },
+    {
+      "name": "probe.py",
+      "bytes": 31251,
+      "sha256": "5db001fa8f71b96a3c5c4131e2829d04ba65686166673aacfb2a9ae36d70d891"
+    },
+    {
+      "name": "replay.json",
+      "bytes": 181981,
+      "sha256": "9a62d49e2a037dec0034723cbb63f2f44735974662cc5b3a6e43ecc617abcca2"
+    },
+    {
+      "name": "replay.summary.json",
+      "bytes": 10286,
+      "sha256": "1abf60a37cf194a0035922a9c4d4d87df22d4781af7d81fa138d80af1990083b"
+    },
+    {
+      "name": "result.json",
+      "bytes": 32701,
+      "sha256": "43bd88003ed08d726ec20f9e439dd41b061a98b51d6b49c4b43587eb8c7b18d8"
+    },
+    {
+      "name": "setup.json",
+      "bytes": 1385,
+      "sha256": "75422541ca52f154bdd971d1cff8aabbb4349704b54d500b2eea3e38e0d474ff"
+    }
+  ],
+  "total_bytes": 273246
+}

@@ -1,8 +1,11 @@
 """Private context boundaries and global-construction accounting invariants."""
 import json
+import gc
 import stat
 
 import pytest
+
+pytestmark = pytest.mark.filterwarnings("error::pytest.PytestUnraisableExceptionWarning")
 
 from scar.analysis.program_context_store import ContextStoreLimit, PreparedContextStore
 from scar.analysis.program_inventory import inventory_program
@@ -77,6 +80,21 @@ def test_raw_record_limit_cleans_partial_file_without_refunding_writes(tmp_path)
         with pytest.raises(ContextStoreLimit):
             store.put(context)
         assert previous < store.compressed_bytes_written <= store.budget.max_compressed_bytes
+
+
+@pytest.mark.parametrize("compressed_limit", [1, 12, 100])
+def test_compressed_limit_closes_gzip_and_removes_the_partial_record(tmp_path, compressed_limit):
+    source = tmp_path / "program.py"
+    source.write_text("def value(x):\n    return x\n")
+    context = prepare_source(source, project_root=tmp_path)
+    with PreparedContextStore(ContextStoreBudget(max_compressed_bytes=compressed_limit)) as store:
+        with pytest.raises(ContextStoreLimit, match="compressed context store budget"):
+            store.put(context)
+        gc.collect()  # Exercise buffered gzip finalizers before leaving the test.
+        assert not list(store.directory.iterdir())
+        assert store.compressed_bytes_written <= compressed_limit
+        with pytest.raises(KeyError):
+            store.get(source)
 
 
 def test_single_root_lowering_cannot_consume_other_observed_root_budget(tmp_path):

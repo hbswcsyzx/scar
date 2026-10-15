@@ -13,16 +13,19 @@ import hashlib
 import io
 import os
 from pathlib import Path
+import re
 import stat
 import tokenize
 
 from scar.ir.frontend_v2 import EXCLUDED_DIRECTORIES, source_reference
+from scar.ir.program.call_edges import CallLinkStatus, CodeSourceLink
 from scar.ir.program.discovery import (
     CandidateRole, DiscoveredFile, DiscoveryGap, DiscoveryGapKind,
     DiscoveryRootMode, DiscoveryStatus, ImportDependency, ModuleCandidate,
     ModuleMapping, SourceDiscovery, DiscoveryControlKind, ImportControlContext,
 )
 from scar.ir.semantics_v2 import ImportForm, SourceSnapshot
+from scar.ir.record_codec import decode, encode
 from scar.ir.v2.common import SourceReference
 
 
@@ -249,10 +252,9 @@ def _module_path_parts(name: str, root: Path) -> tuple[str, ...] | None:
     return parts
 
 
-def _candidate_for_path(name: str, path: Path, root: Path,
-                        project_root: Path, role: CandidateRole,
-                        *, namespace: bool, source: SourceReference | None,
-                        gaps: list[DiscoveryGap]) -> ModuleCandidate:
+def _parent_initializers(path: Path, root: Path, project_root: Path,
+                         *, namespace: bool, source: SourceReference | None,
+                         gaps: list[DiscoveryGap]) -> tuple[str, ...]:
     if namespace:
         target_dir = path
         include_target = False
@@ -282,7 +284,16 @@ def _candidate_for_path(name: str, path: Path, root: Path,
                 parents.append(str(init))
     except ValueError:
         parents = []
-    return ModuleCandidate(name, str(path), str(root), tuple(parents), namespace, role)
+    return tuple(parents)
+
+
+def _candidate_for_path(name: str, path: Path, root: Path,
+                        project_root: Path, role: CandidateRole,
+                        *, namespace: bool, source: SourceReference | None,
+                        gaps: list[DiscoveryGap]) -> ModuleCandidate:
+    parents = _parent_initializers(path, root, project_root, namespace=namespace,
+                                   source=source, gaps=gaps)
+    return ModuleCandidate(name, str(path), str(root), parents, namespace, role)
 
 
 def _resolve_module(name: str, root: Path, project_root: Path,
@@ -630,9 +641,60 @@ def discover_sources(entry, *, project_root=None, source_roots=(), max_files=128
     )
 
 
+def _discover_sources_from_call_sources(entry, *, source_witnesses,
+                                       project_root=None, source_roots=(),
+                                       max_files=128, max_bytes=8_000_000,
+                                       max_directories=4096) -> SourceDiscovery:
+    """Discover the entry closure before independent replayed call sources.
+
+    The v6 coordinator supplies complete CodeSourceLinks from a replayed D0
+    report. Their source hashes are checked again against the same bounded
+    read used for discovery. This internal interface has no trust override.
+    Unlike the original .py entry interface, witnessed additional source
+    filenames need not have a particular suffix.
+    """
+    return _discover_sources_from_entries(
+        entry, project_root=project_root, source_roots=source_roots,
+        max_files=max_files, max_bytes=max_bytes, max_directories=max_directories,
+        _call_source_witnesses=source_witnesses,
+    )
+
+
+def _call_source_fingerprints(witnesses, root):
+    if type(witnesses) is not tuple:
+        raise ValueError("source_witnesses must be a tuple of complete verified CodeSourceLinks")
+    fingerprints = {}
+    for witness in witnesses:
+        if type(witness) is not CodeSourceLink:
+            raise ValueError("source_witnesses require typed CodeSourceLinks")
+        # Validate nested types as well as the outer dataclass. A constructed
+        # record is not an escape from the strict source-witness interface.
+        witness = decode(CodeSourceLink, encode(witness))
+        if (witness.status is not CallLinkStatus.VERIFIED or witness.snapshot is None
+                or witness.definition is None or witness.source is None
+                or witness.snapshot.path != witness.source.path
+                or witness.snapshot.fingerprint != witness.source.fingerprint
+                or re.fullmatch(r"pycode-v2:[0-9a-f]{64}", witness.code) is None
+                or not witness.optimize_levels
+                or any(type(level) is not int or level not in (0, 1, 2)
+                       for level in witness.optimize_levels)
+                or len(set(witness.optimize_levels)) != len(witness.optimize_levels)):
+            raise ValueError("call source witness must have complete verified source/definition evidence")
+        raw_path = witness.snapshot.path
+        if not Path(raw_path).is_absolute() or os.path.normpath(raw_path) != raw_path:
+            raise ValueError("call source witness path must be absolute and normalized")
+        path = _absolute_inside(raw_path, root, relative_to_root=False)
+        fingerprint = witness.snapshot.fingerprint
+        if path in fingerprints and fingerprints[path] != fingerprint:
+            raise ValueError("call source witnesses have conflicting fingerprints for one path")
+        fingerprints[path] = fingerprint
+    return fingerprints
+
+
 def _discover_sources_from_entries(entry, *, additional_entries=(), project_root=None,
                                   source_roots=(), max_files=128,
-                                  max_bytes=8_000_000, max_directories=4096) -> SourceDiscovery:
+                                  max_bytes=8_000_000, max_directories=4096,
+                                  _call_source_witnesses=None) -> SourceDiscovery:
     """Discover one candidate closure with a shared budget and fixed boundary.
 
     Additional entries are absolute paths selected by an internal evidence
@@ -673,12 +735,19 @@ def _discover_sources_from_entries(entry, *, additional_entries=(), project_root
         gaps.append(DiscoveryGap(DiscoveryGapKind.SYMLINK,
             "Entry traverses a symbolic link and was not read.", path=str(entry_abs)))
 
-    additional_paths = set()
-    for item in additional_entries:
-        path = _absolute_inside(item, root, relative_to_root=False)
-        if path.suffix != _SOURCE_SUFFIX:
-            raise ValueError("additional entry must be a .py source file")
-        additional_paths.add(path)
+    source_fingerprints = {}
+    if _call_source_witnesses is None:
+        additional_paths = set()
+        for item in additional_entries:
+            path = _absolute_inside(item, root, relative_to_root=False)
+            if path.suffix != _SOURCE_SUFFIX:
+                raise ValueError("additional entry must be a .py source file")
+            additional_paths.add(path)
+    else:
+        if additional_entries:
+            raise ValueError("call source witnesses cannot be mixed with legacy additional entries")
+        source_fingerprints = _call_source_fingerprints(_call_source_witnesses, root)
+        additional_paths = set(source_fingerprints)
     ordered_additional = tuple(sorted(additional_paths, key=str))
 
     if isinstance(source_roots, (str, bytes, Path)):
@@ -697,11 +766,12 @@ def _discover_sources_from_entries(entry, *, additional_entries=(), project_root
                 "Source-root package initializer is a symbolic link and was not read.",
                 path=str(root_init)))
 
-    # Keep the entry first, then all distinct additional entries, before any
-    # import closure. A file outside the selected search roots still resolves
-    # absolute imports against those roots; its relative context is unknown.
+    # The legacy policy queues additional entries before imports. The v6
+    # witness policy holds them until the entry closure is exhausted. A file
+    # outside selected roots still uses those roots for absolute imports.
     frontier: deque[tuple[Path, SourceReference | None]] = deque([(entry_abs, None)])
-    frontier.extend((path, None) for path in ordered_additional if path != entry_abs)
+    additional_frontier: deque[tuple[Path, SourceReference | None]] = deque(
+        (path, None) for path in ordered_additional if path != entry_abs)
     for path in ordered_additional:
         if _path_has_symlink_below(path, root):
             continue
@@ -709,12 +779,13 @@ def _discover_sources_from_entries(entry, *, additional_entries=(), project_root
         # mapping. A runtime-selected filename does not witness an import or
         # execution of these initializers, so the frontier source stays None.
         for mapping in _module_mappings(path, roots):
-            candidate = _candidate_for_path(
-                mapping.name, path, Path(mapping.source_root), root,
-                CandidateRole.REQUESTED_MODULE, namespace=False,
-                source=None, gaps=gaps,
-            )
-            frontier.extend((Path(parent), None) for parent in candidate.parent_initializers)
+            parents = _parent_initializers(
+                path, Path(mapping.source_root), root, namespace=False,
+                source=None, gaps=gaps)
+            additional_frontier.extend((Path(parent), None) for parent in parents)
+    if _call_source_witnesses is None:
+        frontier.extend(additional_frontier)
+        additional_frontier.clear()
     attempted: set[Path] = set()
     attempted_count = 0
     parsed: dict[Path, tuple[str, str, str, ast.Module, dict[ast.AST, SourceReference],
@@ -722,7 +793,12 @@ def _discover_sources_from_entries(entry, *, additional_entries=(), project_root
     imports: list[ImportDependency] = []
     total_bytes = 0
 
-    while frontier:
+    while frontier or additional_frontier:
+        if not frontier:
+            # v6 gives the original entry/import closure the shared budget
+            # first. Each later observation root then uses this same import
+            # loop; no separate graph or uncharged discovery is introduced.
+            frontier.append(additional_frontier.popleft())
         path, trigger_source = frontier.popleft()
         if path in attempted:
             continue
@@ -768,6 +844,8 @@ def _discover_sources_from_entries(entry, *, additional_entries=(), project_root
                 source=trigger_source, path=str(path)))
             continue
         fingerprint = "sha256:" + hashlib.sha256(text.encode()).hexdigest()
+        if path in source_fingerprints and fingerprint != source_fingerprints[path]:
+            raise ValueError("call source witness fingerprint differs from current discovery read: " + str(path))
         try:
             tree = ast.parse(text, filename=str(path), type_comments=True)
         except (SyntaxError, ValueError) as exc:

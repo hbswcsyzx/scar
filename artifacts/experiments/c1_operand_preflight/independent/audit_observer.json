@@ -1,0 +1,26 @@
+{
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "events": [
+    {
+      "phase": "getframe",
+      "event": "sys._getframe"
+    },
+    {
+      "phase": "frame_code",
+      "event": "object.__getattr__"
+    },
+    {
+      "phase": "function_code",
+      "event": "object.__getattr__"
+    },
+    {
+      "phase": "function_defaults",
+      "event": "object.__getattr__"
+    },
+    {
+      "phase": "function_kwdefaults",
+      "event": "object.__getattr__"
+    }
+  ],
+  "inference": "A collector using these APIs cannot promise no additional user audit-hook calls when such hooks are installed."
+}

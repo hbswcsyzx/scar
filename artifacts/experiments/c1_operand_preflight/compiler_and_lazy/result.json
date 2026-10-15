@@ -1,0 +1,782 @@
+{
+  "schema": "scar.experiment.compile-context-audit",
+  "schema_version": 1,
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "python_executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "frozen_worktree_head": "2cf4e40ba7464275da6d5b846774ae6c28b54c51",
+  "input_report": {
+    "path": "/home/zyf/AAA/scar/artifacts/experiments/n2_call_source_seeds/real/seeds.json.gz",
+    "file_sha256": "b4411a2bd1ce55f7cc52909ae82911d7b221a8e643769fe19166d61d6b903864",
+    "decompressed_sha256": "2fb0269a5484adbf5a2920569763c36ded8fb666ed55c9c4b47e9a57bdc8269c",
+    "decompressed_bytes": 1558907
+  },
+  "probe_sha256": "dde2db3a7f18e613bac24f663ef104d2548cc2e4549c5a7c8a2d783785ce192a",
+  "limits": {
+    "max_report_bytes": 16000000,
+    "max_source_bytes": 4000000,
+    "max_source_files": 16,
+    "max_compile_attempts": 32,
+    "max_nested_codes": 10000,
+    "max_code_depth": 128
+  },
+  "future_features": {
+    "nested_scopes": 16,
+    "generators": 0,
+    "division": 131072,
+    "absolute_import": 262144,
+    "with_statement": 524288,
+    "print_function": 1048576,
+    "unicode_literals": 2097152,
+    "barry_as_FLUFL": 4194304,
+    "generator_stop": 8388608,
+    "annotations": 16777216
+  },
+  "future_mask": 33423376,
+  "future_mask_hex": "0x1fe0010",
+  "source_files": [
+    {
+      "path": "/home/zyf/AAA/le-wm/eval.py",
+      "raw_sha256": "6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+      "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+      "raw_bytes": 5822,
+      "encoding": "utf-8"
+    }
+  ],
+  "measurements": {
+    "mismatch_groups": 5,
+    "unique_source_files": 1,
+    "source_bytes": 5822,
+    "compile_attempts": 6,
+    "compile_cache_hits": 24,
+    "described_codes": 36,
+    "groups_with_full_match": {
+      "legacy_zero_flags": 0,
+      "inferred_future_flags": 5
+    }
+  },
+  "groups": [
+    {
+      "group": {
+        "code": "pycode-v2:54a6f3f0f9563a606d089b046cbdb554734cb3321c914b829b69bbf13d4b18bb",
+        "count": 1,
+        "first_anchor": {
+          "index": 1111,
+          "line_number": 1111,
+          "line_sha256": "b4464df4a13e64042fbb8075b50819db094f0f23272df8a1224bb3f27c9a6cd3",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "first_invocation": {
+          "invocation_id": 557,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "last_anchor": {
+          "index": 1111,
+          "line_number": 1111,
+          "line_sha256": "b4464df4a13e64042fbb8075b50819db094f0f23272df8a1224bb3f27c9a6cd3",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "last_invocation": {
+          "invocation_id": 557,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "process_id": 353869
+      },
+      "captured": {
+        "key": "pycode-v2:54a6f3f0f9563a606d089b046cbdb554734cb3321c914b829b69bbf13d4b18bb",
+        "filename": "/home/zyf/AAA/le-wm/eval.py",
+        "qualname": "<module>",
+        "first_line": 1,
+        "flags": 16777216,
+        "parameters": []
+      },
+      "inferred_future_flags": 16777216,
+      "enabled_future_features": [
+        "annotations"
+      ],
+      "snapshot_current_hash_equal": true,
+      "trials": [
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 0,
+          "cache_hit": false,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 1,
+          "cache_hit": false,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 2,
+          "cache_hit": false,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 0,
+          "cache_hit": false,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:54a6f3f0f9563a606d089b046cbdb554734cb3321c914b829b69bbf13d4b18bb",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "<module>",
+              "first_line": 1,
+              "flags": 16777216,
+              "parameters": []
+            }
+          ]
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 1,
+          "cache_hit": false,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 2,
+          "cache_hit": false,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        }
+      ]
+    },
+    {
+      "group": {
+        "code": "pycode-v2:6d7679139e747a17f5524ebced390f5c6f06098fb71782b0a5e247bb2f37c671",
+        "count": 1,
+        "first_anchor": {
+          "index": 4134,
+          "line_number": 4134,
+          "line_sha256": "cf908b73164741745a3534e5bbd0bb821da344ae6ab979d4808262870fc78d26",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "first_invocation": {
+          "invocation_id": 2070,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "last_anchor": {
+          "index": 4134,
+          "line_number": 4134,
+          "line_sha256": "cf908b73164741745a3534e5bbd0bb821da344ae6ab979d4808262870fc78d26",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "last_invocation": {
+          "invocation_id": 2070,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "process_id": 353869
+      },
+      "captured": {
+        "key": "pycode-v2:6d7679139e747a17f5524ebced390f5c6f06098fb71782b0a5e247bb2f37c671",
+        "filename": "/home/zyf/AAA/le-wm/eval.py",
+        "qualname": "get_episodes_length",
+        "first_line": 29,
+        "flags": 16777219,
+        "parameters": [
+          "dataset",
+          "episodes"
+        ]
+      },
+      "inferred_future_flags": 16777216,
+      "enabled_future_features": [
+        "annotations"
+      ],
+      "snapshot_current_hash_equal": true,
+      "trials": [
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 0,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 1,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 2,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 0,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:6d7679139e747a17f5524ebced390f5c6f06098fb71782b0a5e247bb2f37c671",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "get_episodes_length",
+              "first_line": 29,
+              "flags": 16777219,
+              "parameters": [
+                "dataset",
+                "episodes"
+              ]
+            }
+          ]
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 1,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:6d7679139e747a17f5524ebced390f5c6f06098fb71782b0a5e247bb2f37c671",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "get_episodes_length",
+              "first_line": 29,
+              "flags": 16777219,
+              "parameters": [
+                "dataset",
+                "episodes"
+              ]
+            }
+          ]
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 2,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:6d7679139e747a17f5524ebced390f5c6f06098fb71782b0a5e247bb2f37c671",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "get_episodes_length",
+              "first_line": 29,
+              "flags": 16777219,
+              "parameters": [
+                "dataset",
+                "episodes"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "group": {
+        "code": "pycode-v2:b454a32deb57e445ac73673152bfc3e7d79d541dec15b225c40af338da2666f7",
+        "count": 2,
+        "first_anchor": {
+          "index": 1860,
+          "line_number": 1860,
+          "line_sha256": "329733f9e0d5e489d016fb18df3d56e266553c7d72c41e3130ec91ddb9ed889b",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "first_invocation": {
+          "invocation_id": 933,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "last_anchor": {
+          "index": 3038,
+          "line_number": 3038,
+          "line_sha256": "3e10e7fffd89bcadb0bf4cf621996fab83b7f7b9e5cd2fec25c63f73680c0f6f",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "last_invocation": {
+          "invocation_id": 1522,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "process_id": 353869
+      },
+      "captured": {
+        "key": "pycode-v2:b454a32deb57e445ac73673152bfc3e7d79d541dec15b225c40af338da2666f7",
+        "filename": "/home/zyf/AAA/le-wm/eval.py",
+        "qualname": "img_transform",
+        "first_line": 17,
+        "flags": 16777219,
+        "parameters": [
+          "cfg"
+        ]
+      },
+      "inferred_future_flags": 16777216,
+      "enabled_future_features": [
+        "annotations"
+      ],
+      "snapshot_current_hash_equal": true,
+      "trials": [
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 0,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 1,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 2,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 0,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:b454a32deb57e445ac73673152bfc3e7d79d541dec15b225c40af338da2666f7",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "img_transform",
+              "first_line": 17,
+              "flags": 16777219,
+              "parameters": [
+                "cfg"
+              ]
+            }
+          ]
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 1,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:b454a32deb57e445ac73673152bfc3e7d79d541dec15b225c40af338da2666f7",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "img_transform",
+              "first_line": 17,
+              "flags": 16777219,
+              "parameters": [
+                "cfg"
+              ]
+            }
+          ]
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 2,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:b454a32deb57e445ac73673152bfc3e7d79d541dec15b225c40af338da2666f7",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "img_transform",
+              "first_line": 17,
+              "flags": 16777219,
+              "parameters": [
+                "cfg"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "group": {
+        "code": "pycode-v2:d3e5e998b97856ccac5f0894a5bb40c8bead0ac698fcc5e199bf1503cdfae1c7",
+        "count": 1,
+        "first_anchor": {
+          "index": 3058,
+          "line_number": 3058,
+          "line_sha256": "38aec7e6416806805f12699040db9738142d28add1dc5aab3c40b883e1b83904",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "first_invocation": {
+          "invocation_id": 1532,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "last_anchor": {
+          "index": 3058,
+          "line_number": 3058,
+          "line_sha256": "38aec7e6416806805f12699040db9738142d28add1dc5aab3c40b883e1b83904",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "last_invocation": {
+          "invocation_id": 1532,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "process_id": 353869
+      },
+      "captured": {
+        "key": "pycode-v2:d3e5e998b97856ccac5f0894a5bb40c8bead0ac698fcc5e199bf1503cdfae1c7",
+        "filename": "/home/zyf/AAA/le-wm/eval.py",
+        "qualname": "get_dataset",
+        "first_line": 40,
+        "flags": 16777219,
+        "parameters": [
+          "cfg",
+          "dataset_name"
+        ]
+      },
+      "inferred_future_flags": 16777216,
+      "enabled_future_features": [
+        "annotations"
+      ],
+      "snapshot_current_hash_equal": true,
+      "trials": [
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 0,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 1,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 2,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 0,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:d3e5e998b97856ccac5f0894a5bb40c8bead0ac698fcc5e199bf1503cdfae1c7",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "get_dataset",
+              "first_line": 40,
+              "flags": 16777219,
+              "parameters": [
+                "cfg",
+                "dataset_name"
+              ]
+            }
+          ]
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 1,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:d3e5e998b97856ccac5f0894a5bb40c8bead0ac698fcc5e199bf1503cdfae1c7",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "get_dataset",
+              "first_line": 40,
+              "flags": 16777219,
+              "parameters": [
+                "cfg",
+                "dataset_name"
+              ]
+            }
+          ]
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 2,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:d3e5e998b97856ccac5f0894a5bb40c8bead0ac698fcc5e199bf1503cdfae1c7",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "get_dataset",
+              "first_line": 40,
+              "flags": 16777219,
+              "parameters": [
+                "cfg",
+                "dataset_name"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "group": {
+        "code": "pycode-v2:e00fd01a3cf2a6faf55256a9bfe5d0fb7fedf4046a1a7fd10a4bd7532f0cb98c",
+        "count": 1,
+        "first_anchor": {
+          "index": 1279,
+          "line_number": 1279,
+          "line_sha256": "09aead41c6ab6205ddd5bf95b6c3fdbcc18610939869c983ad395f8ad6e9573b",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "first_invocation": {
+          "invocation_id": 642,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "last_anchor": {
+          "index": 1279,
+          "line_number": 1279,
+          "line_sha256": "09aead41c6ab6205ddd5bf95b6c3fdbcc18610939869c983ad395f8ad6e9573b",
+          "path": "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl"
+        },
+        "last_invocation": {
+          "invocation_id": 642,
+          "process_id": 353869,
+          "thread_id": 136340279064384
+        },
+        "process_id": 353869
+      },
+      "captured": {
+        "key": "pycode-v2:e00fd01a3cf2a6faf55256a9bfe5d0fb7fedf4046a1a7fd10a4bd7532f0cb98c",
+        "filename": "/home/zyf/AAA/le-wm/eval.py",
+        "qualname": "run",
+        "first_line": 49,
+        "flags": 83886083,
+        "parameters": [
+          "cfg"
+        ]
+      },
+      "inferred_future_flags": 16777216,
+      "enabled_future_features": [
+        "annotations"
+      ],
+      "snapshot_current_hash_equal": true,
+      "trials": [
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 0,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 1,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "legacy_zero_flags",
+          "flags": 0,
+          "flags_hex": "0x0",
+          "optimize": 2,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 0,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 1,
+          "full_matches": [
+            {
+              "key": "pycode-v2:e00fd01a3cf2a6faf55256a9bfe5d0fb7fedf4046a1a7fd10a4bd7532f0cb98c",
+              "filename": "/home/zyf/AAA/le-wm/eval.py",
+              "qualname": "run",
+              "first_line": 49,
+              "flags": 83886083,
+              "parameters": [
+                "cfg"
+              ]
+            }
+          ]
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 1,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        },
+        {
+          "strategy": "inferred_future_flags",
+          "flags": 16777216,
+          "flags_hex": "0x1000000",
+          "optimize": 2,
+          "cache_hit": true,
+          "nested_descriptors": 6,
+          "full_match_count": 0,
+          "full_matches": []
+        }
+      ]
+    }
+  ],
+  "fixture": {
+    "fixed_fixture_only_executed": true,
+    "application_executed": false,
+    "source_sha256": "18e8ac1fbddb1a2711d51ab109f3d2b3fa82f81ffc167f4fd555797b76b560eb",
+    "parent_flags": 16777216,
+    "captured": {
+      "key": "pycode-v2:0bb319ab05bf8ec54aa922a86cc29d00167eb3d23dac51f1c377dd5fe3d916cb",
+      "filename": "/tmp/scar-compile-flags-gV2DZOWN/embedded-child.py",
+      "qualname": "<module>",
+      "first_line": 1,
+      "flags": 16777216,
+      "parameters": []
+    },
+    "ordinary": {
+      "key": "pycode-v2:87b09eb62f7373f657844f572655b41058a31f155f7f958340b4b8ee707e4139",
+      "filename": "/tmp/scar-compile-flags-gV2DZOWN/embedded-child.py",
+      "qualname": "<module>",
+      "first_line": 1,
+      "flags": 0,
+      "parameters": []
+    },
+    "reconstructed": {
+      "key": "pycode-v2:0bb319ab05bf8ec54aa922a86cc29d00167eb3d23dac51f1c377dd5fe3d916cb",
+      "filename": "/tmp/scar-compile-flags-gV2DZOWN/embedded-child.py",
+      "qualname": "<module>",
+      "first_line": 1,
+      "flags": 16777216,
+      "parameters": []
+    },
+    "inferred_future_flags": 16777216,
+    "nested_complete_descriptors": [
+      {
+        "key": "pycode-v2:0bb319ab05bf8ec54aa922a86cc29d00167eb3d23dac51f1c377dd5fe3d916cb",
+        "filename": "/tmp/scar-compile-flags-gV2DZOWN/embedded-child.py",
+        "qualname": "<module>",
+        "first_line": 1,
+        "flags": 16777216,
+        "parameters": []
+      },
+      {
+        "key": "pycode-v2:6953fb0d49daa2a0d0dc26021de96ddbf725714fb646054bc11a4a65a665006e",
+        "filename": "/tmp/scar-compile-flags-gV2DZOWN/embedded-child.py",
+        "qualname": "__annotate__",
+        "first_line": 1,
+        "flags": 16777219,
+        "parameters": [
+          "format"
+        ]
+      },
+      {
+        "key": "pycode-v2:7b279cf071cdd5b8404872122bff121aded01964e0fbda21dabba5618fe22a65",
+        "filename": "/tmp/scar-compile-flags-gV2DZOWN/embedded-child.py",
+        "qualname": "identity",
+        "first_line": 1,
+        "flags": 16777219,
+        "parameters": [
+          "value"
+        ]
+      }
+    ],
+    "ordinary_full_match": false,
+    "inferred_full_match": true,
+    "inferred_nested_full_matches": 3
+  },
+  "matching_rule": "Every six-field describe_code dict is compared for complete equality, including structural pycode-v2 key; qualname/line do not select or repair a match.",
+  "application_executed": false,
+  "current_resolver_or_report_modified": false,
+  "inference_boundary": "Recovered future flags reproduce code. This does not prove which historical loader/parent supplied them, nor establish function environment or execution/effects."
+}

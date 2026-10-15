@@ -13,6 +13,7 @@ from dataclasses import dataclass, field, replace
 import hashlib
 import json
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from scar.analysis.program_lowering import prepare_source
 from scar.analysis.source_discovery import discover_sources, _discover_sources_from_entries
@@ -22,6 +23,8 @@ from scar.analysis.runtime_inventory import (
 from scar.analysis.runtime_sources import read_runtime_trace, resolve_runtime_seeds
 from scar.ir.program.runtime_sources import RuntimeTraceBudget
 from scar.ir.program.expansion import ContextStoreBudget, ExpansionMeasurements, ExpansionSchedule
+from scar.ir.program.call_demand import ExpansionScheduleV6, CallSourceScope
+from scar.ir.program.call_edges import CallEdgeBudget
 from scar.ir.program.functions import BodyLoweringProfile, FunctionInterfaces
 from scar.ir.program.frames import FrameModel
 from scar.ir.program.codec import dumps as dump_graph
@@ -35,7 +38,11 @@ from scar.ir.program.inventory import (
     ImportBindingWitness, InventoryIssue, ParameterInventory, ParameterKind, SourceContextDigest,
 )
 from scar.ir.record_codec import decode, encode
+from scar.ir.semantics_v2 import SourceSnapshot
 from scar.ir.v2.ids import OperationDefinitionID
+
+if TYPE_CHECKING:
+    from scar.analysis.call_seeds import CallSourceSeedReport
 
 
 def _canonical(document):
@@ -68,13 +75,31 @@ class ProgramInventory:
     files: tuple[FileInventory, ...]
     budget: InventoryBudget
     runtime_scope: RuntimeScope | None = None
-    expansion: ExpansionSchedule | None = None
+    expansion: ExpansionSchedule | ExpansionScheduleV6 | None = None
     analysis_measurements: ExpansionMeasurements | None = field(default=None, compare=False)
     interfaces: FunctionInterfaces | None = None
     profile: BodyLoweringProfile | None = None
     frames: tuple[FrameModel, ...] = ()
+    call_sources: CallSourceSeedReport | None = None
+    call_source_scope: CallSourceScope | None = None
+    source_analysis_measurements: dict | None = field(default=None, compare=False)
 
     def _check_profile(self):
+        if self.call_sources is not None:
+            from scar.analysis.call_seeds import CallSourceSeedReport
+            from scar.analysis.call_demand import _call_source_scope
+            if (type(self.call_sources) is not CallSourceSeedReport
+                    or type(self.expansion) is not ExpansionScheduleV6
+                    or type(self.call_source_scope) is not CallSourceScope
+                    or self.profile is not BodyLoweringProfile.BOUND_FRAME
+                    or self.runtime_scope is not None):
+                raise ValueError("inventory v6 requires calls, typed scope, v6 expansion and frame profile")
+            self.call_sources.model.__post_init__()
+            self.expansion.__post_init__()
+            if self.call_source_scope != _call_source_scope(self.call_sources, self.files):
+                raise ValueError("call source admissions differ from the final indexed bodies")
+        elif self.call_source_scope is not None or type(self.expansion) is ExpansionScheduleV6:
+            raise ValueError("v6 call records require their bound raw/source report")
         if type(self.frames) is not tuple or any(type(model) is not FrameModel for model in self.frames):
             raise ValueError("inventory frames must be typed frame records")
         if self.profile is None:
@@ -121,12 +146,19 @@ class ProgramInventory:
             summary["runtime"] = self.runtime_scope.summary()
         if self.expansion is not None:
             summary["expansion"] = {
-                "demand_kinds": dict(sorted(Counter(entry.kind.value for entry in self.expansion.entries).items())),
+                "demand_kinds": dict(sorted(Counter(origin.kind.value
+                    for entry in self.expansion.entries for origin in entry.origins).items()))
+                    if self.call_sources is not None else dict(sorted(Counter(entry.kind.value
+                        for entry in self.expansion.entries).items())),
                 "attempted": sum(entry.attempted for entry in self.expansion.entries),
                 "operation_budget_charged": sum(entry.operation_budget_charged for entry in self.expansion.entries),
                 "unknown_construction_costs": sum(not entry.construction_cost_known for entry in self.expansion.entries),
                 "unavailable_contexts": len(self.expansion.unavailable_contexts),
             }
+        if self.call_sources is not None:
+            summary["call_sources"] = self.call_sources.summary()
+            summary["call_source_scope"] = dict(sorted(Counter(
+                admission.status.value for admission in self.call_source_scope.admissions).items()))
         if self.interfaces is not None:
             summary["interfaces"] = {
                 "signatures": len(self.interfaces.signatures),
@@ -148,7 +180,7 @@ class ProgramInventory:
     def to_dict(self):
         self._check_profile()
         document = {
-            "schema": "scar.program-inventory", "schema_version": 5 if self.profile is not None else 4 if self.interfaces is not None else 3 if self.expansion is not None else 2 if self.runtime_scope is not None else 1,
+            "schema": "scar.program-inventory", "schema_version": 6 if self.call_sources is not None else 5 if self.profile is not None else 4 if self.interfaces is not None else 3 if self.expansion is not None else 2 if self.runtime_scope is not None else 1,
             "scope": "source-discovered candidate files, scoped interfaces and bounded automatic body lowering",
             "discovery": encode(self.discovery), "files": [_file_document(file) for file in self.files],
             "budget": encode(self.budget), "summary": self.summary(),
@@ -166,17 +198,21 @@ class ProgramInventory:
         if self.profile is not None:
             document["profile"] = self.profile.value
             document["frames"] = encode(self.frames)
+        if self.call_sources is not None:
+            document["call_sources"] = self.call_sources.to_dict()
+            document["call_source_scope"] = encode(self.call_source_scope)
         return document
 
     @classmethod
     def from_dict(cls, document, *, max_files=128, max_bytes=8_000_000, max_directories=4096,
                   max_lowered_bodies=256, max_operations=10000, max_call_witnesses=4096,
                   runtime_verification_budget=RuntimeTraceBudget(), max_compile_attempts=1024,
-                  context_verification_budget=ContextStoreBudget()):
+                  context_verification_budget=ContextStoreBudget(),
+                  call_verification_budget=CallEdgeBudget()):
         if type(document) is not dict:
             raise ValueError("inventory fields mismatch")
         version = document.get("schema_version")
-        if type(version) is not int or version not in (1, 2, 3, 4, 5):
+        if type(version) is not int or version not in (1, 2, 3, 4, 5, 6):
             raise ValueError("inventory schema/version mismatch")
         expected_fields = {
                 "schema", "schema_version", "scope", "discovery", "files", "budget", "summary",
@@ -187,8 +223,10 @@ class ProgramInventory:
             expected_fields.add("expansion")
         if version >= 4:
             expected_fields.add("interfaces")
-        if version == 5:
+        if version >= 5:
             expected_fields.update(("profile", "frames"))
+        if version == 6:
+            expected_fields.update(("call_sources", "call_source_scope"))
         if set(document) != expected_fields:
             raise ValueError("inventory fields mismatch")
         if document["schema"] != "scar.program-inventory":
@@ -201,6 +239,14 @@ class ProgramInventory:
                 raise ValueError("report exceeds independent verifier budget: " + field)
         discovery = decode(SourceDiscovery, document["discovery"])
         roots = discovery.source_roots if discovery.root_mode is DiscoveryRootMode.DECLARED else ()
+        if version == 6:
+            from scar.analysis.call_demand import replay_inventory_from_calls
+            rebuilt = replay_inventory_from_calls(document, discovery=discovery, roots=roots,
+                budget=requested, context_ceiling=context_verification_budget,
+                call_ceiling=call_verification_budget)
+            if _canonical(rebuilt.to_dict()) != _canonical(document):
+                raise ValueError("inventory differs from current raw call/source/discovery/context replay")
+            return rebuilt
         if version >= 3:
             expansion = decode(ExpansionSchedule, document["expansion"])
             _check_context_budget(expansion.budget, context_verification_budget)
@@ -289,6 +335,20 @@ def _unsupported(node):
         elif not isinstance(node, (ast.Name, ast.Constant, ast.BinOp, ast.UnaryOp, ast.Attribute, ast.Tuple, ast.List)):
             return "expression/control not connected by current body lowerer: " + type(node).__name__
     return ""
+
+
+@dataclass(frozen=True, slots=True)
+class _SourceWitnessIndex:
+    """Small source projection consumed by call/source matching.
+
+    It deliberately has no SourceContextDigest: the call matcher does not
+    consume the three serialized semantic/control layer digests.
+    """
+
+    snapshot: SourceSnapshot
+    definitions: tuple[DefinitionInventory, ...]
+    calls: tuple[CallInventory, ...]
+    coverage: tuple[CoverageEntry, ...]
 
 
 class _Inventory:
@@ -502,18 +562,33 @@ class _Inventory:
 
     def index(self):
         """Publish only lightweight source structure; do not lower a body."""
+        self._walk_source()
+        return self.snapshot()
+
+    def source_witness_index(self):
+        """Publish the call-matcher projection without serializing full layers."""
+        self._walk_source()
+        self._validate_coverage()
+        return _SourceWitnessIndex(
+            self.context.semantics.sources[str(self.context.path)],
+            tuple(self.definitions), tuple(self.calls), tuple(self.coverage),
+        )
+
+    def _walk_source(self):
         for node in self.context.tree.body:
             self.walk(node, self.module, ExecutionPhase.MODULE_INITIALIZATION, "")
         if self.runtime_builder is not None:
             self.runtime_builder.bind(self.context)
-        return self.snapshot()
 
-    def snapshot(self):
+    def _validate_coverage(self):
         # A source atom receives exactly one execution-owner/phase inventory.
         expected = {atom.id for atom in self.context.semantic.source_atoms.values()}
         actual = [entry.source.atom_id for entry in self.coverage]
         if len(actual) != len(set(actual)) or set(actual) != expected:
             raise ValueError("inventory source coverage has missing or duplicate atoms")
+
+    def snapshot(self):
+        self._validate_coverage()
         digest = SourceContextDigest(str(self.context.root), _digest(self.context.semantic.to_dict()),
                                      _digest(self.context.semantics.to_dict()), _digest(self.context.control.to_dict()))
         return FileInventory(self.context.semantics.sources[str(self.context.path)], tuple(self.definitions),
@@ -561,10 +636,16 @@ def _attach_bodies(file, bodies, *, call_witnesses=None):
 def inventory_program(entry, *, project_root=None, source_roots=(), max_files=128, max_bytes=8_000_000,
                       max_directories=4096, max_lowered_bodies=256, max_operations=10000, max_call_witnesses=4096,
                       runtime_trace=None, runtime_budget=RuntimeTraceBudget(), max_compile_attempts=1024,
-                      context_budget=ContextStoreBudget()):
+                      context_budget=ContextStoreBudget(), calls_trace=None, call_budget=CallEdgeBudget()):
     budget = InventoryBudget(max_files, max_bytes, max_directories, max_lowered_bodies, max_operations, max_call_witnesses)
     _check_budget(budget)
     _check_context_budget(context_budget)
+    if calls_trace is not None:
+        if runtime_trace is not None:
+            raise ValueError("calls input and legacy runtime trace are separate inventory modes")
+        from scar.analysis.call_demand import inventory_from_calls
+        return inventory_from_calls(entry, project_root=project_root, source_roots=source_roots,
+            budget=budget, call_trace=calls_trace, call_budget=call_budget, context_budget=context_budget)
     trace = read_runtime_trace(runtime_trace, budget=runtime_budget) if runtime_trace is not None else None
     return _inventory_from_inputs(entry, project_root=project_root, source_roots=source_roots,
                                   budget=budget, runtime=trace, max_compile_attempts=max_compile_attempts,

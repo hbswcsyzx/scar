@@ -338,6 +338,7 @@ def main(argv=None) -> int:
     inventory_program.add_argument("--source-root", action="append", default=[], help="explicit local source root; repeat for candidate contexts")
     inventory_program.add_argument("--out", required=True, help="compact source/body report JSON, optionally .gz")
     inventory_program.add_argument("--trace", help="augment candidate source scope from an existing runtime trace directory/JSONL/gzip")
+    inventory_program.add_argument("--calls", help="raw call-edge trace directory; enable v6 entry-first source demand")
     inventory_program.set_defaults(func=_inventory_program)
     check_inventory = sub.add_parser("check-inventory", help="rebuild a source inventory from current files and discovery context")
     check_inventory.add_argument("report", help="inventory report JSON or JSON.gz")
@@ -365,7 +366,7 @@ def main(argv=None) -> int:
     check_call_seeds = sub.add_parser('check-call-seeds',help='independently rescan compact call seeds against raw trace and current source')
     check_call_seeds.add_argument('report')
     check_call_seeds.set_defaults(func=_check_call_seeds_cli)
-    for command in (call_links,check_call_links,query_call_refs,seed_calls,check_call_seeds):
+    for command in (call_links,check_call_links,query_call_refs,seed_calls,check_call_seeds,inventory_program,check_inventory):
         command.add_argument('--max-call-report-bytes',type=int,default=256000000,
                              help='independent decompressed input/output report ceiling')
         command.add_argument('--max-call-trace-bytes',type=int,default=128000000)
@@ -579,7 +580,8 @@ def _inventory_program(args) -> int:
                                    source_roots=args.source_root, **_inventory_limits(args),
                                    runtime_trace=args.trace, runtime_budget=_runtime_inventory_budget(args),
                                    max_compile_attempts=args.max_compile_attempts,
-                                   context_budget=_context_inventory_budget(args))
+                                   context_budget=_context_inventory_budget(args),
+                                   calls_trace=args.calls, call_budget=_call_budget(args))
         for file in result.discovery.files:
             source = Path(file.snapshot.path)
             if output == source or (output.exists() and source.samefile(output)):
@@ -590,12 +592,26 @@ def _inventory_program(args) -> int:
             actual = resolve(logical)
             if output == logical or output == actual or (output.exists() and actual.samefile(output)):
                 raise ValueError("report must differ from its runtime trace")
-        _compressed_document(output, result.to_dict())
+        if result.call_sources is not None:
+            protected = chain(Path(result.call_sources.model.trace_directory).iterdir(),
+                              _call_source_inputs(result.call_sources.model))
+            if any(output == path.resolve() or output.exists() and path.exists() and output.samefile(path)
+                   for path in protected):
+                raise ValueError("inventory report must differ from raw calls and captured source inputs")
+            if output.exists():
+                existing = _call_json(output, max_bytes=args.max_call_report_bytes)
+                if type(existing) is not dict or existing.get("schema") != "scar.program-inventory":
+                    raise ValueError("refusing to overwrite a non-inventory-report output")
+            _write_call_document(output, result.to_dict(), args.max_call_report_bytes)
+        else:
+            _compressed_document(output, result.to_dict())
     except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
         return 2
     print(json.dumps({"status": "INVENTORIED", "out": str(output), "summary": result.summary(),
-                      "analysis_measurements": _inventory_analysis_measurements(result)}))
+                      "analysis_measurements": _inventory_analysis_measurements(result),
+                      **({"source_analysis_measurements": result.source_analysis_measurements}
+                         if result.call_sources is not None else {})}))
     return 0
 
 
@@ -605,15 +621,17 @@ def _check_inventory(args) -> int:
     from scar.trace.files import open_text
 
     try:
-        with open_text(args.report) as stream:
-            result = ProgramInventory.from_dict(strict_loads(stream.read()), **_inventory_limits(args),
-                runtime_verification_budget=_runtime_inventory_budget(args), max_compile_attempts=args.max_compile_attempts,
-                context_verification_budget=_context_inventory_budget(args))
+        result = ProgramInventory.from_dict(_call_json(args.report, max_bytes=args.max_call_report_bytes),
+            **_inventory_limits(args), runtime_verification_budget=_runtime_inventory_budget(args),
+            max_compile_attempts=args.max_compile_attempts,
+            context_verification_budget=_context_inventory_budget(args), call_verification_budget=_call_budget(args))
     except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
         return 2
     print(json.dumps({"status": "REPLAYED", "summary": result.summary(), "transformation_authorized": False,
-                      "analysis_measurements": _inventory_analysis_measurements(result)}))
+                      "analysis_measurements": _inventory_analysis_measurements(result),
+                      **({"source_analysis_measurements": result.source_analysis_measurements}
+                         if result.call_sources is not None else {})}))
     return 0
 
 
@@ -699,7 +717,7 @@ def _call_inventory_input(path,args,expected=None):
         raise ValueError('call report inventory file differs from its bound input')
     inventory=ProgramInventory.from_dict(_call_json(actual),**_inventory_limits(args),
         runtime_verification_budget=_runtime_inventory_budget(args),max_compile_attempts=args.max_compile_attempts,
-        context_verification_budget=_context_inventory_budget(args))
+        context_verification_budget=_context_inventory_budget(args),call_verification_budget=_call_budget(args))
     return inventory,{'path':str(actual),'sha256':digest}
 
 

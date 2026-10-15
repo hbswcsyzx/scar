@@ -1,6 +1,8 @@
 # D1：入口优先的自动程序展开
 
-状态：Proposed，尚未实现。前置 D0 见 [紧凑源码见证](N2_CALL_SEEDS.md)。
+状态：Verified D1 only；303 项映射门、2,193 项全仓回归及真实归档公共重放通过。
+前置 D0 见 [紧凑源码见证](N2_CALL_SEEDS.md)，本轮记录见
+[D1 验收进度](N2_CALL_DEMAND_ACCEPTANCE.md)。
 本门直接修复“新真实调用见证没有进入自动展开队列”，不增加 detector/backend。
 完整 actual→formal、函数环境、循环、状态与化简指导仍按原 C1/C2/E4 门验收。
 
@@ -69,6 +71,11 @@ core body 合并统计。需要 module/class/lambda/comprehension 接口的定�
 不能让旧 additional-entry 后缀检查使整个自动分析意外终止，也不能把它直接
 当成数据文件。旧 v1–v5 的既有后缀接口不在本门静默变更。
 
+实际验收发现 `prepare_source→frontend selected_sources` 仍拒绝非 `.py` 文件，
+所以真实 D0 对此保留 `SOURCE_BOUNDARY`，不会产生 eligible seed。v6 discovery
+可检查完整 typed witness 的非 `.py` 协议，但这不代表前端端到端已支持该来源；
+本门保持此边界，并测试零 eligible 时仍保存原始 calls 输入和具体原因。
+
 ## 4. 入口依赖调度
 
 目前两处旧策略不足：discovery 把 additional entries 放在 entry imports 前；
@@ -94,7 +101,7 @@ D0 `_Sources.context` 已调用 prepare/index。直接 resolver→现有 expansi
 
 已由单文件 cProfile 及代码审查确认第一步的具体边界：`_Inventory.index()`
 遍历后调用 `snapshot()`，后者为 `SourceContextDigest` 计算三个完整图摘要；
-`_Sources` 仅消费 snapshot、definitions、coverage，从不消费该 context digest。
+`_Sources` 消费 snapshot、definitions、calls、coverage，从不消费该 context digest。
 先新增私有 source-witness index 发布路径，复用同一个 walk、完整 source-atom
 coverage 检查和原 identity factory，只返回所需三类内容。原 `index()/snapshot()`
 及其历史报告仍保留全部摘要。新匹配结果必须逐字段等同冻结 D0 的 code/source

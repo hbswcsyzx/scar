@@ -85,9 +85,24 @@ class _LightSource:
     return_nodes_by_position: dict
 
 
+def _source_witness_projection(prepared):
+    """Publish only the source/signature records consumed by this matcher."""
+    indexed = _Inventory(prepared, 0, 0).source_witness_index()
+    signatures = {}
+    for definition in indexed.definitions:
+        node = next((node for node in ast.walk(prepared.tree) if hasattr(node, "args")
+                     and hasattr(node, "end_lineno") and _span(node) == (
+                         definition.source.start_line, definition.source.end_line,
+                         definition.source.start_column, definition.source.end_column)), None)
+        if node is not None:
+            signatures[definition.id] = extract_signature(prepared, definition, node=node)
+    return indexed, prepared.text, prepared.tree, signatures
+
+
 class _Sources:
-    def __init__(self, root, budget, inventory):
+    def __init__(self, root, budget, inventory, *, _source_workspace=None):
         self.root, self.budget, self.inventory = root, budget, inventory
+        self._source_workspace = _source_workspace
         self.contexts, self.indexes, self.compiled, self.links, self.objects = {}, {}, {}, {}, {}
         self.context_errors = {}
         self.site_links, self.operand_links = {}, {}
@@ -128,17 +143,14 @@ class _Sources:
         else:
             # The optional-inventory path builds source records once, then
             # drops the heavyweight semantic/opcode/control overlays.
-            prepared = prepare_source(path, project_root=self.root)
-            indexed = _Inventory(prepared, 0, 0).index()
-            text, tree = prepared.text, prepared.tree
-            for definition in indexed.definitions:
-                node = next((node for node in ast.walk(tree) if hasattr(node, "args")
-                             and hasattr(node, "end_lineno") and _span(node) == (
-                                 definition.source.start_line, definition.source.end_line,
-                                 definition.source.start_column, definition.source.end_column)), None)
-                if node is not None and definition.id not in self.signatures:
-                    self.signatures[definition.id] = extract_signature(prepared, definition, node=node)
-            del prepared
+            if self._source_workspace is not None:
+                indexed, text, tree, signatures = self._source_workspace.source_projection(path)
+            else:
+                prepared = prepare_source(path, project_root=self.root)
+                indexed, text, tree, signatures = _source_witness_projection(prepared)
+                del prepared
+            self.signatures.update((key, value) for key, value in signatures.items()
+                                   if key not in self.signatures)
         references = {(item.ast_kind, item.source.start_line, item.source.end_line,
                        item.source.start_column, item.source.end_column): item.source for item in indexed.coverage}
         nodes = defaultdict(list)

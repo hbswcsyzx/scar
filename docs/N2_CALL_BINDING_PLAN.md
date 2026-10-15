@@ -1,14 +1,16 @@
 # 下一门：调用求值、实际绑定与函数环境
 
-日期：2026-10-15。状态：**D0 有限验收；D1/C1/C2 尚未实现验收**。
+日期：2026-10-15。状态：**D0/D1 有限验收；C1/C2 尚未实现验收**。
 前置：[C0 frame 验收](N2_FRAME_ACCEPTANCE.md)。不增加 detector/backend。
 完整 C1/C2 和 N2.call-edges E4 保留；下面的有限子门不替代它们。
 
 本轮 D0 实现 `39e8f22` 通过 196 门检查及全仓 2,033 项，原 LeWM 归档独立重放
 通过；自动得到 421 个完整源码定义种子。它们尚未进入 inventory 调度，也不是
 获批优化点。实际成本、剩余边界及报告见 [D0 验收](N2_CALL_SEEDS.md)。
-下一门的 typed 来源、入口优先展开和共享源码准备见
-[D1 开发计划](N2_CALL_DEMAND_PLAN.md)。
+D1 实现 `2cf4e40` 已通过 303 门 / 2,193 全仓检查及原 LeWM 公共重放，32 个
+源码种子接到局部 core，389 个保留具体 scope/lowering 边界，未建立 actual/formal。
+见 [D1 验收](N2_CALL_DEMAND_ACCEPTANCE.md)。下一门细化见
+[跨层实现计划](N2_CROSS_CALL_IMPLEMENTATION.md)。
 
 ## 1. 目标和当前实际断点
 
@@ -17,8 +19,8 @@
 
 当前有两项独立断点，不能只继续增加候选或记录字段：
 
-1. 新 calls-only 的完整 CodeSnapshot 已核验大量 source definitions，但旧
-   runtime-source scheduler 只消费旧 RuntimeTrace/CodeID，不能接收这些见证。
+1. D1 已将 calls-only CodeSnapshot 的唯一 source definition 接入 v6 队列，
+   但 scope/body、环境和参数路由尚未完整，来源到局部 core 不等于跨调用数据连接。
 2. CALL 回调的 callable/arg0 不是未经变换的源码 callee/actual 列表。
    Name 中也可以放 bound method；同引用不能区分显式参数、receiver 或 default。
 

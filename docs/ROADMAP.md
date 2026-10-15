@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **Latest accepted bridge (2026-10-15):** inventory v6 automatically connects raw
+> call-source seeds to typed entry-first demands and local regions. D1 passed
+> 303 mapped / 2,193 full tests and unchanged LeWM archive replay; 32 of 421
+> definition seeds link core, with the other scope/lowering boundaries retained.
+> See [D1 acceptance](N2_CALL_DEMAND_ACCEPTANCE.md). Next is the observed compiler
+> context mismatch, then the full cross-call query gate under
+> [N2_CROSS_CALL_IMPLEMENTATION.md](N2_CROSS_CALL_IMPLEMENTATION.md), environment,
+> loop/state connections and simplification guidance. No new detector/backend.
+
 > **Current priority (2026-10-15):** [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)
 > defines the reviewed semantic node/edge model and N0–N4 prerequisites.
 > Complete program dependencies and subgraph simplification come before

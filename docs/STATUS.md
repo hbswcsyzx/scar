@@ -1,6 +1,25 @@
 # Current evidence and remaining work
 
-## Latest bounded component: D0 compact source seeds (2026-10-15)
+## Latest bounded component: D1 source-to-demand bridge (2026-10-15)
+
+Implementation `2cf4e40` passed **303 mapped checks / 57.703s**, **2,193 full
+repository tests**, and unchanged LeWM archive generation/public replay. Source
+fingerprint: `a64ba352478c1808f6a1a3ed855c37e561898297e2cc3e630f9940505b540747`.
+v6 automatically indexes 150 files/2,211 definitions and emits 50 local body graphs.
+All 421 definition seeds join source inventory; 32 link final core regions, while
+260 class scopes, 28 closure/cell functions, 2 generators and 99 other function
+lowering boundaries remain explicit. These are not optimization candidates.
+Generation took 602.086s/355,692KiB; replay 607.542s/881,800KiB. These are offline
+analysis costs; generation overlapped regression. Raw/source/Git remained unchanged.
+No actual/formal proof, whole-program graph, transformation or LeWM speedup.
+See [D1 acceptance](N2_CALL_DEMAND_ACCEPTANCE.md).
+
+Next: resolve the observed inherited-future compilation mismatch with explicit
+matching profiles and historical replay, then deliver actual→formal→return queries,
+environment/world mapping, loops and state provenance under
+[the concrete cross-call plan](N2_CROSS_CALL_IMPLEMENTATION.md).
+
+## Historical bounded component: D0 compact source seeds (2026-10-15)
 
 Implementation `39e8f22` passed **196 gate checks / 83.324s** and **2,033 full
 repository tests / 242.28s**, with no failures/errors/skips. Its frozen source
@@ -12,8 +31,8 @@ is 266,292 gzip bytes. Generation took 349.361s / 230,564KiB peak RSS; replay
 352.998s / 237,716KiB. Replay overlapped a separate source diagnostic; these are
 analysis costs, not workload benchmarks or LeWM speedup.
 
-The source seeds do not yet enter inventory scheduling, bind actual arguments,
-establish environments/effects, or authorize a transformation. One source profile
+At that milestone source seeds did not enter inventory scheduling, bind actual
+arguments, establish environments/effects, or authorize a transformation. One source profile
 identified unused full-graph digest work in `index→snapshot`. Next: preserve the
 same identity/boundary rules while publishing a thin source index, then typed
 v6 entry-first demand. See [D0 evidence](N2_CALL_SEEDS.md),

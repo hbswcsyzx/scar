@@ -1,5 +1,6 @@
 """Global, bounded source-body demand scheduling, separate from program effects."""
 from collections import defaultdict, deque
+from contextlib import nullcontext
 from dataclasses import replace
 import heapq
 import pickle
@@ -29,7 +30,7 @@ def _error_reason(error):
 
 
 def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered_files, *, interface_model=False,
-                     body_profile=None):
+                     body_profile=None, call_source_report=None, source_workspace=None):
     # Local import avoids a module cycle: the source adapter owns FileInventory
     # construction; this module owns only its global analysis work schedule.
     from scar.analysis.program_inventory import (
@@ -41,33 +42,47 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
     selected_profile = body_profile or BodyLoweringProfile.BOUND_FORMALS
     interfaces = FunctionInterfaceBuilder(profile=selected_profile) if interface_model else None
     frames = []
+    is_v6 = call_source_report is not None
+    if is_v6:
+        from scar.analysis.call_demand_schedule import (
+            CallDemandQueue, _matched_call_sources, entry_frontier_initializers, entry_roots_for,
+        )
+        from scar.ir.program.call_demand import EnteredCallCode, LegacyObservation, SourceCallCandidate
     files, unavailable, bodies, issues = [], {}, {}, defaultdict(list)
-    with PreparedContextStore(context_budget) as store:
+    module_initializers = {}
+    store_scope = (nullcontext(source_workspace.store) if source_workspace is not None
+                   else PreparedContextStore(context_budget))
+    with store_scope as store:
         # Index all files before spending the first body/operation allowance.
         for file in ordered_files:
             path = file.snapshot.path
             context = builder = None
             try:
-                context = prepare_source(path, project_root=discovery.project_root)
+                context = (source_workspace.prepare(path) if source_workspace is not None
+                           else prepare_source(path, project_root=discovery.project_root))
                 if context.semantics.sources[path].fingerprint != file.snapshot.fingerprint:
                     raise ValueError("source changed between discovery and preparation")
                 builder = _Inventory(context, 0, 0, runtime_builder=runtime_builder)
                 indexed = builder.index()
+                module_initializers[path] = builder.module
                 if interfaces is not None:
                     interfaces.index_file(context, indexed, builder.nodes)
             except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
                 if runtime_builder is not None:
                     runtime_builder.file_failed(path)
+                if is_v6 and source_workspace is not None:
+                    unavailable[path] = "source workspace unavailable: " + str(error)
                 indexed = FileInventory(file.snapshot, (), (), (), (),
                     (InventoryIssue(path, "file preparation/inventory failed: " + str(error)),))
             else:
-                try:
-                    # Files without a supported scope never need a heavy body
-                    # context, though their light/source evidence is preserved.
-                    if any(d.kind in _FUNCTIONS for d in indexed.definitions):
-                        store.put(context)
-                except (OSError, ValueError, TypeError, KeyError, RecursionError, pickle.PickleError) as error:
-                    unavailable[path] = _error_reason(error)
+                if source_workspace is None:
+                    try:
+                        # Files without a supported scope never need a heavy body
+                        # context, though their light/source evidence is preserved.
+                        if any(d.kind in _FUNCTIONS for d in indexed.definitions):
+                            store.put(context)
+                    except (OSError, ValueError, TypeError, KeyError, RecursionError, pickle.PickleError) as error:
+                        unavailable[path] = _error_reason(error)
             finally:
                 context = builder = None
             files.append(indexed)
@@ -85,72 +100,120 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             for call in file.calls:
                 by_owner[call.execution_owner].append(call)
 
+        def enqueue_v6_direct_calls(owner, priority):
+            for call in by_owner[owner]:
+                for witness in linker.link(call).candidate_witnesses:
+                    if witness.definition in functions:
+                        demand_queue.add(witness.definition, priority, SourceCallCandidate(call.operation))
+
         observations = defaultdict(list)
         for binding in runtime_builder.bindings.values() if runtime_builder is not None else ():
             for definition in binding.candidate_definitions:
                 if definition in functions:
                     observations[definition].append(binding.observation_index)
-        requests, pending, finished, entries = {}, [], set(), []
-        serial = 0
+        demand_queue = None
+        entry_roots = ()
 
-        def enqueue(definition, kind, *, via_call=None, observed=()):
-            nonlocal serial
-            if definition not in functions or definition in finished:
-                return
-            previous = requests.get(definition)
-            if previous is not None and _RANK[previous.kind] <= _RANK[kind]:
-                return
-            source = functions[definition].source
-            request = BodyExpansion(definition, source, kind, tuple(sorted(set(observed))), via_call)
-            requests[definition] = request
-            serial += 1
-            heapq.heappush(pending, (_RANK[kind], source.path, source.start_line,
-                                    source.start_column, definition.wire, serial, request))
+        if is_v6:
+            demand_queue = CallDemandQueue(functions)
+            entry_roots = entry_roots_for(files, module_initializers, discovery.entry)
 
-        for definition in sorted(observations, key=lambda key: key.wire):
-            enqueue(definition, BodyDemandKind.OBSERVED_CODE, observed=observations[definition])
+            for definition in sorted(observations, key=lambda key: key.wire):
+                for observation_index in sorted(set(observations[definition])):
+                    demand_queue.add(definition, CallDemandQueue.OBSERVED,
+                                     LegacyObservation(observation_index))
 
-        # Conditional dependency closure is a priority policy, not evidence that
-        # a function executed or that its target and effects have been proven.
-        expanded_owners = set()
-
-        def expand_owners(owners):
-            frontier = deque(owners)
-            while frontier:
-                owner = frontier.popleft()
-                if owner in expanded_owners:
+            # A D0 seed is admitted only when its replayed path/fingerprint and
+            # exact definition/source match this complete source inventory.
+            for (process_id, code), match in sorted(_matched_call_sources(call_source_report, files).items()):
+                if match is None:
                     continue
-                expanded_owners.add(owner)
-                for call in by_owner[owner]:
-                    for witness in linker.link(call).candidate_witnesses:
-                        if witness.definition in functions:
-                            enqueue(witness.definition, BodyDemandKind.CANDIDATE_CALL, via_call=call.operation)
-                            frontier.append(witness.definition)
+                _, definition = match
+                if definition.kind in _FUNCTIONS:
+                    demand_queue.add(definition.id, CallDemandQueue.OBSERVED,
+                                     EnteredCallCode(process_id, code))
 
-        roots = set(runtime_builder.definition_index) if runtime_builder is not None else set()
-        roots.update(call.execution_owner for file in files if file.snapshot.path == discovery.entry
-                     for call in file.calls if call.phase is ExecutionPhase.MODULE_INITIALIZATION)
-        expand_owners(sorted(roots, key=lambda key: key.wire))
-        for definition in sorted(functions, key=lambda key: key.wire):
-            enqueue(definition, BodyDemandKind.REMAINDER)
+            # Entry and statically discovered import-module initializers form
+            # the source frontier. Only entry itself is recorded as EntryRoot;
+            # imported modules remain candidate scopes, not claimed executions.
+            for initializer in entry_frontier_initializers(discovery, source_workspace, module_initializers):
+                enqueue_v6_direct_calls(initializer, CallDemandQueue.ENTRY)
+
+            for definition in sorted(functions, key=lambda key: key.wire):
+                demand_queue.add_remainder(definition)
+        else:
+            requests, pending, finished, entries = {}, [], set(), []
+            serial = 0
+
+            def enqueue(definition, kind, *, via_call=None, observed=()):
+                nonlocal serial
+                if definition not in functions or definition in finished:
+                    return
+                previous = requests.get(definition)
+                if previous is not None and _RANK[previous.kind] <= _RANK[kind]:
+                    return
+                source = functions[definition].source
+                request = BodyExpansion(definition, source, kind, tuple(sorted(set(observed))), via_call)
+                requests[definition] = request
+                serial += 1
+                heapq.heappush(pending, (_RANK[kind], source.path, source.start_line,
+                                        source.start_column, definition.wire, serial, request))
+
+            for definition in sorted(observations, key=lambda key: key.wire):
+                enqueue(definition, BodyDemandKind.OBSERVED_CODE, observed=observations[definition])
+
+            # Preserve the historical v1-v5 closure, sorting and admission order.
+            expanded_owners = set()
+
+            def expand_owners(owners):
+                frontier = deque(owners)
+                while frontier:
+                    owner = frontier.popleft()
+                    if owner in expanded_owners:
+                        continue
+                    expanded_owners.add(owner)
+                    for call in by_owner[owner]:
+                        for witness in linker.link(call).candidate_witnesses:
+                            if witness.definition in functions:
+                                enqueue(witness.definition, BodyDemandKind.CANDIDATE_CALL, via_call=call.operation)
+                                frontier.append(witness.definition)
+
+            roots = set(runtime_builder.definition_index) if runtime_builder is not None else set()
+            roots.update(call.execution_owner for file in files if file.snapshot.path == discovery.entry
+                         for call in file.calls if call.phase is ExecutionPhase.MODULE_INITIALIZATION)
+            expand_owners(sorted(roots, key=lambda key: key.wire))
+            for definition in sorted(functions, key=lambda key: key.wire):
+                enqueue(definition, BodyDemandKind.REMAINDER)
 
         remaining_bodies, remaining_operations = budget.max_lowered_bodies, budget.max_operations
         loaded_path, loaded_context = None, None
-        while pending:
-            *_, request = heapq.heappop(pending)
+        while True:
+            v6_task = None
+            if is_v6:
+                v6_task = demand_queue.pop()
+                if v6_task is None:
+                    break
+                request = v6_task
+            else:
+                if not pending:
+                    break
+                *_, request = heapq.heappop(pending)
+                definition = request.definition
+                if definition in finished or requests[definition] is not request:
+                    continue
+                finished.add(definition)
             definition = request.definition
-            if definition in finished or requests[definition] is not request:
-                continue
-            finished.add(definition)
             path = file_by_definition[definition]
             if path in unavailable:
                 body = BodyInventory(definition, BodyStatus.NOT_ATTEMPTED, None, None, unavailable[path])
                 bodies[definition] = body
-                entries.append(request)
+                if not is_v6:
+                    entries.append(request)
                 continue
             if remaining_bodies < 1 or remaining_operations < 1:
                 bodies[definition] = BodyInventory(definition, BodyStatus.NOT_ATTEMPTED, None, None, _BUDGET_REASON)
-                entries.append(request)
+                if not is_v6:
+                    entries.append(request)
                 continue
             remaining_bodies -= 1
             try:
@@ -162,7 +225,16 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             except (OSError, ValueError, TypeError, KeyError, EOFError, RecursionError, pickle.PickleError) as error:
                 unavailable[path] = _error_reason(error)
                 bodies[definition] = BodyInventory(definition, BodyStatus.UNSUPPORTED, None, None, unavailable[path])
-                entries.append(replace(request, attempted=True, status=BodyStatus.UNSUPPORTED))
+                if is_v6:
+                    demand_queue.mark_result(v6_task, status=BodyStatus.UNSUPPORTED,
+                        construction_operations=0, operation_budget_charged=0,
+                        construction_cost_known=True)
+                    # The body context failed to restore, but the completed
+                    # source inventory still supports direct conditional call
+                    # candidates from this one owner.
+                    enqueue_v6_direct_calls(definition, v6_task.priority)
+                else:
+                    entries.append(replace(request, attempted=True, status=BodyStatus.UNSUPPORTED))
                 continue
             cost_known, charged = True, 0
             try:
@@ -205,9 +277,17 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                         issues[path].append(InventoryIssue(path, body.reason, request.source))
             remaining_operations -= charged
             bodies[definition] = body
-            entries.append(replace(request, attempted=True, construction_operations=body.construction_operations,
-                                   status=body.status, operation_budget_charged=charged,
-                                   construction_cost_known=cost_known))
+            if is_v6:
+                demand_queue.mark_result(v6_task, status=body.status,
+                    construction_operations=body.construction_operations,
+                    operation_budget_charged=charged, construction_cost_known=cost_known)
+                # Link only this processed owner's direct source calls. Its
+                # children inherit the parent's frontier and wait their turn.
+                enqueue_v6_direct_calls(definition, v6_task.priority)
+            else:
+                entries.append(replace(request, attempted=True, construction_operations=body.construction_operations,
+                                       status=body.status, operation_budget_charged=charged,
+                                       construction_cost_known=cost_known))
 
             _, new_candidates, _ = _body_connections((body,))
             for operation, targets in new_candidates.items():
@@ -221,9 +301,13 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                          CandidateCondition.NO_EXTERNAL_NAMESPACE_MUTATION))
                     if not linker.admit(calls[operation], witness):
                         continue
-                    enqueue(target, BodyDemandKind.CANDIDATE_CALL, via_call=operation)
-                    expand_owners((target,))
-            expand_owners((definition,))
+                    if is_v6:
+                        demand_queue.add(target, v6_task.priority, SourceCallCandidate(operation))
+                    else:
+                        enqueue(target, BodyDemandKind.CANDIDATE_CALL, via_call=operation)
+                        expand_owners((target,))
+            if not is_v6:
+                expand_owners((definition,))
 
         loaded_context = None
         final = []
@@ -241,8 +325,10 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             final.append(result)
             if runtime_builder is not None:
                 runtime_builder.file_emitted(result)
-        schedule = ExpansionSchedule(context_budget, tuple(entries),
-            tuple(ContextUnavailable(path, reason) for path, reason in sorted(unavailable.items())))
+        unavailable_records = tuple(ContextUnavailable(path, reason)
+                                     for path, reason in sorted(unavailable.items()))
+        schedule = (demand_queue.schedule(context_budget, entry_roots, unavailable_records) if is_v6
+                    else ExpansionSchedule(context_budget, tuple(entries), unavailable_records))
         measurements = ExpansionMeasurements(store.restore_attempts, store.compressed_payload_bytes_restored,
                                              store.compressed_bytes_written, store.uncompressed_bytes_written)
         return tuple(final), schedule, measurements, interfaces.finish(final) if interfaces is not None else None, tuple(frames)
