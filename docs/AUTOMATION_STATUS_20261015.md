@@ -3,6 +3,10 @@
 日期：2026-10-15。**完整自动 LeWM 程序图、可信化简指导及加速闭环尚未完成。**
 已实现的构图流程不要求手工修补 LeWM 图；当前问题是覆盖和连接不完整。
 
+最新开发：v6 已把紧凑调用来源接入自动展开，303 项映射门通过；全仓与原 LeWM
+离线复验进行中，尚未完成 D1.c，暂不替换下表的已验收真实范围。见
+[D1 验收进度](N2_CALL_DEMAND_ACCEPTANCE.md)。
+
 ## 1. 自动化的输入与职责
 
 目标输入是原程序入口/命令、环境、资源预算和行为合同。SCAR 自行发现源码、
@@ -48,8 +52,9 @@ storage 的几何区域不是同一实体。保存视频与保存 Tensor 都可�
 
 ## 4. 尚未接通的具体部分
 
-1. **来源到展开队列。** D0 已取得 421 个源码种子，但旧 inventory scheduler
-   不消费这套新见证。直接把 call group 序号塞进旧 observation_indices 会误建图。
+1. **来源到展开队列。** 主线 D0 已取得 421 个源码种子。开发版 v6 已用独立
+   typed origin 接入新队列，小程序自动端到端及严格重放通过；原 LeWM 复验尚未
+   完成。没有把 call group 序号塞进旧 observation_indices。
 2. **实际参数/返回。** 查询仍在 `ARGUMENT_ROUTING_UNVERIFIED` 停止；方法、
    partial、defaults、callee 重绑和绑定前失败不能靠同对象或源码签名推断。
 3. **函数环境与作用域。** 相同 code 可以关联不同 globals/defaults/closure。

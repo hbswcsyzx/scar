@@ -33,10 +33,16 @@ class _Stored:
 class _CompressedWriter:
     def __init__(self, store, stream):
         self.store, self.stream = store, stream
+        self.exhausted = False
 
     def write(self, data):
-        if len(data) > self.store.budget.max_compressed_bytes - self.store.compressed_bytes_written:
-            raise ContextStoreLimit("compressed context store budget exhausted")
+        if self.exhausted or len(data) > self.store.budget.max_compressed_bytes - self.store.compressed_bytes_written:
+            # Finish gzip's bounded record lifecycle before reporting failure.
+            # Raising inside its buffered writer can strand a Python 3.14
+            # finalizer with a dead weak reference ("lost gzip_file"). No
+            # further bytes are written after the first budget crossing.
+            self.exhausted = True
+            return len(data)
         count = self.stream.write(data)
         self.store.compressed_bytes_written += count
         return count
@@ -96,6 +102,8 @@ class PreparedContextStore:
                     payload = (context.path, context.root, context.text, context.semantic,
                                context.semantics, context.control, context.tree)
                     pickle.dump(payload, writer, protocol=5)
+                if compressed.exhausted:
+                    raise ContextStoreLimit("compressed context store budget exhausted")
             self._stored[key] = _Stored(path, self._hash(path), writer.written,
                 context.semantics.sources[key].fingerprint, context.root)
         except BaseException:

@@ -90,6 +90,15 @@ class CallSourceSeedReport:
         A document can lower its budgets, but cannot raise the verifier's
         independent ceilings. No serialized seed or summary is trusted.
         """
+        model = cls._decode_replay_input(document, verification_budget=verification_budget)
+        rebuilt = read_call_source_seeds(model.trace_directory, model.project_root, budget=model.budget)
+        _require(_canonical(rebuilt.to_dict()) == _canonical(document),
+                 "source seeds differ from current raw trace/source replay")
+        return rebuilt
+
+    @staticmethod
+    def _decode_replay_input(document, *, verification_budget):
+        """Check independent limits and structure before any raw/source I/O."""
         _require(isinstance(verification_budget, CallEdgeBudget),
                  "source seed replay requires a typed independent verifier budget")
         flags = {
@@ -113,11 +122,7 @@ class CallSourceSeedReport:
         for name in budget.__dataclass_fields__:
             _require(getattr(budget, name) <= getattr(verification_budget, name),
                      "source seed report exceeds independent verifier budget: " + name)
-        model = CallSourceSeedModel.from_dict(document["model"])
-        rebuilt = read_call_source_seeds(model.trace_directory, model.project_root, budget=budget)
-        _require(_canonical(rebuilt.to_dict()) == _canonical(document),
-                 "source seeds differ from current raw trace/source replay")
-        return rebuilt
+        return CallSourceSeedModel.from_dict(document["model"])
 
 
 def read_call_source_seeds(trace, project_root, *, budget=CallEdgeBudget()):
@@ -127,6 +132,11 @@ def read_call_source_seeds(trace, project_root, *, budget=CallEdgeBudget()):
     reference routes. A code fingerprint match without a unique source
     definition remains in the report but is not an eligible source seed.
     """
+    return _read_call_source_seeds(trace, project_root, budget=budget)
+
+
+def _read_call_source_seeds(trace, project_root, *, budget, _source_workspace=None):
+    """Private composition shares locally prepared contexts, never report seeds."""
     _require(isinstance(budget, CallEdgeBudget), "source seeds require a typed replay budget")
     root = Path(project_root).resolve()
     _require(root.is_dir(), "project root must be a directory")
@@ -134,7 +144,6 @@ def read_call_source_seeds(trace, project_root, *, budget=CallEdgeBudget()):
     scanned = scan_call_trace(trace, root, budget, sink=sink)
     groups = sink.groups()
     captures = {(capture.process_id, capture.code.key): capture.code for capture in scanned.captures}
-    sources = _Sources(root, budget, inventory=None)
     issues = list(scanned.issues)
     descriptors = {}
     for group in groups:
@@ -147,6 +156,9 @@ def read_call_source_seeds(trace, project_root, *, budget=CallEdgeBudget()):
             ))
         else:
             descriptors[group.code] = captured
+    if _source_workspace is not None:
+        _source_workspace.prime_sources(tuple(descriptors.values()))
+    sources = _Sources(root, budget, inventory=None, _source_workspace=_source_workspace)
     code_links = tuple(sources.code(descriptors[key]) for key in sorted(descriptors))
     return CallSourceSeedReport(CallSourceSeedModel(
         scanned.directory, str(root), budget, scanned.files, scanned.captures,
