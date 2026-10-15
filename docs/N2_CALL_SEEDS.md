@@ -1,7 +1,32 @@
 # D0：从真实调用自动取得紧凑源码见证
 
-状态：实现已完成预冻结定向检查；正式门、全仓回归和真实归档压力测量待记录。
+状态：**D0 有限验收通过**。实现 `39e8f22`：196 项门检查、全仓 2,033 项通过，
+零失败/错误/跳过；原始 LeWM 调用归档生成与独立公共重放均退出 0。
 这是 [调用连接计划](N2_CALL_BINDING_PLAN.md) 的 D0，不是 D1/C1/C2 验收。
+
+源指纹：`81d6a6b675055eaa70a8e4dff566107dc3329859e999e7f918050bd983c26909`。
+门报告 `artifacts/reports/gates/n2-call-seeds-verified.json`，全仓报告同目录
+`n2-call-seeds-full.json`，外部来源报告 `n2-call-seeds-real.json`。
+
+## 本轮实际结果
+
+同一真实归档得到 84,319 个入口记录、812 个 entered-code 分组、850 份 captured
+descriptor。548 个 code/source 核验通过，其中 421 个具有完整唯一 definition，
+成为 421 个可展开种子；259 个 code link 为 INCOMPLETE、5 个 MISMATCH。
+summary 的 `issues=0` 只指总体采集/记录问题，不表示这些源码边界已经消失。
+
+生成 349.361s、峰 RSS 230,564KiB；独立重放 352.998s、峰 RSS 237,716KiB。
+原始报告 1,558,907 字节、gzip 266,292 字节。源码、raw trace、原 LeWM Git HEAD
+及 clean 状态前后相同。重放期间另有单文件 cProfile 诊断并行，重放时间不是
+clean benchmark；生成在诊断前完成。两者均是分析器成本，不是 LeWM 加速。
+
+分析成本仍高。按最大已观察源码 bytes 自动选出的单文件诊断，在重度 cProfile
+下耗时 88.062s：`_Sources.context` 87.508s，`prepare_source` 47.745s，
+`_Inventory.index→snapshot` 38.225s；其中三次全图摘要 `_digest` 累计 24.554s。
+这些是嵌套累计时间，不能相加当总时长。诊断证明该来源匹配路径还创建、验证
+和序列化未被种子结果消费的完整图层；下一门先共享轻量源码索引和既有 ID 生成
+规则，不能简单删除公共验证。原始记录见
+`artifacts/experiments/n2_call_source_seeds/source-profile/`。
 
 ## 为什么先做这一步
 
@@ -68,3 +93,5 @@ D1 才把核验种子自动加入 import/source scope 和 body demand queue，�
 inventory 版本保留精确来源。之后必须补实际 operand/绑定、函数环境、返回与
 状态接口，最后接循环、细状态与逻辑来源。D0 不产生跨调用核心边，不新增
 detector/backend，不声明 LeWM 变换或加速。
+具体来源类型、入口依赖 frontier、共享准备及验收反例见
+[D1 开发计划](N2_CALL_DEMAND_PLAN.md)。
