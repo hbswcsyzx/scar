@@ -263,13 +263,17 @@ def test_unknown_python_operations_remain_effectful_and_runtime_targets_unconfir
         def f(x):
             return helper(x + x)
     """)
+    observed_invocations = []
     for body in file.bodies:
         assert body.graph is not None
         invocations = [op for op in body.graph.operations
                        if op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE]
-        assert invocations
+        observed_invocations.extend(invocations)
+        lifecycle = [op for op in body.graph.operations if op.terminator is None]
+        assert lifecycle and all(not op.effects_complete for op in lifecycle)
         assert all(not op.effects_complete and op.callee is None for op in invocations)
         assert all(target.status.name == "INFERRED" for target in body.metadata.call_targets)
+    assert observed_invocations, "the actual arithmetic/call must retain opaque dispatch and effects"
     assert not result.summary()["fine_state_effects_established"]
     assert not result.summary()["transformation_authorized"]
 

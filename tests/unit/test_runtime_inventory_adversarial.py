@@ -95,7 +95,7 @@ def with_trace(fixture, **kwargs):
 def test_real_runtime_seed_expands_import_closure_and_keeps_unobserved_static_branch(runtime_project):
     root, entry, payload, trace, marker = runtime_project
     static = inventory_program(entry, project_root=root, source_roots=(root,))
-    assert static.to_dict()["schema_version"] == 4
+    assert static.to_dict()["schema_version"] == 5
     assert static.to_dict()["runtime_scope"] is None
     static_paths = {file.snapshot.path for file in static.files}
     assert str(payload) not in static_paths and str(root / "helper.py") not in static_paths
@@ -106,7 +106,7 @@ def test_real_runtime_seed_expands_import_closure_and_keeps_unobserved_static_br
     assert any(edge.source.path == str(payload) and edge.requested == "helper"
                for edge in result.discovery.imports)
     document = result.to_dict()
-    assert document["schema_version"] == 4 and document["runtime_scope"] and document["expansion"] and document["interfaces"]
+    assert document["schema_version"] == 5 and document["runtime_scope"] and document["expansion"] and document["interfaces"]
     assert document["target_executed"] is False
     assert document["summary"]["runtime_reachability_established"] is False
     assert document["transformation_authorized"] is False
