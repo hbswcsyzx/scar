@@ -55,6 +55,12 @@ python -m scar.cli inventory-program path/to/project/entry.py \
   --project-root path/to/project --out artifacts/reports/inventory.json.gz
 python -m scar.cli check-inventory artifacts/reports/inventory.json.gz
 
+# Augment source candidates from existing runtime evidence, including dynamic loading.
+python -m scar.cli inventory-program path/to/project/entry.py \
+  --project-root path/to/project --trace path/to/trace_directory \
+  --out artifacts/reports/runtime-inventory.json.gz
+python -m scar.cli check-inventory artifacts/reports/runtime-inventory.json.gz
+
 # Automatically build a function graph from source, without importing it.
 # Unsupported bodies return 3 and save a located diagnostic with graph=null.
 python -m scar.cli model-program path/to/program.py --entry Class.method \

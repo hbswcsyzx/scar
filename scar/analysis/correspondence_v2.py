@@ -175,7 +175,12 @@ def _qualname(graph: SemanticGraph, definition: OperationDefinition) -> str | No
     return parent_name + separator + name
 
 
-class _Source:
+class SourceCodeIndex:
+    """One decoded snapshot and its cached, exact offline compile trials.
+
+    Shared by graph correspondence and automatic runtime-source inventory.
+    A compile result concerns code objects only, never effects or live binding.
+    """
     def __init__(self, path, text, fingerprints):
         self.path, self.text = path, text
         self.fingerprint = "sha256:" + hashlib.sha256(text.encode()).hexdigest()
@@ -223,6 +228,10 @@ class _Source:
                 result = (records, attempted)
         self.compiled[key] = result
         return result
+
+
+# Retain the historical private name for callers inspecting old evidence.
+_Source = SourceCodeIndex
 
 
 def build_correspondence(

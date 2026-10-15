@@ -2,6 +2,7 @@
 
 日期：2026-10-15。N2.b0 已有限验收，范围与冻结证据见
 [N2B0_ACCEPTANCE.md](N2B0_ACCEPTANCE.md)。完整程序模型仍未完成。
+运行来源桥接 N2.entry 的设计和验收要求见 [N2_ENTRY_PLAN.md](N2_ENTRY_PLAN.md)。
 
 ## 公共入口
 
@@ -81,6 +82,35 @@ construction_operations 与最终保留 core_operations 分开统计。
 这三层的内容 SHA256 和 namespace root，避免重复序列化大图；自动生成的
 核心 body 图和来源对应实际持久化。重放从当前文件重新发现、准备、构图并
 核对所有摘要、图、接口和对应。新出现的本地候选也会改变报告并使旧报告失效。
+
+## 从已有运行 trace 自动补充来源
+
+```bash
+scar inventory-program /path/to/project/entry.py --project-root /path/to/project \
+  --trace /path/to/trace_directory --out runtime-inventory.json.gz
+scar check-inventory runtime-inventory.json.gz
+```
+
+`--trace` 接受目录、JSONL 或 gzip。按实际输入逻辑流的原始字节计算摘要，重复
+调用按 CodeID 和精确进程身份去重，保留次数及首末行锚点。不导入或执行目标，
+不保存新的 Tensor 数值。未观察的静态候选仍保留。
+
+有 trace 的报告是 v2，增加 typed runtime_scope；无 trace 保持 v1。来源候选
+与当前源码版本核对分开：只有原始代码摘要精确复现才有 code-only witness，
+未匹配可能来自缺少编译上下文或旧 marshal 引用布局，不能断言源码一定改变。
+默认离线尝试 local Python、flags=0、optimize=0/1/2，filename 来自观察假设，
+不宣称恢复了原始编译配置。
+
+运行来源定义通过 definition_index 明确定位到源码快照、SourceReference、
+模块 initializer 或 DefinitionInventory；可用时再连接 body.graph.root。
+代码匹配不建立实际参数、闭包、全局状态、纯性或确定 callee。源码候选/观察过
+的定义可优先消耗 body 预算，优先级不构成优化许可。
+
+trace 的解压字节、行数、单行和代码组数，以及代码编译尝试有独立上限。
+CLI 提供 `--max-trace-bytes`、`--max-trace-records`、`--max-trace-line-bytes`、
+`--max-runtime-codes`、`--max-compile-attempts`。验证器独立设置 ceiling；报告
+不能扩大它。重放先重新读取并核对 trace，再从当前源码重新发现/构建/核对。
+相对、生成、非规范、界外、链接和缺失源码都保留具体边界。
 
 ## 剩余依赖
 

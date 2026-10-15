@@ -15,7 +15,12 @@ import json
 from pathlib import Path
 
 from scar.analysis.program_lowering import prepare_source
-from scar.analysis.source_discovery import discover_sources
+from scar.analysis.source_discovery import discover_sources, _discover_sources_from_entries
+from scar.analysis.runtime_inventory import (
+    RuntimeScope, RuntimeScopeBuilder, available_paths, check_compile_limit, check_runtime_ceiling,
+)
+from scar.analysis.runtime_sources import read_runtime_trace, resolve_runtime_seeds
+from scar.ir.program.runtime_sources import RuntimeTraceBudget
 from scar.ir.program.codec import dumps as dump_graph
 from scar.ir.program.model import LiteralOrigin
 from scar.ir.program.discovery import DiscoveryRootMode, SourceDiscovery
@@ -59,10 +64,11 @@ class ProgramInventory:
     discovery: SourceDiscovery
     files: tuple[FileInventory, ...]
     budget: InventoryBudget
+    runtime_scope: RuntimeScope | None = None
 
     def summary(self):
         bodies = [body for file in self.files for body in file.bodies]
-        return {
+        summary = {
             "source_files": len(self.files),
             "definitions": sum(len(file.definitions) for file in self.files),
             "source_calls": sum(len(file.calls) for file in self.files),
@@ -82,25 +88,39 @@ class ProgramInventory:
             "fine_state_effects_established": False, "transformation_authorized": False,
             "annotation_evaluation_policy_established": False,
         }
+        if self.runtime_scope is not None:
+            summary["runtime"] = self.runtime_scope.summary()
+        return summary
 
     def to_dict(self):
-        return {
-            "schema": "scar.program-inventory", "schema_version": 1,
+        document = {
+            "schema": "scar.program-inventory", "schema_version": 2 if self.runtime_scope is not None else 1,
             "scope": "source-discovered candidate files, scoped interfaces and bounded automatic body lowering",
             "discovery": encode(self.discovery), "files": [_file_document(file) for file in self.files],
             "budget": encode(self.budget), "summary": self.summary(),
             "target_executed": False, "transformation_authorized": False,
         }
+        if self.runtime_scope is not None:
+            document["runtime_scope"] = encode(self.runtime_scope)
+        return document
 
     @classmethod
     def from_dict(cls, document, *, max_files=128, max_bytes=8_000_000, max_directories=4096,
-                  max_lowered_bodies=256, max_operations=10000, max_call_witnesses=4096):
-        if type(document) is not dict or set(document) != {
-                "schema", "schema_version", "scope", "discovery", "files", "budget", "summary",
-                "target_executed", "transformation_authorized"}:
+                  max_lowered_bodies=256, max_operations=10000, max_call_witnesses=4096,
+                  runtime_verification_budget=RuntimeTraceBudget(), max_compile_attempts=1024):
+        if type(document) is not dict:
             raise ValueError("inventory fields mismatch")
-        if (document["schema"] != "scar.program-inventory" or type(document["schema_version"]) is not int
-                or document["schema_version"] != 1):
+        version = document.get("schema_version")
+        if type(version) is not int or version not in (1, 2):
+            raise ValueError("inventory schema/version mismatch")
+        expected_fields = {
+                "schema", "schema_version", "scope", "discovery", "files", "budget", "summary",
+                "target_executed", "transformation_authorized"}
+        if version == 2:
+            expected_fields.add("runtime_scope")
+        if set(document) != expected_fields:
+            raise ValueError("inventory fields mismatch")
+        if document["schema"] != "scar.program-inventory":
             raise ValueError("inventory schema/version mismatch")
         requested = decode(InventoryBudget, document["budget"])
         ceiling = InventoryBudget(max_files, max_bytes, max_directories, max_lowered_bodies, max_operations, max_call_witnesses)
@@ -110,8 +130,20 @@ class ProgramInventory:
                 raise ValueError("report exceeds independent verifier budget: " + field)
         discovery = decode(SourceDiscovery, document["discovery"])
         roots = discovery.source_roots if discovery.root_mode is DiscoveryRootMode.DECLARED else ()
-        rebuilt = inventory_program(discovery.entry, project_root=discovery.project_root,
-                                    source_roots=roots, **encode(requested))
+        runtime_options = {}
+        if version == 2:
+            runtime = decode(RuntimeScope, document["runtime_scope"])
+            check_runtime_ceiling(runtime.trace.budget, runtime_verification_budget)
+            check_compile_limit(max_compile_attempts)
+            if runtime.max_compile_attempts > max_compile_attempts:
+                raise ValueError("report exceeds independent verifier max_compile_attempts")
+            current_trace = read_runtime_trace(runtime.trace.manifest.logical_path, budget=runtime.trace.budget)
+            if encode(current_trace) != encode(runtime.trace):
+                raise ValueError("runtime trace differs from its bound raw evidence replay")
+            runtime_options = {"runtime": current_trace,
+                               "max_compile_attempts": runtime.max_compile_attempts}
+        rebuilt = _inventory_from_inputs(discovery.entry, project_root=discovery.project_root,
+                                         source_roots=roots, budget=requested, **runtime_options)
         if _canonical(rebuilt.to_dict()) != _canonical(document):
             raise ValueError("inventory differs from current source/discovery/context replay")
         return rebuilt
@@ -156,9 +188,10 @@ def _unsupported(node):
 
 
 class _Inventory:
-    def __init__(self, context, remaining_bodies, remaining_operations):
+    def __init__(self, context, remaining_bodies, remaining_operations, runtime_builder=None):
         self.context = context
         self.remaining_bodies, self.remaining_operations = remaining_bodies, remaining_operations
+        self.runtime_builder = runtime_builder
         self.definitions, self.calls, self.coverage, self.bodies, self.gaps, self.implicit = [], [], [], [], [], []
         self.nodes = {}
         self.refs = {(atom.kind, atom.reference.start_line, atom.reference.end_line,
@@ -335,9 +368,10 @@ class _Inventory:
     def run(self):
         for node in self.context.tree.body:
             self.walk(node, self.module, ExecutionPhase.MODULE_INITIALIZATION, "")
+        preferred = self.runtime_builder.bind(self.context) if self.runtime_builder is not None else frozenset()
         linked, candidates = set(), {}
         supported = set()
-        for definition in self.definitions:
+        for definition in sorted(self.definitions, key=lambda definition: definition.id not in preferred):
             if definition.kind not in (DefinitionKind.FUNCTION, DefinitionKind.ASYNC_FUNCTION):
                 self.bodies.append(BodyInventory(definition.id, BodyStatus.NOT_ATTEMPTED, None, None,
                                                 "this scope requires a class/lambda/comprehension interface beyond the current body lowerer"))
@@ -396,29 +430,57 @@ class _Inventory:
 
 
 def inventory_program(entry, *, project_root=None, source_roots=(), max_files=128, max_bytes=8_000_000,
-                      max_directories=4096, max_lowered_bodies=256, max_operations=10000, max_call_witnesses=4096):
+                      max_directories=4096, max_lowered_bodies=256, max_operations=10000, max_call_witnesses=4096,
+                      runtime_trace=None, runtime_budget=RuntimeTraceBudget(), max_compile_attempts=1024):
     budget = InventoryBudget(max_files, max_bytes, max_directories, max_lowered_bodies, max_operations, max_call_witnesses)
     _check_budget(budget)
-    discovery = discover_sources(entry, project_root=project_root, source_roots=source_roots,
-                                 max_files=max_files, max_bytes=max_bytes, max_directories=max_directories)
+    trace = read_runtime_trace(runtime_trace, budget=runtime_budget) if runtime_trace is not None else None
+    return _inventory_from_inputs(entry, project_root=project_root, source_roots=source_roots,
+                                  budget=budget, runtime=trace, max_compile_attempts=max_compile_attempts)
+
+
+def _inventory_from_inputs(entry, *, project_root, source_roots, budget, runtime=None, max_compile_attempts=1024):
+    """Construct from raw-source settings and observations read by the adapter.
+
+    Public report replay re-reads the bound trace before calling here. This
+    shares that bounded read with construction, without accepting report seeds.
+    """
+    _check_budget(budget)
+    runtime_builder, paths = None, ()
+    limits = {"project_root": project_root, "source_roots": source_roots,
+              "max_files": budget.max_files, "max_bytes": budget.max_bytes,
+              "max_directories": budget.max_directories}
+    if runtime is None:
+        discovery = discover_sources(entry, **limits)
+    else:
+        root = Path(project_root).resolve() if project_root is not None else Path(entry).absolute().parent.resolve()
+        seeds = resolve_runtime_seeds(runtime, root)
+        paths = available_paths(seeds)
+        discovery = _discover_sources_from_entries(entry, additional_entries=paths, **limits)
+        runtime_builder = RuntimeScopeBuilder(runtime, seeds, max_compile_attempts)
     files = []
-    remaining_bodies, remaining_operations = max_lowered_bodies, max_operations
-    for file in _ordered_files(discovery):
+    remaining_bodies, remaining_operations = budget.max_lowered_bodies, budget.max_operations
+    for file in _ordered_files(discovery, runtime_paths=paths):
         try:
             context = prepare_source(file.snapshot.path, project_root=discovery.project_root)
             if context.semantics.sources[file.snapshot.path].fingerprint != file.snapshot.fingerprint:
                 raise ValueError("source changed between discovery and preparation")
-            builder = _Inventory(context, remaining_bodies, remaining_operations)
+            builder = _Inventory(context, remaining_bodies, remaining_operations, runtime_builder=runtime_builder)
             result = builder.run()
+            if runtime_builder is not None:
+                runtime_builder.file_emitted(result)
             remaining_bodies, remaining_operations = builder.remaining_bodies, builder.remaining_operations
         except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
+            if runtime_builder is not None:
+                runtime_builder.file_failed(file.snapshot.path)
             result = FileInventory(file.snapshot, (), (), (), (),
                                    (InventoryIssue(file.snapshot.path, "file preparation/inventory failed: " + str(error)),))
         files.append(result)
-    return ProgramInventory(discovery, _link_import_calls(discovery, tuple(files), max_witnesses=max_call_witnesses), budget)
+    return ProgramInventory(discovery, _link_import_calls(discovery, tuple(files), max_witnesses=budget.max_call_witnesses), budget,
+                            runtime_builder.finish() if runtime_builder is not None else None)
 
 
-def _ordered_files(discovery):
+def _ordered_files(discovery, *, runtime_paths=()):
     """Spend bounded lowering work near the entry before distant dependencies."""
     adjacency = defaultdict(set)
     for edge in discovery.imports:
@@ -426,15 +488,19 @@ def _ordered_files(discovery):
             if not candidate.namespace:
                 adjacency[edge.source.path].add(candidate.path)
             adjacency[edge.source.path].update(candidate.parent_initializers)
-    distance = {discovery.entry:0}
-    pending = deque([discovery.entry])
+    distance = {path:0 for path in (discovery.entry, *runtime_paths)}
+    pending = deque(distance)
     while pending:
         path = pending.popleft()
         for following in sorted(adjacency[path]):
             if following not in distance:
                 distance[following] = distance[path] + 1
                 pending.append(following)
-    return sorted(discovery.files, key=lambda file:(distance.get(file.snapshot.path, float("inf")), file.snapshot.path))
+    def key(file):
+        path = file.snapshot.path
+        rank = (0 if path == discovery.entry else 1 if path in runtime_paths else 2) if runtime_paths else 0
+        return rank, distance.get(path, float("inf")), path
+    return sorted(discovery.files, key=key)
 
 
 def _link_import_calls(discovery, files, *, max_witnesses=4096):

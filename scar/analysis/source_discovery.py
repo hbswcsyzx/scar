@@ -251,7 +251,7 @@ def _module_path_parts(name: str, root: Path) -> tuple[str, ...] | None:
 
 def _candidate_for_path(name: str, path: Path, root: Path,
                         project_root: Path, role: CandidateRole,
-                        *, namespace: bool, source: SourceReference,
+                        *, namespace: bool, source: SourceReference | None,
                         gaps: list[DiscoveryGap]) -> ModuleCandidate:
     if namespace:
         target_dir = path
@@ -624,6 +624,26 @@ def discover_sources(entry, *, project_root=None, source_roots=(), max_files=128
     The result is a lexical candidate closure, not runtime reachability or a
     statement about actual import search order.
     """
+    return _discover_sources_from_entries(
+        entry, project_root=project_root, source_roots=source_roots,
+        max_files=max_files, max_bytes=max_bytes, max_directories=max_directories,
+    )
+
+
+def _discover_sources_from_entries(entry, *, additional_entries=(), project_root=None,
+                                  source_roots=(), max_files=128,
+                                  max_bytes=8_000_000, max_directories=4096) -> SourceDiscovery:
+    """Discover one candidate closure with a shared budget and fixed boundary.
+
+    Additional entries are absolute paths selected by an internal evidence
+    adapter. Their provenance belongs to that adapter's report; this source
+    graph neither fabricates import statements nor establishes runtime source
+    correspondence. An empty tuple preserves public discovery's v1 behavior.
+    """
+    if type(additional_entries) is not tuple or any(
+            type(path) is not str or not Path(path).is_absolute()
+            for path in additional_entries):
+        raise ValueError("additional_entries must be a tuple of absolute path strings")
     max_files = _positive_limit(max_files, "max_files")
     max_bytes = _positive_limit(max_bytes, "max_bytes")
     max_directories = _positive_limit(max_directories, "max_directories")
@@ -653,6 +673,14 @@ def discover_sources(entry, *, project_root=None, source_roots=(), max_files=128
         gaps.append(DiscoveryGap(DiscoveryGapKind.SYMLINK,
             "Entry traverses a symbolic link and was not read.", path=str(entry_abs)))
 
+    additional_paths = set()
+    for item in additional_entries:
+        path = _absolute_inside(item, root, relative_to_root=False)
+        if path.suffix != _SOURCE_SUFFIX:
+            raise ValueError("additional entry must be a .py source file")
+        additional_paths.add(path)
+    ordered_additional = tuple(sorted(additional_paths, key=str))
+
     if isinstance(source_roots, (str, bytes, Path)):
         raise ValueError("source_roots must be an iterable of paths, not one path")
     explicit_roots = tuple(source_roots)
@@ -669,11 +697,24 @@ def discover_sources(entry, *, project_root=None, source_roots=(), max_files=128
                 "Source-root package initializer is a symbolic link and was not read.",
                 path=str(root_init)))
 
-    # Keep the entry as the first frontier even if callers supplied search
-    # roots that do not include its directory. Such imports still resolve
-    # against the explicitly selected roots; relative imports lack a module
-    # context and are reported as unresolved.
+    # Keep the entry first, then all distinct additional entries, before any
+    # import closure. A file outside the selected search roots still resolves
+    # absolute imports against those roots; its relative context is unknown.
     frontier: deque[tuple[Path, SourceReference | None]] = deque([(entry_abs, None)])
+    frontier.extend((path, None) for path in ordered_additional if path != entry_abs)
+    for path in ordered_additional:
+        if _path_has_symlink_below(path, root):
+            continue
+        # Parent initializers are candidates under each selected source-root
+        # mapping. A runtime-selected filename does not witness an import or
+        # execution of these initializers, so the frontier source stays None.
+        for mapping in _module_mappings(path, roots):
+            candidate = _candidate_for_path(
+                mapping.name, path, Path(mapping.source_root), root,
+                CandidateRole.REQUESTED_MODULE, namespace=False,
+                source=None, gaps=gaps,
+            )
+            frontier.extend((Path(parent), None) for parent in candidate.parent_initializers)
     attempted: set[Path] = set()
     attempted_count = 0
     parsed: dict[Path, tuple[str, str, str, ast.Module, dict[ast.AST, SourceReference],

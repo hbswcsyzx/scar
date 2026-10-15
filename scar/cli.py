@@ -307,6 +307,7 @@ def main(argv=None) -> int:
     inventory_program.add_argument("--project-root", help="filesystem boundary; inferred source roots remain distinct from runtime sys.path")
     inventory_program.add_argument("--source-root", action="append", default=[], help="explicit local source root; repeat for candidate contexts")
     inventory_program.add_argument("--out", required=True, help="compact source/body report JSON, optionally .gz")
+    inventory_program.add_argument("--trace", help="augment candidate source scope from an existing runtime trace directory/JSONL/gzip")
     inventory_program.set_defaults(func=_inventory_program)
     check_inventory = sub.add_parser("check-inventory", help="rebuild a source inventory from current files and discovery context")
     check_inventory.add_argument("report", help="inventory report JSON or JSON.gz")
@@ -318,6 +319,11 @@ def main(argv=None) -> int:
         command.add_argument("--max-lowered-bodies", type=int, default=256)
         command.add_argument("--max-operations", type=int, default=10000, help="aggregate core operation ceiling across all body reports")
         command.add_argument("--max-call-witnesses", type=int, default=4096, help="aggregate conditional call-target witness ceiling")
+        command.add_argument("--max-trace-bytes", type=int, default=128_000_000, help="decompressed runtime trace byte ceiling")
+        command.add_argument("--max-trace-records", type=int, default=200_000, help="runtime trace line ceiling, including blank lines")
+        command.add_argument("--max-trace-line-bytes", type=int, default=2_000_000)
+        command.add_argument("--max-runtime-codes", type=int, default=4096, help="runtime code/process observation group ceiling")
+        command.add_argument("--max-compile-attempts", type=int, default=1024, help="offline code reproduction trial ceiling")
     normalize = sub.add_parser("normalize", help="normalize existing raw trace into IR v2 evidence")
     normalize.add_argument("trace")
     normalize.add_argument("--out", required=True)
@@ -461,6 +467,14 @@ def _inventory_limits(args):
             ("max_files", "max_bytes", "max_directories", "max_lowered_bodies", "max_operations", "max_call_witnesses")}
 
 
+def _runtime_inventory_budget(args):
+    from scar.ir.program.runtime_sources import RuntimeTraceBudget
+    return RuntimeTraceBudget(max_uncompressed_bytes=args.max_trace_bytes,
+                              max_lines=args.max_trace_records,
+                              max_line_bytes=args.max_trace_line_bytes,
+                              max_codes=args.max_runtime_codes)
+
+
 def _inventory_program(args) -> int:
     from scar.analysis.program_inventory import inventory_program
 
@@ -469,11 +483,19 @@ def _inventory_program(args) -> int:
         if not (output.name.endswith(".json") or output.name.endswith(".json.gz")):
             raise ValueError("inventory report must end in .json or .json.gz")
         result = inventory_program(args.source, project_root=args.project_root,
-                                   source_roots=args.source_root, **_inventory_limits(args))
+                                   source_roots=args.source_root, **_inventory_limits(args),
+                                   runtime_trace=args.trace, runtime_budget=_runtime_inventory_budget(args),
+                                   max_compile_attempts=args.max_compile_attempts)
         for file in result.discovery.files:
             source = Path(file.snapshot.path)
             if output == source or (output.exists() and source.samefile(output)):
                 raise ValueError("report must differ from every discovered source")
+        if result.runtime_scope is not None:
+            from scar.trace.files import resolve
+            logical = Path(result.runtime_scope.trace.manifest.logical_path)
+            actual = resolve(logical)
+            if output == logical or output == actual or (output.exists() and actual.samefile(output)):
+                raise ValueError("report must differ from its runtime trace")
         _compressed_document(output, result.to_dict())
     except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
@@ -489,7 +511,8 @@ def _check_inventory(args) -> int:
 
     try:
         with open_text(args.report) as stream:
-            result = ProgramInventory.from_dict(strict_loads(stream.read()), **_inventory_limits(args))
+            result = ProgramInventory.from_dict(strict_loads(stream.read()), **_inventory_limits(args),
+                runtime_verification_budget=_runtime_inventory_budget(args), max_compile_attempts=args.max_compile_attempts)
     except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
         return 2
