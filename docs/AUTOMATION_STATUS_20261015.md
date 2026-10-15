@@ -105,7 +105,7 @@ success_rate=100.0，插桩 wall=125.567秒，原仓库仍无修改。采集写�
 丢弃及6个未配对入口，不能称为完整调用过程。记录已无损压缩并核对原始SHA；
 相同目标/采集源码以250,000事件、192,000,000字节预算重试成功：84,319入口、
 168,638事件、850代码描述，drop/open/path gap均0、errors为空；插桩wall112.960s。
-离线自动连接和严格重放正在执行。截断不是优化
+离线自动连接和API严格重放已通过；预算修复后的公共CLI重放进行中。截断不是优化
 审批拒绝，也不是程序运行失败，应在采集覆盖报告中单独表达。
 
 接下来的自验重点是：实际 callable/receiver/partial/default/cell 与当前调用
@@ -113,3 +113,13 @@ success_rate=100.0，插桩 wall=125.567秒，原仓库仍无修改。采集写�
 逻辑版本。完整程序自动建图的验收，以真实跨层查询和反例为依据，而非节点数。
 本轮有限组件、外部采集和剩余义务详见
 [N2_CALL_EVIDENCE_ACCEPTANCE.md](N2_CALL_EVIDENCE_ACCEPTANCE.md)。
+
+### 新证据对下一步的约束
+
+`677e10f`预算/索引修复通过703项mapped、全仓1,738项。真实API报告中548份
+code核验对应421个definition；1,119次core观察实际只有9个不同调用点（旧图
+110处），直接target body闭合0处，沿核验runtime父链有1处可经过中间层到body。
+没有实际actual→formal来源证明。详见[逐项审计](N2_CALL_CONNECTION_AUDIT.md)。
+下一门从[返回引用与frame生命周期](N2_FRAME_LIFETIME_PLAN.md)开始：持有已求值
+payload，保留ENTER/BIND/DISCARD/EXIT状态依赖；实际调用约定与环境随后接入。
+类型/规则实现先在隔离稀疏worktree推进，主树保留冻结代码完成公共重放。

@@ -2,6 +2,17 @@
 
 ## Current bounded component: N2.call-evidence (2026-10-15)
 
+Follow-up frozen `677e10f` passed **703 mapped tests** and **1,738 repository
+tests** (three documented warnings). Independent raw report/record ceilings are
+public CLI options; streamed bounded output preserves existing reports on
+failure. Return-position indexing keeps the previous source matching semantics.
+Real API replay passed, with **9 distinct observed core calls out of 110**;
+direct target-body joins remain zero, and one core call reaches existing bodies
+through verified runtime parent chains with intermediary effects unproved.
+The new public CLI is replaying the full report. See
+[call connection audit](N2_CALL_CONNECTION_AUDIT.md) and
+[the next frame lifetime gate](N2_FRAME_LIFETIME_PLAN.md).
+
 Frozen `bedcd2d` passed **659 mapped tests** and **1,694 repository tests**
 (three documented warnings, no failures or skips).
 New `trace --calls-only` automatically records immediate caller positions,
@@ -17,8 +28,8 @@ the full N2.call-edges E4 dependency route is **still unmet**.
 The original LeWM command was run twice without target edits. The first hit
 the default 64MB budget. The retry succeeded and recorded 168,638 events,
 84,319 Python entries (including suspended-code segments), 850 code descriptors,
-and zero dropped events/codes, unmatched entries or path gaps. Its offline
-source/core linking and replay are in progress; no complete dependency graph,
+and zero dropped events/codes, unmatched entries or path gaps. Its API offline
+source/core linking and replay passed within the stated scope; no complete dependency graph,
 transformation or clean A/B speedup is claimed. See
 [component evidence and remaining obligations](N2_CALL_EVIDENCE_ACCEPTANCE.md).
 

@@ -1,0 +1,44 @@
+{
+  "instrumented_analysis": true,
+  "target_executed_by_analysis": false,
+  "transformation_authorized": false,
+  "phases": {
+    "inventory_verification": 455.4301952989772,
+    "call_linking": 94.67722940538079,
+    "serialization": 102.26493113301694,
+    "call_replay": 329.3277367167175
+  },
+  "revision": "bedcd2dfa8536a5251c49e5b8b883196207f9a03",
+  "arguments": {
+    "trace": "artifacts/traces/n2_call_edges_lewm_retry_20261015",
+    "project_root": "/home/zyf/AAA/le-wm",
+    "inventory": "artifacts/reports/gates/n2-functions-lewm-inventory.json.gz",
+    "out": "artifacts/experiments/n2_call_edges_lewm_retry_20261015/analysis"
+  },
+  "reference_budget_reason": "raw capture contains 1,386,048 reference observations, exceeding default 1,000,000",
+  "peak_rss_kib": 4980692,
+  "summary": {
+    "frame_entries": 84319,
+    "frame_exits": 84319,
+    "code_source_statuses": {
+      "INCOMPLETE": 297,
+      "MISMATCH": 5,
+      "VERIFIED": 548
+    },
+    "verified_source_call_sites": 22548,
+    "core_call_observations": 1119,
+    "direct_core_call_observations": 1119,
+    "target_body_observations": 1309,
+    "tracked_immediate_callers": 80678,
+    "tracked_ancestors_through_intervening_frames": 3640,
+    "verified_normal_frame_exits": 8925,
+    "reference_occurrences": 422349,
+    "reference_routes": 1808,
+    "issues": 87032,
+    "target_executed_by_linker": false,
+    "function_environment_established": false,
+    "contents_or_effects_established": false,
+    "transformation_authorized": false
+  },
+  "status": "REPLAYED"
+}

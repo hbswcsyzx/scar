@@ -102,6 +102,13 @@ python -m scar.cli link-calls artifacts/traces/calls \
   --out artifacts/reports/calls.json.gz
 python -m scar.cli check-call-links artifacts/reports/calls.json.gz
 
+# Larger reports require independently selected ceilings for both wire data
+# and records. Source-budget boundaries stay explicit; budgets do not prove
+# actual argument binding, effects or permission to transform execution.
+python -m scar.cli check-call-links artifacts/reports/calls-large.json.gz \
+  --max-call-report-bytes 800000000 --max-call-trace-bytes 256000000 \
+  --max-call-trace-events 250000 --max-call-references 2000000
+
 # Optional expensive control detail: user lines and observed loop back-edges.
 python -m scar.cli trace --lines --out artifacts/traces/line-demo -- \
   python path/to/program.py

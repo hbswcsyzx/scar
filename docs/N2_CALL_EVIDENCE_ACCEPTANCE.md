@@ -1,7 +1,8 @@
 # N2.call-evidence：有限组件验收与未闭合依赖
 
 2026-10-15。实现冻结 `bedcd2dfa8536a5251c49e5b8b883196207f9a03`。
-**组件 mapped gate 与全仓回归通过；真实 LeWM 离线连接正在执行。**
+**组件 mapped gate、全仓回归与真实 LeWM API离线重放通过。**
+预算/索引修复`677e10f`的公共CLI完整重放正在执行。
 完整 `N2.call-edges` 的 E4（跨调用精确回溯 source actual）仍未通过。
 
 ## 1. 自动化范围
@@ -75,9 +76,17 @@ LeWM前后HEAD `f70fed80288462ca4d006cb3607ec6da6eaa851f`，git状态均干净�
 重试原始记录含1,386,048个引用观察，超出离线默认1,000,000；实际API复验
 显式使用2,000,000引用、256MB原始数据、250,000事件预算。入口是通用
 `ProgramInventory.from_dict → link_calls → CallEdgeReport.from_dict`；inventory
-只需先严格核验一次，然后在同进程复用。当前CLI未暴露全部CallEdgeBudget
-字段，这个外部压力样例使用等价Python API，未手工补图。
-外部离线连接及重放进行中，不能提前报告其覆盖/可信性结论。
+只需先严格核验一次，然后在同进程复用。初版CLI未暴露全部CallEdgeBudget
+字段，因此首个外部压力样例使用等价Python API，未手工补图。`677e10f`已补齐
+公共CLI独立预算字段及原子限额输出；旧默认上限不自动放宽。
+
+API重放已通过：548份code描述核验，421个不同definition；22,548次源码调用
+位置观察去重为483处，1,119次core CALL观察去重为9处（已有110处）。直接
+core→target body闭合0处，沿核验runtime parent链有1处可经中间层到达body；
+该链保留wrapper和未证效果，不代表参数数据流闭合。详见
+[真实连接逐项审计](N2_CALL_CONNECTION_AUDIT.md)。
+inventory核验455.430s、连接94.677s、序列化102.265s、API重放329.328s，峰RSS
+4,980,692KiB，均为分析成本。完整E4和优化合法性仍未通过。
 
 ## 5. 状态与下一门
 

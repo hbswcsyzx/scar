@@ -1,0 +1,65 @@
+{
+  "schema": "scar.call-connection-evidence-manifest",
+  "schema_version": 1,
+  "api_status": "REPLAYED",
+  "api_implementation": "bedcd2dfa8536a5251c49e5b8b883196207f9a03",
+  "io_implementation": "677e10f4461cdf47b1cb7839ed3fd1b856f7610e",
+  "io_source_sha256": "9d5b8815b0c53c6e2f99a19679fd4bcb967b8d9b30a9decb5c61a17da5ac50c5",
+  "public_replay_status": "RUNNING",
+  "whole_program_complete": false,
+  "actual_formal_provenance_established": false,
+  "transformation_authorized": false,
+  "files": {
+    "artifacts/experiments/n2_call_edges_lewm_retry_20261015/analysis/links.json.gz": {
+      "bytes": 40504077,
+      "sha256": "9c8da97665cd93d5c61e2e75f19f12a5438c6b0dc5b921f229af942bbaad0515"
+    },
+    "artifacts/reports/gates/n2-functions-lewm-inventory.json.gz": {
+      "bytes": 7328776,
+      "sha256": "d9f319ba1688e01fa89599fb2dcae97f804c3d494159f82b5799b157ed4604b2"
+    },
+    "artifacts/reports/gates/n2-call-connections-api.json": {
+      "bytes": 1549,
+      "sha256": "869049ea59a5afec9bc13b7d8e01f7cafb48abf81bf1edf4d46b870cca1145b8"
+    },
+    "artifacts/reports/gates/n2-call-connections-coverage.json": {
+      "bytes": 96821,
+      "sha256": "047fc75096c2128ad402de592d28fc0193cbf80778dbfcbcbf2b580a9b676145"
+    },
+    "artifacts/reports/gates/n2-call-connections-wire-size.json": {
+      "bytes": 145,
+      "sha256": "2615d98fd12d7e9bc53a5e5f903c3043bdeb91a56071e697613ce960cc37a2ba"
+    },
+    "artifacts/reports/gates/n2-call-connections-analyze.py": {
+      "bytes": 3023,
+      "sha256": "5a35a6b829d62fdfd0ccc8415cf793028070825fab26391f918fa384b2095d84"
+    },
+    "artifacts/reports/gates/n2-call-connections-audit.py": {
+      "bytes": 7423,
+      "sha256": "8eab2191f11f23f512640d40fa496abe14b7bb0968ab9567a037bd9f2fa5aabf"
+    }
+  },
+  "trace_compression": [
+    {
+      "logical_path": "artifacts/traces/n2_call_edges_lewm_retry_20261015/call-codes.353869.jsonl",
+      "gzip_path": "artifacts/traces/n2_call_edges_lewm_retry_20261015/call-codes.353869.jsonl.gz",
+      "raw_bytes": 224591,
+      "raw_sha256": "b0d057bbfc282d5e0c91a565ef1163674cbe6c422d8bfde801344961d081f43d",
+      "compressed_bytes": 54286
+    },
+    {
+      "logical_path": "artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl",
+      "gzip_path": "artifacts/traces/n2_call_edges_lewm_retry_20261015/call-events.353869.jsonl.gz",
+      "raw_bytes": 159925490,
+      "raw_sha256": "d07f14ac7289651f8467c8cb391f5ff355f2c2bce2541a44fc9cffbeea0701d2",
+      "compressed_bytes": 7724654
+    },
+    {
+      "logical_path": "artifacts/traces/n2_call_edges_lewm_retry_20261015/resources.jsonl",
+      "gzip_path": "artifacts/traces/n2_call_edges_lewm_retry_20261015/resources.jsonl.gz",
+      "raw_bytes": 82444,
+      "raw_sha256": "0f8292a0fc8c3a77eec74675796b00e84757e2e655c315df37de64fedbc9652c",
+      "compressed_bytes": 8352
+    }
+  ]
+}
