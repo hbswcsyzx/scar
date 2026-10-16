@@ -44,6 +44,10 @@ SCAR 自动采集执行、发现源码、解析操作、展开区域并建立依
 
 ## 3. 已验收与未完成
 
+主线最新完整验收仍为R1。B1开发分支 `codex/call-operands-b1` 的实现提交
+`c91876b` 已通过下面的**组件门**，尚未合并主线，也未通过B1端到端门。
+完整范围见 [B1实现与验收记录](https://github.com/hbswcsyzx/scar/blob/codex/call-operands-b1/docs/N2_B1_IMPLEMENTATION.md)。
+
 | 阶段 | 实际状态 | 限制 |
 | --- | --- | --- |
 | 原程序执行采集 | 原 LeWM 已运行；归档有168,638事件、84,319入口记录、850份code descriptor；记录的drop/open/path gap为0 | 包含 suspended-code 段；一次执行不覆盖所有路径和未来环境 |
@@ -51,6 +55,7 @@ SCAR 自动采集执行、发现源码、解析操作、展开区域并建立依
 | D1 调用来源接入 | 421个 eligible `(pid, code)` 分组全部对应准确源码定义；32 CORE_LINKED、389有具体边界 | 260 class作用域、28 closure/cell、2 generator、99其它函数lowering边界；不是421个优化点 |
 | D1 自主验收 | 303专项、2,193全仓检查及原归档生成/公共独立重放通过 | 是有限接口验收，不是整个LeWM覆盖率 |
 | R1 编译上下文 | 最终287专项、2,278全仓及原归档公共完整重算通过；5条假mismatch全部解决，eligible来源425 | 553 VERIFIED / 259 INCOMPLETE / 0 MISMATCH；不提供数据流或纯性证明 |
+| B1 跨调用来源组件（开发分支） | 冻结组件门304项通过，52.893秒；原始两文件程序经trace、自动inventory和公共查询，穿过两层调用回到准确上层输入 | 仅支持限定的Name调用与位置参数；路线保留条件。不证明内容、函数环境、状态或效果；全仓、独立GPU、原LeWM新采集门待做 |
 | 跨层值/状态连接 | 尚未完整交付；查询会在 `ARGUMENT_ROUTING_UNVERIFIED` 等准确缺口停下 | 不能根据同引用、同shape、同名称或同code补线 |
 | 化简与性能 | 尚无新的可信LeWM修改指导/获批变换/clean A/B加速比 | 离线分析时间不是LeWM执行时间 |
 
@@ -58,6 +63,12 @@ D1 的50个body图和32个CORE_LINKED使用不同统计分母，不能相除当�
 最新R1结果另存独立验收，不覆盖历史D1的算法、报告或数字。
 本轮R1未重跑整个v6展开，因此425是最新seed层结果，150文件/50body仍是D1冻结结果。
 见 [D1证据](N2_CALL_DEMAND_ACCEPTANCE.md)、[R1验收](N2_COMPILATION_CONTEXT_ACCEPTANCE.md)。
+
+B1组件使用distinct/shared/不支持weakref的shared输入自动构图；
+`f(x,x)`的两个输入位置仍是两个Use。独立审查曾复现分支phi误连，现已加入
+`CONTROL_SELECTION_UNVERIFIED`：没有动态选择证据时不能把两侧静态来源都当作
+本次返回来源。缺LOAD、hook gap或布局矛盾也不能留下获准的completion。
+这组结果说明局部连接有进展，不是完整LeWM图或新的LeWM实测结果。
 
 ## 4. 关键难点与处理方式
 
@@ -87,7 +98,8 @@ D1 的50个body图和32个CORE_LINKED使用不同统计分母，不能相除当�
 | 节点 | 必须交付的自动结果 | 必须阻断的反例 |
 | --- | --- | --- |
 | R1已验收 | 原归档5个旧mismatch完整descriptor重现；旧v1/v6按历史profile重放 | 源码漂移、同文件不同flags/compile filename缓存混用、弱化匹配 |
-| B1/B2 + 环境/C2 | 原始多文件命令自动建图；公开查询从指定call result穿过多层actual/formal/return回到准确上层Use，承接环境与后态 | shared object多参数、两次调用、动态defaults/receiver、重绑、异常、hook缺口 |
+| B1整体验收 | 在已通过的304项组件门上补全仓回归、独立PyTorch/GPU及未修改LeWM的新capture/自动查询；记录实际闭合链和逐项断点 | 把组件成功、旧归档重放或仅索引源码当作真实LeWM完整建图 |
+| B2 + 环境/C2 | 扩展receiver/default/pack绑定，建立函数环境和跨调用后态；公开查询穿过对应区域接口 | shared object多参数、两次调用、动态defaults/receiver、重绑、异常、hook缺口 |
 | 循环与细状态 | 原始程序自动恢复循环携带依赖、对象/存储alias、版本和copy来源 | 零次/多次/提前退出、原位修改、共享view、foreign write、RNG |
 | 区域依赖与化简指导 | 从观察根求依赖闭包，给出准确范围、替换/提升位置、保留效果、条件和成本 | 仍有消费者、逃逸、异常或外部效果时误删；只凭重复节点复用 |
 | 原LeWM复验 | 无手工补图，沿上述公共流程自动产生可检查指导；若以后应用修改，再分层验证并clean A/B | workload名称规则、把候选当获批变换、把插桩时间当加速比 |
@@ -100,6 +112,8 @@ D1 的50个body图和32个CORE_LINKED使用不同统计分母，不能相除当�
 
 最近清理已结束的D1工作树和测试目录，释放51,331,072分配字节（约49MiB），
 清理前已核对归档manifest。保留源码、必要原始trace和验收证据；LeWM和共享
-缓存未改。此前独立清理的释放量另见 [磁盘管理](ARTIFACT_RETENTION.md)，不重复累计。
+缓存未改。随后已验证R1归档并删除其结束的工作树，另释放9,027,584分配字节；
+记录见 `artifacts/reports/maintenance/r1-cleanup-20261016.json`。
+此前独立清理的释放量另见 [磁盘管理](ARTIFACT_RETENTION.md)，不重复累计。
 后续采集保持有界元数据/压缩报告，不保存每次迭代Tensor内容，不以采样相等证明
 内容相等；性能判断包含分析、guard、查找和内存成本。

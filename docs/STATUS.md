@@ -1,5 +1,23 @@
 # Current evidence and remaining work
 
+## In development: B1 conditional cross-call reference provenance (2026-10-16)
+
+Branch `codex/call-operands-b1`, implementation `c91876b`, passed the frozen
+**304-check component gate / 52.893s**. Source fingerprint:
+`33d92b1635ac614ab817388dbeb45cda5fe6f71a6af99b115193e473582d1933`.
+Original two-file commands automatically produce source/core records and public
+queries through exact actual/formal/normal-return occurrences back to the unique
+upper input, including shared and non-weakref inputs. Tampering, independent
+budgets and legacy frame/source behavior are covered. A reproduced branch-merge
+misjoin now stops at an explicit control-selection boundary.
+
+This branch is **not merged or accepted as the complete B1 gate**. The new full
+regression, persistent independent PyTorch/GPU evidence and a new bounded run of
+the unchanged LeWM command remain required. Routes are conditional reference
+provenance, not contents, environments, effects, complete program graphs or
+transformation authority. No new LeWM speedup is measured. See
+[automation scope and next gates](AUTOMATION_STATUS_20261016.md).
+
 ## Latest bounded component: R1 recorded compilation context (2026-10-16)
 
 Final **287 mapped checks / 77.390s**, **2,278 full repository tests** and
@@ -35,9 +53,8 @@ analysis costs; generation overlapped regression. Raw/source/Git remained unchan
 No actual/formal proof, whole-program graph, transformation or LeWM speedup.
 See [D1 acceptance](N2_CALL_DEMAND_ACCEPTANCE.md).
 
-Next: resolve the observed inherited-future compilation mismatch with explicit
-matching profiles and historical replay, then deliver actual→formal→return queries,
-environment/world mapping, loops and state provenance under
+R1 above resolved the inherited-future compilation mismatch. Next: complete B1
+end-to-end acceptance, then environment/world mapping, control, loops and state provenance under
 [the concrete cross-call plan](N2_CROSS_CALL_IMPLEMENTATION.md).
 
 ## Historical bounded component: D0 compact source seeds (2026-10-15)
