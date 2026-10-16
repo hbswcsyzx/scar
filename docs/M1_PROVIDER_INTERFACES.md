@@ -1,6 +1,6 @@
 # M1 / T1：P0 外部图来源与规范归属合同
 
-日期：2026-10-16。**组件 225 项通过；最终冻结全仓回归待执行。** 本门落实
+日期：2026-10-16。**P0 组件 225 项、冻结全仓 3,139 项通过。** 本门落实
 [集成设计](MODELING_INTEGRATION.md) 的来源、表示归属和有序端口合同；不是新
 tracer/adapter，不关闭整个 T1、M1/M2 或第一阶段。
 
@@ -138,4 +138,12 @@ wire SHA256 为 `03fe4ff31daf44a390be8f6ab30f4201a55706e581594be84fb27f116e9fcf2
 终版组件通过后重新冻结，并在独立新目录运行最终全仓回归，不覆盖第一次证据。
 
 证据目录：[model_provider_interfaces](../artifacts/experiments/b1_call_operands/model_provider_interfaces/)。
-完整冻结回归终态随后补入；测试结果不作为 M1/M2、自动导入或变换完成的依据。
+最终冻结实现 `b14070820ceb37731dce5fb6d430eaabc2f0c649` 的 `full-final/`：
+3,139 PASS、0 fail/error/skip，3 个既有 warnings；driver wall 424.444s，峰值
+1,026,828KiB。HEAD、clean worktree、367 个源码文件哈希及 15 个 fixture 哈希
+前后一致，本次独占临时目录已清理。该时间是验收成本，不是 LeWM benchmark。
+
+独立审查两次缺口、原 probe、初版门、被中止的 full 及终版门/完整回归均保留。
+本 P0 自主验收关闭；测试结果不作为 T1、M1/M2、自动导入或变换完成的依据。
+下一步先落实 P1 原生端口/tree 与 BoundaryRelation 的逐域合同，继续遵守第一阶段
+完成后先停下来汇报的边界。LeWM 原仓库仍为干净 `f70fed8`，本门未启动 LeWM。

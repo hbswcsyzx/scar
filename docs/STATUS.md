@@ -12,8 +12,11 @@ validator now derives direct completion/pending projections from canonical CFG
 edges. A further shared-landing review found and fixed order-dependent pending
 projection ownership; a valid two-dispatch phi regression now checks record-order
 invariance. The initial frozen full run was deliberately interrupted before any
-tracked edit; its FAIL/-15 receipt is retained. Final frozen full regression is
-pending. This is a declaration component, not
+tracked edit; its FAIL/-15 receipt is retained. Final frozen `b140708` passed
+3,139 full tests in 424.444s / 1,026,828KiB, with three existing warnings and no
+failures/errors/skips. HEAD, clean status, 367 source hashes and 15 fixture hashes
+were identical before/after; the exclusively owned temporary directory was removed.
+This is a declaration component, not
 an FX/Export/ETO adapter, artifact replay, occurrence bridge or equivalence proof.
 Complete T1, M1/M2 and first-stage modeling remain unfinished.
 

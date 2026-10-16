@@ -72,6 +72,11 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 ## 5. 当前证据锚点
 
+- M1/T1 [P0来源与归属](M1_PROVIDER_INTERFACES.md)225项、冻结全仓3,139项通过
+  （implementation `b140708`，367文件源指纹与15份fixture哈希前后一致）。只验证
+  声明合同、规范实体归属与有序端点；P1原生边界、artifact重放、动态occurrence
+  和跨表示等价尚未实现，完整T1/M1/M2及第一阶段仍未完成。
+
 - M1 [C0控制协议组件](M1_CONTROL_INTERFACES.md)354项、冻结全仓3,027项通过
   （implementation `54eb7ec`，源指纹含356文件）。仅验证scope/port/pending/packet和CFG组合，C1 cleanup/context/
   原token来源保持仍未实现，不称完整finally或M1通过。
