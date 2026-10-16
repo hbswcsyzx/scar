@@ -79,7 +79,8 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 - M1/T1 [P1薄边界](M1_NATIVE_INTERFACES.md)168项组件通过（376文件源指纹），
   已接原生槽到规范entry/exit及跨表示八域待证声明，未复制pytree/signature解释器。
-  独立审查发现并修复旧ID子类索引回归；冻结全仓待运行，真实adapter仍未接入。
+  独立审查发现并修复旧ID子类索引回归；`79bf2a9`的3,215项冻结全仓通过，
+  源/18份fixture哈希前后一致，真实adapter仍未接入。
 
 - M1/T1 [P0来源与归属](M1_PROVIDER_INTERFACES.md)225项、冻结全仓3,139项通过
   （implementation `b140708`，367文件源指纹与15份fixture哈希前后一致）。只验证

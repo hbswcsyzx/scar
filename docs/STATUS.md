@@ -11,7 +11,10 @@ Independent integration review reproduced a validator-valid legacy ID-subclass
 index regression after the first 164-check pass; raw original-ID coordinates and
 four new regressions fix it without weakening strict new records. The unchanged
 five-case IR-only probe then passed. Initial results remain archived.
-Frozen full regression is pending. This does not implement native artifact/tree
+Frozen `79bf2a9` passed **3,215 full tests / 431.085s / 1,027,692KiB**, three
+warnings, zero failures/errors/skips. HEAD, clean status, all 376 source hashes and
+18 fixture hashes were identical before/after; the exclusively owned basetemp
+was removed. The single full run needed no retry. This does not implement native artifact/tree
 replay, provider adapters, current lifted-state/write-back, dynamic provenance or
 equivalence. Complete T1/M1/M2 and automatic LeWM modeling remain unfinished.
 

@@ -16,7 +16,7 @@ verify bounded tool capabilities; the new adapters are not yet integrated.
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
 all completion sites and explicit cross-representation obligations. Its 168
-component checks pass; frozen full regression is pending. Native trees/signatures
+component checks and 3,215 frozen full-repository tests pass. Native trees/signatures
 remain authoritative external artifacts, with no adapter, replay or equivalence
 claim. The complete first modeling stage remains unfinished.
 

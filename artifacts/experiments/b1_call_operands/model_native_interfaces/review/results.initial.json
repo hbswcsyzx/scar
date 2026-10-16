@@ -1,0 +1,8 @@
+{
+  "phase": "before IR execution",
+  "command": "PYTHONDONTWRITEBYTECODE=1 python artifacts/experiments/b1_call_operands/model_native_interfaces/review/probe.py",
+  "status": "HARNESS_IMPORT_FAILURE",
+  "error_type": "ModuleNotFoundError",
+  "error": "No module named 'scar'",
+  "explanation": "The independent script directory, not the repository root, was on sys.path. No IR cases executed. Corrected invocation adds PYTHONPATH=.; product/probe source unchanged."
+}

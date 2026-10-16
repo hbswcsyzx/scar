@@ -284,7 +284,7 @@ completion 投影、写回及跨表示证明捆成第一次导入的前置，仍
 因此作以下设计修正；这是 **Proposed 的实施约束，不是新 adapter 已完成**：
 
 [P1](M1_NATIVE_INTERFACES.md)已经把薄边界引用、canonical 分区、跨表示待证域
-接入原 core（168 项组件通过，全仓待验收）；它不解释原生树/角色，也不证明
+接入原 core（168 项组件、3,215项冻结全仓通过）；它不解释原生树/角色，也不证明
 artifact 真正包含这些槽。以下 adapter/重放工作仍未完成。
 
 1. **原生事实留在原生 artifact。** FX 的 `args/kwargs`，Export 的

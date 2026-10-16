@@ -40,7 +40,7 @@ artifact、不把执行证据直绑静态实体，也不授予跨表示等价或
 `native_boundaries/boundary_relations` 只引用既有 entry/exit，保存有序 native 槽
 及 core-only 分区、不同 Region 之间的逐域未证义务。原生 TreeSpec/signature
 留在 artifact，不复制其解释器。无此能力仍按原 v2—v7 写出；原 v7 golden 由
-隔离原 codec 产生。168 项组件已通过，冻结全仓尚待运行；动态 occurrence/
+隔离原 codec 产生。168 项组件与 `79bf2a9` 的3,215项冻结全仓已通过；动态 occurrence/
 denotation、真实 native 适配/写回/等价及完整建模仍未完成。
 
 新完整模型 Resource 有静态 definition/requirement 和动态 instance，handle

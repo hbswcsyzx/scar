@@ -1,6 +1,6 @@
 # P1：原生图的薄边界与跨表示义务
 
-2026-10-16。**已实现，静态组件验收通过；冻结全仓回归待运行。** 基线 `126d56e`。
+2026-10-16。**已实现并通过静态组件与冻结全仓验收。** 基线 `126d56e`，冻结实现 `79bf2a9`。
 遵循 [集成设计 7.2](MODELING_INTEGRATION.md)：不复制 PyTorch 的 TreeSpec、
 graph signature 枚举或 def-use 图。LeWM 不参与类型、规则或 fixture 条件。
 
@@ -127,4 +127,13 @@ occurrence/denotation 等剩余接口；完整第一阶段通过后仍先停下�
 
 独立审查限定于其未参与编写的集成层，见
 [原报告](../artifacts/experiments/b1_call_operands/model_native_interfaces/review/integration-review.md)。
-全仓 G6、完整第一阶段、真实 artifact 适配/重放及运行对应仍不由这些局部结果证明。
+冻结 G6 在 `79bf2a9` 完成：[3,215 PASS / 431.085s / 1,027,692KiB](../artifacts/experiments/b1_call_operands/model_native_interfaces/full/report.json)，
+零 fail/error/skip，三项警告；前后 HEAD、干净状态、376 文件源哈希及18份 fixture
+哈希逐项相同。唯一 full 运行无重试，子进程退出后专属 basetemp 已删除。
+该时间是全仓验收成本，不是目标程序性能。详见[证据索引](../artifacts/experiments/b1_call_operands/model_native_interfaces/README.md)
+与[组件验收记录](../artifacts/experiments/b1_call_operands/model_native_interfaces/acceptance.json)。
+
+完整第一阶段、真实 artifact 适配/重放、当前 lifted-state/写回、运行对应和等价
+仍未完成。下一批建议只归档为 Proposed：
+[state/selector/literal](../artifacts/experiments/b1_call_operands/model_native_interfaces/review/next-state-boundary.md)、
+[其余模型接口顺序](../artifacts/experiments/b1_call_operands/model_native_interfaces/review/next-model-order.md)。
