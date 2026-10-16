@@ -61,14 +61,20 @@ def provider_errors(graph, operation_region, uses):
     operation_bindings = {}
     blocks = {block.id: block for region in graph.regions for block in region.blocks}
     edge_producers = {}
+    incoming = {block: [] for block in blocks}
     for operation in graph.operations:
         if operation.terminator is not None:
             for edge in operation.terminator.successors:
-                for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
-                    if isinstance(actual, (CompletionResult, PendingPayload)):
-                        # These canonical edge projections are produced here;
-                        # ordinary Use forwarding/phi arguments are not.
-                        edge_producers[formal] = operation.id
+                incoming[edge.block].append((operation.id, edge))
+    for block, edges in incoming.items():
+        # Multiple real edges make this a phi, even when one incoming edge
+        # projects a payload. Never choose a producer by record iteration order.
+        if len(edges) != 1:
+            continue
+        operation, edge = edges[0]
+        for actual, formal in zip(edge.arguments, blocks[block].arguments):
+            if isinstance(actual, (CompletionResult, PendingPayload)):
+                edge_producers[formal] = operation
     for index, row in enumerate(graph.provider_bindings):
         path = f"provider_bindings[{index}]"
         envelope = envelopes.get(row.provider)

@@ -4,12 +4,16 @@
 
 [P0](M1_PROVIDER_INTERFACES.md) connects typed provider envelopes, representation
 ownership/observation scope and ordered endpoints to the existing canonical core.
-All 224 component checks pass with source fingerprint
-`6fd34d1c48b2225097f88c8435832dfffefdda7f8fbbed2239cd0be7361e4d03`
-(365 files). Schema v7 preserves original v1–v6 contracts. An independent review
+All 225 final component checks pass with source fingerprint
+`97a2dfe24a6e5d3c72c31ee6d3cb94dc6e8bc9d8dad35e3e9bb4e21ebf3f4b0b`
+(367 files). Schema v7 preserves original v1–v6 contracts. An independent review
 found and reproduced four accepted INVOKE-result source mismatches; the fixed
 validator now derives direct completion/pending projections from canonical CFG
-edges. Frozen full regression is pending. This is a declaration component, not
+edges. A further shared-landing review found and fixed order-dependent pending
+projection ownership; a valid two-dispatch phi regression now checks record-order
+invariance. The initial frozen full run was deliberately interrupted before any
+tracked edit; its FAIL/-15 receipt is retained. Final frozen full regression is
+pending. This is a declaration component, not
 an FX/Export/ETO adapter, artifact replay, occurrence bridge or equivalence proof.
 Complete T1, M1/M2 and first-stage modeling remain unfinished.
 

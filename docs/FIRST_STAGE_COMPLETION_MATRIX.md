@@ -30,7 +30,7 @@ Operation、Value、StateLocation、Region、Resource 是规范实体；输入/�
 | 资源身份及要求 | 原 core 静态 ResourceDefinition/Requirement/Use/Location，严格 v4。 | 动态 instance/generation、handle realization、capacity/ownership/可见性与生命周期约束。 | 静态子项已验收，整体未完成。 |
 | host 返回与资源完成 | 资源协议分册区分 enqueue、wait、work outcome、ready。 | typed WorkTicket/Ready 与内容/分配版本/consumer visibility 对应，stream/event、部分失败/取消。 | 完整 machine 接口未实施。 |
 | Python/库/native 协议 | 113 AST 构造、196字段清单；数据/控制/资源分册及语言反例。 | 通用协议的输入/环境/状态/资源/完成字段逐条映射到核心类型；native 边界保守完整，内部未展开不算已理解。 | 分册已审补若干缺口，不等于 M2 整门通过。 |
-| 现成图及捕获条件 | [工具调研](TOOLING_SURVEY.md)有实际小CPU证据；[P0来源声明](M1_PROVIDER_INTERFACES.md)的envelope、表示归属及有序端点已接原core，224项组件通过。 | lifted slot 与具体实例/状态、原生端口/tree接口、跨表示逐域合同、artifact重放及动态occurrence对应。 | P0组件通过，冻结全仓回归待执行；完整T1及新adapter未完成。 |
+| 现成图及捕获条件 | [工具调研](TOOLING_SURVEY.md)有实际小CPU证据；[P0来源声明](M1_PROVIDER_INTERFACES.md)的envelope、表示归属及有序端点已接原core，225项终版组件通过。 | lifted slot 与具体实例/状态、原生端口/tree接口、跨表示逐域合同、artifact重放及动态occurrence对应。 | P0组件通过，最终冻结全仓回归待执行；完整T1及新adapter未完成。 |
 | 运行证据接口 | 已有 sys.monitoring、module/dispatch、profiler/Kineto 和 raw records。 | 明确缺失/截断/冲突、clock/run/window 域；静态→动态→物理的强类型多对多对应；ETO 等字段导入。 | collector 已复用，统一对应未闭合。 |
 | 合同与观察边界 | Q/M、effects/proof ledger、v2 contracts，whole-model 观察根规格。 | 将返回、必要状态、文件/视频/日志、异常/完成、RNG/梯度/identity/顺序合同绑定到规范接口与证据。 | 现有合同可保留，整体边界连接未完成。 |
 

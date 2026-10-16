@@ -1,6 +1,6 @@
 # M1 / T1：P0 外部图来源与规范归属合同
 
-日期：2026-10-16。**组件 224 项通过；冻结全仓回归待执行。** 本门落实
+日期：2026-10-16。**组件 225 项通过；最终冻结全仓回归待执行。** 本门落实
 [集成设计](MODELING_INTEGRATION.md) 的来源、表示归属和有序端口合同；不是新
 tracer/adapter，不关闭整个 T1、M1/M2 或第一阶段。
 
@@ -74,8 +74,8 @@ run 未知可以留缺口，不能编造运行身份。
    使用不同 result path；一次 Use 始终保留单独输入位置。
 4. Use 绑定的 external.key 必须匹配该 Use 所属 Operation 的外部操作 key。
    OperationResult 值绑定必须匹配 producer 的外部 key，并具有 result path。
-   CompletionResult/PendingPayload 在 CFG 边上直接产生的参数，也按既有边关系
-   检查其来源操作和非空投影；普通入口、Use 转发和 phi 参数不强造 producer。
+   唯一真实入边的 CompletionResult/PendingPayload 直接产生参数时，也按既有边
+   关系检查其来源操作和非空投影；普通入口、Use 转发和多入边 phi 不强造 producer。
    这检查规范化来源声明，不验证外部 locator 或其端口索引的真实含义。
    合法的 `f(x,x)` 用两个路径连两个 Uses，
    二者仍引用同一个规范 Value；绑定没有复制或修改这个 Value 的 producer。
@@ -118,8 +118,10 @@ P0 不关闭以下工作，也不将它们退化为普通 binding：
 
 组件命令：`python scripts/run_gate.py gates/m1_provider_interfaces.json --out
 artifacts/experiments/b1_call_operands/model_provider_interfaces/component`，使用
-`conda activate lewm`。四项标准分别 54/54/103/13，通过共 224 项；源码指纹
-`6fd34d1c48b2225097f88c8435832dfffefdda7f8fbbed2239cd0be7361e4d03`，365 文件。
+`conda activate lewm`。首轮四项标准分别 54/54/103/13，通过共 224 项。
+补共享 phi 反例后的终版报告为 `component-final`，54/55/103/13，共 225 项，
+8.518s；源码指纹
+`97a2dfe24a6e5d3c72c31ee6d3cb94dc6e8bc9d8dad35e3e9bb4e21ebf3f4b0b`，367 文件。
 原 v6 golden 来自隔离的 `git archive 624560e` 与原 codec，非用新类型重建；原
 wire SHA256 为 `03fe4ff31daf44a390be8f6ab30f4201a55706e581594be84fb27f116e9fcf20`。
 
@@ -127,6 +129,13 @@ wire SHA256 为 `03fe4ff31daf44a390be8f6ab30f4201a55706e581594be84fb27f116e9fcf2
 修复从既有 CompletionResult/PendingPayload 边推导来源操作；新增正反例覆盖
 正常/异常/后态、投影及普通转发。外部显式 CFG 参数仍需要 P1 的原生来源合同，
 不能以本 P0 规范化来源规则断言第三方图本身错误。
+
+首次冻结 `35469f0` 的全仓回归启动后，只读复核发现新增 PendingPayload 推导
+对共享落点采用 last-wins，会随 operations 元组顺序变化。先向本次独占 driver
+发 SIGINT，再确认其子进程终止、临时目录清理后修改源码。原 `full/` 保留
+228.805s、returncode=-15、FAIL 的中止记录；不能算作回归通过或一个测试断言失败。
+修复仅从唯一真实入边推导；新增合法双 dispatch 共用 exit shim 的顺序无关测试。
+终版组件通过后重新冻结，并在独立新目录运行最终全仓回归，不覆盖第一次证据。
 
 证据目录：[model_provider_interfaces](../artifacts/experiments/b1_call_operands/model_provider_interfaces/)。
 完整冻结回归终态随后补入；测试结果不作为 M1/M2、自动导入或变换完成的依据。

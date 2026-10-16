@@ -72,7 +72,7 @@ Operation 为展示节点，一个有序 Value use 是边；Region 可展开为�
 ## 3. 每份外部图都必须携带的适配合同
 
 以下是完整集成所需的设计字段。[P0 来源声明](M1_PROVIDER_INTERFACES.md)已把
-envelope、表示归属和有序端点接入原 core，组件 224 项通过；它不包含 adapter、
+envelope、表示归属和有序端点接入原 core，组件 225 项通过；它不包含 adapter、
 artifact 重放或完整边界对应。下列全量合同不能据此算作全部已发布：
 
 ```text
