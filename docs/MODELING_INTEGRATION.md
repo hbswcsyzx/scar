@@ -277,6 +277,41 @@ T3 负责集成后的全程序结果，不作为“到了后期再考虑复用�
 本阶段先交付字段合同、组合校验及构造规则；最小运行导入与上述成本比较在
 第一阶段汇报后的 T2 执行。不会因为又发现一个工具就再建一套独立图模型。
 
+### 7.2 收缩 native 接口：保留原生合同，不复制工具内部模型
+
+2026-10-16 对 P1 草案的复审发现，若把通用 TreeSpec、全部 native 角色、所有
+completion 投影、写回及跨表示证明捆成第一次导入的前置，仍会重复实现现成工具。
+因此作以下设计修正；这是 **Proposed 的实施约束，不是新 adapter 已完成**：
+
+1. **原生事实留在原生 artifact。** FX 的 `args/kwargs`，Export 的
+   `graph_signature.input_specs/output_specs` 与 `call_spec.in_spec/out_spec`，
+   由固定版本 adapter 读取，保留原始顺序、重复位置与路径。优先复用
+   `torch.utils._pytree` 的原生规则，不先写一套 flatten/unflatten 解释器，也不
+   克隆所有 Export 枚举。自定义 pytree 的反序列化不能隐式执行任意代码。
+2. **SCAR 只补必须跨边界查询的引用。** native 槽映射到已有 entry/exit；
+   同一 Value 的两个使用位置保持独立。entry 指实际区域参数，exit 指逻辑
+   ExitPort，查询保留其所有 Return/Raise 站点。映射不再复制 producer、类型、
+   call actual 或前后状态；原始事实和可重算索引不能成为两份可修改的真相。
+3. **先明确导入对象的范围。** 导入一个 provider 自己的 GraphModule，仅说明
+   该表示内的 def-use；不要求先伪造它与原 Python 调用的连接，也不宣称它是原
+   Region 的等价展开。后者仍须具体实例、当前状态、mutation 写回、alias/梯度、
+   RNG、异常、外部历史及资源完成合同。缺项定位到关系，不以全局 UNKNOWN 代替。
+4. **按真实 slice 增补接口。** native 输出是 Tensor payload 时不能改型为
+   StateVersion；opaque tuple 不凭 TreeSpec 自动拆成多个值。可能抛异常的 lookup/
+   写回不能强塞入当前禁止普通 StateAccess 的 INVOKE。若某个边界确实需要这些
+   关系，列出最小反例再扩展规范接口；不能给每个 provider 预造全部语言协议。
+5. **执行图沿用执行图。** ETO 的有序观测及 profiler 的现成 activity/correlation
+   不先强制变成静态 SSA，再据此反推未执行路径。它们进入已有 occurrence/evidence
+   层，与定义图通过有范围的对应关系连接；未连接不影响保存已知的原始事实。
+
+验收顺序：固定一份原生 artifact 和端口分母 → 薄引用映射与错接反例 → 明确
+未证的跨表示域 → 第一阶段完整模型汇报 → T2 的公开导入与采集成本对照。
+第一阶段无需实现所有第三方内部类型；也不能仅保存 artifact 路径就宣布其依赖
+已经进入规范模型。复审记录见
+[reuse boundary review](../artifacts/experiments/tooling_survey/reuse_boundary_review.md)，
+独立的[字段归属检查单](../artifacts/experiments/tooling_survey/value_provider_review.md)
+补充了最小采集组合与不能合并的身份。
+
 ## 8. 调整现有投入
 
 - 保留现有 parser、trace/profiler、source identity、严格 wire reader 与已验证有限

@@ -39,6 +39,11 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 评估成熟前端，不能把自写完整编译器当作模型完成的先决条件。T2 以后适配器
 建图仍属后续阶段，不越过用户要求的第一阶段停止点。
 
+native 接口按[集成设计 7.2](MODELING_INTEGRATION.md)收缩：原生 graph signature/
+TreeSpec 保留在有版本的 artifact，优先复用原生解析规则；SCAR 只添加规范
+entry/exit 引用及必须跨图查询的关系。第一阶段不以自制全部 pytree/Export 类型
+作为前置；provider 自身子图可表示与原 Python 可等价替换分别验收。
+
 复审细化了 [字段归属与替代准入](MODELING_INTEGRATION.md)：在继续新增 source
 control lowering 前先明确现成前端可提供的 CFG/dataflow 和差距，不能把完整
 Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、可能状态后态和

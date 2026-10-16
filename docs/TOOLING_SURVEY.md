@@ -4,6 +4,11 @@
 与 [完整模型](WHOLE_PROGRAM_MODEL.md)、[集成设计](MODELING_INTEGRATION.md)配合阅读。
 本轮不增加 detector/backend，不修改 LeWM，不升级运行环境。
 
+后续复审基线为 `5ccc1d2`：P0 来源/归属声明已实现，但 FX/Export/ETO adapter
+仍未接入。复用设计进一步收缩为原生 artifact + 薄边界引用，避免再次自制
+TreeSpec、复制所有 graph signature 类型，见[集成设计 7.2](MODELING_INTEGRATION.md)。
+下文各历史探针保留自己的版本与范围，不随当前 HEAD 自动升级验收结果。
+
 ## 1. 当前事实及本轮问题
 
 SCAR 的完整程序模型仍未完成。复审时开发分支
@@ -93,10 +98,22 @@ LibCST 原本未安装。`libcst_probe.py` 临时解包 PyPI 固定 **1.9.0** wh
 
 ### 3.2 FX / torchview / torchviz
 
-详见 `visual_fx/` 的独立报告和 FX CPU 探针。torchview/torchviz 未安装；本轮对
-它们进行官方资料与源码审查，不伪称在 3.14/2.13 组合实测成功。
+初次审查详见 `visual_fx/` 的独立报告和 FX CPU 探针，当时 torchview/torchviz
+均未安装、未执行；后续补充了隔离 torchview 小实验，见下段。torchviz 仍未实测。
 torchview 能画 function 和 Tensor 连接，也能展开嵌套；默认显示层级不是能力上限。
 FX 可提供机器可读 operator/module 连接；其捕获范围及 Python 执行影响必须导入。
+
+[后续 CPU 兼容探针](../artifacts/experiments/tooling_survey/torchview_compat/REPORT.md)
+仅在临时目录解包 PyPI torchview 0.2.7 与 graphviz wheel，没有安装到 conda。
+它与初次审阅的 main `241d22b` 虽声明同一版本号，仍是不同来源，结论不混报。
+四类微型样例、五次捕获成功：`x+x` 有两份输入 shape，但只有一个 unique parent；
+view+原位写确实改变输入并共享 storage，图没有给出足以证明这些关系的字段；
+展开嵌套增加显示子图，不能据此算新增执行；counter/buffer 修改与混合 train/eval
+变化都真实发生，buffer 的 add_ 没有进入该次图。没有渲染、GPU 或工作负载运行。
+该结果支持复用已有结构、单独连接效果；不支持把展示边直接作为有序全值依赖。
+初次报告称 returned graph 保留原 module/Tensor 对象的措辞过宽：该保留关系未
+获普遍验证，不能用于生命周期结论；后续检查的 wheel 节点存的是 IDs/shapes。
+历史报告和 manifest 原样保留，修正及其版本范围记录在这里与后续报告。
 
 补充的 [TorchLens 固定源审查](../artifacts/experiments/tooling_survey/torchlens_review/REPORT.md)
 读取官方 `550b96a61972cf7db23044125e5ee63489d217cd`（包声明 2.36.1），没有安装或

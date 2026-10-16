@@ -1,5 +1,18 @@
 # Current evidence and remaining work
 
+## Tool reuse boundary refinement (2026-10-16)
+
+The [survey](TOOLING_SURVEY.md) now includes an isolated PyPI torchview 0.2.7 CPU
+probe: four small cases / five successful captures, with duplicate-input,
+view/in-place, nested-display and capture-side-effect observations. This is not
+a SCAR adapter or workload run. The [integration design §7.2](MODELING_INTEGRATION.md)
+keeps native signature/TreeSpec artifacts authoritative and narrows SCAR additions
+to canonical boundary references and scoped correspondences, avoiding a duplicate
+pytree/signature implementation. Product/test source is unchanged from `5ccc1d2`;
+the existing 3,139-test frozen result was not rerun for these research/docs changes.
+FX/Export/ETO adapters, complete M1/M2 and automatic LeWM whole-program connections
+remain unfinished; no transformation or speedup is claimed.
+
 ## P0 provider provenance component (2026-10-16)
 
 [P0](M1_PROVIDER_INTERFACES.md) connects typed provider envelopes, representation
