@@ -1,5 +1,8 @@
 # SCAR v0.1.0
 
+Start with the [current modeling and tool reuse decision](docs/MODELING_REUSE_DECISION.md)
+for entity types, dependency relations, provider responsibilities and actual gaps.
+
 **Current priority:** [complete the program model](docs/WHOLE_PROGRAM_MODEL.md)
 before whole-program graph recovery and simplification. The
 [ordered gates](docs/WHOLE_PROGRAM_MODEL_PLAN.md) distinguish specifications,

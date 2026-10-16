@@ -4,14 +4,15 @@
 与 [完整模型](WHOLE_PROGRAM_MODEL.md)、[集成设计](MODELING_INTEGRATION.md)配合阅读。
 本轮不增加 detector/backend，不修改 LeWM，不升级运行环境。
 
-后续复审基线为 `5ccc1d2`：P0 来源/归属声明已实现，但 FX/Export/ETO adapter
-仍未接入。复用设计进一步收缩为原生 artifact + 薄边界引用，避免再次自制
+最新复审基线为 `78c5fda`：P0 来源声明与 P1 薄边界已实现，FX/Export/ETO adapter
+仍未接入。面向阅读的[现状与建模决定](MODELING_REUSE_DECISION.md)汇总五类实体、
+连接规则和工具分工。复用设计保留原生 artifact + 薄边界引用，避免再次自制
 TreeSpec、复制所有 graph signature 类型，见[集成设计 7.2](MODELING_INTEGRATION.md)。
 下文各历史探针保留自己的版本与范围，不随当前 HEAD 自动升级验收结果。
 
 ## 1. 当前事实及本轮问题
 
-SCAR 的完整程序模型仍未完成。复审时开发分支
+SCAR 的完整程序模型仍未完成。下文首次复审时开发分支
 `codex/structured-program-model` 为 `845ebb4`，冻结实现 `54eb7ec` 的 3,027 项
 全仓回归通过；这验证已实现代码，不验证尚未实现的模型。下文小实验仍绑定
 各自报告中的历史 revision（包括 `d5311a6`），不是在最新实现上重跑的结果。
@@ -214,3 +215,47 @@ rich memory dataflow 时再按预算开启额外选项。保留 ETO/FX 的不同
    可化简子区域**。这些关系不是一次 forward 画图自动给出的。
 5. 第一阶段仍以完整模型接口及组合规则验收为止点；先落实本次复用设计，
    不继续堆 detector/backend，也不因调研完成而宣称程序建模完成。
+
+## 6. 当前代码复核与下一步复用约束
+
+本节基线 `78c5fda`。本次只读源码、官方资料与旧实验；没有重跑 capture/test。
+三份独立审查分别记录[实际接口](../artifacts/experiments/tooling_reassessment_20261016/review/pytorch.md)、
+[图工具](../artifacts/experiments/tooling_reassessment_20261016/review/graph_tools.md)和
+[当前模型](../artifacts/experiments/tooling_reassessment_20261016/review/status.md)。
+它们不是适配器或模型完成的验收报告。
+
+**Observed（当前源码）：** `scar/trace/session.py:354` 的 `mark_dispatch_write`
+按 op 名尾 `_` 猜写，并标记全部 positional Tensor；`inject.py:180` 已把 func
+转为字符串。该路径没有按 schema 处理准确实参槽、kwargs/out。profiler 初始化
+失败可静默停用，module/dispatch wrapper 的异常路径也不等于正常路径记录。
+这些是当前 collector 的具体局限，不能把相应旧事件升级为完整状态/效果证明。
+本轮未修改这些代码。
+
+**Proposed：** 保留原生 op/schema 引用，优先用 argument 的 `alias_info.is_write`
+及 schema/overload 合同提供已知写集合；未知 schema/外部写保留具体缺口。本机
+`torch/utils/_python_dispatch.py` 与 profiler `SchemaMatcher` 已有相应来源。
+按名字维护新规则、仅依赖 `_version` 或保存全量 Tensor 都不能补齐此关系。
+该修正属于后续执行证据/adapter 验收，不是新增优化 backend。
+
+**Observed（本机源码，未运行）：** Dynamo 已有 Local/Attr/Cell/Defaults/GetItem
+来源链及 side-effects/residual bytecode；FX 子图不含 list append 等节点，不表示
+该效果可删。AOT 的 joint descriptors / fx_utils 已提供输入、mutation、gradient、
+RNG/token 等角色，避免未来自行规定前后向槽顺序。它们是版本限定的内部接口，
+当前没有生产 adapter，本轮也没有可用性或开销验收。官方概念依据：
+[Dynamo 的图、guards 与残余字节码](https://docs.pytorch.org/docs/2.14/user_guide/torch_compiler/compile/programming_model.dynamo_core_concepts.html)、
+[AOT joint descriptors](https://docs.pytorch.org/docs/2.14/user_guide/torch_compiler/export/joint_with_descriptors.html)。
+
+TorchLens 的固定源审查进一步确认其不是粗模块图：有 op occurrence、重复参数
+位置、module/pass、实际条件上下文及部分 mutation/RNG 记录。优先做隔离 provider
+对照；仍不能由这些字段证明未执行分支、NumPy alias 写或一般 Python effects。
+初始动态接入先用已安装的 ETO+Profiler；TorchLens 用来比较缺失关系与采集代价，
+不是默认再加一套全量 observer。torchview 继续作展示/结构交叉检查；已有 probe
+证实重复输入边去重及 capture 对 mode/buffer 的影响，不作为完整 ordered Use 来源。
+
+MLIR/xDSL 已有 Operation/SSAValue/Use/Block/Region 与校验/遍历基础，不只值得
+参考名字。[xDSL core](https://docs.xdsl.dev/reference/ir/core/)明确提供这些接口；
+[MLIR effects](https://mlir.llvm.org/docs/Rationale/SideEffectsAndSpeculation/)同时区分
+内存效果、可能不完成与非局部控制，并说明其建模边界。后续扩通用基础设施前
+必须先做已有能力/无损适配对照；当前没有迁移实测，也不能只以“框架不会分析
+Python”作为排除理由。CodeQL 则优先对照 CFG/flow，LibCST 负责可提供的源定位/
+作用域 metadata；本轮只查官方资料，未运行 CodeQL 或增加其依赖。

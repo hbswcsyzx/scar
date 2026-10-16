@@ -1,5 +1,20 @@
 # Current evidence and remaining work
 
+## Current modeling/tool reuse review (2026-10-16)
+
+The [status and modeling decision](MODELING_REUSE_DECISION.md) separates five core
+entity types, behavior tags and dependency relations, and maps them to existing
+tool providers. Read-only reviews at `78c5fda` confirm profiler/Kineto and Python
+monitoring are integrated, while FX/Export/ETO remain unimplemented adapters.
+TorchLens offers finer dynamic relations than a module-only graph; torchview is
+useful for display but its deduplicated edges do not preserve every argument Use.
+The audit also identifies name-based mutation guesses and collector failure-path
+gaps in the current trace code; these records do not establish complete effects.
+Reuse op schemas, native descriptors and provider artifacts before writing parallel
+logic. No new product code, capture, tests or workload run accompanies this review.
+C1 cleanup remains a design only; schema is still v8. M0–M2, automatic whole-program
+LeWM connectivity and a credible automatic transformation/speedup remain incomplete.
+
 ## P1 thin native boundary component (2026-10-16)
 
 [P1](M1_NATIVE_INTERFACES.md) adds ordered native slot references and an exact

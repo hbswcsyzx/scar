@@ -33,6 +33,12 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 ## 3. 下一批落实顺序
 
+当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1
+声明组件不是实际导入；不要继续以增加声明表、兼容测试或 Tensor wrappers 代替
+自动连接。通用 SSA/Region 基础设施扩展前先对照 MLIR/xDSL，源 CFG/flow 扩展前
+先对照成熟前端。现 collector 的名字猜写与异常/初始化缺口记录为具体待办，
+后续用 schema/来源与采集完整性验证，不提前宣称效果完备。
+
 先落实 [工具复用审查与集成设计](MODELING_INTEGRATION.md) 的 T0/T1：模型中明确
 哪些事实直接复用 ast/symtable/dis、FX/Export、ETO/Kineto，及其类型/状态/范围
 映射。不再扩大与这些接口重复的 Tensor tracer；Python source lowering 优先
