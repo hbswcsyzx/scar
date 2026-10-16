@@ -13,6 +13,9 @@ from typing import TypeAlias
 
 from scar.ir.program.bindings import BindingDefinition, BindingRead
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
+from scar.ir.program.resources import (
+    ResourceDefinition, ResourceLocation, ResourceRequirement, ResourceUse,
+)
 from scar.ir.v2.ids import ValueSlotID
 
 
@@ -647,6 +650,10 @@ class ProgramGraph:
     ordering: tuple[OrderEdge, ...] = ()
     binding_definitions: tuple[BindingDefinition, ...] = ()
     binding_reads: tuple[BindingRead, ...] = ()
+    resources: tuple[ResourceDefinition, ...] = ()
+    resource_requirements: tuple[ResourceRequirement, ...] = ()
+    resource_uses: tuple[ResourceUse, ...] = ()
+    resource_locations: tuple[ResourceLocation, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -672,6 +679,17 @@ class ProgramGraph:
         _tuple(self.binding_reads, "ProgramGraph.binding_reads")
         if any(not isinstance(item, BindingRead) for item in self.binding_reads):
             raise TypeError("ProgramGraph.binding_reads must contain BindingRead")
+        for name, row_type in (("resources", ResourceDefinition),
+                               ("resource_requirements", ResourceRequirement),
+                               ("resource_uses", ResourceUse),
+                               ("resource_locations", ResourceLocation)):
+            rows = _tuple(getattr(self, name), f"ProgramGraph.{name}")
+            if any(type(item) is not row_type for item in rows):
+                raise TypeError(f"ProgramGraph.{name} contains an invalid resource record")
+            _unique(rows, f"ProgramGraph.{name}")
+        _unique(tuple(row.id for row in self.resources), "ProgramGraph resource IDs")
+        _unique(tuple(row.id for row in self.resource_requirements),
+                "ProgramGraph resource requirement IDs")
 
 
 __all__ = [

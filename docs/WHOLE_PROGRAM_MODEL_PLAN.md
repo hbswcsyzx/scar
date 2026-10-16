@@ -59,6 +59,11 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 ## 5. 当前证据锚点
 
+- M1 有限静态资源子项已接原 core 并通过198项组件检查；仍未关闭M1，见
+  [M1_RESOURCE_INTERFACES.md](M1_RESOURCE_INTERFACES.md)。
+- M2 字段级协议分册已细化数据定义、控制及资源；独立语言探针约束规则，
+  不代表全部新类型已落实或自动建图通过。
+
 - 有限同步实现：`dcd4986`，组件 290 / 全仓 2,657，通过范围见
   [N2_STRUCTURED_BODY_ACCEPTANCE.md](N2_STRUCTURED_BODY_ACCEPTANCE.md)。
 - 固定 256 候选源码压力：新 51 个 graph-with-gaps，205 unsupported；

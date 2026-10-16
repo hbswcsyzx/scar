@@ -127,6 +127,11 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
     if issues:
         return tuple(issues)
 
+    from .resource_validation import resource_errors
+    for code, path, message in resource_errors(
+            graph, {op: block_region[block] for op, block in operation_block.items()}, uses):
+        error(code, path, message)
+
     def check_footprint(footprint, location, path):
         extent = locations[location].extent
         if (footprint.kind is FootprintKind.INTERVAL and extent is not None

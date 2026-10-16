@@ -31,6 +31,15 @@ class UseID(Identifier):
     prefix = "program_use"
 
 
+class ResourceDefinitionID(Identifier):
+    prefix = "program_resource"
+
+
+class ResourceRequirementID(Identifier):
+    prefix = "program_resource_requirement"
+
+
 __all__ = [
     "BlockID", "LocationID", "OperationID", "RegionID", "UseID", "ValueID",
+    "ResourceDefinitionID", "ResourceRequirementID",
 ]

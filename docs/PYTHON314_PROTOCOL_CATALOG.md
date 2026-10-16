@@ -7,6 +7,10 @@
 本清单用于防止建模只考虑函数与 Tensor、遗漏定义阶段、语法辅助节点和控制。
 它不是沿 AST children 顺序执行的算法，不能替代每种协议的字段求值规则。
 
+字段级规则分册：[数据与定义](model/PYTHON_DATA_DEFINITION_PROTOCOLS.md)、
+[控制与挂起](model/PYTHON_CONTROL_PROTOCOLS.md)、[资源与库边界](model/RESOURCE_PROTOCOLS.md)。
+这些是模型规格，不表示所有类型 API、validator 或自动前端已经实现。
+
 ## 1. 构造归属
 
 每个具体构造在下表恰有一处归属。字段清单从目标环境的 `ast` 反射保存，

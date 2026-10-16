@@ -1,0 +1,12 @@
+{
+  "scope": "small_static_schema_review_not_dynamic_proof",
+  "compatible_child_and_distinct": [
+    {
+      "code": "resource_constraint",
+      "path": "program_resource_requirement:queue",
+      "message": "contradictory direct requirements"
+    }
+  ],
+  "cpu_memory_pool_requirement": [],
+  "same_file_entity_and_open_file_description": []
+}

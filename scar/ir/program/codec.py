@@ -12,12 +12,16 @@ from scar.ir.program.model import LocalBindingValue, Operation, ProgramGraph
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
-_V1_V2_GRAPH_FIELDS = _GRAPH_FIELDS - _BINDING_FIELDS
+_RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
+                              "resource_locations"})
+_V1_V2_GRAPH_FIELDS = _GRAPH_FIELDS - _BINDING_FIELDS - _RESOURCE_FIELDS
+_V3_GRAPH_FIELDS = _GRAPH_FIELDS - _RESOURCE_FIELDS
 _V1_V2_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V1_V2_GRAPH_FIELDS
-_V3_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
+_V3_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V3_GRAPH_FIELDS
+_V4_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
 
 
 def _require_record_and_graph_valid(graph: ProgramGraph) -> None:
@@ -34,14 +38,17 @@ def _require_record_and_graph_valid(graph: ProgramGraph) -> None:
 
 
 def dumps(graph: ProgramGraph) -> str:
-    """Encode old graphs as byte-compatible v2 and binding graphs as strict v3."""
+    """Preserve v2/v3 encoding; explicit resource interfaces require v4."""
     _require_record_and_graph_valid(graph)
     has_binding_capability = (
         bool(graph.binding_definitions or graph.binding_reads)
         or any(isinstance(value, LocalBindingValue) for value in graph.values))
     encoded = encode(graph)
-    if has_binding_capability:
-        document = {"schema": SCHEMA, "schema_version": 3, **encoded}
+    if any(getattr(graph, name) for name in _RESOURCE_FIELDS):
+        document = {"schema": SCHEMA, "schema_version": 4, **encoded}
+    elif has_binding_capability:
+        document = {"schema": SCHEMA, "schema_version": 3,
+                    **{name: encoded[name] for name in _V3_GRAPH_FIELDS}}
     else:
         document = {"schema": SCHEMA, "schema_version": 2,
                     **{name: encoded[name] for name in _V1_V2_GRAPH_FIELDS}}
@@ -87,7 +94,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact v3 fields or strictly migrate historical v1/v2 records."""
+    """Decode exact v4 fields or strictly migrate historical v1/v2/v3."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -98,23 +105,29 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, SCHEMA_VERSION):
+    if type(version) is not int or version not in (1, 2, 3, SCHEMA_VERSION):
         raise ValueError("unsupported program graph schema version")
-    expected_fields = _V3_ENVELOPE_FIELDS if version == 3 else _V1_V2_ENVELOPE_FIELDS
+    expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
+                       3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
-    graph_fields = _GRAPH_FIELDS if version == 3 else _V1_V2_GRAPH_FIELDS
+    graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
+                    3: _V3_GRAPH_FIELDS, 4: _GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
     if version == 1:
         record = _upgrade_v1_record(record)
     if version in (1, 2):
         record["binding_definitions"] = []
         record["binding_reads"] = []
+    if version < 4:
+        record.update({name: [] for name in _RESOURCE_FIELDS})
     graph = decode(ProgramGraph, record)
     if version == 3 and not (
             graph.binding_definitions or graph.binding_reads
             or any(isinstance(value, LocalBindingValue) for value in graph.values)):
         raise ValueError("schema version 3 requires local-binding graph capability")
+    if version == 4 and not any(getattr(graph, name) for name in _RESOURCE_FIELDS):
+        raise ValueError("schema version 4 requires explicit resource graph capability")
     _require_record_and_graph_valid(graph)
     return graph
 

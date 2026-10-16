@@ -1,0 +1,39 @@
+{
+  "schema": "scar.preliminary-test-history",
+  "scope": "Observed command outcomes before the formal 198-case component gate; no JUnit retained for these preliminary runs",
+  "attempts": [
+    {
+      "command": "python -m pytest -q tests/unit/test_program_resources.py tests/unit/test_program_bindings.py tests/unit/test_program_records.py tests/unit/test_program_validation.py tests/integration/test_structured_program_cli.py",
+      "returncode": 4,
+      "tests_run": 0,
+      "reason": "test_program_validation.py does not exist; no tests executed"
+    },
+    {
+      "selectors": [
+        "tests/unit/test_program_resources.py",
+        "tests/unit/test_program_bindings.py",
+        "tests/unit/test_program_records.py",
+        "tests/unit/test_program_graph.py",
+        "tests/unit/test_program_graph_adversarial.py",
+        "tests/unit/test_structured_program_validation.py",
+        "tests/unit/test_structured_program_execution.py",
+        "tests/integration/test_structured_program_cli.py"
+      ],
+      "returncode": 1,
+      "passed": 162,
+      "failed": 1,
+      "seconds": 12.55,
+      "failure": "test_v2_wire_is_byte_compatible_and_v1_v2_do_not_accept_binding_fields derived the legacy expected document from newly expanded dataclass fields",
+      "resolution": "Generate original v2/v3 golden wire using an isolated original dcd4986 package and compare against frozen bytes"
+    },
+    {
+      "selectors": "same eight files after repairs and extra relation cases",
+      "returncode": 0,
+      "passed": 168,
+      "failed": 0,
+      "seconds": 12.63
+    }
+  ],
+  "formal_component_report": "component/report.json",
+  "no_prior_failure_overwritten": true
+}

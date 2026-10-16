@@ -1,0 +1,318 @@
+{
+  "ast_fields": {
+    "AnnAssign": [
+      "target",
+      "annotation",
+      "value",
+      "simple"
+    ],
+    "Assign": [
+      "targets",
+      "value",
+      "type_comment"
+    ],
+    "AsyncFunctionDef": [
+      "name",
+      "args",
+      "body",
+      "decorator_list",
+      "returns",
+      "type_comment",
+      "type_params"
+    ],
+    "Attribute": [
+      "value",
+      "attr",
+      "ctx"
+    ],
+    "AugAssign": [
+      "target",
+      "op",
+      "value"
+    ],
+    "BinOp": [
+      "left",
+      "op",
+      "right"
+    ],
+    "Call": [
+      "func",
+      "args",
+      "keywords"
+    ],
+    "ClassDef": [
+      "name",
+      "bases",
+      "keywords",
+      "body",
+      "decorator_list",
+      "type_params"
+    ],
+    "Constant": [
+      "value",
+      "kind"
+    ],
+    "Delete": [
+      "targets"
+    ],
+    "Dict": [
+      "keys",
+      "values"
+    ],
+    "Expression": [
+      "body"
+    ],
+    "FormattedValue": [
+      "value",
+      "conversion",
+      "format_spec"
+    ],
+    "FunctionDef": [
+      "name",
+      "args",
+      "body",
+      "decorator_list",
+      "returns",
+      "type_comment",
+      "type_params"
+    ],
+    "FunctionType": [
+      "argtypes",
+      "returns"
+    ],
+    "Import": [
+      "names"
+    ],
+    "ImportFrom": [
+      "module",
+      "names",
+      "level"
+    ],
+    "Interactive": [
+      "body"
+    ],
+    "Interpolation": [
+      "value",
+      "str",
+      "conversion",
+      "format_spec"
+    ],
+    "JoinedStr": [
+      "values"
+    ],
+    "Lambda": [
+      "args",
+      "body"
+    ],
+    "List": [
+      "elts",
+      "ctx"
+    ],
+    "Module": [
+      "body",
+      "type_ignores"
+    ],
+    "Name": [
+      "id",
+      "ctx"
+    ],
+    "NamedExpr": [
+      "target",
+      "value"
+    ],
+    "ParamSpec": [
+      "name",
+      "default_value"
+    ],
+    "Set": [
+      "elts"
+    ],
+    "Slice": [
+      "lower",
+      "upper",
+      "step"
+    ],
+    "Subscript": [
+      "value",
+      "slice",
+      "ctx"
+    ],
+    "TemplateStr": [
+      "values"
+    ],
+    "Tuple": [
+      "elts",
+      "ctx"
+    ],
+    "TypeAlias": [
+      "name",
+      "type_params",
+      "value"
+    ],
+    "TypeVar": [
+      "name",
+      "bound",
+      "default_value"
+    ],
+    "TypeVarTuple": [
+      "name",
+      "default_value"
+    ],
+    "UnaryOp": [
+      "op",
+      "operand"
+    ],
+    "alias": [
+      "name",
+      "asname"
+    ],
+    "arg": [
+      "arg",
+      "annotation",
+      "type_comment"
+    ],
+    "arguments": [
+      "posonlyargs",
+      "args",
+      "vararg",
+      "kwonlyargs",
+      "kw_defaults",
+      "kwarg",
+      "defaults"
+    ],
+    "keyword": [
+      "arg",
+      "value"
+    ]
+  },
+  "ast_modes": {
+    "eval": "Expression",
+    "exec": "Module",
+    "func_type": "FunctionType",
+    "single": "Interactive"
+  },
+  "events": {
+    "alias-bound": [
+      "alias-bound"
+    ],
+    "alias-type-params": [],
+    "alias-value-first": [
+      "alias-value"
+    ],
+    "alias-value-second": [],
+    "async-and-generator": [
+      "after-async-call",
+      "after-generator-call",
+      "generator-body",
+      "after-generator-next",
+      "async-body"
+    ],
+    "augmented-assignment": [
+      "attribute-primary",
+      "attribute-read",
+      "rhs",
+      "inplace-add",
+      "attribute-write"
+    ],
+    "call-binding-error": [
+      "binding-TypeError"
+    ],
+    "call-order": [
+      "callable-expression",
+      "star-expression",
+      "star-item",
+      "keyword-expression",
+      "mapping-expression",
+      "mapping-keys",
+      "mapping-getitem",
+      "target-body"
+    ],
+    "class-annotation-body": [],
+    "class-annotations-access": [
+      "class-name",
+      "class-assigned"
+    ],
+    "class-definition": [
+      "class-decorator-eval:outer",
+      "class-decorator-eval:inner",
+      "base-expression",
+      "metaclass-expression",
+      "class-keyword-expression",
+      "meta-prepare",
+      "class-body",
+      "meta-new-before-type",
+      "descriptor-set-name",
+      "base-init-subclass",
+      "meta-new-after-type",
+      "meta-init",
+      "class-decorator-apply:inner",
+      "class-decorator-apply:outer"
+    ],
+    "f-string": [
+      "value-expression",
+      "repr",
+      "format-spec-expression"
+    ],
+    "function-annotations-first": [
+      "return-annotation"
+    ],
+    "function-annotations-second": [],
+    "function-call": [
+      "function-body"
+    ],
+    "function-definition": [
+      "decorator-eval:outer",
+      "decorator-eval:inner",
+      "default-a",
+      "default-b",
+      "decorator-apply:inner",
+      "decorator-apply:outer"
+    ],
+    "function-local-annotation": [],
+    "generic-annotations": [
+      "parameter-annotation",
+      "return-annotation"
+    ],
+    "generic-definition": [],
+    "generic-type-params": [],
+    "module-after-exec": [],
+    "module-annotations-first": [
+      "module-name",
+      "module-assigned"
+    ],
+    "module-annotations-second": [],
+    "subscript-assignment": [
+      "rhs",
+      "owner",
+      "key",
+      "setitem"
+    ],
+    "t-string-construction": [
+      "value-expression",
+      "format-spec-expression"
+    ],
+    "type-alias-definition": [],
+    "typevar-bound-first": [
+      "type-bound"
+    ],
+    "typevar-bound-second": [],
+    "typevar-default": [
+      "type-default"
+    ]
+  },
+  "function_local_names_after_annotation": [],
+  "implementation": "CPython",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "t_string": {
+    "conversion": "r",
+    "expression": "formatted_value()",
+    "format_spec": "4",
+    "interpolation_type": "Interpolation",
+    "strings": [
+      "",
+      ""
+    ],
+    "type": "Template",
+    "value_type": "Formattable"
+  }
+}

@@ -3,7 +3,15 @@
 Graph-wide validation and queries are available from ``program.validation``
 and ``program.queries``. Typed records remain independently importable.
 """
-from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
+from scar.ir.program.ids import (
+    BlockID, LocationID, OperationID, RegionID, ResourceDefinitionID,
+    ResourceRequirementID, UseID, ValueID,
+)
+from scar.ir.program.resources import (
+    CapacityConstraint, CreatedResource, ExternalResource, RequirementRelation,
+    ResourceDefinition, ResourceKind, ResourceLocation, ResourceRelationConstraint,
+    ResourceRequirement, ResourceRole, ResourceUse,
+)
 from scar.ir.program.bindings import BindingDefinition, BindingRead, BindingState
 from scar.ir.program.model import (
     AccessMode, Behavior, Block, BlockArgument, CompletionResult,
@@ -29,4 +37,8 @@ __all__ = [
     "StateVersionValue", "Successor", "Terminator", "TerminatorKind", "Use",
     "UseID", "UseRole", "Value", "ValueID", "ValueKind", "ValueType",
     "derive_binding_facts", "dumps", "loads", "value_type",
+    "CapacityConstraint", "CreatedResource", "ExternalResource", "RequirementRelation",
+    "ResourceDefinition", "ResourceDefinitionID", "ResourceKind", "ResourceLocation",
+    "ResourceRelationConstraint", "ResourceRequirement", "ResourceRequirementID",
+    "ResourceRole", "ResourceUse",
 ]

@@ -2,6 +2,13 @@
 
 ## Current priority: complete the model before whole-program graphs (2026-10-16)
 
+M1 now has one implemented [static resource interface component](M1_RESOURCE_INTERFACES.md):
+four canonical tables, strict v4 capability and unchanged frozen v2/v3 wire,
+198 component checks passing. [Field-level protocol specifications](PYTHON314_PROTOCOL_CATALOG.md)
+now cover data/definitions, control/resumption and resource/library boundaries;
+their independent language witnesses do not certify a SCAR implementation.
+The rest of M1 and the complete first modeling stage remain unfinished.
+
 **Whole-program abstraction is incomplete.** The revised
 [model specification](WHOLE_PROGRAM_MODEL.md) defines independent Operation,
 Value, StateLocation, Region and Resource, typed environment/completion/resume/

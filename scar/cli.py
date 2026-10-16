@@ -514,7 +514,7 @@ def _optimize_micro(args) -> int:
 
 def _check_program(args) -> int:
     from scar.ir.program.codec import loads as load_program
-    from scar.ir.program.model import value_type
+    from scar.ir.program.model import LocalBindingValue, value_type
 
     source = Path(args.graph)
     report = {"schema": "scar.program-graph-check", "schema_version": 1,
@@ -533,9 +533,19 @@ def _check_program(args) -> int:
             "regions": len(graph.regions), "blocks": sum(len(r.blocks) for r in graph.regions),
             "operations": len(graph.operations), "values": len(graph.values),
             "locations": len(graph.locations), "uses": sum(len(op.uses) for op in graph.operations),
-            "value_kinds": dict(Counter(value_type(value).kind.value for value in graph.values)),
+            "value_kinds": dict(Counter(
+                "LOCAL_BINDING" if isinstance(value, LocalBindingValue)
+                else value_type(value).kind.value for value in graph.values)),
             "declared_incomplete_effects": sum(not op.effects_complete for op in graph.operations),
         })
+        if any((graph.resources, graph.resource_requirements, graph.resource_uses,
+                graph.resource_locations)):
+            report["counts"].update(
+                resources=len(graph.resources),
+                resource_requirements=len(graph.resource_requirements),
+                resource_uses=len(graph.resource_uses),
+                resource_locations=len(graph.resource_locations))
+            report.update(resource_realization_verified=False, readiness_verified=False)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:
         destination = Path(args.out)

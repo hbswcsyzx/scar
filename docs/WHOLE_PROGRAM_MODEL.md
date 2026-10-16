@@ -478,6 +478,12 @@ SCAR 应给出具体位置、替代值/子图、保留依赖、可删区域、�
 
 ### 11.2 当前实现状态
 
+原 core 已增加四张静态资源表、对应校验及严格 v4 wire；有限组件 198 项通过，
+见 [M1_RESOURCE_INTERFACES.md](M1_RESOURCE_INTERFACES.md)。这是 M1 的资源子项，
+不代表动态资源满足、work/ready 或完整第一阶段已实现。字段级协议规格另见
+[数据定义](model/PYTHON_DATA_DEFINITION_PROTOCOLS.md)、
+[控制](model/PYTHON_CONTROL_PROTOCOLS.md)与[资源](model/RESOURCE_PROTOCOLS.md)。
+
 冻结实现 `dcd498699e0cd1331cf496158b29575c3fc2c536` 有限支持 local-binding、
 普通同步表达式/调用、if、while/for、break/continue/else 和显式 typed 接口。
 组件 290 项、全仓 2,657 项通过，见

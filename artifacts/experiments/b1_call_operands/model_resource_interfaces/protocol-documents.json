@@ -1,0 +1,15 @@
+{
+  "schema": "scar.model-protocol-doc-link-check",
+  "status": "PASS",
+  "scope": "Local file existence and pinned document hashes only; not semantic coverage acceptance",
+  "documents": {
+    "docs/WHOLE_PROGRAM_MODEL.md": "85dad666546a1ea9d64f8b313ac8d9e294bdc25e834ae2664e3fd92e1a8e2162",
+    "docs/PYTHON314_PROTOCOL_CATALOG.md": "197af927c2de04a5a424b2e3f480d00c17c7b2a23c676ac86baebb7b441fc6bd",
+    "docs/WHOLE_PROGRAM_MODEL_PLAN.md": "733da0a9bee34fa563d52f071c3263d3f99596316753331127afb4a94014e0a1",
+    "docs/M1_RESOURCE_INTERFACES.md": "c32ca19b4676ae636f3a29777f6e04b02c7c5dfc3b4a619d8d088aafe0d095fb",
+    "docs/model/PYTHON_DATA_DEFINITION_PROTOCOLS.md": "7aa5a1b7975172f77024f5377d67f43b89dd5fe93ac08fe15e37414add8f43b9",
+    "docs/model/PYTHON_CONTROL_PROTOCOLS.md": "a18fa9fe240c4dc8084d31a6bdff48fe4ee029f68aeef2d023bf2e48beccd925",
+    "docs/model/RESOURCE_PROTOCOLS.md": "5033fd3221d112dcebcbf087788440d7545effc88330dff589ed3ed4cdd482e4"
+  },
+  "whole_model_complete": false
+}
