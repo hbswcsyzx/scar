@@ -1,6 +1,7 @@
 # C1：同步 cleanup、待完成转移及当前异常上下文
 
-2026-10-16。**冻结实施规格，尚未验收。** 基线 `78c5fda`。
+2026-10-16。**静态声明组件已实施，243项组件检查通过；冻结全仓验收待执行。**
+设计基线 `78c5fda`，集成基线 `588ca84`。
 本批补齐模型的控制/状态组合接口，不增加 detector/backend，不修改或运行 LeWM。
 source lowering、实际 callable/context/效果对应、with 抑制及 except* 仍分别验收。
 
@@ -81,6 +82,12 @@ Enter 的 saved_context，其余结果全部是这些 after；不得只更新 co
 每条真实 CFG 边与区域出口都参与，INVOKE normal/raise 不例外。发散无出口允许，
 不因此证明 total。必须先通过该单入口/coverage 门，再作本次 activation 的锚证明。
 
+v9 还区分“已求值的语言目标”与“实际完成站点”：清理可以永不结束，或用新转移
+替换原 Return/Raise。经过全部 C1 校验后，只有本 Region 的 interface.pending_argument
+完整 case facts 所捕获的函数出口，可以声明而没有 Return/Raise 站点。闲置 pack、
+未消费的额外 entry 参数或单独的 CLEANUP 标签均不够；原无 C1 图仍要求每个出口
+有实际站点。该出口的 UseSite 查询返回空 tuple，不制造 producer，也不证明 total。
+
 Route 根据 C0 从真实 CFG 推导的 pending port cases 选下一站；case 必须恰好齐全。
 不投影 payload，边的相应参数必须精确转发该 selector 的 Value 和当前状态。
 按当前 source lexical scope 从内向外扫描，使用该操作点的活动栈及 port 的真实目标：
@@ -132,3 +139,27 @@ v9 承载上述六表、SAVED_HANDLED_CONTEXT 与 CleanupRouteTerminator。旧 v
 禁止夹带这些新能力，既有无新能力 wire 保持。手工通用图只验类型/组合，不能计自动
 源码恢复、真实 cleanup 执行或全程序优化。第一阶段完整性矩阵仍须逐项关闭；完成后
 先停下来向用户讲解。初期设计参考及修订依据保留在 `model_cleanup_interfaces/review/`。
+
+v9 的 CleanupRouteTerminator wire 额外带显式 `kind="CLEANUP_ROUTE"` 判别字段，
+不进入 dataclass 构造参数。其余字段与 C0 PendingDispatch 同形，不能按结构或
+是否声明 context domain 猜类型；旧 dispatch 编码不变。通用 record codec 只接受
+本次调用显式传入的 exact-type tag 映射，不使用全局注册或运行授权。
+
+公开查询为 `handled_context_domain(region)`、`cleanup_interface(scope)`、
+`cleanup_action(operation)`、`cleanup_stack(block)`、`cleanup_pending_copies(scope)`、
+`cleanup_context_copies(scope)` 及 `cleanup_route_steps(operation)`。入口栈与 copy
+从规范 CFG 派生；未声明协议时 stack 为 None，不当空栈证明。route step 只说明
+声明图中下一站 Enter/Replace/FINAL_DISPATCH，不授源码、运行或优化权限。
+
+## 7. 本批实际证据与边界
+
+组件门 `gates/m1_cleanup_interfaces.json` 的六项 criteria 全部通过，共243项检查。
+手工通用图覆盖多状态 Return/Raise、嵌套清理、局部 Break/Continue、INVOKE 的
+正常/异常后态以及无实际完成出口的发散清理。独立审查发现并修复了两个组合问题：
+潜在语言目标被旧实际出口要求错拒，以及新 Route 子类遗漏显式 wire 判别字段。
+修前证据、修后定向结果和组件报告保留在
+`artifacts/experiments/b1_call_operands/model_cleanup_interfaces/`。
+
+组件测试只验证所声明 IR 的类型、依赖和组合；没有运行相应 Python source、
+恢复完整 source graph 或验证真实异常上下文。这不关闭完整 M1/M2，也不产生
+LeWM 化简或加速比。冻结 full 结果另行归档，不以本组件通过冒充全仓验收。

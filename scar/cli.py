@@ -515,11 +515,13 @@ def _optimize_micro(args) -> int:
 def _check_program(args) -> int:
     from scar.ir.program.codec import loads as load_program
     from scar.ir.program.model import LocalBindingValue, value_type
+    from scar.ir.program.cleanup import CleanupRouteTerminator
 
     source = Path(args.graph)
     report = {"schema": "scar.program-graph-check", "schema_version": 1,
               "input": str(source.resolve()), "scope": "declared graph structure and dependencies",
-              "source_recovery": False, "transformation_authorized": False}
+              "source_recovery": False, "transformation_authorized": False,
+              "cleanup_structure_validated": False}
     if args.out and Path(args.out).resolve() == source.resolve():
         report.update(status="INVALID", errors=["report path must differ from input graph"])
         print(json.dumps(report, ensure_ascii=False))
@@ -562,6 +564,19 @@ def _check_program(args) -> int:
                 exception_packets=len(graph.exception_packets),
                 pending_completions=len(graph.pending_completions))
             report.update(lexical_source_verified=False, cleanup_unwinding_verified=False,
+                          exception_context_verified=False,
+                          pending_runtime_realization_verified=False)
+        if graph.handled_context_domains:
+            report["counts"].update(
+                cleanup_interfaces=len(graph.cleanup_interfaces),
+                cleanup_actions=sum(len(rows) for rows in (
+                    graph.cleanup_enters, graph.cleanup_resumes,
+                    graph.cleanup_replacements, graph.handled_context_reads)),
+                cleanup_routes=sum(isinstance(op.terminator, CleanupRouteTerminator)
+                                   for op in graph.operations))
+            report.update(cleanup_structure_validated=True,
+                          cleanup_structure_scope="declared static interfaces, CFG routes and state flow",
+                          cleanup_unwinding_verified=False,
                           exception_context_verified=False,
                           pending_runtime_realization_verified=False)
         if graph.provider_envelopes:

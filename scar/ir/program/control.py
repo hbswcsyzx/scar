@@ -43,6 +43,7 @@ def _source_reference(source):
 class ProtocolValueKind(str, Enum):
     PENDING_COMPLETION = "PENDING_COMPLETION"
     EXCEPTION_PACKET = "EXCEPTION_PACKET"
+    SAVED_HANDLED_CONTEXT = "SAVED_HANDLED_CONTEXT"
 
 
 @dataclass(frozen=True, slots=True)

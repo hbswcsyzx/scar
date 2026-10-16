@@ -36,6 +36,10 @@ from scar.ir.program.control import (
     LanguageCompletionKind, PendingCompletionDefinition, PendingDispatchTerminator,
     PendingPayload, PendingSuccessor, ProtocolValueKind, ProtocolValueType,
 )
+from scar.ir.program.cleanup import (
+    CleanupEnter, CleanupInterface, CleanupReplace, CleanupResume,
+    CleanupRouteSuccessor, CleanupRouteTerminator, HandledContextDomain, HandledContextRead,
+)
 from scar.ir.program.model import (
     AccessMode, Behavior, Block, BlockArgument, CompletionResult,
     CompletionSignature, CompletionSuccessor, DataValue, ExitKind, ExitPort,
@@ -70,6 +74,8 @@ __all__ = [
     "ExceptionPacketDefinition", "LanguageCompletionKind", "PendingCompletionDefinition",
     "PendingDispatchTerminator", "PendingPayload", "PendingSuccessor", "ProtocolValue",
     "ProtocolValueKind", "ProtocolValueType",
+    "CleanupEnter", "CleanupInterface", "CleanupReplace", "CleanupResume",
+    "CleanupRouteSuccessor", "CleanupRouteTerminator", "HandledContextDomain", "HandledContextRead",
     "ProviderID", "ProviderArtifact", "ProviderArtifactKind", "ProviderBinding",
     "ProviderCaptureMode", "ProviderCollectionDomain", "ProviderCollectionObservation",
     "ProviderCondition", "ProviderConditionDomain", "ProviderCoverage", "ProviderCoverageDomain",

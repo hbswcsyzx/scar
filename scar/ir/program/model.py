@@ -16,6 +16,10 @@ from scar.ir.program.control import (
     ControlPort, ControlScope, ExceptionPacketDefinition, PendingCompletionDefinition,
     PendingDispatchTerminator, ProtocolValueKind, ProtocolValueType,
 )
+from scar.ir.program.cleanup import (
+    CleanupEnter, CleanupInterface, CleanupReplace, CleanupResume,
+    CleanupRouteTerminator, HandledContextDomain, HandledContextRead,
+)
 from scar.ir.program.environments import EnvironmentInterface, FunctionEntryLayout
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.resources import (
@@ -411,6 +415,7 @@ class TerminatorKind(str, Enum):
     RAISE = "RAISE"
     INVOKE = "INVOKE"
     PENDING_DISPATCH = "PENDING_DISPATCH"
+    CLEANUP_ROUTE = "CLEANUP_ROUTE"
 
 
 @dataclass(frozen=True, slots=True)
@@ -475,8 +480,8 @@ class Terminator:
     def __post_init__(self) -> None:
         if not isinstance(self.kind, TerminatorKind):
             raise TypeError("Terminator.kind must be TerminatorKind")
-        if self.kind is TerminatorKind.PENDING_DISPATCH:
-            raise ValueError("PENDING_DISPATCH requires PendingDispatchTerminator")
+        if self.kind in (TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE):
+            raise ValueError(f"{self.kind.value} requires its dedicated typed terminator")
         _tuple(self.successors, "Terminator.successors")
         if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
             raise TypeError("Terminator.successors must contain successor records")
@@ -521,7 +526,7 @@ class Operation:
     results: tuple[ValueID, ...] = ()
     accesses: tuple[StateAccess, ...] = ()
     effects_complete: bool = False
-    terminator: Terminator | PendingDispatchTerminator | None = None
+    terminator: Terminator | PendingDispatchTerminator | CleanupRouteTerminator | None = None
     callee: RegionID | None = None
     call_arguments: tuple[UseID, ...] = ()
     completions: tuple[CompletionSignature, ...] = ()
@@ -549,8 +554,11 @@ class Operation:
         if type(self.effects_complete) is not bool:
             raise TypeError("Operation.effects_complete must be bool")
         if self.terminator is not None and not isinstance(
-                self.terminator, (Terminator, PendingDispatchTerminator)):
+                self.terminator, (Terminator, PendingDispatchTerminator, CleanupRouteTerminator)):
             raise TypeError("Operation.terminator must be a typed terminator or None")
+        if (isinstance(self.terminator, CleanupRouteTerminator)
+                and type(self.terminator) is not CleanupRouteTerminator):
+            raise TypeError("cleanup route terminator must be exact CleanupRouteTerminator")
         if self.callee is not None and not isinstance(self.callee, RegionID):
             raise TypeError("Operation.callee must be RegionID or None")
         _tuple(self.call_arguments, "Operation.call_arguments")
@@ -604,7 +612,7 @@ class Operation:
 
         if self.terminator is not None:
             terminator_uses = set(self.terminator.values)
-            if isinstance(self.terminator, PendingDispatchTerminator):
+            if isinstance(self.terminator, (PendingDispatchTerminator, CleanupRouteTerminator)):
                 terminator_uses.add(self.terminator.pending)
             if self.terminator.condition is not None:
                 terminator_uses.add(self.terminator.condition)
@@ -700,10 +708,30 @@ class ProgramGraph:
     provider_bindings: tuple[ProviderBinding, ...] = ()
     native_boundaries: tuple[NativeBoundary, ...] = ()
     boundary_relations: tuple[BoundaryRelation, ...] = ()
+    handled_context_domains: tuple[HandledContextDomain, ...] = ()
+    cleanup_interfaces: tuple[CleanupInterface, ...] = ()
+    cleanup_enters: tuple[CleanupEnter, ...] = ()
+    cleanup_resumes: tuple[CleanupResume, ...] = ()
+    cleanup_replacements: tuple[CleanupReplace, ...] = ()
+    handled_context_reads: tuple[HandledContextRead, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
             raise TypeError("ProgramGraph.root must be RegionID")
+        for name, row_type, key in (
+                ("handled_context_domains", HandledContextDomain, "region"),
+                ("cleanup_interfaces", CleanupInterface, "scope"),
+                ("cleanup_enters", CleanupEnter, "operation"),
+                ("cleanup_resumes", CleanupResume, "operation"),
+                ("cleanup_replacements", CleanupReplace, "operation"),
+                ("handled_context_reads", HandledContextRead, "operation")):
+            rows = _tuple(getattr(self, name), f"ProgramGraph.{name}")
+            if any(type(item) is not row_type for item in rows):
+                raise TypeError(f"ProgramGraph.{name} contains an invalid cleanup record")
+            _unique(tuple(getattr(item, key) for item in rows), f"ProgramGraph.{name} keys")
+        _unique(tuple(row.operation for rows in (
+            self.cleanup_enters, self.cleanup_resumes, self.cleanup_replacements,
+            self.handled_context_reads) for row in rows), "cleanup action operation IDs")
         for name, rows, row_type, id_field in (
             ("regions", self.regions, Region, "id"),
             ("operations", self.operations, Operation, "id"),

@@ -118,12 +118,18 @@ occurrence/denotation 等剩余接口；完整第一阶段通过后仍先停下�
   反例，使其实际检验图级 partition，而不削弱构造规则。
 - 根代理的 unused-exit 样例违反既有 `unbound_exit` 约束；修正预期为拒绝，
   不因新增端口接口允许幽灵出口。
+
 - 首版组件 164 项通过后，独立审查实际复现 **B1：合法旧 ID 子类图无法建立新
   ProgramIndex**。改为用原 typed-ID 对象坐标索引，而非对所有旧图强制构造新
   strict 引用；也没有按 ID 文本归并对象。新增 ValueID/RegionID 子类 × 旧 core/
   含无关 native 子区四组合回归。原五项探针中的一项 REGRESSION 已在同探针
   [修复后结果](../artifacts/experiments/b1_call_operands/model_native_interfaces/review/results.after-fix.json)
   中全部 PASS；新声明的 exact-type 规则保持。
+
+后续 v9 C1 对此增加有界区别：真实 cleanup entry 捕获的潜在语言出口可因清理
+发散或替换而没有实际站点；查询返回空 UseSite tuple，不补 producer。只含 P1/
+旧 schema 的原规则不变，闲置声明或额外 entry 参数不能触发该区别，见
+[C1 控制合同](M1_CLEANUP_INTERFACES.md)。
 
 独立审查限定于其未参与编写的集成层，见
 [原报告](../artifacts/experiments/b1_call_operands/model_native_interfaces/review/integration-review.md)。

@@ -9,6 +9,7 @@ from .control import (
     ControlScopeKind, LanguageCompletionKind as K, PendingDispatchTerminator,
     PendingPayload, ProtocolValueKind as P, ProtocolValueType,
 )
+from .cleanup import CleanupRouteTerminator
 from .ids import ControlPortID, ValueID
 from .model import (
     Behavior, BlockArgument, CompletionResult, ExitKind, FootprintKind,
@@ -57,9 +58,10 @@ def derive_pending_facts(graph):
             if term is None:
                 continue
             own = {u.id: u.value for u in operation.uses}
-            selected = own.get(term.pending) if isinstance(term, PendingDispatchTerminator) else None
+            selected = own.get(term.pending) if isinstance(
+                term, (PendingDispatchTerminator, CleanupRouteTerminator)) else None
             for edge in term.successors:
-                if isinstance(term, PendingDispatchTerminator):
+                if isinstance(term, (PendingDispatchTerminator, CleanupRouteTerminator)):
                     if edge.port not in facts.get(selected, ()) and selected not in incomplete:
                         continue  # This case cannot carry another token either.
                 for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
@@ -94,7 +96,8 @@ def control_errors(graph):
     block_region = {b.id: r.id for r in graph.regions for b in r.blocks}
     operation_block = {o: b.id for b in blocks.values() for o in b.operations}
     protocol_values = [v for v in graph.values if isinstance(v, ProtocolValue)]
-    dispatches = [o for o in graph.operations if isinstance(o.terminator, PendingDispatchTerminator)]
+    dispatches = [o for o in graph.operations if isinstance(
+        o.terminator, (PendingDispatchTerminator, CleanupRouteTerminator))]
     if not (scopes or ports or protocol_values or dispatches
             or graph.exception_packets or graph.pending_completions):
         return []
@@ -229,7 +232,9 @@ def control_errors(graph):
                 error("pending_payload_type", definition.value, "Return needs Reference; Raise needs an exception packet")
     for value in protocol_values:
         if isinstance(value.origin, OperationResult):
-            definitions = pending_definitions if value.protocol is P.PENDING_COMPLETION else packet_definitions
+            definitions = (pending_definitions if value.protocol is P.PENDING_COMPLETION
+                           else packet_definitions if value.protocol is P.EXCEPTION_PACKET
+                           else {row.saved_context: row for row in graph.cleanup_enters})
             if value.id not in definitions:
                 error("protocol_definition_missing", value.id, "protocol result needs its unique typed constructor")
     if issues:
@@ -239,16 +244,25 @@ def control_errors(graph):
     for fact in facts.values():
         if not fact.complete:
             error("pending_origin", fact.value, "pending case set has an unsupported boundary or no constructor source")
+    cleanup_operands = {}
+    for row in graph.cleanup_enters:
+        cleanup_operands[row.operation] = {row.pending}
+    for row in graph.cleanup_resumes:
+        cleanup_operands[row.operation] = {row.pending}
+    for row in graph.cleanup_replacements:
+        cleanup_operands[row.operation] = {row.saved_pending, row.replacement}
     for operation in graph.operations:
         term = operation.terminator
         for use in operation.uses:
             if not _protocol(values[use.value], P.PENDING_COMPLETION):
                 continue
-            bound = (isinstance(term, PendingDispatchTerminator) and term.pending == use.id)
+            bound = (isinstance(term, (PendingDispatchTerminator, CleanupRouteTerminator))
+                     and term.pending == use.id)
             bound |= term is not None and any(use.id in e.arguments for e in term.successors)
+            bound |= use.id in cleanup_operands.get(operation.id, ())
             if not bound or use.id in (*operation.call_arguments, *operation.invoke_arguments):
-                error("pending_escape", use.id, "pending only travels on canonical local control operands in C0")
-        if not isinstance(term, PendingDispatchTerminator):
+                error("pending_escape", use.id, "pending only travels on canonical typed local control operands")
+        if not isinstance(term, (PendingDispatchTerminator, CleanupRouteTerminator)):
             continue
         selected = next(u for u in operation.uses if u.id == term.pending)
         if not _protocol(values[selected.value], P.PENDING_COMPLETION):
@@ -263,6 +277,8 @@ def control_errors(graph):
                 continue
             if not target_active(port, owners[operation_block[operation.id]]):
                 error("pending_dispatch_scope", operation.id, "case target must remain active with the nearest loop")
+            if isinstance(term, CleanupRouteTerminator):
+                continue  # C1 validates the next cleanup step, without projecting payloads.
             projections = [(i, values[v]) for i, (a, v) in enumerate(zip(edge.arguments, blocks[edge.block].arguments))
                            if isinstance(a, PendingPayload)]
             has_payload = port.kind in (K.RETURN, K.RAISE)

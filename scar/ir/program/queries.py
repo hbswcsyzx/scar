@@ -4,16 +4,16 @@ from enum import Enum
 
 from .environments import EnvironmentInterface, EnvironmentMember, FunctionEntryLayout
 from .functions import FormalPort
-from .ids import (BoundaryRelationID, EnvironmentInterfaceID, NativeBoundaryID,
-                  OperationID, ProviderID, RegionID, UseID, ValueID)
+from .ids import (BlockID, BoundaryRelationID, ControlScopeID, EnvironmentInterfaceID,
+                  NativeBoundaryID, OperationID, ProviderID, RegionID, UseID, ValueID)
 from .model import ProgramGraph, StateVersionValue, TerminatorKind, Use
-from .validation import require_valid
 from .control import ProtocolValueKind
 from .control_validation import derive_pending_facts
 from .model import ProtocolValue
 from .providers import ProviderBinding, ProviderEnvelope, ProviderRegion
 from .native import BoundaryRelation, EntryPortRef, ExitPortRef, NativeBoundary
 from .native_validation import port_key, region_port_keys
+from .cleanup_validation import CleanupRouteKind, CleanupRouteStep
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,7 +63,14 @@ class EnvironmentCall:
 
 class ProgramIndex:
     def __init__(self, graph: ProgramGraph):
-        require_valid(graph)
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup = []
+        issues = validate(graph, _cleanup_facts=cleanup)
+        if issues:
+            raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+        self._cleanup_facts = cleanup[0]
         self.graph = graph
         self.values = {value.id: value for value in graph.values}
         self.regions = {region.id: region for region in graph.regions}
@@ -73,6 +80,13 @@ class ProgramIndex:
         self._pending_facts = derive_pending_facts(graph) if graph.control_scopes else {}
         self._control_ports = {port.id: port for port in graph.control_ports}
         self._control_scope = {block: scope for scope in graph.control_scopes for block in scope.blocks}
+        self._scopes = {scope.id: scope for scope in graph.control_scopes}
+        self._blocks = {b.id: r.id for r in graph.regions for b in r.blocks}
+        self._context_domains = {row.region: row for row in graph.handled_context_domains}
+        self._cleanups = {row.scope: row for row in graph.cleanup_interfaces}
+        self._cleanup_actions = {row.operation: row for rows in (
+            graph.cleanup_enters, graph.cleanup_resumes, graph.cleanup_replacements,
+            graph.handled_context_reads) for row in rows}
         self._consumers = {value.id: [] for value in graph.values}
         self._uses = {}
         for operation in graph.operations:
@@ -114,6 +128,50 @@ class ProgramIndex:
 
     def producer(self, value_id: ValueID):
         return self.values[value_id].origin
+
+    def handled_context_domain(self, region_id: RegionID):
+        """Return a declaration, not current runtime exception evidence."""
+        if type(region_id) is not RegionID:
+            raise TypeError("handled_context_domain requires RegionID")
+        if region_id not in self.regions:
+            raise KeyError(region_id)
+        return self._context_domains.get(region_id)
+
+    def cleanup_interface(self, scope_id: ControlScopeID):
+        if type(scope_id) is not ControlScopeID:
+            raise TypeError("cleanup_interface requires ControlScopeID")
+        if scope_id not in self._scopes:
+            raise KeyError(scope_id)
+        return self._cleanups.get(scope_id)
+
+    def cleanup_action(self, operation_id: OperationID):
+        if type(operation_id) is not OperationID:
+            raise TypeError("cleanup_action requires OperationID")
+        if operation_id not in self.operations:
+            raise KeyError(operation_id)
+        return self._cleanup_actions.get(operation_id)
+
+    def cleanup_stack(self, block_id: BlockID):
+        """Derived block-entry stack; None means this protocol is undeclared."""
+        if type(block_id) is not BlockID:
+            raise TypeError("cleanup_stack requires BlockID")
+        if block_id not in self._blocks:
+            raise KeyError(block_id)
+        return self._cleanup_facts.stacks.get(block_id)
+
+    def cleanup_pending_copies(self, scope_id: ControlScopeID):
+        if self.cleanup_interface(scope_id) is None:
+            return None
+        return tuple(sorted(self._cleanup_facts.forward[scope_id].pending, key=lambda v: v.wire))
+
+    def cleanup_context_copies(self, scope_id: ControlScopeID):
+        if self.cleanup_interface(scope_id) is None:
+            return None
+        return tuple(sorted(self._cleanup_facts.forward[scope_id].context, key=lambda v: v.wire))
+
+    def cleanup_route_steps(self, operation_id: OperationID) -> tuple[CleanupRouteStep, ...]:
+        self.cleanup_action(operation_id)  # Check canonical identity/existence.
+        return self._cleanup_facts.routes.get(operation_id, ())
 
     def consumers(self, value_id: ValueID) -> tuple[UseSite, ...]:
         return tuple(self._consumers[value_id])
@@ -177,8 +235,9 @@ class ProgramIndex:
         """All canonical Return/Raise occurrences at a logical exit position.
 
         Stable ordering is for presentation only, not execution order. Existing
-        core validation requires every declared exit to have a control site;
-        this index never creates a terminal or a producer to fill a missing one.
+        core validation requires control sites for old graphs. A C1 cleanup can
+        intercept a declared target forever or replace it; no site then returns
+        an empty tuple, without inventing a terminal or producer.
         """
         if type(port) is not ExitPortRef:
             raise TypeError("exit_port_uses requires ExitPortRef")
@@ -274,4 +333,4 @@ class ProgramIndex:
 
 
 __all__ = ["ProgramIndex", "UseSite", "EnvironmentArgument", "EnvironmentCall",
-           "EnvironmentBindingStatus", "FunctionArgument"]
+           "EnvironmentBindingStatus", "FunctionArgument", "CleanupRouteKind", "CleanupRouteStep"]

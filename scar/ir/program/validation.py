@@ -16,6 +16,7 @@ from .model import (
     StateVersionValue, TerminatorKind, UseRole, ValueKind, value_type,
 )
 from .control import PendingDispatchTerminator
+from .cleanup import CleanupRouteTerminator
 
 
 @dataclass(frozen=True, slots=True)
@@ -25,8 +26,12 @@ class ValidationIssue:
     message: str
 
 
-def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
-    """Check exact uses, CFG availability, interfaces and explicit state SSA."""
+def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIssue, ...]:
+    """Check exact uses, CFG availability, interfaces and explicit state SSA.
+
+    The private output collector lets ProgramIndex reuse derived cleanup facts
+    after every validator passes; it never accepts caller-supplied proof facts.
+    """
     issues: list[ValidationIssue] = []
 
     def error(code, path, message):
@@ -205,7 +210,7 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
             if isinstance(values[use.value], StateVersionValue) and use.role is not UseRole.STATE_CONTENT:
                 error("control_state_role", use.id, "state carried across control ports retains content dependence")
         bound = ([term.condition] if term.condition is not None else [])
-        if isinstance(term, PendingDispatchTerminator):
+        if isinstance(term, (PendingDispatchTerminator, CleanupRouteTerminator)):
             bound.append(term.pending)
         bound += [use for edge in term.successors for use in edge.arguments if isinstance(use, UseID)]
         bound += list(term.values)
@@ -309,7 +314,12 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         dominators.update(dom)
         bound_exits = {terminators[block].terminator.exit for block in local
                        if terminators[block].terminator.exit is not None}
-        if {port.name for port in region.exits} != bound_exits:
+        # C1 can intercept a declared language target forever, or replace its
+        # pending transfer. Its full validator checks support from the exact
+        # cleanup entry token after stack/routing checks. Old schemas retain
+        # their original requirement for an actual terminal site at every exit.
+        c1_enabled = any(row.region == region.id for row in graph.handled_context_domains)
+        if {port.name for port in region.exits} != bound_exits and not c1_enabled:
             error("unbound_exit", region.id, "declared exits must be bound to actual control exits")
     if issues:
         return tuple(issues)
@@ -545,6 +555,12 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         for code, path, message in control_errors(graph):
             error(code, path, message)
     if not issues:
+        from .cleanup_validation import analyze_cleanup
+        cleanup_issues, cleanup_facts = analyze_cleanup(
+                graph, operation_blocks=operation_block, dominators=dominators)
+        for code, path, message in cleanup_issues:
+            error(code, path, message)
+    if not issues:
         from .provider_validation import provider_errors
         for code, path, message in provider_errors(
                 graph, {op: block_region[block] for op, block in operation_block.items()}, uses):
@@ -553,6 +569,8 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         from .native_validation import native_errors
         for code, path, message in native_errors(graph):
             error(code, path, message)
+    if not issues and _cleanup_facts is not None:
+        _cleanup_facts.append(cleanup_facts)
     return tuple(issues)
 
 

@@ -1,0 +1,12 @@
+{
+  "revision": "588ca84a709d2f2a79e36b918e473db9a629d58b",
+  "origin": "git archive scar tests; isolated original codec and fixture factory",
+  "archive_sha256": "732ea3f6265230cad0e2502b12ec732e091fe8825687c3440ad9bb8c3f4b9230",
+  "original_codec_sha256": "46eaa9c98870dcdcd218ce9b75197c531ff9877399a6417b3a0651631220e801",
+  "fixture": "tests/fixtures/program_graph_v8_frozen.json",
+  "factory": "tests.fixtures.program_native_graphs.native_boundary_graph",
+  "wire_sha256": "384f343bccc9afe69e0c992cb64e2f7c9ed8258c3e827b8e0fd8dfd7fb09faa9",
+  "wire_bytes": 50154,
+  "file_sha256": "38ac3168127975cab2fbf75d37d73de988e167524c5ad69c59d8b496b382885a",
+  "temporary_directory_removed": true
+}
