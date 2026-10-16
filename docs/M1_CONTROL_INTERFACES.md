@@ -1,6 +1,6 @@
 # M1：词法作用域、异常包与待完成控制值
 
-日期：2026-10-16。状态：**C0 组件354项通过；冻结全仓回归待执行。**
+日期：2026-10-16。状态：**C0 组件354项及冻结全仓3,027项通过；C1仍未实施。**
 基准 `618cf83`，承接 [完整性清单](FIRST_STAGE_COMPLETION_MATRIX.md) 的控制缺口。
 第一阶段仍为模型类型/组合与协议，自动 source lowering、运行采集和化简不在本批。
 
@@ -11,6 +11,12 @@
 roundtrip且v1 reader保持原合同。两项静态审查缺口已修：最近LOOP选择，以及已知callee
 INVOKE的局部后继转发不等于跨Region实参。首次ProtocolValue类型漏接和runner/fixture
 失败均保留，终态报告不覆盖原记录。C0不是完整finally，也不授权优化。
+
+冻结 implementation `54eb7ec43f53218b968db5f8015c8187c88f40a9` 单次全仓回归：
+3,027 PASS / 0 failed / 0 error / 0 skipped，driver 410.615s、峰值1,029,132KiB、
+三项既有警告。前后HEAD、干净工作树、356文件源指纹及11个fixture hash一致。
+只清理该driver专属临时目录；此为验收成本，不是LeWM benchmark。
+证据位于上述根目录的 `full/`，终态范围见 `acceptance.json`。
 
 ## 1. 分批理由与完成边界
 
@@ -86,3 +92,13 @@ C0不猜跨region/外部pending边界的case全集；没有明确来源合同的
 
 证据目录：`artifacts/experiments/b1_call_operands/model_control_interfaces/`。
 原始失败保留；第一阶段仍未完成，不增加detector/backend，不修改LeWM。
+
+## 5. 下一批C1的具体入口
+
+[C1合同](../artifacts/experiments/b1_call_operands/model_control_interfaces/review/NEXT_CLEANUP_IMPLEMENTATION.md)
+及[不确定效果补充](../artifacts/experiments/b1_call_operands/model_control_interfaces/review/NEXT_CLEANUP_UNCERTAINTY_ADDENDUM.md)
+是Proposed设计。C1先定义当前handled-context保存/读取/恢复、相对本次entry anchor的
+逐边must-forward与显式cleanup路由，再检验全出口覆盖及LIFO。port/constructor集合相同
+不能证明载荷保持；普通最终dispatch不充当中间unwind路由。默认未知retention/回调
+效果在所有已声明状态域产生保守后态，缩域须有证据或条件，不把未列域当NONE。
+这些尚未实施，也不改变本批C0的source/runtime/cleanup权限为未证明。

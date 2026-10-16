@@ -66,8 +66,8 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 ## 5. 当前证据锚点
 
-- M1 [C0控制协议组件](M1_CONTROL_INTERFACES.md)354项通过，源指纹含356文件；冻结
-  全仓回归待执行。仅验证scope/port/pending/packet和CFG组合，C1 cleanup/context/
+- M1 [C0控制协议组件](M1_CONTROL_INTERFACES.md)354项、冻结全仓3,027项通过
+  （implementation `54eb7ec`，源指纹含356文件）。仅验证scope/port/pending/packet和CFG组合，C1 cleanup/context/
   原token来源保持仍未实现，不称完整finally或M1通过。
 - M1 函数环境/入口分区组件已接规范 Uses/state，终版组件 327 项、冻结
   全仓 2,835 项通过（implementation `e826713`）。它只验证静态声明，不证明 runtime/source 绑定，见

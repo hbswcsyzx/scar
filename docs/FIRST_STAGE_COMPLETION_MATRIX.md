@@ -22,7 +22,7 @@ Operation、Value、StateLocation、Region、Resource 是规范实体；输入/�
 | 源/代码版本与阶段 | AST/symtable/dis、snapshot/code witnesses、definition/call 分册。 | 将全部定义、编译/定义/进入/恢复阶段与规范操作/环境连接；不以行号当唯一身份。 | 部分实现。 |
 | 操作、值及有序使用 | 原 `ir/program`，准确 producer、Use、block/region、data/reference/state/binding。 | protocol values 与 outcome/adapter 端口；不以 label/string 代替强类型规则。 | 有限 core 已实现。 |
 | Python 函数入口与环境 | 环境及 entry-layout 组件接原 core；形参/环境/状态分区，引用与当前状态分开。 | source signature/replay 对应；真实 callable/code/各role/activation 映射；旧 `record_body` 偏移不能用于新入口。 | 静态声明组件 327 项、冻结全仓 2,835 项通过；不算自动绑定。 |
-| 控制与语言完成 | 同步 if/loop/binding/invoke；[C0](M1_CONTROL_INTERFACES.md)词法scope/typed port、packet/pending构造及CFG case dispatch组件354项通过。 | 完整cleanup/context保存恢复覆盖、边界case合同与来源保持、with/except*及source/LoopInterface对应。 | C0声明组件已实现，冻结全仓回归待执行；完整控制类型/协议未齐。 |
+| 控制与语言完成 | 同步 if/loop/binding/invoke；[C0](M1_CONTROL_INTERFACES.md)词法scope/typed port、packet/pending构造及CFG case dispatch组件354项、冻结全仓3,027项通过。 | 完整cleanup/context保存恢复覆盖、边界case合同与来源保持、with/except*及source/LoopInterface对应。 | C0声明组件已验收；完整控制类型/协议未齐。 |
 | 挂起、恢复与逃逸 | generator/async/closure/callback 分册及部分事件记录。 | continuation、saved private frame、request、当前共享状态、suspension generation；边界 adapter 及生命周期。 | 核心类型/组合尚缺。 |
 | 状态 owner、selector 与 alias | StateLocation/Access、footprint 与版本 SSA；v2 storage 几何。 | namespace key/object field/cell/元素 selector、owner 身份、粗细域覆盖/冲突；外部 alias 写与输入失效关系。 | 现有粗粒度域可保守表达，精化接口未齐。 |
 | 所有 Python literal/表示 | 现 LiteralOrigin 支持 None/bool/int/有限float/str，普通容器有源码协议。 | bytes/complex/Ellipsis 等严格表示、非有限数值的无损 wire、identity/编译折叠与运行构造边界。 | 不完整；不能把缺项算成 UNKNOWN 后验收通过。 |

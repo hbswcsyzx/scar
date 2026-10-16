@@ -20,7 +20,7 @@ bounded checks and 2,835 frozen full-repository tests; this is not automatic
 source recovery or optimization authority.
 
 The [C0 control interface component](docs/M1_CONTROL_INTERFACES.md) passed 354
-bounded checks; its frozen full regression is pending. Lexical scopes, pending
+bounded checks and 3,027 frozen full-repository tests. Lexical scopes, pending
 completion and exception packets now connect through canonical CFG/SSA operands.
 Complete cleanup/context handling and whole-program modeling remain unfinished.
 

@@ -1,0 +1,86 @@
+{
+  "schema": "scar.control-c0-component-acceptance",
+  "schema_version": 1,
+  "created_at": "2026-10-16T05:51:05.823991+00:00",
+  "status": "PASS_BOUNDED_C0_COMPONENT",
+  "implementation_revision": "54eb7ec43f53218b968db5f8015c8187c88f40a9",
+  "source_sha256": "06773c8c8863910cffb70d5859e5019dc040f0a5e8903799abeb837bb52d4a53",
+  "source_file_count": 356,
+  "component": {
+    "status": "PASS",
+    "cases": 354,
+    "driver_duration_seconds": 18.876,
+    "report": "component/report.json"
+  },
+  "full": {
+    "status": "PASS",
+    "counts": {
+      "passed": 3027,
+      "failed": 0,
+      "error": 0,
+      "skipped": 0,
+      "total": 3027
+    },
+    "duration_seconds": 410.6149472547695,
+    "max_rss_kib": 1029132,
+    "source_unchanged_during_test": true,
+    "revision_before": "54eb7ec43f53218b968db5f8015c8187c88f40a9",
+    "revision_after": "54eb7ec43f53218b968db5f8015c8187c88f40a9",
+    "worktree_status_before": "",
+    "worktree_status_after": "",
+    "basetemp_cleanup": "removed exclusively owned basetemp after child termination"
+  },
+  "full_report": "full/report.json",
+  "fixture_files": 11,
+  "fixtures_unchanged": true,
+  "language_witness": {
+    "path": "language/results.json",
+    "python": "3.14.7",
+    "cases": 19,
+    "status": "PASS",
+    "scar_imported": false,
+    "scope": "Independent language behavior, not source recovery or implemented cleanup proof."
+  },
+  "reviews": {
+    "review/INDEPENDENT_DESIGN.md": {
+      "sha256": "b4bc15ebbb359e446e7e5b10f2516b5ccec2d92cadd48f871ccbbdc8dd7f2111",
+      "scope": "Static review/design only; next-cleanup documents remain proposed."
+    },
+    "review/VALIDATOR_REVIEW.md": {
+      "sha256": "439f90ca694264c2ca3636be57e9749b19d94febc4f6b07b84324e9b1b98cb1c",
+      "scope": "Static review/design only; next-cleanup documents remain proposed."
+    },
+    "review/NEXT_CLEANUP_IMPLEMENTATION.md": {
+      "sha256": "8f16fb83507acc17c1a71d7df092f26ad3014bbe9122c5f4daf3047b49f42188",
+      "scope": "Static review/design only; next-cleanup documents remain proposed."
+    },
+    "review/NEXT_CLEANUP_UNCERTAINTY_ADDENDUM.md": {
+      "sha256": "df4f6892d9dd1a58d5a0a5e5d1b06c57bafdf8e15cda83628e77d436af7b7d56",
+      "scope": "Static review/design only; next-cleanup documents remain proposed."
+    }
+  },
+  "preserved_failures": [
+    "graphs/attempt-1-import-path-failure.log: runner setup failed before collection; not a model rejection.",
+    "graphs/attempt-2-fixture-preflight.log: 13 pass/3 fail from fixture/test errors; final owned result 16 pass retained.",
+    "review/invoke-forwarding.xml: 3 initial failures exposed omitted ProtocolValue in ProgramGraph constructor allowed types; fixed, final 3 pass preserved."
+  ],
+  "gate_cost_scope": "Test process resource/cost evidence, not a workload benchmark or speedup.",
+  "complete_first_modeling_stage": false,
+  "complete_M1": false,
+  "complete_M2": false,
+  "cleanup_unwinding_verified": false,
+  "source_recovery_verified": false,
+  "transformation_authorized": false,
+  "protected_workload": {
+    "repository": "/home/zyf/AAA/le-wm",
+    "head": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+    "git_status_after": "clean",
+    "lewm_run_added": false,
+    "edits_added": false
+  },
+  "next_required_work": [
+    "C1 current handled-context state save/read/restore, per-entry token must-forward and explicit cleanup routing.",
+    "Keep unknown retention/interposition effects conservative across all declared state domains unless evidence/conditions justify narrowing.",
+    "Complete remaining control/resume, location/literal, resource/readiness, denotation/provider/contract interfaces and M2 catalog validation."
+  ]
+}

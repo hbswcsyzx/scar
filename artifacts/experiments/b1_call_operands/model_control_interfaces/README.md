@@ -11,3 +11,6 @@
 原v5 wire由旧提交隔离导出，依据在 tests/fixtures/program_graph_v5_wire_provenance.json。
 CLEANUP仅是词法声明，完整finally/context及source/runtime对应仍未完成，公开权限固定false。
 后续C1设计若与正式回归并行，仅写ignored报告，不改变冻结源码；不把验收时间当性能数据。
+
+终态：C0组件354项、冻结implementation `54eb7ec` 全仓3,027项通过；详见acceptance.json。
+C1合同/不确定效果补充仍为Proposed，完整模型未完成。

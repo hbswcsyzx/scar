@@ -6,7 +6,9 @@
 and ports, exception packet/pending SSA constructors, CFG-derived case unions,
 dispatch projections, old wire and public CLI. Source fingerprint is
 `06773c8c8863910cffb70d5859e5019dc040f0a5e8903799abeb837bb52d4a53`
-(356 files). Frozen full regression remains pending. Schema v6 preserves original
+(356 files). Frozen `54eb7ec` passed 3,027 full tests in 410.615s / 1,029,132KiB,
+with three existing warnings, no failures/errors/skips, and identical HEAD,
+clean status, source hashes and 11 fixture hashes before/after. Schema v6 preserves original
 v1–v5 contracts; v5 wire came from an isolated original-revision archive.
 This does not verify source ownership, runtime exception validity or cleanup
 unwinding. C1 must preserve original token/payload and active exception context
