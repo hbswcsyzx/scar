@@ -1,0 +1,189 @@
+{
+  "analysis_files": [
+    {
+      "bytes": 3119,
+      "path": "inventory-observations.json",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "321aca0316c3653085882c6a5069c6723add8d868f0b7f2cd1d43522228414c6"
+    },
+    {
+      "bytes": 7721103,
+      "path": "inventory.json.gz",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "1b29ba654226d6c374bebc2fe7ba212f4658b05b57b521c90590ac4d5384c422"
+    },
+    {
+      "bytes": 0,
+      "path": "inventory.stderr",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2375,
+      "path": "inventory.stdout",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "dc2e9d7c43df5e89cb8029e908c321fc4385faa335fbd15cd813f369da3c7680"
+    },
+    {
+      "bytes": 1283,
+      "path": "inventory.time-v.txt",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "cf2acbcb60da3d0f9a4a16db856c6c67df7a01df75f381b96733dbb36a4347bd"
+    },
+    {
+      "bytes": 0,
+      "path": "link.stderr",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1466,
+      "path": "link.stdout",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "cd05b8cc0cb766b45300cd3785086f596af37343d3b3401830d9dad182d59036"
+    },
+    {
+      "bytes": 1566,
+      "path": "link.time-v.txt",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "3f4b15390de035f03d51021b59cf7cc52daaab40356addea10950b1a69dbaf35"
+    },
+    {
+      "bytes": 5431784,
+      "path": "operands.json.gz",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "beafddd58d8e0abda6c4c998c391928091eb5541df1a18659d53d466678c31a1"
+    },
+    {
+      "bytes": 25483,
+      "path": "progress.json",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "6e85f5376d48f21d0db210e3c19914673c83bcfd9165d9fe5b739bc92b25f025"
+    },
+    {
+      "bytes": 317,
+      "path": "query-selection.json",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "e4ee2bea895227ab5720d9058b3b13347463f33dc55f2c0ce8f461a953731aeb"
+    },
+    {
+      "bytes": 0,
+      "path": "query.stderr",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 5757,
+      "path": "query.stdout",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "f63ef5583f5f314a6f4c0ff98318dc4707d5f3c2c96aa9d1f622546873f3c846"
+    },
+    {
+      "bytes": 1425,
+      "path": "query.time-v.txt",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "8c310a93361dc21baeb3c3bdfd68879978ef5c9171059e1a3cd7e44f5d0e4e09"
+    },
+    {
+      "bytes": 2664,
+      "path": "raw-manifest-after.json",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "284df162cc3cb29dee3bfdb762ec25c3c34319ed26b7b34cfe218c087cd40429"
+    },
+    {
+      "bytes": 2664,
+      "path": "raw-manifest-before.json",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "284df162cc3cb29dee3bfdb762ec25c3c34319ed26b7b34cfe218c087cd40429"
+    },
+    {
+      "bytes": 33253,
+      "path": "result.json",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "d2b524ddf21f4127c4735f09258da2971b90f52ac459b7a69d9083792e588292"
+    },
+    {
+      "bytes": 35225,
+      "path": "source-after.json",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "7bc72e628ce32d13ba4c516cde99289e29ee951576219954b82720e997fed0e9"
+    },
+    {
+      "bytes": 35225,
+      "path": "source-before.json",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "7bc72e628ce32d13ba4c516cde99289e29ee951576219954b82720e997fed0e9"
+    },
+    {
+      "bytes": 2991,
+      "path": "output-manifest.json",
+      "result": "COPIED_AND_VERIFIED",
+      "sha256": "773ccefee842187ca64349f551ea3f0301438f866e63ff9c6e89433b039e1057"
+    }
+  ],
+  "capture_inputs": [
+    {
+      "path": "call-codes.559598.jsonl.gz",
+      "physical_bytes": 61273,
+      "result": "ALREADY_PRESENT_BYTE_IDENTICAL",
+      "sha256_file_bytes": "9f68b08d5ba3b037915d41119d85ff19b0113b66b0dc42c6780ee8851c29742a"
+    },
+    {
+      "path": "call-events.559598.jsonl.gz",
+      "physical_bytes": 10682827,
+      "result": "ALREADY_PRESENT_BYTE_IDENTICAL",
+      "sha256_file_bytes": "5f6a4a4e923fcd35fb3b4fd9a71dd4bde91582e14f0fbb809d0a5487c86e4328"
+    },
+    {
+      "path": "call-meta.559598.json",
+      "physical_bytes": 954,
+      "result": "ALREADY_PRESENT_BYTE_IDENTICAL",
+      "sha256_file_bytes": "aba4e365e92b99e66186a4354d6fa201e8e0bc9ade83db90e8ac45216db186da"
+    },
+    {
+      "path": "call-operand-meta.559598.json",
+      "physical_bytes": 1843,
+      "result": "ALREADY_PRESENT_BYTE_IDENTICAL",
+      "sha256_file_bytes": "1c329f790bf656d4a6ee740b93eb85b7f98971a03ecb5b05f6806f52a9fd1638"
+    },
+    {
+      "path": "call-operands.559598.jsonl.gz",
+      "physical_bytes": 5467095,
+      "result": "ALREADY_PRESENT_BYTE_IDENTICAL",
+      "sha256_file_bytes": "115b19a27724c18e310ba11b2277e15c66f39b9a568e8f816ce28df722a64d23"
+    },
+    {
+      "path": "resources.jsonl",
+      "physical_bytes": 88507,
+      "result": "ALREADY_PRESENT_BYTE_IDENTICAL",
+      "sha256_file_bytes": "e790ab0171c8e2cfae52af5027ccefdc68e33ff5cd1abc0003638117e0052f73"
+    },
+    {
+      "path": "resources.summary.json",
+      "physical_bytes": 498,
+      "result": "ALREADY_PRESENT_BYTE_IDENTICAL",
+      "sha256_file_bytes": "9b90ab6b590013dc29c65e66437e6361165624092979193f6afd8c2e443e4631"
+    },
+    {
+      "path": "run.json",
+      "physical_bytes": 362,
+      "result": "ALREADY_PRESENT_BYTE_IDENTICAL",
+      "sha256_file_bytes": "df356a7c5ae677efb3dd17fd2a13dbc323d6933fd39e1fe0e74468ed24125ab4"
+    }
+  ],
+  "capture_inputs_duplicated": false,
+  "capture_raw_before_after_identical": true,
+  "capture_raw_manifest_sha256": "284df162cc3cb29dee3bfdb762ec25c3c34319ed26b7b34cfe218c087cd40429",
+  "destination_directory": "/tmp/scar-call-windows-qx_qw6dk/artifacts/experiments/b1_call_operands/windows_lewm_analysis",
+  "schema": "scar.offline-analysis-evidence-copy",
+  "schema_version": 1,
+  "source_directory": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis",
+  "source_fingerprint": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574",
+  "source_output_manifest_sha256": "773ccefee842187ca64349f551ea3f0301438f866e63ff9c6e89433b039e1057",
+  "source_result_sha256": "d2b524ddf21f4127c4735f09258da2971b90f52ac459b7a69d9083792e588292",
+  "three_public_phases": [
+    "inventory",
+    "link",
+    "query"
+  ]
+}

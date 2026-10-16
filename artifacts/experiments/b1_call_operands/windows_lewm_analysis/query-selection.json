@@ -1,0 +1,11 @@
+{
+  "normal_return_invocations": 4907,
+  "preferred_invocations": 0,
+  "selected": {
+    "invocation_id": 591,
+    "process_id": 559598,
+    "thread_id": 132143864129344
+  },
+  "selection_rule": "ascending (invocation_id, process_id, thread_id); prefer normal-return caller with completion",
+  "status": "SELECTED"
+}

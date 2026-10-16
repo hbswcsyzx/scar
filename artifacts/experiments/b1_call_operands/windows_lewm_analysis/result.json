@@ -1,0 +1,803 @@
+{
+  "budgets": {
+    "common_argv": [
+      "--max-files",
+      "256",
+      "--max-lowered-bodies",
+      "256",
+      "--max-operations",
+      "10000",
+      "--max-call-trace-bytes",
+      "256000000",
+      "--max-call-trace-lines",
+      "300000",
+      "--max-call-trace-events",
+      "250000",
+      "--max-call-references",
+      "2000000",
+      "--max-call-report-bytes",
+      "256000000"
+    ],
+    "operand_argv": [
+      "--max-operand-raw-bytes",
+      "1250000000",
+      "--max-operand-lines",
+      "2000010",
+      "--max-operand-events",
+      "2000000",
+      "--max-operand-loads",
+      "2000000",
+      "--max-operand-references",
+      "4000000",
+      "--operand-max-routes",
+      "100000",
+      "--operand-max-template-values",
+      "100000"
+    ]
+  },
+  "driver_maximum_resident_set_kib": 2371520,
+  "driver_returncode": 0,
+  "elapsed_seconds": 5858.170985722914,
+  "inventory": {
+    "issue_kinds": {
+      "call_sources.model.code_links[*].issues": {
+        "SOURCE_BOUNDARY": 259,
+        "TARGET_DEFINITION_MISSING": 128
+      },
+      "call_sources.model.issues": {},
+      "discovery.gaps": {
+        "AMBIGUOUS": 13,
+        "DYNAMIC_EXECUTION": 2,
+        "DYNAMIC_IMPORT": 7,
+        "EXTERNAL_OR_UNAVAILABLE": 1051,
+        "STAR_IMPORT": 10
+      },
+      "files[*].bodies[*].metadata.gaps": {
+        "CODE_VERSION": 208,
+        "DYNAMIC_DISPATCH": 809,
+        "DYNAMIC_TARGET": 210,
+        "EFFECT_SUMMARY": 162,
+        "FRAME_EFFECT": 264,
+        "UNSUPPORTED_SIGNATURE": 48,
+        "UNSUPPORTED_SYNTAX": 158
+      },
+      "files[*].gaps": {
+        "UNCLASSIFIED": 3198
+      },
+      "interfaces.bindings[*].issues": {
+        "EXPANDED_ARGUMENT": 4,
+        "NO_SIGNATURE": 54
+      },
+      "interfaces.issues": {}
+    },
+    "schema_version": 6,
+    "summary": {
+      "annotation_evaluation_policy_established": false,
+      "body_statuses": {
+        "LOWERED_WITH_GAPS": 50,
+        "NOT_ATTEMPTED": 1961,
+        "UNSUPPORTED": 206
+      },
+      "call_source_scope": {
+        "CORE_LINKED": 32,
+        "INDEXED_WITHOUT_BODY": 393
+      },
+      "call_sources": {
+        "caller_connections_established": false,
+        "counts": {
+          "code_captures": 850,
+          "eligible_codes": 425,
+          "eligible_groups": 425,
+          "entered_code_groups": 812,
+          "entered_invocations": 84313,
+          "files": 3,
+          "issues": 0,
+          "processes": 1
+        },
+        "data_connections_established": false,
+        "effects_established": false,
+        "function_environment_established": false,
+        "transformation_authorized": false
+      },
+      "construction_operations": 3503,
+      "core_operations": 1148,
+      "core_values": 1919,
+      "coverage_atoms": 122323,
+      "coverage_statuses": {
+        "CONNECTED": 682,
+        "INVENTORY_ONLY": 107351,
+        "UNSUPPORTED": 14290
+      },
+      "cross_file_call_witnesses": 197,
+      "definitions": 2217,
+      "discovery_gaps": 1083,
+      "expansion": {
+        "attempted": 256,
+        "demand_kinds": {
+          "ENTERED_CALL_CODE": 165,
+          "REMAINDER": 1465,
+          "SOURCE_CALL_CANDIDATE": 20
+        },
+        "operation_budget_charged": 3503,
+        "unavailable_contexts": 0,
+        "unknown_construction_costs": 0
+      },
+      "fine_state_effects_established": false,
+      "frames": {
+        "bodies": 50,
+        "completion_guaranteed": false,
+        "profile": "BOUND_FRAME_V1",
+        "release_established": false,
+        "runtime_conditions_established": false,
+        "transitions": {
+          "BIND": 27,
+          "DISCARD": 14,
+          "ENTER": 50,
+          "EXIT": 363
+        }
+      },
+      "implicit_invocations": 518,
+      "interfaces": {
+        "binding_statuses": {
+          "CONDITIONAL": 146,
+          "INCOMPLETE": 55
+        },
+        "bound_bodies": 50,
+        "issues": 0,
+        "live_call_binding_established": false,
+        "signatures": 1663
+      },
+      "inventory_issues": 3198,
+      "runtime_reachability_established": false,
+      "source_calls": 10235,
+      "source_calls_with_candidates": 201,
+      "source_files": 151,
+      "transformation_authorized": false,
+      "whole_program_graph_established": false
+    }
+  },
+  "links": {
+    "authority": {
+      "contents_or_effects_established": false,
+      "function_environment_established": false,
+      "target_executed_by_linker": false,
+      "transformation_authorized": false,
+      "whole_program_complete": false,
+      "world_equivalence_established": false
+    },
+    "code_source_statuses": {
+      "INCOMPLETE": 297,
+      "VERIFIED": 553
+    },
+    "frame_issue_count_aggregate": 83392,
+    "frame_issue_kind_counts": null,
+    "frame_issue_kind_scope": "not serialized by compact public report; no redundant fourth rebuild",
+    "issue_kinds": {
+      "code_links[*].issues": {
+        "SOURCE_BOUNDARY": 297,
+        "TARGET_DEFINITION_MISSING": 128
+      },
+      "operand_metadata[*].errors": {},
+      "routing.issues": {
+        "DISPATCH_BOUNDARY": 41,
+        "HANDSHAKE_BOUNDARY": 96481,
+        "SOURCE_CORE_BOUNDARY": 4001
+      }
+    },
+    "summary": {
+      "contents_or_effects_established": false,
+      "frame": {
+        "code_source_statuses": {
+          "INCOMPLETE": 297,
+          "VERIFIED": 553
+        },
+        "contents_or_effects_established": false,
+        "core_call_observations": 2013,
+        "direct_core_call_observations": 2013,
+        "frame_entries": 84313,
+        "frame_exits": 84313,
+        "function_environment_established": false,
+        "issues": 83392,
+        "reference_occurrences": 0,
+        "reference_routes": 0,
+        "target_body_observations": 4943,
+        "target_executed_by_linker": false,
+        "tracked_ancestors_through_intervening_frames": 3638,
+        "tracked_immediate_callers": 80674,
+        "transformation_authorized": false,
+        "verified_normal_frame_exits": 8927,
+        "verified_source_call_sites": 59999
+      },
+      "function_environment_established": false,
+      "operand_events": 312812,
+      "routing": {
+        "argument_routes": 27,
+        "completion_routes": 27,
+        "conditional_only": true,
+        "contents_or_effects_established": false,
+        "function_environment_established": false,
+        "invocation_returns": 4907,
+        "issues": 100523,
+        "template_values": 471,
+        "transformation_authorized": false,
+        "world_equivalence_established": false
+      },
+      "scope": "conditional reference provenance; state, contents and effects remain separate",
+      "target_executed_by_linker": false,
+      "transformation_authorized": false,
+      "whole_program_complete": false,
+      "world_equivalence_established": false
+    }
+  },
+  "phases": [
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.time-v.txt",
+        "--",
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "-m",
+        "scar.cli",
+        "inventory-program",
+        "/home/zyf/AAA/le-wm/run_inference.py",
+        "--project-root",
+        "/home/zyf/AAA/le-wm",
+        "--calls",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace",
+        "--out",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz",
+        "--max-files",
+        "256",
+        "--max-lowered-bodies",
+        "256",
+        "--max-operations",
+        "10000",
+        "--max-call-trace-bytes",
+        "256000000",
+        "--max-call-trace-lines",
+        "300000",
+        "--max-call-trace-events",
+        "250000",
+        "--max-call-references",
+        "2000000",
+        "--max-call-report-bytes",
+        "256000000"
+      ],
+      "cli_argv": [
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "-m",
+        "scar.cli",
+        "inventory-program",
+        "/home/zyf/AAA/le-wm/run_inference.py",
+        "--project-root",
+        "/home/zyf/AAA/le-wm",
+        "--calls",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace",
+        "--out",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz",
+        "--max-files",
+        "256",
+        "--max-lowered-bodies",
+        "256",
+        "--max-operations",
+        "10000",
+        "--max-call-trace-bytes",
+        "256000000",
+        "--max-call-trace-lines",
+        "300000",
+        "--max-call-trace-events",
+        "250000",
+        "--max-call-references",
+        "2000000",
+        "--max-call-report-bytes",
+        "256000000"
+      ],
+      "cwd": "/tmp/scar-call-windows-qx_qw6dk",
+      "env": {
+        "CONDA_DEFAULT_ENV": "lewm",
+        "CONDA_PREFIX": "/home/zyf/miniconda3/envs/lewm",
+        "HOME": "/home/zyf",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/home/zyf/miniconda3/envs/lewm/bin:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/opt/texlive/bin/x86_64-linux:/home/zyf/.codex/packages/standalone/releases/0.163.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0-linux/codex-arg0dIFEXR:/home/zyf/.codex/tmp/arg0/codex-arg01ftxHq:/home/zyf/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0zWlo5j:/home/zyf/.codex/packages/standalone/releases/0.162.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0F575t5:/home/zyf/.codex/packages/standalone/releases/0.161.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0dhuC6B:/home/zyf/.codex/packages/standalone/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0OA3OA3:/home/zyf/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0bT16DY:/home/zyf/.codex/packages/standalone/releases/0.159.3-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0eoO1PB:/home/zyf/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0FRRokT:/home/zyf/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/codex-path:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/home/zyf/bin:/home/zyf/.local/bin:/opt/texlive/bin/x86_64-linux:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/home/zyf/bin:/home/zyf/.local/bin:/home/zyf/.nvm/versions/node/v24.16.0/bin:/home/zyf/miniconda3/condabin:/opt/texlive/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": "/tmp/scar-call-windows-qx_qw6dk",
+        "PYTHONUNBUFFERED": "1",
+        "TZ": "UTC"
+      },
+      "finished_unix": 1792117315.673237,
+      "name": "inventory",
+      "resources": {
+        "gnu_time_v": {
+          "Average resident set size (kbytes)": "0",
+          "Average shared text size (kbytes)": "0",
+          "Average stack size (kbytes)": "0",
+          "Average total size (kbytes)": "0",
+          "Average unshared data size (kbytes)": "0",
+          "Command being timed": "\"/home/zyf/miniconda3/envs/lewm/bin/python -m scar.cli inventory-program /home/zyf/AAA/le-wm/run_inference.py --project-root /home/zyf/AAA/le-wm --calls /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace --out /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz --max-files 256 --max-lowered-bodies 256 --max-operations 10000 --max-call-trace-bytes 256000000 --max-call-trace-lines 300000 --max-call-trace-events 250000 --max-call-references 2000000 --max-call-report-bytes 256000000\"",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "9:57.25",
+          "Exit status": "0",
+          "File system inputs": "0",
+          "File system outputs": "15096",
+          "Involuntary context switches": "224487",
+          "Major (requiring I/O) page faults": "0",
+          "Maximum resident set size (kbytes)": "357572",
+          "Minor (reclaiming a frame) page faults": "345449",
+          "Page size (bytes)": "4096",
+          "Percent of CPU this job got": "99%",
+          "Signals delivered": "0",
+          "Socket messages received": "0",
+          "Socket messages sent": "0",
+          "Swaps": "0",
+          "System time (seconds)": "2.54",
+          "User time (seconds)": "593.64",
+          "Voluntary context switches": "1"
+        },
+        "maximum_resident_set_kib": 357572
+      },
+      "returncode": 0,
+      "started_unix": 1792116718.4148333,
+      "status": "PASSED",
+      "stderr": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.stderr",
+      "stderr_bytes": 0,
+      "stdout": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.stdout",
+      "stdout_bytes": 2375,
+      "time_v": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.time-v.txt",
+      "wall_seconds": 597.2571566086262
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/link.time-v.txt",
+        "--",
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "-m",
+        "scar.cli",
+        "link-operands",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace",
+        "--project-root",
+        "/home/zyf/AAA/le-wm",
+        "--inventory",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz",
+        "--out",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/operands.json.gz",
+        "--max-files",
+        "256",
+        "--max-lowered-bodies",
+        "256",
+        "--max-operations",
+        "10000",
+        "--max-call-trace-bytes",
+        "256000000",
+        "--max-call-trace-lines",
+        "300000",
+        "--max-call-trace-events",
+        "250000",
+        "--max-call-references",
+        "2000000",
+        "--max-call-report-bytes",
+        "256000000",
+        "--max-operand-raw-bytes",
+        "1250000000",
+        "--max-operand-lines",
+        "2000010",
+        "--max-operand-events",
+        "2000000",
+        "--max-operand-loads",
+        "2000000",
+        "--max-operand-references",
+        "4000000",
+        "--operand-max-routes",
+        "100000",
+        "--operand-max-template-values",
+        "100000"
+      ],
+      "cli_argv": [
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "-m",
+        "scar.cli",
+        "link-operands",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace",
+        "--project-root",
+        "/home/zyf/AAA/le-wm",
+        "--inventory",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz",
+        "--out",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/operands.json.gz",
+        "--max-files",
+        "256",
+        "--max-lowered-bodies",
+        "256",
+        "--max-operations",
+        "10000",
+        "--max-call-trace-bytes",
+        "256000000",
+        "--max-call-trace-lines",
+        "300000",
+        "--max-call-trace-events",
+        "250000",
+        "--max-call-references",
+        "2000000",
+        "--max-call-report-bytes",
+        "256000000",
+        "--max-operand-raw-bytes",
+        "1250000000",
+        "--max-operand-lines",
+        "2000010",
+        "--max-operand-events",
+        "2000000",
+        "--max-operand-loads",
+        "2000000",
+        "--max-operand-references",
+        "4000000",
+        "--operand-max-routes",
+        "100000",
+        "--operand-max-template-values",
+        "100000"
+      ],
+      "cwd": "/tmp/scar-call-windows-qx_qw6dk",
+      "env": {
+        "CONDA_DEFAULT_ENV": "lewm",
+        "CONDA_PREFIX": "/home/zyf/miniconda3/envs/lewm",
+        "HOME": "/home/zyf",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/home/zyf/miniconda3/envs/lewm/bin:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/opt/texlive/bin/x86_64-linux:/home/zyf/.codex/packages/standalone/releases/0.163.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0-linux/codex-arg0dIFEXR:/home/zyf/.codex/tmp/arg0/codex-arg01ftxHq:/home/zyf/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0zWlo5j:/home/zyf/.codex/packages/standalone/releases/0.162.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0F575t5:/home/zyf/.codex/packages/standalone/releases/0.161.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0dhuC6B:/home/zyf/.codex/packages/standalone/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0OA3OA3:/home/zyf/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0bT16DY:/home/zyf/.codex/packages/standalone/releases/0.159.3-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0eoO1PB:/home/zyf/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0FRRokT:/home/zyf/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/codex-path:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/home/zyf/bin:/home/zyf/.local/bin:/opt/texlive/bin/x86_64-linux:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/home/zyf/bin:/home/zyf/.local/bin:/home/zyf/.nvm/versions/node/v24.16.0/bin:/home/zyf/miniconda3/condabin:/opt/texlive/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": "/tmp/scar-call-windows-qx_qw6dk",
+        "PYTHONUNBUFFERED": "1",
+        "TZ": "UTC"
+      },
+      "finished_unix": 1792119944.6545382,
+      "name": "link",
+      "resources": {
+        "gnu_time_v": {
+          "Average resident set size (kbytes)": "0",
+          "Average shared text size (kbytes)": "0",
+          "Average stack size (kbytes)": "0",
+          "Average total size (kbytes)": "0",
+          "Average unshared data size (kbytes)": "0",
+          "Command being timed": "\"/home/zyf/miniconda3/envs/lewm/bin/python -m scar.cli link-operands /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace --project-root /home/zyf/AAA/le-wm --inventory /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz --out /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/operands.json.gz --max-files 256 --max-lowered-bodies 256 --max-operations 10000 --max-call-trace-bytes 256000000 --max-call-trace-lines 300000 --max-call-trace-events 250000 --max-call-references 2000000 --max-call-report-bytes 256000000 --max-operand-raw-bytes 1250000000 --max-operand-lines 2000010 --max-operand-events 2000000 --max-operand-loads 2000000 --max-operand-references 4000000 --operand-max-routes 100000 --operand-max-template-values 100000\"",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "43:45.57",
+          "Exit status": "0",
+          "File system inputs": "0",
+          "File system outputs": "10624",
+          "Involuntary context switches": "1006477",
+          "Major (requiring I/O) page faults": "0",
+          "Maximum resident set size (kbytes)": "1463132",
+          "Minor (reclaiming a frame) page faults": "1087614",
+          "Page size (bytes)": "4096",
+          "Percent of CPU this job got": "99%",
+          "Signals delivered": "0",
+          "Socket messages received": "0",
+          "Socket messages sent": "0",
+          "Swaps": "0",
+          "System time (seconds)": "4.90",
+          "User time (seconds)": "2615.93",
+          "Voluntary context switches": "1"
+        },
+        "maximum_resident_set_kib": 1463132
+      },
+      "returncode": 0,
+      "started_unix": 1792117319.0763774,
+      "status": "PASSED",
+      "stderr": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/link.stderr",
+      "stderr_bytes": 0,
+      "stdout": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/link.stdout",
+      "stdout_bytes": 1466,
+      "time_v": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/link.time-v.txt",
+      "wall_seconds": 2625.577701916918
+    },
+    {
+      "argv": [
+        "/usr/bin/time",
+        "-v",
+        "-o",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/query.time-v.txt",
+        "--",
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "-m",
+        "scar.cli",
+        "query-operand-refs",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/operands.json.gz",
+        "--process",
+        "559598",
+        "--thread",
+        "132143864129344",
+        "--invocation",
+        "591",
+        "--max-reference-steps",
+        "4096",
+        "--max-files",
+        "256",
+        "--max-lowered-bodies",
+        "256",
+        "--max-operations",
+        "10000",
+        "--max-call-trace-bytes",
+        "256000000",
+        "--max-call-trace-lines",
+        "300000",
+        "--max-call-trace-events",
+        "250000",
+        "--max-call-references",
+        "2000000",
+        "--max-call-report-bytes",
+        "256000000",
+        "--max-operand-raw-bytes",
+        "1250000000",
+        "--max-operand-lines",
+        "2000010",
+        "--max-operand-events",
+        "2000000",
+        "--max-operand-loads",
+        "2000000",
+        "--max-operand-references",
+        "4000000",
+        "--operand-max-routes",
+        "100000",
+        "--operand-max-template-values",
+        "100000"
+      ],
+      "cli_argv": [
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "-m",
+        "scar.cli",
+        "query-operand-refs",
+        "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/operands.json.gz",
+        "--process",
+        "559598",
+        "--thread",
+        "132143864129344",
+        "--invocation",
+        "591",
+        "--max-reference-steps",
+        "4096",
+        "--max-files",
+        "256",
+        "--max-lowered-bodies",
+        "256",
+        "--max-operations",
+        "10000",
+        "--max-call-trace-bytes",
+        "256000000",
+        "--max-call-trace-lines",
+        "300000",
+        "--max-call-trace-events",
+        "250000",
+        "--max-call-references",
+        "2000000",
+        "--max-call-report-bytes",
+        "256000000",
+        "--max-operand-raw-bytes",
+        "1250000000",
+        "--max-operand-lines",
+        "2000010",
+        "--max-operand-events",
+        "2000000",
+        "--max-operand-loads",
+        "2000000",
+        "--max-operand-references",
+        "4000000",
+        "--operand-max-routes",
+        "100000",
+        "--operand-max-template-values",
+        "100000"
+      ],
+      "cwd": "/tmp/scar-call-windows-qx_qw6dk",
+      "env": {
+        "CONDA_DEFAULT_ENV": "lewm",
+        "CONDA_PREFIX": "/home/zyf/miniconda3/envs/lewm",
+        "HOME": "/home/zyf",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/home/zyf/miniconda3/envs/lewm/bin:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/opt/texlive/bin/x86_64-linux:/home/zyf/.codex/packages/standalone/releases/0.163.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0-linux/codex-arg0dIFEXR:/home/zyf/.codex/tmp/arg0/codex-arg01ftxHq:/home/zyf/.codex/packages/standalone/releases/0.162.1-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0zWlo5j:/home/zyf/.codex/packages/standalone/releases/0.162.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0F575t5:/home/zyf/.codex/packages/standalone/releases/0.161.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0dhuC6B:/home/zyf/.codex/packages/standalone/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0OA3OA3:/home/zyf/.codex/packages/standalone/releases/0.160.0-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0bT16DY:/home/zyf/.codex/packages/standalone/releases/0.159.3-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0eoO1PB:/home/zyf/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/codex-path:/home/zyf/.codex/tmp/arg0/codex-arg0FRRokT:/home/zyf/.codex/packages/standalone/releases/0.159.2-x86_64-unknown-linux-musl/codex-path:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/home/zyf/bin:/home/zyf/.local/bin:/opt/texlive/bin/x86_64-linux:/home/zyf/.elan/bin:/home/zyf/.local/bin:/home/zyf/bin:/home/zyf/bin:/home/zyf/.local/bin:/home/zyf/.nvm/versions/node/v24.16.0/bin:/home/zyf/miniconda3/condabin:/opt/texlive/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": "/tmp/scar-call-windows-qx_qw6dk",
+        "PYTHONUNBUFFERED": "1",
+        "TZ": "UTC"
+      },
+      "finished_unix": 1792122576.3145752,
+      "name": "query",
+      "resources": {
+        "gnu_time_v": {
+          "Average resident set size (kbytes)": "0",
+          "Average shared text size (kbytes)": "0",
+          "Average stack size (kbytes)": "0",
+          "Average total size (kbytes)": "0",
+          "Average unshared data size (kbytes)": "0",
+          "Command being timed": "\"/home/zyf/miniconda3/envs/lewm/bin/python -m scar.cli query-operand-refs /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/operands.json.gz --process 559598 --thread 132143864129344 --invocation 591 --max-reference-steps 4096 --max-files 256 --max-lowered-bodies 256 --max-operations 10000 --max-call-trace-bytes 256000000 --max-call-trace-lines 300000 --max-call-trace-events 250000 --max-call-references 2000000 --max-call-report-bytes 256000000 --max-operand-raw-bytes 1250000000 --max-operand-lines 2000010 --max-operand-events 2000000 --max-operand-loads 2000000 --max-operand-references 4000000 --operand-max-routes 100000 --operand-max-template-values 100000\"",
+          "Elapsed (wall clock) time (h:mm:ss or m:ss)": "43:50.04",
+          "Exit status": "0",
+          "File system inputs": "0",
+          "File system outputs": "16",
+          "Involuntary context switches": "999029",
+          "Major (requiring I/O) page faults": "0",
+          "Maximum resident set size (kbytes)": "1603864",
+          "Minor (reclaiming a frame) page faults": "1251727",
+          "Page size (bytes)": "4096",
+          "Percent of CPU this job got": "99%",
+          "Signals delivered": "0",
+          "Socket messages received": "0",
+          "Socket messages sent": "0",
+          "Swaps": "0",
+          "System time (seconds)": "5.10",
+          "User time (seconds)": "2620.08",
+          "Voluntary context switches": "1"
+        },
+        "maximum_resident_set_kib": 1603864
+      },
+      "returncode": 0,
+      "started_unix": 1792119946.2680593,
+      "status": "PASSED",
+      "stderr": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/query.stderr",
+      "stderr_bytes": 0,
+      "stdout": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/query.stdout",
+      "stdout_bytes": 5757,
+      "time_v": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/query.time-v.txt",
+      "wall_seconds": 2630.0459097623825
+    }
+  ],
+  "query": {
+    "authority": {
+      "conditional_only": true,
+      "contents_or_effects_established": false,
+      "function_environment_established": false,
+      "transformation_authorized": false,
+      "world_equivalence_established": false
+    },
+    "conditions": [
+      "CAPTURE_PRODUCER_TRUSTED",
+      "NO_FRAME_INTERPOSITION",
+      "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+      "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+      "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+      "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+      "FUNCTION_ENVIRONMENT_UNVERIFIED",
+      "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+    ],
+    "endpoints": [
+      {
+        "definition": {
+          "kind": "opdef",
+          "value": "op:3bfd3fe5cf894688c263c11c",
+          "wire": "opdef:op:3bfd3fe5cf894688c263c11c"
+        },
+        "formal_name": null,
+        "formal_slot": null,
+        "invocation": {
+          "invocation_id": 591,
+          "process_id": 559598,
+          "thread_id": 132143864129344
+        },
+        "kind": "CALL_RESULT",
+        "region": {
+          "kind": "program_region",
+          "value": "9f3dde66ee440d9c95b04324e6a0b311",
+          "wire": "program_region:9f3dde66ee440d9c95b04324e6a0b311"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:acbd315609dbae3d6b2c8f1d",
+            "wire": "source:atom:acbd315609dbae3d6b2c8f1d"
+          },
+          "end_column": 26,
+          "end_line": 346,
+          "fingerprint": "sha256:413a58e2b6cbf46a218b5fadce5ba25136f89474e7bc049304a938b2bdf5599b",
+          "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/_config.py",
+          "start_column": 11,
+          "start_line": 346
+        },
+        "value": {
+          "kind": "program_value",
+          "value": "a5ae1b920c70778938feb72dd7c2bd7b",
+          "wire": "program_value:a5ae1b920c70778938feb72dd7c2bd7b"
+        }
+      }
+    ],
+    "invocation": {
+      "invocation_id": 591,
+      "process_id": 559598,
+      "thread_id": 132143864129344
+    },
+    "issue_kinds": {
+      "query.issues": {
+        "COMPLETION_BOUNDARY": 1
+      }
+    },
+    "issues": [
+      {
+        "anchor": null,
+        "detail": "normal result has no unique observed attempt/entry/completion route",
+        "invocation": {
+          "invocation_id": 591,
+          "process_id": 559598,
+          "thread_id": 132143864129344
+        },
+        "kind": "COMPLETION_BOUNDARY"
+      }
+    ],
+    "max_reference_steps": 4096,
+    "nodes": 1,
+    "obligations": 1,
+    "reference_steps": 1,
+    "roots": 1,
+    "route_kinds": {},
+    "routes": 0,
+    "status": "CONDITIONAL_REFERENCE_QUERY"
+  },
+  "query_selection": {
+    "normal_return_invocations": 4907,
+    "preferred_invocations": 0,
+    "selected": {
+      "invocation_id": 591,
+      "process_id": 559598,
+      "thread_id": 132143864129344
+    },
+    "selection_rule": "ascending (invocation_id, process_id, thread_id); prefer normal-return caller with completion",
+    "status": "SELECTED"
+  },
+  "raw_inputs_unchanged": true,
+  "schema": "scar.windows-external-analysis",
+  "schema_version": 1,
+  "scope": "three public offline CLI phases; conditional source/core/reference evidence only",
+  "source_checks": [
+    {
+      "label": "before",
+      "matches_requested": true,
+      "sha256": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574"
+    },
+    {
+      "label": "before-inventory",
+      "matches_requested": true,
+      "sha256": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574"
+    },
+    {
+      "label": "after-inventory",
+      "matches_requested": true,
+      "sha256": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574"
+    },
+    {
+      "label": "before-link",
+      "matches_requested": true,
+      "sha256": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574"
+    },
+    {
+      "label": "after-link",
+      "matches_requested": true,
+      "sha256": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574"
+    },
+    {
+      "label": "before-query",
+      "matches_requested": true,
+      "sha256": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574"
+    },
+    {
+      "label": "after-query",
+      "matches_requested": true,
+      "sha256": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574"
+    },
+    {
+      "label": "after",
+      "matches_requested": true,
+      "sha256": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574"
+    }
+  ],
+  "source_matches_requested_before_and_after": true,
+  "status": "COMPLETED_CONDITIONAL_ANALYSIS",
+  "target_executed_by_driver": false,
+  "tensor_values_saved": false,
+  "transformation_authorized": false,
+  "uncovered_scope": [
+    "No whole-program, state/content/effect closure or transformation permission is established.",
+    "Unobserved calls, unsupported conventions and unselected control predecessors remain boundaries.",
+    "Only the mechanically selected invocation is queried; this is not a claim about all returns.",
+    "Frame issue kinds are not serialized in the public compact report; only their aggregate is available.",
+    "Native Tensor contents are not recorded or reconstructed."
+  ]
+}

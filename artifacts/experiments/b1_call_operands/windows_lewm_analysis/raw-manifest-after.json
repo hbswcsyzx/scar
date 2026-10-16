@@ -1,0 +1,55 @@
+{
+  "files": [
+    {
+      "path": "call-codes.559598.jsonl.gz",
+      "physical_bytes": 61273,
+      "resolved_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-codes.559598.jsonl.gz",
+      "sha256_file_bytes": "9f68b08d5ba3b037915d41119d85ff19b0113b66b0dc42c6780ee8851c29742a"
+    },
+    {
+      "path": "call-events.559598.jsonl.gz",
+      "physical_bytes": 10682827,
+      "resolved_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-events.559598.jsonl.gz",
+      "sha256_file_bytes": "5f6a4a4e923fcd35fb3b4fd9a71dd4bde91582e14f0fbb809d0a5487c86e4328"
+    },
+    {
+      "path": "call-meta.559598.json",
+      "physical_bytes": 954,
+      "resolved_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-meta.559598.json",
+      "sha256_file_bytes": "aba4e365e92b99e66186a4354d6fa201e8e0bc9ade83db90e8ac45216db186da"
+    },
+    {
+      "path": "call-operand-meta.559598.json",
+      "physical_bytes": 1843,
+      "resolved_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-operand-meta.559598.json",
+      "sha256_file_bytes": "1c329f790bf656d4a6ee740b93eb85b7f98971a03ecb5b05f6806f52a9fd1638"
+    },
+    {
+      "path": "call-operands.559598.jsonl.gz",
+      "physical_bytes": 5467095,
+      "resolved_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-operands.559598.jsonl.gz",
+      "sha256_file_bytes": "115b19a27724c18e310ba11b2277e15c66f39b9a568e8f816ce28df722a64d23"
+    },
+    {
+      "path": "resources.jsonl",
+      "physical_bytes": 88507,
+      "resolved_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/resources.jsonl",
+      "sha256_file_bytes": "e790ab0171c8e2cfae52af5027ccefdc68e33ff5cd1abc0003638117e0052f73"
+    },
+    {
+      "path": "resources.summary.json",
+      "physical_bytes": 498,
+      "resolved_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/resources.summary.json",
+      "sha256_file_bytes": "9b90ab6b590013dc29c65e66437e6361165624092979193f6afd8c2e443e4631"
+    },
+    {
+      "path": "run.json",
+      "physical_bytes": 362,
+      "resolved_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/run.json",
+      "sha256_file_bytes": "df356a7c5ae677efb3dd17fd2a13dbc323d6933fd39e1fe0e74468ed24125ab4"
+    }
+  ],
+  "hash_scope": "all regular files under trace; physical compressed bytes where .gz",
+  "root": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace",
+  "total_physical_bytes": 16303359
+}

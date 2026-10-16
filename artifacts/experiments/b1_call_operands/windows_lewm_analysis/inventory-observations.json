@@ -1,0 +1,118 @@
+{
+  "issue_kinds": {
+    "call_sources.model.code_links[*].issues": {
+      "SOURCE_BOUNDARY": 259,
+      "TARGET_DEFINITION_MISSING": 128
+    },
+    "call_sources.model.issues": {},
+    "discovery.gaps": {
+      "AMBIGUOUS": 13,
+      "DYNAMIC_EXECUTION": 2,
+      "DYNAMIC_IMPORT": 7,
+      "EXTERNAL_OR_UNAVAILABLE": 1051,
+      "STAR_IMPORT": 10
+    },
+    "files[*].bodies[*].metadata.gaps": {
+      "CODE_VERSION": 208,
+      "DYNAMIC_DISPATCH": 809,
+      "DYNAMIC_TARGET": 210,
+      "EFFECT_SUMMARY": 162,
+      "FRAME_EFFECT": 264,
+      "UNSUPPORTED_SIGNATURE": 48,
+      "UNSUPPORTED_SYNTAX": 158
+    },
+    "files[*].gaps": {
+      "UNCLASSIFIED": 3198
+    },
+    "interfaces.bindings[*].issues": {
+      "EXPANDED_ARGUMENT": 4,
+      "NO_SIGNATURE": 54
+    },
+    "interfaces.issues": {}
+  },
+  "schema_version": 6,
+  "summary": {
+    "annotation_evaluation_policy_established": false,
+    "body_statuses": {
+      "LOWERED_WITH_GAPS": 50,
+      "NOT_ATTEMPTED": 1961,
+      "UNSUPPORTED": 206
+    },
+    "call_source_scope": {
+      "CORE_LINKED": 32,
+      "INDEXED_WITHOUT_BODY": 393
+    },
+    "call_sources": {
+      "caller_connections_established": false,
+      "counts": {
+        "code_captures": 850,
+        "eligible_codes": 425,
+        "eligible_groups": 425,
+        "entered_code_groups": 812,
+        "entered_invocations": 84313,
+        "files": 3,
+        "issues": 0,
+        "processes": 1
+      },
+      "data_connections_established": false,
+      "effects_established": false,
+      "function_environment_established": false,
+      "transformation_authorized": false
+    },
+    "construction_operations": 3503,
+    "core_operations": 1148,
+    "core_values": 1919,
+    "coverage_atoms": 122323,
+    "coverage_statuses": {
+      "CONNECTED": 682,
+      "INVENTORY_ONLY": 107351,
+      "UNSUPPORTED": 14290
+    },
+    "cross_file_call_witnesses": 197,
+    "definitions": 2217,
+    "discovery_gaps": 1083,
+    "expansion": {
+      "attempted": 256,
+      "demand_kinds": {
+        "ENTERED_CALL_CODE": 165,
+        "REMAINDER": 1465,
+        "SOURCE_CALL_CANDIDATE": 20
+      },
+      "operation_budget_charged": 3503,
+      "unavailable_contexts": 0,
+      "unknown_construction_costs": 0
+    },
+    "fine_state_effects_established": false,
+    "frames": {
+      "bodies": 50,
+      "completion_guaranteed": false,
+      "profile": "BOUND_FRAME_V1",
+      "release_established": false,
+      "runtime_conditions_established": false,
+      "transitions": {
+        "BIND": 27,
+        "DISCARD": 14,
+        "ENTER": 50,
+        "EXIT": 363
+      }
+    },
+    "implicit_invocations": 518,
+    "interfaces": {
+      "binding_statuses": {
+        "CONDITIONAL": 146,
+        "INCOMPLETE": 55
+      },
+      "bound_bodies": 50,
+      "issues": 0,
+      "live_call_binding_established": false,
+      "signatures": 1663
+    },
+    "inventory_issues": 3198,
+    "runtime_reachability_established": false,
+    "source_calls": 10235,
+    "source_calls_with_candidates": 201,
+    "source_files": 151,
+    "transformation_authorized": false,
+    "whole_program_graph_established": false
+  }
+}
