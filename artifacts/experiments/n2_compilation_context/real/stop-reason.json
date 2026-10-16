@@ -1,0 +1,21 @@
+{
+  "schema": "scar.experiment-stop",
+  "pid": 492921,
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "scar.cli",
+    "check-call-seeds",
+    "/tmp/scar-compile-context-pdq214ra/artifacts/experiments/n2_compilation_context/real/seeds.json.gz",
+    "--max-call-trace-bytes",
+    "256000000",
+    "--max-call-trace-events",
+    "250000",
+    "--max-call-references",
+    "2000000",
+    "--max-call-report-bytes",
+    "8000000"
+  ],
+  "reason": "Additional reproducible raw compile filename cache aliasing counterexample; stop owned replay before editing frozen source. Generation succeeded, not a target runtime failure.",
+  "product_failure": false
+}

@@ -1,11 +1,20 @@
 # SCAR roadmap and scope
 
+> **Automation status (2026-10-16):** the public flow discovers sources and builds
+> bounded graphs without a hand-authored workload model. Complete dependency
+> recovery and LeWM simplification remain unmet. See the explicit
+> [status, challenges and end-to-end gates](AUTOMATION_STATUS_20261016.md).
+> R1 compiler-context recovery passed 287 final mapped checks, 2,278 repository
+> tests and original archive regeneration/replay. Subsequent work
+> remains actual/formal/return and environment/state connectivity, not detectors.
+
 > **Latest accepted bridge (2026-10-15):** inventory v6 automatically connects raw
 > call-source seeds to typed entry-first demands and local regions. D1 passed
 > 303 mapped / 2,193 full tests and unchanged LeWM archive replay; 32 of 421
 > definition seeds link core, with the other scope/lowering boundaries retained.
-> See [D1 acceptance](N2_CALL_DEMAND_ACCEPTANCE.md). Next is the observed compiler
-> context mismatch, then the full cross-call query gate under
+> See [D1 acceptance](N2_CALL_DEMAND_ACCEPTANCE.md). R1 resolved the compiler
+> context mismatch under [separate acceptance](N2_COMPILATION_CONTEXT_ACCEPTANCE.md).
+> Next is the full cross-call query gate under
 > [N2_CROSS_CALL_IMPLEMENTATION.md](N2_CROSS_CALL_IMPLEMENTATION.md), environment,
 > loop/state connections and simplification guidance. No new detector/backend.
 
