@@ -1,5 +1,26 @@
 # Current evidence and remaining work
 
+## Latest bounded component: R1 recorded compilation context (2026-10-16)
+
+Final **287 mapped checks / 77.390s**, **2,278 full repository tests** and
+unchanged LeWM archive regeneration by the public verifier passed. Frozen source
+fingerprint: `aefadf0d7b9b4bb6c2ccd0d8e5248bb6962c6cf79bbcbffb7406afa6d63f08bf`.
+Full process: 290.334s / 1,028,636KiB peak RSS; three existing warnings,
+no failures/errors/skips. Independent archive verification: 252.349s / 236,320KiB.
+
+The five legacy mismatches now exactly reproduce complete code descriptors;
+all other code links and model fields remain unchanged. Counts are 553 VERIFIED,
+259 INCOMPLETE, zero MISMATCH, and 425 eligible definition seeds. New seed v2
+records its matching profile; historical seed v1/nested inventory v6 retain their
+legacy behavior. A second cache spelling regression was reproduced and fixed;
+initial results and intentionally stopped replay remain archived separately.
+
+This verifies source correspondence only. It does not bind actuals, environments
+or state, complete the LeWM graph, authorize a transformation, or give a speedup.
+The 150-file/50-body figures below remain the frozen D1 expansion results; R1 did
+not rerun the entire v6 expansion. See [R1 acceptance](N2_COMPILATION_CONTEXT_ACCEPTANCE.md)
+and the [current automation scope and next end-to-end gates](AUTOMATION_STATUS_20261016.md).
+
 ## Latest bounded component: D1 source-to-demand bridge (2026-10-15)
 
 Implementation `2cf4e40` passed **303 mapped checks / 57.703s**, **2,193 full

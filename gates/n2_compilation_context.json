@@ -1,0 +1,15 @@
+{
+  "gate": "N2-COMPILATION-CONTEXT-R1",
+  "scope": "Source code reproduction uses an explicit recorded-future profile while legacy seed/report and inventory replay retain zero-flags policy.",
+  "limitations": [
+    "Matching complete code descriptors does not establish historical loader, function environment, parameter routing, effects or transformation authority.",
+    "Compiler-context recovery does not supply missing module/class/annotation/lambda/comprehension body interfaces.",
+    "No LeWM execution, source transformation, detector/backend or performance speedup is delivered by this gate."
+  ],
+  "criteria": [
+    {"id": "R1-A-runtime-future-flags-and-cache-identity", "tests": ["tests/unit/test_call_compilation.py"]},
+    {"id": "R1-B-legacy-and-versioned-seed-profile-replay", "tests": ["tests/unit/test_call_source_seed_profiles.py", "tests/unit/test_call_source_seeds.py", "tests/unit/test_call_seed_records.py"]},
+    {"id": "R1-C-public-cli-and-inventory-nested-profile", "tests": ["tests/integration/test_call_compilation_profiles_cli.py", "tests/unit/test_call_source_inventory.py", "tests/unit/test_call_source_workspace.py"]},
+    {"id": "R1-D-old-call-source-and-reader-regression", "tests": ["tests/unit/test_call_trace_reader_history.py", "tests/unit/test_call_edge_links.py", "tests/unit/test_frame_call_links.py", "tests/integration/test_call_source_seeds_cli.py", "tests/unit/test_source_witness_index.py"]}
+  ]
+}

@@ -18,6 +18,9 @@ import tokenize
 from types import CodeType
 
 from scar.analysis.call_trace_reader import CollectingCallSink, scan_call_trace
+from scar.analysis.call_compilation import (
+    UnsupportedCompilationFlags, compile_cache_key, future_flags_for,
+)
 from scar.analysis.function_interfaces import extract_signature
 from scar.analysis.program_inventory import _Inventory
 from scar.analysis.program_lowering import prepare_source
@@ -31,6 +34,7 @@ from scar.ir.program.call_edges import (
 )
 from scar.ir.program.frames import FrameExit as SourceFrameExit
 from scar.ir.program.functions import BodyLoweringProfile
+from scar.ir.program.compilation import CallCompilationProfile
 from scar.ir.program.model import CompletionResult, ExitKind, TerminatorKind
 from scar.ir.program.source import SourceRole
 from scar.ir.record_codec import decode, encode
@@ -100,9 +104,15 @@ def _source_witness_projection(prepared):
 
 
 class _Sources:
-    def __init__(self, root, budget, inventory, *, _source_workspace=None):
+    def __init__(
+        self, root, budget, inventory, *, _source_workspace=None,
+        compilation_profile=CallCompilationProfile.LEGACY_ZERO_FLAGS,
+    ):
+        if type(compilation_profile) is not CallCompilationProfile:
+            raise ValueError("compilation profile must be a CallCompilationProfile")
         self.root, self.budget, self.inventory = root, budget, inventory
         self._source_workspace = _source_workspace
+        self.compilation_profile = compilation_profile
         self.contexts, self.indexes, self.compiled, self.links, self.objects = {}, {}, {}, {}, {}
         self.context_errors = {}
         self.site_links, self.operand_links = {}, {}
@@ -173,6 +183,17 @@ class _Sources:
         if captured.key in self.links:
             return self.links[captured.key]
         try:
+            future_flags = future_flags_for(captured.flags, self.compilation_profile)
+        except UnsupportedCompilationFlags as error:
+            # A malformed/unknown code flag is local to this descriptor. It
+            # must not poison the filename-wide source context cache.
+            result = CodeSourceLink(
+                captured.key, CallLinkStatus.INCOMPLETE,
+                issues=(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY, str(error)),),
+            )
+            self.links[captured.key] = result
+            return result
+        try:
             context = self.context(captured.filename)
         except (OSError, ValueError, SyntaxError, TypeError, KeyError, RecursionError) as error:
             self.context_errors[captured.filename] = str(error)
@@ -180,18 +201,46 @@ class _Sources:
                                     issues=(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY, str(error)),))
             self.links[captured.key] = result
             return result
-        if captured.filename not in self.compiled:
-            trials = []
-            for optimize in (0, 1, 2):
-                code = compile(context.text, captured.filename, "exec", dont_inherit=True, optimize=optimize)
-                for child in _nested_codes(code):
+        trials = []
+        for optimize in (0, 1, 2):
+            cache_key = compile_cache_key(
+                context.path, context.snapshot.fingerprint,
+                self.compilation_profile, captured.flags, optimize,
+                compile_filename=captured.filename,
+            )
+            if cache_key not in self.compiled:
+                try:
+                    module_code = compile(
+                        context.text, captured.filename, "exec",
+                        flags=future_flags, dont_inherit=True, optimize=optimize,
+                    )
+                except (SyntaxError, ValueError, TypeError, OverflowError, RecursionError) as error:
+                    if self.compilation_profile is CallCompilationProfile.LEGACY_ZERO_FLAGS:
+                        raise
+                    # Some future modes can be accepted by compile while the
+                    # source frontend cannot describe that syntax. Preserve a
+                    # concrete boundary instead of claiming a mismatch.
+                    result = CodeSourceLink(
+                        captured.key, CallLinkStatus.INCOMPLETE, context.snapshot,
+                        issues=(_issue(
+                            CallEdgeIssueKind.SOURCE_BOUNDARY,
+                            "recorded compiler context is unsupported by source matching: "
+                            + str(error),
+                        ),),
+                    )
+                    self.links[captured.key] = result
+                    return result
+                compiled_trials = []
+                for child in _nested_codes(module_code):
                     try:
                         description = describe_code(child)
                     except ValueError:
                         continue  # A finite encoder boundary cannot certify this object.
-                    trials.append((optimize, child, description))
-            self.compiled[captured.filename] = trials
-        matches = [(optimize, code) for optimize, code, description in self.compiled[captured.filename]
+                    compiled_trials.append((child, description))
+                self.compiled[cache_key] = tuple(compiled_trials)
+            trials.extend((optimize, code, description)
+                          for code, description in self.compiled[cache_key])
+        matches = [(optimize, code) for optimize, code, description in trials
                    if description == encode(captured)]
         snapshot = context.snapshot
         if not matches:

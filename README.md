@@ -52,7 +52,7 @@ demand-driven call witnesses. Prepared contexts use bounded private storage.
 Default v5 reports add conditional frame lifetime and preserve return-reference
 origins alongside definition work and bound-formal ports. Without a trace,
 runtime scope is null; historical v1–v4 retain their original replay behavior.
-See [current automation scope](docs/AUTOMATION_STATUS_20261015.md),
+See [current automation scope](docs/AUTOMATION_STATUS_20261016.md),
 [function interfaces](docs/N2_FUNCTION_INTERFACES.md) and
 [the next connection gates](docs/N2_CALL_COMPOSITION_PLAN.md).
 
@@ -76,9 +76,21 @@ checks and 2,033 repository tests**, plus unchanged-source LeWM trace replay.
 `seed-calls` and `check-call-seeds` automatically resolve entered code groups
 without retaining reference vectors or saving Tensor contents. The real archive
 yielded 421 unique definition seeds; these are not approved optimizations.
-The [next gate](docs/N2_CALL_DEMAND_PLAN.md) connects them to entry-first source
-and body expansion. Actual/formal binding and whole-program connectivity remain
-pending; no LeWM transformation or speedup is claimed.
+The [D1 bridge](docs/N2_CALL_DEMAND_ACCEPTANCE.md) now connects them to typed,
+entry-first source and body expansion: **303 gate checks / 2,193 repository tests**
+and original archive replay passed. It yields 50 local body graphs with gaps;
+32 source groups link core regions, while 389 retain concrete scope/lowering
+boundaries. Actual/formal binding and whole-program connectivity remain pending;
+no LeWM transformation or speedup is claimed. See the
+[cross-layer implementation plan](docs/N2_CROSS_CALL_IMPLEMENTATION.md).
+
+[Recorded compilation context](docs/N2_COMPILATION_CONTEXT_ACCEPTANCE.md) now
+resolves five source mismatches without weakening complete code descriptors.
+Final **287 mapped / 2,278 repository checks** and independent real-archive
+regeneration/replay passed. New seed reports use schema v2; old v1 and nested
+v6 reports retain their original matching policy. The latest archive yields
+425 eligible definition seeds; this does not establish argument, state or
+optimization proofs.
 
 The graph pass includes loop membership: with `--lines`, observed bytecode
 back-edges become `loop_controls` edges and can produce a
@@ -120,6 +132,13 @@ python -m scar.cli link-calls artifacts/traces/calls \
   --project-root path/to/project --inventory artifacts/reports/inventory.json.gz \
   --out artifacts/reports/calls.json.gz
 python -m scar.cli check-call-links artifacts/reports/calls.json.gz
+
+# Use those original calls to drive entry-first source/body discovery (v6).
+# This builds a bounded inventory, not a complete dependency or optimization proof.
+python -m scar.cli inventory-program path/to/project/entry.py \
+  --project-root path/to/project --calls artifacts/traces/calls \
+  --out artifacts/reports/calls-inventory.json.gz
+python -m scar.cli check-inventory artifacts/reports/calls-inventory.json.gz
 
 # Larger reports require independently selected ceilings for both wire data
 # and records. Source-budget boundaries stay explicit; budgets do not prove
