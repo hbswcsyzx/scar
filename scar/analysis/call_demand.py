@@ -14,6 +14,7 @@ from pathlib import Path
 
 from scar.analysis.program_context_store import PreparedContextStore, ContextStoreLimit
 from scar.analysis.program_lowering import prepare_source
+from scar.ir.program.compilation import CallCompilationProfile
 
 
 def _fresh_failure(error):
@@ -147,7 +148,8 @@ class _SourceWorkspace:
 
 
 def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trace,
-                         call_budget, context_budget, expected_call_sources=None):
+                         call_budget, context_budget, expected_call_sources=None,
+                         compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS):
     from scar.analysis.call_seeds import _read_call_source_seeds
     from scar.analysis.program_expansion import expand_inventory
     from scar.analysis.program_inventory import ProgramInventory, _canonical
@@ -158,7 +160,7 @@ def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trac
     with _SourceWorkspace(root, context_budget, entry=entry, source_roots=source_roots,
                           inventory_budget=budget) as workspace:
         report = _read_call_source_seeds(call_trace, root, budget=call_budget,
-                                         _source_workspace=workspace)
+            _source_workspace=workspace, compilation_profile=compilation_profile)
         if expected_call_sources is not None and _canonical(report.to_dict()) != _canonical(expected_call_sources):
             raise ValueError("call seeds differ from current raw trace/source replay")
         discovery = _discover_sources_from_call_sources(entry, project_root=root,
@@ -239,9 +241,10 @@ def replay_inventory_from_calls(document, *, discovery, roots, budget, context_c
     decode(CallSourceScope, document["call_source_scope"])
     model = CallSourceSeedReport._decode_replay_input(document["call_sources"],
         verification_budget=call_ceiling)
+    compilation_profile = CallSourceSeedReport._compilation_profile(document["call_sources"])
     if model.project_root != discovery.project_root:
         raise ValueError("call-source project root differs from source discovery")
     return inventory_from_calls(discovery.entry, project_root=discovery.project_root,
         source_roots=roots, budget=budget, call_trace=model.trace_directory,
         call_budget=model.budget, context_budget=schedule.budget,
-        expected_call_sources=document["call_sources"])
+        expected_call_sources=document["call_sources"], compilation_profile=compilation_profile)
