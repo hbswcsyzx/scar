@@ -544,6 +544,11 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         from .control_validation import control_errors
         for code, path, message in control_errors(graph):
             error(code, path, message)
+    if not issues:
+        from .provider_validation import provider_errors
+        for code, path, message in provider_errors(
+                graph, {op: block_region[block] for op, block in operation_block.items()}, uses):
+            error(code, path, message)
     return tuple(issues)
 
 

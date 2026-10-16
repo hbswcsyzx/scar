@@ -51,9 +51,14 @@ class ControlPortID(Identifier):
     prefix = "program_control_port"
 
 
+class ProviderID(Identifier):
+    prefix = "program_provider"
+
+
 __all__ = [
     "BlockID", "LocationID", "OperationID", "RegionID", "UseID", "ValueID",
     "ResourceDefinitionID", "ResourceRequirementID",
     "EnvironmentInterfaceID",
     "ControlScopeID", "ControlPortID",
+    "ProviderID",
 ]

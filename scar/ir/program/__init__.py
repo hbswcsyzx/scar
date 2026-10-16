@@ -6,6 +6,15 @@ and ``program.queries``. Typed records remain independently importable.
 from scar.ir.program.ids import (
     BlockID, EnvironmentInterfaceID, LocationID, OperationID, RegionID, ResourceDefinitionID,
     ResourceRequirementID, UseID, ValueID, ControlScopeID, ControlPortID,
+    ProviderID,
+)
+from scar.ir.program.providers import (
+    ProviderArtifact, ProviderArtifactKind, ProviderBinding, ProviderCaptureMode,
+    ProviderCollectionDomain, ProviderCollectionObservation, ProviderCondition,
+    ProviderConditionDomain, ProviderCoverage, ProviderCoverageDomain,
+    ProviderElement, ProviderElementKind, ProviderEnvelope, ProviderFactReference,
+    ProviderPathIndex, ProviderPathKey, ProviderRegion, ProviderRegionRelation,
+    ProviderRunScope, ProviderStage,
 )
 from scar.ir.program.resources import (
     CapacityConstraint, CreatedResource, ExternalResource, RequirementRelation,
@@ -55,4 +64,10 @@ __all__ = [
     "ExceptionPacketDefinition", "LanguageCompletionKind", "PendingCompletionDefinition",
     "PendingDispatchTerminator", "PendingPayload", "PendingSuccessor", "ProtocolValue",
     "ProtocolValueKind", "ProtocolValueType",
+    "ProviderID", "ProviderArtifact", "ProviderArtifactKind", "ProviderBinding",
+    "ProviderCaptureMode", "ProviderCollectionDomain", "ProviderCollectionObservation",
+    "ProviderCondition", "ProviderConditionDomain", "ProviderCoverage", "ProviderCoverageDomain",
+    "ProviderElement", "ProviderElementKind", "ProviderEnvelope", "ProviderFactReference",
+    "ProviderPathIndex", "ProviderPathKey", "ProviderRegion", "ProviderRegionRelation",
+    "ProviderRunScope", "ProviderStage",
 ]

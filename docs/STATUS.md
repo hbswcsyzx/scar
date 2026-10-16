@@ -1,5 +1,18 @@
 # Current evidence and remaining work
 
+## P0 provider provenance component (2026-10-16)
+
+[P0](M1_PROVIDER_INTERFACES.md) connects typed provider envelopes, representation
+ownership/observation scope and ordered endpoints to the existing canonical core.
+All 224 component checks pass with source fingerprint
+`6fd34d1c48b2225097f88c8435832dfffefdda7f8fbbed2239cd0be7361e4d03`
+(365 files). Schema v7 preserves original v1–v6 contracts. An independent review
+found and reproduced four accepted INVOKE-result source mismatches; the fixed
+validator now derives direct completion/pending projections from canonical CFG
+edges. Frozen full regression is pending. This is a declaration component, not
+an FX/Export/ETO adapter, artifact replay, occurrence bridge or equivalence proof.
+Complete T1, M1/M2 and first-stage modeling remain unfinished.
+
 ## Tool reuse reassessment (2026-10-16)
 
 The [integration contract](MODELING_INTEGRATION.md) now specifies field ownership,

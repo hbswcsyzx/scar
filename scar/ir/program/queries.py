@@ -4,18 +4,27 @@ from enum import Enum
 
 from .environments import EnvironmentInterface, EnvironmentMember, FunctionEntryLayout
 from .functions import FormalPort
-from .ids import EnvironmentInterfaceID, OperationID, RegionID, ValueID
+from .ids import EnvironmentInterfaceID, OperationID, ProviderID, RegionID, UseID, ValueID
 from .model import ProgramGraph, StateVersionValue, TerminatorKind, Use
 from .validation import require_valid
 from .control import ProtocolValueKind
 from .control_validation import derive_pending_facts
 from .model import ProtocolValue
+from .providers import ProviderBinding, ProviderEnvelope, ProviderRegion
 
 
 @dataclass(frozen=True, slots=True)
 class UseSite:
     operation: OperationID
     use: Use
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderRegionSource:
+    """A declaration and its envelope, not equivalence or occurrence proof."""
+
+    association: ProviderRegion
+    envelope: ProviderEnvelope
 
 
 class EnvironmentBindingStatus(str, Enum):
@@ -62,15 +71,56 @@ class ProgramIndex:
         self._control_ports = {port.id: port for port in graph.control_ports}
         self._control_scope = {block: scope for scope in graph.control_scopes for block in scope.blocks}
         self._consumers = {value.id: [] for value in graph.values}
+        self._uses = {}
         for operation in graph.operations:
             for use in operation.uses:
-                self._consumers[use.value].append(UseSite(operation.id, use))
+                site = UseSite(operation.id, use)
+                self._consumers[use.value].append(site)
+                self._uses[use.id] = site
+        self._providers = {row.id: row for row in graph.provider_envelopes}
+        self._provider_regions = {region.id: [] for region in graph.regions}
+        for association in graph.provider_regions:
+            self._provider_regions[association.region].append(ProviderRegionSource(
+                association, self._providers[association.provider]))
+        self._provider_sources = {}
+        for binding in graph.provider_bindings:
+            self._provider_sources.setdefault(binding.target, []).append(binding)
 
     def producer(self, value_id: ValueID):
         return self.values[value_id].origin
 
     def consumers(self, value_id: ValueID) -> tuple[UseSite, ...]:
         return tuple(self._consumers[value_id])
+
+    def use_site(self, use_id: UseID) -> UseSite:
+        if type(use_id) is not UseID:
+            raise TypeError("use_site requires canonical UseID")
+        return self._uses[use_id]
+
+    def provider_envelope(self, provider_id: ProviderID) -> ProviderEnvelope:
+        if type(provider_id) is not ProviderID:
+            raise TypeError("provider_envelope requires ProviderID")
+        return self._providers[provider_id]
+
+    def provider_region_sources(self, region_id: RegionID) -> tuple[ProviderRegionSource, ...]:
+        """Return explicit representation owners and observation scopes separately.
+
+        No declaration is inherited into child regions; no association denotes
+        an actual runtime invocation or equivalence between representations.
+        """
+        if type(region_id) is not RegionID:
+            raise TypeError("provider_region_sources requires RegionID")
+        return tuple(self._provider_regions[region_id])
+
+    def provider_sources(self, target: OperationID | ValueID | UseID) -> tuple[ProviderBinding, ...]:
+        """Return exact declarations; an empty tuple is not proof of no sources."""
+        registries = {OperationID: self.operations, ValueID: self.values, UseID: self._uses}
+        registry = registries.get(type(target))
+        if registry is None:
+            raise TypeError("provider_sources needs OperationID, ValueID or UseID")
+        if target not in registry:
+            raise KeyError(target)
+        return tuple(self._provider_sources.get(target, ()))
 
     def entry_arguments(self, region_id: RegionID):
         region = self.regions[region_id]

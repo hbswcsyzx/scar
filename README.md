@@ -13,6 +13,11 @@ The [tooling survey](docs/TOOLING_SURVEY.md) and
 reuse Python compiler interfaces, FX/Export and ETO+Profiler. Current experiments
 verify bounded tool capabilities; the new adapters are not yet integrated.
 
+The [P0 provider provenance component](docs/M1_PROVIDER_INTERFACES.md) connects
+external graph origins and ordered ports to the canonical core. Its 224 component
+checks passed; frozen full regression is pending. Declared coverage and scope
+do not authorize transformations or establish dynamic correspondence.
+
 The [first-stage completion matrix](docs/FIRST_STAGE_COMPLETION_MATRIX.md)
 separates implemented interfaces from remaining modeling work. The latest
 [function environment component](docs/M1_ENVIRONMENT_INTERFACES.md) passed 327

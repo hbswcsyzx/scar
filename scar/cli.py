@@ -564,6 +564,16 @@ def _check_program(args) -> int:
             report.update(lexical_source_verified=False, cleanup_unwinding_verified=False,
                           exception_context_verified=False,
                           pending_runtime_realization_verified=False)
+        if graph.provider_envelopes:
+            report["counts"].update(
+                provider_envelopes=len(graph.provider_envelopes),
+                provider_regions=len(graph.provider_regions),
+                provider_bindings=len(graph.provider_bindings))
+            report.update(provider_artifact_replay_verified=False,
+                          provider_conditions_verified=False,
+                          provider_source_correspondence_verified=False,
+                          cross_representation_equivalence_verified=False,
+                          provider_runtime_correspondence_verified=False)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:
         destination = Path(args.out)

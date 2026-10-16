@@ -21,6 +21,7 @@ from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseI
 from scar.ir.program.resources import (
     ResourceDefinition, ResourceLocation, ResourceRequirement, ResourceUse,
 )
+from scar.ir.program.providers import ProviderBinding, ProviderEnvelope, ProviderRegion
 from scar.ir.v2.ids import ValueSlotID
 
 
@@ -693,6 +694,9 @@ class ProgramGraph:
     control_ports: tuple[ControlPort, ...] = ()
     exception_packets: tuple[ExceptionPacketDefinition, ...] = ()
     pending_completions: tuple[PendingCompletionDefinition, ...] = ()
+    provider_envelopes: tuple[ProviderEnvelope, ...] = ()
+    provider_regions: tuple[ProviderRegion, ...] = ()
+    provider_bindings: tuple[ProviderBinding, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -749,6 +753,15 @@ class ProgramGraph:
             if any(type(row) is not cls for row in rows):
                 raise TypeError("ProgramGraph." + name + " needs exact typed records")
             _unique(tuple(getattr(row, key) for row in rows), "ProgramGraph." + name)
+        for name, cls in (("provider_envelopes", ProviderEnvelope),
+                          ("provider_regions", ProviderRegion),
+                          ("provider_bindings", ProviderBinding)):
+            rows = _tuple(getattr(self, name), "ProgramGraph." + name)
+            if any(type(row) is not cls for row in rows):
+                raise TypeError("ProgramGraph." + name + " needs exact typed records")
+            _unique(rows, "ProgramGraph." + name)
+        _unique(tuple(row.id for row in self.provider_envelopes),
+                "ProgramGraph provider IDs")
 
 
 __all__ = [

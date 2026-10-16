@@ -13,7 +13,7 @@ from scar.ir.program.control import PendingDispatchTerminator, ProtocolValueType
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -21,7 +21,9 @@ _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_us
 _ENVIRONMENT_FIELDS = frozenset({"environments", "function_entries"})
 _CONTROL_FIELDS = frozenset({"control_scopes", "control_ports", "exception_packets",
                              "pending_completions"})
-_V5_GRAPH_FIELDS = _GRAPH_FIELDS - _CONTROL_FIELDS
+_PROVIDER_FIELDS = frozenset({"provider_envelopes", "provider_regions", "provider_bindings"})
+_V6_GRAPH_FIELDS = _GRAPH_FIELDS - _PROVIDER_FIELDS
+_V5_GRAPH_FIELDS = _V6_GRAPH_FIELDS - _CONTROL_FIELDS
 _V4_GRAPH_FIELDS = _V5_GRAPH_FIELDS - _ENVIRONMENT_FIELDS
 _V1_V2_GRAPH_FIELDS = _V4_GRAPH_FIELDS - _BINDING_FIELDS - _RESOURCE_FIELDS
 _V3_GRAPH_FIELDS = _V4_GRAPH_FIELDS - _RESOURCE_FIELDS
@@ -29,7 +31,8 @@ _V1_V2_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V1_V2_GRAPH_
 _V3_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V3_GRAPH_FIELDS
 _V4_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V4_GRAPH_FIELDS
 _V5_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V5_GRAPH_FIELDS
-_V6_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
+_V6_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V6_GRAPH_FIELDS
+_V7_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
 
 
 def _require_record_and_graph_valid(graph: ProgramGraph) -> None:
@@ -46,14 +49,17 @@ def _require_record_and_graph_valid(graph: ProgramGraph) -> None:
 
 
 def dumps(graph: ProgramGraph) -> str:
-    """Preserve v2–v5 encoding; explicit lexical/protocol interfaces require v6."""
+    """Preserve v2–v6 encoding; external provenance declarations require v7."""
     _require_record_and_graph_valid(graph)
     has_binding_capability = (
         bool(graph.binding_definitions or graph.binding_reads)
         or any(isinstance(value, LocalBindingValue) for value in graph.values))
     encoded = encode(graph)
-    if graph.control_scopes:
-        document = {"schema": SCHEMA, "schema_version": 6, **encoded}
+    if graph.provider_envelopes:
+        document = {"schema": SCHEMA, "schema_version": 7, **encoded}
+    elif graph.control_scopes:
+        document = {"schema": SCHEMA, "schema_version": 6,
+                    **{name: encoded[name] for name in _V6_GRAPH_FIELDS}}
     elif graph.environments:
         document = {"schema": SCHEMA, "schema_version": 5,
                     **{name: encoded[name] for name in _V5_GRAPH_FIELDS}}
@@ -108,7 +114,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact v6 fields or strictly migrate historical v1–v5."""
+    """Decode exact v7 fields or strictly migrate historical v1–v6."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -119,16 +125,18 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, SCHEMA_VERSION):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, SCHEMA_VERSION):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
-                       5: _V5_ENVELOPE_FIELDS, 6: _V6_ENVELOPE_FIELDS}[version]
+                       5: _V5_ENVELOPE_FIELDS, 6: _V6_ENVELOPE_FIELDS,
+                       7: _V7_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
                     3: _V3_GRAPH_FIELDS, 4: _V4_GRAPH_FIELDS,
-                    5: _V5_GRAPH_FIELDS, 6: _GRAPH_FIELDS}[version]
+                    5: _V5_GRAPH_FIELDS, 6: _V6_GRAPH_FIELDS,
+                    7: _GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
     if version == 1:
         record = _upgrade_v1_record(record)
@@ -141,6 +149,8 @@ def loads(payload: str) -> ProgramGraph:
         record.update({name: [] for name in _ENVIRONMENT_FIELDS})
     if version < 6:
         record.update({name: [] for name in _CONTROL_FIELDS})
+    if version < 7:
+        record.update({name: [] for name in _PROVIDER_FIELDS})
     graph = decode(ProgramGraph, record)
     if version < 6 and (
             any(isinstance(v, ProtocolValue) for v in graph.values)
@@ -158,6 +168,8 @@ def loads(payload: str) -> ProgramGraph:
         raise ValueError("schema version 5 requires explicit environment graph capability")
     if version == 6 and not graph.control_scopes:
         raise ValueError("schema version 6 requires explicit lexical control capability")
+    if version == 7 and not graph.provider_envelopes:
+        raise ValueError("schema version 7 requires explicit provider provenance capability")
     _require_record_and_graph_valid(graph)
     return graph
 
