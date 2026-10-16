@@ -12,6 +12,10 @@ import math
 from typing import TypeAlias
 
 from scar.ir.program.bindings import BindingDefinition, BindingRead
+from scar.ir.program.control import (
+    ControlPort, ControlScope, ExceptionPacketDefinition, PendingCompletionDefinition,
+    PendingDispatchTerminator, ProtocolValueKind, ProtocolValueType,
+)
 from scar.ir.program.environments import EnvironmentInterface, FunctionEntryLayout
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.resources import (
@@ -239,8 +243,27 @@ class LocalBindingValue:
             raise TypeError("LocalBindingValue.slot must be ValueSlotID")
 
 
-Value: TypeAlias = DataValue | ReferenceValue | StateVersionValue | LocalBindingValue
-ProgramValueType: TypeAlias = ValueType | LocalBindingType
+@dataclass(frozen=True, slots=True)
+class ProtocolValue:
+    """SSA protocol payload, distinct from Python references and state contents."""
+
+    id: ValueID
+    region: RegionID
+    origin: BlockArgument | OperationResult
+    protocol: ProtocolValueKind
+
+    def __post_init__(self) -> None:
+        if type(self.id) is not ValueID or type(self.region) is not RegionID:
+            raise TypeError("protocol value requires exact value and region IDs")
+        if type(self.origin) not in (BlockArgument, OperationResult):
+            raise TypeError("protocol value origin must be an exact argument or result")
+        _value_fields(self.id, self.region, self.origin)
+        if type(self.protocol) is not ProtocolValueKind:
+            raise TypeError("protocol value needs an explicit ProtocolValueKind")
+
+
+Value: TypeAlias = DataValue | ReferenceValue | StateVersionValue | LocalBindingValue | ProtocolValue
+ProgramValueType: TypeAlias = ValueType | LocalBindingType | ProtocolValueType
 
 
 def _value_fields(identity: object, region: object, origin: object, *,
@@ -279,6 +302,8 @@ def value_type(value: Value) -> ProgramValueType:
         return ValueType(ValueKind.STATE, location=value.location)
     if isinstance(value, LocalBindingValue):
         return LocalBindingType(value.slot)
+    if isinstance(value, ProtocolValue):
+        return ProtocolValueType(value.protocol)
     raise TypeError("value_type requires a program Value record")
 
 
@@ -299,6 +324,7 @@ class UseRole(str, Enum):
     STATE_CONTENT = "STATE_CONTENT"
     STATE_ORDER = "STATE_ORDER"
     LOCAL_BINDING = "LOCAL_BINDING"
+    PROTOCOL = "PROTOCOL"
 
 
 @dataclass(frozen=True, slots=True)
@@ -365,15 +391,15 @@ class ExitKind(str, Enum):
 class ExitPort:
     name: str
     kind: ExitKind
-    types: tuple[ValueType, ...]
+    types: tuple[ValueType | ProtocolValueType, ...]
 
     def __post_init__(self) -> None:
         _nonempty_text(self.name, "ExitPort.name")
         if not isinstance(self.kind, ExitKind):
             raise TypeError("ExitPort.kind must be ExitKind")
         _tuple(self.types, "ExitPort.types")
-        if any(not isinstance(item, ValueType) for item in self.types):
-            raise TypeError("ExitPort.types must contain ValueType")
+        if any(not isinstance(item, (ValueType, ProtocolValueType)) for item in self.types):
+            raise TypeError("ExitPort.types must contain value or protocol types")
 
 
 class TerminatorKind(str, Enum):
@@ -382,6 +408,7 @@ class TerminatorKind(str, Enum):
     RETURN = "RETURN"
     RAISE = "RAISE"
     INVOKE = "INVOKE"
+    PENDING_DISPATCH = "PENDING_DISPATCH"
 
 
 @dataclass(frozen=True, slots=True)
@@ -400,14 +427,14 @@ class Successor:
 @dataclass(frozen=True, slots=True)
 class CompletionSignature:
     kind: ExitKind
-    types: tuple[ValueType, ...]
+    types: tuple[ValueType | ProtocolValueType, ...]
 
     def __post_init__(self) -> None:
         if not isinstance(self.kind, ExitKind):
             raise TypeError("CompletionSignature.kind must be ExitKind")
         _tuple(self.types, "CompletionSignature.types")
-        if any(not isinstance(item, ValueType) for item in self.types):
-            raise TypeError("CompletionSignature.types must contain ValueType")
+        if any(not isinstance(item, (ValueType, ProtocolValueType)) for item in self.types):
+            raise TypeError("CompletionSignature.types must contain value or protocol types")
 
 
 @dataclass(frozen=True, slots=True)
@@ -446,6 +473,8 @@ class Terminator:
     def __post_init__(self) -> None:
         if not isinstance(self.kind, TerminatorKind):
             raise TypeError("Terminator.kind must be TerminatorKind")
+        if self.kind is TerminatorKind.PENDING_DISPATCH:
+            raise ValueError("PENDING_DISPATCH requires PendingDispatchTerminator")
         _tuple(self.successors, "Terminator.successors")
         if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
             raise TypeError("Terminator.successors must contain successor records")
@@ -490,7 +519,7 @@ class Operation:
     results: tuple[ValueID, ...] = ()
     accesses: tuple[StateAccess, ...] = ()
     effects_complete: bool = False
-    terminator: Terminator | None = None
+    terminator: Terminator | PendingDispatchTerminator | None = None
     callee: RegionID | None = None
     call_arguments: tuple[UseID, ...] = ()
     completions: tuple[CompletionSignature, ...] = ()
@@ -517,8 +546,9 @@ class Operation:
             raise TypeError("Operation.accesses must contain StateAccess")
         if type(self.effects_complete) is not bool:
             raise TypeError("Operation.effects_complete must be bool")
-        if self.terminator is not None and not isinstance(self.terminator, Terminator):
-            raise TypeError("Operation.terminator must be Terminator or None")
+        if self.terminator is not None and not isinstance(
+                self.terminator, (Terminator, PendingDispatchTerminator)):
+            raise TypeError("Operation.terminator must be a typed terminator or None")
         if self.callee is not None and not isinstance(self.callee, RegionID):
             raise TypeError("Operation.callee must be RegionID or None")
         _tuple(self.call_arguments, "Operation.call_arguments")
@@ -572,6 +602,8 @@ class Operation:
 
         if self.terminator is not None:
             terminator_uses = set(self.terminator.values)
+            if isinstance(self.terminator, PendingDispatchTerminator):
+                terminator_uses.add(self.terminator.pending)
             if self.terminator.condition is not None:
                 terminator_uses.add(self.terminator.condition)
             for successor in self.terminator.successors:
@@ -657,6 +689,10 @@ class ProgramGraph:
     resource_locations: tuple[ResourceLocation, ...] = ()
     environments: tuple[EnvironmentInterface, ...] = ()
     function_entries: tuple[FunctionEntryLayout, ...] = ()
+    control_scopes: tuple[ControlScope, ...] = ()
+    control_ports: tuple[ControlPort, ...] = ()
+    exception_packets: tuple[ExceptionPacketDefinition, ...] = ()
+    pending_completions: tuple[PendingCompletionDefinition, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -665,7 +701,7 @@ class ProgramGraph:
             ("regions", self.regions, Region, "id"),
             ("operations", self.operations, Operation, "id"),
             ("values", self.values, (DataValue, ReferenceValue, StateVersionValue,
-                                      LocalBindingValue), "id"),
+                                      LocalBindingValue, ProtocolValue), "id"),
             ("locations", self.locations, StateLocation, "id"),
         ):
             _tuple(rows, f"ProgramGraph.{name}")
@@ -703,13 +739,23 @@ class ProgramGraph:
             raise TypeError("ProgramGraph.function_entries contains an invalid entry layout")
         _unique(tuple(item.environment for item in self.function_entries),
                 "ProgramGraph function entry environments")
+        for name, cls, key in (
+                ("control_scopes", ControlScope, "id"),
+                ("control_ports", ControlPort, "id"),
+                ("exception_packets", ExceptionPacketDefinition, "value"),
+                ("pending_completions", PendingCompletionDefinition, "value")):
+            rows = getattr(self, name)
+            _tuple(rows, "ProgramGraph." + name)
+            if any(type(row) is not cls for row in rows):
+                raise TypeError("ProgramGraph." + name + " needs exact typed records")
+            _unique(tuple(getattr(row, key) for row in rows), "ProgramGraph." + name)
 
 
 __all__ = [
     "AccessMode", "Behavior", "Block", "BlockArgument", "DataValue", "ExitKind",
     "CompletionResult", "CompletionSignature", "CompletionSuccessor", "ExitPort",
     "Footprint", "FootprintKind", "LiteralOrigin", "LocalBindingType",
-    "LocalBindingValue", "Operation", "OperationResult",
+    "LocalBindingValue", "Operation", "OperationResult", "ProtocolValue",
     "OrderEdge", "Origin", "ProgramGraph",
     "ReferenceValue", "Region", "Stability", "StateAccess", "StateLocation",
     "StateVersionValue", "Successor", "Terminator", "TerminatorKind", "Use",

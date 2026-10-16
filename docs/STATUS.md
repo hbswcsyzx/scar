@@ -1,5 +1,17 @@
 # Current evidence and remaining work
 
+## C0 lexical control and pending protocol component (2026-10-16)
+
+[C0](M1_CONTROL_INTERFACES.md) passed 354 component checks: typed lexical scopes
+and ports, exception packet/pending SSA constructors, CFG-derived case unions,
+dispatch projections, old wire and public CLI. Source fingerprint is
+`06773c8c8863910cffb70d5859e5019dc040f0a5e8903799abeb837bb52d4a53`
+(356 files). Frozen full regression remains pending. Schema v6 preserves original
+v1–v5 contracts; v5 wire came from an isolated original-revision archive.
+This does not verify source ownership, runtime exception validity or cleanup
+unwinding. C1 must preserve original token/payload and active exception context
+across cleanup using current state; first-stage modeling remains incomplete.
+
 ## Function environment interface component (2026-10-16)
 
 [Environment/entry declarations](M1_ENVIRONMENT_INTERFACES.md) now connect to

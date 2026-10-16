@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="0.432" timestamp="2026-10-16T05:30:08.903692+00:00" hostname="gpu1"><testcase classname="tests.unit.test_pending_invoke_forwarding" name="test_forwarding_pending_on_completion_edges_does_not_pass_it_to_callee[False]" time="0.008"><failure message="TypeError: ProgramGraph.values contains an invalid record">known = False
+
+    @pytest.mark.parametrize("known", [False, True])
+    def test_forwarding_pending_on_completion_edges_does_not_pass_it_to_callee(known):
+&gt;       graph = local_pending_across_invoke(known)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_pending_invoke_forwarding.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_pending_invoke_forwarding.py:45: in local_pending_across_invoke
+    graph = replace(graph, regions=tuple(region if r.id == graph.root else r for r in graph.regions),
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: in _replace
+    return self.__class__(**changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;string&gt;:21: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ProgramGraph(root=RegionID(value='main'), regions=(Region(id=RegionID(value='main'), label='main', entry=BlockID(value...ue=ValueID(value='main.pending'), port=ControlPortID(value='main.return'), payload=UseID(value='main.pack.payload')),))
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.root, RegionID):
+            raise TypeError("ProgramGraph.root must be RegionID")
+        for name, rows, row_type, id_field in (
+            ("regions", self.regions, Region, "id"),
+            ("operations", self.operations, Operation, "id"),
+            ("values", self.values, (DataValue, ReferenceValue, StateVersionValue,
+                                      LocalBindingValue), "id"),
+            ("locations", self.locations, StateLocation, "id"),
+        ):
+            _tuple(rows, f"ProgramGraph.{name}")
+            if any(not isinstance(item, row_type) for item in rows):
+&gt;               raise TypeError(f"ProgramGraph.{name} contains an invalid record")
+E               TypeError: ProgramGraph.values contains an invalid record
+
+scar/ir/program/model.py:705: TypeError</failure></testcase><testcase classname="tests.unit.test_pending_invoke_forwarding" name="test_forwarding_pending_on_completion_edges_does_not_pass_it_to_callee[True]" time="0.003"><failure message="TypeError: ProgramGraph.values contains an invalid record">known = True
+
+    @pytest.mark.parametrize("known", [False, True])
+    def test_forwarding_pending_on_completion_edges_does_not_pass_it_to_callee(known):
+&gt;       graph = local_pending_across_invoke(known)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_pending_invoke_forwarding.py:55: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_pending_invoke_forwarding.py:45: in local_pending_across_invoke
+    graph = replace(graph, regions=tuple(region if r.id == graph.root else r for r in graph.regions),
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: in _replace
+    return self.__class__(**changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;string&gt;:21: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ProgramGraph(root=RegionID(value='main'), regions=(Region(id=RegionID(value='main'), label='main', entry=BlockID(value...ue=ValueID(value='main.pending'), port=ControlPortID(value='main.return'), payload=UseID(value='main.pack.payload')),))
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.root, RegionID):
+            raise TypeError("ProgramGraph.root must be RegionID")
+        for name, rows, row_type, id_field in (
+            ("regions", self.regions, Region, "id"),
+            ("operations", self.operations, Operation, "id"),
+            ("values", self.values, (DataValue, ReferenceValue, StateVersionValue,
+                                      LocalBindingValue), "id"),
+            ("locations", self.locations, StateLocation, "id"),
+        ):
+            _tuple(rows, f"ProgramGraph.{name}")
+            if any(not isinstance(item, row_type) for item in rows):
+&gt;               raise TypeError(f"ProgramGraph.{name} contains an invalid record")
+E               TypeError: ProgramGraph.values contains an invalid record
+
+scar/ir/program/model.py:705: TypeError</failure></testcase><testcase classname="tests.unit.test_pending_invoke_forwarding" name="test_passing_pending_into_an_opaque_callee_requires_a_future_boundary_contract" time="0.002"><failure message="TypeError: ProgramGraph.values contains an invalid record">def test_passing_pending_into_an_opaque_callee_requires_a_future_boundary_contract():
+&gt;       graph = local_pending_across_invoke(False)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_pending_invoke_forwarding.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_pending_invoke_forwarding.py:45: in local_pending_across_invoke
+    graph = replace(graph, regions=tuple(region if r.id == graph.root else r for r in graph.regions),
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: in _replace
+    return self.__class__(**changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;string&gt;:21: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ProgramGraph(root=RegionID(value='main'), regions=(Region(id=RegionID(value='main'), label='main', entry=BlockID(value...ue=ValueID(value='main.pending'), port=ControlPortID(value='main.return'), payload=UseID(value='main.pack.payload')),))
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.root, RegionID):
+            raise TypeError("ProgramGraph.root must be RegionID")
+        for name, rows, row_type, id_field in (
+            ("regions", self.regions, Region, "id"),
+            ("operations", self.operations, Operation, "id"),
+            ("values", self.values, (DataValue, ReferenceValue, StateVersionValue,
+                                      LocalBindingValue), "id"),
+            ("locations", self.locations, StateLocation, "id"),
+        ):
+            _tuple(rows, f"ProgramGraph.{name}")
+            if any(not isinstance(item, row_type) for item in rows):
+&gt;               raise TypeError(f"ProgramGraph.{name} contains an invalid record")
+E               TypeError: ProgramGraph.values contains an invalid record
+
+scar/ir/program/model.py:705: TypeError</failure></testcase></testsuite></testsuites>

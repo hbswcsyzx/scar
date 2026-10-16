@@ -7,6 +7,9 @@ from .functions import FormalPort
 from .ids import EnvironmentInterfaceID, OperationID, RegionID, ValueID
 from .model import ProgramGraph, StateVersionValue, TerminatorKind, Use
 from .validation import require_valid
+from .control import ProtocolValueKind
+from .control_validation import derive_pending_facts
+from .model import ProtocolValue
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,6 +58,9 @@ class ProgramIndex:
         self.operations = {operation.id: operation for operation in graph.operations}
         self._environments = {interface.region: interface for interface in graph.environments}
         self._function_entries = {layout.environment: layout for layout in graph.function_entries}
+        self._pending_facts = derive_pending_facts(graph) if graph.control_scopes else {}
+        self._control_ports = {port.id: port for port in graph.control_ports}
+        self._control_scope = {block: scope for scope in graph.control_scopes for block in scope.blocks}
         self._consumers = {value.id: [] for value in graph.values}
         for operation in graph.operations:
             for use in operation.uses:
@@ -77,6 +83,22 @@ class ProgramIndex:
         if region_id not in self.regions:
             raise KeyError(region_id)
         return self._environments.get(region_id)
+
+    def control_scope(self, block_id):
+        """Declared lexical owner, never source correspondence/unwind proof."""
+        if block_id not in {block.id for region in self.graph.regions for block in region.blocks}:
+            raise KeyError(block_id)
+        return self._control_scope.get(block_id)
+
+    def pending_facts(self, value_id: ValueID):
+        """Finite canonical CFG port facts; not dynamic dispatch or cleanup proof."""
+        value = self.values[value_id]
+        if not isinstance(value, ProtocolValue) or value.protocol is not ProtocolValueKind.PENDING_COMPLETION:
+            raise TypeError("pending_facts needs a pending-completion protocol value")
+        return self._pending_facts[value_id]
+
+    def pending_ports(self, value_id: ValueID):
+        return tuple(self._control_ports[identity] for identity in self.pending_facts(value_id).ports)
 
     def function_entry_layout(self, region_id: RegionID) -> FunctionEntryLayout | None:
         interface = self.environment_interface(region_id)

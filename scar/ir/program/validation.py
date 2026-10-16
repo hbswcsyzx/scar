@@ -12,9 +12,10 @@ from .ids import UseID
 from .model import (
     AccessMode, Behavior, BlockArgument, CompletionResult, CompletionSuccessor,
     DataValue, ExitKind, FootprintKind, LocalBindingValue,
-    LiteralOrigin, OperationResult, ProgramGraph, ReferenceValue,
+    LiteralOrigin, OperationResult, ProgramGraph, ProtocolValue, ReferenceValue,
     StateVersionValue, TerminatorKind, UseRole, ValueKind, value_type,
 )
+from .control import PendingDispatchTerminator
 
 
 @dataclass(frozen=True, slots=True)
@@ -165,6 +166,7 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         UseRole.STATE_CONTENT: StateVersionValue,
         UseRole.STATE_ORDER: StateVersionValue,
         UseRole.LOCAL_BINDING: LocalBindingValue,
+        UseRole.PROTOCOL: ProtocolValue,
     }
     for operation in operations.values():
         for use in operation.uses:
@@ -203,6 +205,8 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
             if isinstance(values[use.value], StateVersionValue) and use.role is not UseRole.STATE_CONTENT:
                 error("control_state_role", use.id, "state carried across control ports retains content dependence")
         bound = ([term.condition] if term.condition is not None else [])
+        if isinstance(term, PendingDispatchTerminator):
+            bound.append(term.pending)
         bound += [use for edge in term.successors for use in edge.arguments if isinstance(use, UseID)]
         bound += list(term.values)
         if is_invoke:
@@ -536,6 +540,10 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
     from .binding_validation import validate_bindings
     for issue in validate_bindings(graph):
         error(issue.code, issue.path, issue.message)
+    if not issues:
+        from .control_validation import control_errors
+        for code, path, message in control_errors(graph):
+            error(code, path, message)
     return tuple(issues)
 
 

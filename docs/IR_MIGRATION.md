@@ -26,6 +26,11 @@ state/control，按 [M0—M6](WHOLE_PROGRAM_MODEL_PLAN.md)逐门落实：
 写出，原 v1—v4 reader 保留。这里的 v5 是实际发布的环境表/入口表，不是历史
 提案中尚未实现的控制协议版本。来源/动态对应与旧 source profile 仍有明确缺口。
 
+新实施的 [C0](M1_CONTROL_INTERFACES.md)是 `scar.program-graph` v6：词法scope/port、
+packet/pending Value与唯一构造表、专用dispatch。旧Terminator不改字段；新terminator
+用独立严格record。没有新能力的图仍按原v2—v5写出；旧reader禁止夹带新协议类型。
+C0只验证声明结构，完整cleanup、handled context及跨边界pending合同尚未实施。
+
 新完整模型 Resource 有静态 definition/requirement 和动态 instance，handle
 经对应关系引用它；不能仅作为 EEG 标签。旧 `ready_event` 不承担新完成证明。
 语言 completion、suspend/resume、host outcome、work outcome 有强类型接口，

@@ -556,6 +556,14 @@ def _check_program(args) -> int:
                           environment_extraction_verified=False,
                           python_signature_binding_verified=False,
                           runtime_callable_verified=False)
+        if graph.control_scopes:
+            report["counts"].update(
+                control_scopes=len(graph.control_scopes), control_ports=len(graph.control_ports),
+                exception_packets=len(graph.exception_packets),
+                pending_completions=len(graph.pending_completions))
+            report.update(lexical_source_verified=False, cleanup_unwinding_verified=False,
+                          exception_context_verified=False,
+                          pending_runtime_realization_verified=False)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:
         destination = Path(args.out)

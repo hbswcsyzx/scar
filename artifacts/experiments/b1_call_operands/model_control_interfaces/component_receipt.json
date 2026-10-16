@@ -1,0 +1,15 @@
+{
+  "schema": "scar.control-c0-component-receipt",
+  "schema_version": 1,
+  "status": "COMPONENT_PASS_FULL_REGRESSION_PENDING",
+  "source_sha256": "06773c8c8863910cffb70d5859e5019dc040f0a5e8903799abeb837bb52d4a53",
+  "source_file_count": 356,
+  "component_cases": 354,
+  "duration_seconds": 18.876,
+  "report": "component/report.json",
+  "limits": [
+    "Static scope/protocol/CFG declarations only, not source/runtime/cleanup correctness.",
+    "C1 token provenance and active exception context remain to implement; no optimization authority.",
+    "Complete M1/M2 and first modeling phase remain unfinished."
+  ]
+}

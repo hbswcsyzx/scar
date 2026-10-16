@@ -43,8 +43,17 @@ class EnvironmentInterfaceID(Identifier):
     prefix = "program_environment"
 
 
+class ControlScopeID(Identifier):
+    prefix = "program_control_scope"
+
+
+class ControlPortID(Identifier):
+    prefix = "program_control_port"
+
+
 __all__ = [
     "BlockID", "LocationID", "OperationID", "RegionID", "UseID", "ValueID",
     "ResourceDefinitionID", "ResourceRequirementID",
     "EnvironmentInterfaceID",
+    "ControlScopeID", "ControlPortID",
 ]

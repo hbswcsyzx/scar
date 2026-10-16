@@ -5,7 +5,7 @@ and ``program.queries``. Typed records remain independently importable.
 """
 from scar.ir.program.ids import (
     BlockID, EnvironmentInterfaceID, LocationID, OperationID, RegionID, ResourceDefinitionID,
-    ResourceRequirementID, UseID, ValueID,
+    ResourceRequirementID, UseID, ValueID, ControlScopeID, ControlPortID,
 )
 from scar.ir.program.resources import (
     CapacityConstraint, CreatedResource, ExternalResource, RequirementRelation,
@@ -16,11 +16,16 @@ from scar.ir.program.bindings import BindingDefinition, BindingRead, BindingStat
 from scar.ir.program.environments import (
     EnvironmentInterface, EnvironmentMember, EnvironmentRole, FunctionEntryLayout,
 )
+from scar.ir.program.control import (
+    ControlPort, ControlScope, ControlScopeKind, ExceptionPacketDefinition,
+    LanguageCompletionKind, PendingCompletionDefinition, PendingDispatchTerminator,
+    PendingPayload, PendingSuccessor, ProtocolValueKind, ProtocolValueType,
+)
 from scar.ir.program.model import (
     AccessMode, Behavior, Block, BlockArgument, CompletionResult,
     CompletionSignature, CompletionSuccessor, DataValue, ExitKind, ExitPort,
     Footprint, FootprintKind, LiteralOrigin, Operation, OperationResult, OrderEdge,
-    LocalBindingType, LocalBindingValue, ProgramValueType,
+    LocalBindingType, LocalBindingValue, ProgramValueType, ProtocolValue,
     ProgramGraph, ReferenceValue, Region, Stability, StateAccess, StateLocation,
     StateVersionValue, Successor, Terminator, TerminatorKind, Use, UseRole,
     Value, ValueKind, ValueType, value_type,
@@ -46,4 +51,8 @@ __all__ = [
     "ResourceRole", "ResourceUse",
     "EnvironmentInterface", "EnvironmentInterfaceID", "EnvironmentMember", "EnvironmentRole",
     "FunctionEntryLayout",
+    "ControlPort", "ControlPortID", "ControlScope", "ControlScopeID", "ControlScopeKind",
+    "ExceptionPacketDefinition", "LanguageCompletionKind", "PendingCompletionDefinition",
+    "PendingDispatchTerminator", "PendingPayload", "PendingSuccessor", "ProtocolValue",
+    "ProtocolValueKind", "ProtocolValueType",
 ]
