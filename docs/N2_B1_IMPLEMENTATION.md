@@ -1,6 +1,6 @@
 # B1：原始程序到跨层参数与返回查询
 
-日期：2026-10-16。状态：**Implemented，组件验收通过；B1端到端验收未完成**。
+日期：2026-10-16。状态：**组件、全仓及独立GPU验收通过；真实LeWM采集门失败，B1未完成**。
 前置主线 `6a7410d`，R1已验收；本门不替代环境、状态、控制路径及完整程序门。
 
 ## 1. 交付要求保持不变
@@ -75,7 +75,8 @@ CALL观察到归一化的FunctionType不改标为MethodType。属性调用由未
 六组准则逐项映射到协议/reader、collector、位置路由与控制边界、公开CLI、
 inventory独立输入预算及旧frame/source回归。报告在
 `artifacts/reports/gates/n2-call-operands-b1-component-20261016.{json,md}`。
-这不是全仓回归或B1端到端通过；以下外部GPU与原LeWM门仍待完成。
+该组件结果不单独表示B1端到端通过。随后同一指纹的全仓与独立GPU验证已完成，
+原LeWM新采集暴露预算/观察规模问题，见下一节。
 
 1. 完成独立review并冻结所有实现，记录源指纹；所有已知反例必须纳入门。
 2. 运行映射门与必要全仓回归；公开原始程序正例须真正查询准确上层Use。
@@ -86,6 +87,29 @@ inventory独立输入预算及旧frame/source回归。报告在
 5. 保存失败/通过报告与证据manifest，自行验收、版本提交并推送。
 
 ## 6. 后续仍需完成
+
+### 6.1 同一冻结实现的真实验证
+
+- **Verified**：全仓2,535项通过，零失败/跳过，3条已有warning。进程346.299秒，
+  峰RSS1,027,108KiB；前后指纹一致，工作树干净。并行资源竞争，非benchmark。
+- **Verified（限定引用来源）**：独立真实4090 CUDA/autograd原程序，distinct和
+  shared输入均真实backward；trace→inventory→link→公共重放→两次query退出码全0。
+  两次查询只到本次run.x，分别排除第二条sibling调用；4个choose各保留2个独立Use。
+  16条argument、8条completion均保留8项条件；未保存Tensor数值。
+- **Observed**：原成功LeWM命令新运行exit0、success_rate=100.0，插桩302.111秒。
+  base168,626事件/84,313入口/850 code，零drop/error/path gap，目标Git与tracked
+  Python源码未变。它是新执行，不是旧归档重放，也不是clean benchmark。
+- **Rejected（采集门）**：逐指令sidecar在数据集初始化的一处内联列表推导内已用完
+  2,000,000事件（768,801,553字节），drop1，未覆盖随后规划器。B1不能通过。
+  当前process级route拒绝是源码规则推断；未再为已知失败数据执行昂贵route重建。
+- 三份原始call文件929,747,206字节经解压SHA/字节校验后保留32,886,570压缩字节；
+  仅删除本次拥有的plain副本。所有失败证据保留。
+
+证据：`artifacts/experiments/b1_call_operands/full_regression/`、`generic_gpu/`、
+`lewm_real/`。后续先完成版本化的稀疏调用窗口证据及连续性/失效反例，再做新LeWM
+采集与自动分析；继续增加同类逐指令预算不能解决观察规模随循环增长的问题。
+
+### 6.2 原完整模型要求保持
 
 实际receiver/default/pack绑定、函数环境、跨调用world后态、动态控制选择、
 loop-carried依赖、细粒度状态/alias/provenance，随后才是观察根闭包和具体化简指导。

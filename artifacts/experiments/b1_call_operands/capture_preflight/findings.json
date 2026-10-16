@@ -1,0 +1,123 @@
+{
+  "schema": "scar.b1-call-operands-capture-preflight",
+  "schema_version": 1,
+  "measurement_scope": "Read-only audit of retained calls-only traces and B1 collector/reader code. No LeWM process was started.",
+  "observed_archive": {
+    "successful_retry_trace": "artifacts/traces/n2_call_edges_lewm_retry_20261015",
+    "run_manifest": "artifacts/traces/n2_call_edges_lewm_retry_20261015/run.json",
+    "capture_invocation": "artifacts/experiments/n2_call_edges_lewm_retry_20261015/invocation.json",
+    "cwd": "/home/zyf/AAA/le-wm",
+    "project_root": "/home/zyf/AAA/le-wm",
+    "outer_command": [
+      "/home/zyf/miniconda3/envs/lewm/bin/python",
+      "-m",
+      "scar.cli",
+      "trace",
+      "--calls-only",
+      "--project-root",
+      "/home/zyf/AAA/le-wm",
+      "--out",
+      "/home/zyf/AAA/scar/artifacts/traces/n2_call_edges_lewm_retry_20261015",
+      "--max-call-events",
+      "250000",
+      "--max-call-bytes",
+      "192000000",
+      "--resources",
+      "--resource-interval",
+      "0.25",
+      "--",
+      "/home/zyf/miniconda3/envs/lewm/bin/python",
+      "run_inference.py",
+      "--config-name=pusht",
+      "policy=pusht/weights.pt",
+      "eval.num_eval=1",
+      "eval.eval_budget=25",
+      "eval.goal_offset_steps=25",
+      "cache_dir=/gpu4-share/data/byx/lewm_data",
+      "hydra.job.chdir=False"
+    ],
+    "target_returncode": 0,
+    "target_wall_seconds": 112.96049458440393,
+    "frame_trace": {
+      "events": 168638,
+      "event_attempts": 168638,
+      "invocations": 84319,
+      "codes": 850,
+      "dropped_events": 0,
+      "dropped_codes": 0,
+      "errors": [],
+      "raw_bytes": 160150081,
+      "events_raw_bytes": 159925490,
+      "codes_raw_bytes": 224591,
+      "events_gzip_bytes": 7724654,
+      "codes_gzip_bytes": 54286
+    },
+    "capture_scope_limit": "One process plus newly profiled threads; native calls, child processes, and already-running threads are not complete.",
+    "first_attempt_trace": {
+      "path": "artifacts/traces/n2_call_edges_lewm_20261015",
+      "events": 61450,
+      "event_attempts": 100000,
+      "invocations": 30728,
+      "bytes": 63999900,
+      "dropped_events": 53601,
+      "limits": {
+        "max_call_events": 100000,
+        "max_call_bytes": 64000000
+      }
+    },
+    "later_inventory_of_retry_trace": {
+      "path": "artifacts/experiments/n2_call_demand/real/generate.stdout.json",
+      "source_files": 150,
+      "definitions": 2211,
+      "source_calls": 10160,
+      "entered_invocations": 84319,
+      "eligible_codes": 421,
+      "runtime_reachability_established": false
+    }
+  },
+  "existing_offline_analysis_budgets": {
+    "source_inventory_experiment": {
+      "max_files": 256,
+      "max_lowered_bodies": 256,
+      "max_operations": 10000,
+      "max_call_trace_bytes": 256000000,
+      "max_call_trace_events": 250000,
+      "max_call_references": 2000000,
+      "max_call_report_bytes": 256000000
+    },
+    "call_link_replay_recorded_command": {
+      "max_files": 256,
+      "max_call_report_bytes": 800000000,
+      "max_call_trace_bytes": 256000000,
+      "max_call_trace_events": 250000,
+      "max_call_references": 2000000
+    },
+    "reference_observation_note": "The older call analysis recorded 1,386,048 reference observations; the default 1,000,000 reference ceiling was insufficient, so replay used 2,000,000."
+  },
+  "b1_limits": {
+    "collector_default": {
+      "max_events": 100000,
+      "max_bytes": 32000000,
+      "max_loads_per_instruction": 64,
+      "max_namespace_items_per_lookup": 4096,
+      "max_references": "same ceiling as shared base weak-reference issuer; archive base default was 8192"
+    },
+    "reader_default": {
+      "max_raw_bytes": 128000000,
+      "max_lines": 1000000,
+      "max_line_bytes": 2000000,
+      "max_processes": 128,
+      "max_events": 1000000,
+      "max_loads_aggregate": 1000000,
+      "max_references_aggregate": 2000000,
+      "max_metadata_bytes": 2000000
+    },
+    "counting": "Collector max_events counts every INSTRUCTION, CALL_ATTEMPT, ENTRY_HANDSHAKE, and GAP row. max_loads is per instruction. Collector max_references is the shared live weak-reference table ceiling, not an aggregate sidecar-occurrence limit. Reader max_loads and max_references count all decoded load occurrences and all non-null reference fields across the sidecar; duplicate reference fields count separately.",
+    "reader_budget_scope": "Reader max_raw_bytes/max_lines bound decompressed operand sidecars and metadata. The original v1 frame trace has a separate frame budget; the retained retry archive needs at least 256,000,000 bytes for that input.",
+    "cap_effect": "On event/byte/per-record-size overflow the collector records a drop and stops. The reader preserves a collection-gap issue. The route engine marks that process bad and rejects every attempt from that process with CAPTURE_GAP; a partial prefix is diagnostic only. Per-lookup namespace gaps are narrower and invalidate only route windows that cross them."
+  },
+  "assessment": {
+    "inference": "The retained 25-step calls-only run has 84,319 frame invocations, while the B1 default allows 100,000 total rows including every executed project-code instruction plus call/entry/gap rows. This is not an observed B1 event count, but it is no evidence that the default can cover that run; the total is likely too small for a complete sidecar.",
+    "recommendation": "Treat 100,000 events/32 MB as a bounded instrumentation pilot, not a proven full-run setting. A route-producing capture must finish with zero dropped events, errors, I/O failures, and previous-profile chaining. No archived per-instruction trace supports a numeric full-LeWM budget yet. For a useful bounded first route attempt, shorten the inference workload (for example eval.eval_budget=1) and keep a hard cap; accept route analysis only after clean metadata and reader-budget fit. If using a larger cap, raise the postprocessing operand event/load/reference/raw-byte/line ceilings together and retain the original frame trace ceiling of at least 256 MB. The shortened workload is a proposal, not a verified fit."
+  }
+}

@@ -1,0 +1,374 @@
+{
+  "boundaries": [
+    "Each query stops at its own run.x with ARGUMENT_ROUTING_UNVERIFIED for the caller outside the two-file project root.",
+    "All routes remain conditional; environment, contents, effects, world equivalence and transformation authority are not established.",
+    "This verifies a two-file CUDA/autograd fixture, not whole-program or LeWM coverage.",
+    "Only object references and metadata were saved; no Tensor values were serialized."
+  ],
+  "collection_counts": [
+    {
+      "bytes": 23426,
+      "codes": 12,
+      "dropped_events": 0,
+      "errors": [],
+      "events": 26,
+      "io_failed": false,
+      "schema": "scar.call-edge-trace"
+    },
+    {
+      "bytes": 34616,
+      "call_attempts": 8,
+      "dropped_events": 0,
+      "errors": [],
+      "events": 87,
+      "gaps": 0,
+      "handshakes": 8,
+      "instructions": 71,
+      "io_failed": false,
+      "loads": 34,
+      "schema": "scar.call-operands-trace"
+    }
+  ],
+  "commands": [
+    {
+      "elapsed_seconds": 0.004521242342889309,
+      "name": "source_head_before",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 41
+    },
+    {
+      "elapsed_seconds": 0.008383338339626789,
+      "name": "source_status_before",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 0
+    },
+    {
+      "elapsed_seconds": 0.03273170907050371,
+      "name": "gpu_before",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 101
+    },
+    {
+      "elapsed_seconds": 2.6208287673071027,
+      "name": "untraced_original",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 1206
+    },
+    {
+      "elapsed_seconds": 12.994938080199063,
+      "name": "trace",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 1206
+    },
+    {
+      "elapsed_seconds": 0.8156091896817088,
+      "name": "inventory",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 2161
+    },
+    {
+      "elapsed_seconds": 0.9156900560483336,
+      "name": "link",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 1416
+    },
+    {
+      "elapsed_seconds": 0.9157368270680308,
+      "name": "check",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 1320
+    },
+    {
+      "elapsed_seconds": 0.9159412169829011,
+      "name": "query_distinct",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 32540
+    },
+    {
+      "elapsed_seconds": 0.9661974990740418,
+      "name": "query_shared",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 32555
+    },
+    {
+      "elapsed_seconds": 0.03277803864330053,
+      "name": "gpu_after",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 101
+    },
+    {
+      "elapsed_seconds": 0.004469667561352253,
+      "name": "source_head_after",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 41
+    },
+    {
+      "elapsed_seconds": 0.008205904625356197,
+      "name": "source_status_after",
+      "returncode": 0,
+      "stderr_bytes": 0,
+      "stdout_bytes": 0
+    }
+  ],
+  "environment": {
+    "cuda_device_index": 0,
+    "cuda_device_name": "NVIDIA GeForce RTX 4090",
+    "cuda_peak_memory_allocated_bytes": 2560,
+    "cuda_peak_memory_reserved_bytes": 2097152,
+    "python_version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+    "status": "CUDA_AUTOGRAD_COMPLETED",
+    "tensor_values_saved": false,
+    "torch_cuda_version": "13.2",
+    "torch_version": "2.13.0+cu132"
+  },
+  "runtime_cases": [
+    {
+      "backward_completed": true,
+      "elapsed_seconds": 0.046235525980591774,
+      "inputs_share_object": false,
+      "left_grad_on_cuda": true,
+      "left_grad_present": true,
+      "left_grad_requires_grad": false,
+      "left_requires_grad": true,
+      "loss_has_grad_fn": true,
+      "mode": "distinct",
+      "returned_grad_fn_absent": true,
+      "returned_is_leaf": true,
+      "returned_is_left": true,
+      "right_grad_present": false,
+      "right_requires_grad": true
+    },
+    {
+      "backward_completed": true,
+      "elapsed_seconds": 0.003920495510101318,
+      "inputs_share_object": true,
+      "left_grad_on_cuda": true,
+      "left_grad_present": true,
+      "left_grad_requires_grad": false,
+      "left_requires_grad": true,
+      "loss_has_grad_fn": true,
+      "mode": "shared",
+      "returned_grad_fn_absent": true,
+      "returned_is_leaf": true,
+      "returned_is_left": true,
+      "right_grad_present": true,
+      "right_requires_grad": true
+    }
+  ],
+  "schema": "scar.b1-generic-gpu-result",
+  "schema_version": 1,
+  "source": {
+    "clean_after": true,
+    "clean_before": true,
+    "commit": "c91876b73ed7b15351a0cb925d17c2e017d2c88d",
+    "head_unchanged": true
+  },
+  "spend": {
+    "child_cpu_system_seconds": 1.913774,
+    "child_cpu_user_seconds": 19.984364,
+    "child_peak_rss_kib": 812984,
+    "command_elapsed_seconds": 20.23603153694421,
+    "raw_bytes": 61086,
+    "report_bytes": 129691,
+    "resource_metrics_scope": "child CPU and peak RSS measured in pipeline runner process; preceding micro-only runner CPU not included; command elapsed sum includes micro and pipeline",
+    "traced_program_seconds": 12.994938080199063,
+    "untraced_program_seconds": 2.6208287673071027
+  },
+  "status": "PUBLIC_PIPELINE_PASSED",
+  "validation": {
+    "authority_remains_conditional": true,
+    "choose_actual_routes": 8,
+    "choose_invocations": 4,
+    "choose_uses_and_occurrences_distinct": true,
+    "inventory_schema_version": 6,
+    "public_report_summary": {
+      "contents_or_effects_established": false,
+      "frame": {
+        "code_source_statuses": {
+          "INCOMPLETE": 7,
+          "VERIFIED": 5
+        },
+        "contents_or_effects_established": false,
+        "core_call_observations": 8,
+        "direct_core_call_observations": 8,
+        "frame_entries": 13,
+        "frame_exits": 13,
+        "function_environment_established": false,
+        "issues": 3,
+        "reference_occurrences": 0,
+        "reference_routes": 0,
+        "target_body_observations": 10,
+        "target_executed_by_linker": false,
+        "tracked_ancestors_through_intervening_frames": 1,
+        "tracked_immediate_callers": 9,
+        "transformation_authorized": false,
+        "verified_normal_frame_exits": 12,
+        "verified_source_call_sites": 8
+      },
+      "function_environment_established": false,
+      "operand_events": 87,
+      "routing": {
+        "argument_routes": 16,
+        "completion_routes": 8,
+        "conditional_only": true,
+        "contents_or_effects_established": false,
+        "function_environment_established": false,
+        "invocation_returns": 10,
+        "issues": 0,
+        "template_values": 18,
+        "transformation_authorized": false,
+        "world_equivalence_established": false
+      },
+      "scope": "conditional reference provenance; state, contents and effects remain separate",
+      "target_executed_by_linker": false,
+      "transformation_authorized": false,
+      "whole_program_complete": false,
+      "world_equivalence_established": false
+    },
+    "queries": [
+      {
+        "completion_route_count": 2,
+        "conditions": [
+          "CAPTURE_PRODUCER_TRUSTED",
+          "NO_FRAME_INTERPOSITION",
+          "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+          "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+          "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+          "FUNCTION_ENVIRONMENT_UNVERIFIED",
+          "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+        ],
+        "endpoints": [
+          {
+            "definition": "run",
+            "formal_name": "x",
+            "invocation": {
+              "invocation_id": 4,
+              "process_id": 532276,
+              "thread_id": 132773720692544
+            }
+          }
+        ],
+        "invocation": {
+          "invocation_id": 4,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        },
+        "issue_kinds": [
+          "ARGUMENT_ROUTING_UNVERIFIED"
+        ],
+        "mode": "distinct",
+        "route_count": 4
+      },
+      {
+        "completion_route_count": 2,
+        "conditions": [
+          "CAPTURE_PRODUCER_TRUSTED",
+          "NO_FRAME_INTERPOSITION",
+          "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+          "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+          "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+          "FUNCTION_ENVIRONMENT_UNVERIFIED",
+          "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+        ],
+        "endpoints": [
+          {
+            "definition": "run",
+            "formal_name": "x",
+            "invocation": {
+              "invocation_id": 9,
+              "process_id": 532276,
+              "thread_id": 132773720692544
+            }
+          }
+        ],
+        "invocation": {
+          "invocation_id": 9,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        },
+        "issue_kinds": [
+          "ARGUMENT_ROUTING_UNVERIFIED"
+        ],
+        "mode": "shared",
+        "route_count": 4
+      }
+    ],
+    "sibling_invocation_isolation": [
+      {
+        "excluded_second_choose": [
+          {
+            "invocation_id": 8,
+            "process_id": 532276,
+            "thread_id": 132773720692544
+          }
+        ],
+        "excluded_second_relay": {
+          "invocation_id": 7,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        },
+        "mode": "distinct",
+        "run": {
+          "invocation_id": 4,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        },
+        "selected_choose": {
+          "invocation_id": 6,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        },
+        "selected_relay": {
+          "invocation_id": 5,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        }
+      },
+      {
+        "excluded_second_choose": [
+          {
+            "invocation_id": 13,
+            "process_id": 532276,
+            "thread_id": 132773720692544
+          }
+        ],
+        "excluded_second_relay": {
+          "invocation_id": 12,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        },
+        "mode": "shared",
+        "run": {
+          "invocation_id": 9,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        },
+        "selected_choose": {
+          "invocation_id": 11,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        },
+        "selected_relay": {
+          "invocation_id": 10,
+          "process_id": 532276,
+          "thread_id": 132773720692544
+        }
+      }
+    ],
+    "whole_program_complete": false
+  }
+}
