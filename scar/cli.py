@@ -335,8 +335,8 @@ def main(argv=None) -> int:
     model_program.add_argument("--max-operations", type=int, default=10000)
     model_program.add_argument("--max-report-bytes", type=int, default=256000000,
                                help="independent uncompressed output byte ceiling")
-    model_program.add_argument("--body-profile", choices=("frame", "legacy"), default="frame",
-                               help="conditional frame lifetime model (default), or historical v1 lowering")
+    model_program.add_argument("--body-profile", choices=("frame", "legacy", "structured"), default="frame",
+                               help="conditional frame model (default), historical v1, or versioned local-binding/loop model")
     model_program.add_argument("--out", required=True, help="source-linked graph report, optionally ending in .gz")
     model_program.set_defaults(func=_model_program)
     check_source_program = sub.add_parser("check-source-program", help="strictly replay an automatic source graph against current source")
@@ -553,8 +553,9 @@ def _model_program(args) -> int:
     try:
         if source == output or (output.exists() and source.samefile(output)):
             raise ValueError("report path must differ from source")
-        profile = (BodyLoweringProfile.BOUND_FRAME if args.body_profile == "frame"
-                   else BodyLoweringProfile.LEGACY)
+        profile = {"frame": BodyLoweringProfile.BOUND_FRAME,
+                   "legacy": BodyLoweringProfile.LEGACY,
+                   "structured": BodyLoweringProfile.STRUCTURED_BODY}[args.body_profile]
         result = lower_source(source, args.entry, max_operations=args.max_operations, profile=profile)
         document = result.to_dict()
         _write_call_document(output, document, max_bytes=args.max_report_bytes)

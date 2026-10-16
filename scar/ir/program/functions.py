@@ -19,6 +19,7 @@ class BodyLoweringProfile(str, Enum):
     LEGACY = "LEGACY"
     BOUND_FORMALS = "BOUND_FORMALS_V1"
     BOUND_FRAME = "BOUND_FRAME_V1"
+    STRUCTURED_BODY = "STRUCTURED_BODY_V1"
 
 
 class FunctionKind(str, Enum):
@@ -84,7 +85,8 @@ class BodyEntryInterface:
     profile: BodyLoweringProfile = BodyLoweringProfile.BOUND_FORMALS
 
     def __post_init__(self):
-        if self.profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME):
+        if self.profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME,
+                                BodyLoweringProfile.STRUCTURED_BODY):
             raise ValueError("bound entry needs the bound-formal profile")
         if len({p.slot for p in self.parameters}) != len(self.parameters) or len({p.value for p in self.parameters}) != len(self.parameters):
             raise ValueError("body formal ports must be unique")

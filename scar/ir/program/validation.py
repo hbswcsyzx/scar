@@ -11,7 +11,7 @@ from ..v2._validation import cycle_errors, record_errors
 from .ids import UseID
 from .model import (
     AccessMode, Behavior, BlockArgument, CompletionResult, CompletionSuccessor,
-    DataValue, ExitKind, FootprintKind,
+    DataValue, ExitKind, FootprintKind, LocalBindingValue,
     LiteralOrigin, OperationResult, ProgramGraph, ReferenceValue,
     StateVersionValue, TerminatorKind, UseRole, ValueKind, value_type,
 )
@@ -149,11 +149,17 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
                 check_footprint(value.selector, location, value.id)
 
     # Each use has one owner and a role matching the kind of the actual value.
+    use_value_types = {
+        UseRole.DATA: DataValue,
+        UseRole.REFERENCE: ReferenceValue,
+        UseRole.STATE_CONTENT: StateVersionValue,
+        UseRole.STATE_ORDER: StateVersionValue,
+        UseRole.LOCAL_BINDING: LocalBindingValue,
+    }
     for operation in operations.values():
         for use in operation.uses:
             value = values[use.value]
-            expected = (DataValue if use.role is UseRole.DATA else ReferenceValue
-                        if use.role is UseRole.REFERENCE else StateVersionValue)
+            expected = use_value_types[use.role]
             if not isinstance(value, expected):
                 error("use_role", use.id, "input role does not match value kind")
             if value.region != block_region[operation_block[operation.id]]:
@@ -191,6 +197,13 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         bound += list(term.values)
         if is_invoke:
             bound += list(final.invoke_arguments)
+        if term.kind is TerminatorKind.RAISE:
+            # A definitely-unbound LOAD_LOCAL reads its token as the reason
+            # for raising, but that token is not part of the exception exit
+            # interface. BindingRead is the sole typed exception to the usual
+            # terminator-operand equality rule.
+            bound += [item.binding for item in graph.binding_reads
+                      if item.operation == final.id and item.normal_result is None]
         if len(set(bound)) != len(bound) or set(bound) != set(own_uses):
             error("control_binding", final.id, "each control input port needs its own exact use")
         signatures = {signature.kind: signature for signature in final.completions}
@@ -510,6 +523,9 @@ def validate(graph: ProgramGraph) -> tuple[ValidationIssue, ...]:
         elif (first not in dominators[second]
               or (first == second and positions[edge.before] >= positions[edge.after])):
             error("order_direction", "ordering", "order must agree with mandatory control order")
+    from .binding_validation import validate_bindings
+    for issue in validate_bindings(graph):
+        error(issue.code, issue.path, issue.message)
     return tuple(issues)
 
 

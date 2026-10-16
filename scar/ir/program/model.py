@@ -11,7 +11,9 @@ from enum import Enum
 import math
 from typing import TypeAlias
 
+from scar.ir.program.bindings import BindingDefinition, BindingRead
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
+from scar.ir.v2.ids import ValueSlotID
 
 
 def _nonempty_text(value: object, name: str) -> None:
@@ -63,6 +65,17 @@ class ValueType:
         elif self.kind is ValueKind.REFERENCE:
             if self.data_type is not None or self.location is not None:
                 raise ValueError("REFERENCE type carries neither data_type nor location")
+
+
+@dataclass(frozen=True, slots=True)
+class LocalBindingType:
+    """The type of a local-name binding token, distinct from object values."""
+
+    slot: ValueSlotID
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.slot, ValueSlotID):
+            raise TypeError("LocalBindingType.slot must be ValueSlotID")
 
 
 class FootprintKind(str, Enum):
@@ -207,7 +220,23 @@ class StateVersionValue:
             raise TypeError("StateVersionValue.location must be LocationID")
 
 
-Value: TypeAlias = DataValue | ReferenceValue | StateVersionValue
+@dataclass(frozen=True, slots=True)
+class LocalBindingValue:
+    """SSA token for whether one Python local slot is bound and to what."""
+
+    id: ValueID
+    region: RegionID
+    origin: BlockArgument | OperationResult
+    slot: ValueSlotID
+
+    def __post_init__(self) -> None:
+        _value_fields(self.id, self.region, self.origin)
+        if not isinstance(self.slot, ValueSlotID):
+            raise TypeError("LocalBindingValue.slot must be ValueSlotID")
+
+
+Value: TypeAlias = DataValue | ReferenceValue | StateVersionValue | LocalBindingValue
+ProgramValueType: TypeAlias = ValueType | LocalBindingType
 
 
 def _value_fields(identity: object, region: object, origin: object, *,
@@ -236,7 +265,7 @@ def _literal_data_type(value: bool | int | float | str | None) -> str:
     raise TypeError("unsupported literal builtin value")
 
 
-def value_type(value: Value) -> ValueType:
+def value_type(value: Value) -> ProgramValueType:
     """Return the declared type carried by a program value record."""
     if isinstance(value, DataValue):
         return ValueType(ValueKind.DATA, data_type=value.data_type)
@@ -244,6 +273,8 @@ def value_type(value: Value) -> ValueType:
         return ValueType(ValueKind.REFERENCE)
     if isinstance(value, StateVersionValue):
         return ValueType(ValueKind.STATE, location=value.location)
+    if isinstance(value, LocalBindingValue):
+        return LocalBindingType(value.slot)
     raise TypeError("value_type requires a program Value record")
 
 
@@ -263,6 +294,7 @@ class UseRole(str, Enum):
     REFERENCE = "REFERENCE"
     STATE_CONTENT = "STATE_CONTENT"
     STATE_ORDER = "STATE_ORDER"
+    LOCAL_BINDING = "LOCAL_BINDING"
 
 
 @dataclass(frozen=True, slots=True)
@@ -613,6 +645,8 @@ class ProgramGraph:
     values: tuple[Value, ...]
     locations: tuple[StateLocation, ...] = ()
     ordering: tuple[OrderEdge, ...] = ()
+    binding_definitions: tuple[BindingDefinition, ...] = ()
+    binding_reads: tuple[BindingRead, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -620,7 +654,8 @@ class ProgramGraph:
         for name, rows, row_type, id_field in (
             ("regions", self.regions, Region, "id"),
             ("operations", self.operations, Operation, "id"),
-            ("values", self.values, (DataValue, ReferenceValue, StateVersionValue), "id"),
+            ("values", self.values, (DataValue, ReferenceValue, StateVersionValue,
+                                      LocalBindingValue), "id"),
             ("locations", self.locations, StateLocation, "id"),
         ):
             _tuple(rows, f"ProgramGraph.{name}")
@@ -631,14 +666,21 @@ class ProgramGraph:
         _tuple(self.ordering, "ProgramGraph.ordering")
         if any(not isinstance(item, OrderEdge) for item in self.ordering):
             raise TypeError("ProgramGraph.ordering must contain OrderEdge")
+        _tuple(self.binding_definitions, "ProgramGraph.binding_definitions")
+        if any(not isinstance(item, BindingDefinition) for item in self.binding_definitions):
+            raise TypeError("ProgramGraph.binding_definitions must contain BindingDefinition")
+        _tuple(self.binding_reads, "ProgramGraph.binding_reads")
+        if any(not isinstance(item, BindingRead) for item in self.binding_reads):
+            raise TypeError("ProgramGraph.binding_reads must contain BindingRead")
 
 
 __all__ = [
     "AccessMode", "Behavior", "Block", "BlockArgument", "DataValue", "ExitKind",
     "CompletionResult", "CompletionSignature", "CompletionSuccessor", "ExitPort",
-    "Footprint", "FootprintKind", "LiteralOrigin", "Operation", "OperationResult",
+    "Footprint", "FootprintKind", "LiteralOrigin", "LocalBindingType",
+    "LocalBindingValue", "Operation", "OperationResult",
     "OrderEdge", "Origin", "ProgramGraph",
     "ReferenceValue", "Region", "Stability", "StateAccess", "StateLocation",
     "StateVersionValue", "Successor", "Terminator", "TerminatorKind", "Use",
-    "UseRole", "Value", "ValueKind", "ValueType", "value_type",
+    "ProgramValueType", "UseRole", "Value", "ValueKind", "ValueType", "value_type",
 ]

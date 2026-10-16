@@ -23,6 +23,7 @@ from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, F
 from scar.ir.program.frames import (
     FrameBind, FrameDiscard, FrameEnter, FrameExit, FrameFormal, FrameModel,
 )
+from scar.ir.program.structured import StructuredBodyModel
 from scar.ir.program.model import (
     AccessMode, Behavior, Block, BlockArgument, CompletionResult, CompletionSignature,
     CompletionSuccessor, DataValue, ExitKind, ExitPort, LiteralOrigin, Operation,
@@ -69,6 +70,7 @@ class SourceProgram:
     profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY
     interface: BodyEntryInterface | None = None
     frame: FrameModel | None = None
+    structured: StructuredBodyModel | None = None
 
     def summary(self):
         """Separate declaration/link counts from program and effect coverage."""
@@ -90,9 +92,16 @@ class SourceProgram:
                 "candidate_calls": len(self.metadata.call_targets),
                 "candidate_interfaces": sum(bool(target.arguments) for target in self.metadata.call_targets),
                 "parsed_source_atoms": len(self.semantic.source_atoms),
+                **({"binding_definitions": len(graph.binding_definitions) if graph else 0,
+                    "binding_reads": len(graph.binding_reads) if graph else 0,
+                    "typed_protocols": len(self.structured.protocols) if self.structured else 0,
+                    "loops": len(self.structured.loops) if self.structured else 0}
+                   if self.profile is BodyLoweringProfile.STRUCTURED_BODY else {}),
             },
             "gap_counts": dict(sorted(Counter(gap.kind.value for gap in self.metadata.gaps).items())),
-            "source_selection": ("one file parsed; selected bound-frame body only; candidate calls remain interfaces"
+            "source_selection": ("one file parsed; selected structured synchronous body; unsupported protocols remain coverage failures"
+                                 if self.profile is BodyLoweringProfile.STRUCTURED_BODY else
+                                 "one file parsed; selected bound-frame body only; candidate calls remain interfaces"
                                  if self.profile is BodyLoweringProfile.BOUND_FRAME else
                                  "one file parsed; selected body and available same-file call candidates lowered"),
             "whole_program_coverage_established": False,
@@ -103,7 +112,8 @@ class SourceProgram:
 
     def to_dict(self):
         document = {
-            "schema": "scar.source-program", "schema_version": 1 if self.profile is BodyLoweringProfile.LEGACY else 2,
+            "schema": "scar.source-program", "schema_version": (1 if self.profile is BodyLoweringProfile.LEGACY else
+                3 if self.profile is BodyLoweringProfile.STRUCTURED_BODY else 2),
             "status": ("UNSUPPORTED" if self.graph is None else
                        "LOWERED_WITH_GAPS" if self.metadata.gaps else "LOWERED"),
             "scope": "selected synchronous function bodies, conservative completion/effect model",
@@ -117,6 +127,8 @@ class SourceProgram:
         if self.profile is not BodyLoweringProfile.LEGACY:
             document.update(profile=self.profile.value, interface=encode(self.interface),
                             frame=encode(self.frame))
+        if self.profile is BodyLoweringProfile.STRUCTURED_BODY:
+            document["structured"] = encode(self.structured)
         return document
 
     @classmethod
@@ -133,26 +145,32 @@ class SourceProgram:
         if type(document) is not dict:
             raise ValueError("source program fields mismatch")
         version = document.get("schema_version")
-        if type(version) is not int or version not in (1, 2):
+        if type(version) is not int or version not in (1, 2, 3):
             raise ValueError("source program schema/version mismatch")
-        if version == 2:
+        if version in (2, 3):
             expected_fields |= {"profile", "interface", "frame"}
+        if version == 3:
+            expected_fields.add("structured")
         if set(document) != expected_fields or document["schema"] != "scar.source-program":
             raise ValueError("source program fields mismatch")
         profile = BodyLoweringProfile.LEGACY
-        interface = frame = None
-        if version == 2:
+        interface = frame = structured = None
+        if version in (2, 3):
             profile = BodyLoweringProfile(document["profile"])
-            if profile is not BodyLoweringProfile.BOUND_FRAME:
-                raise ValueError("source-program v2 requires the bound-frame profile")
+            expected_profile = (BodyLoweringProfile.BOUND_FRAME if version == 2 else
+                                BodyLoweringProfile.STRUCTURED_BODY)
+            if profile is not expected_profile:
+                raise ValueError("source-program version requires its exact lowering profile")
             interface = decode(BodyEntryInterface, document["interface"]) if document["interface"] is not None else None
             frame = FrameModel.from_dict(document["frame"]) if document["frame"] is not None else None
+        if version == 3:
+            structured = decode(StructuredBodyModel, document["structured"]) if document["structured"] is not None else None
         metadata = decode(LoweringMetadata, document["metadata"])
         semantic = semantic_from_dict(document["semantic"])
         semantics = SourceSemanticsGraph.from_dict(document["semantics"], semantic)
         control = SourceControlFlowGraph.from_dict(document["control"])
         graph = load_graph(_canonical(document["graph"])) if document["graph"] is not None else None
-        result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame)
+        result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame, structured)
         if _canonical(result.to_dict()) != _canonical(document):
             raise ValueError("source program scope/status/authority or canonical fields differ")
         checked = validate_source_program(result, max_operations=max_operations)
@@ -169,6 +187,7 @@ class LoweredSourceBody:
     operations_emitted: int
     interface: BodyEntryInterface | None = None
     frame: FrameModel | None = None
+    structured: StructuredBodyModel | None = None
 
 
 @dataclass(frozen=True)
@@ -185,6 +204,11 @@ class PreparedSource:
     def lower(self, entry, *, source: SourceReference | None = None, max_operations=10000,
               expand_candidates=True, profile=BodyLoweringProfile.LEGACY):
         _check_arguments(entry, max_operations)
+        if profile is BodyLoweringProfile.STRUCTURED_BODY:
+            if expand_candidates:
+                raise ValueError("structured source bodies require root-only expansion")
+            from scar.analysis.structured_lowering import StructuredBuilder
+            return StructuredBuilder(self, entry, source=source, max_operations=max_operations).run()
         builder = _Builder(self.path, entry, self.text, self.semantic, self.semantics,
                            self.control, max_operations, selected_source=source,
                            tree=self.tree, symbol_tables=self.symbol_tables,
@@ -869,13 +893,14 @@ def _symbol_tables(text, path):
 def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000,
                  profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY) -> SourceProgram:
     _check_arguments(entry, max_operations)
-    if type(profile) is not BodyLoweringProfile or profile not in (BodyLoweringProfile.LEGACY, BodyLoweringProfile.BOUND_FRAME):
-        raise ValueError("standalone source program needs LEGACY or BOUND_FRAME_V1 profile")
+    if type(profile) is not BodyLoweringProfile or profile not in (BodyLoweringProfile.LEGACY,
+            BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY):
+        raise ValueError("unsupported standalone source profile")
     context = prepare_source(path)
     body = context.lower(entry, max_operations=max_operations,
                          expand_candidates=profile is BodyLoweringProfile.LEGACY, profile=profile)
     return SourceProgram(body.graph, body.metadata, context.semantic, context.semantics, context.control,
-                         profile, body.interface, body.frame)
+                         profile, body.interface, body.frame, body.structured)
 
 
 def validate_source_program(result: SourceProgram, *, max_operations: int = 10000):
@@ -883,15 +908,24 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
     try:
         if type(result) is not SourceProgram:
             raise ValueError("expected SourceProgram")
-        if type(result.profile) is not BodyLoweringProfile or result.profile not in (BodyLoweringProfile.LEGACY, BodyLoweringProfile.BOUND_FRAME):
+        if type(result.profile) is not BodyLoweringProfile or result.profile not in (BodyLoweringProfile.LEGACY,
+                BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY):
             raise ValueError("unsupported standalone source lowering profile")
         if result.profile is BodyLoweringProfile.LEGACY:
-            if result.interface is not None or result.frame is not None:
+            if result.interface is not None or result.frame is not None or result.structured is not None:
                 raise ValueError("historical source-program v1 has no bound-frame overlay")
         elif result.graph is None:
-            if result.interface is not None or result.frame is not None:
+            if result.interface is not None or result.frame is not None or result.structured is not None:
                 raise ValueError("unsupported source body has no frame/interface links")
+        elif result.profile is BodyLoweringProfile.STRUCTURED_BODY:
+            from scar.analysis.structured_lowering import require_valid_structured_body
+            if result.frame is not None or result.interface is None:
+                raise ValueError("structured bodies require a structured interface, not a legacy frame overlay")
+            require_valid_structured_body(result.structured, result.graph, result.interface, result.metadata,
+                                           semantic=result.semantic, control=result.control)
         else:
+            if result.structured is not None:
+                raise ValueError("historical frame bodies cannot contain structured protocols")
             from scar.ir.program.frame_validation import require_valid_frame_model
             if result.interface is None or result.interface.profile is not result.profile:
                 raise ValueError("frame source program needs its matching body interface")

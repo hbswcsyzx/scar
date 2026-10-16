@@ -8,13 +8,16 @@ from typing import Any
 from scar.ir.record_codec import decode, encode, loads as _loads
 from scar.ir.v2._validation import record_errors
 
-from scar.ir.program.model import Operation, ProgramGraph
+from scar.ir.program.model import LocalBindingValue, Operation, ProgramGraph
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
-_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
+_BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
+_V1_V2_GRAPH_FIELDS = _GRAPH_FIELDS - _BINDING_FIELDS
+_V1_V2_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V1_V2_GRAPH_FIELDS
+_V3_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
 
 
 def _require_record_and_graph_valid(graph: ProgramGraph) -> None:
@@ -31,9 +34,17 @@ def _require_record_and_graph_valid(graph: ProgramGraph) -> None:
 
 
 def dumps(graph: ProgramGraph) -> str:
-    """Encode a fully validated ProgramGraph using schema version 2."""
+    """Encode old graphs as byte-compatible v2 and binding graphs as strict v3."""
     _require_record_and_graph_valid(graph)
-    document = {"schema": SCHEMA, "schema_version": SCHEMA_VERSION, **encode(graph)}
+    has_binding_capability = (
+        bool(graph.binding_definitions or graph.binding_reads)
+        or any(isinstance(value, LocalBindingValue) for value in graph.values))
+    encoded = encode(graph)
+    if has_binding_capability:
+        document = {"schema": SCHEMA, "schema_version": 3, **encoded}
+    else:
+        document = {"schema": SCHEMA, "schema_version": 2,
+                    **{name: encoded[name] for name in _V1_V2_GRAPH_FIELDS}}
     return json.dumps(document, sort_keys=True, separators=(",", ":"),
                       ensure_ascii=False, allow_nan=False)
 
@@ -76,21 +87,34 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact v2 fields or strictly migrate historical v1 records."""
+    """Decode exact v3 fields or strictly migrate historical v1/v2 records."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
-    if type(document) is not dict or set(document) != _ENVELOPE_FIELDS:
+    if type(document) is not dict:
+        raise ValueError("program graph document has incorrect top-level fields")
+    if not {"schema", "schema_version"} <= set(document):
         raise ValueError("program graph document has incorrect top-level fields")
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, SCHEMA_VERSION):
+    if type(version) is not int or version not in (1, 2, SCHEMA_VERSION):
         raise ValueError("unsupported program graph schema version")
-    record = {name: document[name] for name in _GRAPH_FIELDS}
+    expected_fields = _V3_ENVELOPE_FIELDS if version == 3 else _V1_V2_ENVELOPE_FIELDS
+    if set(document) != expected_fields:
+        raise ValueError("program graph document has incorrect top-level fields")
+    graph_fields = _GRAPH_FIELDS if version == 3 else _V1_V2_GRAPH_FIELDS
+    record = {name: document[name] for name in graph_fields}
     if version == 1:
         record = _upgrade_v1_record(record)
+    if version in (1, 2):
+        record["binding_definitions"] = []
+        record["binding_reads"] = []
     graph = decode(ProgramGraph, record)
+    if version == 3 and not (
+            graph.binding_definitions or graph.binding_reads
+            or any(isinstance(value, LocalBindingValue) for value in graph.values)):
+        raise ValueError("schema version 3 requires local-binding graph capability")
     _require_record_and_graph_valid(graph)
     return graph
 
