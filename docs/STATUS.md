@@ -1,5 +1,20 @@
 # Current evidence and remaining work
 
+## P1 thin native boundary component (2026-10-16)
+
+[P1](M1_NATIVE_INTERFACES.md) adds ordered native slot references and an exact
+native/core-only canonical port partition, all Return/Raise UseSite queries,
+cross-region declared pairs with eight unproved domains, schema v8 and public CLI.
+Final component: **168 PASS / 8.815s**, 376-file source fingerprint
+`7a476a2e161109dc924615cd1c5aeb17fc4ca39176ffade393e15917dbb6fb17`.
+Independent integration review reproduced a validator-valid legacy ID-subclass
+index regression after the first 164-check pass; raw original-ID coordinates and
+four new regressions fix it without weakening strict new records. The unchanged
+five-case IR-only probe then passed. Initial results remain archived.
+Frozen full regression is pending. This does not implement native artifact/tree
+replay, provider adapters, current lifted-state/write-back, dynamic provenance or
+equivalence. Complete T1/M1/M2 and automatic LeWM modeling remain unfinished.
+
 ## Tool reuse boundary refinement (2026-10-16)
 
 The [survey](TOOLING_SURVEY.md) now includes an isolated PyPI torchview 0.2.7 CPU

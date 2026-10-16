@@ -13,6 +13,13 @@ The [tooling survey](docs/TOOLING_SURVEY.md) and
 reuse Python compiler interfaces, FX/Export and ETO+Profiler. Current experiments
 verify bounded tool capabilities; the new adapters are not yet integrated.
 
+The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
+provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
+all completion sites and explicit cross-representation obligations. Its 168
+component checks pass; frozen full regression is pending. Native trees/signatures
+remain authoritative external artifacts, with no adapter, replay or equivalence
+claim. The complete first modeling stage remains unfinished.
+
 The [P0 provider provenance component](docs/M1_PROVIDER_INTERFACES.md) connects
 external graph origins and ordered ports to the canonical core. Its 225 component
 checks and 3,139 frozen full-repository tests passed. Declared coverage and scope

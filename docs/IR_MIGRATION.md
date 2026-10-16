@@ -34,8 +34,14 @@ C0只验证声明结构，完整cleanup、handled context及跨边界pending合�
 [P0来源合同](M1_PROVIDER_INTERFACES.md)新增 `scar.program-graph` v7：envelope、
 provider region 归属/观察关联、定义层端点 binding 三表。没有此能力的图仍按
 原 v2—v6 写出，旧 schema 拒绝新字段；producer/use/state 不另存。v7 不读取
-artifact、不把执行证据直绑静态实体，也不授予跨表示等价或变换权限。P1 的
-原生边界接口和动态 occurrence/denotation 尚未实施。
+artifact、不把执行证据直绑静态实体，也不授予跨表示等价或变换权限。
+
+[P1薄边界](M1_NATIVE_INTERFACES.md)新增 `scar.program-graph` v8：
+`native_boundaries/boundary_relations` 只引用既有 entry/exit，保存有序 native 槽
+及 core-only 分区、不同 Region 之间的逐域未证义务。原生 TreeSpec/signature
+留在 artifact，不复制其解释器。无此能力仍按原 v2—v7 写出；原 v7 golden 由
+隔离原 codec 产生。168 项组件已通过，冻结全仓尚待运行；动态 occurrence/
+denotation、真实 native 适配/写回/等价及完整建模仍未完成。
 
 新完整模型 Resource 有静态 definition/requirement 和动态 instance，handle
 经对应关系引用它；不能仅作为 EEG 标签。旧 `ready_event` 不承担新完成证明。

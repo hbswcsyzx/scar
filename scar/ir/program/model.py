@@ -22,6 +22,7 @@ from scar.ir.program.resources import (
     ResourceDefinition, ResourceLocation, ResourceRequirement, ResourceUse,
 )
 from scar.ir.program.providers import ProviderBinding, ProviderEnvelope, ProviderRegion
+from scar.ir.program.native import BoundaryRelation, NativeBoundary
 from scar.ir.v2.ids import ValueSlotID
 
 
@@ -697,6 +698,8 @@ class ProgramGraph:
     provider_envelopes: tuple[ProviderEnvelope, ...] = ()
     provider_regions: tuple[ProviderRegion, ...] = ()
     provider_bindings: tuple[ProviderBinding, ...] = ()
+    native_boundaries: tuple[NativeBoundary, ...] = ()
+    boundary_relations: tuple[BoundaryRelation, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -762,6 +765,12 @@ class ProgramGraph:
             _unique(rows, "ProgramGraph." + name)
         _unique(tuple(row.id for row in self.provider_envelopes),
                 "ProgramGraph provider IDs")
+        for name, cls in (("native_boundaries", NativeBoundary),
+                          ("boundary_relations", BoundaryRelation)):
+            rows = _tuple(getattr(self, name), "ProgramGraph." + name)
+            if any(type(row) is not cls for row in rows):
+                raise TypeError("ProgramGraph." + name + " needs exact typed records")
+            _unique(tuple(row.id for row in rows), "ProgramGraph." + name + " IDs")
 
 
 __all__ = [

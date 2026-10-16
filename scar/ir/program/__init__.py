@@ -7,6 +7,12 @@ from scar.ir.program.ids import (
     BlockID, EnvironmentInterfaceID, LocationID, OperationID, RegionID, ResourceDefinitionID,
     ResourceRequirementID, UseID, ValueID, ControlScopeID, ControlPortID,
     ProviderID,
+    NativeBoundaryID, BoundaryRelationID,
+)
+from scar.ir.program.native import (
+    BoundaryDomain, BoundaryObligation, BoundaryPortPair, BoundaryRelation,
+    CoreInputPort, CoreOutputPort, EntryPortRef, ExitPortRef, NativeBoundary,
+    NativeInputSlot, NativeOutputSlot,
 )
 from scar.ir.program.providers import (
     ProviderArtifact, ProviderArtifactKind, ProviderBinding, ProviderCaptureMode,
@@ -70,4 +76,7 @@ __all__ = [
     "ProviderElement", "ProviderElementKind", "ProviderEnvelope", "ProviderFactReference",
     "ProviderPathIndex", "ProviderPathKey", "ProviderRegion", "ProviderRegionRelation",
     "ProviderRunScope", "ProviderStage",
+    "NativeBoundaryID", "BoundaryRelationID", "BoundaryDomain", "BoundaryObligation",
+    "BoundaryPortPair", "BoundaryRelation", "CoreInputPort", "CoreOutputPort",
+    "EntryPortRef", "ExitPortRef", "NativeBoundary", "NativeInputSlot", "NativeOutputSlot",
 ]

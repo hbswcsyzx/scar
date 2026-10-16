@@ -574,6 +574,13 @@ def _check_program(args) -> int:
                           provider_source_correspondence_verified=False,
                           cross_representation_equivalence_verified=False,
                           provider_runtime_correspondence_verified=False)
+        if graph.native_boundaries:
+            report["counts"].update(native_boundaries=len(graph.native_boundaries),
+                                    boundary_relations=len(graph.boundary_relations))
+            report.update(native_signature_replay_verified=False,
+                          native_tree_mapping_verified=False,
+                          native_state_binding_verified=False,
+                          boundary_relations_verified=False)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:
         destination = Path(args.out)

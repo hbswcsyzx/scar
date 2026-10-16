@@ -55,10 +55,19 @@ class ProviderID(Identifier):
     prefix = "program_provider"
 
 
+class NativeBoundaryID(Identifier):
+    prefix = "program_native_boundary"
+
+
+class BoundaryRelationID(Identifier):
+    prefix = "program_boundary_relation"
+
+
 __all__ = [
     "BlockID", "LocationID", "OperationID", "RegionID", "UseID", "ValueID",
     "ResourceDefinitionID", "ResourceRequirementID",
     "EnvironmentInterfaceID",
     "ControlScopeID", "ControlPortID",
     "ProviderID",
+    "NativeBoundaryID", "BoundaryRelationID",
 ]

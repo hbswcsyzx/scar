@@ -4,13 +4,16 @@ from enum import Enum
 
 from .environments import EnvironmentInterface, EnvironmentMember, FunctionEntryLayout
 from .functions import FormalPort
-from .ids import EnvironmentInterfaceID, OperationID, ProviderID, RegionID, UseID, ValueID
+from .ids import (BoundaryRelationID, EnvironmentInterfaceID, NativeBoundaryID,
+                  OperationID, ProviderID, RegionID, UseID, ValueID)
 from .model import ProgramGraph, StateVersionValue, TerminatorKind, Use
 from .validation import require_valid
 from .control import ProtocolValueKind
 from .control_validation import derive_pending_facts
 from .model import ProtocolValue
 from .providers import ProviderBinding, ProviderEnvelope, ProviderRegion
+from .native import BoundaryRelation, EntryPortRef, ExitPortRef, NativeBoundary
+from .native_validation import port_key, region_port_keys
 
 
 @dataclass(frozen=True, slots=True)
@@ -85,6 +88,29 @@ class ProgramIndex:
         self._provider_sources = {}
         for binding in graph.provider_bindings:
             self._provider_sources.setdefault(binding.target, []).append(binding)
+        self._native_boundaries = {row.id: row for row in graph.native_boundaries}
+        self._native_regions = {row.region: row for row in graph.native_boundaries}
+        self._boundary_relations = {row.id: row for row in graph.boundary_relations}
+        self._boundary_incidence = {row.id: [] for row in graph.native_boundaries}
+        for row in graph.boundary_relations:
+            self._boundary_incidence[row.left].append(row)
+            self._boundary_incidence[row.right].append(row)
+        self._boundary_ports = {
+            row.id: {port_key(item.port): item.port for item in
+                     (*row.inputs, *row.core_inputs, *row.outputs, *row.core_outputs)}
+            for row in graph.native_boundaries}
+        self._region_ports = {row.id: region_port_keys(row) for row in graph.regions}
+        self._entry_ports = {port: self.values[port[1]]
+                             for entry, _ in self._region_ports.values() for port in entry}
+        self._exit_ports = {port: [] for _, exits in self._region_ports.values() for port in exits}
+        for region in graph.regions:
+            for block in region.blocks:
+                for identity in block.operations:
+                    operation = self.operations[identity]
+                    term = operation.terminator
+                    if term is not None and term.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                        for index, actual in enumerate(term.values):
+                            self._exit_ports[(region.id, term.exit, index)].append(self._uses[actual])
 
     def producer(self, value_id: ValueID):
         return self.values[value_id].origin
@@ -126,6 +152,65 @@ class ProgramIndex:
         region = self.regions[region_id]
         block = next(block for block in region.blocks if block.id == region.entry)
         return tuple(self.values[value_id] for value_id in block.arguments)
+
+    def native_boundary(self, boundary_id: NativeBoundaryID) -> NativeBoundary:
+        if type(boundary_id) is not NativeBoundaryID:
+            raise TypeError("native_boundary requires NativeBoundaryID")
+        return self._native_boundaries[boundary_id]
+
+    def native_boundary_for_region(self, region_id: RegionID) -> NativeBoundary | None:
+        """Absence is a declaration gap, never proof of no native boundary."""
+        if type(region_id) is not RegionID:
+            raise TypeError("native_boundary_for_region requires RegionID")
+        if region_id not in self.regions:
+            raise KeyError(region_id)
+        return self._native_regions.get(region_id)
+
+    def entry_port(self, port: EntryPortRef):
+        """Resolve the existing formal; no actual binding or tree is invented."""
+        if type(port) is not EntryPortRef:
+            raise TypeError("entry_port requires EntryPortRef")
+        port.__post_init__()
+        return self._entry_ports[port_key(port)]
+
+    def exit_port_uses(self, port: ExitPortRef) -> tuple[UseSite, ...]:
+        """All canonical Return/Raise occurrences at a logical exit position.
+
+        Stable ordering is for presentation only, not execution order. Existing
+        core validation requires every declared exit to have a control site;
+        this index never creates a terminal or a producer to fill a missing one.
+        """
+        if type(port) is not ExitPortRef:
+            raise TypeError("exit_port_uses requires ExitPortRef")
+        port.__post_init__()
+        return tuple(sorted(self._exit_ports[port_key(port)], key=lambda site: str(site.operation)))
+
+    def native_input_values(self, boundary_id: NativeBoundaryID):
+        return tuple(self.entry_port(slot.port) for slot in self.native_boundary(boundary_id).inputs)
+
+    def native_output_uses(self, boundary_id: NativeBoundaryID) -> tuple[tuple[UseSite, ...], ...]:
+        return tuple(self.exit_port_uses(slot.port) for slot in self.native_boundary(boundary_id).outputs)
+
+    def boundary_relation(self, relation_id: BoundaryRelationID) -> BoundaryRelation:
+        if type(relation_id) is not BoundaryRelationID:
+            raise TypeError("boundary_relation requires BoundaryRelationID")
+        return self._boundary_relations[relation_id]
+
+    def boundary_relations(self, boundary_id: NativeBoundaryID) -> tuple[BoundaryRelation, ...]:
+        self.native_boundary(boundary_id)
+        return tuple(sorted(self._boundary_incidence[boundary_id], key=lambda row: str(row.id)))
+
+    def boundary_unpaired_ports(self, relation_id: BoundaryRelationID):
+        """Unpaired canonical ports, not evidence of absent data dependencies."""
+        relation = self.boundary_relation(relation_id)
+        result = []
+        for side in ("left", "right"):
+            boundary = self.native_boundary(getattr(relation, side))
+            entry, exits = self._region_ports[boundary.region]
+            paired = {port_key(getattr(pair, side)) for pair in relation.ports}
+            refs = self._boundary_ports[boundary.id]
+            result.append(tuple(refs[port] for port in (*entry, *exits) if port not in paired))
+        return tuple(result)
 
 
     def environment_interface(self, region_id: RegionID) -> EnvironmentInterface | None:
