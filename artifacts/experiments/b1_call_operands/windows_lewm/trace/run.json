@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "run_inference.py",
+    "--config-name=pusht",
+    "policy=pusht/weights.pt",
+    "eval.num_eval=1",
+    "eval.eval_budget=25",
+    "eval.goal_offset_steps=25",
+    "cache_dir=/gpu4-share/data/byx/lewm_data",
+    "hydra.job.chdir=False"
+  ],
+  "returncode": 0,
+  "wall_s": 229.1443658899516
+}

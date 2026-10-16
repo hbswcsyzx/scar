@@ -1,0 +1,37 @@
+[
+  {
+    "bytes": 2930,
+    "current_sha256": "e2c4432aa49c036d1818ceabee32159b3232729173f4cd8d58b016d270f0fb18",
+    "matches": true,
+    "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/raw/call-codes.561530.jsonl",
+    "recorded_raw_sha256": "e2c4432aa49c036d1818ceabee32159b3232729173f4cd8d58b016d270f0fb18"
+  },
+  {
+    "bytes": 20557,
+    "current_sha256": "af312314ba34334cb991681278337325b7197f31c1361aa244f17219e5094799",
+    "matches": true,
+    "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/raw/call-events.561530.jsonl",
+    "recorded_raw_sha256": "af312314ba34334cb991681278337325b7197f31c1361aa244f17219e5094799"
+  },
+  {
+    "bytes": 994,
+    "current_sha256": "c8d2ee274193854962b431b8c02cf80628ee38833cddad7ea9ccffc64f2f4b07",
+    "matches": true,
+    "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/raw/call-meta.561530.json",
+    "recorded_raw_sha256": "c8d2ee274193854962b431b8c02cf80628ee38833cddad7ea9ccffc64f2f4b07"
+  },
+  {
+    "bytes": 1852,
+    "current_sha256": "86d51f586eec3423cf4ce566cee9b3d1fe324a53dc9b085199d0a3d44b048b9e",
+    "matches": true,
+    "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/raw/call-operand-meta.561530.json",
+    "recorded_raw_sha256": "86d51f586eec3423cf4ce566cee9b3d1fe324a53dc9b085199d0a3d44b048b9e"
+  },
+  {
+    "bytes": 21251,
+    "current_sha256": "2d272cca8d810d3bedcb08e0bbec24d1a80642407604d3f06ba89669ae4677c4",
+    "matches": true,
+    "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/raw/call-operands.561530.jsonl",
+    "recorded_raw_sha256": "2d272cca8d810d3bedcb08e0bbec24d1a80642407604d3f06ba89669ae4677c4"
+  }
+]

@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 559598,
+  "project_root": "/home/zyf/AAA/le-wm",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "CPYTHON_CALL_WINDOWS_V1",
+  "limits": {
+    "max_events": 2000000,
+    "max_bytes": 1200000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 312812,
+  "event_attempts": 312812,
+  "instructions": 207248,
+  "call_attempts": 100550,
+  "handshakes": 4069,
+  "gaps": 945,
+  "loads": 17037,
+  "references": 234853,
+  "bytes": 114228269,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-codes.559598.jsonl",
+      "family": "codes",
+      "process_id": 559598,
+      "raw_sha256": "3214afe06c9edb670f34ce493c49d7e2c1502b545c11ad0f8a4cb249c7b48008",
+      "raw_bytes": 224591,
+      "lines": 850
+    },
+    {
+      "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-events.559598.jsonl",
+      "family": "events",
+      "process_id": 559598,
+      "raw_sha256": "68972fa6bb31b8846b99f64cbb366f118f8bbc15f8b05caf2cff67b9c238218d",
+      "raw_bytes": 159979147,
+      "lines": 168626
+    },
+    {
+      "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-meta.559598.json",
+      "family": "meta",
+      "process_id": 559598,
+      "raw_sha256": "aba4e365e92b99e66186a4354d6fa201e8e0bc9ade83db90e8ac45216db186da",
+      "raw_bytes": 954,
+      "lines": 34
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

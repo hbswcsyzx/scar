@@ -1,0 +1,410 @@
+{
+  "all_source_checks_passed": true,
+  "boundary": "Only the generic two-file GPU/autograd reference chain is accepted; whole-program/state/content/effect closure and transformation authority remain false. No LeWM performance claim.",
+  "collector_metadata": [
+    {
+      "active_frames": 0,
+      "bytes": 23487,
+      "callable_environment_established": false,
+      "codes": 12,
+      "dropped_codes": 0,
+      "dropped_events": 0,
+      "errors": [],
+      "event_attempts": 26,
+      "events": 26,
+      "invocation_attempts": 13,
+      "invocations": 13,
+      "io_failed": false,
+      "limits": {
+        "max_bytes": 64000000,
+        "max_codes": 4096,
+        "max_events": 100000,
+        "max_path": 16,
+        "max_references": 8192,
+        "max_values": 64
+      },
+      "open_invocations": 0,
+      "path_gaps": 0,
+      "process_id": 561530,
+      "project_root": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/inputs/project",
+      "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+      "reference_contents_observed": false,
+      "schema": "scar.call-edge-trace",
+      "schema_version": 1,
+      "scope": "initial process and newly profiled threads; native calls/child processes/existing threads not complete",
+      "suspended_exits": 0,
+      "unknown_exits": 0,
+      "wall_ns": 11939231956
+    },
+    {
+      "base_manifest": [
+        {
+          "family": "codes",
+          "lines": 12,
+          "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/raw/call-codes.561530.jsonl",
+          "process_id": 561530,
+          "raw_bytes": 2930,
+          "raw_sha256": "e2c4432aa49c036d1818ceabee32159b3232729173f4cd8d58b016d270f0fb18"
+        },
+        {
+          "family": "events",
+          "lines": 26,
+          "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/raw/call-events.561530.jsonl",
+          "process_id": 561530,
+          "raw_bytes": 20557,
+          "raw_sha256": "af312314ba34334cb991681278337325b7197f31c1361aa244f17219e5094799"
+        },
+        {
+          "family": "meta",
+          "lines": 34,
+          "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/raw/call-meta.561530.json",
+          "process_id": 561530,
+          "raw_bytes": 994,
+          "raw_sha256": "c8d2ee274193854962b431b8c02cf80628ee38833cddad7ea9ccffc64f2f4b07"
+        }
+      ],
+      "bytes": 21251,
+      "call_attempts": 8,
+      "callable_environment_established": false,
+      "dropped_events": 0,
+      "errors": [],
+      "event_attempts": 48,
+      "events": 48,
+      "gaps": 0,
+      "handshakes": 8,
+      "implementation": "cpython",
+      "instructions": 32,
+      "io_failed": false,
+      "limits": {
+        "max_bytes": 32000000,
+        "max_events": 100000,
+        "max_loads": 64,
+        "max_namespace_items": 4096,
+        "max_references": 8192
+      },
+      "loads": 24,
+      "previous_profile": false,
+      "process_id": 561530,
+      "project_root": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/inputs/project",
+      "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+      "reference_contents_observed": false,
+      "references": 64,
+      "rule": "CPYTHON_CALL_WINDOWS_V1",
+      "schema": "scar.call-operands-trace",
+      "schema_version": 1,
+      "transformation_authorized": false
+    }
+  ],
+  "command_system_cpu_seconds": 2.38,
+  "command_user_cpu_seconds": 29.66,
+  "command_wall_seconds": 21.164809624664485,
+  "commands": [
+    {
+      "name": "source-head-before",
+      "returncode": 0,
+      "rss_kib": 3780,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.00797190796583891
+    },
+    {
+      "name": "source-status-before",
+      "returncode": 0,
+      "rss_kib": 5184,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.015970042906701565
+    },
+    {
+      "name": "legacy-check",
+      "returncode": 0,
+      "rss_kib": 35776,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.9655867144465446
+    },
+    {
+      "name": "gpu-before",
+      "returncode": 0,
+      "rss_kib": 22312,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.03214471321552992
+    },
+    {
+      "name": "untraced-original",
+      "returncode": 0,
+      "rss_kib": 809688,
+      "stderr_bytes": 0,
+      "wall_seconds": 2.61971718352288
+    },
+    {
+      "name": "trace",
+      "returncode": 0,
+      "rss_kib": 810944,
+      "stderr_bytes": 0,
+      "wall_seconds": 12.837786650285125
+    },
+    {
+      "name": "inventory",
+      "returncode": 0,
+      "rss_kib": 33312,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.7656069518998265
+    },
+    {
+      "name": "link",
+      "returncode": 0,
+      "rss_kib": 35788,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.9156818026676774
+    },
+    {
+      "name": "check",
+      "returncode": 0,
+      "rss_kib": 36264,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.9659667955711484
+    },
+    {
+      "name": "query-distinct",
+      "returncode": 0,
+      "rss_kib": 34464,
+      "stderr_bytes": 0,
+      "wall_seconds": 1.066292048431933
+    },
+    {
+      "name": "query-shared",
+      "returncode": 0,
+      "rss_kib": 35744,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.9158819513395429
+    },
+    {
+      "name": "gpu-after",
+      "returncode": 0,
+      "rss_kib": 22312,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.03220902942121029
+    },
+    {
+      "name": "source-head-after",
+      "returncode": 0,
+      "rss_kib": 3784,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.007965665310621262
+    },
+    {
+      "name": "source-status-after",
+      "returncode": 0,
+      "rss_kib": 5156,
+      "stderr_bytes": 0,
+      "wall_seconds": 0.01602816767990589
+    }
+  ],
+  "environment": {
+    "cuda_device_index": 0,
+    "cuda_device_name": "NVIDIA GeForce RTX 4090",
+    "cuda_peak_memory_allocated_bytes": 2560,
+    "cuda_peak_memory_reserved_bytes": 2097152,
+    "python_version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+    "status": "CUDA_AUTOGRAD_COMPLETED",
+    "tensor_values_saved": false,
+    "torch_cuda_version": "13.2",
+    "torch_version": "2.13.0+cu132"
+  },
+  "frozen_head": "8a300eb068d992b3737eee0bdf43fa2bf8c8aea1",
+  "legacy_public_replay_status": "REPLAYED_CONDITIONAL_ROUTES",
+  "link_summary": {
+    "contents_or_effects_established": false,
+    "frame": {
+      "code_source_statuses": {
+        "INCOMPLETE": 7,
+        "VERIFIED": 5
+      },
+      "contents_or_effects_established": false,
+      "core_call_observations": 8,
+      "direct_core_call_observations": 8,
+      "frame_entries": 13,
+      "frame_exits": 13,
+      "function_environment_established": false,
+      "issues": 3,
+      "reference_occurrences": 0,
+      "reference_routes": 0,
+      "target_body_observations": 10,
+      "target_executed_by_linker": false,
+      "tracked_ancestors_through_intervening_frames": 1,
+      "tracked_immediate_callers": 9,
+      "transformation_authorized": false,
+      "verified_normal_frame_exits": 12,
+      "verified_source_call_sites": 8
+    },
+    "function_environment_established": false,
+    "operand_events": 48,
+    "routing": {
+      "argument_routes": 16,
+      "completion_routes": 8,
+      "conditional_only": true,
+      "contents_or_effects_established": false,
+      "function_environment_established": false,
+      "invocation_returns": 10,
+      "issues": 0,
+      "template_values": 18,
+      "transformation_authorized": false,
+      "world_equivalence_established": false
+    },
+    "scope": "conditional reference provenance; state, contents and effects remain separate",
+    "target_executed_by_linker": false,
+    "transformation_authorized": false,
+    "whole_program_complete": false,
+    "world_equivalence_established": false
+  },
+  "new_rule": "CPYTHON_CALL_WINDOWS_V1",
+  "old_inputs_unchanged": true,
+  "old_rule": [
+    "CPYTHON_LOAD_OCCURRENCES_V1"
+  ],
+  "protected_raw_files": 5,
+  "public_report_bytes": 129964,
+  "raw_bytes": 47804,
+  "raw_files_bound_to_public_report_and_current_hashes_match": true,
+  "runtime_cases": [
+    {
+      "backward_completed": true,
+      "elapsed_seconds": 0.04530540481209755,
+      "inputs_share_object": false,
+      "left_grad_on_cuda": true,
+      "left_grad_present": true,
+      "left_grad_requires_grad": false,
+      "left_requires_grad": true,
+      "loss_has_grad_fn": true,
+      "mode": "distinct",
+      "returned_grad_fn_absent": true,
+      "returned_is_leaf": true,
+      "returned_is_left": true,
+      "right_grad_present": false,
+      "right_requires_grad": true
+    },
+    {
+      "backward_completed": true,
+      "elapsed_seconds": 0.0037302644923329353,
+      "inputs_share_object": true,
+      "left_grad_on_cuda": true,
+      "left_grad_present": true,
+      "left_grad_requires_grad": false,
+      "left_requires_grad": true,
+      "loss_has_grad_fn": true,
+      "mode": "shared",
+      "returned_grad_fn_absent": true,
+      "returned_is_leaf": true,
+      "returned_is_left": true,
+      "right_grad_present": true,
+      "right_requires_grad": true
+    }
+  ],
+  "schema": "scar.windows-gpu-result",
+  "schema_version": 1,
+  "source_fingerprint": "38dfe6c34545b405fa5e8f08e2828f7357c862527500a6a1f2b3d97072796574",
+  "status": "W2_W3_PUBLIC_GPU_PASSED",
+  "tensor_values_saved": false,
+  "validation": {
+    "authority_remains_false": true,
+    "choose_argument_routes": 8,
+    "choose_invocations": 4,
+    "conditions_per_query": 8,
+    "independent_uses_and_occurrences": true,
+    "inventory_schema_version": 6,
+    "legacy_replay_passed": true,
+    "queries": [
+      {
+        "completion_routes": 2,
+        "conditions": [
+          "CAPTURE_PRODUCER_TRUSTED",
+          "NO_FRAME_INTERPOSITION",
+          "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+          "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+          "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+          "FUNCTION_ENVIRONMENT_UNVERIFIED",
+          "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+        ],
+        "endpoint": "run.x",
+        "excluded_choose": [
+          {
+            "invocation_id": 8,
+            "process_id": 561530,
+            "thread_id": 128805768079168
+          }
+        ],
+        "excluded_relay": {
+          "invocation_id": 7,
+          "process_id": 561530,
+          "thread_id": 128805768079168
+        },
+        "invocation": {
+          "invocation_id": 4,
+          "process_id": 561530,
+          "thread_id": 128805768079168
+        },
+        "issues": {
+          "ARGUMENT_ROUTING_UNVERIFIED": 1
+        },
+        "mode": "distinct",
+        "routes": 4,
+        "selected_choose": {
+          "invocation_id": 6,
+          "process_id": 561530,
+          "thread_id": 128805768079168
+        },
+        "selected_relay": {
+          "invocation_id": 5,
+          "process_id": 561530,
+          "thread_id": 128805768079168
+        }
+      },
+      {
+        "completion_routes": 2,
+        "conditions": [
+          "CAPTURE_PRODUCER_TRUSTED",
+          "NO_FRAME_INTERPOSITION",
+          "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+          "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+          "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+          "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+          "FUNCTION_ENVIRONMENT_UNVERIFIED",
+          "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+        ],
+        "endpoint": "run.x",
+        "excluded_choose": [
+          {
+            "invocation_id": 13,
+            "process_id": 561530,
+            "thread_id": 128805768079168
+          }
+        ],
+        "excluded_relay": {
+          "invocation_id": 12,
+          "process_id": 561530,
+          "thread_id": 128805768079168
+        },
+        "invocation": {
+          "invocation_id": 9,
+          "process_id": 561530,
+          "thread_id": 128805768079168
+        },
+        "issues": {
+          "ARGUMENT_ROUTING_UNVERIFIED": 1
+        },
+        "mode": "shared",
+        "routes": 4,
+        "selected_choose": {
+          "invocation_id": 11,
+          "process_id": 561530,
+          "thread_id": 128805768079168
+        },
+        "selected_relay": {
+          "invocation_id": 10,
+          "process_id": 561530,
+          "thread_id": 128805768079168
+        }
+      }
+    ]
+  },
+  "whole_acceptance_seconds": 21.706297006458044
+}

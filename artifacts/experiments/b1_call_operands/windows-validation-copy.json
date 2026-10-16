@@ -1,0 +1,582 @@
+{
+  "files": [
+    {
+      "bytes": 37044,
+      "path": "windows_full_regression/before.json",
+      "sha256": "1684274eb8642fbb340a5fe4f7517debc22ae339b08650d1981797f5adf9f300"
+    },
+    {
+      "bytes": 731,
+      "path": "windows_full_regression/command.json",
+      "sha256": "8e8a915b2fc1acf7b97ae6ffd229b12accd43f61ef3f66928f9c408edf67be8d"
+    },
+    {
+      "bytes": 7021,
+      "path": "windows_full_regression/driver.py",
+      "sha256": "67abcbef0cde6a927b72f7c80883586dc3cf8433199f0f9a1960e629b66a0339"
+    },
+    {
+      "bytes": 161,
+      "path": "windows_full_regression/process.json",
+      "sha256": "1b98ce85292a55c3aa8a2d09779cf9729d8ce2c67f00ecad02bc1bed8222514a"
+    },
+    {
+      "bytes": 38066,
+      "path": "windows_full_regression/report.json",
+      "sha256": "533982c42bf9df8689a8cb91acea9bc6770fbd43f108bfca250696681a6de747"
+    },
+    {
+      "bytes": 656,
+      "path": "windows_full_regression/report.md",
+      "sha256": "3a295db5a045b0e620d4d0e069ba3d7885c544a43703d73e89731290d57029e5"
+    },
+    {
+      "bytes": 396116,
+      "path": "windows_full_regression/results.xml",
+      "sha256": "dc056f3ca8205aaf261196206210c3cc89ef95970540658539baaaa0711e34f2"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_full_regression/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 4412,
+      "path": "windows_full_regression/stdout.log",
+      "sha256": "1f2f8dc2e1ad0a824e343ac966149c05b9e9d0936d9fe10d1e8f64caaa484a5a"
+    },
+    {
+      "bytes": 1023,
+      "path": "windows_full_regression/time.txt",
+      "sha256": "b1fb4c6646ae4a8b02e381bc85fd25ce097e9641f7d1bb5c717ae6c75ad2209c"
+    },
+    {
+      "bytes": 2800,
+      "path": "windows_gpu/drivers/gpu_program.py",
+      "sha256": "b37c5a382707d312d9612b8a9b5c48d3e4ee7a0c8dd40386a22da903d4d1eeff"
+    },
+    {
+      "bytes": 13276,
+      "path": "windows_gpu/drivers/run_acceptance.py",
+      "sha256": "00c5ba6630c11d79197ebea39970bed3d92540a52c1d0bc7a53dee74aac7b5fe"
+    },
+    {
+      "bytes": 108,
+      "path": "windows_gpu/inputs/project/entry.py",
+      "sha256": "4e99146b409bdfcca97563140339330d3065c6faba397b6f23526fbc7dde98ea"
+    },
+    {
+      "bytes": 108,
+      "path": "windows_gpu/inputs/project/helper.py",
+      "sha256": "0fe4a1932e50d4d90d375c58e2f8b03b7755f878e77d6a7f532a1f8375af8525"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/check.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1320,
+      "path": "windows_gpu/logs/check.stdout",
+      "sha256": "02d0d5602ba2abd4e8a350fb6476e02b5dbbcb67808c13e681767a77ff44e839"
+    },
+    {
+      "bytes": 885,
+      "path": "windows_gpu/logs/check.time-v.txt",
+      "sha256": "9740b1c549a2b7dc1c170146c55a1437d9e23a69c540601d5d3937cb076668e4"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/gpu-after.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 101,
+      "path": "windows_gpu/logs/gpu-after.stdout",
+      "sha256": "fa374cf4e0c9b45599dc5ab3bab9957aaa9aa748749916e0eac6c21661073ff2"
+    },
+    {
+      "bytes": 815,
+      "path": "windows_gpu/logs/gpu-after.time-v.txt",
+      "sha256": "289390a74790db4f5ba81f5724438a3460b71bda7d367a8b304e7960e4ac9ddc"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/gpu-before.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 101,
+      "path": "windows_gpu/logs/gpu-before.stdout",
+      "sha256": "fa374cf4e0c9b45599dc5ab3bab9957aaa9aa748749916e0eac6c21661073ff2"
+    },
+    {
+      "bytes": 815,
+      "path": "windows_gpu/logs/gpu-before.time-v.txt",
+      "sha256": "9504981caa215ea8c2588bef37e1286d18bdd0b47fd1d22f11dd916951ea6bc8"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/inventory.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2161,
+      "path": "windows_gpu/logs/inventory.stdout",
+      "sha256": "7bf63ce428991195ba44400f06829656804ad3185b227377bdbe10eeb6233838"
+    },
+    {
+      "bytes": 1167,
+      "path": "windows_gpu/logs/inventory.time-v.txt",
+      "sha256": "a26872050d4a46a28da3446a7738fe3d5221de13da7d7803b9db2ea8e52fcec6"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/legacy-check.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1320,
+      "path": "windows_gpu/logs/legacy-check.stdout",
+      "sha256": "109a4423adc06a04d1d2a930f3eb0275cb659364c142042481134a8671a7ff38"
+    },
+    {
+      "bytes": 885,
+      "path": "windows_gpu/logs/legacy-check.time-v.txt",
+      "sha256": "ae4eb7ed282e0b72d61f2c8e020cc17b0e79d6077e694f704e7ed403c16d1275"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/link.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1416,
+      "path": "windows_gpu/logs/link.stdout",
+      "sha256": "6bc5290fa1ac13f92907406f421c007feeaf376a123e783c41efab255ca0bf32"
+    },
+    {
+      "bytes": 1168,
+      "path": "windows_gpu/logs/link.time-v.txt",
+      "sha256": "b8f13605690e0d544fc1ab89192d589ffc06cda0148107c236fdd7bf943aa5ee"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/query-distinct.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 32633,
+      "path": "windows_gpu/logs/query-distinct.stdout",
+      "sha256": "ae78aed8119bd0609b5ec1c9f650ffc91feb7976838d4ed67ed731e8c635973c"
+    },
+    {
+      "bytes": 942,
+      "path": "windows_gpu/logs/query-distinct.time-v.txt",
+      "sha256": "c1af1d734767d29b408fb02354cbf624746f6396e8df89732c3116de4670d020"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/query-shared.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 32660,
+      "path": "windows_gpu/logs/query-shared.stdout",
+      "sha256": "9b22c8169c0c9f891669f3c395e603d8a35a85dff090c87bd926f2b26e1a8745"
+    },
+    {
+      "bytes": 942,
+      "path": "windows_gpu/logs/query-shared.time-v.txt",
+      "sha256": "ab148cd609af25f7cd67c5bc332e54951c6071f65da78078022bf6542af3dd17"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/source-head-after.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 41,
+      "path": "windows_gpu/logs/source-head-after.stdout",
+      "sha256": "b19232f1a58ab8e24f321971d3fe3cdb3489f79f38d3d8bc7c5f84459f1a3528"
+    },
+    {
+      "bytes": 732,
+      "path": "windows_gpu/logs/source-head-after.time-v.txt",
+      "sha256": "ae7f17c71caa95bf8dde5eadd625761d6962782be3511cfe1b1529735fc24d94"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/source-head-before.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 41,
+      "path": "windows_gpu/logs/source-head-before.stdout",
+      "sha256": "b19232f1a58ab8e24f321971d3fe3cdb3489f79f38d3d8bc7c5f84459f1a3528"
+    },
+    {
+      "bytes": 732,
+      "path": "windows_gpu/logs/source-head-before.time-v.txt",
+      "sha256": "6709151464f2e1a3a9b613ba9c62387681278537731be19df56565a58ff83302"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/source-status-after.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/source-status-after.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 739,
+      "path": "windows_gpu/logs/source-status-after.time-v.txt",
+      "sha256": "52ad93351f57c040d98e2b7f678ee1483b7e55d188c3256a64ecad3bfc8b7f4e"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/source-status-before.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/source-status-before.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 738,
+      "path": "windows_gpu/logs/source-status-before.time-v.txt",
+      "sha256": "db544fbe276dfd5198e84d876cef278ae5f6ae4c2aaa1d6567edccfd83093a88"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/trace.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1206,
+      "path": "windows_gpu/logs/trace.stdout",
+      "sha256": "7d547c41a4b3b4bead3b7b3b8104c08a48570b2bedca52baebbe422e2d9c4468"
+    },
+    {
+      "bytes": 1254,
+      "path": "windows_gpu/logs/trace.time-v.txt",
+      "sha256": "5f9284fdc47916cbc3b797b211c6eedf0ad49672139ba6607266ed490b7ecc68"
+    },
+    {
+      "bytes": 0,
+      "path": "windows_gpu/logs/untraced-original.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1206,
+      "path": "windows_gpu/logs/untraced-original.stdout",
+      "sha256": "bdd6c96757e2281676912dadd4cba3a4fa56ad3f2dc1d304130cad85cbbe17c4"
+    },
+    {
+      "bytes": 858,
+      "path": "windows_gpu/logs/untraced-original.time-v.txt",
+      "sha256": "d3aa426fe12324bf43e9842ca9fe264ad491a14a5caf361fa72373e1cbd56a75"
+    },
+    {
+      "bytes": 13054,
+      "path": "windows_gpu/manifest/all-files.json",
+      "sha256": "ae429d6d212f692c479d9b5887d3ce551e63ee1c624cd88675142c5edc7f8ff9"
+    },
+    {
+      "bytes": 514,
+      "path": "windows_gpu/manifest/new-inputs.json",
+      "sha256": "20536b08558681ac93b23cad6bfe11fb14266dfc7d3471a3f0165cbcdc824258"
+    },
+    {
+      "bytes": 1048,
+      "path": "windows_gpu/manifest/new-raw.json",
+      "sha256": "84141e98fabe21babd90dd0d6bef3d501fc0b0dc692b841d07e44d5dee21cec4"
+    },
+    {
+      "bytes": 6996,
+      "path": "windows_gpu/manifest/old-inputs-after.json",
+      "sha256": "521cb3536c9089e5dfd8913934a93d72f58e949d63687838042825badceed551"
+    },
+    {
+      "bytes": 6996,
+      "path": "windows_gpu/manifest/old-inputs-before.json",
+      "sha256": "521cb3536c9089e5dfd8913934a93d72f58e949d63687838042825badceed551"
+    },
+    {
+      "bytes": 1742,
+      "path": "windows_gpu/manifest/raw-report-hash-join.json",
+      "sha256": "cb396e1070d45b71a5de8085d2c52f2313677aa2ec67169b4139680c27e2d294"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-after-check.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-after-inventory.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-after-legacy-check.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-after-link.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-after-query-distinct.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-after-query-shared.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-after-trace.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-after.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-before-check.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-before-inventory.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-before-legacy-check.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-before-link.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-before-query-distinct.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-before-query-shared.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-before-trace.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 35180,
+      "path": "windows_gpu/manifest/source-before.json",
+      "sha256": "1bb1fdb2e14c3c15d9fe7d3f9536c6be2097f924865379aef24970279a498243"
+    },
+    {
+      "bytes": 2930,
+      "path": "windows_gpu/raw/call-codes.561530.jsonl",
+      "sha256": "e2c4432aa49c036d1818ceabee32159b3232729173f4cd8d58b016d270f0fb18"
+    },
+    {
+      "bytes": 20557,
+      "path": "windows_gpu/raw/call-events.561530.jsonl",
+      "sha256": "af312314ba34334cb991681278337325b7197f31c1361aa244f17219e5094799"
+    },
+    {
+      "bytes": 994,
+      "path": "windows_gpu/raw/call-meta.561530.json",
+      "sha256": "c8d2ee274193854962b431b8c02cf80628ee38833cddad7ea9ccffc64f2f4b07"
+    },
+    {
+      "bytes": 1852,
+      "path": "windows_gpu/raw/call-operand-meta.561530.json",
+      "sha256": "86d51f586eec3423cf4ce566cee9b3d1fe324a53dc9b085199d0a3d44b048b9e"
+    },
+    {
+      "bytes": 21251,
+      "path": "windows_gpu/raw/call-operands.561530.jsonl",
+      "sha256": "2d272cca8d810d3bedcb08e0bbec24d1a80642407604d3f06ba89669ae4677c4"
+    },
+    {
+      "bytes": 220,
+      "path": "windows_gpu/raw/run.json",
+      "sha256": "c886c26cb7a6ecfc332759f0ab7ab74758f5d35ce3cc052fcf6af2bc11a53aed"
+    },
+    {
+      "bytes": 3161,
+      "path": "windows_gpu/reports/REPORT.md",
+      "sha256": "e5edbb4421a7589e5506b74c5b1b9ac736c9431b14e668cfd03ccee8d8ddd3b0"
+    },
+    {
+      "bytes": 28087,
+      "path": "windows_gpu/reports/inventory.json.gz",
+      "sha256": "13af7615a205c40a0a44e8573e8c46f03789140ed94a75ce90ace8e7d23bd37d"
+    },
+    {
+      "bytes": 9396,
+      "path": "windows_gpu/reports/operands.json.gz",
+      "sha256": "eb56cab94e2096b739e40b4b6692198448be22b706465a99e09d56bf63e67cff"
+    },
+    {
+      "bytes": 46227,
+      "path": "windows_gpu/reports/query-distinct.json",
+      "sha256": "e346a55aad11d0a993d9d9c6c5c053e43bf6072c8a2d81b44dfe199a4e8089bd"
+    },
+    {
+      "bytes": 46254,
+      "path": "windows_gpu/reports/query-shared.json",
+      "sha256": "ab2408af0cd7aeb7eda931fe12c449f1f3b503b6b489ee745b9624209ff8ace4"
+    },
+    {
+      "bytes": 88078,
+      "path": "windows_gpu/reports/receipt.json",
+      "sha256": "4132c77524a824f88088a7f5f0af202f5e3245f505edea16a7d21b602dc9db0c"
+    },
+    {
+      "bytes": 12463,
+      "path": "windows_gpu/reports/result.summary.json",
+      "sha256": "824f107a6bd38e6f0201c67f93fcf0b7d4bfb1326c4fc22787cf5971ec1b81a3"
+    },
+    {
+      "bytes": 2312,
+      "path": "windows_lewm/archive-result.json",
+      "sha256": "82d9e737233a3da8d7815ee26dbbb70bae1859c942ddc5961e469a230353484e"
+    },
+    {
+      "bytes": 469,
+      "path": "windows_lewm/capture-gap-audit.json",
+      "sha256": "7e0eca5a5c612ea68fd32c3811da93546d7e8fd4491bc8d3354a0cf5ca1e30b6"
+    },
+    {
+      "bytes": 2992,
+      "path": "windows_lewm/capture-result.json",
+      "sha256": "bd1650f18329c66a785457a884d0b9275cb7eb8ad844d747cd579b28ddffd4fb"
+    },
+    {
+      "bytes": 1054,
+      "path": "windows_lewm/capture.stderr.log",
+      "sha256": "5613d5345cc1f71f7544839abc3dc3dd73003a31a7b276913d4c07b0137c43e6"
+    },
+    {
+      "bytes": 889,
+      "path": "windows_lewm/capture.stdout.log",
+      "sha256": "2c238550459fee1bee205bc021a96f82fc371a0420b3456c434f0f59b3f1ebd1"
+    },
+    {
+      "bytes": 1337,
+      "path": "windows_lewm/capture.time",
+      "sha256": "21d7909b35dcab40f228e78cfb7e10e2d5efeb1631f44f3dcbf2f634275b0389"
+    },
+    {
+      "bytes": 79013,
+      "path": "windows_lewm/invocation.json",
+      "sha256": "f97c928769aaebda3c13a565008f5f76047be05f721aa0bbfc4d5133e542a912"
+    },
+    {
+      "bytes": 61273,
+      "path": "windows_lewm/trace/call-codes.559598.jsonl.gz",
+      "sha256": "9f68b08d5ba3b037915d41119d85ff19b0113b66b0dc42c6780ee8851c29742a"
+    },
+    {
+      "bytes": 10682827,
+      "path": "windows_lewm/trace/call-events.559598.jsonl.gz",
+      "sha256": "5f6a4a4e923fcd35fb3b4fd9a71dd4bde91582e14f0fbb809d0a5487c86e4328"
+    },
+    {
+      "bytes": 954,
+      "path": "windows_lewm/trace/call-meta.559598.json",
+      "sha256": "aba4e365e92b99e66186a4354d6fa201e8e0bc9ade83db90e8ac45216db186da"
+    },
+    {
+      "bytes": 1843,
+      "path": "windows_lewm/trace/call-operand-meta.559598.json",
+      "sha256": "1c329f790bf656d4a6ee740b93eb85b7f98971a03ecb5b05f6806f52a9fd1638"
+    },
+    {
+      "bytes": 5467095,
+      "path": "windows_lewm/trace/call-operands.559598.jsonl.gz",
+      "sha256": "115b19a27724c18e310ba11b2277e15c66f39b9a568e8f816ce28df722a64d23"
+    },
+    {
+      "bytes": 88507,
+      "path": "windows_lewm/trace/resources.jsonl",
+      "sha256": "e790ab0171c8e2cfae52af5027ccefdc68e33ff5cd1abc0003638117e0052f73"
+    },
+    {
+      "bytes": 498,
+      "path": "windows_lewm/trace/resources.summary.json",
+      "sha256": "9b90ab6b590013dc29c65e66437e6361165624092979193f6afd8c2e443e4631"
+    },
+    {
+      "bytes": 362,
+      "path": "windows_lewm/trace/run.json",
+      "sha256": "df356a7c5ae677efb3dd17fd2a13dbc323d6933fd39e1fe0e74468ed24125ab4"
+    },
+    {
+      "bytes": 806,
+      "path": "windows_lewm/workload_output/hydra/b1_windows/.hydra/config.yaml",
+      "sha256": "9fc22f3e9df8b52861e1f9ed8ae46f51c7807e2b4970b23b9fc255a048b6a614"
+    },
+    {
+      "bytes": 3823,
+      "path": "windows_lewm/workload_output/hydra/b1_windows/.hydra/hydra.yaml",
+      "sha256": "72ee691edce07490c954efca91d79f585e3653aa2f3963254aa55fb6720eacdf"
+    },
+    {
+      "bytes": 137,
+      "path": "windows_lewm/workload_output/hydra/b1_windows/.hydra/overrides.yaml",
+      "sha256": "275acc29ea64495fc4a96d896182b9da7caccae6e541e4619cbc874e21d8e85e"
+    },
+    {
+      "bytes": 375,
+      "path": "windows_lewm/workload_output/hydra/b1_windows/eval.log",
+      "sha256": "e99bdb1db497fbdfca90bd86e9e2946f5b65d69e036f7ed7065a654bf17b97e6"
+    },
+    {
+      "bytes": 12192,
+      "path": "windows_lewm/workload_output/pusht/env_0.mp4",
+      "sha256": "7afe8044fb0679e24fc79a2104c39c5c83a5144c63100d4521c02180c4948b24"
+    },
+    {
+      "bytes": 971,
+      "path": "windows_lewm/workload_output/pusht/pusht_results.txt",
+      "sha256": "3a7051efd4baad6dba9a7a53c7084554d9e3ca00550f039766f37836ad4c39b2"
+    },
+    {
+      "bytes": 4833,
+      "path": "capture_driver.py",
+      "sha256": "b3b2fcccf97abb746e3a74d542ea78b515ad865c0260c4b908ba69490c28af91"
+    },
+    {
+      "bytes": 4082,
+      "path": "archive_driver.py",
+      "sha256": "12a37d40eb745facdbbfb92a50ed54ff99766ebf3cc8b52737fba395bdbe5352"
+    },
+    {
+      "bytes": 21552,
+      "path": "windows_analysis/driver.py",
+      "sha256": "bce993dc860e148a6b79021c6c6f527bff59fece8b5b60a1a52b351ef6762b23"
+    }
+  ],
+  "scope": "completed full regression, public GPU pipeline and capture only; offline LeWM analysis pending",
+  "status": "VERIFIED_COPY",
+  "total_bytes": 17903296
+}

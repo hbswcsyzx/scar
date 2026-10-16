@@ -1,0 +1,18 @@
+{
+  "schema": "scar.call-window-capture-gap-audit",
+  "schema_version": 1,
+  "events": 312812,
+  "gap_reasons": {
+    "PROJECT_FUNCTION_CALL_DID_NOT_ENTER": 945
+  },
+  "last_event": {
+    "index": 312812,
+    "kind": "INSTRUCTION",
+    "invocation_id": 1,
+    "frame_index": 168625,
+    "hook_epoch": 946
+  },
+  "scope": "capture gap audit only; no claim of whole-program/state/effect closure",
+  "whole_program_complete": false,
+  "transformation_authorized": false
+}

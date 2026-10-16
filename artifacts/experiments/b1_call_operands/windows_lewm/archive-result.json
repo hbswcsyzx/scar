@@ -1,0 +1,49 @@
+{
+  "schema": "scar.owned-call-capture-archive",
+  "schema_version": 1,
+  "files": [
+    {
+      "logical_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-codes.559598.jsonl",
+      "retained_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-codes.559598.jsonl.gz",
+      "raw_bytes": 224591,
+      "raw_lines": 850,
+      "raw_sha256": "3214afe06c9edb670f34ce493c49d7e2c1502b545c11ad0f8a4cb249c7b48008",
+      "compressed_bytes": 61273,
+      "compressed_sha256": "9f68b08d5ba3b037915d41119d85ff19b0113b66b0dc42c6780ee8851c29742a",
+      "allocated_bytes_before": 225280,
+      "verified_decompression": true,
+      "plain_removed": true
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-events.559598.jsonl",
+      "retained_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-events.559598.jsonl.gz",
+      "raw_bytes": 159979147,
+      "raw_lines": 168626,
+      "raw_sha256": "68972fa6bb31b8846b99f64cbb366f118f8bbc15f8b05caf2cff67b9c238218d",
+      "compressed_bytes": 10682827,
+      "compressed_sha256": "5f6a4a4e923fcd35fb3b4fd9a71dd4bde91582e14f0fbb809d0a5487c86e4328",
+      "allocated_bytes_before": 159985664,
+      "verified_decompression": true,
+      "plain_removed": true
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-operands.559598.jsonl",
+      "retained_path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm/trace/call-operands.559598.jsonl.gz",
+      "raw_bytes": 114228269,
+      "raw_lines": 312812,
+      "raw_sha256": "032796ed3b8b45e581d77dd55956b277a533644f6ecf5407247097941937fe4e",
+      "compressed_bytes": 5467095,
+      "compressed_sha256": "115b19a27724c18e310ba11b2277e15c66f39b9a568e8f816ce28df722a64d23",
+      "allocated_bytes_before": 114233344,
+      "verified_decompression": true,
+      "plain_removed": true
+    }
+  ],
+  "wall_seconds": 3.6326057547703385,
+  "raw_bytes": 274432007,
+  "retained_compressed_bytes": 16211195,
+  "status": "VERIFIED_COMPRESSED",
+  "capture_coverage_status": "NEEDS_READER_REVIEW",
+  "whole_program_complete": false,
+  "transformation_authorized": false
+}

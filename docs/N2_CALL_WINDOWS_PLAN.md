@@ -1,6 +1,8 @@
 # B1修复门：有界调用窗口证据
 
-日期：2026-10-16。状态：**有限实现与363项组件门通过；新全仓/GPU/LeWM门未完成**。
+日期：2026-10-16。状态：**组件、历史重放、新GPU与2,594项全仓通过；新LeWM采集
+无drop，离线link/query仍运行，W4未完成**。新事实见
+[N2_CALL_WINDOWS_ACCEPTANCE.md](N2_CALL_WINDOWS_ACCEPTANCE.md)。
 基线实现`c91876b`，源指纹
 `33d92b1635ac614ab817388dbeb45cda5fe6f71a6af99b115193e473582d1933`。
 本门解决真实输入暴露的采集规模问题，不新增detector/backend，不更改LeWM。
@@ -77,5 +79,6 @@ W4保持完整要求；小程序通过不能替代原LeWM。每门保存失败�
 源码审查发现并修复：未知offset不能静默DISABLE；静态反汇编要逐项有界；
 所有CodeType实例的disabled-offset记账要有总上限；已知foreign tool/mask干预后
 不能返回DISABLE或部分清理；stop/fork释放前先核对全部自有配置。
-源码完整scope及公共旧归档、独立GPU、新LeWM重试仍按W2—W4要求继续验收。
-原c91876b的2,535全仓及GPU结果不能替代本次新指纹的完整验证。
+后续同指纹 W2/W3 已通过：公共旧归档重放、独立 GPU 和 2,594 项全仓均有新证据。
+W4 新采集零 drop，但含 945 个 scoped gap；离线链接/查询仍须取得原进程终态。
+具体证据及剩余范围见验收记录，原 c91876b 的旧验证仍按原指纹保存。

@@ -1,0 +1,8 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_gpu/drivers/gpu_program.py"
+  ],
+  "returncode": 0,
+  "wall_s": 12.51153433509171
+}

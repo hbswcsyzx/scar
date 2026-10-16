@@ -1,0 +1,23 @@
+{
+  "cwd": "/tmp/scar-call-windows-qx_qw6dk",
+  "command": [
+    "/usr/bin/time",
+    "-v",
+    "-o",
+    "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_full_regression/time.txt",
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests",
+    "--junitxml=/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_full_regression/results.xml",
+    "--basetemp=/tmp/scar-b1-windows-full-8a300eb-2exwoe76",
+    "-o",
+    "cache_dir=/tmp/scar-b1-windows-full-8a300eb-2exwoe76/.pytest_cache"
+  ],
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  }
+}
