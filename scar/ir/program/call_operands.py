@@ -8,6 +8,11 @@ import re
 from scar.ir.program.call_edges import CallRecordAnchor, CallTraceFile, CapturedSite, InvocationKey
 
 
+LOAD_OCCURRENCES_RULE = "CPYTHON_LOAD_OCCURRENCES_V1"
+CALL_WINDOWS_RULE = "CPYTHON_CALL_WINDOWS_V1"
+OPERAND_CAPTURE_RULES = frozenset((LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE))
+
+
 def _require(condition, detail):
     if not condition:
         raise ValueError(detail)
@@ -319,7 +324,7 @@ class OperandCollectionMetadata:
         _integer(self.process_id, "metadata process", 1)
         for name in ("project_root", "python", "implementation", "rule"):
             _text(getattr(self, name), name)
-        _require(self.implementation == "cpython" and self.rule == "CPYTHON_LOAD_OCCURRENCES_V1",
+        _require(self.implementation == "cpython" and self.rule in OPERAND_CAPTURE_RULES,
                  "operand interpreter/rule is unsupported")
         _require(type(self.limits) is OperandCollectionLimits, "operand collection limits must be typed")
         self.limits.__post_init__()
@@ -363,7 +368,8 @@ def operand_references(event):
     return ()
 
 
-__all__ = ["CallOperandBudget", "CallableKind", "FunctionLayout", "CallableShape", "LoadNamespace",
+__all__ = ["LOAD_OCCURRENCES_RULE", "CALL_WINDOWS_RULE", "OPERAND_CAPTURE_RULES",
+           "CallOperandBudget", "CallableKind", "FunctionLayout", "CallableShape", "LoadNamespace",
            "LoadObservation", "OperandEventKind", "OperandInstruction", "OperandCallAttempt",
            "OperandEntryHandshake", "OperandGap", "OperandEvent", "OperandCollectionLimits",
            "OperandCollectionMetadata", "operand_references"]

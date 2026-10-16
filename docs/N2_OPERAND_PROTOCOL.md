@@ -89,7 +89,15 @@ base_manifest, reference_contents_observed, callable_environment_established,
 transformation_authorized
 ```
 
-implementation 固定为 `cpython`；rule 为 `CPYTHON_LOAD_OCCURRENCES_V1`。
+implementation 固定为 `cpython`；rule 是按PID严格分派的观察profile：
+
+| rule | 观察范围 |
+| --- | --- |
+| `CPYTHON_LOAD_OCCURRENCES_V1` | 旧逐指令记录；旧raw/report继续使用原算法 |
+| `CPYTHON_CALL_WINDOWS_V1` | 支持的完整CALL窗口、CALL事件及持续的continuation/handler失效观察点 |
+
+wire字段和schema版本不变，未知rule拒绝。独立重放读取各PID的metadata.rule，
+不能用当前CLI默认模式重解释旧记录；同bundle可有不同PID使用不同规则。
 后三个 authority 字段只能为 false。`previous_profile`、`io_failed` 是 exact bool；
 errors 至多 16 条非空字符串。未知字段或提升权限均拒绝。
 
@@ -110,6 +118,12 @@ bytes 是实际成功写入字节；partial write 后不能继续追加，碎行
 loads 是所有成功 instruction.loads 的总长度；references 是每个非 null reference
 字段的出现次数：每 load 的 reference 与 shape.reference 分别计费，attempt 的
 dispatch.reference 与 arg0 分别计费，即便 token 重复。reader 重新计算以上计数。
+
+windows profile中的instructions是**记录数**，不是执行的所有指令次数。
+有意省略的非窗口位置不计drops，且不支持这些位置没有操作、状态或效果的结论。
+collector的静态计划及disabled-offset累计记账也分别受max_events数值上限约束；
+这些内部工作上限不能混同raw event计数，也不是reader能从省略事件重算的计数。
+它们耗尽须给明确GAP并停止，而非无限保留CodeType实例或位置集合。
 
 `base_manifest` 采用三个现有 CallTraceFile records，完整绑定 codes/events/meta 的
 逻辑路径、PID、family、解压后的 SHA256、bytes、lines。collector 在 base.close 后
@@ -147,6 +161,19 @@ instruction 后，旧 pending attempt 失效；较新的 attempt 不能被旧 at
 与合法返回指令才能继续接唯一 caller CALL normal-result；UNKNOWN/SUSPENDED
 不能接 normal。route 层仍须核对源码、完整 code、layout、字节码动态窗口和 core
 端口，reader 返回本身不意味着这些条件通过。
+
+windows profile还须从准确匹配的当前源码CodeType独立重建窗口：完整相邻的
+LOAD/PUSH_NULL/NOP直到CALL，窗口内部不得有jump target或异常handler入口，
+首offset允许多入口。全部必需位置每次都记录并核对动态顺序；不能按过滤后相邻
+的LOAD子序列推导来源。caller暂停代码保持明确边界。正常CALL continuation与
+handler入口持续观察，不能因首次无pending就DISABLE；未进入的attempt仍由既有
+GAP/INSTRUCTION机制取消。旧profile不暗加该新规则。
+
+采集CLI提供`--operand-capture windows|instructions`；新CLI默认windows，显式
+instructions可复现旧逐指令模式。直接安装collector的无配置默认仍为instructions。
+windows使用本机验证过的local事件DISABLE，code存活期保持有界weak identity登记，
+stop/fork先检查全部tool/mask所有权；外部已改配置时不清掩码或释放其slot。
+完整设计与实际失败依据见 [调用窗口修复计划](N2_CALL_WINDOWS_PLAN.md)。
 
 GAP 与 previous_profile 必须阻断受影响的正路线。hook 配置快照相同不证明持续
 无干预。所有条件路线保留 producer 信任、NO_FRAME_INTERPOSITION、namespace

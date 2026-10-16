@@ -81,6 +81,12 @@ def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=
     Structural errors raise ValueError. Captured code/layout inconsistencies,
     incomplete collection and hook interference remain explicit boundaries.
     This reader does not establish source correspondence or argument routing.
+
+    Each process retains its own strictly decoded metadata.rule. Both capture
+    rules use the same event, GAP and pending-attempt protocol; selected-window
+    capture does not imply that omitted instructions were effect-free. The
+    route builder chooses its bytecode rule from each process's metadata, never
+    from a current collector default or another process in this bundle.
     """
     _require(type(budget) is CallOperandBudget, "operand reader requires a typed independent budget")
     _require(type(frame_budget) is CallEdgeBudget, "operand reader requires a typed frame budget")
@@ -271,7 +277,9 @@ def _validate_relationships(events, entries, exits, frame_scan, issues):
                 elif shape.layout.flags != captured.flags or shape.layout.parameters != captured.parameters:
                     issues.append(OperandReadIssue("LAYOUT_MISMATCH", "callable layout disagrees with the captured descriptor", event.process_id, event.anchor, owner))
         if type(event) is OperandInstruction:
-            # Resuming caller bytecode ends the preceding dispatch window.
+            # A retained caller instruction (including a windows-profile
+            # continuation/cancellation observation) ends the dispatch window.
+            # Absence of other opcode rows is not proof of execution continuity.
             pending.pop(owner, None)
         elif type(event) is OperandCallAttempt:
             attempts[event.key] = event

@@ -13,7 +13,9 @@ import dis
 import inspect
 
 from scar.ir.program.call_edges import CallLinkStatus, FrameCompletion, InvocationKey
-from scar.ir.program.call_operands import CallableKind, LoadNamespace
+from scar.ir.program.call_operands import (
+    CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, CallableKind, LoadNamespace,
+)
 from scar.ir.program.call_operand_routes import (
     ArgumentRoute, CompletionRoute, CoreReferenceKind, CoreReferenceRoute,
     CoreReferenceTemplate, CoreReferenceValue, FrameRouteObligations,
@@ -136,7 +138,7 @@ class _Core:
         return CoreReferenceTemplate(definition, body.graph.root, tuple(values), tuple(routes))
 
 
-def _instruction_plan(code, site, node):
+def _instruction_plan(code, site, node, rule=LOAD_OCCURRENCES_RULE, *, selection=None):
     """Build the narrow LOAD/PUSH_NULL window from exact verified bytecode."""
     from scar.trace.operand_bytecode import load_slots
     instructions = list(dis.get_instructions(code))
@@ -168,6 +170,22 @@ def _instruction_plan(code, site, node):
     _need(all(slot[1] == 'FAST_LOCAL' for _, slot in tokens[1:]), Issue.DISPATCH_BOUNDARY,
           'actuals require explicit fast-local Name loads')
     window.append((call, ()))
+    if rule == CALL_WINDOWS_RULE:
+        # Recompute from the exact source-verified CodeType. A sparse row
+        # subsequence cannot itself prove that no skipped control transfer
+        # entered the middle of this physical instruction interval.
+        from scar.trace.operand_bytecode import call_window_selection
+        suspended = inspect.CO_GENERATOR | inspect.CO_COROUTINE | inspect.CO_ASYNC_GENERATOR
+        _need(not code.co_flags & suspended, Issue.DISPATCH_BOUNDARY,
+              'suspended caller code is outside the sparse call-window rule')
+        selected = selection
+        if selected is None:
+            selected, _ = call_window_selection(code, instructions)
+        _need(selected.get(site.offset) == tuple(instruction.offset for instruction, _ in window),
+              Issue.INSTRUCTION_WINDOW,
+              'sparse CALL window is not one complete physical interval without internal jump or handler entry')
+    else:
+        _need(rule == LOAD_OCCURRENCES_RULE, Issue.CAPTURE_GAP, 'unsupported operand capture rule')
     return tuple(window), tuple(tokens)
 
 
@@ -177,10 +195,17 @@ def _has_index(indices, first, last):
 
 
 def _load_window(attempt, node, caller_code, instructions, instruction_indices, previous_attempt,
-                 local_gaps, global_epochs, read_issues, plans):
-    key = attempt.site.code, attempt.site.offset
+                 local_gaps, global_epochs, read_issues, plans, rule=LOAD_OCCURRENCES_RULE):
+    key = rule, attempt.site.code, attempt.site.offset
     if key not in plans:
-        plans[key] = _instruction_plan(caller_code, attempt.site, node)
+        selection = None
+        if rule == CALL_WINDOWS_RULE:
+            from scar.trace.operand_bytecode import call_window_selection
+            selection_key = rule, attempt.site.code
+            if selection_key not in plans:
+                plans[selection_key] = call_window_selection(caller_code)[0]
+            selection = plans[selection_key]
+        plans[key] = _instruction_plan(caller_code, attempt.site, node, rule, selection=selection)
     plan, tokens = plans[key]
     stop = bisect_left(instruction_indices, attempt.index)
     actual = instructions[max(0, stop - len(plan)):stop]
@@ -278,6 +303,11 @@ def build_operand_routes(*, call_model, operand_model, inventory, sources, budge
                      if meta.errors or meta.io_failed or meta.dropped_events or meta.previous_profile}
     bad_processes.update(item.process_id for item in operand_model.issues
                          if item.invocation is None and item.anchor is None)
+    capture_rules = {}
+    for meta in operand_model.metadata:
+        if meta.process_id in capture_rules:
+            bad_processes.add(meta.process_id)
+        capture_rules[meta.process_id] = meta.rule
     local_gaps, global_gaps, global_epochs, read_issues = defaultdict(list), defaultdict(list), {}, defaultdict(list)
     for gap in operand_model.gaps:
         if gap.invocation is None:
@@ -296,6 +326,9 @@ def build_operand_routes(*, call_model, operand_model, inventory, sources, budge
         last = previous.get(attempt.invocation, 0)
         previous[attempt.invocation] = attempt.index
         try:
+            rule = capture_rules.get(attempt.process_id)
+            _need(rule in (LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE), Issue.CAPTURE_GAP,
+                  'attempt process has no supported capture rule metadata')
             _need(attempt.process_id not in bad_processes, Issue.CAPTURE_GAP,
                   'collector metadata reports loss, failure or an existing profile observer')
             matches = handshakes[attempt.process_id, attempt.index]
@@ -342,7 +375,7 @@ def build_operand_routes(*, call_model, operand_model, inventory, sources, budge
                   Issue.DISPATCH_BOUNDARY, 'actual frame parameters differ from dispatch-time layout')
             observations = _load_window(attempt, node, sources.objects[attempt.site.code],
                 instructions[attempt.invocation], instruction_indices.get(attempt.invocation, []),
-                last, local_gaps, global_epochs, read_issues, plans)
+                last, local_gaps, global_epochs, read_issues, plans, rule)
             _, loaded_callee = observations[0]
             _need(loaded_callee.callable_shape.kind is CallableKind.EXACT_FUNCTION,
                   Issue.DISPATCH_BOUNDARY, 'pre-load callable is a bound method, adapter or unavailable shape')

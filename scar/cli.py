@@ -32,6 +32,7 @@ def _trace(args) -> int:
     env.pop('SCAR_TRACE_CALL_EDGES',None)
     env.pop('SCAR_CALL_TRACE_OWNER_PID',None)
     env.pop('SCAR_CALL_OPERANDS',None)
+    env.pop('SCAR_OPERAND_CAPTURE',None)
     operands = getattr(args, "call_operands", False)
     if getattr(args,"calls_only",False) or operands:
         if args.lines:
@@ -48,7 +49,11 @@ def _trace(args) -> int:
         if operands:
             if args.max_operand_events < 1 or args.max_operand_bytes < 1:
                 raise SystemExit("operand budgets must be positive")
+            capture = getattr(args, 'operand_capture', 'windows')
+            if capture not in ('windows', 'instructions'):
+                raise SystemExit("operand capture must be windows or instructions")
             env['SCAR_CALL_OPERANDS'] = '1'
+            env['SCAR_OPERAND_CAPTURE'] = capture
             env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
             env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
     if args.lines:
@@ -278,6 +283,8 @@ def main(argv=None) -> int:
                        help="resource sampling interval in seconds (with --resources)")
     trace.add_argument('--calls-only',action='store_true',help='record bounded Python call sites and reference identities without Torch hooks or tensor values')
     trace.add_argument('--call-operands',action='store_true',help='record bounded instruction/load/call evidence; implies calls-only (CPython 3.14)')
+    trace.add_argument('--operand-capture',choices=('windows','instructions'),default='windows',
+                       help='capture bounded call windows (default) or every project instruction')
     trace.add_argument('--project-root',help='source boundary for lightweight call-site recording; defaults to target cwd')
     trace.add_argument('--max-call-events',type=int,default=100000)
     trace.add_argument('--max-call-bytes',type=int,default=64000000)

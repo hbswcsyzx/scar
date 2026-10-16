@@ -18,16 +18,24 @@ import weakref
 
 from scar.ir.program.call_edges import CallTraceFile
 from scar.ir.program.call_operands import (
-    CallableKind, FunctionLayout, OperandCollectionLimits,
-    OperandCollectionMetadata,
+    CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, CallableKind, FunctionLayout,
+    OperandCollectionLimits, OperandCollectionMetadata,
 )
 from scar.ir.record_codec import encode
 from scar.trace.code_snapshot import describe_code, site
-from scar.trace.operand_bytecode import load_slots
+from scar.trace.operand_bytecode import (
+    call_family_offsets, call_window_selection, load_slots,
+)
 
 
 _SCHEMA = "scar.call-operands-trace"
-_RULE = "CPYTHON_LOAD_OCCURRENCES_V1"
+_RULE = LOAD_OCCURRENCES_RULE
+_CAPTURE_INSTRUCTIONS = "instructions"
+_CAPTURE_WINDOWS = "windows"
+_CAPTURE_RULES = {
+    _CAPTURE_INSTRUCTIONS: LOAD_OCCURRENCES_RULE,
+    _CAPTURE_WINDOWS: CALL_WINDOWS_RULE,
+}
 _MONITOR_NAME = "scar-call-operands"
 _LOCAL_MASK = sys.monitoring.events.INSTRUCTION | sys.monitoring.events.CALL
 _MAX_EVENT_LINE_BYTES = 2_000_000
@@ -63,8 +71,11 @@ def _layout(code):
 class CallOperandObserver:
     """One per-process monitor attached to an existing CallEdgeRecorder."""
 
-    def __init__(self, recorder, *, max_events=100_000, max_bytes=32_000_000,
-                 max_loads=64, max_namespace_items=4096, max_references=None):
+    def __init__(self, recorder, *, capture="instructions", max_events=100_000,
+                 max_bytes=32_000_000, max_loads=64, max_namespace_items=4096,
+                 max_references=None):
+        if type(capture) is not str or capture not in _CAPTURE_RULES:
+            raise ValueError("operand capture must be 'instructions' or 'windows'")
         for name, value in (("max_events", max_events), ("max_bytes", max_bytes),
                             ("max_loads", max_loads), ("max_namespace_items", max_namespace_items)):
             _positive(value, name)
@@ -86,6 +97,8 @@ class CallOperandObserver:
         self.pid = recorder.pid
         self.root = recorder.root
         self.root_prefix = recorder.root_prefix
+        self.capture = capture
+        self.rule = _CAPTURE_RULES[capture]
         self.limits = OperandCollectionLimits(max_events, max_bytes, max_loads,
                                                max_namespace_items, max_references)
         self.tool_id = None
@@ -107,7 +120,9 @@ class CallOperandObserver:
         self._frames = {}
         self._code_states = {}
         self._plans = {}
+        self._window_plans = {}
         self._planned_instruction_count = 0
+        self._disabled_instruction_count = 0
         self._pending = {}
         self._arg0_missing = getattr(sys.monitoring, "MISSING", _MISSING)
         if self._arg0_missing is _MISSING:
@@ -333,20 +348,43 @@ class CallOperandObserver:
                     self._gap("EXPECTED_FUNCTION_ENTRY_NOT_MATCHED", parent_state[0])
                 self._pending.pop(pending_key, None)
 
+        if self.capture == _CAPTURE_WINDOWS:
+            try:
+                window_plan = self._window_plan(code, code_key)
+            except BaseException as error:
+                self._remember_error(error)
+                self._gap("CALL_WINDOW_PLAN_FAILED_" + type(error).__name__, invocation)
+                self._stopped = True
+                return
+            if window_plan is None:
+                self._gap("CALL_WINDOW_PLAN_INSTRUCTION_BUDGET_EXCEEDED", invocation)
+                self._stopped = True
+                return
+
         identity = threading.get_ident(), id(frame)
         code_reference = weakref.ref(code)
         self._frames[identity] = (invocation, code_key, code_reference)
-        record = self._code_states.get(id(code))
-        if record is None or record[0]() is not code:
-            self._code_states[id(code)] = [code_reference, 0]
-        self._code_states[id(code)][1] += 1
+        record = self._code_state(code, code_reference)
+        if record is None:
+            self._frames.pop(identity, None)
+            self._gap("CALL_WINDOW_CODE_OBJECT_BUDGET_EXCEEDED", invocation)
+            self._stopped = True
+            return
+        record["active"] += 1
         try:
             if sys.monitoring.get_tool(self.tool_id) != self.tool_name or sys.monitoring.get_events(self.tool_id) != 0:
                 self._gap("MONITORING_TOOL_OR_GLOBAL_MASK_CHANGED", invocation)
                 self._interfered = self._stopped = True
                 self._monitoring_interfered = True
                 return
-            sys.monitoring.set_local_events(self.tool_id, code, _LOCAL_MASK)
+            if self.capture == _CAPTURE_WINDOWS and record["installed"]:
+                if sys.monitoring.get_local_events(self.tool_id, code) != _LOCAL_MASK:
+                    self._gap("MONITORING_MASK_CHANGED_AT_CODE_REENTRY", invocation)
+                    self._interfered = self._stopped = True
+                    self._monitoring_interfered = True
+            else:
+                sys.monitoring.set_local_events(self.tool_id, code, _LOCAL_MASK)
+                record["installed"] = True
         except BaseException as error:
             self._gap("MONITORING_LOCAL_MASK_INSTALL_FAILED_" + type(error).__name__, invocation)
             self._stopped = True
@@ -362,10 +400,22 @@ class CallOperandObserver:
             self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", invocation)
         code = code_reference()
         entry = self._code_states.get(id(code)) if code is not None else None
-        if entry is None or entry[0]() is not code:
+        if entry is None or entry["reference"]() is not code:
             return
-        entry[1] -= 1
-        if entry[1] <= 0:
+        entry["active"] -= 1
+        if self.capture == _CAPTURE_WINDOWS:
+            try:
+                intact = (sys.monitoring.get_tool(self.tool_id) == self.tool_name
+                          and sys.monitoring.get_events(self.tool_id) == 0
+                          and sys.monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK)
+                if not intact:
+                    self._gap("MONITORING_MASK_OR_TOOL_CHANGED_AT_FRAME_EXIT", invocation)
+                    self._interfered = self._stopped = True
+                    self._monitoring_interfered = True
+            except BaseException as error:
+                self._remember_error(error)
+            return
+        if entry["active"] <= 0:
             self._code_states.pop(id(code), None)
             try:
                 intact = (sys.monitoring.get_tool(self.tool_id) == self.tool_name
@@ -393,6 +443,62 @@ class CallOperandObserver:
         self._planned_instruction_count += len(result)
         self._plans[code_key] = result
         return result
+
+    def _window_plan(self, code, code_key):
+        """Build one bounded static sparse-selection plan per code descriptor."""
+        cached = self._window_plans.get(code_key)
+        if cached is not None:
+            return cached
+        import dis
+        remaining = self.limits.max_events - self._planned_instruction_count
+        if remaining < 1:
+            return None
+        instructions = []
+        for instruction in dis.get_instructions(code):
+            if len(instructions) >= remaining:
+                return None
+            instructions.append(instruction)
+        instructions = tuple(instructions)
+        opcode_plan = {}
+        for instruction in instructions:
+            opcode_plan[instruction.offset] = (
+                instruction.opname, load_slots(code, instruction))
+        windows, expiry_offsets = call_window_selection(code, instructions)
+        call_offsets = call_family_offsets(code, instructions)
+        selected_offsets = frozenset(expiry_offsets | call_offsets |
+                                     {offset for window in windows.values() for offset in window})
+        if not selected_offsets <= opcode_plan.keys():
+            raise ValueError("call-window plan references an unknown logical instruction")
+        plan = {
+            "opcodes": opcode_plan,
+            "windows": windows,
+            "call_offsets": call_offsets,
+            "expiry_offsets": expiry_offsets,
+            "selected_offsets": selected_offsets,
+        }
+        self._planned_instruction_count += len(instructions)
+        self._plans[code_key] = opcode_plan
+        self._window_plans[code_key] = plan
+        return plan
+
+    def _code_state(self, code, code_reference):
+        key = id(code)
+        state = self._code_states.get(key)
+        if state is not None and state["reference"]() is code:
+            return state
+        if state is not None:
+            self._code_states.pop(key, None)
+        # Inactive but still live CodeType objects retain their monitoring mask
+        # until stop(), so count them against the same bounded code ceiling.
+        for stale_key, stale in tuple(self._code_states.items()):
+            if stale["reference"]() is None:
+                self._code_states.pop(stale_key, None)
+        if len(self._code_states) >= self.recorder.limits["max_codes"]:
+            return None
+        state = {"reference": code_reference, "active": 0, "installed": False,
+                 "disabled_instruction_offsets": set()}
+        self._code_states[key] = state
+        return state
 
     def _event_owner(self, frame, code):
         if frame is None or frame.f_code is not code:
@@ -475,39 +581,71 @@ class CallOperandObserver:
             with self._lock:
                 try:
                     if self._stopped or self._closed or os.getpid() != self.pid:
-                        return
+                        return self._disabled_callback_result(code)
                     if self._event_attempts >= self.limits.max_events:
                         self._dropped += 1
                         self._stopped = True
                         self._hook_epoch += 1
-                        return
+                        return self._disabled_callback_result(code)
                     owner_info = self._event_owner(frame, code)
                     if owner_info is None:
                         self._gap("INSTRUCTION_FRAME_UNAVAILABLE")
-                        return
+                        self._stopped = self.capture == _CAPTURE_WINDOWS
+                        return self._disabled_callback_result(code)
                     owner, code_key = owner_info
                     if not self._monitor_is_intact(code):
                         self._mark_interference(frame, "MONITORING_MASK_OR_TOOL_CHANGED", monitoring=True)
-                        return
+                        return self._disabled_callback_result(code)
                     pending_key = (threading.get_ident(), owner)
                     if self._pending.pop(pending_key, None) is not None:
                         self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", owner)
-                    opcode_plan = self._plan(code, code_key)
-                    if opcode_plan is None:
-                        self._gap("OPCODE_PLAN_INSTRUCTION_BUDGET_EXCEEDED", owner)
-                        self._stopped = True
-                        return
+                    if self.capture == _CAPTURE_WINDOWS:
+                        sparse_plan = self._window_plan(code, code_key)
+                        if sparse_plan is None:
+                            self._gap("CALL_WINDOW_PLAN_INSTRUCTION_BUDGET_EXCEEDED", owner)
+                            self._stopped = True
+                            return self._disabled_callback_result(code)
+                        if type(offset) is not int or offset not in sparse_plan["opcodes"]:
+                            self._gap("INSTRUCTION_NOT_IN_VERIFIED_CODE", owner)
+                            self._stopped = True
+                            return self._disabled_callback_result(code)
+                        if offset not in sparse_plan["selected_offsets"]:
+                            state = self._code_states.get(id(code))
+                            if state is None or state["reference"]() is not code:
+                                self._gap("CALL_WINDOW_CODE_STATE_UNAVAILABLE", owner)
+                                self._stopped = True
+                                return self._disabled_callback_result(code)
+                            disabled = state["disabled_instruction_offsets"]
+                            if offset in disabled:
+                                self._mark_interference(
+                                    frame, "DISABLED_INSTRUCTION_LOCATION_REFIRED", monitoring=True)
+                                return self._disabled_callback_result(code)
+                            if self._disabled_instruction_count >= self.limits.max_events:
+                                self._gap("CALL_WINDOW_DISABLED_OFFSET_BUDGET_EXCEEDED", owner)
+                                self._stopped = True
+                                return self._disabled_callback_result(code)
+                            disabled.add(offset)
+                            self._disabled_instruction_count += 1
+                            return sys.monitoring.DISABLE
+                        opcode_plan = sparse_plan["opcodes"]
+                    else:
+                        opcode_plan = self._plan(code, code_key)
+                        if opcode_plan is None:
+                            self._gap("OPCODE_PLAN_INSTRUCTION_BUDGET_EXCEEDED", owner)
+                            self._stopped = True
+                            return
                     plan = opcode_plan.get(offset)
                     if plan is None:
                         self._gap("INSTRUCTION_NOT_IN_VERIFIED_CODE", owner)
-                        return
+                        self._stopped = self.capture == _CAPTURE_WINDOWS
+                        return self._disabled_callback_result(code)
                     _opname, slots = plan
                     row_site = _raw_site(code, offset)
                     if self._event_attempts >= self.limits.max_events:
                         self._dropped += 1
                         self._stopped = True
                         self._hook_epoch += 1
-                        return
+                        return self._disabled_callback_result(code)
                     event_index = self._event_index + 1
                     seen, snapshots, loads, deferred_gaps = {}, {}, [], []
                     if slots is not None:
@@ -538,6 +676,23 @@ class CallOperandObserver:
                 except BaseException as error:
                     self._remember_error(error)
                     self._gap("INSTRUCTION_CALLBACK_FAILURE_" + type(error).__name__)
+                    if self.capture == _CAPTURE_WINDOWS:
+                        self._stopped = True
+                        return self._disabled_callback_result(code)
+
+    def _disabled_callback_result(self, code=None):
+        if (self.capture != _CAPTURE_WINDOWS or self._monitoring_interfered
+                or self.tool_id is None):
+            return None
+        try:
+            if (sys.monitoring.get_tool(self.tool_id) != self.tool_name
+                    or sys.monitoring.get_events(self.tool_id) != 0):
+                return None
+            if code is not None and sys.monitoring.get_local_events(self.tool_id, code) != _LOCAL_MASK:
+                return None
+        except BaseException:
+            return None
+        return sys.monitoring.DISABLE
 
     def _on_call(self, code, offset, callable_object, arg0):
         try:
@@ -548,20 +703,21 @@ class CallOperandObserver:
             with self._lock:
                 try:
                     if self._stopped or self._closed or os.getpid() != self.pid:
-                        return
+                        return self._disabled_callback_result(code)
                     if self._event_attempts >= self.limits.max_events:
                         self._dropped += 1
                         self._stopped = True
                         self._hook_epoch += 1
-                        return
+                        return self._disabled_callback_result(code)
                     owner_info = self._event_owner(frame, code)
                     if owner_info is None:
                         self._gap("CALL_FRAME_UNAVAILABLE")
-                        return
+                        self._stopped = self.capture == _CAPTURE_WINDOWS
+                        return self._disabled_callback_result(code)
                     owner, _code_key = owner_info
                     if not self._monitor_is_intact(code):
                         self._mark_interference(frame, "MONITORING_MASK_OR_TOOL_CHANGED", monitoring=True)
-                        return
+                        return self._disabled_callback_result(code)
                     pending_key = (threading.get_ident(), owner)
                     if self._pending.pop(pending_key, None) is not None:
                         self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", owner)
@@ -570,7 +726,7 @@ class CallOperandObserver:
                         self._dropped += 1
                         self._stopped = True
                         self._hook_epoch += 1
-                        return
+                        return self._disabled_callback_result(code)
                     event_index = self._event_index + 1
                     seen, snapshots, deferred_gaps = {}, {}, []
                     observed_target_code = (callable_object.__code__
@@ -585,7 +741,7 @@ class CallOperandObserver:
                     for reason in deferred_gaps:
                         self._gap(reason, owner, advance=False)
                     if attempt_index is None:
-                        return
+                        return self._disabled_callback_result(code)
                     if dispatch["kind"] == CallableKind.EXACT_FUNCTION.value and type(callable_object) is types.FunctionType:
                         target_code = observed_target_code
                         if self._code_inside(target_code):
@@ -600,6 +756,9 @@ class CallOperandObserver:
                 except BaseException as error:
                     self._remember_error(error)
                     self._gap("CALL_CALLBACK_FAILURE_" + type(error).__name__)
+                    if self.capture == _CAPTURE_WINDOWS:
+                        self._stopped = True
+                        return self._disabled_callback_result(code)
 
     def stop(self):
         """Stop observation and remove only masks still owned by this tool."""
@@ -613,17 +772,31 @@ class CallOperandObserver:
                     self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", owner)
                 self._pending.clear()
                 self._stopped = True
-                for reference, _count in tuple(self._code_states.values()):
-                    code = reference()
-                    if code is None:
-                        continue
+                if not self._monitoring_interfered:
                     try:
-                        if (sys.monitoring.get_tool(self.tool_id) == self.tool_name
-                                and sys.monitoring.get_events(self.tool_id) == 0
-                                and sys.monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK):
-                            sys.monitoring.set_local_events(self.tool_id, code, 0)
+                        owns_tool = sys.monitoring.get_tool(self.tool_id) == self.tool_name
+                        owns_global_mask = sys.monitoring.get_events(self.tool_id) == 0
+                        installed_codes = []
+                        for state in tuple(self._code_states.values()):
+                            code = state["reference"]()
+                            if code is not None and state["installed"]:
+                                installed_codes.append(code)
+                        owns_local_masks = all(
+                            sys.monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK
+                            for code in installed_codes
+                        )
+                        if owns_tool and owns_global_mask and owns_local_masks:
+                            for code in installed_codes:
+                                sys.monitoring.set_local_events(self.tool_id, code, 0)
+                        elif self.capture == _CAPTURE_WINDOWS and installed_codes:
+                            if len(self._errors) < 16:
+                                self._errors.append("MONITORING_MASK_OR_TOOL_CHANGED_AT_STOP")
+                            self._interfered = True
+                            self._monitoring_interfered = True
                     except BaseException as error:
                         self._remember_error(error)
+                        self._interfered = True
+                        self._monitoring_interfered = True
                 self._code_states.clear()
                 self._frames.clear()
                 if not self._monitoring_interfered:
@@ -644,17 +817,31 @@ class CallOperandObserver:
         if not self._monitoring_interfered and self.tool_id is not None:
             try:
                 monitoring = sys.monitoring
-                if (monitoring.get_tool(self.tool_id) == self.tool_name
-                        and monitoring.get_events(self.tool_id) == 0):
-                    for reference, _count in tuple(self._code_states.values()):
-                        code = reference()
-                        if (code is not None
-                                and monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK):
-                            monitoring.set_local_events(self.tool_id, code, 0)
+                owns_tool = monitoring.get_tool(self.tool_id) == self.tool_name
+                owns_global_mask = monitoring.get_events(self.tool_id) == 0
+                installed_codes = []
+                for state in tuple(self._code_states.values()):
+                    code = state["reference"]()
+                    if code is not None and state["installed"]:
+                        installed_codes.append(code)
+                owns_local_masks = all(
+                    monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK
+                    for code in installed_codes
+                )
+                if owns_tool and owns_global_mask and owns_local_masks:
+                    for code in installed_codes:
+                        monitoring.set_local_events(self.tool_id, code, 0)
                     if monitoring.get_events(self.tool_id) == 0:
                         monitoring.free_tool_id(self.tool_id)
+                else:
+                    # A child-side mismatch means another owner may have
+                    # taken over the tool or one of its local masks.  Do not
+                    # partially clear masks or free the shared tool slot.
+                    self._interfered = True
+                    self._monitoring_interfered = True
             except BaseException:
-                pass
+                self._interfered = True
+                self._monitoring_interfered = True
         if self._fd is not None:
             try:
                 os.close(self._fd)
@@ -692,7 +879,7 @@ class CallOperandObserver:
             ))
             metadata = OperandCollectionMetadata(
                 schema=_SCHEMA, schema_version=1, process_id=self.pid, project_root=self.root,
-                python=sys.version, implementation="cpython", rule=_RULE, limits=self.limits,
+                python=sys.version, implementation="cpython", rule=self.rule, limits=self.limits,
                 events=self._event_count, event_attempts=self._event_attempts,
                 instructions=self._instruction_count, call_attempts=self._attempt_count,
                 handshakes=self._handshake_count, gaps=self._gap_count,
@@ -732,15 +919,19 @@ def _environment_limit(name, default):
     return _positive(int(raw), name)
 
 
-def install(recorder, *, max_events=None, max_bytes=None,
+def install(recorder, *, capture=None, max_events=None, max_bytes=None,
             max_loads=None, max_namespace_items=None, max_references=None):
     """Attach the sidecar without replacing the existing sys.setprofile hook."""
+    if capture is None:
+        capture = os.environ.get("SCAR_OPERAND_CAPTURE", _CAPTURE_INSTRUCTIONS)
+    if type(capture) is not str or capture not in _CAPTURE_RULES:
+        raise ValueError("SCAR_OPERAND_CAPTURE must be 'instructions' or 'windows'")
     max_events = _environment_limit("SCAR_OPERAND_MAX_EVENTS", 100_000) if max_events is None else max_events
     max_bytes = _environment_limit("SCAR_OPERAND_MAX_BYTES", 32_000_000) if max_bytes is None else max_bytes
     max_loads = _environment_limit("SCAR_OPERAND_MAX_LOADS", 64) if max_loads is None else max_loads
     max_namespace_items = (_environment_limit("SCAR_OPERAND_MAX_NAMESPACE_ITEMS", 4096)
                            if max_namespace_items is None else max_namespace_items)
-    return CallOperandObserver(recorder, max_events=max_events, max_bytes=max_bytes,
+    return CallOperandObserver(recorder, capture=capture, max_events=max_events, max_bytes=max_bytes,
                                max_loads=max_loads, max_namespace_items=max_namespace_items,
                                max_references=max_references)
 
