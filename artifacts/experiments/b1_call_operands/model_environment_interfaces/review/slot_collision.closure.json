@@ -1,0 +1,91 @@
+{
+  "schema": "scar.read-only-design-closure",
+  "schema_version": 1,
+  "status": "PASS",
+  "review_scope": "Only closure of the same-body formal/free-variable static slot collision; product and tests were read, not edited.",
+  "created_utc": "2026-10-16T05:02:57.392986+00:00",
+  "worktree": "/tmp/scar-structured-model-280qf4mi",
+  "revision": "e8267134b5daf40e5a2b89b1a00a73186284e864",
+  "revision_note": "The implementation was present as working-tree changes at review time; file SHA256 values identify the reviewed content.",
+  "source_sha256": {
+    "scar/ir/program/environments.py": "14e9c16d89db388793236a3636adaac0557c410a5c633c65f7558d413db029f8",
+    "scar/ir/program/environment_validation.py": "edfefa6a74b80fbbe425de3dce2a0d4750ab971c42f372072f7252c6d19da834",
+    "docs/M1_ENVIRONMENT_INTERFACES.md": "b6778134e042e3dca5a4c2aefe7208024c67370f9aa7ef9995c66bfcee8ecf07",
+    "tests/unit/test_program_environments.py": "c33590e3f84e9a0a3e3ea2f0aaad3b0393f8cbeaaa4c21aeecb76d91ab82e464",
+    "scar/ir/program/validation.py": "3868b74b773593a1cf39a43d5819efc588fd55151d0af0e11683dfff56ddf03f",
+    "scar/ir/program/queries.py": "749b9ce7b6234f13cf804737f8151901869bb3faa95f4fadf431f66bbb7c0d55",
+    "scar/ir/program/codec.py": "c0cb4c5b7f359b46db3b898b35b19d79f6bdcbfb7a36313ac8ef931a41d9ce9c",
+    "tests/unit/test_program_environment_records.py": "d9dd13426b6d4c99d6edf56baef600a4deab6a3686b3c3ed262e7aec9f54ede0"
+  },
+  "historical_evidence": {
+    "path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_environment_interfaces/review/slot_collision.before.json",
+    "sha256": "8caf11b5b23872fd6d16c5440c7f3d606598605d04517ca8a885d3a53e357a2b",
+    "reported_issues_before": [],
+    "preserved": true
+  },
+  "checks": [
+    {
+      "name": "local_free_variable_slot_semantics",
+      "status": "PASS",
+      "evidence": [
+        "scar/ir/program/environments.py:46",
+        "docs/M1_ENVIRONMENT_INTERFACES.md:56"
+      ],
+      "conclusion": "cell_slot denotes this body co_freevars interface slot, not an outer binding origin or runtime cell identity."
+    },
+    {
+      "name": "same_body_static_slot_disjointness",
+      "status": "PASS",
+      "evidence": [
+        "scar/ir/program/environment_validation.py:104"
+      ],
+      "conclusion": "The validator resolves each layout to its own environment and rejects intersection of formal slots and captured free-variable slots with function_entry_slot. Record validation already restricts non-null cell_slot to CAPTURED_CELL."
+    },
+    {
+      "name": "no_alias_or_order_regression_in_rule",
+      "status": "PASS",
+      "conclusion": "The new check compares static slot IDs only. It does not compare actual object identities, reference targets, locations, or entry position. A formal promoted to this body co_cellvars remains legal because that is not this body captured free-variable interface. Existing independent logical/physical order and repeated actual-reference/coarse-location tests remain present."
+    },
+    {
+      "name": "minimal_collision_regression",
+      "status": "PASS",
+      "evidence": [
+        "tests/unit/test_program_environments.py:372"
+      ],
+      "conclusion": "Regression changes only a formal slot to the captured free-variable slot while retaining distinct entry ValueIDs; it requires precisely function_entry_slot and rejects dumps at the codec boundary."
+    }
+  ],
+  "existing_component_gate": {
+    "path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_environment_interfaces/component-final/report.json",
+    "sha256": "ab4535aa3a1594cf9ca11fbd1ee9a65d6a933f658ba3cd9cfb907d7fc937c047",
+    "status": "PASS",
+    "returncode": 0,
+    "result": "327 passed in 16.18s",
+    "driver_duration_seconds": 16.941,
+    "source_sha256": "efefa8a50396c4637935a488fca04663d738f4430679bd4f0975fd07be0c00cd",
+    "source_unchanged_during_test": true,
+    "tested_file_count": 346,
+    "evidence_use": "Read existing gate report; this review did not rerun the gate.",
+    "reviewed_code_and_regression_match_gate_manifest": {
+      "scar/ir/program/environments.py": true,
+      "scar/ir/program/environment_validation.py": true,
+      "tests/unit/test_program_environments.py": true,
+      "scar/ir/program/validation.py": true,
+      "scar/ir/program/queries.py": true,
+      "scar/ir/program/codec.py": true,
+      "tests/unit/test_program_environment_records.py": true
+    },
+    "documentation_in_gate_manifest": false
+  },
+  "new_tests_or_language_probes_run": [],
+  "remaining_blocking_findings_in_this_scope": [],
+  "does_not_prove": [
+    "A declared cell_slot or formal slot actually matches source symtable, co_freevars, co_cellvars, or a runtime callable; extraction/source/code replay remain separate obligations.",
+    "Automatic full body entry recovery, actual Python signature binding, or correctness of closures/defaults/builtins extraction.",
+    "Actual object/cell/location disjointness, complete effects, purity, content identity, lifetime/release, or transformation authority.",
+    "Completion of all M1 or whole-program modeling requirements; this closes one structural consistency defect only."
+  ],
+  "files_written_by_review": [
+    "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_environment_interfaces/review/slot_collision.closure.json"
+  ]
+}

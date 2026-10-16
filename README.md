@@ -16,7 +16,8 @@ verify bounded tool capabilities; the new adapters are not yet integrated.
 The [first-stage completion matrix](docs/FIRST_STAGE_COMPLETION_MATRIX.md)
 separates implemented interfaces from remaining modeling work. The latest
 [function environment component](docs/M1_ENVIRONMENT_INTERFACES.md) passed 327
-bounded checks; this is not automatic source recovery or optimization authority.
+bounded checks and 2,835 frozen full-repository tests; this is not automatic
+source recovery or optimization authority.
 
 SCAR means **State · Control · Action · Resource**. It is a prototype for
 automatic program modeling and optimization planning for Python/PyTorch.

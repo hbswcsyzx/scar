@@ -5,7 +5,9 @@
 - `component-final/`：修复及新增反例后的 327 项终版通过记录，源指纹独立标明。
 - `historical/`：从原版本隔离生成 v4 wire 的依据；不能用当前类型反推旧版。
 - `review/`：独立评审，旧评审对应各自列出的旧 source hashes；最后 slot 修复另存 closure。
-- `full/`：冻结 implementation 后的一次全仓回归；运行前目录仅含独立 driver。
+- `full/`：首个调用只因短 HEAD 参数被 precondition 拒绝，未启动 pytest，原失败保留。
+- `full-final/`：完整 HEAD 的一次冻结回归，2,835 项通过；运行前目录仅含独立 driver。
+- `acceptance.json`：终态范围、revision/源指纹、完整报告链接及未完成项。
 
 独立语言探针、类型构造检查和分区检查的原始证据位于
 `artifacts/experiments/model_environment_interfaces/`；路径差异源于分工，保留原始文件。

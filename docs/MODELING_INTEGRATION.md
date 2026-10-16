@@ -132,6 +132,11 @@ pipeline、假设和逐域结论：数值/梯度、写回、alias/identity、RNG
 优先在同一次采集中启用 ETO + Profiler，保留两者原始 ID 和 window；复用
 现有 Python monitoring、module span 和 Kineto importer。
 
+另将 [TorchLens](TOOLING_SURVEY.md) 作为已有细粒度动态依赖 provider 进行后续
+隔离评估，与 ETO/现有 wrappers 比较来源完整性、metadata/payload 成本、mode/
+状态影响及能力范围。未通过前不接入 live 程序；重跑恢复、force-eager、结构
+hypothesis 等必须进入 provider envelope，不能当原物理执行或纯性证明。
+
 | 对应层 | 可使用的关系 | 必须拒绝的捷径 |
 | --- | --- | --- |
 | Python source ↔ code | source snapshot、compile context、code/position witness。 | 只按文件名/行号/qualname。 |
@@ -199,6 +204,7 @@ T0 完成也不意味着 M1/M2 或完整程序模型完成。
   core；不因新方案删掉历史证据和测试。
 - 在新的 Tensor 图适配器落实前，不再扩写与 FX/Export/ETO 重复的通用 Tensor
   tracing/metadata 机制。新增内容必须说明现成接口为何不足。
+  已有 TorchLens 的细粒度动态结构同样纳入复用范围，不因最初清单遗漏而继续自建。
 - Python 协议规格继续约束模型，但不把“列全语言构造”变成从零写完整编译器的
   必经路线。优先导入成熟前端的结构，再补 SCAR 需要而前端未表达的依赖关系。
 - 保留一套 canonical core 与 scoped correspondences；适配器不直接造 candidate，

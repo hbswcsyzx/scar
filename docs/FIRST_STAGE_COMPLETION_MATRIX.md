@@ -21,7 +21,7 @@ Operation、Value、StateLocation、Region、Resource 是规范实体；输入/�
 | --- | --- | --- | --- |
 | 源/代码版本与阶段 | AST/symtable/dis、snapshot/code witnesses、definition/call 分册。 | 将全部定义、编译/定义/进入/恢复阶段与规范操作/环境连接；不以行号当唯一身份。 | 部分实现。 |
 | 操作、值及有序使用 | 原 `ir/program`，准确 producer、Use、block/region、data/reference/state/binding。 | protocol values 与 outcome/adapter 端口；不以 label/string 代替强类型规则。 | 有限 core 已实现。 |
-| Python 函数入口与环境 | 环境及 entry-layout 组件接原 core；形参/环境/状态分区，引用与当前状态分开。 | source signature/replay 对应；真实 callable/code/各role/activation 映射；旧 `record_body` 偏移不能用于新入口。 | 静态声明组件 327 项通过，冻结全仓回归待执行；不算自动绑定。 |
+| Python 函数入口与环境 | 环境及 entry-layout 组件接原 core；形参/环境/状态分区，引用与当前状态分开。 | source signature/replay 对应；真实 callable/code/各role/activation 映射；旧 `record_body` 偏移不能用于新入口。 | 静态声明组件 327 项、冻结全仓 2,835 项通过；不算自动绑定。 |
 | 控制与语言完成 | 同步 if/loop/binding/invoke 子集；控制协议分册。 | 强类型 Return/Break/Continue 目标、pending cleanup、exception packet/context、with/except*、case dispatch。 | 规格有，核心类型不完整。 |
 | 挂起、恢复与逃逸 | generator/async/closure/callback 分册及部分事件记录。 | continuation、saved private frame、request、当前共享状态、suspension generation；边界 adapter 及生命周期。 | 核心类型/组合尚缺。 |
 | 状态 owner、selector 与 alias | StateLocation/Access、footprint 与版本 SSA；v2 storage 几何。 | namespace key/object field/cell/元素 selector、owner 身份、粗细域覆盖/冲突；外部 alias 写与输入失效关系。 | 现有粗粒度域可保守表达，精化接口未齐。 |
@@ -52,8 +52,8 @@ backend，也不以新的重型 LeWM trace 替代模型接口缺口。
 
 ## 4. 下一批必须完成的顺序
 
-1. 关闭当前 [函数环境与入口组件](M1_ENVIRONMENT_INTERFACES.md)的独立审查、
-   公开 codec/query/CLI 与冻结回归；明确只证明静态声明。
+1. 已关闭 [函数环境与入口组件](M1_ENVIRONMENT_INTERFACES.md)的独立审查、
+   公开 codec/query/CLI 与冻结回归；只证明静态声明，其 source/runtime 对应仍待接入。
 2. 将控制分册落为 canonical typed completion/cleanup/resume/adapter 接口，
    保留原 CFG/Uses/state，并验证错误目标、错误payload、旧world和恢复布局反例。
 3. 完善 location owner/selector 与完整 literal 表示；接资源 instance/work/ready

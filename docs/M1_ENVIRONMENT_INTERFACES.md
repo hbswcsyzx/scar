@@ -1,6 +1,6 @@
 # M1：函数环境接入规范调用与状态边
 
-日期：2026-10-16。状态：**327 项组件检查通过；冻结全仓回归待执行。**
+日期：2026-10-16。状态：**327 项组件检查及 2,835 项冻结全仓回归通过；仅关闭本组件。**
 依据：[整体模型](WHOLE_PROGRAM_MODEL.md) §3—5、
 [现成图的集成合同](MODELING_INTEGRATION.md) §3—4。
 本批落实函数环境这个完整接口，不实现 source lowerer、采集器、detector 或 backend。
@@ -13,6 +13,14 @@
 新增反例后才得到这份终版报告。报告目录：
 `artifacts/experiments/b1_call_operands/model_environment_interfaces/component-final/`。
 这些是结构声明检查，不是程序运行数据或性能结果。
+
+冻结 implementation 为 `e8267134b5daf40e5a2b89b1a00a73186284e864`。全仓一次
+2,835 PASS / 0 failed / 0 error / 0 skipped，driver wall 411.858s、峰值
+1,026,996KiB；三项既有警告。前后 HEAD、干净工作树、346 文件源指纹及8个 fixture
+文件 hash 完全相同。独立 slot 修复闭环 PASS；未重跑目标程序。全仓原始证据为
+`artifacts/experiments/b1_call_operands/model_environment_interfaces/full-final/`。
+最初 `full/` 仅因调用方传短 revision 而在 precondition 拒绝，未启动 pytest；保留
+该失败并在全新目录用完整 HEAD 运行，没有覆盖旧记录。测试时间是验收成本。
 
 ## 1. 为什么需要这条连接
 

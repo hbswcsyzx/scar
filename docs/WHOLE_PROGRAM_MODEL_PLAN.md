@@ -45,9 +45,10 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
    closure/callback 与当前共享状态；不能冻结 yield 时 world。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。
-4. 按构造清单补 source lowering 和未知区域保留，随后接全程序 inventory。
-   类型合同必须先于对应图恢复，不能用 source-only 占位完成验收。
-5. 再统一 occurrence/denotation 与外部读写协议，回溯完整观察根。此后进入 M6。
+4. 在 M1/M2 内补齐构造协议、provider 端口映射与未展开区域的接口规则。
+   source lowering/全程序 inventory 的实际扩展放在 M3；不越过第一阶段停止点。
+5. 在第一阶段落实 occurrence/denotation、外部读写和观察边界的类型合同；真实
+   证据连接在 M4、观察根依赖闭合在 M5，通过后才进入 M6。合同声明不算执行证明。
 
 这些是同一个 ProgramModel 的扩展，不按业务阶段创建不同图模型。模型层
 保持“值推导”和“物化推导”分离，避免 copy 构成逻辑值自环。
@@ -65,8 +66,8 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 ## 5. 当前证据锚点
 
-- M1 函数环境/入口分区组件已接规范 Uses/state，终版组件 327 项通过；冻结
-  全仓回归待执行。它只验证静态声明，不证明 runtime/source 绑定，见
+- M1 函数环境/入口分区组件已接规范 Uses/state，终版组件 327 项、冻结
+  全仓 2,835 项通过（implementation `e826713`）。它只验证静态声明，不证明 runtime/source 绑定，见
   [M1_ENVIRONMENT_INTERFACES.md](M1_ENVIRONMENT_INTERFACES.md)。其余完整分母见
   [FIRST_STAGE_COMPLETION_MATRIX.md](FIRST_STAGE_COMPLETION_MATRIX.md)。
 - M1 有限静态资源子项已接原 core 并通过198项组件检查；仍未关闭M1，见

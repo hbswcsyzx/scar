@@ -4,7 +4,9 @@
 
 [Environment/entry declarations](M1_ENVIRONMENT_INTERFACES.md) now connect to
 the existing canonical Uses, entry ports and state SSA. All 327 component checks
-passed; a frozen full regression is still pending. Wire v5 adds these interfaces
+and 2,835 frozen full-repository tests passed. Implementation `e826713` retained
+the same 346-file source fingerprint and eight fixture hashes across the run
+(411.858s / 1,026,996KiB; three existing warnings). Wire v5 adds these interfaces
 while original v1–v4 fixtures retain their exact contracts. Declarations do not
 verify runtime callable identity, source signature binding or pure effects.
 The [first-stage completion matrix](FIRST_STAGE_COMPLETION_MATRIX.md) records
@@ -19,6 +21,8 @@ Small CPU experiments verified usable FX/Export/state interfaces, an ETO↔Kinet
 CPU record-ID join, and isolated LibCST 1.9.0 parsing/metadata. These are research
 witnesses, not integrated adapters or whole-program coverage. Current SCAR already
 uses profiler/Kineto and sys.monitoring; FX/Export/ETO integration remains pending.
+Pinned TorchLens source/docs now add a fine-grained dynamic-provider candidate;
+no TorchLens installation or local compatibility/capture experiment is claimed.
 No new backend, workload run or speedup claim. Complete first-stage modeling is
 still unfinished; its stopping boundary is unchanged.
 
@@ -87,7 +91,7 @@ analysis costs; generation overlapped regression. Raw/source/Git remained unchan
 No actual/formal proof, whole-program graph, transformation or LeWM speedup.
 See [D1 acceptance](N2_CALL_DEMAND_ACCEPTANCE.md).
 
-Next: resolve the observed inherited-future compilation mismatch with explicit
+Historical next step at that checkpoint: resolve the observed inherited-future compilation mismatch with explicit
 matching profiles and historical replay, then deliver actual→formal→return queries,
 environment/world mapping, loops and state provenance under
 [the concrete cross-call plan](N2_CROSS_CALL_IMPLEMENTATION.md).

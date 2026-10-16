@@ -33,6 +33,7 @@ Python 3.14 网页显示 3.14.8；本机行为以探针及对应源码为准。�
 | `torch.export` | FX/ATen 图、graph signature、pytree call spec、lifted parameters/buffers、shape constraints；特定规范化阶段显式 mutation outputs。 | 成功 export 不说明原 Python region 无效果；约束外输入、mode、alias 和未捕获 Python 行为仍需合同。 | 优先复用规范化 Tensor 区域及其边界；记录具体 pipeline 阶段。 |
 | Dynamo / AOTAutograd / functionalization | 分段捕获、guards、graph-break 原因、前后向及 mutation/alias 重写接口。 | guard 不等于 logical value 相等；functionalization 的新图不是原执行的 storage/identity 记录。 | 编译覆盖/限制和已有图的来源，不启用编译来冒充建模完成。 |
 | torchview | 实际 forward 中 module、Torch function、Tensor 连接、shape；支持嵌套展开、显示深度和 meta device。 | 不是整程序 source/状态图；运行 forward 有执行和模式/引用等影响；图中没有出现的副作用不代表不存在。 | 可选人工审查/展示前端，不能只因有 SVG 就作为规范 IR。 |
+| TorchLens | 上游提供 eager Torch 操作依赖、模块嵌套、动态路径、metadata、activation/gradient 记录与展示。 | rich graph 不保证整程序依赖；有捕获模式、状态/引用/保存成本和未覆盖来源，部分恢复可重跑 forward。 | 增列为动态 provider 候选；只读固定源审查，尚无本机兼容性或采集成本验收。 |
 | torchviz / autograd graph | 从结果的 `grad_fn` 查看反向依赖及相关 saved tensors/parameters。 | 无梯度推理可能没有这张图；没有承诺完整 forward、Python 控制、文件输出。 | 梯度关系审查辅助；不作为整程序前端。 |
 | `torch.profiler` / Kineto | 真实 operator、CPU/runtime/GPU kernel、memcpy、等待及内存活动；原始 correlation 字段。 | 一次 trace 不覆盖未走分支；时间重叠不证明因果；物理 memcpy 不自动说明哪个逻辑值。 | **当前已经使用**，保留物理采集与原始证据，不重写 CUPTI。 |
 | `ExecutionTraceObserver`（ETO） | 动态 RecordFunction 图、operator inputs/outputs、Tensor/storage 标识和 shape/stride/type/device；`rf_id`。 | 标识不是内容版本；普通 Python/NumPy/文件行为不完整；host 记录不是 GPU 完成。 | **优先新增导入适配器**；当前尚未接入 SCAR。 |
@@ -56,6 +57,7 @@ Python 3.14 网页显示 3.14.8；本机行为以探针及对应源码为准。�
   [Dynamo overview](https://docs.pytorch.org/docs/stable/torch.compiler_dynamo_overview.html)。
 - [torchview 原仓库](https://github.com/mert-kurttutan/torchview)、
   [torchviz 原仓库](https://github.com/szagoruyko/pytorchviz)、
+  [TorchLens 固定源](https://github.com/johnmarktaylor91/torchlens/tree/550b96a61972cf7db23044125e5ee63489d217cd)、
   [Profiler/ETO](https://docs.pytorch.org/docs/stable/profiler.html)、
   [sys.monitoring](https://docs.python.org/3.14/library/sys.monitoring.html)。
 - [MLIR LangRef](https://mlir.llvm.org/docs/LangRef/)、
@@ -92,6 +94,14 @@ LibCST 原本未安装。`libcst_probe.py` 临时解包 PyPI 固定 **1.9.0** wh
 它们进行官方资料与源码审查，不伪称在 3.14/2.13 组合实测成功。
 torchview 能画 function 和 Tensor 连接，也能展开嵌套；默认显示层级不是能力上限。
 FX 可提供机器可读 operator/module 连接；其捕获范围及 Python 执行影响必须导入。
+
+补充的 [TorchLens 固定源审查](../artifacts/experiments/tooling_survey/torchlens_review/REPORT.md)
+读取官方 `550b96a61972cf7db23044125e5ee63489d217cd`（包声明 2.36.1），没有安装或
+执行它。其 eager 操作/动态路径/层级图已有较细粒度，不应再造同类 tracer。
+限制页披露重跑恢复、eager/compiled 捕获差别和来源缺口，payload/引用仍有成本；
+无值结构模式也不等于已证明实值依赖。该 checkout 的结构合同和限制页还有阶段
+文字差异，须以隔离兼容实验核对，不能直接导入为 SCAR 事实。新增资料的 URL/hash、
+错误路径404及更正均保留；第三方原文只临时读取并清理，留本次自己的小报告。
 
 本机 FX 探针中 `x+x` 在 args 保留两次 use，而 users 只有一个 consumer；buffer
 写和 Python counter 可发生于 trace 却不保留在重放图中；无 Proxy 的 rand 可被
@@ -143,6 +153,8 @@ Profiler `record_shapes` 可能临时保留引用并影响执行；ETO 某些环
 
 1. 优先复用标准 Python 源/编译见证、ETO+Profiler 动态证据、FX/Export Tensor
    子图。SCAR 负责接口规范化与跨图对应，不要求先自写所有 Tensor 运算规则。
+   TorchLens 增列为动态记录/依赖 provider 的复用评估对象，按具体事实与成本
+   与 ETO/已有 wrappers 比较；不默认同时全开，不把资料审查说成已集成。
 2. 先以适配器试验与公共反例比较精度/成本，再决定是否删除已有 observer 或
    替换静态 lowerer。工具未安装不是“不采用”的充分理由，本机小轮子可以隔离验证。
 3. torchview 作为展示/结构交叉检查；autograd 图补梯度关系；CodeQL/LibCST
