@@ -546,6 +546,16 @@ def _check_program(args) -> int:
                 resource_uses=len(graph.resource_uses),
                 resource_locations=len(graph.resource_locations))
             report.update(resource_realization_verified=False, readiness_verified=False)
+        if graph.environments:
+            report["counts"].update(
+                environments=len(graph.environments),
+                environment_members=sum(len(item.members) for item in graph.environments),
+                function_entries=len(graph.function_entries),
+                python_parameters=sum(len(item.parameters) for item in graph.function_entries))
+            report.update(environment_realization_verified=False,
+                          environment_extraction_verified=False,
+                          python_signature_binding_verified=False,
+                          runtime_callable_verified=False)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:
         destination = Path(args.out)

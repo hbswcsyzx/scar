@@ -65,6 +65,10 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 ## 5. 当前证据锚点
 
+- M1 函数环境/入口分区组件已接规范 Uses/state，终版组件 327 项通过；冻结
+  全仓回归待执行。它只验证静态声明，不证明 runtime/source 绑定，见
+  [M1_ENVIRONMENT_INTERFACES.md](M1_ENVIRONMENT_INTERFACES.md)。其余完整分母见
+  [FIRST_STAGE_COMPLETION_MATRIX.md](FIRST_STAGE_COMPLETION_MATRIX.md)。
 - M1 有限静态资源子项已接原 core 并通过198项组件检查；仍未关闭M1，见
   [M1_RESOURCE_INTERFACES.md](M1_RESOURCE_INTERFACES.md)。
 - M2 字段级协议分册已细化数据定义、控制及资源；独立语言探针约束规则，

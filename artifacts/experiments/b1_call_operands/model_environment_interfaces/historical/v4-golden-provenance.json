@@ -1,0 +1,13 @@
+{
+  "original_revision": "f80af0fedb20c20121707ee1aaf494844b7dcea5",
+  "generation": "isolated git archive scar/tests; original fixture and original codec",
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-c",
+    "from tests.unit.test_program_resources import resource_graph; from scar.ir.program.codec import dumps; print(dumps(resource_graph()))"
+  ],
+  "wire_sha256_without_trailing_newline": "3acea0f9832eb501374a56e6191b06c030e7c11d0ac1846dc4724aa765058d3e",
+  "fixture_sha256": "979d86eadede2634f94ade70d734e6e7415cdd92a2172ff0262ba596cf89d7f7",
+  "fixture_bytes": 2584,
+  "stderr": ""
+}

@@ -1,5 +1,16 @@
 # Current evidence and remaining work
 
+## Function environment interface component (2026-10-16)
+
+[Environment/entry declarations](M1_ENVIRONMENT_INTERFACES.md) now connect to
+the existing canonical Uses, entry ports and state SSA. All 327 component checks
+passed; a frozen full regression is still pending. Wire v5 adds these interfaces
+while original v1–v4 fixtures retain their exact contracts. Declarations do not
+verify runtime callable identity, source signature binding or pure effects.
+The [first-stage completion matrix](FIRST_STAGE_COMPLETION_MATRIX.md) records
+remaining control/resumption, location/literal, resource, denotation and provider
+interfaces. The complete modeling stage is unfinished.
+
 ## Tool reuse review (2026-10-16)
 
 [Survey](TOOLING_SURVEY.md) and [integration design](MODELING_INTEGRATION.md)

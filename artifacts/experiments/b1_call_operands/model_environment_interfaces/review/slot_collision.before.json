@@ -1,0 +1,8 @@
+{
+  "finding": "one body slot claimed as both explicit parameter and captured free-variable slot",
+  "issues_before_change": [],
+  "same_static_slot": true,
+  "distinct_entry_values": true,
+  "semantic_question": "cell_slot must be defined as this body freevar slot rather than outer origin slot; runtime cell/argument aliases are separate",
+  "validator_sha256": "a63089081e0c152f3519b8118310cdca62dd502cd000cb212aba71e04ed38d3f"
+}

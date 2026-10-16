@@ -1,0 +1,25 @@
+{
+  "results": [
+    {
+      "name": "nested_formal_env_overlap",
+      "result": "REJECTED"
+    },
+    {
+      "name": "nested_cell_position_bool",
+      "result": "REJECTED"
+    },
+    {
+      "environment_actual_uses": 6,
+      "environment_actual_values": 1,
+      "formal_actual_uses": 1,
+      "name": "aliased_actuals_keep_distinct_port_occurrences",
+      "result": "PASS",
+      "status": "DECLARED"
+    },
+    {
+      "entry_argument_count": 8,
+      "name": "fixture_has_typed_state_entry_port",
+      "result": "PASS"
+    }
+  ]
+}

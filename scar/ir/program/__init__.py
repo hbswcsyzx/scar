@@ -4,7 +4,7 @@ Graph-wide validation and queries are available from ``program.validation``
 and ``program.queries``. Typed records remain independently importable.
 """
 from scar.ir.program.ids import (
-    BlockID, LocationID, OperationID, RegionID, ResourceDefinitionID,
+    BlockID, EnvironmentInterfaceID, LocationID, OperationID, RegionID, ResourceDefinitionID,
     ResourceRequirementID, UseID, ValueID,
 )
 from scar.ir.program.resources import (
@@ -13,6 +13,9 @@ from scar.ir.program.resources import (
     ResourceRequirement, ResourceRole, ResourceUse,
 )
 from scar.ir.program.bindings import BindingDefinition, BindingRead, BindingState
+from scar.ir.program.environments import (
+    EnvironmentInterface, EnvironmentMember, EnvironmentRole, FunctionEntryLayout,
+)
 from scar.ir.program.model import (
     AccessMode, Behavior, Block, BlockArgument, CompletionResult,
     CompletionSignature, CompletionSuccessor, DataValue, ExitKind, ExitPort,
@@ -41,4 +44,6 @@ __all__ = [
     "ResourceDefinition", "ResourceDefinitionID", "ResourceKind", "ResourceLocation",
     "ResourceRelationConstraint", "ResourceRequirement", "ResourceRequirementID",
     "ResourceRole", "ResourceUse",
+    "EnvironmentInterface", "EnvironmentInterfaceID", "EnvironmentMember", "EnvironmentRole",
+    "FunctionEntryLayout",
 ]

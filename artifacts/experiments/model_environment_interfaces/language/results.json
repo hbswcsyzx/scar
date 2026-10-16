@@ -1,0 +1,29 @@
+{
+  "command": "/home/zyf/miniconda3/envs/lewm/bin/python artifacts/experiments/model_environment_interfaces/language/probe.py",
+  "probe_sha256": "bcff9c19fd5ddcf20d8f131712573bee5a6a2ac7da98c645ae6cc04ac88bde91",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "results": {
+    "builtins_binding": {
+      "globals_and_builtins_can_be_same_object": true,
+      "saved_builtins_survives_global_rebinding": true,
+      "values": [
+        1,
+        1,
+        3
+      ]
+    },
+    "closure_cells": {
+      "cell_not_weakrefable": true,
+      "empty_cell_is_not_none": true,
+      "empty_read_raises_name_error": true,
+      "shared_cell": true
+    },
+    "defaults_and_function_state": {
+      "absent_defaults_are_actual_none": true,
+      "defaults_and_kwdefaults_contents_can_alias": true,
+      "defaults_rebind_without_code_change": true,
+      "function_object_carries_additional_attributes": true
+    }
+  },
+  "scope": "stdlib language observations, not SCAR graph validation"
+}

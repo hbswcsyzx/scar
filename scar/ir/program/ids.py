@@ -39,7 +39,12 @@ class ResourceRequirementID(Identifier):
     prefix = "program_resource_requirement"
 
 
+class EnvironmentInterfaceID(Identifier):
+    prefix = "program_environment"
+
+
 __all__ = [
     "BlockID", "LocationID", "OperationID", "RegionID", "UseID", "ValueID",
     "ResourceDefinitionID", "ResourceRequirementID",
+    "EnvironmentInterfaceID",
 ]

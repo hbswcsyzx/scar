@@ -12,6 +12,7 @@ import math
 from typing import TypeAlias
 
 from scar.ir.program.bindings import BindingDefinition, BindingRead
+from scar.ir.program.environments import EnvironmentInterface, FunctionEntryLayout
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.resources import (
     ResourceDefinition, ResourceLocation, ResourceRequirement, ResourceUse,
@@ -654,6 +655,8 @@ class ProgramGraph:
     resource_requirements: tuple[ResourceRequirement, ...] = ()
     resource_uses: tuple[ResourceUse, ...] = ()
     resource_locations: tuple[ResourceLocation, ...] = ()
+    environments: tuple[EnvironmentInterface, ...] = ()
+    function_entries: tuple[FunctionEntryLayout, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -690,6 +693,16 @@ class ProgramGraph:
         _unique(tuple(row.id for row in self.resources), "ProgramGraph resource IDs")
         _unique(tuple(row.id for row in self.resource_requirements),
                 "ProgramGraph resource requirement IDs")
+        _tuple(self.environments, "ProgramGraph.environments")
+        if any(type(item) is not EnvironmentInterface for item in self.environments):
+            raise TypeError("ProgramGraph.environments contains an invalid environment interface")
+        _unique(tuple(item.id for item in self.environments),
+                "ProgramGraph environment interface IDs")
+        _tuple(self.function_entries, "ProgramGraph.function_entries")
+        if any(type(item) is not FunctionEntryLayout for item in self.function_entries):
+            raise TypeError("ProgramGraph.function_entries contains an invalid entry layout")
+        _unique(tuple(item.environment for item in self.function_entries),
+                "ProgramGraph function entry environments")
 
 
 __all__ = [

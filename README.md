@@ -13,6 +13,11 @@ The [tooling survey](docs/TOOLING_SURVEY.md) and
 reuse Python compiler interfaces, FX/Export and ETO+Profiler. Current experiments
 verify bounded tool capabilities; the new adapters are not yet integrated.
 
+The [first-stage completion matrix](docs/FIRST_STAGE_COMPLETION_MATRIX.md)
+separates implemented interfaces from remaining modeling work. The latest
+[function environment component](docs/M1_ENVIRONMENT_INTERFACES.md) passed 327
+bounded checks; this is not automatic source recovery or optimization authority.
+
 SCAR means **State · Control · Action · Resource**. It is a prototype for
 automatic program modeling and optimization planning for Python/PyTorch.
 The current task is to recover connected value/state/control dependencies,

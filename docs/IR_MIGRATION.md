@@ -21,6 +21,11 @@ state/control，按 [M0—M6](WHOLE_PROGRAM_MODEL_PLAN.md)逐门落实：
 | planner | 保留 NO-OP/成本/证明语义；输入改为闭合区域的具体替代方案，尚未实施该完整桥接。 |
 | backend | 保留旧实现与历史验证；不新增、不因规格通过自动启用。 |
 
+已实施的函数环境/入口分区是现 `ir/program` 的 v5 capability，见
+[组件范围](M1_ENVIRONMENT_INTERFACES.md)；无该 capability 的图仍按原 v2/v3/v4
+写出，原 v1—v4 reader 保留。这里的 v5 是实际发布的环境表/入口表，不是历史
+提案中尚未实现的控制协议版本。来源/动态对应与旧 source profile 仍有明确缺口。
+
 新完整模型 Resource 有静态 definition/requirement 和动态 instance，handle
 经对应关系引用它；不能仅作为 EEG 标签。旧 `ready_event` 不承担新完成证明。
 语言 completion、suspend/resume、host outcome、work outcome 有强类型接口，
