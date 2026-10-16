@@ -3,8 +3,8 @@
   "schema_version": 1,
   "files": {
     "README.md": {
-      "bytes": 1263,
-      "sha256": "4268dbb6e2e77e675999e4b3f75287ae0d14c0abef3bad8bdc002d0e2fb29fd8"
+      "bytes": 1491,
+      "sha256": "8b14c77cec8fc3ad69e0acc5376d896d6d4109d54d85af8f3f3c7c5d37ddfa0c"
     },
     "acceptance.json": {
       "bytes": 3676,
