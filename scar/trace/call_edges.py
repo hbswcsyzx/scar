@@ -35,6 +35,10 @@ class CallEdgeRecorder:
         self.dropped = self.codes_dropped = self.unknown_exits = self.suspended_exits = 0
         self.path_gaps = 0
         self.errors = []
+        # Optional metadata-only operand observer. The historical writer and
+        # its schema remain independent of the sidecar's evidence and budgets.
+        self.operand_observer = None
+        self.previous_profile_present = False
         self.closed = False
         self.io_failed = False
         self.started = time.perf_counter_ns()
@@ -238,8 +242,17 @@ def install(out, project_root):
     os.environ['SCAR_CALL_TRACE_OWNER_PID'] = str(os.getpid())
     main_thread = threading.get_ident()
     previous, previous_thread = sys.getprofile(),threading.getprofile()
+    recorder.previous_profile_present = previous is not None or previous_thread is not None
     def profile(frame,event,arg):
-        recorder.profile(frame,event,arg)
+        observer = recorder.operand_observer
+        if observer is None:
+            recorder.profile(frame,event,arg)
+        else:
+            # Keep the newly retained entry and its sidecar handshake atomic
+            # across threads. Monitoring callbacks use this same outer lock.
+            with recorder.lock:
+                recorder.profile(frame,event,arg)
+                observer.profile(frame,event,arg)
         old = previous if threading.get_ident() == main_thread else previous_thread
         if old is not None:
             old(frame,event,arg)
@@ -253,16 +266,24 @@ def install(out, project_root):
     def finish():
         if os.getpid() != recorder.pid:
             return
+        observer = recorder.operand_observer
+        if observer is not None:
+            observer.stop()
         if sys.getprofile() is profile:
             sys.setprofile(previous)
         if threading.getprofile() is profile:
             threading.setprofile(previous_thread)
         recorder.close()
+        if observer is not None:
+            observer.close()
         if sampler is not None:
             sampler.stop()
     def forked():
         if recorder.closed:
             return
+        observer = recorder.operand_observer
+        if observer is not None:
+            observer.after_fork()
         sys.setprofile(previous)
         threading.setprofile(previous_thread)
         for fd in (recorder.events_fd,recorder.codes_fd):

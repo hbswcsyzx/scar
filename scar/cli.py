@@ -31,10 +31,13 @@ def _trace(args) -> int:
     env["SCAR_TRACE_DEBUG"] = "1"
     env.pop('SCAR_TRACE_CALL_EDGES',None)
     env.pop('SCAR_CALL_TRACE_OWNER_PID',None)
-    if getattr(args,"calls_only",False):
+    env.pop('SCAR_CALL_OPERANDS',None)
+    operands = getattr(args, "call_operands", False)
+    if getattr(args,"calls_only",False) or operands:
         if args.lines:
             raise SystemExit("calls-only does not collect line tracing; use a separate trace")
-        if any(out.glob('call-events.*.jsonl*')) or any(out.glob('call-codes.*.jsonl*')):
+        if (any(out.glob('call-events.*.jsonl*')) or any(out.glob('call-codes.*.jsonl*'))
+                or any(out.glob('call-operands.*.jsonl*')) or any(out.glob('call-operand-meta.*.json*'))):
             raise SystemExit("calls-only requires a fresh output directory")
         env['SCAR_TRACE_CALL_EDGES'] = '1'
         env['SCAR_CALL_PROJECT_ROOT'] = str(Path(args.project_root or Path.cwd()).resolve())
@@ -42,6 +45,12 @@ def _trace(args) -> int:
         env['SCAR_CALL_MAX_BYTES'] = str(args.max_call_bytes)
         if args.max_call_events < 1 or args.max_call_bytes < 1:
             raise SystemExit("call budgets must be positive")
+        if operands:
+            if args.max_operand_events < 1 or args.max_operand_bytes < 1:
+                raise SystemExit("operand budgets must be positive")
+            env['SCAR_CALL_OPERANDS'] = '1'
+            env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
+            env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
     if args.lines:
         env["SCAR_TRACE_LINES"] = "1"
     if args.resources:
@@ -268,9 +277,12 @@ def main(argv=None) -> int:
     trace.add_argument("--resource-interval", type=float, default=0.1,
                        help="resource sampling interval in seconds (with --resources)")
     trace.add_argument('--calls-only',action='store_true',help='record bounded Python call sites and reference identities without Torch hooks or tensor values')
+    trace.add_argument('--call-operands',action='store_true',help='record bounded instruction/load/call evidence; implies calls-only (CPython 3.14)')
     trace.add_argument('--project-root',help='source boundary for lightweight call-site recording; defaults to target cwd')
     trace.add_argument('--max-call-events',type=int,default=100000)
     trace.add_argument('--max-call-bytes',type=int,default=64000000)
+    trace.add_argument('--max-operand-events',type=int,default=100000)
+    trace.add_argument('--max-operand-bytes',type=int,default=32000000)
     trace.add_argument("command", nargs=argparse.REMAINDER)
     trace.set_defaults(func=_trace)
     optimize_cmd = sub.add_parser("optimize", help="run a command with generic opt-in backends")
@@ -366,7 +378,37 @@ def main(argv=None) -> int:
     check_call_seeds = sub.add_parser('check-call-seeds',help='independently rescan compact call seeds against raw trace and current source')
     check_call_seeds.add_argument('report')
     check_call_seeds.set_defaults(func=_check_call_seeds_cli)
-    for command in (call_links,check_call_links,query_call_refs,seed_calls,check_call_seeds,inventory_program,check_inventory):
+    operand_links = sub.add_parser('link-operands',help='automatically link original operand occurrences to core parameter and return ports')
+    operand_links.add_argument('trace')
+    operand_links.add_argument('--project-root',required=True)
+    operand_links.add_argument('--inventory',required=True,help='automatic bound-frame v5/v6 inventory to replay')
+    operand_links.add_argument('--out',required=True)
+    operand_links.set_defaults(func=_link_operands_cli)
+    check_operand_links = sub.add_parser('check-operand-links',help='independently rebuild conditional operand routes from raw trace/source/inventory')
+    check_operand_links.add_argument('report')
+    check_operand_links.set_defaults(func=_check_operand_links_cli)
+    query_operand_refs = sub.add_parser('query-operand-refs',help='follow conditional cross-call return/formal/actual references')
+    query_operand_refs.add_argument('report')
+    query_operand_refs.add_argument('--process',type=int,required=True)
+    query_operand_refs.add_argument('--thread',type=int,required=True)
+    query_operand_refs.add_argument('--invocation',type=int,required=True)
+    query_operand_refs.add_argument('--max-reference-steps',type=int,default=4096)
+    query_operand_refs.set_defaults(func=_query_operand_refs_cli)
+    operand_commands = (operand_links, check_operand_links, query_operand_refs)
+    from scar.ir.program.call_operands import CallOperandBudget
+    from scar.ir.program.call_operand_routes import OperandRouteBudget
+    for command in operand_commands:
+        for name in CallOperandBudget.__dataclass_fields__:
+            flag = '--max-operand-' + name.removeprefix('max_').replace('_','-')
+            aliases = (flag, '--max-operand-bytes') if name == 'max_raw_bytes' else (flag,)
+            command.add_argument(*aliases, dest='operand_' + name, type=int,
+                                 default=getattr(CallOperandBudget(), name),
+                                 help='independent operand reader ceiling: ' + name)
+        for name in OperandRouteBudget.__dataclass_fields__:
+            command.add_argument('--operand-' + name.replace('_','-'), dest='route_' + name,
+                                 type=int, default=getattr(OperandRouteBudget(), name),
+                                 help='independent route construction ceiling: ' + name)
+    for command in (call_links,check_call_links,query_call_refs,seed_calls,check_call_seeds,inventory_program,check_inventory,*operand_commands):
         command.add_argument('--max-call-report-bytes',type=int,default=256000000,
                              help='independent decompressed input/output report ceiling')
         command.add_argument('--max-call-trace-bytes',type=int,default=128000000)
@@ -379,7 +421,7 @@ def main(argv=None) -> int:
         command.add_argument('--max-call-path',type=int,default=128)
         command.add_argument('--max-call-source-files',type=int,default=256)
         command.add_argument('--max-call-source-bytes',type=int,default=16000000)
-    for command in (inventory_program, check_inventory,call_links,check_call_links,query_call_refs):
+    for command in (inventory_program, check_inventory,call_links,check_call_links,query_call_refs,*operand_commands):
         command.add_argument("--max-files", type=int, default=128)
         command.add_argument("--max-bytes", type=int, default=8_000_000)
         command.add_argument("--max-directories", type=int, default=4096)
@@ -706,16 +748,36 @@ def _write_call_document(output, document, max_bytes):
             temporary.unlink(missing_ok=True)
 
 
-def _call_inventory_input(path,args,expected=None):
+def _call_inventory_input(path,args,expected=None,*,max_input_bytes=None):
     import hashlib
     from scar.analysis.program_inventory import ProgramInventory
     from scar.trace.files import resolve
     actual=resolve(Path(path).resolve())
-    with actual.open('rb') as stream:
-        digest=hashlib.file_digest(stream,'sha256').hexdigest()
+    if max_input_bytes is None:
+        # Historical callers retain their original limits and failure order.
+        with actual.open('rb') as stream:
+            digest=hashlib.file_digest(stream,'sha256').hexdigest()
+    else:
+        ceiling=_call_report_limit(max_input_bytes)
+        if actual.stat().st_size > ceiling:
+            raise ValueError('inventory raw input byte budget exceeded')
+        hashed=0
+        hasher=hashlib.sha256()
+        with actual.open('rb') as stream:
+            while True:
+                chunk=stream.read(min(1_000_000,ceiling-hashed+1))
+                if not chunk:
+                    break
+                hashed+=len(chunk)
+                if hashed > ceiling:
+                    raise ValueError('inventory raw input byte budget exceeded')
+                hasher.update(chunk)
+        digest=hasher.hexdigest()
     if expected is not None and digest!=expected:
         raise ValueError('call report inventory file differs from its bound input')
-    inventory=ProgramInventory.from_dict(_call_json(actual),**_inventory_limits(args),
+    document=(_call_json(actual) if max_input_bytes is None else
+              _call_json(actual,max_bytes=max_input_bytes))
+    inventory=ProgramInventory.from_dict(document,**_inventory_limits(args),
         runtime_verification_budget=_runtime_inventory_budget(args),max_compile_attempts=args.max_compile_attempts,
         context_verification_budget=_context_inventory_budget(args),call_verification_budget=_call_budget(args))
     return inventory,{'path':str(actual),'sha256':digest}
@@ -846,6 +908,98 @@ def _query_call_refs_cli(args):
         print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
         return 2
     print(json.dumps({'status':'REFERENCE_QUERY','query':encode(query),'transformation_authorized':False}))
+    return 0
+
+
+def _operand_budgets(args):
+    from scar.ir.program.call_operands import CallOperandBudget
+    from scar.ir.program.call_operand_routes import OperandRouteBudget
+    operand = CallOperandBudget(**{name: getattr(args, 'operand_' + name)
+                                  for name in CallOperandBudget.__dataclass_fields__})
+    route = OperandRouteBudget(**{name: getattr(args, 'route_' + name)
+                                for name in OperandRouteBudget.__dataclass_fields__})
+    return operand, route
+
+
+def _operand_report_input(path, args):
+    import re
+    from scar.analysis.call_operands import CallOperandReport
+    document = _call_json(path, max_bytes=args.max_call_report_bytes)
+    if (type(document) is not dict or set(document) != {'schema','schema_version','inventory','analysis'}
+            or document['schema'] != 'scar.call-operand-links-envelope'
+            or type(document['schema_version']) is not int or document['schema_version'] != 1):
+        raise ValueError('operand report envelope fields/schema mismatch')
+    operand_budget, route_budget = _operand_budgets(args)
+    # Decode the original independent ceilings before consulting the inventory,
+    # target source or raw trace named by this untrusted report.
+    CallOperandReport.check_replay_header(document['analysis'], frame_ceiling=_call_budget(args),
+        operand_ceiling=operand_budget, route_ceiling=route_budget)
+    binding = document['inventory']
+    if (type(binding) is not dict or set(binding) != {'path','sha256'}
+            or type(binding['path']) is not str or not binding['path']
+            or type(binding['sha256']) is not str
+            or re.fullmatch(r'[0-9a-f]{64}',binding['sha256']) is None):
+        raise ValueError('operand report requires a bound inventory file')
+    inventory, _ = _call_inventory_input(binding['path'], args, binding['sha256'],
+                                          max_input_bytes=args.max_call_report_bytes)
+    return CallOperandReport.from_dict(document['analysis'], inventory=inventory,
+        frame_ceiling=_call_budget(args), operand_ceiling=operand_budget, route_ceiling=route_budget)
+
+
+def _link_operands_cli(args):
+    from scar.analysis.call_operands import link_call_operands
+    try:
+        operand_budget, route_budget = _operand_budgets(args)
+        frame_budget = _call_budget(args)
+        limit = _call_report_limit(args.max_call_report_bytes)
+        inventory, binding = _call_inventory_input(args.inventory, args, max_input_bytes=limit)
+        report = link_call_operands(args.trace, args.project_root, inventory,
+            frame_budget=frame_budget, operand_budget=operand_budget, route_budget=route_budget)
+        output = Path(args.out).resolve()
+        if not (output.name.endswith('.json') or output.name.endswith('.json.gz')):
+            raise ValueError('operand report must end in .json or .json.gz')
+        protected = [Path(binding['path']), *(Path(file.snapshot.path) for file in inventory.files),
+                     *_call_source_inputs(report.frame_model)]
+        if any(output == path.resolve() or output.exists() and path.exists() and output.samefile(path)
+               for path in chain(Path(args.trace).resolve().iterdir(), protected)):
+            raise ValueError('operand report must differ from raw trace, source and inventory inputs')
+        if output.exists():
+            existing = _call_json(output, max_bytes=limit)
+            if type(existing) is not dict or existing.get('schema') != 'scar.call-operand-links-envelope':
+                raise ValueError('refusing to overwrite a non-operand-report output')
+        _write_call_document(output, {'schema':'scar.call-operand-links-envelope','schema_version':1,
+            'inventory':binding,'analysis':report.to_dict()}, limit)
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
+        print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
+        return 2
+    print(json.dumps({'status':'CONDITIONAL_ROUTES','summary':report.summary(),
+        'out':str(output),'transformation_authorized':False}))
+    return 0
+
+
+def _check_operand_links_cli(args):
+    try:
+        report = _operand_report_input(args.report,args)
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
+        print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
+        return 2
+    print(json.dumps({'status':'REPLAYED_CONDITIONAL_ROUTES','summary':report.summary(),
+        'transformation_authorized':False}))
+    return 0
+
+
+def _query_operand_refs_cli(args):
+    from scar.ir.program.call_edges import InvocationKey
+    from scar.ir.record_codec import encode
+    try:
+        report = _operand_report_input(args.report,args)
+        query = report.trace_reference(InvocationKey(args.process,args.thread,args.invocation),
+                                       max_steps=args.max_reference_steps)
+    except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
+        print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
+        return 2
+    print(json.dumps({'status':'CONDITIONAL_REFERENCE_QUERY','query':encode(query),
+        'transformation_authorized':False}))
     return 0
 
 

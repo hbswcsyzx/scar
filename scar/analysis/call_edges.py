@@ -651,22 +651,37 @@ class CallEdgeReport:
         return ReferenceTrace(identity, groups, tuple(dict.fromkeys(traversed)), tuple(dict.fromkeys(issues)))
 
 
-def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
-    """Read a collector directory and replay exact source/core relationships.
+def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(), *,
+                     compilation_profile=CallCompilationProfile.LEGACY_ZERO_FLAGS,
+                     frame_scan=None, entries=None, exits=None, allow_v6=False,
+                     include_identity_routes=True):
+    """Compose frame/source links from a local scan, keeping report policy separate.
 
-    The public CLI independently replays a supplied v4/v5 inventory before calling
-    here. Its complete canonical document is bound into this report as well.
+    Only in-process readers supply ``frame_scan``. Public report decoders always
+    rescan their original raw input; serialized models never enter this path as
+    a substitute for scanning. The legacy wrapper retains its v4/v5 policy.
     """
     _require(isinstance(budget, CallEdgeBudget), "link_calls requires a typed replay budget")
     root = Path(project_root).resolve()
     _require(root.is_dir(), "project root must be a directory")
     if inventory is not None:
-        _require(inventory.to_dict()["schema_version"] in (4, 5) and inventory.interfaces is not None,
+        versions = (5, 6) if allow_v6 else (4, 5)
+        _require(inventory.to_dict()["schema_version"] in versions and inventory.interfaces is not None,
+                 "operand/core linking requires a bound-frame v5/v6 inventory" if allow_v6 else
                  "call/core linking requires a bound-formal v4 or bound-frame v5 inventory")
         _require(inventory.discovery.project_root == str(root), "inventory project root differs from call replay")
-    trace_path, files, captures, entries, exits, metadata, trace_issues = _read_trace(trace, root, budget)
+    if frame_scan is None:
+        trace_path, files, captures, entries, exits, metadata, trace_issues = _read_trace(trace, root, budget)
+    else:
+        _require(frame_scan.directory == str(Path(trace).resolve())
+                 and type(entries) is tuple and type(exits) is tuple,
+                 "local frame scan must bind its original trace and observations")
+        trace_path, files, captures = frame_scan.directory, frame_scan.files, frame_scan.captures
+        metadata, trace_issues = frame_scan.metadata, frame_scan.issues
     descriptors = {capture.code.key: capture.code for capture in captures}
-    sources = _Sources(root, budget, inventory)
+    sources = (_Sources(root, budget, inventory)
+               if compilation_profile is CallCompilationProfile.LEGACY_ZERO_FLAGS else
+               _Sources(root, budget, inventory, compilation_profile=compilation_profile))
     for descriptor in descriptors.values():
         sources.code(descriptor)
     entry_index = {entry.invocation: entry for entry in entries}
@@ -773,10 +788,17 @@ def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
         if exit.invocation not in entry_index:
             issues.append(_issue(CallEdgeIssueKind.INVOCATION_MISSING,
                                  "frame exit has no retained entry in the same process/thread", exit.anchor))
-    references, routes = _references(tuple(edges), sources, metadata)
+    references, routes = (_references(tuple(edges), sources, metadata)
+                          if include_identity_routes else ((), ()))
     model = CallEdgeModel(trace_path, str(root), budget, files, captures, tuple(edges), exits,
                           tuple(sources.links.values()), references, routes, tuple(issues), metadata,
                           _sha(inventory.to_dict()) if inventory is not None else None)
+    return model, sources
+
+
+def link_calls(trace, project_root, inventory=None, budget=CallEdgeBudget()):
+    """Replay historical v1 frame/source/core links with their original policy."""
+    model, _ = _link_call_model(trace, project_root, inventory, budget)
     return CallEdgeReport(model)
 
 
