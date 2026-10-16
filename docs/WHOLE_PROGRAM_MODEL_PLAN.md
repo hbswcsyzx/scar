@@ -39,6 +39,12 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 评估成熟前端，不能把自写完整编译器当作模型完成的先决条件。T2 以后适配器
 建图仍属后续阶段，不越过用户要求的第一阶段停止点。
 
+复审细化了 [字段归属与替代准入](MODELING_INTEGRATION.md)：在继续新增 source
+control lowering 前先明确现成前端可提供的 CFG/dataflow 和差距，不能把完整
+Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、可能状态后态和
+具体覆盖缺口；不将边界可表达算作内部已理解。Profiler 内存数据流的单次 CPU
+能力探针已加入 [调研 3.5](TOOLING_SURVEY.md)，尚未接入当前 SCAR。
+
 1. 统一 ControlPort / EnvironmentInterface 与规范状态参数，扩展既有 core 的
    completion target、pending cleanup 与 protocol adapter；先处理同步异常。
 2. 接 SavedFrame / ResumeRequest / continuation generation，再处理 generator、

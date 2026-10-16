@@ -1,0 +1,14 @@
+{
+  "schema": "scar.review-artifact-manifest",
+  "schema_version": 1,
+  "sha256": {
+    "acceptance.json": "7d973ee3943f440aab8c5606e783723a2462fa386a8727c8d67e9be59abcd2e8",
+    "check.py": "77f2afcb99bfe8a87f28d6548416e0a9600b0271c649f21bd4aa5c4ba53ae4e6",
+    "memory-provider/probe.py": "7a7e6cee6f43fe988e07d3060e5409db5ba47f7c3c21ff8bb34ccc4459d9eeab",
+    "memory-provider/probe.stderr": "82cb9f2f4df21dbe494045668fae6ef2cabc15a6e80c1cabf55dd4ee7741fdf7",
+    "memory-provider/probe.stdout": "0eb3a2bfe729168f2f6959484928dbf7dd21c855151597af16bac55387cc24f2",
+    "memory-provider/results.json": "22a20150277cd804455984803e727ecb9928396abd480b387e2f93547b22720e",
+    "provider-review.md": "4d8fb498b14f6b4aa0c052a47cab79c182490e863c902e3e32a6ab0470f295eb",
+    "semantic-review.md": "029696eaaccf61b40142397a3bf62cf13fd6e7b6535d1b58dbd9e8201ac8acc3"
+  }
+}

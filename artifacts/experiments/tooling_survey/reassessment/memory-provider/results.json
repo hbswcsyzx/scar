@@ -1,0 +1,1201 @@
+{
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "CPython",
+  "torch": "2.13.0+cu132",
+  "torch_git_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+  "cuda_build": "13.2",
+  "cuda_initialized_before": false,
+  "capture_count": 1,
+  "options": {
+    "activities": [
+      "CPU"
+    ],
+    "record_shapes": true,
+    "profile_memory": true,
+    "with_stack": true
+  },
+  "stages": {
+    "capture": {
+      "status": "PASS"
+    },
+    "experimental_event_tree": {
+      "status": "PASS",
+      "record_count": 34
+    },
+    "memory_profile": {
+      "status": "PASS",
+      "node_count": 12
+    }
+  },
+  "checks": {
+    "metadata_fields_present": true,
+    "some_allocation_ids_assigned": true,
+    "two_sequential_schema_based_mutation_increments": [
+      {
+        "tensor_id": 3,
+        "allocation_id": 4,
+        "before": 0,
+        "after": 1
+      },
+      {
+        "tensor_id": 3,
+        "allocation_id": 4,
+        "before": 1,
+        "after": 2
+      }
+    ]
+  },
+  "boundaries": [
+    "Experimental/private APIs and this build only.",
+    "One configuration, not an options-availability matrix.",
+    "No test of allocator reuse, external writes, GPU readiness or logical equivalence.",
+    "DataFlowGraph mutation versions are schema-based provider facts, not SCAR LogicalVersion."
+  ],
+  "event_tree": [
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531329702128,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212151942,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531266197376,
+        "id": 0,
+        "allocation_id": 1,
+        "alloc_size": 8,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "aten::add",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329701024,
+      "correlation_id": 1,
+      "start_time_ns": 1792130677212264715,
+      "duration_time_ns": 238810,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531300669712,
+          "storage_data_ptr": 96531294496064,
+          "id": 1,
+          "allocation_id": 2,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [
+            4
+          ],
+          "strides": [
+            1
+          ]
+        },
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531326464480,
+          "storage_data_ptr": 96531266197376,
+          "id": 0,
+          "allocation_id": 1,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "name": "aten::to",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329708272,
+      "correlation_id": 2,
+      "start_time_ns": 1792130677212344134,
+      "duration_time_ns": 136115,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531326464480,
+          "storage_data_ptr": 96531266197376,
+          "id": 0,
+          "allocation_id": 1,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "bool"
+        },
+        {
+          "type": "bool"
+        },
+        {
+          "type": "NoneType"
+        }
+      ]
+    },
+    {
+      "name": "aten::_to_copy",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329966128,
+      "correlation_id": 3,
+      "start_time_ns": 1792130677212379664,
+      "duration_time_ns": 100321,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531326464480,
+          "storage_data_ptr": 96531266197376,
+          "id": 0,
+          "allocation_id": 1,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "bool"
+        },
+        {
+          "type": "NoneType"
+        }
+      ]
+    },
+    {
+      "name": "aten::empty_strided",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329968688,
+      "correlation_id": 4,
+      "start_time_ns": 1792130677212421499,
+      "duration_time_ns": 8410,
+      "inputs": [
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531329997680,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212427869,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531329671808,
+        "id": 2,
+        "allocation_id": 3,
+        "alloc_size": 4,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "aten::copy_",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329969792,
+      "correlation_id": 5,
+      "start_time_ns": 1792130677212448422,
+      "duration_time_ns": 30905,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531326317664,
+          "storage_data_ptr": 96531329671808,
+          "id": 2,
+          "allocation_id": 3,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531326464480,
+          "storage_data_ptr": 96531266197376,
+          "id": 0,
+          "allocation_id": 1,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531329998288,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212484664,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531329672000,
+        "id": 3,
+        "allocation_id": 4,
+        "alloc_size": 16,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531329998896,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212502561,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531329671808,
+        "id": 2,
+        "allocation_id": 3,
+        "alloc_size": -4,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531329999504,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212524096,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531266197376,
+        "id": 0,
+        "allocation_id": 1,
+        "alloc_size": -8,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "aten::view",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329970544,
+      "correlation_id": 6,
+      "start_time_ns": 1792130677212571695,
+      "duration_time_ns": 37310,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531318712032,
+          "storage_data_ptr": 96531329672000,
+          "id": 3,
+          "allocation_id": 4,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [
+            4
+          ],
+          "strides": [
+            1
+          ]
+        },
+        {
+          "type": "NoneType"
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330000112,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212644606,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531266197376,
+        "id": 4,
+        "allocation_id": 5,
+        "alloc_size": 8,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "aten::add_",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329972144,
+      "correlation_id": 7,
+      "start_time_ns": 1792130677212660791,
+      "duration_time_ns": 44659,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531318712032,
+          "storage_data_ptr": 96531329672000,
+          "id": 3,
+          "allocation_id": 4,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [
+            4
+          ],
+          "strides": [
+            1
+          ]
+        },
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329698944,
+          "storage_data_ptr": 96531266197376,
+          "id": 4,
+          "allocation_id": 5,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "name": "aten::to",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329975200,
+      "correlation_id": 8,
+      "start_time_ns": 1792130677212687501,
+      "duration_time_ns": 13268,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329698944,
+          "storage_data_ptr": 96531266197376,
+          "id": 4,
+          "allocation_id": 5,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "bool"
+        },
+        {
+          "type": "bool"
+        },
+        {
+          "type": "NoneType"
+        }
+      ]
+    },
+    {
+      "name": "aten::_to_copy",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329977760,
+      "correlation_id": 9,
+      "start_time_ns": 1792130677212688894,
+      "duration_time_ns": 11681,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329698944,
+          "storage_data_ptr": 96531266197376,
+          "id": 4,
+          "allocation_id": 5,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "bool"
+        },
+        {
+          "type": "NoneType"
+        }
+      ]
+    },
+    {
+      "name": "aten::empty_strided",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329980320,
+      "correlation_id": 10,
+      "start_time_ns": 1792130677212692775,
+      "duration_time_ns": 2566,
+      "inputs": [
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330000720,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212694442,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531263348160,
+        "id": 5,
+        "allocation_id": 6,
+        "alloc_size": 4,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "aten::copy_",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329981424,
+      "correlation_id": 11,
+      "start_time_ns": 1792130677212696965,
+      "duration_time_ns": 3244,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329699200,
+          "storage_data_ptr": 96531263348160,
+          "id": 5,
+          "allocation_id": 6,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329698944,
+          "storage_data_ptr": 96531266197376,
+          "id": 4,
+          "allocation_id": 5,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330001328,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212704405,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531263348160,
+        "id": 5,
+        "allocation_id": 6,
+        "alloc_size": -4,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330001936,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212706833,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531266197376,
+        "id": 4,
+        "allocation_id": 5,
+        "alloc_size": -8,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330002544,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212714023,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531329699392,
+        "id": 6,
+        "allocation_id": 7,
+        "alloc_size": 8,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "aten::add_",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329983024,
+      "correlation_id": 12,
+      "start_time_ns": 1792130677212716360,
+      "duration_time_ns": 12606,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531318712032,
+          "storage_data_ptr": 96531329672000,
+          "id": 3,
+          "allocation_id": 4,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [
+            4
+          ],
+          "strides": [
+            1
+          ]
+        },
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329699424,
+          "storage_data_ptr": 96531329699392,
+          "id": 6,
+          "allocation_id": 7,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "name": "aten::to",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329986080,
+      "correlation_id": 13,
+      "start_time_ns": 1792130677212719318,
+      "duration_time_ns": 7936,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329699424,
+          "storage_data_ptr": 96531329699392,
+          "id": 6,
+          "allocation_id": 7,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "bool"
+        },
+        {
+          "type": "bool"
+        },
+        {
+          "type": "NoneType"
+        }
+      ]
+    },
+    {
+      "name": "aten::_to_copy",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329988640,
+      "correlation_id": 14,
+      "start_time_ns": 1792130677212720249,
+      "duration_time_ns": 6832,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329699424,
+          "storage_data_ptr": 96531329699392,
+          "id": 6,
+          "allocation_id": 7,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "bool"
+        },
+        {
+          "type": "NoneType"
+        }
+      ]
+    },
+    {
+      "name": "aten::empty_strided",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329991200,
+      "correlation_id": 15,
+      "start_time_ns": 1792130677212722152,
+      "duration_time_ns": 1770,
+      "inputs": [
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330003152,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212723436,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531329699776,
+        "id": 7,
+        "allocation_id": 8,
+        "alloc_size": 4,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "aten::copy_",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329992304,
+      "correlation_id": 16,
+      "start_time_ns": 1792130677212725249,
+      "duration_time_ns": 1493,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329699808,
+          "storage_data_ptr": 96531329699776,
+          "id": 7,
+          "allocation_id": 8,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329699424,
+          "storage_data_ptr": 96531329699392,
+          "id": 6,
+          "allocation_id": 7,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.int64",
+          "sizes": [],
+          "strides": []
+        },
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330003760,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212728600,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531329699776,
+        "id": 7,
+        "allocation_id": 8,
+        "alloc_size": -4,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330004368,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212729641,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531329699392,
+        "id": 6,
+        "allocation_id": 7,
+        "alloc_size": -8,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "aten::clone",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329992912,
+      "correlation_id": 17,
+      "start_time_ns": 1792130677212770907,
+      "duration_time_ns": 38115,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531325999392,
+          "storage_data_ptr": 96531329672000,
+          "id": 3,
+          "allocation_id": 4,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [
+            2,
+            2
+          ],
+          "strides": [
+            2,
+            1
+          ]
+        },
+        {
+          "type": "NoneType"
+        }
+      ]
+    },
+    {
+      "name": "aten::empty_strided",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329995968,
+      "correlation_id": 18,
+      "start_time_ns": 1792130677212792273,
+      "duration_time_ns": 2533,
+      "inputs": [
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "int"
+        },
+        {
+          "type": "NoneType"
+        },
+        {
+          "type": "NoneType"
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330004976,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212793900,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531329671808,
+        "id": 8,
+        "allocation_id": 9,
+        "alloc_size": 16,
+        "device": "cpu"
+      }
+    },
+    {
+      "name": "aten::copy_",
+      "tag": "_EventType.TorchOp",
+      "id": 96531329997072,
+      "correlation_id": 19,
+      "start_time_ns": 1792130677212796677,
+      "duration_time_ns": 11702,
+      "inputs": [
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531329700192,
+          "storage_data_ptr": 96531329671808,
+          "id": 8,
+          "allocation_id": 9,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [
+            2,
+            2
+          ],
+          "strides": [
+            2,
+            1
+          ]
+        },
+        {
+          "type": "TensorMetadata",
+          "impl_ptr": 96531325999392,
+          "storage_data_ptr": 96531329672000,
+          "id": 3,
+          "allocation_id": 4,
+          "layout": "torch.strided",
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "sizes": [
+            2,
+            2
+          ],
+          "strides": [
+            2,
+            1
+          ]
+        },
+        {
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "tag": "_EventType.Allocation",
+      "id": 96531330005584,
+      "correlation_id": 0,
+      "start_time_ns": 1792130677212813553,
+      "duration_time_ns": 0,
+      "allocation": {
+        "ptr": 96531329671808,
+        "id": 8,
+        "allocation_id": 9,
+        "alloc_size": -16,
+        "device": "cpu"
+      }
+    }
+  ],
+  "memory_dataflow": [
+    {
+      "name": "[memory]",
+      "event_id": 96531329702128,
+      "inputs": [],
+      "outputs": [
+        {
+          "tensor_id": 0,
+          "allocation_id": 1,
+          "storage_data_ptr": 96531266197376,
+          "device": "cpu",
+          "version": 0
+        }
+      ]
+    },
+    {
+      "name": "aten::add",
+      "event_id": 96531329701024,
+      "inputs": [
+        {
+          "tensor_id": 0,
+          "allocation_id": 1,
+          "storage_data_ptr": 96531266197376,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 0
+        },
+        {
+          "tensor_id": 1,
+          "allocation_id": 2,
+          "storage_data_ptr": 96531294496064,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 0
+        }
+      ],
+      "outputs": [
+        {
+          "tensor_id": 3,
+          "allocation_id": 4,
+          "storage_data_ptr": 96531329672000,
+          "device": "cpu",
+          "version": 0
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "event_id": 96531329999504,
+      "inputs": [
+        {
+          "tensor_id": 0,
+          "allocation_id": 1,
+          "storage_data_ptr": 96531266197376,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 0
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "aten::view",
+      "event_id": 96531329970544,
+      "inputs": [
+        {
+          "tensor_id": 3,
+          "allocation_id": 4,
+          "storage_data_ptr": 96531329672000,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 0
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "[memory]",
+      "event_id": 96531330000112,
+      "inputs": [],
+      "outputs": [
+        {
+          "tensor_id": 4,
+          "allocation_id": 5,
+          "storage_data_ptr": 96531266197376,
+          "device": "cpu",
+          "version": 0
+        }
+      ]
+    },
+    {
+      "name": "aten::add_",
+      "event_id": 96531329972144,
+      "inputs": [
+        {
+          "tensor_id": 3,
+          "allocation_id": 4,
+          "storage_data_ptr": 96531329672000,
+          "device": "cpu",
+          "may_mutate": true,
+          "version": 0
+        },
+        {
+          "tensor_id": 4,
+          "allocation_id": 5,
+          "storage_data_ptr": 96531266197376,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 0
+        }
+      ],
+      "outputs": [
+        {
+          "tensor_id": 3,
+          "allocation_id": 4,
+          "storage_data_ptr": 96531329672000,
+          "device": "cpu",
+          "version": 1
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "event_id": 96531330001936,
+      "inputs": [
+        {
+          "tensor_id": 4,
+          "allocation_id": 5,
+          "storage_data_ptr": 96531266197376,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 0
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "[memory]",
+      "event_id": 96531330002544,
+      "inputs": [],
+      "outputs": [
+        {
+          "tensor_id": 6,
+          "allocation_id": 7,
+          "storage_data_ptr": 96531329699392,
+          "device": "cpu",
+          "version": 0
+        }
+      ]
+    },
+    {
+      "name": "aten::add_",
+      "event_id": 96531329983024,
+      "inputs": [
+        {
+          "tensor_id": 3,
+          "allocation_id": 4,
+          "storage_data_ptr": 96531329672000,
+          "device": "cpu",
+          "may_mutate": true,
+          "version": 1
+        },
+        {
+          "tensor_id": 6,
+          "allocation_id": 7,
+          "storage_data_ptr": 96531329699392,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 0
+        }
+      ],
+      "outputs": [
+        {
+          "tensor_id": 3,
+          "allocation_id": 4,
+          "storage_data_ptr": 96531329672000,
+          "device": "cpu",
+          "version": 2
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "event_id": 96531330004368,
+      "inputs": [
+        {
+          "tensor_id": 6,
+          "allocation_id": 7,
+          "storage_data_ptr": 96531329699392,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 0
+        }
+      ],
+      "outputs": []
+    },
+    {
+      "name": "aten::clone",
+      "event_id": 96531329992912,
+      "inputs": [
+        {
+          "tensor_id": 3,
+          "allocation_id": 4,
+          "storage_data_ptr": 96531329672000,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 2
+        }
+      ],
+      "outputs": [
+        {
+          "tensor_id": 8,
+          "allocation_id": 9,
+          "storage_data_ptr": 96531329671808,
+          "device": "cpu",
+          "version": 0
+        }
+      ]
+    },
+    {
+      "name": "[memory]",
+      "event_id": 96531330005584,
+      "inputs": [
+        {
+          "tensor_id": 8,
+          "allocation_id": 9,
+          "storage_data_ptr": 96531329671808,
+          "device": "cpu",
+          "may_mutate": false,
+          "version": 0
+        }
+      ],
+      "outputs": []
+    }
+  ],
+  "cuda_initialized_after": false,
+  "scar_imported": false,
+  "source_sha256": "7a7e6cee6f43fe988e07d3060e5409db5ba47f7c3c21ff8bb34ccc4459d9eeab",
+  "source_evidence": {
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/profiler/profiler.py": "2e7e248cba6f46787aeb693cd3fb82a1328936dc37e41be86a8e490ea1051eb9",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/profiler/_memory_profiler.py": "c905e005274968bbcd0cf9db0c9361cc48789f4da7982c71f14a350a6a3631de",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_C/_profiler.pyi": "c4656810004ee9569965f6c3fb80c0eec4e28d788a79b85368fa9556457c3757"
+  }
+}

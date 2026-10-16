@@ -54,6 +54,21 @@ Operation 为展示节点，一个有序 Value use 是边；Region 可展开为�
 理论。当前不直接迁移到 MLIR/xDSL：它不会替代 Python completion、外部状态及
 执行对应；迁移也需要先证明已有 wire、查询与依赖语义不丢失，而非用框架名验收。
 
+### 2.1 粒度由问题决定
+
+不将“比现有工具节点更细”作为目标。torchview 可以显示 Torch functions 和
+中间 Tensor；TorchLens/ETO/FX 已提供不同形式的操作关系。SCAR 应导入其可用
+结构，再补缺少的关系；在已有子图内部按需要展开，避免重复记录每个操作。
+
+- 整个 pipeline：先连接加载、变换、调用、外部输出及必要状态，检查父级边界。
+- function/module/loop region：分析输入可用位置、环境、状态、退出和生命周期，
+  为后续 hoist/reuse 提供作用范围。
+- operator 子图：按需使用已有 FX/Export 或动态 provider 的有序输入关系。
+- kernel/copy/wait：用实际 profiler 活动回答物理成本与顺序，不从高层调用猜测。
+
+同一内容可以同时有这几个层级；它们通过展开/实现关系连接，不能合并成一个
+通用 ID。细化终止于当前问题所需精度或预算；未展开部分仍有完整的边界接口。
+
 ## 3. 每份外部图都必须携带的适配合同
 
 以下是必须满足的设计字段，不是新 Python dataclass 已发布：
@@ -93,6 +108,43 @@ Correspondence
 pipeline、假设和逐域结论：数值/梯度、写回、alias/identity、RNG/modes、异常/
 控制、外部历史。未证明的域保留未闭合边界。只有 schema/def-use 导入成功时，
 只能解释 provider 自身的计算；不得称原 Region 已等价展开、无效果或可替代。
+
+### 3.1 字段归属及导入时必须保留的区别
+
+这是下一阶段 provider 接口的字段映射规格，**不是已实现 adapter 清单**。
+
+| 原始事实来源 | 规范落点 | 必须保留或检查 | 不授予的结论 |
+| --- | --- | --- | --- |
+| AST/symtable/dis 或成熟源前端 | SourceReference、定义 Region、环境/控制接口的来源。 | source digest、编译阶段/选项、作用域与准确 span；源码构造与运行操作不要求一对一。 | 每个 AST 节点都执行过；无绑定歧义；完整 CFG/dataflow。 |
+| FX `Node.op/target/args/kwargs` | 所属表示内的 Operation、结果 Value、有序 Use 与容器/slot 路线。 | 同一 Value 的重复实参分别记 Use；字面量、get_attr、不同结果投影分别处理。 | users 集合包含全部输入槽位；get_attr 是不变常量。 |
+| Export signature/call spec | 子区域输入/输出角色、实际环境/状态接口、pytree 端口。 | 区分原始与 decomposed 阶段；参数/buffer/常量/用户输入/写回逐个映射。 | lifted Tensor 永久不变；图外没有 Python 效果。 |
+| Export constraints / Dynamo guards | 带范围的模型适用条件及 graph-break 续接边界。 | 来源版本、环境、模式、shape/value 特化及不满足时的 provider 行为。 | 逻辑数据相等；同一分支对所有输入成立。 |
+| ETO node / inputs / outputs | 动态 OperationOccurrence、局部 Tensor/存储观察、有序实参观测。 | artifact/run/process 命名空间、真实字段类型与 shape/stride/offset；缺失槽位明确保留。 | 记录 ID 是静态 ValueID 或逻辑内容版本。 |
+| ETO `rf_id` 与 Kineto record ID | 同采集窗口内的 CPU occurrence 对应。 | 排除非正 ID；校验唯一性、名称和窗口；冲突不可强配。 | CPU 返回等于 GPU ready；任意窗口均一对一。 |
+| Profiler event tree / memory DataFlowGraph | 版本限定的物理身份/分配观察、schema-derived may-write 与候选版本依据。 | 记录采集 flags、字段缺失、private API 版本；TensorKey 聚合关系不当有序 Use。 | allocation ID 是逻辑值；无写边证明外部写不存在。 |
+| Profiler runtime/correlation/kernel/memcpy | 物理 Activity、ResourceWork、Measurement 与有依据的实现关系。 | 原始时钟/进程/device/context/stream 域；无关联时保留 gap。 | 按时间邻近补数据依赖；`.to()` 必定发生传输。 |
+| TorchLens 等动态依赖 provider | 动态子图及其来源/捕获条件，按 `parent_arg_positions` 的具体路径导入已提供的关系。 | 上游版本、重复 use、嵌套位置、未跟踪来源、重跑与状态影响；折叠的 ParentEdge 不能替代逐槽映射。 | 折叠展示边保持所有实参；捕获路径等于完整程序。 |
+
+某个字段若已有规范 producer/use/state 来源，adapter 只能引用或精化，不能
+重复造另一套可修改关系。对精化不一致的情况记录 conflict 及各自依据。
+provider 不提供的内容精确定位到对应 slot、状态域或完成边界，不填为 NONE。
+
+### 3.2 未展开部分如何建模
+
+完整类型模型不要求 SCAR 自己编译每个 Python/native 内部。每个未展开 Region
+仍要说明实际已知的输入/输出、环境、可能访问的状态域、normal/raise 完成、
+挂起/恢复、资源/ready 与 retention/escape 接口，并给出未解析部分的保守范围。
+语言完成、挂起协议、host 返回和资源完成是不同通道；可能不返回也须保留。
+接口中未知关系可以阻止某种化简，不能让周围已恢复的结构全部消失。
+边界还须声明覆盖范围、可能 alias/escape 和未知效果的保守后态：不能以
+`effects_complete=False` 为由，让未列 StateAccess 的可能受影响域被当作不变。
+同样不能给未知输出增加 identity/alias 精度，或把未知 ready 写成 host-return ready。
+失败出口也携带可能已经发生的写入和外部历史，不能把部分失败当作无效果。
+
+源码归属、内部展开、依赖精度和执行证据分别报告，不能把一个 opaque 外壳
+算作“已完全理解”。模型支持表示一个库边界，也不要求在第一阶段实现该库的
+完整解释器；额外源码 lowering 属于后续自动建图阶段。C1 等控制接口的用途是
+把现成前端和运行证据接到共同边界，不能扩大为自写通用 Python 编译器的项目。
 
 ## 4. Tensor 子区域的导入规则
 
@@ -150,6 +202,11 @@ hypothesis 等必须进入 provider envelope，不能当原物理执行或纯性
 NumPy/native 外部写不一定经过 Torch dispatcher；来源协议与外部状态边仍由 SCAR
 连接，不逐迭代复制 Tensor 来掩盖缺失的写依赖。
 
+新增的 profiler event tree / memory dataflow 来源已做单次 CPU 能力探针，详见
+[调研 3.5](TOOLING_SURVEY.md)。先评估本来已采集的字段；不能为了读取 metadata
+就无条件打开 with_stack 或再启动一个 profiler。rich memory profile 的额外
+选项、private/deprecated 状态和来源语义需要单独记录，未接入当前 SCAR。
+
 默认先收集 IDs/shape/stride/dtype/device、op schema 与必要控制事件；按预算选取
 关注区域。少量值样本只作排除/预筛，不证明相等；不保存完整参数/activation。
 ETO 额外内容采集配置必须显式记录，不能仅依赖 `extra_resources=False`。
@@ -197,6 +254,26 @@ M0—M6 主阶段保留；本次复用审查作为 M0/M1 的输入，**先于继
 T2—T4 属于后续建图/精化，不在用户要求的第一阶段停止点之前偷跑。
 第一阶段完成时先停下来讲解模型、证据、未可证明范围；不开始化简或新增 backend。
 T0 完成也不意味着 M1/M2 或完整程序模型完成。
+
+在 T1 内先确定源前端的替代字段与语义缺口，再决定是否增加自建 control
+lowering。CodeQL 已有 Python CFG/basic-block/dataflow；包括 finally 的多种
+控制路径，不能只因它用于安全分析就认定要重写。其版本支持、提取成本与
+SCAR 所需状态/完成接口须做有界对照；当前没有本机 CodeQL 运行验收。
+T3 负责集成后的全程序结果，不作为“到了后期再考虑复用”的理由。
+
+### 7.1 替换现有 observer / lowerer 的准入条件
+
+1. 列出逐字段覆盖：哪些现有事实由 provider 取代，哪些仍需原 observer，哪些
+   两者都不知道。保留原始来源、缺失/截断和不同层级的语义，不按节点总数验收。
+2. 用相同通用反例检查有序重复实参、原位/外部写、view、状态、随机性、异常、
+   graph break 和生命周期。若 ID 相同被误判为内容相同，立即判该映射不合格。
+3. 在受控窗口量采集开销、文件体积、峰值内存、引用/状态影响；按字段选择最小
+   采集组合。没有这些数据时不能宣称“更高效”或默认叠加全部 hooks。
+4. 原 observer 的删除只在被替代字段及兼容读者通过后执行。失败保留证据，
+   回退既有来源并报告缺口；不把 provider 不兼容变成整个程序不可表示。
+
+本阶段先交付字段合同、组合校验及构造规则；最小运行导入与上述成本比较在
+第一阶段汇报后的 T2 执行。不会因为又发现一个工具就再建一套独立图模型。
 
 ## 8. 调整现有投入
 

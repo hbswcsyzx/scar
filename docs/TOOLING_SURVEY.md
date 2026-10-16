@@ -6,8 +6,10 @@
 
 ## 1. 当前事实及本轮问题
 
-SCAR 的完整程序模型仍未完成。开发分支 `codex/structured-program-model` 的
-`d5311a6` 通过 2,686 项全仓回归；这个数验证已实现代码，不验证尚未实现的模型。
+SCAR 的完整程序模型仍未完成。复审时开发分支
+`codex/structured-program-model` 为 `845ebb4`，冻结实现 `54eb7ec` 的 3,027 项
+全仓回归通过；这验证已实现代码，不验证尚未实现的模型。下文小实验仍绑定
+各自报告中的历史 revision（包括 `d5311a6`），不是在最新实现上重跑的结果。
 固定 256 个 LeWM 源定义的旧压力批次只有 51 个 graph-with-gaps、205 个 unsupported，
 不能作为完整程序建图的验收。没有可信自动变换或 clean A/B 加速比。
 
@@ -36,6 +38,7 @@ Python 3.14 网页显示 3.14.8；本机行为以探针及对应源码为准。�
 | TorchLens | 上游提供 eager Torch 操作依赖、模块嵌套、动态路径、metadata、activation/gradient 记录与展示。 | rich graph 不保证整程序依赖；有捕获模式、状态/引用/保存成本和未覆盖来源，部分恢复可重跑 forward。 | 增列为动态 provider 候选；只读固定源审查，尚无本机兼容性或采集成本验收。 |
 | torchviz / autograd graph | 从结果的 `grad_fn` 查看反向依赖及相关 saved tensors/parameters。 | 无梯度推理可能没有这张图；没有承诺完整 forward、Python 控制、文件输出。 | 梯度关系审查辅助；不作为整程序前端。 |
 | `torch.profiler` / Kineto | 真实 operator、CPU/runtime/GPU kernel、memcpy、等待及内存活动；原始 correlation 字段。 | 一次 trace 不覆盖未走分支；时间重叠不证明因果；物理 memcpy 不自动说明哪个逻辑值。 | **当前已经使用**，保留物理采集与原始证据，不重写 CUPTI。 |
+| Profiler experimental event tree / `_memory_profiler` | 已有 Tensor metadata、allocation ID、内存事件及按 schema 推导的 DataFlowGraph/版本。 | private/experimental；不等于有序全值 def-use、逻辑内容版本或外部写检测；memory timeline 导出已标 deprecated。 | 本轮单次 CPU 探针通过；列为版本固定的可选来源，先评估已有采集字段，禁止默认再写一套 allocation/版本分析。 |
 | `ExecutionTraceObserver`（ETO） | 动态 RecordFunction 图、operator inputs/outputs、Tensor/storage 标识和 shape/stride/type/device；`rf_id`。 | 标识不是内容版本；普通 Python/NumPy/文件行为不完整；host 记录不是 GPU 完成。 | **优先新增导入适配器**；当前尚未接入 SCAR。 |
 | `sys.monitoring` | 低层 Python call/start/return/throw/yield/resume、分支/指令事件。 | CALL 只给规定的少量实参信息，不提供任意完整操作数栈/所有数据依赖。 | **当前已用于 call operands**；按需使用，避免全程序逐指令常开。 |
 | Nsight Systems / Perfetto | 前者可作实际 GPU 系统时间线参考，后者可查看/查询兼容 trace。 | trace viewer 不负责 logical identity、程序合法替代或唯一最优计划。 | 可选 ground truth/查询展示，当前 PATH 未找到 `nsys`，不安装重型依赖。 |
@@ -136,6 +139,37 @@ Profiler `record_shapes` 可能临时保留引用并影响执行；ETO 某些环
 启用额外 Tensor 数据/范围采集。因此 metadata-only 仍有开销，未来 adapter
 须核对实际配置并按预算采集；本轮不启用全 Tensor 内容观察。具体源码依据及
 环境变量名称见 runtime 独立报告，不能把字符串 `'0'` 当“未设置”。
+
+### 3.5 本次补充：已有 profiler 内存数据流
+
+[复审与单次 CPU 探针](../artifacts/experiments/tooling_survey/reassessment/provider-review.md)
+发现本机 Torch 已有 `experimental_event_tree()`、`_TensorMetadata`、`TensorKey`、
+`_Storage(allocation_id)` 和 `_memory_profiler.DataFlowGraph`。固定版本源码及
+hash、命令、metadata-only 结果保存于 `reassessment/memory-provider/`。
+
+本次只采集一次 CPU profile，启用 record_shapes/profile_memory/with_stack：
+event tree 得到 34 条 op/allocation 记录、memory dataflow 得到 12 节点；两次
+add_ 对同一 provider TensorKey 的版本依次为 0→1→2。CUDA 初始化前后均为 false，
+未保存 Tensor 内容、未 import SCAR、未改 LeWM。这是工具能力探针，不是自动
+SCAR 建图、采集开销比较或工作负载加速验收。
+
+边界必须保留：
+
+- DataFlowGraph 聚合 TensorKey，view 可没有新的 outputs；它不是保留全部
+  Python/Tensor 输入槽位的值图。相同 metadata id 不等于同一个 Python 对象，
+  也不能直接与 ETO 的同名 ID 合并。
+- schema 的 may-write 版本不能证明 NumPy/native 外部写不存在，更不是
+  LogicalVersion。尚未验收 allocator reuse、GPU ready 或外部 alias 写。
+- 本机 `_memory_profile()` 要求三个采集 flags；底层 metadata/ID 的条件并不
+  相同。源码显示部分字段可能已由现 SCAR 的 shapes+memory 采集得到；本轮未测
+  with_stack=False 组合，不宣称现有磁盘 trace 已保存这些字段。
+- 这些接口是 private/experimental。本机 `export_memory_timeline` 已标
+  deprecated；其建议的 CUDA allocator snapshot 不自动替代 CPU 内存数据流或
+  有序实参关系。先按固定版本评估，不能设为无回退的长期公开依赖。
+
+决定：先验证从已有 profiler 结果取得所需字段能替代多少重复 observer；需要
+rich memory dataflow 时再按预算开启额外选项。保留 ETO/FX 的不同职责，不把
+所有 provider 默认同时打开。接口范围和替代条件见集成设计 3.1、7.1。
 
 ## 4. SCAR 当前已有复用与实际缺口
 

@@ -1,5 +1,18 @@
 # Current evidence and remaining work
 
+## Tool reuse reassessment (2026-10-16)
+
+The [integration contract](MODELING_INTEGRATION.md) now specifies field ownership,
+granularity and observer replacement criteria. Reuse existing Tensor subgraphs;
+evaluate source CFG providers before expanding custom control lowering. M0–M2
+requires composable boundary types, not an independently implemented full Python
+compiler. A single metadata-only CPU profiler probe found allocation IDs and
+schema-derived mutation versions (0→1→2); see [survey §3.5](TOOLING_SURVEY.md).
+This private/experimental provider is not integrated. Product source and the
+existing frozen 3,027-test result are unchanged; no new full regression, LeWM
+run, automatic transformation or speedup is claimed. First-stage modeling
+remains incomplete.
+
 ## C0 lexical control and pending protocol component (2026-10-16)
 
 [C0](M1_CONTROL_INTERFACES.md) passed 354 component checks: typed lexical scopes
