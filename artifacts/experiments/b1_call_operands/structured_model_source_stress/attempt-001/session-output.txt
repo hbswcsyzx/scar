@@ -1,0 +1,15 @@
+completed 32/256 candidates; operation budget 457/50000
+completed 48/256 candidates; operation budget 687/50000
+completed 64/256 candidates; operation budget 1091/50000
+completed 80/256 candidates; operation budget 1391/50000
+completed 96/256 candidates; operation budget 1739/50000
+completed 112/256 candidates; operation budget 1928/50000
+completed 128/256 candidates; operation budget 2409/50000
+completed 160/256 candidates; operation budget 2773/50000
+completed 176/256 candidates; operation budget 2918/50000
+completed 192/256 candidates; operation budget 13154/50000
+completed 208/256 candidates; operation budget 13279/50000
+completed 224/256 candidates; operation budget 13608/50000
+completed 240/256 candidates; operation budget 13861/50000
+completed 256/256 candidates; operation budget 14106/50000
+{"report": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-001/report.json", "selected": 256, "charged": 14106, "new_statuses": {"CANDIDATE_RECORD_ERROR": 50, "ERROR_COST_UNKNOWN": 1, "UNSUPPORTED": 205}, "source_calls": 1514, "new_core_covered_calls": 0, "duration_seconds": 183.33}

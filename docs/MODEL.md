@@ -1,5 +1,16 @@
 # SCAR execution model
 
+## Whole-program model revision (2026-10-16)
+
+The current complete-model specification is
+[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md), with Operation, Value,
+StateLocation, Region **and Resource** as independent entity families. The
+four-family ProgramGraph below is the retained control/data projection, not
+the entire model. Typed environment, cleanup/resumption, resource realization
+and readiness interfaces remain incompletely implemented. See the
+[ordered model gates](WHOLE_PROGRAM_MODEL_PLAN.md); whole-program modeling is
+not complete. Later historical sections do not override this scope.
+
 ## Program semantics first (2026-10-13 decision)
 
 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) now defines the intended semantic

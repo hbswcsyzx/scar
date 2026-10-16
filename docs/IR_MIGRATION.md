@@ -1,5 +1,28 @@
 # SCAR 当前 IR 到 IR v2 的迁移方案
 
+## 当前迁移决定（2026-10-16）
+
+规范：[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)。旧目录提案及下文历史
+盘点不构成重建另一套 ProgramGraph 的授权。保留一处 canonical producer/Use/
+state/control，按 [M0—M6](WHOLE_PROGRAM_MODEL_PLAN.md)逐门落实：
+
+| 部分 | 当前决定 |
+| --- | --- |
+| trace/profiler/raw evidence | 保留采集与原始格式，缺口/来源不升级为证明；本轮不扩大采集。 |
+| `ir/program` graph | 保留有限同步子集、严格旧版 reader；在原 core 版本化扩控制/环境/资源接口。 |
+| state/value identity | 新接 ValueOccurrence→Denotation；引用经当前 StateRead 取内容；旧 storage observer 只作物理证据。 |
+| provenance/materialization | 保留既有 allocation/alias 证据；分 ValueDerivation/RealizationDerivation，补有效区间和 typed ready。 |
+| candidate/region | 待完整输入/环境/状态/资源/完成边界闭合后重构；旧重复 pattern 不自动获权。 |
+| planner | 保留 NO-OP/成本/证明语义；输入改为闭合区域的具体替代方案，尚未实施该完整桥接。 |
+| backend | 保留旧实现与历史验证；不新增、不因规格通过自动启用。 |
+
+新完整模型 Resource 有静态 definition/requirement 和动态 instance，handle
+经对应关系引用它；不能仅作为 EEG 标签。旧 `ready_event` 不承担新完成证明。
+语言 completion、suspend/resume、host outcome、work outcome 有强类型接口，
+不静默重释旧 NORMAL/RAISE。逐项实现与迁移将保留历史报告按原版本严格重放。
+
+以下保留原迁移审查，凡与上述决定冲突，以本节及完整模型规范为准。
+
 状态：**审查和迁移计划**。
 
 2026-10-13 当前迁移优先级由 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md) §7—8

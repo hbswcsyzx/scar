@@ -1,5 +1,10 @@
 # 程序类型与依赖图
 
+2026-10-16：完整模型及连接规则以
+[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)为准。下文补入独立 Resource；
+已有四类图是有限控制/数据投影。完整建模尚未完成，逐构造清单与实施门见
+[协议清单](PYTHON314_PROTOCOL_CATALOG.md)和[整体计划](WHOLE_PROGRAM_MODEL_PLAN.md)。
+
 日期：2026-10-15。状态：**类型设计、N1 有限核心及 N2.a 自动函数体构图已实现；
 完整程序恢复仍待 N2 后续阶段。** 见 [N2A_ACCEPTANCE.md](N2A_ACCEPTANCE.md)。
 N1 范围和证据见 [N1_ACCEPTANCE.md](N1_ACCEPTANCE.md)。
@@ -16,14 +21,15 @@ N1 范围和证据见 [N1_ACCEPTANCE.md](N1_ACCEPTANCE.md)。
 | StateLocation：状态位置 | 可以被读取、修改的位置或状态域 | 数组内容、字典项、对象字段、文件内容、RNG 状态 |
 | Operation：操作 | 在指定输入、状态和控制条件下发生的操作 | 加法、读取、写入、复制、调用、等待 |
 | Region：区域 | 可递归展开、带明确边界的操作子图 | 函数体、循环、分支、整个处理阶段 |
+| Resource：资源 | 多个状态、物化和工作共同引用的执行/承载身份 | 文件、GPU、stream、memory pool；区分要求、定义与实例 |
 
 这是目前选择的**结构类型**。它们不是完整的操作类型清单，也不要求每行代码
 只能归入其中一类。一行 `a[i] += f(x)` 会展开成读取、调用、计算和写入等操作，
 连接其值和状态位置。
 
 Value 的强类型变体及位置、身份规则沿用 [CORE_GRAPH_MODEL.md](CORE_GRAPH_MODEL.md)。
-Resource、Materialization 和执行事件在实现/证据图中另有类型；不能说 SCAR
-所有图中的节点总共只有四种。
+Resource 在完整 ProgramModel 中有独立身份/要求，Execution 再连接实际实例；
+Materialization 和执行事件有各自类型。不能说 SCAR 所有图的节点总共只有四种。
 
 输入、输出是值在区域边界的角色；常量和循环不变量是带范围的性质；shape、
 dtype 是数据类型/表示属性。一个输入可以同时是某循环的不变量，又是上层操作

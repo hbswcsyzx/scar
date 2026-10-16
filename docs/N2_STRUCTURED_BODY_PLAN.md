@@ -1,6 +1,12 @@
 # N2：完整程序建模与 STRUCTURED_BODY_V1
 
-状态：**Proposed；实施前设计，本文新能力均未验收。**
+状态：**有限 binding/同步 loop 子集已实现并验收；父门与全过程未完成。**
+
+2026-10-16 顺序修订：[完整模型](WHOLE_PROGRAM_MODEL.md)与
+[M0—M6](WHOLE_PROGRAM_MODEL_PLAN.md)优先。完整模型须有独立 Resource；下文
+四类仅指已有 ProgramGraph 投影。实现证据见
+[N2_STRUCTURED_BODY_ACCEPTANCE.md](N2_STRUCTURED_BODY_ACCEPTANCE.md)，不再以
+本计划尚未更新的总体门代替有限范围报告。
 
 日期：2026-10-16。设计审查基线为 `8a300eb068d992b3737eee0bdf43fa2bf8c8aea1`。
 新工作树 `/tmp/scar-structured-model-280qf4mi`。本计划的最终目标是原始程序从
@@ -62,10 +68,10 @@ T=该全过程有实测证据；“部分”不算关闭缺口。
 | autograd/mode | mode state、求导关系、detach/view、数值和梯度合同 | D 有要求；I/A/T 完整接线尚未实现。 |
 | observable outputs | 返回值、文件/日志/交互历史、异常、清理、顺序和所需完成条件分别作为根 | D/I 有部分合同；A/T 本全过程未闭合。 |
 
-目前没有证明需要第五种 Program core 顶层结构家族；也没有证明四个现有类已
-具备所有合同。强类型 completion value/port、resource identity、environment
-接口等必须实际实现和校验，不能用 label、任意 metadata 或一个 unknown world
-名称代替。如果后续接口不够，必须扩展模型并版本化。
+资源审查已修订最初判断：完整 ProgramModel 需要独立 Resource 身份、静态
+要求/定义及运行实例；旧四类 ProgramGraph 只是控制/数据投影。现有类没有
+完整合同。强类型 completion、resource、environment 接口必须实际接线校验，
+不能用 label、任意 metadata 或一个 unknown world 名称代替。
 
 ### 2.1 必须实际连接的跨层接口（Proposed，尚未实现闭合）
 
@@ -416,14 +422,17 @@ source replay；`program_inventory.py,program_expansion.py,function_interfaces.p
 不得为了版本兼容复制多套 source discovery 或图模型。旧 profile 保留旧 builder
 与严格 replay，新 builder 共享来源索引和 core 基础，新增字段有类型与校验。
 
-## 12. 已验收结果（留给根代理更新）
+## 12. 已验收结果与父门边界
 
-**当前无本文新能力的验收记录。** 请逐门追加，不删除剩余门和未知范围。
+冻结 `dcd4986` 的有限 binding/同步循环组件 290 passed，全仓 2,657 passed；
+固定源码压力有51个gap图/205 unsupported。详见独立验收报告。G1相关有限
+子项已有证据，G0完整规格、G2普遍body-preservation、G3新profile全程序
+inventory、G4—G6仍未通过；本表不将局部组件替代整个门。
 
 | 门 | 冻结 revision / source fingerprint | 自动输入与命令 | 结果、JUnit/报告路径 | 实际完成范围与剩余边界 |
 | --- | --- | --- | --- | --- |
-| G0 | 待实施 | 待实施 | 未验收 | 不代表源码自动构图。 |
-| G1 | 待实施 | 待实施 | 未验收 | 不代表所有 Python 控制。 |
+| G0 | 整体规格本轮修订 | M0 独立规格审查 | 一致性有限通过；完整协议未完成 | 不代表源码自动构图。 |
+| G1 | dcd4986 / bf7ccd18… | 290 component / 2,657 full | binding/同步 loop 子项通过；父门未关闭 | 不代表所有 Python 控制。 |
 | G2 | 待实施 | 待实施 | 未验收 | opaque 内部调用不得计覆盖。 |
 | G3 | 待实施 | 待实施 | 未验收 | 不代表全过程语义/执行闭合。 |
 | G4 | 待实施 | 待实施 | 未验收 | 不代表精确资源/效果。 |

@@ -1,0 +1,61 @@
+{
+  "before": {
+    "implementation": "CPython",
+    "max_rss_platform_units": 2371520,
+    "max_rss_units": "KiB on Linux",
+    "platform": "Linux-6.17.0-29-generic-x86_64-with-glibc2.39",
+    "project_revision": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+    "project_status": "",
+    "project_tracked_python_count": 574,
+    "project_tracked_python_error": null,
+    "project_tracked_python_sha256": "bd644315c89c2baeba16a42c891679c7ca5500a4f88191946aea4b2e5148b110",
+    "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+    "scar_revision": "dcd498699e0cd1331cf496158b29575c3fc2c536",
+    "scar_source_fingerprint": "bf7ccd18b51b843c53b6b49f290c5f7368c397f394209991eb1f13a1f313bf05",
+    "scar_status": "",
+    "utc": "2026-10-16T03:16:18.240587+00:00"
+  },
+  "budgets": {
+    "charging": "known operations_emitted per lower attempt; full per-body ceiling on thrown/unknown-cost lower",
+    "max_bodies": 256,
+    "per_body_operations": 10000,
+    "total_operations": 50000
+  },
+  "command": [
+    "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-002/driver.py",
+    "--inventory",
+    "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz",
+    "--project-root",
+    "/home/zyf/AAA/le-wm",
+    "--scar-root",
+    "/tmp/scar-structured-model-280qf4mi",
+    "--out",
+    "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-002"
+  ],
+  "command_display": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-002/driver.py --inventory /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz --project-root /home/zyf/AAA/le-wm --scar-root /tmp/scar-structured-model-280qf4mi --out /home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/structured_model_source_stress/attempt-002",
+  "inventory": {
+    "bytes": 7721103,
+    "candidate_summary": {
+      "eligible_attempted_function_bodies": 256,
+      "inventory_shape_issues": [],
+      "limit": 256,
+      "selected": 256,
+      "selected_record_decode_errors": [],
+      "selected_records_decoded": 256,
+      "truncated": 0
+    },
+    "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/windows_lewm_analysis/inventory.json.gz",
+    "schema": "scar.program-inventory",
+    "schema_version": 6,
+    "sha256": "1b29ba654226d6c374bebc2fe7ba212f4658b05b57b521c90590ac4d5384c422"
+  },
+  "notes": [
+    "Candidate inventory does not authorize facts; current source snapshot/definition is independently checked.",
+    "No target module is imported or executed.",
+    "Root component/full regressions and old source-link analysis may run concurrently; elapsed time can include host contention."
+  ],
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "schema": "scar.structured-source-stress-run",
+  "schema_version": 1,
+  "started_utc": "2026-10-16T03:16:18.290953+00:00"
+}

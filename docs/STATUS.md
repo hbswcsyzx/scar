@@ -1,5 +1,27 @@
 # Current evidence and remaining work
 
+## Current priority: complete the model before whole-program graphs (2026-10-16)
+
+**Whole-program abstraction is incomplete.** The revised
+[model specification](WHOLE_PROGRAM_MODEL.md) defines independent Operation,
+Value, StateLocation, Region and Resource, typed environment/completion/resume/
+readiness interfaces, and the static ValueID→occurrence→denotation bridge.
+Specification consistency does not mean those interfaces are all implemented.
+The [model-first gates](WHOLE_PROGRAM_MODEL_PLAN.md) now precede further detector
+or backend work; [review scope](WHOLE_PROGRAM_MODEL_REVIEW.md) separates them.
+
+Development branch `codex/structured-program-model`, frozen implementation
+`dcd4986`, passed 290 component checks and 2,657 full tests. It implements a
+limited synchronous binding/loop subset. The fixed 256-body source stress has
+51 graphs with gaps and 205 unsupported bodies; 77 of 1,591 source calls have
+the checked ordered core endpoints. This is not a whole-project coverage ratio.
+See [bounded acceptance](N2_STRUCTURED_BODY_ACCEPTANCE.md). Existing main branch
+and historical results below must not be mistaken for this development state.
+
+The LeWM load→inference→environment→video graph remains incomplete. No credible
+automatic LeWM transformation or clean A/B speedup is available. More tests or
+conditional reference routes do not change that conclusion.
+
 ## Latest bounded component: R1 recorded compilation context (2026-10-16)
 
 Final **287 mapped checks / 77.390s**, **2,278 full repository tests** and

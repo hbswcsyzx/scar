@@ -1,5 +1,12 @@
 # SCAR roadmap and scope
 
+> **Priority revision (2026-10-16):** complete the
+> [whole-program entity/interface model](WHOLE_PROGRAM_MODEL.md), then automatic
+> graphs, then simplification guidance. [M0—M6](WHOLE_PROGRAM_MODEL_PLAN.md)
+> supersede historical ordering below. Resource is a first-class entity in the
+> complete model; the four-family ProgramGraph is a bounded projection. No new
+> detector/backend is scheduled before model and dependency closure.
+
 > **Automation status (2026-10-16):** the public flow discovers sources and builds
 > bounded graphs without a hand-authored workload model. Complete dependency
 > recovery and LeWM simplification remain unmet. See the explicit

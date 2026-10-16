@@ -1,5 +1,13 @@
 # SCAR v0.1.0
 
+**Current priority:** [complete the program model](docs/WHOLE_PROGRAM_MODEL.md)
+before whole-program graph recovery and simplification. The
+[ordered gates](docs/WHOLE_PROGRAM_MODEL_PLAN.md) distinguish specifications,
+implemented types, automatic connectivity and optimization authority. The
+[bounded synchronous implementation](docs/N2_STRUCTURED_BODY_ACCEPTANCE.md)
+passes its declared checks; complete LeWM modeling and a verified speedup
+remain unfinished.
+
 SCAR means **State · Control · Action · Resource**. It is a prototype for
 automatic program modeling and optimization planning for Python/PyTorch.
 The current task is to recover connected value/state/control dependencies,

@@ -1,5 +1,13 @@
 # SCAR IR v2：面向语义的程序执行世界模型
 
+2026-10-16 修订：完整模型规范与接口以
+[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)为准；现有四类 ProgramGraph
+是控制/数据投影，完整模型独立保留 Resource。静态 ValueID、动态 occurrence、
+逻辑内容版本及物化不能混用；统一桥接规则见该文 §3。SG/EEG/OIR 继续分离，
+不另建平行 def-use 模型。当前实现/验收边界见
+[有限同步报告](N2_STRUCTURED_BODY_ACCEPTANCE.md)，整体门见
+[WHOLE_PROGRAM_MODEL_PLAN.md](WHOLE_PROGRAM_MODEL_PLAN.md)。以下为此前架构审查。
+
 状态：**已采用的架构设计；实现范围逐 gate 验证**。
 
 2026-10-13 修订：核心节点与依赖的最新决定见
