@@ -57,8 +57,19 @@ LocalBindingType 没有 `.kind`，旧 counts 路径会失败。现分别统计 l
 报告记录当时 HEAD `e95fed8` 及未提交工作树；它验证的是记录的源码 hash，
 不把 e95fed8 原提交误称含有本实现。冻结提交/全仓回归另行记录。
 
+随后冻结提交 `d5311a63211470500c6892af484f500e71c0d61f` 的全仓回归通过：
+**2,686 passed，0 failed/error/skipped，3 warnings，413.541s**，峰值 RSS
+1,026,324 KiB；HEAD、clean status 与全部339个source hash前后相同。
+这验证当前代码回归，没有关闭整个M1，也不是运行加速。
+
 - [逐准则与案例](../artifacts/experiments/b1_call_operands/model_resource_interfaces/component/report.json)
 - [独立审查与两项缺陷的关闭记录](../artifacts/experiments/b1_call_operands/model_resource_interfaces/review.md)
+- [冻结全仓回归](../artifacts/experiments/b1_call_operands/model_resource_interfaces/full/report.json)
+
+复用的回归driver中 measurement_note 含旧模板描述，误称组件gate与旧link正在
+并行。实际组件gate先已结束，仅旧offline query与部分回归时间重叠；concurrency
+快照保留真实进程。原报告/driver不修改，纠正说明保存在同目录
+`measurement-note-erratum.json`。不据该元数据描述作任何性能比较。
 
 初次 focused 命令引用不存在的测试文件，exit 4，没有执行测试；随后 162 passed /
 1 failed，原因是旧兼容测试用当前 dataclass 字段生成历史期望。改为原始隔离
