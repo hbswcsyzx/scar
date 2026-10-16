@@ -6,6 +6,12 @@
 完整模型的说法。已实现的同步子集仍按原版本解释；本文没有静默升级其能力。
 实施顺序与验收见 [WHOLE_PROGRAM_MODEL_PLAN.md](WHOLE_PROGRAM_MODEL_PLAN.md)。
 
+本模型不要求从零实现全部图前端。现成工具的能力审查见
+[TOOLING_SURVEY.md](TOOLING_SURVEY.md)，事实来源、规范化与对应合同见
+[MODELING_INTEGRATION.md](MODELING_INTEGRATION.md)。优先复用 Python 编译见证、
+FX/Export 子图、ETO 与已有 profiler；SCAR 补齐它们之间及外部程序的依赖关系。
+新适配器尚未接入，不能把复用设计计为已完成自动建图。
+
 ## 1. 先定义程序，再构图，再化简
 
 ```text

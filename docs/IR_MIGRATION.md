@@ -6,6 +6,11 @@
 盘点不构成重建另一套 ProgramGraph 的授权。保留一处 canonical producer/Use/
 state/control，按 [M0—M6](WHOLE_PROGRAM_MODEL_PLAN.md)逐门落实：
 
+前端/证据导入先遵循 [工具复用决定](TOOLING_SURVEY.md) 和
+[适配合同](MODELING_INTEGRATION.md)：复用现成 FX/Export/ETO 图与标准 Python
+编译见证；不以另一套 Tensor tracer 替代跨层对应。provider 图保留为不可变证据，
+规范输入/状态只在 core 一处定义。此为迁移设计，尚未实现新 adapter。
+
 | 部分 | 当前决定 |
 | --- | --- |
 | trace/profiler/raw evidence | 保留采集与原始格式，缺口/来源不升级为证明；本轮不扩大采集。 |

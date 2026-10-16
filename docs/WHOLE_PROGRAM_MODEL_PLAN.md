@@ -33,6 +33,12 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 ## 3. 下一批落实顺序
 
+先落实 [工具复用审查与集成设计](MODELING_INTEGRATION.md) 的 T0/T1：模型中明确
+哪些事实直接复用 ast/symtable/dis、FX/Export、ETO/Kineto，及其类型/状态/范围
+映射。不再扩大与这些接口重复的 Tensor tracer；Python source lowering 优先
+评估成熟前端，不能把自写完整编译器当作模型完成的先决条件。T2 以后适配器
+建图仍属后续阶段，不越过用户要求的第一阶段停止点。
+
 1. 统一 ControlPort / EnvironmentInterface 与规范状态参数，扩展既有 core 的
    completion target、pending cleanup 与 protocol adapter；先处理同步异常。
 2. 接 SavedFrame / ResumeRequest / continuation generation，再处理 generator、
@@ -50,7 +56,7 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 - 每门记录冻结 revision/source fingerprint、命令、版本、输入/输出 hash、
   定位明确的失败及终态。原失败保留；脚本错误不计为模型拒绝。
-- 测试数只证明声明范围。已有 2,657 项回归不覆盖尚未实现的新规格。
+- 测试数只证明声明范围。冻结 d5311a6 的 2,686 项回归不覆盖尚未实现的新规格。
 - 源码压力和离线查询的时间是分析成本；instrumented run 与 clean benchmark
   分开。未完成变换/正确性/A-B 时无 LeWM 加速比。
 - tensor 只做有预算的元数据观察；不逐迭代保存大内容、不强持有 frame/object。

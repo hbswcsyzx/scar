@@ -1,10 +1,22 @@
 # Current evidence and remaining work
 
+## Tool reuse review (2026-10-16)
+
+[Survey](TOOLING_SURVEY.md) and [integration design](MODELING_INTEGRATION.md)
+separate existing capture capabilities from SCAR's cross-layer responsibilities.
+Small CPU experiments verified usable FX/Export/state interfaces, an ETO↔Kineto
+CPU record-ID join, and isolated LibCST 1.9.0 parsing/metadata. These are research
+witnesses, not integrated adapters or whole-program coverage. Current SCAR already
+uses profiler/Kineto and sys.monitoring; FX/Export/ETO integration remains pending.
+No new backend, workload run or speedup claim. Complete first-stage modeling is
+still unfinished; its stopping boundary is unchanged.
+
 ## Current priority: complete the model before whole-program graphs (2026-10-16)
 
 M1 now has one implemented [static resource interface component](M1_RESOURCE_INTERFACES.md):
 four canonical tables, strict v4 capability and unchanged frozen v2/v3 wire,
-198 component checks passing. [Field-level protocol specifications](PYTHON314_PROTOCOL_CATALOG.md)
+198 component checks and 2,686 frozen full-regression checks passing.
+[Field-level protocol specifications](PYTHON314_PROTOCOL_CATALOG.md)
 now cover data/definitions, control/resumption and resource/library boundaries;
 their independent language witnesses do not certify a SCAR implementation.
 The rest of M1 and the complete first modeling stage remain unfinished.

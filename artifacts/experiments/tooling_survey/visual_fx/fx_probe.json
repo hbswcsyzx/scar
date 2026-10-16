@@ -1,0 +1,806 @@
+{
+  "basic": {
+    "graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "x",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          },
+          {
+            "node": "x"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "relu": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [
+          "nn_module_stack"
+        ],
+        "name": "relu",
+        "nn_module_stack": [
+          "relu"
+        ],
+        "op": "call_module",
+        "target": "relu",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "relu"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ],
+    "input_occurrence_count_in_args": 2,
+    "placeholder_unique_user_count": 1,
+    "same_input_node_twice": true,
+    "shape_prop": {
+      "add": {
+        "dtype": "torch.float32",
+        "shape": [
+          2,
+          3
+        ]
+      },
+      "output": {
+        "dtype": "torch.float32",
+        "shape": [
+          2,
+          3
+        ]
+      },
+      "relu": {
+        "dtype": "torch.float32",
+        "shape": [
+          2,
+          3
+        ]
+      },
+      "x": {
+        "dtype": "torch.float32",
+        "shape": [
+          2,
+          3
+        ]
+      }
+    }
+  },
+  "buffer_mutation": {
+    "buffer_after_graphmodule_run": 1,
+    "buffer_after_trace": 1,
+    "graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "x",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          },
+          1
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ]
+  },
+  "data_dependent_branch": {
+    "error_type": "torch.fx.proxy.TraceError",
+    "message": "symbolically traced variables cannot be used as inputs to control flow",
+    "partial_graph_attached": false
+  },
+  "helpers": {
+    "graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "x",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x",
+        "users": {
+          "sin": null,
+          "wrapped_helper": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "sin",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "torch._VariableFunctionsClass.sin",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "sin"
+          },
+          1
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "add_1": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [
+          "is_wrapped"
+        ],
+        "name": "wrapped_helper",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "__main__.wrapped_helper",
+        "users": {
+          "add_1": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add"
+          },
+          {
+            "node": "wrapped_helper"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add_1",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add_1"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ]
+  },
+  "leaf_module": {
+    "child_forward_calls_during_trace": 0,
+    "graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "x",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x",
+        "users": {
+          "child": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [
+          "nn_module_stack"
+        ],
+        "name": "child",
+        "nn_module_stack": [
+          "child"
+        ],
+        "op": "call_module",
+        "target": "child",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "child"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ],
+    "root_forward_calls_during_trace": 1
+  },
+  "make_fx": {
+    "called_python_function_during_capture": [
+      "entered"
+    ],
+    "graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [
+          "tensor_meta",
+          "val"
+        ],
+        "name": "x_1",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x_1",
+        "users": {
+          "rand_like": null,
+          "sin": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x_1"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [
+          "tensor_meta",
+          "val"
+        ],
+        "name": "sin",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "torch._ops.aten.aten::sin",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x_1"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {
+          "pin_memory": false
+        },
+        "meta_keys": [
+          "tensor_meta",
+          "val"
+        ],
+        "name": "rand_like",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "torch._ops.aten.aten::rand_like",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "sin"
+          },
+          {
+            "node": "rand_like"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [
+          "tensor_meta",
+          "val"
+        ],
+        "name": "add",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "torch._ops.aten.aten::add.Tensor",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ],
+    "rng_changed_during_capture": true
+  },
+  "make_fx_data_branch": {
+    "negative": {
+      "error_type": "builtins.RuntimeError",
+      "message": "It appears that you're trying to get value out of a tracing tensor with aten._local_scalar_dense.default - erroring out! It's likely that this is caused by data-dependent control flow or similar.  It may be possible to trace this with dynamic shapes; try setting tracing_mode='symbolic' in your make_fx call."
+    },
+    "positive": {
+      "error_type": "builtins.RuntimeError",
+      "message": "It appears that you're trying to get value out of a tracing tensor with aten._local_scalar_dense.default - erroring out! It's likely that this is caused by data-dependent control flow or similar.  It may be possible to trace this with dynamic shapes; try setting tracing_mode='symbolic' in your make_fx call."
+    }
+  },
+  "python_side_effect": {
+    "counter_after_graphmodule_run": 1,
+    "counter_after_symbolic_trace": 1,
+    "graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "x",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          },
+          1
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ]
+  },
+  "random_constant": {
+    "graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "x",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "_tensor_constant0",
+        "nn_module_stack": [],
+        "op": "get_attr",
+        "target": "_tensor_constant0",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          },
+          {
+            "node": "_tensor_constant0"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ],
+    "graphmodule_code": "\n\n\ndef forward(self, x):\n    _tensor_constant0 = self._tensor_constant0\n    add = x + _tensor_constant0;  x = _tensor_constant0 = None\n    return add\n    ",
+    "rng_changed_during_graphmodule_run": false,
+    "rng_changed_during_trace": true
+  },
+  "random_like": {
+    "graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "x",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x",
+        "users": {
+          "add": null,
+          "rand_like": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "rand_like",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "torch._VariableFunctionsClass.rand_like",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          },
+          {
+            "node": "rand_like"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ],
+    "rng_changed_during_trace": false
+  },
+  "runtime": {
+    "device": "cpu",
+    "python": "3.14.7",
+    "torch": "2.13.0+cu132"
+  },
+  "source_metadata": {
+    "custom_graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "x",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          },
+          {
+            "node": "x"
+          }
+        ],
+        "has_stack_trace": true,
+        "kwargs": {},
+        "meta_keys": [
+          "stack_trace"
+        ],
+        "name": "add",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "relu": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add"
+          }
+        ],
+        "has_stack_trace": true,
+        "kwargs": {},
+        "meta_keys": [
+          "nn_module_stack",
+          "stack_trace"
+        ],
+        "name": "relu",
+        "nn_module_stack": [
+          "relu"
+        ],
+        "op": "call_module",
+        "target": "relu",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "relu"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ],
+    "custom_tracer_stack_trace_nodes": {
+      "add": "File \"/tmp/scar-structured-model-280qf4mi/artifacts/experiments/tooling_survey/visual_fx/fx_probe.py\", line 64, in forward\n    shared = x + x\n  File \"/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/fx/proxy.py\", line 927, in impl\n    return tracer.create_proxy(\"call_function\", target, args, kwargs)\n  File \"/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/fx/proxy.py\", line 367, in create_proxy\n    node = self.create_node(kind, target, args_, kwargs_, name, type_expr)\n  File \"/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/fx/proxy.py\", line 287, in create_node\n    user_stack_summary = CapturedTraceback.extract().summary()",
+      "relu": "File \"/tmp/scar-structured-model-280qf4mi/artifacts/experiments/tooling_survey/visual_fx/fx_probe.py\", line 65, in forward\n    return self.relu(shared)\n  File \"/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/fx/proxy.py\", line 367, in create_proxy\n    node = self.create_node(kind, target, args_, kwargs_, name, type_expr)\n  File \"/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/fx/proxy.py\", line 287, in create_node\n    user_stack_summary = CapturedTraceback.extract().summary()"
+    },
+    "default_basic_nodes_have_stack_trace": false
+  },
+  "static_loop": {
+    "call_function_add_count": 3,
+    "graph": [
+      {
+        "args": [],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "x",
+        "nn_module_stack": [],
+        "op": "placeholder",
+        "target": "x",
+        "users": {
+          "add": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "x"
+          },
+          1
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "add_1": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add"
+          },
+          1
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add_1",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "add_2": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add_1"
+          },
+          1
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "add_2",
+        "nn_module_stack": [],
+        "op": "call_function",
+        "target": "_operator.add",
+        "users": {
+          "output": null
+        }
+      },
+      {
+        "args": [
+          {
+            "node": "add_2"
+          }
+        ],
+        "has_stack_trace": false,
+        "kwargs": {},
+        "meta_keys": [],
+        "name": "output",
+        "nn_module_stack": [],
+        "op": "output",
+        "target": "output",
+        "users": {}
+      }
+    ]
+  }
+}

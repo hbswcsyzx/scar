@@ -62,6 +62,28 @@ AST 在不同 flags/实现下可能含义不同。`__future__` 指令按语言�
 `compile`/`exec`/`eval` 创建新的 code/source identity 和 scope，不能借用调用点的 code。
 编译错误是尚未运行 source 的 compile completion。
 
+`TypeIgnore(lineno, tag)` 是 source/type-check 元数据：`lineno` 指向该 type-ignore
+注释的物理行，`tag` 保留 ignore 后的原始标签文本。二者不求值、不读写程序变量，
+没有 runtime result；这里的 lineno 是该节点的 canonical field，仍需在构造守恒中
+逐项归属，不能与其他节点的通用位置 `_attributes` 混为一个遗漏项。
+
+### 2.1.1 Expr 与 Pass
+
+普通 `Expr.value` 按 `V(value)` 求值；正常结果由 expression-statement discard
+协议消费并释放临时引用，然后 Fallthrough。异常/挂起和已发生状态沿对应出口
+传递。释放可能触发 finalizer、unraisable hook 或不完成，依资源/frame 协议处理，
+不能将其全部当普通 Raise，也不能视为无效果。Interactive 模式的显示协议可
+调用 `sys.displayhook`，不能直接改为普通 discard。
+
+被编译器识别的首个 docstring 表达式先走 docstring/definition 协议：module/class
+可写 `__doc__` namespace，function docstring 属于 code/function metadata；它不是
+每次 body entry 都重新执行的普通 Expr。目标 optimization 模式也影响保留方式。
+源节点继续有归属，不能因 compiler 没有生成普通求值指令就从源码模型删除。
+
+`Pass()` 没有运行字段或数据结果；基础语言行为是当前 suite 的 Fallthrough，
+不创建新 binding/state version。source/编译归属仍保留。跟踪、信号等宿主干预
+按环境合同处理，不能由“pass 无业务效果”推断整个 frame 无可观察交互。
+
 ### 2.2 Scope 与 Name 绑定
 
 scope 分类在 compile phase 由整个 code block 决定，不可从某个 `Name` 节点单独猜：
@@ -72,7 +94,7 @@ scope 分类在 compile phase 由整个 code block 决定，不可从某个 `Nam
 
 | source construct | 读/写规则 |
 | --- | --- |
-| `Name(ctx=Load)` | 消费该 scope 对应的当前绑定。Local 读取 `BindingRead`；cell/free 读取 cell state；global 先查 module globals，再查 builtins；class body 的 name lookup 先查执行中的 class namespace，再查 globals/builtins。读取可失败，且 namespace 可被其他代码改动。 |
+| `Name(ctx=Load)` | 消费该编译上下文对应的当前绑定。普通 function local 读取 `BindingRead`，cell/free 读取 cell state，global 先查 module globals 再查 builtins。class/annotation 上下文还需按目标 compiler/code witness 确定 namespace、free cell、globals 的查找路径；仅 scope 枚举不足以决定。读取可失败，namespace/cell 可被其他代码改动。 |
 | `Name(ctx=Store)` | RHS 已求值后更新所在 binding。local 建新 binding version；global/nonlocal/class/module 写入对应 namespace/cell state。不同分支的 `BOUND`/`UNBOUND` 合流由 CFG 输入推导，不能由源码标签宣称。 |
 | `Name(ctx=Del)` | 按 scope 删除 binding；删除可失败，后续读变成未绑定。local 与 global/cell deletion 是不同状态域。 |
 | `Global(names)` | compile-time scope 声明；没有 runtime 名称赋值步骤。必须遵守语法位置约束；声明使 block 内相应 Name 绑定走 module globals。 |
@@ -82,6 +104,13 @@ Python 函数 fast-local 绑定改变不意味着其 object payload 改变；`x 
 `x` 的绑定指向 RHS 的引用/数据。相反，`global_x = y`、`cell_x = y` 更新可由其他
 activation 观察的位置，需进入状态接口。引用目标的可变性、身份、内容状态和 lifetime
 分开表示。闭包捕获 cell 的身份在函数对象环境中固定，cell 内容可以跨调用改变。
+
+class body 中一个 free Name 可以先查 prepared class namespace，再读 enclosing
+cell；本机探针中 outer x=3、prepared namespace x=9，class 的 y=x 得到 9，
+对应 `LOAD_LOCALS` / `LOAD_FROM_DICT_OR_DEREF`。method function 的 free Name
+则不因此捕获 class namespace。应复用 `symtable` 的编译作用域与 `dis` 的版本化
+指令/位置见证，保留真实 lookup 协议，不能自行把所有 free Name 简化为直接 cell read。
+独立证据见 `artifacts/experiments/b1_call_operands/model_stage1_audit/class_namespace_free_probe.json`。
 
 ## 3. 函数、lambda 和参数字段
 
@@ -187,6 +216,14 @@ AST `TypeVar` 声明协议。上述语义只表达 runtime type object 的建立
 | `type_params` | generic class type parameter/annotation scope，按 §4 处理。 |
 | `body` | 在 metaclass `__prepare__` 提供的 namespace 中执行一遍。namespace 可能是自定义 mapping；class-scope lookup/Store、方法定义、descriptor 值、类 annotations、类语句的副作用和异常都接到这个状态。 |
 
+header 跨字段复用 §9 的 argument-preparation 协议：先准备 `bases` 中的位置与
+starred 部分（逐项求值并展开），再准备 `keywords` 的命名值与 `**` mapping。
+合法源码即使将 keyword 写在 starred base 前，也不是全 header 的文本求值顺序。
+本机 `class Header(metaclass=meta(), *base_pack()): pass` 先执行 base_pack，后求
+metaclass expression。每部分内部保持语言顺序，mapping 展开/重复名/非法 key
+和迭代失败保留各自异常及后态；完成 header 准备后才走 base resolution、metaclass
+selection/prepare 与 body。非法语法先在 compile phase 拒绝，不制造部分执行。
+
 若 metaclass 路径实际调用 `type.__new__`，descriptor `__set_name__` 和基类
 `__init_subclass__` 可在 class creation 期间发生；Metaclass `__call__`/`__new__` 或
 decorator 可改写/替换类，需为具体已证实的边建证据。类体创建的普通方法不会将 class
@@ -269,6 +306,17 @@ local annotation 不执行且不写 runtime `__annotations__`，但该名字仍�
 求值；attribute/local annotation 表达式不运行。不同 target 不得只因 field 中存在
 `annotation` 就制造 annotation expression call。
 
+`simple` 是编译选择 0/1，不求运行真值：只有未加括号的 Name target 的 simple=1
+进入 simple-name annotation 收集；括号 Name 的 simple=0 不因 target 仍是 Name
+而加入该映射。无 RHS 的 Name 不执行值赋值，不建立一个等于 None 的绑定，也不
+覆盖已有值；它在函数中的 compile-local 归属和 module/class 的 annotation setup
+分别保留。
+
+无 RHS 的 Attribute 仍求 owner 一次，无 RHS 的 Subscript 仍依序求 owner/key，
+但均不调用最终 getter/setter。组成 owner/key 的内部表达式仍可 lookup、call、
+抛异常或产生效果；不能因 annotation 不求值而删掉整句。annotation setup/惰性
+环境的建立也按对应 scope/compiler 协议保留。本机探针已确认该目标求值差别。
+
 ### 8.3 `AugAssign(target, op, value)`
 
 先将 target 定位一次；Name 读一次当前绑定，Attribute 一次求 owner 并读属性，Subscript
@@ -289,18 +337,34 @@ binding；attribute/subscript 调各自 `__delete__`/`__delitem__`。`NamedExpr`
 ## 9. Call：表达式、展开、绑定、dispatch、entry
 
 调用协议不是单一 `CALL` 节点。语言参考：[calls](https://docs.python.org/3.14/reference/expressions.html#calls)。
-本机 3.14.7 事件 probe 确认，源码 `callable()(named=kw(), *star(), **map())` 的实际顺序是
-callable、star 表达式及其迭代、keyword expression、mapping expression/keys/values，最后
-callee body。不能按 AST `Call(func, args, keywords)` 字段组合出错误的 keyword-before-star
-顺序。
+positional/starred **表达式求值**与 iterator **展开**是不同步骤。即使源码把 named
+keyword 写在星号前，star 表达式也在 keyword expression 之前求值；但不能据此
+断言 iterable 一定立即展开。原定义协议 probe 的 star_expr 返回 list，仅记录了
+构造列表的事件，没有观察其 iterator 协议，不能证明“迭代在 keywords 之前”。
 
 | field | protocol |
 | --- | --- |
 | `Call.func` | 先求 callable expression 一次；Attribute/Name 等自有其访问 protocol。实际 callable 可能是函数、bound method、descriptor result、builtin、partial、class/metaclass 或 `__call__` object。 |
-| `Call.args` | 按 positional-argument 规则求普通与 starred expressions；`*` 立即迭代并依序采集 items。每个 actual occurrence 有独立 Use；pack 不能按对象相等去重。 |
+| `Call.args` | 按 positional-argument 规则求普通与 starred expressions；求 iterable 与逐项展开分开建模，展开阶段按目标 compiler/call-adapter 路线确定，见下表。每个 actual occurrence 有独立 Use；pack 不能按对象相等去重。 |
 | `Call.keywords` / `keyword.arg` | Keyword values 按语言规定顺序求值。普通 `arg` 是显式 keyword 名；`arg=None` 是 `**mapping`。mapping 的 `keys`/读取、string-key 校验、重复名冲突和 pack 顺序可执行 user protocol。 |
 | dispatch/binding | 先完成 argument expression/expansion，再由运行时目标绑定形参；缺参、多余、duplicate、pos-only 冲突等可在 body entry 前抛 `TypeError`。不产生 body activation。 |
 | body entry | 只有本次运行确实进入匹配的 function code/frame 才连接 callee Region；绑定完成不证明目标身份、globals/defaults/closure 或效果。 |
+
+本机 CPython 3.14.7 独立自定义 iterable 探针记录 `star_expr/iter/next/kw/body`，
+并用 compiler/dis 见证区分路线：
+
+| 被测 call 形式 | 实际阶段与失败影响 |
+| --- | --- |
+| `fn(*star(), named=kw())` | 先 star expression、kw，随后 CALL_FUNCTION_EX 路线展开 iterable，再 body。kw 失败不执行 iter；iter/next 失败时 kw 已发生。 |
+| `fn(0, *star(), named=kw())` | prefix pack 的 LIST_EXTEND 在 kw 之前展开；iter 失败则不执行 kw。 |
+| `fn(*star(), 0, named=kw())` | 后续 positional pack 使展开在 kw 之前。 |
+| `fn(*star(), *other(), named=kw())` | 为多个 starred positional 依次构造 pack，实际展开发生于 kw 前；前项失败截断后项。 |
+
+16 个正常/失败案例见 `model_stage1_audit/closure/call_star_probe.py` 与对应 JSON。
+这些路线约束目标版本，不将四个样例推广成所有 callable/实现的相同展开策略；
+tuple/list 快路、descriptor/call adapter 与 `**` 合并也按实际 compiler/协议接口
+连接。实现应复用编译见证及运行 evidence，不按 AST field 顺序或“star 立即迭代”
+口号补造状态/异常边。函数绑定仍等待该次参数准备完成，之前的部分效果不回滚。
 
 无序 AST 字段、同一个 object token、同 code 或源中同名函数都不足以将一次动态 call
 认定为某个定义。`*`/`**` 可能调用 iterator/mapping methods 并在 body 前失败；重复
@@ -318,9 +382,15 @@ dispatch。binary special method 可返回 `NotImplemented`、修改状态或 ra
 和 numeric tower 会影响选择。`MatMult` 等 Python 运算符与 NumPy/Torch operator 行为
 之间须有版本化实现证据，不能按符号假设内核、shape、device 或 purity。
 
-`UnaryOp` 先求 operand。正负/反转运算走 `__pos__`/`__neg__`/`__invert__`；`not` 先做
+值上下文的 `UnaryOp` 先求 operand。正负/反转运算走 `__pos__`/`__neg__`/`__invert__`；`not` 先做
 truth test（`__bool__`，否则 `__len__`），再生成 builtin bool。Truth method 可调用/改状态/
 raise。运算符 AST marker 是所选协议参数，不单独制造运行时值。
+
+直接条件上下文另有 `T(Not e; true, false) = T(e; false, true)`，按 continuation
+取反，不先生成 V(e) 再无条件求真。V(Not e) 仍求 operand 的值、Truth 后产生
+bool；两者不得合并。本机 a 恒假时，值上下文 `not (a and b)` 会调用 a 的 bool
+两次，直接 `if not (a and b)` 一次。该规则只属于本次条件求值，不授予跨语句
+缓存 truth 的权限，见控制分册 §0.2。
 
 AugAssign 的 inplace precedence 与 fallback 见 §8.3。非 builtin/未核对的运算实现，效果、
 身份、数据转换和异常默认为 incomplete；不能只按两个输入 value 相同合并结果。
@@ -338,11 +408,22 @@ truth/compare 异常端口由[控制协议](PYTHON_CONTROL_PROTOCOLS.md)规定�
 
 | AST family/field | evaluation/dispatch |
 | --- | --- |
-| `List.elts`, `Tuple.elts`, `Set.elts` | 按源顺序求各 element；`Starred` 展开 iterable。建立相应 container reference/identity；set hash/equality、元素迭代和分配可触发实现协议/异常。 |
+| Load-context 的 `List.elts` / `Tuple.elts`，以及 `Set.elts` | 按源顺序求各 element；`Starred` 展开 iterable。建立相应 container reference/identity；set hash/equality、元素迭代和分配可触发实现协议/异常。 |
 | `Dict.keys`, `Dict.values` | 成对按源顺序执行：每项先求 key，再求 value；`None` key 表示 `**` mapping expansion，需走 mapping protocol。插入期间 hash/equality 可 callback/raise，后续重复 key 会改变最终 mapping state。 |
 | `ListComp`/`SetComp`/`DictComp` | 建 implicit comprehension scope 和迭代 Region；target/filter/result 的重复次数与路径见控制协议。Dict 项仍 key-before-value。Comprehension iteration target 不泄漏；walrus target 有特殊 containing-scope 规则。 |
 | `GeneratorExp` | 外层 iterable 及 outer iterator 在 generator 建立时求值；生成器主体和后续 iterator/filter/yield 延至迭代/resume。不能以 generator object 的创建声称其所有元素已计算。 |
 | `Constant(value, kind)` | 精确保留解析出的 None/bool/int/float/complex/str/bytes/Ellipsis 等 literal 和源位置/前缀信息。常量折叠、interning、identity、对象复用属于 compiler/runtime 行为；相同 literal spelling/value 不自动证明同一对象或可跨次缓存。 |
+
+`List.ctx`、`Tuple.ctx`、`Starred.ctx` 选择不同协议，不是统一构造容器：
+
+| ctx | 具体连接 |
+| --- | --- |
+| List/Tuple Load | 求各 elts 值/展开并创建结果容器。 |
+| List/Tuple Store | 作为 target pattern 消费 RHS，执行 unpack 与递归 target Store；不读取被赋值名称、不构造 target 容器。每个 unpack 单元按目标实现先做所需元素/长度检查，再按目标顺序更新；已完成的其他 target 更新在后来失败时保留。 |
+| List/Tuple Del | 按 elts 左到右递归删除 target；`del (a,b)` / `del [a,b]` 不创建容器、不读元素值，也不从 iterable 解包。Attribute/Subscript 子 target 才求其 owner/key；失败截断后续删除。 |
+| Starred Load | 在合法 call/container 的展开位置求 value，迭代阶段由所属协议决定；Call 见 §9，不能统一成求 value 后立即迭代。孤立或其他非法位置由 compile 拒绝。 |
+| Starred Store | 仅在合法 unpack target 中接收剩余元素，再按 value 子 target Store；约束及失败端口属于 unpack 协议。 |
+| Starred Del | 不是合法删除 target；compile 拒绝，不虚构展开/删除执行边。 |
 
 Container result 是 Python reference，内部元素关系/别名和后续 mutability 应由资源协议
 建模。构造异常可能发生在部分元素已求值之后；将整个 literal 视为原子纯 constant 会

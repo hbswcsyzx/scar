@@ -41,6 +41,13 @@ operand 引用。`if a and b` 中 a 为假，只求真 a 一次；先写 `v = a 
 需要值时保留选中 operand；任何离开这次表达式的后续读取都不能继承“永远真假”事实。
 本机探针 `truth_context`、`comparison_chain` 给出实际调用次数和引用身份。
 
+UnaryOp 的 Not 也必须区分上下文：`T(Not e; k_true, k_false)` 直接连接
+`T(e; k_false, k_true)`，不将 e 先作为普通 Python 值物化再无条件 Truth。
+`V(Not e)` 则按值协议求 V(e)、再 Truth 并产生 bool。对恒假的自定义 a，
+3.14.7 独立探针观察值上下文 `not (a and b)` 调用 a 的 bool 两次，而直接
+`if not (a and b)` 一次。该差别是源程序的求值上下文，不是缓存/省略 truth
+的优化许可。其他 unary 操作在条件上下文仍先完成其值协议，再按 T 消费结果。
+
 ### 0.3 生命周期、异常、资源
 
 表达式临时值、iterator、pending payload、exception target 和 manager 均有保留/释放

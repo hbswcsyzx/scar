@@ -7,6 +7,12 @@
 > complete model; the four-family ProgramGraph is a bounded projection. No new
 > detector/backend is scheduled before model and dependency closure.
 
+> **Tool reuse revision (2026-10-16):** use existing Python compiler frontends,
+> FX/Export tensor subgraphs and ETO+Profiler execution facts before expanding
+> bespoke tracing/lowering. The [survey](TOOLING_SURVEY.md) and
+> [integration contract](MODELING_INTEGRATION.md) distinguish tested capabilities
+> from pending adapters. Complete first-stage modeling remains unfinished.
+
 > **Automation status (2026-10-16):** the public flow discovers sources and builds
 > bounded graphs without a hand-authored workload model. Complete dependency
 > recovery and LeWM simplification remain unmet. See the explicit

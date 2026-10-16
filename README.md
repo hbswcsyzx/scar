@@ -8,6 +8,11 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
+The [tooling survey](docs/TOOLING_SURVEY.md) and
+[model integration design](docs/MODELING_INTEGRATION.md) define how SCAR will
+reuse Python compiler interfaces, FX/Export and ETO+Profiler. Current experiments
+verify bounded tool capabilities; the new adapters are not yet integrated.
+
 SCAR means **State · Control · Action · Resource**. It is a prototype for
 automatic program modeling and optimization planning for Python/PyTorch.
 The current task is to recover connected value/state/control dependencies,
