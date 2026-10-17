@@ -1,0 +1,146 @@
+{
+  "scope": "IR-only integration mutations, not runtime/source proof",
+  "results": [
+    {
+      "name": "baseline",
+      "pass": true,
+      "issues": []
+    },
+    {
+      "name": "context-ordinary-operation-escape",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_context_escape",
+          "path": "program_use:review.escape.context",
+          "message": "saved context only forwards within its owning active cleanup or restores it"
+        }
+      ]
+    },
+    {
+      "name": "resume-stale-state",
+      "pass": true,
+      "issues": [
+        {
+          "code": "stale_state",
+          "path": "program_use:shared.cleanup.resume.world",
+          "message": "use must read the current version of this block's state"
+        }
+      ]
+    },
+    {
+      "name": "protected-entry-without-route",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_protected_bypass",
+          "path": "program_operation:shared.return.to.cleanup",
+          "message": "every physical exit from protection first enters its cleanup via a route"
+        },
+        {
+          "code": "cleanup_entry_edge",
+          "path": "program_operation:shared.return.to.cleanup",
+          "message": "cleanup entry only accepts a derived Enter route"
+        }
+      ]
+    },
+    {
+      "name": "replace-saved-old-pending",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_replacement_fresh",
+          "path": "program_operation:shared.cleanup.resume",
+          "message": "replacement must be freshly constructed after this entry on all incoming paths"
+        }
+      ]
+    },
+    {
+      "name": "leave-active-cleanup-without-pop",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_stack_entry",
+          "path": "program_block:shared.cleanup.post-pop-route",
+          "message": "entry stack must match active lexical cleanup ancestors"
+        },
+        {
+          "code": "cleanup_stack_entry",
+          "path": "program_block:shared.dispatch.block",
+          "message": "entry stack must match active lexical cleanup ancestors"
+        },
+        {
+          "code": "cleanup_stack_entry",
+          "path": "program_block:shared.raise_exit",
+          "message": "entry stack must match active lexical cleanup ancestors"
+        },
+        {
+          "code": "cleanup_exit_bypass",
+          "path": "program_block:shared.raise_exit",
+          "message": "terminal exit bypasses a pending cleanup obligation"
+        },
+        {
+          "code": "cleanup_stack_entry",
+          "path": "program_block:shared.return_exit",
+          "message": "entry stack must match active lexical cleanup ancestors"
+        },
+        {
+          "code": "cleanup_exit_bypass",
+          "path": "program_block:shared.return_exit",
+          "message": "terminal exit bypasses a pending cleanup obligation"
+        }
+      ]
+    },
+    {
+      "name": "nested-fallthrough-and-return",
+      "pass": true,
+      "issues": []
+    },
+    {
+      "name": "nested-restore-outer-context-as-inner",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_context_forward",
+          "path": "program_operation:nested.inner.resume",
+          "message": "restore must consume this activation's saved context"
+        }
+      ]
+    },
+    {
+      "name": "nested-consume-new-pending-as-outer-original",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_pending_forward",
+          "path": "program_operation:nested.outer.replace",
+          "message": "exit must consume this entry's original pending, not an equal port or repack"
+        }
+      ]
+    },
+    {
+      "name": "nested-route-substitute-outer-old-pending",
+      "pass": true,
+      "issues": [
+        {
+          "code": "cleanup_route_pending",
+          "path": "program_operation:nested.inner.route",
+          "message": "route forwards its exact selected pending, without repacking"
+        }
+      ]
+    },
+    {
+      "name": "local-break-continue-preserve-outer-pending",
+      "pass": true,
+      "issues": []
+    },
+    {
+      "name": "canonical-query-index",
+      "pass": true
+    },
+    {
+      "name": "nested-query-route-steps",
+      "pass": true
+    }
+  ]
+}

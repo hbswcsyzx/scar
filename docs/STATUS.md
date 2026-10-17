@@ -1,5 +1,23 @@
 # Current evidence and remaining work
 
+## C1 cleanup/context static component (2026-10-16; archived 2026-10-17)
+
+[C1](M1_CLEANUP_INTERFACES.md) connects Enter/Resume/Replace and saved exception
+context to canonical pending Uses, current all-domain state and lexical CFG
+routes. All **243 component checks** pass. Independent review found and fixed
+a valid divergent cleanup rejected by the old actual-exit requirement; a second
+integration fix rejects new Route subclasses that would lose their wire tag.
+Original failures and precise counterexamples remain archived.
+
+Frozen `0ea05e6` passed **3,330 full tests / 428.510s / 1,028,484KiB**, with three
+existing warnings and zero failures/errors/skips. HEAD, clean status, 391 source
+hashes and 22 fixture hashes matched before/after; its exclusively owned basetemp
+was removed. Schema v9 preserves original v1–v8 contracts. This verifies declared
+static IR composition only: no new source recovery, runtime unwinding proof,
+provider adapter, LeWM transformation or speedup. Complete M0–M2 remain unfinished;
+resumption, precise state/literals, dynamic resources and occurrence/denotation
+still require interfaces. See the [evidence archive](../artifacts/experiments/b1_call_operands/model_cleanup_interfaces/README.md).
+
 ## Current modeling/tool reuse review (2026-10-16)
 
 The [status and modeling decision](MODELING_REUSE_DECISION.md) separates five core
@@ -12,7 +30,8 @@ The audit also identifies name-based mutation guesses and collector failure-path
 gaps in the current trace code; these records do not establish complete effects.
 Reuse op schemas, native descriptors and provider artifacts before writing parallel
 logic. No new product code, capture, tests or workload run accompanies this review.
-C1 cleanup remains a design only; schema is still v8. M0–M2, automatic whole-program
+At that read-only checkpoint C1 was a design and schema was v8; the separate C1
+receipt above records the later implementation. M0–M2, automatic whole-program
 LeWM connectivity and a credible automatic transformation/speedup remain incomplete.
 
 ## P1 thin native boundary component (2026-10-16)

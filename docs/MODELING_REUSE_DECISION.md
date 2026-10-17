@@ -1,8 +1,9 @@
 # 建模现状、工具分工与实施边界
 
 2026-10-16。审查基线 `78c5fda`，分支 `codex/structured-program-model`。
-本次是只读代码审计、官方资料复核和设计收束；没有新增采集、adapter、detector
-或 backend。既有小实验保持各自的版本与范围，不冒充本轮实测。
+原工具审查是只读代码审计、官方资料复核和设计收束；没有新增采集、adapter、
+detector 或 backend。2026-10-17 更新下面的 C1 实施状态；既有工具小实验保持
+各自的版本与范围，不冒充本轮实测。
 
 ## 1. 当前完成了什么
 
@@ -14,10 +15,11 @@
 | 自动建图 | 已有有限同步 source lowering 与历史 LeWM 证据。 | 加载→推理→环境交互→保存全过程已连接。 |
 | 化简结果 | 尚无可信的 LeWM 自动变换及 clean A/B 加速比。 | 测试数量等于模型覆盖率或加速效果。 |
 
-最近冻结实现 `79bf2a9` 的 3,215 项回归通过，见
-[原始报告](../artifacts/experiments/b1_call_operands/model_native_interfaces/full/report.json)。
-这是已实现范围的回归结果，不关闭第一阶段。`M1_CLEANUP_INTERFACES.md` 仍为
-待实施规格，当前 schema 仍是 v8；不能把草案中的六表或 v9 当成产品能力。
+最近冻结实现 `0ea05e6` 的 3,330 项回归通过，见
+[原始报告](../artifacts/experiments/b1_call_operands/model_cleanup_interfaces/full/report.json)。
+[C1 cleanup/context](M1_CLEANUP_INTERFACES.md) 的六表、v9、栈/路由及 copy/fresh
+组合校验已实施，243项组件检查通过。这是声明 IR 的回归结果，不是自动 source
+恢复或实际异常上下文证明，也不关闭第一阶段。
 
 ## 2. 如何拆分：实体、行为、连接分别定义
 

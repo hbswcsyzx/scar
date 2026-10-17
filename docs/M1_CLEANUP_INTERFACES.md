@@ -1,6 +1,7 @@
 # C1：同步 cleanup、待完成转移及当前异常上下文
 
-2026-10-16。**静态声明组件已实施，243项组件检查通过；冻结全仓验收待执行。**
+2026-10-16 验收，2026-10-17 归档。**静态声明组件已实施并验收：243项组件检查、
+3,330项冻结全仓测试通过。**
 设计基线 `78c5fda`，集成基线 `588ca84`。
 本批补齐模型的控制/状态组合接口，不增加 detector/backend，不修改或运行 LeWM。
 source lowering、实际 callable/context/效果对应、with 抑制及 except* 仍分别验收。
@@ -162,4 +163,10 @@ v9 的 CleanupRouteTerminator wire 额外带显式 `kind="CLEANUP_ROUTE"` 判别
 
 组件测试只验证所声明 IR 的类型、依赖和组合；没有运行相应 Python source、
 恢复完整 source graph 或验证真实异常上下文。这不关闭完整 M1/M2，也不产生
-LeWM 化简或加速比。冻结 full 结果另行归档，不以本组件通过冒充全仓验收。
+LeWM 化简或加速比。
+
+冻结实现 `0ea05e6` 的单次全仓回归为3,330 PASS、零失败/错误/跳过、三项原有
+warning；428.510s，峰值RSS 1,028,484KiB。运行前后HEAD、clean状态、391个源文件
+及22份fixture哈希相同；专属basetemp已移除。该结果是回归验收成本，不是workload
+性能。组件与完整receipt、独立反例审查见
+[证据目录](../artifacts/experiments/b1_call_operands/model_cleanup_interfaces/README.md)。

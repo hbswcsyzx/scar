@@ -1,0 +1,13 @@
+{
+  "constructor": {
+    "rejected": true,
+    "type": "TypeError",
+    "message": "cleanup route terminator must be exact CleanupRouteTerminator"
+  },
+  "bypassed_constructor": [
+    {
+      "code": "schema",
+      "message": "graph.operations[4]: cleanup route terminator must be exact CleanupRouteTerminator"
+    }
+  ]
+}

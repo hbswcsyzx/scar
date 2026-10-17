@@ -83,6 +83,11 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 ## 5. 当前证据锚点
 
+- M1 [C1 cleanup/context](M1_CLEANUP_INTERFACES.md)243项组件通过；冻结实现
+  `0ea05e6` 的3,330项全仓回归通过，391文件源指纹及22份fixture哈希前后一致。
+  只验证声明图的pending/context/当前state、LIFO与route组合；不证明真实unwind，
+  with/except*、resumption和第一阶段完整接口仍未完成。
+
 - M1/T1 [P1薄边界](M1_NATIVE_INTERFACES.md)168项组件通过（376文件源指纹），
   已接原生槽到规范entry/exit及跨表示八域待证声明，未复制pytree/signature解释器。
   独立审查发现并修复旧ID子类索引回归；`79bf2a9`的3,215项冻结全仓通过，
@@ -94,8 +99,8 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
   和跨表示等价尚未实现，完整T1/M1/M2及第一阶段仍未完成。
 
 - M1 [C0控制协议组件](M1_CONTROL_INTERFACES.md)354项、冻结全仓3,027项通过
-  （implementation `54eb7ec`，源指纹含356文件）。仅验证scope/port/pending/packet和CFG组合，C1 cleanup/context/
-  原token来源保持仍未实现，不称完整finally或M1通过。
+  （implementation `54eb7ec`，源指纹含356文件）。该历史组件仅验证scope/port/
+  pending/packet和CFG组合；C1由上面的独立组件接入，不称完整finally或M1通过。
 - M1 函数环境/入口分区组件已接规范 Uses/state，终版组件 327 项、冻结
   全仓 2,835 项通过（implementation `e826713`）。它只验证静态声明，不证明 runtime/source 绑定，见
   [M1_ENVIRONMENT_INTERFACES.md](M1_ENVIRONMENT_INTERFACES.md)。其余完整分母见

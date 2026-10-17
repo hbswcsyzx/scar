@@ -16,6 +16,14 @@ The [tooling survey](docs/TOOLING_SURVEY.md) and
 reuse Python compiler interfaces, FX/Export and ETO+Profiler. Current experiments
 verify bounded tool capabilities; the new adapters are not yet integrated.
 
+The [C1 cleanup/context component](docs/M1_CLEANUP_INTERFACES.md) connects pending
+values, saved exception context and current state through canonical CFG routes.
+Its 243 component checks and 3,330 frozen full-repository tests pass. These are
+static declared-IR checks; automatic source recovery, runtime unwinding and the
+complete first modeling stage remain unfinished. The
+[evidence archive](artifacts/experiments/b1_call_operands/model_cleanup_interfaces/README.md)
+retains independent reviews, original failures and the unchanged-source receipt.
+
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
 all completion sites and explicit cross-representation obligations. Its 168

@@ -29,7 +29,8 @@ state/control，按 [M0—M6](WHOLE_PROGRAM_MODEL_PLAN.md)逐门落实：
 新实施的 [C0](M1_CONTROL_INTERFACES.md)是 `scar.program-graph` v6：词法scope/port、
 packet/pending Value与唯一构造表、专用dispatch。旧Terminator不改字段；新terminator
 用独立严格record。没有新能力的图仍按原v2—v5写出；旧reader禁止夹带新协议类型。
-C0只验证声明结构，完整cleanup、handled context及跨边界pending合同尚未实施。
+C0只验证声明结构；同步cleanup及handled context由下述C1扩展，实际source/runtime
+对应及完整跨边界pending合同仍未完成。
 
 [P0来源合同](M1_PROVIDER_INTERFACES.md)新增 `scar.program-graph` v7：envelope、
 provider region 归属/观察关联、定义层端点 binding 三表。没有此能力的图仍按
@@ -42,6 +43,13 @@ artifact、不把执行证据直绑静态实体，也不授予跨表示等价或
 留在 artifact，不复制其解释器。无此能力仍按原 v2—v7 写出；原 v7 golden 由
 隔离原 codec 产生。168 项组件与 `79bf2a9` 的3,215项冻结全仓已通过；动态 occurrence/
 denotation、真实 native 适配/写回/等价及完整建模仍未完成。
+
+[C1 cleanup/context](M1_CLEANUP_INTERFACES.md)新增 `scar.program-graph` v9：
+六表引用既有pending/context/当前state/CFG，派生栈与entry-relative copy/fresh，
+不另存producer。新CleanupRoute使用显式wire tag，旧C0 dispatch不变；旧v1—v8
+拒绝新能力，没有C1的图仍按原版本写出。243项组件与`0ea05e6`的3,330项冻结全仓
+通过。允许清理截留的潜在函数出口没有实际站点，必须由指定pending入口完整facts
+支撑；旧无C1图的实际出口要求保留。with/except*、挂起恢复和真实context仍未验证。
 
 新完整模型 Resource 有静态 definition/requirement 和动态 instance，handle
 经对应关系引用它；不能仅作为 EEG 标签。旧 `ready_event` 不承担新完成证明。
