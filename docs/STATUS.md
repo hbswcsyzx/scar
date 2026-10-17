@@ -1,5 +1,18 @@
 # Current evidence and remaining work
 
+## C2 resumption architecture review (2026-10-17)
+
+[C2 design](M1_RESUMPTION_INTERFACES.md) chooses explicit temporal successors in
+one logical body, with separate derived logical-control and cut-availability
+queries. Three reviews and small stdlib witnesses expose context inheritance,
+delegate-only driver paths and the old synchronous FrameExit adjacency conflict.
+The first language batch contains 23 dynamic observation groups and four static
+code shapes; four later delegation-context observations are separate. Five design
+checks on existing valid core CFGs support the availability cut, not an implemented
+Suspend validator. C2.0 exact-field freeze remains open. Product schema/source
+are unchanged from the C1 implementation; no full retry, new capture, LeWM run,
+transformation or speedup accompanies this specification update.
+
 ## C1 cleanup/context static component (2026-10-16; archived 2026-10-17)
 
 [C1](M1_CLEANUP_INTERFACES.md) connects Enter/Resume/Replace and saved exception

@@ -1,0 +1,183 @@
+{
+  "codes": {
+    "asynchronous_generator": {
+      "code_flags": 16777731,
+      "code_name": "asynchronous_generator",
+      "instruction_count": 12,
+      "kind_bits": {
+        "async_generator": true,
+        "coroutine": false,
+        "generator": false,
+        "iterable_coroutine": false
+      },
+      "mask_for_reference": 928,
+      "suspension_instructions": [
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 0,
+          "opname": "RETURN_GENERATOR"
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 4,
+          "opname": "RESUME"
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 10,
+          "opname": "YIELD_VALUE"
+        },
+        {
+          "arg": 5,
+          "argrepr": "",
+          "offset": 12,
+          "opname": "RESUME"
+        }
+      ]
+    },
+    "coroutine": {
+      "code_flags": 16777347,
+      "code_name": "coroutine",
+      "instruction_count": 18,
+      "kind_bits": {
+        "async_generator": false,
+        "coroutine": true,
+        "generator": false,
+        "iterable_coroutine": false
+      },
+      "mask_for_reference": 928,
+      "suspension_instructions": [
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 0,
+          "opname": "RETURN_GENERATOR"
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 4,
+          "opname": "RESUME"
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 8,
+          "opname": "GET_AWAITABLE"
+        },
+        {
+          "arg": 3,
+          "argrepr": "to L2",
+          "offset": 12,
+          "opname": "SEND"
+        },
+        {
+          "arg": 1,
+          "argrepr": "",
+          "offset": 16,
+          "opname": "YIELD_VALUE"
+        },
+        {
+          "arg": 3,
+          "argrepr": "",
+          "offset": 18,
+          "opname": "RESUME"
+        }
+      ]
+    },
+    "delegated_generator": {
+      "code_flags": 16777251,
+      "code_name": "delegated_generator",
+      "instruction_count": 18,
+      "kind_bits": {
+        "async_generator": false,
+        "coroutine": false,
+        "generator": true,
+        "iterable_coroutine": false
+      },
+      "mask_for_reference": 928,
+      "suspension_instructions": [
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 0,
+          "opname": "RETURN_GENERATOR"
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 4,
+          "opname": "RESUME"
+        },
+        {
+          "arg": 3,
+          "argrepr": "to L2",
+          "offset": 12,
+          "opname": "SEND"
+        },
+        {
+          "arg": 1,
+          "argrepr": "",
+          "offset": 16,
+          "opname": "YIELD_VALUE"
+        },
+        {
+          "arg": 2,
+          "argrepr": "",
+          "offset": 18,
+          "opname": "RESUME"
+        }
+      ]
+    },
+    "plain_generator": {
+      "code_flags": 16777251,
+      "code_name": "plain_generator",
+      "instruction_count": 11,
+      "kind_bits": {
+        "async_generator": false,
+        "coroutine": false,
+        "generator": true,
+        "iterable_coroutine": false
+      },
+      "mask_for_reference": 928,
+      "suspension_instructions": [
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 0,
+          "opname": "RETURN_GENERATOR"
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 4,
+          "opname": "RESUME"
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 8,
+          "opname": "YIELD_VALUE"
+        },
+        {
+          "arg": 5,
+          "argrepr": "",
+          "offset": 10,
+          "opname": "RESUME"
+        }
+      ]
+    }
+  },
+  "created_utc": "2026-10-17T23:28:06.944289+00:00",
+  "runtime": {
+    "dis_path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/dis.py",
+    "implementation": "CPython",
+    "version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]"
+  },
+  "schema": "scar.language-bytecode-probe.v1",
+  "scope": "stdlib static disassembly only; functions are not invoked; no torch, SCAR, target workload, or frame retention",
+  "script_sha256": "93af8789e2523a86d8b6b70de5adedb3f9b7be31b902d2f768e99ac79ab61869"
+}

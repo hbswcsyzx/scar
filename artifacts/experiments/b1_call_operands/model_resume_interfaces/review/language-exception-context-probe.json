@@ -1,0 +1,84 @@
+{
+  "created_utc": "2026-10-17T23:29:21.709832+00:00",
+  "observations": {
+    "after_internal_handler_cleared": {
+      "caller_after_type": "RuntimeError",
+      "caller_before_type": "RuntimeError",
+      "caller_context_restored": true,
+      "generator_value": "RuntimeError"
+    },
+    "caller_context_inherited_per_drive": [
+      {
+        "caller_after_type": "ValueError",
+        "caller_before_type": "ValueError",
+        "caller_context_restored": true,
+        "generator_value": "ValueError"
+      },
+      {
+        "caller_after_type": "LookupError",
+        "caller_before_type": "LookupError",
+        "caller_context_restored": true,
+        "generator_value": "LookupError"
+      },
+      {
+        "caller_after_type": "IndexError",
+        "caller_before_type": "IndexError",
+        "caller_context_restored": true,
+        "generator_value": "IndexError"
+      }
+    ],
+    "generator_handler_saved_across_yield": [
+      {
+        "caller_after_type": "ValueError",
+        "caller_before_type": "ValueError",
+        "caller_context_restored": true,
+        "generator_value": {
+          "is_owned_exception": true,
+          "type": "KeyError"
+        }
+      },
+      {
+        "caller_after_type": "OSError",
+        "caller_before_type": "OSError",
+        "caller_context_restored": true,
+        "generator_value": {
+          "is_owned_exception": true,
+          "type": "KeyError"
+        }
+      }
+    ],
+    "yield_in_finally_with_pending_raise": {
+      "first_drive": {
+        "caller_after_type": "ValueError",
+        "caller_before_type": "ValueError",
+        "caller_context_restored": true,
+        "generator_value": {
+          "is_pending_error": true,
+          "type": "KeyError"
+        }
+      },
+      "outer_caller_restored_after_nested_catch": true,
+      "propagation": {
+        "inside_catch_is_propagated": true,
+        "is_pending_error": true,
+        "type": "KeyError"
+      }
+    },
+    "yield_in_finally_with_pending_return": {
+      "caller_after_type": "ArithmeticError",
+      "caller_before_type": "ArithmeticError",
+      "caller_context_restored": true,
+      "generator_value": {
+        "no_handled_exception": false
+      },
+      "terminal_value": "body-return"
+    }
+  },
+  "runtime": {
+    "implementation": "CPython",
+    "version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]"
+  },
+  "schema": "scar.language-exception-context-probe.v1",
+  "scope": "stdlib CPU witness; logs exception type and identity booleans only; no frame/local retention, torch, SCAR, or target workload",
+  "script_sha256": "b939847a945b1d5d1c4eac69a01f5c7d49e113655b0eff5c6a5c040bbe4c37a2"
+}

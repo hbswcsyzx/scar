@@ -24,6 +24,10 @@ complete first modeling stage remain unfinished. The
 [evidence archive](artifacts/experiments/b1_call_operands/model_cleanup_interfaces/README.md)
 retains independent reviews, original failures and the unchanged-source receipt.
 
+The next [resumption interface design](docs/M1_RESUMPTION_INTERFACES.md) separates
+body continuation, driver phases, current shared state and saved private values.
+Its architecture review is documented; exact-field freeze and implementation remain open.
+
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
 all completion sites and explicit cross-representation obligations. Its 168

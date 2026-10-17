@@ -1,0 +1,74 @@
+{
+  "scope": "Design-only extra-root availability on existing synchronous core fixtures",
+  "not_verified": [
+    "actual Suspend/Resume records",
+    "fresh shared-state ingress",
+    "context switching",
+    "C1 composition",
+    "source/runtime recovery"
+  ],
+  "revision": "fec9f5b426caad5e0c974c9bd99c42a0fb256882",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "script_sha256": "6c3c5a0fb8328b589870bb0b6a7b52fd7c55bb6d2aaaa91d38b1541292132af2",
+  "cases": [
+    {
+      "case": "ordinary core",
+      "hypothetical_roots": [],
+      "core_issues": [],
+      "unavailable_uses": [],
+      "expected": [],
+      "passed": true
+    },
+    {
+      "case": "header cut, missing saved limit",
+      "hypothetical_roots": [
+        "header"
+      ],
+      "core_issues": [],
+      "unavailable_uses": [
+        "program_use:compare.limit"
+      ],
+      "expected": [
+        "program_use:compare.limit"
+      ],
+      "passed": true
+    },
+    {
+      "case": "limit forwarded into header",
+      "hypothetical_roots": [
+        "header"
+      ],
+      "core_issues": [],
+      "unavailable_uses": [],
+      "expected": [],
+      "passed": true
+    },
+    {
+      "case": "second cut exposes transitive omission",
+      "hypothetical_roots": [
+        "header",
+        "body"
+      ],
+      "core_issues": [],
+      "unavailable_uses": [
+        "program_use:backedge.saved-limit"
+      ],
+      "expected": [
+        "program_use:backedge.saved-limit"
+      ],
+      "passed": true
+    },
+    {
+      "case": "limit forwarded across both cuts",
+      "hypothetical_roots": [
+        "header",
+        "body"
+      ],
+      "core_issues": [],
+      "unavailable_uses": [],
+      "expected": [],
+      "passed": true
+    }
+  ],
+  "status": "PASS"
+}

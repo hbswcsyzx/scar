@@ -282,6 +282,21 @@ stack，以及存在时的 pending completion。恢复时接：
 cell、global 或输入对象。同一 suspension generation 不能动态复制恢复执行。
 Yield 的 payload、最终 Return 与 iterator exhaustion 经不同 adapter 对接。
 
+该 generation 指实际 body continuation，不等于每次外部 driver request 的 epoch。
+委托协议可能接受请求并直接产生 host 结果而没有恢复父 body；只有真实 body
+恢复才消费相应 continuation。driver 重入/排他与 body 恢复的代次分别建模。
+
+frame 的 handled-context 保存可重定位的 body-owned 片段及“继承本次 caller”
+边界，不能保存一次 `sys.exception()` 的扁平结果或固定 None。初入/恢复时以当前
+caller 接链，挂起/真正结束时归还本次 caller；该 caller token 不跨挂起保存。
+最终 frame-release 与 body completion/上下文切换分阶段描述，不静默套用同步
+FrameExit 的出口邻接规则。
+
+待实施的 [C2 合同](M1_RESUMPTION_INTERFACES.md)采用同一逻辑 body 的显式 temporal
+successors；ordinary 数据可用性在恢复 landing 切断，保存 Uses 接新参数，共享状态
+接本次输入。logical CFG 与 availability 是同一规范边的不同派生查询，不另存另一
+套 producer/use。该设计尚未成为产品 capability，C2.0 字段冻结仍未关闭。
+
 closure 是函数对象与环境/cell 的关系；callback 注册不等于实际调用。调度关系
 可以跨词法父 Region 的返回，次数/线程/状态必须由实际协议和证据连接。
 

@@ -1,0 +1,135 @@
+{
+  "created_utc": "2026-10-17T23:31:25.836012+00:00",
+  "observations": {
+    "asyncgen_aclose_awaited": {
+      "awaitable_stop_iteration_value": null,
+      "body_log": [
+        "body-enter",
+        "async-finally"
+      ],
+      "state": "AGEN_CLOSED"
+    },
+    "asyncgen_aclose_request_created": {
+      "body_log": [
+        "body-enter"
+      ],
+      "state": "AGEN_SUSPENDED"
+    },
+    "asyncgen_request_awaited": {
+      "awaitable_stop_iteration_value": "async-item",
+      "body_log": [
+        "body-enter"
+      ],
+      "state": "AGEN_SUSPENDED"
+    },
+    "asyncgen_request_created": {
+      "body_log": [],
+      "request_type": "async_generator_asend",
+      "state": "AGEN_CREATED"
+    },
+    "asyncio_cancel_request": {
+      "body_log": [
+        "body-enter",
+        "cancel-caught"
+      ],
+      "pending_cancel_count": 1,
+      "task_cancelled": false,
+      "task_result": "suppressed-result"
+    },
+    "close_before_first_entry": {
+      "body_log": [],
+      "state": "GEN_CLOSED"
+    },
+    "coroutine_created": {
+      "body_log": [],
+      "state": "CORO_CREATED"
+    },
+    "coroutine_suspended": {
+      "body_log": [
+        "body-enter"
+      ],
+      "scheduler_token": "scheduler-token",
+      "state": "CORO_SUSPENDED"
+    },
+    "coroutine_terminal": {
+      "body_log": [
+        "body-enter",
+        [
+          "await-expression-result",
+          [
+            "await-result",
+            "resume-value"
+          ]
+        ]
+      ],
+      "state": "CORO_CLOSED",
+      "stop_iteration_value": "coroutine-return"
+    },
+    "generator_created": {
+      "body_log": [],
+      "state": "GEN_CREATED"
+    },
+    "generator_first_next": {
+      "body_log": [
+        "body-enter"
+      ],
+      "state": "GEN_SUSPENDED",
+      "value": "yielded-item"
+    },
+    "generator_terminal": {
+      "body_log": [
+        "body-enter",
+        [
+          "resumed-with",
+          "sent-value"
+        ]
+      ],
+      "state": "GEN_CLOSED",
+      "stop_iteration_value": "generator-return"
+    },
+    "mutable_shared_state_between_resumes": {
+      "first_yield": [
+        "first",
+        "before-resume"
+      ],
+      "second_yield": [
+        "second",
+        "current-send",
+        "changed-between-resumes"
+      ],
+      "state": "GEN_SUSPENDED"
+    },
+    "yield_during_close": {
+      "body_log": [
+        "finally-entered"
+      ],
+      "error_type": "RuntimeError",
+      "first_yield": "ready",
+      "state_after_error": "GEN_SUSPENDED"
+    },
+    "yield_from": {
+      "first_yield": "child-yield",
+      "log": [
+        [
+          "child-send",
+          "delegated-send"
+        ],
+        "child-finally",
+        [
+          "parent-yield-from-result",
+          "child-return"
+        ]
+      ],
+      "parent_stop_iteration_value": "parent-return",
+      "state": "GEN_CLOSED"
+    }
+  },
+  "runtime": {
+    "implementation": "CPython",
+    "inspect_path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/inspect.py",
+    "version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]"
+  },
+  "schema": "scar.language-resume-probe.v1",
+  "scope": "stdlib CPU witness only; no torch, SCAR import, target workload, frame retention, or tensor payload",
+  "script_sha256": "f413c4718333c629c84cdbe57a071148c5c679eb0ffc903847d804919ec74266"
+}

@@ -51,6 +51,12 @@ denotation、真实 native 适配/写回/等价及完整建模仍未完成。
 通过。允许清理截留的潜在函数出口没有实际站点，必须由指定pending入口完整facts
 支撑；旧无C1图的实际出口要求保留。with/except*、挂起恢复和真实context仍未验证。
 
+下一批 [C2](M1_RESUMPTION_INTERFACES.md)仍为架构/字段合同，尚未发布新schema。
+规范选择同body typed temporal successors，复用canonical Uses/参数；logical CFG
+与跨挂起availability分别派生。当前ResumeInput/context切换、driver-only路径与
+frame-release阶段尚须落为严格记录和校验；不能将现同步FrameModel直接放宽，
+也不能把文档里的拟议术语当已支持的新类型。原C1源指纹及3,330项回归证据不变。
+
 新完整模型 Resource 有静态 definition/requirement 和动态 instance，handle
 经对应关系引用它；不能仅作为 EEG 标签。旧 `ready_event` 不承担新完成证明。
 语言 completion、suspend/resume、host outcome、work outcome 有强类型接口，

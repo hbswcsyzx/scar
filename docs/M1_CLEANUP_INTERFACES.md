@@ -57,6 +57,8 @@ Enter 的 saved_context，其余结果全部是这些 after；不得只更新 co
 - Enter 是 entry 第一项操作，消费真实 pending_argument，产生 saved_context。
   该保存值捕获进入前 ambient context；pending Raise 安装 packet.exception，
   其他 case 保持 ambient，不按 Return 标签清 None。安装效果进入当前 state。
+  此同步接口的抽象 token 不规定为扁平异常引用；未来 C2 跨挂起保存还须保留
+  body-owned context 与继承当前 caller 的关系，不能快照旧 caller 的可见异常。
 - Resume/Replace 直接归属本 cleanup scope，消费本次 Enter 的保存 context。
   Resume 消费 entry 原 token，恢复 context 后继续同一 token。Replace 同时消费
   原 token 与本次 activation 内新构造的 replacement，恢复 context 后继续新 token。

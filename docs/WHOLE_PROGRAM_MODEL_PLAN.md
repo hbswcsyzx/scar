@@ -58,8 +58,10 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 1. 统一 ControlPort / EnvironmentInterface 与规范状态参数，扩展既有 core 的
    completion target、pending cleanup 与 protocol adapter；先处理同步异常。
-2. 接 SavedFrame / ResumeRequest / continuation generation，再处理 generator、
-   closure/callback 与当前共享状态；不能冻结 yield 时 world。
+2. 按 [C2](M1_RESUMPTION_INTERFACES.md)先关闭exact字段及driver/body/context阶段合同，
+   再接保存Uses、typed ResumeInput、temporal successors与cut availability。
+   body generation与drive epoch分开；不能冻结yield时world、上次caller context，
+   或把接受请求等同实际body entry。当前C2.0仍开放，不以架构审查冒充类型实施。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。
 4. 在 M1/M2 内补齐构造协议、provider 端口映射与未展开区域的接口规则。
@@ -82,6 +84,11 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
   可只读复用的重型 trace。
 
 ## 5. 当前证据锚点
+
+- C2架构审查（2026-10-17）收束为同body temporal边和两个派生投影；23组初批动态
+  观察、4种静态code shape、另4组delegate-context观察及5个availability设计检查。
+  这不是C2产品测试；字段冻结、context/C1/frame组合与实际导入尚未完成，见
+  [C2实施合同](M1_RESUMPTION_INTERFACES.md)。本批不重跑原有full或LeWM。
 
 - M1 [C1 cleanup/context](M1_CLEANUP_INTERFACES.md)243项组件通过；冻结实现
   `0ea05e6` 的3,330项全仓回归通过，391文件源指纹及22份fixture哈希前后一致。
