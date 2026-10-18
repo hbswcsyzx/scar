@@ -24,6 +24,25 @@ def materialization_key(ref):
     return ref.artifact.sha256, ref.artifact.schema, ref.artifact.size_bytes, ref.materialization
 
 
+def check_work_materialization(ctx, work, ref, path):
+    """Reconcile an original read/write/retained Mat with this exact ticket.
+
+    COMPLETE is a declared set, not a proof of runtime capture. A reference in
+    another ticket or at another URI cannot change this ticket's membership.
+    Merely citing a Mat as evidence for an allocation does not declare a Mat
+    borrow; callers pass only actual content placements or Mat targets.
+    """
+    key = materialization_key(ref)
+    if key in ctx.work_materialization_keys[work.id]:
+        return
+    if work.materializations_coverage is Completeness.COMPLETE:
+        ctx.issue('work_materialization_unlisted', path,
+                  'declared read/write/retained materialization is absent from this ticket complete set')
+    else:
+        ctx.gap('work_materialization_unresolved', path,
+                'this ticket has partial or unknown materialization coverage; exact association is missing')
+
+
 def effect_key(effect):
     if type(effect) is AccessRef:
         return 'access', effect.operation, effect.index
@@ -31,6 +50,12 @@ def effect_key(effect):
 
 
 def work_errors(ctx):
+    # Immutable model declarations: prepare once, also reusable by a refreshed
+    # external content context. Do not rescan every work set for every read.
+    ctx.work_materialization_keys = {
+        row.id: frozenset(materialization_key(ref) for ref in row.materializations)
+        for row in ctx.model.submissions
+    }
     requirements_by_id = {row.id: row for row in ctx.program.resource_requirements}
     def issue(code, path, message):
         ctx.issue('work_' + code, path, message)
@@ -360,6 +385,8 @@ def work_errors(ctx):
         if type(work.retention) is tuple and row.id not in work.retention:
             issue('retention_backlink', path, 'retained work does not reference this retention in its declared set')
         check_target(row.target, work, path)
+        if type(row.target) is MaterializationRef:
+            check_work_materialization(ctx, work, row.target, path)
         if type(row.start) is WithinOperation:
             operation_scope(row.start.operation, path)
             entry = OccurrencePoint(row.start.operation, OccurrencePhase.BEFORE)
@@ -472,4 +499,4 @@ def work_errors(ctx):
         gap('retention_lifetime_unverified', path, 'borrow coverage/release authority and all competing accesses remain unverified; no free is authorized')
 
 
-__all__ = ['materialization_key', 'effect_key', 'work_errors']
+__all__ = ['materialization_key', 'check_work_materialization', 'effect_key', 'work_errors']

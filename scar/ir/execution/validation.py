@@ -63,7 +63,8 @@ class _Context:
                      'denotations', 'work_evidence_bindings', 'observation_requirements',
                      'observation_roots', 'content_reads', 'source_inventories',
                      'source_bridges', 'writes', 'produced', 'established_productions',
-                     'target_lifetime_events', 'order_associations', 'contribution_supports'):
+                     'target_lifetime_events', 'order_associations', 'contribution_supports',
+                     'call_activations'):
             registry = {}
             for row in getattr(model, name):
                 if row.id in registry:
@@ -96,6 +97,8 @@ class _Context:
         self.work_effects = {effect for row in model.submissions for effect in row.effects}
         self.work_effects.update(effect for row in model.outcomes for effect in row.effect_frontier)
         self.work_outcomes, self.work_quiescences, self.work_retentions = {}, {}, {}
+        self.resolved_call_activations = {}
+        self.call_activations_by_caller = {}
         for rows, registry in ((model.outcomes, self.work_outcomes), (model.quiescences, self.work_quiescences),
                                (model.retentions, self.work_retentions)):
             for row in rows:
@@ -386,6 +389,9 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
     _coordinates(ctx)
     if not ctx.issues:
         _flow(ctx)
+    if not ctx.issues:
+        from .call_validation import call_errors
+        call_errors(ctx)
     if not ctx.issues:
         _evidence_gaps(ctx)
     if not ctx.issues:

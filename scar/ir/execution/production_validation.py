@@ -156,6 +156,10 @@ def write_errors(ctx):
                 if inventory is not None and run is not None and inventory.run != run:
                     ctx.issue('production_source_run', path, 'source inventory and writer belong to different runs')
         placement = resolve_placement(ctx, row.placement, path)
+        if (type(row.writer) is WorkWrite and writer is not None
+                and type(row.placement) is not Unresolved):
+            from .work_validation import check_work_materialization
+            check_work_materialization(ctx, writer, row.placement.materialization, path)
         edge_sources = ([(row.stage, stage)] if type(row.stage) is SourceEdgeRef and stage is not None else []) + source_pairs
         for reference, resolved in edge_sources:
             edge = resolved['edge']

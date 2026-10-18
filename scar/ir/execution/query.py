@@ -161,6 +161,16 @@ class ExecutionIndex:
             'actual': actual, 'gaps': tuple(ctx.gaps), 'source_runtime_verified': False,
             'transformation_authorized': False})
 
+    def call_activation(self, identity):
+        """Inspect an explicit call link; declarations never prove identity."""
+        from .call_query import call_activation
+        return call_activation(self._ctx, identity)
+
+    def call_entries(self, caller_id):
+        """This caller's links, retaining a missing dynamic callee as a gap."""
+        from .call_query import call_entries
+        return call_entries(self._ctx, caller_id)
+
     def definition_for_use(self, operation, use):
         """Original Use/definition plus its declared dynamic definition endpoint."""
         ctx = self._ctx

@@ -514,6 +514,11 @@ def content_errors(ctx):
                 ctx.issue('content_missing_state_support', path, 'boundary read omits original state input occurrence')
             ctx.gap('content_invoke_read_unverified', path, 'invoke boundary state transport is not a native read/footprint proof')
         placement = resolve_placement(ctx, row.placement, path)
+        if type(consumer) is ResourceConsumer and type(row.placement) is not Unresolved:
+            work = ctx.submissions.get(consumer.read.ticket)
+            if work is not None:
+                from .work_validation import check_work_materialization
+                check_work_materialization(ctx, work, row.placement.materialization, path)
         denotation = None if actual is None else ctx.resolved_denotations.get(actual.id)
         identity = None if denotation is None else denotation['denotation'].identity
         if actual is not None and type(ctx.core_values[actual.value]) is DataValue and identity is None:

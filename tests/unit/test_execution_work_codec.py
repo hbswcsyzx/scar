@@ -187,9 +187,9 @@ def test_encoder_rechecks_mutation_before_capability_omission_or_nested_encoding
         dumps(model)
 
 
-@pytest.mark.parametrize("version", (True, 0, 3, "2", 4, 5, 6, 7))
+@pytest.mark.parametrize("version", (True, 0, 3, "2", 4, 5, 6, 7, 8))
 def test_schema_versions_are_exact_supported_integers(queued, version):
-    if type(version) is int and version in (3, 4, 5, 6):
+    if type(version) is int and version in (3, 4, 5, 6, 7):
         # Preserve old case identities as their versions become supported;
         # an explicit newer version with empty capability adds no evidence.
         assert loads(dumps(queued, schema_version=version)) == queued

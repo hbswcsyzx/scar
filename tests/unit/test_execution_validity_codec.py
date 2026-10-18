@@ -18,7 +18,8 @@ FIELDS = ('established_productions', 'target_lifetime_events', 'order_associatio
 def test_v6_wire_preserves_all_new_capabilities_and_exact_nested_variants():
     model = validity_record_model()
     document = to_dict(model)
-    assert SCHEMA_VERSION == document['schema_version'] == 6
+    assert SCHEMA_VERSION >= 7
+    assert document['schema_version'] == 6
     assert all(document['model']['fields'][name] for name in FIELDS)
     restored = loads(dumps(model))
     assert restored == model and dumps(restored) == dumps(model)

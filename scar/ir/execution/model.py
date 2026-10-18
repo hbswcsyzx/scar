@@ -25,6 +25,7 @@ from .production import (
 from .validity import (
     ContributionSupport, EstablishedProduction, OrderAssociation, TargetLifetimeEvent,
 )
+from .calls import CallActivation
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,6 +99,7 @@ class ExecutionModel:
     target_lifetime_events: tuple[TargetLifetimeEvent, ...] = ()
     order_associations: tuple[OrderAssociation, ...] = ()
     contribution_supports: tuple[ContributionSupport, ...] = ()
+    call_activations: tuple[CallActivation, ...] = ()
 
     def __post_init__(self):
         if type(self.snapshot) is not ProgramSnapshot:
@@ -129,6 +131,7 @@ TABLE_TYPES = {
     'writes': WriteAssociation, 'produced': OutcomeProduction,
     'established_productions': EstablishedProduction, 'target_lifetime_events': TargetLifetimeEvent,
     'order_associations': OrderAssociation, 'contribution_supports': ContributionSupport,
+    'call_activations': CallActivation,
 }
 
 

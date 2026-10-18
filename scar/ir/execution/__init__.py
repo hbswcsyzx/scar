@@ -1,5 +1,7 @@
 """Typed execution occurrences and resource associations over canonical program IR."""
 
+from .calls import CallActivation
+from .ids import CallActivationID
 from .production import (
     BytePrefixWrite,
     EvidenceInventoryBinding,
@@ -28,6 +30,7 @@ from .validity import (
 )
 
 __all__ = [
+    "CallActivation", "CallActivationID",
     "BytePrefixWrite", "EvidenceInventoryBinding", "ExternalEstablishment",
     "HostWrite", "InventorySourceRef", "OutcomeProduction", "RawRecordRef",
     "SourceEdgeRef", "SourceEndpointBridge", "SourceEndpointRef",

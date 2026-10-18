@@ -268,8 +268,8 @@ def test_production_wire_rejects_malformed_new_nested_fields(production_model):
 
 
 def test_schema_version_six_remains_unsupported(production_model):
-    # Keep the historical case ID; the next unsupported capability moved to 7.
-    for value in (7, True, "5"):
+    # Keep the historical case ID; the next unsupported capability moved to 8.
+    for value in (8, True, "5"):
         with pytest.raises(ValueError, match="schema_version"):
             dumps(production_model, schema_version=value)
         doc = to_dict(production_model)

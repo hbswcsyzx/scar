@@ -20,7 +20,7 @@ from .model import ExecutionModel
 
 
 SCHEMA = "scar.execution-model"
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 _WORK_FIELDS = frozenset({"submissions", "outcomes", "quiescences", "retentions", "queue_prefixes"})
 _ORDER_FIELDS = frozenset({"queue_order_profiles", "event_records", "queue_waits"})
 _CONTENT_FIELDS = frozenset({"denotations", "work_evidence_bindings", "observation_requirements",
@@ -28,6 +28,7 @@ _CONTENT_FIELDS = frozenset({"denotations", "work_evidence_bindings", "observati
 _PRODUCTION_FIELDS = frozenset({"source_inventories", "source_bridges", "writes", "produced"})
 _VALIDITY_FIELDS = frozenset({"established_productions", "target_lifetime_events",
                             "order_associations", "contribution_supports"})
+_CALL_FIELDS = frozenset({"call_activations"})
 
 
 def _tag(cls):
@@ -43,10 +44,11 @@ def _record_schema(cls, schema_version):
                      or (schema_version < 3 and field.name in _ORDER_FIELDS)
                      or (schema_version < 4 and field.name in _CONTENT_FIELDS)
                      or (schema_version < 5 and field.name in _PRODUCTION_FIELDS)
-                     or (schema_version < 6 and field.name in _VALIDITY_FIELDS))))
+                     or (schema_version < 6 and field.name in _VALIDITY_FIELDS)
+                     or (schema_version < 7 and field.name in _CALL_FIELDS))))
 
 
-@lru_cache(maxsize=6)
+@lru_cache(maxsize=7)
 def _vocabulary(schema_version):
     """Only types reachable through the fixed model schema may have wire tags."""
     vocabulary, visited = {}, set()
@@ -207,7 +209,7 @@ def _decode(value, expected, path, schema_version):
 
 
 def _version(version):
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7):
         raise ValueError("unsupported execution schema_version")
     return version
 
@@ -229,8 +231,11 @@ def to_dict(model: ExecutionModel, *, schema_version: int | None = None) -> dict
         has_content = any(getattr(model, name) for name in _CONTENT_FIELDS)
         has_production = any(getattr(model, name) for name in _PRODUCTION_FIELDS)
         has_validity = any(getattr(model, name) for name in _VALIDITY_FIELDS)
-        version = (6 if has_validity else 5 if has_production else 4 if has_content else 3 if has_order
+        has_calls = any(getattr(model, name) for name in _CALL_FIELDS)
+        version = (7 if has_calls else 6 if has_validity else 5 if has_production else 4 if has_content else 3 if has_order
                    else 2 if has_work else 1) if schema_version is None else _version(schema_version)
+        if version < 7 and has_calls:
+            _fail("model", f"call capability cannot be encoded as schema v{version}")
         if version < 6 and has_validity:
             _fail("model", f"validity capability cannot be encoded as schema v{version}")
         if version < 5 and has_production:

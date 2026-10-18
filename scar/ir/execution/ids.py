@@ -150,6 +150,10 @@ class ContributionSupportID(Identifier):
     prefix = "exec_contribution_support"
 
 
+class CallActivationID(Identifier):
+    prefix = "exec_call_activation"
+
+
 __all__ = [
     "RunID", "ProcessInstanceID", "HostThreadInstanceID", "RegionActivationID",
     "ExecutionSegmentID", "BlockVisitID", "OperationOccurrenceID",
@@ -162,4 +166,5 @@ __all__ = [
     "ObservationRequirementID", "ObservationRootID",
     "EvidenceInventoryID", "SourceBridgeID", "WriteAssociationID", "OutcomeProductionID",
     "EstablishedProductionID", "TargetLifetimeEventID", "OrderAssociationID", "ContributionSupportID",
+    "CallActivationID",
 ]
