@@ -273,6 +273,12 @@
       "tests": [
         "tests/unit/test_program_created_close_consumers.py"
       ]
+    },
+    {
+      "id": "bounded-copy-query-hash-and-declaration-order-determinism-with-real-truncation",
+      "tests": [
+        "tests/unit/test_program_protocol_flow_determinism.py"
+      ]
     }
   ]
 }

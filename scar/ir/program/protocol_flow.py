@@ -203,13 +203,23 @@ class ProtocolFlow:
                 item = operation.id, number, edge.block, assignments
                 outgoing[block.id].append(item)
                 incoming[edge.block].append((block.id, item))
-        reached, pending = set(), [declaration.entry]
+        # Schedule from original CFG successor order, never hash iteration or
+        # declaration-table order. Iterative DFS also supports deep/cyclic CFGs
+        # without using Python's recursion limit. All original parallel edges
+        # stay in outgoing/incoming; only DFS visits are deduplicated.
+        reached, postorder = {declaration.entry}, []
+        pending = [(declaration.entry, iter(outgoing[declaration.entry]))]
         while pending:
-            block = pending.pop()
-            if block not in reached:
-                reached.add(block)
-                pending.extend(item[2] for item in outgoing[block])
-        result = declaration, outgoing, incoming, frozenset(reached)
+            block, successors = pending[-1]
+            edge = next(successors, None)
+            if edge is None:
+                postorder.append(block)
+                pending.pop()
+            elif edge[2] not in reached:
+                reached.add(edge[2])
+                pending.append((edge[2], iter(outgoing[edge[2]])))
+        order = tuple(reversed(postorder))
+        result = declaration, outgoing, incoming, frozenset(reached), order
         self._region_edges[region] = result
         return result
 
@@ -224,11 +234,11 @@ class ProtocolFlow:
         if key in self._flows:
             return self._flows[key]
         region = self.region_of[port.operation]
-        declaration, outgoing, incoming, reached = self._edges(region)
+        declaration, outgoing, incoming, reached, order = self._edges(region)
         universe = self._universes[region]
-        edges = {(item[0], item[1]): universe for block in reached for item in outgoing[block]}
+        edges = {(item[0], item[1]): universe for block in order for item in outgoing[block]}
         before = {}
-        pending, queued = deque(reached), set(reached)
+        pending, queued = deque(order), set(reached)
         while pending:
             if not self.spend("copy_blocks"):
                 return None
@@ -302,7 +312,7 @@ class ProtocolFlow:
         key = port.operation, port.phase, port.edge, target
         if key in self._reachability:
             return self._reachability[key]
-        _, outgoing, _, _ = self._edges(self.region_of[target])
+        _, outgoing, _, _, _ = self._edges(self.region_of[target])
         target_block = self.block_of[target]
         if port.phase == 'edge':
             if not self.spend('protocol_reachability_candidates'):

@@ -1,6 +1,25 @@
 # Current evidence and remaining work
 
-## P2 declared matrix and component passed; frozen full pending (2026-10-18)
+## P2 frozen full failed; bounded-query scheduling repair open (2026-10-18)
+
+The actual frozen `44d56af` run finished **5,672 passed /1 failed /0 errors or
+skips**, five warnings,545.049s. All646 registered source hashes stayed fixed.
+The sole Created-close positive exhausted its default query budget. A fresh
+eight-seed investigation reproduced hash-order-dependent worklist costs without
+old-test pollution: seed5 truncated at4,096; sufficient-budget costs ranged
+1,712–4,676. None remains an unproved result, never a successful proof.
+[Repair gates](M1_GENERATOR_MATRIX_REPAIR.md) preserve this failed full and
+require deterministic original-CFG scheduling, focused/component checks, then
+a separate clean frozen full. P2 acceptance remains open. The earlier scoped
+component results below do not override this failure.
+
+The minimal RPO repair now passes275 focused cases and660 component cases across
+37 criteria at one647-source fingerprint. New regressions first reproduced the
+failure, then verified eight fresh hash processes, declaration-table reordering
+and real budget truncation. Source review found no blocker. The separate
+`repair/full` frozen run is pending; this is not yet a full-regression PASS.
+
+## P2 declared matrix and component checkpoint (2026-10-18)
 
 [Plan](M1_GENERATOR_MATRIX_PLAN.md), [amendment](M1_ADMISSION_PREDICATE_CONTRACT.md)
 and [progress/failures](M1_GENERATOR_MATRIX_PROGRESS.md) now connect original
@@ -11,8 +30,8 @@ static body reentry and initial/internal/escaping exception routes. Caller-conte
 joint inputs share prepared indexes, flow and budget. Single-completion INVOKE
 uses explicit Program18 capability; legacy wires retain their family. Independent
 review passes within scope. **272 focused /657 component cases /36 criteria**
-pass at one646-source fingerprint. The clean frozen full run is next; the prior
-5,401 result below belongs to its older implementation. Source/native category,
+pass at one646-source fingerprint. The subsequent full failed as recorded above;
+the prior5,401 result below belongs to its older implementation. Source/native category,
 holder coherence and runtime identity remain unproved. P3–P5, D3 and full
 M0–M2 remain OPEN; no automatic LeWM recovery, transformation or new speedup.
 
