@@ -1,0 +1,7 @@
+{
+  "returncode": 0,
+  "pytest_result": "4 passed, 14 deselected in 0.42s",
+  "module_sha256": "8adaa530a1801949a0706948c9aef2410148782fa95e49da18706ed5c794fae0",
+  "test_sha256": "af4efa34a3fe50337050a6b20f08e32fdc92db47fb0f6d363dffc5414689efff",
+  "scope": "only four new require_valid real-CFG join/loop cases; no repeated full owned run"
+}

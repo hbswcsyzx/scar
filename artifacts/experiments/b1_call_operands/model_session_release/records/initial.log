@@ -1,0 +1,821 @@
+..........FFFFFFFFFFFFFFFFF                                              [100%]
+=================================== FAILURES ===================================
+_ test_graph_tables_require_exact_tuples_records_unique_keys_and_nested_recheck _
+
+    def test_graph_tables_require_exact_tuples_records_unique_keys_and_nested_recheck():
+        row = _update()
+        with pytest.raises(TypeError, match="tuple"):
+            _graph(session_updates=[row])
+        with pytest.raises(TypeError, match="exact typed records"):
+>           _graph(session_updates=(_release(),))
+                                    ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[body_outcome_commits] _
+
+role = 'body_outcome_commits'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[created_close_tests] _
+
+role = 'created_close_tests'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[no_body_finishes] _
+
+role = 'no_body_finishes'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[resumable_creates] _
+
+role = 'resumable_creates'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[async_request_creates] _
+
+role = 'async_request_creates'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[request_association_reads] _
+
+role = 'request_association_reads'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[final_body_gates] _
+
+role = 'final_body_gates'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[body_drives] _
+
+role = 'body_drives'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[frame_context_initials] _
+
+role = 'frame_context_initials'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[frame_context_attaches] _
+
+role = 'frame_context_attaches'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[frame_context_detaches] _
+
+role = 'frame_context_detaches'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[cleanup_enters] _
+
+role = 'cleanup_enters'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[cleanup_resumes] _
+
+role = 'cleanup_resumes'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[cleanup_replacements] _
+
+role = 'cleanup_replacements'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[handled_context_reads] _
+
+role = 'handled_context_reads'
+
+    @pytest.mark.parametrize("role", (
+        "body_outcome_commits", "created_close_tests", "no_body_finishes",
+        "resumable_creates", "async_request_creates", "request_association_reads",
+        "final_body_gates", "body_drives", "frame_context_initials",
+        "frame_context_attaches", "frame_context_detaches", "cleanup_enters",
+        "cleanup_resumes", "cleanup_replacements", "handled_context_reads"))
+    def test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role(role):
+        previous = _prior_roles()[role]
+        for name, row in (("session_updates", _update()),
+>                         ("terminal_frame_releases", _release())):
+                                                      ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+_ test_session_and_release_conflict_but_distinct_release_attempts_share_owner_legally _
+
+    def test_session_and_release_conflict_but_distinct_release_attempts_share_owner_legally():
+>       update, release = _update(), _release()
+                                     ^^^^^^^^^^
+
+tests/unit/test_session_release_records.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_session_release_records.py:32: in _release
+    return TerminalFrameRelease(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:6: in __init__
+    ???
+scar/ir/program/lifecycle.py:155: in __post_init__
+    _record(self.rules, FrameRules, "terminal frame release rules")
+scar/ir/program/lifecycle.py:24: in _record
+    value.__post_init__()
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = FrameRules(version=<FrameRuleVersion.PYTHON_FRAME_V1: 'PYTHON_FRAME_V1'>, condition=<FrameCondition.NO_FRAME_INTERPOSI....MAY_NOT_COMPLETE: 'MAY_NOT_COMPLETE'>, finalizer_errors=<FrameFinalizerErrors.UNRAISABLE: 'UNRAISABLE'>, release=True)
+
+    def __post_init__(self):
+        fixed = (
+            ("version", FrameRuleVersion.PYTHON_FRAME_V1),
+            ("condition", FrameCondition.NO_FRAME_INTERPOSITION),
+            ("condition_status", ProofStatus.UNKNOWN),
+            ("completion", FrameCompletionRule.PRESERVE_PENDING_IF_COMPLETED),
+            ("effects", Completeness.UNKNOWN),
+            ("termination", FrameTermination.MAY_NOT_COMPLETE),
+            ("finalizer_errors", FrameFinalizerErrors.UNRAISABLE),
+            ("release", FrameRelease.NOT_GUARANTEED),
+        )
+        for name, expected in fixed:
+            if getattr(self, name) is not expected:
+>               raise ValueError(f"FrameRules.{name} must remain {expected.value}")
+E               ValueError: FrameRules.release must remain NOT_GUARANTEED
+
+scar/ir/program/frames.py:77: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_session_release_records.py::test_graph_tables_require_exact_tuples_records_unique_keys_and_nested_recheck
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[body_outcome_commits]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[created_close_tests]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[no_body_finishes]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[resumable_creates]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[async_request_creates]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[request_association_reads]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[final_body_gates]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[body_drives]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[frame_context_initials]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[frame_context_attaches]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[frame_context_detaches]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[cleanup_enters]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[cleanup_resumes]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[cleanup_replacements]
+FAILED tests/unit/test_session_release_records.py::test_new_actions_cannot_overlay_any_existing_lifecycle_driver_context_cleanup_role[handled_context_reads]
+FAILED tests/unit/test_session_release_records.py::test_session_and_release_conflict_but_distinct_release_attempts_share_owner_legally
+17 failed, 10 passed in 0.60s

@@ -1,0 +1,13 @@
+cd /tmp/scar-structured-model-280qf4mi
+source /home/zyf/miniconda3/etc/profile.d/conda.sh
+conda activate lewm
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python - <<'PY'
+import json
+from pathlib import Path
+from scripts.run_gate import fingerprint
+digest, files = fingerprint()
+expected = '23e4c97fc75b7ea889c964fb77a5eada6b617ab94e9a3b308d617f16af340596'
+payload = {'scope': 'read-only source fingerprint; no tests or gate main', 'source_sha256': digest, 'source_file_count': len(files), 'matches_root_freeze': digest == expected, 'files': files}
+Path('artifacts/experiments/b1_call_operands/model_session_release/review/receipt-fingerprint.json').write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+print(json.dumps({key: value for key, value in payload.items() if key != 'files'}, sort_keys=True))
+PY

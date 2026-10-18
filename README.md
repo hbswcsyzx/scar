@@ -46,7 +46,7 @@ publication, no-body paths, session state and reference drop. The
 [D2.0 contract](docs/M1_DRIVER_LIFECYCLE_CONTRACT.md) now fixes fields and the
 edge-first must analysis. The [D2.1 body publication component](docs/M1_BODY_PUBLICATION_ACCEPTANCE.md)
 passes 741 component checks and 3,776 frozen full tests (`49201e7`).
-Session/drop and E/F/P product analysis remain unfinished; these declarations
+Further session/drop and E/F/P components are recorded below; these declarations
 and language observations add no runtime or transformation authority.
 The [D2.2 no-body component](docs/M1_NO_BODY_ACCEPTANCE.md) now passes 836 component
 checks / 21 criteria and 3,871 frozen full tests (`006a0e0`). It connects the real
@@ -56,7 +56,9 @@ path. Predicate/branch/mark structure is distinct from actual runtime guard exec
 The [D2.3 session/release component](docs/M1_SESSION_RELEASE_ACCEPTANCE.md) passes
 974 component checks / 27 criteria. It derives path-correlated terminal history
 and current session predicates, checks precise owner/state at release, and keeps
-unknown effects and native applicability explicit. Its frozen full run is pending.
+unknown effects and native applicability explicit. Frozen `f67037d` passes 4,009
+full tests. Complete first-stage modeling, source/runtime correspondence and LeWM
+automatic simplification remain unfinished.
 
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,

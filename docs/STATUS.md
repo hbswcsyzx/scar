@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## D2.3 component passed; frozen full run pending (2026-10-18)
+## D2.3 session/release and conditional E/F/P accepted (2026-10-18)
 
 The [session/release component](M1_SESSION_RELEASE_ACCEPTANCE.md) derives terminal
 E/F, then explanatory T, and ordered current R/B session predicates with exact
@@ -8,8 +8,15 @@ state support and invalidation. Actual edges rename simultaneously before must
 joins. The component passes **974 cases / 27 criteria**, with all 443 source
 hashes unchanged. Final independent cross-reviews bind the implementation.
 Strict v14, original endpoints and CLI keep native/runtime/transform authority
-false. The single frozen full run remains pending. D2.4/D3 and complete M0–M2
-remain open.
+false. Frozen clean `f67037d` passes **4,009 tests / 468.490s / 1,030,312KiB**,
+zero failures/errors/skips and three warnings. HEAD, 443 source and 38 fixture
+hashes match before/after; every prior 35 fixture and 3,871 test identity survives.
+The 974-case / 27-criterion component takes 15.967s. Two independent cross-reviews
+bind the final fingerprint, and the exclusively owned basetemp was removed.
+[Archived evidence](../artifacts/experiments/b1_call_operands/model_session_release/README.md)
+retains original failures and immutable v13 generation. Protected checkouts are
+unchanged. D2.4/D3 and complete M0–M2 remain open; no new LeWM transformation
+or clean A/B speedup is established.
 
 ## D2.2 no-body component and frozen full run accepted (2026-10-18)
 
@@ -25,8 +32,9 @@ changed prior fixture is the authorized publication helper extraction, and all
 old JSON wires are byte-exact. Independent bounded source review matches the
 component fingerprint. The owned basetemp was removed and protected checkouts
 are unchanged. [Archived evidence](../artifacts/experiments/b1_call_operands/model_no_body/README.md)
-preserves original failures and commands. D2.3/D2.4, D3 and complete M0–M2 remain
-open; no new LeWM transform or clean A/B speedup is established.
+preserves original failures and commands. D2.3 was still open at that checkpoint;
+its acceptance is recorded above. D2.4/D3 and complete M0–M2 remain open;
+no new LeWM transform or clean A/B speedup is established.
 
 ## D2.0 contract and D2.1 body publication accepted (2026-10-18)
 
@@ -46,7 +54,7 @@ existing warnings. HEAD, clean status, all 423 source and 32 fixture hashes matc
 all prior 29 fixtures and 3,706 test identities remain. The owned basetemp was removed.
 See the [archive](../artifacts/experiments/b1_call_operands/model_body_publication/README.md).
 At that D2.1 checkpoint, D2.2–D2.4 were open; D2.2 acceptance is recorded above.
-D2.3/D2.4, D3, complete C2/M0–M2 and LeWM automatic modeling/simplification remain open.
+D2.4/D3, complete C2/M0–M2 and LeWM automatic modeling/simplification remain open.
 
 ## D2 lifecycle review and ordered implementation gates (2026-10-18)
 

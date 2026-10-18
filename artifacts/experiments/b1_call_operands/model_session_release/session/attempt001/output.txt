@@ -1,0 +1,28 @@
+F.....                                                                   [100%]
+=================================== FAILURES ===================================
+___ test_after_operation_support_uses_exact_lifecycle_current_state_versions ___
+
+    def test_after_operation_support_uses_exact_lifecycle_current_state_versions():
+        graph = session_release_program(strict_subset=True, extra_domain=True, release=False)
+        facts = _analyze(graph)
+        interface, = graph.driver_interfaces
+        row, = graph.session_updates
+        request, body = _pair(graph, row)
+        point = facts.session.after[row.operation]
+        posts = point.for_pair(request, body)
+        by_post = {fact.post: fact for fact in posts}
+    
+        assert set(by_post) == {SessionPost.COMPLETE, SessionPost.ABANDON}
+        assert point.reachable
+>       assert len(interface.lifecycle) < len({
+            value.location for value in graph.values if isinstance(value, StateVersionValue)
+        })
+E       AssertionError: assert 3 < 3
+E        +  where 3 = len((LocationID(value='resume.world'), LocationID(value='resume.context'), LocationID(value='driver.extra')))
+E        +    where (LocationID(value='resume.world'), LocationID(value='resume.context'), LocationID(value='driver.extra')) = DriverInterface(region=RegionID(value='driver'), body=RegionID(value='resume'), receiver_kind=<DriverReceiverKind.ASYN...aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', size_bytes=1, schema='driver-contract-v1'), locator='D1 declaration only'))).lifecycle
+E        +  and   3 = len({LocationID(value='driver.extra'), LocationID(value='resume.world'), LocationID(value='resume.context')})
+
+tests/unit/test_session_flow.py:41: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_session_flow.py::test_after_operation_support_uses_exact_lifecycle_current_state_versions
+1 failed, 5 passed in 0.43s

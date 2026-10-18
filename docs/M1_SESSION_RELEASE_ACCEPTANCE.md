@@ -29,8 +29,19 @@ records 定向最终27项通过；wire40项首轮通过；terminal flow分批8�
 4项 selected通过（重叠，不算26个独立用例，最终文件18项）。当前 P 定向6项通过，
 图分批18项及2项 precision通过，query/CLI13项首轮通过，真实合流/loop/rebase
 组合14项首轮通过。统一组件门 **974项 / 27标准 / 15.967s PASS**，443源文件hash
-在运行前后不变；所有新增义务和旧D2.2/D1/core回归均已映射。冻结全仓待clean
-实现提交后执行，不能提前宣称通过。
+在运行前后不变；所有新增义务和旧D2.2/D1/core回归均已映射。冻结 clean 实现
+`f67037d632b093e68f26eb0c2fab34767878651c` 的唯一全仓回归 **4,009 PASS /
+0 FAIL / 0 ERROR / 0 SKIP**。外部 468.490s，pytest 466.57s，峰值 RSS
+1,030,312 KiB，三条警告。HEAD、全部443源及38fixture运行前后一致；原35份fixture
+全部未变，原3,871个测试身份全部保留，新增138个。独占basetemp在子进程结束后
+删除，原LeWM和主SCAR checkout均未修改。
+
+组件在dirty `817cc0b` 基线上采集，逐文件hash与后来clean实现完整一致，不伪报
+成同一HEAD；所有定向、组件、全仓集合重叠，不累加为独立测试。最终源指纹
+`23e4c97fc75b7ea889c964fb77a5eada6b617ab94e9a3b308d617f16af340596`
+同时绑定独立交叉源码复审及冻结回归。复审不算另一次测试，也不算native证明。
+[完整归档与只读校验器](../artifacts/experiments/b1_call_operands/model_session_release/README.md)
+保留命令、版本、原输出、JUnit、失败/修正与每文件SHA。时间仅是验收成本。
 
 原始失败保留：records破坏性测试共享default污染、P测试误用strict_subset参数；
 均为测试隔离/假设错误，不能冒充产品拒绝或新模型发现。源码审查修复的 reference

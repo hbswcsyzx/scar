@@ -1,0 +1,1 @@
+source /home/zyf/miniconda3/etc/profile.d/conda.sh && conda activate lewm && PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python -m pytest -q tests/unit/test_session_flow.py --junitxml=artifacts/experiments/b1_call_operands/model_session_release/session/attempt001/junit.xml

@@ -59,5 +59,6 @@ fixture helper 如为组合 ASYNC 图抽出，单独列出其已授权字节变�
 [完整证据及校验器](../artifacts/experiments/b1_call_operands/model_no_body/README.md)
 保留命令、报告、JUnit、历史生成与每文件 SHA。以上时间均为验收成本。
 native 真值、纯性、真实字段、no-reset、guard 执行和 source/runtime 对应仍未证；
-通过声明校验不授权变换。SessionUpdate、TerminalFrameRelease、E/F/P 分析、
-D3、完整 C2 和第一阶段 M0–M2 均未完成。本组件不产生 LeWM 加速比。
+通过声明校验不授权变换。此D2.2 checkpoint时SessionUpdate、TerminalFrameRelease
+和E/F/P仍未实现；后续声明组件见[D2.3验收](M1_SESSION_RELEASE_ACCEPTANCE.md)。
+D2.4/D3、完整C2和第一阶段M0–M2仍未完成。本组件不产生 LeWM 加速比。
