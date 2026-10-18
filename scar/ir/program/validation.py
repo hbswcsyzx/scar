@@ -154,6 +154,10 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
             graph, {op: block_region[block] for op, block in operation_block.items()}, uses):
         error(code, path, message)
 
+    from .state_address_validation import state_address_errors
+    for code, path, message in state_address_errors(graph):
+        error(code, path, message)
+
     def check_footprint(footprint, location, path):
         extent = locations[location].extent
         if (footprint.kind is FootprintKind.INTERVAL and extent is not None

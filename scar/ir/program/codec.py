@@ -17,10 +17,11 @@ from scar.ir.program.resumption import (
     ResumeInput, SavedInput, SuspendTerminator,
 )
 from scar.ir.program.drivers import BodyDriveResult, BodyDriveTerminator
+from scar.ir.program.state_addresses import STATE_ADDRESS_RECORD_TAGS
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 14
+SCHEMA_VERSION = 15
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -40,7 +41,9 @@ _DRIVER_FIELDS = frozenset({"resumable_creates", "raw_driver_requests",
 _PUBLICATION_FIELDS = frozenset({"driver_lifecycles", "body_outcome_commits"})
 _NO_BODY_FIELDS = frozenset({"created_close_tests", "no_body_finishes"})
 _SESSION_RELEASE_FIELDS = frozenset({"session_updates", "terminal_frame_releases"})
-_V13_GRAPH_FIELDS = _GRAPH_FIELDS - _SESSION_RELEASE_FIELDS
+_STATE_ADDRESS_FIELDS = frozenset({"state_address_refinements"})
+_V14_GRAPH_FIELDS = _GRAPH_FIELDS - _STATE_ADDRESS_FIELDS
+_V13_GRAPH_FIELDS = _V14_GRAPH_FIELDS - _SESSION_RELEASE_FIELDS
 _V12_GRAPH_FIELDS = _V13_GRAPH_FIELDS - _NO_BODY_FIELDS
 _V11_GRAPH_FIELDS = _V12_GRAPH_FIELDS - _PUBLICATION_FIELDS
 _V10_GRAPH_FIELDS = _V11_GRAPH_FIELDS - _DRIVER_FIELDS
@@ -64,7 +67,8 @@ _V10_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V10_GRAPH_FIEL
 _V11_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V11_GRAPH_FIELDS
 _V12_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V12_GRAPH_FIELDS
 _V13_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V13_GRAPH_FIELDS
-_V14_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
+_V14_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V14_GRAPH_FIELDS
+_V15_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
 _CLEANUP_RECORD_TAGS = {CleanupRouteTerminator: ("kind", "CLEANUP_ROUTE")}
 _RESUMPTION_RECORD_TAGS = {SuspendTerminator: ("kind", "SUSPEND")}
 _V10_RECORD_TAGS = {**_CLEANUP_RECORD_TAGS, **_RESUMPTION_RECORD_TAGS}
@@ -172,7 +176,7 @@ def _has_session_release_capability(graph: ProgramGraph) -> bool:
 
 
 def dumps(graph: ProgramGraph) -> str:
-    """Preserve historical encoding; session/release declarations require v14."""
+    """Preserve historical encoding; address declarations alone select v15."""
     _require_record_and_graph_valid(graph)
     if _has_cleanup_capability(graph) and not graph.handled_context_domains:
         raise ValueError("cleanup capability requires explicit handled-context domains")
@@ -186,10 +190,17 @@ def dumps(graph: ProgramGraph) -> str:
     has_publication = _has_publication_capability(graph)
     has_no_body = _has_no_body_capability(graph)
     has_session_release = _has_session_release_capability(graph)
-    encoded = encode(graph, record_tags=(_V11_RECORD_TAGS if has_driver else
-                     _V10_RECORD_TAGS if has_resumption else _CLEANUP_RECORD_TAGS))
-    if has_session_release:
-        document = {"schema": SCHEMA, "schema_version": 14, **encoded}
+    has_addresses = bool(graph.state_address_refinements)
+    tags = (_V11_RECORD_TAGS if has_driver else
+            _V10_RECORD_TAGS if has_resumption else _CLEANUP_RECORD_TAGS)
+    if has_addresses:
+        tags = {**tags, **STATE_ADDRESS_RECORD_TAGS}
+    encoded = encode(graph, record_tags=tags)
+    if has_addresses:
+        document = {"schema": SCHEMA, "schema_version": 15, **encoded}
+    elif has_session_release:
+        document = {"schema": SCHEMA, "schema_version": 14,
+                    **{name: encoded[name] for name in _V14_GRAPH_FIELDS}}
     elif has_no_body:
         document = {"schema": SCHEMA, "schema_version": 13,
                     **{name: encoded[name] for name in _V13_GRAPH_FIELDS}}
@@ -268,7 +279,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact v14 fields or strictly migrate historical v1–v13."""
+    """Decode exact v15 fields or strictly migrate historical v1–v14."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -279,7 +290,7 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
@@ -287,7 +298,8 @@ def loads(payload: str) -> ProgramGraph:
                        7: _V7_ENVELOPE_FIELDS, 8: _V8_ENVELOPE_FIELDS,
                        9: _V9_ENVELOPE_FIELDS, 10: _V10_ENVELOPE_FIELDS,
                        11: _V11_ENVELOPE_FIELDS, 12: _V12_ENVELOPE_FIELDS,
-                       13: _V13_ENVELOPE_FIELDS, 14: _V14_ENVELOPE_FIELDS}[version]
+                       13: _V13_ENVELOPE_FIELDS, 14: _V14_ENVELOPE_FIELDS,
+                       15: _V15_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
@@ -296,7 +308,7 @@ def loads(payload: str) -> ProgramGraph:
                     7: _V7_GRAPH_FIELDS, 8: _V8_GRAPH_FIELDS, 9: _V9_GRAPH_FIELDS,
                     10: _V10_GRAPH_FIELDS, 11: _V11_GRAPH_FIELDS,
                     12: _V12_GRAPH_FIELDS, 13: _V13_GRAPH_FIELDS,
-                    14: _GRAPH_FIELDS}[version]
+                    14: _V14_GRAPH_FIELDS, 15: _GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
     if version == 1:
         record = _upgrade_v1_record(record)
@@ -331,6 +343,8 @@ def loads(payload: str) -> ProgramGraph:
         record.update({name: [] for name in _NO_BODY_FIELDS})
     if version < 14:
         record.update({name: [] for name in _SESSION_RELEASE_FIELDS})
+    if version < 15:
+        record.update({name: [] for name in _STATE_ADDRESS_FIELDS})
     if version < 11:
         record.update({name: [] for name in _DRIVER_FIELDS})
         # Inspect only canonical protocol-bearing fields. Capability rejection
@@ -383,10 +397,12 @@ def loads(payload: str) -> ProgramGraph:
                 term = operation.get("terminator") if type(operation) is dict else None
                 if type(term) is dict and term.get("kind") == "SUSPEND":
                     raise ValueError("historical schema cannot contain resumable-body capability")
-    graph = decode(ProgramGraph, record,
-                   record_tags=(_V11_RECORD_TAGS if version >= 11 else
-                                _V10_RECORD_TAGS if version == 10 else
-                                _CLEANUP_RECORD_TAGS if version == 9 else None))
+    tags = (_V11_RECORD_TAGS if version >= 11 else
+            _V10_RECORD_TAGS if version == 10 else
+            _CLEANUP_RECORD_TAGS if version == 9 else None)
+    if version == 15:
+        tags = {**tags, **STATE_ADDRESS_RECORD_TAGS}
+    graph = decode(ProgramGraph, record, record_tags=tags)
     if version < 11 and _has_driver_capability(graph):
         raise ValueError("historical schema cannot contain driver capability")
     if version < 9 and _has_cleanup_capability(graph):
@@ -427,6 +443,8 @@ def loads(payload: str) -> ProgramGraph:
         raise ValueError("schema version 13 requires explicit no-body capability")
     if version == 14 and not _has_session_release_capability(graph):
         raise ValueError("schema version 14 requires explicit session/release capability")
+    if version == 15 and not graph.state_address_refinements:
+        raise ValueError("schema version 15 requires explicit state-address capability")
     _require_record_and_graph_valid(graph)
     return graph
 

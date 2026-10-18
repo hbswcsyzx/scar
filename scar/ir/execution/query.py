@@ -198,6 +198,16 @@ class ExecutionIndex:
         current = ctx.current(point)
         return None if current is None else deepcopy(current)
 
+    def state_address(self, effect, *, budget=4096):
+        """Bind an address declaration to exact original dynamic state ports."""
+        from .state_addresses import state_address
+        from .validity_budget import ValidityBudget
+        ValidityBudget(budget)
+        if type(effect) not in (AccessRef, InvokeBoundaryStateEffect):
+            raise TypeError('state_address requires AccessRef or InvokeBoundaryStateEffect')
+        effect.__post_init__()
+        return state_address(self._content_context(), effect, budget=budget)
+
     def occurrence(self, identity):
         ctx = self._ctx
         row = ctx.occurrences[identity]

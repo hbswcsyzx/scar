@@ -25,6 +25,10 @@ from .lifecycle import (
 )
 from .lifecycle_flow import TerminalPointFacts
 from .session_flow import SessionPointFacts
+from .state_addresses import (
+    ExistingAccess, InvokeStateOperand, ReferenceOwner, ResourceOwner,
+    StateAddressSite, UnknownOwner, address_effect_uses,
+)
 from scar.ir.v2.common import ProofStatus
 
 
@@ -276,8 +280,12 @@ class ProgramIndex:
         self._no_body_finishes = {row.operation: row for row in graph.no_body_finishes}
         self._session_updates = {row.operation: row for row in graph.session_updates}
         self._terminal_frame_releases = {row.operation: row for row in graph.terminal_frame_releases}
+        self._state_addresses = {row.site: row for row in graph.state_address_refinements}
+        self._state_resource_uses = {(row.operation, row.requirement): row
+                                     for row in graph.resource_uses}
         self.graph = graph
         self.values = {value.id: value for value in graph.values}
+        self.locations = {location.id: location for location in graph.locations}
         self.regions = {region.id: region for region in graph.regions}
         self.operations = {operation.id: operation for operation in graph.operations}
         self._environments = {interface.region: interface for interface in graph.environments}
@@ -336,6 +344,85 @@ class ProgramIndex:
 
     def producer(self, value_id: ValueID):
         return self.values[value_id].origin
+
+    def state_address(self, site: StateAddressSite) -> dict:
+        """Project original state ports and optional address declarations.
+
+        ``refinement=None`` explicitly means unknown address precision. Its
+        empty effect tuple is not an empty-effect proof: the coarse state
+        dependency and original operation remain present. INVOKE completion
+        ports are returned separately without manufacturing an ``after``.
+
+        ``operands`` retains unknown-owner inputs first, then selector inputs
+        in path order, including repetitions. A reference owner is separately
+        available as its original ``owner_use``.
+        """
+        if type(site) not in (ExistingAccess, InvokeStateOperand):
+            raise TypeError("state_address requires an exact state address site")
+        site.__post_init__()
+        operation = self.operations[site.operation]
+        completions = ()
+        if type(site) is ExistingAccess:
+            if (operation.terminator is not None
+                    and operation.terminator.kind is TerminatorKind.INVOKE):
+                raise ValueError("INVOKE state addresses require InvokeStateOperand")
+            if site.index >= len(operation.accesses):
+                raise KeyError(site)
+            access = operation.accesses[site.index]
+            before = self._uses[access.before]
+            carrier = self.locations[access.location]
+            after = None if access.after is None else self.values[access.after]
+        else:
+            if (operation.terminator is None
+                    or operation.terminator.kind is not TerminatorKind.INVOKE
+                    or site.state_use not in operation.invoke_arguments):
+                raise ValueError("state address site must select an actual INVOKE state operand")
+            before = self._uses[site.state_use]
+            value = self.values[before.use.value]
+            if before.operation != operation.id or not isinstance(value, StateVersionValue):
+                raise ValueError("state address INVOKE operand must be an owned state Use")
+            access, after = None, None
+            carrier = self.locations[value.location]
+            completions = tuple(
+                {"successor_index": number, "successor": successor,
+                 "formal": self.values[formal], "argument": actual}
+                for number, successor in enumerate(operation.terminator.successors)
+                for actual, formal in zip(successor.arguments,
+                                          self._block_records[successor.block].arguments)
+                if isinstance(self.values[formal], StateVersionValue)
+                and self.values[formal].location == carrier.id)
+
+        refinement = self._state_addresses.get(site)
+        effects = []
+        if refinement is not None:
+            for number, effect in enumerate(refinement.effects):
+                owner = effect.owner
+                unknown_inputs = owner.operands if type(owner) is UnknownOwner else ()
+                operands = (*unknown_inputs, *address_effect_uses(effect))
+                effects.append({
+                    "index": number, "effect": effect,
+                    "owner_use": self._uses[owner.use] if type(owner) is ReferenceOwner else None,
+                    "resource_use": self._state_resource_uses[(operation.id, owner.requirement)]
+                        if type(owner) is ResourceOwner else None,
+                    "operands": tuple(self._uses[use] for use in operands),
+                })
+        conditions = (
+            "typed address paths do not interpret legacy Footprint coordinate units or establish geometric coverage",
+            "DECLARED_COMPLETE describes declared addresses and modes, not native effects or source/runtime applicability",
+        )
+        if refinement is None:
+            conditions += (
+                "address precision is unknown without a refinement; the empty address tuple is not an empty-effect proof",
+            )
+        return {
+            "site": refinement.site if refinement is not None else site,
+            "refinement": refinement, "operation": operation, "carrier": carrier,
+            "access": access, "before": before, "after": after,
+            "completions": completions, "effects": tuple(effects),
+            "coarse_dependencies_retained": True,
+            "address_interpretation_verified": False, "conditions": conditions,
+            "source_runtime_verified": False, "transformation_authorized": False,
+        }
 
     def _driver_operation(self, operation_id, rows):
         if type(operation_id) is not OperationID:

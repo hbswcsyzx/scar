@@ -51,6 +51,13 @@ from scar.ir.program.cleanup import (
     CleanupEnter, CleanupInterface, CleanupReplace, CleanupResume,
     CleanupRouteSuccessor, CleanupRouteTerminator, HandledContextDomain, HandledContextRead,
 )
+from scar.ir.program.state_addresses import (
+    AddressCoverage, AddressEffect, AddressOwner, AddressSelector, AddressUnit,
+    CellContent, DomainOwner, DynamicField, Element, ExistingAccess,
+    InvokeStateOperand, NamespaceKey, ObjectField, ReferenceOwner, ResourceOwner,
+    Slice, StateAddressRefinement, StateAddressSite, StorageRange,
+    UnknownOwner, UnknownSelection, WholeOwner,
+)
 from scar.ir.program.model import (
     AccessMode, Behavior, Block, BlockArgument, CompletionResult,
     CompletionSignature, CompletionSuccessor, DataValue, ExitKind, ExitPort,
@@ -113,4 +120,9 @@ __all__ = [
     "BodyOutcomeCommit", "CreatedCloseTest", "DriveOutcomeRef", "DriverLifecycle",
     "NoBodyFinish",
     "LifecyclePostBinding", "SessionPost", "SessionUpdate", "TerminalFrameRelease",
+    "AddressCoverage", "AddressEffect", "AddressOwner", "AddressSelector", "AddressUnit",
+    "CellContent", "DomainOwner", "DynamicField", "Element", "ExistingAccess",
+    "InvokeStateOperand", "NamespaceKey", "ObjectField", "ReferenceOwner", "ResourceOwner",
+    "Slice", "StateAddressRefinement", "StateAddressSite", "StorageRange",
+    "UnknownOwner", "UnknownSelection", "WholeOwner",
 ]

@@ -39,6 +39,8 @@ from scar.ir.program.resources import (
 )
 from scar.ir.program.providers import ProviderBinding, ProviderEnvelope, ProviderRegion
 from scar.ir.program.native import BoundaryRelation, NativeBoundary
+from scar.ir.program.state_modes import AccessMode
+from scar.ir.program.state_addresses import StateAddressRefinement
 from scar.ir.v2.ids import ValueSlotID
 
 
@@ -358,12 +360,6 @@ class Use:
             raise TypeError("Use.value must be ValueID")
         if not isinstance(self.role, UseRole):
             raise TypeError("Use.role must be UseRole")
-
-
-class AccessMode(str, Enum):
-    READ = "READ"
-    WRITE = "WRITE"
-    READ_WRITE = "READ_WRITE"
 
 
 @dataclass(frozen=True, slots=True)
@@ -765,10 +761,19 @@ class ProgramGraph:
     no_body_finishes: tuple[NoBodyFinish, ...] = ()
     session_updates: tuple[SessionUpdate, ...] = ()
     terminal_frame_releases: tuple[TerminalFrameRelease, ...] = ()
+    state_address_refinements: tuple[StateAddressRefinement, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
             raise TypeError("ProgramGraph.root must be RegionID")
+        refinements = _tuple(self.state_address_refinements,
+                             "ProgramGraph.state_address_refinements")
+        if any(type(row) is not StateAddressRefinement for row in refinements):
+            raise TypeError("ProgramGraph.state_address_refinements needs exact address records")
+        for row in refinements:
+            row.__post_init__()
+        _unique(tuple(row.site for row in refinements),
+                "ProgramGraph.state_address_refinements sites")
         for name, row_type, key in (
                 ("handled_context_domains", HandledContextDomain, "region"),
                 ("cleanup_interfaces", CleanupInterface, "scope"),
@@ -937,6 +942,7 @@ __all__ = [
     "LocalBindingValue", "Operation", "OperationResult", "ProtocolValue",
     "OrderEdge", "Origin", "ProgramGraph",
     "ReferenceValue", "Region", "Stability", "StateAccess", "StateLocation",
+    "StateAddressRefinement",
     "StateVersionValue", "Successor", "Terminator", "TerminatorKind", "Use",
     "ProgramValueType", "UseRole", "Value", "ValueKind", "ValueType", "value_type",
 ]
