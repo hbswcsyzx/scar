@@ -17,14 +17,15 @@ from .native_validation import port_key, region_port_keys
 from .cleanup_validation import CleanupRouteKind, CleanupRouteStep
 from .resumption import ResumeInput, ResumeSlot, ResumeSlotKind, SuspendTerminator, saved_actual_use
 from .resumption_flow import first_body_outcome_operations
-from .drivers import BodyDrive, BodyDriveResult, NormalResultPort
+from .drivers import BodyDrive, BodyDriveResult, DriverInterface, NormalResultPort
 from .driver_flow import body_drive_target, body_outcome_uses
 from .lifecycle import (
-    BodyOutcomeCommit, CreatedCloseTest, LifecyclePostBinding, NoBodyFinish,
+    BodyOutcomeCommit, CreatedCloseTest, DriverLifecycle, LifecyclePostBinding, NoBodyFinish,
     SessionUpdate, TerminalFrameRelease,
 )
 from .lifecycle_flow import TerminalPointFacts
 from .session_flow import SessionPointFacts
+from scar.ir.v2.common import ProofStatus
 
 
 @dataclass(frozen=True, slots=True)
@@ -129,11 +130,57 @@ class NoBodyPublication:
 
 
 @dataclass(frozen=True, slots=True)
+class LifecycleScope:
+    """Original explicit declarations; their runtime applicability stays unknown."""
+
+    declaration: DriverLifecycle
+    interface: DriverInterface
+
+    @property
+    def applicability(self) -> ProofStatus:
+        return ProofStatus.UNKNOWN
+
+    @property
+    def rule(self):
+        return self.interface.rule
+
+
+class LifecyclePosition(str, Enum):
+    BEFORE = "BEFORE"
+    AFTER = "AFTER"
+    EDGE = "EDGE"
+
+
+@dataclass(frozen=True, slots=True)
 class LifecyclePoint:
-    """Conditional declaration facts, not native/runtime or free/ready proof."""
+    """Positioned conditional facts, not native/runtime or free/ready proof."""
 
     terminal: TerminalPointFacts
     session: SessionPointFacts
+    scope: LifecycleScope
+    operation: Operation
+    position: LifecyclePosition
+    successor_index: int | None
+
+    def __post_init__(self):
+        if type(self.scope) is not LifecycleScope:
+            raise TypeError("lifecycle point needs its declared LifecycleScope")
+        if not isinstance(self.operation, Operation):
+            raise TypeError("lifecycle point needs its original Operation")
+        if type(self.position) is not LifecyclePosition:
+            raise TypeError("lifecycle position must be LifecyclePosition")
+        if self.position is LifecyclePosition.EDGE:
+            if (type(self.successor_index) is not int or self.successor_index < 0
+                    or self.operation.terminator is None
+                    or self.successor_index >= len(self.operation.terminator.successors)):
+                raise ValueError("lifecycle edge index must identify a real successor")
+        elif self.successor_index is not None:
+            raise ValueError("before/after lifecycle points cannot have an edge index")
+
+    @property
+    def successor(self):
+        return (self.operation.terminator.successors[self.successor_index]
+                if self.position is LifecyclePosition.EDGE else None)
 
 
 @dataclass(frozen=True, slots=True)
@@ -145,6 +192,7 @@ class SessionPublication:
     accesses: tuple[PublicationAccess, ...]
     support: tuple[StateVersionValue, ...]
     normal_successor: CompletionSuccessor | None
+    point: LifecyclePoint
 
 
 @dataclass(frozen=True, slots=True)
@@ -153,6 +201,7 @@ class TerminalReleasePublication:
     owner: UseSite
     accesses: tuple[PublicationAccess, ...]
     sources: tuple[BodyPublication | NoBodyPublication, ...]
+    point: LifecyclePoint
 
 
 @dataclass(frozen=True, slots=True)
@@ -219,6 +268,9 @@ class ProgramIndex:
         self._final_body_gates = {row.operation: row for row in graph.final_body_gates}
         self._body_drives = {row.operation: row for row in graph.body_drives}
         self._driver_lifecycles = {row.region: row for row in graph.driver_lifecycles}
+        self._lifecycle_scopes = {
+            row.region: LifecycleScope(row, self._driver_interfaces[row.region])
+            for row in graph.driver_lifecycles}
         self._body_outcome_commits = {row.operation: row for row in graph.body_outcome_commits}
         self._created_close_tests = {row.operation: row for row in graph.created_close_tests}
         self._no_body_finishes = {row.operation: row for row in graph.no_body_finishes}
@@ -336,6 +388,11 @@ class ProgramIndex:
             raise KeyError(region_id)
         return self._driver_lifecycles.get(region_id)
 
+    def lifecycle_scope(self, region_id: RegionID):
+        """An explicit conditional scope, never inferred from a D1 interface."""
+        self.driver_lifecycle(region_id)
+        return self._lifecycle_scopes.get(region_id)
+
     def body_outcome_commit(self, operation_id: OperationID):
         return self._driver_operation(operation_id, self._body_outcome_commits)
 
@@ -404,14 +461,17 @@ class ProgramIndex:
         facts = self._lifecycle_facts.get(region)
         if facts is None:
             return None
-        return LifecyclePoint(getattr(facts.terminal, position)[operation_id],
-                              getattr(facts.session, position)[operation_id])
+        field = position.value.lower()
+        return LifecyclePoint(getattr(facts.terminal, field)[operation_id],
+                              getattr(facts.session, field)[operation_id],
+                              self._lifecycle_scopes[region], self.operations[operation_id],
+                              position, None)
 
     def lifecycle_before(self, operation_id: OperationID):
-        return self._lifecycle_point(operation_id, "before")
+        return self._lifecycle_point(operation_id, LifecyclePosition.BEFORE)
 
     def lifecycle_after(self, operation_id: OperationID):
-        return self._lifecycle_point(operation_id, "after")
+        return self._lifecycle_point(operation_id, LifecyclePosition.AFTER)
 
     def lifecycle_edge(self, operation_id: OperationID, successor_index: int):
         self._driver_operation(operation_id, {})
@@ -425,7 +485,9 @@ class ProgramIndex:
         if facts is None:
             return None
         key = (operation_id, successor_index)
-        return LifecyclePoint(facts.terminal.edges[key], facts.session.edges[key])
+        return LifecyclePoint(facts.terminal.edges[key], facts.session.edges[key],
+                              self._lifecycle_scopes[region], op,
+                              LifecyclePosition.EDGE, successor_index)
 
     def session_publication(self, operation_id: OperationID):
         row = self.session_update(operation_id)
@@ -444,7 +506,8 @@ class ProgramIndex:
                            if isinstance(self.values[self._uses[identity].use.value], StateVersionValue))
         request, body = self._uses[row.request], self._uses[row.body]
         post = next(fact for fact in point.session.for_pair(request.use.value, body.use.value) if fact.post is row.post)
-        return SessionPublication(row, request, body, states, self._state_access_views(operation_id), post.support, normal)
+        return SessionPublication(row, request, body, states, self._state_access_views(operation_id),
+                                  post.support, normal, point)
 
     def terminal_release_publication(self, operation_id: OperationID):
         row = self.terminal_frame_release(operation_id)
@@ -454,7 +517,7 @@ class ProgramIndex:
         point = self.lifecycle_before(operation_id)
         sources = tuple(self.body_publication(identity) or self.no_body_publication(identity)
                         for identity in sorted(point.terminal.source_operations(owner.use.value), key=lambda item: item.wire))
-        return TerminalReleasePublication(row, owner, self._state_access_views(operation_id), sources)
+        return TerminalReleasePublication(row, owner, self._state_access_views(operation_id), sources, point)
 
     def normal_result(self, operation_id: OperationID, port: NormalResultPort):
         """The original NORMAL landing value at an exact produced result slot."""
@@ -856,7 +919,7 @@ class ProgramIndex:
 __all__ = ["ProgramIndex", "UseSite", "BodyOutcomeSite", "DriverBinding", "DriveInputBinding",
            "InstanceCaptureInput", "PublicationAccess", "BodyPublication",
            "CreatedClosePredicate", "NoBodyPublication",
-           "LifecyclePoint", "SessionPublication", "TerminalReleasePublication",
+           "LifecycleScope", "LifecyclePosition", "LifecyclePoint", "SessionPublication", "TerminalReleasePublication",
            "EnvironmentArgument", "EnvironmentCall",
            "EnvironmentBindingStatus", "FunctionArgument", "CleanupRouteKind", "CleanupRouteStep",
            "ResumptionBinding", "SuspensionHandoff"]

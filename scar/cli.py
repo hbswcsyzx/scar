@@ -518,6 +518,8 @@ def _check_program(args) -> int:
     from scar.ir.program.cleanup import CleanupRouteTerminator
     from scar.ir.program.resumption import SuspendTerminator
     from scar.ir.program.drivers import BodyDriveTerminator
+    from scar.ir.record_codec import encode as encode_record
+    from scar.ir.v2.common import ProofStatus
 
     source = Path(args.graph)
     report = {"schema": "scar.program-graph-check", "schema_version": 1,
@@ -534,7 +536,8 @@ def _check_program(args) -> int:
               "body_publication_structure_validated": False,
               "no_body_structure_validated": False,
               "session_release_structure_validated": False,
-              "conditional_lifecycle_facts_derived": False}
+              "conditional_lifecycle_facts_derived": False,
+              "conditional_lifecycle_scopes": []}
     if args.out and Path(args.out).resolve() == source.resolve():
         report.update(status="INVALID", errors=["report path must differ from input graph"])
         print(json.dumps(report, ensure_ascii=False))
@@ -635,6 +638,22 @@ def _check_program(args) -> int:
                           driver_structure_scope="declared static driver ports, CFG and current state flow",
                           driver_lifecycle_verified=False)
         if graph.driver_lifecycles:
+            interfaces = {row.region: row for row in graph.driver_interfaces}
+            operation_regions = {operation: region.id for region in graph.regions
+                                 for block in region.blocks for operation in block.operations}
+            tables = ("body_outcome_commits", "created_close_tests", "no_body_finishes",
+                      "session_updates", "terminal_frame_releases")
+            report["conditional_lifecycle_scopes"] = [
+                {"region": scope.region.wire,
+                 "rule_profile": interfaces[scope.region].rule.profile.value,
+                 "implementation": encode_record(interfaces[scope.region].rule.implementation),
+                 "applicability": ProofStatus.UNKNOWN.value,
+                 "conditional_facts_derived": True,
+                 "declared_capabilities": {
+                     name: sum(operation_regions[row.operation] == scope.region
+                               for row in getattr(graph, name)) for name in tables}}
+                for scope in graph.driver_lifecycles]
+            report["conditional_lifecycle_facts_derived"] = True
             report["counts"].update(
                 driver_lifecycles=len(graph.driver_lifecycles),
                 body_outcome_commits=len(graph.body_outcome_commits))
