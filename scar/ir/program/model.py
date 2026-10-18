@@ -525,6 +525,12 @@ class LiteralEvaluation:
         require_definition(self.definition)
 
 
+# Protocol annotations resolve only after the canonical result port classes
+# exist. The private binding installs these exact classes, never copies of them.
+from scar.ir.program.protocols import (ProtocolOperation, ProtocolScope, _bind_model_ports)
+_bind_model_ports(OperationResult, InvokeLiteralResult)
+
+
 @dataclass(frozen=True, slots=True)
 class CompletionSuccessor:
     kind: ExitKind
@@ -826,10 +832,22 @@ class ProgramGraph:
     terminal_frame_releases: tuple[TerminalFrameRelease, ...] = ()
     state_address_refinements: tuple[StateAddressRefinement, ...] = ()
     literal_evaluations: tuple[LiteralEvaluation, ...] = ()
+    protocol_scopes: tuple[ProtocolScope, ...] = ()
+    protocol_operations: tuple[ProtocolOperation, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
             raise TypeError("ProgramGraph.root must be RegionID")
+        for name, row_type in (("protocol_scopes", ProtocolScope),
+                               ("protocol_operations", ProtocolOperation)):
+            rows = _tuple(getattr(self, name), "ProgramGraph." + name)
+            if any(type(row) is not row_type for row in rows):
+                raise TypeError("ProgramGraph." + name + " requires exact protocol records")
+            for row in rows:
+                row.__post_init__()
+        _unique(tuple(row.id for row in self.protocol_scopes), "protocol scope IDs")
+        _unique(tuple((row.scope, row.clause, row.operation, row.slot)
+                      for row in self.protocol_operations), "protocol operation keys")
         evaluations = _tuple(self.literal_evaluations, "ProgramGraph.literal_evaluations")
         if any(type(row) is not LiteralEvaluation for row in evaluations):
             raise TypeError("literal_evaluations requires exact LiteralEvaluation records")
@@ -1002,6 +1020,7 @@ class ProgramGraph:
 
 
 __all__ = [
+    "ProtocolScope", "ProtocolOperation",
     "ExactLiteralOrigin", "LiteralEvaluation", "InvokeLiteralResult", "is_literal_origin",
     "AccessMode", "Behavior", "Block", "BlockArgument", "DataValue", "ExitKind",
     "CompletionResult", "CompletionSignature", "CompletionSuccessor", "ExitPort",

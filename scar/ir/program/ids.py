@@ -63,11 +63,15 @@ class BoundaryRelationID(Identifier):
     prefix = "program_boundary_relation"
 
 
+class ProtocolScopeID(Identifier):
+    prefix = "program_protocol_scope"
+
+
 __all__ = [
     "BlockID", "LocationID", "OperationID", "RegionID", "UseID", "ValueID",
     "ResourceDefinitionID", "ResourceRequirementID",
     "EnvironmentInterfaceID",
     "ControlScopeID", "ControlPortID",
     "ProviderID",
-    "NativeBoundaryID", "BoundaryRelationID",
+    "NativeBoundaryID", "BoundaryRelationID", "ProtocolScopeID",
 ]

@@ -25,6 +25,9 @@ from .lifecycle import (
 )
 from .lifecycle_flow import TerminalPointFacts
 from .session_flow import SessionPointFacts
+from .protocols import NoEntryOutcome, ProtocolOperation
+from .protocol_flow import ProtocolPort
+from .structured import ControlEdgeReference
 from .state_addresses import (
     ExistingAccess, InvokeStateOperand, ReferenceOwner, ResourceOwner,
     StateAddressSite, UnknownOwner, address_effect_uses,
@@ -200,11 +203,28 @@ class SessionPublication:
 
 
 @dataclass(frozen=True, slots=True)
+class NoEntryPublication:
+    """A conditional exact-edge source; not an observed body entry or permit."""
+
+    declaration: ProtocolOperation
+    instance: UseSite
+    selected_edge: ControlEdgeReference | None
+    terminal: ProtocolPort
+    source: ProtocolPort
+    state_sites: tuple[StateAddressSite, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class TerminalReleasePublication:
+    """Current must-fact with possible static source explanations.
+
+    Multiple declarations on one source operation can describe different edges;
+    their presence here does not mean they all occurred on the current path.
+    """
     release: TerminalFrameRelease
     owner: UseSite
     accesses: tuple[PublicationAccess, ...]
-    sources: tuple[BodyPublication | NoBodyPublication, ...]
+    sources: tuple[BodyPublication | NoBodyPublication | NoEntryPublication, ...]
     point: LifecyclePoint
 
 
@@ -637,9 +657,32 @@ class ProgramIndex:
             return None
         owner = self._uses[row.owner]
         point = self.lifecycle_before(operation_id)
-        sources = tuple(self.body_publication(identity) or self.no_body_publication(identity)
-                        for identity in sorted(point.terminal.source_operations(owner.use.value), key=lambda item: item.wire))
-        return TerminalReleasePublication(row, owner, self._state_access_views(operation_id), sources, point)
+        sources = []
+        for identity in sorted(point.terminal.source_operations(owner.use.value), key=lambda item: item.wire):
+            previous = self.body_publication(identity) or self.no_body_publication(identity)
+            if previous is not None:
+                sources.append(previous)
+            else:
+                sources.extend(self.no_entry_publications(identity))
+        return TerminalReleasePublication(row, owner, self._state_access_views(operation_id), tuple(sources), point)
+
+    def no_entry_publications(self, operation_id: OperationID):
+        self._driver_operation(operation_id, {})
+        from .protocol_flow import ProtocolFlow
+        from .protocol_validation import no_entry_route
+        from .protocols import ProtocolClause
+        ctx = ProtocolFlow(self.graph)
+        result = []
+        for row in self.graph.protocol_operations:
+            if (row.operation != operation_id or type(row.contract) is not NoEntryOutcome
+                    or row.clause not in (ProtocolClause.INITIAL_THROW_DELIVERED,
+                                          ProtocolClause.INITIAL_THROW_CONSTRUCTOR_FAILURE)):
+                continue
+            route = no_entry_route(ctx, row)
+            if route['complete']:
+                result.append(NoEntryPublication(row, self._uses[row.contract.instance_use],
+                    row.contract.selected_edge, route['terminal'], route['source'], row.contract.state_sites))
+        return tuple(result)
 
     def normal_result(self, operation_id: OperationID, port: NormalResultPort):
         """The original NORMAL landing value at an exact produced result slot."""
@@ -659,6 +702,11 @@ class ProgramIndex:
         position = next(index for index, actual in enumerate(edge.arguments)
                         if type(actual) is CompletionResult and actual.index == port.index)
         return self.values[block.arguments[position]]
+
+    def protocol_obligations(self, scope=None, *, budget=4096):
+        """Fixed supplied-model obligations; missing joins never remove clauses."""
+        from .protocol_query import protocol_obligations
+        return protocol_obligations(self.graph, scope, budget=budget)
 
     def creation_bindings(self, operation_id: OperationID):
         """Bound references from Create Uses; no dynamic instance is inferred."""

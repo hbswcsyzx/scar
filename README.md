@@ -21,6 +21,13 @@ checks proposed port connectivity, leaving source/identity/captures unproved.
 P2–P5 implementation remains open; this adds no product capability or full run.
 Initial findings, corrections and the earlier failed native expectation remain.
 
+The [P2 protocol foundation](docs/M1_PROTOCOL_FOUNDATION.md) now implements
+the fixed F records, original-port connections, selected-edge terminal sources
+and bounded obligation queries. Validation is in progress. Program17 preserves
+legacy capability selection; Execution remains7. This is a partial checkpoint:
+the complete synchronous generator matrix and P3–P5 remain open, and supplied
+model checks do not establish automatic program recovery or transformations.
+
 The [exact literal content/source/evaluation interfaces](docs/M1_LITERAL_INTERFACES.md)
 pass [1,716 component checks /32 criteria and 5,294 clean frozen full tests](docs/M1_LITERAL_ACCEPTANCE.md)
 (`4bc55eb`). Exact abstract Data content and source declarations attach to the

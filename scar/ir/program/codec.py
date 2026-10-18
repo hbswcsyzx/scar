@@ -20,10 +20,11 @@ from scar.ir.program.drivers import BodyDriveResult, BodyDriveTerminator
 from scar.ir.program.state_addresses import STATE_ADDRESS_RECORD_TAGS
 from scar.ir.program.literal_sources import ExactLiteralOrigin, LITERAL_SOURCE_RECORD_TAGS
 from scar.ir.program.model import InvokeLiteralResult
+from scar.ir.program.protocols import PROTOCOL_RECORD_TAGS
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 16
+SCHEMA_VERSION = 17
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -45,7 +46,9 @@ _NO_BODY_FIELDS = frozenset({"created_close_tests", "no_body_finishes"})
 _SESSION_RELEASE_FIELDS = frozenset({"session_updates", "terminal_frame_releases"})
 _STATE_ADDRESS_FIELDS = frozenset({"state_address_refinements"})
 _LITERAL_FIELDS = frozenset({"literal_evaluations"})
-_V15_GRAPH_FIELDS = _GRAPH_FIELDS - _LITERAL_FIELDS
+_PROTOCOL_FIELDS = frozenset({"protocol_scopes", "protocol_operations"})
+_V16_GRAPH_FIELDS = _GRAPH_FIELDS - _PROTOCOL_FIELDS
+_V15_GRAPH_FIELDS = _V16_GRAPH_FIELDS - _LITERAL_FIELDS
 _V14_GRAPH_FIELDS = _V15_GRAPH_FIELDS - _STATE_ADDRESS_FIELDS
 _V13_GRAPH_FIELDS = _V14_GRAPH_FIELDS - _SESSION_RELEASE_FIELDS
 _V12_GRAPH_FIELDS = _V13_GRAPH_FIELDS - _NO_BODY_FIELDS
@@ -73,7 +76,8 @@ _V12_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V12_GRAPH_FIEL
 _V13_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V13_GRAPH_FIELDS
 _V14_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V14_GRAPH_FIELDS
 _V15_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V15_GRAPH_FIELDS
-_V16_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
+_V16_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V16_GRAPH_FIELDS
+_V17_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
 _LITERAL_RECORD_TAGS = {**LITERAL_SOURCE_RECORD_TAGS,
                         InvokeLiteralResult: ("kind", "INVOKE_LITERAL_RESULT")}
 _CLEANUP_RECORD_TAGS = {CleanupRouteTerminator: ("kind", "CLEANUP_ROUTE")}
@@ -187,8 +191,12 @@ def _has_literal_capability(graph: ProgramGraph) -> bool:
         isinstance(value.origin, ExactLiteralOrigin) for value in graph.values)
 
 
+def _has_protocol_capability(graph: ProgramGraph) -> bool:
+    return any(getattr(graph, name) for name in _PROTOCOL_FIELDS)
+
+
 def dumps(graph: ProgramGraph) -> str:
-    """Preserve historical encoding; address declarations alone select v15."""
+    """Select only present capabilities; preserve historical field/tag/byte profiles."""
     _require_record_and_graph_valid(graph)
     if _has_cleanup_capability(graph) and not graph.handled_context_domains:
         raise ValueError("cleanup capability requires explicit handled-context domains")
@@ -204,15 +212,21 @@ def dumps(graph: ProgramGraph) -> str:
     has_session_release = _has_session_release_capability(graph)
     has_addresses = bool(graph.state_address_refinements)
     has_literals = _has_literal_capability(graph)
+    has_protocols = _has_protocol_capability(graph)
     tags = (_V11_RECORD_TAGS if has_driver else
             _V10_RECORD_TAGS if has_resumption else _CLEANUP_RECORD_TAGS)
-    if has_addresses:
+    if has_addresses or has_protocols:
         tags = {**tags, **STATE_ADDRESS_RECORD_TAGS}
-    if has_literals:
+    if has_literals or has_protocols:
         tags = {**tags, **_LITERAL_RECORD_TAGS}
+    if has_protocols:
+        tags = {**tags, **PROTOCOL_RECORD_TAGS}
     encoded = encode(graph, record_tags=tags)
-    if has_literals:
-        document = {"schema": SCHEMA, "schema_version": 16, **encoded}
+    if has_protocols:
+        document = {"schema": SCHEMA, "schema_version": 17, **encoded}
+    elif has_literals:
+        document = {"schema": SCHEMA, "schema_version": 16,
+                    **{name: encoded[name] for name in _V16_GRAPH_FIELDS}}
     elif has_addresses:
         document = {"schema": SCHEMA, "schema_version": 15,
                     **{name: encoded[name] for name in _V15_GRAPH_FIELDS}}
@@ -256,7 +270,7 @@ def dumps(graph: ProgramGraph) -> str:
         document = {"schema": SCHEMA, "schema_version": 2,
                     **{name: encoded[name] for name in _V1_V2_GRAPH_FIELDS}}
     return json.dumps(document, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=has_literals, allow_nan=False)
+                      ensure_ascii=(has_literals or has_protocols), allow_nan=False)
 
 
 def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
@@ -297,7 +311,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact v15 fields or strictly migrate historical v1–v14."""
+    """Decode exact v17 fields or strictly migrate historical v1–v16."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -308,7 +322,7 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
@@ -317,7 +331,7 @@ def loads(payload: str) -> ProgramGraph:
                        9: _V9_ENVELOPE_FIELDS, 10: _V10_ENVELOPE_FIELDS,
                        11: _V11_ENVELOPE_FIELDS, 12: _V12_ENVELOPE_FIELDS,
                        13: _V13_ENVELOPE_FIELDS, 14: _V14_ENVELOPE_FIELDS,
-                       15: _V15_ENVELOPE_FIELDS, 16: _V16_ENVELOPE_FIELDS}[version]
+                       15: _V15_ENVELOPE_FIELDS, 16: _V16_ENVELOPE_FIELDS, 17: _V17_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
@@ -326,7 +340,7 @@ def loads(payload: str) -> ProgramGraph:
                     7: _V7_GRAPH_FIELDS, 8: _V8_GRAPH_FIELDS, 9: _V9_GRAPH_FIELDS,
                     10: _V10_GRAPH_FIELDS, 11: _V11_GRAPH_FIELDS,
                     12: _V12_GRAPH_FIELDS, 13: _V13_GRAPH_FIELDS,
-                    14: _V14_GRAPH_FIELDS, 15: _V15_GRAPH_FIELDS, 16: _GRAPH_FIELDS}[version]
+                    14: _V14_GRAPH_FIELDS, 15: _V15_GRAPH_FIELDS, 16: _V16_GRAPH_FIELDS, 17: _GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
     if version == 1:
         record = _upgrade_v1_record(record)
@@ -361,6 +375,8 @@ def loads(payload: str) -> ProgramGraph:
         record.update({name: [] for name in _NO_BODY_FIELDS})
     if version < 14:
         record.update({name: [] for name in _SESSION_RELEASE_FIELDS})
+    if version < 17:
+        record.update({name: [] for name in _PROTOCOL_FIELDS})
     if version < 16:
         record.update({name: [] for name in _LITERAL_FIELDS})
     if version < 15:
@@ -424,7 +440,13 @@ def loads(payload: str) -> ProgramGraph:
         tags = {**tags, **STATE_ADDRESS_RECORD_TAGS}
     if version >= 16:
         tags = {**tags, **_LITERAL_RECORD_TAGS}
+    if version >= 17:
+        tags = {**tags, **PROTOCOL_RECORD_TAGS}
     graph = decode(ProgramGraph, record, record_tags=tags)
+    if version < 17 and _has_protocol_capability(graph):
+        raise ValueError("historical schema cannot contain protocol capability")
+    if version == 17 and not _has_protocol_capability(graph):
+        raise ValueError("schema version 17 requires explicit protocol capability")
     if version < 16 and _has_literal_capability(graph):
         raise ValueError("historical schema cannot contain exact literal capability")
     if version == 16 and not _has_literal_capability(graph):

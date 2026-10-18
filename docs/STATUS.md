@@ -1,5 +1,18 @@
 # Current evidence and remaining work
 
+## P2 protocol foundation implemented; acceptance in progress (2026-10-18)
+
+[Scope and next steps](M1_PROTOCOL_FOUNDATION.md): exact protocol records attach
+to the original CFG/Use/result/state ports. Current-evaluation copies, raw
+ordinals, explicit packet components, adapter host outputs and selected no-entry
+edges are checked separately from type equality. Fixed profile/clause and known
+N/R denominators survive missing rows and bounded-query truncation. Program17
+keeps legacy family selection; Execution remains7. Independent review added
+missing-domain, cyclic-route and unrelated-host-output counterexamples.
+Focused and component acceptance is being completed before one clean frozen
+full run. Complete P2's16-cell matrix, P3–P5, D3 and full M0–M2 remain OPEN.
+No automatic LeWM recovery, new backend, transformation or speedup is claimed.
+
 ## P1 protocol/occurrence contract frozen; implementation open (2026-10-18)
 
 [Joint contract](M1_PROTOCOL_CONTRACT.md) passes independent PASS_WITH_SCOPE for

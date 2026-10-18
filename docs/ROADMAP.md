@@ -1,5 +1,12 @@
 # SCAR roadmap and scope
 
+> **P2 implementation in progress (2026-10-18):** the
+> [protocol foundation](M1_PROTOCOL_FOUNDATION.md) connects exact F records to
+> original ports, current evaluations, state and selected no-entry lifecycle
+> routes. Program17 compatibility, fixed obligations and composition are under
+> acceptance. This partial checkpoint does not close the16-cell P2 matrix,
+> P3–P5 or full M0–M2. Execution remains7. No new LeWM speedup is claimed.
+
 > **Current design work (2026-10-18):** the
 > [C2/D3 audit](M1_PROTOCOL_FAMILY_AUDIT.md) identifies missing protocol-to-original
 > CFG/port obligations and per-Drive persistent-body occurrence associations.

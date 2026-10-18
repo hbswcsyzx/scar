@@ -699,6 +699,10 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
                 graph, operation_blocks=operation_block, region_domains=region_domains):
             error(code, path, message)
     if not issues:
+        from .protocol_validation import protocol_errors
+        for code, path, message in protocol_errors(graph):
+            error(code, path, message)
+    if not issues:
         from .lifecycle_analysis import analyze_lifecycles
         lifecycle_issues, lifecycle_facts = analyze_lifecycles(graph, operation_blocks=operation_block)
         for code, path, message in lifecycle_issues:

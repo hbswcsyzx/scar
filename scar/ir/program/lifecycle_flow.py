@@ -157,6 +157,14 @@ def derive_terminal_facts(graph, interface) -> TerminalFacts:
         if row.operation in operations:
             seeds[row.operation] = next(indices[use.value] for use in operations[row.operation].uses
                                         if use.id == row.instance)
+    from .protocol_validation import no_entry_seeds
+    protocol_seeds = no_entry_seeds(graph, interface.region)
+    edge_seeds = {}
+    for (identity, successor), owner in protocol_seeds.items():
+        if successor is None:
+            seeds[identity] = indices[owner]
+        else:
+            edge_seeds[identity, successor] = indices[owner]
     forget = {op.id: {indices[result]: None for result in op.results if result in indices}
               for op in operations.values()}
 
@@ -179,6 +187,11 @@ def derive_terminal_facts(graph, interface) -> TerminalFacts:
         state = _rename(state, forget[op.id])
         return _finish(state, seeds[op.id]) if op.id in seeds else state
 
+    def edge_transfer(state, key):
+        if key in edge_seeds:
+            state = _finish(state, edge_seeds[key])
+        return _rename(state, edge_maps[key])
+
     block_before = {identity: None for identity in blocks}
     block_after = dict(block_before)
     work, queued = deque((region.entry,)), {region.entry}
@@ -186,7 +199,7 @@ def derive_terminal_facts(graph, interface) -> TerminalFacts:
         identity = work.popleft()
         queued.remove(identity)
         state = initial if identity == region.entry else _meet(
-            _rename(block_after[parent], edge_maps[key]) for parent, key in incoming[identity])
+            edge_transfer(block_after[parent], key) for parent, key in incoming[identity])
         block_before[identity] = state
         for op_id in blocks[identity].operations:
             state = must_transfer(state, operations[op_id])
@@ -206,7 +219,7 @@ def derive_terminal_facts(graph, interface) -> TerminalFacts:
             state = must_transfer(state, operations[op_id])
             after[op_id] = state
         for key in outgoing[block.id]:
-            edge_must[key] = _rename(state, edge_maps[key])
+            edge_must[key] = edge_transfer(state, key)
 
     # E/F is now immutable. T alone grows by finite union over fixed transfers.
     empty_sources = (frozenset(),) * size
@@ -227,6 +240,13 @@ def derive_terminal_facts(graph, interface) -> TerminalFacts:
                             for index, source in enumerate(sources))
         return sources
 
+    def source_edge(sources, key):
+        if key in edge_seeds and after[key[0]] is not None:
+            group = after[key[0]].classes[edge_seeds[key]]
+            sources = tuple(frozenset((key[0],)) if after[key[0]].classes[index] == group else source
+                            for index, source in enumerate(sources))
+        return rename_sources(sources, edge_maps[key], edge_must[key])
+
     source_before = {identity: empty_sources for identity in blocks}
     source_after = dict(source_before)
     work = deque(block.id for block in region.blocks if block_before[block.id] is not None)
@@ -237,7 +257,7 @@ def derive_terminal_facts(graph, interface) -> TerminalFacts:
         if identity == region.entry:
             sources = empty_sources
         else:
-            arriving = [rename_sources(source_after[parent], edge_maps[key], edge_must[key])
+            arriving = [source_edge(source_after[parent], key)
                         for parent, key in incoming[identity] if block_after[parent] is not None]
             sources = mask(tuple(frozenset().union(*(state[index] for state in arriving))
                                  for index in range(size)), block_before[identity])
@@ -280,7 +300,7 @@ def derive_terminal_facts(graph, interface) -> TerminalFacts:
             sources = source_transfer(sources, op_id)
             public_after[op_id] = point(after[op_id], sources)
         for key in outgoing[block.id]:
-            public_edges[key] = point(edge_must[key], rename_sources(sources, edge_maps[key], edge_must[key]))
+            public_edges[key] = point(edge_must[key], source_edge(sources, key))
     return TerminalFacts(region.id, public_before, public_after, public_edges)
 
 

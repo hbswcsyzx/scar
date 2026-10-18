@@ -43,7 +43,7 @@ def test_resumption_graph_uses_strict_v10_tagged_wire_and_roundtrips():
     graph = resumption_program()
     payload = dumps(graph)
     document = json.loads(payload)
-    assert SCHEMA_VERSION == 16
+    assert SCHEMA_VERSION == 17
     assert document["schema_version"] == 10
     assert RESUMPTION_FIELDS <= set(document)
     assert all(document[name] for name in RESUMPTION_FIELDS)
