@@ -11,7 +11,16 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
-The [typed state-address interfaces](docs/M1_STATE_ADDRESS_INTERFACES.md)
+The [exact literal content/source/evaluation interfaces](docs/M1_LITERAL_INTERFACES.md)
+pass [1,716 component checks /32 criteria and 5,294 clean frozen full tests](docs/M1_LITERAL_ACCEPTANCE.md)
+(`4bc55eb`). Exact abstract Data content and source declarations attach to the
+original producer ports; matching payloads do not establish object identity or
+remove effects. All prior 5,144 case identities/74 fixtures survive; current 603
+source hashes and 78 fixtures match. Complete C2/D3/M2, automatic source/runtime
+correspondence, whole-program recovery and LeWM simplification remain unfinished.
+No new workload speedup was measured.
+
+The earlier [typed state-address interfaces](docs/M1_STATE_ADDRESS_INTERFACES.md)
 pass [1,317 component checks /25 criteria and 5,144 clean frozen full tests](docs/M1_STATE_ADDRESS_ACCEPTANCE.md)
 (`805c670`). Owner/key/selector effects refine original state carriers and actual
 invocation ports; they introduce no separate field state chain or alias proof.

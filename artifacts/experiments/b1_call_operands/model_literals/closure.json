@@ -1,0 +1,26 @@
+{
+  "scope": "L exact content and source declarations on original producers; complete M0-M2 and automatic recovery remain open",
+  "implementation_revision": "4bc55ebcec2537adabfe3a40db7c3f1df17c4d48",
+  "source_sha256": "7d3187f36f6cca07e0714a49ac20dbe1c0634601568f2986ef8f0c178431f7a9",
+  "source_files": 603,
+  "criteria": 32,
+  "component_cases": 1716,
+  "full_cases": 5294,
+  "component_seconds": 49.349,
+  "full_seconds": 544.3679314125329,
+  "scope_inventory_complete": false,
+  "source_runtime_verified": false,
+  "value_identity_verified": false,
+  "transformation_authorized": false,
+  "new_lewm_speedup_measurement": false,
+  "documents": {
+    "README.md": "d7c0fc9ea04c19411c0145a846b6e39f6acde3ca867e7fe52656b6d68d37b3ce",
+    "docs/STATUS.md": "3db5e21aec343536605ef05732ce60488d04ec26b09111aba3580274f1231f7c",
+    "docs/ROADMAP.md": "8969c7ad7458e46d30626854160f75f1b8b7ba869739001f7aedb93cfd0e638a",
+    "docs/FIRST_STAGE_COMPLETION_MATRIX.md": "abf0b303243a1f23773da34418d3dbc85a5c138dc5356b1bc9e005082c9f9e6c",
+    "docs/WHOLE_PROGRAM_MODEL_PLAN.md": "00db11f1e7c3956ff52159f71d555e6ceaa306529614d554596e6607098f1be0",
+    "docs/M1_LITERAL_PLAN.md": "1c76cdd7bec032f81d9e9eb2b609fa26362abf670b3a86a304b6d68ea93465de",
+    "docs/M1_LITERAL_INTERFACES.md": "cec829c3ef21b7368d67e0c5fd55a520f394379a329904dd30e779f452199663",
+    "docs/M1_LITERAL_ACCEPTANCE.md": "83204e3e3a33f1db272dff7e14126c020ef3def8281f646c192179ed94ae419a"
+  }
+}

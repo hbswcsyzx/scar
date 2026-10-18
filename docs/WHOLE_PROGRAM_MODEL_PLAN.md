@@ -64,8 +64,16 @@ S现按[计划](M1_STATE_ADDRESS_PLAN.md)完成[状态地址接口](M1_STATE_ADD
 1,317组件/25标准通过，冻结 `805c670` 的5,144项全仓通过。原5,055 case/72fixtures
 保留，590源码/74fixtures指纹一致。多owner/selector共享原carrier，dynamic binding
 按实际occurrence/分支/完成端口查询；native/alias/物理解释仍未证。不扩展detector或
-backend。下一独立门复用PythonLiteral，补complex/精确bits/大小预算、core wire及
-来源阶段/identity边界，再继续C2/D3和M2原分母，完整第一阶段仍未完成。
+backend。当时下一独立门为PythonLiteral精确内容/预算及core接入；其验收记录在下。
+
+L现按[计划](M1_LITERAL_PLAN.md)完成[内容/来源/原求值接口](M1_LITERAL_INTERFACES.md)：
+1,716组件/32标准通过，冻结 `4bc55eb` 的5,294项全仓通过。原5,144 case/74fixtures
+保留，603源码/78fixtures指纹一致。精确内容、scoped来源与原求值分开，原Uses/
+状态/效果保持；新Data可用性、loop/call/resume、多state与actual N/R/forward均
+有有限组合。SourceExpression/CodeConstant不证明真实source/code-slot，容器内部
+仍需M2；不以附件替对象identity。接下来先审计C2/D3原家族义务，再落实M2构造
+与接口组合，最后核对完整M0–M2矩阵。自动恢复在M3/M4，不在本门冒充完成。
+第一阶段仍未完成，不增加detector/backend或新的LeWM重型profile。
 
 当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1
 声明组件不是实际导入；不要继续以增加声明表、兼容测试或 Tensor wrappers 代替

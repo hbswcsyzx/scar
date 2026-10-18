@@ -1,5 +1,22 @@
 # Current evidence and remaining work
 
+## L exact content, source and original evaluation ports accepted (2026-10-18)
+
+[Interfaces](M1_LITERAL_INTERFACES.md), [acceptance](M1_LITERAL_ACCEPTANCE.md):
+**1,716 component cases /32 criteria /49.349s**; one clean frozen `4bc55eb` passes
+**5,294 full tests /544.368s /1,027,208 KiB**, zero failures/errors/skips,
+five warnings. All prior 5,144 identities/74 fixtures survive; current 603 source
+hashes/78 fixtures match. Exact abstract Data and original Data/Reference result
+attachments separate typed contents, scoped definitions and actual evaluations.
+Loop/call/resume, two-state NORMAL/RAISE/forward and existing execution wire
+connections pass; shared budgets and legacy family boundaries remain explicit.
+Independent review is PASS_WITH_SCOPE. Original failures, source findings and
+the legacy raw-surrogate JSON defect remain recorded. Source/code-slot replay,
+runtime identity and opaque construction interiors remain unproved. Next:
+remaining C2/D3 family obligations and M2 construct decomposition. Complete
+M0–M2 and automatic LeWM recovery/simplification remain unfinished; no new
+speedup was measured. Historical checkpoint scopes follow.
+
 ## S typed state-address interfaces accepted (2026-10-18)
 
 [Interfaces](M1_STATE_ADDRESS_INTERFACES.md), [acceptance](M1_STATE_ADDRESS_ACCEPTANCE.md):

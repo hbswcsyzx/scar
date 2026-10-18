@@ -1,6 +1,17 @@
 # SCAR roadmap and scope
 
-> **Current S checkpoint accepted (2026-10-18):**
+> **Current L checkpoint accepted (2026-10-18):**
+> [Exact content/source/evaluation interfaces](M1_LITERAL_INTERFACES.md) pass
+> [1,716 component cases /32 criteria and 5,294 clean frozen full tests](M1_LITERAL_ACCEPTANCE.md)
+> (`4bc55eb`). Original 5,144 identities/74 fixtures survive; 603 source hashes/
+> 78 fixtures match. Contents and scoped definitions attach to original producers
+> without changing identity, Uses or effects. Legacy profiles, bounded payloads,
+> loop/call/resume and actual NORMAL/RAISE/forward ports are covered within the
+> finite declaration scope. Source/code/runtime replay remains open. Next:
+> C2/D3 family obligations, M2 construct rules, then whole M0–M2 closure review.
+> No new detector/backend, automatic LeWM simplification or measured speedup.
+
+> **Earlier S checkpoint accepted (2026-10-18):**
 > [Typed state-address interfaces](M1_STATE_ADDRESS_INTERFACES.md) pass
 > [1,317 component cases /25 criteria and 5,144 clean frozen full tests](M1_STATE_ADDRESS_ACCEPTANCE.md)
 > (`805c670`). All prior 5,055 identities/72 fixtures survive; 590 source hashes/

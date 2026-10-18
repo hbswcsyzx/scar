@@ -1,0 +1,22 @@
+...........................F.....................                        [100%]
+=================================== FAILURES ===================================
+_ test_same_static_payload_cannot_bypass_original_stale_incarnation_guard[call] _
+
+case = 'call'
+
+    @pytest.mark.parametrize('case', ('loop', 'call'))
+    def test_same_static_payload_cannot_bypass_original_stale_incarnation_guard(case):
+        program, model, _ = literal_loop_execution() if case == 'loop' else literal_calls_execution()
+        first = ValueOccurrenceID('2.literal.object' if case == 'loop' else 'child.1.0.literal.object')
+        target = OperationOccurrenceID('4.literal.observe' if case == 'loop' else 'child.2.0.literal.observe')
+        uses = tuple(replace(row, value=first) if row.operation == target else row for row in model.uses)
+        report = validate(replace(model, uses=uses), program)
+>       assert not report.valid and any(row.code == 'stale_incarnation' for row in report.issues)
+E       AssertionError: assert (not False and False)
+E        +  where False = ValidationReport(issues=(ExecutionIssue(code='use_activation', path='program_use:literal.observe.first', message='oper...erified', path='model', message='declared occurrence/identity links have not been established by a runtime adapter'),)).valid
+E        +  and   False = any(<generator object test_same_static_payload_cannot_bypass_original_stale_incarnation_guard.<locals>.<genexpr> at 0x73c5d0022330>)
+
+tests/integration/test_execution_literals.py:164: AssertionError
+=========================== short test summary info ============================
+FAILED tests/integration/test_execution_literals.py::test_same_static_payload_cannot_bypass_original_stale_incarnation_guard[call]
+1 failed, 48 passed in 1.44s
