@@ -31,7 +31,8 @@ class ValidationIssue:
     message: str
 
 
-def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None) -> tuple[ValidationIssue, ...]:
+def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None,
+             _lifecycle_facts=None) -> tuple[ValidationIssue, ...]:
     """Check exact uses, CFG availability, interfaces and explicit state SSA.
 
     The private output collector lets ProgramIndex reuse derived cleanup facts
@@ -685,6 +686,16 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
                 graph, operation_blocks=operation_block, incoming_edges=incoming_edges):
             error(code, path, message)
     if not issues:
+        from .session_release_validation import session_release_errors
+        for code, path, message in session_release_errors(
+                graph, operation_blocks=operation_block, region_domains=region_domains):
+            error(code, path, message)
+    if not issues:
+        from .lifecycle_analysis import analyze_lifecycles
+        lifecycle_issues, lifecycle_facts = analyze_lifecycles(graph, operation_blocks=operation_block)
+        for code, path, message in lifecycle_issues:
+            error(code, path, message)
+    if not issues:
         from .provider_validation import provider_errors
         for code, path, message in provider_errors(
                 graph, {op: block_region[block] for op, block in operation_block.items()}, uses):
@@ -697,6 +708,8 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
         _cleanup_facts.append(cleanup_facts)
     if not issues and _resumption_facts is not None:
         _resumption_facts.append(resumption_facts)
+    if not issues and _lifecycle_facts is not None:
+        _lifecycle_facts.append(lifecycle_facts)
     return tuple(issues)
 
 

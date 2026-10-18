@@ -53,6 +53,11 @@ checks / 21 criteria and 3,871 frozen full tests (`006a0e0`). It connects the re
 bool branch, exact owner and body-only state mark, preserving the original false
 path. Predicate/branch/mark structure is distinct from actual runtime guard execution.
 
+The [D2.3 session/release component](docs/M1_SESSION_RELEASE_ACCEPTANCE.md) passes
+974 component checks / 27 criteria. It derives path-correlated terminal history
+and current session predicates, checks precise owner/state at release, and keeps
+unknown effects and native applicability explicit. Its frozen full run is pending.
+
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
 all completion sites and explicit cross-representation obligations. Its 168

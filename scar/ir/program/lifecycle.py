@@ -7,7 +7,9 @@ or transformation authority.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from enum import Enum
 
+from scar.ir.program.frames import FrameRules
 from scar.ir.program.ids import OperationID, RegionID, UseID, ValueID
 from scar.ir.program.structured import ControlEdgeReference
 
@@ -100,7 +102,61 @@ class NoBodyFinish:
         _exact(self.instance, UseID, "no-body finish instance")
 
 
+class LifecyclePostBinding(str, Enum):
+    AFTER_OPERATION = "AFTER_OPERATION"
+    NORMAL_COMPLETION = "NORMAL_COMPLETION"
+
+
+class SessionPost(str, Enum):
+    HOLD = "HOLD"
+    COMPLETE = "COMPLETE"
+    ABANDON = "ABANDON"
+
+
+@dataclass(frozen=True, slots=True)
+class SessionUpdate:
+    """A conditional post on an operation's after-state or NORMAL completion.
+
+    Request/body are distinct owned Use ports; their actual values may alias.
+    Current-state support and source applicability are checked separately.
+    """
+
+    operation: OperationID
+    request: UseID
+    body: UseID
+    binding: LifecyclePostBinding
+    post: SessionPost
+
+    def __post_init__(self) -> None:
+        _exact(self.operation, OperationID, "session update operation")
+        _exact(self.request, UseID, "session update request")
+        _exact(self.body, UseID, "session update body")
+        if self.request == self.body:
+            raise ValueError("session update request/body UseIDs must be distinct")
+        _exact(self.binding, LifecyclePostBinding, "session update binding")
+        _exact(self.post, SessionPost, "session update post")
+
+
+@dataclass(frozen=True, slots=True)
+class TerminalFrameRelease:
+    """A narrow owner-frame reference relinquishment stage, never a free proof.
+
+    Fixed FrameRules allow callbacks/unknown effects and possible noncompletion;
+    repeated real attempts are not rejected merely for sharing an owner.
+    """
+
+    operation: OperationID
+    owner: UseID
+    rules: FrameRules = FrameRules()
+
+    def __post_init__(self) -> None:
+        _exact(self.operation, OperationID, "terminal frame release operation")
+        _exact(self.owner, UseID, "terminal frame release owner")
+        _record(self.rules, FrameRules, "terminal frame release rules")
+
+
 __all__ = [
     "DriverLifecycle", "DriveOutcomeRef", "BodyOutcomeCommit",
-    "CreatedCloseTest", "NoBodyFinish",
+    "CreatedCloseTest", "NoBodyFinish", "LifecyclePostBinding", "SessionPost",
+    "SessionUpdate", "TerminalFrameRelease",
 ]

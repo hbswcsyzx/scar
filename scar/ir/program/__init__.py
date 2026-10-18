@@ -36,6 +36,7 @@ from scar.ir.program.drivers import (
 )
 from scar.ir.program.lifecycle import (
     BodyOutcomeCommit, CreatedCloseTest, DriveOutcomeRef, DriverLifecycle, NoBodyFinish,
+    LifecyclePostBinding, SessionPost, SessionUpdate, TerminalFrameRelease,
 )
 from scar.ir.program.bindings import BindingDefinition, BindingRead, BindingState
 from scar.ir.program.environments import (
@@ -111,4 +112,5 @@ __all__ = [
     "RawRequestKind", "RequestAssociationRead", "ResumableCreate",
     "BodyOutcomeCommit", "CreatedCloseTest", "DriveOutcomeRef", "DriverLifecycle",
     "NoBodyFinish",
+    "LifecyclePostBinding", "SessionPost", "SessionUpdate", "TerminalFrameRelease",
 ]

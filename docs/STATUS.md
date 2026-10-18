@@ -1,5 +1,16 @@
 # Current evidence and remaining work
 
+## D2.3 component passed; frozen full run pending (2026-10-18)
+
+The [session/release component](M1_SESSION_RELEASE_ACCEPTANCE.md) derives terminal
+E/F, then explanatory T, and ordered current R/B session predicates with exact
+state support and invalidation. Actual edges rename simultaneously before must
+joins. The component passes **974 cases / 27 criteria**, with all 443 source
+hashes unchanged. Final independent cross-reviews bind the implementation.
+Strict v14, original endpoints and CLI keep native/runtime/transform authority
+false. The single frozen full run remains pending. D2.4/D3 and complete M0–M2
+remain open.
+
 ## D2.2 no-body component and frozen full run accepted (2026-10-18)
 
 The [no-body component](M1_NO_BODY_ACCEPTANCE.md) passes **836 cases / 21 criteria /

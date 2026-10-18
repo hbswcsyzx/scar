@@ -30,6 +30,7 @@ from scar.ir.program.drivers import (
 )
 from scar.ir.program.lifecycle import (
     BodyOutcomeCommit, CreatedCloseTest, DriveOutcomeRef, DriverLifecycle, NoBodyFinish,
+    SessionUpdate, TerminalFrameRelease,
 )
 from scar.ir.program.environments import EnvironmentInterface, FunctionEntryLayout
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
@@ -762,6 +763,8 @@ class ProgramGraph:
     body_outcome_commits: tuple[BodyOutcomeCommit, ...] = ()
     created_close_tests: tuple[CreatedCloseTest, ...] = ()
     no_body_finishes: tuple[NoBodyFinish, ...] = ()
+    session_updates: tuple[SessionUpdate, ...] = ()
+    terminal_frame_releases: tuple[TerminalFrameRelease, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -826,7 +829,9 @@ class ProgramGraph:
         _unique(body_commit_operations, "ProgramGraph body outcome commit operations")
         for name, row_type in (
                 ("created_close_tests", CreatedCloseTest),
-                ("no_body_finishes", NoBodyFinish)):
+                ("no_body_finishes", NoBodyFinish),
+                ("session_updates", SessionUpdate),
+                ("terminal_frame_releases", TerminalFrameRelease)):
             rows = _tuple(getattr(self, name), "ProgramGraph." + name)
             if any(type(row) is not row_type for row in rows):
                 raise TypeError("ProgramGraph." + name + " needs exact typed records")
@@ -836,7 +841,9 @@ class ProgramGraph:
         created_close_operations = tuple(row.operation for row in self.created_close_tests)
         no_body_finish_operations = tuple(row.operation for row in self.no_body_finishes)
         lifecycle_operations = (
-            *body_commit_operations, *created_close_operations, *no_body_finish_operations)
+            *body_commit_operations, *created_close_operations, *no_body_finish_operations,
+            *(row.operation for row in self.session_updates),
+            *(row.operation for row in self.terminal_frame_releases))
         _unique(lifecycle_operations, "ProgramGraph lifecycle action operation IDs")
         existing_role_operations = {
             row.operation for rows in (

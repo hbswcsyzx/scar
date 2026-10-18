@@ -532,7 +532,9 @@ def _check_program(args) -> int:
               "driver_structure_validated": False,
               "driver_lifecycle_verified": False,
               "body_publication_structure_validated": False,
-              "no_body_structure_validated": False}
+              "no_body_structure_validated": False,
+              "session_release_structure_validated": False,
+              "conditional_lifecycle_facts_derived": False}
     if args.out and Path(args.out).resolve() == source.resolve():
         report.update(status="INVALID", errors=["report path must differ from input graph"])
         print(json.dumps(report, ensure_ascii=False))
@@ -644,6 +646,13 @@ def _check_program(args) -> int:
                                     no_body_finishes=len(graph.no_body_finishes))
             report.update(no_body_structure_validated=True,
                           no_body_structure_scope="declared predicate, real branch edges and optional no-body finish links",
+                          driver_lifecycle_verified=False)
+        if graph.session_updates or graph.terminal_frame_releases:
+            report["counts"].update(session_updates=len(graph.session_updates),
+                                    terminal_frame_releases=len(graph.terminal_frame_releases))
+            report.update(session_release_structure_validated=True,
+                          session_release_structure_scope="declared post states and conditional terminal owner history; no native applicability or resource-release guarantee",
+                          conditional_lifecycle_facts_derived=True,
                           driver_lifecycle_verified=False)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:

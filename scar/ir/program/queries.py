@@ -6,7 +6,7 @@ from .environments import EnvironmentInterface, EnvironmentMember, FunctionEntry
 from .functions import FormalPort
 from .ids import (BlockID, BoundaryRelationID, ControlScopeID, EnvironmentInterfaceID,
                   NativeBoundaryID, OperationID, ProviderID, RegionID, UseID, ValueID)
-from .model import (CompletionResult, DataValue, ExitKind, Operation, ProgramGraph, ReferenceValue,
+from .model import (CompletionResult, CompletionSuccessor, DataValue, ExitKind, Operation, ProgramGraph, ReferenceValue,
                     StateAccess, StateVersionValue, Successor, TerminatorKind, Use)
 from .control import ProtocolValueKind
 from .control_validation import derive_pending_facts
@@ -19,7 +19,12 @@ from .resumption import ResumeInput, ResumeSlot, ResumeSlotKind, SuspendTerminat
 from .resumption_flow import first_body_outcome_operations
 from .drivers import BodyDrive, BodyDriveResult, NormalResultPort
 from .driver_flow import body_drive_target, body_outcome_uses
-from .lifecycle import BodyOutcomeCommit, CreatedCloseTest, NoBodyFinish
+from .lifecycle import (
+    BodyOutcomeCommit, CreatedCloseTest, LifecyclePostBinding, NoBodyFinish,
+    SessionUpdate, TerminalFrameRelease,
+)
+from .lifecycle_flow import TerminalPointFacts
+from .session_flow import SessionPointFacts
 
 
 @dataclass(frozen=True, slots=True)
@@ -124,6 +129,33 @@ class NoBodyPublication:
 
 
 @dataclass(frozen=True, slots=True)
+class LifecyclePoint:
+    """Conditional declaration facts, not native/runtime or free/ready proof."""
+
+    terminal: TerminalPointFacts
+    session: SessionPointFacts
+
+
+@dataclass(frozen=True, slots=True)
+class SessionPublication:
+    update: SessionUpdate
+    request: UseSite
+    body: UseSite
+    state_inputs: tuple[UseSite, ...]
+    accesses: tuple[PublicationAccess, ...]
+    support: tuple[StateVersionValue, ...]
+    normal_successor: CompletionSuccessor | None
+
+
+@dataclass(frozen=True, slots=True)
+class TerminalReleasePublication:
+    release: TerminalFrameRelease
+    owner: UseSite
+    accesses: tuple[PublicationAccess, ...]
+    sources: tuple[BodyPublication | NoBodyPublication, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class ProviderRegionSource:
     """A declaration and its envelope, not equivalence or occurrence proof."""
 
@@ -167,12 +199,14 @@ class ProgramIndex:
         # Reuse the validator's canonical CFG/dominators and derived cleanup
         # result rather than running a second dataflow algorithm for queries.
         from .validation import validate
-        cleanup, resumption = [], []
-        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption)
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
         if issues:
             raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
         self._cleanup_facts = cleanup[0]
         self._resumption_facts = resumption[0]
+        self._lifecycle_facts = lifecycle[0]
         self._bodies = {row.region: row for row in graph.resumable_bodies}
         self._frame_context_actions = {row.operation: row for rows in (
             graph.frame_context_initials, graph.frame_context_attaches,
@@ -188,6 +222,8 @@ class ProgramIndex:
         self._body_outcome_commits = {row.operation: row for row in graph.body_outcome_commits}
         self._created_close_tests = {row.operation: row for row in graph.created_close_tests}
         self._no_body_finishes = {row.operation: row for row in graph.no_body_finishes}
+        self._session_updates = {row.operation: row for row in graph.session_updates}
+        self._terminal_frame_releases = {row.operation: row for row in graph.terminal_frame_releases}
         self.graph = graph
         self.values = {value.id: value for value in graph.values}
         self.regions = {region.id: region for region in graph.regions}
@@ -355,6 +391,70 @@ class ProgramIndex:
         predicate = self.created_close_predicate(block.operations[-2])
         return NoBodyPublication(finish, predicate, self._uses[finish.instance],
                                  self._state_access_views(operation_id))
+
+    def session_update(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._session_updates)
+
+    def terminal_frame_release(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._terminal_frame_releases)
+
+    def _lifecycle_point(self, operation_id, position):
+        self._driver_operation(operation_id, {})
+        region = self._blocks[self._operation_blocks[operation_id]]
+        facts = self._lifecycle_facts.get(region)
+        if facts is None:
+            return None
+        return LifecyclePoint(getattr(facts.terminal, position)[operation_id],
+                              getattr(facts.session, position)[operation_id])
+
+    def lifecycle_before(self, operation_id: OperationID):
+        return self._lifecycle_point(operation_id, "before")
+
+    def lifecycle_after(self, operation_id: OperationID):
+        return self._lifecycle_point(operation_id, "after")
+
+    def lifecycle_edge(self, operation_id: OperationID, successor_index: int):
+        self._driver_operation(operation_id, {})
+        if type(successor_index) is not int or successor_index < 0:
+            raise ValueError("successor index must be an exact nonnegative integer")
+        op = self.operations[operation_id]
+        if op.terminator is None or successor_index >= len(op.terminator.successors):
+            raise ValueError("successor index exceeds the real operation signature")
+        region = self._blocks[self._operation_blocks[operation_id]]
+        facts = self._lifecycle_facts.get(region)
+        if facts is None:
+            return None
+        key = (operation_id, successor_index)
+        return LifecyclePoint(facts.terminal.edges[key], facts.session.edges[key])
+
+    def session_publication(self, operation_id: OperationID):
+        row = self.session_update(operation_id)
+        if row is None:
+            return None
+        operation = self.operations[operation_id]
+        normal = None
+        if row.binding is LifecyclePostBinding.AFTER_OPERATION:
+            point = self.lifecycle_after(operation_id)
+            states = tuple(self._uses[access.before] for access in operation.accesses)
+        else:
+            number, normal = next((number, edge) for number, edge in enumerate(operation.terminator.successors)
+                                  if edge.kind is ExitKind.NORMAL)
+            point = self.lifecycle_edge(operation_id, number)
+            states = tuple(self._uses[identity] for identity in operation.invoke_arguments
+                           if isinstance(self.values[self._uses[identity].use.value], StateVersionValue))
+        request, body = self._uses[row.request], self._uses[row.body]
+        post = next(fact for fact in point.session.for_pair(request.use.value, body.use.value) if fact.post is row.post)
+        return SessionPublication(row, request, body, states, self._state_access_views(operation_id), post.support, normal)
+
+    def terminal_release_publication(self, operation_id: OperationID):
+        row = self.terminal_frame_release(operation_id)
+        if row is None:
+            return None
+        owner = self._uses[row.owner]
+        point = self.lifecycle_before(operation_id)
+        sources = tuple(self.body_publication(identity) or self.no_body_publication(identity)
+                        for identity in sorted(point.terminal.source_operations(owner.use.value), key=lambda item: item.wire))
+        return TerminalReleasePublication(row, owner, self._state_access_views(operation_id), sources)
 
     def normal_result(self, operation_id: OperationID, port: NormalResultPort):
         """The original NORMAL landing value at an exact produced result slot."""
@@ -756,6 +856,7 @@ class ProgramIndex:
 __all__ = ["ProgramIndex", "UseSite", "BodyOutcomeSite", "DriverBinding", "DriveInputBinding",
            "InstanceCaptureInput", "PublicationAccess", "BodyPublication",
            "CreatedClosePredicate", "NoBodyPublication",
+           "LifecyclePoint", "SessionPublication", "TerminalReleasePublication",
            "EnvironmentArgument", "EnvironmentCall",
            "EnvironmentBindingStatus", "FunctionArgument", "CleanupRouteKind", "CleanupRouteStep",
            "ResumptionBinding", "SuspensionHandoff"]
