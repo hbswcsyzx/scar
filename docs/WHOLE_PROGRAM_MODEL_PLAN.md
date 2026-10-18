@@ -64,6 +64,9 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
    然后关闭完整[C2](M1_RESUMPTION_INTERFACES.md)的Create/driver/context/release
    字段与组合。body generation与drive epoch分开；不冻结yield时world或旧caller，
    不把接受请求等同实际body entry。完整C2.0/C2.4仍开放，不能以body组件代替。
+   [Driver字段复审](M1_DRIVER_INTERFACES.md)已用语言反例否定旧raw请求/混合claim方案，
+   先修复permit/session与owner/commit关系；共用的[首outcome查询](M1_BODY_OUTCOME_FRONTIER.md)
+   按冻结的结构关系先行实施，不把它当作完整driver字段冻结或C2验收。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。
 4. 在 M1/M2 内补齐构造协议、provider 端口映射与未展开区域的接口规则。

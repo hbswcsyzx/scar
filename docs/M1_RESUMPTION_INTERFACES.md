@@ -5,6 +5,10 @@
 已进入v10实施与独立验收，不能据此宣布完整C2、自动lowerer或运行adapter完成。
 本文件不是detector/backend发布声明，第一阶段仍未完成。
 
+2026-10-18补充：[driver字段复审](M1_DRIVER_INTERFACES.md)用语言反例修订raw THROW、
+permit/session、Create候选和release合同，完整C2D字段仍未冻结；
+[首outcome查询](M1_BODY_OUTCOME_FRONTIER.md)单独实施本次入口的结构边界。
+
 ## 1. 这批模型要补什么
 
 同一个可恢复函数涉及不同身份：代码定义、创建出的对象、持续的 body activation、

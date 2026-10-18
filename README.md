@@ -31,6 +31,12 @@ state, drive-local context, temporal control and cut availability. The
 driver/instance/generation and release interfaces. Body structure alone does not
 establish Python source recovery or runtime resumption.
 
+The [driver model review](docs/M1_DRIVER_INTERFACES.md) uses bounded language
+witnesses to separate raw requests, ingress permits, persistent sessions and
+reference release. Its exact fields remain open. The
+[first-outcome query](docs/M1_BODY_OUTCOME_FRONTIER.md) is being implemented as
+a shared relation over the existing body graph, without a new driver/backend.
+
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
 all completion sites and explicit cross-representation obligations. Its 168

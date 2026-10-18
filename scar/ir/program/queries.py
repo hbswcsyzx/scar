@@ -15,6 +15,7 @@ from .native import BoundaryRelation, EntryPortRef, ExitPortRef, NativeBoundary
 from .native_validation import port_key, region_port_keys
 from .cleanup_validation import CleanupRouteKind, CleanupRouteStep
 from .resumption import ResumeInput, ResumeSlot, SuspendTerminator, saved_actual_use
+from .resumption_flow import first_body_outcome_operations
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,6 +37,15 @@ class ResumptionBinding:
 class SuspensionHandoff:
     exported: UseSite
     states: tuple[UseSite, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class BodyOutcomeSite:
+    """A source operation's exported outcome operands, without saved/private slots."""
+
+    operation: OperationID
+    kind: TerminatorKind
+    values: tuple[UseSite, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -202,6 +212,53 @@ class ProgramIndex:
             return None
         return SuspensionHandoff(self._uses[term.exported],
                                  tuple(self._uses[use] for use in term.handoff))
+
+    def body_outcomes(self, region_id: RegionID, start: BlockID | None = None):
+        """Derive first outcomes from a body entry or exact resume landing.
+
+        This is a structural query over ordinary CFG successors. A SUSPEND is
+        returned as the current drive's outcome; its temporal successors are
+        considered only by a later query rooted at that landing. The result
+        does not assert that any outcome executes at runtime.
+        """
+        if type(region_id) is not RegionID:
+            raise TypeError("body_outcomes requires RegionID")
+        region = self.regions.get(region_id)
+        if region is None:
+            raise KeyError(region_id)
+
+        if start is not None:
+            if type(start) is not BlockID:
+                raise TypeError("body_outcomes start requires BlockID")
+            owner = self._blocks.get(start)
+            if owner is None:
+                raise KeyError(start)
+            if owner != region_id:
+                raise ValueError("body_outcomes start belongs to another region")
+
+        if region_id not in self._bodies:
+            return None
+
+        if start is None:
+            start = region.entry
+        roots = self._resumption_facts.roots[region_id]
+        if start not in roots:
+            raise ValueError("body_outcomes start must be the entry or a temporal landing")
+
+        outcome_operations = first_body_outcome_operations(region, self.operations, start)
+        sites = []
+        for operation_id in outcome_operations:
+            operation = self.operations[operation_id]
+            terminator = operation.terminator
+            if terminator.kind is TerminatorKind.SUSPEND:
+                values = (terminator.exported, *terminator.handoff)
+            else:
+                values = terminator.values
+            sites.append(BodyOutcomeSite(
+                operation_id, terminator.kind,
+                tuple(self._uses[use_id] for use_id in values),
+            ))
+        return tuple(sites)
 
     def handled_context_domain(self, region_id: RegionID):
         """Return a declaration, not current runtime exception evidence."""
@@ -406,6 +463,6 @@ class ProgramIndex:
             for parameter in self._function_entries[interface.id].parameters))
 
 
-__all__ = ["ProgramIndex", "UseSite", "EnvironmentArgument", "EnvironmentCall",
+__all__ = ["ProgramIndex", "UseSite", "BodyOutcomeSite", "EnvironmentArgument", "EnvironmentCall",
            "EnvironmentBindingStatus", "FunctionArgument", "CleanupRouteKind", "CleanupRouteStep",
            "ResumptionBinding", "SuspensionHandoff"]
