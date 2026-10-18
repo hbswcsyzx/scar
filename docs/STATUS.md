@@ -1,5 +1,15 @@
 # Current evidence and remaining work
 
+## P3 first frozen full failed; repair gate open (2026-10-18)
+
+The clean `61db593` full finished **5,816 passed /6 failed /0 errors or skips**,
+562.467s and1,030,792 KiB RSS; all668 source hashes stayed fixed. The six
+failures are old future-v8/maximum-v7 assertions in three codec test files
+omitted from the component selection. [Repair gates](M1_BODY_OCCURRENCE_REPAIR.md)
+preserve that failed full, require exact legacy wire/fixture checks and include
+all89 affected cases before a separate clean repair full. P3 is not accepted;
+the prior scoped component PASS does not override this failure.
+
 ## P3 persistent-body occurrence implementation under review (2026-10-18)
 
 [Plan](M1_BODY_OCCURRENCE_PLAN.md), [API](M1_BODY_OCCURRENCE_API.md) and
