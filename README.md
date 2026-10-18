@@ -41,6 +41,9 @@ The [D1 driver connection component](docs/M1_DRIVER_ACCEPTANCE.md) implements th
 canonical Create/Start/Resume/outcome path, v11 wire and input/output queries.
 All 671 component checks and 3,706 frozen full tests (`382363c`) pass. Lifecycle,
 source/runtime correspondence and complete whole-program modeling remain open.
+The [D2 lifecycle review and gates](docs/M1_DRIVER_LIFECYCLE.md) separate body
+publication, no-body paths, session state and reference drop. D2 fields remain
+under review; these language observations add no product/runtime authority.
 
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,

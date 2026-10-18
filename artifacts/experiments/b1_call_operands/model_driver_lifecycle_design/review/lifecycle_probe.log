@@ -1,0 +1,70 @@
+{
+  "observations": {
+    "asyncgen_close_yield_then_retry": {
+      "body_log": [
+        "finally-enter"
+      ],
+      "final_state": "AGEN_SUSPENDED",
+      "first_close_error": "RuntimeError",
+      "first_yield": "ready",
+      "retry_error": "StopAsyncIteration",
+      "state_after_failed_close": "AGEN_SUSPENDED"
+    },
+    "asyncgen_request_vs_body": {
+      "body_log_after_aclose": [
+        "body-enter"
+      ],
+      "body_log_after_first_request": [
+        "body-enter"
+      ],
+      "body_log_at_request_creation": [],
+      "created_state": "AGEN_CREATED",
+      "first_item": "item-1",
+      "state_after_aclose_await": "AGEN_CLOSED",
+      "state_after_anext_request_completed": "AGEN_SUSPENDED",
+      "state_when_aclose_request_created": "AGEN_SUSPENDED"
+    },
+    "close_yield_then_retry": {
+      "body_log": [
+        "finally-enter"
+      ],
+      "final_state": "GEN_CLOSED",
+      "first_close_error": "RuntimeError",
+      "first_yield": "ready",
+      "retry_error": null,
+      "retry_result_is_none": true,
+      "state_after_failed_close": "GEN_SUSPENDED"
+    },
+    "created_close_no_body": {
+      "after": "GEN_CLOSED",
+      "before": "GEN_CREATED",
+      "body_log": [],
+      "close_result_is_none": true
+    },
+    "created_close_releases_capture_after_commit": {
+      "final_state": "GEN_CLOSED",
+      "release_callbacks": [
+        {
+          "observed_state": "GEN_CLOSED"
+        }
+      ]
+    },
+    "terminal_frame_drop_reentry": {
+      "first_yield": "first",
+      "release_callbacks": [
+        {
+          "observed_state": "GEN_CLOSED",
+          "reentry_result": "StopIteration"
+        }
+      ],
+      "state_after_return": "GEN_CLOSED",
+      "terminal_value": "done"
+    }
+  },
+  "runtime": {
+    "implementation": "CPython",
+    "version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]"
+  },
+  "schema": "scar.driver-lifecycle-probe.v1",
+  "scope": "stdlib CPU lifecycle witness; no SCAR, torch, target workload, frame retention, or payload values"
+}

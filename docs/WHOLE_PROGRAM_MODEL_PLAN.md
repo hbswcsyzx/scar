@@ -69,7 +69,9 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
    按冻结的结构关系先行实施，不把它当作完整driver字段冻结或C2验收。
    后续[连接合同第二稿](M1_DRIVER_CONTRACT_V2.md)取消可传递permit和通用request历史，
    用gate真实completion→唯一BodyDrive表达资格与准入后态。先按[D1完整路径及验收矩阵](M1_DRIVER_IMPLEMENTATION.md)
-   实施已收敛的规范连接；D2生命周期独立细化，不靠D1字段设计通过缩小完整C2分母。
+   实施已收敛的规范连接（已验收）；[D2生命周期](M1_DRIVER_LIFECYCLE.md)按
+   字段冻结→body publication→no-body→session/drop→组合验收细化，D2.0仍开放，
+   不靠D1字段设计通过缩小完整C2分母。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。
 4. 在 M1/M2 内补齐构造协议、provider 端口映射与未展开区域的接口规则。
@@ -92,6 +94,11 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
   可只读复用的重型 trace。
 
 ## 5. 当前证据锚点
+
+- [D2生命周期复审及实施门](M1_DRIVER_LIFECYCLE.md)已记录非raising no-body路径、
+  多完成来源合流、callback后post失效及body/request状态分离。三项stdlib断言通过；
+  另一脚本六组仅为观测，初稿错误与按原JSON修正均保留。D2字段冻结仍OPEN，
+  本设计批不改产品或重跑D1全仓；原模型完整性分母保持。
 
 - [D1规范driver连接组件](M1_DRIVER_ACCEPTANCE.md)671项组件/13标准通过，冻结
   `382363c`的3,706项全仓/457.563s通过；415源文件/29份fixture指纹前后一致。

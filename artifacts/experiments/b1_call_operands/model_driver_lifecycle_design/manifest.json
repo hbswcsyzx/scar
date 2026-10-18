@@ -1,0 +1,74 @@
+{
+  "schema": "scar.d2-design-review-manifest",
+  "schema_version": 1,
+  "files": {
+    "README.md": {
+      "bytes": 2558,
+      "sha256": "327c9b22ed6627025e9fbbba92d550db53190326fd4d99727a9671fe4ee78447"
+    },
+    "check_evidence.py": {
+      "bytes": 4165,
+      "sha256": "a61e8611a0793213f1c1e34cac605d49c20b631fb258b35d62ce507d7ed230d4"
+    },
+    "receipt.json": {
+      "bytes": 1092,
+      "sha256": "a27cce0464c32f6aa74d05872d40b9e2ea3eb7780b8d030cc8b44da2b0b67150"
+    },
+    "review/adversarial.initial.md": {
+      "bytes": 15302,
+      "sha256": "729319f0f3b4d24ccb1a1d6f6f8198929771ad51b586e7f8fc7884e685cc8e1c"
+    },
+    "review/adversarial.md": {
+      "bytes": 16954,
+      "sha256": "78220143df40ce9401d939d8398ed0fcea74fa40ef2d8b7a24118009680576f1"
+    },
+    "review/core.md": {
+      "bytes": 15073,
+      "sha256": "9e453b9abef07a258236130214ff9e43b8039597dbef16f0acf5a8fe57c8126a"
+    },
+    "review/lifecycle_probe.attempt1.json": {
+      "bytes": 1814,
+      "sha256": "ed6c25f6e7c1daa8c6d668f1a345a78e1d0a883b913876345a598980db138bd8"
+    },
+    "review/lifecycle_probe.attempt1.log": {
+      "bytes": 1814,
+      "sha256": "ed6c25f6e7c1daa8c6d668f1a345a78e1d0a883b913876345a598980db138bd8"
+    },
+    "review/lifecycle_probe.json": {
+      "bytes": 2049,
+      "sha256": "39f010353a01c8b0ed1b048e8ee26114ef28b4406528da4c18fba079bb2e2cb2"
+    },
+    "review/lifecycle_probe.log": {
+      "bytes": 2049,
+      "sha256": "39f010353a01c8b0ed1b048e8ee26114ef28b4406528da4c18fba079bb2e2cb2"
+    },
+    "review/lifecycle_probe.py": {
+      "bytes": 7510,
+      "sha256": "5829655b35eca68d8c908fb075ee729a8173a6fc3b583eb315b95637ce9f1bc8"
+    },
+    "review/root-decisions.md": {
+      "bytes": 6565,
+      "sha256": "12530e4c51448176642bad729855dfc1846a0c2ceb34a7df7d73cffddb7b4fd8"
+    },
+    "review/session_release.md": {
+      "bytes": 16753,
+      "sha256": "889641d548cc2995e37a4c458783b3864d8916c70f19a9a61e6d8b0de0f78a11"
+    },
+    "review/session_release_probe.json": {
+      "bytes": 1167,
+      "sha256": "23cf7fa00002d00eedff33234692e501ec58464ad1d0bee396c5ed00a419818f"
+    },
+    "review/session_release_probe.log": {
+      "bytes": 1167,
+      "sha256": "23cf7fa00002d00eedff33234692e501ec58464ad1d0bee396c5ed00a419818f"
+    },
+    "review/session_release_probe.py": {
+      "bytes": 3628,
+      "sha256": "3210653be341d4a373758858e0cc72acfd3568c5633282ddf9404b17179f9e6f"
+    },
+    "source_audit.json": {
+      "bytes": 46047,
+      "sha256": "ee0690ec2c0139e3df0e77e53e16de4918d9c46234fc27c80c6f65f7c9da29fa"
+    }
+  }
+}

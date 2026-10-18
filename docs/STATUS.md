@@ -1,5 +1,24 @@
 # Current evidence and remaining work
 
+## D2 lifecycle review and ordered implementation gates (2026-10-18)
+
+The [D2 review](M1_DRIVER_LIFECYCLE.md) separates exact body publication,
+nonraising no-body branches, session postconditions and reference drop. Shared
+release after multiple completions is legal; anchor/owner relations must be
+derived per actual CFG path. Body publication must not imply session completion.
+
+Three stdlib assertion cases pass: a callback invalidates a helper's earlier
+post, an exceptional completion retains partial writes, and unraisable finalizer
+failure preserves the return while retaining effects. A separate six-case
+lifecycle script emits observations only, with no assertions. Root corrected a
+reviewer's CLOSED claim against its raw JSON: second async-close exhaustion
+still reports SUSPENDED through inspect. The initial report remains archived.
+
+D2.0 field freeze is **OPEN**. State coverage, no-body request roles, multiple
+anchor/current-owner propagation, post invalidation and drop scope must converge
+before implementation. No product code, detector, backend or heavy workload run
+was added by this review; D1 acceptance below remains the latest product receipt.
+
 ## D1 canonical driver connections accepted (2026-10-18)
 
 The [D1 component](M1_DRIVER_ACCEPTANCE.md) implements the accepted static
