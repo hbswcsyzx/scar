@@ -1,5 +1,12 @@
 # SCAR roadmap and scope
 
+> **R2.3 contract / geometry checkpoint (2026-10-18):**
+> [consumer/production/visibility contract](M1_RESOURCE_READY_CONTRACT.md) reviewed;
+> [shared selector geometry](M1_RESOURCE_COVERAGE_ACCEPTANCE.md) passes **432
+> component cases / 6 criteria / 9.768s**, 493 hashes unchanged. Three real
+> bounded CPU/OS witnesses pass. Clean frozen full is pending; D/P/V, R3 and
+> complete M0–M2 remain required. Byte coverage is not content or readiness.
+
 > **R2.2 component checkpoint (2026-10-18):** exact event generations, waits and
 > bounded queue profiles connect to conditional consumer-start order; **497
 > component cases / 7 criteria / 9.382s**, all 489 hashes unchanged. Execution v3

@@ -1,5 +1,18 @@
 # Current evidence and remaining work
 
+## R2.3 contract and geometry component accepted; frozen full pending (2026-10-18)
+
+The [R2.3 relation contract](M1_RESOURCE_READY_CONTRACT.md) keeps source-derived
+contributions separate from lineage/invalidators, exact consumers and actual
+read intervals. The [shared geometry prerequisite](M1_RESOURCE_COVERAGE_ACCEPTANCE.md)
+passes **432 cases / 6 criteria / 9.768s**, with all **493** registered hashes
+unchanged. It connects original MatRefs to scoped, budgeted byte coverage;
+snapshot validation and strict decoding reuse existing ValueGraph machinery.
+Three real bounded CPU/OS witnesses pass; no GPU profiling or source recovery
+is claimed. One frozen full regression is pending. D/P/V, R3 and complete
+M0–M2 remain open; COVERED grants no content/ready/free/transform authority
+and no LeWM speedup is measured.
+
 ## R2.2 event/order component and frozen full accepted (2026-10-18)
 
 The [order interfaces](M1_RESOURCE_ORDER_INTERFACES.md) preserve exact record

@@ -216,5 +216,88 @@ class ExecutionIndex:
         """Require producer completion before consumer *start*, not its end."""
         return self.order_path(WorkEnd(producer), WorkStart(consumer), budget=budget)
 
+    def materialization_coverage(self, required, offered, *, budget=4096):
+        """Compare declared storage selectors; never content or readiness.
+
+        Materializations without a region need an explicit endpoint/selector
+        mapping. They are not silently removed from the offered alternatives.
+        The local resolver verifies one exact snapshot per artifact per query;
+        the execution context's mutable external-graph cache is not reused.
+        """
+        from .coverage import (
+            CoverageGap, CoverageStatus, RegionRef, _ValueCatalog, _storage_coverage,
+        )
+        from .resources import _record
+        from .work import MaterializationRef
+        from dataclasses import replace
+
+        if type(budget) is not int or budget <= 0:
+            raise ValueError('materialization coverage budget must be a positive integer')
+        _record(required, MaterializationRef, 'required materialization')
+        if type(offered) is not tuple:
+            raise TypeError('offered materializations must be an exact tuple')
+        for ref in offered:
+            _record(ref, MaterializationRef, 'offered materialization')
+        catalog = _ValueCatalog(self._ctx.value_graphs)
+        gaps, resolved, unmapped = [], [], []
+        used, regions = 0, {}
+
+        def key(ref):
+            artifact = ref.artifact
+            return artifact.sha256, artifact.schema, artifact.size_bytes, ref.materialization
+
+        def resolve(ref):
+            graph = catalog.graph(ref.artifact)
+            if graph is None:
+                gaps.append(CoverageGap('external_graph_unavailable', None,
+                    f'exact ValueGraph unavailable for {ref.materialization}; no URI is opened'))
+                unmapped.append(ref)
+                return None
+            row = graph.materializations.get(ref.materialization)
+            if row is None:
+                raise ValueError('materialization is absent from the exact ValueGraph')
+            region = None if row.region is None else RegionRef(ref.artifact, row.region)
+            resolved.append({'reference': ref, 'materialization': row, 'region': region})
+            if region is None:
+                gaps.append(CoverageGap('materialization_region_unresolved', None,
+                    f'{ref.materialization} requires an explicit endpoint placement/selector; region=None is not storage'))
+                unmapped.append(ref)
+            return region
+
+        for ref in (required, *offered):
+            if used >= budget:
+                gaps.append(CoverageGap('geometry_budget_exhausted', None,
+                    'shared coverage budget cannot visit all materialization references'))
+                break
+            used += 1
+            if key(ref) not in regions:
+                regions[key(ref)] = resolve(ref)
+
+        geometry = None
+        status = CoverageStatus.UNRESOLVED
+        required_region = regions.get(key(required))
+        all_visited = used == len(offered) + 1
+        if all_visited and required_region is not None:
+            available = tuple(regions[key(ref)] for ref in offered if regions[key(ref)] is not None)
+            if used < budget:
+                geometry = _storage_coverage(required_region, available, catalog=catalog, budget=budget - used)
+                used += geometry.budget_used
+                status = geometry.status
+                if unmapped and status is CoverageStatus.INCOMPLETE:
+                    # Missing offered placements may cover currently missing
+                    # bytes; absence of their geometry cannot prove a hole.
+                    geometry = replace(geometry, status=CoverageStatus.UNRESOLVED,
+                                       missing_intervals=None, gaps=(*geometry.gaps, *gaps))
+                    status = CoverageStatus.UNRESOLVED
+            else:
+                gaps.append(CoverageGap('geometry_budget_exhausted', required_region,
+                    'shared coverage budget was consumed by materialization references'))
+        return deepcopy({'required': required, 'offered': offered,
+            'resolved': tuple(resolved), 'unmapped': tuple(unmapped),
+            'status': status.value, 'geometry': geometry, 'budget_used': used,
+            'gaps': tuple(gaps) + (() if geometry is None else geometry.gaps),
+            'execution_gaps': self.report.gaps,
+            'source_runtime_verified': False, 'transformation_authorized': False})
+
 
 __all__ = ['DefinitionLink', 'FormalRoute', 'ExecutionIndex']

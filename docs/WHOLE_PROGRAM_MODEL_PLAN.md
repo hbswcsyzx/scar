@@ -100,6 +100,12 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 ## 5. 当前证据锚点
 
+- [R2.3关系合同](M1_RESOURCE_READY_CONTRACT.md)保留D/P/V：denotation/exact读取、
+  来源派生贡献及Produced、读取区间/visibility/AND-OR；没有actual work的Host/Q
+  root不造ticket。[共享G前置](M1_RESOURCE_COVERAGE_ACCEPTANCE.md)的原MatRef/scoped
+  geometry查询432组件/6标准/9.768s通过，493指纹不变；三项真实CPU/OS见证通过。
+  一次clean冻结全仓待运行；完整R2.3及M0–M2仍未完成，不用geometry代替其余义务。
+
 - [R2.2 event/order](M1_RESOURCE_ORDER_INTERFACES.md)接准确record代次、原event状态
   和resource端口、实际wait及有限queue profile，到consumer Start的条件路径；
   497组件/7标准/9.382s通过，489登记文件指纹不变，历史v1/v2 wire保留。

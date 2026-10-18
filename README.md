@@ -11,6 +11,13 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
+The [R2.3 contract](docs/M1_RESOURCE_READY_CONTRACT.md) separates exact consumer
+denotation, source-derived production, read-interval validity and visibility.
+Its [shared geometry prerequisite](docs/M1_RESOURCE_COVERAGE_ACCEPTANCE.md)
+passes **432 component checks / 6 criteria**; frozen full regression is pending.
+The original MatRef query compares budgeted byte coverage only. D/P/V and
+complete first-stage modeling remain open; it grants no ready/transform authority.
+
 The [R2.2 event/order component](docs/M1_RESOURCE_ORDER_INTERFACES.md) connects
 exact event generations, original state/resource ports and bounded queue profiles
 to conditional producer-end→consumer-start paths. Its
