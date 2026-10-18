@@ -1,5 +1,25 @@
 # Current evidence and remaining work
 
+## Driver connection contract, second review (2026-10-18)
+
+The [revised D1 connection contract](M1_DRIVER_CONTRACT_V2.md) replaces a
+transferable permit and request-history state machine with a final admission
+INVOKE whose private NORMAL landing contains only the paired BodyDrive. State
+is produced by canonical completions; existing owner/request identities are
+forwarded through distinct Uses. Captures, resume inputs and finite outcomes
+remain derived from the original body interfaces and exact source sites.
+
+Six corrected design-witness checks exercise current core wiring; the original
+script enum error is preserved. These are **not BodyDrive product tests**. The
+[implementation matrix](M1_DRIVER_IMPLEMENTATION.md) defines D1's complete
+Create→Start→Suspend and Resume→outcome path, positive cases and rejection cases.
+Product sources remain unchanged. D2 lifecycle fields, full C2D, M0–M2 and
+automatic LeWM modeling/simplification are still incomplete; no new speedup.
+D1 connection fields are now accepted for implementation after independent
+review and the recorded root resolutions. Lifecycle domains may be a proper
+subset of the driver's domains; gate inputs and both post-state completions
+still cover every driver domain. This is design acceptance only.
+
 ## Driver modeling review and first-outcome query (2026-10-18)
 
 [Driver review](M1_DRIVER_INTERFACES.md) rejects the old raw-THROW packet,

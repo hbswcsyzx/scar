@@ -1,0 +1,40 @@
+{
+  "schema": "scar.driver-connection-design-acceptance",
+  "schema_version": 1,
+  "status": "D1_CONNECTION_DESIGN_ACCEPTED",
+  "baseline_revision": "499d708f9092a8bf35915e8db9a004631a223d7b",
+  "prior_product_implementation_revision": "9f3d7e796f2fb975528b123d009f1dacb84602ba",
+  "scope": "D1 static connection fields and implementation acceptance matrix only; no new product capability.",
+  "source_sha256": "2407cdea2418e8f9dc023ef8ab37709f1172a11bd75b4b134bcbb5ff69a58f84",
+  "source_file_count": 406,
+  "fixture_file_count": 26,
+  "design_checks": 6,
+  "reviewed_contract_sha256": "ff62d8f150519de0d6f7a1ef1d93d9ee81eb854e42299b3095fafe81a0741de1",
+  "final_reviews": [
+    {
+      "report": "review/root-core-contract-review.md",
+      "status": "ACCEPT_D1_CONNECTION_DESIGN",
+      "scope": "Canonical fields; lifecycle-domain equality suggestion resolved by root."
+    },
+    {
+      "report": "review/root-gate-contract-resolution.md",
+      "status": "ACCEPT_D1_CONNECTION_DESIGN",
+      "scope": "Gate/corridor fields and fixed roles."
+    },
+    {
+      "report": "review/root-lifecycle-contract-resolution.md",
+      "status": "ACCEPT_D1_CONNECTION_DESIGN",
+      "scope": "D1 outcome landing and explicit D2-open boundary only."
+    }
+  ],
+  "root_resolution": "review/root-final-resolution.md",
+  "d1_product_implemented": false,
+  "d2_fields_frozen": false,
+  "full_d0_complete": false,
+  "full_first_stage_complete": false,
+  "transformation_verified": false,
+  "lewm_speedup_measured": false,
+  "new_pytest_run": false,
+  "new_full_regression_run": false,
+  "new_language_probe": false
+}

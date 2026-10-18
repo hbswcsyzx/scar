@@ -67,6 +67,9 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
    [Driver字段复审](M1_DRIVER_INTERFACES.md)已用语言反例否定旧raw请求/混合claim方案，
    先修复permit/session与owner/commit关系；共用的[首outcome查询](M1_BODY_OUTCOME_FRONTIER.md)
    按冻结的结构关系先行实施，不把它当作完整driver字段冻结或C2验收。
+   后续[连接合同第二稿](M1_DRIVER_CONTRACT_V2.md)取消可传递permit和通用request历史，
+   用gate真实completion→唯一BodyDrive表达资格与准入后态。先按[D1完整路径及验收矩阵](M1_DRIVER_IMPLEMENTATION.md)
+   实施已收敛的规范连接；D2生命周期独立细化，不靠D1字段设计通过缩小完整C2分母。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。
 4. 在 M1/M2 内补齐构造协议、provider 端口映射与未展开区域的接口规则。
@@ -89,6 +92,11 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
   可只读复用的重型 trace。
 
 ## 5. 当前证据锚点
+
+- [D1连接第二稿](M1_DRIVER_CONTRACT_V2.md)及[实施矩阵](M1_DRIVER_IMPLEMENTATION.md)
+  提供下一批代码的完整接口和正反路径；独立core/gate/lifecycle审查的原意见与修正
+  均保留。六项corridor设计检查只验证现core可接线和专用检查需求；产品源码未改，
+  不重跑旧全仓。D2、D3、完整C2及第一阶段仍开放。
 
 - [C2F首outcome查询](M1_BODY_OUTCOME_FRONTIER.md)517项组件/7.384s、冻结`9f3d7e7`
   的3,549项全仓/433.223s通过，406源文件及26份fixture哈希前后一致。新查询只

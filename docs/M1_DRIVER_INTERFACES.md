@@ -5,6 +5,11 @@
 保留[C2B](M1_RESUMPTION_BODY_ACCEPTANCE.md)和完整C2.0/C2.4分母；不把一个新查询或
 语言探针算作完整resumption。阶段顺序继续按[总计划](WHOLE_PROGRAM_MODEL_PLAN.md)。
 
+后续收敛见[第二稿连接合同](M1_DRIVER_CONTRACT_V2.md)及[D1实施验收矩阵](M1_DRIVER_IMPLEMENTATION.md)。
+第二稿撤回本文§2.2可传递permit候选：采用final gate INVOKE→私有单操作BodyDrive，
+后态使用既有completion producer；不增加通用RequestGate历史状态机。本文保留先前
+审查经过和语言反例，冲突处以第二稿为准；D2生命周期与完整C2D仍未关闭。
+
 ## 1. 不变的核心类型与规范来源
 
 不增加业务实体类别。Create、lookup、normalize、gate、body ingress、release仍是
