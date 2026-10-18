@@ -100,6 +100,12 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 ## 5. 当前证据锚点
 
+- [资源执行R0](M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md)完成三份独立终审与六个
+  stdlib CPU/OS断言见证；core occurrence/旧EEG、资源/handle代次、INVOKE状态端口、
+  work/host outcome及Completed/Ordered consumer支持的关系合同已收敛。
+  [R1→R2→R3](M1_RESOURCE_EXECUTION_PLAN.md)仍待产品实现；451项注册源指纹与D2.4
+  相同，没有重跑全仓、运行GPU实验或把设计当新runtime/ready证明。
+
 - [D2.4](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)通过真实body及driver active-cleanup
   组合、准确当前状态和私有pending/context转发；公开point保留原rule/scope与实际边，
   applicability保持UNKNOWN。1,015组件/32标准/18.022s，冻结`37baeaf`的4,050全仓/

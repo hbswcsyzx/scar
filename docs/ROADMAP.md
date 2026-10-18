@@ -1,5 +1,11 @@
 # SCAR roadmap and scope
 
+> **Resource relation contract (2026-10-18):** [R0](M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md)
+> passes bounded design review and six asserted CPU/OS witnesses. The
+> [R1→R2→R3 plan](M1_RESOURCE_EXECUTION_PLAN.md) implements exact occurrences and
+> instance/handle bindings, work/outcome/order/ready, then lifecycle composition.
+> This does not implement those records or establish GPU readiness; M0–M2 stays open.
+
 > **Modeling gate (2026-10-18):** [D2.4 lifecycle composition](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)
 > passes 1,015 component checks and 4,050 frozen full tests. Conditional facts now
 > retain original scope/rule/operation/edge; native applicability stays UNKNOWN.

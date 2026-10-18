@@ -1,0 +1,57 @@
+{
+  "recorded_at": "2026-10-18T03:56:27.297886+00:00",
+  "local_package_versions": {
+    "torch": "2.13.0+cu132",
+    "numpy": "2.5.2",
+    "pytest": "9.1.1"
+  },
+  "local_sources": {
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/nvidia/cu13/include/cuda_runtime_api.h": {
+      "bytes": 662016,
+      "sha256": "42da3b0dc8fe60bf8730a9f8689668df9f44e5f955ce31ed9b05bb1ef7a3a342"
+    },
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/cuda/streams.py": {
+      "bytes": 10658,
+      "sha256": "28d90fd68be59e8dd9a30d230e7df6f61a4b020e6e2da9fa89839691a1cfced5"
+    }
+  },
+  "cudart_version_macro": 13020,
+  "primary_references": [
+    {
+      "url": "https://docs.python.org/3.14/library/os.html#os.fsync",
+      "method": "web open/find",
+      "status": "OPENED",
+      "note": "3.14.8 online; local interpreter 3.14.7. flush and fsync distinct."
+    },
+    {
+      "url": "https://docs.python.org/3.14/library/concurrent.futures.html#future-objects",
+      "method": "web open/find",
+      "status": "OPENED",
+      "note": "done includes cancellation; running Future.cancel can return false."
+    },
+    {
+      "url": "https://pubs.opengroup.org/onlinepubs/9799919799/functions/dup.html",
+      "method": "web search excerpt",
+      "status": "SEARCH_SUPPORTED_OPEN_CACHE_MISS",
+      "note": "dup/dup2 open-file-description aliasing; local asserted witnesses provide independent limited execution evidence."
+    },
+    {
+      "url": "https://docs.nvidia.com/cuda/archive/13.2.1/cuda-runtime-api/group__CUDART__EVENT.html",
+      "method": "web search excerpt plus local installed header",
+      "status": "SEARCH_SUPPORTED_OPEN_CACHE_MISS",
+      "note": "record captures a prefix, re-record does not change previous wait binding; installed header macro 13020 is version anchor, not GPU execution proof."
+    },
+    {
+      "url": "https://docs.pytorch.org/docs/stable/generated/torch.cuda.Event.html",
+      "method": "web redirect/search excerpt plus local streams.py",
+      "status": "ONLINE_STABLE_IS_2.14",
+      "note": "Not treated as installed 2.13.0 source. Pinned online 2.13 fetch failed; local file SHA above supplies local version anchor."
+    }
+  ],
+  "limitations": [
+    "No GPU execution or timing",
+    "No reproduction of entire external documentation",
+    "No power-loss durability witness",
+    "No source/runtime or readiness proof for SCAR"
+  ]
+}

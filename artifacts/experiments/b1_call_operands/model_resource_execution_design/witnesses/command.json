@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "artifacts/experiments/b1_call_operands/model_resource_execution_design/witnesses/runtime_witnesses.py"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "returncode": 0,
+  "seconds": 0.09265675488859415,
+  "script_sha256": "149e0fb885b900edafc1b0abd2a6340663de2d81d24a6adef7db86bfda86fb3f",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "platform": "Linux-6.17.0-29-generic-x86_64-with-glibc2.39",
+  "started_under": "conda activate lewm",
+  "recorded_at": "2026-10-18T03:49:58.022940+00:00",
+  "scope": "stdlib CPU and exclusively owned temporary files; no SCAR product/trace/CUDA"
+}

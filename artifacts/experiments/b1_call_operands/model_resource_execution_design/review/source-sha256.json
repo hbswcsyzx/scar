@@ -1,0 +1,14 @@
+{
+  "scar/ir/program/resources.py": "167f0b2e1267278362341e6622e5cb164292e93484da94c8403b382e1e6e434f",
+  "scar/ir/program/resource_validation.py": "f2709a6d9e9898bc5ecb87ae2396510750550fde1bb071f8ab9808569f352c39",
+  "docs/M1_RESOURCE_INTERFACES.md": "b8d02ddf84e6368cd08b4b2127d5a77458e8b5de3847f713573be8318bc931e5",
+  "docs/WHOLE_PROGRAM_MODEL.md": "ea4bb6cd1d4976ad7e6d1b7ccd214c5cdeafa0f657623e2363fd110bada9e509",
+  "docs/model/RESOURCE_PROTOCOLS.md": "5033fd3221d112dcebcbf087788440d7545effc88330dff589ed3ed4cdd482e4",
+  "scar/ir/v2/values.py": "2c4ab8a69d46ef312f454c487329150cd7f3f4a12819e51bf8a8ae218210f259",
+  "scar/ir/v2/ids.py": "d11e038a6a4c7de6dee5c8050182a97ddb4a6a6a399c466836ca64d6d9cb0a23",
+  "scar/ir/v2/evidence.py": "dba2dffc93e0f7dba0f5a0196c1f802e909644106c9380426fdf1472dc3a61c5",
+  "scar/ir/v2/contracts.py": "c7aaae3ea0e292e425cfbe820d4508363b9e26e0c94427cefc5a4bb0ae6e15b1",
+  "scar/ir/program/providers.py": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343",
+  "scar/ir/provenance.py": "f8f11d353a05c9b2ec893ae5ab3da7be747b4a2ea3b28a21eb1f7891237523c1",
+  "scar/trace/normalize_v2.py": "7733fb9b02a8f657d2413a982a3203ee2d3dee7d532400118ca7b1902538b2a5"
+}

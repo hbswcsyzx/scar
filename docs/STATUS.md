@@ -1,5 +1,18 @@
 # Current evidence and remaining work
 
+## R0 resource execution relation contract reviewed (2026-10-18)
+
+The [resource design gate](M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md) converges
+core occurrences versus evidence instances, resource/handle lifetimes, canonical
+ordinary/INVOKE effect links, work outcomes and per-consumer completion/order
+supports. Three independent final reviews bind the contract. Six asserted real
+stdlib CPU/OS witnesses pass; no GPU experiment or new full regression was run.
+Production and registered test/gate sources still match accepted D2.4. R1/R2
+records/validators remain **unimplemented**, not silently granted by the design.
+Next follows [R1→R2→R3](M1_RESOURCE_EXECUTION_PLAN.md): identities/bindings,
+work/ready, then complete load/consume/save interface composition. M0–M2 and
+LeWM automatic simplification remain open. Earlier sections are checkpointed.
+
 ## D2.4 cleanup composition and scoped queries accepted (2026-10-18)
 
 The [composition component](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md) passes

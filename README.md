@@ -67,6 +67,12 @@ state; detached query points retain the original rule, scope and actual edge.
 Applicability stays UNKNOWN. Resource completion, value provenance and the full
 modeling stage remain open; no new LeWM speedup is claimed.
 
+The [R0 resource relation review](docs/M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md)
+separates scoped occurrences, resource/handle lifetimes, work outcomes and
+completion versus ordered consumer visibility. Six real stdlib CPU/OS witnesses
+pass. R1/R2 product records and validation remain unimplemented; this review
+adds no new profiler, backend, GPU result or full-suite run.
+
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
 all completion sites and explicit cross-representation obligations. Its 168
