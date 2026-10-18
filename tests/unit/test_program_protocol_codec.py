@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from scar.ir import record_codec
-from scar.ir.execution.codec import SCHEMA_VERSION as EXECUTION_SCHEMA_VERSION
+from scar.ir.execution import codec as execution_codec
 from scar.ir.program import codec
 from scar.ir.program.ids import NativeBoundaryID, OperationID, UseID
 from scar.ir.program.model import CompletionResult, ExitKind, InvokeLiteralResult
@@ -30,7 +30,12 @@ def test_f_capability_roundtrips_scope_only_and_n_r_port_graphs(target):
     wire = codec.dumps(graph)
     document = json.loads(wire)
     assert codec.SCHEMA_VERSION == 18
-    assert EXECUTION_SCHEMA_VERSION == 7  # O is a separate later capability.
+    # F does not select O; the independent old execution still selects v7.
+    assert execution_codec.SCHEMA_VERSION >= 7
+    old_wire = (Path(__file__).parents[1] / "fixtures/execution_v7_frozen.json").read_bytes()
+    old_execution = execution_codec.loads(old_wire.decode("utf-8"))
+    assert execution_codec.to_dict(old_execution)["schema_version"] == 7
+    assert execution_codec.dumps(old_execution).encode("utf-8") == old_wire
     assert document["schema_version"] == 17
     assert codec.loads(wire) == graph
     assert codec.dumps(codec.loads(wire)) == wire

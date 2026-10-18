@@ -45,14 +45,15 @@ def case_ids(rows):
 
 
 def assemble():
-    full = read(HERE / 'full/report.json')
-    component = read(HERE / 'component/attempt003/report.json')
-    before, after = (read(HERE / f'full/source.{phase}.json') for phase in ('before', 'after'))
+    full = read(HERE / 'repair/full/report.json')
+    component = read(HERE / 'repair/component/attempt001/report.json')
+    before, after = (read(HERE / f'repair/full/source.{phase}.json') for phase in ('before', 'after'))
     assert full['status'] == component['status'] == 'PASS'
     assert before == after and not before['worktree_status']
     previous = read(PRIOR / 'repair/full/source.before.json')
     old_cases = read(PRIOR / 'repair/full/cases.json')
-    cases = read(HERE / 'full/cases.json')
+    cases = read(HERE / 'repair/full/cases.json')
+    failed_cases = read(HERE / 'full/cases.json')
     component_cases = {tuple((row['class'], row['name'])) for criterion in component['criteria']
                        for evidence in criterion['evidence'] for row in evidence['cases']}
     missing = sorted(case_ids(old_cases) - case_ids(cases))
@@ -60,21 +61,25 @@ def assemble():
     changed = sorted(path for path, sha in previous['fixture_sha256'].items()
                      if before['fixture_sha256'].get(path) != sha)
     assert not missing and not removed and not changed
+    assert case_ids(failed_cases) == case_ids(cases)
     dump(HERE / 'preservation.json', {'preserved_previous_cases': len(old_cases),
         'missing_cases': missing, 'removed_source_files': removed, 'changed_previous_fixtures': changed,
-        'previous_fixtures': len(previous['fixture_sha256']), 'current_fixtures': len(before['fixture_sha256'])})
+        'previous_fixtures': len(previous['fixture_sha256']), 'current_fixtures': len(before['fixture_sha256']),
+        'preserved_failed_full_cases': len(failed_cases)})
     current = protected()
     assert current == read(HERE / 'protected.before.json')
     dump(HERE / 'protected.after.json', current)
     docs = ('M1_BODY_OCCURRENCE_PLAN', 'M1_BODY_OCCURRENCE_API', 'M1_BODY_OCCURRENCE_PROGRESS',
-            'M1_BODY_OCCURRENCE_ACCEPTANCE', 'M1_PROTOCOL_CONTRACT', 'M1_PROTOCOL_FAMILY_PLAN',
+            'M1_BODY_OCCURRENCE_REPAIR', 'M1_BODY_OCCURRENCE_ACCEPTANCE',
+            'M1_REMAINING_PROTOCOL_PLAN', 'M1_PROTOCOL_CONTRACT', 'M1_PROTOCOL_FAMILY_PLAN',
             'STATUS', 'ROADMAP', 'WHOLE_PROGRAM_MODEL_PLAN', 'FIRST_STAGE_COMPLETION_MATRIX',
             'MODELING_REUSE_DECISION')
     dump(HERE / 'closure.json', {'status': 'PASS_WITH_SCOPE_P3_BODY_OCCURRENCE',
         'implementation_revision': before['revision'], 'source_sha256': before['source_sha256'],
         'source_files': before['source_file_count'], 'criteria': len(component['criteria']),
-        'component_cases': len(component_cases), 'focused_cases': 166, 'full_cases': len(cases),
+        'component_cases': len(component_cases), 'focused_cases': 255, 'full_cases': len(cases),
         'previous_cases': len(old_cases), 'p3_declared_occurrence_complete': True,
+        'initial_full_status': 'FAIL', 'initial_full_cases': len(failed_cases),
         'd3_complete': False, 'm0_m2_complete': False, 'scope_inventory_complete': False,
         'source_runtime_verified': False, 'value_identity_verified': False,
         'transformation_authorized': False, 'new_lewm_speedup_measurement': False,
@@ -87,8 +92,8 @@ def check():
     listing = files()
     assert listing == read(HERE / 'manifest.json')['files']
     closure = read(HERE / 'closure.json')
-    full, component = read(HERE / 'full/report.json'), read(HERE / 'component/attempt003/report.json')
-    before, after = (read(HERE / f'full/source.{phase}.json') for phase in ('before', 'after'))
+    full, component = read(HERE / 'repair/full/report.json'), read(HERE / 'repair/component/attempt001/report.json')
+    before, after = (read(HERE / f'repair/full/source.{phase}.json') for phase in ('before', 'after'))
     assert full['status'] == component['status'] == 'PASS'
     assert full['returncode'] == component['returncode'] == 0
     assert full['source_unchanged_during_test'] and component['source_unchanged_during_test']
@@ -104,12 +109,20 @@ def check():
     component_cases = {(row['class'], row['name']) for criterion in component['criteria']
                        for evidence in criterion['evidence'] for row in evidence['cases']}
     assert len(component_cases) == closure['component_cases']
-    assert digest(HERE / 'full/driver.py') == DRIVER_SHA
+    assert digest(HERE / 'repair/full/driver.py') == DRIVER_SHA
     assert not full['driver_errors']
     assert full['basetemp_cleanup'] == 'removed exclusively owned basetemp after child termination'
     assert not Path(full['basetemp']).exists()
-    for path, row in read(HERE / 'full/manifest.json')['files'].items():
-        assert listing['full/' + path] == row
+    for directory in ('full', 'repair/full'):
+        for path, row in read(HERE / directory / 'manifest.json')['files'].items():
+            assert listing[directory + '/' + path] == row
+    failed = read(HERE / 'full/report.json')
+    assert failed['status'] == closure['initial_full_status'] == 'FAIL'
+    assert failed['counts'] == {'passed': 5816, 'failed': 6, 'error': 0, 'skipped': 0, 'total': 5822}
+    assert failed['source_unchanged_during_test'] and not failed['driver_errors']
+    assert failed['source_sha256_before'] == '43549a160f4e11005af314efa492659832b7e14f060c72b7caa9e8ab9a308ea9'
+    assert digest(HERE / 'full/driver.py') == DRIVER_SHA
+    assert not Path(failed['basetemp']).exists()
     previous = read(PRIOR / 'repair/full/source.before.json')
     assert len(previous['files']) == 647 and previous['files'].keys() <= before['files'].keys()
     assert len(previous['fixture_sha256']) == 92
@@ -117,13 +130,16 @@ def check():
     current_fixtures = {str(path.relative_to(ROOT)): digest(path)
         for path in sorted((ROOT / 'tests/fixtures').rglob('*')) if path.is_file() and '__pycache__' not in path.parts}
     assert current_fixtures == before['fixture_sha256'] and len(current_fixtures) == 99
-    old, cases = read(PRIOR / 'repair/full/cases.json'), read(HERE / 'full/cases.json')
+    old, cases = read(PRIOR / 'repair/full/cases.json'), read(HERE / 'repair/full/cases.json')
+    failed_cases = read(HERE / 'full/cases.json')
     assert len(case_ids(old)) == len(old) == closure['previous_cases'] == 5676
     assert len(case_ids(cases)) == len(cases) == closure['full_cases'] == 5822
     assert case_ids(old) <= case_ids(cases) and component_cases <= case_ids(cases)
+    assert case_ids(failed_cases) == case_ids(cases) and len(failed_cases) == closure['initial_full_cases'] == 5822
     assert full['counts'] == {'passed': 5822, 'failed': 0, 'error': 0, 'skipped': 0, 'total': 5822}
     conservation = read(HERE / 'preservation.json')
     assert conservation['missing_cases'] == conservation['removed_source_files'] == conservation['changed_previous_fixtures'] == []
+    assert conservation['preserved_failed_full_cases'] == len(failed_cases)
     assert protected() == read(HERE / 'protected.after.json') == read(HERE / 'protected.before.json')
     assert closure['status'] == 'PASS_WITH_SCOPE_P3_BODY_OCCURRENCE' and closure['p3_declared_occurrence_complete']
     assert not any(closure[name] for name in ('d3_complete', 'm0_m2_complete', 'scope_inventory_complete',
@@ -133,18 +149,19 @@ def check():
     assert digest(ROOT / 'docs/M1_PROTOCOL_CONTRACT.md') == '2a5d982907ed8d9d9e93586f8cf9979002cbac6e27c73de8aac8ce4d0c45c4ac'
     sha, current = runpy.run_path(str(ROOT / 'scripts/run_gate.py'))['fingerprint']()
     assert sha == closure['source_sha256'] and current == before['files']
-    focused_dir = HERE / 'final-focused/attempt005'
+    focused_dir = HERE / 'repair/final-focused/attempt001'
     focused = read(focused_dir / 'result.json')
     assert focused['returncode'] == 0 and focused['source_unchanged']
     assert read(focused_dir / 'sources.before.json') == read(focused_dir / 'sources.after.json') == current
-    assert len(list(ET.parse(focused_dir / 'junit.xml').iter('testcase'))) == closure['focused_cases'] == 166
+    assert len(list(ET.parse(focused_dir / 'junit.xml').iter('testcase'))) == closure['focused_cases'] == 255
     assert read(HERE / 'port-review/red001/result.json')['returncode'] == 1
     assert read(HERE / 'port-review/unassociated-create/red001/result.json')['returncode'] == 1
     assert read(HERE / 'legacy-version/red001/result.json')['returncode'] == 1
     assert read(HERE / 'component/attempt001/report.json')['status'] == 'FAIL'
     print(json.dumps({'status': 'PASS', 'scope': closure['status'], 'archived_files': len(listing),
         'source_files': len(current), 'fixtures': len(current_fixtures), 'criteria': 18,
-        'focused_cases': 166, 'component_cases': len(component_cases), 'full_cases': len(cases),
+        'focused_cases': 255, 'component_cases': len(component_cases), 'full_cases': len(cases),
+        'initial_failed_full_cases': len(failed_cases),
         'preserved_previous_cases': len(old), 'tests_started_by_checker': 0}))
 
 

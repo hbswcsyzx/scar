@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from scar.ir.execution.codec import SCHEMA_VERSION as EXECUTION_SCHEMA_VERSION
+from scar.ir.execution import codec as execution_codec
 from scar.ir.program import codec
 from scar.ir.program.protocols import BodyStateCondition
 from scar.ir.program.validation import require_valid
@@ -32,7 +32,13 @@ def test_sixth_variant_roundtrip_preserves_original_uses_and_branch_without_fake
     document = json.loads(wire)
     contract = document["protocol_operations"][0]["contract"]
     assert codec.SCHEMA_VERSION == document["schema_version"] == 18
-    assert EXECUTION_SCHEMA_VERSION == 7
+    # Program capabilities do not pin the execution codec's maximum version.
+    # The independent old execution wire must still select exactly v7.
+    assert execution_codec.SCHEMA_VERSION >= 7
+    old_wire = (Path(__file__).parents[1] / "fixtures/execution_v7_frozen.json").read_bytes()
+    old_execution = execution_codec.loads(old_wire.decode("utf-8"))
+    assert execution_codec.to_dict(old_execution)["schema_version"] == 7
+    assert execution_codec.dumps(old_execution).encode("utf-8") == old_wire
     assert contract["kind"] == "PROTOCOL_ADMISSION_PREDICATE"
     assert set(contract) == {"subject", "result", "branch", "kind"}
     assert contract["subject"]["kind"] == (

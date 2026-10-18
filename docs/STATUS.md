@@ -10,6 +10,14 @@ preserve that failed full, require exact legacy wire/fixture checks and include
 all89 affected cases before a separate clean repair full. P3 is not accepted;
 the prior scoped component PASS does not override this failure.
 
+The narrow repair changes only three codec test files and the gate selection;
+product code is unchanged.89 affected,255 final focused and606 component cases
+across18 criteria now pass at one668-source fingerprint. Independent read-only
+review confirms exact old v5/v7 wire bytes and separate v8/future9 checks.
+A separate repair full is pending. [P4 planning](M1_REMAINING_PROTOCOL_PLAN.md)
+records three read-only reviews and the original16 obligation groups; it is not
+P4 implementation or acceptance.
+
 ## P3 persistent-body occurrence implementation under review (2026-10-18)
 
 [Plan](M1_BODY_OCCURRENCE_PLAN.md), [API](M1_BODY_OCCURRENCE_API.md) and

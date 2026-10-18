@@ -129,6 +129,9 @@
     {
       "id": "legacy-original-execution-coordinates-flow-wire-and-call-ports",
       "tests": [
+        "tests/unit/test_execution_production_codec.py",
+        "tests/unit/test_program_admission_codec.py",
+        "tests/unit/test_program_protocol_codec.py",
         "tests/unit/test_execution_coordinates_records.py",
         "tests/unit/test_execution_flow.py",
         "tests/unit/test_execution_links.py",

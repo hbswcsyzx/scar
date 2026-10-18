@@ -268,8 +268,17 @@ def test_production_wire_rejects_malformed_new_nested_fields(production_model):
 
 
 def test_schema_version_six_remains_unsupported(production_model):
-    # Keep the historical case ID; the next unsupported capability moved to 8.
-    for value in (8, True, "5"):
+    # Preserve the case ID and the original v5 family, while explicit v8 is
+    # now supported. Maximum capability does not change automatic selection.
+    original = to_dict(production_model)
+    assert original["schema_version"] == 5
+    explicit = to_dict(production_model, schema_version=8)
+    assert explicit["schema_version"] == 8
+    restored = loads(dumps(production_model, schema_version=8))
+    assert from_dict(explicit) == restored == production_model
+    assert to_dict(restored) == original
+    assert dumps(restored) == dumps(production_model)
+    for value in (9, True, "5"):
         with pytest.raises(ValueError, match="schema_version"):
             dumps(production_model, schema_version=value)
         doc = to_dict(production_model)
