@@ -1,5 +1,13 @@
 # SCAR roadmap and scope
 
+> **Modeling gate (2026-10-18):** [D2.4 lifecycle composition](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)
+> passes 1,015 component checks and 4,050 frozen full tests. Conditional facts now
+> retain original scope/rule/operation/edge; native applicability stays UNKNOWN.
+> Next are resource instance/work/outcome/ready, selector/literal and occurrence/
+> provenance interfaces, then the remaining family/catalog obligations. The
+> [first-stage matrix](FIRST_STAGE_COMPLETION_MATRIX.md) remains open; automatic
+> source/runtime recovery and simplification follow its completion.
+
 > **Priority revision (2026-10-16):** complete the
 > [whole-program entity/interface model](WHOLE_PROGRAM_MODEL.md), then automatic
 > graphs, then simplification guidance. [M0—M6](WHOLE_PROGRAM_MODEL_PLAN.md)

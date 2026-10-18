@@ -74,7 +74,8 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
    →组合验收细化；D2.0已收敛，D2.1组件及冻结全仓已验收；[D2.2](M1_NO_BODY_ACCEPTANCE.md)
    836组件/21标准及冻结`006a0e0`的3,871项全仓已通过；
    [D2.3 session/release与E/F/P](M1_SESSION_RELEASE_ACCEPTANCE.md)974组件/27标准及
-   冻结`f67037d`的4,009项全仓通过，后续先D2.4组合/公开范围复核再D3，
+   冻结`f67037d`的4,009项全仓通过；[D2.4组合/公开范围](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)
+   1,015组件/32标准及冻结`37baeaf`的4,050项全仓通过，后续补D3接口义务，
    不靠D1字段设计通过缩小完整C2分母。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。
@@ -98,6 +99,13 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
   可只读复用的重型 trace。
 
 ## 5. 当前证据锚点
+
+- [D2.4](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)通过真实body及driver active-cleanup
+  组合、准确当前状态和私有pending/context转发；公开point保留原rule/scope与实际边，
+  applicability保持UNKNOWN。1,015组件/32标准/18.022s，冻结`37baeaf`的4,050全仓/
+  457.655s通过；451源/42fixture前后一致，原38fixture及4,009测试身份全部保留。
+  下一批资源instance/work/ready、selector/literal、occurrence/provenance与M2守恒；
+  不把手工组合图当自动程序恢复。
 
 - [D2.3](M1_SESSION_RELEASE_ACCEPTANCE.md)实现逐边同时改名后的E/F must及解释T，
   当前R/B谓词P、current支持和callback失效；974组件/27标准/15.967s通过。

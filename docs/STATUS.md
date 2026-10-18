@@ -1,5 +1,22 @@
 # Current evidence and remaining work
 
+## D2.4 cleanup composition and scoped queries accepted (2026-10-18)
+
+The [composition component](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md) passes
+**1,015 cases / 32 criteria / 18.022s**. Actual body and driver-owned cleanup
+fixtures preserve canonical source, pending/context, current state and real
+helper NORMAL/RAISE. Detached points retain original scope/rule/operation and
+actual edge; applicability remains UNKNOWN. Wire stays v14.
+Frozen clean `37baeaf` passes **4,050 tests / 457.655s / 1,029,216KiB**, no
+failures/errors/skips and three warnings. All 451 source and 42 fixture hashes
+match before/after; all prior 4,009 test identities and 38 fixtures remain.
+[Evidence and read-only checker](../artifacts/experiments/b1_call_operands/model_lifecycle_composition/README.md)
+retain raw failures, immutable v14 generation and independent reviews. Protected
+checkouts are unchanged. Next are resource instance/work/ready, selector/literal,
+occurrence/provenance and remaining family/catalog interfaces. Complete M0–M2,
+source/runtime recovery and LeWM simplification remain open; no new speedup is
+measured. The following sections preserve their earlier checkpoint scopes.
+
 ## D2.3 session/release and conditional E/F/P accepted (2026-10-18)
 
 The [session/release component](M1_SESSION_RELEASE_ACCEPTANCE.md) derives terminal

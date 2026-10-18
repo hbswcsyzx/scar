@@ -1,0 +1,52 @@
+FF.....                                                                  [100%]
+=================================== FAILURES ===================================
+_ test_actual_cleanup_return_and_raise_frontier_keep_independent_terminal_sources[AFTER_OPERATION] _
+
+binding = 'AFTER_OPERATION'
+
+    @pytest.mark.parametrize("binding", ("AFTER_OPERATION", "NORMAL_COMPLETION"))
+    def test_actual_cleanup_return_and_raise_frontier_keep_independent_terminal_sources(binding):
+        graph = body_cleanup_lifecycle_program(binding=binding)
+        index = ProgramIndex(graph)
+        assert len(graph.body_outcome_commits) == 2
+        source_kinds = {index.operations[row.outcome.source].terminator.kind
+                        for row in graph.body_outcome_commits}
+        assert source_kinds == {TerminatorKind.RETURN, TerminatorKind.RAISE}
+        assert graph.cleanup_interfaces and graph.cleanup_resumes and graph.cleanup_replacements
+        assert graph.handled_context_domains
+        for number, commit in enumerate(graph.body_outcome_commits):
+            release = index.terminal_release_publication(OperationID(f"session.release.{number}"))
+            assert len(release.sources) == 1
+            assert release.sources[0].commit is commit
+>           assert release.sources[0].source.source.id == commit.outcome.source
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'BodyOutcomeSite' object has no attribute 'source'
+
+tests/unit/test_lifecycle_body_composition.py:28: AttributeError
+_ test_actual_cleanup_return_and_raise_frontier_keep_independent_terminal_sources[NORMAL_COMPLETION] _
+
+binding = 'NORMAL_COMPLETION'
+
+    @pytest.mark.parametrize("binding", ("AFTER_OPERATION", "NORMAL_COMPLETION"))
+    def test_actual_cleanup_return_and_raise_frontier_keep_independent_terminal_sources(binding):
+        graph = body_cleanup_lifecycle_program(binding=binding)
+        index = ProgramIndex(graph)
+        assert len(graph.body_outcome_commits) == 2
+        source_kinds = {index.operations[row.outcome.source].terminator.kind
+                        for row in graph.body_outcome_commits}
+        assert source_kinds == {TerminatorKind.RETURN, TerminatorKind.RAISE}
+        assert graph.cleanup_interfaces and graph.cleanup_resumes and graph.cleanup_replacements
+        assert graph.handled_context_domains
+        for number, commit in enumerate(graph.body_outcome_commits):
+            release = index.terminal_release_publication(OperationID(f"session.release.{number}"))
+            assert len(release.sources) == 1
+            assert release.sources[0].commit is commit
+>           assert release.sources[0].source.source.id == commit.outcome.source
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           AttributeError: 'BodyOutcomeSite' object has no attribute 'source'
+
+tests/unit/test_lifecycle_body_composition.py:28: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_lifecycle_body_composition.py::test_actual_cleanup_return_and_raise_frontier_keep_independent_terminal_sources[AFTER_OPERATION]
+FAILED tests/unit/test_lifecycle_body_composition.py::test_actual_cleanup_return_and_raise_frontier_keep_independent_terminal_sources[NORMAL_COMPLETION]
+2 failed, 5 passed in 0.54s

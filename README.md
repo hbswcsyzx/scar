@@ -60,6 +60,13 @@ unknown effects and native applicability explicit. Frozen `f67037d` passes 4,009
 full tests. Complete first-stage modeling, source/runtime correspondence and LeWM
 automatic simplification remain unfinished.
 
+The [D2.4 lifecycle composition gate](docs/M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)
+passes 1,015 component checks / 32 criteria and 4,050 frozen full tests (`37baeaf`).
+Actual body and driver cleanup paths retain private pending/context and current
+state; detached query points retain the original rule, scope and actual edge.
+Applicability stays UNKNOWN. Resource completion, value provenance and the full
+modeling stage remain open; no new LeWM speedup is claimed.
+
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
 all completion sites and explicit cross-representation obligations. Its 168

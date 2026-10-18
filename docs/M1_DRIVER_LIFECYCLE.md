@@ -6,7 +6,8 @@
 下文§4是本轮审查的问题记录，按新合同逐项解决，不再作为未定字段。
 [D2.1 publication](M1_BODY_PUBLICATION_ACCEPTANCE.md)已通过组件及冻结全仓验收；
 [D2.2 no-body](M1_NO_BODY_ACCEPTANCE.md)及[D2.3 session/release与E/F/P](M1_SESSION_RELEASE_ACCEPTANCE.md)
-也已通过声明组件和冻结全仓；D2.4/D3及完整第一阶段仍未完成。
+也已通过声明组件和冻结全仓；[D2.4组合与公开范围](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)
+通过1,015组件/32标准与冻结`37baeaf`的4,050全仓。D3及完整第一阶段仍未完成。
 不更改五类核心实体，不增加detector/backend，不把语言小实验算自动程序建图。
 
 ## 1. 补的是什么依赖
