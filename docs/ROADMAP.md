@@ -1,6 +1,14 @@
 # SCAR roadmap and scope
 
-> **P2 foundation accepted (2026-10-18):** the
+> **P2 declared generator matrix accepted (2026-10-18):**
+> [Acceptance](M1_GENERATOR_MATRIX_ACCEPTANCE.md) closes16 cells and their original
+> input/state/branch/current-outcome/host joins.275 focused,660 component/37 criteria
+> and5,676 clean frozen full tests at`bd673cd` pass;647 source hashes/92 fixtures
+> match. The first full failure and deterministic-budget repair remain archived.
+> Next:P3 persistent-body occurrences and conditional host order, thenP4/P5 and
+> originalM2 constructs. FullM0–M2 and automatic LeWM modeling/speedup remain open.
+
+> **Earlier P2 foundation accepted (2026-10-18):** the
 > [protocol foundation](M1_PROTOCOL_FOUNDATION.md) connects exact F records to
 > original ports, current evaluations, state and selected no-entry lifecycle
 > routes. [Acceptance](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md):155 focused,
@@ -9,7 +17,7 @@
 > This partial checkpoint does not close the16-cell P2 matrix,
 > P3–P5 or full M0–M2. Execution remains7. No new LeWM speedup is claimed.
 
-> **Current design work (2026-10-18):** the
+> **Earlier design audit (2026-10-18):** the
 > [C2/D3 audit](M1_PROTOCOL_FAMILY_AUDIT.md) identifies missing protocol-to-original
 > CFG/port obligations and per-Drive persistent-body occurrence associations.
 > [P0–P5](M1_PROTOCOL_FAMILY_PLAN.md) retains28 obligation groups. P0 audit and

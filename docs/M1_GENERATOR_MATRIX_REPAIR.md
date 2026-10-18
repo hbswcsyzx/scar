@@ -53,3 +53,10 @@ native/runtime identity 及优化授权仍未关闭。没有新 detector/backend
   原646文件均仍在，原 full 的92个 fixture 内容未变。
 - 下一步干净提交并启动 `repair/full` 的一次冻结完整回归。原 full FAIL 仍是
   先前实现的真实结果，最终 P2 验收尚未通过。
+
+## R3 / R4 后续收口
+
+R3在干净`bd673cd`完成一次新的完整回归：**5,676通过、0失败/error/skip**，
+548.571s，647源指纹前后不变；原FAIL没有覆盖。R4的守恒、保护目录、原失败/
+最终full双manifest与只读checker按[验收报告](M1_GENERATOR_MATRIX_ACCEPTANCE.md)
+和同目录closure/manifest独立归档；不将本门通过扩大成完整M0–M2。

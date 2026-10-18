@@ -29,6 +29,12 @@ detector 或 backend。2026-10-17/18 更新下面的 C1/C2B 实施状态；既�
 完整16格P2、O发生关联、其余家族及完整第一阶段仍未关闭，不改变下述五类实体
 和工具分工，也不是自动恢复或LeWM化简结果。
 
+最新[P2同步generator声明矩阵](M1_GENERATOR_MATRIX_ACCEPTANCE.md)已限定验收：
+原16格、精确caller/状态/当前结果/host连接通过275定向、660组件/37标准及
+`bd673cd`的5,676冻结全仓。原full失败与hash预算修复保留。它关闭此前开放的
+P2声明矩阵；P3持续发生关联、其余家族、完整M0–M2和source/provider实际导入
+仍开放，不改变下述五类实体或工具复用决定，不产生LeWM优化或加速结论。
+
 此前冻结实现 `e6b4723` 的3,542项回归通过，见
 [C2B body验收](M1_RESUMPTION_BODY_ACCEPTANCE.md)；499项组件及403个源文件指纹匹配。
 此前`0ea05e6`的3,330项原始回归保持[C1证据](../artifacts/experiments/b1_call_operands/model_cleanup_interfaces/full/report.json)范围。

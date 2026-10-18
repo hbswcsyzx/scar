@@ -84,10 +84,16 @@ JSON保留。此为审计/规划，不是新产品验收；603源/78fixtures未�
 现按已冻结F/O合同进行P2闭环实施，然后做全家族组合，不将模型接口缺失
 整个推迟给M4采集，也不造native解析器/调度器作为前置。
 
-最新[P2基础连接验收](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md)通过155定向、334组件/
+此前[P2基础连接验收](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md)通过155定向、334组件/
 11标准和干净`8a62a98`的一次5,401全仓。原5,294case/78fixtures全部保留；617源/
 82fixtures匹配。只核限定F原端口、当前结果与no-entry生命周期连接，Execution
 仍为7；完整P2矩阵、P3–P5、M2原分母均OPEN。它不替代当前门的完整交付。
+
+后续[P2完整同步generator声明矩阵](M1_GENERATOR_MATRIX_ACCEPTANCE.md)现限定通过：
+全部16格与原输入/状态/消费者连接，275定向、660组件/37标准，以及干净`bd673cd`
+的一次5,676全仓；647源/92fixtures守恒。原完整回归1失败与确定性预算修复均保留。
+该结果更新上述P2状态；Execution仍7，P3–P5、完整M0–M2及自动建图不因此通过。
+下一步按原联合合同接持续body的实际发生与有条件host因果桥，再落实其余家族/M2。
 
 当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1
 声明组件不是实际导入；不要继续以增加声明表、兼容测试或 Tensor wrappers 代替

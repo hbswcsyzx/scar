@@ -1,6 +1,20 @@
 # Current evidence and remaining work
 
-## P2 frozen full failed; bounded-query scheduling repair open (2026-10-18)
+## P2 synchronous generator declared matrix accepted (2026-10-18)
+
+[Acceptance](M1_GENERATOR_MATRIX_ACCEPTANCE.md): all16 phase/request cells now
+connect original caller inputs, state predicates, branches, drive/no-entry,
+current outcomes and host consumers. Program18 selects explicit new capabilities;
+legacy wires remain. **275 focused /660 component cases /37 criteria** pass.
+One clean frozen `bd673cd` passes **5,676 full tests /548.571s /1,028,776 KiB**,
+zero failures/errors/skips, five warnings. All647 registered source hashes match;
+prior5,401 and initial failed-full5,673 identities and all92 fixtures survive.
+Protected checkouts remain unchanged. The initial failed full and repair evidence
+below are retained. P3–P5, D3, complete M0–M2, automatic LeWM recovery and verified
+speedup remain OPEN. Next is persistent-body occurrence/instance correspondence
+and conditional host order under the frozen P3 contract, without new backends.
+
+## Repair history: P2 frozen full failed (2026-10-18)
 
 The actual frozen `44d56af` run finished **5,672 passed /1 failed /0 errors or
 skips**, five warnings,545.049s. All646 registered source hashes stayed fixed.
@@ -10,14 +24,15 @@ old-test pollution: seed5 truncated at4,096; sufficient-budget costs ranged
 1,712–4,676. None remains an unproved result, never a successful proof.
 [Repair gates](M1_GENERATOR_MATRIX_REPAIR.md) preserve this failed full and
 require deterministic original-CFG scheduling, focused/component checks, then
-a separate clean frozen full. P2 acceptance remains open. The earlier scoped
-component results below do not override this failure.
+a separate clean frozen full. P2 acceptance remained open at that checkpoint;
+the earlier scoped component results did not override this failure.
 
 The minimal RPO repair now passes275 focused cases and660 component cases across
 37 criteria at one647-source fingerprint. New regressions first reproduced the
 failure, then verified eight fresh hash processes, declaration-table reordering
 and real budget truncation. Source review found no blocker. The separate
-`repair/full` frozen run is pending; this is not yet a full-regression PASS.
+`repair/full` subsequently passed as reported above. Its result does not change
+the status or source attribution of the initial failed full.
 
 ## P2 declared matrix and component checkpoint (2026-10-18)
 

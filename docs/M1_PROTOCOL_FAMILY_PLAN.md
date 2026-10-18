@@ -4,7 +4,12 @@
 原 [C2](M1_RESUMPTION_INTERFACES.md)、[D1](M1_DRIVER_CONTRACT_V2.md)、
 [D2](M1_DRIVER_LIFECYCLE_CONTRACT.md) 和 [控制协议§7](model/PYTHON_CONTROL_PROTOCOLS.md)。
 **当前 P0 审计及 [P1联合合同冻结](M1_PROTOCOL_CONTRACT.md)完成；
-P2–P5 实施、D3、完整第一阶段均未完成。**
+P3–P5 实施、D3、完整第一阶段均未完成。**
+
+[P2完整同步generator声明矩阵](M1_GENERATOR_MATRIX_ACCEPTANCE.md)现限定通过：
+16格及原输入/状态/消费者连接、275定向、660组件/37标准；修复一次预算调度
+故障后，干净`bd673cd`的5,676全仓通过。原失败full和全部反例保留。这里只关闭
+P2声明门，不证明source/native/runtime对应；下一步按原合同实施P3发生关联与host顺序。
 
 [P2基础实施检查点](M1_PROTOCOL_FOUNDATION.md)现按[限定验收](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md)
 通过155定向、334组件/11标准及`8a62a98`的一次5,401全仓，接通原端口、当前结果、
