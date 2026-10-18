@@ -1,5 +1,22 @@
 # SCAR execution model
 
+## Independent packet-route checkpoint (2026-10-18)
+
+Original lookup RAISE, original injection and matcher RAISE are three distinct
+packet sources. A narrow binding in the existing protocol_bindings table names
+the injection; actual matcher completions and bool branch derive true/false/
+failure routes. This adds no entity family or producer/state graph. Each input
+case correlates its complete source/caller/CFG tuple independently; original
+consumer and incoming inventories retain the denominator.
+
+The shared-budget frontier query checks exact original packet consumers and
+active C1 pending tokens. Cycles, reevaluation, opaque effects, normalization,
+native categories and C1 continuation preserve explicit gaps. Finally override
+support does not certify source applicability. All routes remain frontier-only;
+runtime identity and transformation authority remain false. See the
+[plan](M1_LOOKUP_FALLBACK_PLAN.md) and [acceptance](M1_LOOKUP_FALLBACK_PROGRESS.md).
+965 affected focused cases pass; all16 complete P4 groups and M0–M2 remain OPEN.
+
 ## Exception matching connection checkpoint (2026-10-18)
 
 The typed program core represents ordinary exception matching as an attachment

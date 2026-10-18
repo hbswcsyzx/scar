@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-c",
+    "\nimport hashlib\nimport inspect\nimport json\nfrom pathlib import Path\nimport sys\n\nimport scar.ir.program.codec as codec\nimport tests.fixtures.program_exception_match_graphs as fixture\n\ntree = Path.cwd().resolve()\nmodules = {\"encoder\": codec, \"fixture\": fixture}\nsources = {}\nfor label, module in modules.items():\n    path = Path(inspect.getfile(module)).resolve()\n    assert path.is_relative_to(tree), (label, path, tree)\n    sources[label] = {\"path\": str(path.relative_to(tree)),\n                      \"sha256\": hashlib.sha256(path.read_bytes()).hexdigest()}\nassert codec.SCHEMA_VERSION == 21\ngraph, _ = fixture.exception_match_program(mode=\"invoke\", input_kind=\"packet\")\nwire = codec.dumps(graph).encode(\"ascii\")\ndocument = json.loads(wire)\nassert document[\"schema_version\"] == 21\nassert document[\"exception_matches\"]\nassert not document[\"protocol_scopes\"] and not document[\"protocol_bindings\"]\nassert codec.dumps(codec.loads(wire.decode(\"ascii\"))).encode(\"ascii\") == wire\nPath(sys.argv[1]).write_bytes(wire)\nprint(json.dumps({\"schema_version\": 21, \"python_version\": sys.version,\n                  \"fixture_bytes\": len(wire),\n                  \"fixture_sha256\": hashlib.sha256(wire).hexdigest(),\n                  \"sources\": sources}, sort_keys=True))\n",
+    "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_lookup_fallback/oracle-v21/attempt001/program_graph_v21_frozen.json"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_lookup_fallback/oracle-v21/attempt001/program21-source-xnei3yp8",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONPATH": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_lookup_fallback/oracle-v21/attempt001/program21-source-xnei3yp8"
+  },
+  "source_revision": "8585d7f2aa013896fa58c3759d540338b78d43a5"
+}

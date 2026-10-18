@@ -1,5 +1,16 @@
 # SCAR roadmap and scope
 
+> **P4 independent packet fallback checkpoint (2026-10-18):**
+> [Acceptance](M1_LOOKUP_FALLBACK_PROGRESS.md) links independent E0/EL/EM to
+> original matcher/branch consumers, per-case source tuples and active C1
+> frontiers. 965 affected focused pass (old880 obligations incl. two documented
+> schema-parameter migrations; new85) with713 stable sources. Program22 preserves
+> an independent old21 oracle and legacy bytes; Execution8 stays unchanged.
+> Next: remaining normalization/source, C1 projection/context/override and
+> caller/family combinations under the unchanged16-group denominator, then
+> component/frozen-full and P5/M2. All16 groups and completeM0–M2 remain OPEN.
+> No new full, backend, automatic LeWM model, transformation or speedup.
+
 > **P4 generic exception matcher checkpoint (2026-10-18):**
 > [Acceptance](M1_EXCEPTION_MATCH_PROGRESS.md) connects real exception/handler
 > Uses, own N/R ports, bool branches and produced/forwarded states. 880 affected

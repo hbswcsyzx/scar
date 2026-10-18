@@ -535,6 +535,7 @@ _bind_model_ports(OperationResult, InvokeLiteralResult)
 # ProgramGraph captures their annotations.
 from scar.ir.program.protocol_connections import (
     AsyncSessionOutcome, CancelDelivery, CancelDeliveryRef, CancelHandling,
+    DelegateLookupFallback, NormalizedThrowSource,
     InitialAdvance, InjectedPacketTrigger, PROTOCOL_BINDING_TYPES,
     ProtocolBinding, ProtocolCallInputCase, ProtocolCallInputs,
     ProtocolOperationRef, ProtocolResultConsumers, RawOperandSource,
@@ -902,6 +903,8 @@ class ProgramGraph:
                        row.packet_source, row.consumer)
             elif type(row) is CancelHandling:
                 key = (type(row), row.delivery, row.handler_packet)
+            elif type(row) is DelegateLookupFallback:
+                key = (type(row), row.lookup, row.matcher, row.guard)
             else:
                 key = (type(row), row.scope, row.result)
             binding_keys.append(key)

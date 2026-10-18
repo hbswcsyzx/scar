@@ -21,7 +21,7 @@ def test_immutable_d2_3_v14_wire_is_unchanged_by_query_scope_views():
     proof = json.loads((FIXTURES / "program_graph_v14_frozen.proof.json").read_text())
     assert proof["source_revision"] == "fdf9d0d37ab043db297f095bfafa685b32b0b058"
     assert proof["codec_schema_version"] == proof["wire_schema_version"] == 14
-    assert SCHEMA_VERSION == 21
+    assert SCHEMA_VERSION == 22
     assert proof["codec_path_inside_immutable_archive"] is True
     assert proof["fixture_bytes"] == len(raw)
     assert proof["fixture_sha256"] == hashlib.sha256(raw).hexdigest()

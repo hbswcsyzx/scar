@@ -41,6 +41,7 @@ from scar.ir.program.lifecycle import (
 from scar.ir.program.protocol_connections import (
     AsyncSessionOutcome, CallTrigger, CancelDelivery,
     CancelDeliveryRef, CancelHandling,
+    DelegateLookupFallback, NormalizedThrowSource,
     InitialAdvance, InjectedPacketTrigger, PROTOCOL_BINDING_TYPES,
     PROTOCOL_CONNECTION_RECORD_TAGS, ProtocolBinding, ProtocolCallInputCase,
     ProtocolCallInputs, ProtocolOperationRef, ProtocolResultConsumers,
@@ -100,6 +101,7 @@ from .resumption import (
 )
 
 __all__ = [
+    'DelegateLookupFallback', 'NormalizedThrowSource',
     "BuiltinExceptionCategory", "ExceptionHandlerOperand", "ExceptionMatcher", "FixedBuiltinHandler",
     "CodeConstant", "ExactLiteralOrigin", "LiteralDefinition", "SourceExpression",
     "UninterpretedConstant", "UnlocatedLiteral", "LiteralEvaluation",

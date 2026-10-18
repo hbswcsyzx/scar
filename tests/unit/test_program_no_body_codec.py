@@ -32,7 +32,7 @@ def test_no_body_and_predicate_only_roundtrip_without_publishing_future_d2_table
     graph = no_body_program(receiver=receiver, predicate_only=predicate_only, strict_subset=True, extra_domain=True)
     payload = dumps(graph)
     document = json.loads(payload)
-    assert SCHEMA_VERSION == 21
+    assert SCHEMA_VERSION == 22
     assert document["schema_version"] == 13
     assert NO_BODY_FIELDS <= set(document)
     assert document["created_close_tests"]

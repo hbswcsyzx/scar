@@ -1,5 +1,24 @@
 # Current evidence and remaining work
 
+## P4 independent lookup-fallback packet checkpoint (2026-10-18)
+
+[Plan](M1_LOOKUP_FALLBACK_PLAN.md) and [acceptance](M1_LOOKUP_FALLBACK_PROGRESS.md)
+connect E0 injection, own lookup RAISE EL and own matcher RAISE EM to three
+derived original routes. Per-case complete tuples, active C1 pending frontiers,
+reevaluation/cycle/opaque boundaries and budget truncation retain their distinct
+roles. A real wrong-RAW-role omission is reproduced and fixed; the local OR
+positive passed before the change, so it is not labeled a reproduced bug.
+
+Final **965 affected focused** pass at one stable **713-source** fingerprint:
+old880 obligations (878 unchanged IDs plus two future-version22→23 migrations),
+new85; zero failures/errors/skips. All prior failed attempts remain archived.
+Program22 is a new binding capability, not a new table; an independent old21
+encoder oracle and legacy2–21 bytes pass, Execution8 remains unchanged.
+All16 P4 groups, P5/M2 and fullM0–M2 remain OPEN. Next: normalization/source,
+full C1 projection/context/override and remaining caller/family combinations.
+No new component/full, backend, automatic whole-LeWM model, transformation or
+speedup is claimed. Original LeWM and the protected main checkout remain clean.
+
 ## P4 generic exception matcher checkpoint (2026-10-18)
 
 [Plan](M1_EXCEPTION_MATCH_PLAN.md) and [acceptance](M1_EXCEPTION_MATCH_PROGRESS.md)

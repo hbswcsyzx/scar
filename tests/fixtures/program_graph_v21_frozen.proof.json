@@ -1,0 +1,16 @@
+{
+  "encoder_source_sha256": "9b36d73cecda61688d6d62a0b5e7e471543ba8c471e70c44d199219843351032",
+  "fixture_bytes": 24222,
+  "fixture_profile": "exception_match_program(mode='invoke', input_kind='packet')",
+  "fixture_sha256": "59ef85f4b1d2c1981d15f0b1f4ce8987a026c95ca5e9dd37f666091334d184ff",
+  "fixture_source_sha256": "8bd2e1aae771d92f8101565ad1a3e1e2926a9ac5514e2f1de95d80ab00ea4531",
+  "generated_by": "git archive of source_revision; isolated cwd/PYTHONPATH; old codec only",
+  "generation_command": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_lookup_fallback/oracle-v21/attempt001/command.json",
+  "generator_sha256": "ae45e6a745a92ab4d78c4e425b11b26f6dc4aebfabcaa1ca00c875d23f7a2c4e",
+  "python_version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "schema_version": 21,
+  "source_archive": "artifacts/experiments/b1_call_operands/model_lookup_fallback/oracle-v21/attempt001/source-v21.tar",
+  "source_archive_sha256": "710f568c744fa5e9549d033212ce17dfbf185a4d5e104d177213010da1032c16",
+  "source_revision": "8585d7f2aa013896fa58c3759d540338b78d43a5",
+  "source_tree_cleanup": "TemporaryDirectory removed only the owned extraction; tar retained"
+}

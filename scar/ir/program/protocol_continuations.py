@@ -419,6 +419,9 @@ def continuation_connections(ctx):
         check(None if actual is None else actual == expected, path,
               "fixed continuation port has the wrong payload role", "protocol_continuation_role")
 
+    from .protocol_lookup_fallbacks import fallback_binding_issues, lookup_fallbacks
+    issues.extend(fallback_binding_issues(ctx))
+
     # Supplied metadata outside the canonical slot inventory is a contradiction,
     # not an absent obligation that can disappear from the derived traversal.
     for row in ctx.graph.protocol_operations:
@@ -552,6 +555,8 @@ def continuation_connections(ctx):
                     if _selected_kind(ctx, contract.result) is ExitKind.RAISE:
                         entry['method_exception_matches'] = _method_exception_matches(
                             ctx, row, method_consumers.get(identity), missing)
+                        entry['lookup_fallbacks'] = lookup_fallbacks(
+                            ctx, row, entry['method_exception_matches'], issue, missing)
                         missing("method_lookup_exception_category_unproved", identity)
                     else:
                         ledger = method_consumers.get(identity)

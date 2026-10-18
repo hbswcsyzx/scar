@@ -362,8 +362,46 @@ class TaskStatusRead:
         self.consumer.__post_init__()
 
 
-ProtocolBinding: TypeAlias = AsyncSessionOutcome | CancelDelivery | CancelHandling | TaskStatusRead
-PROTOCOL_BINDING_TYPES = (AsyncSessionOutcome, CancelDelivery, CancelHandling, TaskStatusRead)
+@dataclass(frozen=True, slots=True)
+class NormalizedThrowSource:
+    """Independent raw and whole-packet anchors, not a normalization proof."""
+
+    raw: OwnedUse
+    packet: ExpectedSourcePort
+
+    def __post_init__(self) -> None:
+        _record(self.raw, OwnedUse, 'normalized throw raw source')
+        _expected_source(self.packet, 'normalized throw packet source')
+
+
+@dataclass(frozen=True, slots=True)
+class DelegateLookupFallback:
+    lookup: ProtocolOperationRef
+    matcher: OperationID
+    request: NormalizedThrowSource | InjectedPacketTrigger | StaticProtocolGap
+    guard: ControlEdgeReference | None = None
+
+    def __post_init__(self) -> None:
+        _record(self.lookup, ProtocolOperationRef, 'fallback exact lookup site')
+        _identifier(self.matcher, OperationID, 'fallback original matcher operation')
+        if type(self.request) not in (NormalizedThrowSource, InjectedPacketTrigger, StaticProtocolGap):
+            raise TypeError('lookup fallback requires an exact independent request source or gap')
+        self.request.__post_init__()
+        if self.guard is not None:
+            _record(self.guard, ControlEdgeReference, 'fallback original guard')
+
+
+ProtocolBinding: TypeAlias = AsyncSessionOutcome | CancelDelivery | CancelHandling | TaskStatusRead | DelegateLookupFallback
+PROTOCOL_BINDING_TYPES = (AsyncSessionOutcome, CancelDelivery, CancelHandling, TaskStatusRead, DelegateLookupFallback)
+
+LOOKUP_FALLBACK_RECORD_TAGS = MappingProxyType({
+    NormalizedThrowSource: ('kind', 'NORMALIZED_THROW_SOURCE'),
+    DelegateLookupFallback: ('kind', 'DELEGATE_LOOKUP_FALLBACK'),
+})
+
+
+def has_lookup_fallback_capability(graph: object) -> bool:
+    return any(type(row) is DelegateLookupFallback for row in getattr(graph, 'protocol_bindings', ()))
 
 
 def _call_trigger(value: object, name: str) -> None:
@@ -550,6 +588,8 @@ def has_delegated_method_lookup_capability(graph: object) -> bool:
 
 
 __all__ = [
+    'DelegateLookupFallback', 'NormalizedThrowSource', 'LOOKUP_FALLBACK_RECORD_TAGS',
+    'has_lookup_fallback_capability',
     "AssociationPort", "AsyncSessionOutcome", "CallTrigger", "CancelDelivery",
     "CancelDeliveryRef", "CancelHandling", "ExactResultPort", "ExpectedSourcePort",
     "InitialAdvance", "InjectedPacketTrigger", "PROTOCOL_CONNECTION_RECORD_TAGS",

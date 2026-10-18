@@ -14,7 +14,7 @@ from scar.ir.program.model import (
     BlockArgument, CompletionResult, InvokeLiteralResult, OperationResult, ProgramGraph,
 )
 from scar.ir.program.protocol_connections import (
-    AsyncSessionOutcome, CancelDelivery, CancelDeliveryRef, CancelHandling,
+    AsyncSessionOutcome, CancelDelivery, CancelDeliveryRef, CancelHandling, DelegateLookupFallback,
     PROTOCOL_BINDING_TYPES,
     ProtocolCallInputCase, ProtocolCallInputs, ProtocolOperationRef,
     ProtocolResultConsumers, RawOperandSource, RawRequestTrigger,
@@ -73,7 +73,7 @@ def test_exact_record_variants_keep_canonical_port_roles():
     assert handling.delivery == delivery_ref
     assert status.state_sites == (InvokeStateOperand(OP, USE),)
     assert set(PROTOCOL_BINDING_TYPES) == {AsyncSessionOutcome, CancelDelivery,
-                                           CancelHandling, TaskStatusRead}
+                                           CancelHandling, TaskStatusRead, DelegateLookupFallback}
     with pytest.raises(FrozenInstanceError):
         inputs.site = site
     with pytest.raises((AttributeError, TypeError)):
