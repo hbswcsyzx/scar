@@ -1,0 +1,5 @@
+{"case": "shared", "core_issues": [], "execution_issues": [], "gaps": 14, "links": 2, "activations": 3}
+{"case": "invoke.raise=False.transfer=True", "core_issues": [], "execution_issues": [], "gaps": 10, "links": 1, "activations": 2}
+{"case": "invoke.raise=False.transfer=False", "core_issues": [], "execution_issues": [], "gaps": 11, "links": 1, "activations": 2}
+{"case": "invoke.raise=True.transfer=True", "core_issues": [], "execution_issues": [], "gaps": 10, "links": 1, "activations": 2}
+{"case": "invoke.raise=True.transfer=False", "core_issues": [], "execution_issues": [], "gaps": 11, "links": 1, "activations": 2}

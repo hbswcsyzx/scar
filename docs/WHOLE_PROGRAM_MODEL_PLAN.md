@@ -39,8 +39,12 @@ R2.3-D/P 已接原端口、消费者/Q 根、独立来源与实际产出；接�
 原 effect resolver 不再以 work 为 host INVOKE 存在前提；准确 actual/future 贡献、
 区段 AND/OR、原 Mat 匹配、全读取区间威胁和精确 target lifetime 已接规范图。
 完整 endpoint/native source/coherence 协议仍有准确缺口，MATCHED 不授变换权限。
-下一步先审查 R3 通用 load→produce→consume→output→release 的跨接口组合，明确
-Q 端点、原生边界与生命周期如何相接，按正反例自行验收。随后继续 selector/
+[R3.1 动态调用及 work 物化集合连接](M1_CALL_ACTIVATION_API.md)现通过
+[591 项组件与冻结 `881cbfb` 的 4,951 项全仓验收](M1_CALL_ACTIVATION_ACCEPTANCE.md)，
+原参数/返回/状态端口没有复制；未知入口不能豁免已知线程冲突，声明不证明真实对应。
+下一步按[R3.2/R3.3](M1_RESOURCE_COMPOSITION_PLAN.md)连接完整 Q requirement 分母下
+load→produce→consume→output→release 的跨接口组合，明确端点、原生边界与生命周期。
+随后继续 selector/
 literal、剩余家族及 M2 构造分母。**完整第一阶段仍未完成。** 不增加 detector/backend，
 不以手工夹具冒充 LeWM 自动恢复或以测试耗时冒充加速。
 

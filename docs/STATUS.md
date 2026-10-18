@@ -1,5 +1,23 @@
 # Current evidence and remaining work
 
+## R3.1 call activation and work-set connections accepted (2026-10-18)
+
+[API](M1_CALL_ACTIVATION_API.md) and [acceptance](M1_CALL_ACTIVATION_ACCEPTANCE.md):
+**591 component cases / 8 criteria / 16.611s**, all **555** source hashes unchanged.
+One clean frozen `881cbfb` passes **4,951 full tests / 490.693s / 1,025,300 KiB**,
+zero failures/errors/skips, four warnings. All prior **4,826** case identities
+and **65** fixtures survive; current **68** fixtures match. Owned basetemp removed,
+protected checkouts unchanged. Exact caller/activation/entry/completion links
+derive original argument/result/state routes; missing capture stays explicit.
+Known thread conflicts, multiple terminal occurrences and duplicate/cyclic
+dynamic links are rejected. Complete work Mat sets agree with declared reads,
+writes and Mat borrow targets. Execution v7 preserves v1–v6 bytes and tags.
+These are declared connections, not runtime/value identity or transformation
+proof. [Next R3.2/R3.3](M1_RESOURCE_COMPOSITION_PLAN.md) connects complete Q
+requirements to load/consume/save/lifetime; endpoint protocols, native capture,
+full M0–M2 and automatic LeWM modeling/simplification remain unfinished.
+No new workload speedup was measured. Earlier checkpoint scopes follow.
+
 ## R2.3-V content validity/support interfaces and frozen full accepted (2026-10-18)
 
 The [V API](M1_VALIDITY_API.md) derives labeled source contributions, exact

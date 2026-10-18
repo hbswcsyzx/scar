@@ -1,0 +1,10 @@
+[
+  "git",
+  "ls-tree",
+  "-r",
+  "--name-only",
+  "348d18277b963bc183fb420bf173f05594d667d8",
+  "scar",
+  "tests/fixtures/execution_validity_records.py",
+  "tests/fixtures/execution_v5_frozen.json"
+]

@@ -11,6 +11,14 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
+The [R3.1 call activation and work-set connections](docs/M1_CALL_ACTIVATION_API.md)
+pass [591 component checks / 8 criteria and 4,951 clean frozen full tests](docs/M1_CALL_ACTIVATION_ACCEPTANCE.md)
+(`881cbfb`). All previous 4,826 test identities and 65 fixtures survive.
+Original argument/completion/state ports remain canonical; declared routes do
+not prove runtime identity. Execution v7 retains v1–v6 bytes. Whole R3,
+complete M0–M2 and automatic LeWM simplification remain open. Next is complete
+Q-rooted load/consume/save composition; no new speedup was measured.
+
 The [R2.3-V content validity/support interfaces](docs/M1_VALIDITY_API.md)
 now connect source-derived labeled actual/future coverage, exact alternatives,
 original effects, conservative whole-read threats and target lifetimes. Its

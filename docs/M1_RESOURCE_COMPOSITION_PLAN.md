@@ -5,6 +5,9 @@
 本门仍属于 M0–M2 建模，不新增 detector、backend、lowerer 或 LeWM 专用规则。
 本文件是计划，不是已通过的报告。
 
+R3.1 限定接口现已通过[591 项组件与冻结 `881cbfb` 的 4,951 项全仓验收](M1_CALL_ACTIVATION_ACCEPTANCE.md)。
+原 R3.2/R3.3 和完整 M0–M2 分母保留，下表后续项目尚未通过。
+
 ## 模型与审查结论
 
 规范实体仍是 Operation、Value、StateLocation、Region、Resource。静态端口和

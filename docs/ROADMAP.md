@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **R3.1 interface checkpoint (2026-10-18):**
+> [call activation and work-set connections](M1_CALL_ACTIVATION_API.md) pass
+> **591 component cases / 8 criteria / 16.611s**, all 555 source hashes unchanged.
+> Clean frozen `881cbfb` passes **4,951 full tests / 490.693s**; all prior 4,826
+> identities and 65 fixtures survive. [Acceptance](M1_CALL_ACTIVATION_ACCEPTANCE.md)
+> preserves exact original ports, unknown boundaries and runtime identity gaps.
+> Next: [R3.2/R3.3 full Q-rooted load/consume/save composition](M1_RESOURCE_COMPOSITION_PLAN.md),
+> then remaining selector/literal/family/M2 obligations. Whole R3 and M0–M2 stay
+> open; no new backend, automatic LeWM simplification or speedup is claimed.
+
 > **R2.3-V interface checkpoint (2026-10-18):**
 > [content validity/support API](M1_VALIDITY_API.md) passes **649 component
 > cases / 11 criteria / 18.653s**, 544 source hashes unchanged. One clean frozen

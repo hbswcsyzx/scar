@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="17" time="0.809" timestamp="2026-10-18T09:46:34.659563+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_complete_work_set_cannot_omit_a_separately_declared_materialization[read]" time="0.067"><failure message="assert False&#10; +  where False = any(&lt;generator object test_complete_work_set_cannot_omit_a_separately_declared_materialization.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e74c8930&gt;)">kind = 'read'
+
+    @pytest.mark.parametrize('kind', ('read', 'write', 'retained'))
+    def test_complete_work_set_cannot_omit_a_separately_declared_materialization(kind):
+        program, model, values, evidence, ticket, _ = _case(kind)
+        model = _set(model, ticket, Completeness.COMPLETE, ())
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+&gt;       assert any(issue.code == 'work_materialization_unlisted' for issue in report.issues)
+E       assert False
+E        +  where False = any(&lt;generator object test_complete_work_set_cannot_omit_a_separately_declared_materialization.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e74c8930&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:45: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_complete_work_set_cannot_omit_a_separately_declared_materialization[write]" time="0.021"><failure message="assert False&#10; +  where False = any(&lt;generator object test_complete_work_set_cannot_omit_a_separately_declared_materialization.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e74c9b10&gt;)">kind = 'write'
+
+    @pytest.mark.parametrize('kind', ('read', 'write', 'retained'))
+    def test_complete_work_set_cannot_omit_a_separately_declared_materialization(kind):
+        program, model, values, evidence, ticket, _ = _case(kind)
+        model = _set(model, ticket, Completeness.COMPLETE, ())
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+&gt;       assert any(issue.code == 'work_materialization_unlisted' for issue in report.issues)
+E       assert False
+E        +  where False = any(&lt;generator object test_complete_work_set_cannot_omit_a_separately_declared_materialization.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e74c9b10&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:45: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_complete_work_set_cannot_omit_a_separately_declared_materialization[retained]" time="0.014"><failure message="assert False&#10; +  where False = any(&lt;generator object test_complete_work_set_cannot_omit_a_separately_declared_materialization.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e735c520&gt;)">kind = 'retained'
+
+    @pytest.mark.parametrize('kind', ('read', 'write', 'retained'))
+    def test_complete_work_set_cannot_omit_a_separately_declared_materialization(kind):
+        program, model, values, evidence, ticket, _ = _case(kind)
+        model = _set(model, ticket, Completeness.COMPLETE, ())
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+&gt;       assert any(issue.code == 'work_materialization_unlisted' for issue in report.issues)
+E       assert False
+E        +  where False = any(&lt;generator object test_complete_work_set_cannot_omit_a_separately_declared_materialization.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e735c520&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:45: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_partial_or_unknown_set_omission_stays_a_specific_gap[PARTIAL-read]" time="0.012"><failure message="assert False&#10; +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e74c85f0&gt;)">kind = 'read', coverage = &lt;Completeness.PARTIAL: 'PARTIAL'&gt;
+
+    @pytest.mark.parametrize('kind', ('read', 'write', 'retained'))
+    @pytest.mark.parametrize('coverage', (Completeness.PARTIAL, Completeness.UNKNOWN))
+    def test_partial_or_unknown_set_omission_stays_a_specific_gap(kind, coverage):
+        program, model, values, evidence, ticket, _ = _case(kind)
+        model = _set(model, ticket, coverage, ())
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+        assert report.valid, report.issues
+&gt;       assert any(gap.code == 'work_materialization_unresolved' for gap in report.gaps)
+E       assert False
+E        +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e74c85f0&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:57: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_partial_or_unknown_set_omission_stays_a_specific_gap[PARTIAL-write]" time="0.014"><failure message="assert False&#10; +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e735dff0&gt;)">kind = 'write', coverage = &lt;Completeness.PARTIAL: 'PARTIAL'&gt;
+
+    @pytest.mark.parametrize('kind', ('read', 'write', 'retained'))
+    @pytest.mark.parametrize('coverage', (Completeness.PARTIAL, Completeness.UNKNOWN))
+    def test_partial_or_unknown_set_omission_stays_a_specific_gap(kind, coverage):
+        program, model, values, evidence, ticket, _ = _case(kind)
+        model = _set(model, ticket, coverage, ())
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+        assert report.valid, report.issues
+&gt;       assert any(gap.code == 'work_materialization_unresolved' for gap in report.gaps)
+E       assert False
+E        +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e735dff0&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:57: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_partial_or_unknown_set_omission_stays_a_specific_gap[PARTIAL-retained]" time="0.013"><failure message="assert False&#10; +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e7371150&gt;)">kind = 'retained', coverage = &lt;Completeness.PARTIAL: 'PARTIAL'&gt;
+
+    @pytest.mark.parametrize('kind', ('read', 'write', 'retained'))
+    @pytest.mark.parametrize('coverage', (Completeness.PARTIAL, Completeness.UNKNOWN))
+    def test_partial_or_unknown_set_omission_stays_a_specific_gap(kind, coverage):
+        program, model, values, evidence, ticket, _ = _case(kind)
+        model = _set(model, ticket, coverage, ())
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+        assert report.valid, report.issues
+&gt;       assert any(gap.code == 'work_materialization_unresolved' for gap in report.gaps)
+E       assert False
+E        +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e7371150&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:57: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_partial_or_unknown_set_omission_stays_a_specific_gap[UNKNOWN-read]" time="0.013"><failure message="assert False&#10; +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e74cbc60&gt;)">kind = 'read', coverage = &lt;Completeness.UNKNOWN: 'UNKNOWN'&gt;
+
+    @pytest.mark.parametrize('kind', ('read', 'write', 'retained'))
+    @pytest.mark.parametrize('coverage', (Completeness.PARTIAL, Completeness.UNKNOWN))
+    def test_partial_or_unknown_set_omission_stays_a_specific_gap(kind, coverage):
+        program, model, values, evidence, ticket, _ = _case(kind)
+        model = _set(model, ticket, coverage, ())
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+        assert report.valid, report.issues
+&gt;       assert any(gap.code == 'work_materialization_unresolved' for gap in report.gaps)
+E       assert False
+E        +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e74cbc60&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:57: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_partial_or_unknown_set_omission_stays_a_specific_gap[UNKNOWN-write]" time="0.014"><failure message="assert False&#10; +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e735d970&gt;)">kind = 'write', coverage = &lt;Completeness.UNKNOWN: 'UNKNOWN'&gt;
+
+    @pytest.mark.parametrize('kind', ('read', 'write', 'retained'))
+    @pytest.mark.parametrize('coverage', (Completeness.PARTIAL, Completeness.UNKNOWN))
+    def test_partial_or_unknown_set_omission_stays_a_specific_gap(kind, coverage):
+        program, model, values, evidence, ticket, _ = _case(kind)
+        model = _set(model, ticket, coverage, ())
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+        assert report.valid, report.issues
+&gt;       assert any(gap.code == 'work_materialization_unresolved' for gap in report.gaps)
+E       assert False
+E        +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e735d970&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:57: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_partial_or_unknown_set_omission_stays_a_specific_gap[UNKNOWN-retained]" time="0.013"><failure message="assert False&#10; +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e73702b0&gt;)">kind = 'retained', coverage = &lt;Completeness.UNKNOWN: 'UNKNOWN'&gt;
+
+    @pytest.mark.parametrize('kind', ('read', 'write', 'retained'))
+    @pytest.mark.parametrize('coverage', (Completeness.PARTIAL, Completeness.UNKNOWN))
+    def test_partial_or_unknown_set_omission_stays_a_specific_gap(kind, coverage):
+        program, model, values, evidence, ticket, _ = _case(kind)
+        model = _set(model, ticket, coverage, ())
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+        assert report.valid, report.issues
+&gt;       assert any(gap.code == 'work_materialization_unresolved' for gap in report.gaps)
+E       assert False
+E        +  where False = any(&lt;generator object test_partial_or_unknown_set_omission_stays_a_specific_gap.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e73702b0&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:57: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_matching_original_mat_in_complete_set_preserves_native_uncertainty[read]" time="0.012" /><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_matching_original_mat_in_complete_set_preserves_native_uncertainty[write]" time="0.015" /><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_matching_original_mat_in_complete_set_preserves_native_uncertainty[retained]" time="0.016" /><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_uri_alias_does_not_change_scoped_materialization_identity[read]" time="0.015" /><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_uri_alias_does_not_change_scoped_materialization_identity[write]" time="0.017" /><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_uri_alias_does_not_change_scoped_materialization_identity[retained]" time="0.016" /><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_materialization_from_another_ticket_cannot_fill_complete_consumer_set" time="0.014"><failure message="assert False&#10; +  where False = any(&lt;generator object test_materialization_from_another_ticket_cannot_fill_complete_consumer_set.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e735fb90&gt;)">def test_materialization_from_another_ticket_cannot_fill_complete_consumer_set():
+        program, model, values, evidence, _ = content_connection_fixture(consumer='work')
+        read = model.content_reads[0]
+        actual = read.consumer.read.ticket
+        other = next(row.id for row in model.submissions if row.id != actual)
+        model = _set(model, actual, Completeness.COMPLETE, ())
+        model = _set(model, other, Completeness.COMPLETE, (read.placement.materialization,))
+        report = validate(model, program, value_graphs=values, evidence_graphs=evidence)
+&gt;       assert any(issue.code == 'work_materialization_unlisted' for issue in report.issues)
+E       assert False
+E        +  where False = any(&lt;generator object test_materialization_from_another_ticket_cannot_fill_complete_consumer_set.&lt;locals&gt;.&lt;genexpr&gt; at 0x79d1e735fb90&gt;)
+
+tests/unit/test_execution_work_materialization_connections.py:91: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_work_materialization_connections" name="test_missing_placement_stays_unknown_and_does_not_invent_a_materialization" time="0.014" /></testsuite></testsuites>
