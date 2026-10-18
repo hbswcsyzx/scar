@@ -45,12 +45,13 @@ The [D2 lifecycle review and gates](docs/M1_DRIVER_LIFECYCLE.md) separate body
 publication, no-body paths, session state and reference drop. The
 [D2.0 contract](docs/M1_DRIVER_LIFECYCLE_CONTRACT.md) now fixes fields and the
 edge-first must analysis. The [D2.1 body publication component](docs/M1_BODY_PUBLICATION_ACCEPTANCE.md)
-passes 741 component checks and 3,776 frozen full tests (`49201e7`). No-body,
-session/drop and E/F/P product analysis remain unfinished; these declarations
+passes 741 component checks and 3,776 frozen full tests (`49201e7`).
+Session/drop and E/F/P product analysis remain unfinished; these declarations
 and language observations add no runtime or transformation authority.
 The [D2.2 no-body component](docs/M1_NO_BODY_ACCEPTANCE.md) now passes 836 component
-checks / 21 criteria. Its frozen full regression is pending; predicate/branch/mark
-structure is distinct from actual runtime guard execution.
+checks / 21 criteria and 3,871 frozen full tests (`006a0e0`). It connects the real
+bool branch, exact owner and body-only state mark, preserving the original false
+path. Predicate/branch/mark structure is distinct from actual runtime guard execution.
 
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,

@@ -1,0 +1,5 @@
+Attempt 001
+Worktree: /tmp/scar-structured-model-280qf4mi
+Python: active conda environment lewm
+PYTHONDONTWRITEBYTECODE=1; PYTHONPATH=.
+AST parse passed. First graph validation failed for BODY at missing_result/missing_value for driver.created_close.bool. No association case was reached. No product files were edited during this attempt.

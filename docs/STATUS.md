@@ -1,14 +1,21 @@
 # Current evidence and remaining work
 
-## D2.2 component passed; frozen full run pending (2026-10-18)
+## D2.2 no-body component and frozen full run accepted (2026-10-18)
 
 The [no-body component](M1_NO_BODY_ACCEPTANCE.md) passes **836 cases / 21 criteria /
 12.709s**, with all 430 source hashes unchanged. It joins a declared current-state
 test, its real bool BRANCH and an explicit private true-path body-only mark.
 Predicate-only graphs remain legal; the false path keeps the original final
 gate and BodyDrive. No runtime guard, native lifecycle or transformation is proved.
-Full regression will run once after a clean implementation commit. D2.3/D2.4,
-D3 and complete M0–M2 remain open.
+Frozen clean `006a0e0` passes **3,871 tests / 463.982s / 1,028,088KiB**, with
+zero failures/errors/skips and three warnings. All 430 source and 35 fixture
+hashes match before/after. All prior 3,776 test identities survive; the only
+changed prior fixture is the authorized publication helper extraction, and all
+old JSON wires are byte-exact. Independent bounded source review matches the
+component fingerprint. The owned basetemp was removed and protected checkouts
+are unchanged. [Archived evidence](../artifacts/experiments/b1_call_operands/model_no_body/README.md)
+preserves original failures and commands. D2.3/D2.4, D3 and complete M0–M2 remain
+open; no new LeWM transform or clean A/B speedup is established.
 
 ## D2.0 contract and D2.1 body publication accepted (2026-10-18)
 
@@ -27,8 +34,8 @@ Independent bounded review passes with unchanged source. Frozen `49201e7` passes
 existing warnings. HEAD, clean status, all 423 source and 32 fixture hashes match;
 all prior 29 fixtures and 3,706 test identities remain. The owned basetemp was removed.
 See the [archive](../artifacts/experiments/b1_call_operands/model_body_publication/README.md).
-D2.2–D2.4, D3,
-complete C2/M0–M2 and LeWM automatic modeling/simplification remain open.
+At that D2.1 checkpoint, D2.2–D2.4 were open; D2.2 acceptance is recorded above.
+D2.3/D2.4, D3, complete C2/M0–M2 and LeWM automatic modeling/simplification remain open.
 
 ## D2 lifecycle review and ordered implementation gates (2026-10-18)
 

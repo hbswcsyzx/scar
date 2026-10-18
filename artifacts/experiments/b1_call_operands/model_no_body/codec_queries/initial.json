@@ -1,0 +1,64 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_program_no_body_codec.py",
+    "tests/unit/test_program_no_body_queries.py"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "exit_code": 0,
+  "elapsed_seconds": 2.318223237991333,
+  "source_hashes": [
+    {
+      "path": "scar/ir/program/codec.py",
+      "syntax": "ok",
+      "single_terminal_newline": true,
+      "sha256": "4be6f084d7390f7dbd8a859dae2112fd28cb4eec6b27f3c79a5945fd616dde2f"
+    },
+    {
+      "path": "scar/ir/program/queries.py",
+      "syntax": "ok",
+      "single_terminal_newline": true,
+      "sha256": "4b76caca361b5361b9a8511133bcff3c5ba49b70297b7c633d52eacf59dbe625"
+    },
+    {
+      "path": "scar/cli.py",
+      "syntax": "ok",
+      "single_terminal_newline": true,
+      "sha256": "09a8d2c4c0c9fca515397699cb55dc2df84b8425e8beed608c58db7e6765b168"
+    },
+    {
+      "path": "tests/unit/test_program_no_body_codec.py",
+      "syntax": "ok",
+      "single_terminal_newline": true,
+      "sha256": "70e4251de2c10571fd2fb01255edae69a1958833702da066ff8e79281aa2234b"
+    },
+    {
+      "path": "tests/unit/test_program_no_body_queries.py",
+      "syntax": "ok",
+      "single_terminal_newline": true,
+      "sha256": "6429fe3cdb68ceb665286708c6ec59e3ab4df91b5e7f681c75682b9f339b7319"
+    },
+    {
+      "path": "tests/unit/test_program_resumption_codec.py",
+      "syntax": "ok",
+      "single_terminal_newline": true,
+      "sha256": "e7c7f91bca82d9679dc90b490e43ebe132622ffbee08e096c3223623a8ba3f19"
+    },
+    {
+      "path": "tests/unit/test_program_driver_codec.py",
+      "syntax": "ok",
+      "single_terminal_newline": true,
+      "sha256": "eb0c7de11241cd35d7a1a65d89fd84bd99687197374344392b61db6ffc08cd1e"
+    },
+    {
+      "path": "tests/unit/test_program_publication_codec.py",
+      "syntax": "ok",
+      "single_terminal_newline": true,
+      "sha256": "e18281cb80e17601add876ba31719876f3e7311d9ef290005dfa87236773b8c1"
+    }
+  ]
+}

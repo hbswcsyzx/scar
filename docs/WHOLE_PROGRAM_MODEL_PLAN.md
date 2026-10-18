@@ -72,7 +72,7 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
    实施已收敛的规范连接（已验收）；[D2生命周期](M1_DRIVER_LIFECYCLE.md)按
    [冻结合同](M1_DRIVER_LIFECYCLE_CONTRACT.md)→body publication→no-body→session/drop
    →组合验收细化；D2.0已收敛，D2.1组件及冻结全仓已验收；[D2.2](M1_NO_BODY_ACCEPTANCE.md)
-   836组件/21标准已通过，冻结全仓待执行，
+   836组件/21标准及冻结`006a0e0`的3,871项全仓已通过，
    不靠D1字段设计通过缩小完整C2分母。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。
@@ -96,6 +96,11 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
   可只读复用的重型 trace。
 
 ## 5. 当前证据锚点
+
+- [D2.2 no-body](M1_NO_BODY_ACCEPTANCE.md)836组件/21标准/12.709s通过，
+  冻结`006a0e0`的3,871项全仓/463.982s通过；430源/35fixture前后一致，
+  保留原3,776测试身份。接通true mark与实际bool/owner/current-state，false
+  保留原gate/Drive路径；不授native/source/runtime或变换权限。
 
 - [D2.0合同](M1_DRIVER_LIFECYCLE_CONTRACT.md)已冻结字段及E/F→解释T、当前P的派生
   关系；同一有限方程脚本在conda lewm完成11场景/1,920有界单步核对，不是产品证明。
