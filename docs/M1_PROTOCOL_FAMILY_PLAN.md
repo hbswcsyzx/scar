@@ -4,12 +4,19 @@
 原 [C2](M1_RESUMPTION_INTERFACES.md)、[D1](M1_DRIVER_CONTRACT_V2.md)、
 [D2](M1_DRIVER_LIFECYCLE_CONTRACT.md) 和 [控制协议§7](model/PYTHON_CONTROL_PROTOCOLS.md)。
 **当前 P0 审计及 [P1联合合同冻结](M1_PROTOCOL_CONTRACT.md)完成；
-P3–P5 实施、D3、完整第一阶段均未完成。**
+P4–P5 实施、D3、完整第一阶段均未完成。**
+
+[P3持续body声明发生关联](M1_BODY_OCCURRENCE_ACCEPTANCE.md)现限定通过：
+O01–O16原端口、instance/captures/segment/首出口与conditional host顺序，
+255定向、606组件/18标准及干净`8138986`的5,822全仓通过；668源/99fixtures
+守恒。原6失败full和test-only版本修复保留。下一步按
+[P4具体规划](M1_REMAINING_PROTOCOL_PLAN.md)接F12–F24/X25–X27消费者和组合，
+不因已存在profile/clause而声明其已实现。
 
 [P2完整同步generator声明矩阵](M1_GENERATOR_MATRIX_ACCEPTANCE.md)现限定通过：
 16格及原输入/状态/消费者连接、275定向、660组件/37标准；修复一次预算调度
 故障后，干净`bd673cd`的5,676全仓通过。原失败full和全部反例保留。这里只关闭
-P2声明门，不证明source/native/runtime对应；下一步按原合同实施P3发生关联与host顺序。
+P2声明门，不证明source/native/runtime对应；随后P3限定结果见上，不关闭P4/P5。
 
 [P2基础实施检查点](M1_PROTOCOL_FOUNDATION.md)现按[限定验收](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md)
 通过155定向、334组件/11标准及`8a62a98`的一次5,401全仓，接通原端口、当前结果、
@@ -79,7 +86,7 @@ core-connections 的 F01–F16、语言报告的机制表与上述编号有重�
 | P0 当前审计 | 三路源码审读、旧 IR 五观察、新启动 throw 六观察及初败、完整分母。 | 已有关系/真缺口/推断撤回分别记录；不得把旧泛型结构当 native 等价。已完成审计，不授产品 PASS。 |
 | P1 联合合同冻结 | [精确合同](M1_PROTOCOL_CONTRACT.md)：F 固定 profile/原端口与 O 两自然键关系；以下五项决策均有落点。 | 已以 PASS_WITH_SCOPE 自主关闭设计门；保留初稿及修订。只证明设计可实施，不算 F/O 产品或全家族通过。 |
 | P2 F 基础闭环 | 同步 generator 全表，原 raw→处理→gate/body 或无 body→source→host adapter。 | 正确类型但错来源、前置拒绝误终结、初入/内部异常混同、close 错后态必须发现；其他家族分母仍保留。 |
-| P3 O 发生闭环 | 一持续 body 两次 Drive，Start/Resume、instance/captures、当前/saved inputs、实际首出口。 | 不放宽 CallActivation；错 activation/generation/run/状态/来源拒绝，缺捕获保 gap；可逐次换线程。 |
+| P3 O 发生闭环 | 已按[限定验收](M1_BODY_OCCURRENCE_ACCEPTANCE.md)通过：一持续 body 两次 Drive，Start/Resume、instance/captures、当前/saved inputs、实际首出口。 | O01–O16、conditional host桥及mixed occurrence cycle通过；不授native/runtime或自动建图。 |
 | P4 全家族组合 | coroutine/generator-coroutine、async request、delegation、await/cancel 与 C1/session/release。 | 逐项映射 F12–F24/X25–X27；普通 opaque 边界不冒充内部协议已验证，不能只贴家族 label。 |
 | P5 公共面与完整 D3 | X28、完整 F/X ledger、独立复审、兼容/预算/版本与冻结全仓归档。 | 旧 case/fixture守恒；手工 IR 不冒自动恢复；实际未实现项目保持 OPEN。满足整门才写 D3 通过。 |
 
@@ -94,7 +101,7 @@ core-connections 的 F01–F16、语言报告的机制表与上述编号有重�
 其中“尚待冻结”是P0历史措辞，具体实施以联合合同为准。启动路径用准确
 NoEntryInputPort/selected edge/当前后态；11个fixed profiles及原scoped来源；
 五种局部contract与派生consumer义务；两O表及实例/capture/segment逐端点核对；
-Program17/Execution8、完整ledger及预算。当前进入P2，不等待用户逐门审批。
+Program17/Execution8、完整ledger及预算。P2/P3现限定通过，进入P4，不等待用户逐门审批。
 
 1. **启动异常路径。** 采用明确的 no-user-entry 初入注入路线，不伪造函数形参、
    SEND 或进入未执行的 finally。不能用“规范化失败”一个标签决定是否关闭；

@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **P3 declared persistent-body occurrences accepted (2026-10-18):**
+> [Acceptance](M1_BODY_OCCURRENCE_ACCEPTANCE.md) closes O01–O16 on original
+> ports, persistent activation/segment/outcome, Create/owner/copy and conditional
+> host order.255 focused,606 component/18 criteria and5,822 clean frozen full
+> tests at`8138986` pass;668 source hashes/99 fixtures match. The original6-failure
+> full and test-only codec repair remain separate evidence. Next:
+> [P4's16 original obligation groups](M1_REMAINING_PROTOCOL_PLAN.md), P5 and M2.
+> FullM0–M2, automatic LeWM modeling and verified speedup remain open.
+
 > **P2 declared generator matrix accepted (2026-10-18):**
 > [Acceptance](M1_GENERATOR_MATRIX_ACCEPTANCE.md) closes16 cells and their original
 > input/state/branch/current-outcome/host joins.275 focused,660 component/37 criteria

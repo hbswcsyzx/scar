@@ -1,6 +1,21 @@
 # Current evidence and remaining work
 
-## P3 first frozen full failed; repair gate open (2026-10-18)
+## P3 declared persistent-body occurrences accepted (2026-10-18)
+
+[Acceptance](M1_BODY_OCCURRENCE_ACCEPTANCE.md) closes O01–O16: persistent
+activation/Drive/segment/first outcome, original ports, Create/owner/copy
+compatibility and conditional CALL/body host order. **255 focused /606 component
+cases /18 criteria** pass. Clean frozen `8138986` passes **5,822 full tests**,
+zero failures/errors/skips, five warnings,563.710s and1,029,520 KiB RSS.
+All668 source hashes match; previous5,676 and failed-full5,822 case identities,
+92 old/99 current fixtures and protected checkouts are conserved. The first
+failed full and its test-only capability repair remain separate evidence.
+Execution8 is conditional; legacy wire families retain exact bytes. This is
+declared occurrence validation, not automatic runtime recovery or optimization.
+Next is [P4's detailed plan](M1_REMAINING_PROTOCOL_PLAN.md), then P5 and original
+M2 obligations. D3, completeM0–M2, automatic LeWM modeling and speedup remain OPEN.
+
+## Repair history: P3 first frozen full failed (2026-10-18)
 
 The clean `61db593` full finished **5,816 passed /6 failed /0 errors or skips**,
 562.467s and1,030,792 KiB RSS; all668 source hashes stayed fixed. The six
@@ -14,11 +29,11 @@ The narrow repair changes only three codec test files and the gate selection;
 product code is unchanged.89 affected,255 final focused and606 component cases
 across18 criteria now pass at one668-source fingerprint. Independent read-only
 review confirms exact old v5/v7 wire bytes and separate v8/future9 checks.
-A separate repair full is pending. [P4 planning](M1_REMAINING_PROTOCOL_PLAN.md)
+The separate repair full subsequently passed as reported above. [P4 planning](M1_REMAINING_PROTOCOL_PLAN.md)
 records three read-only reviews and the original16 obligation groups; it is not
 P4 implementation or acceptance.
 
-## P3 persistent-body occurrence implementation under review (2026-10-18)
+## Earlier P3 persistent-body component checkpoint (2026-10-18)
 
 [Plan](M1_BODY_OCCURRENCE_PLAN.md), [API](M1_BODY_OCCURRENCE_API.md) and
 [progress/failures](M1_BODY_OCCURRENCE_PROGRESS.md) connect original Drive ports,

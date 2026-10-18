@@ -35,6 +35,13 @@ detector 或 backend。2026-10-17/18 更新下面的 C1/C2B 实施状态；既�
 P2声明矩阵；P3持续发生关联、其余家族、完整M0–M2和source/provider实际导入
 仍开放，不改变下述五类实体或工具复用决定，不产生LeWM优化或加速结论。
 
+随后[P3持续body声明发生关联](M1_BODY_OCCURRENCE_ACCEPTANCE.md)已限定通过：
+O01–O16原端口/实例/segment/首出口、逐binding/copy兼容及conditional host
+因果桥，255定向、606组件/18标准、干净`8138986`的5,822冻结全仓通过；
+668源/99fixtures守恒。首轮6失败及test-only兼容修复保留。它不改变五类实体
+和现成工具分工；下一步按[P4详细规划](M1_REMAINING_PROTOCOL_PLAN.md)补原
+生产者—消费者关系，之后P5和M2。完整M0–M2及自动LeWM化简仍未完成。
+
 此前冻结实现 `e6b4723` 的3,542项回归通过，见
 [C2B body验收](M1_RESUMPTION_BODY_ACCEPTANCE.md)；499项组件及403个源文件指纹匹配。
 此前`0ea05e6`的3,330项原始回归保持[C1证据](../artifacts/experiments/b1_call_operands/model_cleanup_interfaces/full/report.json)范围。

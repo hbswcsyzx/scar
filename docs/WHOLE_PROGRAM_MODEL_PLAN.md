@@ -95,6 +95,14 @@ JSON保留。此为审计/规划，不是新产品验收；603源/78fixtures未�
 该结果更新上述P2状态；Execution仍7，P3–P5、完整M0–M2及自动建图不因此通过。
 下一步按原联合合同接持续body的实际发生与有条件host因果桥，再落实其余家族/M2。
 
+随后[P3持续发生关联验收](M1_BODY_OCCURRENCE_ACCEPTANCE.md)现限定通过：
+O01–O16接原端口、Create/owner/copy、持续activation/segment/首出口与有条件
+host因果桥。255定向、606组件/18标准及干净`8138986`的5,822冻结全仓通过，
+668源/99fixtures守恒；原full6失败与test-only能力修复各自保留。Execution8
+条件选择，旧v1–v7字节不变。下一步按[P4详细规划](M1_REMAINING_PROTOCOL_PLAN.md)
+落实F12–F24/X25–X27原消费者关系，然后P5与原M2分母。第一阶段仍未完成，
+不新增detector/backend，不把supplied-model关联当自动恢复或LeWM加速。
+
 当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1
 声明组件不是实际导入；不要继续以增加声明表、兼容测试或 Tensor wrappers 代替
 自动连接。通用 SSA/Region 基础设施扩展前先对照 MLIR/xDSL，源 CFG/flow 扩展前

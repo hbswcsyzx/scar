@@ -43,3 +43,11 @@
 668源前后指纹一致：`b16a1bac16f134c69133f2b0f88a1c291fa0029f9714e95693ae0bdec233f3d4`。
 独立只读复核无阻断；`scar/`相对初始实现零修改，旧fixture和case身份未改。
 本检查点仍不授P3通过，后续独立`repair/full`必须真实完成。
+
+## 4. 独立修复完整回归
+
+后续干净冻结`81389862ee3f1dfe88c59f74ca1bfeff732779ff`的`repair/full`实际
+5,822通过、0失败/error/skip、5warnings；pytest561.54s，外部563.710s，峰值
+1,029,520 KiB。668源前后指纹稳定且与最终定向/组件一致。原`full`的6失败
+及其manifest保持原样。P3按[限定验收](M1_BODY_OCCURRENCE_ACCEPTANCE.md)关闭，
+其余协议、完整M0–M2和自动建图仍未完成。

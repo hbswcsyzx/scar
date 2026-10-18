@@ -1,6 +1,13 @@
 # 第一阶段完整性分母：模型、接口、协议
 
-最新限定检查点：[P2同步generator声明矩阵](M1_GENERATOR_MATRIX_ACCEPTANCE.md)
+最新限定检查点：[P3持续发生关联](M1_BODY_OCCURRENCE_ACCEPTANCE.md)接O01–O16
+原端口、Create/owner/copy、activation/segment/首出口及conditional host顺序；
+255定向、606组件/18标准和干净`8138986`的5,822冻结全仓通过，668源/99fixtures
+守恒。首轮6失败full与test-only能力修复保留。P4/P5、原113构造/196字段及
+完整M0–M2仍开放；[P4详细计划](M1_REMAINING_PROTOCOL_PLAN.md)保原16组义务，
+不将profile存在当消费者已闭合。
+
+此前限定检查点：[P2同步generator声明矩阵](M1_GENERATOR_MATRIX_ACCEPTANCE.md)
 关闭16格及原输入/状态/当前结果/host连接；275定向、660组件/37标准和干净
 `bd673cd`的5,676全仓通过，647源/92fixtures守恒。原full失败与确定性调度修复
 保留。P3实际持续发生、P4/P5、原113构造/196字段及完整M0–M2仍未关闭；
@@ -59,7 +66,7 @@ Operation、Value、StateLocation、Region、Resource 是规范实体；输入/�
 | 操作、值及有序使用 | 原 `ir/program`，准确 producer、Use、block/region、data/reference/state/binding。 | protocol values 与 outcome/adapter 端口；不以 label/string 代替强类型规则。 | 有限 core 已实现。 |
 | Python 函数入口与环境 | 环境及 entry-layout 接原 core；[R3.1](M1_CALL_ACTIVATION_ACCEPTANCE.md)将准确 caller→child activation/entry/actual completion 接到原 input/result/state，591组件、冻结`881cbfb`的4,951全仓通过。 | source signature/replay、真实 callable/code/role/activation 对应仍待恢复；旧 `record_body` 偏移不能用于新入口。 | 静态及限定动态关联通过，不算自动绑定或值身份/纯度证明。 |
 | 控制与语言完成 | 同步 if/loop/binding/invoke；[C0](M1_CONTROL_INTERFACES.md)词法scope/typed port、packet/pending构造及CFG case dispatch；[C1](M1_CLEANUP_INTERFACES.md)同步cleanup/context及entry-relative copy/fresh组合243项组件、3,330项冻结全仓通过。 | with/except*、完整跨边界case合同、实际context/source/LoopInterface对应；挂起中的active cleanup与resumption组合。 | C0/C1静态声明组件已验收；完整控制类型/协议未齐。 |
-| 挂起、恢复与逃逸 | C2B/首outcome及D1、D2.1–D2.4有限结构已验收；[D3审计](M1_PROTOCOL_FAMILY_AUDIT.md)保留28组义务，[P1合同](M1_PROTOCOL_CONTRACT.md)冻结原端口与发生字段；[P2](M1_GENERATOR_MATRIX_ACCEPTANCE.md)同步16格原输入/状态/结果/host声明连接已验收。 | 按P3–P5接Drive→activation/segment/outcome与instance/captures、其余body/delegate/await/cancel家族及完整ledger；自动采集另属M4。 | P0/P1设计和P2声明门关闭；完整F/O与C2.0/C2.4仍开放，不把声明当source/native/runtime证明。 |
+| 挂起、恢复与逃逸 | C2B/首outcome及D1、D2.1–D2.4有限结构已验收；[D3审计](M1_PROTOCOL_FAMILY_AUDIT.md)保留28组义务，[P1合同](M1_PROTOCOL_CONTRACT.md)冻结原端口与发生字段；[P2](M1_GENERATOR_MATRIX_ACCEPTANCE.md)同步16格及[P3](M1_BODY_OCCURRENCE_ACCEPTANCE.md)持续实例/端口/host声明关联已验收。 | P4/P5接其余body/delegate/await/cancel家族的原消费者、当前状态及完整ledger；自动采集另属M4。 | P0/P1设计、P2/P3限定声明门关闭；完整F/O与C2.0/C2.4仍开放，不把声明当source/native/runtime证明。 |
 | 状态 owner、selector 与 alias | StateLocation/Access、footprint 与版本 SSA；v2 storage 几何；[S接口](M1_STATE_ADDRESS_INTERFACES.md)接typed owner/selector、原Uses/实际occurrence和两完成端口，1,317组件/5,144冻结全仓通过。 | 真实owner/native地址身份、完整alias/partition及物理Mat对应；外部alias写与输入失效关系。 | 声明级精化接口有限验收；完整state/alias/native语义未完成，不授disjoint或变换。 |
 | 所有 Python literal/表示 | [L接口](M1_LITERAL_INTERFACES.md)复用PythonLiteral，严格表示八类scalar/tuple、bits/complex/surrogate和预算；Exact Data及原direct/INVOKE NORMAL求值附件、v16与旧family隔离，1,716组件/5,294冻结全仓通过。 | AST/compile/code-slot与实际求值来源重放；运行对象identity；容器/格式化/展开内部协议与全部M2构造对应。 | 有限内容/来源/原端口接口已验收；声明不授恒值来源、纯性或删除/复用权限，完整M2及第一阶段未完成。 |
 | 逻辑值、来源与物化 | v2 LogicalValue/Version、Provenance、allocation/region/materialization；G/D/P接原端口、scoped指代、独立来源与部分实际产出；[V验收](M1_VALIDITY_ACCEPTANCE.md)接source-derived带标签的actual/future贡献、每贡献替代支持、准确Mat范围与全读取区间威胁，649组件、冻结`550496f`的4,826全仓通过。 | 完整native writer/capture闭合、source/runtime及exact native slot对应；其它endpoint/native/coherence与whole-work实际来源对应；持久化仍需独立合同。 | G/D/P/V及R3.3限定buffered组合已验收；完整物理对应与第一阶段未完成，不证明ready或自动恢复。 |
