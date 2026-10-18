@@ -70,7 +70,8 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
    后续[连接合同第二稿](M1_DRIVER_CONTRACT_V2.md)取消可传递permit和通用request历史，
    用gate真实completion→唯一BodyDrive表达资格与准入后态。先按[D1完整路径及验收矩阵](M1_DRIVER_IMPLEMENTATION.md)
    实施已收敛的规范连接（已验收）；[D2生命周期](M1_DRIVER_LIFECYCLE.md)按
-   字段冻结→body publication→no-body→session/drop→组合验收细化，D2.0仍开放，
+   [冻结合同](M1_DRIVER_LIFECYCLE_CONTRACT.md)→body publication→no-body→session/drop
+   →组合验收细化；D2.0已收敛，D2.1组件已通过、待冻结全仓，
    不靠D1字段设计通过缩小完整C2分母。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。
@@ -94,6 +95,11 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
   可只读复用的重型 trace。
 
 ## 5. 当前证据锚点
+
+- [D2.0合同](M1_DRIVER_LIFECYCLE_CONTRACT.md)已冻结字段及E/F→解释T、当前P的派生
+  关系；同一有限方程脚本在conda lewm完成11场景/1,920有界单步核对，不是产品证明。
+  [D2.1 publication](M1_BODY_PUBLICATION_ACCEPTANCE.md)741组件/17标准/10.937s通过，
+  423文件指纹前后一致，v12及原Use/state查询已接通；独立/全仓验收待归档。
 
 - [D2生命周期复审及实施门](M1_DRIVER_LIFECYCLE.md)已记录非raising no-body路径、
   多完成来源合流、callback后post失效及body/request状态分离。三项stdlib断言通过；

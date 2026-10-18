@@ -34,6 +34,7 @@ from scar.ir.program.drivers import (
     DriverRuleProfile, FinalBodyGate, NormalResultPort, RawRequestDefinition,
     RawRequestKind, RequestAssociationRead, ResumableCreate,
 )
+from scar.ir.program.lifecycle import BodyOutcomeCommit, DriveOutcomeRef, DriverLifecycle
 from scar.ir.program.bindings import BindingDefinition, BindingRead, BindingState
 from scar.ir.program.environments import (
     EnvironmentInterface, EnvironmentMember, EnvironmentRole, FunctionEntryLayout,
@@ -106,4 +107,5 @@ __all__ = [
     "CreationCapture", "DriverInterface", "DriverReceiverKind", "DriverRule",
     "DriverRuleProfile", "FinalBodyGate", "NormalResultPort", "RawRequestDefinition",
     "RawRequestKind", "RequestAssociationRead", "ResumableCreate",
+    "BodyOutcomeCommit", "DriveOutcomeRef", "DriverLifecycle",
 ]

@@ -42,8 +42,12 @@ canonical Create/Start/Resume/outcome path, v11 wire and input/output queries.
 All 671 component checks and 3,706 frozen full tests (`382363c`) pass. Lifecycle,
 source/runtime correspondence and complete whole-program modeling remain open.
 The [D2 lifecycle review and gates](docs/M1_DRIVER_LIFECYCLE.md) separate body
-publication, no-body paths, session state and reference drop. D2 fields remain
-under review; these language observations add no product/runtime authority.
+publication, no-body paths, session state and reference drop. The
+[D2.0 contract](docs/M1_DRIVER_LIFECYCLE_CONTRACT.md) now fixes fields and the
+edge-first must analysis. The [D2.1 body publication component](docs/M1_BODY_PUBLICATION_ACCEPTANCE.md)
+passes 741 component checks; frozen full acceptance is pending. No-body,
+session/drop and E/F/P product analysis remain unfinished; these declarations
+and language observations add no runtime or transformation authority.
 
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,

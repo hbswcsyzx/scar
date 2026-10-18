@@ -144,7 +144,10 @@ must-equality关系E，以及每个carrier的must-finished性质F。F成立才�
 
 这支持“不同完成来源→对应owner phi→共用release”，而交换未finished owner的
 edge actual会在改名后丢F。无种子loop不会造F，静态ID循环复用不会继承旧incarnation。
-有限关系/性质工作队列收敛；不推一般bool路径可满足性，精度不足不授优化权限。
+实现分两阶段：先固定E与F的布尔must解，再在这个固定解上求解释来源T的有限union
+最小不动点。T只通过常量源、copy/同时改名、forget清空与union传播，不参与F真值或
+release资格。不能把terminal重置来源与E/F联合解释成同一个简单单调格。有限关系/
+性质工作队列收敛；不推一般bool路径可满足性，精度不足不授优化权限。
 
 ### 6.2 当前session性质P
 

@@ -28,6 +28,7 @@ from scar.ir.program.drivers import (
     AsyncRequestCreate, BodyDrive, BodyDriveTerminator, DriverInterface,
     FinalBodyGate, RawRequestDefinition, RequestAssociationRead, ResumableCreate,
 )
+from scar.ir.program.lifecycle import BodyOutcomeCommit, DriveOutcomeRef, DriverLifecycle
 from scar.ir.program.environments import EnvironmentInterface, FunctionEntryLayout
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.resources import (
@@ -481,6 +482,13 @@ class CompletionSuccessor:
 
 @dataclass(frozen=True, slots=True)
 class Terminator:
+    """Canonical control terminator.
+
+    For ``BRANCH``, ``successors[0]`` is the true edge and
+    ``successors[1]`` is the false edge. This meaning is part of the core IR
+    contract and does not change the ordered wire representation.
+    """
+
     kind: TerminatorKind
     successors: tuple[Successor | CompletionSuccessor, ...] = ()
     condition: UseID | None = None
@@ -748,6 +756,8 @@ class ProgramGraph:
     driver_interfaces: tuple[DriverInterface, ...] = ()
     final_body_gates: tuple[FinalBodyGate, ...] = ()
     body_drives: tuple[BodyDrive, ...] = ()
+    driver_lifecycles: tuple[DriverLifecycle, ...] = ()
+    body_outcome_commits: tuple[BodyOutcomeCommit, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -796,6 +806,32 @@ class ProgramGraph:
             self.resumable_creates, self.async_request_creates,
             self.request_association_reads, self.final_body_gates, self.body_drives)
             for row in rows), "driver operation IDs")
+        _tuple(self.driver_lifecycles, "ProgramGraph.driver_lifecycles")
+        if any(type(row) is not DriverLifecycle for row in self.driver_lifecycles):
+            raise TypeError("ProgramGraph.driver_lifecycles needs exact typed records")
+        for row in self.driver_lifecycles:
+            row.__post_init__()
+        _unique(tuple(row.region for row in self.driver_lifecycles),
+                "ProgramGraph driver lifecycle regions")
+        _tuple(self.body_outcome_commits, "ProgramGraph.body_outcome_commits")
+        if any(type(row) is not BodyOutcomeCommit for row in self.body_outcome_commits):
+            raise TypeError("ProgramGraph.body_outcome_commits needs exact typed records")
+        for row in self.body_outcome_commits:
+            row.__post_init__()
+        body_commit_operations = tuple(row.operation for row in self.body_outcome_commits)
+        _unique(body_commit_operations, "ProgramGraph body outcome commit operations")
+        existing_role_operations = {
+            row.operation for rows in (
+                self.resumable_creates, self.async_request_creates,
+                self.request_association_reads, self.final_body_gates, self.body_drives,
+                self.frame_context_initials, self.frame_context_attaches,
+                self.frame_context_detaches, self.cleanup_enters, self.cleanup_resumes,
+                self.cleanup_replacements, self.handled_context_reads,
+            ) for row in rows
+        }
+        if existing_role_operations.intersection(body_commit_operations):
+            raise ValueError(
+                "body outcome commit operation conflicts with another typed operation role")
         for name, rows, row_type, id_field in (
             ("regions", self.regions, Region, "id"),
             ("operations", self.operations, Operation, "id"),
@@ -869,6 +905,7 @@ __all__ = [
     "AccessMode", "Behavior", "Block", "BlockArgument", "DataValue", "ExitKind",
     "CompletionResult", "CompletionSignature", "CompletionSuccessor", "ExitPort",
     "AsyncRequestCreate", "BodyDrive", "BodyDriveTerminator", "DriverInterface",
+    "BodyOutcomeCommit", "DriveOutcomeRef", "DriverLifecycle",
     "FinalBodyGate", "RawRequestDefinition", "RequestAssociationRead", "ResumableCreate",
     "Footprint", "FootprintKind", "LiteralOrigin", "LocalBindingType",
     "LocalBindingValue", "Operation", "OperationResult", "ProtocolValue",

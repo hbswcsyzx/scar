@@ -530,7 +530,8 @@ def _check_program(args) -> int:
               "body_runtime_verified": False,
               "body_exclusivity_verified": False,
               "driver_structure_validated": False,
-              "driver_lifecycle_verified": False}
+              "driver_lifecycle_verified": False,
+              "body_publication_structure_validated": False}
     if args.out and Path(args.out).resolve() == source.resolve():
         report.update(status="INVALID", errors=["report path must differ from input graph"])
         print(json.dumps(report, ensure_ascii=False))
@@ -629,6 +630,13 @@ def _check_program(args) -> int:
                     if type(operation.terminator) is BodyDriveTerminator))
             report.update(driver_structure_validated=True,
                           driver_structure_scope="declared static driver ports, CFG and current state flow",
+                          driver_lifecycle_verified=False)
+        if graph.driver_lifecycles:
+            report["counts"].update(
+                driver_lifecycles=len(graph.driver_lifecycles),
+                body_outcome_commits=len(graph.body_outcome_commits))
+            report.update(body_publication_structure_validated=True,
+                          body_publication_structure_scope="declared body outcome, owner and publication state links",
                           driver_lifecycle_verified=False)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:

@@ -1,5 +1,21 @@
 # Current evidence and remaining work
 
+## D2.0 contract and D2.1 body publication (2026-10-18; full pending)
+
+The [frozen D2 contract](M1_DRIVER_LIFECYCLE_CONTRACT.md) separates historical
+terminal facts from current session posts. Alias/finish analysis uses simultaneous
+edge renaming before a must join; explanatory sources are derived only after
+the Boolean E/F solution is fixed. No path-configuration enumeration or consumed
+release token is required. Design equations are not product E/F/P analysis.
+
+The [D2.1 component](M1_BODY_PUBLICATION_ACCEPTANCE.md) connects explicit scope,
+exact body source, original owner and current StateAccess/after at the private
+landing's first operation. Its v12 wire, endpoint queries and CLI pass **741
+component checks / 17 criteria / 10.937s**, with all 423 source hashes unchanged.
+Independent bounded review passes with unchanged source; frozen full acceptance
+is pending. D2.2–D2.4, D3,
+complete C2/M0–M2 and LeWM automatic modeling/simplification remain open.
+
 ## D2 lifecycle review and ordered implementation gates (2026-10-18)
 
 The [D2 review](M1_DRIVER_LIFECYCLE.md) separates exact body publication,
@@ -14,9 +30,10 @@ lifecycle script emits observations only, with no assertions. Root corrected a
 reviewer's CLOSED claim against its raw JSON: second async-close exhaustion
 still reports SUSPENDED through inspect. The initial report remains archived.
 
-D2.0 field freeze is **OPEN**. State coverage, no-body request roles, multiple
+D2.0 was **OPEN at this review checkpoint**. State coverage, no-body request roles, multiple
 anchor/current-owner propagation, post invalidation and drop scope must converge
-before implementation. No product code, detector, backend or heavy workload run
+before implementation; the subsequent contract/component are recorded above.
+No product code, detector, backend or heavy workload run
 was added by this review; D1 acceptance below remains the latest product receipt.
 
 ## D1 canonical driver connections accepted (2026-10-18)

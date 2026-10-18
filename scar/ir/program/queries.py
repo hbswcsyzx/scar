@@ -7,7 +7,7 @@ from .functions import FormalPort
 from .ids import (BlockID, BoundaryRelationID, ControlScopeID, EnvironmentInterfaceID,
                   NativeBoundaryID, OperationID, ProviderID, RegionID, UseID, ValueID)
 from .model import (CompletionResult, ExitKind, ProgramGraph, ReferenceValue,
-                    StateVersionValue, TerminatorKind, Use)
+                    StateAccess, StateVersionValue, TerminatorKind, Use)
 from .control import ProtocolValueKind
 from .control_validation import derive_pending_facts
 from .model import ProtocolValue
@@ -17,8 +17,9 @@ from .native_validation import port_key, region_port_keys
 from .cleanup_validation import CleanupRouteKind, CleanupRouteStep
 from .resumption import ResumeInput, ResumeSlot, ResumeSlotKind, SuspendTerminator, saved_actual_use
 from .resumption_flow import first_body_outcome_operations
-from .drivers import BodyDriveResult, NormalResultPort
+from .drivers import BodyDrive, BodyDriveResult, NormalResultPort
 from .driver_flow import body_drive_target, body_outcome_uses
+from .lifecycle import BodyOutcomeCommit
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,6 +74,26 @@ class DriveInputBinding:
 
     formal: ValueID
     source: UseSite | InstanceCaptureInput
+
+
+@dataclass(frozen=True, slots=True)
+class PublicationAccess:
+    """An original access, canonical before Use and actual write result (if any)."""
+
+    access: StateAccess
+    before: UseSite
+    after: StateVersionValue | None
+
+
+@dataclass(frozen=True, slots=True)
+class BodyPublication:
+    """Declared source/owner/state links; no runtime or lifecycle proof is granted."""
+
+    commit: BodyOutcomeCommit
+    drive: BodyDrive
+    source: BodyOutcomeSite
+    instance: UseSite
+    accesses: tuple[PublicationAccess, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -136,6 +157,8 @@ class ProgramIndex:
         self._driver_interfaces = {row.region: row for row in graph.driver_interfaces}
         self._final_body_gates = {row.operation: row for row in graph.final_body_gates}
         self._body_drives = {row.operation: row for row in graph.body_drives}
+        self._driver_lifecycles = {row.region: row for row in graph.driver_lifecycles}
+        self._body_outcome_commits = {row.operation: row for row in graph.body_outcome_commits}
         self.graph = graph
         self.values = {value.id: value for value in graph.values}
         self.regions = {region.id: region for region in graph.regions}
@@ -237,6 +260,36 @@ class ProgramIndex:
 
     def body_drive(self, operation_id: OperationID):
         return self._driver_operation(operation_id, self._body_drives)
+
+    def driver_lifecycle(self, region_id: RegionID):
+        """An explicit D2.1 publication scope, not completed lifecycle analysis."""
+        if type(region_id) is not RegionID:
+            raise TypeError("driver_lifecycle requires RegionID")
+        if region_id not in self.regions:
+            raise KeyError(region_id)
+        return self._driver_lifecycles.get(region_id)
+
+    def body_outcome_commit(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._body_outcome_commits)
+
+    def body_publication(self, operation_id: OperationID):
+        """Resolve publication against original Uses/accesses and source-derived output.
+
+        READ has no fabricated after-state; every write result retains its
+        canonical producer. Source kind comes from the actual body outcome,
+        without inferring native state, session completion or reference release.
+        """
+        commit = self.body_outcome_commit(operation_id)
+        if commit is None:
+            return None
+        source = next(site for site in self.drive_outcomes(commit.outcome.drive)
+                      if site.operation == commit.outcome.source)
+        return BodyPublication(
+            commit, self._body_drives[commit.outcome.drive], source,
+            self._uses[commit.instance], tuple(PublicationAccess(
+                access, self._uses[access.before],
+                None if access.after is None else self.values[access.after])
+                for access in self.operations[commit.operation].accesses))
 
     def normal_result(self, operation_id: OperationID, port: NormalResultPort):
         """The original NORMAL landing value at an exact produced result slot."""
@@ -636,6 +689,7 @@ class ProgramIndex:
 
 
 __all__ = ["ProgramIndex", "UseSite", "BodyOutcomeSite", "DriverBinding", "DriveInputBinding",
-           "InstanceCaptureInput", "EnvironmentArgument", "EnvironmentCall",
+           "InstanceCaptureInput", "PublicationAccess", "BodyPublication",
+           "EnvironmentArgument", "EnvironmentCall",
            "EnvironmentBindingStatus", "FunctionArgument", "CleanupRouteKind", "CleanupRouteStep",
            "ResumptionBinding", "SuspensionHandoff"]
