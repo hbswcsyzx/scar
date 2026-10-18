@@ -1,0 +1,174 @@
+{
+  "schema": "scar.protocol-port-design-blueprint",
+  "revision": "f9a568182e1672541261020bb9f919609179bb05",
+  "script_sha256": "9e2722fb065bf51fc12f4b7bae485be18f63a6acf168f52732e48cf2c9736cee",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "source_sha256": "7d3187f36f6cca07e0714a49ac20dbe1c0634601568f2986ef8f0c178431f7a9",
+  "source_files": 603,
+  "scope": "Existing hand-authored IR and proposed FK rows; not an implementation of O records, runtime capture, or protocol proof.",
+  "new_product_capability": false,
+  "new_pytest_run": false,
+  "source_runtime_verified": false,
+  "transformation_authorized": false,
+  "status": "DESIGN_PORTS_CONNECTED",
+  "rows": [
+    {
+      "drive": "exec_operation_occurrence:drive.start.1.driver.drive",
+      "activation": "exec_region_activation:body",
+      "entry": "exec_block_visit:body.0",
+      "derived_segment": "exec_execution_segment:body",
+      "outcome": "exec_operation_occurrence:body.0.resume.suspend",
+      "original_static_source": "program_operation:resume.suspend",
+      "inputs": [
+        {
+          "formal": "exec_value_occurrence:body.0.resume.x",
+          "kind": "INSTANCE_CAPTURE_UNRESOLVED",
+          "instance_use": "program_use:driver.drive.role.0"
+        },
+        {
+          "formal": "exec_value_occurrence:body.0.resume.world.0",
+          "kind": "ORIGINAL_USE",
+          "source_operation": "exec_operation_occurrence:drive.start.1.driver.drive",
+          "source_use": "program_use:driver.drive.state.0",
+          "source_value": "exec_value_occurrence:drive.start.1.driver.ingress.arg.2"
+        },
+        {
+          "formal": "exec_value_occurrence:body.0.resume.context.0",
+          "kind": "ORIGINAL_USE",
+          "source_operation": "exec_operation_occurrence:drive.start.1.driver.drive",
+          "source_use": "program_use:driver.drive.state.1",
+          "source_value": "exec_value_occurrence:drive.start.1.driver.ingress.arg.3"
+        },
+        {
+          "formal": "exec_value_occurrence:body.0.resume.environment.FUNCTION_OBJECT",
+          "kind": "INSTANCE_CAPTURE_UNRESOLVED",
+          "instance_use": "program_use:driver.drive.role.0"
+        },
+        {
+          "formal": "exec_value_occurrence:body.0.resume.environment.GLOBALS_NAMESPACE",
+          "kind": "INSTANCE_CAPTURE_UNRESOLVED",
+          "instance_use": "program_use:driver.drive.role.0"
+        },
+        {
+          "formal": "exec_value_occurrence:body.0.resume.environment.BUILTINS_NAMESPACE",
+          "kind": "INSTANCE_CAPTURE_UNRESOLVED",
+          "instance_use": "program_use:driver.drive.role.0"
+        },
+        {
+          "formal": "exec_value_occurrence:body.0.resume.environment.DEFAULTS",
+          "kind": "INSTANCE_CAPTURE_UNRESOLVED",
+          "instance_use": "program_use:driver.drive.role.0"
+        },
+        {
+          "formal": "exec_value_occurrence:body.0.resume.environment.KEYWORD_DEFAULTS",
+          "kind": "INSTANCE_CAPTURE_UNRESOLVED",
+          "instance_use": "program_use:driver.drive.role.0"
+        }
+      ],
+      "outputs": [
+        {
+          "source_operation": "exec_operation_occurrence:body.0.resume.suspend",
+          "source_use": "program_use:resume.suspend.export",
+          "source_value": "exec_value_occurrence:body.0.resume.x",
+          "driver_formal": "exec_value_occurrence:drive.start.2.driver.outcome.arg.0"
+        },
+        {
+          "source_operation": "exec_operation_occurrence:body.0.resume.suspend",
+          "source_use": "program_use:resume.suspend.world",
+          "source_value": "exec_value_occurrence:body.0.resume.world.0",
+          "driver_formal": "exec_value_occurrence:drive.start.2.driver.outcome.arg.1"
+        },
+        {
+          "source_operation": "exec_operation_occurrence:body.0.resume.suspend",
+          "source_use": "program_use:resume.suspend.context",
+          "source_value": "exec_value_occurrence:body.0.resume.detach.after",
+          "driver_formal": "exec_value_occurrence:drive.start.2.driver.outcome.arg.2"
+        }
+      ],
+      "instance_identity_verified": false,
+      "source_runtime_verified": false
+    },
+    {
+      "drive": "exec_operation_occurrence:drive.resume.1.second.driver.drive",
+      "activation": "exec_region_activation:body",
+      "entry": "exec_block_visit:body.1",
+      "derived_segment": "exec_execution_segment:body.resumed",
+      "outcome": "exec_operation_occurrence:body.1.resume.return",
+      "original_static_source": "program_operation:resume.return",
+      "inputs": [
+        {
+          "formal": "exec_value_occurrence:body.1.resume.value.world",
+          "kind": "ORIGINAL_USE",
+          "source_operation": "exec_operation_occurrence:drive.resume.1.second.driver.drive",
+          "source_use": "program_use:second.driver.drive.state.0",
+          "source_value": "exec_value_occurrence:drive.resume.1.second.driver.ingress.arg.3"
+        },
+        {
+          "formal": "exec_value_occurrence:body.1.resume.value.x",
+          "kind": "ORIGINAL_USE",
+          "source_operation": "exec_operation_occurrence:body.0.resume.suspend",
+          "source_use": "program_use:resume.suspend.x",
+          "source_value": "exec_value_occurrence:body.0.resume.x"
+        },
+        {
+          "formal": "exec_value_occurrence:body.1.resume.value.frame",
+          "kind": "ORIGINAL_USE",
+          "source_operation": "exec_operation_occurrence:body.0.resume.suspend",
+          "source_use": "program_use:resume.suspend.frame",
+          "source_value": "exec_value_occurrence:body.0.resume.detach.frame"
+        },
+        {
+          "formal": "exec_value_occurrence:body.1.resume.value.sent",
+          "kind": "ORIGINAL_USE",
+          "source_operation": "exec_operation_occurrence:drive.resume.1.second.driver.drive",
+          "source_use": "program_use:second.driver.drive.role.2",
+          "source_value": "exec_value_occurrence:drive.resume.1.second.driver.ingress.arg.2"
+        },
+        {
+          "formal": "exec_value_occurrence:body.1.resume.value.context",
+          "kind": "ORIGINAL_USE",
+          "source_operation": "exec_operation_occurrence:drive.resume.1.second.driver.drive",
+          "source_use": "program_use:second.driver.drive.state.1",
+          "source_value": "exec_value_occurrence:drive.resume.1.second.driver.ingress.arg.4"
+        }
+      ],
+      "outputs": [
+        {
+          "source_operation": "exec_operation_occurrence:body.1.resume.return",
+          "source_use": "program_use:resume.return.value",
+          "source_value": "exec_value_occurrence:body.1.resume.value.x",
+          "driver_formal": "exec_value_occurrence:drive.resume.2.second.driver.outcome.arg.0"
+        },
+        {
+          "source_operation": "exec_operation_occurrence:body.1.resume.return",
+          "source_use": "program_use:resume.return.world",
+          "source_value": "exec_value_occurrence:body.1.resume.value.world.written",
+          "driver_formal": "exec_value_occurrence:drive.resume.2.second.driver.outcome.arg.1"
+        },
+        {
+          "source_operation": "exec_operation_occurrence:body.1.resume.return",
+          "source_use": "program_use:resume.return.context",
+          "source_value": "exec_value_occurrence:body.1.resume.value.detach.after",
+          "driver_formal": "exec_value_occurrence:drive.resume.2.second.driver.outcome.arg.2"
+        }
+      ],
+      "instance_identity_verified": false,
+      "source_runtime_verified": false
+    }
+  ],
+  "existing_execution_issues": [],
+  "existing_execution_gaps": [
+    "evidence_missing",
+    "evidence_missing",
+    "evidence_missing",
+    "evidence_missing",
+    "evidence_missing",
+    "evidence_missing",
+    "evidence_missing",
+    "evidence_missing",
+    "evidence_missing",
+    "evidence_missing",
+    "source_runtime_unverified"
+  ],
+  "source_unchanged": true
+}

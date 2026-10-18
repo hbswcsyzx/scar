@@ -13,11 +13,13 @@ remain unfinished.
 
 The [C2/D3 audit](docs/M1_PROTOCOL_FAMILY_AUDIT.md) now identifies the missing
 protocol-to-CFG obligations and Drive-to-persistent-body occurrence connections.
-Its [plan](docs/M1_PROTOCOL_FAMILY_PLAN.md) preserves28 obligation groups and
-explicit field decisions. Five old-IR observations and six new bounded startup
-throw observations constrain the design; the original failed expectation is
-retained. This is an audit/plan checkpoint, with fields still open and no new
-product capability or full-suite run.
+Its [plan](docs/M1_PROTOCOL_FAMILY_PLAN.md) preserves28 obligation groups. The
+[P1 joint contract](docs/M1_PROTOCOL_CONTRACT.md) is now frozen after independent
+design review: exact protocol producer/consumer ports, no-entry/host routes and
+per-Drive persistent-body execution associations. One existing-IR blueprint
+checks proposed port connectivity, leaving source/identity/captures unproved.
+P2–P5 implementation remains open; this adds no product capability or full run.
+Initial findings, corrections and the earlier failed native expectation remain.
 
 The [exact literal content/source/evaluation interfaces](docs/M1_LITERAL_INTERFACES.md)
 pass [1,716 component checks /32 criteria and 5,294 clean frozen full tests](docs/M1_LITERAL_ACCEPTANCE.md)

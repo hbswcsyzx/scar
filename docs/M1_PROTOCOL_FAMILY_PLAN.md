@@ -3,7 +3,8 @@
 2026-10-18。审计基线 `08c4cbf`，依据 [实际审计](M1_PROTOCOL_FAMILY_AUDIT.md)、
 原 [C2](M1_RESUMPTION_INTERFACES.md)、[D1](M1_DRIVER_CONTRACT_V2.md)、
 [D2](M1_DRIVER_LIFECYCLE_CONTRACT.md) 和 [控制协议§7](model/PYTHON_CONTROL_PROTOCOLS.md)。
-**当前 P0 审计完成；P1 精确字段未冻结。D3、完整第一阶段均未完成。**
+**当前 P0 审计及 [P1联合合同冻结](M1_PROTOCOL_CONTRACT.md)完成；
+P2–P5 实施、D3、完整第一阶段均未完成。**
 
 ## 1. 交付目标与固定原则
 
@@ -66,7 +67,7 @@ core-connections 的 F01–F16、语言报告的机制表与上述编号有重�
 | 节点 | 交付 | 验收及拒绝条件 |
 | --- | --- | --- |
 | P0 当前审计 | 三路源码审读、旧 IR 五观察、新启动 throw 六观察及初败、完整分母。 | 已有关系/真缺口/推断撤回分别记录；不得把旧泛型结构当 native 等价。已完成审计，不授产品 PASS。 |
-| P1 联合合同冻结 | F 协议义务与 O 发生关联；精确字段/原端口/能力边界；以下五项决策。 | 独立审查必须无剩余实质矛盾；没有名字猜测、可删分母、自证 phase 或第二状态图。未通过前不堆 records。 |
+| P1 联合合同冻结 | [精确合同](M1_PROTOCOL_CONTRACT.md)：F 固定 profile/原端口与 O 两自然键关系；以下五项决策均有落点。 | 已以 PASS_WITH_SCOPE 自主关闭设计门；保留初稿及修订。只证明设计可实施，不算 F/O 产品或全家族通过。 |
 | P2 F 基础闭环 | 同步 generator 全表，原 raw→处理→gate/body 或无 body→source→host adapter。 | 正确类型但错来源、前置拒绝误终结、初入/内部异常混同、close 错后态必须发现；其他家族分母仍保留。 |
 | P3 O 发生闭环 | 一持续 body 两次 Drive，Start/Resume、instance/captures、当前/saved inputs、实际首出口。 | 不放宽 CallActivation；错 activation/generation/run/状态/来源拒绝，缺捕获保 gap；可逐次换线程。 |
 | P4 全家族组合 | coroutine/generator-coroutine、async request、delegation、await/cancel 与 C1/session/release。 | 逐项映射 F12–F24/X25–X27；普通 opaque 边界不冒充内部协议已验证，不能只贴家族 label。 |
@@ -78,6 +79,12 @@ core-connections 的 F01–F16、语言报告的机制表与上述编号有重�
 纯审计/文档节点复用已冻结源证据，不为了增加计数再跑完整回归。
 
 ## 4. P1 必须冻结的五个决定
+
+五项现按[联合合同](M1_PROTOCOL_CONTRACT.md)冻结：下文保留原始问题及候选，
+其中“尚待冻结”是P0历史措辞，具体实施以联合合同为准。启动路径用准确
+NoEntryInputPort/selected edge/当前后态；11个fixed profiles及原scoped来源；
+五种局部contract与派生consumer义务；两O表及实例/capture/segment逐端点核对；
+Program17/Execution8、完整ledger及预算。当前进入P2，不等待用户逐门审批。
 
 1. **启动异常路径。** 采用明确的 no-user-entry 初入注入路线，不伪造函数形参、
    SEND 或进入未执行的 finally。不能用“规范化失败”一个标签决定是否关闭；

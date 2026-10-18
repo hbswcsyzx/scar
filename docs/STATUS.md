@@ -1,6 +1,22 @@
 # Current evidence and remaining work
 
-## C2/D3 audit completed; exact protocol fields remain open (2026-10-18)
+## P1 protocol/occurrence contract frozen; implementation open (2026-10-18)
+
+[Joint contract](M1_PROTOCOL_CONTRACT.md) passes independent PASS_WITH_SCOPE for
+the exact design: two static subject forms, five fixed operation contracts,
+11 profiles and original consumer/host routes; two natural-key O tables pair
+each Drive with a persistent activation and this ingress/outcome. Exact source,
+N/R state, no-entry edge-only lifecycle, per-binding identity and conditional
+host order are explicit. Initial proposals and corrections remain archived.
+One existing-IR blueprint connects Start/Resume original ports; it leaves six
+Start capture recipes and native/source identity unproved. This is not an O
+validator or runtime capture test. Product603 files/78 fixtures are unchanged;
+no new pytest/full/native witness or LeWM benchmark. The prior5,294 full result
+below remains attributed to4bc55eb. Next is P2 implementation, then P3–P5 and
+the original M2 denominator. Complete M0–M2, automatic LeWM modeling and a
+verified speedup remain unfinished. Historical checkpoint scopes follow.
+
+## Earlier C2/D3 audit; exact fields were open at that checkpoint (2026-10-18)
 
 [Audit](M1_PROTOCOL_FAMILY_AUDIT.md) and [plan](M1_PROTOCOL_FAMILY_PLAN.md)
 preserve F01–F24/X25–X28. Three source reviews identify two connected gaps:

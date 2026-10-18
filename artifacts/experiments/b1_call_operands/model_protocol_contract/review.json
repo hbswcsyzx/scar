@@ -1,0 +1,19 @@
+{
+  "status": "PASS_WITH_SCOPE",
+  "reviewer": "/root/cleanup_forward_review",
+  "scope": "P1 exact contract design, not implementation, runtime identity, source completeness or transformation proof",
+  "unresolved_design_blockers": [],
+  "reviewed_files": {
+    "docs/M1_PROTOCOL_CONTRACT.md": "2a5d982907ed8d9d9e93586f8cf9979002cbac6e27c73de8aac8ce4d0c45c4ac",
+    "artifacts/experiments/b1_call_operands/model_protocol_contract/design/f-static.md": "986d2e6276ece7fec5c83d502a27a634d1121dfd3501e68d58185159eae2cbd7",
+    "artifacts/experiments/b1_call_operands/model_protocol_contract/design/o-execution.md": "c57915180cb408d68f3319d5255fda1bd811b972501416c1b4b56cc804448f7b"
+  },
+  "review_report": {
+    "path": "artifacts/experiments/b1_call_operands/model_protocol_contract/design/independent-review.md",
+    "sha256": "2b15849990a0a1e30568fef1133473e544a785ef048698aac815c2607bd33942"
+  },
+  "progress_documents_independently_reviewed": false,
+  "source_runtime_verified": false,
+  "protocol_implementation_complete": false,
+  "transformation_authorized": false
+}
