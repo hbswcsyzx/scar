@@ -1,0 +1,19 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_execution_resource_records.py"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": "."
+  },
+  "source_hashes": {
+    "scar/ir/execution/resources.py": "657fca489d07fd3e32e5552782e02c6b6b58c8ed061c3c0040313d442a2e3000",
+    "tests/unit/test_execution_resource_records.py": "822f038d5eedf3ac026cec8bb1b5b109636fcd9a1bd944cbc27dc3aba5591a38"
+  }
+}

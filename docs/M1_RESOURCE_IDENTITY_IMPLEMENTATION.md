@@ -100,3 +100,6 @@ handle end/rebind、错误 owner/target/run/process、显式/隐式选择错接�
 selector/alias owner、occurrence→denotation/provenance、M2 协议守恒仍有缺口。
 M0–M2 全部完成后，按用户要求先停下来汇报模型，再进入自动建图与化简。
 本门不产生 LeWM TRANSFORM，不产生新的 A/B 加速比。
+
+最终 [R1 自主验收报告](M1_RESOURCE_IDENTITY_ACCEPTANCE.md)记录实际失败与修正、
+302 项组件门和 4,192 项 clean 冻结全仓；原 4,050 测试身份及全部历史 fixture 保留。

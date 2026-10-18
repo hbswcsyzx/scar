@@ -104,7 +104,9 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
   activation/segment/visit及原Operation/Value/Use、资源实例/handle/requirement，
   从原CFG/StateAccess推导当前发生，缺采不吞已知旧版本矛盾。
   302组件/14标准/4.575s通过；472注册源指纹不变，新增142项发生/资源检查。
-  此实现检查点尚待clean冻结全仓；R2/R3、denotation/provenance及M0–M2未关闭，
+  [clean冻结`6fcac0f`](M1_RESOURCE_IDENTITY_ACCEPTANCE.md)的4,192全仓/459.327s通过，
+  472源/44fixture前后一致；原4,050测试身份/451源/42fixture全部保留。
+  R2/R3、denotation/provenance及M0–M2未关闭，
   不把手工IR组合或证据引用当作自动恢复、runtime证明或LeWM加速。
 
 - [资源执行R0](M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md)完成三份独立终审与六个

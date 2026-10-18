@@ -1,0 +1,8 @@
+{
+  "exit_code": 0,
+  "elapsed_seconds": 1.2100446112453938,
+  "source_hashes": {
+    "scar/ir/execution/codec.py": "9fe67ab00091d1477c71baa3259394d8f2062d9c3deb93bdf3c318f9faaf37bd",
+    "tests/unit/test_execution_codec.py": "1f2875ff9f03a3b493149d18c75c78ab6e4576942a51c24723ea8eb8b086736a"
+  }
+}

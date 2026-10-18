@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## R1 identity component passed; frozen full pending (2026-10-18)
+## R1 identity component and frozen full accepted (2026-10-18)
 
 The [R1 implementation](M1_RESOURCE_IDENTITY_IMPLEMENTATION.md) binds canonical
 program bytes, run/process/thread incarnations, activation/segment/block visits,
@@ -10,8 +10,12 @@ observations cannot authorize an explicitly old loop value or state. Distinct
 native handle and referent realms do not require identical namespace types.
 Component **302 cases / 14 criteria / 4.575s** passes with all **472** registered
 source hashes unchanged, including 142 new execution cases. Original failures
-and bounded independent reviews remain archived. A clean frozen full regression
-has not yet run for this implementation checkpoint. R2/R3, denotation/provenance,
+and bounded independent reviews remain archived. Clean frozen `6fcac0f` passes
+**4,192 full tests / 459.327s / 1,027,068 KiB**, zero failures/errors/skips and
+three warnings. All prior 4,050 identities, 451 source and 42 fixtures survive;
+all 472 source and 44 fixture hashes match before/after. The owned basetemp was
+removed and protected checkouts remain unchanged. See the
+[acceptance and archive](M1_RESOURCE_IDENTITY_ACCEPTANCE.md). R2/R3, denotation/provenance,
 selector/literal, remaining family/catalog and complete M0–M2 remain open.
 These are declared-IR checks, not automatic source/runtime recovery or a LeWM
 optimization/speedup result. Earlier sections preserve their checkpoint scopes.

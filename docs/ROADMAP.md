@@ -2,8 +2,8 @@
 
 > **R1 implementation checkpoint (2026-10-18):** exact occurrence/resource
 > records, canonical CFG/state links, strict execution wire and original-port
-> queries pass **302 component cases / 14 criteria**; the clean frozen full
-> regression is pending. [Implementation](M1_RESOURCE_IDENTITY_IMPLEMENTATION.md).
+> queries pass **302 component cases / 14 criteria** and **4,192 clean frozen
+> full tests** (`6fcac0f`). [Acceptance](M1_RESOURCE_IDENTITY_ACCEPTANCE.md).
 > Next are R2 work/outcome/order/ready and R3 composition. Runtime/source
 > correspondence, complete M0–M2 and LeWM simplification remain open.
 

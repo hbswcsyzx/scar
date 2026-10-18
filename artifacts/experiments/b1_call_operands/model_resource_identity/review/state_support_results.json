@@ -1,0 +1,51 @@
+{
+  "baseline": {
+    "gaps": [
+      "evidence_missing",
+      "resource_access_missing",
+      "source_runtime_unverified"
+    ],
+    "issues": [],
+    "valid": true
+  },
+  "known_current_stale": {
+    "gaps": [
+      "evidence_missing",
+      "resource_access_missing",
+      "source_runtime_unverified"
+    ],
+    "issues": [
+      "stale_state",
+      "resource_current_state_support",
+      "stale_state",
+      "resource_current_state_support"
+    ],
+    "valid": false
+  },
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "source_hashes": {
+    "scar/ir/execution/flow.py": "7b9e2b9df4af89a83225ae0c520d7d44b61a75e9e1c1d2b64edad55a82cc9f20",
+    "scar/ir/execution/resource_validation.py": "bbce9ae2d3664b59cfc981d863b9d151c882f6d83f4db9eeababd72463c3f985",
+    "scar/ir/execution/validation.py": "d8bb45288bc6180b1052b20599fbb161a14511ca6b1180acd9168385b3647d02"
+  },
+  "source_hashes_after": {
+    "scar/ir/execution/flow.py": "7b9e2b9df4af89a83225ae0c520d7d44b61a75e9e1c1d2b64edad55a82cc9f20",
+    "scar/ir/execution/resource_validation.py": "bbce9ae2d3664b59cfc981d863b9d151c882f6d83f4db9eeababd72463c3f985",
+    "scar/ir/execution/validation.py": "d8bb45288bc6180b1052b20599fbb161a14511ca6b1180acd9168385b3647d02"
+  },
+  "torch_imported": false,
+  "unobserved_current_with_old_support": {
+    "gaps": [
+      "evidence_missing",
+      "formal_unobserved",
+      "resource_access_missing",
+      "resource_current_state_unknown",
+      "source_runtime_unverified",
+      "state_support_unresolved",
+      "unresolved",
+      "use_unresolved"
+    ],
+    "issues": [],
+    "valid": true
+  }
+}
