@@ -35,7 +35,8 @@ def _call_model(*, unresolved=False, provider_source=False):
 def test_v7_roundtrip_keeps_exact_original_ids_and_unresolved_variants(unresolved, provider_source):
     model = _call_model(unresolved=unresolved, provider_source=provider_source)
     document = to_dict(model)
-    assert SCHEMA_VERSION == document['schema_version'] == 7
+    assert SCHEMA_VERSION >= 7
+    assert document['schema_version'] == 7
     restored = loads(dumps(model))
     assert restored == model
     assert dumps(restored) == dumps(model)
@@ -176,9 +177,14 @@ def test_local_mutation_cannot_hide_capability_or_bypass_exact_records(corruptio
         dumps(model)
 
 
-@pytest.mark.parametrize('version', (True, 0, -1, '7', 8))
+@pytest.mark.parametrize('version', (True, 0, -1, '7', 8, 9))
 def test_new_max_version_does_not_admit_bool_string_or_future_version(version):
     model = _call_model()
+    if type(version) is int and version == 8:
+        # Preserve this historical case identity: v8 is now a supported explicit
+        # empty capability view. The new v9 case retains the future rejection.
+        assert from_dict(to_dict(model, schema_version=version)) == model
+        return
     with pytest.raises(ValueError, match='schema_version'):
         dumps(model, schema_version=version)
     document = to_dict(model)

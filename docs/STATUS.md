@@ -1,5 +1,17 @@
 # Current evidence and remaining work
 
+## P3 persistent-body occurrence implementation under review (2026-10-18)
+
+[Plan](M1_BODY_OCCURRENCE_PLAN.md), [API](M1_BODY_OCCURRENCE_API.md) and
+[progress/failures](M1_BODY_OCCURRENCE_PROGRESS.md) connect original Drive ports,
+Create/owner/captures, persistent activation/segment/first outcome, fresh scoped
+copy compatibility and conditional CALL/body host order. Final166 focused and
+517 component cases across18 criteria pass at one668-source fingerprint.
+Clean frozen-full acceptance and archive remain pending; P3 is not yet accepted.
+Independent reviews closed endpoint/inventory, intermediate-copy and
+unassociated-Create-source gaps; all original failures remain. No automatic runtime adapter, new backend,
+LeWM transformation or speedup is claimed. P4/P5, D3 and fullM0–M2 remain OPEN.
+
 ## P2 synchronous generator declared matrix accepted (2026-10-18)
 
 [Acceptance](M1_GENERATOR_MATRIX_ACCEPTANCE.md): all16 phase/request cells now

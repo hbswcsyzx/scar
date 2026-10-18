@@ -165,6 +165,20 @@ class ExecutionIndex:
         from .call_query import call_activation
         return call_activation(self._ctx, identity)
 
+    def drive_execution(self, identity, *, budget=4096):
+        """Original body ports and this declared persistent execution segment."""
+        from .resumable_query import drive_execution
+        from .validity_budget import ValidityBudget
+        shared = ValidityBudget(budget)
+        return drive_execution(self._content_context(), identity, shared=shared)
+
+    def body_activation_origin(self, identity, *, budget=4096):
+        """Exact Create NORMAL handle or explicit missing/external origin."""
+        from .resumable_query import body_activation_origin
+        from .validity_budget import ValidityBudget
+        shared = ValidityBudget(budget)
+        return body_activation_origin(self._content_context(), identity, shared=shared)
+
     def call_entries(self, caller_id):
         """This caller's links, retaining a missing dynamic callee as a gap."""
         from .call_query import call_entries

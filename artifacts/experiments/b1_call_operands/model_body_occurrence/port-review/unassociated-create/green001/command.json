@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_execution_body_port_review.py::test_known_contrary_create_source_is_not_hidden_by_an_absent_origin_association",
+    "--junitxml=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_body_occurrence/port-review/unassociated-create/green001/junit.xml"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": "Focused test attempt during shared development; not a component or full acceptance"
+}

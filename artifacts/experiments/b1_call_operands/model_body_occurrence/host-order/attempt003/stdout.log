@@ -1,0 +1,14 @@
+..........F                                                              [100%]
+=================================== FAILURES ===================================
+_ test_actual_call_and_body_bridges_can_cycle_even_when_call_activation_dag_is_acyclic _
+
+    def test_actual_call_and_body_bridges_can_cycle_even_when_call_activation_dag_is_acyclic():
+        program, model, details = mixed_body_call_cycle_execution()
+>       assert not program.validate()
+                   ^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramGraph' object has no attribute 'validate'
+
+tests/unit/test_execution_body_order.py:149: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_body_order.py::test_actual_call_and_body_bridges_can_cycle_even_when_call_activation_dag_is_acyclic
+1 failed, 10 passed in 1.56s

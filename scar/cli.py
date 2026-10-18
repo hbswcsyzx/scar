@@ -270,6 +270,11 @@ def _constants(args) -> int:
     return 0
 
 
+def _query_body_execution(args) -> int:
+    from scar.ir.execution.cli import query_body_execution
+    return query_body_execution(args)
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="scar")
     sub = parser.add_subparsers(dest="subcommand", required=True)
@@ -329,6 +334,15 @@ def main(argv=None) -> int:
     check_program.add_argument("graph", help="scar.program-graph JSON document")
     check_program.add_argument("--out", help="optional structural validation report")
     check_program.set_defaults(func=_check_program)
+    query_body = sub.add_parser("query-body-execution", help="inspect declared body drive or activation links without executing code")
+    query_body.add_argument("program", help="strict scar.program-graph JSON document")
+    query_body.add_argument("execution", help="strict scar.execution-model JSON document")
+    body_subject = query_body.add_mutually_exclusive_group(required=True)
+    body_subject.add_argument("--drive", help="canonical exec_operation_occurrence:<value> ID")
+    body_subject.add_argument("--activation", help="canonical exec_region_activation:<value> ID")
+    query_body.add_argument("--budget", type=int, default=4096)
+    query_body.add_argument("--out", help="optional query report; must differ from both inputs")
+    query_body.set_defaults(func=_query_body_execution)
     model_program = sub.add_parser("model-program", help="automatically lower a selected Python function into the typed program core")
     model_program.add_argument("source", help="Python source file, read without importing or executing it")
     model_program.add_argument("--entry", required=True, help="qualified function body, for example Class.method")

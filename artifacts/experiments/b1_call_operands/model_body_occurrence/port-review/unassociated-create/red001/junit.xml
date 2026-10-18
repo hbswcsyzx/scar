@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.006" timestamp="2026-10-18T19:12:56.327206+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_body_port_review" name="test_known_contrary_create_source_is_not_hidden_by_an_absent_origin_association" time="0.334"><failure message="AssertionError: ValidationReport(issues=(), gaps=(ExecutionIssue(code='call_source_runtime_unverified', path='exec_call_activation:0.s...verified', path='model', message='declared occurrence/identity links have not been established by a runtime adapter')))&#10;assert 'body_instance_source' in set()">def test_known_contrary_create_source_is_not_hidden_by_an_absent_origin_association():
+        program, model, details = resumable_execution(instances=2)
+        left, right = model.body_activation_origins
+        # The actual owner still comes from Create-left, which now has no origin
+        # association anywhere. The supplied body claims Create-right instead.
+        changed = replace(model, denotations=(), body_activation_origins=(
+            replace(left, creation=right.creation),))
+        bare = replace(changed, body_drive_executions=(), body_activation_origins=())
+        assert validate(bare, program).valid
+        report = validate(changed, program)
+&gt;       assert 'body_instance_source' in {row.code for row in report.issues}, report
+E       AssertionError: ValidationReport(issues=(), gaps=(ExecutionIssue(code='call_source_runtime_unverified', path='exec_call_activation:0.s...verified', path='model', message='declared occurrence/identity links have not been established by a runtime adapter')))
+E       assert 'body_instance_source' in set()
+
+tests/unit/test_execution_body_port_review.py:89: AssertionError</failure></testcase></testsuite></testsuites>

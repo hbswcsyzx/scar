@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="4" time="0.997" timestamp="2026-10-18T18:45:14.370766+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_body_values" name="test_actual_saved_data_binding_keeps_declared_versions_separate_from_numerical_equality[False]" time="0.088"><failure message="TypeError: value denotation source must be a typed variant">changed = False
+
+    @pytest.mark.parametrize('changed', (False, True))
+    def test_actual_saved_data_binding_keeps_declared_versions_separate_from_numerical_equality(changed):
+&gt;       program, model, details = saved_data_execution(changed_version=changed)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_body_values.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_body_values.py:63: in saved_data_execution
+    denotations = tuple(ValueDenotation(DenotationID('body.data.' + str(number)), value.id,
+                  ^^^^^
+tests/fixtures/execution_body_values.py:63: in &lt;genexpr&gt;
+    denotations = tuple(ValueDenotation(DenotationID('body.data.' + str(number)), value.id,
+&lt;string&gt;:8: in __init__
+    ???
+scar/ir/execution/content.py:179: in __post_init__
+    _source(self.source, "value denotation source")
+scar/ir/execution/resources.py:63: in _source
+    _variant(value, (ProviderFactReference, MissingEvidence), name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Unresolved(reason='declared numerical lineage, not observed equality', point=EvidencePoint(run=RunID(value='calls'), p...eID(value='calls'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence')))
+expected = (&lt;class 'scar.ir.program.providers.ProviderFactReference'&gt;, &lt;class 'scar.ir.execution.common.MissingEvidence'&gt;)
+name = 'value denotation source'
+
+    def _variant(value, expected, name):
+        if type(value) not in expected:
+&gt;           raise TypeError(f"{name} must be a typed variant")
+E           TypeError: value denotation source must be a typed variant
+
+scar/ir/execution/resources.py:46: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_body_values" name="test_actual_saved_data_binding_keeps_declared_versions_separate_from_numerical_equality[True]" time="0.030"><failure message="TypeError: value denotation source must be a typed variant">changed = True
+
+    @pytest.mark.parametrize('changed', (False, True))
+    def test_actual_saved_data_binding_keeps_declared_versions_separate_from_numerical_equality(changed):
+&gt;       program, model, details = saved_data_execution(changed_version=changed)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_body_values.py:15: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_body_values.py:63: in saved_data_execution
+    denotations = tuple(ValueDenotation(DenotationID('body.data.' + str(number)), value.id,
+                  ^^^^^
+tests/fixtures/execution_body_values.py:63: in &lt;genexpr&gt;
+    denotations = tuple(ValueDenotation(DenotationID('body.data.' + str(number)), value.id,
+&lt;string&gt;:8: in __init__
+    ???
+scar/ir/execution/content.py:179: in __post_init__
+    _source(self.source, "value denotation source")
+scar/ir/execution/resources.py:63: in _source
+    _variant(value, (ProviderFactReference, MissingEvidence), name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Unresolved(reason='declared numerical lineage, not observed equality', point=EvidencePoint(run=RunID(value='calls'), p...eID(value='calls'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence')))
+expected = (&lt;class 'scar.ir.program.providers.ProviderFactReference'&gt;, &lt;class 'scar.ir.execution.common.MissingEvidence'&gt;)
+name = 'value denotation source'
+
+    def _variant(value, expected, name):
+        if type(value) not in expected:
+&gt;           raise TypeError(f"{name} must be a typed variant")
+E           TypeError: value denotation source must be a typed variant
+
+scar/ir/execution/resources.py:46: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_body_values" name="test_query_rechecks_mutable_external_value_artifact_instead_of_using_old_denotations" time="0.029"><failure message="TypeError: value denotation source must be a typed variant">def test_query_rechecks_mutable_external_value_artifact_instead_of_using_old_denotations():
+&gt;       program, model, details = saved_data_execution()
+                                  ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_body_values.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_body_values.py:63: in saved_data_execution
+    denotations = tuple(ValueDenotation(DenotationID('body.data.' + str(number)), value.id,
+                  ^^^^^
+tests/fixtures/execution_body_values.py:63: in &lt;genexpr&gt;
+    denotations = tuple(ValueDenotation(DenotationID('body.data.' + str(number)), value.id,
+&lt;string&gt;:8: in __init__
+    ???
+scar/ir/execution/content.py:179: in __post_init__
+    _source(self.source, "value denotation source")
+scar/ir/execution/resources.py:63: in _source
+    _variant(value, (ProviderFactReference, MissingEvidence), name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = Unresolved(reason='declared numerical lineage, not observed equality', point=EvidencePoint(run=RunID(value='calls'), p...eID(value='calls'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence')))
+expected = (&lt;class 'scar.ir.program.providers.ProviderFactReference'&gt;, &lt;class 'scar.ir.execution.common.MissingEvidence'&gt;)
+name = 'value denotation source'
+
+    def _variant(value, expected, name):
+        if type(value) not in expected:
+&gt;           raise TypeError(f"{name} must be a typed variant")
+E           TypeError: value denotation source must be a typed variant
+
+scar/ir/execution/resources.py:46: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_body_values" name="test_body_origin_with_no_captured_drive_or_origin_is_a_missing_query_not_a_crash" time="0.156" /></testsuite></testsuites>

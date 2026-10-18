@@ -26,6 +26,7 @@ from .validity import (
     ContributionSupport, EstablishedProduction, OrderAssociation, TargetLifetimeEvent,
 )
 from .calls import CallActivation
+from .resumables import BodyActivationOrigin, BodyDriveExecution
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +101,8 @@ class ExecutionModel:
     order_associations: tuple[OrderAssociation, ...] = ()
     contribution_supports: tuple[ContributionSupport, ...] = ()
     call_activations: tuple[CallActivation, ...] = ()
+    body_drive_executions: tuple[BodyDriveExecution, ...] = ()
+    body_activation_origins: tuple[BodyActivationOrigin, ...] = ()
 
     def __post_init__(self):
         if type(self.snapshot) is not ProgramSnapshot:
@@ -132,6 +135,8 @@ TABLE_TYPES = {
     'established_productions': EstablishedProduction, 'target_lifetime_events': TargetLifetimeEvent,
     'order_associations': OrderAssociation, 'contribution_supports': ContributionSupport,
     'call_activations': CallActivation,
+    'body_drive_executions': BodyDriveExecution,
+    'body_activation_origins': BodyActivationOrigin,
 }
 
 

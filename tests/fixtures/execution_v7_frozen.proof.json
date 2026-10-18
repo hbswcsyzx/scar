@@ -1,0 +1,40 @@
+{
+  "call_activation_count": 2,
+  "call_activations": [
+    "call1",
+    "call2"
+  ],
+  "codec_sha256": "90b6499f128fc1e716549c34de5ff42546d9d7af8554659499913004e5359be3",
+  "encoder": "scar.ir.execution.codec.dumps(model, schema_version=7)",
+  "factory_details": [
+    "caller",
+    "caller_activation",
+    "caller_entry",
+    "callers",
+    "children",
+    "completions",
+    "entries",
+    "links"
+  ],
+  "fixture_sha256": "6fa0d2eca706edc3a371d4d8d8581973b7e28b94ce5623e89048789e3fc8c90b",
+  "fixture_source": "tests/fixtures/execution_call_graphs.py",
+  "immutable_blobs": {
+    "scar/ir/execution/calls.py": "a287446babd077c072f51182d12ecc5e670bd2e1700b6396e914e134d95a183f",
+    "scar/ir/execution/codec.py": "90b6499f128fc1e716549c34de5ff42546d9d7af8554659499913004e5359be3",
+    "scar/ir/execution/common.py": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8",
+    "scar/ir/execution/coordinates.py": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09",
+    "scar/ir/execution/model.py": "14a28d9531b744924e24ba1633b691cdb91019e37829665e5f711369c7f2a126",
+    "scar/ir/execution/snapshot.py": "7757c299a965e37f5e73eeaa1f4ed304da6b7bfb970cded5d274fdc4e8483107",
+    "tests/fixtures/execution_call_graphs.py": "6fa0d2eca706edc3a371d4d8d8581973b7e28b94ce5623e89048789e3fc8c90b",
+    "tests/fixtures/program_graphs.py": "c3a47df7d1f7f13169917f90009957d2f5dbafc1be1bec750817cb496ed10c27"
+  },
+  "payload_bytes": 33417,
+  "payload_sha256": "099df5b8405557388e0e5834365a881363852ee4caabca53727e7286e03217e2",
+  "platform": "Linux-6.17.0-29-generic-x86_64-with-glibc2.39",
+  "program_fixture_sha256": "c3a47df7d1f7f13169917f90009957d2f5dbafc1be1bec750817cb496ed10c27",
+  "program_root": "caller",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "revision": "a740661bdf5ed34676d65e6c8eb5f15b890e0084",
+  "schema": "scar.execution-model",
+  "schema_version": 7
+}

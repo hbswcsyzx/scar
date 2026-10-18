@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_execution_content_codec.py::test_versions_stay_exact_and_unsupported_versions_still_fail",
+    "tests/unit/test_execution_work_codec.py::test_schema_versions_are_exact_supported_integers",
+    "tests/unit/test_execution_order_codec.py::test_unknown_versions_remain_rejected_after_adding_v3",
+    "--junitxml=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_body_occurrence/legacy-version/red001/junit.xml"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": "Focused test attempt during shared development; not a component or full acceptance"
+}

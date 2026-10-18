@@ -233,7 +233,10 @@ def test_codec_never_resolves_catalogs_or_opens_provider_artifacts(content, monk
 
 
 def test_versions_stay_exact_and_unsupported_versions_still_fail(content):
-    for version in (True, 0, 8, "4"):
+    for version in (True, 0, 8, 9, "4"):
+        if type(version) is int and version == 8:
+            assert loads(dumps(content, schema_version=version)) == content
+            continue
         with pytest.raises(ValueError, match="schema_version"):
             dumps(content, schema_version=version)
         document = to_dict(content)

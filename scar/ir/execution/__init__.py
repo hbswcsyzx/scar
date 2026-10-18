@@ -1,6 +1,7 @@
 """Typed execution occurrences and resource associations over canonical program IR."""
 
 from .calls import CallActivation
+from .resumables import BodyActivationOrigin, BodyDriveExecution
 from .composition import CompositionScope
 from .ids import CallActivationID
 from .production import (
@@ -33,6 +34,7 @@ from .validity import (
 __all__ = [
     "CompositionScope",
     "CallActivation", "CallActivationID",
+    "BodyDriveExecution", "BodyActivationOrigin",
     "BytePrefixWrite", "EvidenceInventoryBinding", "ExternalEstablishment",
     "HostWrite", "InventorySourceRef", "OutcomeProduction", "RawRecordRef",
     "SourceEdgeRef", "SourceEndpointBridge", "SourceEndpointRef",

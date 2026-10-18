@@ -364,6 +364,7 @@ def _external_stages(ctx):
     from .content_validation import content_errors
     from .production_validation import write_errors, produced_errors
     from .validity_validation import validity_errors
+    from .resumable_identity import body_identity_errors
 
     def evidence_bindings(context):
         for row in context.model.evidence_bindings:
@@ -379,11 +380,14 @@ def _external_stages(ctx):
         ('source_inventory', source_inventory_errors), ('resource', resource_errors),
         ('work', work_errors), ('order', order_errors), ('evidence_bindings', evidence_bindings),
         ('observation', observation_errors), ('content', content_errors),
+        ('body_identity', body_identity_errors),
         ('source_bridge', source_bridge_errors), ('write', write_errors),
         ('produced', produced_errors), ('validity', validity_errors),
     ):
         if ctx.issues:
             break
+        if name == 'body_identity' and not (ctx.resolved_body_drives or ctx.resolved_body_origins):
+            continue
         called.append(name)
         stage(ctx)
     ctx.external_preparation = {
@@ -426,7 +430,8 @@ def refresh_external_context(base_ctx):
         'work_materialization_keys', 'order_steps', 'order_adjacency',
         'resolved_denotations', 'resolved_content_reads', 'resolved_writes',
         'resolved_produced', 'resolved_establishments', 'resolved_lifetime_events',
-        'resolved_order_associations', 'resolved_supports', '_endpoint_profile_cache'}
+        'resolved_order_associations', 'resolved_supports', '_endpoint_profile_cache',
+        'body_copy_compatibility'}
     catalogs = {'value_graphs', 'evidence_graphs', 'semantic_graphs', 'artifact_bytes'}
     for name, value in vars(base_ctx).items():
         if name in external:
@@ -472,8 +477,12 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
         from .call_validation import call_errors
         call_errors(ctx)
     if not ctx.issues:
-        from .host_order import prepare_host_order
+        from .resumable_validation import body_errors
+        body_errors(ctx)
+    if not ctx.issues:
+        from .host_order import prepare_host_order, host_cycle_errors
         prepare_host_order(ctx)
+        host_cycle_errors(ctx)
     if not ctx.issues:
         _evidence_gaps(ctx)
     ctx._canonical_gaps = tuple(ctx.gaps)
