@@ -1,5 +1,13 @@
 # SCAR roadmap and scope
 
+> **R2.1 work checkpoint (2026-10-18):** original access/actual INVOKE state
+> effects, terminal observations, independent quiescence and resource retention
+> pass **407 component checks / 9 criteria**; clean frozen full is pending.
+> [Work interfaces](M1_RESOURCE_WORK_INTERFACES.md) and
+> [R2.1→R2.2→R2.3 plan](M1_RESOURCE_WORK_PLAN.md) retain full R2 event/order,
+> consumer/production coverage and ready requirements. This does not close R2,
+> R3 or M0–M2 and does not authorize a transformation.
+
 > **R1 implementation checkpoint (2026-10-18):** exact occurrence/resource
 > records, canonical CFG/state links, strict execution wire and original-port
 > queries pass **302 component cases / 14 criteria** and **4,192 clean frozen

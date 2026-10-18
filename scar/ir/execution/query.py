@@ -9,13 +9,14 @@ from copy import deepcopy
 from dataclasses import dataclass
 
 from scar.ir.program.ids import UseID, ValueID
-from scar.ir.program.model import BlockArgument, CompletionResult
+from scar.ir.program.model import BlockArgument, CompletionResult, TerminatorKind
 from scar.ir.program.drivers import BodyDriveResult
 from scar.ir.program.resumption import ResumeInput, SavedInput, saved_actual_use
 from .common import Unresolved
-from .coordinates import ControlTransfer, OccurrencePhase, OccurrencePoint, UseOccurrence
-from .ids import BlockVisitID, OperationOccurrenceID, RegionActivationID, ValueOccurrenceID
+from .coordinates import AccessRef, ControlTransfer, OccurrencePhase, OccurrencePoint, UseOccurrence
+from .ids import BlockVisitID, OperationOccurrenceID, QueuePrefixID, RegionActivationID, ValueOccurrenceID
 from .validation import _analyze
+from .work import ActualCompletionState, InvokeBoundaryStateEffect, WithinOperation
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,6 +101,67 @@ class ExecutionIndex:
         op = ctx.occurrences[row.operation].operation
         original = next(x for x in ctx.program.resource_uses if x.operation == op and x.requirement == requirement.id)
         return deepcopy({'access': row, 'binding': binding, 'requirement': requirement, 'original_use': original})
+
+    def canonical_effect(self, effect):
+        """Resolve original access/input and actual landing; no copied effects."""
+        ctx = self._ctx
+        if type(effect) is AccessRef:
+            effect.__post_init__()
+            occurrence = ctx.occurrences[effect.operation]
+            operation = ctx.core_operations[occurrence.operation]
+            if effect.index >= len(operation.accesses):
+                raise ValueError('effect index does not select an original StateAccess')
+            access = operation.accesses[effect.index]
+            return deepcopy({'kind': 'access', 'reference': effect, 'operation': occurrence,
+                'access': access, 'before': ctx.uses.get((occurrence.id, access.before)),
+                'after': None if access.after is None else ctx.results.get((occurrence.id, access.after))})
+        if type(effect) is not InvokeBoundaryStateEffect:
+            raise TypeError('canonical_effect requires exact AccessRef or InvokeBoundaryStateEffect')
+        if effect not in ctx.work_effects:
+            raise ValueError('invoke boundary effect must be an existing validated work association')
+        occurrence = ctx.occurrences[effect.invocation]
+        operation = ctx.core_operations[occurrence.operation]
+        transfer = ctx.outgoing.get(effect.invocation)
+        post = None if type(effect.post) is not ActualCompletionState else ctx.values[effect.post.formal]
+        return deepcopy({'kind': 'invoke_boundary', 'reference': effect, 'operation': occurrence,
+            'input': ctx.uses.get((effect.state_input.operation, effect.state_input.use)),
+            'actual_transfer': transfer, 'post': effect.post if post is None else post,
+            'successor': None if transfer is None else operation.terminator.successors[transfer.successor_index]})
+
+    def work(self, identity):
+        """Keep host completion, terminal observations and quiescence separate."""
+        ctx = self._ctx
+        row = ctx.submissions[identity]
+        host = None
+        if type(row.origin) is WithinOperation:
+            occurrence = ctx.occurrences[row.origin.operation]
+            operation = ctx.core_operations[occurrence.operation]
+            transfer = ctx.outgoing.get(row.origin.operation)
+            if (transfer is not None and operation.terminator is not None
+                    and operation.terminator.kind is TerminatorKind.INVOKE):
+                host = operation.terminator.successors[transfer.successor_index].kind
+        return deepcopy({'submission': row, 'host_completion': host,
+            'outcomes': tuple(ctx.work_outcomes.get(identity, ())),
+            'quiescences': tuple(ctx.work_quiescences.get(identity, ())),
+            'retentions': tuple(ctx.work_retentions.get(identity, ())),
+            'effects': tuple(self.canonical_effect(effect) for effect in row.effects),
+            'source_runtime_verified': False, 'transformation_authorized': False})
+
+    def queue_prefix(self, identity, *, budget=4096):
+        """Inspect persistent predecessor links; this does not assert device HB."""
+        if type(budget) is not int or budget <= 0:
+            raise ValueError('queue-prefix query budget must be a positive integer')
+        ctx = self._ctx
+        current = ctx.queue_prefixes[identity]
+        rows = []
+        while len(rows) < budget:
+            rows.append(current)
+            if type(current.previous) is not QueuePrefixID:
+                return deepcopy({'prefixes': tuple(rows), 'boundary': current.previous,
+                                 'truncated': False, 'runtime_order_verified': False})
+            current = ctx.queue_prefixes[current.previous]
+        return deepcopy({'prefixes': tuple(rows), 'boundary': current.id,
+                         'truncated': True, 'runtime_order_verified': False})
 
 
 __all__ = ['DefinitionLink', 'FormalRoute', 'ExecutionIndex']

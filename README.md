@@ -11,6 +11,13 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
+The [R2.1 work foundation](docs/M1_RESOURCE_WORK_INTERFACES.md) now connects
+actual access/INVOKE completion effects, work terminal observations, independent
+quiescence and resource retention. Its component passes **407 checks / 9 criteria**;
+clean frozen full regression is pending. Execution v2 retains byte-exact original
+v1 compatibility. [R2 event/order/consumer-ready](docs/M1_RESOURCE_WORK_PLAN.md)
+and complete first-stage modeling remain open; no new LeWM speedup is claimed.
+
 The [tooling survey](docs/TOOLING_SURVEY.md) and
 [model integration design](docs/MODELING_INTEGRATION.md) define how SCAR will
 reuse Python compiler interfaces, FX/Export and ETO+Profiler. Current experiments

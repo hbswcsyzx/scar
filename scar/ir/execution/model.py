@@ -14,6 +14,7 @@ from .resources import (
     AllocationPlacement, HandleBinding, RequirementBinding, ResourceAccessBinding,
     ResourceInstance, ResourceRealization,
 )
+from .work import QueuePrefix, ResourceOutcome, WorkQuiescence, WorkRetention, WorkSubmission
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,6 +67,11 @@ class ExecutionModel:
     accesses: tuple[ResourceAccessBinding, ...] = ()
     placements: tuple[AllocationPlacement, ...] = ()
     evidence_bindings: tuple[OccurrenceEvidenceBinding, ...] = ()
+    submissions: tuple[WorkSubmission, ...] = ()
+    outcomes: tuple[ResourceOutcome, ...] = ()
+    quiescences: tuple[WorkQuiescence, ...] = ()
+    retentions: tuple[WorkRetention, ...] = ()
+    queue_prefixes: tuple[QueuePrefix, ...] = ()
 
     def __post_init__(self):
         if type(self.snapshot) is not ProgramSnapshot:
@@ -86,6 +92,8 @@ TABLE_TYPES = {
     'transfers': ControlTransfer, 'resources': ResourceInstance, 'realizations': ResourceRealization,
     'requirements': RequirementBinding, 'handles': HandleBinding, 'accesses': ResourceAccessBinding,
     'placements': AllocationPlacement, 'evidence_bindings': OccurrenceEvidenceBinding,
+    'submissions': WorkSubmission, 'outcomes': ResourceOutcome, 'quiescences': WorkQuiescence,
+    'retentions': WorkRetention, 'queue_prefixes': QueuePrefix,
 }
 
 

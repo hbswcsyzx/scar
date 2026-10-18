@@ -20,7 +20,8 @@ from .model import ExecutionModel
 
 
 SCHEMA = "scar.execution-model"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
+_WORK_FIELDS = frozenset({"submissions", "outcomes", "quiescences", "retentions", "queue_prefixes"})
 
 
 def _tag(cls):
@@ -28,13 +29,14 @@ def _tag(cls):
 
 
 @lru_cache(maxsize=None)
-def _record_schema(cls):
+def _record_schema(cls, schema_version):
     hints = get_type_hints(cls)
-    return tuple((field.name, hints[field.name]) for field in fields(cls))
+    return tuple((field.name, hints[field.name]) for field in fields(cls)
+                 if not (schema_version == 1 and cls is ExecutionModel and field.name in _WORK_FIELDS))
 
 
-@lru_cache(maxsize=1)
-def _vocabulary():
+@lru_cache(maxsize=2)
+def _vocabulary(schema_version):
     """Only types reachable through the fixed model schema may have wire tags."""
     vocabulary, visited = {}, set()
 
@@ -58,7 +60,7 @@ def _vocabulary():
             raise TypeError(f"conflicting execution wire tag: {name}")
         vocabulary[name] = expected
         if not issubclass(expected, (Identifier, Enum)):
-            for _, child in _record_schema(expected):
+            for _, child in _record_schema(expected, schema_version):
                 visit(child)
 
     visit(ExecutionModel)
@@ -76,7 +78,7 @@ def _object(value, keys, path):
         _fail(path, "missing or unknown fields")
 
 
-def _concrete(value, expected, path, *, wire):
+def _concrete(value, expected, path, schema_version, *, wire):
     """Choose a Union by its declared tag; never guess by matching field shape."""
     choices = get_args(expected) if get_origin(expected) in (Union, UnionType) else (expected,)
     if wire:
@@ -84,7 +86,7 @@ def _concrete(value, expected, path, *, wire):
             markers = [key for key in ("$record", "$id", "$enum") if key in value]
             if len(markers) != 1 or type(value[markers[0]]) is not str:
                 _fail(path, "expected exactly one typed tag")
-            actual = _vocabulary().get(value[markers[0]])
+            actual = _vocabulary(schema_version).get(value[markers[0]])
             if actual is None:
                 _fail(path, "unknown type tag")
         else:
@@ -100,22 +102,22 @@ def _concrete(value, expected, path, *, wire):
     _fail(path, "tag or type does not match the declared field")
 
 
-def _encode(value, expected, path):
-    expected = _concrete(value, expected, path, wire=False)
+def _encode(value, expected, path, schema_version):
+    expected = _concrete(value, expected, path, schema_version, wire=False)
     if get_origin(expected) is tuple:
         arguments = get_args(expected)
         if len(arguments) == 2 and arguments[1] is Ellipsis:
-            return [_encode(child, arguments[0], f"{path}[{index}]")
+            return [_encode(child, arguments[0], f"{path}[{index}]", schema_version)
                     for index, child in enumerate(value)]
         if len(value) != len(arguments):
             _fail(path, "incorrect tuple length")
-        return [_encode(child, kind, f"{path}[{index}]")
+        return [_encode(child, kind, f"{path}[{index}]", schema_version)
                 for index, (child, kind) in enumerate(zip(value, arguments))]
     if expected in (str, int, bool, float, type(None)):
         if expected is float and not math.isfinite(value):
             _fail(path, "non-finite number")
         return value
-    if _vocabulary().get(_tag(expected)) is not expected:
+    if _vocabulary(schema_version).get(_tag(expected)) is not expected:
         _fail(path, "type is not in execution vocabulary")
     if issubclass(expected, Identifier):
         # Preserve the original canonical program/v2 namespace and wire form.
@@ -132,22 +134,22 @@ def _encode(value, expected, path):
         if expected(value.value) is not value:
             _fail(path, "invalid enum member")
         return {"$enum": _tag(expected), "value": value.value}
-    result = {name: _encode(getattr(value, name), kind, path + "." + name)
-              for name, kind in _record_schema(expected)}
+    result = {name: _encode(getattr(value, name), kind, path + "." + name, schema_version)
+              for name, kind in _record_schema(expected, schema_version)}
     value.__post_init__()
     return {"$record": _tag(expected), "fields": result}
 
 
-def _decode(value, expected, path):
-    expected = _concrete(value, expected, path, wire=True)
+def _decode(value, expected, path, schema_version):
+    expected = _concrete(value, expected, path, schema_version, wire=True)
     if get_origin(expected) is tuple:
         arguments = get_args(expected)
         if len(arguments) == 2 and arguments[1] is Ellipsis:
-            return tuple(_decode(child, arguments[0], f"{path}[{index}]")
+            return tuple(_decode(child, arguments[0], f"{path}[{index}]", schema_version)
                          for index, child in enumerate(value))
         if len(value) != len(arguments):
             _fail(path, "incorrect array length")
-        return tuple(_decode(child, kind, f"{path}[{index}]")
+        return tuple(_decode(child, kind, f"{path}[{index}]", schema_version)
                      for index, (child, kind) in enumerate(zip(value, arguments)))
     if expected in (str, int, bool, float, type(None)):
         if expected is float and not math.isfinite(value):
@@ -173,17 +175,36 @@ def _decode(value, expected, path):
     _object(value, ("$record", "fields"), path)
     if value["$record"] != _tag(expected):
         _fail(path, "invalid record tag")
-    schema = _record_schema(expected)
+    schema = _record_schema(expected, schema_version)
     _object(value["fields"], (name for name, _ in schema), path + ".fields")
-    return expected(**{name: _decode(value["fields"][name], kind, path + "." + name)
+    return expected(**{name: _decode(value["fields"][name], kind, path + "." + name, schema_version)
                        for name, kind in schema})
 
 
-def to_dict(model: ExecutionModel) -> dict:
-    """Recheck record shape/local invariants; do not perform graph validation."""
+def _version(version):
+    if type(version) is not int or version not in (1, 2):
+        raise ValueError("unsupported execution schema_version")
+    return version
+
+
+def to_dict(model: ExecutionModel, *, schema_version: int | None = None) -> dict:
+    """Use v1 for resource-only records; v2 adds work, without graph proof.
+
+    Explicit v2 can encode empty work tables. Decoding v1 supplies those empty
+    tables only as a representation migration, never as evidence of no work.
+    """
     try:
-        return {"schema": SCHEMA, "schema_version": SCHEMA_VERSION,
-                "model": _encode(model, ExecutionModel, "model")}
+        if type(model) is not ExecutionModel:
+            _fail("model", "expected exact ExecutionModel")
+        # Recheck all tables before capability selection: malformed false-like
+        # fields must not disappear just because v1 omits empty work tables.
+        model.__post_init__()
+        has_work = any(getattr(model, name) for name in _WORK_FIELDS)
+        version = (2 if has_work else 1) if schema_version is None else _version(schema_version)
+        if version == 1 and has_work:
+            _fail("model", "work capability cannot be encoded as schema v1")
+        return {"schema": SCHEMA, "schema_version": version,
+                "model": _encode(model, ExecutionModel, "model", version)}
     except (TypeError, AttributeError, RecursionError) as error:
         raise ValueError(f"invalid execution record: {error}") from error
 
@@ -194,15 +215,14 @@ def from_dict(data: dict) -> ExecutionModel:
         _object(data, ("schema", "schema_version", "model"), "document")
         if type(data["schema"]) is not str or data["schema"] != SCHEMA:
             _fail("document", "unexpected schema")
-        if type(data["schema_version"]) is not int or data["schema_version"] != SCHEMA_VERSION:
-            _fail("document", "unsupported schema_version")
-        return _decode(data["model"], ExecutionModel, "model")
+        version = _version(data["schema_version"])
+        return _decode(data["model"], ExecutionModel, "model", version)
     except (TypeError, AttributeError, RecursionError) as error:
         raise ValueError(f"invalid execution document: {error}") from error
 
 
-def dumps(model: ExecutionModel) -> str:
-    return json.dumps(to_dict(model), sort_keys=True, ensure_ascii=False,
+def dumps(model: ExecutionModel, *, schema_version: int | None = None) -> str:
+    return json.dumps(to_dict(model, schema_version=schema_version), sort_keys=True, ensure_ascii=False,
                       separators=(",", ":"), allow_nan=False)
 
 

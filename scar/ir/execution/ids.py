@@ -66,10 +66,31 @@ class RealizationID(Identifier):
     prefix = "exec_realization"
 
 
+class WorkTicketID(Identifier):
+    prefix = "exec_work_ticket"
+
+
+class WorkOutcomeID(Identifier):
+    prefix = "exec_work_outcome"
+
+
+class WorkQuiescenceID(Identifier):
+    prefix = "exec_work_quiescence"
+
+
+class WorkRetentionID(Identifier):
+    prefix = "exec_work_retention"
+
+
+class QueuePrefixID(Identifier):
+    prefix = "exec_queue_prefix"
+
+
 __all__ = [
     "RunID", "ProcessInstanceID", "HostThreadInstanceID", "RegionActivationID",
     "ExecutionSegmentID", "BlockVisitID", "OperationOccurrenceID",
     "ValueOccurrenceID", "ResourceInstanceID", "ExternalRealmID",
     "NativeHandleLifetimeID", "ResourceBindingID", "HandleBindingID",
     "ResourceAccessID", "RealizationID",
+    "WorkTicketID", "WorkOutcomeID", "WorkQuiescenceID", "WorkRetentionID", "QueuePrefixID",
 ]

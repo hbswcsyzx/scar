@@ -1,0 +1,20 @@
+{
+  "gate": "M1-R2.1-WORK-OUTCOME-RETENTION",
+  "scope": "Work ticket origins, exact canonical access/invoke completion effects, persistent queue-prefix submission coordinates, terminal observations, independent quiescence and work-holder retention; original-port queries, execution v2 capability and byte-exact historical v1. This is a subgate of the still-open complete R2 work/order/ready model.",
+  "limitations": [
+    "Declared record/graph consistency does not establish Python/native/runtime correspondence, protocol applicability, physical coverage, whole produced content, visibility, ready, free or transformation authority.",
+    "R2.2 event generation and order-to-consumer-start, R2.3 derived contribution/denotation/current-version readiness and R3 pipeline composition remain open. No event or ready backend is smuggled into this gate.",
+    "No new source lowerer, detector, backend, heavy LeWM profiling or A/B speedup is claimed. Test timings measure acceptance cost."
+  ],
+  "criteria": [
+    {"id": "exact-work-record-variants-completeness-and-nested-mutation", "tests": ["tests/unit/test_execution_work_records.py"]},
+    {"id": "actual-normal-raise-ports-partial-failure-cancel-quiescence-and-retention-composition", "tests": ["tests/unit/test_execution_work_graph.py"]},
+    {"id": "strict-v2-capability-independent-v1-wire-and-no-lossy-downgrade", "tests": ["tests/unit/test_execution_work_codec.py", "tests/unit/test_execution_codec.py"]},
+    {"id": "host-raise-pending-work-retains-original-state-effects-and-multiple-terminal-observations", "tests": ["tests/unit/test_execution_work_queries.py::test_invoke_queries_retain_actual_host_outcome_and_original_state_input_and_landing", "tests/unit/test_execution_work_queries.py::test_host_raise_can_have_pending_work_without_any_terminal_or_quiescence_observation", "tests/unit/test_execution_work_queries.py::test_multiple_terminal_observations_are_retained_and_result_is_detached"]},
+    {"id": "original-access-before-after-unresolved-boundary-and-conditional-internal-borrow", "tests": ["tests/unit/test_execution_work_queries.py::test_ordinary_effect_query_derives_original_access_before_use_and_after_definition", "tests/unit/test_execution_work_queries.py::test_unresolved_invoke_post_and_external_work_remain_unresolved_in_query", "tests/unit/test_execution_work_queries.py::test_internal_retention_may_name_actual_post_but_cannot_claim_an_exact_host_point"]},
+    {"id": "queue-prefix-bounds-ticket-and-even-empty-boundary-scope-without-order-authority", "tests": ["tests/unit/test_execution_work_queries.py::test_persistent_queue_prefix_query_is_bounded_without_order_authority", "tests/unit/test_execution_work_queries.py::test_empty_queue_boundary_must_match_queue_identity_run_even_without_a_work_ticket", "tests/unit/test_execution_work_queries.py::test_work_observations_cannot_precede_the_enclosing_submission_call", "tests/unit/test_execution_work_queries.py::test_another_activation_may_observe_work_but_missing_host_order_remains_a_specific_gap"]},
+    {"id": "direct-held-handle-basis-type-and-referent-target-cannot-be-bypassed", "tests": ["tests/unit/test_execution_work_queries.py::test_known_direct_retention_basis_must_match_held_handle_type_and_target"]},
+    {"id": "r1-coordinate-resource-and-current-state-associations-remain-accurate", "tests": ["tests/unit/test_execution_coordinates_records.py", "tests/unit/test_execution_resource_records.py", "tests/unit/test_execution_resources_graph.py", "tests/unit/test_execution_flow.py", "tests/unit/test_execution_links.py"]},
+    {"id": "canonical-core-and-original-v14-wire-keep-their-contracts", "tests": ["tests/unit/test_program_resources.py", "tests/unit/test_program_graph.py", "tests/unit/test_program_graph_adversarial.py", "tests/unit/test_program_session_release_codec.py", "tests/unit/test_record_codec_tags.py", "tests/integration/test_program_graph_roundtrip.py"]}
+  ]
+}

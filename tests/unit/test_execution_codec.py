@@ -51,7 +51,8 @@ def test_canonical_resource_fixtures_roundtrip_without_collapsing_ids(options):
     assert type(restored.operations[0].id) is OperationOccurrenceID
     assert restored.resources[0].id != restored.resources[1].id
     assert to_dict(model)["schema"] == SCHEMA == "scar.execution-model"
-    assert to_dict(model)["schema_version"] == SCHEMA_VERSION == 1
+    assert to_dict(model)["schema_version"] == 1  # No work capability retains original v1 bytes.
+    assert SCHEMA_VERSION == 2
     if options.get("native_handles"):
         assert type(restored.handles[1].handle) is type(model.handles[1].handle)
         assert restored.handles[1].target == restored.handles[2].target

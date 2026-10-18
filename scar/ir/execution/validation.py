@@ -53,7 +53,8 @@ class _Context:
         self.evidence_graphs = {} if evidence_graphs is None else evidence_graphs
         self._external_cache = {}
         for name in ('runs', 'processes', 'threads', 'activations', 'segments', 'visits',
-                     'operations', 'values', 'resources', 'realizations', 'requirements', 'handles', 'accesses'):
+                     'operations', 'values', 'resources', 'realizations', 'requirements', 'handles', 'accesses',
+                     'submissions', 'outcomes', 'quiescences', 'retentions', 'queue_prefixes'):
             registry = {}
             for row in getattr(model, name):
                 if row.id in registry:
@@ -83,6 +84,13 @@ class _Context:
         self.before, self.after, self.edges = {}, {}, {}
         self.state_definitions_before, self.state_definitions_after, self.state_definitions_edges = {}, {}, {}
         self.visit_environments = {}
+        self.work_effects = {effect for row in model.submissions for effect in row.effects}
+        self.work_effects.update(effect for row in model.outcomes for effect in row.effect_frontier)
+        self.work_outcomes, self.work_quiescences, self.work_retentions = {}, {}, {}
+        for rows, registry in ((model.outcomes, self.work_outcomes), (model.quiescences, self.work_quiescences),
+                               (model.retentions, self.work_retentions)):
+            for row in rows:
+                registry.setdefault(row.ticket, []).append(row)
 
     def issue(self, code, path, message):
         self.issues.append(ExecutionIssue(code, str(path), message))
@@ -387,6 +395,9 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None):
     if not ctx.issues:
         from .resource_validation import resource_errors
         resource_errors(ctx)
+    if not ctx.issues:
+        from .work_validation import work_errors
+        work_errors(ctx)
     if not ctx.issues:
         for row in model.evidence_bindings:
             if row.operation not in ctx.occurrences:
