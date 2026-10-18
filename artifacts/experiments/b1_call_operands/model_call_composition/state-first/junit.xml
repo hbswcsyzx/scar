@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="9" time="0.820" timestamp="2026-10-18T22:40:19.991716+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_call_composition_state" name="test_internal_written_raise_state_exports_then_enters_the_second_helper" time="0.002"><failure message="NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope">def test_internal_written_raise_state_exports_then_enters_the_second_helper():
+&gt;       details, index = _program()
+                         ^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;enumerate object at 0x74fae8cd6930&gt;
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+&gt;       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError</failure></testcase><testcase classname="tests.unit.test_program_call_composition_state" name="test_old_world_availability_cannot_substitute_for_the_second_helpers_written_actual" time="0.001"><failure message="NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope">def test_old_world_availability_cannot_substitute_for_the_second_helpers_written_actual():
+&gt;       details, index = _program()
+                         ^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;enumerate object at 0x74fae8d3b4c0&gt;
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+&gt;       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError</failure></testcase><testcase classname="tests.unit.test_program_call_composition_state" name="test_both_first_completion_routes_preserve_the_independent_domain_on_entry_to_h2" time="0.001"><failure message="NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope">def test_both_first_completion_routes_preserve_the_independent_domain_on_entry_to_h2():
+&gt;       details, index = _program(branches=("normal", "raise"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;enumerate object at 0x74fae8d4c0e0&gt;
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+&gt;       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError</failure></testcase><testcase classname="tests.unit.test_program_call_composition_state" name="test_mixed_preserved_and_written_world_routes_do_not_collapse_to_one_positive_input" time="0.001"><failure message="NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope">def test_mixed_preserved_and_written_world_routes_do_not_collapse_to_one_positive_input():
+&gt;       details, index = _program(branches=("normal", "raise"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;enumerate object at 0x74fae8d5cd60&gt;
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+&gt;       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError</failure></testcase><testcase classname="tests.unit.test_program_call_composition_state" name="test_preserved_normal_world_can_be_copied_to_the_next_helpers_actual_and_formal" time="0.001"><failure message="NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope">def test_preserved_normal_world_can_be_copied_to_the_next_helpers_actual_and_formal():
+&gt;       details, index = _program(branches=("normal",))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;enumerate object at 0x74fae8d6db70&gt;
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+&gt;       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError</failure></testcase><testcase classname="tests.unit.test_program_call_composition_state" name="test_second_helpers_future_result_cannot_supply_its_own_entry[0-world-CALL]" time="0.002"><failure message="NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope">invoke = False, ordinal = 0, domain = 'world'
+
+    @pytest.mark.parametrize("invoke", (False, True), ids=("CALL", "INVOKE"))
+    @pytest.mark.parametrize("ordinal,domain", ((0, "world"), (1, "context")))
+    def test_second_helpers_future_result_cannot_supply_its_own_entry(invoke, ordinal, domain):
+&gt;       details, index = _program(invoke=invoke)
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;enumerate object at 0x74fae8d46b10&gt;
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+&gt;       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError</failure></testcase><testcase classname="tests.unit.test_program_call_composition_state" name="test_second_helpers_future_result_cannot_supply_its_own_entry[0-world-INVOKE]" time="0.196" /><testcase classname="tests.unit.test_program_call_composition_state" name="test_second_helpers_future_result_cannot_supply_its_own_entry[1-context-CALL]" time="0.002"><failure message="NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope">invoke = False, ordinal = 1, domain = 'context'
+
+    @pytest.mark.parametrize("invoke", (False, True), ids=("CALL", "INVOKE"))
+    @pytest.mark.parametrize("ordinal,domain", ((0, "world"), (1, "context")))
+    def test_second_helpers_future_result_cannot_supply_its_own_entry(invoke, ordinal, domain):
+&gt;       details, index = _program(invoke=invoke)
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;enumerate object at 0x74fae8d4ede0&gt;
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+&gt;       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError</failure></testcase><testcase classname="tests.unit.test_program_call_composition_state" name="test_second_helpers_future_result_cannot_supply_its_own_entry[1-context-INVOKE]" time="0.010" /></testsuite></testsuites>

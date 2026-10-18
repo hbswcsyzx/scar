@@ -1,0 +1,37 @@
+{
+  "previous_goal_turn": "progress: ea13ecf source change,788 focused,pushed",
+  "base_revision": "ea13ecf0d2bf4117e5e378e5774211d109bc3e3a",
+  "plan_sha256": "62d0417ebf8a6a65b8c134d583e6fe30ddd5770fa606ca78e49f8ad65e98729c",
+  "protected": {
+    "le-wm": {
+      "path": "/home/zyf/AAA/le-wm",
+      "head": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+      "status": ""
+    },
+    "scar": {
+      "path": "/home/zyf/AAA/scar",
+      "head": "84f165fce1e2e37617c974ce9fee574ea816406b",
+      "status": ""
+    }
+  },
+  "obligation_groups": [
+    "F12",
+    "F13",
+    "F14",
+    "F15",
+    "F16",
+    "F17",
+    "F18",
+    "F19",
+    "F20",
+    "F21",
+    "F22",
+    "F23",
+    "F24",
+    "X25",
+    "X26",
+    "X27"
+  ],
+  "tests_started": 0,
+  "selectors": 39
+}

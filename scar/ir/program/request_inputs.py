@@ -223,7 +223,10 @@ def request_input_binding(index, raw, input, ordinal=0, *, budget=4096, accounti
     gaps.extend((*raw_view['gaps'], *input_view['gaps']))
     for view in operands.values():
         gaps.extend(view['gaps'])
+    inventory_complete = (not accounting.truncated and all(view['source_inventory_complete']
+                          for view in (raw_view, input_view, *operands.values())))
     return {'raw': raw_view, 'input': input_view, 'operand_origins': tuple(operands.values()),
+        'source_inventory_complete': inventory_complete,
         'bindings': tuple(bindings), 'gaps': tuple(gaps), 'cursor': cursor,
         'status': 'TRUNCATED' if accounting.truncated else 'PARTIAL' if gaps else 'DECLARED',
         'budget': {'limit': accounting.limit, 'used': accounting.used, 'costs': dict(accounting.costs),

@@ -189,13 +189,19 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
         relevant = copy_flow.selected_edges(guard_edges, region=operation_region.get(target.operation)) or None
         return (copy_flow.forwards(source, target) if relevant is None else
                 copy_flow.forwards(source, target, guard=relevant))
-    recipes, gaps, pending = [], [], []
+    recipes, gaps, pending, missing_routes = [], [], [], []
     if guard_ambiguity is not None:
         gaps.append({**guard_ambiguity, "message": "distinct incoming visits cannot be flattened into one source route"})
     cursor = None
 
     def gap(code, message, **details):
         return {"code": code, "message": message, **details}
+
+    def missing(item):
+        # An alternative with no emitted recipe must remain in the AND
+        # denominator. Ordinary occurrence/identity conditions are separate.
+        gaps.append(item)
+        missing_routes.append(item)
 
     def spend(kind, path):
         if accounting.truncated:
@@ -335,11 +341,11 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
         anchor = operations.get(anchor_op_id)
         anchor_pair = all_uses.get(anchor_use_id)
         if current is None or anchor is None or anchor_pair is None:
-            gaps.append(gap("source_port_missing", "route references a missing original row",
+            missing(gap("source_port_missing", "route references a missing original row",
                             value=current_id, operation=anchor_op_id, use=anchor_use_id))
             continue
         if anchor_pair[0] != anchor_op_id:
-            gaps.append(gap("source_use_owner_mismatch", "route anchor Use is not owned by its operation",
+            missing(gap("source_use_owner_mismatch", "route anchor Use is not owned by its operation",
                             operation=anchor_op_id, use=anchor_use_id))
             continue
         if current_id in trail:
@@ -375,11 +381,11 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
         if type(origin) is OperationResult:
             producer = operations.get(origin.operation)
             if producer is None or origin.index >= len(producer.results):
-                gaps.append(gap("producer_port_missing", "OperationResult is absent",
+                missing(gap("producer_port_missing", "OperationResult is absent",
                                 value=current.id, origin=origin))
                 continue
             if producer.results[origin.index] != current.id:
-                gaps.append(gap("producer_port_mismatch", "OperationResult selects another ValueID",
+                missing(gap("producer_port_mismatch", "OperationResult selects another ValueID",
                                 value=current.id, origin=origin))
                 continue
             freshness = None
@@ -399,18 +405,18 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                  freshness_target=freshness_target)
             continue
         if type(origin) is not BlockArgument:
-            gaps.append(gap("unsupported_origin", "origin has no supported static reverse recipe",
+            missing(gap("unsupported_origin", "origin has no supported static reverse recipe",
                             value=current.id, origin=origin))
             continue
 
         block = block_by_id.get(origin.block)
         region_id = region_by_block.get(origin.block)
         if block is None or region_id is None or origin.index >= len(block.arguments):
-            gaps.append(gap("block_argument_missing", "BlockArgument port is absent",
+            missing(gap("block_argument_missing", "BlockArgument port is absent",
                             value=current.id, origin=origin))
             continue
         if block.arguments[origin.index] != current.id:
-            gaps.append(gap("block_argument_mismatch", "BlockArgument ordinal selects another ValueID",
+            missing(gap("block_argument_mismatch", "BlockArgument ordinal selects another ValueID",
                             value=current.id, origin=origin))
             continue
 
@@ -440,7 +446,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                              and caller.terminator.kind is TerminatorKind.INVOKE
                              else caller.call_arguments)
                 if origin.index >= len(arguments):
-                    gaps.append(gap("call_actual_missing", "caller lacks this formal ordinal",
+                    missing(gap("call_actual_missing", "caller lacks this formal ordinal",
                                     caller=caller.id, callee=region_id,
                                     formal_index=origin.index))
                     candidate += 1
@@ -448,7 +454,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                 actual_id = arguments[origin.index]
                 actual_pair = all_uses.get(actual_id)
                 if actual_pair is None or actual_pair[0] != caller.id:
-                    gaps.append(gap("call_actual_unowned", "actual is not an owned Use of caller",
+                    missing(gap("call_actual_unowned", "actual is not an owned Use of caller",
                                     caller=caller.id, callee=region_id, use=actual_id))
                     candidate += 1
                     continue
@@ -482,7 +488,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                 binding = next((item for item in index.drive_input_bindings(drive.operation)
                                 if item.formal == current.id), None)
                 if binding is None:
-                    gaps.append(gap("body_start_binding_missing",
+                    missing(gap("body_start_binding_missing",
                                     "BodyStart has no derived source for this formal",
                                     drive=drive.operation, formal=current.id))
                     candidate += 1
@@ -531,7 +537,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                     or pred.id in guard_sources and guard_sources[pred.id] != successor_index):
                 continue
             if origin.index >= len(successor.arguments):
-                gaps.append(gap("cfg_actual_missing", "incoming successor lacks the formal ordinal",
+                missing(gap("cfg_actual_missing", "incoming successor lacks the formal ordinal",
                                 operation=pred.id, successor_index=successor_index,
                                 formal_index=origin.index))
                 continue
@@ -544,7 +550,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
             if type(actual) is UseID:
                 actual_pair = all_uses.get(actual)
                 if actual_pair is None or actual_pair[0] != pred.id:
-                    gaps.append(gap("cfg_actual_unowned", "edge actual is not owned by its terminator",
+                    missing(gap("cfg_actual_unowned", "edge actual is not owned by its terminator",
                                     operation=pred.id, use=actual,
                                     successor_index=successor_index))
                     continue
@@ -570,7 +576,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                      freshness_target=freshness_target, source_port=port)
             elif type(actual) in (ResumeInput, SavedInput):
                 if type(pred.terminator) is not SuspendTerminator:
-                    gaps.append(gap("resume_input_without_suspend",
+                    missing(gap("resume_input_without_suspend",
                                     "resume slot projection is not on SuspendTerminator",
                                     operation=pred.id, successor_index=successor_index))
                     continue
@@ -625,7 +631,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                     saved_use = saved_actual_use(pred, actual)
                     found = all_uses.get(saved_use)
                     if found is None or found[0] != pred.id:
-                        gaps.append(gap("saved_input_use_unresolved",
+                        missing(gap("saved_input_use_unresolved",
                                         "SavedInput does not select an original Suspend Use",
                                         operation=pred.id, successor_index=successor_index,
                                         saved_slot=actual.saved_slot))
@@ -655,7 +661,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                          "PendingPayload has no selected dynamic pending value",
                          operation=pred.id, successor_index=successor_index)))
             else:
-                gaps.append(gap("cfg_source_kind_unresolved", "unsupported original edge input kind",
+                missing(gap("cfg_source_kind_unresolved", "unsupported original edge input kind",
                                 operation=pred.id, successor_index=successor_index,
                                 actual=actual))
         if cursor is not None:
@@ -663,9 +669,15 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
 
     runtime_gaps = tuple(gaps) + tuple(
         item for recipe in recipes for item in recipe["gaps"])
+    inventory_complete = (not missing_routes and guard_ambiguity is None
+                          and cursor is None and not accounting.truncated)
+    for recipe in recipes:
+        recipe['origin_inventory_complete'] = inventory_complete
     return {
         "consumer": {"operation": operation, "use": use, "value": value},
         "recipes": tuple(recipes),
+        "source_inventory_complete": inventory_complete,
+        "missing_origin_routes": tuple(missing_routes),
         "gaps": runtime_gaps,
         "caller_scope": "SUPPLIED_STATIC_CALLERS_ONLY",
         "caller_scope_complete": False,

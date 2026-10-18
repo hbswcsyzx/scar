@@ -1,5 +1,23 @@
 # Current evidence and remaining work
 
+## P4 return-then-downward composition checkpoint (2026-10-18)
+
+[Plan](M1_CALL_COMPOSITION_PLAN.md) and [acceptance record](M1_CALL_COMPOSITION_PROGRESS.md)
+connect exact known-call return copies to later helper entry formals and actual
+internal consumer Uses. Per-call multi-argument seeds, state versions, local
+guards and fresh resets remain distinct. A reproduced false positive from an
+uninventoried original branch is repaired with explicit incomplete-origin
+coverage; known routes remain evidence without authorizing the whole query.
+
+Final **811 affected focused cases** pass (previous788 + new23), zero failures,
+errors or skips, at one stable **702-source** fingerprint. The first809P/2F
+budget regression and prior failures remain archived. Rejecting unresolved
+occurrence prerequisites before unnecessary path scanning restores the original
+4096-budget tests without changing limits/assertions. All16 P4 groups, P5/M2
+and fullM0–M2 remain OPEN. Next: remaining exception matcher/packet/handler and
+family connections. No component/full, new backend, automatic whole-LeWM model,
+transformation or speedup is claimed for this checkpoint.
+
 ## P4 known-callee return connection checkpoint (2026-10-18)
 
 [Plan](M1_CALL_RETURN_PLAN.md) and [acceptance record](M1_CALL_RETURN_PROGRESS.md)

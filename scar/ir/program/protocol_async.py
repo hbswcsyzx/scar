@@ -152,6 +152,7 @@ class _Analysis:
                     definitions.append({**detail, 'recipe': candidate, 'context': extended})
             projections.append({'create': create, 'request_result': source, 'request_recipe': recipe,
                 'body_input': body, 'latent_input': latent, 'raw_requests': tuple(definitions),
+                'source_inventory_complete': origins['source_inventory_complete'] and raw['source_inventory_complete'],
                 'context': context, 'conditions': ('stored request projection implementation unproved',)})
         if not projections:
             self.gap('async_request_origin_unresolved', path)
@@ -194,6 +195,9 @@ class _Analysis:
         flags = tuple(row['match'] for row in matches)
         match = (False if flags and all(value is False for value in flags) else
                  True if flags and all(value is True for value in flags) else None)
+        if not projection.get('source_inventory_complete', True):
+            match = None
+            self.gap('async_request_origin_inventory_unresolved', path)
         if match is None:
             self.gap('async_latent_packet_normalization_unresolved', path, definition=definition)
         return {'definition': definition, 'projection': projection, 'actual': actual,
@@ -236,7 +240,8 @@ class _Analysis:
             scheduler = self.ctx.origins(OwnedUse(drive.operation, drive.scheduler_request))
             definitions = tuple({**detail, 'recipe': recipe} for recipe in scheduler['recipes']
                                 for detail in recipe['raw_requests'])
-            projections = ({'raw_requests': definitions, 'context': None, 'scheduler': True},)
+            projections = ({'raw_requests': definitions, 'context': None, 'scheduler': True,
+                            'source_inventory_complete': scheduler['source_inventory_complete']},)
         _, _, ingress = body_drive_target(self.ctx.graph, drive)
         for item in drive.resume_inputs:
             if not self.spend('delivery_slots', path):
@@ -291,10 +296,15 @@ class _Analysis:
                             contexts.append(context)
                         flags = tuple(route['match'] for route in contexts)
                         match = False if flags and all(value is False for value in flags) else True if flags and all(value is True for value in flags) else None
+                        if not view['source_inventory_complete']:
+                            match = None
                         report = {'match': match, 'routes': tuple(contexts), 'gaps': view['gaps'], 'cursor': view['cursor']}
                         result = (self.ctx.correlate({'match': current_projection['context']['match'],
                             'routes': (current_projection['context'],), 'gaps': (), 'cursor': None},
                             report) if first else report)
+                    if not projection.get('source_inventory_complete', True):
+                        result = {**result, 'match': None, 'gaps': (*result['gaps'],
+                                  'async_request_origin_inventory_unresolved')}
                     alternatives.append({'definition': definition, 'projection': projection,
                                          'actual': actual, 'binding': result, 'match': result['match']})
             if alternatives and all(item['match'] is False for item in alternatives):
@@ -555,7 +565,7 @@ class _Analysis:
                             if False in known:
                                 self.issue('async_return_value', body.id,
                                     'async-generator Return has a known non-None payload')
-                            elif not known or None in known:
+                            elif not payload['source_inventory_complete'] or not known or None in known:
                                 self.gap('async_return_payload_unproved', body.id)
                     elif kind is TerminatorKind.RAISE:
                         self.gap('async_terminal_exception_classification_unproved', path)

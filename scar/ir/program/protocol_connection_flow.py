@@ -99,10 +99,12 @@ class ConnectionContext(ProtocolFlow):
         """Project original caller/CFG context without adding a copy relation."""
         from .request_inputs import _context
         calls, choices, rooted = _context(self.index, recipe, self.budget)
-        return {"match": True if rooted and not self.budget.truncated else None,
+        complete = recipe.get('origin_inventory_complete', True)
+        return {"match": True if rooted and complete and not self.budget.truncated else None,
                 "context": calls, "choices": choices, "recipe": recipe,
                 "rooted": rooted, "runtime_identity_verified": False,
-                "gaps": () if rooted else ("static_caller_or_cfg_visit_context_unresolved",)}
+                "gaps": (("source_origin_inventory_unresolved",) if not complete else
+                         () if rooted else ("static_caller_or_cfg_visit_context_unresolved",))}
 
     def correlate(self, *reports):
         """Join declared semantic projections on the same static context.
@@ -141,7 +143,11 @@ class ConnectionContext(ProtocolFlow):
         target_calls, target_choices, target_rooted = _context(self.index, consumer_recipe, self.budget)
         choices = {**source_choices, **target_choices}
         match, extension, gaps = None, None, ()
-        if any(key in source_choices and source_choices[key] != value for key, value in target_choices.items()):
+        complete = (recipe.get('origin_inventory_complete', True)
+                    and consumer_recipe.get('origin_inventory_complete', True))
+        if not complete:
+            gaps = ('source_origin_inventory_unresolved',)
+        elif any(key in source_choices and source_choices[key] != value for key, value in target_choices.items()):
             match = False
         elif source_calls == target_calls and source_rooted and target_rooted:
             match = True
@@ -149,7 +155,7 @@ class ConnectionContext(ProtocolFlow):
             extension = _helper_context_extension(self.index, self, anchor,
                 source_calls, target_calls, self.budget)
             match = True if type(extension) is dict else extension
-        if match is None:
+        if match is None and not gaps:
             gaps = ("projection_caller_prefix_unresolved",)
         return {"match": match, "context": target_calls, "choices": choices,
                 "recipe": recipe, "consumer_recipe": consumer_recipe,
@@ -219,7 +225,8 @@ class ConnectionContext(ProtocolFlow):
                                 "choices": dict(row["cfg_choices"])}
                                for row in report["bindings"])
                 covered = {id(row["input_recipe"]) for row in report["bindings"]}
-                complete = (report["cursor"] is None and report["input"]["recipes"]
+                complete = (report["cursor"] is None and report['source_inventory_complete']
+                            and report["input"]["recipes"]
                             and all(id(recipe) in covered for recipe in report["input"]["recipes"])
                             and all(recipe["freshness"] is True or recipe["freshness_target"] is None
                                 for row in report["bindings"] for recipe in
@@ -280,6 +287,7 @@ class ConnectionContext(ProtocolFlow):
                 gaps=("source_availability_unresolved",) if match is None else (),
                 conditions=("availability does not prove native request selection",))
         routes, gaps, cursor = [], [], None
+        inventory_complete = True
         arguments = (operation.invoke_arguments if operation.terminator is not None
                      and operation.terminator.kind is TerminatorKind.INVOKE else
                      operation.call_arguments if operation.callee is not None else
@@ -289,6 +297,10 @@ class ConnectionContext(ProtocolFlow):
             if isinstance(value, StateVersionValue):
                 continue
             report = self.origins(OwnedUse(consumer, identity), guard=guard)
+            inventory_complete &= report['source_inventory_complete']
+            if not report['source_inventory_complete']:
+                gaps.extend(report['missing_origin_routes'])
+                gaps.append('source_availability_origin_inventory_unresolved')
             for recipe in report["recipes"]:
                 if not self.spend("connection_available_routes"):
                     cursor = {"phase": "source_availability", "consumer": consumer, "path": path}
@@ -310,9 +322,9 @@ class ConnectionContext(ProtocolFlow):
             if self.budget.truncated:
                 break
         matches = tuple(route["match"] for route in routes)
-        if matches and all(match is True for match in matches) and cursor is None:
+        if matches and all(match is True for match in matches) and cursor is None and inventory_complete:
             match = True
-        elif matches and all(match is False for match in matches) and cursor is None:
+        elif matches and all(match is False for match in matches) and cursor is None and inventory_complete:
             match = False
         else:
             match = None
@@ -323,6 +335,7 @@ class ConnectionContext(ProtocolFlow):
     def _bind_cross_region(self, expected, port, actual, *, guard):
         """Follow original call/formal paths; never equate local reachability with global reachability."""
         from .request_inputs import _context
+        from .call_composition import compose_route
         export = self._returns.export_applicable(self.region_of[port.operation],
                                                 self.region_of[actual.operation])
         if export is None:
@@ -336,7 +349,7 @@ class ConnectionContext(ProtocolFlow):
             if not self.spend("connection_source_routes"):
                 return _answer(routes=routes, gaps=(*gaps, "protocol_connection_budget_exhausted"),
                                cursor={"phase": "connection_source_routes", "actual": actual})
-            calls, choices, _ = _context(self.index, recipe, self.budget)
+            calls, choices, rooted = _context(self.index, recipe, self.budget)
             for selected in self.selected_edges(guard):
                 applicable = [number for (_, operation), number in choices.items()
                               if operation == selected.operation]
@@ -346,38 +359,33 @@ class ConnectionContext(ProtocolFlow):
                 applicable = None
             if applicable is not None:
                 continue
-            leaf_match = recipe["leaf"].id in port.values
             formal_steps = tuple(step for step in recipe["path"]
                 if step.get("kind") in ("CALL_ACTUAL_TO_FORMAL", "CFG_COPY")
                 and getattr(step.get("formal"), "id", step.get("formal")) in port.values)
-            anchored = leaf_match or bool(formal_steps)
-            current = None
-            if anchored and calls:
-                first = next((caller for caller, region, _ in calls
-                              if region == self.region_of[port.operation]), None)
-                if first is not None:
-                    future = (self.block_of[port.operation] == self.block_of[first]
-                        and (self.positions[port.operation] > self.positions[first]
-                             or port.operation == first and port.phase != "before"))
-                    relevant = self.selected_edges(guard, region=self.region_of[port.operation]) or None
-                    flow = {} if future else self._fresh_copies(port, guard=relevant)
-                    current = (None if flow is None else
-                               bool(set(port.values).intersection(flow.get(first, ()))))
-            # A known foreign leaf is a mismatching route; an unsupported
-            # return/opaque bridge cannot establish a positive copy relation.
-            match = current if anchored else False
+            composition = compose_route(self, expected, port, actual, recipe,
+                guard=guard, calls=calls, choices=choices, rooted=rooted)
+            match = composition['match']
+            gaps.extend(composition['gaps'])
             routes.append({"source": expected, "actual": actual, "recipe": recipe,
                            "context": calls, "choices": choices, "match": match,
-                           "formal_support": formal_steps})
+                           "formal_support": formal_steps, "composition": composition})
         matches = tuple(route["match"] for route in routes)
-        if matches and all(item is True for item in matches) and report["cursor"] is None:
+        complete = report['source_inventory_complete']
+        if not complete:
+            gaps.append('call_composition_origin_inventory_unresolved')
+        if matches and all(item is True for item in matches) and report["cursor"] is None and complete:
             match = True
-        elif matches and all(item is False for item in matches) and report["cursor"] is None:
+        elif matches and all(item is False for item in matches) and report["cursor"] is None and complete:
             match = False
         else:
             match = None
             gaps.append("cross_region_source_routes_unresolved")
-        return _answer(match, routes=routes, gaps=gaps, cursor=report["cursor"])
+        cursor = report['cursor']
+        if self.budget.truncated:
+            match = None
+            cursor = cursor or {'phase': 'call_composition', 'actual': actual}
+        return {**_answer(match, routes=routes, gaps=gaps, cursor=cursor),
+                'source_inventory_complete': complete, 'missing_origin_routes': report['missing_origin_routes']}
 
     def current(self, site, consumer, *, after=False, path=""):
         """Check the original state version at this consumer operation.

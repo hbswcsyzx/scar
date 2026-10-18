@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **P4 return-then-downward composition checkpoint (2026-10-18):**
+> [Acceptance](M1_CALL_COMPOSITION_PROGRESS.md) connects original returns to the
+> next exact helper actual/formal and internal consumer. Missing original input
+> branches now retain an incomplete denominator rather than a false success.
+> 811 affected focused cases (old788 + new23) pass at one stable702-source
+> fingerprint; the original4096 budget/determinism regressions pass unchanged.
+> Next: exception matcher/packet/handler and remaining family connections under
+> the unchanged16-group P4 denominator, then P5/M2. FullM0–M2 remains OPEN.
+> No new component/full run, whole-LeWM recovery, backend or speedup.
+
 > **P4 known-callee return connection checkpoint (2026-10-18):**
 > [Acceptance](M1_CALL_RETURN_PROGRESS.md) covers exact callee exit→caller slots,
 > same-call copies, separate state versions and guarded internal-source export.

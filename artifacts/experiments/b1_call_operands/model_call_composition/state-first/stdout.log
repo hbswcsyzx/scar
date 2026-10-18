@@ -1,0 +1,194 @@
+FFFFFF.F.                                                                [100%]
+=================================== FAILURES ===================================
+___ test_internal_written_raise_state_exports_then_enters_the_second_helper ____
+
+    def test_internal_written_raise_state_exports_then_enters_the_second_helper():
+>       details, index = _program()
+                         ^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <enumerate object at 0x74fae8cd6930>
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+>       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError
+_ test_old_world_availability_cannot_substitute_for_the_second_helpers_written_actual _
+
+    def test_old_world_availability_cannot_substitute_for_the_second_helpers_written_actual():
+>       details, index = _program()
+                         ^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <enumerate object at 0x74fae8d3b4c0>
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+>       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError
+_ test_both_first_completion_routes_preserve_the_independent_domain_on_entry_to_h2 _
+
+    def test_both_first_completion_routes_preserve_the_independent_domain_on_entry_to_h2():
+>       details, index = _program(branches=("normal", "raise"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <enumerate object at 0x74fae8d4c0e0>
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+>       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError
+_ test_mixed_preserved_and_written_world_routes_do_not_collapse_to_one_positive_input _
+
+    def test_mixed_preserved_and_written_world_routes_do_not_collapse_to_one_positive_input():
+>       details, index = _program(branches=("normal", "raise"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <enumerate object at 0x74fae8d5cd60>
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+>       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError
+_ test_preserved_normal_world_can_be_copied_to_the_next_helpers_actual_and_formal _
+
+    def test_preserved_normal_world_can_be_copied_to_the_next_helpers_actual_and_formal():
+>       details, index = _program(branches=("normal",))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:56: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <enumerate object at 0x74fae8d6db70>
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+>       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError
+_ test_second_helpers_future_result_cannot_supply_its_own_entry[0-world-CALL] __
+
+invoke = False, ordinal = 0, domain = 'world'
+
+    @pytest.mark.parametrize("invoke", (False, True), ids=("CALL", "INVOKE"))
+    @pytest.mark.parametrize("ordinal,domain", ((0, "world"), (1, "context")))
+    def test_second_helpers_future_result_cannot_supply_its_own_entry(invoke, ordinal, domain):
+>       details, index = _program(invoke=invoke)
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <enumerate object at 0x74fae8d46b10>
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+>       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError
+_ test_second_helpers_future_result_cannot_supply_its_own_entry[1-context-CALL] _
+
+invoke = False, ordinal = 1, domain = 'context'
+
+    @pytest.mark.parametrize("invoke", (False, True), ids=("CALL", "INVOKE"))
+    @pytest.mark.parametrize("ordinal,domain", ((0, "world"), (1, "context")))
+    def test_second_helpers_future_result_cannot_supply_its_own_entry(invoke, ordinal, domain):
+>       details, index = _program(invoke=invoke)
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_call_composition_state.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_call_composition_state.py:11: in _program
+    graph, details = call_composition_state_program(**options)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_call_composition_state_graphs.py:90: in call_composition_state_program
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+            ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <enumerate object at 0x74fae8d4ede0>
+
+    after = tuple(StateVersionValue(ValueID(name + f".state.{index}"), root.id,
+>       OperationResult(call.id, index), location)
+                        ^^^^
+        for index, location in enumerate((base["world"], base["context"])))
+E   NameError: cannot access free variable 'call' where it is not associated with a value in enclosing scope
+
+tests/fixtures/program_call_composition_state_graphs.py:91: NameError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_call_composition_state.py::test_internal_written_raise_state_exports_then_enters_the_second_helper
+FAILED tests/unit/test_program_call_composition_state.py::test_old_world_availability_cannot_substitute_for_the_second_helpers_written_actual
+FAILED tests/unit/test_program_call_composition_state.py::test_both_first_completion_routes_preserve_the_independent_domain_on_entry_to_h2
+FAILED tests/unit/test_program_call_composition_state.py::test_mixed_preserved_and_written_world_routes_do_not_collapse_to_one_positive_input
+FAILED tests/unit/test_program_call_composition_state.py::test_preserved_normal_world_can_be_copied_to_the_next_helpers_actual_and_formal
+FAILED tests/unit/test_program_call_composition_state.py::test_second_helpers_future_result_cannot_supply_its_own_entry[0-world-CALL]
+FAILED tests/unit/test_program_call_composition_state.py::test_second_helpers_future_result_cannot_supply_its_own_entry[1-context-CALL]
+7 failed, 2 passed in 0.82s
