@@ -1,5 +1,24 @@
 # Current evidence and remaining work
 
+## P4 generic exception matcher checkpoint (2026-10-18)
+
+[Plan](M1_EXCEPTION_MATCH_PLAN.md) and [acceptance](M1_EXCEPTION_MATCH_PROGRESS.md)
+add original-operation matcher attachments with independent exception/handler
+inputs, exact own NORMAL/RAISE ports, bool branch and produced/forwarded state
+edges. Ordinary, dynamic, only-RAISE and known-callee INVOKE paths are represented
+without fake operands or protocol scopes. Lookup-RAISE consumers now connect to
+their real matcher; category/native applicability and fallback remain unproved.
+
+Final **880 affected focused cases** pass (old811 obligations:810 unchanged IDs
+and one documented future-schema21→22 migration; new69), zero failures/errors/
+skips, one stable **707-source** fingerprint. Real missing-connection, expanded
+INVOKE, forwarded-state and applicability failures remain archived. Program21
+is isolated by a nonempty capability; an independent old20 encoder oracle and
+legacy2–20 bytes pass. Execution8 remains unchanged. All16 P4 groups, P5/M2 and
+fullM0–M2 stay OPEN. Next: independent injected/lookup/matcher packets and true/
+false/failure fallback routes, then remaining families. No new component/full,
+backend, automatic whole-LeWM model, transformation or speedup here.
+
 ## P4 return-then-downward composition checkpoint (2026-10-18)
 
 [Plan](M1_CALL_COMPOSITION_PLAN.md) and [acceptance record](M1_CALL_COMPOSITION_PROGRESS.md)

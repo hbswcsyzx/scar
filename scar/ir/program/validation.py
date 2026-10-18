@@ -702,6 +702,10 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
         from .protocol_validation import protocol_errors
         for code, path, message in protocol_errors(graph):
             error(code, path, message)
+    if not issues and graph.exception_matches:
+        from .exception_match_query import exception_match_errors
+        for code, path, message in exception_match_errors(graph):
+            error(code, path, message)
     if not issues:
         from .lifecycle_analysis import analyze_lifecycles
         lifecycle_issues, lifecycle_facts = analyze_lifecycles(graph, operation_blocks=operation_block)
@@ -719,7 +723,7 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
     prepared = None
     if not issues:
         from .protocol_connections import has_protocol_connection_capability
-        if has_protocol_connection_capability(graph):
+        if has_protocol_connection_capability(graph) or graph.exception_matches:
             from .queries import ProgramIndex
             from .protocol_connection_flow import ConnectionContext
             from .protocol_connection_validation import connection_reports

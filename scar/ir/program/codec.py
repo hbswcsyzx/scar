@@ -27,10 +27,11 @@ from scar.ir.program.protocol_connections import (
     PROTOCOL_CONNECTION_RECORD_TAGS, has_delegated_method_lookup_capability,
     has_protocol_connection_capability,
 )
+from scar.ir.program.exception_matches import EXCEPTION_MATCH_RECORD_TAGS
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 20
+SCHEMA_VERSION = 21
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -55,7 +56,11 @@ _LITERAL_FIELDS = frozenset({"literal_evaluations"})
 _PROTOCOL_FIELDS = frozenset({"protocol_scopes", "protocol_operations"})
 _CONNECTION_FIELDS = frozenset({"protocol_call_inputs", "protocol_result_consumers",
                                 "protocol_bindings"})
-_V18_GRAPH_FIELDS = _GRAPH_FIELDS - _CONNECTION_FIELDS
+_EXCEPTION_MATCH_FIELDS = frozenset({"exception_matches"})
+_V21_GRAPH_FIELDS = _GRAPH_FIELDS
+_V20_GRAPH_FIELDS = _V21_GRAPH_FIELDS - _EXCEPTION_MATCH_FIELDS
+_V19_GRAPH_FIELDS = _V20_GRAPH_FIELDS
+_V18_GRAPH_FIELDS = _V19_GRAPH_FIELDS - _CONNECTION_FIELDS
 _V17_GRAPH_FIELDS = _V18_GRAPH_FIELDS
 _V16_GRAPH_FIELDS = _V17_GRAPH_FIELDS - _PROTOCOL_FIELDS
 _V15_GRAPH_FIELDS = _V16_GRAPH_FIELDS - _LITERAL_FIELDS
@@ -89,10 +94,9 @@ _V15_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V15_GRAPH_FIEL
 _V16_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V16_GRAPH_FIELDS
 _V17_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V17_GRAPH_FIELDS
 _V18_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V18_GRAPH_FIELDS
-_V19_GRAPH_FIELDS = _GRAPH_FIELDS
-_V20_GRAPH_FIELDS = _V19_GRAPH_FIELDS
 _V19_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V19_GRAPH_FIELDS
 _V20_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V20_GRAPH_FIELDS
+_V21_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V21_GRAPH_FIELDS
 _V17_PROTOCOL_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_RECORD_TAGS.items()
                              if record not in ADMISSION_RECORD_TAGS}
 _LITERAL_RECORD_TAGS = {**LITERAL_SOURCE_RECORD_TAGS,
@@ -245,24 +249,31 @@ def dumps(graph: ProgramGraph) -> str:
     has_protocols = _has_protocol_capability(graph)
     has_protocol_connections = _has_protocol_connection_capability(graph)
     has_method_lookup = has_delegated_method_lookup_capability(graph)
+    has_exception_matches = bool(graph.exception_matches)
     has_admission = _has_admission_capability(graph)
     has_invoke_subset = _has_invoke_subset_capability(graph)
     tags = (_V11_RECORD_TAGS if has_driver else
             _V10_RECORD_TAGS if has_resumption else _CLEANUP_RECORD_TAGS)
-    if has_addresses or has_protocols:
+    if has_addresses or has_protocols or has_exception_matches:
         tags = {**tags, **STATE_ADDRESS_RECORD_TAGS}
-    if has_literals or has_protocols:
+    if has_literals or has_protocols or has_exception_matches:
         tags = {**tags, **_LITERAL_RECORD_TAGS}
-    if has_protocols or has_protocol_connections:
+    if has_protocols or has_protocol_connections or has_exception_matches:
         tags = {**tags, **(PROTOCOL_RECORD_TAGS if has_admission else _V17_PROTOCOL_RECORD_TAGS)}
-    if has_protocol_connections:
+    if has_protocol_connections or has_exception_matches:
         tags = {**tags, **PROTOCOL_CONNECTION_RECORD_TAGS}
+    if has_exception_matches:
+        tags = {**tags, **EXCEPTION_MATCH_RECORD_TAGS}
     encoded = encode(graph, record_tags=tags)
-    if has_method_lookup:
+    if has_exception_matches:
+        document = {"schema": SCHEMA, "schema_version": 21,
+                    **{name: encoded[name] for name in _V21_GRAPH_FIELDS}}
+    elif has_method_lookup:
         document = {"schema": SCHEMA, "schema_version": 20,
                     **{name: encoded[name] for name in _V20_GRAPH_FIELDS}}
     elif has_protocol_connections:
-        document = {"schema": SCHEMA, "schema_version": 19, **encoded}
+        document = {"schema": SCHEMA, "schema_version": 19,
+                    **{name: encoded[name] for name in _V19_GRAPH_FIELDS}}
     elif has_admission or has_invoke_subset:
         document = {"schema": SCHEMA, "schema_version": 18,
                     **{name: encoded[name] for name in _V18_GRAPH_FIELDS}}
@@ -315,7 +326,8 @@ def dumps(graph: ProgramGraph) -> str:
         document = {"schema": SCHEMA, "schema_version": 2,
                     **{name: encoded[name] for name in _V1_V2_GRAPH_FIELDS}}
     return json.dumps(document, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=(has_literals or has_protocols or has_protocol_connections),
+                      ensure_ascii=(has_literals or has_protocols or has_protocol_connections
+                                    or has_exception_matches),
                       allow_nan=False)
 
 
@@ -357,7 +369,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact capability profiles v1–v20 without upgrading old wire."""
+    """Decode exact capability profiles v1–v21 without upgrading old wire."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -368,7 +380,7 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
@@ -379,7 +391,8 @@ def loads(payload: str) -> ProgramGraph:
                        13: _V13_ENVELOPE_FIELDS, 14: _V14_ENVELOPE_FIELDS,
                        15: _V15_ENVELOPE_FIELDS, 16: _V16_ENVELOPE_FIELDS,
                        17: _V17_ENVELOPE_FIELDS, 18: _V18_ENVELOPE_FIELDS,
-                       19: _V19_ENVELOPE_FIELDS, 20: _V20_ENVELOPE_FIELDS}[version]
+                       19: _V19_ENVELOPE_FIELDS, 20: _V20_ENVELOPE_FIELDS,
+                       21: _V21_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
@@ -390,8 +403,11 @@ def loads(payload: str) -> ProgramGraph:
                     12: _V12_GRAPH_FIELDS, 13: _V13_GRAPH_FIELDS,
                     14: _V14_GRAPH_FIELDS, 15: _V15_GRAPH_FIELDS, 16: _V16_GRAPH_FIELDS,
                     17: _V17_GRAPH_FIELDS, 18: _V18_GRAPH_FIELDS,
-                    19: _V19_GRAPH_FIELDS, 20: _V20_GRAPH_FIELDS}[version]
+                    19: _V19_GRAPH_FIELDS, 20: _V20_GRAPH_FIELDS,
+                    21: _V21_GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
+    if version < 21:
+        record.update({name: [] for name in _EXCEPTION_MATCH_FIELDS})
     if version == 1:
         record = _upgrade_v1_record(record)
     if version in (1, 2):
@@ -496,7 +512,13 @@ def loads(payload: str) -> ProgramGraph:
         tags = {**tags, **(PROTOCOL_RECORD_TAGS if version >= 18 else _V17_PROTOCOL_RECORD_TAGS)}
     if version >= 19:
         tags = {**tags, **PROTOCOL_CONNECTION_RECORD_TAGS}
+    if version >= 21:
+        tags = {**tags, **EXCEPTION_MATCH_RECORD_TAGS}
     graph = decode(ProgramGraph, record, record_tags=tags)
+    if version < 21 and graph.exception_matches:
+        raise ValueError("historical schema cannot contain exception matcher capability")
+    if version == 21 and not graph.exception_matches:
+        raise ValueError("schema version 21 requires explicit exception matcher capability")
     has_method_lookup = has_delegated_method_lookup_capability(graph)
     if version < 20 and has_method_lookup:
         raise ValueError("historical schema cannot contain delegated method lookup capability")

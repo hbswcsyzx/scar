@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.846" timestamp="2026-10-18T23:17:02.376089+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_exception_matches" name="test_known_callee_invoke_matcher_preserves_its_real_normal_and_raise_ports" time="0.046"><failure message="ValueError: exception_match_operation at program_operation:exception-match.evaluate: matcher requires an ordinary primitive or original INVOKE">def test_known_callee_invoke_matcher_preserves_its_real_normal_and_raise_ports():
+        graph, details = exception_match_program(mode="invoke", input_kind="packet", known_callee=True)
+        _bare_valid(graph)
+        # A legitimate original known-callee INVOKE is not an ordinary CALL and
+        # must not be excluded by the attachment's primitive-only ordinary rule.
+&gt;       require_valid(graph)
+
+tests/unit/test_program_exception_matches.py:207: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='exception-match'), regions=(Region(id=RegionID(value='exception-match'), label='ordi...eOperand(operation=OperationID(value='exception-match.evaluate'), state_use=UseID(value='exception-match.state')),)),))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: exception_match_operation at program_operation:exception-match.evaluate: matcher requires an ordinary primitive or original INVOKE
+
+scar/ir/program/validation.py:749: ValueError</failure></testcase><testcase classname="tests.unit.test_program_exception_matches" name="test_complete_matcher_retains_forwarded_current_state_ports_on_each_original_edge" time="0.050"><failure message="AssertionError: forwarded current state ports are still part of the N/R denominator&#10;assert 0 == 2&#10; +  where 0 = len(())">def test_complete_matcher_retains_forwarded_current_state_ports_on_each_original_edge():
+        graph, details = exception_match_program(mode="invoke", input_kind="packet", forward_state=True)
+        _bare_valid(graph)
+        require_valid(graph)
+        operation = details["operation"]
+        assert operation.effects_complete is True
+        assert all(len(signature.types) == 1 for signature in operation.completions)
+        blocks = {block.id: block for region in graph.regions for block in region.blocks}
+        values = {value.id: value for value in graph.values}
+        expected = []
+        for index, edge in enumerate(operation.terminator.successors):
+            # These state carriers are original forwarded Uses, not logical
+            # produced completion slots.  The bool/packet slot has another role.
+            actual, formal = next((actual, formal) for actual, formal in
+                zip(edge.arguments, blocks[edge.block].arguments)
+                if getattr(values[formal], "location", None) == graph.locations[0].id)
+            assert actual not in operation.invoke_arguments
+            expected.append((ControlEdgeReference(operation.id, index), edge.kind, actual, formal))
+        assert expected[0][2] != expected[1][2]
+        report = ProgramIndex(graph).exception_match(operation.id)
+        support, = report["state_support"]
+        completions = support["completions"]
+&gt;       assert len(completions) == 2, "forwarded current state ports are still part of the N/R denominator"
+E       AssertionError: forwarded current state ports are still part of the N/R denominator
+E       assert 0 == 2
+E        +  where 0 = len(())
+
+tests/unit/test_program_exception_matches.py:243: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,11 @@
+[
+  "git",
+  "-C",
+  "/tmp/scar-structured-model-280qf4mi",
+  "archive",
+  "--format=tar",
+  "8f08bda1d192f7f9b778c06bb51d6509e17fc8ca",
+  "scar",
+  "tests",
+  "pyproject.toml"
+]

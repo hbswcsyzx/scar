@@ -166,14 +166,14 @@ def _consumer_role(operation, use):
     return term.kind is not TerminatorKind.JUMP
 
 
-def consumer_ledger(ctx, row):
+def consumer_ledger(ctx, row=None, *, source=None, site=None, source_operation=None):
     """Derive known exact targets before inspecting any targets attachment."""
-    site, targets, support, gaps = _site(row), [], [], []
+    if row is not None:
+        site, source_operation = _site(row), row.operation
+    targets, support, gaps = [], [], []
     try:
-        if type(row.contract) is OutcomeAdapter:
-            source = row.contract.output
-        else:
-            source = ctx.row_result(row)
+        if row is not None:
+            source = row.contract.output if type(row.contract) is OutcomeAdapter else ctx.row_result(row)
         if type(source) in (HostTerminal, NativeExit):
             return {"site": site, "source": source, "targets": (source,),
                     "support": (), "direct_terminal": True, "gaps": (),
@@ -227,7 +227,7 @@ def consumer_ledger(ctx, row):
                     gaps.append({"code": "consumer_condition_correlation_unresolved", "target": target})
                 if not operation.effects_complete:
                     gaps.append({"code": "consumer_escape_or_effects_unresolved", "target": target})
-            elif report["match"] is None and ctx.region_of[operation.id] != ctx.region_of[row.operation]:
+            elif report["match"] is None and ctx.region_of[operation.id] != ctx.region_of[source_operation]:
                 # A possible cross-region route must not be silently erased.
                 gaps.append({"code": "consumer_cross_region_inventory_unresolved", "use": actual})
         if ctx.budget.truncated:
@@ -323,6 +323,9 @@ def connection_reports(ctx):
     reports = {"common": common_connections(ctx),
                "continuations": continuation_connections(ctx),
                "async": async_connections(ctx)}
+    if ctx.graph.exception_matches:
+        from .exception_match_query import exception_match_reports
+        reports['exception_matches'] = exception_match_reports(ctx)
     predicate_issues = []
     for row in ctx.graph.protocol_operations:
         if type(row.contract) is AdmissionPredicate and type(row.contract.subject) is RequestStateCondition:

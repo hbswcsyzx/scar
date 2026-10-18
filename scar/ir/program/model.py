@@ -546,6 +546,8 @@ from scar.ir.program.protocol_connections import (
 _bind_connection_model_ports(OperationResult, InvokeLiteralResult, BlockArgument)
 _bind_protocol_records()
 
+from scar.ir.program.exception_matches import ExceptionMatcher
+
 
 @dataclass(frozen=True, slots=True)
 class CompletionSuccessor:
@@ -856,10 +858,17 @@ class ProgramGraph:
     protocol_call_inputs: tuple[ProtocolCallInputs, ...] = ()
     protocol_result_consumers: tuple[ProtocolResultConsumers, ...] = ()
     protocol_bindings: tuple[ProtocolBinding, ...] = ()
+    exception_matches: tuple[ExceptionMatcher, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
             raise TypeError("ProgramGraph.root must be RegionID")
+        matches = _tuple(self.exception_matches, 'ProgramGraph.exception_matches')
+        if any(type(row) is not ExceptionMatcher for row in matches):
+            raise TypeError('ProgramGraph.exception_matches requires exact ExceptionMatcher records')
+        for row in matches:
+            row.__post_init__()
+        _unique(tuple(row.operation for row in matches), 'ProgramGraph exception matcher operations')
         for name, row_type in (("protocol_scopes", ProtocolScope),
                                ("protocol_operations", ProtocolOperation)):
             rows = _tuple(getattr(self, name), "ProgramGraph." + name)

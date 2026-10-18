@@ -86,6 +86,9 @@ from scar.ir.program.model import (
 # These public aliases depend on canonical model-owned port classes. Import
 # them only after model.py has bound those exact classes into protocol_connections.
 from scar.ir.program.protocol_connections import AssociationPort, ExactResultPort, ExpectedSourcePort
+from scar.ir.program.exception_matches import (
+    BuiltinExceptionCategory, ExceptionHandlerOperand, ExceptionMatcher, FixedBuiltinHandler,
+)
 from scar.ir.program.codec import SCHEMA, SCHEMA_VERSION, dumps, loads
 from scar.ir.program.binding_validation import derive_binding_facts
 
@@ -97,6 +100,7 @@ from .resumption import (
 )
 
 __all__ = [
+    "BuiltinExceptionCategory", "ExceptionHandlerOperand", "ExceptionMatcher", "FixedBuiltinHandler",
     "CodeConstant", "ExactLiteralOrigin", "LiteralDefinition", "SourceExpression",
     "UninterpretedConstant", "UnlocatedLiteral", "LiteralEvaluation",
     "InvokeLiteralResult", "is_literal_origin",

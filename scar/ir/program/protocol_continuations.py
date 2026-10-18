@@ -550,6 +550,8 @@ def continuation_connections(ctx):
                                   "protocol_initial_advance")
                 if contract.rule in _METHOD_LOOKUPS:
                     if _selected_kind(ctx, contract.result) is ExitKind.RAISE:
+                        entry['method_exception_matches'] = _method_exception_matches(
+                            ctx, row, method_consumers.get(identity), missing)
                         missing("method_lookup_exception_category_unproved", identity)
                     else:
                         ledger = method_consumers.get(identity)
@@ -608,6 +610,36 @@ def continuation_connections(ctx):
               "conditions": ("native lookup, exception-category and iterator interpretation unproved",)}
     ctx._continuation_connections = result
     return result
+
+
+def _method_exception_matches(ctx, row, ledger, missing):
+    """Connect actual lookup-packet consumers without granting fallback.
+
+    A matching operation's own RAISE packet is a different source. The native
+    class test and the handler's packet/control action remain separate duties.
+    """
+    from .exception_match_query import matcher_view
+    source = ContractResult(row.scope, row.clause, row.operation, row.slot, row.contract.result)
+    matches = []
+    if ledger is None:
+        missing('method_lookup_exception_consumer_inventory_unresolved', _site(row))
+        return ()
+    for support in ledger.get('support', ()):
+        if not ctx.spend('continuation_exception_matches'):
+            missing('method_lookup_exception_match_inventory_truncated', _site(row))
+            break
+        actual = support['use']
+        matcher = ctx.index._exception_matches.get(actual.operation)
+        if matcher is None or matcher.input_use != actual.use:
+            continue
+        binding = ctx.bind(source, actual)
+        report = matcher_view(ctx, matcher)
+        matches.append({'matcher': matcher, 'input_binding': binding, 'report': report})
+        if binding['match'] is not True:
+            missing('method_lookup_exception_match_source_unresolved', _site(row))
+    if not matches:
+        missing('method_lookup_exception_matcher_unresolved', _site(row))
+    return tuple(matches)
 
 
 def _method_call_consumers(ctx, row, ledger, advances, check, issue, missing):

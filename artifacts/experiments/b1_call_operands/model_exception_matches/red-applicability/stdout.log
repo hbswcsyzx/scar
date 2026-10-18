@@ -1,0 +1,56 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+____ test_unverified_builtin_applicability_stays_an_explicit_query_gap[gap] ____
+
+declaration = 'gap'
+
+    @pytest.mark.parametrize('declaration', ('gap', 'fact'))
+    def test_unverified_builtin_applicability_stays_an_explicit_query_gap(declaration):
+        from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+        graph, details = exception_match_program()
+        handler = details['matcher'].handler
+        if declaration == 'fact':
+            fact = ProviderFactReference(ProviderArtifact('memory://handler-declaration',
+                '0' * 64, 0, 'unverified-handler-declaration'), 'handler')
+            handler = replace(handler, applicability=fact)
+            graph = _change_matcher(graph, handler=handler)
+        require_valid(graph)
+        report = ProgramIndex(graph).exception_match(details['operation'].id)
+        assert all(item['match'] is True for item in report['inputs'])
+        assert report['bool_binding']['match'] is True
+>       assert report['status'] == 'PARTIAL'
+E       AssertionError: assert 'DECLARED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + DECLARED
+
+tests/unit/test_program_exception_matches.py:305: AssertionError
+___ test_unverified_builtin_applicability_stays_an_explicit_query_gap[fact] ____
+
+declaration = 'fact'
+
+    @pytest.mark.parametrize('declaration', ('gap', 'fact'))
+    def test_unverified_builtin_applicability_stays_an_explicit_query_gap(declaration):
+        from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+        graph, details = exception_match_program()
+        handler = details['matcher'].handler
+        if declaration == 'fact':
+            fact = ProviderFactReference(ProviderArtifact('memory://handler-declaration',
+                '0' * 64, 0, 'unverified-handler-declaration'), 'handler')
+            handler = replace(handler, applicability=fact)
+            graph = _change_matcher(graph, handler=handler)
+        require_valid(graph)
+        report = ProgramIndex(graph).exception_match(details['operation'].id)
+        assert all(item['match'] is True for item in report['inputs'])
+        assert report['bool_binding']['match'] is True
+>       assert report['status'] == 'PARTIAL'
+E       AssertionError: assert 'DECLARED' == 'PARTIAL'
+E         
+E         - PARTIAL
+E         + DECLARED
+
+tests/unit/test_program_exception_matches.py:305: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_exception_matches.py::test_unverified_builtin_applicability_stays_an_explicit_query_gap[gap]
+FAILED tests/unit/test_program_exception_matches.py::test_unverified_builtin_applicability_stays_an_explicit_query_gap[fact]
+2 failed in 0.82s

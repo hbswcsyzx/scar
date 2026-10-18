@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-c",
+    "\nimport hashlib\nimport inspect\nimport json\nfrom pathlib import Path\nimport sys\n\nimport scar.ir.program.codec as codec\nimport tests.fixtures.program_method_lookup_graphs as fixture\n\ntree = Path.cwd().resolve()\nmodules = {\"encoder\": codec, \"fixture\": fixture}\nsources = {}\nfor label, module in modules.items():\n    path = Path(inspect.getfile(module)).resolve()\n    assert path.is_relative_to(tree), (label, path, tree)\n    sources[label] = {\"path\": str(path.relative_to(tree)),\n                      \"sha256\": hashlib.sha256(path.read_bytes()).hexdigest()}\nassert codec.SCHEMA_VERSION == 20\ngraph, _ = fixture.method_lookup_program(request=\"send\")\nwire = codec.dumps(graph).encode(\"ascii\")\ndocument = json.loads(wire)\nassert document[\"schema_version\"] == 20\nassert \"exception_matches\" not in document\nassert document[\"protocol_operations\"] and document[\"protocol_call_inputs\"]\nassert document[\"protocol_result_consumers\"]\nassert codec.dumps(codec.loads(wire.decode(\"ascii\"))).encode(\"ascii\") == wire\nPath(sys.argv[1]).write_bytes(wire)\nprint(json.dumps({\"schema_version\": 20, \"python_version\": sys.version,\n                  \"fixture_bytes\": len(wire),\n                  \"fixture_sha256\": hashlib.sha256(wire).hexdigest(),\n                  \"sources\": sources}, sort_keys=True))\n",
+    "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_exception_matches/oracle-v20/attempt001/program_graph_v20_frozen.json"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_exception_matches/oracle-v20/attempt001/program20-source-vwcqddxo",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONNOUSERSITE": "1",
+    "PYTHONPATH": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_exception_matches/oracle-v20/attempt001/program20-source-vwcqddxo"
+  },
+  "source_revision": "8f08bda1d192f7f9b778c06bb51d6509e17fc8ca"
+}

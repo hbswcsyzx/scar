@@ -1,5 +1,22 @@
 # SCAR execution model
 
+## Exception matching connection checkpoint (2026-10-18)
+
+The typed program core represents ordinary exception matching as an attachment
+to an existing Operation, with original exception/packet and handler Uses,
+state inputs, its own NORMAL bool/RAISE packet and the bool's real branch.
+Fixed intrinsics invent no handler operand; dynamic class/tuple values retain
+their actual Reference. Matching, handler expression evaluation, handled-context
+installation and cleanup are distinct operations/dependencies.
+
+This adds no fundamental node family or producer/state graph. Known callee
+INVOKEs can expand into their original Region; produced completion slots and
+forwarded state Uses remain distinct. Builtin/category declarations do not
+prove runtime class identity or authorize a missing-method fallback. See the
+[design and gates](M1_EXCEPTION_MATCH_PLAN.md) and [implementation record](M1_EXCEPTION_MATCH_PROGRESS.md).
+Whole-program modeling and automatic source recovery remain incomplete; this
+supplied-model interface does not close M0–M2.
+
 ## Whole-program model revision (2026-10-16)
 
 The current complete-model specification is

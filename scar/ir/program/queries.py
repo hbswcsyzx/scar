@@ -296,6 +296,7 @@ class ProgramIndex:
         return index
 
     def _prepare(self, graph, cleanup, resumption, lifecycle):
+        self._exception_matches = {row.operation: row for row in graph.exception_matches}
         self._cleanup_facts = cleanup
         self._resumption_facts = resumption
         self._lifecycle_facts = lifecycle
@@ -744,6 +745,11 @@ class ProgramIndex:
         """
         from .call_returns import source_binding
         return source_binding(self, expected, actual, guard=guard, budget=budget)
+
+    def exception_match(self, operation, *, budget=4096):
+        """Original exception/handler tuple, own completions and bool branch."""
+        from .exception_match_query import exception_match
+        return exception_match(self, operation, budget=budget)
 
     def paired_input_origins(self, raw, pack_operand, *, budget=4096):
         """Exact raw-pack operand routes; not a predicate-input binding."""

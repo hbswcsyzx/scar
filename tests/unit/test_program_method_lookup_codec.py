@@ -115,7 +115,7 @@ def test_program20_requires_its_new_capability():
         codec.loads(json.dumps(document))
 
 
-@pytest.mark.parametrize("version", [21, True])
+@pytest.mark.parametrize("version", [22, True])
 def test_program_graph_rejects_future_or_boolean_schema_versions(version):
     fixture_dir = Path(__file__).resolve().parents[1] / "fixtures"
     document = json.loads((fixture_dir / "program_graph_v19_frozen.json").read_text())

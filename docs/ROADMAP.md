@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **P4 generic exception matcher checkpoint (2026-10-18):**
+> [Acceptance](M1_EXCEPTION_MATCH_PROGRESS.md) connects real exception/handler
+> Uses, own N/R ports, bool branches and produced/forwarded states. 880 affected
+> focused cases pass (old811 obligations incl. one explicit schema-parameter
+> migration; new69) with707 stable sources. Program21 preserves an independent
+> old20 oracle and legacy2–20 bytes; no new Execution family. Next: exact E0/EL/EM
+> fallback routes and remaining family connections. All16 P4 groups and full
+> M0–M2 remain OPEN. No new full, backend, automatic LeWM model or speedup.
+
 > **P4 return-then-downward composition checkpoint (2026-10-18):**
 > [Acceptance](M1_CALL_COMPOSITION_PROGRESS.md) connects original returns to the
 > next exact helper actual/formal and internal consumer. Missing original input
