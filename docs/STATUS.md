@@ -1,5 +1,22 @@
 # Current evidence and remaining work
 
+## R2.3-D content/consumer component and frozen full accepted (2026-10-18)
+
+The [D interfaces](M1_CONTENT_CONNECTION_API.md) connect original values/ports,
+scoped denotations and placements, exact work/source pairs, conservative reads
+and explicit contract observation roots. Open partial source pairs do not imply
+exclusion or permit same-host substitution. Execution v4 retains v1–v3 bytes.
+The component passes **445 cases / 7 criteria / 9.995s** with all **506** source
+hashes unchanged. One clean frozen `f71740e` passes **4,568 full tests /
+477.660s / 1,025,092 KiB**, zero failures/errors/skips and three warnings.
+All prior 4,427 identities and 50 fixtures survive; all current 54 fixtures match,
+owned basetemp is removed, protected checkouts remain clean. Original failures,
+review corrections and hash migrations are archived; see
+[acceptance](M1_CONTENT_CONNECTION_ACCEPTANCE.md). These are declared model
+interfaces, not native/runtime recovery or ready/transform authority. P/V, R3,
+complete M0–M2 and automatic LeWM modeling/simplification remain open. No new
+LeWM speedup has been measured.
+
 ## R2.3 contract and geometry component/full accepted (2026-10-18)
 
 The [R2.3 relation contract](M1_RESOURCE_READY_CONTRACT.md) keeps source-derived

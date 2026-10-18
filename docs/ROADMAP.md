@@ -1,5 +1,13 @@
 # SCAR roadmap and scope
 
+> **R2.3-D checkpoint (2026-10-18):**
+> [content/consumer API](M1_CONTENT_CONNECTION_API.md) and explicit Q roots pass
+> **445 component cases / 7 criteria / 9.995s**, 506 source hashes unchanged.
+> Clean frozen `f71740e` passes **4,568 full tests / 477.660s**. See
+> [acceptance](M1_CONTENT_CONNECTION_ACCEPTANCE.md). Next is source-derived
+> production P, followed by interval validity/visibility V and R3 composition.
+> Complete M0–M2, automatic LeWM modeling and speedup remain open.
+
 > **R2.3 contract / geometry checkpoint (2026-10-18):**
 > [consumer/production/visibility contract](M1_RESOURCE_READY_CONTRACT.md) reviewed;
 > [shared selector geometry](M1_RESOURCE_COVERAGE_ACCEPTANCE.md) passes **432

@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="12" time="0.805" timestamp="2026-10-18T06:49:50.411198+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_content_query" name="test_query_returns_original_occurrence_subject_and_separate_denotation[data]" time="0.001"><failure message="TypeError: StateAccess.full_overwrite must be bool">kind = 'data'
+
+    @pytest.mark.parametrize('kind', ('data', 'reference'))
+    def test_query_returns_original_occurrence_subject_and_separate_denotation(kind):
+&gt;       index, details, _, _ = _index(kind=kind)
+                               ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_content_query.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_content_query.py:23: in _index
+    program, model, values, evidence, details = content_connection_fixture(**options)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_content_graphs.py:200: in content_connection_fixture
+    program, data, reference, static_read, data_uses, read_before = _program(
+tests/fixtures/execution_content_graphs.py:92: in _program
+    (StateAccess(world, read_before.id, AccessMode.READ, None,
+&lt;string&gt;:10: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = StateAccess(location=LocationID(value='content.world'), before=UseID(value='content.read.before'), mode=&lt;AccessMode.RE...rintKind.WHOLE: 'WHOLE'&gt;, start=None, stop=None), full_overwrite=UseID(value='content.read.reference'), reference=None)
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.location, LocationID):
+            raise TypeError("StateAccess.location must be LocationID")
+        if not isinstance(self.before, UseID):
+            raise TypeError("StateAccess.before must be UseID")
+        if not isinstance(self.mode, AccessMode):
+            raise TypeError("StateAccess.mode must be AccessMode")
+        if self.after is not None and not isinstance(self.after, ValueID):
+            raise TypeError("StateAccess.after must be ValueID or None")
+        if not isinstance(self.footprint, Footprint):
+            raise TypeError("StateAccess.footprint must be Footprint")
+        if type(self.full_overwrite) is not bool:
+&gt;           raise TypeError("StateAccess.full_overwrite must be bool")
+E           TypeError: StateAccess.full_overwrite must be bool
+
+scar/ir/program/model.py:391: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_content_query" name="test_query_returns_original_occurrence_subject_and_separate_denotation[reference]" time="0.001"><failure message="TypeError: StateAccess.full_overwrite must be bool">kind = 'reference'
+
+    @pytest.mark.parametrize('kind', ('data', 'reference'))
+    def test_query_returns_original_occurrence_subject_and_separate_denotation(kind):
+&gt;       index, details, _, _ = _index(kind=kind)
+                               ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_content_query.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_content_query.py:23: in _index
+    program, model, values, evidence, details = content_connection_fixture(**options)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_content_graphs.py:200: in content_connection_fixture
+    program, data, reference, static_read, data_uses, read_before = _program(
+tests/fixtures/execution_content_graphs.py:92: in _program
+    (StateAccess(world, read_before.id, AccessMode.READ, None,
+&lt;string&gt;:10: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = StateAccess(location=LocationID(value='content.world'), before=UseID(value='content.read.before'), mode=&lt;AccessMode.RE...rintKind.WHOLE: 'WHOLE'&gt;, start=None, stop=None), full_overwrite=UseID(value='content.read.reference'), reference=None)
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.location, LocationID):
+            raise TypeError("StateAccess.location must be LocationID")
+        if not isinstance(self.before, UseID):
+            raise TypeError("StateAccess.before must be UseID")
+        if not isinstance(self.mode, AccessMode):
+            raise TypeError("StateAccess.mode must be AccessMode")
+        if self.after is not None and not isinstance(self.after, ValueID):
+            raise TypeError("StateAccess.after must be ValueID or None")
+        if not isinstance(self.footprint, Footprint):
+            raise TypeError("StateAccess.footprint must be Footprint")
+        if type(self.full_overwrite) is not bool:
+&gt;           raise TypeError("StateAccess.full_overwrite must be bool")
+E           TypeError: StateAccess.full_overwrite must be bool
+
+scar/ir/program/model.py:391: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_content_query" name="test_whole_work_query_uses_start_to_end_and_keeps_exact_ticket" time="0.001"><failure message="TypeError: StateAccess.full_overwrite must be bool">def test_whole_work_query_uses_start_to_end_and_keeps_exact_ticket():
+        from scar.ir.execution.order import WorkStart, WorkEnd
+&gt;       index, details, _, _ = _index(consumer='work')
+                               ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_content_query.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_content_query.py:23: in _index
+    program, model, values, evidence, details = content_connection_fixture(**options)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_content_graphs.py:200: in content_connection_fixture
+    program, data, reference, static_read, data_uses, read_before = _program(
+tests/fixtures/execution_content_graphs.py:92: in _program
+    (StateAccess(world, read_before.id, AccessMode.READ, None,
+&lt;string&gt;:10: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = StateAccess(location=LocationID(value='content.world'), before=UseID(value='content.read.before'), mode=&lt;AccessMode.RE...rintKind.WHOLE: 'WHOLE'&gt;, start=None, stop=None), full_overwrite=UseID(value='content.read.reference'), reference=None)
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.location, LocationID):
+            raise TypeError("StateAccess.location must be LocationID")
+        if not isinstance(self.before, UseID):
+            raise TypeError("StateAccess.before must be UseID")
+        if not isinstance(self.mode, AccessMode):
+            raise TypeError("StateAccess.mode must be AccessMode")
+        if self.after is not None and not isinstance(self.after, ValueID):
+            raise TypeError("StateAccess.after must be ValueID or None")
+        if not isinstance(self.footprint, Footprint):
+            raise TypeError("StateAccess.footprint must be Footprint")
+        if type(self.full_overwrite) is not bool:
+&gt;           raise TypeError("StateAccess.full_overwrite must be bool")
+E           TypeError: StateAccess.full_overwrite must be bool
+
+scar/ir/program/model.py:391: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_content_query" name="test_reference_and_current_state_do_not_permanently_bind_object_to_content_version" time="0.000"><failure message="TypeError: StateAccess.full_overwrite must be bool">def test_reference_and_current_state_do_not_permanently_bind_object_to_content_version():
+&gt;       index, details, _, _ = _index(kind='reference')
+                               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_content_query.py:54: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_content_query.py:23: in _index
+    program, model, values, evidence, details = content_connection_fixture(**options)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_content_graphs.py:200: in content_connection_fixture
+    program, data, reference, static_read, data_uses, read_before = _program(
+tests/fixtures/execution_content_graphs.py:92: in _program
+    (StateAccess(world, read_before.id, AccessMode.READ, None,
+&lt;string&gt;:10: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = StateAccess(location=LocationID(value='content.world'), before=UseID(value='content.read.before'), mode=&lt;AccessMode.RE...rintKind.WHOLE: 'WHOLE'&gt;, start=None, stop=None), full_overwrite=UseID(value='content.read.reference'), reference=None)
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.location, LocationID):
+            raise TypeError("StateAccess.location must be LocationID")
+        if not isinstance(self.before, UseID):
+            raise TypeError("StateAccess.before must be UseID")
+        if not isinstance(self.mode, AccessMode):
+            raise TypeError("StateAccess.mode must be AccessMode")
+        if self.after is not None and not isinstance(self.after, ValueID):
+            raise TypeError("StateAccess.after must be ValueID or None")
+        if not isinstance(self.footprint, Footprint):
+            raise TypeError("StateAccess.footprint must be Footprint")
+        if type(self.full_overwrite) is not bool:
+&gt;           raise TypeError("StateAccess.full_overwrite must be bool")
+E           TypeError: StateAccess.full_overwrite must be bool
+
+scar/ir/program/model.py:391: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_content_query" name="test_every_content_query_revalidates_caller_graph_after_index_construction[values]" time="0.001"><failure message="TypeError: StateAccess.full_overwrite must be bool">family = 'values'
+
+    @pytest.mark.parametrize('family', ('values', 'evidence'))
+    def test_every_content_query_revalidates_caller_graph_after_index_construction(family):
+&gt;       index, details, values, evidence = _index()
+                                           ^^^^^^^^
+
+tests/unit/test_execution_content_query.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_content_query.py:23: in _index
+    program, model, values, evidence, details = content_connection_fixture(**options)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_content_graphs.py:200: in content_connection_fixture
+    program, data, reference, static_read, data_uses, read_before = _program(
+tests/fixtures/execution_content_graphs.py:92: in _program
+    (StateAccess(world, read_before.id, AccessMode.READ, None,
+&lt;string&gt;:10: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = StateAccess(location=LocationID(value='content.world'), before=UseID(value='content.read.before'), mode=&lt;AccessMode.RE...rintKind.WHOLE: 'WHOLE'&gt;, start=None, stop=None), full_overwrite=UseID(value='content.read.reference'), reference=None)
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.location, LocationID):
+            raise TypeError("StateAccess.location must be LocationID")
+        if not isinstance(self.before, UseID):
+            raise TypeError("StateAccess.before must be UseID")
+        if not isinstance(self.mode, AccessMode):
+            raise TypeError("StateAccess.mode must be AccessMode")
+        if self.after is not None and not isinstance(self.after, ValueID):
+            raise TypeError("StateAccess.after must be ValueID or None")
+        if not isinstance(self.footprint, Footprint):
+            raise TypeError("StateAccess.footprint must be Footprint")
+        if type(self.full_overwrite) is not bool:
+&gt;           raise TypeError("StateAccess.full_overwrite must be bool")
+E           TypeError: StateAccess.full_overwrite must be bool
+
+scar/ir/program/model.py:391: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_content_query" name="test_every_content_query_revalidates_caller_graph_after_index_construction[evidence]" time="0.001"><failure message="TypeError: StateAccess.full_overwrite must be bool">family = 'evidence'
+
+    @pytest.mark.parametrize('family', ('values', 'evidence'))
+    def test_every_content_query_revalidates_caller_graph_after_index_construction(family):
+&gt;       index, details, values, evidence = _index()
+                                           ^^^^^^^^
+
+tests/unit/test_execution_content_query.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_content_query.py:23: in _index
+    program, model, values, evidence, details = content_connection_fixture(**options)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_content_graphs.py:200: in content_connection_fixture
+    program, data, reference, static_read, data_uses, read_before = _program(
+tests/fixtures/execution_content_graphs.py:92: in _program
+    (StateAccess(world, read_before.id, AccessMode.READ, None,
+&lt;string&gt;:10: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = StateAccess(location=LocationID(value='content.world'), before=UseID(value='content.read.before'), mode=&lt;AccessMode.RE...rintKind.WHOLE: 'WHOLE'&gt;, start=None, stop=None), full_overwrite=UseID(value='content.read.reference'), reference=None)
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.location, LocationID):
+            raise TypeError("StateAccess.location must be LocationID")
+        if not isinstance(self.before, UseID):
+            raise TypeError("StateAccess.before must be UseID")
+        if not isinstance(self.mode, AccessMode):
+            raise TypeError("StateAccess.mode must be AccessMode")
+        if self.after is not None and not isinstance(self.after, ValueID):
+            raise TypeError("StateAccess.after must be ValueID or None")
+        if not isinstance(self.footprint, Footprint):
+            raise TypeError("StateAccess.footprint must be Footprint")
+        if type(self.full_overwrite) is not bool:
+&gt;           raise TypeError("StateAccess.full_overwrite must be bool")
+E           TypeError: StateAccess.full_overwrite must be bool
+
+scar/ir/program/model.py:391: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_content_query" name="test_returned_materialization_and_source_records_are_detached" time="0.001"><failure message="TypeError: StateAccess.full_overwrite must be bool">def test_returned_materialization_and_source_records_are_detached():
+&gt;       index, details, values, evidence = _index()
+                                           ^^^^^^^^
+
+tests/unit/test_execution_content_query.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_content_query.py:23: in _index
+    program, model, values, evidence, details = content_connection_fixture(**options)
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_content_graphs.py:200: in content_connection_fixture
+    program, data, reference, static_read, data_uses, read_before = _program(
+tests/fixtures/execution_content_graphs.py:92: in _program
+    (StateAccess(world, read_before.id, AccessMode.READ, None,
+&lt;string&gt;:10: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = StateAccess(location=LocationID(value='content.world'), before=UseID(value='content.read.before'), mode=&lt;AccessMode.RE...rintKind.WHOLE: 'WHOLE'&gt;, start=None, stop=None), full_overwrite=UseID(value='content.read.reference'), reference=None)
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.location, LocationID):
+            raise TypeError("StateAccess.location must be LocationID")
+        if not isinstance(self.before, UseID):
+            raise TypeError("StateAccess.before must be UseID")
+        if not isinstance(self.mode, AccessMode):
+            raise TypeError("StateAccess.mode must be AccessMode")
+        if self.after is not None and not isinstance(self.after, ValueID):
+            raise TypeError("StateAccess.after must be ValueID or None")
+        if not isinstance(self.footprint, Footprint):
+            raise TypeError("StateAccess.footprint must be Footprint")
+        if type(self.full_overwrite) is not bool:
+&gt;           raise TypeError("StateAccess.full_overwrite must be bool")
+E           TypeError: StateAccess.full_overwrite must be bool
+
+scar/ir/program/model.py:391: TypeError</failure></testcase><testcase classname="tests.unit.test_execution_content_query" name="test_observation_query_resolves_contract_and_original_actual_without_work[False]" time="0.052" /><testcase classname="tests.unit.test_execution_content_query" name="test_observation_query_resolves_contract_and_original_actual_without_work[True]" time="0.009" /><testcase classname="tests.unit.test_execution_content_query" name="test_observation_query_rechecks_semantic_graph_and_detaches_contract" time="0.010" /><testcase classname="tests.unit.test_execution_content_query" name="test_endpoint_observation_content_has_no_fake_storage_and_uri_is_not_identity" time="0.016" /><testcase classname="tests.unit.test_execution_content_query" name="test_endpoint_content_cannot_substitute_another_known_allocation" time="0.010" /></testsuite></testsuites>

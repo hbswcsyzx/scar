@@ -33,6 +33,12 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 ## 3. 下一批落实顺序
 
+R2.3-D 的[原端口/内容/消费者与 Q 观察接口](M1_CONTENT_CONNECTION_API.md)已通过
+[445 项组件及冻结 `f71740e` 的4,568项全仓验收](M1_CONTENT_CONNECTION_ACCEPTANCE.md)。
+这只关闭声明接口子门；P 来源生产、V 区间有效性与 visibility、R3 组合仍按上位合同
+推进。下一步先收敛来源 bridge/inventory/贡献与部分 Produced，再编码、自行验收；
+不增加 detector/backend，不用部分来源的非成员性推排斥。完整第一阶段仍未完成。
+
 当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1
 声明组件不是实际导入；不要继续以增加声明表、兼容测试或 Tensor wrappers 代替
 自动连接。通用 SSA/Region 基础设施扩展前先对照 MLIR/xDSL，源 CFG/flow 扩展前

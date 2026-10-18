@@ -11,12 +11,21 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
+The [R2.3-D content/consumer interfaces](docs/M1_CONTENT_CONNECTION_API.md)
+connect original ports, scoped denotations/materializations, exact work/source
+associations and explicit contract observation roots. Its
+[acceptance](docs/M1_CONTENT_CONNECTION_ACCEPTANCE.md) passes **445 component
+checks / 7 criteria** and **4,568 clean frozen full tests** (`f71740e`).
+Execution v4 preserves v1–v3 bytes. Missing source pairs remain explicit gaps;
+P production, V stability/visibility, R3 and full M0–M2 remain open. This does
+not establish automatic LeWM modeling, transformations or a speedup.
+
 The [R2.3 contract](docs/M1_RESOURCE_READY_CONTRACT.md) separates exact consumer
 denotation, source-derived production, read-interval validity and visibility.
 Its [shared geometry prerequisite](docs/M1_RESOURCE_COVERAGE_ACCEPTANCE.md)
 passes **432 component checks / 6 criteria** and **4,427 clean frozen full tests**
 (`aa2b917`).
-The original MatRef query compares budgeted byte coverage only. D/P/V and
+The original MatRef query compares budgeted byte coverage only. P/V and
 complete first-stage modeling remain open; it grants no ready/transform authority.
 
 The [R2.2 event/order component](docs/M1_RESOURCE_ORDER_INTERFACES.md) connects

@@ -1,0 +1,8 @@
+source /home/zyf/miniconda3/etc/profile.d/conda.sh
+conda activate lewm
+export PYTHONDONTWRITEBYTECODE=1
+export PYTHONPATH=.
+python -m pytest -q tests/unit/test_execution_content_connections.py --junitxml=artifacts/experiments/b1_call_operands/model_content/connections/test-attempt002/junit.xml > artifacts/experiments/b1_call_operands/model_content/connections/test-attempt002/stdout-stderr.log 2>&1
+status=$?
+printf '%s\n' "$status" > artifacts/experiments/b1_call_operands/model_content/connections/test-attempt002/exit_code.txt
+cat artifacts/experiments/b1_call_operands/model_content/connections/test-attempt002/stdout-stderr.log

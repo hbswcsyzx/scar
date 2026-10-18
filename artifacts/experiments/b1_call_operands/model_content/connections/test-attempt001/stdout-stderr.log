@@ -1,0 +1,43 @@
+.....F.....F.                                                            [100%]
+=================================== FAILURES ===================================
+_ test_source_pairing_rejects_a_known_wrong_occurrence_but_missing_pair_stays_open _
+
+    def test_source_pairing_rejects_a_known_wrong_occurrence_but_missing_pair_stays_open():
+        program, model, values, evidence, _ = content_connection_fixture(wrong_source="producer")
+        report = _check(program, model, values, evidence)
+>       assert "content_operation_source" in _codes(report)
+E       AssertionError: assert 'content_operation_source' in set()
+E        +  where set() = _codes(ValidationReport(issues=(), gaps=(ExecutionIssue(code='evidence_missing', path='model.runs[0].source', message='test d...verified', path='model', message='declared occurrence/identity links have not been established by a runtime adapter'))))
+
+tests/unit/test_execution_content_connections.py:83: AssertionError
+_ test_native_duplicate_output_positions_keep_distinct_uses_for_the_same_value _
+
+    def test_native_duplicate_output_positions_keep_distinct_uses_for_the_same_value():
+        program, model, values, evidence, details = native_content_fixture(completion="return")
+        output_row = next(row for row in model.denotations if isinstance(row.basis, NativeOutputRef))
+        occurrence = next(row for row in model.operations if row.id == details["operation"])
+        static_operation = next(row for row in program.operations if row.id == occurrence.operation)
+        second_use_id = static_operation.terminator.values[1]
+        second_use = next(row for row in model.uses
+                          if row.operation == occurrence.id and row.use == second_use_id)
+        assert second_use.value == output_row.value
+        duplicate = replace(output_row, value=second_use.value,
+                            basis=replace(output_row.basis, position=1))
+        model = replace(model, denotations=tuple(
+            duplicate if row.id == output_row.id else row for row in model.denotations))
+        report = _check(program, model, values, evidence)
+        assert report.valid
+    
+        wrong_port = replace(duplicate, basis=replace(duplicate.basis, position=2))
+        model = replace(model, denotations=tuple(
+            wrong_port if row.id == duplicate.id else row for row in model.denotations))
+        report = _check(program, model, values, evidence)
+>       assert "content_native_actual" in _codes(report)
+E       AssertionError: assert 'content_native_actual' in {'content_native_exit'}
+E        +  where {'content_native_exit'} = _codes(ValidationReport(issues=(ExecutionIssue(code='content_native_exit', path='denotations[exec_denotation:native.content.o...verified', path='model', message='declared occurrence/identity links have not been established by a runtime adapter'))))
+
+tests/unit/test_execution_content_connections.py:203: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_content_connections.py::test_source_pairing_rejects_a_known_wrong_occurrence_but_missing_pair_stays_open
+FAILED tests/unit/test_execution_content_connections.py::test_native_duplicate_output_positions_keep_distinct_uses_for_the_same_value
+2 failed, 11 passed in 0.86s
