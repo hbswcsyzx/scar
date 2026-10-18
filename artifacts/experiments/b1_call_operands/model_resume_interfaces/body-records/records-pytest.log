@@ -1,0 +1,6 @@
+Command: PYTHONPATH=. /home/zyf/miniconda3/envs/lewm/bin/python -m pytest -q tests/unit/test_resumption_records.py
+Exit code: 0
+........................................................................ [ 82%]
+...............                                                          [100%]
+87 passed in 0.40s
+

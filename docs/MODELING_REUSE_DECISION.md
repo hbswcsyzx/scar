@@ -2,7 +2,7 @@
 
 2026-10-16。审查基线 `78c5fda`，分支 `codex/structured-program-model`。
 原工具审查是只读代码审计、官方资料复核和设计收束；没有新增采集、adapter、
-detector 或 backend。2026-10-17 更新下面的 C1 实施状态；既有工具小实验保持
+detector 或 backend。2026-10-17/18 更新下面的 C1/C2B 实施状态；既有工具小实验保持
 各自的版本与范围，不冒充本轮实测。
 
 ## 1. 当前完成了什么
@@ -15,8 +15,9 @@ detector 或 backend。2026-10-17 更新下面的 C1 实施状态；既有工具
 | 自动建图 | 已有有限同步 source lowering 与历史 LeWM 证据。 | 加载→推理→环境交互→保存全过程已连接。 |
 | 化简结果 | 尚无可信的 LeWM 自动变换及 clean A/B 加速比。 | 测试数量等于模型覆盖率或加速效果。 |
 
-最近冻结实现 `0ea05e6` 的 3,330 项回归通过，见
-[原始报告](../artifacts/experiments/b1_call_operands/model_cleanup_interfaces/full/report.json)。
+最近冻结实现 `e6b4723` 的3,542项回归通过，见
+[C2B body验收](M1_RESUMPTION_BODY_ACCEPTANCE.md)；499项组件及403个源文件指纹匹配。
+此前`0ea05e6`的3,330项原始回归保持[C1证据](../artifacts/experiments/b1_call_operands/model_cleanup_interfaces/full/report.json)范围。
 [C1 cleanup/context](M1_CLEANUP_INTERFACES.md) 的六表、v9、栈/路由及 copy/fresh
 组合校验已实施，243项组件检查通过。这是声明 IR 的回归结果，不是自动 source
 恢复或实际异常上下文证明，也不关闭第一阶段。

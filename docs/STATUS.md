@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## C2B resumable body component (2026-10-18; full regression pending)
+## C2B resumable body component (2026-10-18)
 
 [Body contract](M1_RESUMPTION_BODY_COMPONENT.md) now has strict records,
 Suspend-owned saved Uses, current-state ResumeInput signatures, context
@@ -11,8 +11,12 @@ checks, not automatically recovered Python execution.
 
 Independent review reproduced and fixed an overstrict frame-alias check. The
 final component gate passes **499 checks / 7.077s**, all seven criteria, with
-403 source hashes unchanged during the run. Frozen full regression remains
-pending. Full C2.0/C2.4 driver, instance/generation/exclusivity and final
+403 source hashes unchanged during the run. Frozen `e6b4723` passes **3,542 full
+tests / 432.922s / 1,030,184KiB**, with zero failures/errors/skips and three existing
+warnings. HEAD, clean status, source and 26 fixture hashes match before/after;
+its own basetemp was removed. See the [acceptance](M1_RESUMPTION_BODY_ACCEPTANCE.md)
+and [evidence archive](../artifacts/experiments/b1_call_operands/model_resume_interfaces/BODY_README.md).
+Full C2.0/C2.4 driver, instance/generation/exclusivity and final
 release remain open. M0–M2 and automatic LeWM modeling remain incomplete; no
 transformation or speedup is claimed. Earlier design/C1 results below retain
 their original source and scope.

@@ -1,0 +1,5 @@
+Command: PYTHONPATH=. /home/zyf/miniconda3/envs/lewm/bin/python -m pytest -q tests/unit/test_resumption_forwarding.py
+Exit code: 0
+...........                                                              [100%]
+11 passed in 0.29s
+

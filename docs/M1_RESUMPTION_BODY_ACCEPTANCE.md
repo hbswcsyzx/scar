@@ -1,7 +1,8 @@
 # C2B body 结构组件验收
 
-2026-10-18；最终组件 **499项PASS / 7.077s**，7项标准全部通过，测试前后源指纹
-相同。**冻结全仓回归待完成，尚未完成发布验收。**
+2026-10-18；最终组件 **499项PASS / 7.077s**，7项标准全部通过；冻结实现
+`e6b47239c874b179416b2ed5a37bd0bd07b5d2b7` 的 **3,542项全仓回归PASS**。
+**C2B静态body组件已验收；完整C2与第一阶段未完成。**
 字段依据：[body 合同](M1_RESUMPTION_BODY_COMPONENT.md)。完整
 [C2](M1_RESUMPTION_INTERFACES.md)与 M0–M2 第一阶段仍未完成。
 
@@ -40,9 +41,14 @@ source lowerer、Tensor tracer、detector 或 backend。
 覆盖403个源/测试/脚本/gate文件。原始报告位于
 `artifacts/experiments/b1_call_operands/model_resume_interfaces/body-component/final.json`。
 
+冻结全仓单次运行432.922s、峰值1,030,184KiB，零失败/错误/跳过，三条既有warnings。
+HEAD与clean状态、403个逐文件源哈希、26份fixture哈希前后完全相同；只删除本次
+驱动器自己的basetemp。该时间是验收成本，不是workload性能。完整命令、环境、
+JUnit与前后快照见[证据归档](../artifacts/experiments/b1_call_operands/model_resume_interfaces/BODY_README.md)。
+
 ## 后续顺序与权限
 
-1. 完成本组件的独立复核、gate、冻结 full、归档和版本推送。
+1. 已完成本组件的独立复核、gate、冻结full；按独立manifest归档并推送版本。
 2. 冻结完整 Create/driver/body ingress/host outcome/release 字段合同，区分 drive
    epoch 与 body generation，处理 delegate-only 与无 body 的 drive。
 3. 落实例/代次、专用 ingress、生命周期与 adapter 的 typed 组合，沿既有 C0/C1/

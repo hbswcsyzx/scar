@@ -24,9 +24,9 @@ complete first modeling stage remain unfinished. The
 [evidence archive](artifacts/experiments/b1_call_operands/model_cleanup_interfaces/README.md)
 retains independent reviews, original failures and the unchanged-source receipt.
 
-The [resumption body component](docs/M1_RESUMPTION_BODY_COMPONENT.md) is being
-implemented and independently checked: saved Uses and fresh ingress state,
-drive-local context, temporal control and cut availability. The
+The [resumption body component](docs/M1_RESUMPTION_BODY_ACCEPTANCE.md) passes
+499 component checks and 3,542 frozen full tests: saved Uses and fresh ingress
+state, drive-local context, temporal control and cut availability. The
 [full resumption contract](docs/M1_RESUMPTION_INTERFACES.md) still needs creation,
 driver/instance/generation and release interfaces. Body structure alone does not
 establish Python source recovery or runtime resumption.

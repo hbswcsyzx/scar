@@ -1,7 +1,8 @@
 # C2B：可恢复 body 的字段与组合合同
 
 2026-10-17字段合同，2026-10-18实施更新；基线 `b4bc1a4`。body类型和组合已实施，
-独立审查及最终499项组件通过；**冻结全仓回归尚待完成，不算发布验收关闭。**
+独立审查、最终499项组件及冻结`e6b4723`的3,542项全仓通过；
+**静态body组件已验收**，详细证据见[验收报告](M1_RESUMPTION_BODY_ACCEPTANCE.md)。
 本组件落实 C2.1–C2.3 的 body 结构。完整 C2 的 Create/driver/实例与代次/host adapter/
 最终 release 仍按 [C2 主合同](M1_RESUMPTION_INTERFACES.md) C2.0/C2.4 继续；不改变
 第一阶段完整分母，不将本组件称完整 generator/coroutine 支持或自动源码建图。

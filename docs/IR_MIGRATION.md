@@ -51,12 +51,12 @@ denotation、真实 native 适配/写回/等价及完整建模仍未完成。
 通过。允许清理截留的潜在函数出口没有实际站点，必须由指定pending入口完整facts
 支撑；旧无C1图的实际出口要求保留。with/except*、挂起恢复和真实context仍未验证。
 
-[C2B body组件](M1_RESUMPTION_BODY_COMPONENT.md)正在实施v10：四张body/context表、
+[C2B body组件](M1_RESUMPTION_BODY_COMPONENT.md)已实施v10：四张body/context表、
 独立Suspend variant、SavedInput/ResumeInput及精确context作用域。logical CFG保留
 cleanup activation；availability在独立landing切断未保存定义。相同saved Use解析
 用于引用精度、local binding及C0/C1推导，不另造actual/producer。无该capability
 的图继续按原v2–v9写出；v1–v9拒绝新字段/协议，隔离原v9 codec的golden保留。
-独立组件和冻结full尚待验收；原C1的3,330项报告不作新代码的验证结果。
+499项组件及冻结`e6b4723`的3,542项全仓通过；原C1的3,330项报告保持历史范围。
 
 完整[C2](M1_RESUMPTION_INTERFACES.md)仍缺Create/专用driver ingress、实例和代次、
 delegate-only路径及final release。普通CALL/INVOKE禁止直接以ResumableBody为callee，

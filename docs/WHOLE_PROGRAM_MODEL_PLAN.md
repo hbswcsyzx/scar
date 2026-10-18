@@ -59,7 +59,8 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 1. 统一 ControlPort / EnvironmentInterface 与规范状态参数，扩展既有 core 的
    completion target、pending cleanup 与 protocol adapter；先处理同步异常。
 2. 按[C2B body合同](M1_RESUMPTION_BODY_COMPONENT.md)独立验收保存Uses、typed
-   ResumeInput、temporal successors、cut availability及context/C1组合；当前实施中。
+   ResumeInput、temporal successors、cut availability及context/C1组合；499项组件及
+   冻结`e6b4723`的3,542项全仓已通过。
    然后关闭完整[C2](M1_RESUMPTION_INTERFACES.md)的Create/driver/context/release
    字段与组合。body generation与drive epoch分开；不冻结yield时world或旧caller，
    不把接受请求等同实际body entry。完整C2.0/C2.4仍开放，不能以body组件代替。
@@ -85,6 +86,10 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
   可只读复用的重型 trace。
 
 ## 5. 当前证据锚点
+
+- [C2B静态body](M1_RESUMPTION_BODY_ACCEPTANCE.md)已验收：499项组件/7.077s，
+  冻结`e6b4723`的3,542项全仓/432.922s，403源文件及26份fixture前后哈希一致。
+  实现通用temporal输入、上下文与binding/C1组合，不证明完整driver或运行恢复。
 
 - C2架构审查（2026-10-17）收束为同body temporal边和两个派生投影；23组初批动态
   观察、4种静态code shape、另4组delegate-context观察及5个availability设计检查。
