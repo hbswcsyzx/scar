@@ -21,6 +21,7 @@ from .ids import ContentReadID
 from .production import InventorySourceRef, RawRecordRef, SourceEdgeRef, SourceEndpointRef
 from .source_validation import resolve_endpoint
 from .work import MaterializationRef
+from .validity_budget import ValidityBudget
 
 
 _RELATIONS = frozenset((EvidenceRelation.PRODUCES, EvidenceRelation.MATERIALIZES,
@@ -49,6 +50,28 @@ class _Budget:
         self.used += count
         self.costs[kind] += count
         return True
+
+
+class _SharedBudget:
+    """P traversal charged immediately to the caller's one derived budget."""
+    def __init__(self, shared, gaps):
+        self.shared, self.gaps = shared, gaps
+        self.used, self.truncated = 0, False
+        self.costs = {key: 0 for key in ('lineage_nodes', 'source_edges', 'raw_rows',
+                                        'association_joins', 'selector_rank')}
+
+    def take(self, kind, path, count=1):
+        before = self.shared.used
+        accepted = self.shared.spend('production_query', count, path=path)
+        charged = self.shared.used - before
+        self.used += charged
+        self.costs[kind] += charged
+        if not accepted:
+            if not self.truncated:
+                _gap(self.gaps, 'production_budget', path,
+                     'traversal truncated; unvisited sources/joins are not independent or absent')
+            self.truncated = True
+        return accepted
 
 
 def _gap(gaps, code, path, message):
@@ -409,14 +432,7 @@ def _groups(candidates, budget, gaps):
         ('write_associations', 'outcome_productions', 'candidates')}} for group in groups)
 
 
-def production(ctx, read_id, *, budget=4096):
-    """Return conditional source candidates for an original content read.
-
-    No caller-supplied contribution list is accepted. The result is detached,
-    contains no target tensor values, and never grants runtime/ready authority.
-    """
-    gaps = []
-    traversal = _Budget(budget, gaps)
+def _production(ctx, read_id, traversal, gaps, *, include_context_gaps):
     if type(read_id) is not ContentReadID:
         raise TypeError('production read must be an exact ContentReadID')
     resolved = ctx.resolved_content_reads[read_id]
@@ -442,15 +458,41 @@ def production(ctx, read_id, *, budget=4096):
     groups = _groups(candidates, traversal, gaps)
     _gap(gaps, 'production_capture_unverified', 'inventory',
          'format replay accounts for supplied files, not all runtime writes, aliases, dropped events or external effects')
-    return deepcopy({'read': read, 'demand': demand, 'lineage_prerequisites': lineage,
+    context_gaps = (tuple({'code': item.code, 'path': item.path, 'message': item.message}
+                          for item in ctx.gaps) if include_context_gaps else ())
+    return {'read': read, 'demand': demand, 'lineage_prerequisites': lineage,
         'candidates': tuple(candidates), 'current_production': groups,
         'possible_invalidators': tuple(item['id'] for item in candidates if 'possible_invalidator' in item['relevance']),
         'unresolved_relevance': tuple(item['id'] for item in candidates if 'unresolved_relevance' in item['relevance']),
         'pending_sources': pending,
-        'gaps': tuple({'code': item.code, 'path': item.path, 'message': item.message} for item in ctx.gaps) + tuple(gaps),
+        'gaps': context_gaps + tuple(gaps),
         'budget_used': traversal.used, 'budget_costs': traversal.costs, 'truncated': traversal.truncated,
         'budget_scope': 'lineage/source rows/association joins/selector ranks; excludes snapshot/replay byte/line costs and detached report copying',
-        'source_runtime_verified': False, 'readiness_verified': False, 'transformation_authorized': False})
+        'source_runtime_verified': False, 'readiness_verified': False, 'transformation_authorized': False}
 
 
-__all__ = ['production']
+def production_shared(ctx, read_id, *, budget: ValidityBudget, include_context_gaps=False):
+    """Internal, undetached P view using the whole composition's budget.
+
+    A caller must detach its aggregate once before publishing it. An exhausted
+    budget retains pending-source gaps rather than restarting a local allowance.
+    """
+    if not isinstance(budget, ValidityBudget):
+        raise TypeError('production_shared requires a ValidityBudget')
+    gaps = []
+    traversal = _SharedBudget(budget, gaps)
+    if budget.remaining == 0:
+        budget.mark_truncated('production', 'no shared budget remains for this read')
+        traversal.truncated = True
+        _gap(gaps, 'production_budget', 'production', 'read traversal was not started; its obligations remain unresolved')
+    return _production(ctx, read_id, traversal, gaps, include_context_gaps=include_context_gaps)
+
+
+def production(ctx, read_id, *, budget=4096):
+    """Return the legacy detached conditional source view for one read."""
+    gaps = []
+    traversal = _Budget(budget, gaps)
+    return deepcopy(_production(ctx, read_id, traversal, gaps, include_context_gaps=True))
+
+
+__all__ = ['production', 'production_shared']

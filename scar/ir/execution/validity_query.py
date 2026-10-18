@@ -14,7 +14,7 @@ from .content_validation import artifact_key
 from .coverage import RegionRef, _ValueCatalog, _labeled_storage_coverage
 from .ids import ContentReadID
 from .production import RawRecordRef, WorkWrite
-from .production_query import production
+from .production_query import production_shared
 from .validity_budget import ValidityBudget
 from .validity_stability import production_interval, read_domain, read_interval, stability
 from .validity_validation import resolve_support
@@ -157,14 +157,16 @@ def _physical_groups(fragments, budget):
     return tuple({**group, 'fragments': tuple(group['fragments'])} for group in groups)
 
 
-def validity(ctx, read_id, *, budget=4096):
-    """Inspect actual coverage, exact alternatives, threats and open conditions."""
-    shared = ValidityBudget(budget)
+def validity_shared(ctx, read_id, *, budget: ValidityBudget, include_context_gaps=False):
+    """Internal undetached V view; charge the caller's shared derived budget."""
+    if not isinstance(budget, ValidityBudget):
+        raise TypeError('validity_shared requires a ValidityBudget')
+    shared = budget
+    used_before, costs_before, gaps_before = shared.used, dict(shared.costs), len(shared.gaps)
     if type(read_id) is not ContentReadID:
         raise TypeError('validity requires an exact ContentReadID')
     read = ctx.resolved_content_reads[read_id]
-    universe = production(ctx, read_id, budget=shared.remaining)
-    shared.spend('production_query', universe['budget_used'], path='validity.production')
+    universe = production_shared(ctx, read_id, budget=shared, include_context_gaps=include_context_gaps)
     if universe['truncated']:
         shared.mark_truncated('validity.production', 'independent source/lineage traversal was truncated')
     contributions = _fragments(ctx, read, universe, shared)
@@ -273,7 +275,9 @@ def validity(ctx, read_id, *, budget=4096):
               else 'CONTRADICTED' if blocked_portions else 'MISSING')
     conditions.extend(('source capture/write/alias/window completeness remains unverified',
                        'native content and visibility applicability remain unverified'))
-    return deepcopy({'read': read['read'], 'demand': universe['demand'],
+    context_gaps = (tuple({'code': row.code, 'path': row.path, 'message': row.message}
+                          for row in ctx.gaps) if include_context_gaps else ())
+    return {'read': read['read'], 'demand': universe['demand'],
         'interval': read_interval(ctx, read), 'domain': read_domain(ctx, read),
         'source_universe': universe, 'lineage_prerequisites': universe['lineage_prerequisites'],
         'contributions': tuple(contributions), 'physical_groups': groups,
@@ -287,12 +291,18 @@ def validity(ctx, read_id, *, budget=4096):
             'conditions': ('supplied file projection is not full runtime writer/alias capture',)},
         'invalidators': tuple(invalidators), 'lifetime': tuple(lifetime),
         'validity_conditions': tuple(dict.fromkeys(conditions)),
-        'gaps': tuple({'code': row.code, 'path': row.path, 'message': row.message} for row in ctx.gaps)
-            + tuple(shared.gaps),
-        'budget_used': shared.used, 'budget_costs': dict(shared.costs), 'truncated': shared.truncated,
+        'gaps': context_gaps + tuple(shared.gaps[gaps_before:]),
+        'budget_used': shared.used - used_before,
+        'budget_costs': {key: value - costs_before.get(key, 0) for key, value in shared.costs.items()
+                         if value != costs_before.get(key, 0)}, 'truncated': shared.truncated,
         'budget_scope': 'shared source, joins, formula, geometry, order and threat scans; record/FK validation, snapshot/replay and detached copying separate',
         'source_runtime_verified': False, 'runtime_visibility_verified': False,
-        'transformation_authorized': False})
+        'transformation_authorized': False}
 
 
-__all__ = ['validity']
+def validity(ctx, read_id, *, budget=4096):
+    """Legacy detached single-read view with its own positive integer budget."""
+    return deepcopy(validity_shared(ctx, read_id, budget=ValidityBudget(budget), include_context_gaps=True))
+
+
+__all__ = ['validity', 'validity_shared']

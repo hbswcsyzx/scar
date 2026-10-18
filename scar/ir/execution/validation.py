@@ -1,5 +1,6 @@
 """Validate declared execution links without certifying source/runtime identity."""
 from dataclasses import dataclass, fields, is_dataclass
+from copy import copy
 import hashlib
 import json
 
@@ -367,6 +368,98 @@ def _evidence_gaps(ctx):
     visit(ctx.model, 'model')
 
 
+def _external_stages(ctx):
+    """One ordering for construction and a fresh external query snapshot."""
+    from .source_validation import source_inventory_errors, source_bridge_errors
+    from .resource_validation import resource_errors
+    from .work_validation import work_errors
+    from .order_validation import order_errors
+    from .observation_validation import observation_errors
+    from .content_validation import content_errors
+    from .production_validation import write_errors, produced_errors
+    from .validity_validation import validity_errors
+
+    def evidence_bindings(context):
+        for row in context.model.evidence_bindings:
+            if row.operation not in context.occurrences:
+                context.issue('evidence_occurrence', 'evidence_bindings', 'missing core occurrence endpoint')
+            graph = context._external(row.legacy.artifact, 'evidence_bindings', EvidenceGraph,
+                                      context.evidence_graphs)
+            if graph is not None and row.legacy.instance not in graph.instances:
+                context.issue('evidence_instance', 'evidence_bindings', 'missing exact legacy instance endpoint')
+
+    called = []
+    for name, stage in (
+        ('source_inventory', source_inventory_errors), ('resource', resource_errors),
+        ('work', work_errors), ('order', order_errors), ('evidence_bindings', evidence_bindings),
+        ('observation', observation_errors), ('content', content_errors),
+        ('source_bridge', source_bridge_errors), ('write', write_errors),
+        ('produced', produced_errors), ('validity', validity_errors),
+    ):
+        if ctx.issues:
+            break
+        called.append(name)
+        stage(ctx)
+    ctx.external_preparation = {
+        'canonical_flow_reused': False, 'stage_calls': tuple(called),
+        'cost_scope': 'record/FK validation, container preparation, snapshot verification and inventory replay; '
+                      'separate from the derived traversal budget and detached result copying',
+    }
+
+
+def _runtime_gap(ctx):
+    ctx.gap('source_runtime_unverified', 'model',
+            'declared occurrence/identity links have not been established by a runtime adapter')
+
+
+def _containers(value):
+    """Copy context-owned containers, retaining original immutable records."""
+    if type(value) is dict:
+        return {key: _containers(item) for key, item in value.items()}
+    if type(value) is list:
+        return [_containers(item) for item in value]
+    if type(value) is set:
+        return set(value)
+    if type(value) is tuple:
+        return tuple(_containers(item) for item in value)
+    return value
+
+
+def refresh_external_context(base_ctx):
+    """Reuse validated canonical flow and recheck all external relationships.
+
+    Caller catalogs remain live inputs, but their objects are verified and
+    detached once by this new resolver. No derived dictionaries or diagnostics
+    are written back to the construction context.
+    """
+    if not isinstance(base_ctx, _Context) or base_ctx.issues:
+        raise ValueError('external refresh requires a valid analyzed execution context')
+    ctx = copy(base_ctx)
+    external = {'snapshots', 'issues', 'gaps', '_gap_keys', 'external_preparation',
+        'source_resolutions', 'inventory_sources', 'resolved_source_bridges',
+        'work_materialization_keys', 'order_steps', 'order_adjacency',
+        'resolved_denotations', 'resolved_content_reads', 'resolved_writes',
+        'resolved_produced', 'resolved_establishments', 'resolved_lifetime_events',
+        'resolved_order_associations', 'resolved_supports'}
+    catalogs = {'value_graphs', 'evidence_graphs', 'semantic_graphs', 'artifact_bytes'}
+    for name, value in vars(base_ctx).items():
+        if name in external:
+            ctx.__dict__.pop(name, None)
+        elif name not in catalogs:
+            setattr(ctx, name, _containers(value))
+    ctx.issues = []
+    ctx.gaps = list(base_ctx._canonical_gaps)
+    ctx._gap_keys = {(item.code, item.path, item.message) for item in ctx.gaps}
+    ctx.snapshots = ExternalSnapshots(ctx.value_graphs, ctx.evidence_graphs, ctx.semantic_graphs,
+                                      ctx.artifact_bytes)
+    _external_stages(ctx)
+    ctx.external_preparation['canonical_flow_reused'] = True
+    _runtime_gap(ctx)
+    if ctx.issues:
+        raise ValueError('; '.join(f'{row.code} at {row.path}: {row.message}' for row in ctx.issues))
+    return ctx
+
+
 def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None):
     if type(model) is not ExecutionModel:
         return ValidationReport((ExecutionIssue('record', 'model', 'expected exact ExecutionModel'),), ()), None
@@ -394,44 +487,11 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
         call_errors(ctx)
     if not ctx.issues:
         _evidence_gaps(ctx)
+    ctx._canonical_gaps = tuple(ctx.gaps)
     if not ctx.issues:
-        from .source_validation import source_inventory_errors
-        source_inventory_errors(ctx)
-    if not ctx.issues:
-        from .resource_validation import resource_errors
-        resource_errors(ctx)
-    if not ctx.issues:
-        from .work_validation import work_errors
-        work_errors(ctx)
-    if not ctx.issues:
-        from .order_validation import order_errors
-        order_errors(ctx)
-    if not ctx.issues:
-        for row in model.evidence_bindings:
-            if row.operation not in ctx.occurrences:
-                ctx.issue('evidence_occurrence', 'evidence_bindings', 'missing core occurrence endpoint')
-            graph = ctx._external(row.legacy.artifact, 'evidence_bindings', EvidenceGraph, ctx.evidence_graphs)
-            if graph is not None and row.legacy.instance not in graph.instances:
-                ctx.issue('evidence_instance', 'evidence_bindings', 'missing exact legacy instance endpoint')
-    if not ctx.issues:
-        from .observation_validation import observation_errors
-        observation_errors(ctx)
-    if not ctx.issues:
-        from .content_validation import content_errors
-        content_errors(ctx)
-    if not ctx.issues:
-        from .source_validation import source_bridge_errors
-        source_bridge_errors(ctx)
-    if not ctx.issues:
-        from .production_validation import write_errors, produced_errors
-        write_errors(ctx)
-        if not ctx.issues:
-            produced_errors(ctx)
-    if not ctx.issues:
-        from .validity_validation import validity_errors
-        validity_errors(ctx)
+        _external_stages(ctx)
     # Evidence reference presence is not native/source/runtime applicability.
-    ctx.gap('source_runtime_unverified', 'model', 'declared occurrence/identity links have not been established by a runtime adapter')
+    _runtime_gap(ctx)
     return ValidationReport(tuple(ctx.issues), tuple(ctx.gaps)), ctx
 
 

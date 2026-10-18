@@ -51,32 +51,22 @@ class ExecutionIndex:
         """Fresh external snapshots per content query, reusing canonical flow.
 
         The caller's mutable external graphs may have changed since this index
-        was built. Recheck D/Q associations; never mutate the construction-time
-        report or reuse its trusted external graph objects.
+        was built. Recheck source, resource, work, order, evidence and D/Q/P/V
+        associations without mutating the construction-time report or trusting
+        its old external graph objects.
         """
-        from copy import copy
-        from .snapshot import ExternalSnapshots
-        from .observation_validation import observation_errors
-        from .content_validation import content_errors
-        from .source_validation import source_inventory_errors, source_bridge_errors
-        from .production_validation import write_errors, produced_errors
-        from .validity_validation import validity_errors
-        ctx = copy(self._ctx)
-        ctx.issues, ctx.gaps, ctx._gap_keys = [], [], set()
-        ctx.snapshots = ExternalSnapshots(ctx.value_graphs, ctx.evidence_graphs, ctx.semantic_graphs,
-                                           ctx.artifact_bytes)
-        source_inventory_errors(ctx)
-        observation_errors(ctx)
-        content_errors(ctx)
-        source_bridge_errors(ctx)
-        write_errors(ctx)
-        if not ctx.issues:
-            produced_errors(ctx)
-        if not ctx.issues:
-            validity_errors(ctx)
-        if ctx.issues:
-            raise ValueError('; '.join(f'{x.code} at {x.path}: {x.message}' for x in ctx.issues))
-        return ctx
+        from .validation import refresh_external_context
+        return refresh_external_context(self._ctx)
+
+    def resource_composition(self, *, scopes=(), budget=4096):
+        """Whole supplied-model projection under explicit, typed Q scopes."""
+        from .composition_requirements import validate_scopes, prepare_scopes
+        from .composition_query import resource_composition
+        from .validity_budget import ValidityBudget
+        shared = ValidityBudget(budget)
+        validate_scopes(scopes)
+        prepare_scopes(self._ctx, scopes)  # owner FKs only; no external access
+        return resource_composition(self._content_context(), scopes, budget=shared)
 
     def denotation(self, value):
         """Canonical type/identity; content versions never stand for references."""
@@ -120,7 +110,8 @@ class ExecutionIndex:
     def production(self, identity, *, budget=4096):
         """Inspect independent source candidates, not an authoritative writer set."""
         from .production_query import production
-        return deepcopy(production(self._content_context(), identity, budget=budget))
+        # The public P wrapper already detaches once, as the V wrapper does.
+        return production(self._content_context(), identity, budget=budget)
 
     def validity(self, identity, *, budget=4096):
         """Conditional source-derived contribution coverage and interval safety."""
