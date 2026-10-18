@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **Current design work (2026-10-18):** the
+> [C2/D3 audit](M1_PROTOCOL_FAMILY_AUDIT.md) identifies missing protocol-to-original
+> CFG/port obligations and per-Drive persistent-body occurrence associations.
+> [P0–P5](M1_PROTOCOL_FAMILY_PLAN.md) retains28 obligation groups. P0 audit is
+> complete; exact fields and implementation remain open. Five old-IR and six
+> bounded startup-throw observations retain their real scope and first failure.
+> Product603-file fingerprint remains unchanged; no new full run or speedup.
+> Next is the joint F/O field contract, not another enum or optimization backend.
+
 > **Current L checkpoint accepted (2026-10-18):**
 > [Exact content/source/evaluation interfaces](M1_LITERAL_INTERFACES.md) pass
 > [1,716 component cases /32 criteria and 5,294 clean frozen full tests](M1_LITERAL_ACCEPTANCE.md)

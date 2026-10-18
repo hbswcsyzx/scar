@@ -367,6 +367,14 @@ close 成功不必总返回 None，3.13+ 可返回关闭时 body Return 的值�
 被统一置为 Closed。`generator_protocol` 已测上述最易混淆的创建、发送、关闭返回、
 未启动关闭及 close 失败后 Suspended 边界，表格其余常规路径依据版本化方法规范。
 
+2026-10-18的[启动throw审计](../M1_PROTOCOL_FAMILY_AUDIT.md)补充六项CPython3.14.7
+有界观察：generator非法参数42留Created且可后续启动；异常类构造器回调抛
+RuntimeError则已Closed；启动前注入StopIteration实例原样传播，cause=None，
+也已Closed。普通ValueError实例的generator/coroutine/asyncgen均没有用户body日志，
+asyncgen request创建与实际驱动分别记录。不得把所有“规范化失败”当同一后态，
+也不得将启动前注入当已进入body的Raise。原见证因错误预期断言exit1，JSON在
+断言前已保存；不是六项产品测试PASS，模型字段仍待冻结。
+
 正常 generator Return(value) 在 next/send 边界成为 StopIteration.value。body 自行
 逃出的 StopIteration 按 PEP 479 转 RuntimeError；不能按异常名称统一判自然结束。
 async generator 有独立 StopAsyncIteration/awaitable iteration adapter；禁止非空

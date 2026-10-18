@@ -1,5 +1,21 @@
 # Current evidence and remaining work
 
+## C2/D3 audit completed; exact protocol fields remain open (2026-10-18)
+
+[Audit](M1_PROTOCOL_FAMILY_AUDIT.md) and [plan](M1_PROTOCOL_FAMILY_PLAN.md)
+preserve F01–F24/X25–X28. Three source reviews identify two connected gaps:
+protocol obligations on original CFG/Uses/results/current state, and actual
+Drive→persistent body activation→this ingress/first outcome. Existing C2B/D1/D2
+records remain canonical. No-body/delegate-only paths must not invent Drive.
+Five declared-IR observations show the old generic scope. Six bounded CPython
+startup-throw observations refute uniform CREATED-after-normalization-error and
+startup StopIteration wrapping assumptions; the original script exit1 and data
+remain. A read-only data check is not a passing native test rerun. Product603
+source hashes/78 fixtures are unchanged; the5,294 full result below belongs to
+the prior frozen implementation, not a new run. P0 audit is complete; P1 field
+freeze, F/O implementation, D3, full M0–M2 and automatic LeWM modeling remain
+open. No new detector/backend/profile or speedup. Historical checkpoints follow.
+
 ## L exact content, source and original evaluation ports accepted (2026-10-18)
 
 [Interfaces](M1_LITERAL_INTERFACES.md), [acceptance](M1_LITERAL_ACCEPTANCE.md):

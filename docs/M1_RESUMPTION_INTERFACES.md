@@ -1,5 +1,10 @@
 # C2：可恢复 body、驱动协议与跨挂起依赖
 
+**当前阅读指引（2026-10-18）：** 本文保留最初C2设计历史；其body/context字段
+已由[C2B](M1_RESUMPTION_BODY_ACCEPTANCE.md)实施，D1/D2另有后续验收。下文“拟议”
+或“待实施”不是所有部分的当前状态。准确剩余范围见[C2/D3审计](M1_PROTOCOL_FAMILY_AUDIT.md)
+及[当前计划](M1_PROTOCOL_FAMILY_PLAN.md)，完整C2.0/C2.4仍未关闭。
+
 2026-10-17 架构合同，2026-10-18 更新：完整 C2.0 字段冻结与 C2.4 driver 仍开放。
 基线 `fec9f5b` 的研究证据保持原范围；[C2B body组件](M1_RESUMPTION_BODY_COMPONENT.md)
 已进入v10实施与独立验收，不能据此宣布完整C2、自动lowerer或运行adapter完成。

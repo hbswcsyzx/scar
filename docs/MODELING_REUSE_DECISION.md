@@ -18,8 +18,10 @@ detector 或 backend。2026-10-17/18 更新下面的 C1/C2B 实施状态；既�
 当前 [D2.2 no-body](M1_NO_BODY_ACCEPTANCE.md) 的836组件及冻结 `006a0e0` 的
 3,871项全仓通过；仅声明层的bool分支/精确owner/当前状态连接，不授runtime权限。
 [D2.3](M1_SESSION_RELEASE_ACCEPTANCE.md)974组件及冻结`f67037d`的4,009全仓也已通过，
-接通声明内历史终态/alias和当前session谓词的路径派生。D2.4/D3与完整第一阶段
-仍未关闭；实际provider/runtime导入和新LeWM优化没有因此完成。
+接通声明内历史终态/alias和当前session谓词的路径派生。后续[D2.4组合](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)
+也已验收；[C2/D3审计](M1_PROTOCOL_FAMILY_AUDIT.md)定位协议到原CFG/端口义务与
+实际Drive到持续body执行段/首出口的关联缺口。D3精确字段与完整第一阶段仍未
+关闭；实际provider/runtime导入和新LeWM优化没有因此完成。
 
 此前冻结实现 `e6b4723` 的3,542项回归通过，见
 [C2B body验收](M1_RESUMPTION_BODY_ACCEPTANCE.md)；499项组件及403个源文件指纹匹配。

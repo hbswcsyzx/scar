@@ -292,10 +292,12 @@ caller 接链，挂起/真正结束时归还本次 caller；该 caller token 不
 最终 frame-release 与 body completion/上下文切换分阶段描述，不静默套用同步
 FrameExit 的出口邻接规则。
 
-待实施的 [C2 合同](M1_RESUMPTION_INTERFACES.md)采用同一逻辑 body 的显式 temporal
+已实施的 [C2B body组件](M1_RESUMPTION_BODY_ACCEPTANCE.md)采用同一逻辑 body 的显式 temporal
 successors；ordinary 数据可用性在恢复 landing 切断，保存 Uses 接新参数，共享状态
 接本次输入。logical CFG 与 availability 是同一规范边的不同派生查询，不另存另一
-套 producer/use。该设计尚未成为产品 capability，C2.0 字段冻结仍未关闭。
+套 producer/use。D1/D2又接上静态gate/drive与有限生命周期；完整[C2/D3审计](M1_PROTOCOL_FAMILY_AUDIT.md)
+仍缺协议raw/delivery/host-adapter义务和本次Drive到持续body segment/outcome的实际
+发生接口，完整C2.0/C2.4及第一阶段未关闭。接口可声明/拒错与自动采集分别验收。
 
 closure 是函数对象与环境/cell 的关系；callback 注册不等于实际调用。调度关系
 可以跨词法父 Region 的返回，次数/线程/状态必须由实际协议和证据连接。

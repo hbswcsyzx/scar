@@ -75,6 +75,14 @@ L现按[计划](M1_LITERAL_PLAN.md)完成[内容/来源/原求值接口](M1_LITE
 与接口组合，最后核对完整M0–M2矩阵。自动恢复在M3/M4，不在本门冒充完成。
 第一阶段仍未完成，不增加detector/backend或新的LeWM重型profile。
 
+C2/D3现完成[源码与语言反例审计](M1_PROTOCOL_FAMILY_AUDIT.md)：既有C2B/D1/D2
+结构不重做，缺F协议义务→原CFG/Use/result/state和O实际Drive→持续body入口/首出口
+两条连接。[P0–P5计划](M1_PROTOCOL_FAMILY_PLAN.md)保留28组分母；P0完成，P1
+字段未冻。启动throw六观察推翻“构造异常失败总保持Created”等假设，原exit1与
+JSON保留。此为审计/规划，不是新产品验收；603源/78fixtures未变，未重跑全仓。
+先联合冻结F/O exact合同，然后按闭环实施与全家族组合推进，不将模型接口缺失
+整个推迟给M4采集，也不造native解析器/调度器作为前置。
+
 当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1
 声明组件不是实际导入；不要继续以增加声明表、兼容测试或 Tensor wrappers 代替
 自动连接。通用 SSA/Region 基础设施扩展前先对照 MLIR/xDSL，源 CFG/flow 扩展前

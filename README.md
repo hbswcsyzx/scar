@@ -11,6 +11,14 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
+The [C2/D3 audit](docs/M1_PROTOCOL_FAMILY_AUDIT.md) now identifies the missing
+protocol-to-CFG obligations and Drive-to-persistent-body occurrence connections.
+Its [plan](docs/M1_PROTOCOL_FAMILY_PLAN.md) preserves28 obligation groups and
+explicit field decisions. Five old-IR observations and six new bounded startup
+throw observations constrain the design; the original failed expectation is
+retained. This is an audit/plan checkpoint, with fields still open and no new
+product capability or full-suite run.
+
 The [exact literal content/source/evaluation interfaces](docs/M1_LITERAL_INTERFACES.md)
 pass [1,716 component checks /32 criteria and 5,294 clean frozen full tests](docs/M1_LITERAL_ACCEPTANCE.md)
 (`4bc55eb`). Exact abstract Data content and source declarations attach to the

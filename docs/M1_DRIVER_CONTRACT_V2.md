@@ -1,5 +1,10 @@
 # C2D：driver 连接合同第二稿
 
+当前阅读指引（2026-10-18）：第1–3节字段已由D1实施；第4节旧D2候选由
+[后续冻结合同](M1_DRIVER_LIFECYCLE_CONTRACT.md)及D2.1–D2.4验收取代。
+完整剩余范围见[C2/D3审计](M1_PROTOCOL_FAMILY_AUDIT.md)与[当前计划](M1_PROTOCOL_FAMILY_PLAN.md)，
+不要重实施本文保留的历史候选字段。
+
 2026-10-18；审查基线 `499d708`。**D1设计已收敛；其后实施见[组件验收](M1_DRIVER_ACCEPTANCE.md)。**
 本文收敛 [先前复审](M1_DRIVER_INTERFACES.md) 的具体连接方式，不更改五类核心实体，
 不增加 detector/backend，不宣布完整 C2 或第一阶段完成。

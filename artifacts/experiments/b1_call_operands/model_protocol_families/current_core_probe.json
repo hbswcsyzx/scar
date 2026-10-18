@@ -1,0 +1,83 @@
+{
+  "schema": "scar.protocol-family-current-core-observation",
+  "revision": "08c4cbfc6b675919ab15e8654567889727f3c466",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "source_sha256": "7d3187f36f6cca07e0714a49ac20dbe1c0634601568f2986ef8f0c178431f7a9",
+  "source_files": 603,
+  "script_sha256": "b07e7587b66a6ec73284fcd16552bbebed1452d547a9b26b6f3915d7b4f55c62",
+  "cases": [
+    {
+      "target": "start",
+      "receiver_kind": "BODY",
+      "body_family": "GENERATOR",
+      "structural_issues": [],
+      "original_outcome_routes": [
+        {
+          "original_body_source": "program_operation:resume.suspend",
+          "body_outcome": "SUSPEND",
+          "driver_terminal": "RETURN",
+          "driver_terminal_operation": "program_operation:driver.outcome.exit",
+          "producer_ports_retained": 3
+        }
+      ],
+      "python_family_adapter_validated": false
+    },
+    {
+      "target": "value",
+      "receiver_kind": "BODY",
+      "body_family": "GENERATOR",
+      "structural_issues": [],
+      "original_outcome_routes": [
+        {
+          "original_body_source": "program_operation:resume.return",
+          "body_outcome": "RETURN",
+          "driver_terminal": "RETURN",
+          "driver_terminal_operation": "program_operation:driver.outcome.exit",
+          "producer_ports_retained": 3
+        }
+      ],
+      "python_family_adapter_validated": false
+    },
+    {
+      "target": "packet",
+      "receiver_kind": "BODY",
+      "body_family": "GENERATOR",
+      "structural_issues": [],
+      "original_outcome_routes": [
+        {
+          "original_body_source": "program_operation:resume.raise",
+          "body_outcome": "RAISE",
+          "driver_terminal": "RAISE",
+          "driver_terminal_operation": "program_operation:driver.outcome.exit",
+          "producer_ports_retained": 3
+        }
+      ],
+      "python_family_adapter_validated": false
+    },
+    {
+      "target": "value",
+      "receiver_kind": "ASYNC_REQUEST",
+      "body_family": "GENERATOR",
+      "structural_issues": [],
+      "original_outcome_routes": [
+        {
+          "original_body_source": "program_operation:resume.return",
+          "body_outcome": "RETURN",
+          "driver_terminal": "RETURN",
+          "driver_terminal_operation": "program_operation:driver.outcome.exit",
+          "producer_ports_retained": 3
+        }
+      ],
+      "python_family_adapter_validated": false
+    }
+  ],
+  "existing_wrong_flavor_guard": [
+    "resumption_flavor"
+  ],
+  "scope": "Five declared-IR observations; no pytest, compiler, Python resumable execution, GPU or LeWM run.",
+  "interpretation": "The old D1 contract checks generic structure. These examples do not claim native Python adapter equivalence; their acceptance is not an existing-contract defect.",
+  "source_unchanged": true,
+  "family_protocol_complete": false,
+  "source_runtime_verified": false,
+  "transformation_authorized": false
+}
