@@ -1,6 +1,7 @@
 # D1：规范 driver 连接组件
 
-2026-10-18；设计基线 `306a789`。**已实施，671项组件检查通过；冻结全仓待完成。**
+2026-10-18；设计基线 `306a789`。**D1静态连接组件已验收：671项组件、3,706项冻结全仓通过。**
+实施 revision：`382363c3a5e762b40a7b4bf0d47726a7bbbbe509`。
 依据[连接合同](M1_DRIVER_CONTRACT_V2.md)第1–3节及[实施矩阵](M1_DRIVER_IMPLEMENTATION.md)。
 这不是自动 Python/LeWM 建图、runtime adapter 或优化发布。
 
@@ -81,8 +82,17 @@ packet、request创建/关联、L真子集和额外driver域、多source、C1/IN
 最终组件耗时9.142s，报告为 `component/final.json`；首个671项通过记录也保留，最终
 只规范化一个测试文件的末尾空行后重验，以绑定准确源指纹。独立审查终态没有剩余的有界实现
 阻断；报告哈希只标识修后的源码，不能拿来绑定修前进程早已加载的模块。原始修前/
-修后结果均保留。冻结全仓结果待归档后在此更新，
-不沿用旧3,549项回归替代本次新代码验收。
+修后结果均保留。
+
+冻结 `382363c` 单次全仓得到3,706 passed、0 failed/error/skipped；pytest有三条既有
+warning。外部计时457.563s、pytest计时455.58s、最大RSS为1,025,620KiB。HEAD、clean
+status、415个源文件与29份fixture的逐文件哈希前后一致；原26份fixture保持原哈希。
+测试退出后只移除了本次独占的basetemp。此耗时是验收成本，不是LeWM或任何workload
+的性能测量。组件用例与全仓用例有重叠，不相加为独立证据。
+
+原始JUnit、逐case、命令/环境、前后源码清单、计时和独立审查见
+[归档](../artifacts/experiments/b1_call_operands/model_driver_implementation/README.md)。
+归档检查只核对这些既有证据，不重跑测试或目标程序。
 
 ## 4. 没有因此证明什么
 

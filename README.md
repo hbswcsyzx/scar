@@ -39,7 +39,7 @@ relation over the existing body graph. Its 517 component checks and 3,549 frozen
 full tests pass; this introduces no driver/backend or runtime authority.
 The [D1 driver connection component](docs/M1_DRIVER_ACCEPTANCE.md) implements the
 canonical Create/Start/Resume/outcome path, v11 wire and input/output queries.
-All 671 component checks pass; frozen full regression is pending. Lifecycle,
+All 671 component checks and 3,706 frozen full tests (`382363c`) pass. Lifecycle,
 source/runtime correspondence and complete whole-program modeling remain open.
 
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects

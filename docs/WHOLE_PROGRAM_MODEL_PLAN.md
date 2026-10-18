@@ -93,8 +93,9 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 ## 5. 当前证据锚点
 
-- [D1规范driver连接组件](M1_DRIVER_ACCEPTANCE.md)已实施，671项组件/13标准通过，
-  415源文件指纹前后一致；独立raw行为标签反例已修复。冻结全仓/最终归档待完成。
+- [D1规范driver连接组件](M1_DRIVER_ACCEPTANCE.md)671项组件/13标准通过，冻结
+  `382363c`的3,706项全仓/457.563s通过；415源文件/29份fixture指纹前后一致。
+  独立raw行为标签反例已修复；原始失败、独立审查与全仓证据均归档。
   新增严格v11及原始input/output端口派生，不授D2/D3、source/runtime或变换权限。
 
 - [D1连接第二稿](M1_DRIVER_CONTRACT_V2.md)及[实施矩阵](M1_DRIVER_IMPLEMENTATION.md)

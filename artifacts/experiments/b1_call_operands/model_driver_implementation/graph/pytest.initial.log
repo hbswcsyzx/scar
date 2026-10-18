@@ -1,0 +1,35 @@
+.....................................F                                   [100%]
+=================================== FAILURES ===================================
+____________ test_duplicate_metadata_and_missing_gate_are_rejected _____________
+
+    def test_duplicate_metadata_and_missing_gate_are_rejected():
+        graph = driver_program()
+>       duplicate = replace(graph, final_body_gates=(*graph.final_body_gates, graph.final_body_gates[0]))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_driver_graph.py:251: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: in _replace
+    return self.__class__(**changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:43: in __init__
+    ???
+scar/ir/program/model.py:793: in __post_init__
+    _unique(tuple(getattr(item, key) for item in rows),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+values = (OperationID(value='driver.gate'), OperationID(value='driver.gate'))
+name = 'ProgramGraph.final_body_gates keys'
+
+    def _unique(values: tuple, name: str) -> None:
+        if len(set(values)) != len(values):
+>           raise ValueError(f"{name} must not contain duplicates")
+E           ValueError: ProgramGraph.final_body_gates keys must not contain duplicates
+
+scar/ir/program/model.py:59: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_driver_graph.py::test_duplicate_metadata_and_missing_gate_are_rejected
+1 failed, 37 passed in 0.61s

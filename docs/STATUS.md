@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## D1 canonical driver connections implemented (2026-10-18; full pending)
+## D1 canonical driver connections accepted (2026-10-18)
 
 The [D1 component](M1_DRIVER_ACCEPTANCE.md) implements the accepted static
 Create/raw/request/association/gate/BodyDrive records, core state and CFG joins,
@@ -10,8 +10,13 @@ the run. Historical v10 golden was generated from isolated immutable `306a789`,
 with no mutable codec imports. Independent review found and fixed raw constructor
 behavior-tag inconsistency; both the failing reproduction and fixed results remain.
 
-Final bounded independent review reports no remaining implementation blocker;
-implementation freeze and one full regression remain before release acceptance.
+Final bounded independent review reports no remaining implementation blocker.
+Frozen implementation `382363c` passes **3,706 full tests / 457.563s /
+1,025,620KiB**, with no failures, errors or skips and three existing warnings.
+HEAD, clean status, all 415 source hashes and 29 fixture hashes match before/after;
+the prior 26 fixtures are unchanged and the exclusively owned basetemp was removed.
+The [archive](../artifacts/experiments/b1_call_operands/model_driver_implementation/README.md)
+retains commands, original failures, reviews, JUnit and source receipts.
 D2 lifecycle, D3 full protocol-family rules, complete
 C2D/M0–M2 and source/runtime/instance correspondence remain open. No new LeWM
 profiling, transformation or speedup is established.
