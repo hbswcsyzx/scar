@@ -1,5 +1,24 @@
 # Current evidence and remaining work
 
+## R2.3-V content validity/support interfaces and frozen full accepted (2026-10-18)
+
+The [V API](M1_VALIDITY_API.md) derives labeled source contributions, exact
+Completed/Ordered alternatives, actual versus future coverage and whole-read
+threat/lifetime conditions. Unknown rules cannot waive original Mat placement;
+deleting an observed-result association cannot enable future whole coverage.
+Only necessary blocked portions cause conflict; unused historical leaves do
+not poison unrelated missing portions. [Acceptance](M1_VALIDITY_ACCEPTANCE.md):
+**649 component cases / 11 criteria / 18.653s**, all **544** hashes unchanged.
+One clean frozen `550496f` passes **4,826 full tests / 494.394s / 1,026,012 KiB**,
+zero failures/errors/skips, four warnings. All previous **4,713** case identities
+and **59** fixtures survive; current **65** fixtures match. Owned basetemp removed,
+protected checkouts unchanged. Execution v6 preserves v1–v5 bytes with an
+independent pre-V golden. Endpoint protocol parsing and whole-work source
+boundary mapping remain unresolved; no native/ready/free/transform authority.
+Next is R3 composition and the remaining complete M0–M2 denominator. Automatic
+LeWM recovery/simplification and a new measured speedup remain unfinished.
+The following sections preserve earlier checkpoint scopes.
+
 ## R2.3-P source/write/production interfaces and frozen full accepted (2026-10-18)
 
 The [P API](M1_PRODUCTION_API.md) connects independent supplied-source manifests,

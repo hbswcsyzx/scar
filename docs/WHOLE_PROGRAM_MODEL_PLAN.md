@@ -33,13 +33,16 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 ## 3. 下一批落实顺序
 
-R2.3-D 已接原端口/内容/消费者及 Q 根；接续的 [P 来源/写入/实际产出](M1_PRODUCTION_API.md)
-通过 [477 项组件及冻结 `c84fbfe` 的4,713项全仓验收](M1_PRODUCTION_ACCEPTANCE.md)。
-独立来源清单自动重放投影，源端点、原 writer/frontier/selector 与候选查询已连接；
-完整 native writer/capture closure 仍待实际证据。下一步先收敛 V 的每贡献 AND/OR、
-整个读取区间与 Host/Queue/Endpoint 可见域；复用准确原 effect resolver，使 host INVOKE
-读取无需虚构 work。先审查合同和反例，再编码、自行验收，随后 R3 全过程组合。
-不增加 detector/backend，不用部分来源的非成员性推排斥。完整第一阶段仍未完成。
+R2.3-D/P 已接原端口、消费者/Q 根、独立来源与实际产出；接续的
+[V 内容有效性/贡献支持接口](M1_VALIDITY_API.md)通过
+[649 项组件及冻结 `550496f` 的 4,826 项全仓验收](M1_VALIDITY_ACCEPTANCE.md)。
+原 effect resolver 不再以 work 为 host INVOKE 存在前提；准确 actual/future 贡献、
+区段 AND/OR、原 Mat 匹配、全读取区间威胁和精确 target lifetime 已接规范图。
+完整 endpoint/native source/coherence 协议仍有准确缺口，MATCHED 不授变换权限。
+下一步先审查 R3 通用 load→produce→consume→output→release 的跨接口组合，明确
+Q 端点、原生边界与生命周期如何相接，按正反例自行验收。随后继续 selector/
+literal、剩余家族及 M2 构造分母。**完整第一阶段仍未完成。** 不增加 detector/backend，
+不以手工夹具冒充 LeWM 自动恢复或以测试耗时冒充加速。
 
 当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1
 声明组件不是实际导入；不要继续以增加声明表、兼容测试或 Tensor wrappers 代替

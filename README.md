@@ -11,14 +11,24 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
-The [R2.3-P source/write/production interfaces](docs/M1_PRODUCTION_API.md)
+The [R2.3-V content validity/support interfaces](docs/M1_VALIDITY_API.md)
+now connect source-derived labeled actual/future coverage, exact alternatives,
+original effects, conservative whole-read threats and target lifetimes. Its
+[acceptance](docs/M1_VALIDITY_ACCEPTANCE.md) passes **649 checks / 11 criteria**
+and **4,826 clean frozen full tests** (`550496f`); all prior 4,713 identities and
+59 fixtures survive. Execution v6 preserves v1–v5 bytes. Endpoint protocol
+parsing, native capture, R3 and full M0–M2 remain open. Conditional MATCHED does
+not grant readiness or transformation; no new LeWM speedup was measured.
+
+The earlier [R2.3-P source/write/production interfaces](docs/M1_PRODUCTION_API.md)
 now connect independent raw-source manifests, strict normalization replay,
 scoped endpoint bridges, original writes and actual partial outcomes. Its
 [acceptance](docs/M1_PRODUCTION_ACCEPTANCE.md) passes **477 component checks /
 8 criteria** and **4,713 clean frozen full tests** (`c84fbfe`). All prior 4,568
 test identities and 54 fixtures survive. Execution v5 retains v1–v4 bytes.
-Native complete writer capture, V interval validity/visibility, R3 and full
-M0–M2 remain open; automatic LeWM modeling and speedup remain unfinished.
+That checkpoint left native complete writer capture, V interval validity/visibility,
+R3 and full M0–M2 open; the bounded V interfaces are described above. Automatic
+LeWM modeling and speedup remain unfinished.
 
 The earlier [R2.3-D content/consumer interfaces](docs/M1_CONTENT_CONNECTION_API.md)
 connect original ports, scoped denotations/materializations, exact work/source

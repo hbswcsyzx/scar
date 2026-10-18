@@ -1,0 +1,860 @@
+{
+  "preserved_previous_cases": 4713,
+  "missing_cases": [],
+  "new_cases": [
+    {
+      "class": "tests.integration.test_execution_validity_witness",
+      "name": "test_owned_nonblocking_pipe_short_write_stays_partial_in_validity_query",
+      "outcome": "passed",
+      "seconds": "0.083",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_actual_placement",
+      "name": "test_unknown_rule_does_not_authorize_cross_allocation_scope_or_outside_mat[allocation-production_selector_allocation]",
+      "outcome": "passed",
+      "seconds": "0.016",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_actual_placement",
+      "name": "test_unknown_rule_does_not_authorize_cross_allocation_scope_or_outside_mat[outside-production_actual_outside]",
+      "outcome": "passed",
+      "seconds": "0.016",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_actual_placement",
+      "name": "test_unknown_rule_does_not_authorize_cross_allocation_scope_or_outside_mat[scope-production_selector_scope]",
+      "outcome": "passed",
+      "seconds": "0.024",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_actual_placement",
+      "name": "test_consistent_partial_actual_with_unknown_rule_retains_exact_mat_match_but_no_native_proof",
+      "outcome": "passed",
+      "seconds": "0.017",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_shared_resolver_returns_original_actual_invoke_ports[False]",
+      "outcome": "passed",
+      "seconds": "0.019",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_shared_resolver_returns_original_actual_invoke_ports[True]",
+      "outcome": "passed",
+      "seconds": "0.019",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_unresolved_invoke_post_preserves_actual_edge_without_inventing_formal",
+      "outcome": "passed",
+      "seconds": "0.019",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_access_view_keeps_original_mode_and_state_endpoints",
+      "outcome": "passed",
+      "seconds": "0.011",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_host_invoke_content_read_and_public_projection_need_no_work_ticket",
+      "outcome": "passed",
+      "seconds": "0.023",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_public_projection_and_production_adapter_use_the_actual_formal",
+      "outcome": "passed",
+      "seconds": "0.027",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_public_projection_rejects_malformed_completion_without_mutating_context[wrong_actual_edge]",
+      "outcome": "passed",
+      "seconds": "0.019",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_public_projection_rejects_malformed_completion_without_mutating_context[wrong_result]",
+      "outcome": "passed",
+      "seconds": "0.019",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_public_projection_rejects_malformed_completion_without_mutating_context[foreign_formal]",
+      "outcome": "passed",
+      "seconds": "0.020",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_resource_consumer_ticket_absence_from_partial_list_is_a_gap_not_an_issue[PARTIAL]",
+      "outcome": "passed",
+      "seconds": "0.024",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_resource_consumer_ticket_absence_from_partial_list_is_a_gap_not_an_issue[UNKNOWN]",
+      "outcome": "passed",
+      "seconds": "0.024",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_canonical_effects",
+      "name": "test_resource_consumer_ticket_absence_from_complete_list_is_an_issue",
+      "outcome": "passed",
+      "seconds": "0.024",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_labeled_coverage",
+      "name": "test_disjoint_halves_keep_their_own_labels_instead_of_cross_pairing_support",
+      "outcome": "passed",
+      "seconds": "0.002",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_labeled_coverage",
+      "name": "test_overlap_adds_or_labels_only_where_both_original_selectors_apply",
+      "outcome": "passed",
+      "seconds": "0.002",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_labeled_coverage",
+      "name": "test_stride_holes_remain_uncovered_and_required_holes_are_not_invented",
+      "outcome": "passed",
+      "seconds": "0.003",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_labeled_coverage",
+      "name": "test_exact_huge_strided_ref_remains_symbolic_not_empty_or_enumerated",
+      "outcome": "passed",
+      "seconds": "0.002",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_labeled_coverage",
+      "name": "test_empty_zero_stride_is_covered_without_any_phantom_labeled_bytes",
+      "outcome": "passed",
+      "seconds": "0.001",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_labeled_coverage",
+      "name": "test_preused_query_budget_is_shared_across_geometry_and_label_sweep",
+      "outcome": "passed",
+      "seconds": "0.002",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_labeled_coverage",
+      "name": "test_bare_allocation_id_in_another_artifact_cannot_supply_a_label",
+      "outcome": "passed",
+      "seconds": "0.002",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_labeled_coverage",
+      "name": "test_duplicate_label_cannot_silently_merge_two_different_fragment_selectors",
+      "outcome": "passed",
+      "seconds": "0.001",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_v6_wire_preserves_all_new_capabilities_and_exact_nested_variants",
+      "outcome": "passed",
+      "seconds": "0.044",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[1]",
+      "outcome": "passed",
+      "seconds": "0.019",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[2]",
+      "outcome": "passed",
+      "seconds": "0.012",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[3]",
+      "outcome": "passed",
+      "seconds": "0.025",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[4]",
+      "outcome": "passed",
+      "seconds": "0.008",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[5]",
+      "outcome": "passed",
+      "seconds": "0.016",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_v5_golden_proof_names_pre_v_codec_and_all_p_tables",
+      "outcome": "passed",
+      "seconds": "0.001",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_populated_validity_cannot_be_downgraded[1]",
+      "outcome": "passed",
+      "seconds": "0.009",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_populated_validity_cannot_be_downgraded[2]",
+      "outcome": "passed",
+      "seconds": "0.009",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_populated_validity_cannot_be_downgraded[3]",
+      "outcome": "passed",
+      "seconds": "0.008",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_populated_validity_cannot_be_downgraded[4]",
+      "outcome": "passed",
+      "seconds": "0.008",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_populated_validity_cannot_be_downgraded[5]",
+      "outcome": "passed",
+      "seconds": "0.008",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[1]",
+      "outcome": "passed",
+      "seconds": "0.003",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[2]",
+      "outcome": "passed",
+      "seconds": "0.003",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[3]",
+      "outcome": "passed",
+      "seconds": "0.004",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[4]",
+      "outcome": "passed",
+      "seconds": "0.002",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[5]",
+      "outcome": "passed",
+      "seconds": "0.002",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_empty_validity_keeps_lowest_schema_and_false_like_tampering_cannot_hide_it[established_productions]",
+      "outcome": "passed",
+      "seconds": "0.012",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_empty_validity_keeps_lowest_schema_and_false_like_tampering_cannot_hide_it[target_lifetime_events]",
+      "outcome": "passed",
+      "seconds": "0.011",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_empty_validity_keeps_lowest_schema_and_false_like_tampering_cannot_hide_it[order_associations]",
+      "outcome": "passed",
+      "seconds": "0.013",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_empty_validity_keeps_lowest_schema_and_false_like_tampering_cannot_hide_it[contribution_supports]",
+      "outcome": "passed",
+      "seconds": "0.012",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_v6_nested_forgery_rejected[id-namespace]",
+      "outcome": "passed",
+      "seconds": "0.019",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_v6_nested_forgery_rejected[bool-value]",
+      "outcome": "passed",
+      "seconds": "0.021",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_v6_nested_forgery_rejected[unknown-field]",
+      "outcome": "passed",
+      "seconds": "0.019",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_v6_nested_forgery_rejected[wrong-domain]",
+      "outcome": "passed",
+      "seconds": "0.021",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_v6_nested_forgery_rejected[untyped-production]",
+      "outcome": "passed",
+      "seconds": "0.019",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_codec_does_not_open_or_resolve_artifacts_for_validity_records",
+      "outcome": "passed",
+      "seconds": "0.026",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_codec",
+      "name": "test_empty_explicit_v6_migrates_back_to_lowest_populated_capability",
+      "outcome": "passed",
+      "seconds": "0.030",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_connections",
+      "name": "test_invalid_validity_budget_is_rejected_before_external_refresh",
+      "outcome": "passed",
+      "seconds": "0.039",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_connections",
+      "name": "test_nonexact_validity_read_id_is_rejected_before_external_refresh",
+      "outcome": "passed",
+      "seconds": "0.035",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_host_establishment_and_domain_retain_original_ports",
+      "outcome": "passed",
+      "seconds": "0.039",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_establishment_cannot_substitute_host_before_for_after",
+      "outcome": "passed",
+      "seconds": "0.023",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_actual_host_order_and_reverse_are_distinct",
+      "outcome": "passed",
+      "seconds": "0.025",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_unknown_evidence_point_equality_is_not_clock_alignment",
+      "outcome": "passed",
+      "seconds": "0.022",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_host_native_result_has_independent_original_foreign_key[absent]",
+      "outcome": "passed",
+      "seconds": "0.024",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_host_native_result_has_independent_original_foreign_key[foreign]",
+      "outcome": "passed",
+      "seconds": "0.027",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_same_process_different_thread_is_not_the_host_domain",
+      "outcome": "passed",
+      "seconds": "0.027",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_unresolved_actual_thread_is_a_gap_instead_of_a_known_wrong_domain",
+      "outcome": "passed",
+      "seconds": "0.043",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_unknown_completed_basis_is_not_successful_visibility",
+      "outcome": "passed",
+      "seconds": "0.025",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_pending_and_actual_queued_contributions_use_exact_consumer_start[False]",
+      "outcome": "passed",
+      "seconds": "0.045",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_pending_and_actual_queued_contributions_use_exact_consumer_start[True]",
+      "outcome": "passed",
+      "seconds": "0.042",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_queue_prefix_end_without_fifo_does_not_support_start",
+      "outcome": "passed",
+      "seconds": "0.043",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_terminal_actual_cannot_be_replaced_by_pending_request_selector",
+      "outcome": "passed",
+      "seconds": "0.039",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_deleting_outcome_and_actual_does_not_hide_an_independent_observed_result",
+      "outcome": "passed",
+      "seconds": "0.042",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_new_causal_declaration_is_assumption_without_native_interpretation",
+      "outcome": "passed",
+      "seconds": "0.044",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_combined_fifo_event_and_new_declaration_cycle_is_rejected",
+      "outcome": "passed",
+      "seconds": "0.042",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush[False]",
+      "outcome": "passed",
+      "seconds": "0.012",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush[True]",
+      "outcome": "passed",
+      "seconds": "0.012",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_domains",
+      "name": "test_result_literal_from_another_run_is_not_an_original_host_return",
+      "outcome": "passed",
+      "seconds": "0.041",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_completed_left_and_pending_ordered_right_match_without_claiming_actual_full_production",
+      "outcome": "passed",
+      "seconds": "0.093",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_two_actual_partial_results_cover_whole_only_after_each_own_support_matches",
+      "outcome": "passed",
+      "seconds": "0.091",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_missing_right_support_does_not_borrow_left_completed_evidence",
+      "outcome": "passed",
+      "seconds": "0.097",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_missing_wait_to_consumer_start_does_not_become_ordered_visibility",
+      "outcome": "passed",
+      "seconds": "0.103",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_known_terminal_short_result_cannot_use_requested_tail_through_order[COMPLETED]",
+      "outcome": "passed",
+      "seconds": "0.106",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_known_terminal_short_result_cannot_use_requested_tail_through_order[FAILED]",
+      "outcome": "passed",
+      "seconds": "0.097",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_known_terminal_short_result_cannot_use_requested_tail_through_order[CANCELLED]",
+      "outcome": "passed",
+      "seconds": "0.090",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_terminal_result_cannot_be_bypassed_by_none_pending_support",
+      "outcome": "passed",
+      "seconds": "0.058",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_deleting_known_outcome_does_not_turn_independent_source_short_result_into_future_whole_write",
+      "outcome": "passed",
+      "seconds": "0.152",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_wrong_actual_consumer_queue_is_a_structural_domain_error",
+      "outcome": "passed",
+      "seconds": "0.056",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_missing_alternative_does_not_poison_matching_alternative_on_exact_same_fragment",
+      "outcome": "passed",
+      "seconds": "0.092",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_unused_other_version_candidate_does_not_poison_valid_covering_combination",
+      "outcome": "passed",
+      "seconds": "0.103",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_actual_alias_overwrite_of_needed_fragment_blocks_its_otherwise_matching_support",
+      "outcome": "passed",
+      "seconds": "0.101",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_repaired_left_with_historical_blocked_left_does_not_turn_missing_right_into_contradiction",
+      "outcome": "passed",
+      "seconds": "0.108",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_uninterpreted_endpoint_actual_to_mat_join_cannot_borrow_byte_geometry_for_known_or_conditional_cover",
+      "outcome": "passed",
+      "seconds": "0.092",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_removing_right_associations_keeps_original_source_obligation_instead_of_empty_and[False]",
+      "outcome": "passed",
+      "seconds": "0.165",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_removing_right_associations_keeps_original_source_obligation_instead_of_empty_and[True]",
+      "outcome": "passed",
+      "seconds": "0.179",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_one_shared_budget_caps_source_geometry_order_and_threat_scans",
+      "outcome": "passed",
+      "seconds": "0.098",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_query",
+      "name": "test_query_rechecks_external_catalog_and_returns_detached_original_facts",
+      "outcome": "passed",
+      "seconds": "0.153",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_records",
+      "name": "test_lifetime_and_establishment_keep_distinct_original_targets_and_points",
+      "outcome": "passed",
+      "seconds": "0.008",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_records",
+      "name": "test_none_means_pending_ordered_only_not_unknown_or_completed",
+      "outcome": "passed",
+      "seconds": "0.008",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_records",
+      "name": "test_nested_private_mutation_is_rechecked_and_subclasses_are_not_wire_types",
+      "outcome": "passed",
+      "seconds": "0.008",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_records",
+      "name": "test_records_frozen_slotted_and_strict_order_cannot_be_self_loop",
+      "outcome": "passed",
+      "seconds": "0.008",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_records",
+      "name": "test_shared_budget_rejects_invalid_limit_before_work[True]",
+      "outcome": "passed",
+      "seconds": "0.001",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_records",
+      "name": "test_shared_budget_rejects_invalid_limit_before_work[4]",
+      "outcome": "passed",
+      "seconds": "0.002",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_records",
+      "name": "test_shared_budget_rejects_invalid_limit_before_work[0]",
+      "outcome": "passed",
+      "seconds": "0.001",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_records",
+      "name": "test_shared_budget_rejects_invalid_limit_before_work[-1]",
+      "outcome": "passed",
+      "seconds": "0.001",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_records",
+      "name": "test_one_budget_saturates_and_preserves_every_stage_cost_and_truncation",
+      "outcome": "passed",
+      "seconds": "0.001",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_exact_establishing_effect_excluded_without_erasing_source_universe",
+      "outcome": "passed",
+      "seconds": "0.024",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_shared_budget_exhaustion_preserves_unvisited_threats",
+      "outcome": "passed",
+      "seconds": "0.025",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_two_intervening_write_restore_stages_do_not_disappear_at_equal_version_endpoints",
+      "outcome": "passed",
+      "seconds": "0.032",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_write_inside_conservative_production_extent_is_potential_not_definite_repaired_content",
+      "outcome": "passed",
+      "seconds": "0.031",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_retirement_is_separate_from_borrow_and_invalidates_exact_incarnation",
+      "outcome": "passed",
+      "seconds": "0.025",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_another_allocation_lifetime_does_not_retire_this_materialization",
+      "outcome": "passed",
+      "seconds": "0.025",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_geometry_budget_guard_cannot_turn_unknown_comparison_into_disjoint",
+      "outcome": "passed",
+      "seconds": "0.025",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_source_requested_overlap_only_conflicts_for_actual_produced_overlap[0]",
+      "outcome": "passed",
+      "seconds": "0.043",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_source_requested_overlap_only_conflicts_for_actual_produced_overlap[4]",
+      "outcome": "passed",
+      "seconds": "0.042",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_validity_stability",
+      "name": "test_source_requested_overlap_only_conflicts_for_actual_produced_overlap[16]",
+      "outcome": "passed",
+      "seconds": "0.043",
+      "detail": null
+    },
+    {
+      "class": "tests.unit.test_execution_work_codec",
+      "name": "test_schema_versions_are_exact_supported_integers[7]",
+      "outcome": "passed",
+      "seconds": "0.004",
+      "detail": null
+    }
+  ],
+  "new_cases_by_class": {
+    "tests.integration.test_execution_validity_witness": 1,
+    "tests.unit.test_execution_actual_placement": 4,
+    "tests.unit.test_execution_canonical_effects": 12,
+    "tests.unit.test_execution_labeled_coverage": 8,
+    "tests.unit.test_execution_validity_codec": 28,
+    "tests.unit.test_execution_validity_connections": 2,
+    "tests.unit.test_execution_validity_domains": 19,
+    "tests.unit.test_execution_validity_query": 19,
+    "tests.unit.test_execution_validity_records": 9,
+    "tests.unit.test_execution_validity_stability": 10,
+    "tests.unit.test_execution_work_codec": 1
+  },
+  "previous_source_files": 521,
+  "new_source_files": [
+    "gates/m1_content_validity.json",
+    "scar/ir/execution/effects.py",
+    "scar/ir/execution/production_ranges.py",
+    "scar/ir/execution/validity.py",
+    "scar/ir/execution/validity_budget.py",
+    "scar/ir/execution/validity_order.py",
+    "scar/ir/execution/validity_query.py",
+    "scar/ir/execution/validity_stability.py",
+    "scar/ir/execution/validity_validation.py",
+    "tests/fixtures/execution_effect_reads.py",
+    "tests/fixtures/execution_lifetime_graphs.py",
+    "tests/fixtures/execution_validity_records.py",
+    "tests/fixtures/execution_visibility_graphs.py",
+    "tests/integration/test_execution_validity_witness.py",
+    "tests/unit/test_execution_actual_placement.py",
+    "tests/unit/test_execution_canonical_effects.py",
+    "tests/unit/test_execution_labeled_coverage.py",
+    "tests/unit/test_execution_validity_codec.py",
+    "tests/unit/test_execution_validity_connections.py",
+    "tests/unit/test_execution_validity_domains.py",
+    "tests/unit/test_execution_validity_query.py",
+    "tests/unit/test_execution_validity_records.py",
+    "tests/unit/test_execution_validity_stability.py"
+  ],
+  "removed_source_files": [],
+  "changed_previous_source_files": [
+    "scar/ir/execution/__init__.py",
+    "scar/ir/execution/codec.py",
+    "scar/ir/execution/content_validation.py",
+    "scar/ir/execution/coverage.py",
+    "scar/ir/execution/ids.py",
+    "scar/ir/execution/model.py",
+    "scar/ir/execution/order_validation.py",
+    "scar/ir/execution/production_validation.py",
+    "scar/ir/execution/query.py",
+    "scar/ir/execution/validation.py",
+    "scar/ir/execution/work_validation.py",
+    "tests/unit/test_execution_codec.py",
+    "tests/unit/test_execution_content_codec.py",
+    "tests/unit/test_execution_order_codec.py",
+    "tests/unit/test_execution_production_codec.py",
+    "tests/unit/test_execution_work_codec.py"
+  ],
+  "unchanged_previous_source_files": 505,
+  "previous_fixtures": 59,
+  "current_fixtures": 65,
+  "changed_previous_fixtures": [],
+  "current_fixtures_unchanged": true
+}

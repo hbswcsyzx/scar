@@ -1,5 +1,8 @@
 # R2.3-V：读取有效性、可见域与贡献支持
 
+限定接口已通过[649 项组件与冻结 `550496f` 的 4,826 项全仓验收](M1_VALIDITY_ACCEPTANCE.md)。
+完整 endpoint/native 协议、R3 与 M0–M2 仍未关闭；下述原计划和分母保持。
+
 实施基线：`f2b4672d9555348dcd05da62a8cd126711ef22f9`。上轮 P 的
 477 项组件与冻结 `c84fbfe` 的 4,713 项全仓通过，源码及旧测试守恒已归档。
 本门接续[完整 R2.3 合同](M1_RESOURCE_READY_CONTRACT.md)，不新增 detector、backend

@@ -1,0 +1,2 @@
+conda run -n lewm env PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. pytest -q tests/unit/test_execution_work_graph.py tests/unit/test_execution_work_queries.py tests/unit/test_execution_production_query.py tests/unit/test_execution_content_connections.py tests/unit/test_execution_order_graphs.py tests/unit/test_execution_produced.py
+Terminal status: exit 0

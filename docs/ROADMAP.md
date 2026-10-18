@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **R2.3-V interface checkpoint (2026-10-18):**
+> [content validity/support API](M1_VALIDITY_API.md) passes **649 component
+> cases / 11 criteria / 18.653s**, 544 source hashes unchanged. One clean frozen
+> `550496f` passes **4,826 full tests / 494.394s**; previous 4,713 identities and
+> 59 fixtures survive. [Acceptance](M1_VALIDITY_ACCEPTANCE.md) retains exact
+> partial/future coverage, necessary-portion conflicts, actual placement guards
+> and original failures. Endpoint protocols/native capture, R3 and complete
+> M0–M2 remain open; conditional support does not grant a transformation or
+> a LeWM speedup. Continue general load/consume/output/lifetime composition.
+
 > **R2.3-P interface checkpoint (2026-10-18):**
 > [source/write/production API](M1_PRODUCTION_API.md) passes **477 component
 > cases / 8 criteria / 11.647s**, 521 source hashes unchanged. Clean frozen

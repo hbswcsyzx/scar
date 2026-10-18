@@ -1,6 +1,7 @@
 # R2.3-V 接口冻结与规范事实归属
 
-状态：实施接口冻结，**尚未验收**。基线 `f2b4672`；顺序见
+状态：**限定声明接口已验收**，见[结果与未闭合项](M1_VALIDITY_ACCEPTANCE.md)。
+基线 `f2b4672`，实现冻结 `550496f`；顺序见
 [实施计划](M1_VALIDITY_PLAN.md)，全部义务见 [R2.3 合同](M1_RESOURCE_READY_CONTRACT.md)。
 V0 三份独立审查保存在 `model_validity/design/`。以下不授予 native 或转换权限。
 

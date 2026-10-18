@@ -1,0 +1,566 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="16" skipped="0" tests="76" time="2.641" timestamp="2026-10-18T08:44:25.388813+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_validity_records" name="test_lifetime_and_establishment_keep_distinct_original_targets_and_points" time="0.026"><failure message="IndexError: tuple index out of range">def test_lifetime_and_establishment_keep_distinct_original_targets_and_points():
+&gt;       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_records.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_records" name="test_none_means_pending_ordered_only_not_unknown_or_completed" time="0.008"><failure message="IndexError: tuple index out of range">def test_none_means_pending_ordered_only_not_unknown_or_completed():
+&gt;       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_records.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_records" name="test_nested_private_mutation_is_rechecked_and_subclasses_are_not_wire_types" time="0.009"><failure message="IndexError: tuple index out of range">def test_nested_private_mutation_is_rechecked_and_subclasses_are_not_wire_types():
+&gt;       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_records.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_records" name="test_records_frozen_slotted_and_strict_order_cannot_be_self_loop" time="0.007"><failure message="IndexError: tuple index out of range">def test_records_frozen_slotted_and_strict_order_cannot_be_self_loop():
+&gt;       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_records.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_records" name="test_shared_budget_rejects_invalid_limit_before_work[True]" time="0.001" /><testcase classname="tests.unit.test_execution_validity_records" name="test_shared_budget_rejects_invalid_limit_before_work[4]" time="0.000" /><testcase classname="tests.unit.test_execution_validity_records" name="test_shared_budget_rejects_invalid_limit_before_work[0]" time="0.000" /><testcase classname="tests.unit.test_execution_validity_records" name="test_shared_budget_rejects_invalid_limit_before_work[-1]" time="0.000" /><testcase classname="tests.unit.test_execution_validity_records" name="test_one_budget_saturates_and_preserves_every_stage_cost_and_truncation" time="0.000" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_v6_wire_preserves_all_new_capabilities_and_exact_nested_variants" time="0.008"><failure message="IndexError: tuple index out of range">def test_v6_wire_preserves_all_new_capabilities_and_exact_nested_variants():
+&gt;       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:19: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[1]" time="0.021" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[2]" time="0.021" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[3]" time="0.036" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[4]" time="0.023" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_independent_old_golden_bytes_remain_exact_and_supply_only_empty_v_defaults[5]" time="0.018" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_v5_golden_proof_names_pre_v_codec_and_all_p_tables" time="0.001" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_populated_validity_cannot_be_downgraded[1]" time="0.009"><failure message="IndexError: tuple index out of range">version = 1
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+&gt;           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_populated_validity_cannot_be_downgraded[2]" time="0.008"><failure message="IndexError: tuple index out of range">version = 2
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+&gt;           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_populated_validity_cannot_be_downgraded[3]" time="0.008"><failure message="IndexError: tuple index out of range">version = 3
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+&gt;           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_populated_validity_cannot_be_downgraded[4]" time="0.009"><failure message="IndexError: tuple index out of range">version = 4
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+&gt;           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_populated_validity_cannot_be_downgraded[5]" time="0.007"><failure message="IndexError: tuple index out of range">version = 5
+
+    @pytest.mark.parametrize('version', range(1, 6))
+    def test_populated_validity_cannot_be_downgraded(version):
+        with pytest.raises(ValueError, match='validity capability'):
+&gt;           dumps(validity_record_model(), schema_version=version)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[1]" time="0.003" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[2]" time="0.002" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[3]" time="0.003" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[4]" time="0.001" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_older_vocabulary_cannot_reach_new_tag_or_accept_even_empty_new_tables[5]" time="0.002" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_empty_validity_keeps_lowest_schema_and_false_like_tampering_cannot_hide_it[established_productions]" time="0.012" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_empty_validity_keeps_lowest_schema_and_false_like_tampering_cannot_hide_it[target_lifetime_events]" time="0.011" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_empty_validity_keeps_lowest_schema_and_false_like_tampering_cannot_hide_it[order_associations]" time="0.011" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_empty_validity_keeps_lowest_schema_and_false_like_tampering_cannot_hide_it[contribution_supports]" time="0.012" /><testcase classname="tests.unit.test_execution_validity_codec" name="test_v6_nested_forgery_rejected[id-namespace]" time="0.007"><failure message="IndexError: tuple index out of range">corruption = 'id-namespace'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+&gt;       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_v6_nested_forgery_rejected[bool-value]" time="0.007"><failure message="IndexError: tuple index out of range">corruption = 'bool-value'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+&gt;       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_v6_nested_forgery_rejected[unknown-field]" time="0.008"><failure message="IndexError: tuple index out of range">corruption = 'unknown-field'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+&gt;       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_v6_nested_forgery_rejected[wrong-domain]" time="0.007"><failure message="IndexError: tuple index out of range">corruption = 'wrong-domain'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+&gt;       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_v6_nested_forgery_rejected[untyped-production]" time="0.007"><failure message="IndexError: tuple index out of range">corruption = 'untyped-production'
+
+    @pytest.mark.parametrize('corruption', ('id-namespace', 'bool-value', 'unknown-field', 'wrong-domain', 'untyped-production'))
+    def test_v6_nested_forgery_rejected(corruption):
+&gt;       document = to_dict(validity_record_model())
+                           ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:79: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_codec_does_not_open_or_resolve_artifacts_for_validity_records" time="0.008"><failure message="IndexError: tuple index out of range">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x786c18682650&gt;
+
+    def test_codec_does_not_open_or_resolve_artifacts_for_validity_records(monkeypatch):
+&gt;       model = validity_record_model()
+                ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_validity_codec.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def validity_record_model():
+        model = loads((Path(__file__).parent / 'execution_v5_frozen.json').read_text())
+        fact = model.writes[0].source
+        gap = Unresolved('wire fixture has no native correspondence', model.activations[0].entry)
+        occurrence = model.operations[0].id
+        before = OccurrencePoint(occurrence, OccurrencePhase.BEFORE)
+        after = OccurrencePoint(occurrence, OccurrencePhase.AFTER)
+        raw = model.writes[0].stage
+        edge = SourceEdgeRef(raw.source, 'production.wire.source-edge')
+        region = model.writes[0].placement.selector
+        target = next(row.target for row in model.source_bridges if type(row.target) is AllocationTarget)
+        established = EstablishedProduction(EstablishedProductionID('wire.established'), model.writes[1].id,
+            after, region, model.values[0].id, BytePrefixWrite(), fact)
+        unknown = EstablishedProduction(EstablishedProductionID('wire.established.unknown'), model.writes[2].id,
+            model.activations[0].entry, gap, gap, gap, fact)
+        retired = TargetLifetimeEvent(TargetLifetimeEventID('wire.retired'), target, LifetimeEventKind.RETIRED,
+            WorkEnd(model.submissions[0].id), raw, AccessRef(occurrence, 0), fact, fact)
+        live = TargetLifetimeEvent(TargetLifetimeEventID('wire.live'), target, LifetimeEventKind.LIVE,
+            gap, edge, None, fact, fact)
+        orders = (OrderAssociation(OrderAssociationID('wire.order'), before, after,
+            UseRef(model.uses[0].operation, model.uses[0].use), fact, fact),
+            OrderAssociation(OrderAssociationID('wire.order.unknown'),
+&gt;               WorkStart(model.submissions[0].id), PrefixEnd(model.queue_prefixes[0].id), gap, fact, fact))
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: tuple index out of range
+
+tests/fixtures/execution_validity_records.py:43: IndexError</failure></testcase><testcase classname="tests.unit.test_execution_validity_codec" name="test_empty_explicit_v6_migrates_back_to_lowest_populated_capability" time="0.040" /><testcase classname="tests.unit.test_execution_production_codec" name="test_v5_roundtrip_reaches_all_production_records_and_target_variants" time="0.059" /><testcase classname="tests.unit.test_execution_production_codec" name="test_v4_golden_from_immutable_old_codec_is_byte_exact" time="0.007" /><testcase classname="tests.unit.test_execution_production_codec" name="test_each_production_table_selects_v5_and_cannot_be_downgraded[source_inventories]" time="0.014" /><testcase classname="tests.unit.test_execution_production_codec" name="test_each_production_table_selects_v5_and_cannot_be_downgraded[source_bridges]" time="0.017" /><testcase classname="tests.unit.test_execution_production_codec" name="test_each_production_table_selects_v5_and_cannot_be_downgraded[writes]" time="0.016" /><testcase classname="tests.unit.test_execution_production_codec" name="test_each_production_table_selects_v5_and_cannot_be_downgraded[produced]" time="0.015" /><testcase classname="tests.unit.test_execution_production_codec" name="test_explicit_v5_with_empty_production_tables_does_not_upgrade_default" time="0.015" /><testcase classname="tests.unit.test_execution_production_codec" name="test_v1_v4_wire_rejects_explicit_production_table_fields[source_inventories]" time="0.004" /><testcase classname="tests.unit.test_execution_production_codec" name="test_v1_v4_wire_rejects_explicit_production_table_fields[source_bridges]" time="0.003" /><testcase classname="tests.unit.test_execution_production_codec" name="test_v1_v4_wire_rejects_explicit_production_table_fields[writes]" time="0.004" /><testcase classname="tests.unit.test_execution_production_codec" name="test_v1_v4_wire_rejects_explicit_production_table_fields[produced]" time="0.003" /><testcase classname="tests.unit.test_execution_production_codec" name="test_p_tags_are_absent_from_v1_v4_vocabulary" time="0.001" /><testcase classname="tests.unit.test_execution_production_codec" name="test_production_wire_rejects_malformed_new_nested_fields" time="0.034" /><testcase classname="tests.unit.test_execution_production_codec" name="test_schema_version_six_remains_unsupported" time="0.019" /><testcase classname="tests.unit.test_execution_content_codec" name="test_independently_archived_v3_event_work_wire_is_exact_and_old_bytes_unchanged" time="0.060" /><testcase classname="tests.unit.test_execution_content_codec" name="test_full_v4_roundtrip_preserves_original_typed_version_and_native_namespaces" time="0.051" /><testcase classname="tests.unit.test_execution_content_codec" name="test_each_content_table_alone_selects_v4_and_downgrade_cannot_drop_it[denotations]" time="0.034" /><testcase classname="tests.unit.test_execution_content_codec" name="test_each_content_table_alone_selects_v4_and_downgrade_cannot_drop_it[work_evidence_bindings]" time="0.033" /><testcase classname="tests.unit.test_execution_content_codec" name="test_each_content_table_alone_selects_v4_and_downgrade_cannot_drop_it[observation_requirements]" time="0.034" /><testcase classname="tests.unit.test_execution_content_codec" name="test_each_content_table_alone_selects_v4_and_downgrade_cannot_drop_it[observation_roots]" time="0.035" /><testcase classname="tests.unit.test_execution_content_codec" name="test_each_content_table_alone_selects_v4_and_downgrade_cannot_drop_it[content_reads]" time="0.035" /><testcase classname="tests.unit.test_execution_content_codec" name="test_explicit_v4_empty_content_tables_do_not_invent_evidence_or_change_default_version" time="0.058" /><testcase classname="tests.unit.test_execution_content_codec" name="test_v4_requires_every_content_field_and_v1_v3_reject_even_empty_new_fields[denotations]" time="0.019" /><testcase classname="tests.unit.test_execution_content_codec" name="test_v4_requires_every_content_field_and_v1_v3_reject_even_empty_new_fields[work_evidence_bindings]" time="0.018" /><testcase classname="tests.unit.test_execution_content_codec" name="test_v4_requires_every_content_field_and_v1_v3_reject_even_empty_new_fields[observation_requirements]" time="0.019" /><testcase classname="tests.unit.test_execution_content_codec" name="test_v4_requires_every_content_field_and_v1_v3_reject_even_empty_new_fields[observation_roots]" time="0.017" /><testcase classname="tests.unit.test_execution_content_codec" name="test_v4_requires_every_content_field_and_v1_v3_reject_even_empty_new_fields[content_reads]" time="0.019" /><testcase classname="tests.unit.test_execution_content_codec" name="test_content_tags_are_not_reachable_through_legacy_wire_vocabulary" time="0.018" /><testcase classname="tests.unit.test_execution_content_codec" name="test_denotation_native_reference_and_explicit_unknown_basis_variants_roundtrip" time="0.196" /><testcase classname="tests.unit.test_execution_content_codec" name="test_host_nativework_and_observation_consumers_preserve_read_and_endpoint_variants" time="0.280" /><testcase classname="tests.unit.test_execution_content_codec" name="test_q_declared_output_endpoint_and_actual_root_variants_are_not_coerced" time="0.127" /><testcase classname="tests.unit.test_execution_content_codec" name="test_nested_content_tag_or_type_forgery_is_rejected[missing-tag]" time="0.022" /><testcase classname="tests.unit.test_execution_content_codec" name="test_nested_content_tag_or_type_forgery_is_rejected[unknown-tag]" time="0.026" /><testcase classname="tests.unit.test_execution_content_codec" name="test_nested_content_tag_or_type_forgery_is_rejected[wrong-union]" time="0.028" /><testcase classname="tests.unit.test_execution_content_codec" name="test_nested_content_tag_or_type_forgery_is_rejected[bool-version]" time="0.027" /><testcase classname="tests.unit.test_execution_content_codec" name="test_nested_content_tag_or_type_forgery_is_rejected[extra-field]" time="0.026" /><testcase classname="tests.unit.test_execution_content_codec" name="test_private_mutation_cannot_hide_capability_or_create_false_typed_values" time="0.010" /><testcase classname="tests.unit.test_execution_content_codec" name="test_codec_never_resolves_catalogs_or_opens_provider_artifacts" time="0.032" /><testcase classname="tests.unit.test_execution_content_codec" name="test_versions_stay_exact_and_unsupported_versions_still_fail" time="0.037" /></testsuite></testsuites>
