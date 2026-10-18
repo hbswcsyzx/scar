@@ -20,6 +20,8 @@ from .cleanup import CleanupRouteTerminator
 from .resumption import (
     ResumeInput, SuspendTerminator, saved_actual_use, resume_slot_type,
 )
+from .drivers import BodyDriveResult, BodyDriveSuccessor, BodyDriveTerminator
+from .driver_flow import body_outcome_types
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,6 +57,7 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
     regions = registry(graph.regions, "regions")
     body_regions = {row.region for row in graph.resumable_bodies}
     operations = registry(graph.operations, "operations")
+    drives = {row.operation: row for row in graph.body_drives}
     values = registry(graph.values, "values")
     locations = registry(graph.locations, "locations")
     blocks = {}
@@ -210,6 +213,7 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
         if Behavior.CONTROL not in final.behaviors:
             error("control_behavior", final.id, "terminator requires CONTROL")
         is_invoke = term.kind is TerminatorKind.INVOKE
+        is_drive = type(term) is BodyDriveTerminator
         if (final.results or final.accesses or final.callee is not None) and not is_invoke:
             error("terminator_effect", final.id, "N1 terminators only bind control and interface uses")
         own_uses = {use.id: use for use in final.uses}
@@ -223,6 +227,12 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
         bound += list(term.values)
         if is_invoke:
             bound += list(final.invoke_arguments)
+        if is_drive:
+            if final.id not in drives:
+                error("driver_declaration_missing", final.id,
+                      "a BodyDrive terminator requires its canonical driver record")
+            else:
+                bound += list(drives[final.id].actual_uses)
         if term.kind is TerminatorKind.RAISE:
             # A definitely-unbound LOAD_LOCAL reads its token as the reason
             # for raising, but that token is not part of the exception exit
@@ -243,6 +253,12 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
             incoming_edges[edge.block].append((final.id, edge_index))
             if len(edge.arguments) != len(target.arguments):
                 error("edge_arity", final.id, "successor argument count mismatch")
+            drive_types = None
+            if isinstance(edge, BodyDriveSuccessor):
+                try:
+                    drive_types = body_outcome_types(graph, edge.source)
+                except ValueError as exc:
+                    error("driver_outcome_source", final.id, str(exc))
             for actual, formal in zip(edge.arguments, target.arguments):
                 if isinstance(actual, ResumeInput):
                     if not isinstance(term, SuspendTerminator):
@@ -256,6 +272,26 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
                             or ref.selector.kind is not FootprintKind.UNKNOWN):
                         error("resumption_reference_precision", formal,
                               "a newly delivered reference grants no target, selector or identity facts")
+                elif isinstance(actual, BodyDriveResult):
+                    if not is_drive or not isinstance(edge, BodyDriveSuccessor):
+                        error("driver_result_binding", final.id,
+                              "a body projection requires a typed BodyDrive successor")
+                        continue
+                    if drive_types is None:
+                        continue
+                    if actual.index >= len(drive_types):
+                        error("driver_result_index", final.id,
+                              "body result index exceeds this source's actual signature")
+                        continue
+                    if value_type(values[formal]) != drive_types[actual.index]:
+                        error("driver_result_type", formal,
+                              "body projection type differs from this source's signature")
+                    ref = values[formal]
+                    if isinstance(ref, ReferenceValue) and (
+                            ref.targets is not None or ref.referent_identity is not None
+                            or ref.selector.kind is not FootprintKind.UNKNOWN):
+                        error("driver_reference_precision", formal,
+                              "a body reference result grants no identity or alias precision")
                 elif isinstance(actual, CompletionResult):
                     if not isinstance(edge, CompletionSuccessor) or edge.kind not in signatures:
                         error("completion_binding", final.id, "produced value requires an invoke completion")
@@ -280,6 +316,11 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
                 produced = [arg.index for arg in edge.arguments if isinstance(arg, CompletionResult)]
                 if len(set(produced)) != len(produced) or set(produced) != set(range(len(signatures[edge.kind].types))):
                     error("completion_slots", final.id, "every produced completion slot must bind exactly once")
+            if isinstance(edge, BodyDriveSuccessor) and drive_types is not None:
+                produced = [arg.index for arg in edge.arguments if isinstance(arg, BodyDriveResult)]
+                if len(set(produced)) != len(produced) or set(produced) != set(range(len(drive_types))):
+                    error("driver_result_slots", final.id,
+                          "every source outcome slot must bind exactly once")
         if term.kind is TerminatorKind.BRANCH and term.condition in own_uses:
             condition = values[own_uses[term.condition].value]
             if not isinstance(condition, DataValue) or condition.data_type != "builtins.bool":
@@ -300,7 +341,8 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
         return tuple(issues)
 
     for operation in terminators.values():
-        if operation.terminator.kind in (TerminatorKind.INVOKE, TerminatorKind.SUSPEND):
+        if operation.terminator.kind in (
+                TerminatorKind.INVOKE, TerminatorKind.SUSPEND, TerminatorKind.BODY_DRIVE):
             for edge in operation.terminator.successors:
                 if len(incoming_edges[edge.block]) != 1:
                     error("completion_private_target", operation.id,
@@ -513,6 +555,23 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
                     if callee_types != {kind: signature.types for kind, signature in signatures.items()}:
                         error("invoke_callee_exits", operation.id, "callee completion interfaces differ from invocation")
 
+            if operation.id in drives and type(operation.terminator) is BodyDriveTerminator:
+                drive = drives[operation.id]
+                input_domains = {
+                    values[own_uses[item.source].value].location
+                    for item in drive.state_inputs
+                    if item.source in own_uses
+                    and isinstance(values[own_uses[item.source].value], StateVersionValue)
+                }
+                for edge in operation.terminator.successors:
+                    for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
+                        value = values[formal]
+                        if (isinstance(value, StateVersionValue)
+                                and isinstance(actual, BodyDriveResult)
+                                and value.location not in input_domains):
+                            error("driver_state_input", operation.id,
+                                  "produced body state requires its current location as a drive input")
+
             if operation.callee is not None and not is_invoke:
                 callee = regions[operation.callee]
                 if Behavior.CONTROL not in operation.behaviors:
@@ -607,6 +666,12 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
                 graph, operation_blocks=operation_block, region_domains=region_domains,
                 incoming_edges=incoming_edges)
         for code, path, message in resumption_issues:
+            error(code, path, message)
+    if not issues:
+        from .driver_validation import driver_errors
+        for code, path, message in driver_errors(
+                graph, operation_blocks=operation_block, region_domains=region_domains,
+                incoming_edges=incoming_edges):
             error(code, path, message)
     if not issues:
         from .provider_validation import provider_errors

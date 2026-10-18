@@ -513,10 +513,11 @@ def _optimize_micro(args) -> int:
 
 
 def _check_program(args) -> int:
-    from scar.ir.program.codec import loads as load_program
+    from scar.ir.program.codec import _has_driver_capability, loads as load_program
     from scar.ir.program.model import LocalBindingValue, value_type
     from scar.ir.program.cleanup import CleanupRouteTerminator
     from scar.ir.program.resumption import SuspendTerminator
+    from scar.ir.program.drivers import BodyDriveTerminator
 
     source = Path(args.graph)
     report = {"schema": "scar.program-graph-check", "schema_version": 1,
@@ -527,7 +528,9 @@ def _check_program(args) -> int:
               "body_driver_verified": False,
               "body_source_verified": False,
               "body_runtime_verified": False,
-              "body_exclusivity_verified": False}
+              "body_exclusivity_verified": False,
+              "driver_structure_validated": False,
+              "driver_lifecycle_verified": False}
     if args.out and Path(args.out).resolve() == source.resolve():
         report.update(status="INVALID", errors=["report path must differ from input graph"])
         print(json.dumps(report, ensure_ascii=False))
@@ -611,6 +614,22 @@ def _check_program(args) -> int:
                                        + len(graph.frame_context_attaches)
                                        + len(graph.frame_context_detaches)))
             report["body_structure_validated"] = True
+        if _has_driver_capability(graph):
+            report["counts"].update(
+                resumable_creates=len(graph.resumable_creates),
+                raw_driver_requests=len(graph.raw_driver_requests),
+                async_request_creates=len(graph.async_request_creates),
+                request_association_reads=len(graph.request_association_reads),
+                driver_interfaces=len(graph.driver_interfaces),
+                final_body_gates=len(graph.final_body_gates),
+                body_drives=len(graph.body_drives),
+                body_drive_outcomes=sum(
+                    len(operation.terminator.successors)
+                    for operation in graph.operations
+                    if type(operation.terminator) is BodyDriveTerminator))
+            report.update(driver_structure_validated=True,
+                          driver_structure_scope="declared static driver ports, CFG and current state flow",
+                          driver_lifecycle_verified=False)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:
         destination = Path(args.out)

@@ -37,10 +37,10 @@ reference release. Its exact fields remain open. The
 [first-outcome query](docs/M1_BODY_OUTCOME_FRONTIER.md) is implemented as a shared
 relation over the existing body graph. Its 517 component checks and 3,549 frozen
 full tests pass; this introduces no driver/backend or runtime authority.
-The [revised driver connection contract](docs/M1_DRIVER_CONTRACT_V2.md) and
-[D1 implementation matrix](docs/M1_DRIVER_IMPLEMENTATION.md) define the next
-canonical Create/Start/Resume/outcome path; their design review is not a driver
-implementation or complete lifecycle acceptance.
+The [D1 driver connection component](docs/M1_DRIVER_ACCEPTANCE.md) implements the
+canonical Create/Start/Resume/outcome path, v11 wire and input/output queries.
+All 671 component checks pass; frozen full regression is pending. Lifecycle,
+source/runtime correspondence and complete whole-program modeling remain open.
 
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,

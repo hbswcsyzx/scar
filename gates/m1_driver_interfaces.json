@@ -1,0 +1,108 @@
+{
+  "gate": "M1-C2D-D1-CANONICAL-DRIVER-CONNECTIONS",
+  "scope": "Static post-binding Create, raw request, request association, exact final-gate corridor and BodyDrive Start/Resume with canonical current states, input recipes and source-relative finite outcomes; strict v11 wire and existing body/control/native regressions.",
+  "limitations": [
+    "Well-formed declarations do not prove source lowering, actual callable/instance/activation/generation, guard execution, native equivalence or exclusive access.",
+    "D2 lifecycle commit, no-body finish, request/session updates, reference-release rules and D3 full protocol-family validation are not implemented or accepted by D1.",
+    "Finite first-outcome coverage is structural, not branch satisfiability, execution frequency or must-return. Empty outcomes do not imply no effects or dead work.",
+    "Instance-frame capture projections do not choose a Create occurrence; known static capture recipes and edges do not prove current Tensor contents or data equality.",
+    "No detector/backend/LeWM rule, Tensor-value snapshot, source lowerer, runtime adapter, transformation or speedup claim. Full C2D and M0-M2 remain open."
+  ],
+  "criteria": [
+    {
+      "id": "driver-exact-records-and-owned-source-ports",
+      "tests": [
+        "tests/unit/test_driver_records.py"
+      ]
+    },
+    {
+      "id": "complete-create-start-resume-state-and-final-admission-graph",
+      "tests": [
+        "tests/unit/test_program_driver_graph.py"
+      ]
+    },
+    {
+      "id": "driver-v11-capability-and-immutable-v1-v10-wire",
+      "tests": [
+        "tests/unit/test_program_driver_codec.py"
+      ]
+    },
+    {
+      "id": "driver-input-output-recipes-original-uses-and-public-proof-boundary",
+      "tests": [
+        "tests/unit/test_program_driver_queries.py"
+      ]
+    },
+    {
+      "id": "first-outcome-frontier-canonical-payload-and-exact-body-ingress",
+      "tests": [
+        "tests/unit/test_body_outcome_frontier.py"
+      ]
+    },
+    {
+      "id": "strict-body-context-and-indexed-temporal-records",
+      "tests": [
+        "tests/unit/test_resumption_records.py"
+      ]
+    },
+    {
+      "id": "body-current-context-state-and-multiple-availability-cuts",
+      "tests": [
+        "tests/unit/test_program_resumption_graph.py"
+      ]
+    },
+    {
+      "id": "local-binding-original-cleanup-and-fresh-replacement-across-suspension",
+      "tests": [
+        "tests/unit/test_resumption_cleanup.py",
+        "tests/unit/test_resumption_forwarding.py"
+      ]
+    },
+    {
+      "id": "invoke-partial-poststate-and-dedicated-body-ingress-boundary",
+      "tests": [
+        "tests/unit/test_resumption_invoke.py"
+      ]
+    },
+    {
+      "id": "logical-cfg-core-binding-and-c0-c1-regression",
+      "tests": [
+        "tests/unit/test_program_graph.py",
+        "tests/unit/test_program_graph_adversarial.py",
+        "tests/unit/test_program_bindings.py",
+        "tests/unit/test_program_control_graph.py",
+        "tests/unit/test_program_cleanup_graph.py",
+        "tests/unit/test_program_cleanup_invoke.py",
+        "tests/unit/test_cleanup_forward.py",
+        "tests/unit/test_cleanup_nontermination.py",
+        "tests/unit/test_cleanup_integration_regressions.py"
+      ]
+    },
+    {
+      "id": "strict-v10-discriminator-and-original-v1-to-v9-wire",
+      "tests": [
+        "tests/unit/test_program_resumption_codec.py",
+        "tests/unit/test_program_cleanup_codec.py",
+        "tests/unit/test_program_control_codec.py",
+        "tests/unit/test_program_native_codec.py",
+        "tests/unit/test_program_provider_codec.py",
+        "tests/unit/test_record_codec_tags.py",
+        "tests/integration/test_program_graph_roundtrip.py"
+      ]
+    },
+    {
+      "id": "public-structure-without-source-driver-runtime-or-transform-authority",
+      "tests": [
+        "tests/integration/test_resumption_program_cli.py",
+        "tests/integration/test_cleanup_program_cli.py",
+        "tests/unit/test_program_providers.py"
+      ]
+    },
+    {
+      "id": "ordinary-native-exits-keep-existing-port-and-id-contracts",
+      "tests": [
+        "tests/unit/test_native_exit_queries.py"
+      ]
+    }
+  ]
+}

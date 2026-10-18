@@ -6,7 +6,8 @@ from .environments import EnvironmentInterface, EnvironmentMember, FunctionEntry
 from .functions import FormalPort
 from .ids import (BlockID, BoundaryRelationID, ControlScopeID, EnvironmentInterfaceID,
                   NativeBoundaryID, OperationID, ProviderID, RegionID, UseID, ValueID)
-from .model import ProgramGraph, StateVersionValue, TerminatorKind, Use
+from .model import (CompletionResult, ExitKind, ProgramGraph, ReferenceValue,
+                    StateVersionValue, TerminatorKind, Use)
 from .control import ProtocolValueKind
 from .control_validation import derive_pending_facts
 from .model import ProtocolValue
@@ -14,8 +15,10 @@ from .providers import ProviderBinding, ProviderEnvelope, ProviderRegion
 from .native import BoundaryRelation, EntryPortRef, ExitPortRef, NativeBoundary
 from .native_validation import port_key, region_port_keys
 from .cleanup_validation import CleanupRouteKind, CleanupRouteStep
-from .resumption import ResumeInput, ResumeSlot, SuspendTerminator, saved_actual_use
+from .resumption import ResumeInput, ResumeSlot, ResumeSlotKind, SuspendTerminator, saved_actual_use
 from .resumption_flow import first_body_outcome_operations
+from .drivers import BodyDriveResult, NormalResultPort
+from .driver_flow import body_drive_target, body_outcome_uses
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,6 +49,30 @@ class BodyOutcomeSite:
     operation: OperationID
     kind: TerminatorKind
     values: tuple[UseSite, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class DriverBinding:
+    """An existing formal and its canonical source Use, without a new producer."""
+
+    formal: ValueID
+    actual: UseSite
+
+
+@dataclass(frozen=True, slots=True)
+class InstanceCaptureInput:
+    """A declared instance-frame projection, without choosing a Create occurrence."""
+
+    instance: UseSite
+    formal: ValueID
+
+
+@dataclass(frozen=True, slots=True)
+class DriveInputBinding:
+    """A body formal's canonical source or instance capture recipe."""
+
+    formal: ValueID
+    source: UseSite | InstanceCaptureInput
 
 
 @dataclass(frozen=True, slots=True)
@@ -102,6 +129,13 @@ class ProgramIndex:
         self._frame_context_actions = {row.operation: row for rows in (
             graph.frame_context_initials, graph.frame_context_attaches,
             graph.frame_context_detaches) for row in rows}
+        self._raw_driver_requests = {row.value: row for row in graph.raw_driver_requests}
+        self._resumable_creates = {row.operation: row for row in graph.resumable_creates}
+        self._async_request_creates = {row.operation: row for row in graph.async_request_creates}
+        self._association_reads = {row.operation: row for row in graph.request_association_reads}
+        self._driver_interfaces = {row.region: row for row in graph.driver_interfaces}
+        self._final_body_gates = {row.operation: row for row in graph.final_body_gates}
+        self._body_drives = {row.operation: row for row in graph.body_drives}
         self.graph = graph
         self.values = {value.id: value for value in graph.values}
         self.regions = {region.id: region for region in graph.regions}
@@ -113,6 +147,7 @@ class ProgramIndex:
         self._control_scope = {block: scope for scope in graph.control_scopes for block in scope.blocks}
         self._scopes = {scope.id: scope for scope in graph.control_scopes}
         self._blocks = {b.id: r.id for r in graph.regions for b in r.blocks}
+        self._block_records = {b.id: b for r in graph.regions for b in r.blocks}
         self._context_domains = {row.region: row for row in graph.handled_context_domains}
         self._cleanups = {row.scope: row for row in graph.cleanup_interfaces}
         self._cleanup_actions = {row.operation: row for rows in (
@@ -159,6 +194,146 @@ class ProgramIndex:
 
     def producer(self, value_id: ValueID):
         return self.values[value_id].origin
+
+    def _driver_operation(self, operation_id, rows):
+        if type(operation_id) is not OperationID:
+            raise TypeError("driver operation query requires OperationID")
+        if operation_id not in self.operations:
+            raise KeyError(operation_id)
+        return rows.get(operation_id)
+
+    def raw_driver_request(self, value_id: ValueID):
+        """Return a pack declaration; raw entry ports need not have one."""
+        if type(value_id) is not ValueID:
+            raise TypeError("raw_driver_request requires ValueID")
+        if value_id not in self.values:
+            raise KeyError(value_id)
+        return self._raw_driver_requests.get(value_id)
+
+    def raw_driver_operands(self, value_id: ValueID):
+        """Original ordered reference Uses; None differs from a known zero arity."""
+        row = self.raw_driver_request(value_id)
+        return None if row is None else tuple(self._uses[use] for use in row.operands)
+
+    def resumable_create(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._resumable_creates)
+
+    def async_request_create(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._async_request_creates)
+
+    def request_association_read(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._association_reads)
+
+    def driver_interface(self, region_id: RegionID):
+        """Static driver roles, without source or runtime authorization."""
+        if type(region_id) is not RegionID:
+            raise TypeError("driver_interface requires RegionID")
+        if region_id not in self.regions:
+            raise KeyError(region_id)
+        return self._driver_interfaces.get(region_id)
+
+    def final_body_gate(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._final_body_gates)
+
+    def body_drive(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._body_drives)
+
+    def normal_result(self, operation_id: OperationID, port: NormalResultPort):
+        """The original NORMAL landing value at an exact produced result slot."""
+        self._driver_operation(operation_id, {})
+        if type(port) is not NormalResultPort:
+            raise TypeError("normal_result requires NormalResultPort")
+        port.__post_init__()
+        operation = self.operations[operation_id]
+        if operation.terminator is None or operation.terminator.kind is not TerminatorKind.INVOKE:
+            raise ValueError("normal_result requires INVOKE")
+        edge = next(edge for edge in operation.terminator.successors if edge.kind is ExitKind.NORMAL)
+        signature = next(signature for signature in operation.completions
+                         if signature.kind is ExitKind.NORMAL)
+        if port.index >= len(signature.types):
+            raise IndexError(port.index)
+        block = self._block_records[edge.block]
+        position = next(index for index, actual in enumerate(edge.arguments)
+                        if type(actual) is CompletionResult and actual.index == port.index)
+        return self.values[block.arguments[position]]
+
+    def creation_bindings(self, operation_id: OperationID):
+        """Bound references from Create Uses; no dynamic instance is inferred."""
+        row = self.resumable_create(operation_id)
+        return None if row is None else tuple(
+            DriverBinding(capture.formal, self._uses[capture.source]) for capture in row.captures)
+
+    def drive_input_bindings(self, operation_id: OperationID):
+        """Derive Start captures or Resume saved/current inputs, without copying actuals.
+
+        A Start reference describes a projection of this Drive's actual
+        instance frame. It does not select any static Create or runtime object.
+        Resume saved sources remain the original Suspend Uses; only dynamic
+        payload/state inputs are supplied by the Drive's canonical operands.
+        """
+        drive = self.body_drive(operation_id)
+        if drive is None:
+            return None
+        region, start, edge = body_drive_target(self.graph, drive)
+        states = {item.location: self._uses[item.source] for item in drive.state_inputs}
+        if edge is None:
+            bindings = []
+            for formal in self._block_records[start].arguments:
+                value = self.values[formal]
+                if isinstance(value, StateVersionValue):
+                    source = states[value.location]
+                elif isinstance(value, ReferenceValue):
+                    source = InstanceCaptureInput(self._uses[drive.instance], formal)
+                else:
+                    raise ValueError("Start input must be a state or captured reference")
+                bindings.append(DriveInputBinding(formal, source))
+            return tuple(bindings)
+        dynamic = {item.slot: self._uses[item.source] for item in drive.resume_inputs}
+        bindings = self.resumption_bindings(drive.target.suspend, drive.target.successor)
+        result = []
+        for binding, actual in zip(bindings, edge.arguments):
+            if binding.saved is not None:
+                source = binding.saved
+            else:
+                slot = edge.inputs[actual.resume_slot]
+                source = (states[slot.location] if slot.kind is ResumeSlotKind.STATE
+                          else dynamic[actual.resume_slot])
+            result.append(DriveInputBinding(binding.formal, source))
+        return tuple(result)
+
+    def drive_outcomes(self, operation_id: OperationID):
+        """Actual source-relative declarations in this drive's edge order.
+
+        Values are the body's original public handoff/terminal Uses, never its
+        private saved slots or invented driver-side producers. No occurrence,
+        state postcondition, lifecycle commit or runtime choice is established.
+        """
+        if self.body_drive(operation_id) is None:
+            return None
+        term = self.operations[operation_id].terminator
+        return tuple(BodyOutcomeSite(
+            edge.source, self.operations[edge.source].terminator.kind,
+            tuple(self._uses[use] for use in body_outcome_uses(self.operations[edge.source])))
+            for edge in term.successors)
+
+    def drive_bindings(self, operation_id: OperationID, source: OperationID):
+        """Resolve landing formals to body result Uses or driver forwarding Uses."""
+        drive = self.body_drive(operation_id)
+        if type(source) is not OperationID:
+            raise TypeError("drive_bindings source requires OperationID")
+        if drive is None:
+            return None
+        if source not in self.operations:
+            raise KeyError(source)
+        term = self.operations[operation_id].terminator
+        edge = next((edge for edge in term.successors if edge.source == source), None)
+        if edge is None:
+            raise ValueError("source is not an outcome of this BodyDrive")
+        block = self._block_records[edge.block]
+        uses = body_outcome_uses(self.operations[source])
+        return tuple(DriverBinding(formal, self._uses[
+            uses[actual.index] if type(actual) is BodyDriveResult else actual])
+            for actual, formal in zip(edge.arguments, block.arguments))
 
     def resumable_body(self, region_id: RegionID):
         """A static body declaration, without runtime or driver evidence."""
@@ -250,10 +425,7 @@ class ProgramIndex:
         for operation_id in outcome_operations:
             operation = self.operations[operation_id]
             terminator = operation.terminator
-            if terminator.kind is TerminatorKind.SUSPEND:
-                values = (terminator.exported, *terminator.handoff)
-            else:
-                values = terminator.values
+            values = body_outcome_uses(operation)
             sites.append(BodyOutcomeSite(
                 operation_id, terminator.kind,
                 tuple(self._uses[use_id] for use_id in values),
@@ -463,6 +635,7 @@ class ProgramIndex:
             for parameter in self._function_entries[interface.id].parameters))
 
 
-__all__ = ["ProgramIndex", "UseSite", "BodyOutcomeSite", "EnvironmentArgument", "EnvironmentCall",
+__all__ = ["ProgramIndex", "UseSite", "BodyOutcomeSite", "DriverBinding", "DriveInputBinding",
+           "InstanceCaptureInput", "EnvironmentArgument", "EnvironmentCall",
            "EnvironmentBindingStatus", "FunctionArgument", "CleanupRouteKind", "CleanupRouteStep",
            "ResumptionBinding", "SuspensionHandoff"]

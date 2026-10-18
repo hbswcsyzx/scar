@@ -19,6 +19,7 @@ from .model import (
 from .resumption import (
     ResumeInput, SavedInput, SavedRole, SuspendTerminator, saved_actual_use,
 )
+from .drivers import BodyDriveResult
 
 
 def _protocol(value, kind):
@@ -75,7 +76,7 @@ def derive_pending_facts(graph):
                         continue
                     before = len(facts[formal]), formal in incomplete
                     actual_use = saved_actual_use(operation, actual)
-                    if (isinstance(actual, (CompletionResult, ResumeInput))
+                    if (isinstance(actual, (CompletionResult, ResumeInput, BodyDriveResult))
                             or isinstance(actual, SavedInput) and actual_use not in saved_pending):
                         incomplete.add(formal)
                     elif actual_use in own:
@@ -103,10 +104,11 @@ def control_errors(graph):
     blocks = {b.id: b for r in graph.regions for b in r.blocks}
     block_region = {b.id: r.id for r in graph.regions for b in r.blocks}
     operation_block = {o: b.id for b in blocks.values() for o in b.operations}
-    # Frame/caller protocols belong to the dedicated resumable-body validator.
+    # Frame/caller and raw driver requests have dedicated interface validators.
     # Delivered exception packets still use C0 lexical ownership and packing.
     protocol_values = [v for v in graph.values if isinstance(v, ProtocolValue)
-                       and v.protocol not in (P.FRAME_CONTEXT, P.DRIVE_CALLER_CONTEXT)]
+                       and v.protocol not in (P.FRAME_CONTEXT, P.DRIVE_CALLER_CONTEXT,
+                                              P.RAW_DRIVER_REQUEST)]
     dispatches = [o for o in graph.operations if isinstance(
         o.terminator, (PendingDispatchTerminator, CleanupRouteTerminator))]
     if not (scopes or ports or protocol_values or dispatches

@@ -1,7 +1,7 @@
 # D1：从 Create 到本次 body outcome 的规范连接
 
 2026-10-18；依赖 [D1连接合同](M1_DRIVER_CONTRACT_V2.md) 第1–3节；D2/D3仍开放。
-本计划是下一批产品工作的顺序及自主验收分母，不是已经实现的 API。
+本计划是产品实施顺序及自主验收分母；当前结果见[组件验收](M1_DRIVER_ACCEPTANCE.md)。
 
 ## 1. 必须交付的完整路径
 
@@ -24,8 +24,8 @@
 
 | 顺序 | 实际落点 | 交付和约束 |
 | --- | --- | --- |
-| 1 | `scar/ir/program/drivers.py`（拟新增）、`model.py`、`control.py`、`__init__.py` | exact records、RAW_DRIVER_REQUEST、typed drive terminator/result；ProgramGraph表与规范Use唯一归属。不是仅增加未接线enum。 |
-| 2 | `validation.py`、`resumption_flow.py`、拟新增 `driver_validation.py` | 接原CFG successor、availability、state与typed projection；先普通结构有效，再检查driver合同；坏body不触发查询递归或崩溃。 |
+| 1 | `scar/ir/program/drivers.py`、`model.py`、`control.py`、`__init__.py` | exact records、RAW_DRIVER_REQUEST、typed drive terminator/result；ProgramGraph表与规范Use唯一归属。不是仅增加未接线enum。 |
+| 2 | `validation.py`、`driver_flow.py`、`resumption_flow.py`、`driver_validation.py` | 接原CFG successor、availability、state与typed projection；先普通结构有效，再检查driver合同；坏body不触发查询递归或崩溃。 |
 | 3 | `codec.py`、`queries.py`、CLI现有program入口 | codec新capability完整检测；端口查询返回原UseSite，输入/输出关系只派生一次。旧版本无driver仍逐字节保留。 |
 | 4 | `tests/fixtures/`、`tests/unit/`、原gate runner | 以下全部正反例及旧能力回归；冻结产品后单次完整回归、保留所有初次失败/修正、独立报告与版本推送。 |
 

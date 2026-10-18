@@ -24,6 +24,10 @@ from scar.ir.program.resumption import (
     FrameContextAttach, FrameContextDetach, FrameContextInitial, ResumableBody,
     SuspendTerminator,
 )
+from scar.ir.program.drivers import (
+    AsyncRequestCreate, BodyDrive, BodyDriveTerminator, DriverInterface,
+    FinalBodyGate, RawRequestDefinition, RequestAssociationRead, ResumableCreate,
+)
 from scar.ir.program.environments import EnvironmentInterface, FunctionEntryLayout
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.resources import (
@@ -421,6 +425,7 @@ class TerminatorKind(str, Enum):
     PENDING_DISPATCH = "PENDING_DISPATCH"
     CLEANUP_ROUTE = "CLEANUP_ROUTE"
     SUSPEND = "SUSPEND"
+    BODY_DRIVE = "BODY_DRIVE"
 
 
 @dataclass(frozen=True, slots=True)
@@ -486,7 +491,7 @@ class Terminator:
         if not isinstance(self.kind, TerminatorKind):
             raise TypeError("Terminator.kind must be TerminatorKind")
         if self.kind in (TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE,
-                         TerminatorKind.SUSPEND):
+                         TerminatorKind.SUSPEND, TerminatorKind.BODY_DRIVE):
             raise ValueError(f"{self.kind.value} requires its dedicated typed terminator")
         _tuple(self.successors, "Terminator.successors")
         if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
@@ -532,7 +537,8 @@ class Operation:
     results: tuple[ValueID, ...] = ()
     accesses: tuple[StateAccess, ...] = ()
     effects_complete: bool = False
-    terminator: Terminator | PendingDispatchTerminator | CleanupRouteTerminator | SuspendTerminator | None = None
+    terminator: (Terminator | PendingDispatchTerminator | CleanupRouteTerminator
+                 | SuspendTerminator | BodyDriveTerminator | None) = None
     callee: RegionID | None = None
     call_arguments: tuple[UseID, ...] = ()
     completions: tuple[CompletionSignature, ...] = ()
@@ -561,13 +567,15 @@ class Operation:
             raise TypeError("Operation.effects_complete must be bool")
         if self.terminator is not None and not isinstance(
                 self.terminator, (Terminator, PendingDispatchTerminator, CleanupRouteTerminator,
-                                  SuspendTerminator)):
+                                  SuspendTerminator, BodyDriveTerminator)):
             raise TypeError("Operation.terminator must be a typed terminator or None")
         if (isinstance(self.terminator, CleanupRouteTerminator)
                 and type(self.terminator) is not CleanupRouteTerminator):
             raise TypeError("cleanup route terminator must be exact CleanupRouteTerminator")
         if isinstance(self.terminator, SuspendTerminator) and type(self.terminator) is not SuspendTerminator:
             raise TypeError("suspend terminator must be exact SuspendTerminator")
+        if isinstance(self.terminator, BodyDriveTerminator) and type(self.terminator) is not BodyDriveTerminator:
+            raise TypeError("body drive terminator must be exact BodyDriveTerminator")
         if self.callee is not None and not isinstance(self.callee, RegionID):
             raise TypeError("Operation.callee must be RegionID or None")
         _tuple(self.call_arguments, "Operation.call_arguments")
@@ -591,6 +599,7 @@ class Operation:
             raise ValueError("Operation.invoke_arguments must reference its own uses")
         is_invoke = (self.terminator is not None
                      and self.terminator.kind is TerminatorKind.INVOKE)
+        is_body_drive = type(self.terminator) is BodyDriveTerminator
         if is_invoke and self.call_arguments:
             raise ValueError("INVOKE uses invoke_arguments, not call_arguments")
         if self.callee is None and self.call_arguments and not is_invoke:
@@ -606,6 +615,11 @@ class Operation:
                 raise ValueError("only INVOKE may carry completion signatures")
             if self.invoke_arguments:
                 raise ValueError("only INVOKE may carry invoke_arguments")
+        if is_body_drive and (self.results or self.accesses or self.callee is not None
+                              or self.call_arguments or self.completions or self.invoke_arguments):
+            raise ValueError(
+                "BODY_DRIVE cannot carry ordinary results, accesses, callee, call arguments, "
+                "completions, or invoke arguments")
         for access in self.accesses:
             before = uses_by_id.get(access.before)
             if before is None:
@@ -727,6 +741,13 @@ class ProgramGraph:
     frame_context_initials: tuple[FrameContextInitial, ...] = ()
     frame_context_attaches: tuple[FrameContextAttach, ...] = ()
     frame_context_detaches: tuple[FrameContextDetach, ...] = ()
+    raw_driver_requests: tuple[RawRequestDefinition, ...] = ()
+    resumable_creates: tuple[ResumableCreate, ...] = ()
+    async_request_creates: tuple[AsyncRequestCreate, ...] = ()
+    request_association_reads: tuple[RequestAssociationRead, ...] = ()
+    driver_interfaces: tuple[DriverInterface, ...] = ()
+    final_body_gates: tuple[FinalBodyGate, ...] = ()
+    body_drives: tuple[BodyDrive, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -758,6 +779,23 @@ class ProgramGraph:
             self.frame_context_initials, self.frame_context_attaches, self.frame_context_detaches,
             self.cleanup_enters, self.cleanup_resumes, self.cleanup_replacements,
             self.handled_context_reads) for row in rows), "context primitive operation IDs")
+        for name, row_type, key in (
+                ("raw_driver_requests", RawRequestDefinition, "value"),
+                ("resumable_creates", ResumableCreate, "operation"),
+                ("async_request_creates", AsyncRequestCreate, "operation"),
+                ("request_association_reads", RequestAssociationRead, "operation"),
+                ("driver_interfaces", DriverInterface, "region"),
+                ("final_body_gates", FinalBodyGate, "operation"),
+                ("body_drives", BodyDrive, "operation")):
+            rows = _tuple(getattr(self, name), "ProgramGraph." + name)
+            if any(type(item) is not row_type for item in rows):
+                raise TypeError("ProgramGraph." + name + " needs exact driver records")
+            _unique(tuple(getattr(item, key) for item in rows),
+                    "ProgramGraph." + name + " keys")
+        _unique(tuple(row.operation for rows in (
+            self.resumable_creates, self.async_request_creates,
+            self.request_association_reads, self.final_body_gates, self.body_drives)
+            for row in rows), "driver operation IDs")
         for name, rows, row_type, id_field in (
             ("regions", self.regions, Region, "id"),
             ("operations", self.operations, Operation, "id"),
@@ -830,6 +868,8 @@ class ProgramGraph:
 __all__ = [
     "AccessMode", "Behavior", "Block", "BlockArgument", "DataValue", "ExitKind",
     "CompletionResult", "CompletionSignature", "CompletionSuccessor", "ExitPort",
+    "AsyncRequestCreate", "BodyDrive", "BodyDriveTerminator", "DriverInterface",
+    "FinalBodyGate", "RawRequestDefinition", "RequestAssociationRead", "ResumableCreate",
     "Footprint", "FootprintKind", "LiteralOrigin", "LocalBindingType",
     "LocalBindingValue", "Operation", "OperationResult", "ProtocolValue",
     "OrderEdge", "Origin", "ProgramGraph",

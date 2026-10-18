@@ -27,6 +27,13 @@ from scar.ir.program.resources import (
     ResourceDefinition, ResourceKind, ResourceLocation, ResourceRelationConstraint,
     ResourceRequirement, ResourceRole, ResourceUse,
 )
+from scar.ir.program.drivers import (
+    AsyncRequestCreate, BodyDrive, BodyDriveResult, BodyDriveSuccessor,
+    BodyDriveTerminator, BodyResume, BodyResumeInput, BodyStart, BodyStateInput,
+    CreationCapture, DriverInterface, DriverReceiverKind, DriverRule,
+    DriverRuleProfile, FinalBodyGate, NormalResultPort, RawRequestDefinition,
+    RawRequestKind, RequestAssociationRead, ResumableCreate,
+)
 from scar.ir.program.bindings import BindingDefinition, BindingRead, BindingState
 from scar.ir.program.environments import (
     EnvironmentInterface, EnvironmentMember, EnvironmentRole, FunctionEntryLayout,
@@ -94,4 +101,9 @@ __all__ = [
     "NativeBoundaryID", "BoundaryRelationID", "BoundaryDomain", "BoundaryObligation",
     "BoundaryPortPair", "BoundaryRelation", "CoreInputPort", "CoreOutputPort",
     "EntryPortRef", "ExitPortRef", "NativeBoundary", "NativeInputSlot", "NativeOutputSlot",
+    "AsyncRequestCreate", "BodyDrive", "BodyDriveResult", "BodyDriveSuccessor",
+    "BodyDriveTerminator", "BodyResume", "BodyResumeInput", "BodyStart", "BodyStateInput",
+    "CreationCapture", "DriverInterface", "DriverReceiverKind", "DriverRule",
+    "DriverRuleProfile", "FinalBodyGate", "NormalResultPort", "RawRequestDefinition",
+    "RawRequestKind", "RequestAssociationRead", "ResumableCreate",
 ]
