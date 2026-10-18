@@ -1,0 +1,66 @@
+{
+  "schema": "scar.frozen-full-regression-manifest",
+  "schema_version": 1,
+  "files": {
+    "cases.json": {
+      "bytes": 961363,
+      "sha256": "4a702cb7619b82b4350e893dc89f80e7a47676c9af2c064dac8008765162db6f"
+    },
+    "command.json": {
+      "bytes": 4512,
+      "sha256": "f6d3ec37aa84b362c8fbdbf4d7612cc5f241504d016f49bb061622b19fb7c6c4"
+    },
+    "concurrency.after.txt": {
+      "bytes": 103,
+      "sha256": "f3074580b3f09ae818030e9995c17503f11bacf214ec41dcf0298bb42eb3eea3"
+    },
+    "concurrency.before.txt": {
+      "bytes": 103,
+      "sha256": "8581a9a3e9512c656403babdc2feec093cb290263b51db69be9e6a83f22ac381"
+    },
+    "driver.py": {
+      "bytes": 11255,
+      "sha256": "9a28d3b043e12484e099d9794478399ceccaf24e42dd6643c535e7cee2de9b28"
+    },
+    "process.json": {
+      "bytes": 192,
+      "sha256": "a70ab772e7e93abcd61c8ae55f77575aa749bc24767018cea675e7f4d3b53d9d"
+    },
+    "progress.json": {
+      "bytes": 245,
+      "sha256": "543396bf402657638aee2f16297a9be54b384bd84dad78edfb41e354610984c6"
+    },
+    "report.json": {
+      "bytes": 5840,
+      "sha256": "222cb5ce13c90287c534e38662d1fa93a235df5db333479d0630a53b7a875163"
+    },
+    "report.md": {
+      "bytes": 812,
+      "sha256": "c5eb3812b23c122dfbe6a5f0aba37d72f959e7cd6953315c120d19b711bc2053"
+    },
+    "results.xml": {
+      "bytes": 680968,
+      "sha256": "3f48e361bcaabab7e733cbf70db77801b26530bcca97f94ba1a2b8c61f6db4c8"
+    },
+    "source.after.json": {
+      "bytes": 60004,
+      "sha256": "d5d9a050372c517a232c33fad915354c90d7206b9524a13d9f01c81ecf045537"
+    },
+    "source.before.json": {
+      "bytes": 60004,
+      "sha256": "d5d9a050372c517a232c33fad915354c90d7206b9524a13d9f01c81ecf045537"
+    },
+    "stderr.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stdout.log": {
+      "bytes": 6342,
+      "sha256": "3079c984a5ea8c2bc15bd589578e918904fa074e6dca9d10f538aeae9f5b66de"
+    },
+    "time-v.txt": {
+      "bytes": 1042,
+      "sha256": "812bd4d9b8230470bb24d0c484f21734203566c375b56d93f37199593d514f32"
+    }
+  }
+}

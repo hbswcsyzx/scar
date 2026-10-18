@@ -14,8 +14,8 @@ remain unfinished.
 The [R2.2 event/order component](docs/M1_RESOURCE_ORDER_INTERFACES.md) connects
 exact event generations, original state/resource ports and bounded queue profiles
 to conditional producer-end→consumer-start paths. Its
-[acceptance](docs/M1_RESOURCE_ORDER_ACCEPTANCE.md) passes **497 checks / 7 criteria**;
-the frozen full regression is pending. Execution v3 preserves original v1/v2
+[acceptance](docs/M1_RESOURCE_ORDER_ACCEPTANCE.md) passes **497 checks / 7 criteria**
+and **4,387 clean frozen full tests** (`e8121f0`). Execution v3 preserves original v1/v2
 bytes. Consumer production/denotation/ready, complete M0–M2 and a verified LeWM
 speedup remain open.
 
@@ -24,7 +24,7 @@ actual access/INVOKE completion effects, work terminal observations, independent
 quiescence and resource retention. Its [acceptance](docs/M1_RESOURCE_WORK_ACCEPTANCE.md)
 passes **407 checks / 9 criteria** and **4,297 clean frozen full tests** (`bb1b402`).
 Execution v2 retains byte-exact original
-v1 compatibility. [R2 event/order/consumer-ready](docs/M1_RESOURCE_WORK_PLAN.md)
+v1 compatibility. [R2 consumer-ready](docs/M1_RESOURCE_WORK_PLAN.md)
 and complete first-stage modeling remain open; no new LeWM speedup is claimed.
 
 The [tooling survey](docs/TOOLING_SURVEY.md) and

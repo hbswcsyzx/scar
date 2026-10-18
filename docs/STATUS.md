@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## R2.2 event/order component accepted; frozen full pending (2026-10-18)
+## R2.2 event/order component and frozen full accepted (2026-10-18)
 
 The [order interfaces](M1_RESOURCE_ORDER_INTERFACES.md) preserve exact record
 generations, original event-state ports, finite queue profiles and conditional
@@ -8,8 +8,11 @@ producer-end→consumer-start paths. The component passes **497 cases / 7 criter
 9.382s**, all **489** registered hashes unchanged. Historical v1/v2 bytes remain
 exact under capability-aware execution v3. Independent review closed external
 queue/run/process scope gaps; original fixture failure and corrected checks are
-retained. [Acceptance](M1_RESOURCE_ORDER_ACCEPTANCE.md) awaits one clean frozen
-full regression. This does not establish native/runtime truth, ready/free or
+retained. Clean frozen `e8121f0` passes **4,387 full tests / 476.489s /
+1,027,808 KiB**, zero failures/errors/skips and three warnings. All 489 source
+and 50 fixture hashes match; all prior 4,297 case identities and 47 fixtures
+survive. The owned basetemp was removed and protected checkouts remain clean.
+See [acceptance](M1_RESOURCE_ORDER_ACCEPTANCE.md). This does not establish native/runtime truth, ready/free or
 transformation authority. R2.3 consumer/production/denotation, R3 and complete
 M0–M2 remain open; no new LeWM speedup has been measured.
 

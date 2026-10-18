@@ -2,7 +2,7 @@
 
 ## 状态与证据范围
 
-**组件已通过；本次冻结全仓回归待运行。** 起点 R2.1 `9c7a913`，
+**组件及一次 clean 冻结全仓回归均通过。** 起点 R2.1 `9c7a913`，
 按 [计划](M1_RESOURCE_ORDER_PLAN.md) 实现 [接口](M1_RESOURCE_ORDER_INTERFACES.md)。
 没有新增 detector/backend/lowerer，也没有新的 LeWM profiling 或加速比。
 
@@ -10,7 +10,16 @@ Verified：组件 **497 cases / 7 criteria / 9.382s**，零失败；登记 **489
 源/测试/gate 文件指纹前后一致：
 `10e12c818eb8c8adaeb3a4e0e4cf4dd4927137f568da590b02f648e013c4a3e5`。
 报告保留组件运行前的基线 HEAD、dirty status 和实际 tested-files hash；
-后续 clean full 将另绑定完整实现提交，不能把组件基线 HEAD 当成实现版本。
+clean full 则绑定完整实现提交，不能把组件基线 HEAD 当成实现版本。
+
+冻结实现 `e8121f077c93286e7903e54aeb1729e250bfcb44` 的一次 full：
+**4,387 PASS / 0 failed / 0 error / 0 skipped**，三条 warning；
+外部 wall **476.48855237290263s**、pytest **474.52s**，最大 RSS
+**1,027,808 KiB**。489 个登记文件、50 个 fixture 的前后 hash 完全一致，
+clean HEAD/status 前后一致；本次独占 basetemp 已在子进程终结后移除。
+旧 480 登记文件中 473 个未变、七个明确的接线/schema 断言更新；新增九个。
+旧 47 fixture 字节全保留，旧 4,297 测试身份全保留，新增 90 项。
+这是验收成本，不是工作负载性能。LeWM 和 SCAR 主工作区 HEAD/status 未变且干净。
 
 ## 已实现和验证的连接
 
@@ -48,7 +57,7 @@ v2 golden 从不可变 `bb1b402b498e9ce80a701658a59c1471e8ec32ce` 的隔离 arch
 独立生成，assert 实际导入路径均属 archive、旧 codec 最大版本为 2：
 **56,435 bytes**，SHA256
 `b03a304a582a662d71ebdbe4685776aef9ec4fc357142f0fa2e6656cdae03234`。
-旧 v1 golden 没有重新生成，原 fixture 与 case 守恒将在 full 单独核对。
+旧 v1 golden 没有重新生成；fixture/case 守恒已由冻结 full 及独立归档核对。
 
 ## 保留的缺口及下一步
 
