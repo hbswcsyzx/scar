@@ -204,31 +204,17 @@ class _Context:
             elif current[value.location] != identity:
                 self.issue('stale_state', path, 'support is not the exact current dynamic state incarnation')
 
-    def point_precedes(self, left, right):
-        if type(left) is not OccurrencePoint or type(right) is not OccurrencePoint:
+    def point_precedes(self, left, right, *, budget=None):
+        from .host_order import host_path, local_point_precedes
+        local = local_point_precedes(self, left, right)
+        if local is not None:
+            return local
+        # Keep original same-activation reverse/disconnected semantics.
+        if (type(left) is not OccurrencePoint or type(right) is not OccurrencePoint
+                or left.operation not in self.occurrences or right.operation not in self.occurrences
+                or self.activation_of(left.operation) == self.activation_of(right.operation)):
             return None
-        if left.operation not in self.occurrences or right.operation not in self.occurrences:
-            return None
-        for point in (left, right):
-            if point.phase is OccurrencePhase.EDGE:
-                transfer = self.outgoing.get(point.operation)
-                if transfer is None or transfer.successor_index != point.successor_index:
-                    return None
-        a, b = self.occurrences[left.operation], self.occurrences[right.operation]
-        if self.activation_of(a.id) != self.activation_of(b.id):
-            return None
-        rank = {OccurrencePhase.BEFORE: 0, OccurrencePhase.AFTER: 1, OccurrencePhase.EDGE: 2}
-        if a.visit == b.visit:
-            block = self.blocks[self.visits[a.visit].block]
-            return (block.operations.index(a.operation), rank[left.phase]) <= (
-                block.operations.index(b.operation), rank[right.phase])
-        cursor, visited = b.visit, set()
-        while cursor not in visited and cursor in self.incoming:
-            visited.add(cursor)
-            cursor = self.occurrences[self.incoming[cursor].operation].visit
-            if cursor == a.visit:
-                return True
-        return None
+        return True if host_path(self, left, right, budget=budget) is not None else None
 
     def _external(self, artifact, path, kind, catalog):
         try:
@@ -440,7 +426,7 @@ def refresh_external_context(base_ctx):
         'work_materialization_keys', 'order_steps', 'order_adjacency',
         'resolved_denotations', 'resolved_content_reads', 'resolved_writes',
         'resolved_produced', 'resolved_establishments', 'resolved_lifetime_events',
-        'resolved_order_associations', 'resolved_supports'}
+        'resolved_order_associations', 'resolved_supports', '_endpoint_profile_cache'}
     catalogs = {'value_graphs', 'evidence_graphs', 'semantic_graphs', 'artifact_bytes'}
     for name, value in vars(base_ctx).items():
         if name in external:
@@ -485,6 +471,9 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
     if not ctx.issues:
         from .call_validation import call_errors
         call_errors(ctx)
+    if not ctx.issues:
+        from .host_order import prepare_host_order
+        prepare_host_order(ctx)
     if not ctx.issues:
         _evidence_gaps(ctx)
     ctx._canonical_gaps = tuple(ctx.gaps)

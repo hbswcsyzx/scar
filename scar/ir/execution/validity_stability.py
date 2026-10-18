@@ -83,6 +83,23 @@ def _region(ctx, reference):
 
 
 def _spatial(ctx, left, right, budget):
+    endpoint_left = type(left) is dict and left.get('kind') == 'endpoint-byte-range'
+    endpoint_right = type(right) is dict and right.get('kind') == 'endpoint-byte-range'
+    if endpoint_left or endpoint_right:
+        if not (endpoint_left and endpoint_right):
+            return 'POSSIBLE'
+        if not budget.spend('geometry', 1, path='stability.endpoint-selector'):
+            return 'UNRESOLVED'
+        if target_key(left['target']) != target_key(right['target']):
+            # Different declared instances may still be aliases of one native
+            # endpoint; retain the candidate as possible rather than disjoint.
+            return 'POSSIBLE'
+        left_start, left_end = left['offset_bytes'], left['offset_bytes'] + left['length_bytes']
+        right_start, right_end = right['offset_bytes'], right['offset_bytes'] + right['length_bytes']
+        if left_start == left_end or right_start == right_end:
+            return 'DISJOINT'
+        return ('DISJOINT' if left_end <= right_start or right_end <= left_start
+                else 'OVERLAP')
     if type(left) is not RegionRef or type(right) is not RegionRef:
         return 'UNRESOLVED'
     if artifact_key(left.artifact) != artifact_key(right.artifact):
@@ -123,8 +140,14 @@ def _spatial(ctx, left, right, budget):
 
 def _selector(write, resolved):
     if resolved is not None and resolved.get('placement') is not None:
+        if resolved.get('endpoint_request') is not None:
+            return resolved['endpoint_request']
         return resolved['placement'][1]
     return getattr(write.placement, 'selector', None)
+
+
+def _actual_selector(produced):
+    return produced.get('actual_selector', produced['row'].actual)
 
 
 def _effect_of(write):
@@ -177,7 +200,8 @@ def stability(ctx, read_resolved, fragment, *, budget):
     write = fragment['write']
     original_effect = _effect_of(write)
     selector = fragment.get('actual') or fragment.get('requested')
-    demand_selector = None if read_resolved.get('placement') is None else read_resolved['placement'][1]
+    demand_selector = (read_resolved.get('endpoint_extent')
+        or (None if read_resolved.get('placement') is None else read_resolved['placement'][1]))
     if selector is None:
         selector = demand_selector
     run = point_run(ctx, start) if start is not None else None
@@ -266,7 +290,7 @@ def stability(ctx, read_resolved, fragment, *, budget):
                     if not budget.spend('association_joins', path='stability.actual-write'):
                         break
                     if produced['row'].write == other.id:
-                        actuals.append(_spatial(ctx, produced['row'].actual, selector, budget))
+                        actuals.append(_spatial(ctx, _actual_selector(produced), selector, budget))
             spatial = ('OVERLAP' if 'OVERLAP' in actuals else 'POSSIBLE'
                        if any(item != 'DISJOINT' for item in relations) else 'UNRESOLVED')
             if not actuals and relations and all(item == 'DISJOINT' for item in relations):
@@ -325,7 +349,7 @@ def stability(ctx, read_resolved, fragment, *, budget):
                 if not budget.spend('association_joins', path='stability.source-actual'):
                     break
                 if produced['row'].write == other.id:
-                    actual_relations.append(_spatial(ctx, produced['row'].actual, selector, budget))
+                    actual_relations.append(_spatial(ctx, _actual_selector(produced), selector, budget))
             spatial = _spatial(ctx, _selector(other, resolved), selector, budget)
             if actual_relations:
                 spatial = ('OVERLAP' if 'OVERLAP' in actual_relations else 'DISJOINT'

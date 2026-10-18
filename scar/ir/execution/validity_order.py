@@ -14,6 +14,7 @@ from .coordinates import AccessRef, OccurrencePhase, OccurrencePoint, UseRef
 from .order import EventSignal, PrefixEnd, WorkEnd, WorkStart
 from .production import RawRecordRef, SourceEdgeRef
 from .work import InvokeBoundaryStateEffect, WithinOperation
+from .host_order import host_path, host_steps, local_point_precedes
 
 
 def point_run(ctx, point):
@@ -148,14 +149,9 @@ def _steps(ctx, point, endpoints, associations, budget, *, assumptions):
         yield step.target, {'source': step.source, 'target': step.target,
                            'rule': step.rule, 'support': step.support}, False
     if type(point) is OccurrencePoint:
-        for target in endpoints:
-            if target == point:
-                continue
-            if not budget.spend('order_edges', path='order.host'):
-                return
-            if _canonical(ctx, point, target) is True:
-                yield target, {'source': point, 'target': target,
-                               'rule': 'actual-host-path', 'support': ()}, False
+        for step in host_steps(ctx, point, endpoints, budget=budget):
+            yield step.target, {'source': step.source, 'target': step.target,
+                               'rule': step.rule, 'support': step.support}, False
     for resolved in associations.get(point, ()):
         is_assumption = resolved['strength'] != 'CONDITIONAL'
         if is_assumption and not assumptions:
@@ -171,9 +167,25 @@ def point_order(ctx, left, right, *, budget):
     """Query causal order without promoting unparsed declarations to support."""
     if not budget.spend('order_queries', path='order.query'):
         return {'status': 'UNRESOLVED', 'path': (), 'truncated': True}
-    if _canonical(ctx, left, right) is True:
+    if type(left) is OccurrencePoint and type(right) is OccurrencePoint:
+        # Same-activation comparisons use the prepared O(1) original CFG index;
+        # do not charge a call search for a relation already established there.
+        if local_point_precedes(ctx, left, right) is True:
+            return {'status': 'CONDITIONAL', 'path': (), 'truncated': budget.truncated}
+        if local_point_precedes(ctx, right, left) is True and left != right:
+            return {'status': 'CONTRADICTED', 'path': (), 'truncated': budget.truncated}
+        if (left.operation in ctx.occurrences and right.operation in ctx.occurrences
+                and ctx.activation_of(left.operation) != ctx.activation_of(right.operation)):
+            path = host_path(ctx, left, right, budget=budget)
+            if path is not None:
+                return {'status': 'CONDITIONAL', 'path': tuple(
+                    {'source': step.source, 'target': step.target, 'rule': step.rule, 'support': step.support}
+                    for step in path), 'truncated': budget.truncated}
+            if not budget.truncated and host_path(ctx, right, left, budget=budget) is not None:
+                return {'status': 'CONTRADICTED', 'path': (), 'truncated': budget.truncated}
+    elif _canonical(ctx, left, right) is True:
         return {'status': 'CONDITIONAL', 'path': (), 'truncated': budget.truncated}
-    if left != right and _canonical(ctx, right, left) is True:
+    if (type(left) is not OccurrencePoint or type(right) is not OccurrencePoint) and left != right and _canonical(ctx, right, left) is True:
         return {'status': 'CONTRADICTED', 'path': (), 'truncated': budget.truncated}
     run_left, run_right = point_run(ctx, left), point_run(ctx, right)
     if run_left is not None and run_right is not None and run_left != run_right:

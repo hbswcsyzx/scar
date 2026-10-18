@@ -9,7 +9,10 @@ from collections import deque
 from scar.ir.program.model import BlockArgument, CompletionResult, LiteralOrigin, TerminatorKind
 
 from .common import EvidencePoint, Unresolved
-from .content import EndpointContent, HostConsumer, ObservationConsumer, ResourceConsumer
+from .content import EndpointContent, HostConsumer, ObservationConsumer, ProtocolSelector, ResourceConsumer
+from .endpoint_protocol import (
+    resolve_endpoint_profile, same_fact_reference, same_materialization,
+)
 from .content_validation import check_target, target_key
 from .coordinates import AccessRef, OccurrencePhase, OccurrencePoint
 from .ids import OperationOccurrenceID, ValueOccurrenceID
@@ -452,15 +455,33 @@ def _supports(ctx):
                 elif target_key(domain.target) != target_key(placement.target):
                     ctx.issue('validity_endpoint_domain', path, 'visibility names another endpoint incarnation')
                 else:
-                    root = read['observation_root']
-                    requirement = None if root is None else ctx.observation_requirements.get(root.requirement)
-                    # An exact Q association is a mechanical condition, not a
-                    # universal read/flush/persist implication or native proof.
-                    if requirement is None:
+                    profile_budget = ValidityBudget(4096)
+                    profile_gap_count = len(ctx.gaps)
+                    read_profile = (resolve_endpoint_profile(ctx, placement.selector, path,
+                                                             budget=profile_budget)
+                                    if type(placement.selector) is ProtocolSelector else None)
+                    visibility_profile = resolve_endpoint_profile(ctx, visibility.protocol, path,
+                                                                  budget=profile_budget)
+                    from .content_validation import _content_interval
+                    interval = _content_interval(ctx, read['read'].consumer,
+                                                 read['observation_root'])
+                    interval_profile = (None if interval is None else
+                        resolve_endpoint_profile(ctx, interval.protocol, path,
+                                                 budget=profile_budget))
+                    if read_profile is None or visibility_profile is None or interval_profile is None:
+                        if any(gap.code == 'endpoint_profile_unsupported'
+                               for gap in ctx.gaps[profile_gap_count:]):
+                            ctx.gap('validity_endpoint_interpreter_unsupported', path,
+                                    'same Q protocol reference is not a parsed observation/facet/selector visibility interpretation')
                         ctx.gap('validity_endpoint_protocol_unresolved', path,
-                                'intermediate endpoint has no interpreted read/flush/persistence protocol')
-                    ctx.gap('validity_endpoint_interpreter_unsupported', path,
-                            'same Q protocol reference is not a parsed observation/facet/selector visibility interpretation')
+                                'endpoint read selector, interval and visibility need the same parsed byte-prefix profile')
+                    elif (read_profile['operation'] != 'READ'
+                            or visibility_profile['operation'] != 'READ'
+                            or interval_profile['operation'] != 'READ'
+                            or not same_fact_reference(read_profile['reference'], visibility_profile['reference'])
+                            or not same_fact_reference(read_profile['reference'], interval_profile['reference'])):
+                        ctx.issue('validity_endpoint_protocol', path,
+                                  'visibility must retain the exact READ profile used by the endpoint selector and interval')
             else:
                 ctx.check_point(domain.point, path)
                 ctx.gap('validity_visibility_domain_unresolved', path, domain.reason)
@@ -519,6 +540,133 @@ def _anchored_basis(ctx, visibility):
     return False
 
 
+def _endpoint_visibility_matches(ctx, support, read, production, budget, path, conditions):
+    """Interpret only the fixed byte-prefix read-after-completed-write rule."""
+    from .content import DataIdentity, EndpointContent, ProtocolSelector
+    from .endpoint_protocol import endpoint_extent, resolve_endpoint_profile, same_fact_reference, same_materialization
+
+    read_row, visibility = read['read'], support['visibility']
+    if type(read_row.placement) is not EndpointContent:
+        return False
+    if type(read_row.placement.selector) is not ProtocolSelector:
+        conditions.append('endpoint read selector has no parsed byte-prefix profile')
+        return False
+    profile_refs = [read_row.placement.selector]
+    interval = None
+    from .content_validation import _content_interval
+    interval = _content_interval(ctx, read_row.consumer, read.get('observation_root'))
+    if interval is None:
+        conditions.append('endpoint read interval is not available for the fixed byte-prefix rule')
+        return False
+    profile_refs.append(interval.protocol)
+    profile_refs.append(visibility.protocol)
+    read_profile = None
+    for index, reference in enumerate(profile_refs):
+        if not budget.spend('endpoint_profile_ranges', path=path):
+            conditions.append('shared budget ended before endpoint profile interpretation')
+            return False
+        current = resolve_endpoint_profile(ctx, reference, path, budget=budget)
+        if current is None:
+            conditions.append('endpoint profile bytes are missing, unsupported or malformed')
+            return False
+        if current['operation'] != 'READ':
+            ctx.issue('validity_endpoint_profile_role', path,
+                      'read selector, interval and visibility must use READ profiles')
+            return False
+        if index == 0:
+            read_profile = current
+        elif not same_fact_reference(read_profile['reference'], current['reference']):
+            ctx.issue('validity_endpoint_profile_identity', path,
+                      'endpoint selector, read interval and visibility use different profile artifacts')
+            return False
+
+    read_extent = read.get('endpoint_extent')
+    if read_extent is None:
+        read_extent = endpoint_extent(ctx, read_row.placement.target, read_profile, path,
+            expected_operation='READ', materialization=read_row.placement.materialization)
+    if read_extent is None:
+        conditions.append('endpoint read byte extent is unresolved')
+        return False
+    if production is None:
+        conditions.append('endpoint visibility requires an actual completed write range')
+        return False
+    write_resolved = support['write']
+    write_row = write_resolved['row']
+    if type(write_row.placement) is not EndpointContent:
+        conditions.append('contribution does not declare an endpoint byte write')
+        return False
+    request = write_resolved.get('endpoint_request')
+    actual = production.get('actual_selector')
+    if request is None or actual is None or type(request) is not dict or type(actual) is not dict:
+        conditions.append('endpoint request or actual prefix range is unresolved')
+        return False
+
+    target_matches = (target_key(read_extent['target']) == target_key(request['target'])
+                      == target_key(actual['target']))
+    mat_matches = (same_materialization(read_row.placement.materialization,
+                                        write_row.placement.materialization)
+                   and same_materialization(read_row.placement.materialization,
+                                           request.get('materialization'))
+                   and same_materialization(read_row.placement.materialization,
+                                           actual.get('materialization')))
+    if not target_matches:
+        ctx.issue('validity_endpoint_target', path,
+                  'read, write request and actual prefix must name the same endpoint instance')
+        return False
+    if not mat_matches:
+        ctx.issue('validity_endpoint_materialization', path,
+                  'read and endpoint write must name the same exact materialization, not merely the same logical version')
+        return False
+    read_mat = read.get('placement')
+    write_mat = write_resolved.get('placement')
+    if (read_mat is None or write_mat is None or read_mat[0] is None or write_mat[0] is None
+            or read_mat[0].value_version != write_mat[0].value_version):
+        ctx.issue('validity_endpoint_version', path,
+                  'read and endpoint write materialization do not establish the same scoped logical version')
+        return False
+    if (request['operation'] != 'WRITE_REQUEST' or actual['operation'] != 'WRITE_ACTUAL'
+            or request['profile'] != actual['profile']
+            or request['offset_bytes'] != actual['offset_bytes']
+            or actual['offset_bytes'] != 0):
+        ctx.issue('validity_endpoint_range', path,
+                  'request and actual must use the fixed zero-offset byte-prefix profile')
+        return False
+    source_input = write_resolved.get('source_byte_input')
+    if source_input is None or source_input.get('extent') is None:
+        conditions.append('endpoint write has no unique original byte Data Use/ContentRead geometry')
+        return False
+    if (request['length_bytes'] != source_input['extent']['length_bytes']
+            or actual['length_bytes'] > request['length_bytes']):
+        ctx.issue('validity_endpoint_source_extent', path,
+                  'write request differs from its exact source byte input or actual prefix exceeds the request')
+        return False
+    if actual['length_bytes'] < read_extent['length_bytes']:
+        conditions.append('actual written prefix is shorter than the independent read selector extent')
+        return False
+    if production.get('placement_match') is not True:
+        conditions.append('actual prefix has not matched its original request, raw byte counts and endpoint placement')
+        return False
+
+    from .production import HostWrite, WorkWrite
+    if type(write_row.writer) is WorkWrite:
+        outcome = production.get('outcome')
+        from .work import WorkOutcomeKind
+        if outcome is None or outcome.ticket != write_row.writer.ticket:
+            conditions.append('actual endpoint write has no exact work outcome')
+            return False
+        if outcome.kind is not WorkOutcomeKind.COMPLETED:
+            conditions.append('failed, cancelled or still-pending work cannot satisfy read-after-completed-write')
+            return False
+        quiescence = ctx.quiescences.get(outcome.quiescence) if type(outcome.quiescence) is not Unresolved else None
+        if quiescence is None or quiescence.ticket != outcome.ticket:
+            conditions.append('completed work has no exact validated quiescence association')
+            return False
+    elif type(write_row.writer) is not HostWrite:
+        conditions.append('external establishment has no interpreted host/work completion for this endpoint rule')
+        return False
+    return True
+
+
 def resolve_support(ctx, support, fragment, read, *, budget):
     """Bounded interpretation shared with the detached validity query.
 
@@ -529,6 +677,7 @@ def resolve_support(ctx, support, fragment, read, *, budget):
     from .validity_stability import read_interval
 
     row, visibility = support['row'], support['visibility']
+    issue_start = len(ctx.issues)
     paths, conditions = [], list(support.get('conditions', ()))
     if not budget.spend('support_joins', path=f'contribution_supports[{row.id}]'):
         return {'row': row, 'status': 'TRUNCATED', 'paths': (), 'conditions': tuple(conditions)}
@@ -543,7 +692,10 @@ def resolve_support(ctx, support, fragment, read, *, budget):
                 or expected['row'].id != production['row'].id)):
             matched = False
     if type(visibility) is OrderedVisibility:
-        if _queue(ctx, read['read']) is None or type(write.writer) is not WorkWrite:
+        if type(read['read'].placement) is EndpointContent:
+            matched = False
+            conditions.append('queue order alone does not establish endpoint read-after-completed-write visibility')
+        elif _queue(ctx, read['read']) is None or type(write.writer) is not WorkWrite:
             matched = False
         else:
             paths.append(point_order(ctx, WorkEnd(write.writer.ticket),
@@ -570,13 +722,9 @@ def resolve_support(ctx, support, fragment, read, *, budget):
             placement = read['read'].placement
             matched = (matched and type(placement) is EndpointContent
                        and target_key(placement.target) == target_key(domain.target))
-            root = read.get('observation_root')
-            requirement = None if root is None else ctx.observation_requirements.get(root.requirement)
-            # Q root/target/protocol identity checks preserve the requested
-            # association. No existing parser interprets endpoint visibility,
-            # so equality of two FactRefs must not grant a successful rule.
-            matched = False
-            conditions.append('endpoint read/flush/persistence protocol is unsupported')
+            matched = (matched and _endpoint_visibility_matches(
+                ctx, support, read, production, budget,
+                f'contribution_supports[{row.id}]', conditions))
         else:
             matched = False
         begin, _ = read_interval(ctx, read)
@@ -585,15 +733,21 @@ def resolve_support(ctx, support, fragment, read, *, budget):
         else:
             matched = False
         if type(write.writer) is WorkWrite:
-            paths.append(point_order(ctx, WorkEnd(write.writer.ticket), visibility.established, budget=budget))
+            completed = WorkEnd(write.writer.ticket)
+            if completed != visibility.established:
+                paths.append(point_order(ctx, completed, visibility.established, budget=budget))
         elif production is not None and 'established' in production:
-            paths.append(point_order(ctx, production['established'], visibility.established, budget=budget))
+            established = production['established']
+            if established != visibility.established:
+                paths.append(point_order(ctx, established, visibility.established, budget=budget))
     else:
         matched = False
     matched = matched and all(path['status'] == 'CONDITIONAL' for path in paths)
     if any(path['status'] == 'ASSUMPTION' for path in paths):
         conditions.append('causal path contains unsupported/unparsed assumptions')
-    return {'row': row, 'status': 'TRUNCATED' if budget.truncated else 'MATCHED' if matched else 'MISSING',
+    status = ('TRUNCATED' if budget.truncated else 'CONTRADICTED'
+              if len(ctx.issues) > issue_start else 'MATCHED' if matched else 'MISSING')
+    return {'row': row, 'status': status,
             'domain': support.get('domain'), 'visibility': visibility, 'paths': tuple(paths),
             'conditions': tuple(dict.fromkeys(conditions)), 'gaps': support.get('gaps', ())}
 

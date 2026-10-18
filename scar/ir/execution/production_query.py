@@ -13,12 +13,13 @@ from scar.ir.provenance import _byte_bounds, _width
 from scar.ir.v2.evidence import EvidenceNodeKind, EvidenceRelation
 from scar.ir.v2.values import ValueGraph
 from .common import Unresolved
-from .content import ObservationConsumer, VersionRef
-from .content_validation import artifact_key, point_scope
+from .content import EndpointContent, ObservationConsumer, VersionRef
+from .content_validation import artifact_key, point_scope, target_key
 from .coordinates import OccurrencePhase, OccurrencePoint
 from .coverage import RegionRef
 from .ids import ContentReadID
 from .production import InventorySourceRef, RawRecordRef, SourceEdgeRef, SourceEndpointRef
+from .endpoint_protocol import same_materialization
 from .source_validation import resolve_endpoint
 from .work import MaterializationRef
 from .validity_budget import ValidityBudget
@@ -238,6 +239,23 @@ def _endpoints(ctx, candidate, budget, gaps):
 
 
 def _spatial(ctx, facets, demand, budget, path):
+    endpoint = demand.get('endpoint_extent')
+    if type(endpoint) is dict and endpoint.get('kind') == 'endpoint-byte-range':
+        other = facets
+        if type(other) is not dict or other.get('kind') != 'endpoint-byte-range':
+            return 'unresolved'
+        if not budget.take('selector_rank', path, 1):
+            return 'unresolved'
+        if target_key(endpoint['target']) != target_key(other['target']):
+            # Distinct declared ResourceInstances need not be physically
+            # disjoint; retain a possible alias until a scoped native rule can
+            # establish that fact.
+            return 'possible_overlap'
+        left_start, left_end = endpoint['offset_bytes'], endpoint['offset_bytes'] + endpoint['length_bytes']
+        right_start, right_end = other['offset_bytes'], other['offset_bytes'] + other['length_bytes']
+        if left_start == left_end or right_start == right_end:
+            return 'disjoint'
+        return 'disjoint' if left_end <= right_start or right_end <= left_start else 'overlap'
     region = demand.get('selector')
     if type(region) is not RegionRef:
         return 'unresolved'
@@ -301,6 +319,33 @@ def _relevance(ctx, candidate, demand, lineage, budget):
         if not budget.take('association_joins', f'{candidate["id"]}.placement'):
             break
         placement, original = write['placement'], write['row'].placement
+        demand_placement = demand.get('placement')
+        if (type(original) is EndpointContent and type(demand_placement) is EndpointContent
+                and type(write.get('endpoint_request')) is dict
+                and type(demand.get('endpoint_extent')) is dict):
+            request = write['endpoint_request']
+            extent = demand['endpoint_extent']
+            overlap = _spatial(ctx, request, {'endpoint_extent': extent}, budget,
+                               str(candidate['id']))
+            if overlap in ('overlap', 'possible_overlap'):
+                labels.add('possible_invalidator')
+            if placement is None or placement[0] is None:
+                candidate['conditions'].append('endpoint_write_materialization_unresolved')
+                continue
+            mat, _selector = placement
+            same_version = (demand['version'] is not None
+                and (artifact_key(original.materialization.artifact), mat.value_version)
+                    == _version_key(demand['version']))
+            same_mat = same_materialization(original.materialization,
+                                             demand_placement.materialization)
+            same_target = target_key(original.target) == target_key(demand_placement.target)
+            if same_version and same_mat and same_target:
+                current.append(write)
+                candidate['conditions'].append(
+                    'endpoint request association is conditional; actual byte coverage and visibility remain separate')
+            elif overlap not in ('disjoint', 'different_allocation'):
+                candidate['conditions'].append('endpoint_write_demand_relevance_unresolved')
+            continue
         if placement is None or type(original) is Unresolved or placement[0] is None:
             candidate['conditions'].append('write_placement_unresolved')
             continue
@@ -440,9 +485,12 @@ def _production(ctx, read_id, traversal, gaps, *, include_context_gaps):
     materialization = None if type(read.placement) is Unresolved else read.placement.materialization
     version = (None if placement is None or placement[0] is None or materialization is None
                else VersionRef(materialization.artifact, placement[0].value_version))
+    endpoint_extent = resolved.get('endpoint_extent')
     demand = {'read': read, 'run': _run(ctx, resolved), 'placement': read.placement,
               'materialization': materialization, 'version': version,
-              'selector': None if placement is None else placement[1],
+              'selector': endpoint_extent if endpoint_extent is not None else
+                          None if placement is None else placement[1],
+              'endpoint_extent': endpoint_extent,
               'denotation': resolved['denotation'], 'state_support': read.support}
     lineage, lineage_keys = _lineage(ctx, version, traversal, gaps)
     candidates, pending = _universe(ctx, demand['run'], traversal, gaps)

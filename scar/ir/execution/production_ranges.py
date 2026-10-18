@@ -6,9 +6,10 @@ It preserves P diagnostics and original artifact-scoped regions verbatim.
 from scar.ir.program.model import DataValue, LiteralOrigin
 from scar.ir.program.providers import ProviderFactReference
 from .common import Unresolved
-from .content import StorageContent
-from .content_validation import artifact_key
+from .content import EndpointContent, ProtocolSelector, StorageContent
+from .content_validation import artifact_key, target_key
 from .coverage import CoverageStatus, RegionRef, _ValueCatalog, _storage_coverage
+from .endpoint_protocol import endpoint_extent, resolve_endpoint_profile, same_materialization
 from .production import BytePrefixWrite, RawRecordRef
 
 
@@ -88,15 +89,31 @@ def resolve_actual_range(ctx, write, actual_ref, rule, result, path):
     from .source_validation import resolve_raw
 
     actual = None
+    actual_endpoint = None
+    actual_profile = None
     if type(actual_ref) is RegionRef:
         graph = ctx.external_values(actual_ref.artifact, path)
         actual = None if graph is None else graph.regions.get(actual_ref.region)
         if graph is not None and actual is None:
             ctx.issue('production_actual_region', path, 'actual selector is absent from exact ValueGraph')
+    elif type(actual_ref) is ProtocolSelector:
+        if type(write.placement) is not EndpointContent:
+            ctx.issue('production_actual_endpoint_placement', path,
+                      'endpoint byte actual requires the original endpoint content placement')
+        else:
+            actual_profile = resolve_endpoint_profile(ctx, actual_ref, path)
+            if actual_profile is not None:
+                if actual_profile['operation'] != 'WRITE_ACTUAL':
+                    ctx.issue('production_actual_endpoint_profile', path,
+                              'actual endpoint selector requires a WRITE_ACTUAL profile')
+                actual_endpoint = endpoint_extent(ctx, write.placement.target, actual_profile, path,
+                    expected_operation='WRITE_ACTUAL',
+                    materialization=write.placement.materialization)
     else:
         ctx.gap('production_actual_unresolved', path, 'actual selector has no parsed byte geometry')
     placement_match = _actual_placement(ctx, write, actual_ref, actual, path)
     raw, profile, requested = None, None, None
+    actual_selector = actual_ref if type(actual_ref) is RegionRef else actual_endpoint
     if type(rule) is BytePrefixWrite:
         if type(write.stage) is not RawRecordRef:
             ctx.gap('production_profile_stage_unresolved', path, 'byte-prefix profile requires an exact original raw record stage')
@@ -106,7 +123,49 @@ def resolve_actual_range(ctx, write, actual_ref, rule, result, path):
                 profile = _profile(ctx, raw, path)
         resolved = ctx.resolved_writes.get(write.id)
         if type(write.placement) is not StorageContent:
-            ctx.gap('production_profile_placement_unresolved', path, 'byte-prefix rule does not interpret endpoint or unknown placements')
+            if type(write.placement) is not EndpointContent:
+                ctx.gap('production_profile_placement_unresolved', path,
+                        'byte-prefix rule requires an interpreted storage or endpoint placement')
+            elif type(write.placement.selector) is not ProtocolSelector:
+                ctx.gap('production_endpoint_request_unresolved', path,
+                        'endpoint placement has no original WRITE_REQUEST profile')
+            else:
+                resolved = ctx.resolved_writes.get(write.id)
+                requested = None if resolved is None else resolved.get('endpoint_request')
+                if requested is None:
+                    ctx.gap('production_endpoint_request_unresolved', path,
+                            'original endpoint request range was not interpreted')
+                if actual_endpoint is None:
+                    ctx.gap('production_endpoint_actual_unresolved', path,
+                            'actual endpoint range was not interpreted')
+                if requested is not None and actual_endpoint is not None:
+                    if (requested['operation'] != 'WRITE_REQUEST'
+                            or requested['profile'] != actual_endpoint['profile']):
+                        ctx.issue('production_endpoint_profile_pair', path,
+                                  'request and actual must use this exact fixed byte-prefix interpretation')
+                    if requested['offset_bytes'] != actual_endpoint['offset_bytes']:
+                        ctx.issue('production_endpoint_offset', path,
+                                  'actual endpoint prefix must use the exact request offset')
+                    if profile is not None and requested['length_bytes'] != profile['requested_bytes']:
+                        ctx.issue('production_endpoint_request_count', path,
+                                  'request profile length differs from the exact raw requested byte count')
+                    if profile is not None and actual_endpoint['length_bytes'] != profile['written_bytes']:
+                        ctx.issue('production_endpoint_actual_count', path,
+                                  'actual profile length differs from the exact raw written byte count')
+                    if (target_key(requested['target']) != target_key(actual_endpoint['target'])
+                            or not same_materialization(requested['materialization'],
+                                                       actual_endpoint['materialization'])):
+                        ctx.issue('production_endpoint_actual_placement', path,
+                                  'actual range must keep the original endpoint instance and exact destination MatRef')
+                    placement_match = bool(
+                        profile is not None and actual_profile is not None
+                        and requested['length_bytes'] == profile['requested_bytes']
+                        and actual_endpoint['length_bytes'] == profile['written_bytes']
+                        and actual_profile['operation'] == 'WRITE_ACTUAL'
+                        and requested['offset_bytes'] == actual_endpoint['offset_bytes'] == 0
+                        and target_key(requested['target']) == target_key(actual_endpoint['target'])
+                        and same_materialization(requested['materialization'],
+                                                 actual_endpoint['materialization']))
         elif resolved is not None and resolved['placement'] is not None:
             mat, selector = resolved['placement']
             if selector is not None:
@@ -140,7 +199,8 @@ def resolve_actual_range(ctx, write, actual_ref, rule, result, path):
             ctx.gap('production_result_unresolved', path, 'protocol result has no parsed exact raw/result correspondence')
     else:
         ctx.gap('production_rule_unresolved', path, rule.reason)
-    return {'actual': actual, 'requested': requested, 'rawprofile': profile,
+    return {'actual': actual_endpoint if actual_endpoint is not None else actual,
+            'actual_selector': actual_selector, 'requested': requested, 'rawprofile': profile,
             'raw': raw, 'protocol_result': result, 'placement_match': placement_match}
 
 

@@ -9,9 +9,10 @@ from __future__ import annotations
 from copy import deepcopy
 
 from .common import Unresolved
-from .content import VersionRef
-from .content_validation import artifact_key
+from .content import EndpointContent, VersionRef
+from .content_validation import artifact_key, target_key
 from .coverage import RegionRef, _ValueCatalog, _labeled_storage_coverage
+from .endpoint_protocol import same_materialization
 from .ids import ContentReadID
 from .production import RawRecordRef, WorkWrite
 from .production_query import production_shared
@@ -57,7 +58,8 @@ def _fragments(ctx, read, universe, budget):
         placement = resolved.get('placement')
         version = (None if placement is None or placement[0] is None or type(original.placement) is Unresolved
                    else VersionRef(original.placement.materialization.artifact, placement[0].value_version))
-        requested = None if placement is None else placement[1]
+        requested = (resolved.get('endpoint_request') if type(original.placement) is EndpointContent
+                     else None if placement is None else placement[1])
         productions = []
         for registry in (ctx.resolved_produced, ctx.resolved_establishments):
             for actual in registry.values():
@@ -78,7 +80,7 @@ def _fragments(ctx, read, universe, budget):
                 break
             pending = (actual is None and not terminal and type(original.writer) is WorkWrite
                        and not source_result['blocked'])
-            selected = actual['row'].actual if actual is not None else requested if pending else None
+            selected = (actual.get('actual_selector') if actual is not None else requested if pending else None)
             same_version = (version is not None and expected is not None
                 and artifact_key(version.artifact) == artifact_key(expected.artifact)
                 and version.version == expected.version)
@@ -112,15 +114,175 @@ def _fragments(ctx, read, universe, budget):
 
 def _coverage(ctx, required, fragments, budget):
     offers = []
-    for fragment in fragments:
+    pending_fragment_range = None
+    for index, fragment in enumerate(fragments):
         if not budget.spend('coverage_offers', path='validity.coverage-offers'):
+            pending_fragment_range = (index, len(fragments))
             break
-        if type(fragment['actual']) is RegionRef:
+        if type(fragment['actual']) is RegionRef or (
+                type(fragment['actual']) is dict
+                and fragment['actual'].get('kind') == 'endpoint-byte-range'):
             offers.append((fragment['label'], fragment['actual']))
-    if type(required) is not RegionRef:
+    endpoint_required = (type(required) is dict
+                         and required.get('kind') == 'endpoint-byte-range')
+    if endpoint_required:
+        compatible = tuple((label, offer) for label, offer in offers
+                           if type(offer) is dict and offer.get('kind') == 'endpoint-byte-range')
+        incompatible = tuple((label, offer) for label, offer in offers
+                             if not (type(offer) is dict
+                                     and offer.get('kind') == 'endpoint-byte-range'))
+        result = _endpoint_coverage(required, compatible, budget)
+    elif type(required) is RegionRef:
+        compatible = tuple((label, offer) for label, offer in offers if type(offer) is RegionRef)
+        incompatible = tuple((label, offer) for label, offer in offers if type(offer) is not RegionRef)
+        result = _labeled_storage_coverage(required, compatible,
+            catalog=_ValueCatalog.from_snapshots(ctx.snapshots), budget=budget)
+    else:
         return _empty_coverage(required, 'endpoint selector has no interpreted byte/extent coverage rule')
-    return _labeled_storage_coverage(required, tuple(offers),
-        catalog=_ValueCatalog.from_snapshots(ctx.snapshots), budget=budget)
+    if incompatible:
+        # Preserve candidates from other physical selector families for
+        # diagnosis, but never hand an endpoint descriptor to storage geometry
+        # (or a RegionRef to endpoint arithmetic). Same logical version is not
+        # a placement or byte-range mapping.
+        result = {**result, 'unmatched_offers': incompatible,
+            'gaps': (*result.get('gaps', ()), {
+                'code': 'coverage_selector_family_unmatched',
+                'path': 'validity.coverage',
+                'message': 'offers from another physical selector family cannot cover this demand without an explicit mapping',
+            })}
+    else:
+        result = {**result, 'unmatched_offers': ()}
+    if pending_fragment_range is not None:
+        result = {**result, 'status': 'UNRESOLVED', 'truncated': True,
+                  'pending_fragment_range': pending_fragment_range,
+                  'gaps': (*result.get('gaps', ()), {
+                      'code': 'coverage_offer_scan_truncated',
+                      'path': 'validity.coverage-offers',
+                      'message': 'unvisited contribution fragments remain in the parent contributions inventory',
+                  })}
+    else:
+        result = {**result, 'pending_fragment_range': None}
+    return result
+
+
+def _endpoint_coverage(required, offered, budget):
+    """Coverage for one exact endpoint instance/MatRef over zero-based bytes.
+
+    The accepted profile is zero-offset only, so each offer is a prefix. The
+    read profile supplies the independent required extent; production never
+    shrinks that denominator.
+    """
+    path = 'validity.endpoint-coverage'
+    before = budget.used
+    required_cost = 1 + max(1, required['length_bytes'].bit_length() // 64 + 1)
+    if not budget.spend('endpoint_geometry', required_cost, path=path):
+        return {'status': 'UNRESOLVED', 'required': required,
+            'offered': tuple(item for _, item in offered), 'geometry': None,
+            'intersections': (), 'portions': (), 'symbolic_whole': (),
+            'budget_used': budget.used - before,
+            'gaps': ({'code': 'endpoint_geometry_truncated', 'path': path,
+                      'message': 'shared budget ended before endpoint range derivation'},),
+            'unmatched_offers': (),
+            'pending_offers': tuple(label for label, _ in offered),
+            'pending_portions': (), 'truncated': True,
+            'source_runtime_verified': False, 'transformation_authorized': False}
+    length = required['length_bytes']
+    if type(length) is not int or length <= 0 or required['offset_bytes'] != 0:
+        return _empty_coverage(required, 'endpoint profile does not define a nonempty zero-offset read range')
+    accepted, unmatched = [], []
+    max_prefix = 0
+    pending_offers = ()
+    offer_scan_complete = True
+    for index, (label, offer) in enumerate(offered):
+        cost = 1 + max(1, offer['length_bytes'].bit_length() // 64 + 1)
+        if not budget.spend('endpoint_geometry', cost, path=path):
+            pending_offers = tuple(item_label for item_label, _ in offered[index:])
+            offer_scan_complete = False
+            break
+        same_endpoint = target_key(offer['target']) == target_key(required['target'])
+        same_mat = same_materialization(offer['materialization'], required['materialization'])
+        if same_endpoint and same_mat and offer['offset_bytes'] == 0:
+            accepted.append((label, offer))
+            max_prefix = max(max_prefix, min(length, offer['length_bytes']))
+        else:
+            unmatched.append(label)
+
+    # Keep a coarse, exact prefix summary even if detailed boundary labeling
+    # runs out of budget. It is only a lower bound when offer scanning stopped.
+    covered = [(0, max_prefix)] if max_prefix > 0 else []
+    missing = (((max_prefix, length),) if offer_scan_complete and max_prefix < length
+               else () if offer_scan_complete else None)
+    portions, intersections = [], []
+    pending_portions = ()
+    if budget.truncated:
+        boundaries_complete = False
+    else:
+        # Building the set touches every accepted prefix; charge before doing
+        # that work. The two endpoints are included in the charge.
+        build_cost = len(accepted) + 2
+        if not budget.spend('endpoint_boundary_build', build_cost, path=path):
+            boundaries_complete = False
+        else:
+            boundaries = {0, length}
+            for _label, offer in accepted:
+                boundaries.add(min(length, offer['length_bytes']))
+            sort_cost = len(boundaries) * (1 + len(boundaries).bit_length())
+            if not budget.spend('endpoint_boundary_sort', sort_cost, path=path):
+                boundaries_complete = False
+            else:
+                ordered = tuple(sorted(boundaries))
+                boundaries_complete = True
+
+    if boundaries_complete:
+        boundary_pairs = tuple((left, right) for left, right in zip(ordered, ordered[1:])
+                               if right > left)
+        for pair_index, (left, right) in enumerate(boundary_pairs):
+            # Each portion scans the full accepted offer list to build labels.
+            # Charge the complete cost before scanning it, so a partial label
+            # tuple can never look complete.
+            if not budget.spend('endpoint_portion_labels', 1 + len(accepted), path=path):
+                # Retain the already-budgeted boundary sequence with a cursor;
+                # copying a potentially large suffix after exhaustion would
+                # itself be unbudgeted work.
+                pending_portions = {'boundaries': ordered,
+                                    'next_pair_index': pair_index}
+                break
+            labels = tuple(label for label, offer in accepted if offer['length_bytes'] >= right)
+            portions.append({'start': left, 'stop': right, 'labels': labels})
+            if labels:
+                intersections.append({'interval': (left, right), 'labels': labels})
+    elif not budget.truncated:
+        # The inputs were scanned but the boundary representation was not.
+        pending_portions = {'boundaries': None, 'next_pair_index': 0,
+                            'required_interval': (0, length)}
+
+    truncated = budget.truncated
+    if truncated:
+        status = 'UNRESOLVED'
+    elif max_prefix >= length:
+        status = 'COVERED'
+    else:
+        status = 'INCOMPLETE'
+    if not offer_scan_complete:
+        status = 'UNRESOLVED'
+    gaps = []
+    if unmatched:
+        gaps.append({'code': 'endpoint_range_scope_unmatched', 'path': path,
+                     'message': 'offers with another endpoint instance or MatRef do not cover this independent read selector'})
+    if truncated:
+        gaps.append({'code': 'endpoint_geometry_truncated', 'path': path,
+                     'message': 'endpoint geometry stopped at the shared query budget; unvisited offers or portions remain unresolved'})
+    geometry = {'endpoint': required['target'], 'materialization': required['materialization'],
+                'required_intervals': ((0, length),),
+                'covered_intervals': tuple(covered),
+                'missing_intervals': missing}
+    return {'status': status, 'required': required,
+            'offered': tuple(item for _, item in offered), 'geometry': geometry,
+            'intersections': tuple(intersections), 'portions': tuple(portions),
+            'symbolic_whole': (), 'budget_used': budget.used - before, 'gaps': tuple(gaps),
+            'unmatched_offers': tuple(unmatched), 'pending_offers': pending_offers,
+            'pending_portions': pending_portions, 'truncated': truncated,
+            'source_runtime_verified': False, 'transformation_authorized': False}
 
 
 def _same_production(support, fragment):

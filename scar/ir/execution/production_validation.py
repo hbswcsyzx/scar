@@ -5,6 +5,8 @@ from scar.ir.v2.common import Completeness
 from .common import Unresolved
 from .content import NativeOutputRef
 from .content_validation import artifact_key, native_port, resolve_placement
+from .content import EndpointContent, ProtocolSelector
+from .endpoint_protocol import endpoint_extent, resolve_endpoint_profile, source_byte_input
 from .coordinates import OccurrencePhase, OccurrencePoint
 from .effects import effect_context, resolve_canonical_effect
 from .ids import OperationOccurrenceID
@@ -156,6 +158,25 @@ def write_errors(ctx):
                 if inventory is not None and run is not None and inventory.run != run:
                     ctx.issue('production_source_run', path, 'source inventory and writer belong to different runs')
         placement = resolve_placement(ctx, row.placement, path)
+        endpoint_profile, endpoint_request, byte_input = None, None, None
+        if type(row.placement) is EndpointContent:
+            if type(row.placement.selector) is ProtocolSelector:
+                endpoint_profile = resolve_endpoint_profile(ctx, row.placement.selector, path)
+                if endpoint_profile is not None:
+                    if endpoint_profile['operation'] != 'WRITE_REQUEST':
+                        ctx.issue('production_endpoint_profile_role', path,
+                                  'endpoint write placement requires a WRITE_REQUEST profile')
+                    endpoint_request = endpoint_extent(ctx, row.placement.target, endpoint_profile, path,
+                        expected_operation='WRITE_REQUEST',
+                        materialization=row.placement.materialization)
+                    byte_input = source_byte_input(ctx, row, {'writer': writer}, path)
+                    if (byte_input is not None and endpoint_request is not None
+                            and endpoint_request['length_bytes'] != byte_input['extent']['length_bytes']):
+                        ctx.issue('production_endpoint_request_length', path,
+                                  'write request byte length differs from the unique original source ContentRead geometry')
+            else:
+                ctx.gap('production_endpoint_profile_unresolved', path,
+                        'endpoint write requires an explicit WRITE_REQUEST ProtocolSelector')
         if (type(row.writer) is WorkWrite and writer is not None
                 and type(row.placement) is not Unresolved):
             from .work_validation import check_work_materialization
@@ -178,7 +199,9 @@ def write_errors(ctx):
         ctx.gap('production_state_content_unverified', path, 'original state/value and source endpoints do not prove physical content/version production')
         ctx.resolved_writes[row.id] = {'row': row, 'writer': writer, 'production': row.production,
             'value': value, 'effect': effect, 'placement': placement, 'stage': stage,
-            'sources': tuple(sources), 'gaps': tuple(ctx.gaps[start:])}
+            'sources': tuple(sources), 'gaps': tuple(ctx.gaps[start:]),
+            'endpoint_profile': endpoint_profile, 'endpoint_request': endpoint_request,
+            'source_byte_input': byte_input}
 
 
 def produced_errors(ctx):
@@ -222,6 +245,7 @@ def produced_errors(ctx):
         ctx.gap('production_native_protocol_unverified', path, 'parsed declaration does not establish physical write/native applicability, source authority or content stability')
         ctx.resolved_produced[row.id] = {'row': row, 'write': write, 'outcome': outcome,
             'frontier': frontier, 'protocol_result': outcome.protocol_result, 'rawprofile': profile,
+            'actual_selector': ranges['actual_selector'],
             'placement_match': ranges['placement_match'],
             'actual': actual, 'requested': requested, 'conditions': ('native/source applicability remains unverified',),
             'gaps': tuple(ctx.gaps[start:])}

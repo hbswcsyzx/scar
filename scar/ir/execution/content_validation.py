@@ -15,6 +15,9 @@ from .content import (
     ObservationConsumer, ProtocolSelector, ResourceConsumer, StorageContent,
 )
 from .coordinates import AccessRef, InitialEntry, OccurrencePhase, OccurrencePoint, UseRef
+from .endpoint_protocol import (
+    endpoint_extent, resolve_endpoint_profile, same_fact_reference,
+)
 from .effects import effect_context, resolve_canonical_effect
 from .ids import OperationOccurrenceID
 from .coverage import CoverageStatus, RegionRef, _ValueCatalog, _storage_coverage
@@ -347,13 +350,27 @@ def resolve_placement(ctx, placement, path):
     if type(placement.selector) is Unresolved:
         ctx.gap('content_selector_unresolved', path, placement.selector.reason)
     elif type(placement.selector) is ProtocolSelector:
-        ctx.gap('content_selector_protocol_unverified', path, 'endpoint selector has no parsed native protocol interpretation')
+        profile = resolve_endpoint_profile(ctx, placement.selector, path)
+        if profile is None:
+            ctx.gap('content_selector_protocol_unverified', path,
+                    'endpoint selector has no interpreted byte-prefix profile')
     else:
         resolve_subject(ctx, placement.selector, path)
         ctx.gap('content_endpoint_selector_alignment', path, 'canonical selector needs endpoint/protocol correspondence')
     if mat.region is not None:
         ctx.issue('content_endpoint_storage', path, 'endpoint-backed content cannot discard a known storage-backed materialization region')
     return mat, placement.selector
+
+
+def _content_interval(ctx, consumer, root):
+    from .content import NativeWorkRead
+    if type(consumer) is HostConsumer:
+        return consumer.interval
+    if type(consumer) is ResourceConsumer and type(consumer.read) is NativeWorkRead:
+        return consumer.read.interval
+    if type(consumer) is ObservationConsumer and root is not None:
+        return root.interval
+    return None
 
 
 def content_errors(ctx):
@@ -514,6 +531,34 @@ def content_errors(ctx):
                 ctx.issue('content_missing_state_support', path, 'boundary read omits original state input occurrence')
             ctx.gap('content_invoke_read_unverified', path, 'invoke boundary state transport is not a native read/footprint proof')
         placement = resolve_placement(ctx, row.placement, path)
+        endpoint_profile, endpoint_range = None, None
+        if type(row.placement) is EndpointContent:
+            if type(row.placement.selector) is ProtocolSelector:
+                endpoint_profile = resolve_endpoint_profile(ctx, row.placement.selector, path)
+                if endpoint_profile is not None:
+                    if endpoint_profile['operation'] != 'READ':
+                        ctx.issue('content_endpoint_profile_role', path,
+                                  'endpoint content read requires a READ byte profile')
+                    endpoint_range = endpoint_extent(ctx, row.placement.target, endpoint_profile, path,
+                        expected_operation='READ', materialization=row.placement.materialization)
+                    interval = _content_interval(ctx, consumer, root)
+                    if interval is None:
+                        ctx.gap('content_endpoint_read_interval_unresolved', path,
+                                'endpoint read has no original protocol interval to bind its profile')
+                    else:
+                        interval_profile = resolve_endpoint_profile(ctx, interval.protocol, path)
+                        if interval_profile is not None:
+                            if (interval_profile['operation'] != 'READ'
+                                    or not same_fact_reference(
+                                        interval_profile['reference'], endpoint_profile['reference'])):
+                                ctx.issue('content_endpoint_read_profile', path,
+                                          'endpoint selector and actual read interval use different profile facts')
+                        else:
+                            ctx.gap('content_endpoint_read_profile_unresolved', path,
+                                    'read interval profile has no exact supported artifact')
+            else:
+                ctx.gap('content_endpoint_read_profile_unresolved', path,
+                        'endpoint byte read requires an explicit ProtocolSelector extent')
         if type(consumer) is ResourceConsumer and type(row.placement) is not Unresolved:
             work = ctx.submissions.get(consumer.read.ticket)
             if work is not None:
@@ -545,7 +590,8 @@ def content_errors(ctx):
                 'host state at anchor does not prove stable content, lifetime or visibility across the actual read interval')
         ctx.resolved_content_reads[row.id] = {'read': row, 'subject': subject, 'actual': actual,
             'denotation': denotation, 'placement': placement, 'basis': basis,
-            'consumer_input': input_basis, 'observation_root': root}
+            'consumer_input': input_basis, 'observation_root': root,
+            'endpoint_profile': endpoint_profile, 'endpoint_extent': endpoint_range}
 
 
 __all__ = ['content_errors', 'check_interval', 'check_target']

@@ -287,7 +287,8 @@ def call_errors(ctx) -> None:
         activation_id = ctx.activation_of(occurrence.id)
         if activation_id is not None:
             terminal_occurrences_by_activation.setdefault(activation_id, []).append(occurrence)
-    visit_chains = _visit_chains(ctx) if ctx.model.call_activations else ({}, {})
+    visit_chains = _visit_chains(ctx)
+    ctx.host_visit_chains = visit_chains
 
     for row in ctx.model.call_activations:
         rows_by_caller.setdefault(row.caller, []).append(row.id)
