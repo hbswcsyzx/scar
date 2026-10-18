@@ -11,13 +11,22 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
-The [R3.1 call activation and work-set connections](docs/M1_CALL_ACTIVATION_API.md)
+The [R3.2 Q and original execution evidence composition](docs/M1_PIPELINE_COMPOSITION_API.md)
+passes [677 component checks / 13 criteria and 5,011 clean frozen full tests](docs/M1_PIPELINE_COMPOSITION_ACCEPTANCE.md)
+(`31bf2e4`). All previous 4,951 case identities and 68 fixtures survive.
+Typed query scopes preserve expected obligations when Q rows are missing;
+original data/control/state/call/source/work associations share one budget and
+one fresh external context. This composes supplied models, not automatic program
+recovery or transformation proof. R3.3, full M0–M2 and automatic LeWM
+simplification remain open; no new speedup was measured.
+
+The earlier [R3.1 call activation and work-set connections](docs/M1_CALL_ACTIVATION_API.md)
 pass [591 component checks / 8 criteria and 4,951 clean frozen full tests](docs/M1_CALL_ACTIVATION_ACCEPTANCE.md)
 (`881cbfb`). All previous 4,826 test identities and 65 fixtures survive.
 Original argument/completion/state ports remain canonical; declared routes do
 not prove runtime identity. Execution v7 retains v1–v6 bytes. Whole R3,
 complete M0–M2 and automatic LeWM simplification remain open. Next is complete
-Q-rooted load/consume/save composition; no new speedup was measured.
+Q-rooted load/consume/save composition at that checkpoint; R3.2 is recorded above.
 
 The [R2.3-V content validity/support interfaces](docs/M1_VALIDITY_API.md)
 now connect source-derived labeled actual/future coverage, exact alternatives,

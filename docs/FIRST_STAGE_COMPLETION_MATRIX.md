@@ -4,6 +4,12 @@
 它不把已实现组件重新命名为完整程序模型。阶段顺序见
 [WHOLE_PROGRAM_MODEL_PLAN.md](WHOLE_PROGRAM_MODEL_PLAN.md)。
 
+最新限定接口：[R3.2 验收](M1_PIPELINE_COMPOSITION_ACCEPTANCE.md)通过 677 项组件、
+冻结 `31bf2e4` 的 5,011 项全仓；原 4,951 case/68 fixtures 全保留。准确 Q scope 的
+合同分母、完整原 inventory、数据/状态/实际控制/调用/独立来源/work/lifetime 已有
+统一只读组合查询。scope 恢复、output 对应、facet 目标/基数、endpoint/native 协议、
+R3.3 全过程模型与下表其它缺口仍在原分母，未关闭第一阶段。
+
 ## 1. 当前类型分解及各自职责
 
 Operation、Value、StateLocation、Region、Resource 是规范实体；输入/输出是端口

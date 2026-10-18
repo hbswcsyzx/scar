@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **Current R3.2 checkpoint (2026-10-18):**
+> [Scoped Q and supplied execution composition](M1_PIPELINE_COMPOSITION_API.md)
+> passes [677 component cases / 13 criteria and 5,011 clean frozen full tests](M1_PIPELINE_COMPOSITION_ACCEPTANCE.md)
+> (`31bf2e4`). All prior 4,951 cases/68 fixtures survive; current 567 source
+> hashes and 69 fixtures match. This preserves original obligations and typed
+> dependency/evidence paths with one shared budget, not automatic recovery or
+> optimization proof. Next is R3.3 generic full IO-pipeline/OS composition, then
+> remaining selector/literal/C2/D3/M2 obligations. Full M0–M2 stays open; no new
+> LeWM speedup. Earlier checkpoint notes below retain their historical scope.
+
 > **R3.1 interface checkpoint (2026-10-18):**
 > [call activation and work-set connections](M1_CALL_ACTIVATION_API.md) pass
 > **591 component cases / 8 criteria / 16.611s**, all 555 source hashes unchanged.

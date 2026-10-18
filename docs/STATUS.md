@@ -1,5 +1,23 @@
 # Current evidence and remaining work
 
+## R3.2 supplied-model Q and execution composition accepted (2026-10-18)
+
+[API](M1_PIPELINE_COMPOSITION_API.md), [acceptance](M1_PIPELINE_COMPOSITION_ACCEPTANCE.md):
+**677 component cases / 13 criteria / 20.8s**; all **567** source hashes unchanged.
+One clean frozen `31bf2e4` passes **5,011 full tests / 486.670s / 1,028,760 KiB**,
+zero failures/errors/skips, four warnings. All prior **4,951** case identities
+and **68** fixtures survive; current **69** fixtures match. Protected checkouts
+remain unchanged/clean; only owned basetemp removed after child exit.
+Query-only exact contract/owner scopes preserve missing requirement/root/read
+obligations, with facet target/cardinality gaps retained. Full supplied-model
+inventory and original Use/state/CFG/call/source/work/lifetime associations
+share one fresh external context and one derived budget; independent source
+edges do not require ContentRead. An absent scope stays unresolved, not empty success.
+These are declared model associations, not automatic capture or transformation
+authority. R3.3 generic load→consume→write→flush/close, endpoint/native protocols,
+selector/literal/C2/D3 and complete M0–M2 remain open. No new LeWM recovery,
+optimization or speedup was measured. Earlier checkpoint scopes follow.
+
 ## R3.1 call activation and work-set connections accepted (2026-10-18)
 
 [API](M1_CALL_ACTIVATION_API.md) and [acceptance](M1_CALL_ACTIVATION_ACCEPTANCE.md):

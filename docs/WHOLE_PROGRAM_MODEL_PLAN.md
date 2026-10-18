@@ -42,8 +42,13 @@ R2.3-D/P 已接原端口、消费者/Q 根、独立来源与实际产出；接�
 [R3.1 动态调用及 work 物化集合连接](M1_CALL_ACTIVATION_API.md)现通过
 [591 项组件与冻结 `881cbfb` 的 4,951 项全仓验收](M1_CALL_ACTIVATION_ACCEPTANCE.md)，
 原参数/返回/状态端口没有复制；未知入口不能豁免已知线程冲突，声明不证明真实对应。
-下一步按[R3.2/R3.3](M1_RESOURCE_COMPOSITION_PLAN.md)连接完整 Q requirement 分母下
-load→produce→consume→output→release 的跨接口组合，明确端点、原生边界与生命周期。
+[R3.2 Q 与原执行证据组合](M1_PIPELINE_COMPOSITION_API.md)现通过
+[677 项组件与冻结 `31bf2e4` 的 5,011 项全仓验收](M1_PIPELINE_COMPOSITION_ACCEPTANCE.md)。
+完整 supplied-model 与期望合同义务独立保留；scope 未恢复不空成功，原 source effects
+不依赖 read 偶遇；原端口、actual/future 与生命周期分别回查，一份 fresh context 与
+一个派生总预算不代表 runtime/capture 完整。下一步按原[R3.3](M1_RESOURCE_COMPOSITION_PLAN.md)
+验收通用 load→produce→consume→output→flush/close/release 模型与有界 OS 见证，
+明确端点、原生边界与生命周期，不把声明组合冒充自动建图。
 随后继续 selector/
 literal、剩余家族及 M2 构造分母。**完整第一阶段仍未完成。** 不增加 detector/backend，
 不以手工夹具冒充 LeWM 自动恢复或以测试耗时冒充加速。

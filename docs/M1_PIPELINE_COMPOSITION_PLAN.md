@@ -74,3 +74,20 @@ write→flush/close 完整模型和有界 OS 见证仍在原分母；如果本�
 恢复和 endpoint read/flush/persist 解释分别记录。R3 之后仍有 selector/literal、
 C2/D3 等接口及 M2 全构造分母；完整 M0–M2 经逐项验收后，按用户要求停下讲解。
 当前不宣称整个程序建模完成，也不提前启动新的优化变换。
+
+## 4. 接续 R3.3 的有序交付与验收
+
+1. 先审原 endpoint/protocol/requirement/state 接口，明确文件/缓冲/设备端点的
+   read、actual prefix、write、flush、close 与持久化各自前后条件；不能因端点
+   是 FactRef 就认为协议已解释。不新建一套 producer、Use 或 lifecycle 图。
+2. 用通用多函数流水线组合原调用端口：load→表示/物化→提交→等待/消费→write→
+   flush/close。输入、参数/状态、返回与外部效果根同页回查；正常及 RAISE/partial/
+   pending/cleanup 路径都保留。模型测试声明与自动源恢复严格区分。
+3. 采用 exclusively owned 临时文件/有限 OS 观测核对选定协议；所有等待有界，
+   不触碰用户数据或共享缓存。真实 OS 行为不自动证明 IR 与该运行完整对应；
+   close、flush 与 durable persistence 不等价。未支持协议精确列出范围。
+4. 独立审查模型与见证对应，逐条关闭原 R3 分母；针对具体缺口做组件验收后，
+   干净实现提交、一次全仓、守恒/保护核对、归档和推送。完整 M0–M2 不随 R3
+   单门自动完成，后续 selector/literal/C2/D3/M2 仍须按完整矩阵自行验收。
+
+此顺序是下一门计划，不是本门已实现或已验证的结果；不增加 detector/backend。
