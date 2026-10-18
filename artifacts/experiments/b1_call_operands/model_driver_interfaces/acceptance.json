@@ -1,0 +1,30 @@
+{
+  "schema": "scar.body-outcome-frontier-acceptance",
+  "schema_version": 1,
+  "status": "PASS",
+  "scope": "Static derived first-outcome query only; driver field review remains REVISE.",
+  "implementation_revision": "9f3d7e796f2fb975528b123d009f1dacb84602ba",
+  "source_sha256": "2407cdea2418e8f9dc023ef8ab37709f1172a11bd75b4b134bcbb5ff69a58f84",
+  "source_file_count": 406,
+  "fixture_file_count": 26,
+  "component_checks": 517,
+  "new_query_checks": 7,
+  "component_seconds": 7.384,
+  "full_counts": {
+    "passed": 3549,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "total": 3549
+  },
+  "full_seconds": 433.22301615960896,
+  "max_rss_kib": 1030428,
+  "driver_field_review": "REVISE",
+  "full_first_stage_complete": false,
+  "full_c2_complete": false,
+  "driver_implemented": false,
+  "source_recovery_verified": false,
+  "runtime_resumption_verified": false,
+  "transformation_verified": false,
+  "lewm_speedup_measured": false
+}

@@ -150,6 +150,7 @@ Created-close没有body入口但仍可能释放已绑定引用，不能捏造bod
    直接实施，当前完整C2.0未关闭。
 2. **Frontier依赖组件：**将§4.1接入已有ProgramIndex和唯一共享派生函数，正例/
    错入口/多cut/循环/cleanup/真实payload/private排除自验收；不变更wire或body规则。
+   已通过517项组件及冻结`9f3d7e7`的3,549项全仓，C2D完整字段仍未因此通过。
 3. **D1规范连接：**Create/raw request/association、专用BodyDrive与各输入/outcome，
    复用current SSA与helper INVOKE；旧schema拒绝新能力，不只交孤立records。
 4. **D2阶段关系：**permit单次/owner同步转发、嵌套与无body路径、session保持/完成、

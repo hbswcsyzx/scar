@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## Driver modeling review and first-outcome query (2026-10-18; full pending)
+## Driver modeling review and first-outcome query (2026-10-18)
 
 [Driver review](M1_DRIVER_INTERFACES.md) rejects the old raw-THROW packet,
 combined claim/session and region-wide outcome assumptions. Eight lifecycle
@@ -12,8 +12,11 @@ The [first-outcome frontier](M1_BODY_OUTCOME_FRONTIER.md) now connects to
 the existing canonical body/CFG and ProgramIndex: stop at the first Suspend,
 Return or Raise from a selected entry/landing, without following temporal edges
 or exposing saved private values. Seven new API tests and all **517 component
-checks / 7.384s** pass, with 406 source hashes unchanged. Frozen full regression
-and archive acceptance remain pending; the prior
+checks / 7.384s** pass. Frozen `9f3d7e7` passes **3,549 full tests / 433.223s /
+1,030,428KiB**, zero failures/errors/skips and three existing warnings. HEAD,
+clean status, 406 source hashes and 26 fixture hashes match before/after; the
+owned basetemp was removed. See the [archive](../artifacts/experiments/b1_call_operands/model_driver_interfaces/README.md).
+The prior
 3,542-test body receipt below remains scoped to `e6b4723`. Complete M0–M2 and
 automatic LeWM modeling/simplification remain unfinished.
 

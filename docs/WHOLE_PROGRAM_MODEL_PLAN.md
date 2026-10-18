@@ -90,6 +90,11 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 ## 5. 当前证据锚点
 
+- [C2F首outcome查询](M1_BODY_OUTCOME_FRONTIER.md)517项组件/7.384s、冻结`9f3d7e7`
+  的3,549项全仓/433.223s通过，406源文件及26份fixture哈希前后一致。新查询只
+  派生已有图中本次entry/landing的首终端，不跨temporal边。driver审查发现旧字段
+  不足，8组生命周期断言、另3组claim/raw请求观察约束后续修订，不关闭C2D.0。
+
 - [C2B静态body](M1_RESUMPTION_BODY_ACCEPTANCE.md)已验收：499项组件/7.077s，
   冻结`e6b4723`的3,542项全仓/432.922s，403源文件及26份fixture前后哈希一致。
   实现通用temporal输入、上下文与binding/C1组合，不证明完整driver或运行恢复。

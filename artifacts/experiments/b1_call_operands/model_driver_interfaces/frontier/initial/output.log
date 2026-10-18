@@ -1,0 +1,23 @@
+....F..                                                                  [100%]
+=================================== FAILURES ===================================
+_____________ test_valid_nonterminating_body_has_an_empty_frontier _____________
+
+    def test_valid_nonterminating_body_has_an_empty_frontier():
+        graph = _nonterminating_body()
+>       require_valid(graph)
+
+tests/unit/test_body_outcome_frontier.py:168: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='frontier.diverging'), regions=(Region(id=RegionID(value='frontier.diverging'), label...ier.diverging.attach.operand'), caller=ValueID(value='frontier.diverging.attach.caller')),), frame_context_detaches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: state_parameters at program_block:frontier.diverging.loop: all blocks must carry exactly the region state domains
+
+scar/ir/program/validation.py:630: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_body_outcome_frontier.py::test_valid_nonterminating_body_has_an_empty_frontier
+1 failed, 6 passed in 0.47s

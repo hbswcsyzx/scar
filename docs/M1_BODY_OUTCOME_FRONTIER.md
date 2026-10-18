@@ -1,7 +1,7 @@
 # C2F：当前body入口的outcome frontier
 
-2026-10-18；基线`012db08`。查询已实施，7项新定向测试与517项组件检查通过；
-**冻结全仓回归待完成，尚未关闭发布验收。** 这是
+2026-10-18；基线`012db08`。查询已实施，7项新定向测试、517项组件与冻结
+`9f3d7e7`的3,549项全仓通过；**静态派生查询组件已验收。** 这是
 [driver复审](M1_DRIVER_INTERFACES.md)确定的必要派生关系，完整driver字段仍开放。
 
 ## 模型含义
@@ -58,4 +58,9 @@ landing B → ordinary CFG → Return
 不扫描Tensor内容或维护第二份图。
 
 组件报告：`artifacts/experiments/b1_call_operands/model_driver_interfaces/component/final.json`。
-实现冻结、单次全仓、独立归档核验和推送仍须完成；完整driver不属于本组件。
+冻结实现`9f3d7e796f2fb975528b123d009f1dacb84602ba`的完整回归3,549项PASS、
+零失败/错误/跳过，三条既有warnings。单次运行433.223s、峰值1,030,428KiB；
+HEAD/clean/406源文件与26份fixture哈希前后完全相同，只清理自己basetemp。
+这些时间是验收成本，不是workload性能。完整证据与核验脚本见
+[归档](../artifacts/experiments/b1_call_operands/model_driver_interfaces/README.md)。
+完整driver、source/runtime对应和第一阶段都不属于本组件已完成的范围。
