@@ -159,7 +159,8 @@ def _fields(document):
 
 def test_v5_roundtrip_reaches_all_production_records_and_target_variants(production_model):
     document = to_dict(production_model)
-    assert document["schema_version"] == SCHEMA_VERSION == 5
+    assert document["schema_version"] == 5
+    assert SCHEMA_VERSION >= 5
     assert all(_fields(document)[field] for field in PRODUCTION_FIELDS)
     restored = loads(dumps(production_model))
     assert restored == production_model
@@ -267,7 +268,8 @@ def test_production_wire_rejects_malformed_new_nested_fields(production_model):
 
 
 def test_schema_version_six_remains_unsupported(production_model):
-    for value in (6, True, "5"):
+    # Keep the historical case ID; the next unsupported capability moved to 7.
+    for value in (7, True, "5"):
         with pytest.raises(ValueError, match="schema_version"):
             dumps(production_model, schema_version=value)
         doc = to_dict(production_model)

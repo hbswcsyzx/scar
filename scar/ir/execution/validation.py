@@ -62,7 +62,8 @@ class _Context:
                      'queue_order_profiles', 'event_records', 'queue_waits',
                      'denotations', 'work_evidence_bindings', 'observation_requirements',
                      'observation_roots', 'content_reads', 'source_inventories',
-                     'source_bridges', 'writes', 'produced'):
+                     'source_bridges', 'writes', 'produced', 'established_productions',
+                     'target_lifetime_events', 'order_associations', 'contribution_supports'):
             registry = {}
             for row in getattr(model, name):
                 if row.id in registry:
@@ -420,6 +421,9 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
         write_errors(ctx)
         if not ctx.issues:
             produced_errors(ctx)
+    if not ctx.issues:
+        from .validity_validation import validity_errors
+        validity_errors(ctx)
     # Evidence reference presence is not native/source/runtime applicability.
     ctx.gap('source_runtime_unverified', 'model', 'declared occurrence/identity links have not been established by a runtime adapter')
     return ValidationReport(tuple(ctx.issues), tuple(ctx.gaps)), ctx

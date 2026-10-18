@@ -14,9 +14,10 @@ from scar.ir.program.drivers import BodyDriveResult
 from scar.ir.program.resumption import ResumeInput, SavedInput, saved_actual_use
 from .common import Unresolved
 from .coordinates import AccessRef, ControlTransfer, OccurrencePhase, OccurrencePoint, UseOccurrence
+from .effects import effect_context, resolve_canonical_effect
 from .ids import BlockVisitID, OperationOccurrenceID, QueuePrefixID, RegionActivationID, ValueOccurrenceID
 from .validation import _analyze
-from .work import ActualCompletionState, InvokeBoundaryStateEffect, WithinOperation
+from .work import InvokeBoundaryStateEffect, WithinOperation
 from .order import EventSignal, PrefixEnd, WorkEnd, WorkStart
 
 
@@ -59,6 +60,7 @@ class ExecutionIndex:
         from .content_validation import content_errors
         from .source_validation import source_inventory_errors, source_bridge_errors
         from .production_validation import write_errors, produced_errors
+        from .validity_validation import validity_errors
         ctx = copy(self._ctx)
         ctx.issues, ctx.gaps, ctx._gap_keys = [], [], set()
         ctx.snapshots = ExternalSnapshots(ctx.value_graphs, ctx.evidence_graphs, ctx.semantic_graphs,
@@ -70,6 +72,8 @@ class ExecutionIndex:
         write_errors(ctx)
         if not ctx.issues:
             produced_errors(ctx)
+        if not ctx.issues:
+            validity_errors(ctx)
         if ctx.issues:
             raise ValueError('; '.join(f'{x.code} at {x.path}: {x.message}' for x in ctx.issues))
         return ctx
@@ -117,6 +121,19 @@ class ExecutionIndex:
         """Inspect independent source candidates, not an authoritative writer set."""
         from .production_query import production
         return deepcopy(production(self._content_context(), identity, budget=budget))
+
+    def validity(self, identity, *, budget=4096):
+        """Conditional source-derived contribution coverage and interval safety."""
+        from .validity_budget import ValidityBudget
+        from .validity_query import validity
+        from .ids import ContentReadID
+        # Reject malformed budgets before replaying any external artifact.
+        ValidityBudget(budget)
+        if type(identity) is not ContentReadID:
+            raise TypeError('validity requires an exact ContentReadID')
+        identity.__post_init__()
+        # The validity query already detaches its complete returned view once.
+        return validity(self._content_context(), identity, budget=budget)
 
     def write(self, identity):
         """Original writer/effect/placement association and its unresolved joins."""
@@ -205,28 +222,24 @@ class ExecutionIndex:
     def canonical_effect(self, effect):
         """Resolve original access/input and actual landing; no copied effects."""
         ctx = self._ctx
-        if type(effect) is AccessRef:
-            effect.__post_init__()
-            occurrence = ctx.occurrences[effect.operation]
-            operation = ctx.core_operations[occurrence.operation]
-            if effect.index >= len(operation.accesses):
-                raise ValueError('effect index does not select an original StateAccess')
-            access = operation.accesses[effect.index]
-            return deepcopy({'kind': 'access', 'reference': effect, 'operation': occurrence,
-                'access': access, 'before': ctx.uses.get((occurrence.id, access.before)),
-                'after': None if access.after is None else ctx.results.get((occurrence.id, access.after))})
-        if type(effect) is not InvokeBoundaryStateEffect:
-            raise TypeError('canonical_effect requires exact AccessRef or InvokeBoundaryStateEffect')
-        if effect not in ctx.work_effects:
-            raise ValueError('invoke boundary effect must be an existing validated work association')
-        occurrence = ctx.occurrences[effect.invocation]
-        operation = ctx.core_operations[occurrence.operation]
-        transfer = ctx.outgoing.get(effect.invocation)
-        post = None if type(effect.post) is not ActualCompletionState else ctx.values[effect.post.formal]
-        return deepcopy({'kind': 'invoke_boundary', 'reference': effect, 'operation': occurrence,
-            'input': ctx.uses.get((effect.state_input.operation, effect.state_input.use)),
-            'actual_transfer': transfer, 'post': effect.post if post is None else post,
-            'successor': None if transfer is None else operation.terminator.successors[transfer.successor_index]})
+        if type(effect) is AccessRef and effect.operation not in ctx.occurrences:
+            raise KeyError(effect.operation)
+        if type(effect) is InvokeBoundaryStateEffect and effect.invocation not in ctx.occurrences:
+            raise KeyError(effect.invocation)
+        issues = []
+        view = resolve_canonical_effect(effect_context(
+            ctx, issue=lambda code, path, message: issues.append((code, path, message)),
+            gap=lambda _code, _path, _message: None), effect, 'canonical_effect')
+        if issues:
+            raise ValueError('; '.join(
+                f'{code} at {path}: {message}' for code, path, message in issues))
+        if view is None:
+            raise ValueError('effect does not resolve to an original canonical operation port')
+        if view['kind'] == 'access':
+            return deepcopy({key: view[key] for key in
+                ('kind', 'reference', 'operation', 'access', 'before', 'after')})
+        return deepcopy({key: view[key] for key in
+            ('kind', 'reference', 'operation', 'input', 'actual_transfer', 'post', 'successor')})
 
     def work(self, identity):
         """Keep host completion, terminal observations and quiescence separate."""

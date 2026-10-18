@@ -134,6 +134,22 @@ class OutcomeProductionID(Identifier):
     prefix = "exec_outcome_production"
 
 
+class EstablishedProductionID(Identifier):
+    prefix = "exec_established_production"
+
+
+class TargetLifetimeEventID(Identifier):
+    prefix = "exec_target_lifetime_event"
+
+
+class OrderAssociationID(Identifier):
+    prefix = "exec_order_association"
+
+
+class ContributionSupportID(Identifier):
+    prefix = "exec_contribution_support"
+
+
 __all__ = [
     "RunID", "ProcessInstanceID", "HostThreadInstanceID", "RegionActivationID",
     "ExecutionSegmentID", "BlockVisitID", "OperationOccurrenceID",
@@ -145,4 +161,5 @@ __all__ = [
     "DenotationID", "WorkEvidenceBindingID", "ContentReadID",
     "ObservationRequirementID", "ObservationRootID",
     "EvidenceInventoryID", "SourceBridgeID", "WriteAssociationID", "OutcomeProductionID",
+    "EstablishedProductionID", "TargetLifetimeEventID", "OrderAssociationID", "ContributionSupportID",
 ]

@@ -1,11 +1,12 @@
 """Check declared work against canonical ports without inferring ready or free."""
 from collections import deque
 
-from scar.ir.program.model import BlockArgument, CompletionResult, ReferenceValue, StateVersionValue, TerminatorKind
+from scar.ir.program.model import ReferenceValue, StateVersionValue
 from scar.ir.program.resources import ResourceRole
 from scar.ir.v2.common import Completeness
 from .common import EvidencePoint, Unresolved
 from .coordinates import AccessRef, OccurrencePhase, OccurrencePoint, UseRef
+from .effects import effect_context, resolve_canonical_effect
 from .ids import (
     OperationOccurrenceID, QueuePrefixID, ResourceAccessID, ValueOccurrenceID,
     WorkQuiescenceID,
@@ -14,9 +15,8 @@ from .resources import (
     AllocationTarget, InstanceTarget, ProcessRealm, ProcessTarget, RunRealm, ThreadTarget,
 )
 from .work import (
-    ActualCompletionState, BorrowRelease, DirectExecution, ExternalWorkSource,
-    HandleTarget, InvokeBoundaryStateEffect, MaterializationRef, QueueStart,
-    Queued, WithinOperation,
+    BorrowRelease, DirectExecution, ExternalWorkSource, HandleTarget,
+    MaterializationRef, QueueStart, Queued, WithinOperation,
 )
 
 
@@ -102,66 +102,14 @@ def work_errors(ctx):
         return graph, row
 
     def check_effect(effect, work, path):
-        if type(effect) is AccessRef:
-            occurrence = ctx.occurrences.get(effect.operation)
-            if occurrence is None:
-                issue('effect_operation', path, 'access references an unknown operation occurrence')
-                return
-            op = ctx.core_operations[occurrence.operation]
-            if effect.index >= len(op.accesses):
-                issue('effect_access', path, 'effect does not select an original StateAccess')
-                return
-            identity = effect.operation
-        else:
-            identity = effect.invocation
-            occurrence = ctx.occurrences.get(identity)
-            if occurrence is None:
-                issue('effect_operation', path, 'boundary effect references an unknown invocation')
-                return
-            op = ctx.core_operations[occurrence.operation]
-            if op.terminator is None or op.terminator.kind is not TerminatorKind.INVOKE:
-                issue('invoke_kind', path, 'boundary state effect requires an actual canonical INVOKE')
-                return
-            original = ctx.core_uses.get(effect.state_input.use)
-            if (effect.state_input.operation != identity or original is None
-                    or original[0].id != op.id or effect.state_input.use not in op.invoke_arguments):
-                issue('invoke_input', path, 'state input is not an exact original invoke argument Use')
-                return
-            value = ctx.core_values[original[1].value]
-            if type(value) is not StateVersionValue:
-                issue('invoke_input', path, 'boundary effect input must be a StateVersionValue Use')
-                return
-            use = ctx.uses.get((identity, effect.state_input.use))
-            if use is None or type(use.value) is Unresolved:
-                gap('invoke_input_unobserved', path, 'actual state input occurrence is not established')
-            else:
+        view = resolve_canonical_effect(effect_context(ctx, issue=issue, gap=gap), effect, path)
+        if view is None:
+            return
+        identity = effect.operation if type(effect) is AccessRef else effect.invocation
+        if view['kind'] == 'invoke_boundary':
+            use = view['input']
+            if use is not None and type(use.value) is not Unresolved:
                 ctx.check_support((use.value,), OccurrencePoint(identity, OccurrencePhase.BEFORE), path)
-            if type(effect.post) is Unresolved:
-                gap('invoke_post_unresolved', path, effect.post.reason)
-            else:
-                post = effect.post
-                if post.successor_index >= len(op.terminator.successors):
-                    issue('invoke_successor', path, 'post does not select a canonical completion successor')
-                    return
-                successor = op.terminator.successors[post.successor_index]
-                transfer = ctx.outgoing.get(identity)
-                if transfer is None:
-                    gap('invoke_completion_unobserved', path, 'no actual completion transfer establishes this post')
-                elif transfer.successor_index != post.successor_index:
-                    issue('invoke_actual_edge', path, 'post selects a different outcome than this invocation actually took')
-                formal = ctx.values.get(post.formal)
-                core = None if formal is None else ctx.core_values[formal.value]
-                if (type(core) is not StateVersionValue or type(core.origin) is not BlockArgument
-                        or core.origin.block != successor.block or core.location != value.location):
-                    issue('invoke_formal', path, 'post must reference the state formal of this exact completion and location')
-                    return
-                argument = successor.arguments[core.origin.index]
-                if type(argument) is not CompletionResult or argument.index != post.result_index:
-                    issue('invoke_result', path, 'post index is not the exact original CompletionResult at this formal')
-                if transfer is not None and formal.origin != transfer.target:
-                    issue('invoke_formal_visit', path, 'post formal comes from another landing traversal')
-                if ctx.value_activation(post.formal) != ctx.activation_of(identity):
-                    issue('invoke_formal_scope', path, 'post formal belongs to another body activation')
         run, _ = operation_scope(identity, path)
         same_run(scopes.get(work.id, (None, None))[0], run, path)
         if type(work.origin) is WithinOperation and work.origin.operation != identity:

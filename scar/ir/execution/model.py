@@ -22,6 +22,9 @@ from .production import (
     EvidenceInventoryBinding, OutcomeProduction, SourceEndpointBridge,
     WriteAssociation,
 )
+from .validity import (
+    ContributionSupport, EstablishedProduction, OrderAssociation, TargetLifetimeEvent,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -91,6 +94,10 @@ class ExecutionModel:
     source_bridges: tuple[SourceEndpointBridge, ...] = ()
     writes: tuple[WriteAssociation, ...] = ()
     produced: tuple[OutcomeProduction, ...] = ()
+    established_productions: tuple[EstablishedProduction, ...] = ()
+    target_lifetime_events: tuple[TargetLifetimeEvent, ...] = ()
+    order_associations: tuple[OrderAssociation, ...] = ()
+    contribution_supports: tuple[ContributionSupport, ...] = ()
 
     def __post_init__(self):
         if type(self.snapshot) is not ProgramSnapshot:
@@ -120,6 +127,8 @@ TABLE_TYPES = {
     'content_reads': ContentRead,
     'source_inventories': EvidenceInventoryBinding, 'source_bridges': SourceEndpointBridge,
     'writes': WriteAssociation, 'produced': OutcomeProduction,
+    'established_productions': EstablishedProduction, 'target_lifetime_events': TargetLifetimeEvent,
+    'order_associations': OrderAssociation, 'contribution_supports': ContributionSupport,
 }
 
 

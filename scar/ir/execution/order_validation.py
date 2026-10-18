@@ -12,6 +12,7 @@ from scar.ir.program.resources import ResourceRole
 from scar.ir.program.resumption import saved_actual_use
 from .common import EvidencePoint, Unresolved
 from .coordinates import AccessRef, OccurrencePhase, OccurrencePoint
+from .effects import effect_context, resolve_canonical_effect
 from .ids import QueuePrefixID
 from .order import EventSignal, PrefixEnd, WorkEnd, WorkStart
 from .resources import InstanceTarget, ProcessRealm, RunRealm
@@ -164,42 +165,53 @@ def order_errors(ctx):
         if work is not None and effect not in work.effects:
             issue('generation_effect', path, 'generation must select an original effect of this marker work')
             return None, None
+        effect_issue_codes = {
+            'effect_operation': 'order_generation_effect',
+            'effect_access': 'order_generation_effect',
+            'invoke_kind': 'order_generation_effect',
+            'invoke_input': 'order_generation_effect',
+            'invoke_successor': 'order_generation_effect',
+            'invoke_actual_edge': 'order_generation_effect',
+            'invoke_formal': 'order_generation_effect',
+            'invoke_result': 'order_generation_effect',
+            'invoke_formal_visit': 'order_generation_effect',
+            'invoke_formal_scope': 'order_generation_effect',
+        }
+        effect_gap_codes = {
+            'invoke_input_unobserved': 'order_generation_unresolved',
+            'invoke_completion_unobserved': 'order_generation_unresolved',
+            'invoke_post_unresolved': 'order_generation_unresolved',
+        }
+        view = resolve_canonical_effect(effect_context(
+            ctx,
+            issue=lambda code, p, message: ctx.issue(
+                effect_issue_codes.get(code, 'order_generation_effect'), p, message),
+            gap=lambda code, p, message: ctx.gap(
+                effect_gap_codes.get(code, 'order_generation_unresolved'), p, message),
+        ), effect, path)
+        if view is None:
+            return None, None
         if type(effect) is AccessRef:
-            occurrence = ctx.occurrences.get(effect.operation)
-            if occurrence is None:
-                issue('generation_effect', path, 'generation references a missing operation')
-                return None, None
-            op = ctx.core_operations[occurrence.operation]
-            if effect.index >= len(op.accesses):
-                issue('generation_effect', path, 'generation does not select an original StateAccess')
-                return None, None
-            access = op.accesses[effect.index]
+            access = view['access']
             if access.after is None:
                 issue('generation_write', path, 'record generation must define a post-state')
                 return access.location, None
-            post = ctx.results.get((effect.operation, access.after))
+            post = view['after']
             if post is None:
                 gap('generation_unobserved', path, 'record post-state occurrence was not captured')
             return access.location, None if post is None else post.id
-        # INVOKE effects must already have passed work_errors' actual-edge,
-        # result-index and landing-formal checks. Unscoped external copies cannot.
-        occurrence = ctx.occurrences.get(effect.invocation)
-        original = ctx.core_uses.get(effect.state_input.use)
-        if (occurrence is None or original is None or effect.state_input.operation != effect.invocation
-                or original[0].id != occurrence.operation):
-            issue('generation_effect', path, 'invoke generation has a missing or mismatched original input endpoint')
-            return None, None
-        if type(effect.post) is ActualCompletionState and effect.post.formal not in ctx.values:
-            issue('generation_effect', path, 'invoke generation post-state occurrence is absent')
-            return None, None
+        # For an unscoped marker, retain the existing global boundary-membership
+        # condition. A shared resolver does not itself activate an event marker.
         if effect not in ctx.work_effects:
             gap('generation_boundary_unresolved', path, 'external invoke state needs a validated work boundary')
             return None, None
-        if type(effect.post) is not ActualCompletionState:
+        if type(view['declared_post']) is not ActualCompletionState:
             gap('generation_unresolved', path, 'invoke record has no actual post-state')
             return None, None
-        post = ctx.values[effect.post.formal]
-        return ctx.core_values[post.value].location, post.id
+        if view['actual_transfer'] is None or view['formal'] is None:
+            gap('generation_unresolved', path, 'invoke completion has no observed post-state landing')
+            return view['input_location'], None
+        return view['input_location'], view['formal'].id
 
     # Intrinsic completion and explicit dependencies are conditional work-order
     # statements, not observations of completion or of successful production.

@@ -7,6 +7,7 @@ from scar.ir.program.model import (
     AccessMode, DataValue, ReferenceValue, StateVersionValue, TerminatorKind,
 )
 from scar.ir.v2.evidence import EvidenceGraph, EvidenceNodeKind as N, EvidenceRelation as R
+from scar.ir.v2.common import Completeness
 from .common import EvidencePoint, Unresolved
 from .content import (
     DataIdentity, EndpointContent, EvidenceEdgeRef, EvidenceObservationRef,
@@ -14,6 +15,7 @@ from .content import (
     ObservationConsumer, ProtocolSelector, ResourceConsumer, StorageContent,
 )
 from .coordinates import AccessRef, InitialEntry, OccurrencePhase, OccurrencePoint, UseRef
+from .effects import effect_context, resolve_canonical_effect
 from .ids import OperationOccurrenceID
 from .coverage import CoverageStatus, RegionRef, _ValueCatalog, _storage_coverage
 from .resources import AllocationTarget, InstanceTarget, ProcessRealm, ProcessTarget, ThreadTarget
@@ -105,16 +107,18 @@ def resolve_subject(ctx, subject, path):
         return {'subject': subject, 'operation': occurrence, 'use': original[1],
                 'actual': actual, 'value': value, 'definition': ctx.core_values[original[1].value],
                 'access': None, 'before': None}
-    if subject.index >= len(operation.accesses):
-        ctx.issue('content_subject_access', path, 'subject does not select an original StateAccess')
+    resolved = resolve_canonical_effect(effect_context(ctx, issue=lambda code, p, message: ctx.issue(
+        {'effect_operation': 'content_subject_operation', 'effect_access': 'content_subject_access'}.get(
+            code, 'content_subject_access'), p, message)), subject, path)
+    if resolved is None:
         return None
-    access = operation.accesses[subject.index]
+    access = resolved['access']
     if access.mode is AccessMode.WRITE:
         ctx.issue('content_subject_write', path, 'a write-only StateAccess is not a content read')
-    before = ctx.uses.get((subject.operation, access.before))
+    before = resolved['before']
     if before is None or type(before.value) is Unresolved:
         ctx.gap('content_subject_unobserved', path, 'StateAccess has no exact observed before state')
-    reference = None if access.reference is None else ctx.uses.get((subject.operation, access.reference))
+    reference = resolved['reference_use']
     return {'subject': subject, 'operation': occurrence, 'access': access, 'before': before,
             'reference': reference, 'value': None, 'actual': None, 'use': None}
 
@@ -488,11 +492,24 @@ def content_errors(ctx):
                     elif access.reference != consumer.subject.use:
                         ctx.issue('content_effect_reference', path, 'original StateAccess identifies another reference Use')
         elif type(row.effect) is InvokeBoundaryStateEffect:
-            if row.effect not in ctx.work_effects:
-                ctx.issue('content_invoke_effect', path, 'boundary effect must retain an existing validated work-effect association')
+            def invoke_effect_issue(code, p, message):
+                ctx.issue('content_invoke_effect', p, message)
+
+            view = resolve_canonical_effect(effect_context(
+                ctx, issue=invoke_effect_issue, gap=lambda _code, _path, _message: None), row.effect, path)
+            if view is not None:
+                if type(consumer) is ResourceConsumer:
+                    work = ctx.submissions.get(consumer.read.ticket)
+                    if work is not None and row.effect not in work.effects:
+                        if work.effects_coverage is Completeness.COMPLETE:
+                            ctx.issue('content_invoke_effect', path,
+                                      'boundary effect is absent from this consumer ticket complete effect list')
+                        else:
+                            ctx.gap('content_invoke_effect_unresolved', path,
+                                    'this consumer ticket has partial or unknown effect coverage')
             if subject is not None and row.effect.invocation != consumer.subject.operation:
                 ctx.issue('content_effect_owner', path, 'invoke effect belongs to a different operation occurrence')
-            original = ctx.uses.get((row.effect.state_input.operation, row.effect.state_input.use))
+            original = None if view is None else view['input']
             if original is not None and type(original.value) is not Unresolved and original.value not in row.support:
                 ctx.issue('content_missing_state_support', path, 'boundary read omits original state input occurrence')
             ctx.gap('content_invoke_read_unverified', path, 'invoke boundary state transport is not a native read/footprint proof')

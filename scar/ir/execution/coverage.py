@@ -380,4 +380,128 @@ def storage_coverage(required, offered, *, value_graphs, budget=4096):
     return _storage_coverage(required, offered, catalog=_ValueCatalog(value_graphs), budget=budget)
 
 
-__all__ = ["RegionRef", "CoverageStatus", "CoverageGap", "StorageCoverageResult", "storage_coverage"]
+def _labeled_storage_coverage(required, offered, *, catalog, budget):
+    """Preserve each offer's label while reusing the exact existing geometry.
+
+    This is a derived view, not a new selector or content proof. Labels name
+    caller-resolved fragments; the validity layer checks their version/domain.
+    All repeated geometry and the label sweep consume one shared query budget.
+    """
+    from .validity_budget import ValidityBudget
+
+    _record(required, RegionRef, "required region")
+    _exact(offered, tuple, "labeled offers")
+    _exact(catalog, _ValueCatalog, "per-query ValueGraph resolver")
+    _exact(budget, ValidityBudget, "shared validity budget")
+    seen = set()
+    for offer in offered:
+        _exact(offer, tuple, "labeled offer")
+        if len(offer) != 2:
+            raise ValueError("labeled offer must contain a label and region")
+        label, ref = offer
+        _exact(label, str, "coverage label")
+        if not label or label in seen:
+            raise ValueError("coverage labels must be nonempty and unique")
+        seen.add(label)
+        _record(ref, RegionRef, "labeled region")
+
+    started, intersections, gaps = budget.used, [], []
+
+    def geometry(refs):
+        if budget.truncated or budget.remaining == 0:
+            budget.mark_truncated('coverage.labels', 'no remaining shared budget for labeled geometry')
+            return None
+        result = _storage_coverage(required, refs, catalog=catalog, budget=budget.remaining)
+        budget.spend('geometry', result.budget_used, path='coverage.labels')
+        gaps.extend(result.gaps)
+        if any(gap.code == 'geometry_budget_exhausted' for gap in result.gaps):
+            budget.mark_truncated('coverage.labels', 'exact selector geometry exceeded the shared budget')
+        return result
+
+    union = geometry(tuple(ref for _, ref in offered))
+    symbolic, events = [], []
+    for label, ref in offered:
+        if not budget.spend('coverage_labels', path='coverage.labels.offer'):
+            break
+        single = geometry((ref,))
+        if single is None:
+            break
+        intersections.append({'label': label, 'region': ref, 'geometry': single})
+        if single.status is CoverageStatus.COVERED and single.covered_intervals is None:
+            symbolic.append(label)
+        for left, right in single.covered_intervals or ():
+            if not budget.spend('coverage_label_events', 2, path='coverage.labels.intersections'):
+                break
+            events.extend(((left, 1, label), (right, -1, label)))
+        if budget.truncated:
+            break
+
+    portions = []
+    if symbolic:
+        # A huge exact strided selector can be covered without enumerating
+        # holes. None here means the original symbolic selector, not zero bytes.
+        portions.append({'selector': required, 'interval': None,
+                         'labels': tuple(symbolic), 'symbolic': True})
+    elif union is not None and union.covered_intervals is not None:
+        # Mask the sweep by requested bytes. No bounding box fills their holes.
+        required_intervals = (*union.covered_intervals, *(union.missing_intervals or ()))
+        for left, right in required_intervals:
+            if not budget.spend('coverage_label_events', 2, path='coverage.labels.demand'):
+                break
+            events.extend(((left, 1, None), (right, -1, None)))
+        count = len(events)
+        if not budget.truncated and budget.spend('coverage_label_sort', count * (1 + count.bit_length()),
+                                                path='coverage.labels.sort'):
+            events.sort(key=lambda event: event[0])
+            active, requested, cursor = {}, 0, 0
+            while cursor < count:
+                position = events[cursor][0]
+                while cursor < count and events[cursor][0] == position:
+                    if not budget.spend('coverage_label_sweep', path='coverage.labels.sweep'):
+                        break
+                    _, delta, label = events[cursor]
+                    if label is None:
+                        requested += delta
+                    else:
+                        active[label] = active.get(label, 0) + delta
+                        if not active[label]:
+                            del active[label]
+                    cursor += 1
+                if budget.truncated or cursor == count:
+                    break
+                stop = events[cursor][0]
+                if requested and position < stop:
+                    cost = len(active) * (1 + len(active).bit_length()) + 1
+                    if not budget.spend('coverage_label_sweep', cost, path='coverage.labels.portion'):
+                        break
+                    labels = tuple(sorted(active))
+                    if portions and portions[-1]['labels'] == labels and portions[-1]['interval'][1] == position:
+                        portions[-1]['interval'] = (portions[-1]['interval'][0], stop)
+                    else:
+                        portions.append({'selector': required, 'interval': (position, stop),
+                                         'labels': labels, 'symbolic': False})
+
+    status = CoverageStatus.UNRESOLVED
+    if symbolic:
+        status = CoverageStatus.COVERED
+    elif union is not None and not budget.truncated:
+        if union.status is CoverageStatus.COVERED and all(item['labels'] for item in portions):
+            status = CoverageStatus.COVERED
+        elif union.status is CoverageStatus.INCOMPLETE:
+            status = CoverageStatus.INCOMPLETE
+    return {'status': status.value, 'required': required, 'offered': offered, 'geometry': union,
+            'intersections': tuple(intersections), 'portions': tuple(portions),
+            'symbolic_whole': tuple(symbolic), 'budget_used': budget.used - started,
+            'gaps': tuple(gaps), 'truncated': budget.truncated,
+            'source_runtime_verified': False, 'transformation_authorized': False}
+
+
+def labeled_storage_coverage(required, offered, *, value_graphs, budget=4096):
+    """Return labeled byte coverage, without granting content/visibility proof."""
+    from .validity_budget import ValidityBudget
+    return _labeled_storage_coverage(required, offered, catalog=_ValueCatalog(value_graphs),
+                                     budget=ValidityBudget(budget))
+
+
+__all__ = ["RegionRef", "CoverageStatus", "CoverageGap", "StorageCoverageResult", "storage_coverage",
+           "labeled_storage_coverage"]
