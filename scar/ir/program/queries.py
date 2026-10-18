@@ -345,6 +345,41 @@ class ProgramIndex:
     def producer(self, value_id: ValueID):
         return self.values[value_id].origin
 
+    def literal_evaluation(self, site) -> dict:
+        """Original production and optional content declaration, never identity proof."""
+        from .literal_validation import literal_site
+        from .literal_sources import CodeConstant, SourceExpression, UninterpretedConstant, UnlocatedLiteral
+        resolved = literal_site(self.graph, site)
+        row = next((row for row in self.graph.literal_evaluations if row.site == site), None)
+        operation = resolved["operation"]
+        conditions = []
+        if row is None:
+            conditions.append("content declaration is absent")
+        else:
+            if type(row.literal) is UninterpretedConstant:
+                conditions.append("content and its type mapping are uninterpreted: " + row.literal.reason)
+            else:
+                conditions.append("exact payload representation is checked; runtime content applicability is unverified")
+            if type(row.definition) is UnlocatedLiteral:
+                conditions.append("definition source is unlocated: " + row.definition.reason)
+            elif type(row.definition) is CodeConstant:
+                conditions.append("code-record context and co_consts slot have not been replayed or verified")
+            elif type(row.definition) is SourceExpression:
+                conditions.append("source expression span is declared, not an AST classification or replay")
+        conditions.extend((
+            "equal content establishes neither object identity nor future immutability",
+            "original effects, state, exceptions and producer remain unchanged",
+        ))
+        return {
+            "site": site, "row": row, **resolved,
+            "uses": tuple(self._uses[use.id] for use in operation.uses),
+            "literal": None if row is None else row.literal,
+            "definition": None if row is None else row.definition,
+            "conditions": tuple(conditions),
+            "source_runtime_verified": False, "value_identity_verified": False,
+            "transformation_authorized": False,
+        }
+
     def state_address(self, site: StateAddressSite) -> dict:
         """Project original state ports and optional address declarations.
 

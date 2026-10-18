@@ -14,7 +14,7 @@ import re
 from .common import ProofClaim, ProofStatus, SourceReference, SourceVersion
 from .contracts import EffectTarget, EffectTargetKind
 from ._validation import mapping_errors, record_errors, cycle_errors
-from ..literals import PythonLiteral
+from ..literals import PythonLiteral, require_legacy_literal
 from .ids import (
     ContractID,
     ControlRegionID,
@@ -258,10 +258,12 @@ class StaticValueSubstitution:
             raise TypeError("source must be SourceReference")
         if not isinstance(self.literal, PythonLiteral):
             raise TypeError("literal must be PythonLiteral")
+        require_legacy_literal(self.literal)
         if self.binding is not None and not isinstance(self.binding, StaticBindingID):
             raise TypeError("binding must be StaticBindingID or None")
 
     def as_dict(self) -> dict[str, Any]:
+        require_legacy_literal(self.literal)
         return {
             "static_value": self.static_value.as_dict(),
             "operation": self.operation.as_dict(),

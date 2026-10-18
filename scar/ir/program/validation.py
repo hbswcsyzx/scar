@@ -12,7 +12,7 @@ from .ids import UseID
 from .model import (
     AccessMode, Behavior, BlockArgument, CompletionResult, CompletionSuccessor,
     DataValue, ExitKind, FootprintKind, LocalBindingValue,
-    LiteralOrigin, OperationResult, ProgramGraph, ProtocolValue, ReferenceValue,
+    LiteralOrigin, is_literal_origin, OperationResult, ProgramGraph, ProtocolValue, ReferenceValue,
     StateVersionValue, TerminatorKind, UseRole, ValueKind, value_type,
 )
 from .control import PendingDispatchTerminator
@@ -156,6 +156,10 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
 
     from .state_address_validation import state_address_errors
     for code, path, message in state_address_errors(graph):
+        error(code, path, message)
+
+    from .literal_validation import literal_errors
+    for code, path, message in literal_errors(graph):
         error(code, path, message)
 
     def check_footprint(footprint, location, path):
@@ -415,7 +419,7 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
         block = operation_block[operation.id]
         for use in operation.uses:
             origin = values[use.value].origin
-            if isinstance(origin, LiteralOrigin):
+            if is_literal_origin(origin):
                 continue
             producer_block = (origin.block if isinstance(origin, BlockArgument)
                               else operation_block[origin.operation])

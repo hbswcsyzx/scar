@@ -98,7 +98,7 @@ from .optimization import (
     ValuePattern,
     ValueSubstitution,
 )
-from ..literals import LiteralKind, PythonLiteral
+from ..literals import PythonLiteral, require_legacy_literal
 from .semantic import (
     ControlRegion,
     ModuleDefinition,
@@ -184,6 +184,9 @@ def _wire_type(value: Any, expected: Any, path: str) -> None:
         for key, child in value.items():
             _wire_type(key, arguments[0], f"{path}.key")
             _wire_type(child, arguments[1], f"{path}.{key}")
+        return
+    if expected is PythonLiteral:
+        require_legacy_literal(PythonLiteral.from_dict(value))
         return
     if isinstance(expected, type) and issubclass(expected, Identifier):
         if expected is Identifier:
@@ -343,12 +346,9 @@ def _source(data: dict[str, Any]) -> SourceReference:
 
 
 def _python_literal(data: dict[str, Any]) -> PythonLiteral:
-    if not isinstance(data, dict) or set(data) != {"kind", "payload", "items"}:
-        raise ValueError("python_literal: expected exact kind/payload/items fields")
-    _record(data, PythonLiteral, "python_literal")
-    return PythonLiteral(
-        LiteralKind(data["kind"]), data.get("payload"),
-        tuple(_python_literal(item) for item in data.get("items", ())))
+    literal = PythonLiteral.from_dict(data)
+    require_legacy_literal(literal)
+    return literal
 
 
 def _effect_set(data: dict[str, Any]) -> EffectSet:

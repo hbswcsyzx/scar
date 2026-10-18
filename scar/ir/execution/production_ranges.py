@@ -3,7 +3,8 @@
 The fixed byte-prefix profile is a declaration parser, not a native adapter.
 It preserves P diagnostics and original artifact-scoped regions verbatim.
 """
-from scar.ir.program.model import DataValue, LiteralOrigin
+from scar.ir.program.model import DataValue, ExactLiteralOrigin, LiteralOrigin
+from scar.ir.literals import LiteralKind
 from scar.ir.program.providers import ProviderFactReference
 from .common import Unresolved
 from .content import EndpointContent, ProtocolSelector, StorageContent
@@ -189,9 +190,12 @@ def resolve_actual_range(ctx, write, actual_ref, rule, result, path):
                 ctx.issue('production_protocol_result', path, 'protocol result must reference this exact raw record payload')
         elif type(result) is not Unresolved and result in ctx.values:
             definition = ctx.core_values[ctx.values[result].value]
-            if (isinstance(definition, DataValue) and isinstance(definition.origin, LiteralOrigin)
-                    and type(definition.origin.value) is int and profile is not None):
-                if definition.origin.value != profile['written_bytes']:
+            origin = definition.origin
+            integer = (origin.value if type(origin) is LiteralOrigin and type(origin.value) is int
+                       else origin.literal.to_python() if type(origin) is ExactLiteralOrigin
+                       and origin.literal.kind is LiteralKind.INT else None)
+            if isinstance(definition, DataValue) and integer is not None and profile is not None:
+                if integer != profile['written_bytes']:
                     ctx.issue('production_protocol_result', path, 'literal protocol result conflicts with parsed produced bytes')
             else:
                 ctx.gap('production_result_unresolved', path, 'original result value has no decoded exact integer payload/port correspondence')

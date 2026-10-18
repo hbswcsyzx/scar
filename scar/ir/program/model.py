@@ -41,6 +41,10 @@ from scar.ir.program.providers import ProviderBinding, ProviderEnvelope, Provide
 from scar.ir.program.native import BoundaryRelation, NativeBoundary
 from scar.ir.program.state_modes import AccessMode
 from scar.ir.program.state_addresses import StateAddressRefinement
+from scar.ir.program.literal_sources import (ExactLiteralOrigin, LiteralDefinition,
+    UninterpretedConstant, UnlocatedLiteral, require_definition)
+from scar.ir.program.structured import ControlEdgeReference
+from scar.ir.literals import PythonLiteral
 from scar.ir.v2.ids import ValueSlotID
 
 
@@ -187,7 +191,12 @@ class OperationResult:
         _exact_nonnegative_int(self.index, "OperationResult.index")
 
 
-Origin: TypeAlias = LiteralOrigin | BlockArgument | OperationResult
+def is_literal_origin(origin: object) -> bool:
+    """Activation-local content origins; producer attachments are excluded."""
+    return isinstance(origin, (LiteralOrigin, ExactLiteralOrigin))
+
+
+Origin: TypeAlias = LiteralOrigin | ExactLiteralOrigin | BlockArgument | OperationResult
 
 
 @dataclass(frozen=True, slots=True)
@@ -198,13 +207,21 @@ class DataValue:
     data_type: str
 
     def __post_init__(self) -> None:
-        _value_fields(self.id, self.region, self.origin, allow_literal=True)
+        _value_fields(self.id, self.region, self.origin, allow_literal=True, allow_exact=True)
         _nonempty_text(self.data_type, "DataValue.data_type")
         if isinstance(self.origin, LiteralOrigin):
             expected_type = _literal_data_type(self.origin.value)
             if self.data_type != expected_type:
                 raise ValueError(
                     f"literal DataValue type must be {expected_type!r} for its exact builtin value")
+
+        if type(self.origin) is ExactLiteralOrigin:
+            from scar.ir.literals import literal_builtin_type
+            self.origin.__post_init__()
+            kind = literal_builtin_type(self.origin.literal)
+            expected_type = kind.__module__ + "." + kind.__qualname__
+            if self.data_type != expected_type:
+                raise ValueError(f"exact literal DataValue type must be {expected_type!r}")
 
 
 @dataclass(frozen=True, slots=True)
@@ -287,13 +304,17 @@ ProgramValueType: TypeAlias = ValueType | LocalBindingType | ProtocolValueType
 
 
 def _value_fields(identity: object, region: object, origin: object, *,
-                  allow_literal: bool = False) -> None:
+                  allow_literal: bool = False, allow_exact: bool = False) -> None:
     if not isinstance(identity, ValueID):
         raise TypeError("value.id must be ValueID")
     if not isinstance(region, RegionID):
         raise TypeError("value.region must be RegionID")
-    if not isinstance(origin, (LiteralOrigin, BlockArgument, OperationResult)):
+    if not isinstance(origin, (LiteralOrigin, ExactLiteralOrigin, BlockArgument, OperationResult)):
         raise TypeError("value.origin must be a supported Origin record")
+    if isinstance(origin, ExactLiteralOrigin) and type(origin) is not ExactLiteralOrigin:
+        raise TypeError("exact literal origin must have exact record type")
+    if isinstance(origin, ExactLiteralOrigin) and not allow_exact:
+        raise ValueError("ExactLiteralOrigin is valid only for DataValue")
     if isinstance(origin, LiteralOrigin) and not allow_literal:
         raise ValueError("LiteralOrigin is valid only for DataValue")
 
@@ -460,6 +481,48 @@ class CompletionResult:
 
     def __post_init__(self) -> None:
         _exact_nonnegative_int(self.index, "CompletionResult.index")
+
+
+@dataclass(frozen=True, slots=True)
+class InvokeLiteralResult:
+    edge: ControlEdgeReference
+    result: CompletionResult
+
+    def __post_init__(self):
+        if type(self.edge) is not ControlEdgeReference:
+            raise TypeError("literal completion requires exact ControlEdgeReference")
+        self.edge.__post_init__()
+        if type(self.edge.operation.value) is not str or not self.edge.operation.value:
+            raise ValueError("literal completion operation ID requires exact nonempty string")
+        if type(self.result) is not CompletionResult:
+            raise TypeError("literal completion requires exact CompletionResult")
+        self.result.__post_init__()
+
+
+@dataclass(frozen=True, slots=True)
+class LiteralEvaluation:
+    """Content declaration on an original producer, never an object identity."""
+    site: OperationResult | InvokeLiteralResult
+    literal: PythonLiteral | UninterpretedConstant
+    definition: LiteralDefinition = UnlocatedLiteral()
+
+    def __post_init__(self):
+        from scar.ir.literals import require_exact_literal
+        if type(self.site) not in (OperationResult, InvokeLiteralResult):
+            raise TypeError("literal evaluation requires exact original result site")
+        self.site.__post_init__()
+        if type(self.site) is OperationResult:
+            if type(self.site.operation) is not OperationID:
+                raise TypeError("literal result operation must be exact OperationID")
+            if type(self.site.operation.value) is not str or not self.site.operation.value:
+                raise ValueError("literal result operation ID requires exact nonempty string")
+        if type(self.literal) is PythonLiteral:
+            require_exact_literal(self.literal)
+        elif type(self.literal) is UninterpretedConstant:
+            self.literal.__post_init__()
+        else:
+            raise TypeError("literal evaluation payload must be exact or uninterpreted")
+        require_definition(self.definition)
 
 
 @dataclass(frozen=True, slots=True)
@@ -762,10 +825,17 @@ class ProgramGraph:
     session_updates: tuple[SessionUpdate, ...] = ()
     terminal_frame_releases: tuple[TerminalFrameRelease, ...] = ()
     state_address_refinements: tuple[StateAddressRefinement, ...] = ()
+    literal_evaluations: tuple[LiteralEvaluation, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
             raise TypeError("ProgramGraph.root must be RegionID")
+        evaluations = _tuple(self.literal_evaluations, "ProgramGraph.literal_evaluations")
+        if any(type(row) is not LiteralEvaluation for row in evaluations):
+            raise TypeError("literal_evaluations requires exact LiteralEvaluation records")
+        for row in evaluations:
+            row.__post_init__()
+        _unique(tuple(row.site for row in evaluations), "literal evaluation sites")
         refinements = _tuple(self.state_address_refinements,
                              "ProgramGraph.state_address_refinements")
         if any(type(row) is not StateAddressRefinement for row in refinements):
@@ -932,6 +1002,7 @@ class ProgramGraph:
 
 
 __all__ = [
+    "ExactLiteralOrigin", "LiteralEvaluation", "InvokeLiteralResult", "is_literal_origin",
     "AccessMode", "Behavior", "Block", "BlockArgument", "DataValue", "ExitKind",
     "CompletionResult", "CompletionSignature", "CompletionSuccessor", "ExitPort",
     "AsyncRequestCreate", "BodyDrive", "BodyDriveTerminator", "DriverInterface",

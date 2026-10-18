@@ -20,7 +20,7 @@ import re
 from typing import ClassVar
 
 from .record_codec import decode, encode, loads
-from .literals import LiteralKind, PythonLiteral
+from .literals import LiteralKind, PythonLiteral, require_legacy_literal
 from .v2._validation import cycle_errors, mapping_errors, record_errors
 from .v2.common import SourceReference
 from .v2.ids import (
@@ -195,6 +195,10 @@ class OperationSemantics:
     import_spec: ImportSpec | None = None
 
     def __post_init__(self) -> None:
+        if self.literal is not None:
+            if type(self.literal) is not PythonLiteral:
+                raise TypeError("literal must be exact PythonLiteral or None")
+            require_legacy_literal(self.literal)
         if not self.block:
             raise ValueError("operation block is required")
         _nonnegative(self.position, "operation position")

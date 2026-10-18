@@ -8,6 +8,7 @@ import math
 from types import UnionType
 from typing import Any, Union, get_args, get_origin, get_type_hints
 
+from .literals import PythonLiteral, _preflight_literal
 from .v2.ids import Identifier, LogicalValueID, ValueVersionID
 from .v2._validation import record_errors
 
@@ -50,6 +51,8 @@ def encode(value, *, record_tags=None):
 
 
 def _encode(value, tags):
+    if type(value) is PythonLiteral:
+        _preflight_literal(value)
     if isinstance(value, Enum):
         return value.value
     if isinstance(value, (Identifier, ValueVersionID)):
@@ -103,6 +106,9 @@ def _decode(expected, value, tags):
             raise ValueError("mapping must be a wire object")
         return {_decode(arguments[0], key, tags): _decode(arguments[1], item, tags)
                 for key, item in value.items()}
+    if expected is PythonLiteral:
+        tag = tags.get(PythonLiteral)
+        return PythonLiteral.from_dict(value, _record_tag=tag)
     if isinstance(expected, type) and issubclass(expected, Enum):
         if type(value) is not str:
             raise ValueError("enum must be a string")

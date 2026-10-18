@@ -6,7 +6,7 @@ are gaps, not fictitious writes, values, edges, or device ordering guarantees.
 """
 from collections import deque
 
-from scar.ir.program.model import BlockArgument, LiteralOrigin, OperationResult, StateVersionValue, TerminatorKind
+from scar.ir.program.model import BlockArgument, LiteralOrigin, OperationResult, StateVersionValue, TerminatorKind, is_literal_origin
 from scar.ir.program.resumption import SuspendTerminator
 from .common import Unresolved
 from .coordinates import CaptureIngress, InitialEntry, ResumeIngress
@@ -154,7 +154,7 @@ def derive_flow(ctx):
     occurrences = {(row.visit, row.operation): row for row in ctx.model.operations}
     literals = {}
     for row in ctx.model.values:
-        if isinstance(ctx.core_values[row.value].origin, LiteralOrigin):
+        if is_literal_origin(ctx.core_values[row.value].origin):
             literals.setdefault(row.origin, {})[row.value] = row.id
     end_env, end_state, end_definitions, end_state_definitions = {}, {}, {}, {}
     for identity in ordered:

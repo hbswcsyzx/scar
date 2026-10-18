@@ -58,7 +58,12 @@ from scar.ir.program.state_addresses import (
     Slice, StateAddressRefinement, StateAddressSite, StorageRange,
     UnknownOwner, UnknownSelection, WholeOwner,
 )
+from scar.ir.program.literal_sources import (
+    CodeConstant, ExactLiteralOrigin, LiteralDefinition, SourceExpression,
+    UninterpretedConstant, UnlocatedLiteral,
+)
 from scar.ir.program.model import (
+    LiteralEvaluation, InvokeLiteralResult, is_literal_origin,
     AccessMode, Behavior, Block, BlockArgument, CompletionResult,
     CompletionSignature, CompletionSuccessor, DataValue, ExitKind, ExitPort,
     Footprint, FootprintKind, LiteralOrigin, Operation, OperationResult, OrderEdge,
@@ -78,6 +83,9 @@ from .resumption import (
 )
 
 __all__ = [
+    "CodeConstant", "ExactLiteralOrigin", "LiteralDefinition", "SourceExpression",
+    "UninterpretedConstant", "UnlocatedLiteral", "LiteralEvaluation",
+    "InvokeLiteralResult", "is_literal_origin",
     "FrameContextAttach", "FrameContextDetach", "FrameContextInitial", "ResumableBody",
     "ResumableKind", "ResumeInput", "ResumeSlot", "ResumeSlotKind", "ResumeSuccessor",
     "SavedInput", "SavedRole", "SavedSlot", "SuspendTerminator", "SuspensionFlavor",

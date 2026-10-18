@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 
-from scar.ir.program.model import LiteralOrigin, ReferenceValue
+from scar.ir.program.model import LiteralOrigin, ReferenceValue, is_literal_origin
 from scar.ir.program.queries import ProgramIndex
 from scar.ir.program.ids import UseID
 from scar.ir.program.state_addresses import ExistingAccess, InvokeStateOperand
@@ -63,7 +63,7 @@ def state_address(ctx, effect, *, budget=4096):
             value = ctx.values[use.value]
         definition = ctx.core_values[site.use.value]
         denotation = None if value is None else ctx.resolved_denotations.get(value.id)
-        literal = definition.origin if type(definition.origin) is LiteralOrigin else None
+        literal = definition.origin if is_literal_origin(definition.origin) else None
         if value is not None and type(definition) is ReferenceValue and denotation is None:
             gap('state_address_owner_identity_unresolved', path,
                 'a captured reference occurrence does not establish an object identity')

@@ -12,6 +12,8 @@ from functools import lru_cache
 from types import UnionType
 from typing import Any, Union, get_args, get_origin, get_type_hints
 
+from ..literals import PythonLiteral, _preflight_literal
+
 
 @lru_cache(maxsize=None)
 def _hints(cls: type) -> dict:
@@ -110,6 +112,12 @@ def _record_errors(value: Any, plan: tuple, path: str) -> list[str]:
         good_type = isinstance(value, expected)
     if not good_type:
         return [f"{path} must be {getattr(expected, '__name__', expected)}"]
+    if expected is PythonLiteral:
+        try:
+            _preflight_literal(value)
+        except (TypeError, ValueError) as exc:
+            return [f"{path}: {exc}"]
+        return []
     if not is_dataclass(value):
         return []
     errors = []

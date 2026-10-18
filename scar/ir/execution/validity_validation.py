@@ -6,7 +6,7 @@ a protocol label or an enum value.
 """
 from collections import deque
 
-from scar.ir.program.model import BlockArgument, CompletionResult, LiteralOrigin, TerminatorKind
+from scar.ir.program.model import BlockArgument, CompletionResult, LiteralOrigin, TerminatorKind, is_literal_origin
 
 from .common import EvidencePoint, Unresolved
 from .content import EndpointContent, HostConsumer, ObservationConsumer, ProtocolSelector, ResourceConsumer
@@ -181,7 +181,7 @@ def _establishments(ctx):
                     definition = ctx.core_values[result.value]
                     owner = write.writer.operation
                     operation = ctx.core_operations[ctx.occurrences[owner].operation]
-                    if type(definition.origin) is LiteralOrigin:
+                    if is_literal_origin(definition.origin):
                         ctx.gap('validity_establishment_result_port_unverified', path,
                                 'literal/count equality is not an original native return-port correspondence')
                     elif type(result.origin) is OperationOccurrenceID:

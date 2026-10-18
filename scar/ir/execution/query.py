@@ -72,7 +72,7 @@ class ExecutionIndex:
         """Canonical type/identity; content versions never stand for references."""
         from scar.ir.program.model import (
             DataValue, ReferenceValue, StateVersionValue, LocalBindingValue,
-            ProtocolValue, LiteralOrigin,
+            ProtocolValue, LiteralOrigin, is_literal_origin,
         )
         ctx = self._content_context()
         row = ctx.values[value]
@@ -82,9 +82,17 @@ class ExecutionIndex:
                 LocalBindingValue: 'binding', ProtocolValue: 'protocol'}[type(definition)]
         return deepcopy({'kind': kind, 'occurrence': row, 'definition': definition,
             'association': association,
-            'literal': definition.origin if type(definition.origin) is LiteralOrigin else None,
+            'literal': definition.origin if is_literal_origin(definition.origin) else None,
             'gaps': tuple(ctx.gaps), 'source_runtime_verified': False,
             'transformation_authorized': False})
+
+    def literal_evaluation(self, site, occurrence, *, budget=4096):
+        """Declared content at an exact original producer, never object reuse."""
+        from .literals import literal_evaluation, validate_literal_request
+        validate_literal_request(site, occurrence, budget)
+        if occurrence not in self._ctx.occurrences:
+            raise ValueError('literal evaluation operation occurrence is not captured')
+        return literal_evaluation(self._content_context(), site, occurrence, budget=budget)
 
     def content_read(self, identity):
         """Original consumer/effect/selector associations, never ready=True."""

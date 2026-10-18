@@ -5,7 +5,7 @@ import hashlib
 import json
 
 from scar.ir.program.codec import dumps as program_dumps
-from scar.ir.program.model import BlockArgument, LiteralOrigin, OperationResult, StateVersionValue
+from scar.ir.program.model import BlockArgument, LiteralOrigin, OperationResult, StateVersionValue, is_literal_origin
 from scar.ir.program.resumption import SuspendTerminator
 from scar.ir.v2._validation import record_errors
 from scar.ir.v2.values import ValueGraph
@@ -313,7 +313,7 @@ def _coordinates(ctx):
             activation = None if visit is None else ctx.segments[visit.segment].activation
         else:
             activation = row.origin
-            good = activation in ctx.activations and isinstance(origin, LiteralOrigin)
+            good = activation in ctx.activations and is_literal_origin(origin)
         if not good or activation not in ctx.activations or ctx.activations[activation].region != value.region:
             ctx.issue('value_origin', row.id, 'dynamic definition does not match the exact canonical producer/formal/literal')
     if ctx.issues:
