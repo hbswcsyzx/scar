@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **R2.3-P interface checkpoint (2026-10-18):**
+> [source/write/production API](M1_PRODUCTION_API.md) passes **477 component
+> cases / 8 criteria / 11.647s**, 521 source hashes unchanged. Clean frozen
+> `c84fbfe` passes **4,713 full tests / 477.899s**; prior **4,568** identities and **54**
+> fixtures survive. See [acceptance](M1_PRODUCTION_ACCEPTANCE.md). Next is V:
+> per-contribution support, read-interval stability and visibility, then R3.
+> Native complete writer capture, full M0–M2 and automatic LeWM simplification
+> remain open; no new backend or speedup is claimed.
+
 > **R2.3-D checkpoint (2026-10-18):**
 > [content/consumer API](M1_CONTENT_CONNECTION_API.md) and explicit Q roots pass
 > **445 component cases / 7 criteria / 9.995s**, 506 source hashes unchanged.

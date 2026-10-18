@@ -1,0 +1,33 @@
+{
+  "reason": "Remove duplicate extracted-source trees and archive copies after independently generating and hashing the v4 golden from immutable revision 5ab22f8d8fcbabbc59d494b571651d480468f3d5.",
+  "archive_sha256": "a574d8c2b58a98e4aef5b657204acedf1e263535600d89675db8531c2bb437d2",
+  "archive_size_bytes_each": 4382720,
+  "removed": [
+    {
+      "attempt": "attempt001",
+      "tar": "attempt001/legacy-source.tar",
+      "extracted_tree": "attempt001/archive",
+      "extracted_tree_size_bytes": 4182398,
+      "status": "removed"
+    },
+    {
+      "attempt": "attempt002",
+      "tar": "attempt002/legacy-source.tar",
+      "extracted_tree": "attempt002/archive",
+      "extracted_tree_size_bytes": 4182398,
+      "status": "removed"
+    }
+  ],
+  "preserved": [
+    "attempt001/command.sh",
+    "attempt001/output.log",
+    "attempt001/imported-source-hashes.json",
+    "attempt001/archive-sha256.txt",
+    "attempt002/command.sh",
+    "attempt002/output.log",
+    "attempt002/imported-source-hashes.json",
+    "attempt002/archive-sha256.txt",
+    "tests/fixtures/execution_v4_frozen.json",
+    "tests/fixtures/execution_v4_frozen.json.proof.json"
+  ]
+}

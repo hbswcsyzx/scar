@@ -33,10 +33,12 @@ M1/M2 的工作允许按协议逐步落地，但门报告保留完整分母及�
 
 ## 3. 下一批落实顺序
 
-R2.3-D 的[原端口/内容/消费者与 Q 观察接口](M1_CONTENT_CONNECTION_API.md)已通过
-[445 项组件及冻结 `f71740e` 的4,568项全仓验收](M1_CONTENT_CONNECTION_ACCEPTANCE.md)。
-这只关闭声明接口子门；P 来源生产、V 区间有效性与 visibility、R3 组合仍按上位合同
-推进。下一步先收敛来源 bridge/inventory/贡献与部分 Produced，再编码、自行验收；
+R2.3-D 已接原端口/内容/消费者及 Q 根；接续的 [P 来源/写入/实际产出](M1_PRODUCTION_API.md)
+通过 [477 项组件及冻结 `c84fbfe` 的4,713项全仓验收](M1_PRODUCTION_ACCEPTANCE.md)。
+独立来源清单自动重放投影，源端点、原 writer/frontier/selector 与候选查询已连接；
+完整 native writer/capture closure 仍待实际证据。下一步先收敛 V 的每贡献 AND/OR、
+整个读取区间与 Host/Queue/Endpoint 可见域；复用准确原 effect resolver，使 host INVOKE
+读取无需虚构 work。先审查合同和反例，再编码、自行验收，随后 R3 全过程组合。
 不增加 detector/backend，不用部分来源的非成员性推排斥。完整第一阶段仍未完成。
 
 当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1

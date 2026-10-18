@@ -1,5 +1,21 @@
 # Current evidence and remaining work
 
+## R2.3-P source/write/production interfaces and frozen full accepted (2026-10-18)
+
+The [P API](M1_PRODUCTION_API.md) connects independent supplied-source manifests,
+exact raw normalization replay, scoped endpoints, original work/host/external
+writes and partial Outcome selectors. Source candidates survive deleted joins;
+lineage, current production associations and possible invalidators remain distinct.
+[Acceptance](M1_PRODUCTION_ACCEPTANCE.md): **477 component cases / 8 criteria /
+11.647s**, all **521** source hashes unchanged. One clean frozen `c84fbfe` passes
+**4,713 full tests / 477.899s / 1,028,872 KiB**, zero failures/errors/skips and
+four warnings. All prior **4,568** case identities and **54** fixtures survive;
+current **59** fixtures match, owned basetemp removed, protected checkouts unchanged.
+Execution v5 retains v1–v4 bytes with an independently archived v4 golden.
+These are declared interfaces, not native complete writer capture, automatic
+whole-program recovery, readiness or transformation authority. V/R3 and full
+M0–M2 remain open; no new LeWM profiling, optimization or speedup is claimed.
+
 ## R2.3-D content/consumer component and frozen full accepted (2026-10-18)
 
 The [D interfaces](M1_CONTENT_CONNECTION_API.md) connect original values/ports,

@@ -1,0 +1,10 @@
+No pytest process was launched in this attempt.
+
+The wrapper-copy shell command incorrectly invoked `python` before activating
+conda lewm. The shell returned exit 127: `/bin/bash: line 1: python: command not found`.
+The following command attempted to run the nonexistent copied command.sh and
+also returned exit 127: `bash: artifacts/experiments/b1_call_operands/model_production/source/attempt002/command.sh: No such file or directory`.
+
+These outputs were returned by the command tool; this note records them after
+the failure. No pre-test hash, pytest output or JUnit exists for attempt002.
+Attempt003 uses an explicitly written wrapper with conda activation.

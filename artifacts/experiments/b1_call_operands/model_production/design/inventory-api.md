@@ -1,0 +1,11 @@
+# Inventory implementation interface (finite scope)
+
+InventoryResolution: frozen slots `(sources: tuple[ResolvedSource,...], gaps: tuple[InventoryGap,...], format_replayed: bool)`; derived source_runtime_verified/transformation_authorized always false. ResolvedSource/RawInventoryRecord fields follow the parent frozen task verbatim. Raw payloads are detached dicts or None, never runtime objects.
+
+Plain artifact JSON has exact `{uri,sha256,size_bytes,schema}`. Recipe implementation has exact `{path,fingerprint}` (canonical SourceVersion SHA256). Scope has exact `{kind:'provider',value:{run,process_id,window,clock,thread_id}}` or `{kind:'missing',reason:nonempty str}`. CaptureManifest/NormalizationIndex profiles use the exact field sets from inventory-review §2. Projection is tagged normalized(recipe,bundle,coverage) or unresolved(reason).
+
+InventoryResolver reads source artifacts only through explicitly supplied snapshot.payload bytes, never artifact URI. Parent explicitly accepted that the implementation source fingerprint reads only fixed installed SCAR normalize_v2.__file__, never recipe.path; unknown implementation is a gap, never executable provider code. Replay uses normalize_bytes and the existing IRBundle strict decoder. Counts and complete labels do not prove runtime writes.
+
+Budgets aggregate distinct artifact payload bytes/artifact count and raw physical lines per resolve. The complete manifest supplies source placeholders before per-source work. A control manifest too large/unavailable cannot reveal unknown source keys and yields an inventory-root gap, never empty-source proof. Input/source validation is distinct from actual write-capture completeness. No public complete/verified/ready flag is accepted.
+
+Product builder `build_inventory(sources:dict[str,bytes], *, scopes=None, metadata=None)` and fixture `inventory_sources(raw_streams=None, metadata=None, scopes=None)` both return `(manifest,index,artifact_bytes)`. `scopes` maps original source keys to exact ProviderRunScope or None; `metadata` maps keys to collector JSON dicts. Recipe source_label/namespace=`inventory:`+key. This only seals the supplied input set. All physical raw rows survive in RawInventoryRecord, including original metadata.scar_native_result; no extra writer list is accepted.

@@ -11,13 +11,22 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
-The [R2.3-D content/consumer interfaces](docs/M1_CONTENT_CONNECTION_API.md)
+The [R2.3-P source/write/production interfaces](docs/M1_PRODUCTION_API.md)
+now connect independent raw-source manifests, strict normalization replay,
+scoped endpoint bridges, original writes and actual partial outcomes. Its
+[acceptance](docs/M1_PRODUCTION_ACCEPTANCE.md) passes **477 component checks /
+8 criteria** and **4,713 clean frozen full tests** (`c84fbfe`). All prior 4,568
+test identities and 54 fixtures survive. Execution v5 retains v1–v4 bytes.
+Native complete writer capture, V interval validity/visibility, R3 and full
+M0–M2 remain open; automatic LeWM modeling and speedup remain unfinished.
+
+The earlier [R2.3-D content/consumer interfaces](docs/M1_CONTENT_CONNECTION_API.md)
 connect original ports, scoped denotations/materializations, exact work/source
 associations and explicit contract observation roots. Its
 [acceptance](docs/M1_CONTENT_CONNECTION_ACCEPTANCE.md) passes **445 component
 checks / 7 criteria** and **4,568 clean frozen full tests** (`f71740e`).
 Execution v4 preserves v1–v3 bytes. Missing source pairs remain explicit gaps;
-P production, V stability/visibility, R3 and full M0–M2 remain open. This does
+That checkpoint left P production, V stability/visibility, R3 and full M0–M2 open. It does
 not establish automatic LeWM modeling, transformations or a speedup.
 
 The [R2.3 contract](docs/M1_RESOURCE_READY_CONTRACT.md) separates exact consumer
