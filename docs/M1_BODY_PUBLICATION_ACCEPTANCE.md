@@ -1,7 +1,8 @@
 # D2.1：body outcome publication组件
 
 2026-10-18；依据[冻结合同](M1_DRIVER_LIFECYCLE_CONTRACT.md)§2–3及§7。
-**已实施，741项组件/17标准及独立有限审查通过；冻结全仓终态尚待归档。**
+**D2.1声明组件已验收：741项组件/17标准、独立有限审查、3,776项冻结全仓通过。**
+实施revision：`49201e7390e3feea9bfbc70d3336daefaf8e4b4e`。
 本门是静态声明接口，不是完整D2、自动source恢复或运行时生命周期证明。
 
 ## 1. 实际连接及代码
@@ -61,10 +62,19 @@ source/runtime/exclusivity/transformation标志均不升级。
   独立有限审查通过多source错接、双owner formal任选、
   W⊊L省略未访问域、foreign Use及坏metadata不崩溃；九项中首跑八项得到预期，
   一项脚本错误将三域误解包为两域，保留原失败、仅补跑该一项。产品未因审查改动。
-  六个被审文件哈希前后一致。单次冻结全仓结果后续在此补齐。
+  六个被审文件哈希前后一致。
 
-原始脚本、失败、命令、环境、组件及全仓证据在
-`artifacts/experiments/b1_call_operands/model_body_publication/`按实际范围归档。
+冻结`49201e7`单次全仓得到3,776 passed、0 failed/error/skipped，三条既有warning。
+外部计时459.570s、pytest计时457.80s、最大RSS为1,028,440KiB。HEAD、clean状态、
+423个源文件和32份fixture逐文件哈希前后一致；原29份fixture不改。测试退出后仅
+移除本次独占basetemp。该耗时是验收成本，不是workload性能。
+
+归档复核另外检查：原全仓3,706个case身份完整保留，恰新增70个；741项组件case均
+包含在全仓中。组件/定向/full有重叠，不能相加。SCAR主工作区和LeWM原仓HEAD及
+clean状态均保持原值。
+
+原始脚本、失败、命令、环境、组件及全仓证据见
+[完整归档](../artifacts/experiments/b1_call_operands/model_body_publication/README.md)。
 
 ## 4. 后续与明确界限
 

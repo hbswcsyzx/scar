@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## D2.0 contract and D2.1 body publication (2026-10-18; full pending)
+## D2.0 contract and D2.1 body publication accepted (2026-10-18)
 
 The [frozen D2 contract](M1_DRIVER_LIFECYCLE_CONTRACT.md) separates historical
 terminal facts from current session posts. Alias/finish analysis uses simultaneous
@@ -12,8 +12,12 @@ The [D2.1 component](M1_BODY_PUBLICATION_ACCEPTANCE.md) connects explicit scope,
 exact body source, original owner and current StateAccess/after at the private
 landing's first operation. Its v12 wire, endpoint queries and CLI pass **741
 component checks / 17 criteria / 10.937s**, with all 423 source hashes unchanged.
-Independent bounded review passes with unchanged source; frozen full acceptance
-is pending. D2.2–D2.4, D3,
+Independent bounded review passes with unchanged source. Frozen `49201e7` passes
+**3,776 full tests / 459.570s / 1,028,440KiB**, no failures/errors/skips and three
+existing warnings. HEAD, clean status, all 423 source and 32 fixture hashes match;
+all prior 29 fixtures and 3,706 test identities remain. The owned basetemp was removed.
+See the [archive](../artifacts/experiments/b1_call_operands/model_body_publication/README.md).
+D2.2–D2.4, D3,
 complete C2/M0–M2 and LeWM automatic modeling/simplification remain open.
 
 ## D2 lifecycle review and ordered implementation gates (2026-10-18)

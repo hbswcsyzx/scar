@@ -1,0 +1,8 @@
+{
+  "returncode": 1,
+  "failed_stage": "git archive",
+  "reason": "fatal: pathspec 'tests/__init__.py' did not match any files",
+  "evidence_note": "Failure observed in exec output; initial outer stdout was not redirected to a file.",
+  "fixture_created": false,
+  "owned_empty_temporary_removed": "/tmp/scar-publication-v11-w477wgv8"
+}

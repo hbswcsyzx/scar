@@ -4,6 +4,8 @@
 **本文件保留设计审查及实施计划；D2.0合同已收敛，D2产品按后续门实施。**
 冻结字段、来源、E/F/P与失效规则见[规范合同](M1_DRIVER_LIFECYCLE_CONTRACT.md)；
 下文§4是本轮审查的问题记录，按新合同逐项解决，不再作为未定字段。
+[D2.1 publication](M1_BODY_PUBLICATION_ACCEPTANCE.md)已通过组件及冻结全仓验收；
+D2.2–D2.4及完整第一阶段仍未完成。
 不更改五类核心实体，不增加detector/backend，不把语言小实验算自动程序建图。
 
 ## 1. 补的是什么依赖
