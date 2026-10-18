@@ -1,0 +1,47 @@
+........................................F....                            [100%]
+=================================== FAILURES ===================================
+_____ test_invoke_forwarded_state_stays_a_real_edge_use_without_fake_after _____
+
+    def test_invoke_forwarded_state_stays_a_real_edge_use_without_fake_after():
+        graph, _ = state_address_program()
+        row = next(row for row in graph.state_address_refinements if type(row.site) is InvokeStateOperand)
+        index = ProgramIndex(graph)
+        view = index.state_address(row.site)
+        chosen = view["completions"][0]
+        operation = view["operation"]
+        blocks = {block.id: block for region in graph.regions for block in region.blocks}
+        position = blocks[chosen["successor"].block].arguments.index(chosen["formal"].id)
+        forwarded = Use(UseID("state-address.test.forward"), view["before"].use.value, UseRole.STATE_CONTENT)
+        arguments = list(chosen["successor"].arguments)
+        arguments[position] = forwarded.id
+        successor = replace(chosen["successor"], arguments=tuple(arguments))
+        successors = tuple(successor if number == chosen["successor_index"] else edge
+                           for number, edge in enumerate(operation.terminator.successors))
+        operation = replace(operation, effects_complete=True, uses=(*operation.uses, forwarded),
+                            terminator=replace(operation.terminator, successors=successors))
+        graph = replace(graph, operations=tuple(operation if old.id == operation.id else old
+                                                for old in graph.operations))
+>       index = ProgramIndex(graph)
+                ^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_state_address_query.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x76335f680590>
+graph = ProgramGraph(root=RegionID(value='address.root'), regions=(Region(id=RegionID(value='address.root'), label='state addr...e=<AccessMode.READ_WRITE: 'READ_WRITE'>, stage=None),), coverage=<AddressCoverage.PARTIAL: 'PARTIAL'>, protocol=None)))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: completion_slots at program_operation:address.invoke: every produced completion slot must bind exactly once
+
+scar/ir/program/queries.py:259: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_state_address_query.py::test_invoke_forwarded_state_stays_a_real_edge_use_without_fake_after
+1 failed, 44 passed in 1.21s

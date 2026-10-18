@@ -11,7 +11,16 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
-The [R3.3 generic buffered pipeline model](docs/M1_PIPELINE_CLOSURE_API.md)
+The [typed state-address interfaces](docs/M1_STATE_ADDRESS_INTERFACES.md)
+pass [1,317 component checks /25 criteria and 5,144 clean frozen full tests](docs/M1_STATE_ADDRESS_ACCEPTANCE.md)
+(`805c670`). Owner/key/selector effects refine original state carriers and actual
+invocation ports; they introduce no separate field state chain or alias proof.
+All prior 5,055 case identities/72 fixtures survive; current 590 source hashes
+and 74 fixtures match. Automatic source/native identity, full literal/C2/D3/M2,
+whole-program recovery and LeWM simplification remain unfinished. No new
+workload speedup was measured.
+
+The earlier [R3.3 generic buffered pipeline model](docs/M1_PIPELINE_CLOSURE_API.md)
 passes [722 component checks /17 criteria and 5,055 clean frozen full tests](docs/M1_PIPELINE_CLOSURE_ACCEPTANCE.md)
 (`6947778`). Exact call order, independent byte extents, buffer→flush→file and
 exception/pending cleanup paths preserve original associations in one model.

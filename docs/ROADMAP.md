@@ -1,5 +1,16 @@
 # SCAR roadmap and scope
 
+> **Current S checkpoint accepted (2026-10-18):**
+> [Typed state-address interfaces](M1_STATE_ADDRESS_INTERFACES.md) pass
+> [1,317 component cases /25 criteria and 5,144 clean frozen full tests](M1_STATE_ADDRESS_ACCEPTANCE.md)
+> (`805c670`). All prior 5,055 identities/72 fixtures survive; 590 source hashes/
+> 74 fixtures match. Owner/key/selector declarations connect original state and
+> actual occurrence ports without a separate coherence chain. This is a finite
+> declaration interface gate, not native/address/alias identity or source recovery.
+> Next: literal payload/budgets/core wire, C2/D3 and M2 original obligations.
+> Complete first stage and automatic LeWM simplification remain open; no new
+> measured speedup. Earlier checkpoint scopes follow.
+
 > **Current R3.3 checkpoint accepted (2026-10-18):**
 > [Generic pipeline API](M1_PIPELINE_CLOSURE_API.md) passes
 > [722 component cases /17 criteria and 5,055 clean frozen full tests](M1_PIPELINE_CLOSURE_ACCEPTANCE.md)

@@ -60,6 +60,13 @@ pending/cleanup在同图连接；三项真实OS见证不冒充automatic correspo
 R3计划关闭，下一步按原顺序补selector/owner、literal、C2/D3及M2全构造，不继续堆
 资源协议小门。完整第一阶段未完成；不新增detector/backend或LeWM重型profile。
 
+S现按[计划](M1_STATE_ADDRESS_PLAN.md)完成[状态地址接口](M1_STATE_ADDRESS_INTERFACES.md)：
+1,317组件/25标准通过，冻结 `805c670` 的5,144项全仓通过。原5,055 case/72fixtures
+保留，590源码/74fixtures指纹一致。多owner/selector共享原carrier，dynamic binding
+按实际occurrence/分支/完成端口查询；native/alias/物理解释仍未证。不扩展detector或
+backend。下一独立门复用PythonLiteral，补complex/精确bits/大小预算、core wire及
+来源阶段/identity边界，再继续C2/D3和M2原分母，完整第一阶段仍未完成。
+
 当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1
 声明组件不是实际导入；不要继续以增加声明表、兼容测试或 Tensor wrappers 代替
 自动连接。通用 SSA/Region 基础设施扩展前先对照 MLIR/xDSL，源 CFG/flow 扩展前

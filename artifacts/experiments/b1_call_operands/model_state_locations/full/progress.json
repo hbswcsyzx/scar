@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "returncode": 0,
+  "finished_at": "2026-10-18T13:08:09.150968+00:00",
+  "duration_seconds": 516.7538779713213,
+  "counts": {
+    "passed": 5144,
+    "failed": 0,
+    "error": 0,
+    "skipped": 0,
+    "total": 5144
+  }
+}

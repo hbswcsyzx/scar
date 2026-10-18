@@ -1,0 +1,26 @@
+{
+  "scope": "S typed owner/selector refinement on original state carriers; complete M0-M2 and automatic recovery remain open",
+  "implementation_revision": "805c670a12ea15cf12b32395180c8fcd954beda2",
+  "source_sha256": "b0a340543b4015b903196f1cb5f0ffe202d864a57e56382ef674896310c95ef1",
+  "source_files": 590,
+  "criteria": 25,
+  "component_cases": 1317,
+  "full_cases": 5144,
+  "component_seconds": 44.578,
+  "full_seconds": 516.7538779713213,
+  "scope_inventory_complete": false,
+  "source_runtime_verified": false,
+  "value_identity_verified": false,
+  "transformation_authorized": false,
+  "new_lewm_speedup_measurement": false,
+  "documents": {
+    "README.md": "3dec15cb88c9279e73102c8c33f0247282db50f5063f45b5912802e0dbd92430",
+    "docs/STATUS.md": "f9114fb4b360e49ae411cd4fb4b3b9b4c6807ea500fd277d6bcf3a25eaf048c4",
+    "docs/ROADMAP.md": "41fd53be06d8718e685b288c9cffcdeaa9528a9001743c4ef7e5766c2e7a0fcf",
+    "docs/FIRST_STAGE_COMPLETION_MATRIX.md": "6b9f662c0e3b6be23ccc331937b3448067ffa3d9e656505faba7d0b8890186dd",
+    "docs/WHOLE_PROGRAM_MODEL_PLAN.md": "d4f73652212373e7a9cb1b62ce06f481b82b3d4c0089cbf4768969808258419b",
+    "docs/M1_STATE_ADDRESS_PLAN.md": "41b2cb8ea6ef73fab4639718952723ebe8592dc90566cb1c95e032cdd19a9aa0",
+    "docs/M1_STATE_ADDRESS_INTERFACES.md": "4514a72ab1660cb2a831a30d1cd80f7a18aa778d1504f44cc062e7446d74bf36",
+    "docs/M1_STATE_ADDRESS_ACCEPTANCE.md": "da4b2b3fe1a03cdd7a6f77c47282bd339bd914726dc29a95a8ca69e04019d9f7"
+  }
+}

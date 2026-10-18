@@ -1,5 +1,20 @@
 # Current evidence and remaining work
 
+## S typed state-address interfaces accepted (2026-10-18)
+
+[Interfaces](M1_STATE_ADDRESS_INTERFACES.md), [acceptance](M1_STATE_ADDRESS_ACCEPTANCE.md):
+**1,317 component cases /25 criteria /44.578s**; one clean frozen `805c670` passes
+**5,144 full tests /516.754s /1,026,572 KiB**, zero failures/errors/skips,
+five warnings. All prior 5,055 identities and 72 fixtures survive; current 590
+source hashes and 74 fixtures match. Typed owner/selector/mode/stage effects
+retain original state carriers, actual operand occurrences and N/R/forward
+ports. Six selector, branch owner/key and original ContentRead guard combinations
+close the finite declaration gate; native/address/alias identity remains unproved.
+Original failures, withdrawn assumptions and independent scope review survive.
+Next: precise literal payload/budgets/core wire, remaining C2/D3 and M2.
+Complete M0–M2, automatic LeWM recovery and simplification remain unfinished;
+no new speedup was measured. Historical checkpoint scopes follow.
+
 ## R3.3 generic buffered pipeline and bounded OS observations accepted (2026-10-18)
 
 [API](M1_PIPELINE_CLOSURE_API.md), [acceptance](M1_PIPELINE_CLOSURE_ACCEPTANCE.md):

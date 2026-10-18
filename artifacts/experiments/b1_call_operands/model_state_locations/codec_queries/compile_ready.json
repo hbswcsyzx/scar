@@ -1,0 +1,17 @@
+{
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "scope": "AST parse and product imports only; no pytest or fixture execution",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "files": {
+    "scar/ir/program/model.py": "bb9993520ee76ab6dd5531884944f96a990379fff74d7935c81a10b818df4d61",
+    "scar/ir/program/__init__.py": "82661bc66d8955a2dbf354282e0bd7d701e367c01777a61d3c52339075e48e8e",
+    "scar/ir/program/codec.py": "81cac8e544bfab868d95b037bd8149c4e73cb9e18b128c244bdc104136084089",
+    "scar/ir/program/validation.py": "277c32f7434bf1a7c08c0ac458792b5dd6971dc3b14f8b7ccbfcd50ba7923a09",
+    "scar/ir/program/queries.py": "18482a721ba9f02a687cb1a396f0b24b83cde426d487f581459aa4010a937273",
+    "tests/unit/test_program_state_address_codec.py": "e965d41e70867f2050392ec2b0aaf083a03939ad29e408e6eb7b7b4eb6ebc90b",
+    "tests/unit/test_program_state_address_query.py": "2c9d8f49434cdfc92f781044074a8c1ef523c18f9fa0e1bf703637a94ba2099c"
+  },
+  "schema_version": 15,
+  "single_access_mode": true,
+  "state_address_method": true
+}
