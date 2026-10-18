@@ -38,9 +38,9 @@ class FormalRoute:
 
 
 class ExecutionIndex:
-    def __init__(self, model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None):
+    def __init__(self, model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None):
         report, ctx = _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
-                               semantic_graphs=semantic_graphs)
+                               semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes)
         if not report.valid:
             raise ValueError('; '.join(f'{x.code} at {x.path}: {x.message}' for x in report.issues))
         self._ctx = ctx
@@ -57,11 +57,19 @@ class ExecutionIndex:
         from .snapshot import ExternalSnapshots
         from .observation_validation import observation_errors
         from .content_validation import content_errors
+        from .source_validation import source_inventory_errors, source_bridge_errors
+        from .production_validation import write_errors, produced_errors
         ctx = copy(self._ctx)
         ctx.issues, ctx.gaps, ctx._gap_keys = [], [], set()
-        ctx.snapshots = ExternalSnapshots(ctx.value_graphs, ctx.evidence_graphs, ctx.semantic_graphs)
+        ctx.snapshots = ExternalSnapshots(ctx.value_graphs, ctx.evidence_graphs, ctx.semantic_graphs,
+                                           ctx.artifact_bytes)
+        source_inventory_errors(ctx)
         observation_errors(ctx)
         content_errors(ctx)
+        source_bridge_errors(ctx)
+        write_errors(ctx)
+        if not ctx.issues:
+            produced_errors(ctx)
         if ctx.issues:
             raise ValueError('; '.join(f'{x.code} at {x.path}: {x.message}' for x in ctx.issues))
         return ctx
@@ -104,6 +112,23 @@ class ExecutionIndex:
             'declared_native_interval': native_interval,
             'gaps': tuple(ctx.gaps), 'source_runtime_verified': False,
             'transformation_authorized': False})
+
+    def production(self, identity, *, budget=4096):
+        """Inspect independent source candidates, not an authoritative writer set."""
+        from .production_query import production
+        return deepcopy(production(self._content_context(), identity, budget=budget))
+
+    def write(self, identity):
+        """Original writer/effect/placement association and its unresolved joins."""
+        ctx = self._content_context()
+        return deepcopy({**ctx.resolved_writes[identity], 'validation_gaps': tuple(ctx.gaps),
+                         'source_runtime_verified': False, 'transformation_authorized': False})
+
+    def outcome_production(self, identity):
+        """Observed outcome/result and actual selector without ready inference."""
+        ctx = self._content_context()
+        return deepcopy({**ctx.resolved_produced[identity], 'validation_gaps': tuple(ctx.gaps),
+                         'source_runtime_verified': False, 'transformation_authorized': False})
 
     def observation_root(self, identity):
         """Resolve an explicit Q requirement to its actual value/endpoint."""

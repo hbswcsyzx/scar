@@ -441,6 +441,10 @@ def content_errors(ctx):
                         ctx.issue('content_consumer_owner', path, 'subject belongs to another sequential submission occurrence')
                     else:
                         ctx.gap('content_consumer_nested_alignment', path, 'nested host/native work mapping has not been established')
+                elif work is not None and type(work.origin) is not WithinOperation and subject is not None:
+                    original_run = point_scope(ctx, OccurrencePoint(consumer.subject.operation, OccurrencePhase.BEFORE))[0]
+                    if work.origin.point.run != original_run:
+                        ctx.issue('content_consumer_run', path, 'external consumer work and original subject belong to different runs')
                 if type(consumer.read) is NativeWorkRead:
                     check_interval(ctx, consumer.read.interval, path)
                     _align_interval(ctx, consumer.read.interval, consumer.subject.operation, path, host=False)

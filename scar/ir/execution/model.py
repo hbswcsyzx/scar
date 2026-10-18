@@ -18,6 +18,10 @@ from .order import EventRecord, QueueOrderProfile, QueueWait
 from .work import QueuePrefix, ResourceOutcome, WorkQuiescence, WorkRetention, WorkSubmission
 from .content import ContentRead, ValueDenotation, WorkEvidenceBinding
 from .observations import ObservationRequirement, ObservationRoot
+from .production import (
+    EvidenceInventoryBinding, OutcomeProduction, SourceEndpointBridge,
+    WriteAssociation,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -83,6 +87,10 @@ class ExecutionModel:
     observation_requirements: tuple[ObservationRequirement, ...] = ()
     observation_roots: tuple[ObservationRoot, ...] = ()
     content_reads: tuple[ContentRead, ...] = ()
+    source_inventories: tuple[EvidenceInventoryBinding, ...] = ()
+    source_bridges: tuple[SourceEndpointBridge, ...] = ()
+    writes: tuple[WriteAssociation, ...] = ()
+    produced: tuple[OutcomeProduction, ...] = ()
 
     def __post_init__(self):
         if type(self.snapshot) is not ProgramSnapshot:
@@ -110,6 +118,8 @@ TABLE_TYPES = {
     'denotations': ValueDenotation, 'work_evidence_bindings': WorkEvidenceBinding,
     'observation_requirements': ObservationRequirement, 'observation_roots': ObservationRoot,
     'content_reads': ContentRead,
+    'source_inventories': EvidenceInventoryBinding, 'source_bridges': SourceEndpointBridge,
+    'writes': WriteAssociation, 'produced': OutcomeProduction,
 }
 
 

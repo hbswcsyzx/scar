@@ -86,7 +86,7 @@ def test_independently_archived_v3_event_work_wire_is_exact_and_old_bytes_unchan
     assert proof["codec_schema_version"] == proof["wire_schema_version"] == 3
     assert proof["payload_sha256"] == hashlib.sha256(payload).hexdigest()
     assert proof["payload_size_bytes"] == len(payload)
-    assert SCHEMA_VERSION == 4
+    assert SCHEMA_VERSION == 5
     model = loads(payload.decode())
     assert all(getattr(model, name) == () for name in CONTENT_FIELDS)
     assert dumps(model).encode() == dumps(model, schema_version=3).encode() == payload
@@ -233,7 +233,7 @@ def test_codec_never_resolves_catalogs_or_opens_provider_artifacts(content, monk
 
 
 def test_versions_stay_exact_and_unsupported_versions_still_fail(content):
-    for version in (True, 0, 5, "4"):
+    for version in (True, 0, 6, "4"):
         with pytest.raises(ValueError, match="schema_version"):
             dumps(content, schema_version=version)
         document = to_dict(content)

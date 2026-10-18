@@ -118,6 +118,22 @@ class ObservationRootID(Identifier):
     prefix = "exec_observation_root"
 
 
+class EvidenceInventoryID(Identifier):
+    prefix = "exec_evidence_inventory"
+
+
+class SourceBridgeID(Identifier):
+    prefix = "exec_source_bridge"
+
+
+class WriteAssociationID(Identifier):
+    prefix = "exec_write_association"
+
+
+class OutcomeProductionID(Identifier):
+    prefix = "exec_outcome_production"
+
+
 __all__ = [
     "RunID", "ProcessInstanceID", "HostThreadInstanceID", "RegionActivationID",
     "ExecutionSegmentID", "BlockVisitID", "OperationOccurrenceID",
@@ -128,4 +144,5 @@ __all__ = [
     "QueueOrderProfileID", "EventRecordID", "QueueWaitID",
     "DenotationID", "WorkEvidenceBindingID", "ContentReadID",
     "ObservationRequirementID", "ObservationRootID",
+    "EvidenceInventoryID", "SourceBridgeID", "WriteAssociationID", "OutcomeProductionID",
 ]

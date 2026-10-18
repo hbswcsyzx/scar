@@ -20,11 +20,12 @@ from .model import ExecutionModel
 
 
 SCHEMA = "scar.execution-model"
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 _WORK_FIELDS = frozenset({"submissions", "outcomes", "quiescences", "retentions", "queue_prefixes"})
 _ORDER_FIELDS = frozenset({"queue_order_profiles", "event_records", "queue_waits"})
 _CONTENT_FIELDS = frozenset({"denotations", "work_evidence_bindings", "observation_requirements",
                              "observation_roots", "content_reads"})
+_PRODUCTION_FIELDS = frozenset({"source_inventories", "source_bridges", "writes", "produced"})
 
 
 def _tag(cls):
@@ -38,7 +39,8 @@ def _record_schema(cls, schema_version):
                  if not (cls is ExecutionModel and (
                      (schema_version < 2 and field.name in _WORK_FIELDS)
                      or (schema_version < 3 and field.name in _ORDER_FIELDS)
-                     or (schema_version < 4 and field.name in _CONTENT_FIELDS))))
+                     or (schema_version < 4 and field.name in _CONTENT_FIELDS)
+                     or (schema_version < 5 and field.name in _PRODUCTION_FIELDS))))
 
 
 @lru_cache(maxsize=4)
@@ -65,6 +67,13 @@ def _vocabulary(schema_version):
         if name in vocabulary and vocabulary[name] is not expected:
             raise TypeError(f"conflicting execution wire tag: {name}")
         vocabulary[name] = expected
+        if expected is Identifier:
+            # EvidenceEndpoint.reference intentionally accepts the typed v2
+            # identifier family. Keep its finite wire tags closed to the
+            # concrete identifier classes admitted by EvidenceNodeKind.
+            from scar.ir.v2.evidence import _TYPED_EVIDENCE_ENDPOINTS
+            for endpoint_type in _TYPED_EVIDENCE_ENDPOINTS.values():
+                visit(endpoint_type)
         if not issubclass(expected, (Identifier, Enum)):
             for _, child in _record_schema(expected, schema_version):
                 visit(child)
@@ -105,6 +114,13 @@ def _concrete(value, expected, path, schema_version, *, wire):
                 return choice
         elif actual is choice:
             return choice
+        elif choice is Identifier and isinstance(actual, type):
+            # EvidenceEndpoint.reference is deliberately typed as the v2
+            # Identifier base.  Its enclosing endpoint record rechecks the
+            # exact kind-specific identifier before it can enter the model.
+            from scar.ir.v2.evidence import _TYPED_EVIDENCE_ENDPOINTS
+            if actual in _TYPED_EVIDENCE_ENDPOINTS.values():
+                return actual
     _fail(path, "tag or type does not match the declared field")
 
 
@@ -188,13 +204,13 @@ def _decode(value, expected, path, schema_version):
 
 
 def _version(version):
-    if type(version) is not int or version not in (1, 2, 3, 4):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5):
         raise ValueError("unsupported execution schema_version")
     return version
 
 
 def to_dict(model: ExecutionModel, *, schema_version: int | None = None) -> dict:
-    """Choose v1 resources, v2 work, v3 order or v4 content, without graph proof.
+    """Choose the lowest populated capability schema, without graph proof.
 
     Explicit newer versions can encode empty capability tables. Decoding older
     versions supplies empty defaults only as migration, never absence evidence.
@@ -208,7 +224,11 @@ def to_dict(model: ExecutionModel, *, schema_version: int | None = None) -> dict
         has_work = any(getattr(model, name) for name in _WORK_FIELDS)
         has_order = any(getattr(model, name) for name in _ORDER_FIELDS)
         has_content = any(getattr(model, name) for name in _CONTENT_FIELDS)
-        version = (4 if has_content else 3 if has_order else 2 if has_work else 1) if schema_version is None else _version(schema_version)
+        has_production = any(getattr(model, name) for name in _PRODUCTION_FIELDS)
+        version = (5 if has_production else 4 if has_content else 3 if has_order
+                   else 2 if has_work else 1) if schema_version is None else _version(schema_version)
+        if version < 5 and has_production:
+            _fail("model", f"production capability cannot be encoded as schema v{version}")
         if version < 4 and has_content:
             _fail("model", f"content capability cannot be encoded as schema v{version}")
         if version < 3 and has_order:

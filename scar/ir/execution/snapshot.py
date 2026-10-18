@@ -58,7 +58,7 @@ class ExternalSnapshots:
     No artifact URI is opened and no caller-specified decoder is executed.
     """
 
-    def __init__(self, value_graphs=None, evidence_graphs=None, semantic_graphs=None):
+    def __init__(self, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None):
         families = _families()
         self._catalogs = {}
         for kind, catalog in zip(families, (value_graphs, evidence_graphs, semantic_graphs), strict=True):
@@ -68,6 +68,68 @@ class ExternalSnapshots:
                 raise SnapshotError('catalog_type', 'external graph catalogs require exact dicts with exact string keys')
             self._catalogs[kind] = catalog
         self._verified = {}
+        self._artifact_bytes = {} if artifact_bytes is None else artifact_bytes
+        if (type(self._artifact_bytes) is not dict
+                or any(type(key) is not str for key in self._artifact_bytes)):
+            raise SnapshotError('catalog_type', 'artifact byte catalogs require exact dicts with exact string keys')
+        self._payloads = {}
+
+    def payload(self, artifact):
+        """Return exact immutable supplied bytes, never open the artifact URI."""
+        if type(artifact) is not ProviderArtifact:
+            raise SnapshotError('external_snapshot', 'payload reference must be an exact ProviderArtifact')
+        try:
+            artifact.__post_init__()
+        except (TypeError, ValueError) as error:
+            raise SnapshotError('external_snapshot', str(error)) from error
+        key = artifact.sha256, artifact.schema, artifact.size_bytes
+        if key in self._payloads:
+            return self._payloads[key]
+        if artifact.sha256 not in self._artifact_bytes:
+            self._payloads[key] = None
+            return None
+        payload = self._artifact_bytes[artifact.sha256]
+        if type(payload) is not bytes:
+            raise SnapshotError('external_graph_type', 'supplied artifact payload must be exact bytes')
+        if len(payload) != artifact.size_bytes or hashlib.sha256(payload).hexdigest() != artifact.sha256:
+            raise SnapshotError('external_snapshot', 'artifact payload bytes/hash/size do not match reference')
+        self._payloads[key] = payload
+        return payload
+
+    def include(self, artifact, graph):
+        """Include a verified source-bundle component in this resolver only.
+
+        This gives no source/native authority. A supplied caller catalog entry
+        must also match; derived components cannot conceal a wrong supplied
+        family or snapshot. Caller dictionaries and graph objects stay intact.
+        """
+        families, kind = _families(), type(graph)
+        if kind not in families:
+            raise SnapshotError('external_graph_type', 'derived component must be an exact whitelisted graph family')
+        if type(artifact) is not ProviderArtifact:
+            raise SnapshotError('external_snapshot', 'derived component requires an exact artifact reference')
+        try:
+            artifact.__post_init__()
+        except (TypeError, ValueError) as error:
+            raise SnapshotError('external_snapshot', str(error)) from error
+        wire = _validated_bytes(graph)
+        if (artifact.schema != graph.SCHEMA or len(wire) != artifact.size_bytes
+                or hashlib.sha256(wire).hexdigest() != artifact.sha256):
+            raise SnapshotError('external_snapshot', 'derived component bytes/hash/schema do not match reference')
+        key = kind, artifact.sha256, artifact.schema, artifact.size_bytes
+        if artifact.sha256 in self._catalogs[kind]:
+            existing = self.graph(artifact, kind)
+            if existing is None:
+                raise SnapshotError('external_snapshot', 'caller catalog changed after missing snapshot was observed')
+            return existing
+        if key in self._verified and self._verified[key] is not None:
+            return self._verified[key]
+        try:
+            snapshot = families[kind](json.loads(wire))
+        except (AttributeError, TypeError, KeyError, ValueError, OverflowError, RecursionError) as error:
+            raise SnapshotError('external_graph_invalid', 'invalid derived source component: ' + str(error)) from error
+        self._verified[key] = snapshot
+        return snapshot
 
     def graph(self, artifact, kind):
         families = _families()
@@ -79,6 +141,8 @@ class ExternalSnapshots:
             artifact.__post_init__()
         except (TypeError, ValueError) as error:
             raise SnapshotError('external_snapshot', str(error)) from error
+        if artifact.schema != kind.SCHEMA:
+            raise SnapshotError('external_snapshot', 'external artifact schema does not match requested graph family')
         key = kind, artifact.sha256, artifact.schema, artifact.size_bytes
         if key in self._verified:
             return self._verified[key]

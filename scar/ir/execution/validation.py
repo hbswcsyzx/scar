@@ -46,20 +46,23 @@ class ValidationReport:
 
 
 class _Context:
-    def __init__(self, model, program, value_graphs, evidence_graphs, semantic_graphs=None):
+    def __init__(self, model, program, value_graphs, evidence_graphs, semantic_graphs=None, artifact_bytes=None):
         self.model, self.program = model, program
         self.issues, self.gaps = [], []
         self._gap_keys = set()
         self.value_graphs = {} if value_graphs is None else value_graphs
         self.evidence_graphs = {} if evidence_graphs is None else evidence_graphs
         self.semantic_graphs = {} if semantic_graphs is None else semantic_graphs
-        self.snapshots = ExternalSnapshots(self.value_graphs, self.evidence_graphs, self.semantic_graphs)
+        self.artifact_bytes = {} if artifact_bytes is None else artifact_bytes
+        self.snapshots = ExternalSnapshots(self.value_graphs, self.evidence_graphs, self.semantic_graphs,
+                                           self.artifact_bytes)
         for name in ('runs', 'processes', 'threads', 'activations', 'segments', 'visits',
                      'operations', 'values', 'resources', 'realizations', 'requirements', 'handles', 'accesses',
                      'submissions', 'outcomes', 'quiescences', 'retentions', 'queue_prefixes',
                      'queue_order_profiles', 'event_records', 'queue_waits',
                      'denotations', 'work_evidence_bindings', 'observation_requirements',
-                     'observation_roots', 'content_reads'):
+                     'observation_roots', 'content_reads', 'source_inventories',
+                     'source_bridges', 'writes', 'produced'):
             registry = {}
             for row in getattr(model, name):
                 if row.id in registry:
@@ -360,11 +363,11 @@ def _evidence_gaps(ctx):
     visit(ctx.model, 'model')
 
 
-def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None):
+def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None):
     if type(model) is not ExecutionModel:
         return ValidationReport((ExecutionIssue('record', 'model', 'expected exact ExecutionModel'),), ()), None
     for name, catalog in (('value_graphs', value_graphs), ('evidence_graphs', evidence_graphs),
-                          ('semantic_graphs', semantic_graphs)):
+                          ('semantic_graphs', semantic_graphs), ('artifact_bytes', artifact_bytes)):
         if catalog is not None and (type(catalog) is not dict or any(type(key) is not str for key in catalog)):
             return ValidationReport((ExecutionIssue('catalog_type', name, 'expected dict keyed by artifact SHA256 strings'),), ()), None
     try:
@@ -374,7 +377,7 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
         wire = program_dumps(program).encode('utf-8')
     except (TypeError, ValueError, AttributeError) as error:
         return ValidationReport((ExecutionIssue('record_or_program', 'model', str(error)),), ()), None
-    ctx = _Context(model, program, value_graphs, evidence_graphs, semantic_graphs)
+    ctx = _Context(model, program, value_graphs, evidence_graphs, semantic_graphs, artifact_bytes)
     artifact = model.snapshot.artifact
     if (artifact.schema != 'scar.program-graph' or artifact.sha256 != hashlib.sha256(wire).hexdigest()
             or artifact.size_bytes != len(wire) or model.snapshot.schema_version != json.loads(wire)['schema_version']):
@@ -384,6 +387,9 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
         _flow(ctx)
     if not ctx.issues:
         _evidence_gaps(ctx)
+    if not ctx.issues:
+        from .source_validation import source_inventory_errors
+        source_inventory_errors(ctx)
     if not ctx.issues:
         from .resource_validation import resource_errors
         resource_errors(ctx)
@@ -406,19 +412,27 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
     if not ctx.issues:
         from .content_validation import content_errors
         content_errors(ctx)
+    if not ctx.issues:
+        from .source_validation import source_bridge_errors
+        source_bridge_errors(ctx)
+    if not ctx.issues:
+        from .production_validation import write_errors, produced_errors
+        write_errors(ctx)
+        if not ctx.issues:
+            produced_errors(ctx)
     # Evidence reference presence is not native/source/runtime applicability.
     ctx.gap('source_runtime_unverified', 'model', 'declared occurrence/identity links have not been established by a runtime adapter')
     return ValidationReport(tuple(ctx.issues), tuple(ctx.gaps)), ctx
 
 
-def validate(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None):
+def validate(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None):
     return _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
-                    semantic_graphs=semantic_graphs)[0]
+                    semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes)[0]
 
 
-def require_valid(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None):
+def require_valid(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None):
     report = validate(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
-                      semantic_graphs=semantic_graphs)
+                      semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes)
     if report.issues:
         raise ValueError('; '.join(f'{row.code} at {row.path}: {row.message}' for row in report.issues))
     return report
