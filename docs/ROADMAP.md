@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **P4 design/shared-query checkpoint (2026-10-18):**
+> [Connection contract v1](M1_PROTOCOL_CONNECTION_CONTRACT.md) is design-frozen
+> after three independent reviews. [No-RAW helper source queries](M1_PROTOCOL_HELPER_INPUTS.md)
+> now follow exact reference-only call chains: original1-failure evidence,
+>22 focused and final112 affected cases pass at one670-source fingerprint.
+> This is not a full P4 gate. Next: Program19 records/codec, shared tuple/source
+> resolver and all16 original family/combination groups, then uniform component/
+> frozen-full acceptance. P5, M2 and completeM0–M2 remain open; no new LeWM speedup.
+
 > **P3 declared persistent-body occurrences accepted (2026-10-18):**
 > [Acceptance](M1_BODY_OCCURRENCE_ACCEPTANCE.md) closes O01–O16 on original
 > ports, persistent activation/segment/outcome, Create/owner/copy and conditional

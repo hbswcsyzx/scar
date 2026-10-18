@@ -111,3 +111,12 @@ C1组合；root核规范事实归属、共享规则和统一验收。没有用�
 P4完成后仍需P5完整F01–F24/X25–X28 ledger及公共面、M2原113构造/196字段
 映射与完整M0–M2总验收。满足后按用户要求停下来解释模型，再推进自动建图。
 本计划不新增detector/backend，不写LeWM规则，不给LeWM加速结论。
+
+## 7. 当前实施检查点（2026-10-18）
+
+[P4-1连接合同v1](M1_PROTOCOL_CONNECTION_CONTRACT.md)经三路反对性复审限定冻结。
+独立expected来源、相关输入tuple/原merge guard、parent slot、独立消费者清单、
+request/session与cancel目标/交付的字段已收束；原草案和被拒方案保留。
+[共享helper查询](M1_PROTOCOL_HELPER_INPUTS.md)先真实1失败，再修复no-RAW参数
+跨call来源，必要定向22及最终112通过，670源稳定；没有整个P4组件或全仓结果。
+新Program19及16组产品闭环仍待实施，P4/P5和完整M0–M2未完成。

@@ -1,5 +1,22 @@
 # Current evidence and remaining work
 
+## P4 connection design frozen; shared source query implemented (2026-10-18)
+
+[Contract v1](M1_PROTOCOL_CONNECTION_CONTRACT.md) passes three independent
+design reviews. It defines expected input tuples/merge guards, original resume
+slots, an independent consumer ledger, request/session and exact cancel-target
+links; it adds no second producer/use/state graph. Initial proposals and rejected
+shapes are preserved. Program19 records and the full16-group P4 implementation
+remain pending; design acceptance does not close P4.
+
+The [helper query checkpoint](M1_PROTOCOL_HELPER_INPUTS.md) first reproduced one
+missing positive, then implemented exact static caller-prefix extension without
+fake RAW helper parameters.22 focused and final112 affected source/admission/
+budget cases pass; all670 source hashes stay fixed. This remains an intermediate
+P4 check, with no complete P4 component/full run. The last full regression below
+belongs to `8138986`, not this new query implementation. No automatic LeWM
+transformation, heavy profile or new speedup is claimed. FullM0–M2 remains OPEN.
+
 ## P3 declared persistent-body occurrences accepted (2026-10-18)
 
 [Acceptance](M1_BODY_OCCURRENCE_ACCEPTANCE.md) closes O01–O16: persistent

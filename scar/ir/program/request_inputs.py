@@ -55,6 +55,43 @@ def _none_content(recipe):
     return None
 
 
+def _helper_context_extension(index, flow, raw, raw_calls, input_calls, accounting):
+    """Extend one exact caller prefix without adding a RAW formal to a helper.
+
+    The raw anchor must still be current before that prefix's first downstream
+    call. Further call/actual/formal steps come from the original input recipe;
+    this is a possible static operand route, not request-instance identity.
+    """
+    if (len(raw_calls) >= len(input_calls)
+            or input_calls[:len(raw_calls)] != raw_calls):
+        return False
+    if not accounting.spend('request_helper_context_checks', path='request_inputs.helper'):
+        return None
+    suffix = input_calls[len(raw_calls):]
+    caller_id, caller_region, _ = suffix[0]
+    raw_region = index._blocks[index._operation_blocks[raw.operation]]
+    if caller_region != raw_region:
+        return False
+    cache = getattr(flow, '_request_helper_anchor_cache', None)
+    if cache is None:
+        cache = flow._request_helper_anchor_cache = {}
+    key = raw, caller_id
+    if key not in cache:
+        port = flow.port(raw)
+        before = None if port is None else flow._fresh_copies(port)
+        use = flow.owned_use(raw.operation, raw.use)
+        cache[key] = None if before is None else use.value in before.get(caller_id, ())
+    current = cache[key]
+    if current is not True:
+        return current
+    if not accounting.spend('request_helper_call_steps', len(suffix), path='request_inputs.helper'):
+        return None
+    return {'raw_anchor': raw, 'entry_call': index.operations[caller_id],
+            'call_context_suffix': suffix, 'anchor_current_before_call': True,
+            'raw_argument_required': False, 'request_identity_verified': False,
+            'source_runtime_verified': False, 'transformation_authorized': False}
+
+
 def request_input_binding(index, raw, input, ordinal=0, *, budget=4096, accounting=None, _flow=None):
     """Join a driver raw Use and a separate input Use through the same caller path.
 
@@ -132,10 +169,18 @@ def request_input_binding(index, raw, input, ordinal=0, *, budget=4096, accounti
                     input_calls, input_choices, input_rooted = _context(index, input_recipe, accounting)
                     forwarded = (consumer_forward is not None
                                  and (*raw_calls, consumer_forward['context']) == input_calls)
-                    if not input_rooted or (raw_calls != input_calls and not forwarded):
+                    if not input_rooted or operand_recipe['leaf'].id != input_recipe['leaf'].id:
                         continue
-                    if operand_recipe['leaf'].id != input_recipe['leaf'].id:
-                        continue
+                    extension = None
+                    if raw_calls != input_calls and not forwarded:
+                        extension = _helper_context_extension(index, flow, raw, raw_calls,
+                                                             input_calls, accounting)
+                        if type(extension) is not dict:
+                            if extension is None:
+                                gaps.append({'code': 'request_helper_context_unresolved',
+                                             'raw': raw, 'input': input,
+                                             'caller_context': input_calls})
+                            continue
                     choices = dict(operand_choices)
                     consistent = True
                     for key, selected in (*raw_choices.items(), *input_choices.items()):
@@ -158,6 +203,7 @@ def request_input_binding(index, raw, input, ordinal=0, *, budget=4096, accounti
                         'raw_recipe': raw_recipe, 'operand_recipe': operand_recipe, 'input_recipe': input_recipe,
                         'caller_context': input_calls, 'cfg_choices': tuple(choices.items()),
                         'raw_consumer_forward': consumer_forward if forwarded else None,
+                        'raw_context_extension': extension,
                         'declared_operand_is_none': _none_content(operand_recipe),
                         'status': 'DECLARED_SAME_SOURCE',
                         'runtime_identity_verified': False, 'source_runtime_verified': False,
