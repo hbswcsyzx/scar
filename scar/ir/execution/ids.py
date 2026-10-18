@@ -98,6 +98,26 @@ class QueueWaitID(Identifier):
     prefix = "exec_queue_wait"
 
 
+class DenotationID(Identifier):
+    prefix = "exec_denotation"
+
+
+class WorkEvidenceBindingID(Identifier):
+    prefix = "exec_work_evidence_binding"
+
+
+class ContentReadID(Identifier):
+    prefix = "exec_content_read"
+
+
+class ObservationRequirementID(Identifier):
+    prefix = "exec_observation_requirement"
+
+
+class ObservationRootID(Identifier):
+    prefix = "exec_observation_root"
+
+
 __all__ = [
     "RunID", "ProcessInstanceID", "HostThreadInstanceID", "RegionActivationID",
     "ExecutionSegmentID", "BlockVisitID", "OperationOccurrenceID",
@@ -106,4 +126,6 @@ __all__ = [
     "ResourceAccessID", "RealizationID",
     "WorkTicketID", "WorkOutcomeID", "WorkQuiescenceID", "WorkRetentionID", "QueuePrefixID",
     "QueueOrderProfileID", "EventRecordID", "QueueWaitID",
+    "DenotationID", "WorkEvidenceBindingID", "ContentReadID",
+    "ObservationRequirementID", "ObservationRootID",
 ]

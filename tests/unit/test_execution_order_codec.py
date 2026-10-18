@@ -70,7 +70,7 @@ def test_immutable_v2_native_work_fixture_is_independent_and_byte_exact():
     assert proof["historical_source_hashes"]["scar/ir/execution/codec.py"] == (
         "b9df39823e351e855702a8bdb324cb637da1431fd55b5a5bc1a3c3310e0fd890")
     model = loads(payload.decode())
-    assert SCHEMA_VERSION == 3
+    assert SCHEMA_VERSION == 4
     assert all(getattr(model, field) == () for field in ORDER_FIELDS)
     assert dumps(model).encode() == payload
     assert dumps(model, schema_version=2).encode() == payload
@@ -212,7 +212,10 @@ def test_encoder_rechecks_order_records_before_capability_selection(ordered, mut
 
 
 def test_unknown_versions_remain_rejected_after_adding_v3(ordered):
-    for version in (True, 0, 4, "3"):
+    for version in (True, 0, 4, "3", 5):
+        if type(version) is int and version == 4:
+            assert loads(dumps(ordered, schema_version=version)) == ordered
+            continue
         with pytest.raises(ValueError, match="schema_version"):
             dumps(ordered, schema_version=version)
         document = to_dict(ordered)

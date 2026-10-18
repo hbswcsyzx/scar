@@ -20,9 +20,11 @@ from .model import ExecutionModel
 
 
 SCHEMA = "scar.execution-model"
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 _WORK_FIELDS = frozenset({"submissions", "outcomes", "quiescences", "retentions", "queue_prefixes"})
 _ORDER_FIELDS = frozenset({"queue_order_profiles", "event_records", "queue_waits"})
+_CONTENT_FIELDS = frozenset({"denotations", "work_evidence_bindings", "observation_requirements",
+                             "observation_roots", "content_reads"})
 
 
 def _tag(cls):
@@ -35,10 +37,11 @@ def _record_schema(cls, schema_version):
     return tuple((field.name, hints[field.name]) for field in fields(cls)
                  if not (cls is ExecutionModel and (
                      (schema_version < 2 and field.name in _WORK_FIELDS)
-                     or (schema_version < 3 and field.name in _ORDER_FIELDS))))
+                     or (schema_version < 3 and field.name in _ORDER_FIELDS)
+                     or (schema_version < 4 and field.name in _CONTENT_FIELDS))))
 
 
-@lru_cache(maxsize=3)
+@lru_cache(maxsize=4)
 def _vocabulary(schema_version):
     """Only types reachable through the fixed model schema may have wire tags."""
     vocabulary, visited = {}, set()
@@ -185,13 +188,13 @@ def _decode(value, expected, path, schema_version):
 
 
 def _version(version):
-    if type(version) is not int or version not in (1, 2, 3):
+    if type(version) is not int or version not in (1, 2, 3, 4):
         raise ValueError("unsupported execution schema_version")
     return version
 
 
 def to_dict(model: ExecutionModel, *, schema_version: int | None = None) -> dict:
-    """Choose v1 resources, v2 work, or v3 order, without graph proof.
+    """Choose v1 resources, v2 work, v3 order or v4 content, without graph proof.
 
     Explicit newer versions can encode empty capability tables. Decoding older
     versions supplies empty defaults only as migration, never absence evidence.
@@ -204,7 +207,10 @@ def to_dict(model: ExecutionModel, *, schema_version: int | None = None) -> dict
         model.__post_init__()
         has_work = any(getattr(model, name) for name in _WORK_FIELDS)
         has_order = any(getattr(model, name) for name in _ORDER_FIELDS)
-        version = (3 if has_order else 2 if has_work else 1) if schema_version is None else _version(schema_version)
+        has_content = any(getattr(model, name) for name in _CONTENT_FIELDS)
+        version = (4 if has_content else 3 if has_order else 2 if has_work else 1) if schema_version is None else _version(schema_version)
+        if version < 4 and has_content:
+            _fail("model", f"content capability cannot be encoded as schema v{version}")
         if version < 3 and has_order:
             _fail("model", f"order capability cannot be encoded as schema v{version}")
         if version == 1 and has_work:

@@ -16,6 +16,8 @@ from .resources import (
 )
 from .order import EventRecord, QueueOrderProfile, QueueWait
 from .work import QueuePrefix, ResourceOutcome, WorkQuiescence, WorkRetention, WorkSubmission
+from .content import ContentRead, ValueDenotation, WorkEvidenceBinding
+from .observations import ObservationRequirement, ObservationRoot
 
 
 @dataclass(frozen=True, slots=True)
@@ -76,6 +78,11 @@ class ExecutionModel:
     queue_order_profiles: tuple[QueueOrderProfile, ...] = ()
     event_records: tuple[EventRecord, ...] = ()
     queue_waits: tuple[QueueWait, ...] = ()
+    denotations: tuple[ValueDenotation, ...] = ()
+    work_evidence_bindings: tuple[WorkEvidenceBinding, ...] = ()
+    observation_requirements: tuple[ObservationRequirement, ...] = ()
+    observation_roots: tuple[ObservationRoot, ...] = ()
+    content_reads: tuple[ContentRead, ...] = ()
 
     def __post_init__(self):
         if type(self.snapshot) is not ProgramSnapshot:
@@ -100,6 +107,9 @@ TABLE_TYPES = {
     'retentions': WorkRetention, 'queue_prefixes': QueuePrefix,
     'queue_order_profiles': QueueOrderProfile, 'event_records': EventRecord,
     'queue_waits': QueueWait,
+    'denotations': ValueDenotation, 'work_evidence_bindings': WorkEvidenceBinding,
+    'observation_requirements': ObservationRequirement, 'observation_roots': ObservationRoot,
+    'content_reads': ContentRead,
 }
 
 

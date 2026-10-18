@@ -194,7 +194,7 @@ def test_uri_is_not_identity_and_each_artifact_is_hashed_once_per_query(monkeypa
     artifact = _artifact(graph)
     required = RegionRef(artifact, StorageRegionID("required"))
     offered = RegionRef(replace(artifact, uri="file:///must-not-open"), StorageRegionID("offered"))
-    import scar.ir.execution.coverage as module
+    import scar.ir.execution.snapshot as module
     original, calls = module.external_bytes, []
 
     def counted(value):

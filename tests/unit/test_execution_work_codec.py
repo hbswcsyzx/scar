@@ -43,7 +43,7 @@ def test_frozen_v1_is_independent_and_current_default_preserves_exact_bytes():
     assert proof["payload_size_bytes"] == len(payload)
     assert proof["historical_codec_sha256"] == "9fe67ab00091d1477c71baa3259394d8f2062d9c3deb93bdf3c318f9faaf37bd"
     model = loads(payload.decode())
-    assert SCHEMA_VERSION == 3
+    assert SCHEMA_VERSION == 4
     assert all(getattr(model, field) == () for field in WORK_FIELDS)
     assert dumps(model).encode() == payload
     assert dumps(model, schema_version=1).encode() == payload
@@ -187,11 +187,11 @@ def test_encoder_rechecks_mutation_before_capability_omission_or_nested_encoding
         dumps(model)
 
 
-@pytest.mark.parametrize("version", (True, 0, 3, "2", 4))
+@pytest.mark.parametrize("version", (True, 0, 3, "2", 4, 5))
 def test_schema_versions_are_exact_supported_integers(queued, version):
-    if type(version) is int and version == 3:
-        # Preserve the original version-3 contract case: it becomes supported
-        # when order capability is introduced, while version 4 is still invalid.
+    if type(version) is int and version in (3, 4):
+        # Preserve old case identities as their versions become supported;
+        # an explicit newer version with empty capability adds no evidence.
         assert loads(dumps(queued, schema_version=version)) == queued
         return
     with pytest.raises(ValueError, match="schema_version"):

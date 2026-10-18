@@ -38,12 +38,86 @@ class FormalRoute:
 
 
 class ExecutionIndex:
-    def __init__(self, model, program, *, value_graphs=None, evidence_graphs=None):
-        report, ctx = _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs)
+    def __init__(self, model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None):
+        report, ctx = _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
+                               semantic_graphs=semantic_graphs)
         if not report.valid:
             raise ValueError('; '.join(f'{x.code} at {x.path}: {x.message}' for x in report.issues))
         self._ctx = ctx
         self.report = deepcopy(report)
+
+    def _content_context(self):
+        """Fresh external snapshots per content query, reusing canonical flow.
+
+        The caller's mutable external graphs may have changed since this index
+        was built. Recheck D/Q associations; never mutate the construction-time
+        report or reuse its trusted external graph objects.
+        """
+        from copy import copy
+        from .snapshot import ExternalSnapshots
+        from .observation_validation import observation_errors
+        from .content_validation import content_errors
+        ctx = copy(self._ctx)
+        ctx.issues, ctx.gaps, ctx._gap_keys = [], [], set()
+        ctx.snapshots = ExternalSnapshots(ctx.value_graphs, ctx.evidence_graphs, ctx.semantic_graphs)
+        observation_errors(ctx)
+        content_errors(ctx)
+        if ctx.issues:
+            raise ValueError('; '.join(f'{x.code} at {x.path}: {x.message}' for x in ctx.issues))
+        return ctx
+
+    def denotation(self, value):
+        """Canonical type/identity; content versions never stand for references."""
+        from scar.ir.program.model import (
+            DataValue, ReferenceValue, StateVersionValue, LocalBindingValue,
+            ProtocolValue, LiteralOrigin,
+        )
+        ctx = self._content_context()
+        row = ctx.values[value]
+        definition = ctx.core_values[row.value]
+        association = ctx.resolved_denotations.get(value)
+        kind = {DataValue: 'data', ReferenceValue: 'reference', StateVersionValue: 'state',
+                LocalBindingValue: 'binding', ProtocolValue: 'protocol'}[type(definition)]
+        return deepcopy({'kind': kind, 'occurrence': row, 'definition': definition,
+            'association': association,
+            'literal': definition.origin if type(definition.origin) is LiteralOrigin else None,
+            'gaps': tuple(ctx.gaps), 'source_runtime_verified': False,
+            'transformation_authorized': False})
+
+    def content_read(self, identity):
+        """Original consumer/effect/selector associations, never ready=True."""
+        from .content import ResourceConsumer, NativeWorkRead
+        from .order import WorkStart, WorkEnd
+        ctx = self._content_context()
+        result = ctx.resolved_content_reads[identity]
+        consumer = result['read'].consumer
+        if type(consumer) is ResourceConsumer:
+            conservative = (WorkStart(consumer.read.ticket), WorkEnd(consumer.read.ticket))
+            interval = conservative
+            native_interval = consumer.read.interval if type(consumer.read) is NativeWorkRead else None
+        else:
+            conservative = None
+            native_interval = None
+            interval = (result['observation_root'].interval if result['observation_root'] is not None
+                        else consumer.interval)
+        return deepcopy({**result, 'interval': interval, 'conservative_work_interval': conservative,
+            'declared_native_interval': native_interval,
+            'gaps': tuple(ctx.gaps), 'source_runtime_verified': False,
+            'transformation_authorized': False})
+
+    def observation_root(self, identity):
+        """Resolve an explicit Q requirement to its actual value/endpoint."""
+        from .observations import BoundEndpoint, OutputValue
+        ctx = self._content_context()
+        root = ctx.observation_roots[identity]
+        requirement = ctx.observation_requirements[root.requirement]
+        graph = ctx.external_semantic(requirement.contract.artifact, identity)
+        actual = (ctx.requirements[root.actual.binding] if type(root.actual) is BoundEndpoint
+                  else ctx.values[root.actual.value] if type(root.actual) is OutputValue else root.actual)
+        return deepcopy({'root': root, 'requirement': requirement,
+            'contract': None if graph is None else graph.contracts[requirement.contract.contract],
+            'actual': actual, 'gaps': tuple(ctx.gaps), 'source_runtime_verified': False,
+            'transformation_authorized': False})
 
     def definition_for_use(self, operation, use):
         """Original Use/definition plus its declared dynamic definition endpoint."""

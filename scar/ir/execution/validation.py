@@ -9,6 +9,7 @@ from scar.ir.program.resumption import SuspendTerminator
 from scar.ir.v2._validation import record_errors
 from scar.ir.v2.values import ValueGraph
 from scar.ir.v2.evidence import EvidenceGraph
+from scar.ir.v2.semantic import SemanticGraph
 from .common import EvidencePoint, MissingEvidence, Unresolved
 from .coordinates import (
     CaptureIngress, InitialEntry, OccurrencePhase, OccurrencePoint, ResumeIngress,
@@ -16,7 +17,7 @@ from .coordinates import (
 )
 from .ids import BlockVisitID, OperationOccurrenceID, RegionActivationID
 from .model import ExecutionModel
-from .snapshot import external_bytes
+from .snapshot import ExternalSnapshots, SnapshotError
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,17 +46,20 @@ class ValidationReport:
 
 
 class _Context:
-    def __init__(self, model, program, value_graphs, evidence_graphs):
+    def __init__(self, model, program, value_graphs, evidence_graphs, semantic_graphs=None):
         self.model, self.program = model, program
         self.issues, self.gaps = [], []
         self._gap_keys = set()
         self.value_graphs = {} if value_graphs is None else value_graphs
         self.evidence_graphs = {} if evidence_graphs is None else evidence_graphs
-        self._external_cache = {}
+        self.semantic_graphs = {} if semantic_graphs is None else semantic_graphs
+        self.snapshots = ExternalSnapshots(self.value_graphs, self.evidence_graphs, self.semantic_graphs)
         for name in ('runs', 'processes', 'threads', 'activations', 'segments', 'visits',
                      'operations', 'values', 'resources', 'realizations', 'requirements', 'handles', 'accesses',
                      'submissions', 'outcomes', 'quiescences', 'retentions', 'queue_prefixes',
-                     'queue_order_profiles', 'event_records', 'queue_waits'):
+                     'queue_order_profiles', 'event_records', 'queue_waits',
+                     'denotations', 'work_evidence_bindings', 'observation_requirements',
+                     'observation_roots', 'content_reads'):
             registry = {}
             for row in getattr(model, name):
                 if row.id in registry:
@@ -219,34 +223,20 @@ class _Context:
         return None
 
     def _external(self, artifact, path, kind, catalog):
-        key = artifact.sha256, artifact.schema, artifact.size_bytes, kind
-        if key in self._external_cache:
-            return self._external_cache[key]
-        graph = catalog.get(artifact.sha256)
+        try:
+            graph = self.snapshots.graph(artifact, kind)
+        except SnapshotError as error:
+            self.issue(error.code, path, str(error))
+            return None
         if graph is None:
             self.gap('external_graph_unavailable', path, 'exact external artifact has not been supplied')
-            return None
-        if type(graph) is not kind:
-            self.issue('external_graph_type', path, 'supplied external graph has the wrong graph family')
-            return None
-        try:
-            report = graph.validate()
-            if not report['valid']:
-                self.issue('external_graph_invalid', path, '; '.join(report['errors']))
-                return None
-            wire = external_bytes(graph)
-        except (AttributeError, TypeError, ValueError, KeyError) as error:
-            self.issue('external_graph_invalid', path, f'external graph shape or encoding is invalid: {error}')
-            return None
-        if (artifact.schema != graph.SCHEMA or len(wire) != artifact.size_bytes
-                or hashlib.sha256(wire).hexdigest() != artifact.sha256):
-            self.issue('external_snapshot', path, 'external bytes/schema/digest do not match the named artifact')
-            return None
-        self._external_cache[key] = graph
         return graph
 
     def external_values(self, artifact, path):
         return self._external(artifact, path, ValueGraph, self.value_graphs)
+
+    def external_semantic(self, artifact, path):
+        return self._external(artifact, path, SemanticGraph, self.semantic_graphs)
 
 
 def _coordinates(ctx):
@@ -370,10 +360,11 @@ def _evidence_gaps(ctx):
     visit(ctx.model, 'model')
 
 
-def _analyze(model, program, *, value_graphs=None, evidence_graphs=None):
+def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None):
     if type(model) is not ExecutionModel:
         return ValidationReport((ExecutionIssue('record', 'model', 'expected exact ExecutionModel'),), ()), None
-    for name, catalog in (('value_graphs', value_graphs), ('evidence_graphs', evidence_graphs)):
+    for name, catalog in (('value_graphs', value_graphs), ('evidence_graphs', evidence_graphs),
+                          ('semantic_graphs', semantic_graphs)):
         if catalog is not None and (type(catalog) is not dict or any(type(key) is not str for key in catalog)):
             return ValidationReport((ExecutionIssue('catalog_type', name, 'expected dict keyed by artifact SHA256 strings'),), ()), None
     try:
@@ -383,7 +374,7 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None):
         wire = program_dumps(program).encode('utf-8')
     except (TypeError, ValueError, AttributeError) as error:
         return ValidationReport((ExecutionIssue('record_or_program', 'model', str(error)),), ()), None
-    ctx = _Context(model, program, value_graphs, evidence_graphs)
+    ctx = _Context(model, program, value_graphs, evidence_graphs, semantic_graphs)
     artifact = model.snapshot.artifact
     if (artifact.schema != 'scar.program-graph' or artifact.sha256 != hashlib.sha256(wire).hexdigest()
             or artifact.size_bytes != len(wire) or model.snapshot.schema_version != json.loads(wire)['schema_version']):
@@ -409,17 +400,25 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None):
             graph = ctx._external(row.legacy.artifact, 'evidence_bindings', EvidenceGraph, ctx.evidence_graphs)
             if graph is not None and row.legacy.instance not in graph.instances:
                 ctx.issue('evidence_instance', 'evidence_bindings', 'missing exact legacy instance endpoint')
+    if not ctx.issues:
+        from .observation_validation import observation_errors
+        observation_errors(ctx)
+    if not ctx.issues:
+        from .content_validation import content_errors
+        content_errors(ctx)
     # Evidence reference presence is not native/source/runtime applicability.
     ctx.gap('source_runtime_unverified', 'model', 'declared occurrence/identity links have not been established by a runtime adapter')
     return ValidationReport(tuple(ctx.issues), tuple(ctx.gaps)), ctx
 
 
-def validate(model, program, *, value_graphs=None, evidence_graphs=None):
-    return _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs)[0]
+def validate(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None):
+    return _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
+                    semantic_graphs=semantic_graphs)[0]
 
 
-def require_valid(model, program, *, value_graphs=None, evidence_graphs=None):
-    report = validate(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs)
+def require_valid(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None):
+    report = validate(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
+                      semantic_graphs=semantic_graphs)
     if report.issues:
         raise ValueError('; '.join(f'{row.code} at {row.path}: {row.message}' for row in report.issues))
     return report

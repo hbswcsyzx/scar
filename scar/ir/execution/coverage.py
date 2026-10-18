@@ -14,17 +14,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-import hashlib
-import json
 import sys
 
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.provenance import _byte_bounds, _byte_intervals, _width
-from scar.ir.v2.codec import values_from_dict
 from scar.ir.v2.ids import StorageRegionID
 from scar.ir.v2.values import ValueGraph
 from .resources import _exact, _id, _index, _record
-from .snapshot import external_bytes
+from .snapshot import ExternalSnapshots, SnapshotError
 
 
 @dataclass(frozen=True, slots=True)
@@ -125,38 +122,26 @@ class _ValueCatalog:
     """Per-query exact snapshot resolver shared by MatRef and region queries."""
 
     def __init__(self, value_graphs):
+        # Retain the existing public geometry input-type contract while the
+        # shared resolver exposes coded SnapshotError to graph validation.
         _exact(value_graphs, dict, "ValueGraph catalog")
-        for key in value_graphs:
-            _exact(key, str, "ValueGraph catalog key")
-        self.catalog, self.verified = value_graphs, {}
+        try:
+            self._snapshots = ExternalSnapshots(value_graphs=value_graphs)
+        except SnapshotError as error:
+            if error.code == "catalog_type":
+                raise TypeError(str(error)) from error
+            raise
 
     def graph(self, artifact):
-        _record(artifact, ProviderArtifact, "ValueGraph artifact")
-        key = _artifact_key(artifact)
-        if key in self.verified:
-            return self.verified[key]
-        if artifact.sha256 not in self.catalog:
-            self.verified[key] = None
-            return None
-        graph = self.catalog[artifact.sha256]
-        if type(graph) is not ValueGraph:
-            raise ValueError("supplied external graph must be an exact ValueGraph")
-        try:
-            report = graph.validate()
-            if not report["valid"]:
-                raise ValueError("invalid external ValueGraph: " + "; ".join(report["errors"]))
-            wire = external_bytes(graph)
-        except (AttributeError, TypeError, KeyError, OverflowError) as error:
-            raise ValueError("invalid external ValueGraph shape or encoding: " + str(error)) from error
-        if (artifact.schema != graph.SCHEMA or artifact.size_bytes != len(wire)
-                or artifact.sha256 != hashlib.sha256(wire).hexdigest()):
-            raise ValueError("external ValueGraph bytes/schema/hash do not match region artifact")
-        # Read only the bytes whose identity was checked. The caller's mutable
-        # records may change after serialization; the strict existing decoder
-        # also validates the detached representation actually used for geometry.
-        snapshot = values_from_dict(json.loads(wire))
-        self.verified[key] = snapshot
-        return snapshot
+        return self._snapshots.graph(artifact, ValueGraph)
+
+    @classmethod
+    def from_snapshots(cls, snapshots):
+        """Reuse one content-query resolver without opening a second catalog."""
+        _exact(snapshots, ExternalSnapshots, "external snapshot resolver")
+        result = cls.__new__(cls)
+        result._snapshots = snapshots
+        return result
 
 
 class _Budget:
