@@ -20,8 +20,9 @@ from .model import ExecutionModel
 
 
 SCHEMA = "scar.execution-model"
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 _WORK_FIELDS = frozenset({"submissions", "outcomes", "quiescences", "retentions", "queue_prefixes"})
+_ORDER_FIELDS = frozenset({"queue_order_profiles", "event_records", "queue_waits"})
 
 
 def _tag(cls):
@@ -32,10 +33,12 @@ def _tag(cls):
 def _record_schema(cls, schema_version):
     hints = get_type_hints(cls)
     return tuple((field.name, hints[field.name]) for field in fields(cls)
-                 if not (schema_version == 1 and cls is ExecutionModel and field.name in _WORK_FIELDS))
+                 if not (cls is ExecutionModel and (
+                     (schema_version < 2 and field.name in _WORK_FIELDS)
+                     or (schema_version < 3 and field.name in _ORDER_FIELDS))))
 
 
-@lru_cache(maxsize=2)
+@lru_cache(maxsize=3)
 def _vocabulary(schema_version):
     """Only types reachable through the fixed model schema may have wire tags."""
     vocabulary, visited = {}, set()
@@ -182,16 +185,16 @@ def _decode(value, expected, path, schema_version):
 
 
 def _version(version):
-    if type(version) is not int or version not in (1, 2):
+    if type(version) is not int or version not in (1, 2, 3):
         raise ValueError("unsupported execution schema_version")
     return version
 
 
 def to_dict(model: ExecutionModel, *, schema_version: int | None = None) -> dict:
-    """Use v1 for resource-only records; v2 adds work, without graph proof.
+    """Choose v1 resources, v2 work, or v3 order, without graph proof.
 
-    Explicit v2 can encode empty work tables. Decoding v1 supplies those empty
-    tables only as a representation migration, never as evidence of no work.
+    Explicit newer versions can encode empty capability tables. Decoding older
+    versions supplies empty defaults only as migration, never absence evidence.
     """
     try:
         if type(model) is not ExecutionModel:
@@ -200,7 +203,10 @@ def to_dict(model: ExecutionModel, *, schema_version: int | None = None) -> dict
         # fields must not disappear just because v1 omits empty work tables.
         model.__post_init__()
         has_work = any(getattr(model, name) for name in _WORK_FIELDS)
-        version = (2 if has_work else 1) if schema_version is None else _version(schema_version)
+        has_order = any(getattr(model, name) for name in _ORDER_FIELDS)
+        version = (3 if has_order else 2 if has_work else 1) if schema_version is None else _version(schema_version)
+        if version < 3 and has_order:
+            _fail("model", f"order capability cannot be encoded as schema v{version}")
         if version == 1 and has_work:
             _fail("model", "work capability cannot be encoded as schema v1")
         return {"schema": SCHEMA, "schema_version": version,

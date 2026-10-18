@@ -1,5 +1,12 @@
 # SCAR roadmap and scope
 
+> **R2.2 component checkpoint (2026-10-18):** exact event generations, waits and
+> bounded queue profiles connect to conditional consumer-start order; **497
+> component cases / 7 criteria / 9.382s**, all 489 hashes unchanged. Execution v3
+> preserves historical v1/v2 bytes. [Acceptance](M1_RESOURCE_ORDER_ACCEPTANCE.md)
+> awaits clean frozen full regression. Next is R2.3 consumer/denotation/production
+> coverage; R3 and complete M0–M2 remain open. No new backend or LeWM speedup.
+
 > **R2.1 work checkpoint (2026-10-18):** original access/actual INVOKE state
 > effects, terminal observations, independent quiescence and resource retention
 > pass **407 component checks / 9 criteria** and **4,297 clean frozen full tests**

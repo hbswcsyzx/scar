@@ -86,6 +86,18 @@ class QueuePrefixID(Identifier):
     prefix = "exec_queue_prefix"
 
 
+class QueueOrderProfileID(Identifier):
+    prefix = "exec_queue_order_profile"
+
+
+class EventRecordID(Identifier):
+    prefix = "exec_event_record"
+
+
+class QueueWaitID(Identifier):
+    prefix = "exec_queue_wait"
+
+
 __all__ = [
     "RunID", "ProcessInstanceID", "HostThreadInstanceID", "RegionActivationID",
     "ExecutionSegmentID", "BlockVisitID", "OperationOccurrenceID",
@@ -93,4 +105,5 @@ __all__ = [
     "NativeHandleLifetimeID", "ResourceBindingID", "HandleBindingID",
     "ResourceAccessID", "RealizationID",
     "WorkTicketID", "WorkOutcomeID", "WorkQuiescenceID", "WorkRetentionID", "QueuePrefixID",
+    "QueueOrderProfileID", "EventRecordID", "QueueWaitID",
 ]

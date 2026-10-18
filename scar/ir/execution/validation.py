@@ -54,7 +54,8 @@ class _Context:
         self._external_cache = {}
         for name in ('runs', 'processes', 'threads', 'activations', 'segments', 'visits',
                      'operations', 'values', 'resources', 'realizations', 'requirements', 'handles', 'accesses',
-                     'submissions', 'outcomes', 'quiescences', 'retentions', 'queue_prefixes'):
+                     'submissions', 'outcomes', 'quiescences', 'retentions', 'queue_prefixes',
+                     'queue_order_profiles', 'event_records', 'queue_waits'):
             registry = {}
             for row in getattr(model, name):
                 if row.id in registry:
@@ -398,6 +399,9 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None):
     if not ctx.issues:
         from .work_validation import work_errors
         work_errors(ctx)
+    if not ctx.issues:
+        from .order_validation import order_errors
+        order_errors(ctx)
     if not ctx.issues:
         for row in model.evidence_bindings:
             if row.operation not in ctx.occurrences:

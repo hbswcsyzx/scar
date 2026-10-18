@@ -11,6 +11,14 @@ implemented types, automatic connectivity and optimization authority. The
 passes its declared checks; complete LeWM modeling and a verified speedup
 remain unfinished.
 
+The [R2.2 event/order component](docs/M1_RESOURCE_ORDER_INTERFACES.md) connects
+exact event generations, original state/resource ports and bounded queue profiles
+to conditional producer-end→consumer-start paths. Its
+[acceptance](docs/M1_RESOURCE_ORDER_ACCEPTANCE.md) passes **497 checks / 7 criteria**;
+the frozen full regression is pending. Execution v3 preserves original v1/v2
+bytes. Consumer production/denotation/ready, complete M0–M2 and a verified LeWM
+speedup remain open.
+
 The [R2.1 work foundation](docs/M1_RESOURCE_WORK_INTERFACES.md) now connects
 actual access/INVOKE completion effects, work terminal observations, independent
 quiescence and resource retention. Its [acceptance](docs/M1_RESOURCE_WORK_ACCEPTANCE.md)

@@ -17,6 +17,7 @@ from .coordinates import AccessRef, ControlTransfer, OccurrencePhase, Occurrence
 from .ids import BlockVisitID, OperationOccurrenceID, QueuePrefixID, RegionActivationID, ValueOccurrenceID
 from .validation import _analyze
 from .work import ActualCompletionState, InvokeBoundaryStateEffect, WithinOperation
+from .order import EventSignal, PrefixEnd, WorkEnd, WorkStart
 
 
 @dataclass(frozen=True, slots=True)
@@ -162,6 +163,58 @@ class ExecutionIndex:
             current = ctx.queue_prefixes[current.previous]
         return deepcopy({'prefixes': tuple(rows), 'boundary': current.id,
                          'truncated': True, 'runtime_order_verified': False})
+
+    def order_path(self, source, target, *, budget=4096):
+        """A bounded conditional path, never completion, readiness or authority.
+
+        Missing paths are UNRESOLVED, not proof of independence. Protocols and
+        original association rows are returned as conditions in each step.
+        """
+        from collections import deque
+        if type(budget) is not int or budget <= 0:
+            raise ValueError('order query budget must be a positive integer')
+        ctx = self._ctx
+        for point in (source, target):
+            if type(point) not in (WorkStart, WorkEnd, PrefixEnd, EventSignal):
+                raise TypeError('order endpoints must be exact typed resource boundaries')
+            point.__post_init__()
+            registry, identity = ((ctx.submissions, point.ticket) if type(point) in (WorkStart, WorkEnd)
+                                  else (ctx.queue_prefixes, point.prefix) if type(point) is PrefixEnd
+                                  else (ctx.event_records, point.record))
+            if identity not in registry:
+                raise KeyError(identity)
+        predecessor, pending = {source: None}, deque([source])
+        examined, path, truncated = 0, (), False
+        while pending and source != target:
+            current = pending.popleft()
+            for step in ctx.order_adjacency.get(current, ()):
+                if examined >= budget:
+                    truncated = True
+                    break
+                examined += 1
+                if step.target in predecessor:
+                    continue
+                predecessor[step.target] = step
+                pending.append(step.target)
+                if step.target == target:
+                    chain, cursor = [], target
+                    while cursor != source:
+                        link = predecessor[cursor]
+                        chain.append(link)
+                        cursor = link.source
+                    path = tuple(reversed(chain))
+                    break
+            if path or truncated:
+                break
+        return deepcopy({'source': source, 'target': target,
+            'status': 'CONDITIONAL' if path else 'UNRESOLVED', 'path': path,
+            'truncated': truncated, 'examined_edges': examined, 'gaps': self.report.gaps,
+            'runtime_order_verified': False, 'source_runtime_verified': False,
+            'transformation_authorized': False})
+
+    def work_order(self, producer, consumer, *, budget=4096):
+        """Require producer completion before consumer *start*, not its end."""
+        return self.order_path(WorkEnd(producer), WorkStart(consumer), budget=budget)
 
 
 __all__ = ['DefinitionLink', 'FormalRoute', 'ExecutionIndex']

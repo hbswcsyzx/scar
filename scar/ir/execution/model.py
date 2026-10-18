@@ -14,6 +14,7 @@ from .resources import (
     AllocationPlacement, HandleBinding, RequirementBinding, ResourceAccessBinding,
     ResourceInstance, ResourceRealization,
 )
+from .order import EventRecord, QueueOrderProfile, QueueWait
 from .work import QueuePrefix, ResourceOutcome, WorkQuiescence, WorkRetention, WorkSubmission
 
 
@@ -72,6 +73,9 @@ class ExecutionModel:
     quiescences: tuple[WorkQuiescence, ...] = ()
     retentions: tuple[WorkRetention, ...] = ()
     queue_prefixes: tuple[QueuePrefix, ...] = ()
+    queue_order_profiles: tuple[QueueOrderProfile, ...] = ()
+    event_records: tuple[EventRecord, ...] = ()
+    queue_waits: tuple[QueueWait, ...] = ()
 
     def __post_init__(self):
         if type(self.snapshot) is not ProgramSnapshot:
@@ -94,6 +98,8 @@ TABLE_TYPES = {
     'placements': AllocationPlacement, 'evidence_bindings': OccurrenceEvidenceBinding,
     'submissions': WorkSubmission, 'outcomes': ResourceOutcome, 'quiescences': WorkQuiescence,
     'retentions': WorkRetention, 'queue_prefixes': QueuePrefix,
+    'queue_order_profiles': QueueOrderProfile, 'event_records': EventRecord,
+    'queue_waits': QueueWait,
 }
 
 

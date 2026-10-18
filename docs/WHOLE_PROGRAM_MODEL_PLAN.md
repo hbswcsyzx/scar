@@ -100,6 +100,12 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 ## 5. 当前证据锚点
 
+- [R2.2 event/order](M1_RESOURCE_ORDER_INTERFACES.md)接准确record代次、原event状态
+  和resource端口、实际wait及有限queue profile，到consumer Start的条件路径；
+  497组件/7标准/9.382s通过，489登记文件指纹不变，历史v1/v2 wire保留。
+  [验收](M1_RESOURCE_ORDER_ACCEPTANCE.md)尚待一次clean冻结全仓；后续R2.3必须
+  接denotation/实际生产贡献和可见域，不能用条件顺序冒充完整ready。
+
 - [R2.1工作基础](M1_RESOURCE_WORK_INTERFACES.md)接原Access/实际INVOKE completion、
   独立outcome/quiescence/retention，严格execution v2及独立历史v1 bytes；
   407组件/9标准/6.282s及[clean冻结`bb1b402`](M1_RESOURCE_WORK_ACCEPTANCE.md)的
