@@ -11,8 +11,9 @@ from dataclasses import dataclass
 from typing import AbstractSet, Mapping, TYPE_CHECKING
 
 from .control import ProtocolValueKind
-from .ids import BlockID, OperationID, UseID, ValueID
+from .ids import BlockID, OperationID, ValueID
 from .model import BlockArgument, OperationResult, ProgramGraph, ProtocolValue
+from .resumption import SavedInput, SavedRole, saved_actual_use
 
 if TYPE_CHECKING:
     from .cleanup import CleanupInterface
@@ -105,8 +106,16 @@ def derive_cleanup_forward(
                 continue
             for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
                 if formal in incoming:
-                    source = (own.get(actual) if block.id in slice_blocks
-                              and isinstance(actual, UseID) else None)
+                    actual_use = saved_actual_use(operation, actual)
+                    source = own.get(actual_use) if block.id in slice_blocks else None
+                    if isinstance(actual, SavedInput) and source is not None:
+                        role = operation.terminator.saved[actual.saved_slot].role
+                        protocol = getattr(values[source], "protocol", None)
+                        if ((protocol is ProtocolValueKind.PENDING_COMPLETION
+                             and role is not SavedRole.PENDING_COMPLETION)
+                                or (protocol is ProtocolValueKind.SAVED_HANDLED_CONTEXT
+                                    and role is not SavedRole.CLEANUP_CONTEXT)):
+                            source = None
                     incoming[formal].append(source)
     copies = {formal: tuple(sources) for formal, sources in incoming.items()}
 

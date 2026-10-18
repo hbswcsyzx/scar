@@ -15,6 +15,7 @@ from .model import (
     AccessMode, Behavior, BlockArgument, FootprintKind, OperationResult,
     ProtocolValue, ReferenceValue, StateVersionValue, TerminatorKind,
 )
+from .resumption import SavedRole, SuspendTerminator, saved_actual_use
 
 
 class CleanupRouteKind(str, Enum):
@@ -385,13 +386,24 @@ def analyze_cleanup(graph, *, operation_blocks, dominators):
                 continue
             targets = [formal for edge in (term.successors if term is not None else ())
                        for actual, formal in zip(edge.arguments, blocks[edge.block].arguments)
-                       if actual == use.id]
+                       if saved_actual_use(operation, actual) == use.id]
             owning = [scope for scope, facts in forward.items() if use.value in facts.context]
-            if (not targets or use.id in (*operation.call_arguments, *operation.invoke_arguments)
+            retained = False
+            invalid_save = False
+            if isinstance(term, SuspendTerminator):
+                slots = [slot for slot in term.saved if slot.use == use.id]
+                retained = bool(slots) and all(slot.role is SavedRole.CLEANUP_CONTEXT for slot in slots)
+                source = operation_blocks[operation.id]
+                retained &= any(scope in after[source] and ancestor(scope, owners[source])
+                                for scope in owning)
+                invalid_save = bool(slots) and not retained
+            if (invalid_save or not (targets or retained)
+                    or use.id in (*operation.call_arguments, *operation.invoke_arguments)
                     or not owning or any(not any(
                         ancestor(scope, owners[values[formal].origin.block]) for scope in owning)
                         for formal in targets)):
-                error("cleanup_context_escape", use.id, "saved context only forwards within its owning active cleanup or restores it")
+                error("cleanup_context_escape", use.id,
+                      "saved context only forwards, restores, or privately saves within its owning active cleanup")
     if not issues:
         # A logical Return/Raise target can be intercepted by cleanup which
         # diverges or replaces that transfer. Such an exit is a declared

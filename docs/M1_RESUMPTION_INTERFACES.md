@@ -1,8 +1,9 @@
 # C2：可恢复 body、驱动协议与跨挂起依赖
 
-2026-10-17。**架构审查与实施合同；C2 产品接口尚未实施，C2.0 字段冻结门仍未关闭。**
-基线 `fec9f5b`；现产品仍为已验收的同步 core/C1、schema v9。本文件不是新 schema、
-自动 lowerer、trace adapter、detector 或 backend 的发布声明。第一阶段仍未完成。
+2026-10-17 架构合同，2026-10-18 更新：完整 C2.0 字段冻结与 C2.4 driver 仍开放。
+基线 `fec9f5b` 的研究证据保持原范围；[C2B body组件](M1_RESUMPTION_BODY_COMPONENT.md)
+已进入v10实施与独立验收，不能据此宣布完整C2、自动lowerer或运行adapter完成。
+本文件不是detector/backend发布声明，第一阶段仍未完成。
 
 ## 1. 这批模型要补什么
 
@@ -162,6 +163,8 @@ FX/Export 只提供自己的子图。模型阶段不扩大 source lowerer、Tens
 观察组不是断言式测试；设计探针不是 C2 validator 实现。完整请求×状态、实际
 finalizer、实例/并发、源码到 IR、ETO 或 GPU 均未据此验收。
 
-当前仅 C1 代码已验收并推送；本批 C2 仍是规格工作，源/测试产品指纹保持不变。
+上述架构研究交付时仅C1代码已验收，C2产品指纹未变。后续独立实施的
+[C2B body组件](M1_RESUMPTION_BODY_COMPONENT.md)以自己的gate、源指纹和报告验收，
+不沿用研究观察或旧C1回归来声称新实现通过。完整driver/生命周期仍开放。
 完整 M0–M2、自动 LeWM 全过程建图、具体化简与加速比仍未完成。不会以某个子门
 通过改写第一阶段的完成条件；满足完整清单后才停下来向用户讲解。

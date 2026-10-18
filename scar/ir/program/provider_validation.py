@@ -12,6 +12,7 @@ from .model import (
 )
 from .control import PendingPayload
 from .providers import ProviderArtifactKind, ProviderElementKind, ProviderRegionRelation
+from .resumption import ResumeInput
 
 
 def provider_errors(graph, operation_region, uses):
@@ -73,7 +74,11 @@ def provider_errors(graph, operation_region, uses):
             continue
         operation, edge = edges[0]
         for actual, formal in zip(edge.arguments, blocks[block].arguments):
-            if isinstance(actual, (CompletionResult, PendingPayload)):
+            if isinstance(actual, (CompletionResult, PendingPayload, ResumeInput)):
+                # This checks the external binding's boundary-operation owner.
+                # The canonical value remains a BlockArgument, including for
+                # externally supplied resume state/payload; no producer or
+                # runtime evidence is added to ProgramGraph.
                 edge_producers[formal] = operation
     for index, row in enumerate(graph.provider_bindings):
         path = f"provider_bindings[{index}]"

@@ -16,6 +16,9 @@ from .model import (
     OperationResult, ProtocolValue, ReferenceValue, StateVersionValue,
     TerminatorKind, UseRole, ValueKind, ValueType,
 )
+from .resumption import (
+    ResumeInput, SavedInput, SavedRole, SuspendTerminator, saved_actual_use,
+)
 
 
 def _protocol(value, kind):
@@ -58,6 +61,9 @@ def derive_pending_facts(graph):
             if term is None:
                 continue
             own = {u.id: u.value for u in operation.uses}
+            saved_pending = {slot.use for slot in term.saved
+                             if slot.role is SavedRole.PENDING_COMPLETION} if isinstance(
+                                 term, SuspendTerminator) else set()
             selected = own.get(term.pending) if isinstance(
                 term, (PendingDispatchTerminator, CleanupRouteTerminator)) else None
             for edge in term.successors:
@@ -68,10 +74,12 @@ def derive_pending_facts(graph):
                     if formal not in pending:
                         continue
                     before = len(facts[formal]), formal in incomplete
-                    if isinstance(actual, CompletionResult):
+                    actual_use = saved_actual_use(operation, actual)
+                    if (isinstance(actual, (CompletionResult, ResumeInput))
+                            or isinstance(actual, SavedInput) and actual_use not in saved_pending):
                         incomplete.add(formal)
-                    elif actual in own:
-                        source = own[actual]
+                    elif actual_use in own:
+                        source = own[actual_use]
                         carried = facts.get(source, set())
                         if selected == source:
                             carried = carried & {edge.port}
@@ -95,7 +103,10 @@ def control_errors(graph):
     blocks = {b.id: b for r in graph.regions for b in r.blocks}
     block_region = {b.id: r.id for r in graph.regions for b in r.blocks}
     operation_block = {o: b.id for b in blocks.values() for o in b.operations}
-    protocol_values = [v for v in graph.values if isinstance(v, ProtocolValue)]
+    # Frame/caller protocols belong to the dedicated resumable-body validator.
+    # Delivered exception packets still use C0 lexical ownership and packing.
+    protocol_values = [v for v in graph.values if isinstance(v, ProtocolValue)
+                       and v.protocol not in (P.FRAME_CONTEXT, P.DRIVE_CALLER_CONTEXT)]
     dispatches = [o for o in graph.operations if isinstance(
         o.terminator, (PendingDispatchTerminator, CleanupRouteTerminator))]
     if not (scopes or ports or protocol_values or dispatches
@@ -251,14 +262,24 @@ def control_errors(graph):
         cleanup_operands[row.operation] = {row.pending}
     for row in graph.cleanup_replacements:
         cleanup_operands[row.operation] = {row.saved_pending, row.replacement}
+    body_regions = {row.region for row in graph.resumable_bodies}
+    detach_operations = {row.operation for row in graph.frame_context_detaches}
     for operation in graph.operations:
         term = operation.terminator
+        saved_pending = {slot.use for slot in term.saved
+                         if slot.role is SavedRole.PENDING_COMPLETION} if isinstance(
+                             term, SuspendTerminator) else set()
         for use in operation.uses:
             if not _protocol(values[use.value], P.PENDING_COMPLETION):
                 continue
             bound = (isinstance(term, (PendingDispatchTerminator, CleanupRouteTerminator))
                      and term.pending == use.id)
-            bound |= term is not None and any(use.id in e.arguments for e in term.successors)
+            bound |= term is not None and any(
+                saved_actual_use(operation, actual) == use.id
+                and (not isinstance(actual, SavedInput) or use.id in saved_pending)
+                for edge in term.successors for actual in edge.arguments)
+            # A declared private retained value need not be restored by a case.
+            bound |= use.id in saved_pending
             bound |= use.id in cleanup_operands.get(operation.id, ())
             if not bound or use.id in (*operation.call_arguments, *operation.invoke_arguments):
                 error("pending_escape", use.id, "pending only travels on canonical typed local control operands")
@@ -300,7 +321,11 @@ def control_errors(graph):
                 landing = blocks[edge.block]
                 final = operations[landing.operations[-1]]
                 expected_kind = TerminatorKind.RETURN if port.kind is K.RETURN else TerminatorKind.RAISE
-                if (len(landing.operations) != 1 or final.terminator.kind is not expected_kind
+                detached_shim = (len(landing.operations) == 2
+                                 and block_region[landing.id] in body_regions
+                                 and landing.operations[0] in detach_operations)
+                if ((len(landing.operations) != 1 and not detached_shim)
+                        or final.terminator.kind is not expected_kind
                         or final.terminator.exit != port.exit):
                     error("pending_exit_landing", operation.id, "exit case needs an exact forwarding exit shim")
                 elif len(projections) == 1:

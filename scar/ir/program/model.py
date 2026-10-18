@@ -20,6 +20,10 @@ from scar.ir.program.cleanup import (
     CleanupEnter, CleanupInterface, CleanupReplace, CleanupResume,
     CleanupRouteTerminator, HandledContextDomain, HandledContextRead,
 )
+from scar.ir.program.resumption import (
+    FrameContextAttach, FrameContextDetach, FrameContextInitial, ResumableBody,
+    SuspendTerminator,
+)
 from scar.ir.program.environments import EnvironmentInterface, FunctionEntryLayout
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.resources import (
@@ -416,6 +420,7 @@ class TerminatorKind(str, Enum):
     INVOKE = "INVOKE"
     PENDING_DISPATCH = "PENDING_DISPATCH"
     CLEANUP_ROUTE = "CLEANUP_ROUTE"
+    SUSPEND = "SUSPEND"
 
 
 @dataclass(frozen=True, slots=True)
@@ -480,7 +485,8 @@ class Terminator:
     def __post_init__(self) -> None:
         if not isinstance(self.kind, TerminatorKind):
             raise TypeError("Terminator.kind must be TerminatorKind")
-        if self.kind in (TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE):
+        if self.kind in (TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE,
+                         TerminatorKind.SUSPEND):
             raise ValueError(f"{self.kind.value} requires its dedicated typed terminator")
         _tuple(self.successors, "Terminator.successors")
         if any(not isinstance(item, (Successor, CompletionSuccessor)) for item in self.successors):
@@ -526,7 +532,7 @@ class Operation:
     results: tuple[ValueID, ...] = ()
     accesses: tuple[StateAccess, ...] = ()
     effects_complete: bool = False
-    terminator: Terminator | PendingDispatchTerminator | CleanupRouteTerminator | None = None
+    terminator: Terminator | PendingDispatchTerminator | CleanupRouteTerminator | SuspendTerminator | None = None
     callee: RegionID | None = None
     call_arguments: tuple[UseID, ...] = ()
     completions: tuple[CompletionSignature, ...] = ()
@@ -554,11 +560,14 @@ class Operation:
         if type(self.effects_complete) is not bool:
             raise TypeError("Operation.effects_complete must be bool")
         if self.terminator is not None and not isinstance(
-                self.terminator, (Terminator, PendingDispatchTerminator, CleanupRouteTerminator)):
+                self.terminator, (Terminator, PendingDispatchTerminator, CleanupRouteTerminator,
+                                  SuspendTerminator)):
             raise TypeError("Operation.terminator must be a typed terminator or None")
         if (isinstance(self.terminator, CleanupRouteTerminator)
                 and type(self.terminator) is not CleanupRouteTerminator):
             raise TypeError("cleanup route terminator must be exact CleanupRouteTerminator")
+        if isinstance(self.terminator, SuspendTerminator) and type(self.terminator) is not SuspendTerminator:
+            raise TypeError("suspend terminator must be exact SuspendTerminator")
         if self.callee is not None and not isinstance(self.callee, RegionID):
             raise TypeError("Operation.callee must be RegionID or None")
         _tuple(self.call_arguments, "Operation.call_arguments")
@@ -714,6 +723,10 @@ class ProgramGraph:
     cleanup_resumes: tuple[CleanupResume, ...] = ()
     cleanup_replacements: tuple[CleanupReplace, ...] = ()
     handled_context_reads: tuple[HandledContextRead, ...] = ()
+    resumable_bodies: tuple[ResumableBody, ...] = ()
+    frame_context_initials: tuple[FrameContextInitial, ...] = ()
+    frame_context_attaches: tuple[FrameContextAttach, ...] = ()
+    frame_context_detaches: tuple[FrameContextDetach, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -732,6 +745,19 @@ class ProgramGraph:
         _unique(tuple(row.operation for rows in (
             self.cleanup_enters, self.cleanup_resumes, self.cleanup_replacements,
             self.handled_context_reads) for row in rows), "cleanup action operation IDs")
+        for name, row_type, key in (
+                ("resumable_bodies", ResumableBody, "region"),
+                ("frame_context_initials", FrameContextInitial, "operation"),
+                ("frame_context_attaches", FrameContextAttach, "operation"),
+                ("frame_context_detaches", FrameContextDetach, "operation")):
+            rows = _tuple(getattr(self, name), "ProgramGraph." + name)
+            if any(type(row) is not row_type for row in rows):
+                raise TypeError("ProgramGraph." + name + " needs exact resumption records")
+            _unique(tuple(getattr(row, key) for row in rows), "ProgramGraph." + name)
+        _unique(tuple(row.operation for rows in (
+            self.frame_context_initials, self.frame_context_attaches, self.frame_context_detaches,
+            self.cleanup_enters, self.cleanup_resumes, self.cleanup_replacements,
+            self.handled_context_reads) for row in rows), "context primitive operation IDs")
         for name, rows, row_type, id_field in (
             ("regions", self.regions, Region, "id"),
             ("operations", self.operations, Operation, "id"),

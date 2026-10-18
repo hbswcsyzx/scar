@@ -1,5 +1,22 @@
 # Current evidence and remaining work
 
+## C2B resumable body component (2026-10-18; full regression pending)
+
+[Body contract](M1_RESUMPTION_BODY_COMPONENT.md) now has strict records,
+Suspend-owned saved Uses, current-state ResumeInput signatures, context
+Initial/Attach/Detach, separate logical and availability projections, and
+binding/C0/C1 composition. Six initial valid graph probes passed; the missing
+saved-value probe was rejected at its unavailable Use. These are manual IR
+checks, not automatically recovered Python execution.
+
+Independent review reproduced and fixed an overstrict frame-alias check. The
+final component gate passes **499 checks / 7.077s**, all seven criteria, with
+403 source hashes unchanged during the run. Frozen full regression remains
+pending. Full C2.0/C2.4 driver, instance/generation/exclusivity and final
+release remain open. M0–M2 and automatic LeWM modeling remain incomplete; no
+transformation or speedup is claimed. Earlier design/C1 results below retain
+their original source and scope.
+
 ## C2 resumption architecture review (2026-10-17)
 
 [C2 design](M1_RESUMPTION_INTERFACES.md) chooses explicit temporal successors in

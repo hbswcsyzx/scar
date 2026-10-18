@@ -53,7 +53,16 @@ from scar.ir.program.codec import SCHEMA, SCHEMA_VERSION, dumps, loads
 from scar.ir.program.binding_validation import derive_binding_facts
 
 
+from .resumption import (
+    FrameContextAttach, FrameContextDetach, FrameContextInitial, ResumableBody,
+    ResumableKind, ResumeInput, ResumeSlot, ResumeSlotKind, ResumeSuccessor,
+    SavedInput, SavedRole, SavedSlot, SuspendTerminator, SuspensionFlavor,
+)
+
 __all__ = [
+    "FrameContextAttach", "FrameContextDetach", "FrameContextInitial", "ResumableBody",
+    "ResumableKind", "ResumeInput", "ResumeSlot", "ResumeSlotKind", "ResumeSuccessor",
+    "SavedInput", "SavedRole", "SavedSlot", "SuspendTerminator", "SuspensionFlavor",
     "AccessMode", "Behavior", "BindingDefinition", "BindingRead", "BindingState",
     "Block", "BlockArgument", "BlockID",
     "CompletionResult", "CompletionSignature", "CompletionSuccessor", "DataValue",

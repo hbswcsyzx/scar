@@ -516,12 +516,18 @@ def _check_program(args) -> int:
     from scar.ir.program.codec import loads as load_program
     from scar.ir.program.model import LocalBindingValue, value_type
     from scar.ir.program.cleanup import CleanupRouteTerminator
+    from scar.ir.program.resumption import SuspendTerminator
 
     source = Path(args.graph)
     report = {"schema": "scar.program-graph-check", "schema_version": 1,
               "input": str(source.resolve()), "scope": "declared graph structure and dependencies",
               "source_recovery": False, "transformation_authorized": False,
-              "cleanup_structure_validated": False}
+              "cleanup_structure_validated": False,
+              "body_structure_validated": False,
+              "body_driver_verified": False,
+              "body_source_verified": False,
+              "body_runtime_verified": False,
+              "body_exclusivity_verified": False}
     if args.out and Path(args.out).resolve() == source.resolve():
         report.update(status="INVALID", errors=["report path must differ from input graph"])
         print(json.dumps(report, ensure_ascii=False))
@@ -596,6 +602,15 @@ def _check_program(args) -> int:
                           native_tree_mapping_verified=False,
                           native_state_binding_verified=False,
                           boundary_relations_verified=False)
+        if graph.resumable_bodies:
+            report["counts"].update(
+                resumable_bodies=len(graph.resumable_bodies),
+                suspensions=sum(type(operation.terminator) is SuspendTerminator
+                                for operation in graph.operations),
+                frame_context_actions=(len(graph.frame_context_initials)
+                                       + len(graph.frame_context_attaches)
+                                       + len(graph.frame_context_detaches)))
+            report["body_structure_validated"] = True
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:
         destination = Path(args.out)

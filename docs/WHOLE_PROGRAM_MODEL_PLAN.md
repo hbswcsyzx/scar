@@ -58,10 +58,11 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 1. 统一 ControlPort / EnvironmentInterface 与规范状态参数，扩展既有 core 的
    completion target、pending cleanup 与 protocol adapter；先处理同步异常。
-2. 按 [C2](M1_RESUMPTION_INTERFACES.md)先关闭exact字段及driver/body/context阶段合同，
-   再接保存Uses、typed ResumeInput、temporal successors与cut availability。
-   body generation与drive epoch分开；不能冻结yield时world、上次caller context，
-   或把接受请求等同实际body entry。当前C2.0仍开放，不以架构审查冒充类型实施。
+2. 按[C2B body合同](M1_RESUMPTION_BODY_COMPONENT.md)独立验收保存Uses、typed
+   ResumeInput、temporal successors、cut availability及context/C1组合；当前实施中。
+   然后关闭完整[C2](M1_RESUMPTION_INTERFACES.md)的Create/driver/context/release
+   字段与组合。body generation与drive epoch分开；不冻结yield时world或旧caller，
+   不把接受请求等同实际body entry。完整C2.0/C2.4仍开放，不能以body组件代替。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。
 4. 在 M1/M2 内补齐构造协议、provider 端口映射与未展开区域的接口规则。

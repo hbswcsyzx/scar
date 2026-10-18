@@ -51,11 +51,16 @@ denotation、真实 native 适配/写回/等价及完整建模仍未完成。
 通过。允许清理截留的潜在函数出口没有实际站点，必须由指定pending入口完整facts
 支撑；旧无C1图的实际出口要求保留。with/except*、挂起恢复和真实context仍未验证。
 
-下一批 [C2](M1_RESUMPTION_INTERFACES.md)仍为架构/字段合同，尚未发布新schema。
-规范选择同body typed temporal successors，复用canonical Uses/参数；logical CFG
-与跨挂起availability分别派生。当前ResumeInput/context切换、driver-only路径与
-frame-release阶段尚须落为严格记录和校验；不能将现同步FrameModel直接放宽，
-也不能把文档里的拟议术语当已支持的新类型。原C1源指纹及3,330项回归证据不变。
+[C2B body组件](M1_RESUMPTION_BODY_COMPONENT.md)正在实施v10：四张body/context表、
+独立Suspend variant、SavedInput/ResumeInput及精确context作用域。logical CFG保留
+cleanup activation；availability在独立landing切断未保存定义。相同saved Use解析
+用于引用精度、local binding及C0/C1推导，不另造actual/producer。无该capability
+的图继续按原v2–v9写出；v1–v9拒绝新字段/协议，隔离原v9 codec的golden保留。
+独立组件和冻结full尚待验收；原C1的3,330项报告不作新代码的验证结果。
+
+完整[C2](M1_RESUMPTION_INTERFACES.md)仍缺Create/专用driver ingress、实例和代次、
+delegate-only路径及final release。普通CALL/INVOKE禁止直接以ResumableBody为callee，
+同步FrameModel不放宽。静态body有效不证明source/runtime adapter或可变换。
 
 新完整模型 Resource 有静态 definition/requirement 和动态 instance，handle
 经对应关系引用它；不能仅作为 EEG 标签。旧 `ready_event` 不承担新完成证明。

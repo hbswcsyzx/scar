@@ -1,0 +1,15 @@
+{
+  "schema": "scar.program-graph-v9-freeze-proof",
+  "schema_version": 9,
+  "source_revision": "b4bc1a4",
+  "source_tree": "isolated git archive b4bc1a4; generation used archive PYTHONPATH, not current mutable codec",
+  "command": "source /home/zyf/miniconda3/etc/profile.d/conda.sh && conda activate lewm && PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=<isolated-b4bc1a4-archive> python -c \"dumps(resume_multistate_graph()) + \\\"\\n\\\"\"",
+  "fixture": "tests.fixtures.program_cleanup_graphs.resume_multistate_graph",
+  "logical_wire_sha256": "d1ee55c4f27c90dbd82966cc1b2c7a2f583956bc4afdefb68ee352e7828af0f3",
+  "fixture_file_sha256": "7ee924f2eb682fbde1f9954453d222619513ca26efd6dbab7090009ecf4ad751",
+  "fixture_file_bytes": 60957,
+  "isolated_codec_sha256": "d9d802cfa0791622f5c610432c03ca883bba16b807c9f18bebd251e81f47b350",
+  "terminal_newline": true,
+  "generated_from_current_worktree": false,
+  "runtime": "conda environment lewm"
+}

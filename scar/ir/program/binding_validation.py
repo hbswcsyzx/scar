@@ -4,13 +4,20 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .bindings import BindingState
-from .ids import UseID, ValueID
+from .ids import ValueID
 from .model import (
     AccessMode, Behavior, BlockArgument, BindingDefinition, BindingRead, CompletionResult,
     CompletionSuccessor, LocalBindingValue, OperationResult, ProgramGraph,
     ExitKind, ReferenceValue, StateVersionValue, TerminatorKind, UseRole,
     ValueType, ValueKind, FootprintKind,
 )
+from .resumption import ResumeInput, SavedInput, SavedRole, SuspendTerminator, saved_actual_use
+
+
+def _saved_binding_uses(operation):
+    term = operation.terminator
+    return {slot.use for slot in term.saved if slot.role is SavedRole.LOCAL_BINDING} if isinstance(
+        term, SuspendTerminator) else set()
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,15 +79,18 @@ def derive_binding_facts(graph: ProgramGraph) -> dict[ValueID, frozenset[Binding
             terminator = operations.get(block.operations[-1])
             if terminator is None or terminator.terminator is None:
                 continue
+            saved_bindings = _saved_binding_uses(terminator)
             for edge in terminator.terminator.successors:
                 target = blocks.get(edge.block)
                 if target is None:
                     continue
                 for actual, formal in zip(edge.arguments, target.arguments):
                     formal_value = values.get(formal)
-                    if not isinstance(formal_value, LocalBindingValue) or not isinstance(actual, UseID):
+                    actual_use = saved_actual_use(terminator, actual)
+                    if (not isinstance(formal_value, LocalBindingValue) or actual_use is None
+                            or isinstance(actual, SavedInput) and actual_use not in saved_bindings):
                         continue
-                    pair = uses.get(actual)
+                    pair = uses.get(actual_use)
                     source = values.get(pair[1].value) if pair is not None else None
                     if (pair is not None and pair[0] == terminator.id
                             and pair[1].role is UseRole.LOCAL_BINDING
@@ -242,6 +252,7 @@ def validate_bindings(graph: ProgramGraph) -> tuple[BindingValidationIssue, ...]
             terminator = operations.get(block.operations[-1])
             if terminator is None or terminator.terminator is None:
                 continue
+            saved_bindings = _saved_binding_uses(terminator)
             for edge in terminator.terminator.successors:
                 target = blocks.get(edge.block)
                 if target is None:
@@ -253,13 +264,20 @@ def validate_bindings(graph: ProgramGraph) -> tuple[BindingValidationIssue, ...]
                     if isinstance(actual, CompletionResult):
                         error("binding_completion_result", formal,
                               "local-binding tokens cannot be fabricated from completion results")
-                    elif isinstance(actual, UseID):
-                        pair = uses.get(actual)
+                    elif isinstance(actual, ResumeInput):
+                        error("binding_resume_result", formal,
+                              "local-binding tokens cannot be fabricated from resume inputs")
+                    else:
+                        actual_use = saved_actual_use(terminator, actual)
+                        if actual_use is None:
+                            continue
+                        pair = uses.get(actual_use)
                         actual_value = values.get(pair[1].value) if pair is not None else None
                         if (pair is None or pair[0] != terminator.id
                                 or pair[1].role is not UseRole.LOCAL_BINDING
                                 or not isinstance(actual_value, LocalBindingValue)
-                                or actual_value.slot != formal_value.slot):
+                                or actual_value.slot != formal_value.slot
+                                or isinstance(actual, SavedInput) and actual_use not in saved_bindings):
                             error("binding_edge_slot", formal,
                                   "CFG carries must forward the same local slot with LOCAL_BINDING role")
                         elif formal in incoming_binding_values:
@@ -505,12 +523,16 @@ def validate_bindings(graph: ProgramGraph) -> tuple[BindingValidationIssue, ...]
             operation = operations.get(block.operations[-1])
             if operation is None or operation.terminator is None:
                 continue
+            saved_bindings = _saved_binding_uses(operation)
+            authorized.update(saved_bindings)
             for edge in operation.terminator.successors:
                 for actual in edge.arguments:
-                    if isinstance(actual, UseID):
-                        pair = uses.get(actual)
+                    actual_use = saved_actual_use(operation, actual)
+                    if (actual_use is not None and (not isinstance(actual, SavedInput)
+                                                   or actual_use in saved_bindings)):
+                        pair = uses.get(actual_use)
                         if pair is not None and pair[1].role is UseRole.LOCAL_BINDING:
-                            authorized.add(actual)
+                            authorized.add(actual_use)
     for operation in graph.operations:
         for use in operation.uses:
             if (use.role is UseRole.LOCAL_BINDING and use.id not in authorized

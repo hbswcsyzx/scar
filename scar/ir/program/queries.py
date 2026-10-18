@@ -14,12 +14,28 @@ from .providers import ProviderBinding, ProviderEnvelope, ProviderRegion
 from .native import BoundaryRelation, EntryPortRef, ExitPortRef, NativeBoundary
 from .native_validation import port_key, region_port_keys
 from .cleanup_validation import CleanupRouteKind, CleanupRouteStep
+from .resumption import ResumeInput, ResumeSlot, SuspendTerminator, saved_actual_use
 
 
 @dataclass(frozen=True, slots=True)
 class UseSite:
     operation: OperationID
     use: Use
+
+
+@dataclass(frozen=True, slots=True)
+class ResumptionBinding:
+    """A landing parameter's declared saved source or later ingress slot."""
+
+    formal: ValueID
+    saved: UseSite | None
+    supplied: ResumeSlot | None
+
+
+@dataclass(frozen=True, slots=True)
+class SuspensionHandoff:
+    exported: UseSite
+    states: tuple[UseSite, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,11 +82,16 @@ class ProgramIndex:
         # Reuse the validator's canonical CFG/dominators and derived cleanup
         # result rather than running a second dataflow algorithm for queries.
         from .validation import validate
-        cleanup = []
-        issues = validate(graph, _cleanup_facts=cleanup)
+        cleanup, resumption = [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption)
         if issues:
             raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
         self._cleanup_facts = cleanup[0]
+        self._resumption_facts = resumption[0]
+        self._bodies = {row.region: row for row in graph.resumable_bodies}
+        self._frame_context_actions = {row.operation: row for rows in (
+            graph.frame_context_initials, graph.frame_context_attaches,
+            graph.frame_context_detaches) for row in rows}
         self.graph = graph
         self.values = {value.id: value for value in graph.values}
         self.regions = {region.id: region for region in graph.regions}
@@ -128,6 +149,59 @@ class ProgramIndex:
 
     def producer(self, value_id: ValueID):
         return self.values[value_id].origin
+
+    def resumable_body(self, region_id: RegionID):
+        """A static body declaration, without runtime or driver evidence."""
+        if type(region_id) is not RegionID:
+            raise TypeError("resumable_body requires RegionID")
+        if region_id not in self.regions:
+            raise KeyError(region_id)
+        return self._bodies.get(region_id)
+
+    def frame_context_action(self, operation_id: OperationID):
+        if type(operation_id) is not OperationID:
+            raise TypeError("frame_context_action requires OperationID")
+        if operation_id not in self.operations:
+            raise KeyError(operation_id)
+        return self._frame_context_actions.get(operation_id)
+
+    def drive_context(self, block_id: BlockID):
+        """Derived context at block entry, not an observed drive identity."""
+        if type(block_id) is not BlockID:
+            raise TypeError("drive_context requires BlockID")
+        if block_id not in self._blocks:
+            raise KeyError(block_id)
+        return self._resumption_facts.contexts.get(block_id)
+
+    def availability_roots(self, region_id: RegionID):
+        if self.resumable_body(region_id) is None:
+            return None
+        return self._resumption_facts.roots[region_id]
+
+    def resumption_bindings(self, operation_id: OperationID, case: int):
+        """Project a case from canonical saved Uses and its input signature."""
+        self.frame_context_action(operation_id)  # Exact identity/existence check.
+        op = self.operations[operation_id]
+        if not isinstance(op.terminator, SuspendTerminator):
+            raise ValueError("resumption_bindings requires SUSPEND")
+        if type(case) is not int:
+            raise TypeError("case requires int")
+        if case < 0 or case >= len(op.terminator.successors):
+            raise IndexError(case)
+        edge = op.terminator.successors[case]
+        block = next(b for r in self.graph.regions for b in r.blocks if b.id == edge.block)
+        return tuple(ResumptionBinding(formal, None, edge.inputs[actual.resume_slot])
+                     if isinstance(actual, ResumeInput) else
+                     ResumptionBinding(formal, self._uses[saved_actual_use(op, actual)], None)
+                     for actual, formal in zip(edge.arguments, block.arguments))
+
+    def suspension_handoff(self, operation_id: OperationID):
+        self.frame_context_action(operation_id)
+        term = self.operations[operation_id].terminator
+        if not isinstance(term, SuspendTerminator):
+            return None
+        return SuspensionHandoff(self._uses[term.exported],
+                                 tuple(self._uses[use] for use in term.handoff))
 
     def handled_context_domain(self, region_id: RegionID):
         """Return a declaration, not current runtime exception evidence."""
@@ -333,4 +407,5 @@ class ProgramIndex:
 
 
 __all__ = ["ProgramIndex", "UseSite", "EnvironmentArgument", "EnvironmentCall",
-           "EnvironmentBindingStatus", "FunctionArgument", "CleanupRouteKind", "CleanupRouteStep"]
+           "EnvironmentBindingStatus", "FunctionArgument", "CleanupRouteKind", "CleanupRouteStep",
+           "ResumptionBinding", "SuspensionHandoff"]

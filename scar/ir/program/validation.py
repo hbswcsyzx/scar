@@ -17,6 +17,9 @@ from .model import (
 )
 from .control import PendingDispatchTerminator
 from .cleanup import CleanupRouteTerminator
+from .resumption import (
+    ResumeInput, SuspendTerminator, saved_actual_use, resume_slot_type,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,7 +29,7 @@ class ValidationIssue:
     message: str
 
 
-def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIssue, ...]:
+def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None) -> tuple[ValidationIssue, ...]:
     """Check exact uses, CFG availability, interfaces and explicit state SSA.
 
     The private output collector lets ProgramIndex reuse derived cleanup facts
@@ -50,6 +53,7 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
         return result
 
     regions = registry(graph.regions, "regions")
+    body_regions = {row.region for row in graph.resumable_bodies}
     operations = registry(graph.operations, "operations")
     values = registry(graph.values, "values")
     locations = registry(graph.locations, "locations")
@@ -94,6 +98,9 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
                 error("missing_result", operation.id, str(value_id))
         if operation.callee is not None and operation.callee not in regions:
             error("missing_callee", operation.id, str(operation.callee))
+        if operation.callee in body_regions:
+            error("resumption_direct_call", operation.id,
+                  "a resumable body requires a dedicated driver ingress, not CALL/INVOKE")
     for value in graph.values:
         if value.region not in regions:
             error("value_region", value.id, str(value.region))
@@ -237,7 +244,19 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
             if len(edge.arguments) != len(target.arguments):
                 error("edge_arity", final.id, "successor argument count mismatch")
             for actual, formal in zip(edge.arguments, target.arguments):
-                if isinstance(actual, CompletionResult):
+                if isinstance(actual, ResumeInput):
+                    if not isinstance(term, SuspendTerminator):
+                        error("resumption_binding", final.id, "resume input requires SUSPEND")
+                        continue
+                    if value_type(values[formal]) != resume_slot_type(edge.inputs[actual.resume_slot]):
+                        error("resumption_input_type", formal, "resume input signature differs from landing parameter")
+                    ref = values[formal]
+                    if isinstance(ref, ReferenceValue) and (
+                            ref.targets is not None or ref.referent_identity is not None
+                            or ref.selector.kind is not FootprintKind.UNKNOWN):
+                        error("resumption_reference_precision", formal,
+                              "a newly delivered reference grants no target, selector or identity facts")
+                elif isinstance(actual, CompletionResult):
                     if not isinstance(edge, CompletionSuccessor) or edge.kind not in signatures:
                         error("completion_binding", final.id, "produced value requires an invoke completion")
                         continue
@@ -253,8 +272,10 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
                             or ref.selector.kind is not FootprintKind.UNKNOWN):
                         error("completion_reference_precision", formal,
                               "produced references need verified summaries before gaining target or identity precision")
-                elif actual in own_uses and value_type(values[own_uses[actual].value]) != value_type(values[formal]):
-                    error("edge_type", actual, "successor argument type mismatch")
+                else:
+                    source = saved_actual_use(final, actual)
+                    if source in own_uses and value_type(values[own_uses[source].value]) != value_type(values[formal]):
+                        error("edge_type", source, "successor argument type mismatch")
             if isinstance(edge, CompletionSuccessor) and edge.kind in signatures:
                 produced = [arg.index for arg in edge.arguments if isinstance(arg, CompletionResult)]
                 if len(set(produced)) != len(produced) or set(produced) != set(range(len(signatures[edge.kind].types))):
@@ -279,7 +300,7 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
         return tuple(issues)
 
     for operation in terminators.values():
-        if operation.terminator.kind is TerminatorKind.INVOKE:
+        if operation.terminator.kind in (TerminatorKind.INVOKE, TerminatorKind.SUSPEND):
             for edge in operation.terminator.successors:
                 if len(incoming_edges[edge.block]) != 1:
                     error("completion_private_target", operation.id,
@@ -288,6 +309,7 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
         return tuple(issues)
 
     dominators = {}
+    availability = {}
     for region in graph.regions:
         local = {block.id for block in region.blocks}
         if predecessors[region.entry]:
@@ -312,6 +334,24 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
                     dom[block] = updated
                     changed = True
         dominators.update(dom)
+        # Logical edges preserve cleanup activation. Availability has additional
+        # roots: a future drive cannot use an old definition without an explicit
+        # saved slot and a fresh landing parameter, even through a loop/merge.
+        roots = {region.entry} | {
+            edge.block for block in local
+            if isinstance(terminators[block].terminator, SuspendTerminator)
+            for edge in terminators[block].terminator.successors
+        }
+        available = {block: ({block} if block in roots else set(local)) for block in local}
+        changed = True
+        while changed:
+            changed = False
+            for block in local - roots:
+                updated = {block} | set.intersection(*(available[p] for p in predecessors[block]))
+                if updated != available[block]:
+                    available[block] = updated
+                    changed = True
+        availability.update(available)
         bound_exits = {terminators[block].terminator.exit for block in local
                        if terminators[block].terminator.exit is not None}
         # C1 can intercept a declared language target forever, or replace its
@@ -332,8 +372,8 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
                 continue
             producer_block = (origin.block if isinstance(origin, BlockArgument)
                               else operation_block[origin.operation])
-            if producer_block not in dominators[block]:
-                error("unavailable_value", use.id, "definition does not dominate use")
+            if producer_block not in availability[block]:
+                error("unavailable_value", use.id, "definition does not dominate use across all availability roots")
             elif (isinstance(origin, OperationResult) and producer_block == block
                   and positions[origin.operation] >= positions[operation.id]):
                 error("use_before_definition", use.id, "result must be defined before use")
@@ -528,8 +568,9 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
                                       if isinstance(values[use.value], StateVersionValue))
                 for edge in operation.terminator.successors:
                     for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
-                        if isinstance(actual, UseID):
-                            reference_binding(values[own_uses[actual].value], values[formal], actual)
+                        source = saved_actual_use(operation, actual)
+                        if source is not None:
+                            reference_binding(values[own_uses[source].value], values[formal], source)
             actual_state_uses = {use.id for use in operation.uses if isinstance(values[use.value], StateVersionValue)}
             if actual_state_uses != consumed_state:
                 error("unaccounted_state_use", operation.id, "state inputs require access, call or control bindings")
@@ -561,6 +602,13 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
         for code, path, message in cleanup_issues:
             error(code, path, message)
     if not issues:
+        from .resumption_validation import analyze_resumption
+        resumption_issues, resumption_facts = analyze_resumption(
+                graph, operation_blocks=operation_block, region_domains=region_domains,
+                incoming_edges=incoming_edges)
+        for code, path, message in resumption_issues:
+            error(code, path, message)
+    if not issues:
         from .provider_validation import provider_errors
         for code, path, message in provider_errors(
                 graph, {op: block_region[block] for op, block in operation_block.items()}, uses):
@@ -571,6 +619,8 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None) -> tuple[ValidationIss
             error(code, path, message)
     if not issues and _cleanup_facts is not None:
         _cleanup_facts.append(cleanup_facts)
+    if not issues and _resumption_facts is not None:
+        _resumption_facts.append(resumption_facts)
     return tuple(issues)
 
 

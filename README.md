@@ -24,9 +24,12 @@ complete first modeling stage remain unfinished. The
 [evidence archive](artifacts/experiments/b1_call_operands/model_cleanup_interfaces/README.md)
 retains independent reviews, original failures and the unchanged-source receipt.
 
-The next [resumption interface design](docs/M1_RESUMPTION_INTERFACES.md) separates
-body continuation, driver phases, current shared state and saved private values.
-Its architecture review is documented; exact-field freeze and implementation remain open.
+The [resumption body component](docs/M1_RESUMPTION_BODY_COMPONENT.md) is being
+implemented and independently checked: saved Uses and fresh ingress state,
+drive-local context, temporal control and cut availability. The
+[full resumption contract](docs/M1_RESUMPTION_INTERFACES.md) still needs creation,
+driver/instance/generation and release interfaces. Body structure alone does not
+establish Python source recovery or runtime resumption.
 
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,
