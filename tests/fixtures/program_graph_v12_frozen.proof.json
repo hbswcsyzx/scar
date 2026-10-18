@@ -1,0 +1,11 @@
+{
+  "source_revision": "e86563a7f1b729549e73078f3776f715a9a9edec",
+  "codec_schema_version": 12,
+  "wire_schema_version": 12,
+  "factory": "publication_program(target='value', extra_domain=True, strict_subset=True)",
+  "codec_path_inside_immutable_archive": true,
+  "codec_sha256": "3c96ccb9fd126c56e0d9805072e1c54a98e8d557a5c8e72beef34d3491399cd1",
+  "fixture_bytes": 69273,
+  "fixture_sha256": "76f594871b1f80e8fb62039bff15f3ee5efd4d2a274f12f28ca4a1ad53e36b2f",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]"
+}

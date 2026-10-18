@@ -8,7 +8,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from scar.ir.program.ids import OperationID, RegionID, UseID
+from scar.ir.program.ids import OperationID, RegionID, UseID, ValueID
+from scar.ir.program.structured import ControlEdgeReference
 
 
 def _exact(value: object, expected: type, name: str) -> None:
@@ -57,4 +58,49 @@ class BodyOutcomeCommit:
         _exact(self.instance, UseID, "body outcome commit instance")
 
 
-__all__ = ["DriverLifecycle", "DriveOutcomeRef", "BodyOutcomeCommit"]
+@dataclass(frozen=True, slots=True)
+class CreatedCloseTest:
+    """Declares a typed test for a created body and close request.
+
+    The graph validator joins each role Use to its exact driver input/source;
+    this record does not prove predicate behavior or purity.
+    """
+
+    operation: OperationID
+    instance: UseID
+    scheduler_request: UseID
+    effective_request: UseID
+    session: UseID | None
+    result: ValueID
+
+    def __post_init__(self) -> None:
+        _exact(self.operation, OperationID, "created-close test operation")
+        role_uses = [self.instance, self.scheduler_request, self.effective_request]
+        for name in ("instance", "scheduler_request", "effective_request"):
+            _exact(getattr(self, name), UseID, "created-close test " + name)
+        if self.session is not None:
+            _exact(self.session, UseID, "created-close test session")
+            role_uses.append(self.session)
+        if len(set(role_uses)) != len(role_uses):
+            raise ValueError("created-close role UseIDs must be distinct")
+        _exact(self.result, ValueID, "created-close test result")
+
+
+@dataclass(frozen=True, slots=True)
+class NoBodyFinish:
+    """Declares a body-only terminal mark on a created-close true edge."""
+
+    operation: OperationID
+    precondition: ControlEdgeReference
+    instance: UseID
+
+    def __post_init__(self) -> None:
+        _exact(self.operation, OperationID, "no-body finish operation")
+        _record(self.precondition, ControlEdgeReference, "no-body finish precondition")
+        _exact(self.instance, UseID, "no-body finish instance")
+
+
+__all__ = [
+    "DriverLifecycle", "DriveOutcomeRef", "BodyOutcomeCommit",
+    "CreatedCloseTest", "NoBodyFinish",
+]

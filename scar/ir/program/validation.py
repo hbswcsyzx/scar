@@ -680,6 +680,11 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
                 incoming_edges=incoming_edges):
             error(code, path, message)
     if not issues:
+        from .no_body_validation import no_body_errors
+        for code, path, message in no_body_errors(
+                graph, operation_blocks=operation_block, incoming_edges=incoming_edges):
+            error(code, path, message)
+    if not issues:
         from .provider_validation import provider_errors
         for code, path, message in provider_errors(
                 graph, {op: block_region[block] for op, block in operation_block.items()}, uses):

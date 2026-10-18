@@ -6,8 +6,8 @@ from .environments import EnvironmentInterface, EnvironmentMember, FunctionEntry
 from .functions import FormalPort
 from .ids import (BlockID, BoundaryRelationID, ControlScopeID, EnvironmentInterfaceID,
                   NativeBoundaryID, OperationID, ProviderID, RegionID, UseID, ValueID)
-from .model import (CompletionResult, ExitKind, ProgramGraph, ReferenceValue,
-                    StateAccess, StateVersionValue, TerminatorKind, Use)
+from .model import (CompletionResult, DataValue, ExitKind, Operation, ProgramGraph, ReferenceValue,
+                    StateAccess, StateVersionValue, Successor, TerminatorKind, Use)
 from .control import ProtocolValueKind
 from .control_validation import derive_pending_facts
 from .model import ProtocolValue
@@ -19,7 +19,7 @@ from .resumption import ResumeInput, ResumeSlot, ResumeSlotKind, SuspendTerminat
 from .resumption_flow import first_body_outcome_operations
 from .drivers import BodyDrive, BodyDriveResult, NormalResultPort
 from .driver_flow import body_drive_target, body_outcome_uses
-from .lifecycle import BodyOutcomeCommit
+from .lifecycle import BodyOutcomeCommit, CreatedCloseTest, NoBodyFinish
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,6 +97,33 @@ class BodyPublication:
 
 
 @dataclass(frozen=True, slots=True)
+class CreatedClosePredicate:
+    """Original predicate inputs and its actual bool-conditioned branch edges."""
+
+    test: CreatedCloseTest
+    instance: UseSite
+    scheduler_request: UseSite
+    effective_request: UseSite
+    session: UseSite | None
+    result: DataValue
+    branch: Operation
+    condition: UseSite
+    true_successor: Successor
+    false_successor: Successor
+    accesses: tuple[PublicationAccess, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class NoBodyPublication:
+    """An explicit true-path finish, without a body outcome or new producer."""
+
+    finish: NoBodyFinish
+    predicate: CreatedClosePredicate
+    instance: UseSite
+    accesses: tuple[PublicationAccess, ...]
+
+
+@dataclass(frozen=True, slots=True)
 class ProviderRegionSource:
     """A declaration and its envelope, not equivalence or occurrence proof."""
 
@@ -159,6 +186,8 @@ class ProgramIndex:
         self._body_drives = {row.operation: row for row in graph.body_drives}
         self._driver_lifecycles = {row.region: row for row in graph.driver_lifecycles}
         self._body_outcome_commits = {row.operation: row for row in graph.body_outcome_commits}
+        self._created_close_tests = {row.operation: row for row in graph.created_close_tests}
+        self._no_body_finishes = {row.operation: row for row in graph.no_body_finishes}
         self.graph = graph
         self.values = {value.id: value for value in graph.values}
         self.regions = {region.id: region for region in graph.regions}
@@ -171,6 +200,8 @@ class ProgramIndex:
         self._scopes = {scope.id: scope for scope in graph.control_scopes}
         self._blocks = {b.id: r.id for r in graph.regions for b in r.blocks}
         self._block_records = {b.id: b for r in graph.regions for b in r.blocks}
+        self._operation_blocks = {operation: block.id for region in graph.regions
+                                  for block in region.blocks for operation in block.operations}
         self._context_domains = {row.region: row for row in graph.handled_context_domains}
         self._cleanups = {row.scope: row for row in graph.cleanup_interfaces}
         self._cleanup_actions = {row.operation: row for rows in (
@@ -272,6 +303,12 @@ class ProgramIndex:
     def body_outcome_commit(self, operation_id: OperationID):
         return self._driver_operation(operation_id, self._body_outcome_commits)
 
+    def _state_access_views(self, operation_id):
+        return tuple(PublicationAccess(
+            access, self._uses[access.before],
+            None if access.after is None else self.values[access.after])
+            for access in self.operations[operation_id].accesses)
+
     def body_publication(self, operation_id: OperationID):
         """Resolve publication against original Uses/accesses and source-derived output.
 
@@ -286,10 +323,38 @@ class ProgramIndex:
                       if site.operation == commit.outcome.source)
         return BodyPublication(
             commit, self._body_drives[commit.outcome.drive], source,
-            self._uses[commit.instance], tuple(PublicationAccess(
-                access, self._uses[access.before],
-                None if access.after is None else self.values[access.after])
-                for access in self.operations[commit.operation].accesses))
+            self._uses[commit.instance], self._state_access_views(commit.operation))
+
+    def created_close_test(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._created_close_tests)
+
+    def no_body_finish(self, operation_id: OperationID):
+        return self._driver_operation(operation_id, self._no_body_finishes)
+
+    def created_close_predicate(self, operation_id: OperationID):
+        """Resolve real branch order, without evaluating the predicate or its guard."""
+        test = self.created_close_test(operation_id)
+        if test is None:
+            return None
+        block = self._block_records[self._operation_blocks[operation_id]]
+        branch = self.operations[block.operations[-1]]
+        return CreatedClosePredicate(
+            test, self._uses[test.instance], self._uses[test.scheduler_request],
+            self._uses[test.effective_request],
+            None if test.session is None else self._uses[test.session],
+            self.values[test.result], branch, self._uses[branch.terminator.condition],
+            branch.terminator.successors[0], branch.terminator.successors[1],
+            self._state_access_views(operation_id))
+
+    def no_body_publication(self, operation_id: OperationID):
+        """Resolve only a declared finish; predicate-only graphs have no such result."""
+        finish = self.no_body_finish(operation_id)
+        if finish is None:
+            return None
+        block = self._block_records[self._operation_blocks[finish.precondition.operation]]
+        predicate = self.created_close_predicate(block.operations[-2])
+        return NoBodyPublication(finish, predicate, self._uses[finish.instance],
+                                 self._state_access_views(operation_id))
 
     def normal_result(self, operation_id: OperationID, port: NormalResultPort):
         """The original NORMAL landing value at an exact produced result slot."""
@@ -690,6 +755,7 @@ class ProgramIndex:
 
 __all__ = ["ProgramIndex", "UseSite", "BodyOutcomeSite", "DriverBinding", "DriveInputBinding",
            "InstanceCaptureInput", "PublicationAccess", "BodyPublication",
+           "CreatedClosePredicate", "NoBodyPublication",
            "EnvironmentArgument", "EnvironmentCall",
            "EnvironmentBindingStatus", "FunctionArgument", "CleanupRouteKind", "CleanupRouteStep",
            "ResumptionBinding", "SuspensionHandoff"]

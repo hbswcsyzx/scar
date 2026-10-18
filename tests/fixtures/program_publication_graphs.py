@@ -11,9 +11,19 @@ from tests.fixtures.program_driver_graphs import driver_program
 
 
 def publication_program(*, target="start", extra_domain=False, strict_subset=False,
-                        create=False, direct_owner=False, body_graph=None):
+                        create=False, direct_owner=False, body_graph=None,
+                        async_request=False):
     graph = driver_program(target=target, extra_domain=extra_domain or strict_subset,
-                           create=create, body_graph=body_graph)
+                           create=create, async_request=async_request, body_graph=body_graph)
+    return with_publications(graph, strict_subset=strict_subset, direct_owner=direct_owner)
+
+
+def with_publications(graph, *, strict_subset=False, direct_owner=False):
+    """Add the existing D2.1 publication declaration to a driver graph.
+
+    Keeping this transformation separate lets D2.2 fixtures reuse the same
+    canonical BodyDrive without duplicating or reinterpreting its outcomes.
+    """
     drive, = graph.body_drives
     drive_op = next(op for op in graph.operations if op.id == drive.operation)
     interface, = graph.driver_interfaces

@@ -71,7 +71,8 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
    用gate真实completion→唯一BodyDrive表达资格与准入后态。先按[D1完整路径及验收矩阵](M1_DRIVER_IMPLEMENTATION.md)
    实施已收敛的规范连接（已验收）；[D2生命周期](M1_DRIVER_LIFECYCLE.md)按
    [冻结合同](M1_DRIVER_LIFECYCLE_CONTRACT.md)→body publication→no-body→session/drop
-   →组合验收细化；D2.0已收敛，D2.1组件及冻结全仓已验收，
+   →组合验收细化；D2.0已收敛，D2.1组件及冻结全仓已验收；[D2.2](M1_NO_BODY_ACCEPTANCE.md)
+   836组件/21标准已通过，冻结全仓待执行，
    不靠D1字段设计通过缩小完整C2分母。
 3. 接 ResourceDefinition/Requirement/Instance、handle、WorkTicket/readiness，
    复用 allocation/materialization/provenance 的已有证据，消除未连接的身份表。

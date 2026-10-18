@@ -28,7 +28,9 @@ from scar.ir.program.drivers import (
     AsyncRequestCreate, BodyDrive, BodyDriveTerminator, DriverInterface,
     FinalBodyGate, RawRequestDefinition, RequestAssociationRead, ResumableCreate,
 )
-from scar.ir.program.lifecycle import BodyOutcomeCommit, DriveOutcomeRef, DriverLifecycle
+from scar.ir.program.lifecycle import (
+    BodyOutcomeCommit, CreatedCloseTest, DriveOutcomeRef, DriverLifecycle, NoBodyFinish,
+)
 from scar.ir.program.environments import EnvironmentInterface, FunctionEntryLayout
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.resources import (
@@ -758,6 +760,8 @@ class ProgramGraph:
     body_drives: tuple[BodyDrive, ...] = ()
     driver_lifecycles: tuple[DriverLifecycle, ...] = ()
     body_outcome_commits: tuple[BodyOutcomeCommit, ...] = ()
+    created_close_tests: tuple[CreatedCloseTest, ...] = ()
+    no_body_finishes: tuple[NoBodyFinish, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -820,6 +824,20 @@ class ProgramGraph:
             row.__post_init__()
         body_commit_operations = tuple(row.operation for row in self.body_outcome_commits)
         _unique(body_commit_operations, "ProgramGraph body outcome commit operations")
+        for name, row_type in (
+                ("created_close_tests", CreatedCloseTest),
+                ("no_body_finishes", NoBodyFinish)):
+            rows = _tuple(getattr(self, name), "ProgramGraph." + name)
+            if any(type(row) is not row_type for row in rows):
+                raise TypeError("ProgramGraph." + name + " needs exact typed records")
+            for row in rows:
+                row.__post_init__()
+            _unique(tuple(row.operation for row in rows), "ProgramGraph." + name + " operations")
+        created_close_operations = tuple(row.operation for row in self.created_close_tests)
+        no_body_finish_operations = tuple(row.operation for row in self.no_body_finishes)
+        lifecycle_operations = (
+            *body_commit_operations, *created_close_operations, *no_body_finish_operations)
+        _unique(lifecycle_operations, "ProgramGraph lifecycle action operation IDs")
         existing_role_operations = {
             row.operation for rows in (
                 self.resumable_creates, self.async_request_creates,
@@ -829,9 +847,9 @@ class ProgramGraph:
                 self.cleanup_replacements, self.handled_context_reads,
             ) for row in rows
         }
-        if existing_role_operations.intersection(body_commit_operations):
+        if existing_role_operations.intersection(lifecycle_operations):
             raise ValueError(
-                "body outcome commit operation conflicts with another typed operation role")
+                "lifecycle action operation conflicts with another typed operation role")
         for name, rows, row_type, id_field in (
             ("regions", self.regions, Region, "id"),
             ("operations", self.operations, Operation, "id"),
@@ -905,7 +923,8 @@ __all__ = [
     "AccessMode", "Behavior", "Block", "BlockArgument", "DataValue", "ExitKind",
     "CompletionResult", "CompletionSignature", "CompletionSuccessor", "ExitPort",
     "AsyncRequestCreate", "BodyDrive", "BodyDriveTerminator", "DriverInterface",
-    "BodyOutcomeCommit", "DriveOutcomeRef", "DriverLifecycle",
+    "BodyOutcomeCommit", "CreatedCloseTest", "DriveOutcomeRef", "DriverLifecycle",
+    "NoBodyFinish",
     "FinalBodyGate", "RawRequestDefinition", "RequestAssociationRead", "ResumableCreate",
     "Footprint", "FootprintKind", "LiteralOrigin", "LocalBindingType",
     "LocalBindingValue", "Operation", "OperationResult", "ProtocolValue",

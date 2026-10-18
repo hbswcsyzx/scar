@@ -513,7 +513,7 @@ def _optimize_micro(args) -> int:
 
 
 def _check_program(args) -> int:
-    from scar.ir.program.codec import _has_driver_capability, loads as load_program
+    from scar.ir.program.codec import _has_driver_capability, _has_no_body_capability, loads as load_program
     from scar.ir.program.model import LocalBindingValue, value_type
     from scar.ir.program.cleanup import CleanupRouteTerminator
     from scar.ir.program.resumption import SuspendTerminator
@@ -531,7 +531,8 @@ def _check_program(args) -> int:
               "body_exclusivity_verified": False,
               "driver_structure_validated": False,
               "driver_lifecycle_verified": False,
-              "body_publication_structure_validated": False}
+              "body_publication_structure_validated": False,
+              "no_body_structure_validated": False}
     if args.out and Path(args.out).resolve() == source.resolve():
         report.update(status="INVALID", errors=["report path must differ from input graph"])
         print(json.dumps(report, ensure_ascii=False))
@@ -637,6 +638,12 @@ def _check_program(args) -> int:
                 body_outcome_commits=len(graph.body_outcome_commits))
             report.update(body_publication_structure_validated=True,
                           body_publication_structure_scope="declared body outcome, owner and publication state links",
+                          driver_lifecycle_verified=False)
+        if graph.driver_lifecycles and _has_no_body_capability(graph):
+            report["counts"].update(created_close_tests=len(graph.created_close_tests),
+                                    no_body_finishes=len(graph.no_body_finishes))
+            report.update(no_body_structure_validated=True,
+                          no_body_structure_scope="declared predicate, real branch edges and optional no-body finish links",
                           driver_lifecycle_verified=False)
     payload = json.dumps(report, ensure_ascii=False, indent=2)
     if args.out:

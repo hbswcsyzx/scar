@@ -1,5 +1,15 @@
 # Current evidence and remaining work
 
+## D2.2 component passed; frozen full run pending (2026-10-18)
+
+The [no-body component](M1_NO_BODY_ACCEPTANCE.md) passes **836 cases / 21 criteria /
+12.709s**, with all 430 source hashes unchanged. It joins a declared current-state
+test, its real bool BRANCH and an explicit private true-path body-only mark.
+Predicate-only graphs remain legal; the false path keeps the original final
+gate and BodyDrive. No runtime guard, native lifecycle or transformation is proved.
+Full regression will run once after a clean implementation commit. D2.3/D2.4,
+D3 and complete M0–M2 remain open.
+
 ## D2.0 contract and D2.1 body publication accepted (2026-10-18)
 
 The [frozen D2 contract](M1_DRIVER_LIFECYCLE_CONTRACT.md) separates historical

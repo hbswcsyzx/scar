@@ -48,6 +48,9 @@ edge-first must analysis. The [D2.1 body publication component](docs/M1_BODY_PUB
 passes 741 component checks and 3,776 frozen full tests (`49201e7`). No-body,
 session/drop and E/F/P product analysis remain unfinished; these declarations
 and language observations add no runtime or transformation authority.
+The [D2.2 no-body component](docs/M1_NO_BODY_ACCEPTANCE.md) now passes 836 component
+checks / 21 criteria. Its frozen full regression is pending; predicate/branch/mark
+structure is distinct from actual runtime guard execution.
 
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,

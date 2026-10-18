@@ -5,14 +5,13 @@ admission, source correspondence or lifecycle proof.
 """
 from __future__ import annotations
 
-from .cleanup_forward import _must_forward
 from .control import ProtocolValueKind as P
 from .drivers import (
     BodyDriveResult, BodyDriveTerminator, BodyResume, BodyStart,
     DriverReceiverKind,
 )
 from .environments import EnvironmentRole
-from .driver_flow import body_drive_target, body_outcome_uses
+from .driver_flow import body_drive_target, body_outcome_uses, driver_role_copies
 from .model import (
     Behavior, BlockArgument, CompletionResult, ExitKind, OperationResult, ProtocolValue,
     ReferenceValue, StateVersionValue, TerminatorKind, value_type,
@@ -207,20 +206,6 @@ def driver_errors(graph, *, operation_blocks, region_domains, incoming_edges):
     if len(gates) != len(graph.final_body_gates):
         error("driver_gate_pair", "final_body_gates", "each Drive has exactly one final gate")
 
-    # Fixed receiver/scheduler roles use every real incoming, without origin unions.
-    copy_incoming = {}
-    for region in graph.regions:
-        for block in region.blocks:
-            for formal in block.arguments:
-                copy_incoming[formal] = []
-    for op in graph.operations:
-        if op.terminator is None:
-            continue
-        for edge in op.terminator.successors:
-            for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
-                source = saved_actual_use(op, actual)
-                use = owned(op, source) if source is not None else None
-                copy_incoming[formal].append(use.value if use is not None else None)
     role_copies = {}
     for region_id, interface in interfaces.items():
         region = regions.get(region_id)
@@ -235,10 +220,7 @@ def driver_errors(graph, *, operation_blocks, region_domains, incoming_edges):
         domains = region_domains[region_id]
         if not interface.lifecycle or not set(interface.lifecycle).issubset(domains):
             error("driver_lifecycle", region_id, "lifecycle must be a nonempty subset of the driver's entry state domains")
-        role_copies[region_id] = (
-            _must_forward({interface.receiver}, copy_incoming),
-            _must_forward({interface.scheduler_request}, copy_incoming),
-        )
+        role_copies[region_id] = driver_role_copies(graph, interface)
 
     for operation in operations.values():
         if isinstance(operation.terminator, BodyDriveTerminator) and operation.id not in drives:

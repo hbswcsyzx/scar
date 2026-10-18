@@ -12,6 +12,42 @@ from .model import (
 )
 
 
+def _body_update_errors(op, instance_id, interface, values, error, prefix):
+    """Body-only shape shared by source and no-body publication.
+
+    Callers establish the real source/guard and exact owner. Core state checks
+    establish current before/after and preserve every untouched domain.
+    """
+    own = {use.id: use for use in op.uses}
+    if (op.terminator is not None or op.callee is not None or op.call_arguments
+            or op.invoke_arguments or op.completions or not op.effects_complete
+            or set(op.behaviors) != {Behavior.CONTROL, Behavior.READ, Behavior.WRITE}):
+        error(prefix + "_shape", op.id, "publication is a complete callback-free ordinary state intrinsic")
+    lifecycle = set(interface.lifecycle)
+    writes = set()
+    state_uses = set()
+    for access in op.accesses:
+        state_uses.add(access.before)
+        if (access.location not in lifecycle
+                or access.mode not in (AccessMode.READ, AccessMode.READ_WRITE)
+                or access.footprint.kind is not FootprintKind.WHOLE
+                or access.full_overwrite
+                or access.reference not in (None, instance_id)):
+            error(prefix + "_access", op.id, "publication accesses are whole current READ/RW lifecycle domains")
+        before = own.get(access.before)
+        if (before is None or before.role is not UseRole.STATE_CONTENT
+                or not isinstance(values[before.value], StateVersionValue)):
+            error(prefix + "_state", op.id, "publication must use its canonical state access inputs")
+        if access.mode is AccessMode.READ_WRITE:
+            writes.add(access.after)
+    if not writes:
+        error(prefix + "_writes", op.id, "body publication requires at least one actual lifecycle state write")
+    if set(op.results) != writes:
+        error(prefix + "_results", op.id, "publication results must be exactly its real written after states")
+    if set(own) != state_uses | {instance_id}:
+        error(prefix + "_uses", op.id, "only the original instance and access-before Uses belong to publication")
+
+
 def body_publication_errors(graph, *, operation_blocks, region_domains, incoming_edges):
     """Validate explicit scopes and each exact source/owner/current-state join."""
     errors = []
@@ -85,36 +121,7 @@ def body_publication_errors(graph, *, operation_blocks, region_domains, incoming
                 or not isinstance(values[instance.value], ReferenceValue) or not owner_matches):
             error("publication_owner", row.operation, "owner must copy this drive's original instance, not a produced payload")
 
-        if (op.terminator is not None or op.callee is not None or op.call_arguments
-                or op.invoke_arguments or op.completions or not op.effects_complete
-                or set(op.behaviors) != {Behavior.CONTROL, Behavior.READ, Behavior.WRITE}):
-            error("publication_shape", row.operation, "publication is a complete callback-free ordinary state intrinsic")
-        lifecycle = set(interface.lifecycle)
-        if not lifecycle.issubset(region_domains[region_id]):
-            # D1 already checks this; keep the local obligation explicit.
-            error("publication_domains", row.operation, "lifecycle domains must belong to this driver")
-        writes = set()
-        state_uses = set()
-        for access in op.accesses:
-            state_uses.add(access.before)
-            if (access.location not in lifecycle
-                    or access.mode not in (AccessMode.READ, AccessMode.READ_WRITE)
-                    or access.footprint.kind is not FootprintKind.WHOLE
-                    or access.full_overwrite
-                    or access.reference not in (None, row.instance)):
-                error("publication_access", row.operation, "publication accesses are whole current READ/RW lifecycle domains")
-            before = own.get(access.before)
-            if (before is None or before.role is not UseRole.STATE_CONTENT
-                    or not isinstance(values[before.value], StateVersionValue)):
-                error("publication_state", row.operation, "publication must use its canonical state access inputs")
-            if access.mode is AccessMode.READ_WRITE:
-                writes.add(access.after)
-        if not writes:
-            error("publication_writes", row.operation, "body publication requires at least one actual lifecycle state write")
-        if set(op.results) != writes:
-            error("publication_results", row.operation, "publication results must be exactly its real written after states")
-        if set(own) != state_uses | {row.instance}:
-            error("publication_uses", row.operation, "only the original instance and access-before Uses belong to publication")
+        _body_update_errors(op, row.instance, interface, values, error, "publication")
 
     for outcome, edge in expected.items():
         found = by_outcome.get(outcome, ())

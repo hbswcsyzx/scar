@@ -10,6 +10,32 @@ from .model import TerminatorKind, value_type
 from .resumption import SuspendTerminator
 
 
+def driver_role_copies(graph, interface):
+    """Must-copies of the fixed receiver/scheduler on every real local edge.
+
+    Call only after core validation: the Region entry has no predecessors and
+    ordinary CFG edges stay inside that Region. Noncopy completion/resume ports
+    contribute None; distinct successor edges never collapse into origin sets.
+    """
+    from .cleanup_forward import _must_forward
+    from .resumption import saved_actual_use
+
+    region = next(region for region in graph.regions if region.id == interface.region)
+    blocks = {block.id: block for block in region.blocks}
+    operations = {operation.id: operation for operation in graph.operations}
+    incoming = {formal: [] for block in region.blocks for formal in block.arguments}
+    for block in region.blocks:
+        operation = operations[block.operations[-1]]
+        own = {use.id: use.value for use in operation.uses}
+        for edge in operation.terminator.successors:
+            for actual, formal in zip(edge.arguments, blocks[edge.block].arguments):
+                incoming[formal].append(own.get(saved_actual_use(operation, actual)))
+    return (
+        _must_forward({interface.receiver}, incoming),
+        _must_forward({interface.scheduler_request}, incoming),
+    )
+
+
 def body_drive_target(graph, drive):
     """Resolve the declared body and this drive's entry or resume landing."""
     from .drivers import BodyDrive, BodyResume, BodyStart
@@ -65,4 +91,4 @@ def body_outcome_types(graph, source):
     return tuple(result)
 
 
-__all__ = ["body_drive_target", "body_outcome_uses", "body_outcome_types"]
+__all__ = ["body_drive_target", "body_outcome_uses", "body_outcome_types", "driver_role_copies"]
