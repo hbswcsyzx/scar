@@ -1,0 +1,6 @@
+{
+  "returncode": 1,
+  "duration_seconds": 1.9882792923599482,
+  "owned_basetemp_removed_after_child_exit": "/tmp/scar-v-focus-0gbb4m6e",
+  "directory": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_pipeline_closure/pipeline_overlay/attempt003"
+}

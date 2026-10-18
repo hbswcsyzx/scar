@@ -4,11 +4,11 @@
 它不把已实现组件重新命名为完整程序模型。阶段顺序见
 [WHOLE_PROGRAM_MODEL_PLAN.md](WHOLE_PROGRAM_MODEL_PLAN.md)。
 
-最新限定接口：[R3.2 验收](M1_PIPELINE_COMPOSITION_ACCEPTANCE.md)通过 677 项组件、
-冻结 `31bf2e4` 的 5,011 项全仓；原 4,951 case/68 fixtures 全保留。准确 Q scope 的
-合同分母、完整原 inventory、数据/状态/实际控制/调用/独立来源/work/lifetime 已有
-统一只读组合查询。scope 恢复、output 对应、facet 目标/基数、endpoint/native 协议、
-R3.3 全过程模型与下表其它缺口仍在原分母，未关闭第一阶段。
+最新限定接口：[R3.3 验收](M1_PIPELINE_CLOSURE_ACCEPTANCE.md)通过722项组件/17标准，
+冻结 `6947778` 的5,055项全仓；原5,011 case/69 fixtures全保留。跨同步调用host桥、
+独立endpoint范围、同图buffer→flush→file与异常/pending/cleanup已有限组合，三项
+真实OS见证单独归属。Q facet目标/基数、native/coherence/真实身份未闭合；下表
+selector/literal/C2/D3/M2原分母仍完整保留，**不关闭第一阶段**。
 
 ## 1. 当前类型分解及各自职责
 
@@ -32,9 +32,9 @@ Operation、Value、StateLocation、Region、Resource 是规范实体；输入/�
 | 挂起、恢复与逃逸 | C2B/首outcome及[D1](M1_DRIVER_ACCEPTANCE.md)已验收；[D2.0合同](M1_DRIVER_LIFECYCLE_CONTRACT.md)已收敛，[D2.1 publication](M1_BODY_PUBLICATION_ACCEPTANCE.md)741组件、冻结`49201e7`的3,776项全仓通过。 | D3全家族接口义务；source/runtime对应另属后续自动恢复/运行证据门，不当作第一阶段手工模型证明。 | [D2.2 no-body](M1_NO_BODY_ACCEPTANCE.md)836组件/3,871全仓、[D2.3 E/F/P与session/release](M1_SESSION_RELEASE_ACCEPTANCE.md)974组件/4,009全仓及[D2.4 C1/context组合和公开范围](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)1,015组件/冻结`37baeaf`的4,050全仓均已验收；完整C2.0/C2.4与第一阶段未关闭，不算自动恢复。 |
 | 状态 owner、selector 与 alias | StateLocation/Access、footprint 与版本 SSA；v2 storage 几何。 | namespace key/object field/cell/元素 selector、owner 身份、粗细域覆盖/冲突；外部 alias 写与输入失效关系。 | 现有粗粒度域可保守表达，精化接口未齐。 |
 | 所有 Python literal/表示 | 现 LiteralOrigin 支持 None/bool/int/有限float/str，普通容器有源码协议。 | bytes/complex/Ellipsis 等严格表示、非有限数值的无损 wire、identity/编译折叠与运行构造边界。 | 不完整；不能把缺项算成 UNKNOWN 后验收通过。 |
-| 逻辑值、来源与物化 | v2 LogicalValue/Version、Provenance、allocation/region/materialization；G/D/P接原端口、scoped指代、独立来源与部分实际产出；[V验收](M1_VALIDITY_ACCEPTANCE.md)接source-derived带标签的actual/future贡献、每贡献替代支持、准确Mat范围与全读取区间威胁，649组件、冻结`550496f`的4,826全仓通过。 | 完整native writer/capture闭合、source/runtime及exact native slot对应；endpoint read/flush/persist实际协议、whole-work来源边界及R3组合。 | G/D/P/V限定声明接口已验收，完整物理生产/可见性与全过程组合未完成，不证明ready或自动恢复。 |
+| 逻辑值、来源与物化 | v2 LogicalValue/Version、Provenance、allocation/region/materialization；G/D/P接原端口、scoped指代、独立来源与部分实际产出；[V验收](M1_VALIDITY_ACCEPTANCE.md)接source-derived带标签的actual/future贡献、每贡献替代支持、准确Mat范围与全读取区间威胁，649组件、冻结`550496f`的4,826全仓通过。 | 完整native writer/capture闭合、source/runtime及exact native slot对应；其它endpoint/native/coherence与whole-work实际来源对应；持久化仍需独立合同。 | G/D/P/V及R3.3限定buffered组合已验收；完整物理对应与第一阶段未完成，不证明ready或自动恢复。 |
 | 资源身份及要求 | 原 core 静态 ResourceDefinition/Requirement/Use/Location，严格 v4；[R0](M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md)六个CPU/OS见证；[R1验收](M1_RESOURCE_IDENTITY_ACCEPTANCE.md)的occurrence/instance/handle/requirement/access及当前支持302项组件、冻结`6fcac0f`的4,192全仓通过。 | 跨调用/denotation来源与物理身份仍待实际对应；不凭入口绑定授永久rights/capacity或ready。 | 声明级动态接口门已验收；整体未完成，runtime/source未授予。 |
-| host 返回与资源完成 | R2.1接ticket/原效果、terminal、quiescence/retention；R2.2接event代次与consumer-start顺序；D/P接准确read/frontier/result/actual；[V](M1_VALIDITY_ACCEPTANCE.md)接Host/Queue/Endpoint支持与target lifetime，准确区段AND/OR，649组件/4,826全仓通过。 | 完整端点协议及native/coherence/捕获对应；R3通用load/consume/save与生命周期/Q组合、实际GPU对应。 | 已验收各限定声明子门；整个R2/R3及第一阶段未完成，不授ready/free/transform。 |
+| host 返回与资源完成 | R2.1接ticket/原效果、terminal、quiescence/retention；R2.2接event代次与consumer-start顺序；D/P接准确read/frontier/result/actual；[V](M1_VALIDITY_ACCEPTANCE.md)接Host/Queue/Endpoint支持与target lifetime，准确区段AND/OR，649组件/4,826全仓通过。 | 其它端点协议、native/coherence/捕获、完整Q facet及实际GPU对应。 | 已验收R3.3同图load/consume/save/flush与生命周期/Q限定组合；通用native协议与第一阶段未完成，不授ready/free/transform。 |
 | Python/库/native 协议 | 113 AST 构造、196字段清单；数据/控制/资源分册及语言反例。 | 通用协议的输入/环境/状态/资源/完成字段逐条映射到核心类型；native 边界保守完整，内部未展开不算已理解。 | 分册已审补若干缺口，不等于 M2 整门通过。 |
 | 现成图及捕获条件 | [工具调研](TOOLING_SURVEY.md)有实际小CPU证据；[P0来源声明](M1_PROVIDER_INTERFACES.md)已验收；[P1薄边界](M1_NATIVE_INTERFACES.md)的原生槽/规范分区、原生树来源引用及跨表示八域待证合同168项组件与3,215项冻结全仓通过。 | lifted slot 与具体实例/当前状态、真实tree映射和写回、artifact重放及动态occurrence对应。 | P0/P1声明组件已验收，完整T1及新adapter未完成。 |
 | 运行证据接口 | 已有 sys.monitoring、module/dispatch、profiler/Kineto 和 raw records。 | 明确缺失/截断/冲突、clock/run/window 域；静态→动态→物理的强类型多对多对应；ETO 等字段导入。 | collector 已复用，统一对应未闭合。 |

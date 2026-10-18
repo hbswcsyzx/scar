@@ -1,6 +1,17 @@
 # SCAR roadmap and scope
 
-> **Current R3.2 checkpoint (2026-10-18):**
+> **Current R3.3 checkpoint accepted (2026-10-18):**
+> [Generic pipeline API](M1_PIPELINE_CLOSURE_API.md) passes
+> [722 component cases /17 criteria and 5,055 clean frozen full tests](M1_PIPELINE_CLOSURE_ACCEPTANCE.md)
+> (`6947778`). Original 5,011 cases/69 fixtures survive; 578 source hashes/72 fixtures
+> match. Cross-call host order, independent endpoint ranges and a single buffered
+> pipeline connect original ports/state/work/source/Q; three bounded OS cases
+> remain separate observations. Final query cost115,996/131,072 is a limitation,
+> not a speedup; default4096 is unchanged. Next: selector/owner, full literal,
+> C2/D3 and M2 construct obligations. Complete M0–M2 and automatic LeWM modeling/
+> simplification remain open. Historical checkpoint scopes follow.
+
+> **Earlier R3.2 checkpoint (2026-10-18):**
 > [Scoped Q and supplied execution composition](M1_PIPELINE_COMPOSITION_API.md)
 > passes [677 component cases / 13 criteria and 5,011 clean frozen full tests](M1_PIPELINE_COMPOSITION_ACCEPTANCE.md)
 > (`31bf2e4`). All prior 4,951 cases/68 fixtures survive; current 567 source

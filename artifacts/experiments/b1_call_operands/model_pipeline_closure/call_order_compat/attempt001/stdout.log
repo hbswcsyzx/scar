@@ -1,0 +1,16 @@
+...........F...........................                                  [100%]
+=================================== FAILURES ===================================
+_ test_unused_other_version_candidate_does_not_poison_valid_covering_combination _
+
+    def test_unused_other_version_candidate_does_not_poison_valid_covering_combination():
+        result = _query(visibility_execution(old_version=True))
+>       assert _status(result) == 'MATCHED'
+E       AssertionError: assert 'TRUNCATED' == 'MATCHED'
+E         
+E         - MATCHED
+E         + TRUNCATED
+
+tests/unit/test_execution_validity_query.py:144: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_validity_query.py::test_unused_other_version_candidate_does_not_poison_valid_covering_combination
+1 failed, 38 passed in 3.37s

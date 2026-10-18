@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.237" timestamp="2026-10-18T11:25:48.555648+00:00" hostname="gpu1"><testcase classname="tests.integration.test_execution_io_pipeline" name="test_complete_pipeline_uses_one_program_and_exact_dynamic_calls" time="0.788"><failure message="AssertionError: assert 6 == 0&#10; +  where 6 = len((CallActivation(id=CallActivationID(value='io.link.0'), caller=OperationOccurrenceID(value='io.main.1.io.main.call'), ....io.close.return'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence'))))&#10; +    where (CallActivation(id=CallActivationID(value='io.link.0'), caller=OperationOccurrenceID(value='io.main.1.io.main.call'), ....io.close.return'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence'))) = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='b3294daecbee...io.close.return'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence')))).call_activations&#10; +  and   0 = len(())">def test_complete_pipeline_uses_one_program_and_exact_dynamic_calls():
+        program, model, catalogs, details = io_pipeline_execution()
+        require_valid(model, program, **catalogs)
+        index = ExecutionIndex(model, program, **catalogs)
+        view = index.resource_composition(budget=32768)
+        assert len(program.regions) == len(model.activations) == 7
+&gt;       assert len(model.call_activations) == len(view['routes']['calls']) == 6
+E       AssertionError: assert 6 == 0
+E        +  where 6 = len((CallActivation(id=CallActivationID(value='io.link.0'), caller=OperationOccurrenceID(value='io.main.1.io.main.call'), ....io.close.return'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence'))))
+E        +    where (CallActivation(id=CallActivationID(value='io.link.0'), caller=OperationOccurrenceID(value='io.main.1.io.main.call'), ....io.close.return'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence'))) = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='b3294daecbee...io.close.return'), source=MissingEvidence(reason='hand-authored call pairing; not source/runtime identity evidence')))).call_activations
+E        +  and   0 = len(())
+
+tests/integration/test_execution_io_pipeline.py:13: AssertionError</failure></testcase></testsuite></testsuites>

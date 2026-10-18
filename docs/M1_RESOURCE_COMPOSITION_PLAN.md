@@ -10,6 +10,11 @@ R3.2 组合公开面现已通过[677 项组件与冻结 `31bf2e4` 的 5,011 项�
 准确合同/owner 请求建立独立义务分母，保留完整原模型与未检查项，复用原证据/P/V。
 R3.3 全过程模型与 OS 见证、完整 M0–M2 分母保留；声明接口不冒充自动恢复。
 
+R3.3现通过[722组件/17标准与冻结`6947778`的5,055项全仓验收](M1_PIPELINE_CLOSURE_ACCEPTANCE.md)。
+同一buffered流水线与真实OS见证按原计划关闭限定分母；独立字节profile不解释所有
+端点协议，也不授native/ready/free/persist/transform权限。接续selector/literal、
+C2/D3与M2完整分母；完整M0–M2、自动建图和LeWM化简仍未完成。
+
 ## 模型与审查结论
 
 规范实体仍是 Operation、Value、StateLocation、Region、Resource。静态端口和

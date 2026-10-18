@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.580" timestamp="2026-10-18T11:20:02.106112+00:00" hostname="gpu1"><testcase classname="tests.integration.test_execution_io_pipeline" name="test_complete_pipeline_uses_one_program_and_exact_dynamic_calls" time="0.060"><failure message="ValueError: protocol_pack_operation at program_value:io.load.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.prepare.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.run.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.save.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.close.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.main.pending: pack only constructs its one control payload; state/effects stay outside">def test_complete_pipeline_uses_one_program_and_exact_dynamic_calls():
+&gt;       program, model, catalogs, details = io_pipeline_execution()
+                                            ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_execution_io_pipeline.py:8: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_io_pipeline.py:330: in io_pipeline_execution
+    model, scopes, source = _model(program, paths)
+                            ^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:176: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:90: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='shared.region'), regions=(Region(id=RegionID(value='shared.region'), label='pipeline..., body_outcome_commits=(), created_close_tests=(), no_body_finishes=(), session_updates=(), terminal_frame_releases=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_pack_operation at program_value:io.load.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.prepare.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.run.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.save.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.close.packet: pack only constructs its one control payload; state/effects stay outside; protocol_pack_operation at program_value:io.main.pending: pack only constructs its one control payload; state/effects stay outside
+
+scar/ir/program/validation.py:719: ValueError</failure></testcase></testsuite></testsuites>

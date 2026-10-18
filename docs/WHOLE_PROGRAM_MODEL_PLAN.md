@@ -46,12 +46,19 @@ R2.3-D/P 已接原端口、消费者/Q 根、独立来源与实际产出；接�
 [677 项组件与冻结 `31bf2e4` 的 5,011 项全仓验收](M1_PIPELINE_COMPOSITION_ACCEPTANCE.md)。
 完整 supplied-model 与期望合同义务独立保留；scope 未恢复不空成功，原 source effects
 不依赖 read 偶遇；原端口、actual/future 与生命周期分别回查，一份 fresh context 与
-一个派生总预算不代表 runtime/capture 完整。下一步按原[R3.3](M1_RESOURCE_COMPOSITION_PLAN.md)
-验收通用 load→produce→consume→output→flush/close/release 模型与有界 OS 见证，
+一个派生总预算不代表 runtime/capture 完整。后续[R3.3计划](M1_RESOURCE_COMPOSITION_PLAN.md)
+要求通用 load→produce→consume→output→flush/close/release 模型与有界 OS 见证，
 明确端点、原生边界与生命周期，不把声明组合冒充自动建图。
 随后继续 selector/
 literal、剩余家族及 M2 构造分母。**完整第一阶段仍未完成。** 不增加 detector/backend，
 不以手工夹具冒充 LeWM 自动恢复或以测试耗时冒充加速。
+
+R3.3现按[接口](M1_PIPELINE_CLOSURE_API.md)完成
+[722组件/17标准与冻结`6947778`的5,055项全仓验收](M1_PIPELINE_CLOSURE_ACCEPTANCE.md)。
+原端口、host causal bridge、独立endpoint范围、buffer与flush内容边、empty/partial/
+pending/cleanup在同图连接；三项真实OS见证不冒充automatic correspondence。该限定
+R3计划关闭，下一步按原顺序补selector/owner、literal、C2/D3及M2全构造，不继续堆
+资源协议小门。完整第一阶段未完成；不新增detector/backend或LeWM重型profile。
 
 当前代码与工具分工复审见[建模与复用决定](MODELING_REUSE_DECISION.md)。P0/P1
 声明组件不是实际导入；不要继续以增加声明表、兼容测试或 Tensor wrappers 代替

@@ -1,5 +1,21 @@
 # Current evidence and remaining work
 
+## R3.3 generic buffered pipeline and bounded OS observations accepted (2026-10-18)
+
+[API](M1_PIPELINE_CLOSURE_API.md), [acceptance](M1_PIPELINE_CLOSURE_ACCEPTANCE.md):
+**722 component cases /17 criteria /33.458s**; one clean frozen `6947778` passes
+**5,055 full tests /501.339s /1,028,008 KiB**, zero failures/errors/skips,
+five warnings. All prior 5,011 identities and 69 fixtures survive; current 578
+source hashes and 72 fixtures match. Exact synchronous call bridges, independent
+READ8/request8/actual4 byte profiles, buffer→flush→file contents, empty-buffer and
+actual RAISE/pending/cleanup paths compose in one seven-region model. Three real
+bounded OS cases retain separate attribution. Final normal query uses115,996/
+131,072; default4096 remains, host-order search cost remains a known limit.
+Original failed attempts and independent review closures are retained. Declared
+MATCHED is not native/runtime identity, persistence or transformation permission.
+R3.3's limited plan is closed; selector/literal/C2/D3/M2, complete M0–M2 and
+automatic LeWM recovery/simplification remain open. No new speedup was measured.
+
 ## R3.2 supplied-model Q and execution composition accepted (2026-10-18)
 
 [API](M1_PIPELINE_COMPOSITION_API.md), [acceptance](M1_PIPELINE_COMPOSITION_ACCEPTANCE.md):

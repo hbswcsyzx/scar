@@ -1,0 +1,52 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+_ test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush[False] _
+
+changed_protocol = False
+
+    @pytest.mark.parametrize('changed_protocol', [False, True])
+    def test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush(changed_protocol):
+        from scar.ir.program.providers import ProviderFactReference
+        from tests.fixtures.execution_lifetime_graphs import endpoint_lifetime_execution
+        fixture = list(endpoint_lifetime_execution())
+        if changed_protocol:
+            model = fixture[1]
+            row = model.contribution_supports[0]
+            fixture[1] = replace(model, contribution_supports=(replace(row,
+                visibility=replace(row.visibility, protocol=ProviderFactReference(model.snapshot.artifact,
+                                                                                 'arbitrary-flush'))),))
+        ctx = _index(fixture)._ctx
+        assert ctx.resolved_supports[fixture[-1]['support']]['status'] == 'MISSING'
+        assert any(gap.code == 'content_selector_protocol_unverified' for gap in ctx.gaps)
+>       assert any(gap.code == 'validity_endpoint_interpreter_unsupported' for gap in ctx.gaps)
+E       assert False
+E        +  where False = any(<generator object test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush.<locals>.<genexpr> at 0x75410c574930>)
+
+tests/unit/test_execution_validity_domains.py:192: AssertionError
+_ test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush[True] _
+
+changed_protocol = True
+
+    @pytest.mark.parametrize('changed_protocol', [False, True])
+    def test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush(changed_protocol):
+        from scar.ir.program.providers import ProviderFactReference
+        from tests.fixtures.execution_lifetime_graphs import endpoint_lifetime_execution
+        fixture = list(endpoint_lifetime_execution())
+        if changed_protocol:
+            model = fixture[1]
+            row = model.contribution_supports[0]
+            fixture[1] = replace(model, contribution_supports=(replace(row,
+                visibility=replace(row.visibility, protocol=ProviderFactReference(model.snapshot.artifact,
+                                                                                 'arbitrary-flush'))),))
+        ctx = _index(fixture)._ctx
+        assert ctx.resolved_supports[fixture[-1]['support']]['status'] == 'MISSING'
+        assert any(gap.code == 'content_selector_protocol_unverified' for gap in ctx.gaps)
+>       assert any(gap.code == 'validity_endpoint_interpreter_unsupported' for gap in ctx.gaps)
+E       assert False
+E        +  where False = any(<generator object test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush.<locals>.<genexpr> at 0x75410c575cb0>)
+
+tests/unit/test_execution_validity_domains.py:192: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_validity_domains.py::test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush[False]
+FAILED tests/unit/test_execution_validity_domains.py::test_endpoint_observation_matches_only_its_exact_protocol_not_any_flush[True]
+2 failed in 0.60s
