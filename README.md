@@ -70,8 +70,13 @@ modeling stage remain open; no new LeWM speedup is claimed.
 The [R0 resource relation review](docs/M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md)
 separates scoped occurrences, resource/handle lifetimes, work outcomes and
 completion versus ordered consumer visibility. Six real stdlib CPU/OS witnesses
-pass. R1/R2 product records and validation remain unimplemented; this review
-adds no new profiler, backend, GPU result or full-suite run.
+pass. That design checkpoint did not implement R1/R2 or add a new full-suite run.
+The [R1 identity implementation](docs/M1_RESOURCE_IDENTITY_IMPLEMENTATION.md)
+now connects exact canonical execution occurrences, resource/handle lifetimes,
+requirement owners, current-state support and artifact-scoped evidence links.
+Its component gate passes **302 checks / 14 criteria**; this implementation
+checkpoint awaits a clean frozen full regression. R2 work/order/ready, complete
+M0–M2 and automatic LeWM simplification remain open. No new speedup is claimed.
 
 The [P1 thin native boundary component](docs/M1_NATIVE_INTERFACES.md) connects
 provider slot declarations to canonical entry/exit ports, retaining repeated Uses,

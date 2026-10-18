@@ -1,5 +1,21 @@
 # Current evidence and remaining work
 
+## R1 identity component passed; frozen full pending (2026-10-18)
+
+The [R1 implementation](M1_RESOURCE_IDENTITY_IMPLEMENTATION.md) binds canonical
+program bytes, run/process/thread incarnations, activation/segment/block visits,
+operation/value/Use occurrences, resource realizations, requirement owners and
+handle lifetimes. Actual host CFG derives current definitions and state; omitted
+observations cannot authorize an explicitly old loop value or state. Distinct
+native handle and referent realms do not require identical namespace types.
+Component **302 cases / 14 criteria / 4.575s** passes with all **472** registered
+source hashes unchanged, including 142 new execution cases. Original failures
+and bounded independent reviews remain archived. A clean frozen full regression
+has not yet run for this implementation checkpoint. R2/R3, denotation/provenance,
+selector/literal, remaining family/catalog and complete M0–M2 remain open.
+These are declared-IR checks, not automatic source/runtime recovery or a LeWM
+optimization/speedup result. Earlier sections preserve their checkpoint scopes.
+
 ## R0 resource execution relation contract reviewed (2026-10-18)
 
 The [resource design gate](M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md) converges

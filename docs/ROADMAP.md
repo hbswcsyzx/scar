@@ -1,10 +1,18 @@
 # SCAR roadmap and scope
 
+> **R1 implementation checkpoint (2026-10-18):** exact occurrence/resource
+> records, canonical CFG/state links, strict execution wire and original-port
+> queries pass **302 component cases / 14 criteria**; the clean frozen full
+> regression is pending. [Implementation](M1_RESOURCE_IDENTITY_IMPLEMENTATION.md).
+> Next are R2 work/outcome/order/ready and R3 composition. Runtime/source
+> correspondence, complete M0–M2 and LeWM simplification remain open.
+
 > **Resource relation contract (2026-10-18):** [R0](M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md)
 > passes bounded design review and six asserted CPU/OS witnesses. The
 > [R1→R2→R3 plan](M1_RESOURCE_EXECUTION_PLAN.md) implements exact occurrences and
 > instance/handle bindings, work/outcome/order/ready, then lifecycle composition.
-> This does not implement those records or establish GPU readiness; M0–M2 stays open.
+> That design checkpoint did not implement those records or establish GPU readiness;
+> the subsequent R1 implementation is recorded above. M0–M2 stays open.
 
 > **Modeling gate (2026-10-18):** [D2.4 lifecycle composition](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)
 > passes 1,015 component checks and 4,050 frozen full tests. Conditional facts now

@@ -100,11 +100,19 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 ## 5. 当前证据锚点
 
+- [资源身份R1实现](M1_RESOURCE_IDENTITY_IMPLEMENTATION.md)接规范program snapshot、
+  activation/segment/visit及原Operation/Value/Use、资源实例/handle/requirement，
+  从原CFG/StateAccess推导当前发生，缺采不吞已知旧版本矛盾。
+  302组件/14标准/4.575s通过；472注册源指纹不变，新增142项发生/资源检查。
+  此实现检查点尚待clean冻结全仓；R2/R3、denotation/provenance及M0–M2未关闭，
+  不把手工IR组合或证据引用当作自动恢复、runtime证明或LeWM加速。
+
 - [资源执行R0](M1_RESOURCE_EXECUTION_DESIGN_ACCEPTANCE.md)完成三份独立终审与六个
   stdlib CPU/OS断言见证；core occurrence/旧EEG、资源/handle代次、INVOKE状态端口、
   work/host outcome及Completed/Ordered consumer支持的关系合同已收敛。
-  [R1→R2→R3](M1_RESOURCE_EXECUTION_PLAN.md)仍待产品实现；451项注册源指纹与D2.4
-  相同，没有重跑全仓、运行GPU实验或把设计当新runtime/ready证明。
+  在该设计检查点，[R1→R2→R3](M1_RESOURCE_EXECUTION_PLAN.md)仍待产品实现；
+  当时451项注册源指纹与D2.4相同，没有重跑全仓、运行GPU实验或把设计当
+  新runtime/ready证明。后续R1实现记录在上。
 
 - [D2.4](M1_LIFECYCLE_COMPOSITION_ACCEPTANCE.md)通过真实body及driver active-cleanup
   组合、准确当前状态和私有pending/context转发；公开point保留原rule/scope与实际边，
