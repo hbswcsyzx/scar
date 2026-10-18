@@ -55,7 +55,7 @@ def _none_content(recipe):
     return None
 
 
-def _helper_context_extension(index, flow, raw, raw_calls, input_calls, accounting):
+def _helper_context_extension(index, flow, raw, raw_calls, input_calls, accounting, guard=None):
     """Extend one exact caller prefix without adding a RAW formal to a helper.
 
     The raw anchor must still be current before that prefix's first downstream
@@ -75,10 +75,11 @@ def _helper_context_extension(index, flow, raw, raw_calls, input_calls, accounti
     cache = getattr(flow, '_request_helper_anchor_cache', None)
     if cache is None:
         cache = flow._request_helper_anchor_cache = {}
-    key = raw, caller_id
+    relevant = flow.selected_edges(guard, region=raw_region) or None
+    key = raw, caller_id, relevant
     if key not in cache:
         port = flow.port(raw)
-        before = None if port is None else flow._fresh_copies(port)
+        before = None if port is None else flow._fresh_copies(port, guard=relevant)
         use = flow.owned_use(raw.operation, raw.use)
         cache[key] = None if before is None else use.value in before.get(caller_id, ())
     current = cache[key]
@@ -92,7 +93,7 @@ def _helper_context_extension(index, flow, raw, raw_calls, input_calls, accounti
             'source_runtime_verified': False, 'transformation_authorized': False}
 
 
-def request_input_binding(index, raw, input, ordinal=0, *, budget=4096, accounting=None, _flow=None):
+def request_input_binding(index, raw, input, ordinal=0, *, budget=4096, accounting=None, _flow=None, _guard=None):
     """Join a driver raw Use and a separate input Use through the same caller path.
 
     The raw pack's exact operand, its origin, and the input's origin must all
@@ -118,10 +119,11 @@ def request_input_binding(index, raw, input, ordinal=0, *, budget=4096, accounti
     elif type(accounting) is not ValidityBudget or budget != 4096:
         raise TypeError('use one exact shared accounting budget or an integer budget')
     flow = ProtocolFlow(index.graph, budget=accounting) if _flow is None else _flow
-    if type(flow) is not ProtocolFlow or flow.graph is not index.graph or flow.budget is not accounting:
+    from .protocol_connection_flow import ConnectionContext
+    if type(flow) not in (ProtocolFlow, ConnectionContext) or flow.graph is not index.graph or flow.budget is not accounting:
         raise ValueError('request input query must share this exact graph and accounting flow')
-    raw_view = _input_origins_with_flow(index, raw.operation, raw.use, accounting=accounting, _copy_flow=flow)
-    input_view = _input_origins_with_flow(index, input.operation, input.use, accounting=accounting, _copy_flow=flow)
+    raw_view = _input_origins_with_flow(index, raw.operation, raw.use, accounting=accounting, _copy_flow=flow, _guard=_guard)
+    input_view = _input_origins_with_flow(index, input.operation, input.use, accounting=accounting, _copy_flow=flow, _guard=_guard)
     bindings, gaps, cursor, operands = [], [], None, {}
     consumer_forward = None
     if raw_operation.callee is not None:
@@ -152,7 +154,7 @@ def request_input_binding(index, raw, input, ordinal=0, *, budget=4096, accounti
                 continue
             if use.id not in operands:
                 operands[use.id] = _input_origins_with_flow(index, owner.id, use.id,
-                    accounting=accounting, _copy_flow=flow)
+                    accounting=accounting, _copy_flow=flow, _guard=_guard)
             for operand_number, operand_recipe in enumerate(operands[use.id]['recipes']):
                 operand_calls, operand_choices, operand_rooted = _context(index, operand_recipe, accounting)
                 raw_calls, raw_choices, raw_rooted = _context(index, raw_recipe, accounting, operand_calls)
@@ -174,7 +176,7 @@ def request_input_binding(index, raw, input, ordinal=0, *, budget=4096, accounti
                     extension = None
                     if raw_calls != input_calls and not forwarded:
                         extension = _helper_context_extension(index, flow, raw, raw_calls,
-                                                             input_calls, accounting)
+                                                             input_calls, accounting, _guard)
                         if type(extension) is not dict:
                             if extension is None:
                                 gaps.append({'code': 'request_helper_context_unresolved',

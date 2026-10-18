@@ -1,0 +1,115 @@
+.............F.FFFFF                                                     [100%]
+=================================== FAILURES ===================================
+_ test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites[True] _
+
+handled = True
+
+    @pytest.mark.parametrize('handled', (True, False))
+    def test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites(handled):
+        graph, details = cancellation_program(handled=handled)
+>       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_connections.py:21: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed')))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:resume: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError
+_ test_actual_failed_task_creation_cannot_supply_expected_cancellation_target __
+
+    def test_actual_failed_task_creation_cannot_supply_expected_cancellation_target():
+        from scar.ir.program.protocol_connections import CancelDelivery
+        graph, _ = cancellation_program()
+        delivery = next(row for row in graph.protocol_bindings if type(row) is CancelDelivery)
+        bad_target = replace(delivery.expected_target,
+            task_result=InvokeLiteralResult(ControlEdgeReference(delivery.expected_target.task_result.edge.operation, 1), CompletionResult(0)))
+        bad = replace(graph, protocol_bindings=tuple(replace(row, expected_target=bad_target) if row is delivery else row
+                                                    for row in graph.protocol_bindings))
+>       assert 'cancel_binding_reference' in _codes(bad)
+E       AssertionError: assert 'cancel_binding_reference' in {'unbound_exit'}
+E        +  where {'unbound_exit'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))
+
+tests/unit/test_program_async_connections.py:143: AssertionError
+__ test_full_delivery_reference_cannot_silently_choose_another_packet_source ___
+
+    def test_full_delivery_reference_cannot_silently_choose_another_packet_source():
+        from scar.ir.program.protocol_connections import CancelHandling
+        graph, _ = cancellation_program()
+        handling = next(row for row in graph.protocol_bindings if type(row) is CancelHandling)
+        changed = replace(handling, delivery=replace(handling.delivery,
+            packet_source=handling.delivery.expected_target.task_result))
+        bad = replace(graph, protocol_bindings=tuple(changed if row is handling else row for row in graph.protocol_bindings))
+>       assert 'cancel_delivery_reference' in _codes(bad)
+E       AssertionError: assert 'cancel_delivery_reference' in {'unbound_exit'}
+E        +  where {'unbound_exit'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))
+
+tests/unit/test_program_async_connections.py:153: AssertionError
+_ test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator _
+
+    def test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator():
+        from scar.ir.program.protocol_connections import TaskStatusRead
+        graph, _ = cancellation_program()
+        graph = replace(graph, protocol_bindings=tuple(row for row in graph.protocol_bindings if type(row) is TaskStatusRead))
+>       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:160: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_connections.py:21: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur... consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))),))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:resume: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError
+_ test_task_status_cannot_read_another_reference_and_report_this_cancelled_task _
+
+    def test_task_status_cannot_read_another_reference_and_report_this_cancelled_task():
+        graph, details = cancellation_program()
+        interface, = graph.driver_interfaces
+        status = details['status']
+        changed = replace(status, uses=tuple(replace(use, value=interface.receiver) if use.id == UseID('cancel.status.task') else use
+                                            for use in status.uses))
+        bad = replace(graph, operations=tuple(changed if row.id == status.id else row for row in graph.operations))
+>       assert 'cancel_status_task' in _codes(bad)
+E       AssertionError: assert 'cancel_status_task' in {'unbound_exit'}
+E        +  where {'unbound_exit'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))
+
+tests/unit/test_program_async_connections.py:174: AssertionError
+__ test_task_status_cannot_use_the_earlier_cancel_calls_boolean_as_its_result __
+
+    def test_task_status_cannot_use_the_earlier_cancel_calls_boolean_as_its_result():
+        from scar.ir.program.protocol_connections import TaskStatusRead
+        graph, details = cancellation_program()
+        status = next(row for row in graph.protocol_bindings if type(row) is TaskStatusRead)
+        changed = replace(status, result=InvokeLiteralResult(ControlEdgeReference(details['cancel'], 0), CompletionResult(0)))
+        bad = replace(graph, protocol_bindings=tuple(changed if row is status else row for row in graph.protocol_bindings))
+>       assert 'cancel_binding_reference' in _codes(bad)
+E       AssertionError: assert 'cancel_binding_reference' in {'unbound_exit'}
+E        +  where {'unbound_exit'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))
+
+tests/unit/test_program_async_connections.py:183: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_connections.py::test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites[True]
+FAILED tests/unit/test_program_async_connections.py::test_actual_failed_task_creation_cannot_supply_expected_cancellation_target
+FAILED tests/unit/test_program_async_connections.py::test_full_delivery_reference_cannot_silently_choose_another_packet_source
+FAILED tests/unit/test_program_async_connections.py::test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator
+FAILED tests/unit/test_program_async_connections.py::test_task_status_cannot_read_another_reference_and_report_this_cancelled_task
+FAILED tests/unit/test_program_async_connections.py::test_task_status_cannot_use_the_earlier_cancel_calls_boolean_as_its_result
+6 failed, 14 passed in 1.27s

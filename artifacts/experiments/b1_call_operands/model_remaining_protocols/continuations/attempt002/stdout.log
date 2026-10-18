@@ -1,0 +1,20 @@
+...............F.................                                        [100%]
+=================================== FAILURES ===================================
+___ test_await_call_cannot_use_same_typed_root_instead_of_its_lookup_result ____
+
+    def test_await_call_cannot_use_same_typed_root_instead_of_its_lookup_result():
+        graph, details = _typed(kind="await")
+        call = details["await_call"]["operation"].id
+        from scar.ir.program.model import BlockArgument
+        from scar.ir.program.ids import BlockID
+        bad = _change_inputs(graph, lambda row: row.site.operation == call,
+            lambda row: replace(row, cases=tuple(replace(case,
+                receiver=BlockArgument(BlockID("continuation.entry"), 1)) for case in row.cases)))
+>       assert {"protocol_connection_copy", "protocol_call_input", "protocol_copy"} & _codes(bad)
+E       AssertionError: assert ({'protocol_call_input', 'protocol_connection_copy', 'protocol_copy'} & {'protocol_input_source'})
+E        +  where {'protocol_input_source'} = _codes(ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...), slot=1), targets=(HostTerminal(operation=OperationID(value='continuation.extract.error')),))), protocol_bindings=()))
+
+tests/unit/test_program_continuation_connections.py:85: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_continuation_connections.py::test_await_call_cannot_use_same_typed_root_instead_of_its_lookup_result
+1 failed, 32 passed in 1.32s

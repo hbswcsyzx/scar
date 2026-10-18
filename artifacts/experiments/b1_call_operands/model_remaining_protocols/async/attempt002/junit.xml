@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="20" time="1.299" timestamp="2026-10-18T20:34:46.363045+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_async_connections" name="test_real_async_association_gate_source_and_session_use_original_ports[start-ASYNC_YIELD]" time="0.076"><failure message="ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source">target = 'start', flavor = 'ASYNC_YIELD'
+
+    @pytest.mark.parametrize('target,flavor', [('start', 'ASYNC_YIELD'), ('start', 'AWAIT'),
+                                             ('value', 'ASYNC_YIELD'), ('packet', 'ASYNC_YIELD')])
+    def test_real_async_association_gate_source_and_session_use_original_ports(target, flavor):
+        graph, details = async_driver_program(target=target, flavor=flavor)
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_connections.py:21: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...data'), source=DriveOutcomeRef(drive=OperationID(value='driver.drive'), source=OperationID(value='resume.suspend'))),))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_real_async_association_gate_source_and_session_use_original_ports[start-AWAIT]" time="0.014"><failure message="ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source">target = 'start', flavor = 'AWAIT'
+
+    @pytest.mark.parametrize('target,flavor', [('start', 'ASYNC_YIELD'), ('start', 'AWAIT'),
+                                             ('value', 'ASYNC_YIELD'), ('packet', 'ASYNC_YIELD')])
+    def test_real_async_association_gate_source_and_session_use_original_ports(target, flavor):
+        graph, details = async_driver_program(target=target, flavor=flavor)
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_connections.py:21: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...data'), source=DriveOutcomeRef(drive=OperationID(value='driver.drive'), source=OperationID(value='resume.suspend'))),))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_real_async_association_gate_source_and_session_use_original_ports[value-ASYNC_YIELD]" time="0.024"><failure message="ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source">target = 'value', flavor = 'ASYNC_YIELD'
+
+    @pytest.mark.parametrize('target,flavor', [('start', 'ASYNC_YIELD'), ('start', 'AWAIT'),
+                                             ('value', 'ASYNC_YIELD'), ('packet', 'ASYNC_YIELD')])
+    def test_real_async_association_gate_source_and_session_use_original_ports(target, flavor):
+        graph, details = async_driver_program(target=target, flavor=flavor)
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_connections.py:21: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...adata'), source=DriveOutcomeRef(drive=OperationID(value='driver.drive'), source=OperationID(value='resume.return'))),))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_real_async_association_gate_source_and_session_use_original_ports[packet-ASYNC_YIELD]" time="0.016"><failure message="ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source">target = 'packet', flavor = 'ASYNC_YIELD'
+
+    @pytest.mark.parametrize('target,flavor', [('start', 'ASYNC_YIELD'), ('start', 'AWAIT'),
+                                             ('value', 'ASYNC_YIELD'), ('packet', 'ASYNC_YIELD')])
+    def test_real_async_association_gate_source_and_session_use_original_ports(target, flavor):
+        graph, details = async_driver_program(target=target, flavor=flavor)
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_connections.py:21: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...tadata'), source=DriveOutcomeRef(drive=OperationID(value='driver.drive'), source=OperationID(value='resume.raise'))),))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_attachments_can_be_removed_without_fabricating_or_breaking_old_core_ports" time="0.015" /><testcase classname="tests.unit.test_program_async_connections" name="test_deleting_session_source_relation_keeps_the_original_source_obligation" time="0.035" /><testcase classname="tests.unit.test_program_async_connections" name="test_known_async_outcome_cannot_publish_the_other_session_post[AWAIT-COMPLETE]" time="0.013" /><testcase classname="tests.unit.test_program_async_connections" name="test_known_async_outcome_cannot_publish_the_other_session_post[ASYNC_YIELD-HOLD]" time="0.019" /><testcase classname="tests.unit.test_program_async_connections" name="test_same_typed_external_body_cannot_replace_the_exact_request_projection" time="0.018" /><testcase classname="tests.unit.test_program_async_connections" name="test_attached_association_cannot_swap_its_two_exact_normal_results" time="0.019" /><testcase classname="tests.unit.test_program_async_connections" name="test_session_relation_must_name_the_real_drive_source_not_a_same_region_operation" time="0.018" /><testcase classname="tests.unit.test_program_async_connections" name="test_small_budget_retains_an_explicit_cursor_and_original_missing_inventory" time="0.017"><failure message="ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source">def test_small_budget_retains_an_explicit_cursor_and_original_missing_inventory():
+        graph, _ = async_driver_program()
+&gt;       report = _view(graph, budget=1)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_connections.py:21: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...data'), source=DriveOutcomeRef(drive=OperationID(value='driver.drive'), source=OperationID(value='resume.suspend'))),))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: async_session_request at async.session.program_operation:async.session.metadata: original consumer differs from its independently declared source
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_suspended_body_is_not_finished_when_its_async_request_completes" time="0.019" /><testcase classname="tests.unit.test_program_async_connections" name="test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites[True]" time="0.012"><failure message="ValueError: driver_result_type at program_value:driver.outcome.arg.0: body projection type differs from this source's signature">handled = True
+
+    @pytest.mark.parametrize('handled', (True, False))
+    def test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites(handled):
+        graph, details = cancellation_program(handled=handled)
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_connections.py:21: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed')))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: driver_result_type at program_value:driver.outcome.arg.0: body projection type differs from this source's signature
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_cancel_call_injection_handling_and_final_status_are_distinct_original_sites[False]" time="0.037" /><testcase classname="tests.unit.test_program_async_connections" name="test_actual_failed_task_creation_cannot_supply_expected_cancellation_target" time="0.013"><failure message="AssertionError: assert 'cancel_binding_reference' in {'driver_result_type'}&#10; +  where {'driver_result_type'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))">def test_actual_failed_task_creation_cannot_supply_expected_cancellation_target():
+        from scar.ir.program.protocol_connections import CancelDelivery
+        graph, _ = cancellation_program()
+        delivery = next(row for row in graph.protocol_bindings if type(row) is CancelDelivery)
+        bad_target = replace(delivery.expected_target,
+            task_result=InvokeLiteralResult(ControlEdgeReference(delivery.expected_target.task_result.edge.operation, 1), CompletionResult(0)))
+        bad = replace(graph, protocol_bindings=tuple(replace(row, expected_target=bad_target) if row is delivery else row
+                                                    for row in graph.protocol_bindings))
+&gt;       assert 'cancel_binding_reference' in _codes(bad)
+E       AssertionError: assert 'cancel_binding_reference' in {'driver_result_type'}
+E        +  where {'driver_result_type'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))
+
+tests/unit/test_program_async_connections.py:143: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_full_delivery_reference_cannot_silently_choose_another_packet_source" time="0.011"><failure message="AssertionError: assert 'cancel_delivery_reference' in {'driver_result_type'}&#10; +  where {'driver_result_type'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))">def test_full_delivery_reference_cannot_silently_choose_another_packet_source():
+        from scar.ir.program.protocol_connections import CancelHandling
+        graph, _ = cancellation_program()
+        handling = next(row for row in graph.protocol_bindings if type(row) is CancelHandling)
+        changed = replace(handling, delivery=replace(handling.delivery,
+            packet_source=handling.delivery.expected_target.task_result))
+        bad = replace(graph, protocol_bindings=tuple(changed if row is handling else row for row in graph.protocol_bindings))
+&gt;       assert 'cancel_delivery_reference' in _codes(bad)
+E       AssertionError: assert 'cancel_delivery_reference' in {'driver_result_type'}
+E        +  where {'driver_result_type'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))
+
+tests/unit/test_program_async_connections.py:153: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator" time="0.009"><failure message="ValueError: driver_result_type at program_value:driver.outcome.arg.0: body projection type differs from this source's signature">def test_deleting_cancel_relations_does_not_delete_request_delivery_handler_status_denominator():
+        from scar.ir.program.protocol_connections import TaskStatusRead
+        graph, _ = cancellation_program()
+        graph = replace(graph, protocol_bindings=tuple(row for row in graph.protocol_bindings if type(row) is TaskStatusRead))
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_async_connections.py:160: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_connections.py:21: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur... consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))),))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: driver_result_type at program_value:driver.outcome.arg.0: body projection type differs from this source's signature
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_task_status_cannot_read_another_reference_and_report_this_cancelled_task" time="0.012"><failure message="AssertionError: assert 'cancel_status_task' in {'driver_result_type'}&#10; +  where {'driver_result_type'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))">def test_task_status_cannot_read_another_reference_and_report_this_cancelled_task():
+        graph, details = cancellation_program()
+        interface, = graph.driver_interfaces
+        status = details['status']
+        changed = replace(status, uses=tuple(replace(use, value=interface.receiver) if use.id == UseID('cancel.status.task') else use
+                                            for use in status.uses))
+        bad = replace(graph, operations=tuple(changed if row.id == status.id else row for row in graph.operations))
+&gt;       assert 'cancel_status_task' in _codes(bad)
+E       AssertionError: assert 'cancel_status_task' in {'driver_result_type'}
+E        +  where {'driver_result_type'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))
+
+tests/unit/test_program_async_connections.py:174: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_connections" name="test_task_status_cannot_use_the_earlier_cancel_calls_boolean_as_its_result" time="0.011"><failure message="AssertionError: assert 'cancel_binding_reference' in {'driver_result_type'}&#10; +  where {'driver_result_type'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))">def test_task_status_cannot_use_the_earlier_cancel_calls_boolean_as_its_result():
+        from scar.ir.program.protocol_connections import TaskStatusRead
+        graph, details = cancellation_program()
+        status = next(row for row in graph.protocol_bindings if type(row) is TaskStatusRead)
+        changed = replace(status, result=InvokeLiteralResult(ControlEdgeReference(details['cancel'], 0), CompletionResult(0)))
+        bad = replace(graph, protocol_bindings=tuple(changed if row is status else row for row in graph.protocol_bindings))
+&gt;       assert 'cancel_binding_reference' in _codes(bad)
+E       AssertionError: assert 'cancel_binding_reference' in {'driver_result_type'}
+E        +  where {'driver_result_type'} = _codes(ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur..., consumer=OwnedUse(operation=OperationID(value='cancel.status.consume'), use=UseID(value='cancel.status.observed'))))))
+
+tests/unit/test_program_async_connections.py:183: AssertionError</failure></testcase></testsuite></testsuites>

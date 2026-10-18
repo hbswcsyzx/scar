@@ -530,6 +530,22 @@ class LiteralEvaluation:
 from scar.ir.program.protocols import (ProtocolOperation, ProtocolScope, _bind_model_ports)
 _bind_model_ports(OperationResult, InvokeLiteralResult)
 
+# P4 connection records use canonical model result/formal ports. Bind those
+# late, after the original classes exist, then close the protocol unions before
+# ProgramGraph captures their annotations.
+from scar.ir.program.protocol_connections import (
+    AsyncSessionOutcome, CancelDelivery, CancelDeliveryRef, CancelHandling,
+    InitialAdvance, InjectedPacketTrigger, PROTOCOL_BINDING_TYPES,
+    ProtocolBinding, ProtocolCallInputCase, ProtocolCallInputs,
+    ProtocolOperationRef, ProtocolResultConsumers, RawOperandSource,
+    RawRequestTrigger, RequestAssociation, RequestStateCondition,
+    RequestStateRule, ResumeSourceBinding, TaskCreatedTarget,
+    TaskStatusRead, TaskStatusRule, TaskTargetRead, TaskTargetRole,
+    TaskTargetSource, _bind_connection_model_ports, _bind_protocol_records,
+)
+_bind_connection_model_ports(OperationResult, InvokeLiteralResult, BlockArgument)
+_bind_protocol_records()
+
 
 @dataclass(frozen=True, slots=True)
 class CompletionSuccessor:
@@ -837,6 +853,9 @@ class ProgramGraph:
     literal_evaluations: tuple[LiteralEvaluation, ...] = ()
     protocol_scopes: tuple[ProtocolScope, ...] = ()
     protocol_operations: tuple[ProtocolOperation, ...] = ()
+    protocol_call_inputs: tuple[ProtocolCallInputs, ...] = ()
+    protocol_result_consumers: tuple[ProtocolResultConsumers, ...] = ()
+    protocol_bindings: tuple[ProtocolBinding, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
@@ -851,6 +870,33 @@ class ProgramGraph:
         _unique(tuple(row.id for row in self.protocol_scopes), "protocol scope IDs")
         _unique(tuple((row.scope, row.clause, row.operation, row.slot)
                       for row in self.protocol_operations), "protocol operation keys")
+        for name, row_type in (
+                ("protocol_call_inputs", ProtocolCallInputs),
+                ("protocol_result_consumers", ProtocolResultConsumers)):
+            rows = _tuple(getattr(self, name), "ProgramGraph." + name)
+            if any(type(row) is not row_type for row in rows):
+                raise TypeError("ProgramGraph." + name + " requires exact connection records")
+            for row in rows:
+                row.__post_init__()
+            _unique(tuple(row.site for row in rows), "ProgramGraph." + name + " sites")
+        bindings = _tuple(self.protocol_bindings, "ProgramGraph.protocol_bindings")
+        if any(type(row) not in PROTOCOL_BINDING_TYPES for row in bindings):
+            raise TypeError("ProgramGraph.protocol_bindings requires a closed exact binding union")
+        for row in bindings:
+            row.__post_init__()
+        binding_keys = []
+        for row in bindings:
+            if type(row) is AsyncSessionOutcome:
+                key = (type(row), row.scope, row.update, row.source)
+            elif type(row) is CancelDelivery:
+                key = (type(row), row.scope, row.expected_target,
+                       row.packet_source, row.consumer)
+            elif type(row) is CancelHandling:
+                key = (type(row), row.delivery, row.handler_packet)
+            else:
+                key = (type(row), row.scope, row.result)
+            binding_keys.append(key)
+        _unique(tuple(binding_keys), "ProgramGraph protocol binding keys")
         evaluations = _tuple(self.literal_evaluations, "ProgramGraph.literal_evaluations")
         if any(type(row) is not LiteralEvaluation for row in evaluations):
             raise TypeError("literal_evaluations requires exact LiteralEvaluation records")
@@ -1023,7 +1069,13 @@ class ProgramGraph:
 
 
 __all__ = [
-    "ProtocolScope", "ProtocolOperation",
+    "ProtocolScope", "ProtocolOperation", "ProtocolOperationRef",
+    "RawOperandSource", "RawRequestTrigger", "InjectedPacketTrigger", "InitialAdvance",
+    "ProtocolCallInputCase", "ProtocolCallInputs", "ResumeSourceBinding",
+    "ProtocolResultConsumers", "RequestAssociation", "RequestStateCondition",
+    "RequestStateRule", "AsyncSessionOutcome", "TaskCreatedTarget", "TaskTargetRead",
+    "TaskTargetRole", "TaskTargetSource", "CancelDelivery", "CancelDeliveryRef",
+    "CancelHandling", "TaskStatusRead", "TaskStatusRule", "ProtocolBinding",
     "ExactLiteralOrigin", "LiteralEvaluation", "InvokeLiteralResult", "is_literal_origin",
     "AccessMode", "Behavior", "Block", "BlockArgument", "DataValue", "ExitKind",
     "CompletionResult", "CompletionSignature", "CompletionSuccessor", "ExitPort",

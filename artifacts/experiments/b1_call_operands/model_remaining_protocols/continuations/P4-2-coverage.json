@@ -1,0 +1,382 @@
+{
+  "stage": "P4-2 intermediate implementation; not whole P4 acceptance",
+  "status": "OPEN",
+  "denominator": {
+    "count": 16,
+    "groups": [
+      "F12",
+      "F13",
+      "F14",
+      "F15",
+      "F16",
+      "F17",
+      "F18",
+      "F19",
+      "F20",
+      "F21",
+      "F22",
+      "F23",
+      "F24",
+      "X25",
+      "X26",
+      "X27"
+    ]
+  },
+  "owned_focused": {
+    "directory": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt009",
+    "passed": 52,
+    "failed": 0,
+    "seconds_pytest": 2.26,
+    "exit": 0,
+    "source_fingerprint": "3af821cb7b9486a8f7b0befc89ed56747b3ef7dcb54abf91e79a7f9be5982459",
+    "source_unchanged": true
+  },
+  "source_runtime_verified": false,
+  "transformation_authorized": false,
+  "sources": {
+    "scar/ir/program/protocol_continuations.py": "97ec80c4a5aaf4615a4239d57dac0eb61ed1d95b1ae008e9f4695bc5f31eee40",
+    "tests/fixtures/program_continuation_graphs.py": "0137c37ebc5d4c101c36f77a1bdd624ce88d987b3b258b25943541f356b43733",
+    "tests/fixtures/program_continuation_cleanup_graphs.py": "71f27991640be83ddaebf6c2525b8b0964662cda7e2ec2e1c1822f45dfc778e7",
+    "tests/unit/test_program_continuation_connections.py": "fc8730283979c569a5338d7dcb0c04ecf77a0a7e78757ab9e0fd6ae43032ad53",
+    "scar/ir/program/protocol_connection_flow.py": "bcccc64ce8674ae90127899c484cf9d58cf77fc8df23a7f524eef1c126106cff",
+    "scar/ir/program/protocol_connection_validation.py": "b4189e9b5020cff96d5bab3a2478ab0ef0737fc677972dcc2eea354f9ae14912",
+    "docs/M1_PROTOCOL_CONNECTION_CONTRACT.md": "f8ec4ed141c5e9d8d25a201b9f978ea1b93d81d72a0dab9466d3fef33fa17eb8",
+    "docs/M1_PROTOCOL_FAMILY_PLAN.md": "c516739abd42d200d5709dc87da0a4ff352f86543c22a7d7377586ef3e1c412c",
+    "docs/M1_REMAINING_PROTOCOL_PLAN.md": "0b360d67fc03e79674c829807c9718f8d05ebe58e65c845da670afcc5d70ab24"
+  },
+  "groups": [
+    {
+      "group": "F12",
+      "status": "OPEN",
+      "requirement": "await lookup/call/iterator validation, zero-suspension completion and protocol errors",
+      "owned_tests": [
+        "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[await]",
+        "test_await_call_cannot_use_same_typed_root_instead_of_its_lookup_result",
+        "test_await_lookup_bound_method_is_not_the_iterator_returned_by_await_call",
+        "test_await_iterator_cannot_replace_the_actual_extracted_expression_result"
+      ],
+      "observed": "Real lookup N/R, own NORMAL bound method to a separate await call, own NORMAL iterator to delegate advance, extraction N/R and distinct final expression adapter/host consumers.",
+      "remaining": [
+        "Explicit invalid iterator / plain generator eligibility and each distinct source failure branch.",
+        "A native coroutine complete zero-suspension and suspension family graph, beyond the current language helper sites."
+      ]
+    },
+    {
+      "group": "F13",
+      "status": "OPEN",
+      "requirement": "each scheduler handoff, exact resume iterator, and final expression/result",
+      "owned_tests": [
+        "test_parent_resume_binds_the_actual_non_state_slot_without_guessing_from_flavor",
+        "test_parent_slot_relation_deletion_preserves_the_original_required_slot",
+        "test_parent_slot_cannot_borrow_another_same_typed_current_reference",
+        "test_supplied_resume_rows_outside_the_canonical_slot_inventory_are_rejected"
+      ],
+      "observed": "Eight exact nonSTATE slot/flavor combinations bind real processed sources through the gate and canonical BodyResume. BodyStart/nonDrive/missing/STATE row sites reject. Deleting rows retains original slot obligations.",
+      "remaining": [
+        "A combined repeated scheduler handoff to final expression, not just one static resume boundary.",
+        "New P3 dynamic occurrence combinations, actual current/saved inputs and outcomes for these language protocol sites."
+      ]
+    },
+    {
+      "group": "F14",
+      "status": "OPEN",
+      "requirement": "coroutine phases, reentry/reuse, throw/close and actual poststates",
+      "owned_tests": [],
+      "observed": "No new phase-complete coroutine graph is claimed by this owned batch.",
+      "remaining": [
+        "Current phase predicate and exact branch through callback/reentry/reuse/throw/close consumers; preserve the whole parent denominator."
+      ]
+    },
+    {
+      "group": "F15",
+      "status": "OPEN",
+      "requirement": "generator-coroutine direct driving and awaiting the same body; ordinary generator eligibility",
+      "owned_tests": [
+        "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[wrapper]"
+      ],
+      "observed": "Wrapper lookup/call own N/R and its iterator/extraction result consumers are explicit. This is a helper-site composition, not a complete body-family proof.",
+      "remaining": [
+        "Same GENERATOR_COROUTINE body with both direct and await routes, rejecting wrong plain-generator eligibility and unrelated Drive outputs."
+      ]
+    },
+    {
+      "group": "F16",
+      "status": "OPEN",
+      "requirement": "four async request kinds, association, first send, reuse/concurrency",
+      "owned_tests": [],
+      "observed": "Outside owned continuation evidence; another owner handles async records and compositions. No uninspected test is credited.",
+      "remaining": [
+        "Verify exact R/B/S/latent associations and all original async request variants in the integrated ledger."
+      ]
+    },
+    {
+      "group": "F17",
+      "status": "OPEN",
+      "requirement": "AWAIT session HOLD versus ASYNC_YIELD item/request completion and body pause",
+      "owned_tests": [],
+      "observed": "Outside owned continuation evidence; existing slot tests do not close session semantics.",
+      "remaining": [
+        "Combine actual async outcomes and SessionUpdate with exact current state and request consumers."
+      ]
+    },
+    {
+      "group": "F18",
+      "status": "OPEN",
+      "requirement": "async natural completion, active terminator exceptions and illegal source-level return",
+      "owned_tests": [],
+      "observed": "No full async terminator family composition is claimed here.",
+      "remaining": [
+        "Exact source rule and own N/R adapter outputs; retain active exception versus natural completion distinction."
+      ]
+    },
+    {
+      "group": "F19",
+      "status": "OPEN",
+      "requirement": "closed/athrow/aclose and failure continuation relationships",
+      "owned_tests": [],
+      "observed": "No native closed flag or host completion is treated as disappearance of a body continuation.",
+      "remaining": [
+        "Version-scoped closed/failure routes and independent request/session/frame consumers in integrated evidence."
+      ]
+    },
+    {
+      "group": "F20",
+      "status": "OPEN",
+      "requirement": "yield-from evaluation/GetIterator/first advance, zero parent suspension and initial failure",
+      "owned_tests": [
+        "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[delegate]",
+        "test_initial_advance_names_the_current_evaluation_instead_of_a_bare_initial_flag",
+        "test_initial_advance_cannot_be_reused_after_a_real_advance_backedge"
+      ],
+      "observed": "Real GetIterator own N/R, current iterator receiver, genuine advance N/R, initial marker tied to its evaluation, actual backedge counterexample. Delegate-only routes have no parent Drive/Attach/F.",
+      "remaining": [
+        "Expanded independent method lookup stage remains a real typed rule/interface gap, not merely native applicability.",
+        "Complete original source evaluation and invalid iterator/first exhaustion family graph, beyond the atomic helper boundary."
+      ]
+    },
+    {
+      "group": "F21",
+      "status": "OPEN",
+      "requirement": "NEXT/SEND split, method lookup/call/result/current state and item/final consumers",
+      "owned_tests": [
+        "test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct",
+        "test_two_lookup_request_tuples_merge_upstream_of_the_real_send_call",
+        "test_receiver_and_send_operand_cannot_come_from_opposite_merge_predecessors",
+        "test_deleting_the_paired_call_attachment_keeps_both_selected_call_rows_required",
+        "test_partial_single_guard_does_not_claim_the_other_merge_predecessor_was_checked"
+      ],
+      "observed": "Raw trigger and ordered arguments, independent selected lookup result, two real lookup/request branches merged before an ordinary JUMP and actual call, complete receiver/argument tuple correlation and independent incoming inventory.",
+      "remaining": [
+        "Independent bound-method lookup to call receiver is not yet a closed delegation rule.",
+        "Missing-method branch and a dedicated reevaluated same-static-producer / stale carried result counterexample."
+      ]
+    },
+    {
+      "group": "F22",
+      "status": "OPEN",
+      "requirement": "THROW original 1-3 arguments, missing method/failure/item/exhaustion, parent recovery",
+      "owned_tests": [
+        "test_delegate_throw_keeps_each_original_raw_operand_and_order",
+        "test_raw_throw_ordinals_cannot_be_reordered_even_when_all_references_have_the_same_type",
+        "test_item_exhaustion_packet_and_state_are_not_interchangeable_metadata"
+      ],
+      "observed": "Exact raw trigger and ordinals 0..arity-1, actual INVOKE arguments and selected item/reference versus exhaustion or failure packet, with metadata-only core-valid wrong-role examples.",
+      "remaining": [
+        "Missing delegate.throw method to the exact original parent packet.",
+        "Expanded method lookup, new versus original packet and complete family-specific cross-helper/caller tuple composition."
+      ]
+    },
+    {
+      "group": "F23",
+      "status": "OPEN",
+      "requirement": "close NORMAL continues old GeneratorExit, RAISE overrides; pending/context and parent boundaries",
+      "owned_tests": [
+        "test_close_normal_continues_old_injection_but_raise_overrides_with_own_packet",
+        "test_close_none_normal_result_is_not_a_new_host_item_or_parent_exception",
+        "test_close_normal_cannot_replay_a_different_same_typed_entry_packet",
+        "test_close_normal_and_raise_merge_into_one_real_fresh_pending_and_current_cleanup_replace",
+        "test_shared_cleanup_pending_cannot_use_close_none_or_lose_the_new_close_exception"
+      ],
+      "observed": "Actual close N/R; own None is discarded, NORMAL continues independently supplied current injected packet, RAISE replaces it with exact own packet. Both real close completions merge into a shared fresh PendingRaise and original CleanupReplace using joint original-edge choices. Delegate-only has no parent Drive/Attach/F/release.",
+      "remaining": [
+        "Raw CLOSE through a real GE normalizer and PacketDefinition in a local/noDriver helper.",
+        "Raw THROW(GE) exact class-selected route and independent close-method lookup.",
+        "No claim of parsed native GeneratorExit interpretation or inferred physical identity."
+      ]
+    },
+    {
+      "group": "F24",
+      "status": "OPEN",
+      "requirement": "cancel request, actual delivery/handler, suppression/cleanup/re-await/final state",
+      "owned_tests": [],
+      "observed": "Outside owned continuation evidence. Exception packets and ordinary close tests are not cancel proof.",
+      "remaining": [
+        "Integrated exact delivery, current handler/context, selected continuation and session consumers from async owner evidence."
+      ]
+    },
+    {
+      "group": "X25",
+      "status": "OPEN",
+      "requirement": "active C1 across at least two cuts, saved pending/context/delegate, local binding and current state",
+      "owned_tests": [
+        "test_resume_source_connection_composes_with_active_cleanup_saved_pending_and_fresh_raise",
+        "test_continuation_metadata_cannot_let_an_active_cleanup_private_token_escape_through_the_helper",
+        "test_close_normal_and_raise_merge_into_one_real_fresh_pending_and_current_cleanup_replace"
+      ],
+      "observed": "One real cut saves pending/context/frame (and delegate in the close fixture), precise resume sources and active caller formal, helper own N/R and shared fresh Replace. Private token escape is rejected by original core; packets and handled context stay on original SSA.",
+      "remaining": [
+        "At least two real cuts with local binding, loop/merge and stale pending/context/delegate/state counterexamples.",
+        "The one-cut positive and old C1 regressions cannot substitute for this original group."
+      ]
+    },
+    {
+      "group": "X26",
+      "status": "OPEN",
+      "requirement": "terminal publication/session currentness, partial RAISE, narrow release versus broad helper",
+      "owned_tests": [],
+      "observed": "This owned close helper does not grant F, session post, or terminal release. Its active C1 connection is not the full lifecycle composition.",
+      "remaining": [
+        "New continuation protocol rows combined with actual BodyOutcomeCommit/NoBodyFinish, SessionUpdate kill/reseed, partial RAISE and TerminalFrameRelease owner/current-state guards."
+      ]
+    },
+    {
+      "group": "X27",
+      "status": "OPEN",
+      "requirement": "these language protocols composed with P3 repeated Drive/persistent activation/actual entry/outcome",
+      "owned_tests": [],
+      "observed": "All supplied owned graphs are static declaration fixtures. No new Execution O graph is constructed or claimed.",
+      "remaining": [
+        "Actual occurrence compositions for these new sites with exact instance/capture/saved inputs/first outcome/current segment thread/run.",
+        "Partial capture and deleted joins must retain consumer obligations; prior standalone P3 acceptance is not this group."
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt001",
+      "returncode": 2,
+      "duration_seconds": 1.3940640771761537,
+      "source_sha256_before": "b5a90c4b5231a09377c997636e9b5a2a223571171deb5bbc688c744043ecdd62",
+      "source_sha256_after": "b5a90c4b5231a09377c997636e9b5a2a223571171deb5bbc688c744043ecdd62",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt002",
+      "returncode": 1,
+      "duration_seconds": 1.9927701419219375,
+      "source_sha256_before": "c0d60616bba832004534c3dc952c58a1e0e28aed9ea59243f01f3e3288f26305",
+      "source_sha256_after": "c0d60616bba832004534c3dc952c58a1e0e28aed9ea59243f01f3e3288f26305",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt003",
+      "returncode": 1,
+      "duration_seconds": 2.2381861805915833,
+      "source_sha256_before": "dbcd4d59b5b69148189e3e8631f19e7cf990dfb136a539ccc36e24e616205d37",
+      "source_sha256_after": "dbcd4d59b5b69148189e3e8631f19e7cf990dfb136a539ccc36e24e616205d37",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt004",
+      "returncode": 0,
+      "duration_seconds": 2.171868077479303,
+      "source_sha256_before": "a6e81da4687dd4662495f14d09b0ac9abad69bb2963ebc1740635277697f393b",
+      "source_sha256_after": "a6e81da4687dd4662495f14d09b0ac9abad69bb2963ebc1740635277697f393b",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt005",
+      "returncode": 0,
+      "duration_seconds": 2.4992329105734825,
+      "source_sha256_before": "29bddaa0acae2854e2322aeb5cbdf59abe4026aedf264352fd33799426102a46",
+      "source_sha256_after": "364761902a33f83f44a1fe11bfc77cf6147daae034f25af5b1ee8779727d2762",
+      "source_unchanged": false,
+      "changed_paths": [
+        "scar/ir/program/protocol_connection_flow.py"
+      ]
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt006",
+      "returncode": 0,
+      "duration_seconds": 2.597820638678968,
+      "source_sha256_before": "105514b7eac3a4a67a9e09cdf39a32971865182cfb4c7116a0c0448749c7c8b9",
+      "source_sha256_after": "105514b7eac3a4a67a9e09cdf39a32971865182cfb4c7116a0c0448749c7c8b9",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt007",
+      "returncode": 1,
+      "duration_seconds": 2.898614037781954,
+      "source_sha256_before": "93a780c73599d9b773dc5ed08ddc7fc3fa635bc755d6620246da8770b2714ba7",
+      "source_sha256_after": "93a780c73599d9b773dc5ed08ddc7fc3fa635bc755d6620246da8770b2714ba7",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt008",
+      "returncode": 1,
+      "duration_seconds": 3.0278999265283346,
+      "source_sha256_before": "faa1f0de8e8d04474c9749a972fc02fe1233321ebb0701d4df84e488b0b7c6ab",
+      "source_sha256_after": "faa1f0de8e8d04474c9749a972fc02fe1233321ebb0701d4df84e488b0b7c6ab",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/attempt009",
+      "returncode": 0,
+      "duration_seconds": 2.902382501401007,
+      "source_sha256_before": "3af821cb7b9486a8f7b0befc89ed56747b3ef7dcb54abf91e79a7f9be5982459",
+      "source_sha256_after": "3af821cb7b9486a8f7b0befc89ed56747b3ef7dcb54abf91e79a7f9be5982459",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/cleanup-attempt001",
+      "returncode": 1,
+      "duration_seconds": 1.4755575191229582,
+      "source_sha256_before": "cba61559bcdd827abcc0830e7e41cb232721676895c83d61f4c2041e4474021b",
+      "source_sha256_after": "cba61559bcdd827abcc0830e7e41cb232721676895c83d61f4c2041e4474021b",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/cleanup-attempt002",
+      "returncode": 1,
+      "duration_seconds": 1.4920661859214306,
+      "source_sha256_before": "fce6de94e30d1024b707f785985b18606cbfb6d7f68e33f7525e21787e6f1e8a",
+      "source_sha256_after": "fce6de94e30d1024b707f785985b18606cbfb6d7f68e33f7525e21787e6f1e8a",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/cleanup-attempt003",
+      "returncode": 0,
+      "duration_seconds": 1.5927203260362148,
+      "source_sha256_before": "ca49b2ef392113abf43c37785ac4a275c70dd87ba4f4a894741f599b211780e4",
+      "source_sha256_after": "ca49b2ef392113abf43c37785ac4a275c70dd87ba4f4a894741f599b211780e4",
+      "source_unchanged": true,
+      "changed_paths": []
+    },
+    {
+      "path": "artifacts/experiments/b1_call_operands/model_remaining_protocols/continuations/paired-attempt001",
+      "returncode": 0,
+      "duration_seconds": 1.5550654781982303,
+      "source_sha256_before": "4f5b009d03440cfa0507c77651a3b46295372d9a88da036c9e5c4e8293a62fb2",
+      "source_sha256_after": "4f5b009d03440cfa0507c77651a3b46295372d9a88da036c9e5c4e8293a62fb2",
+      "source_unchanged": true,
+      "changed_paths": []
+    }
+  ],
+  "scope_conditions": [
+    "Original core SSA/Use/CFG remain authoritative.",
+    "Native/source applicability and dynamic identity are not proved by metadata.",
+    "Shared derivation budgets do not bound snapshot/parser/FK/preparation or all CPU time.",
+    "Atomic delegate helpers do not establish expanded bound-method lookup internals.",
+    "No component/full/native probe ran in this owned batch."
+  ]
+}

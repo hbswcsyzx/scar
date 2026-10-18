@@ -120,3 +120,8 @@ request/session与cancel目标/交付的字段已收束；原草案和被拒方�
 [共享helper查询](M1_PROTOCOL_HELPER_INPUTS.md)先真实1失败，再修复no-RAW参数
 跨call来源，必要定向22及最终112通过，670源稳定；没有整个P4组件或全仓结果。
 新Program19及16组产品闭环仍待实施，P4/P5和完整M0–M2未完成。
+
+后续 [P4-2实施记录](M1_PROTOCOL_CONNECTION_IMPLEMENTATION.md)已落 Program19 记录、
+共享连接/消费者库存及家族 resolver，中间版本最终受影响定向694项通过、684源稳定。
+完整16组仍逐项OPEN，尚未进行完整P4组件/全仓验收；不得把上述设计检查点或本轮
+定向计数改写成P4完成。下一轮按两份覆盖台账的结构/状态/发生关联缺口继续。

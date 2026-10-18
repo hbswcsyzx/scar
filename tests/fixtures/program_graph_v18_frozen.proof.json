@@ -1,0 +1,23 @@
+{
+  "archive_sha256": "6e136bc23f73796b051d429489a0a707276e10913462c7d3cbc25abfcac13bc4",
+  "capability": "single-completion INVOKE; ProgramGraph format has no ExecutionModel.call_activations table",
+  "command": "cd /tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_remaining_protocols/records-codec/oracle-v18/source; source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm; PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python /tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_remaining_protocols/records-codec/oracle-v18/old_v18_encoder.py",
+  "details_included": [
+    "alternate",
+    "before",
+    "callee",
+    "input",
+    "invoke",
+    "landings",
+    "terminals",
+    "world"
+  ],
+  "encoder_source_sha256": "355d5863e59a0714c14ad3e4bffb1e6423a6900b924cb94df8e7654310bc7a94",
+  "fixture_builder_source_sha256": "41aba0cbde2c4d761b18b991cbccecc1f292836a88a1d79792c0896899b60dc5",
+  "fixture_bytes": 13215,
+  "fixture_sha256": "a1300ed97379e76455cd09e996ff2e5ca158bdca8f5e97149135a1a987c266d2",
+  "python": "3.14.7",
+  "schema_version": 18,
+  "source_revision": "add4ba84c9529e1f864e4029bd7c145cfacdfafc",
+  "support_file": "tests/__init__.py was empty temporary namespace-import scaffolding, absent from the git archive"
+}

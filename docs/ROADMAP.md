@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **P4-2 implementation in progress (2026-10-18):**
+> [Program19 connections](M1_PROTOCOL_CONNECTION_IMPLEMENTATION.md) now have
+> typed records, a shared original-port/guard/context resolver, independently
+> derived consumer inventories and family resolvers.694 affected focused cases
+> pass at one stable684-source fingerprint; this is an intermediate checkpoint.
+> All16 original obligation groups, independent review, unified component and
+> one clean frozen full remain required. P5/M2 and fullM0–M2 remain OPEN.
+> No new detector/backend, automatic LeWM model or speedup is claimed.
+
 > **P4 design/shared-query checkpoint (2026-10-18):**
 > [Connection contract v1](M1_PROTOCOL_CONNECTION_CONTRACT.md) is design-frozen
 > after three independent reviews. [No-RAW helper source queries](M1_PROTOCOL_HELPER_INPUTS.md)

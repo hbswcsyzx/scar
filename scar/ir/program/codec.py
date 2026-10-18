@@ -23,10 +23,13 @@ from scar.ir.program.model import InvokeLiteralResult
 from scar.ir.program.protocols import (
     ADMISSION_RECORD_TAGS, AdmissionPredicate, PROTOCOL_RECORD_TAGS,
 )
+from scar.ir.program.protocol_connections import (
+    PROTOCOL_CONNECTION_RECORD_TAGS, has_protocol_connection_capability,
+)
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 18
+SCHEMA_VERSION = 19
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -49,7 +52,11 @@ _SESSION_RELEASE_FIELDS = frozenset({"session_updates", "terminal_frame_releases
 _STATE_ADDRESS_FIELDS = frozenset({"state_address_refinements"})
 _LITERAL_FIELDS = frozenset({"literal_evaluations"})
 _PROTOCOL_FIELDS = frozenset({"protocol_scopes", "protocol_operations"})
-_V16_GRAPH_FIELDS = _GRAPH_FIELDS - _PROTOCOL_FIELDS
+_CONNECTION_FIELDS = frozenset({"protocol_call_inputs", "protocol_result_consumers",
+                                "protocol_bindings"})
+_V18_GRAPH_FIELDS = _GRAPH_FIELDS - _CONNECTION_FIELDS
+_V17_GRAPH_FIELDS = _V18_GRAPH_FIELDS
+_V16_GRAPH_FIELDS = _V17_GRAPH_FIELDS - _PROTOCOL_FIELDS
 _V15_GRAPH_FIELDS = _V16_GRAPH_FIELDS - _LITERAL_FIELDS
 _V14_GRAPH_FIELDS = _V15_GRAPH_FIELDS - _STATE_ADDRESS_FIELDS
 _V13_GRAPH_FIELDS = _V14_GRAPH_FIELDS - _SESSION_RELEASE_FIELDS
@@ -79,8 +86,9 @@ _V13_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V13_GRAPH_FIEL
 _V14_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V14_GRAPH_FIELDS
 _V15_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V15_GRAPH_FIELDS
 _V16_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V16_GRAPH_FIELDS
-_V17_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
-_V18_ENVELOPE_FIELDS = _V17_ENVELOPE_FIELDS
+_V17_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V17_GRAPH_FIELDS
+_V18_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V18_GRAPH_FIELDS
+_V19_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
 _V17_PROTOCOL_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_RECORD_TAGS.items()
                              if record not in ADMISSION_RECORD_TAGS}
 _LITERAL_RECORD_TAGS = {**LITERAL_SOURCE_RECORD_TAGS,
@@ -200,6 +208,9 @@ def _has_protocol_capability(graph: ProgramGraph) -> bool:
     return any(getattr(graph, name) for name in _PROTOCOL_FIELDS)
 
 
+_has_protocol_connection_capability = has_protocol_connection_capability
+
+
 def _has_admission_capability(graph: ProgramGraph) -> bool:
     return any(type(row.contract) is AdmissionPredicate for row in graph.protocol_operations)
 
@@ -228,6 +239,7 @@ def dumps(graph: ProgramGraph) -> str:
     has_addresses = bool(graph.state_address_refinements)
     has_literals = _has_literal_capability(graph)
     has_protocols = _has_protocol_capability(graph)
+    has_protocol_connections = _has_protocol_connection_capability(graph)
     has_admission = _has_admission_capability(graph)
     has_invoke_subset = _has_invoke_subset_capability(graph)
     tags = (_V11_RECORD_TAGS if has_driver else
@@ -236,13 +248,19 @@ def dumps(graph: ProgramGraph) -> str:
         tags = {**tags, **STATE_ADDRESS_RECORD_TAGS}
     if has_literals or has_protocols:
         tags = {**tags, **_LITERAL_RECORD_TAGS}
-    if has_protocols:
+    if has_protocols or has_protocol_connections:
         tags = {**tags, **(PROTOCOL_RECORD_TAGS if has_admission else _V17_PROTOCOL_RECORD_TAGS)}
+    if has_protocol_connections:
+        tags = {**tags, **PROTOCOL_CONNECTION_RECORD_TAGS}
     encoded = encode(graph, record_tags=tags)
-    if has_admission or has_invoke_subset:
-        document = {"schema": SCHEMA, "schema_version": 18, **encoded}
+    if has_protocol_connections:
+        document = {"schema": SCHEMA, "schema_version": 19, **encoded}
+    elif has_admission or has_invoke_subset:
+        document = {"schema": SCHEMA, "schema_version": 18,
+                    **{name: encoded[name] for name in _V18_GRAPH_FIELDS}}
     elif has_protocols:
-        document = {"schema": SCHEMA, "schema_version": 17, **encoded}
+        document = {"schema": SCHEMA, "schema_version": 17,
+                    **{name: encoded[name] for name in _V17_GRAPH_FIELDS}}
     elif has_literals:
         document = {"schema": SCHEMA, "schema_version": 16,
                     **{name: encoded[name] for name in _V16_GRAPH_FIELDS}}
@@ -289,7 +307,8 @@ def dumps(graph: ProgramGraph) -> str:
         document = {"schema": SCHEMA, "schema_version": 2,
                     **{name: encoded[name] for name in _V1_V2_GRAPH_FIELDS}}
     return json.dumps(document, sort_keys=True, separators=(",", ":"),
-                      ensure_ascii=(has_literals or has_protocols), allow_nan=False)
+                      ensure_ascii=(has_literals or has_protocols or has_protocol_connections),
+                      allow_nan=False)
 
 
 def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
@@ -330,7 +349,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact v18 capability or strictly preserve historical v1–v17."""
+    """Decode exact v19 capability or strictly preserve historical v1–v18."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -341,7 +360,7 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
@@ -351,7 +370,8 @@ def loads(payload: str) -> ProgramGraph:
                        11: _V11_ENVELOPE_FIELDS, 12: _V12_ENVELOPE_FIELDS,
                        13: _V13_ENVELOPE_FIELDS, 14: _V14_ENVELOPE_FIELDS,
                        15: _V15_ENVELOPE_FIELDS, 16: _V16_ENVELOPE_FIELDS,
-                       17: _V17_ENVELOPE_FIELDS, 18: _V18_ENVELOPE_FIELDS}[version]
+                       17: _V17_ENVELOPE_FIELDS, 18: _V18_ENVELOPE_FIELDS,
+                       19: _V19_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
@@ -361,7 +381,8 @@ def loads(payload: str) -> ProgramGraph:
                     10: _V10_GRAPH_FIELDS, 11: _V11_GRAPH_FIELDS,
                     12: _V12_GRAPH_FIELDS, 13: _V13_GRAPH_FIELDS,
                     14: _V14_GRAPH_FIELDS, 15: _V15_GRAPH_FIELDS, 16: _V16_GRAPH_FIELDS,
-                    17: _GRAPH_FIELDS, 18: _GRAPH_FIELDS}[version]
+                    17: _V17_GRAPH_FIELDS, 18: _V18_GRAPH_FIELDS,
+                    19: _GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
     if version == 1:
         record = _upgrade_v1_record(record)
@@ -398,6 +419,8 @@ def loads(payload: str) -> ProgramGraph:
         record.update({name: [] for name in _SESSION_RELEASE_FIELDS})
     if version < 17:
         record.update({name: [] for name in _PROTOCOL_FIELDS})
+    if version < 19:
+        record.update({name: [] for name in _CONNECTION_FIELDS})
     if version < 16:
         record.update({name: [] for name in _LITERAL_FIELDS})
     if version < 15:
@@ -463,6 +486,8 @@ def loads(payload: str) -> ProgramGraph:
         tags = {**tags, **_LITERAL_RECORD_TAGS}
     if version >= 17:
         tags = {**tags, **(PROTOCOL_RECORD_TAGS if version >= 18 else _V17_PROTOCOL_RECORD_TAGS)}
+    if version >= 19:
+        tags = {**tags, **PROTOCOL_CONNECTION_RECORD_TAGS}
     graph = decode(ProgramGraph, record, record_tags=tags)
     if version < 18 and _has_admission_capability(graph):
         raise ValueError("historical schema cannot contain admission predicate capability")
@@ -470,6 +495,10 @@ def loads(payload: str) -> ProgramGraph:
         raise ValueError("historical schema cannot contain single-completion INVOKE capability")
     if version == 18 and not (_has_admission_capability(graph) or _has_invoke_subset_capability(graph)):
         raise ValueError("schema version 18 requires explicit admission predicate capability or single-completion INVOKE")
+    if version < 19 and _has_protocol_connection_capability(graph):
+        raise ValueError("historical schema cannot contain protocol connection capability")
+    if version == 19 and not _has_protocol_connection_capability(graph):
+        raise ValueError("schema version 19 requires explicit protocol connection capability")
     if version < 17 and _has_protocol_capability(graph):
         raise ValueError("historical schema cannot contain protocol capability")
     if version == 17 and not _has_protocol_capability(graph):

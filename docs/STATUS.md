@@ -1,5 +1,20 @@
 # Current evidence and remaining work
 
+## P4-2 scoped implementation checkpoint (2026-10-18)
+
+[Implementation notes](M1_PROTOCOL_CONNECTION_IMPLEMENTATION.md) connect new
+Program19 records to original ports, guarded input tuples, independent consumer
+inventories and prepared-index queries. Async/session/cancel and continuation
+resolvers pass **694 affected focused cases** at one stable **684-source**
+fingerprint. Independent review exposed and fixed alias export, ambiguous merge
+visits and unresolved context false positives; original failures remain.
+Conditional consumers
+must survive must-copy failure; missing attachments keep their denominators.
+The original16-group P4 gate remains OPEN. This is not whole-program automatic
+recovery, a new backend, completeM0–M2, or a verified LeWM speedup. No complete
+regression on this implementation has run; the historical full below stays
+attributed to its original frozen revision.
+
 ## P4 connection design frozen; shared source query implemented (2026-10-18)
 
 [Contract v1](M1_PROTOCOL_CONNECTION_CONTRACT.md) passes three independent

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.880" timestamp="2026-10-18T21:00:25.355393+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_protocol_connection_records" name="test_package_port_aliases_match_closed_model_unions_in_fresh_process" time="0.435"><failure message="AssertionError: Traceback (most recent call last):&#10;    File &quot;&lt;string&gt;&quot;, line 8, in &lt;module&gt;&#10;      assert program.AssociationPort is connections.AssociationPort&#10;             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^&#10;  AssertionError&#10;  &#10;assert 1 == 0&#10; +  where 1 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-c', '\nfrom typing import Any, get_args\nimport ...t is connections.AssociationPort\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n').returncode">def test_package_port_aliases_match_closed_model_unions_in_fresh_process():
+        script = textwrap.dedent("""
+            from typing import Any, get_args
+            import scar.ir.program as program
+            from scar.ir.program import protocol_connections as connections
+            from scar.ir.program.model import BlockArgument, InvokeLiteralResult, OperationResult
+            from scar.ir.program.protocols import ProtocolSourcePort
+    
+            assert program.AssociationPort is connections.AssociationPort
+            assert program.ExactResultPort is connections.ExactResultPort
+            assert program.ExpectedSourcePort is connections.ExpectedSourcePort
+            assert Any not in get_args(program.ExpectedSourcePort)
+            assert get_args(program.ExpectedSourcePort) == (ProtocolSourcePort, BlockArgument)
+            assert get_args(program.AssociationPort) == (
+                OperationResult, InvokeLiteralResult,
+                connections.OwnedUse, connections.StaticProtocolGap,
+            )
+            assert get_args(program.ExactResultPort) == (OperationResult, InvokeLiteralResult)
+        """)
+        root = Path(__file__).resolve().parents[2]
+        environment = dict(os.environ)
+        environment["PYTHONDONTWRITEBYTECODE"] = "1"
+        environment["PYTHONPATH"] = str(root)
+        result = subprocess.run([sys.executable, "-c", script], cwd=root,
+                                env=environment, capture_output=True, text=True)
+&gt;       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: Traceback (most recent call last):
+E           File "&lt;string&gt;", line 8, in &lt;module&gt;
+E             assert program.AssociationPort is connections.AssociationPort
+E                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E         AssertionError
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/home/zyf/miniconda3/envs/lewm/bin/python', '-c', '\nfrom typing import Any, get_args\nimport ...t is connections.AssociationPort\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n').returncode
+
+tests/unit/test_program_protocol_connection_records.py:183: AssertionError</failure></testcase></testsuite></testsuites>

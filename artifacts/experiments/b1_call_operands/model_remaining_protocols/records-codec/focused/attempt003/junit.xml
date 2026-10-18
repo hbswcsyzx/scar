@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="10" time="1.139" timestamp="2026-10-18T20:37:31.466126+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_protocol_records" name="test_exact_record_variants_keep_canonical_port_roles" time="0.001" /><testcase classname="tests.unit.test_program_protocol_records" name="test_new_contract_and_admission_subjects_are_exact_closed_unions" time="0.001" /><testcase classname="tests.unit.test_program_protocol_records" name="test_constructors_revalidate_exact_nested_values_and_indices" time="0.001"><failure message="TypeError: protocol operation reference slot must be exact int">def test_constructors_revalidate_exact_nested_values_and_indices():
+        with pytest.raises(TypeError):
+            ProtocolOperationRef(SCOPE, ProtocolClause.AWAIT_LOOKUP, OP, True)
+        with pytest.raises(TypeError):
+            ProtocolCallInputCase(None, RESULT, [], None)
+        with pytest.raises(ValueError):
+            ProtocolCallInputs(ProtocolOperationRef(SCOPE, ProtocolClause.AWAIT_LOOKUP, OP, 0), ())
+        edge = ControlEdgeReference(OP, 0)
+        object.__setattr__(edge, "successor_index", True)
+        with pytest.raises((TypeError, ValueError)):
+            ProtocolCallInputCase(edge, RESULT, (), None)
+    
+        # frozen objects can still arrive from unsafe decoders or object.__setattr__;
+        # the owner graph must rerun nested exact checks instead of trusting them.
+        site = ProtocolOperationRef(SCOPE, ProtocolClause.AWAIT_LOOKUP, OP, 0)
+        object.__setattr__(site, "slot", True)
+&gt;       malformed = ProtocolCallInputs(site, (ProtocolCallInputCase(None, RESULT, (), None),))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_protocol_records.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+&lt;string&gt;:5: in __init__
+    ???
+scar/ir/program/protocol_connections.py:159: in __post_init__
+    _record(self.site, ProtocolOperationRef, "protocol call input site")
+scar/ir/program/protocol_connections.py:47: in _record
+    value.__post_init__()
+scar/ir/program/protocol_connections.py:88: in __post_init__
+    _index(self.slot, "protocol operation reference slot")
+scar/ir/program/protocol_connections.py:40: in _index
+    _exact(value, int, name)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = True, expected = &lt;class 'int'&gt;
+name = 'protocol operation reference slot'
+
+    def _exact(value: object, expected: type, name: str) -&gt; None:
+        if type(value) is not expected:
+&gt;           raise TypeError(f"{name} must be exact {expected.__name__}")
+E           TypeError: protocol operation reference slot must be exact int
+
+scar/ir/program/protocol_connections.py:29: TypeError</failure></testcase><testcase classname="tests.unit.test_program_protocol_records" name="test_program_graph_uses_unique_natural_keys_and_exact_tuples" time="0.001" /><testcase classname="tests.unit.test_program_protocol_connections_codec" name="test_nested_connection_records_roundtrip_with_closed_local_tags" time="0.007" /><testcase classname="tests.unit.test_program_protocol_connections_codec" name="test_request_association_and_task_status_wire_variants_keep_original_ports" time="0.007" /><testcase classname="tests.unit.test_program_protocol_connections_codec" name="test_program19_roundtrips_full_continuation_and_async_connections" time="0.482" /><testcase classname="tests.unit.test_program_protocol_connections_codec" name="test_program19_requires_a_real_connection_capability_and_does_not_downgrade" time="0.038" /><testcase classname="tests.unit.test_program_protocol_connections_codec" name="test_historical_v18_oracle_retains_exact_fields_tags_and_bytes" time="0.009" /><testcase classname="tests.unit.test_program_protocol_connections_codec" name="test_old_protocol_only_scope_still_selects_its_historical_profile" time="0.036" /></testsuite></testsuites>

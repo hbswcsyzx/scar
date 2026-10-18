@@ -272,14 +272,33 @@ class ProgramIndex:
         # Reuse the validator's canonical CFG/dominators and derived cleanup
         # result rather than running a second dataflow algorithm for queries.
         from .validation import validate
-        cleanup, resumption, lifecycle = [], [], []
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
         issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
-                          _lifecycle_facts=lifecycle)
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
         if issues:
             raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
-        self._cleanup_facts = cleanup[0]
-        self._resumption_facts = resumption[0]
-        self._lifecycle_facts = lifecycle[0]
+        if prepared:
+            self.__dict__.update(prepared[0].__dict__)
+            return
+        self._prepare(graph, cleanup[0], resumption[0], lifecycle[0])
+
+    @classmethod
+    def _from_validated_core(cls, graph, cleanup, resumption, lifecycle):
+        """Private validation-stage index over an already checked core.
+
+        Only validation calls this, after canonical CFG/SSA, resumptions,
+        lifecycles and provider/native checks. It avoids calling validation
+        recursively when a connection obligation needs original call routes.
+        This is preparation, not an alternative public graph validator.
+        """
+        index = cls.__new__(cls)
+        index._prepare(graph, cleanup, resumption, lifecycle)
+        return index
+
+    def _prepare(self, graph, cleanup, resumption, lifecycle):
+        self._cleanup_facts = cleanup
+        self._resumption_facts = resumption
+        self._lifecycle_facts = lifecycle
         self._bodies = {row.region: row for row in graph.resumable_bodies}
         self._frame_context_actions = {row.operation: row for rows in (
             graph.frame_context_initials, graph.frame_context_attaches,

@@ -6,7 +6,7 @@ and ``program.queries``. Typed records remain independently importable.
 from scar.ir.program.ids import (
     BlockID, EnvironmentInterfaceID, LocationID, OperationID, RegionID, ResourceDefinitionID,
     ResourceRequirementID, UseID, ValueID, ControlScopeID, ControlPortID,
-    ProviderID,
+    ProviderID, ProtocolScopeID,
     NativeBoundaryID, BoundaryRelationID,
 )
 from scar.ir.program.native import (
@@ -37,6 +37,17 @@ from scar.ir.program.drivers import (
 from scar.ir.program.lifecycle import (
     BodyOutcomeCommit, CreatedCloseTest, DriveOutcomeRef, DriverLifecycle, NoBodyFinish,
     LifecyclePostBinding, SessionPost, SessionUpdate, TerminalFrameRelease,
+)
+from scar.ir.program.protocol_connections import (
+    AsyncSessionOutcome, CallTrigger, CancelDelivery,
+    CancelDeliveryRef, CancelHandling,
+    InitialAdvance, InjectedPacketTrigger, PROTOCOL_BINDING_TYPES,
+    PROTOCOL_CONNECTION_RECORD_TAGS, ProtocolBinding, ProtocolCallInputCase,
+    ProtocolCallInputs, ProtocolOperationRef, ProtocolResultConsumers,
+    RawOperandSource, RawRequestTrigger, RequestAssociation,
+    RequestStateCondition, RequestStateRule, ResumeSourceBinding,
+    TaskCreatedTarget, TaskStatusRead, TaskStatusRule, TaskTargetRead,
+    TaskTargetRole, TaskTargetSource,
 )
 from scar.ir.program.bindings import BindingDefinition, BindingRead, BindingState
 from scar.ir.program.environments import (
@@ -72,6 +83,9 @@ from scar.ir.program.model import (
     StateVersionValue, Successor, Terminator, TerminatorKind, Use, UseRole,
     Value, ValueKind, ValueType, value_type,
 )
+# These public aliases depend on canonical model-owned port classes. Import
+# them only after model.py has bound those exact classes into protocol_connections.
+from scar.ir.program.protocol_connections import AssociationPort, ExactResultPort, ExpectedSourcePort
 from scar.ir.program.codec import SCHEMA, SCHEMA_VERSION, dumps, loads
 from scar.ir.program.binding_validation import derive_binding_facts
 
@@ -127,6 +141,15 @@ __all__ = [
     "RawRequestKind", "RequestAssociationRead", "ResumableCreate",
     "BodyOutcomeCommit", "CreatedCloseTest", "DriveOutcomeRef", "DriverLifecycle",
     "NoBodyFinish",
+    "AssociationPort", "AsyncSessionOutcome", "CallTrigger", "CancelDelivery",
+    "CancelDeliveryRef", "CancelHandling", "ExactResultPort", "ExpectedSourcePort",
+    "InitialAdvance", "InjectedPacketTrigger", "PROTOCOL_BINDING_TYPES",
+    "PROTOCOL_CONNECTION_RECORD_TAGS", "ProtocolBinding", "ProtocolCallInputCase",
+    "ProtocolCallInputs", "ProtocolOperationRef", "ProtocolResultConsumers",
+    "RawOperandSource", "RawRequestTrigger", "RequestAssociation",
+    "RequestStateCondition", "RequestStateRule", "ResumeSourceBinding",
+    "TaskCreatedTarget", "TaskStatusRead", "TaskStatusRule", "TaskTargetRead",
+    "TaskTargetRole", "TaskTargetSource", "ProtocolScopeID",
     "LifecyclePostBinding", "SessionPost", "SessionUpdate", "TerminalFrameRelease",
     "AddressCoverage", "AddressEffect", "AddressOwner", "AddressSelector", "AddressUnit",
     "CellContent", "DomainOwner", "DynamicField", "Element", "ExistingAccess",

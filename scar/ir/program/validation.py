@@ -32,7 +32,7 @@ class ValidationIssue:
 
 
 def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None,
-             _lifecycle_facts=None) -> tuple[ValidationIssue, ...]:
+             _lifecycle_facts=None, _prepared_index=None) -> tuple[ValidationIssue, ...]:
     """Check exact uses, CFG availability, interfaces and explicit state SSA.
 
     The private output collector lets ProgramIndex reuse derived cleanup facts
@@ -716,6 +716,20 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
         from .native_validation import native_errors
         for code, path, message in native_errors(graph):
             error(code, path, message)
+    prepared = None
+    if not issues:
+        from .protocol_connections import has_protocol_connection_capability
+        if has_protocol_connection_capability(graph):
+            from .queries import ProgramIndex
+            from .protocol_connection_flow import ConnectionContext
+            from .protocol_connection_validation import connection_reports
+            prepared = ProgramIndex._from_validated_core(
+                graph, cleanup_facts, resumption_facts, lifecycle_facts)
+            ctx = ConnectionContext(graph, index=prepared)
+            for code, path, message in connection_reports(ctx)["issues"]:
+                error(code, path, message)
+    if not issues and _prepared_index is not None and prepared is not None:
+        _prepared_index.append(prepared)
     if not issues and _cleanup_facts is not None:
         _cleanup_facts.append(cleanup_facts)
     if not issues and _resumption_facts is not None:

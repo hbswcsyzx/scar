@@ -17,6 +17,7 @@ from scar.ir.program.protocols import (
     RequestProcessingRule,
 )
 from scar.ir.program.resumption import ResumableKind
+from .protocol_connections import RequestAssociation, RequestStateCondition, ResumeSourceBinding
 
 
 PROFILE_CLAUSES = MappingProxyType({
@@ -133,7 +134,7 @@ _allow(_ASYNC_PROFILE, (ProtocolClause.ASYNC_REQUEST_SOURCE,), RequestProcessing
        {RequestProcessingRule.CHECK_ASYNC_REQUEST})
 _allow(_ASYNC_PROFILE, (ProtocolClause.ASYNC_REQUEST_DELIVERY,), RequestProcessing,
        {RequestProcessingRule.CHECK_ASYNC_REQUEST, RequestProcessingRule.CHECK_INITIAL_ASEND,
-        RequestProcessingRule.NORMALIZE_ASYNC_THROW})
+        RequestProcessingRule.NORMALIZE_ASYNC_THROW, RequestProcessingRule.NORMALIZE_GENERATOR_EXIT})
 _allow(_CREATED_THROW, (ProtocolClause.RAW_ADMISSION,), RequestProcessing,
        {RequestProcessingRule.CHECK_THROW})
 _allow(_CREATED_THROW, (ProtocolClause.THROW_NORMALIZATION,), RequestProcessing,
@@ -231,6 +232,13 @@ _allow(_CREATED_THROW,
        (ProtocolClause.PREENTRY_REJECT, ProtocolClause.INITIAL_THROW_DELIVERED,
         ProtocolClause.INITIAL_THROW_CONSTRUCTOR_FAILURE), NoEntryOutcome)
 _allow(ProtocolProfile.GENERATOR_BODY_V1, (ProtocolClause.RAW_ADMISSION,), AdmissionPredicate)
+for profile in _BODY_PROFILES[1:]:
+    _allow(profile, (ProtocolClause.RAW_ADMISSION,), AdmissionPredicate)
+for profile in (*_BODY_PROFILES, _ASYNC_PROFILE, _SUSPENDED_CLOSE):
+    _allow(profile, (ProtocolClause.BODY_INGRESS,), ResumeSourceBinding)
+_allow(_ASYNC_PROFILE, (ProtocolClause.ASYNC_REQUEST_ASSOCIATE,), RequestAssociation)
+_allow(_ASYNC_PROFILE, (ProtocolClause.ASYNC_REQUEST_SOURCE,
+                       ProtocolClause.ASYNC_REQUEST_DELIVERY), AdmissionPredicate)
 
 ALLOWED_RULES = MappingProxyType(_allowed)
 del _allow
@@ -259,7 +267,10 @@ def contract_allowed(profile: ProtocolProfile, clause: ProtocolClause, contract:
     rules = ALLOWED_RULES.get(_key(profile, clause, contract_type))
     if rules is None:
         return False
-    if contract_type in (NoEntryOutcome, AdmissionPredicate):
+    if contract_type is AdmissionPredicate:
+        return ((type(contract.subject) is RequestStateCondition) ==
+                (profile is _ASYNC_PROFILE))
+    if contract_type in (NoEntryOutcome, ResumeSourceBinding, RequestAssociation):
         return True
     return getattr(contract, "rule", None) in rules
 

@@ -16,7 +16,7 @@ from tests.fixtures.program_state_addresses import state_address_program
 def test_either_capability_selects_v16(exact, attachments):
     graph, _ = literal_program(exact=exact, attachments=attachments)
     wire = dumps(graph)
-    assert SCHEMA_VERSION == 18
+    assert SCHEMA_VERSION == 19
     assert json.loads(wire)["schema_version"] == 16
     assert loads(wire) == graph
     assert dumps(loads(wire)) == wire

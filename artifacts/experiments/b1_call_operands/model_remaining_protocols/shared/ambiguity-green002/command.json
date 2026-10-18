@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_program_connection_flow.py::test_cross_region_availability_does_not_pick_the_last_of_two_conflicting_helper_merge_visits",
+    "tests/unit/test_program_connection_flow.py::test_source_queries_keep_conflicting_helper_incoming_visits_unresolved",
+    "tests/unit/test_program_connection_flow.py::test_a_static_recursive_recipe_cannot_be_relabelled_as_a_complete_call_context",
+    "--junitxml=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_remaining_protocols/shared/ambiguity-green002/junit.xml"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": "Focused test attempt during shared development; not a component or full acceptance"
+}

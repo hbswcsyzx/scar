@@ -18,8 +18,13 @@ def _row_view(ctx, row, index=None):
     contract, gaps, ports = row.contract, [], []
     predicate = None
     if type(contract) is AdmissionPredicate:
-        from .admission import admission_view
-        predicate = admission_view(ctx, row)
+        from .protocol_connections import RequestStateCondition
+        if type(contract.subject) is RequestStateCondition:
+            from .protocol_async import request_state_view
+            predicate = request_state_view(ctx, row)
+        else:
+            from .admission import admission_view
+            predicate = admission_view(ctx, row)
         if type(contract.subject) is ReferenceIsNoneCondition:
             from .control import ProtocolValueKind
             from .request_inputs import request_input_binding
@@ -122,7 +127,11 @@ def protocol_obligations(graph, scope=None, *, budget=4096, _index=None):
     shared = ValidityBudget(budget)
     if scope is not None and type(scope) is not ProtocolScopeID:
         raise TypeError('protocol scope query requires exact ProtocolScopeID or None')
-    ctx = ProtocolFlow(graph, budget=shared)
+    from .queries import ProgramIndex
+    from .protocol_connection_flow import ConnectionContext
+    from .protocol_connection_validation import connection_reports
+    index = ProgramIndex(graph) if _index is None else _index
+    ctx = ConnectionContext(graph, index=index, budget=shared)
     if scope is not None and scope not in ctx.scopes:
         raise KeyError(scope)
     selected = tuple(row for row in graph.protocol_scopes if scope is None or row.id == scope)
@@ -139,7 +148,7 @@ def protocol_obligations(graph, scope=None, *, budget=4096, _index=None):
                 for row in rows:
                     if not shared.spend('protocol_rows', path='protocol.rows'):
                         break
-                    details.append(_row_view(ctx, row, _index))
+                    details.append(_row_view(ctx, row, index))
                 original = _derived(ctx, declaration, clause) if not shared.truncated else ()
                 for item in original:
                     gaps.extend(item.get('gaps', ()))
@@ -185,12 +194,14 @@ def protocol_obligations(graph, scope=None, *, budget=4096, _index=None):
                       'conditions': ('source/native applicability unproved',
                                      'source site inventory unproved'),
                       'source_inventory_complete': False})
+    connections = connection_reports(ctx)
     global_gaps.extend(shared.gaps)
     return {'scopes': tuple(views), 'gaps': tuple(global_gaps),
             'obligation_groups': _GROUPS, 'cursor': cursor,
             'budget': {'limit': shared.limit, 'used': shared.used,
                        'costs': dict(shared.costs), 'truncated': shared.truncated},
             'preparation_work': dict(ctx.preparation),
+            'connections': connections,
             'source_inventory_complete': False,
             'protocol_implementation_complete': False,
             'source_runtime_verified': False, 'transformation_authorized': False}

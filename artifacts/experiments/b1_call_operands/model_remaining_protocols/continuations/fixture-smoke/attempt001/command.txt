@@ -1,0 +1,1 @@
+source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm; PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python - [inline canonical fixture smoke]

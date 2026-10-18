@@ -438,12 +438,13 @@ class ReferenceIsNoneCondition:
 class AdmissionPredicate:
     """Original bool production and intended branch, without a phase state."""
 
-    subject: BodyStateCondition | ReferenceIsNoneCondition
+    subject: AdmissionSubject
     result: OperationResult
     branch: OperationID
 
     def __post_init__(self) -> None:
-        if type(self.subject) not in (BodyStateCondition, ReferenceIsNoneCondition):
+        if type(self.subject) not in (
+                BodyStateCondition, ReferenceIsNoneCondition, *_CONNECTION_ADMISSION_SUBJECT_TYPES):
             raise TypeError("admission predicate subject must be an exact typed condition")
         self.subject.__post_init__()
         operation_result, _ = _model_port_types()
@@ -454,7 +455,9 @@ class AdmissionPredicate:
 
     @property
     def state_sites(self) -> tuple[ExistingAccess, ...]:
-        return self.subject.state_sites if type(self.subject) is BodyStateCondition else ()
+        return (self.subject.state_sites
+                if type(self.subject) in (BodyStateCondition, *_CONNECTION_ADMISSION_SUBJECT_TYPES)
+                else ())
 
 
 @dataclass(frozen=True, slots=True)
@@ -463,7 +466,7 @@ class ProtocolOperation:
     clause: ProtocolClause
     operation: OperationID
     slot: int
-    contract: RequestProcessing | ProtocolCall | PacketConstruction | OutcomeAdapter | NoEntryOutcome | AdmissionPredicate
+    contract: ProtocolContract
     source: ProviderFactReference | StaticProtocolGap
 
     def __post_init__(self) -> None:
@@ -473,7 +476,7 @@ class ProtocolOperation:
         _index(self.slot, "protocol operation slot")
         if type(self.contract) not in (
                 RequestProcessing, ProtocolCall, PacketConstruction, OutcomeAdapter, NoEntryOutcome,
-                AdmissionPredicate):
+                AdmissionPredicate, *_CONNECTION_CONTRACT_TYPES):
             raise TypeError("protocol operation contract must be one exact protocol contract record")
         self.contract.__post_init__()
         if type(self.source) is ProviderFactReference:
@@ -552,6 +555,44 @@ def _no_entry_input(value: object, name: str) -> None:
         value.__post_init__()
     else:
         _protocol_result_port(value, name)
+
+
+# Extended by protocol_connections only after its records exist.  The aliases
+# are rebound so get_type_hints/record_codec retain the exact closed union.
+ProtocolContract: TypeAlias = Any
+AdmissionSubject: TypeAlias = Any
+_CONNECTION_CONTRACT_TYPES: tuple[type, ...] = ()
+_CONNECTION_ADMISSION_SUBJECT_TYPES: tuple[type, ...] = ()
+_CONNECTION_RECORDS_BOUND = False
+
+
+def _bind_protocol_connection_types(
+        resume_source_binding: type,
+        request_association: type,
+        request_state_condition: type) -> None:
+    global ProtocolContract, AdmissionSubject
+    global _CONNECTION_CONTRACT_TYPES, _CONNECTION_ADMISSION_SUBJECT_TYPES
+    global _CONNECTION_RECORDS_BOUND
+    from scar.ir.program.protocol_connections import (
+        RequestAssociation, RequestStateCondition, ResumeSourceBinding,
+    )
+    expected = (ResumeSourceBinding, RequestAssociation, RequestStateCondition)
+    supplied = (resume_source_binding, request_association, request_state_condition)
+    if supplied != expected or any(type(item) is not type for item in supplied):
+        raise TypeError("protocol connections must bind the canonical exact record classes")
+    if _CONNECTION_RECORDS_BOUND:
+        if (_CONNECTION_CONTRACT_TYPES != supplied[:2]
+                or _CONNECTION_ADMISSION_SUBJECT_TYPES != supplied[2:]):
+            raise RuntimeError("protocol connection records cannot be rebound")
+        return
+    _CONNECTION_CONTRACT_TYPES = supplied[:2]
+    _CONNECTION_ADMISSION_SUBJECT_TYPES = supplied[2:]
+    ProtocolContract = Union[
+        RequestProcessing, ProtocolCall, PacketConstruction, OutcomeAdapter,
+        NoEntryOutcome, AdmissionPredicate, ResumeSourceBinding, RequestAssociation,
+    ]
+    AdmissionSubject = Union[BodyStateCondition, ReferenceIsNoneCondition, RequestStateCondition]
+    _CONNECTION_RECORDS_BOUND = True
 
 
 def _terminal(value: object, name: str) -> None:

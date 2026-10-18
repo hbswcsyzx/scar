@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="36" time="1.548" timestamp="2026-10-18T20:41:24.328383+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[next-delegate]" time="0.091" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[next-await]" time="0.021" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[next-wrapper]" time="0.021" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[send-delegate]" time="0.017" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[send-await]" time="0.023" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[send-wrapper]" time="0.022" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[throw-delegate]" time="0.020" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[throw-await]" time="0.024" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[throw-wrapper]" time="0.025" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-delegate]" time="0.005"><failure message="ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits">kind = 'delegate', request_kind = 'close'
+
+    @pytest.mark.parametrize("kind", ("delegate", "await", "wrapper"))
+    @pytest.mark.parametrize("request_kind", ("next", "send", "throw", "close"))
+    def test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct(kind, request_kind):
+        graph, details = _typed(kind=kind, request=request_kind)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_continuation_connections.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...tion=OperationID(value='continuation.advance'), use=UseID(value='continuation.advance.a0')),)),), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-await]" time="0.006"><failure message="ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits">kind = 'await', request_kind = 'close'
+
+    @pytest.mark.parametrize("kind", ("delegate", "await", "wrapper"))
+    @pytest.mark.parametrize("request_kind", ("next", "send", "throw", "close"))
+    def test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct(kind, request_kind):
+        graph, details = _typed(kind=kind, request=request_kind)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_continuation_connections.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...ation=OperationID(value='continuation.advance'), use=UseID(value='continuation.advance.a0')),))), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_continuation_connections" name="test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct[close-wrapper]" time="0.005"><failure message="ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits">kind = 'wrapper', request_kind = 'close'
+
+    @pytest.mark.parametrize("kind", ("delegate", "await", "wrapper"))
+    @pytest.mark.parametrize("request_kind", ("next", "send", "throw", "close"))
+    def test_lookup_iterator_request_and_actual_item_exhaustion_failure_are_distinct(kind, request_kind):
+        graph, details = _typed(kind=kind, request=request_kind)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_continuation_connections.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...ation=OperationID(value='continuation.advance'), use=UseID(value='continuation.advance.a0')),))), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_continuation_connections" name="test_delegate_throw_keeps_each_original_raw_operand_and_order[1]" time="0.014" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_delegate_throw_keeps_each_original_raw_operand_and_order[2]" time="0.016" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_delegate_throw_keeps_each_original_raw_operand_and_order[3]" time="0.015" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_await_call_cannot_use_same_typed_root_instead_of_its_lookup_result" time="0.012" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_await_lookup_bound_method_is_not_the_iterator_returned_by_await_call" time="0.013" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_raw_throw_ordinals_cannot_be_reordered_even_when_all_references_have_the_same_type" time="0.011" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_item_exhaustion_packet_and_state_are_not_interchangeable_metadata[item_input]" time="0.007" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_item_exhaustion_packet_and_state_are_not_interchangeable_metadata[exhaustion_input]" time="0.007" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_item_exhaustion_packet_and_state_are_not_interchangeable_metadata[state_output]" time="0.011" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_initial_advance_names_the_current_evaluation_instead_of_a_bare_initial_flag" time="0.017" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_initial_advance_cannot_be_reused_after_a_real_advance_backedge" time="0.012" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_close_normal_continues_old_injection_but_raise_overrides_with_own_packet" time="0.004"><failure message="ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits">def test_close_normal_continues_old_injection_but_raise_overrides_with_own_packet():
+        graph, details = continuation_close_program()
+&gt;       require_valid(graph)
+
+tests/unit/test_program_continuation_connections.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...tion=OperationID(value='continuation.advance'), use=UseID(value='continuation.advance.a0')),)),), protocol_bindings=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:continuation: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:745: ValueError</failure></testcase><testcase classname="tests.unit.test_program_continuation_connections" name="test_close_none_normal_result_is_not_a_new_host_item_or_parent_exception" time="0.008" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_resume_binds_the_actual_non_state_slot_without_guessing_from_flavor[SENT_VALUE-AWAIT]" time="0.034" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_resume_binds_the_actual_non_state_slot_without_guessing_from_flavor[SENT_VALUE-DELEGATION]" time="0.029" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_resume_binds_the_actual_non_state_slot_without_guessing_from_flavor[THROWN_PACKET-AWAIT]" time="0.019" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_resume_binds_the_actual_non_state_slot_without_guessing_from_flavor[THROWN_PACKET-DELEGATION]" time="0.020" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_resume_binds_the_actual_non_state_slot_without_guessing_from_flavor[DELEGATE_VALUE-AWAIT]" time="0.027" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_resume_binds_the_actual_non_state_slot_without_guessing_from_flavor[DELEGATE_VALUE-DELEGATION]" time="0.028" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_resume_binds_the_actual_non_state_slot_without_guessing_from_flavor[DELEGATE_PACKET-AWAIT]" time="0.020" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_resume_binds_the_actual_non_state_slot_without_guessing_from_flavor[DELEGATE_PACKET-DELEGATION]" time="0.023" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_slot_relation_deletion_preserves_the_original_required_slot" time="0.022" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_parent_slot_cannot_borrow_another_same_typed_current_reference" time="0.023" /><testcase classname="tests.unit.test_program_continuation_connections" name="test_tiny_shared_budget_retains_unchecked_sites_and_resume_slot_denominators" time="0.010" /></testsuite></testsuites>

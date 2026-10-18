@@ -31,7 +31,8 @@ def test_sixth_variant_roundtrip_preserves_original_uses_and_branch_without_fake
     wire = codec.dumps(graph)
     document = json.loads(wire)
     contract = document["protocol_operations"][0]["contract"]
-    assert codec.SCHEMA_VERSION == document["schema_version"] == 18
+    assert codec.SCHEMA_VERSION == 19
+    assert document["schema_version"] == 18
     # Program capabilities do not pin the execution codec's maximum version.
     # The independent old execution wire must still select exactly v7.
     assert execution_codec.SCHEMA_VERSION >= 7

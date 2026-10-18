@@ -86,6 +86,37 @@ class ProtocolFlow:
             raise ValueError("protocol Use must be owned by the exact operation")
         return found[1]
 
+    def selected_edges(self, guard=None, *, region=None):
+        """Exact temporary CFG choices, not a new graph or dynamic visit ID."""
+        from .structured import ControlEdgeReference
+        edges = () if guard is None else guard if type(guard) is tuple else (guard,)
+        selected = {}
+        for edge in edges:
+            if type(edge) is not ControlEdgeReference:
+                raise TypeError("selected edges require exact ControlEdgeReference records")
+            edge.__post_init__()
+            operation = self.operations.get(edge.operation)
+            if (operation is None or operation.terminator is None or
+                    edge.successor_index >= len(operation.terminator.successors)):
+                raise ValueError("selected edge must exist in the original CFG")
+            if edge.operation in selected and selected[edge.operation] != edge:
+                raise ValueError("one static operation cannot select two different successors")
+            selected[edge.operation] = edge
+        return tuple(sorted((edge for edge in selected.values() if region is None
+                    or self.region_of[edge.operation] == region),
+                    key=lambda edge: (edge.operation.wire, edge.successor_index)))
+
+    def selection_ambiguity(self, guard=None):
+        """Different visits to one merge are not one static selection."""
+        targets = {}
+        for edge in self.selected_edges(guard):
+            block = self.operations[edge.operation].terminator.successors[edge.successor_index].block
+            if block in targets and targets[block] != edge:
+                return {"code": "selected_merge_visits_require_occurrence_context",
+                        "merge": block, "edges": (targets[block], edge)}
+            targets[block] = edge
+        return None
+
     def driver_roles(self, region):
         """Prepared must-copy roles, not object identity or a second state graph."""
         if region not in self._driver_roles:
@@ -223,20 +254,65 @@ class ProtocolFlow:
         self._region_edges[region] = result
         return result
 
-    def _fresh_copies(self, port):
-        """Finite must analysis over original CFG, reset at each evaluation.
+    def _fresh_copies(self, port, *, guard=None, mode="must"):
+        """Finite copy analysis over original CFG, reset at each evaluation.
 
         Only transient sets of original ValueIDs are derived. Parallel edge
         renaming uses the pre-edge set. Unreachable predecessors never create
-        facts; all reachable incoming alternatives must support a copy.
+        facts. The default must mode requires every reachable incoming
+        alternative; may mode unions possibilities for consumer inventory.
         """
         key = port.operation, port.phase, port.edge, port.values
+        if mode not in ("must", "may"):
+            raise ValueError("copy query mode must be must or may")
+        if mode == "may":
+            key = (*key, "may")
+        guards = self.selected_edges(guard)
+        if self.selection_ambiguity(guards) is not None:
+            return None
+        if guards:
+            key = (*key, guards)
         if key in self._flows:
             return self._flows[key]
         region = self.region_of[port.operation]
         declaration, outgoing, incoming, reached, order = self._edges(region)
+        if guards:
+            source_choices, target_choices = {}, {}
+            for selected in guards:
+                if not self.spend("guard_choices"):
+                    return None
+                operation = self.operations[selected.operation]
+                if self.region_of[operation.id] != region:
+                    raise ValueError("guard must select an original edge in the source region")
+                target = operation.terminator.successors[selected.successor_index].block
+                pair = operation.id, selected.successor_index
+                source_choices[operation.id] = selected.successor_index
+                if target in target_choices and target_choices[target] != pair:
+                    # Different incoming visits of one merge require an
+                    # occurrence context; a static conjunction cannot select it.
+                    return None
+                target_choices[target] = pair
+            outgoing = {block: [edge for edge in edges
+                if (edge[0] not in source_choices or source_choices[edge[0]] == edge[1])
+                and (edge[2] not in target_choices or target_choices[edge[2]] == (edge[0], edge[1]))]
+                for block, edges in outgoing.items()}
+            incoming = {block: [] for block in incoming}
+            for parent, edges in outgoing.items():
+                for edge in edges:
+                    incoming[edge[2]].append((parent, edge))
+            reachable, pending = set(), [declaration.entry]
+            while pending:
+                if not self.spend("guard_reachability"):
+                    return None
+                block = pending.pop()
+                if block not in reachable:
+                    reachable.add(block)
+                    pending.extend(edge[2] for edge in outgoing[block])
+            reached = frozenset(reachable)
+            order = tuple(block for block in order if block in reached)
         universe = self._universes[region]
-        edges = {(item[0], item[1]): universe for block in order for item in outgoing[block]}
+        initial = universe if mode == "must" else frozenset()
+        edges = {(item[0], item[1]): initial for block in order for item in outgoing[block]}
         before = {}
         pending, queued = deque(order), set(reached)
         while pending:
@@ -252,7 +328,8 @@ class ProtocolFlow:
                            if parent in reached]
                 if not self.spend("copy_meet", sum(map(len, parents))):
                     return None
-                current = frozenset.intersection(*parents) if parents else frozenset()
+                current = ((frozenset.intersection(*parents) if mode == "must"
+                            else frozenset.union(*parents)) if parents else frozenset())
             for identity in block.operations:
                 if not self.spend("copy_operations"):
                     return None
@@ -283,7 +360,7 @@ class ProtocolFlow:
         self._flows[key] = before
         return before
 
-    def forwards(self, source, target, *, referring=None):
+    def forwards(self, source, target, *, referring=None, guard=None):
         """True/False/None for this producer evaluation at an exact consumer Use."""
         port = self.port(source, referring=referring)
         destination = self.owned_use(target.operation, target.use)
@@ -295,7 +372,7 @@ class ProtocolFlow:
                 and (self.positions[port.operation] > self.positions[target.operation]
                      or (port.operation == target.operation and port.phase != "before"))):
             return False
-        flow = self._fresh_copies(port)
+        flow = self._fresh_copies(port, guard=guard)
         return None if flow is None else destination.value in flow.get(target.operation, ())
 
     def reaches(self, source, target):
@@ -346,6 +423,22 @@ class ProtocolFlow:
                 pending.append(edge[2])
         self._reachability[key] = False
         return False
+
+    def may_forwards(self, source, target):
+        """Possible original copy, used only for consumer inventory.
+
+        A union meet can retain infeasible correlated paths. It never proves
+        a current input or authorizes an optimization; must/guarded checks
+        remain separate and use this same original CFG transfer engine.
+        """
+        port = self.port(source)
+        destination = self.owned_use(target.operation, target.use)
+        if port is None or port.gap is not None or port.operation is None:
+            return None
+        if self.region_of[port.operation] != self.region_of[target.operation]:
+            return None
+        before = self._fresh_copies(port, mode="may")
+        return None if before is None else destination.value in before.get(target.operation, ())
 
     def terminal_uses(self, terminal):
         port = self.port(terminal)

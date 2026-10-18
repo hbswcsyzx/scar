@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="12" time="1.021" timestamp="2026-10-18T20:34:28.490546+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_connection_flow" name="test_two_incoming_tuples_remain_valid_through_a_later_jump" time="0.017"><failure message="ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership">def test_two_incoming_tuples_remain_valid_through_a_later_jump():
+        graph, _ = merged_connection_program()
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_connection_flow.py:19: in _view
+    index = ProgramIndex(graph)
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x718733923cb0&gt;
+graph = ProgramGraph(root=RegionID(value='merge.connection'), regions=(Region(id=RegionID(value='merge.connection'), label='or...='merge.observe.1.input')), HostTerminal(operation=OperationID(value='merge.normal.return')))),), protocol_bindings=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_receiver_and_argument_cannot_be_selected_from_different_incoming_routes" time="0.003"><failure message="AssertionError: assert 'protocol_input_source' in {'protocol_scope'}">def test_receiver_and_argument_cannot_be_selected_from_different_incoming_routes():
+        graph, _ = merged_connection_program(swap_argument=True)
+&gt;       assert "protocol_input_source" in {issue.code for issue in validate(graph)}
+E       AssertionError: assert 'protocol_input_source' in {'protocol_scope'}
+
+tests/unit/test_program_connection_flow.py:37: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_missing_incoming_case_keeps_an_obligation_instead_of_accepting_the_good_subset" time="0.001"><failure message="ValueError: a single protocol call input case must be unguarded">def test_missing_incoming_case_keeps_an_obligation_instead_of_accepting_the_good_subset():
+&gt;       graph, _ = merged_connection_program(omit_right=True)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_connection_graphs.py:120: in merged_connection_program
+    protocol_call_inputs=(ProtocolCallInputs(site, cases),) if attach else (),
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;string&gt;:5: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = ProtocolCallInputs(site=ProtocolOperationRef(scope=ProtocolScopeID(value='merge.scope'), clause=&lt;ProtocolClause.THROW_...), index=0), arguments=(OperationResult(operation=OperationID(value='merge.left.produce'), index=1),), trigger=None),))
+
+    def __post_init__(self) -&gt; None:
+        _record(self.site, ProtocolOperationRef, "protocol call input site")
+        _tuple(self.cases, "protocol call input cases")
+        if not self.cases:
+            raise ValueError("protocol call input cases must be nonempty")
+        for case in self.cases:
+            _record(case, ProtocolCallInputCase, "protocol call input case")
+        guards = tuple(case.guard for case in self.cases)
+        if len(self.cases) == 1:
+            if guards[0] is not None:
+&gt;               raise ValueError("a single protocol call input case must be unguarded")
+E               ValueError: a single protocol call input case must be unguarded
+
+scar/ir/program/protocol_connections.py:168: ValueError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_actual_result_uses_define_inventory_before_declared_targets_are_read" time="0.003"><failure message="ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership">def test_actual_result_uses_define_inventory_before_declared_targets_are_read():
+        graph, details = merged_connection_program(omit_consumer=True)
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_connection_flow.py:19: in _view
+    index = ProgramIndex(graph)
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x718733648ad0&gt;
+graph = ProgramGraph(root=RegionID(value='merge.connection'), regions=(Region(id=RegionID(value='merge.connection'), label='or...e(operation=OperationID(value='merge.observe.0'), use=UseID(value='merge.observe.0.input')),)),), protocol_bindings=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_removing_attachments_does_not_remove_input_or_result_use_denominators" time="0.003"><failure message="ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership">def test_removing_attachments_does_not_remove_input_or_result_use_denominators():
+        graph, details = merged_connection_program(attach=False)
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_connection_flow.py:19: in _view
+    index = ProgramIndex(graph)
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x718733922ba0&gt;
+graph = ProgramGraph(root=RegionID(value='merge.connection'), regions=(Region(id=RegionID(value='merge.connection'), label='or...VEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)),), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_opaque_consumer_is_retained_and_never_becomes_a_dead_work_proof" time="0.003"><failure message="ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership">def test_opaque_consumer_is_retained_and_never_becomes_a_dead_work_proof():
+        graph, details = merged_connection_program(opaque_consumer=True)
+&gt;       ledger, = _view(graph)["consumers"]
+                  ^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:67: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_connection_flow.py:19: in _view
+    index = ProgramIndex(graph)
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x718733923cb0&gt;
+graph = ProgramGraph(root=RegionID(value='merge.connection'), regions=(Region(id=RegionID(value='merge.connection'), label='or...='merge.observe.1.input')), HostTerminal(operation=OperationID(value='merge.normal.return')))),), protocol_bindings=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_invalid_call_input_foreign_key_is_a_structural_contradiction" time="0.003"><failure message="AssertionError: assert 'protocol_connection_site' in {'protocol_scope'}">def test_invalid_call_input_foreign_key_is_a_structural_contradiction():
+        graph, details = merged_connection_program()
+        attachment, = graph.protocol_call_inputs
+        bad_site = replace(details["site"], slot=999)
+        bad = replace(graph, protocol_call_inputs=(replace(attachment, site=bad_site),))
+&gt;       assert "protocol_connection_site" in {issue.code for issue in validate(bad)}
+E       AssertionError: assert 'protocol_connection_site' in {'protocol_scope'}
+
+tests/unit/test_program_connection_flow.py:77: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_formal_resolves_original_value_without_manufacturing_a_producer" time="0.003"><failure message="ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership">def test_formal_resolves_original_value_without_manufacturing_a_producer():
+        graph, details = merged_connection_program()
+&gt;       index = ProgramIndex(graph)
+                ^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x7187339238c0&gt;
+graph = ProgramGraph(root=RegionID(value='merge.connection'), regions=(Region(id=RegionID(value='merge.connection'), label='or...='merge.observe.1.input')), HostTerminal(operation=OperationID(value='merge.normal.return')))),), protocol_bindings=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_known_small_budget_stays_partial_and_preserves_fixed_call_inventory" time="0.003"><failure message="ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership">def test_known_small_budget_stays_partial_and_preserves_fixed_call_inventory():
+        graph, _ = merged_connection_program()
+&gt;       report = _view(graph, budget=1)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_connection_flow.py:19: in _view
+    index = ProgramIndex(graph)
+            ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x718733923770&gt;
+graph = ProgramGraph(root=RegionID(value='merge.connection'), regions=(Region(id=RegionID(value='merge.connection'), label='or...='merge.observe.1.input')), HostTerminal(operation=OperationID(value='merge.normal.return')))),), protocol_bindings=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_prepared_query_does_not_construct_a_second_program_index" time="0.003"><failure message="ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x71873363e8b0&gt;
+
+    def test_prepared_query_does_not_construct_a_second_program_index(monkeypatch):
+        graph, _ = merged_connection_program()
+&gt;       index = ProgramIndex(graph)
+                ^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_connection_flow.py:99: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;scar.ir.program.queries.ProgramIndex object at 0x718733923b60&gt;
+graph = ProgramGraph(root=RegionID(value='merge.connection'), regions=(Region(id=RegionID(value='merge.connection'), label='or...='merge.observe.1.input')), HostTerminal(operation=OperationID(value='merge.normal.return')))),), protocol_bindings=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: protocol_scope at program_value:merge.packet: protocol values need declared lexical ownership
+
+scar/ir/program/queries.py:279: ValueError</failure></testcase><testcase classname="tests.unit.test_program_connection_flow" name="test_reference_only_helper_routes_retain_both_callers_and_the_raw_anchor" time="0.038" /><testcase classname="tests.unit.test_program_connection_flow" name="test_cross_function_wrong_reference_does_not_match_equal_none_content" time="0.003" /></testsuite></testsuites>

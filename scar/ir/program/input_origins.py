@@ -136,7 +136,7 @@ def _origin_route_indexes(index):
 
 
 def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
-                             *, accounting: ValidityBudget, _copy_flow) -> dict:
+                             *, accounting: ValidityBudget, _copy_flow, _guard=None) -> dict:
     """Private shared-budget/context implementation used by paired traces."""
     from .queries import InstanceCaptureInput, ProgramIndex
 
@@ -179,7 +179,19 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                  if _copy_flow is None else _copy_flow)
     if copy_flow.graph is not graph or copy_flow.budget is not accounting:
         raise ValueError("copy flow must share this ProgramIndex graph and accounting")
+    guard_edges = copy_flow.selected_edges(_guard)
+    guard_ambiguity = copy_flow.selection_ambiguity(guard_edges)
+    guard_sources = {edge.operation: edge.successor_index for edge in guard_edges}
+    guard_targets = {operations[edge.operation].terminator.successors[edge.successor_index].block:
+                     (edge.operation, edge.successor_index) for edge in guard_edges}
+
+    def fresh(source, target):
+        relevant = copy_flow.selected_edges(guard_edges, region=operation_region.get(target.operation)) or None
+        return (copy_flow.forwards(source, target) if relevant is None else
+                copy_flow.forwards(source, target, guard=relevant))
     recipes, gaps, pending = [], [], []
+    if guard_ambiguity is not None:
+        gaps.append({**guard_ambiguity, "message": "distinct incoming visits cannot be flattened into one source route"})
     cursor = None
 
     def gap(code, message, **details):
@@ -312,7 +324,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
     first = (value.id, operation.id, use.id, (), frozenset(), ())
     schedule(first, phase="start", at=use.id, index_number=0, total=1)
 
-    while pending and cursor is None:
+    while pending and cursor is None and guard_ambiguity is None:
         task = pending.pop()
         current_id, anchor_op_id, anchor_use_id, path_back, trail, route_gaps = task
         if not spend("nodes", current_id):
@@ -375,7 +387,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
             if operation_region.get(producer.id) == operation_region.get(anchor.id):
                 freshness_target = OwnedUse(anchor.id, anchor_use_id)
                 try:
-                    freshness = copy_flow.forwards(origin, freshness_target)
+                    freshness = fresh(origin, freshness_target)
                 except (TypeError, ValueError, KeyError):
                     freshness = None
             if freshness is None and accounting.truncated and cursor is None:
@@ -515,6 +527,9 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                           "pending_candidates": total - candidate,
                           "pending_tasks": len(pending)}
                 break
+            if ((block.id in guard_targets and guard_targets[block.id] != (pred.id, successor_index))
+                    or pred.id in guard_sources and guard_sources[pred.id] != successor_index):
+                continue
             if origin.index >= len(successor.arguments):
                 gaps.append(gap("cfg_actual_missing", "incoming successor lacks the formal ordinal",
                                 operation=pred.id, successor_index=successor_index,
@@ -542,7 +557,7 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                 if operation_region.get(pred.id) == operation_region.get(anchor.id):
                     freshness_target = OwnedUse(anchor.id, anchor_use_id)
                     try:
-                        freshness = copy_flow.forwards(port, freshness_target)
+                        freshness = fresh(port, freshness_target)
                     except (TypeError, ValueError, KeyError):
                         freshness = None
                 local_gaps = (*route_gaps, gap(
