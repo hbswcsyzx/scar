@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="17" time="0.434" timestamp="2026-10-18T04:57:58.929753+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_work_records" name="test_submission_keeps_ticket_origin_queue_and_core_effect_endpoints_typed" time="0.001"><failure message="NameError: name 'DirectExecution' is not defined">def test_submission_keeps_ticket_origin_queue_and_core_effect_endpoints_typed():
+        operation = OperationOccurrenceID("invoke")
+        effect = InvokeBoundaryStateEffect(
+            operation, UseRef(operation, UseID("world-in")),
+            ActualCompletionState(1, 2, ValueOccurrenceID("world-after-raise")),
+        )
+        prefix = QueuePrefixID("prefix")
+        queue = QueuePrefix(
+            prefix, ResourceInstanceID("queue-instance"),
+            QueueStart(_fact("/queue-start")), WorkTicketID("ticket"),
+            OccurrencePoint(operation, OccurrencePhase.AFTER), _fact("/queue-protocol"),
+            _fact("/queue-prefix"),
+        )
+&gt;       row = _submission(
+            origin=ExternalWorkSource(_point(), _fact("/external-submit")),
+            scheduling=Queued(ResourceAccessID("queue-access"), prefix),
+            effects=(effect,),
+            materializations=(), materializations_coverage=Completeness.UNKNOWN,
+            retention=_gap("retention coverage missing"),
+        )
+
+tests/unit/test_execution_work_records.py:86: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+changes = {'origin': ExternalWorkSource(point=EvidencePoint(run=RunID(value='run'), process=ProcessInstanceID(value='process'), ...uccessor_index=1, result_index=2, formal=ValueOccurrenceID(value='world-after-raise'))),), 'materializations': (), ...}
+
+    def _submission(**changes):
+        args = dict(
+            id=WorkTicketID("ticket"),
+            origin=WithinOperation(OperationOccurrenceID("submit"), _fact("/submit")),
+            executor=ResourceAccessID("executor-access"),
+&gt;           scheduling=DirectExecution(HostThreadInstanceID("host-thread"), _fact("/direct")),
+                       ^^^^^^^^^^^^^^^
+            dependencies=(),
+            dependencies_coverage=Completeness.COMPLETE,
+            effects=(AccessRef(OperationOccurrenceID("submit"), 0),),
+            effects_coverage=Completeness.PARTIAL,
+            materializations=(MaterializationRef(_artifact("memory://values"),
+                                                 MaterializationID("mat")),),
+            materializations_coverage=Completeness.PARTIAL,
+            retention=(WorkRetentionID("retention"),),
+            protocol=_fact("/protocol/submit"),
+            source=_fact("/source"),
+        )
+E       NameError: name 'DirectExecution' is not defined
+
+tests/unit/test_execution_work_records.py:57: NameError</failure></testcase><testcase classname="tests.unit.test_execution_work_records" name="test_terminal_failure_keeps_partial_effects_and_quiescence_independent" time="0.000" /><testcase classname="tests.unit.test_execution_work_records" name="test_quiescence_and_borrow_release_have_separate_exact_records" time="0.001" /><testcase classname="tests.unit.test_execution_work_records" name="test_prefix_start_and_append_are_distinct_from_submission_table_order" time="0.003" /><testcase classname="tests.unit.test_execution_work_records" name="test_records_are_frozen_slotted_and_revalidate_nested_values" time="0.000"><failure message="NameError: name 'DirectExecution' is not defined">def test_records_are_frozen_slotted_and_revalidate_nested_values():
+&gt;       row = _submission()
+              ^^^^^^^^^^^^^
+
+tests/unit/test_execution_work_records.py:158: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+changes = {}
+
+    def _submission(**changes):
+        args = dict(
+            id=WorkTicketID("ticket"),
+            origin=WithinOperation(OperationOccurrenceID("submit"), _fact("/submit")),
+            executor=ResourceAccessID("executor-access"),
+&gt;           scheduling=DirectExecution(HostThreadInstanceID("host-thread"), _fact("/direct")),
+                       ^^^^^^^^^^^^^^^
+            dependencies=(),
+            dependencies_coverage=Completeness.COMPLETE,
+            effects=(AccessRef(OperationOccurrenceID("submit"), 0),),
+            effects_coverage=Completeness.PARTIAL,
+            materializations=(MaterializationRef(_artifact("memory://values"),
+                                                 MaterializationID("mat")),),
+            materializations_coverage=Completeness.PARTIAL,
+            retention=(WorkRetentionID("retention"),),
+            protocol=_fact("/protocol/submit"),
+            source=_fact("/source"),
+        )
+E       NameError: name 'DirectExecution' is not defined
+
+tests/unit/test_execution_work_records.py:57: NameError</failure></testcase><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;0]" time="0.001" /><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;1]" time="0.000" /><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;2]" time="0.000" /><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;3]" time="0.001" /><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;4]" time="0.001"><failure message="NameError: name 'DirectExecution' is not defined">factory = &lt;function &lt;lambda&gt; at 0x714103555bc0&gt;
+
+    @pytest.mark.parametrize("factory", [
+        lambda: ActualCompletionState(True, 0, ValueOccurrenceID("formal")),
+        lambda: ActualCompletionState(0, False, ValueOccurrenceID("formal")),
+        lambda: QueuePrefix(QueuePrefixID("empty"), ResourceAccessID("q"),
+                            QueuePrefixID("prior"), None, _point(), _fact(), _fact()),
+        lambda: QueuePrefix(QueuePrefixID("prefix"), ResourceAccessID("not-an-instance"),
+                            QueueStart(_fact("/start")), None, _point(), _fact(), _fact()),
+        lambda: _submission(dependencies=(WorkTicketID("ticket"),)),
+        lambda: _submission(dependencies=(WorkTicketID("dep"), WorkTicketID("dep"))),
+        lambda: _submission(effects=[]),
+        lambda: _submission(effects=(AccessRef(OperationOccurrenceID("o"), True),)),
+        lambda: _submission(dependencies_coverage="COMPLETE"),
+        lambda: ResourceOutcome(
+            WorkOutcomeID("o"), WorkTicketID("t"), "FAILED", _point(),
+            _gap(), (), Completeness.UNKNOWN, _gap(), _fact()),
+        lambda: WorkRetention(
+            WorkRetentionID("r"), WorkTicketID("t"),
+            InstanceTarget(ResourceInstanceID("instance")),
+            UseRef(OperationOccurrenceID("op"), UseID("use")),
+            _point(), (ValueOccurrenceID("s"), ValueOccurrenceID("s")),
+            ReleaseAuthority.BORROWED, Sharing.SHARED, _gap(), _fact()),
+    ])
+    def test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices(factory):
+        with pytest.raises((TypeError, ValueError)):
+&gt;           factory()
+
+tests/unit/test_execution_work_records.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_work_records.py:180: in &lt;lambda&gt;
+    lambda: _submission(dependencies=(WorkTicketID("ticket"),)),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+changes = {'dependencies': (WorkTicketID(value='ticket'),)}
+
+    def _submission(**changes):
+        args = dict(
+            id=WorkTicketID("ticket"),
+            origin=WithinOperation(OperationOccurrenceID("submit"), _fact("/submit")),
+            executor=ResourceAccessID("executor-access"),
+&gt;           scheduling=DirectExecution(HostThreadInstanceID("host-thread"), _fact("/direct")),
+                       ^^^^^^^^^^^^^^^
+            dependencies=(),
+            dependencies_coverage=Completeness.COMPLETE,
+            effects=(AccessRef(OperationOccurrenceID("submit"), 0),),
+            effects_coverage=Completeness.PARTIAL,
+            materializations=(MaterializationRef(_artifact("memory://values"),
+                                                 MaterializationID("mat")),),
+            materializations_coverage=Completeness.PARTIAL,
+            retention=(WorkRetentionID("retention"),),
+            protocol=_fact("/protocol/submit"),
+            source=_fact("/source"),
+        )
+E       NameError: name 'DirectExecution' is not defined
+
+tests/unit/test_execution_work_records.py:57: NameError</failure></testcase><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;5]" time="0.001"><failure message="NameError: name 'DirectExecution' is not defined">factory = &lt;function &lt;lambda&gt; at 0x714103555c70&gt;
+
+    @pytest.mark.parametrize("factory", [
+        lambda: ActualCompletionState(True, 0, ValueOccurrenceID("formal")),
+        lambda: ActualCompletionState(0, False, ValueOccurrenceID("formal")),
+        lambda: QueuePrefix(QueuePrefixID("empty"), ResourceAccessID("q"),
+                            QueuePrefixID("prior"), None, _point(), _fact(), _fact()),
+        lambda: QueuePrefix(QueuePrefixID("prefix"), ResourceAccessID("not-an-instance"),
+                            QueueStart(_fact("/start")), None, _point(), _fact(), _fact()),
+        lambda: _submission(dependencies=(WorkTicketID("ticket"),)),
+        lambda: _submission(dependencies=(WorkTicketID("dep"), WorkTicketID("dep"))),
+        lambda: _submission(effects=[]),
+        lambda: _submission(effects=(AccessRef(OperationOccurrenceID("o"), True),)),
+        lambda: _submission(dependencies_coverage="COMPLETE"),
+        lambda: ResourceOutcome(
+            WorkOutcomeID("o"), WorkTicketID("t"), "FAILED", _point(),
+            _gap(), (), Completeness.UNKNOWN, _gap(), _fact()),
+        lambda: WorkRetention(
+            WorkRetentionID("r"), WorkTicketID("t"),
+            InstanceTarget(ResourceInstanceID("instance")),
+            UseRef(OperationOccurrenceID("op"), UseID("use")),
+            _point(), (ValueOccurrenceID("s"), ValueOccurrenceID("s")),
+            ReleaseAuthority.BORROWED, Sharing.SHARED, _gap(), _fact()),
+    ])
+    def test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices(factory):
+        with pytest.raises((TypeError, ValueError)):
+&gt;           factory()
+
+tests/unit/test_execution_work_records.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_work_records.py:181: in &lt;lambda&gt;
+    lambda: _submission(dependencies=(WorkTicketID("dep"), WorkTicketID("dep"))),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+changes = {'dependencies': (WorkTicketID(value='dep'), WorkTicketID(value='dep'))}
+
+    def _submission(**changes):
+        args = dict(
+            id=WorkTicketID("ticket"),
+            origin=WithinOperation(OperationOccurrenceID("submit"), _fact("/submit")),
+            executor=ResourceAccessID("executor-access"),
+&gt;           scheduling=DirectExecution(HostThreadInstanceID("host-thread"), _fact("/direct")),
+                       ^^^^^^^^^^^^^^^
+            dependencies=(),
+            dependencies_coverage=Completeness.COMPLETE,
+            effects=(AccessRef(OperationOccurrenceID("submit"), 0),),
+            effects_coverage=Completeness.PARTIAL,
+            materializations=(MaterializationRef(_artifact("memory://values"),
+                                                 MaterializationID("mat")),),
+            materializations_coverage=Completeness.PARTIAL,
+            retention=(WorkRetentionID("retention"),),
+            protocol=_fact("/protocol/submit"),
+            source=_fact("/source"),
+        )
+E       NameError: name 'DirectExecution' is not defined
+
+tests/unit/test_execution_work_records.py:57: NameError</failure></testcase><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;6]" time="0.001"><failure message="NameError: name 'DirectExecution' is not defined">factory = &lt;function &lt;lambda&gt; at 0x714103555d20&gt;
+
+    @pytest.mark.parametrize("factory", [
+        lambda: ActualCompletionState(True, 0, ValueOccurrenceID("formal")),
+        lambda: ActualCompletionState(0, False, ValueOccurrenceID("formal")),
+        lambda: QueuePrefix(QueuePrefixID("empty"), ResourceAccessID("q"),
+                            QueuePrefixID("prior"), None, _point(), _fact(), _fact()),
+        lambda: QueuePrefix(QueuePrefixID("prefix"), ResourceAccessID("not-an-instance"),
+                            QueueStart(_fact("/start")), None, _point(), _fact(), _fact()),
+        lambda: _submission(dependencies=(WorkTicketID("ticket"),)),
+        lambda: _submission(dependencies=(WorkTicketID("dep"), WorkTicketID("dep"))),
+        lambda: _submission(effects=[]),
+        lambda: _submission(effects=(AccessRef(OperationOccurrenceID("o"), True),)),
+        lambda: _submission(dependencies_coverage="COMPLETE"),
+        lambda: ResourceOutcome(
+            WorkOutcomeID("o"), WorkTicketID("t"), "FAILED", _point(),
+            _gap(), (), Completeness.UNKNOWN, _gap(), _fact()),
+        lambda: WorkRetention(
+            WorkRetentionID("r"), WorkTicketID("t"),
+            InstanceTarget(ResourceInstanceID("instance")),
+            UseRef(OperationOccurrenceID("op"), UseID("use")),
+            _point(), (ValueOccurrenceID("s"), ValueOccurrenceID("s")),
+            ReleaseAuthority.BORROWED, Sharing.SHARED, _gap(), _fact()),
+    ])
+    def test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices(factory):
+        with pytest.raises((TypeError, ValueError)):
+&gt;           factory()
+
+tests/unit/test_execution_work_records.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_work_records.py:182: in &lt;lambda&gt;
+    lambda: _submission(effects=[]),
+            ^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+changes = {'effects': []}
+
+    def _submission(**changes):
+        args = dict(
+            id=WorkTicketID("ticket"),
+            origin=WithinOperation(OperationOccurrenceID("submit"), _fact("/submit")),
+            executor=ResourceAccessID("executor-access"),
+&gt;           scheduling=DirectExecution(HostThreadInstanceID("host-thread"), _fact("/direct")),
+                       ^^^^^^^^^^^^^^^
+            dependencies=(),
+            dependencies_coverage=Completeness.COMPLETE,
+            effects=(AccessRef(OperationOccurrenceID("submit"), 0),),
+            effects_coverage=Completeness.PARTIAL,
+            materializations=(MaterializationRef(_artifact("memory://values"),
+                                                 MaterializationID("mat")),),
+            materializations_coverage=Completeness.PARTIAL,
+            retention=(WorkRetentionID("retention"),),
+            protocol=_fact("/protocol/submit"),
+            source=_fact("/source"),
+        )
+E       NameError: name 'DirectExecution' is not defined
+
+tests/unit/test_execution_work_records.py:57: NameError</failure></testcase><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;7]" time="0.001" /><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;8]" time="0.001"><failure message="NameError: name 'DirectExecution' is not defined">factory = &lt;function &lt;lambda&gt; at 0x714103555e80&gt;
+
+    @pytest.mark.parametrize("factory", [
+        lambda: ActualCompletionState(True, 0, ValueOccurrenceID("formal")),
+        lambda: ActualCompletionState(0, False, ValueOccurrenceID("formal")),
+        lambda: QueuePrefix(QueuePrefixID("empty"), ResourceAccessID("q"),
+                            QueuePrefixID("prior"), None, _point(), _fact(), _fact()),
+        lambda: QueuePrefix(QueuePrefixID("prefix"), ResourceAccessID("not-an-instance"),
+                            QueueStart(_fact("/start")), None, _point(), _fact(), _fact()),
+        lambda: _submission(dependencies=(WorkTicketID("ticket"),)),
+        lambda: _submission(dependencies=(WorkTicketID("dep"), WorkTicketID("dep"))),
+        lambda: _submission(effects=[]),
+        lambda: _submission(effects=(AccessRef(OperationOccurrenceID("o"), True),)),
+        lambda: _submission(dependencies_coverage="COMPLETE"),
+        lambda: ResourceOutcome(
+            WorkOutcomeID("o"), WorkTicketID("t"), "FAILED", _point(),
+            _gap(), (), Completeness.UNKNOWN, _gap(), _fact()),
+        lambda: WorkRetention(
+            WorkRetentionID("r"), WorkTicketID("t"),
+            InstanceTarget(ResourceInstanceID("instance")),
+            UseRef(OperationOccurrenceID("op"), UseID("use")),
+            _point(), (ValueOccurrenceID("s"), ValueOccurrenceID("s")),
+            ReleaseAuthority.BORROWED, Sharing.SHARED, _gap(), _fact()),
+    ])
+    def test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices(factory):
+        with pytest.raises((TypeError, ValueError)):
+&gt;           factory()
+
+tests/unit/test_execution_work_records.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_work_records.py:184: in &lt;lambda&gt;
+    lambda: _submission(dependencies_coverage="COMPLETE"),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+changes = {'dependencies_coverage': 'COMPLETE'}
+
+    def _submission(**changes):
+        args = dict(
+            id=WorkTicketID("ticket"),
+            origin=WithinOperation(OperationOccurrenceID("submit"), _fact("/submit")),
+            executor=ResourceAccessID("executor-access"),
+&gt;           scheduling=DirectExecution(HostThreadInstanceID("host-thread"), _fact("/direct")),
+                       ^^^^^^^^^^^^^^^
+            dependencies=(),
+            dependencies_coverage=Completeness.COMPLETE,
+            effects=(AccessRef(OperationOccurrenceID("submit"), 0),),
+            effects_coverage=Completeness.PARTIAL,
+            materializations=(MaterializationRef(_artifact("memory://values"),
+                                                 MaterializationID("mat")),),
+            materializations_coverage=Completeness.PARTIAL,
+            retention=(WorkRetentionID("retention"),),
+            protocol=_fact("/protocol/submit"),
+            source=_fact("/source"),
+        )
+E       NameError: name 'DirectExecution' is not defined
+
+tests/unit/test_execution_work_records.py:57: NameError</failure></testcase><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;9]" time="0.001" /><testcase classname="tests.unit.test_execution_work_records" name="test_work_records_reject_wrong_variants_duplicate_coordinates_and_bool_indices[&lt;lambda&gt;10]" time="0.001" /><testcase classname="tests.unit.test_execution_work_records" name="test_exact_nested_types_reject_subclasses_and_wrong_resource_targets" time="0.000"><failure message="NameError: name 'DirectExecution' is not defined">def test_exact_nested_types_reject_subclasses_and_wrong_resource_targets():
+        class ChildTicket(WorkTicketID):
+            pass
+    
+        class ChildPoint(OccurrencePoint):
+            pass
+    
+        with pytest.raises(TypeError):
+&gt;           _submission(id=ChildTicket("child"))
+
+tests/unit/test_execution_work_records.py:208: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+changes = {'id': test_exact_nested_types_reject_subclasses_and_wrong_resource_targets.&lt;locals&gt;.ChildTicket(value='child')}
+
+    def _submission(**changes):
+        args = dict(
+            id=WorkTicketID("ticket"),
+            origin=WithinOperation(OperationOccurrenceID("submit"), _fact("/submit")),
+            executor=ResourceAccessID("executor-access"),
+&gt;           scheduling=DirectExecution(HostThreadInstanceID("host-thread"), _fact("/direct")),
+                       ^^^^^^^^^^^^^^^
+            dependencies=(),
+            dependencies_coverage=Completeness.COMPLETE,
+            effects=(AccessRef(OperationOccurrenceID("submit"), 0),),
+            effects_coverage=Completeness.PARTIAL,
+            materializations=(MaterializationRef(_artifact("memory://values"),
+                                                 MaterializationID("mat")),),
+            materializations_coverage=Completeness.PARTIAL,
+            retention=(WorkRetentionID("retention"),),
+            protocol=_fact("/protocol/submit"),
+            source=_fact("/source"),
+        )
+E       NameError: name 'DirectExecution' is not defined
+
+tests/unit/test_execution_work_records.py:57: NameError</failure></testcase></testsuite></testsuites>

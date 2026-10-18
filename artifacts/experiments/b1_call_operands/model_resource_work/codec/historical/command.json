@@ -1,0 +1,24 @@
+{
+  "archive_command": [
+    "git",
+    "archive",
+    "--format=tar",
+    "6fcac0f778d56d7fe4fdb90e546b23e545f86f96",
+    "scar",
+    "tests/fixtures"
+  ],
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-c",
+    "from pathlib import Path\nimport sys\nimport scar.ir.execution.codec as codec\nfrom tests.fixtures.execution_resource_graphs import resource_execution_program\nassert codec.SCHEMA_VERSION == 1\nassert Path(codec.__file__).resolve().is_relative_to(Path.cwd().resolve())\nassert Path(sys.path[0] or '.').resolve() == Path.cwd().resolve()\nprogram, model = resource_execution_program(native_handles=True)\nassert len(model.activations) == 2\nsys.stdout.write(codec.dumps(model))\n"
+  ],
+  "cwd": "/tmp/scar-execution-v1-05dml6d5",
+  "environment": {
+    "PYTHONDONTWRITEBYTECODE": "1",
+    "PYTHONPATH": "/tmp/scar-execution-v1-05dml6d5"
+  },
+  "source_revision": "6fcac0f778d56d7fe4fdb90e546b23e545f86f96",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "historical_codec_sha256": "9fe67ab00091d1477c71baa3259394d8f2062d9c3deb93bdf3c318f9faaf37bd",
+  "historical_fixture_sha256": "e72ea43784824f7c8f1d72eecd1672f69b99ace49ff5f74eb26d7cea370a05ce"
+}

@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## R2.1 work foundation component passed; frozen full pending (2026-10-18)
+## R2.1 work foundation component and frozen full accepted (2026-10-18)
 
 The [work interface](M1_RESOURCE_WORK_INTERFACES.md) connects submissions to
 original access/actual INVOKE completion ports, separate terminal observations,
@@ -9,7 +9,11 @@ and detached indexed queries preserve scope; they do not establish device order.
 The final component passes **407 cases / 9 criteria / 6.282s** with all **480**
 registered source hashes unchanged. Independent immutable v1 wire is byte-exact;
 new work capability uses execution v2. Raw failures and bounded review closure
-are archived. Clean frozen full regression remains pending at this checkpoint.
+are archived. Clean frozen `bb1b402` passes **4,297 full tests / 461.721s /
+1,029,332 KiB**, zero failures/errors/skips and three warnings. All 480 source
+and 47 fixture hashes match; all prior 4,192 case identities and 44 fixtures
+survive. The owned basetemp was removed and protected checkouts remain clean.
+See [acceptance and evidence](M1_RESOURCE_WORK_ACCEPTANCE.md).
 [R2.2 event/order and R2.3 consumer/coverage/ready](M1_RESOURCE_WORK_PLAN.md),
 R3 composition, complete M0–M2 and automatic LeWM modeling/simplification remain
 open. No runtime/native verification, free, transformation or speedup is granted.

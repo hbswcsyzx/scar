@@ -102,7 +102,8 @@ Python 编译器作为 M0–M2 的前置。未展开部分保留 typed 边界、
 
 - [R2.1工作基础](M1_RESOURCE_WORK_INTERFACES.md)接原Access/实际INVOKE completion、
   独立outcome/quiescence/retention，严格execution v2及独立历史v1 bytes；
-  407组件/9标准/6.282s通过，480注册源指纹不变，此实现检查点尚待clean冻结全仓。
+  407组件/9标准/6.282s及[clean冻结`bb1b402`](M1_RESOURCE_WORK_ACCEPTANCE.md)的
+  4,297全仓/461.721s通过，480源/47fixture前后一致，原4,192测试身份全部保留。
   [后续R2.2/R2.3](M1_RESOURCE_WORK_PLAN.md)仍须event代次、设备顺序到consumer-start、
   production/denotation/当前版本可用性；不得把R2.1重定义成整个R2已完成。
 

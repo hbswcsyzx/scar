@@ -13,8 +13,9 @@ remain unfinished.
 
 The [R2.1 work foundation](docs/M1_RESOURCE_WORK_INTERFACES.md) now connects
 actual access/INVOKE completion effects, work terminal observations, independent
-quiescence and resource retention. Its component passes **407 checks / 9 criteria**;
-clean frozen full regression is pending. Execution v2 retains byte-exact original
+quiescence and resource retention. Its [acceptance](docs/M1_RESOURCE_WORK_ACCEPTANCE.md)
+passes **407 checks / 9 criteria** and **4,297 clean frozen full tests** (`bb1b402`).
+Execution v2 retains byte-exact original
 v1 compatibility. [R2 event/order/consumer-ready](docs/M1_RESOURCE_WORK_PLAN.md)
 and complete first-stage modeling remain open; no new LeWM speedup is claimed.
 

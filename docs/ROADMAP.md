@@ -2,7 +2,8 @@
 
 > **R2.1 work checkpoint (2026-10-18):** original access/actual INVOKE state
 > effects, terminal observations, independent quiescence and resource retention
-> pass **407 component checks / 9 criteria**; clean frozen full is pending.
+> pass **407 component checks / 9 criteria** and **4,297 clean frozen full tests**
+> (`bb1b402`); [acceptance](M1_RESOURCE_WORK_ACCEPTANCE.md).
 > [Work interfaces](M1_RESOURCE_WORK_INTERFACES.md) and
 > [R2.1→R2.2→R2.3 plan](M1_RESOURCE_WORK_PLAN.md) retain full R2 event/order,
 > consumer/production coverage and ready requirements. This does not close R2,

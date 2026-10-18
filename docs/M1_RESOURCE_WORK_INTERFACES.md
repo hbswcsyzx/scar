@@ -84,7 +84,8 @@ work 非空默认输出 `scar.execution-model` v2；五表为空默认保留原 
 
 组件门 `gates/m1_resource_work.json` 最终 **407 cases / 9 criteria / 6.282s PASS**，
 480 注册源码指纹不变。包括首批构造/组合/wire/query 和 R1/core 回归；首次失败、
-具体修正与独立限定复审保留。clean 冻结全仓在本实现检查点尚待执行。
+具体修正与独立限定复审保留。[clean 冻结全仓验收](M1_RESOURCE_WORK_ACCEPTANCE.md)
+在 `bb1b402` 上通过 **4,297 项**，480 源/47 fixture 前后一致，原 4,192 测试身份全部保留。
 
 R2.2 的 event record generation/order-to-consumer-start、R2.3 的 denotation、
 生产贡献覆盖和按消费者/版本/分配/域的可用性，以及 R3 组合都仍未完成。

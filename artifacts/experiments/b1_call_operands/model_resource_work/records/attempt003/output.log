@@ -1,0 +1,6 @@
+started_at=2026-10-18T04:58:16Z
+c092b7b39691fce22d8cc00d8922cce5df4800c6ece615d28492edbd3fc6bd70  scar/ir/execution/work.py
+4b4f801ea0d97a1c8d663a2c4835a9672d7a322b26acac947b6f151062a26a40  tests/unit/test_execution_work_records.py
+.................                                                        [100%]
+17 passed in 0.35s
+pytest_exit=0
