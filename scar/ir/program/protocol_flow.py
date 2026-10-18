@@ -58,7 +58,10 @@ class ProtocolFlow:
         for row in graph.protocol_operations:
             self.rows_by_clause.setdefault((row.scope, row.clause), []).append(row)
         self.drives = {row.operation: row for row in graph.body_drives}
+        self.gates = {row.operation: row for row in graph.final_body_gates}
         self.interfaces = {row.region: row for row in graph.driver_interfaces}
+        self.bodies = {row.region: row for row in graph.resumable_bodies}
+        self._driver_roles = {}
         self.drives_by_region = {}
         for row in graph.body_drives:
             self.drives_by_region.setdefault(self.region_of[row.operation], []).append(row)
@@ -66,12 +69,13 @@ class ProtocolFlow:
         self.packets = {row.value: row for row in graph.exception_packets}
         self.boundaries = {row.id: row for row in graph.native_boundaries}
         self._ports, self._flows, self._region_edges, self._universes = {}, {}, {}, {}
+        self._reachability = {}
         for value in graph.values:
             self._universes.setdefault(value.region, set()).add(value.id)
         self._universes = {key: frozenset(values) for key, values in self._universes.items()}
         self.preparation = {"operations": len(self.operations), "values": len(self.values),
                             "uses": len(self.uses), "blocks": len(self.blocks),
-                            "protocol_rows": len(self.rows)}
+                            "protocol_rows": len(self.rows), "final_body_gates": len(self.gates)}
 
     def spend(self, kind, cost=1):
         return self.budget is None or self.budget.spend(kind, cost, "protocol." + kind)
@@ -82,9 +86,18 @@ class ProtocolFlow:
             raise ValueError("protocol Use must be owned by the exact operation")
         return found[1]
 
+    def driver_roles(self, region):
+        """Prepared must-copy roles, not object identity or a second state graph."""
+        if region not in self._driver_roles:
+            from .driver_flow import driver_role_copies
+            self._driver_roles[region] = tuple(frozenset(items) for items in
+                driver_role_copies(self.graph, self.interfaces[region]))
+            self.preparation['driver_role_copy_analyses'] = len(self._driver_roles)
+        return self._driver_roles[region]
+
     def row_result(self, row):
-        from .protocols import OutcomeAdapter, ProtocolCall, RequestProcessing
-        if type(row.contract) in (RequestProcessing, ProtocolCall):
+        from .protocols import AdmissionPredicate, OutcomeAdapter, ProtocolCall, RequestProcessing
+        if type(row.contract) in (AdmissionPredicate, RequestProcessing, ProtocolCall):
             return row.contract.result
         if type(row.contract) is OutcomeAdapter and type(row.contract.output) in (
                 OperationResult, InvokeLiteralResult, StaticProtocolGap):
@@ -274,6 +287,55 @@ class ProtocolFlow:
             return False
         flow = self._fresh_copies(port)
         return None if flow is None else destination.value in flow.get(target.operation, ())
+
+    def reaches(self, source, target):
+        """Can this selected original completion reach an operation locally?
+
+        Reachability is not freshness or runtime path selection. In particular,
+        a helper on a terminal reject branch is not a competing body producer.
+        """
+        port = self.port(source)
+        if port is None or port.gap is not None or port.operation is None:
+            return None
+        if self.region_of[port.operation] != self.region_of[target]:
+            return False
+        key = port.operation, port.phase, port.edge, target
+        if key in self._reachability:
+            return self._reachability[key]
+        _, outgoing, _, _ = self._edges(self.region_of[target])
+        target_block = self.block_of[target]
+        if port.phase == 'edge':
+            if not self.spend('protocol_reachability_candidates'):
+                return None
+            pending = [self.operations[port.operation].terminator.successors[port.edge].block]
+        else:
+            source_block = self.block_of[port.operation]
+            after = self.positions[port.operation] + (port.phase != 'before')
+            if source_block == target_block and self.positions[target] >= after:
+                self._reachability[key] = True
+                return True
+            pending = []
+            for edge in outgoing[source_block]:
+                if not self.spend('protocol_reachability_candidates'):
+                    return None
+                pending.append(edge[2])
+        seen = set()
+        while pending:
+            if not self.spend('protocol_reachability_blocks'):
+                return None
+            block = pending.pop()
+            if block == target_block:
+                self._reachability[key] = True
+                return True
+            if block in seen:
+                continue
+            seen.add(block)
+            for edge in outgoing[block]:
+                if not self.spend('protocol_reachability_edges'):
+                    return None
+                pending.append(edge[2])
+        self._reachability[key] = False
+        return False
 
     def terminal_uses(self, terminal):
         port = self.port(terminal)

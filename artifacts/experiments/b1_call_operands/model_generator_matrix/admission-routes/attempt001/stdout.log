@@ -1,0 +1,292 @@
+....FFFF....FFFF.                                                        [100%]
+=================================== FAILURES ===================================
+_ test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_CREATED] _
+
+rule = <BodyStatePredicateRule.IS_CREATED: 'IS_CREATED'>, target = 'value'
+truth = True
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+>       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x797edc4fcc20>
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError
+_ test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_RUNNING] _
+
+rule = <BodyStatePredicateRule.IS_RUNNING: 'IS_RUNNING'>, target = 'value'
+truth = True
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+>       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x797edbd2e510>
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError
+_ test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_SUSPENDED] _
+
+rule = <BodyStatePredicateRule.IS_SUSPENDED: 'IS_SUSPENDED'>, target = 'value'
+truth = True
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+>       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x797edbd2e3c0>
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError
+_ test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_CLOSED] _
+
+rule = <BodyStatePredicateRule.IS_CLOSED: 'IS_CLOSED'>, target = 'value'
+truth = True
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+>       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x797edbd2ea50>
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError
+_ test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_CREATED] _
+
+rule = <BodyStatePredicateRule.IS_CREATED: 'IS_CREATED'>, target = 'value'
+truth = False
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+>       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x797edbe8fe00>
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError
+_ test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_RUNNING] _
+
+rule = <BodyStatePredicateRule.IS_RUNNING: 'IS_RUNNING'>, target = 'value'
+truth = False
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+>       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x797edc4fcc20>
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError
+_ test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_SUSPENDED] _
+
+rule = <BodyStatePredicateRule.IS_SUSPENDED: 'IS_SUSPENDED'>, target = 'value'
+truth = False
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+>       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x797edbd2e3c0>
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError
+_ test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_CLOSED] _
+
+rule = <BodyStatePredicateRule.IS_CLOSED: 'IS_CLOSED'>, target = 'value'
+truth = False
+
+    @pytest.mark.parametrize('rule', tuple(Rule))
+    @pytest.mark.parametrize('target', ('start', 'value'))
+    @pytest.mark.parametrize('truth', (True, False))
+    def test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs(rule, target, truth):
+        graph, details = phase_gate_program(rule=rule, target=target, truth=truth)
+>       predicate, gate = _gate_route(graph, details)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_admission_routes.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_admission_routes.py:102: in _gate_route
+    report = ProgramIndex(graph).protocol_obligations(details['scope'], budget=20000)
+             ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x797edbd2e510>
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))))
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle = [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: exit_binding at program_operation:phase.alternate: missing or wrong kind of exit
+
+scar/ir/program/queries.py:279: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_admission_routes.py::test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_CREATED]
+FAILED tests/unit/test_program_admission_routes.py::test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_RUNNING]
+FAILED tests/unit/test_program_admission_routes.py::test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_SUSPENDED]
+FAILED tests/unit/test_program_admission_routes.py::test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[True-value-IS_CLOSED]
+FAILED tests/unit/test_program_admission_routes.py::test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_CREATED]
+FAILED tests/unit/test_program_admission_routes.py::test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_RUNNING]
+FAILED tests/unit/test_program_admission_routes.py::test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_SUSPENDED]
+FAILED tests/unit/test_program_admission_routes.py::test_original_branch_reaches_actual_gate_and_compares_read_with_gate_inputs[False-value-IS_CLOSED]
+8 failed, 9 passed in 1.06s

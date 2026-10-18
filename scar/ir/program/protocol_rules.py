@@ -11,7 +11,7 @@ from types import MappingProxyType
 
 from scar.ir.program.drivers import DriverReceiverKind
 from scar.ir.program.protocols import (
-    DriverSubject, NoEntryOutcome, OperationSiteSubject, OutcomeAdapter,
+    AdmissionPredicate, DriverSubject, NoEntryOutcome, OperationSiteSubject, OutcomeAdapter,
     OutcomeAdapterRule, PacketConstruction, PacketRule, ProtocolCall,
     ProtocolCallRule, ProtocolClause, ProtocolProfile, RequestProcessing,
     RequestProcessingRule,
@@ -230,6 +230,7 @@ _allow(_ASYNC_PROFILE, (ProtocolClause.CLOSE_ROUTE,), OutcomeAdapter,
 _allow(_CREATED_THROW,
        (ProtocolClause.PREENTRY_REJECT, ProtocolClause.INITIAL_THROW_DELIVERED,
         ProtocolClause.INITIAL_THROW_CONSTRUCTOR_FAILURE), NoEntryOutcome)
+_allow(ProtocolProfile.GENERATOR_BODY_V1, (ProtocolClause.RAW_ADMISSION,), AdmissionPredicate)
 
 ALLOWED_RULES = MappingProxyType(_allowed)
 del _allow
@@ -258,7 +259,7 @@ def contract_allowed(profile: ProtocolProfile, clause: ProtocolClause, contract:
     rules = ALLOWED_RULES.get(_key(profile, clause, contract_type))
     if rules is None:
         return False
-    if contract_type is NoEntryOutcome:
+    if contract_type in (NoEntryOutcome, AdmissionPredicate):
         return True
     return getattr(contract, "rule", None) in rules
 

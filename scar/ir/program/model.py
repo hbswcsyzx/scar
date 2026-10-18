@@ -581,13 +581,14 @@ class Terminator:
             raise TypeError("Terminator.values must contain UseID")
 
         if self.kind is TerminatorKind.INVOKE:
-            if (len(self.successors) != 2
+            if (not self.successors
                     or any(not isinstance(item, CompletionSuccessor) for item in self.successors)
-                    or {item.kind for item in self.successors} != {ExitKind.NORMAL, ExitKind.RAISE}
-                    or self.successors[0].block == self.successors[1].block
+                    or len({item.kind for item in self.successors}) != len(self.successors)
+                    or not {item.kind for item in self.successors} <= {ExitKind.NORMAL, ExitKind.RAISE}
+                    or len({item.block for item in self.successors}) != len(self.successors)
                     or self.condition is not None or self.exit is not None or self.values):
                 raise ValueError(
-                    "INVOKE requires distinct NORMAL and RAISE completion successors and no other terminator payload")
+                    "INVOKE requires a nonempty subset of distinct NORMAL/RAISE completion successors and no other terminator payload")
         elif any(not isinstance(item, Successor) for item in self.successors):
             raise TypeError("only INVOKE may use CompletionSuccessor")
         elif self.kind is TerminatorKind.JUMP:
@@ -683,9 +684,11 @@ class Operation:
         if is_invoke:
             if self.results or self.accesses:
                 raise ValueError("INVOKE cannot define ordinary results or state accesses")
-            if (len(self.completions) != 2
-                    or {item.kind for item in self.completions} != {ExitKind.NORMAL, ExitKind.RAISE}):
-                raise ValueError("INVOKE requires one NORMAL and one RAISE completion signature")
+            if (not self.completions
+                    or len({item.kind for item in self.completions}) != len(self.completions)
+                    or {item.kind for item in self.completions}
+                       != {item.kind for item in self.terminator.successors}):
+                raise ValueError("INVOKE requires unique completion signatures matching its actual completion edges")
         else:
             if self.completions:
                 raise ValueError("only INVOKE may carry completion signatures")

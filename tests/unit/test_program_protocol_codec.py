@@ -29,7 +29,7 @@ def test_f_capability_roundtrips_scope_only_and_n_r_port_graphs(target):
     graph, _ = generator_protocol_program(target=target)
     wire = codec.dumps(graph)
     document = json.loads(wire)
-    assert codec.SCHEMA_VERSION == 17
+    assert codec.SCHEMA_VERSION == 18
     assert EXECUTION_SCHEMA_VERSION == 7  # O is a separate later capability.
     assert document["schema_version"] == 17
     assert codec.loads(wire) == graph

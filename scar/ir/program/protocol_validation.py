@@ -12,10 +12,10 @@ from .lifecycle import DriveOutcomeRef
 from .protocol_flow import ProtocolFlow, ProtocolReferenceError
 from .protocol_rules import PROFILE_FAMILY, contract_allowed, profile_subject, required_clauses
 from .protocols import (
-    ContractResult, DriverSubject, DriveResult, HostTerminal, NativeExit,
+    AdmissionPredicate, ContractResult, DriverSubject, DriveResult, HostTerminal, NativeExit,
     NoEntryOutcome, OperationSiteSubject, OutcomeAdapter, OutcomeAdapterRule,
     OwnedUse, PacketConstruction, PacketRule, ProtocolCall, ProtocolClause,
-    ProtocolCallRule, RequestProcessing, RequestProcessingRule, StaticProtocolGap,
+    ProtocolCallRule, ProtocolProfile, RequestProcessing, RequestProcessingRule, StaticProtocolGap,
 )
 from .resumption import SuspendTerminator
 from .resumption import ResumeSlotKind, SuspensionFlavor
@@ -42,6 +42,12 @@ _EXCEPTION_ADAPTER_RULES = (
     OutcomeAdapterRule.GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR,
     OutcomeAdapterRule.ASYNCGEN_RETURN_TO_STOP_ASYNC_ITERATION,
 )
+_CLOSE_ERROR_RULES = (
+    OutcomeAdapterRule.CLOSE_IGNORED_EXIT_TO_RUNTIME_ERROR,
+    OutcomeAdapterRule.ASYNCGEN_CLOSE_YIELD_ERROR,
+)
+_CLOSE_RULES = (OutcomeAdapterRule.CLOSE_RETURN_VALUE, *_CLOSE_ERROR_RULES)
+_ERROR_ADAPTER_RULES = (*_EXCEPTION_ADAPTER_RULES, *_CLOSE_ERROR_RULES)
 
 
 def host_output_copy(ctx, source, terminal):
@@ -86,8 +92,10 @@ def adapter_host_output(ctx, row):
     terminal = contract.output
     if ctx.region_of[terminal.operation] != ctx.region_of[operation.id]:
         return False
-    if contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE:
-        return host_output_copy(ctx, contract.input, terminal)
+    direct = (host_output_copy(ctx, contract.input, terminal)
+              if contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE else None)
+    if direct is True:
+        return True
     ports = []
     if operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE:
         if row.slot >= len(operation.terminator.successors):
@@ -103,7 +111,21 @@ def adapter_host_output(ctx, row):
         ports = [OperationResult(operation.id, index) for index, value in enumerate(operation.results)
                  if not isinstance(ctx.values[value], StateVersionValue)]
     matches = [host_output_copy(ctx, source, terminal) for source in ports]
-    return True if True in matches else None if not matches or None in matches else False
+    return (True if True in matches else None if None in matches
+            else direct if not matches and contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE
+            else None if not matches else False)
+
+
+class ProtocolOperandRoleError(ValueError):
+    """An owned edge-forward Use is not an actual call operand."""
+
+
+def _actual_protocol_use(ctx, operation, identity):
+    use = ctx.owned_use(operation.id, identity)
+    if (operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
+            and identity not in operation.invoke_arguments):
+        raise ProtocolOperandRoleError("protocol operand must be a real invoke argument, not an edge-only forward")
+    return use
 
 
 def raw_definition(ctx, raw_use):
@@ -288,6 +310,9 @@ def protocol_errors(graph, *, context=None):
         elif (subject.region not in ctx.regions or subject.operation not in ctx.operations
               or ctx.region_of.get(subject.operation) != subject.region):
             error("protocol_scope", scope.id, "operation site must belong to its exact region")
+        elif scope.profile is ProtocolProfile.CREATED_CLOSE_V1 and not any(
+                row.operation == subject.operation for row in graph.created_close_tests):
+            error("protocol_created_close_site", scope.id, "created-close scope must bind its exact CreatedCloseTest operation")
     for number, row in enumerate(graph.protocol_operations):
         path = f"protocol_operations[{number}]"
         scope = ctx.scopes.get(row.scope)
@@ -309,9 +334,12 @@ def protocol_errors(graph, *, context=None):
             _state_sites(ctx, row)
         except ValueError as exc:
             error("protocol_state_site", path, exc)
-        if type(contract) is RequestProcessing:
+        if type(contract) is AdmissionPredicate:
+            from .admission import admission_errors
+            issues.extend(admission_errors(ctx, row))
+        elif type(contract) is RequestProcessing:
             try:
-                raw_use = ctx.owned_use(operation.id, contract.raw_use)
+                raw_use = _actual_protocol_use(ctx, operation, contract.raw_use)
                 raw_value = ctx.values[raw_use.value]
                 if (contract.rule is not RequestProcessingRule.CHECK_ASYNC_REQUEST
                         and (not isinstance(raw_value, ProtocolValue)
@@ -324,7 +352,7 @@ def protocol_errors(graph, *, context=None):
                 for binding in contract.operand_bindings:
                     target = OwnedUse(operation.id, binding.operation_use)
                     try:
-                        ctx.owned_use(operation.id, binding.operation_use)
+                        _actual_protocol_use(ctx, operation, binding.operation_use)
                     except ValueError as exc:
                         error("protocol_raw_operand", path, exc)
                         continue
@@ -336,13 +364,20 @@ def protocol_errors(graph, *, context=None):
                         if ctx.forwards(OwnedUse(producer, raw.operands[binding.request_ordinal]), target) is False:
                             error("protocol_raw_operand", path, "expanded operand is not that original raw ordinal")
                 _own_result(ctx, row, contract.result)
+            except ProtocolOperandRoleError as exc:
+                error("protocol_operand_role", path, exc)
             except (TypeError, ValueError) as exc:
                 error("protocol_result_owner", path, exc)
         elif type(contract) is ProtocolCall:
             try:
+                if operation.callee is None and (operation.terminator is None
+                        or operation.terminator.kind is not TerminatorKind.INVOKE):
+                    error("protocol_call_shape", path, "protocol call requires its original CALL or INVOKE")
                 for identity in (contract.receiver_use, *contract.argument_uses):
-                    ctx.owned_use(operation.id, identity)
+                    _actual_protocol_use(ctx, operation, identity)
                 _own_result(ctx, row, contract.result)
+            except ProtocolOperandRoleError as exc:
+                error("protocol_operand_role", path, exc)
             except (TypeError, ValueError) as exc:
                 error("protocol_result_owner", path, exc)
         elif type(contract) is PacketConstruction:
@@ -387,12 +422,13 @@ def protocol_errors(graph, *, context=None):
                       else "protocol_packet_source", path, exc)
         elif type(contract) is OutcomeAdapter:
             try:
-                ctx.owned_use(operation.id, contract.input_use)
-                body_rules = (*_EXCEPTION_ADAPTER_RULES, OutcomeAdapterRule.ASYNCGEN_YIELD_TO_REQUEST_ITEM)
+                _actual_protocol_use(ctx, operation, contract.input_use)
+                body_rules = (*_EXCEPTION_ADAPTER_RULES, *_CLOSE_RULES,
+                              OutcomeAdapterRule.ASYNCGEN_YIELD_TO_REQUEST_ITEM)
                 if contract.rule in body_rules and type(contract.input) is not DriveResult:
                     error("protocol_adapter_source", path, "this adapter requires its exact body DriveResult")
-                if type(contract.input) is DriveResult and type(scope.subject) is DriverSubject:
-                    if ctx.region_of.get(contract.input.outcome.drive) != scope.subject.interface_region:
+                if type(contract.input) is DriveResult and contract.rule in body_rules:
+                    if ctx.region_of.get(contract.input.outcome.drive) != ctx.region_of[operation.id]:
                         error("protocol_adapter_source", path, "body adapter source belongs to another driver region")
                 if ctx.forwards(contract.input, OwnedUse(operation.id, contract.input_use), referring=row) is False:
                     error("protocol_copy", path, "adapter input is not the selected source result")
@@ -404,7 +440,9 @@ def protocol_errors(graph, *, context=None):
                             error("protocol_adapter_source", path, "adapter requires the exact public payload slot zero")
                         else:
                             payload = ctx.values[ctx.owned_use(body.id, body_values[0]).value]
-                            if contract.rule is OutcomeAdapterRule.GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR:
+                            if (contract.rule is OutcomeAdapterRule.GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR
+                                    or (contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE
+                                        and body.terminator.kind is TerminatorKind.RAISE)):
                                 valid_payload = isinstance(payload, ProtocolValue) and payload.protocol is ProtocolValueKind.EXCEPTION_PACKET
                             else:
                                 valid_payload = isinstance(payload, (ReferenceValue, DataValue))
@@ -422,9 +460,17 @@ def protocol_errors(graph, *, context=None):
                             type(body.terminator) is not SuspendTerminator
                             or body.terminator.flavor is not SuspensionFlavor.ASYNC_YIELD):
                         error("protocol_adapter_source", path, "async item adapter requires its exact ASYNC_YIELD")
+                    if contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE and body.terminator.kind not in (
+                            TerminatorKind.RETURN, TerminatorKind.RAISE):
+                        error("protocol_adapter_source", path, "close value adapter requires a terminal body outcome")
+                    if contract.rule in _CLOSE_ERROR_RULES:
+                        expected_flavor = (SuspensionFlavor.ASYNC_YIELD
+                            if contract.rule is OutcomeAdapterRule.ASYNCGEN_CLOSE_YIELD_ERROR else SuspensionFlavor.YIELD)
+                        if type(body.terminator) is not SuspendTerminator or body.terminator.flavor is not expected_flavor:
+                            error("protocol_adapter_source", path, "ignored-close adapter requires the exact illegal YIELD outcome")
                 if type(contract.output) in (OperationResult, InvokeLiteralResult, StaticProtocolGap):
                     produced = _own_result(ctx, row, contract.output)
-                    if contract.rule in _EXCEPTION_ADAPTER_RULES and produced is not None:
+                    if contract.rule in _ERROR_ADAPTER_RULES and produced is not None:
                         for value in produced.values:
                             if not isinstance(ctx.values[value], (ReferenceValue, ProtocolValue)):
                                 error("protocol_adapter_source", path, "exception adapter output cannot be a state/data slot")
@@ -433,13 +479,24 @@ def protocol_errors(graph, *, context=None):
                                 if kind is ExitKind.RAISE and (not isinstance(ctx.values[value], ProtocolValue)
                                         or ctx.values[value].protocol is not ProtocolValueKind.EXCEPTION_PACKET):
                                     error("protocol_adapter_source", path, "RAISE adapter output must be its exception packet")
+                    if contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE and produced is not None:
+                        for value in produced.values:
+                            actual = ctx.values[value]
+                            raised = (type(contract.output) is InvokeLiteralResult
+                                      and operation.terminator.successors[produced.edge].kind is ExitKind.RAISE)
+                            if (raised and (not isinstance(actual, ProtocolValue)
+                                    or actual.protocol is not ProtocolValueKind.EXCEPTION_PACKET)) or (
+                                    not raised and not isinstance(actual, (ReferenceValue, DataValue))):
+                                error("protocol_adapter_source", path, "close adapter output has a different payload role")
                 else:
                     terminal = ctx.port(contract.output)
-                    if contract.rule in _EXCEPTION_ADAPTER_RULES and type(contract.output) is HostTerminal:
+                    if contract.rule in _ERROR_ADAPTER_RULES and type(contract.output) is HostTerminal:
                         if ctx.operations[terminal.operation].terminator.kind is not TerminatorKind.RAISE:
                             error("protocol_adapter_source", path, "Python completion adapter host terminal must RAISE")
                     if type(contract.output) is HostTerminal and adapter_host_output(ctx, row) is False:
                         error("protocol_copy", path, "host output is not this adapter's selected current result")
+            except ProtocolOperandRoleError as exc:
+                error("protocol_operand_role", path, exc)
             except (KeyError, TypeError, ValueError) as exc:
                 error("protocol_contract_result", path, exc)
         elif type(contract) is NoEntryOutcome:
@@ -488,10 +545,35 @@ def host_terminals(ctx, source):
     return tuple(found)
 
 
+def _close_reaches_terminal(ctx, row, terminal):
+    output = row.contract.output
+    if type(output) is HostTerminal:
+        return output == terminal and adapter_host_output(ctx, row) is True
+    if type(output) in (OperationResult, InvokeLiteralResult):
+        return host_output_copy(ctx, output, terminal) is True
+    return False
+
+
+def _adapter_route_copy(ctx, row, terminal):
+    """This adapter's selected output, without treating a gap as a mismatch."""
+    output = row.contract.output
+    if type(output) is HostTerminal:
+        return adapter_host_output(ctx, row) if output == terminal else False
+    if type(output) in (OperationResult, InvokeLiteralResult):
+        return host_output_copy(ctx, output, terminal)
+    return None
+
+
 def connection_errors(ctx):
     """Consumer obligations are derived from core markers, not row count."""
     errors = []
     for scope in ctx.scopes.values():
+        if scope.profile is ProtocolProfile.CREATED_CLOSE_V1:
+            from .created_close import created_close_view
+            for route in created_close_view(ctx, scope)['routes']:
+                if route['declared_none_result'] is False:
+                    errors.append(('protocol_close_result', str(route['terminal'].operation),
+                                   'created generator close must return None, not another known value or its receiver'))
         if type(scope.subject) is not DriverSubject:
             continue
         region = scope.subject.interface_region
@@ -513,7 +595,8 @@ def connection_errors(ctx):
                                  RequestProcessingRule.NORMALIZE_THROW_CLASS,
                                  RequestProcessingRule.NORMALIZE_GENERATOR_EXIT,
                                  RequestProcessingRule.NORMALIZE_ASYNC_THROW))
-                    candidates = [row for row in processors if row.contract.rule in expected]
+                    candidates = [row for row in processors if row.contract.rule in expected
+                                  and ctx.reaches(row.contract.result, drive.operation) is not False]
                     matches = [ctx.forwards(row.contract.result, OwnedUse(drive.operation, actual.source))
                                for row in candidates]
                     if matches and all(match is False for match in matches):
@@ -543,18 +626,40 @@ def connection_errors(ctx):
                             if row.contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE
                             and type(row.contract.input) is DriveResult
                             and row.contract.input.outcome == source.outcome]
-                        if not any(host_output_copy(ctx, row.contract.input, terminal) is True
-                                   for row in close_routes):
+                        if not any(_close_reaches_terminal(ctx, row, terminal) for row in close_routes):
                             errors.append(('protocol_host_adapter', str(drive.operation),
                                            'body Return needs its explicit Python completion adapter'))
+                if body.terminator.kind is TerminatorKind.RAISE:
+                    # The native profile may propagate the current whole packet
+                    # or explicitly adapt this exact body outcome. Merely having
+                    # some same-typed packet at the host is not propagation.
+                    routes = [row for row in adapters
+                              if type(row.contract.input) is DriveResult
+                              and row.contract.input.outcome == source.outcome]
+                    for terminal in host_terminals(ctx, source):
+                        kind = ctx.operations[terminal.operation].terminator.kind
+                        selected = [row for row in routes
+                                    if kind is TerminatorKind.RAISE
+                                    or row.contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE]
+                        matches = [_adapter_route_copy(ctx, row, terminal) for row in selected]
+                        if kind is TerminatorKind.RAISE:
+                            matches.append(host_output_copy(ctx, source, terminal))
+                        if not matches or all(match is False for match in matches):
+                            errors.append(('protocol_copy', str(terminal.operation),
+                                           'host outcome is neither this body RAISE packet nor its selected adapter result'))
         for row in adapters:
-            if (row.contract.rule not in _EXCEPTION_ADAPTER_RULES
+            if (row.contract.rule not in (*_ERROR_ADAPTER_RULES, OutcomeAdapterRule.CLOSE_RETURN_VALUE)
                     or type(row.contract.output) not in (OperationResult, InvokeLiteralResult)):
                 continue
             for terminal in host_terminals(ctx, row.contract.output):
-                if ctx.operations[terminal.operation].terminator.kind is not TerminatorKind.RAISE:
+                expected = TerminatorKind.RAISE
+                if row.contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE:
+                    port = ctx.port(row.contract.output)
+                    if port.phase != 'edge' or ctx.operations[port.operation].terminator.successors[port.edge].kind is not ExitKind.RAISE:
+                        expected = TerminatorKind.RETURN
+                if ctx.operations[terminal.operation].terminator.kind is not expected:
                     errors.append(('protocol_host_adapter', str(terminal.operation),
-                                   'Python exception adapter cannot return normally at the host'))
+                                   'host terminal kind differs from this adapter completion'))
                 if host_output_copy(ctx, row.contract.output, terminal) is False:
                     errors.append(('protocol_copy', str(terminal.operation),
                                    'host exception is not this adapter result or its explicit packet'))

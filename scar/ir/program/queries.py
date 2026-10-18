@@ -693,20 +693,40 @@ class ProgramIndex:
         operation = self.operations[operation_id]
         if operation.terminator is None or operation.terminator.kind is not TerminatorKind.INVOKE:
             raise ValueError("normal_result requires INVOKE")
-        edge = next(edge for edge in operation.terminator.successors if edge.kind is ExitKind.NORMAL)
+        edge = next((edge for edge in operation.terminator.successors if edge.kind is ExitKind.NORMAL), None)
+        if edge is None:
+            raise ValueError("normal_result requires an actual NORMAL completion")
         signature = next(signature for signature in operation.completions
                          if signature.kind is ExitKind.NORMAL)
         if port.index >= len(signature.types):
             raise IndexError(port.index)
         block = self._block_records[edge.block]
-        position = next(index for index, actual in enumerate(edge.arguments)
-                        if type(actual) is CompletionResult and actual.index == port.index)
+        position = next((index for index, actual in enumerate(edge.arguments)
+                         if type(actual) is CompletionResult and actual.index == port.index), None)
+        if position is None:
+            raise ValueError("normal_result slot has no produced landing value")
         return self.values[block.arguments[position]]
 
     def protocol_obligations(self, scope=None, *, budget=4096):
         """Fixed supplied-model obligations; missing joins never remove clauses."""
         from .protocol_query import protocol_obligations
-        return protocol_obligations(self.graph, scope, budget=budget)
+        return protocol_obligations(self.graph, scope, budget=budget, _index=self)
+
+    def input_origins(self, operation_id, use_id, *, budget=4096):
+        """Static original input routes, reusing this validated model index."""
+        from scar.ir.execution.validity_budget import ValidityBudget
+        from .input_origins import _input_origins
+        return _input_origins(self, operation_id, use_id, accounting=ValidityBudget(budget))
+
+    def paired_input_origins(self, raw, pack_operand, *, budget=4096):
+        """Exact raw-pack operand routes; not a predicate-input binding."""
+        from .input_origins import paired_input_origins
+        return paired_input_origins(self, raw, pack_operand, budget=budget)
+
+    def request_input_binding(self, raw, input, ordinal=0, *, budget=4096):
+        """Joint original raw/operand/input routes under one static call context."""
+        from .request_inputs import request_input_binding
+        return request_input_binding(self, raw, input, ordinal, budget=budget)
 
     def creation_bindings(self, operation_id: OperationID):
         """Bound references from Create Uses; no dynamic instance is inferred."""

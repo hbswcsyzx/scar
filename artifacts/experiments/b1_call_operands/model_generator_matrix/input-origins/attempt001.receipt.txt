@@ -1,0 +1,1 @@
+Preflight parser attempt 001 failed on a missing closing parenthesis in input_origins.py. Exact source SHA was not captured at execution time and is intentionally not inferred from the corrected file. The command and emitted exception are retained verbatim.

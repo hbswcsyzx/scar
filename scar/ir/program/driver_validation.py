@@ -304,6 +304,9 @@ def driver_errors(graph, *, operation_blocks, region_domains, incoming_edges):
         if drive_op is None or not isinstance(drive_op.terminator, BodyDriveTerminator):
             error("driver_gate_pair", row.operation, "paired Drive requires its existing canonical terminator")
             continue
+        if {edge.kind for edge in op.terminator.successors} != {ExitKind.NORMAL, ExitKind.RAISE}:
+            error("driver_gate_completions", row.operation, "final body gate requires both NORMAL and RAISE completions")
+            continue
         normal = next(edge for edge in op.terminator.successors if edge.kind is ExitKind.NORMAL)
         landing = blocks[normal.block]
         if len(incoming_edges[landing.id]) != 1 or landing.operations != (row.drive,):

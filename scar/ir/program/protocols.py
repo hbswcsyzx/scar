@@ -146,6 +146,13 @@ class RequestProcessingRule(str, Enum):
     NORMALIZE_ASYNC_THROW = "NORMALIZE_ASYNC_THROW"
 
 
+class BodyStatePredicateRule(str, Enum):
+    IS_CREATED = "IS_CREATED"
+    IS_RUNNING = "IS_RUNNING"
+    IS_SUSPENDED = "IS_SUSPENDED"
+    IS_CLOSED = "IS_CLOSED"
+
+
 class ProtocolCallRule(str, Enum):
     AWAIT_LOOKUP = "AWAIT_LOOKUP"
     AWAIT_CALL = "AWAIT_CALL"
@@ -396,12 +403,67 @@ class NoEntryOutcome:
 
 
 @dataclass(frozen=True, slots=True)
+class BodyStateCondition:
+    """Only the owner and READ sites actually consumed by the predicate."""
+
+    instance_use: UseID
+    state_sites: tuple[ExistingAccess, ...]
+    rule: BodyStatePredicateRule
+
+    def __post_init__(self) -> None:
+        _identifier(self.instance_use, UseID, "body-state predicate instance Use")
+        _exact(self.state_sites, tuple, "body-state predicate state sites")
+        if not self.state_sites:
+            raise ValueError("body-state predicate state sites must be nonempty")
+        for site in self.state_sites:
+            _record(site, ExistingAccess, "body-state predicate state site")
+            _identifier(site.operation, OperationID, "body-state predicate access operation")
+            _index(site.index, "body-state predicate access index")
+        if len(set(self.state_sites)) != len(self.state_sites):
+            raise ValueError("body-state predicate state sites must be distinct")
+        _exact(self.rule, BodyStatePredicateRule, "body-state predicate rule")
+
+
+@dataclass(frozen=True, slots=True)
+class ReferenceIsNoneCondition:
+    """The real reference operand; neither a body nor a raw pack is added."""
+
+    input_use: UseID
+
+    def __post_init__(self) -> None:
+        _identifier(self.input_use, UseID, "reference-is-None predicate input Use")
+
+
+@dataclass(frozen=True, slots=True)
+class AdmissionPredicate:
+    """Original bool production and intended branch, without a phase state."""
+
+    subject: BodyStateCondition | ReferenceIsNoneCondition
+    result: OperationResult
+    branch: OperationID
+
+    def __post_init__(self) -> None:
+        if type(self.subject) not in (BodyStateCondition, ReferenceIsNoneCondition):
+            raise TypeError("admission predicate subject must be an exact typed condition")
+        self.subject.__post_init__()
+        operation_result, _ = _model_port_types()
+        _record(self.result, operation_result, "admission predicate result")
+        _identifier(self.result.operation, OperationID, "admission predicate result operation")
+        _index(self.result.index, "admission predicate result index")
+        _identifier(self.branch, OperationID, "admission predicate branch")
+
+    @property
+    def state_sites(self) -> tuple[ExistingAccess, ...]:
+        return self.subject.state_sites if type(self.subject) is BodyStateCondition else ()
+
+
+@dataclass(frozen=True, slots=True)
 class ProtocolOperation:
     scope: ProtocolScopeID
     clause: ProtocolClause
     operation: OperationID
     slot: int
-    contract: RequestProcessing | ProtocolCall | PacketConstruction | OutcomeAdapter | NoEntryOutcome
+    contract: RequestProcessing | ProtocolCall | PacketConstruction | OutcomeAdapter | NoEntryOutcome | AdmissionPredicate
     source: ProviderFactReference | StaticProtocolGap
 
     def __post_init__(self) -> None:
@@ -410,7 +472,8 @@ class ProtocolOperation:
         _identifier(self.operation, OperationID, "protocol operation operation")
         _index(self.slot, "protocol operation slot")
         if type(self.contract) not in (
-                RequestProcessing, ProtocolCall, PacketConstruction, OutcomeAdapter, NoEntryOutcome):
+                RequestProcessing, ProtocolCall, PacketConstruction, OutcomeAdapter, NoEntryOutcome,
+                AdmissionPredicate):
             raise TypeError("protocol operation contract must be one exact protocol contract record")
         self.contract.__post_init__()
         if type(self.source) is ProviderFactReference:
@@ -511,6 +574,7 @@ def _bind_model_ports(operation_result: type, invoke_literal_result: type) -> No
     """Bind exact model-owned result classes after their definitions exist."""
     global ProtocolResultPort, ProtocolSourcePort, AdapterInputPort, NoEntryInputPort
     global _MODEL_PORT_CLASSES
+    global OperationResult
     from scar.ir.program import model
     if operation_result is not model.OperationResult or invoke_literal_result is not model.InvokeLiteralResult:
         raise TypeError("protocol ports can bind only the canonical model result classes")
@@ -526,6 +590,16 @@ def _bind_model_ports(operation_result: type, invoke_literal_result: type) -> No
         StaticProtocolGap,
     ]
     _MODEL_PORT_CLASSES = operation_result, invoke_literal_result
+    # The new predicate result is the one ordinary canonical port, not the
+    # broader protocol result union. Resolve its postponed annotation here.
+    OperationResult = operation_result
+
+
+ADMISSION_RECORD_TAGS = MappingProxyType({
+    BodyStateCondition: ("kind", "PROTOCOL_BODY_STATE_CONDITION"),
+    ReferenceIsNoneCondition: ("kind", "PROTOCOL_REFERENCE_IS_NONE_CONDITION"),
+    AdmissionPredicate: ("kind", "PROTOCOL_ADMISSION_PREDICATE"),
+})
 
 
 PROTOCOL_RECORD_TAGS = MappingProxyType({
@@ -545,9 +619,12 @@ PROTOCOL_RECORD_TAGS = MappingProxyType({
     OutcomeAdapter: ("kind", "PROTOCOL_OUTCOME_ADAPTER"),
     NoEntryOutcome: ("kind", "PROTOCOL_NO_ENTRY_OUTCOME"),
     ProtocolOperation: ("kind", "PROTOCOL_OPERATION"),
+    **ADMISSION_RECORD_TAGS,
 })
 
 __all__ = [
+    "ADMISSION_RECORD_TAGS", "AdmissionPredicate", "BodyStateCondition",
+    "BodyStatePredicateRule", "ReferenceIsNoneCondition",
     "AdapterInputPort", "ContractResult", "DriveResult", "DriverSubject",
     "HostTerminal", "NativeExit", "NoEntryInputPort", "NoEntryOutcome",
     "OperationSiteSubject", "OutcomeAdapter", "OutcomeAdapterRule", "OwnedUse",

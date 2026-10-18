@@ -1,0 +1,10 @@
+source /home/zyf/miniconda3/etc/profile.d/conda.sh
+conda activate lewm
+mkdir -p artifacts/experiments/b1_call_operands/model_generator_matrix/input-origins
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python - <<'PY'
+import ast
+from pathlib import Path
+path = Path('scar/ir/program/input_origins.py')
+ast.parse(path.read_text(), filename=str(path))
+print('AST parse: PASS')
+PY

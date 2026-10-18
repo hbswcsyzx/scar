@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="21" skipped="0" tests="49" time="3.714" timestamp="2026-10-18T17:34:38.858478+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_generator_admission" name="test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[NEXT-created]" time="0.082" /><testcase classname="tests.unit.test_program_generator_admission" name="test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[NEXT-running]" time="0.033" /><testcase classname="tests.unit.test_program_generator_admission" name="test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[SEND-created]" time="0.054" /><testcase classname="tests.unit.test_program_generator_admission" name="test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[SEND-running]" time="0.052" /><testcase classname="tests.unit.test_program_generator_admission" name="test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[THROW-created]" time="0.045" /><testcase classname="tests.unit.test_program_generator_admission" name="test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[THROW-running]" time="0.052" /><testcase classname="tests.unit.test_program_generator_admission" name="test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[CLOSE-created]" time="0.050" /><testcase classname="tests.unit.test_program_generator_admission" name="test_all_eight_stage_request_cells_use_actual_predicates_callers_and_current_ports[CLOSE-running]" time="0.048" /><testcase classname="tests.unit.test_program_generator_admission" name="test_created_send_none_and_real_rejected_send_retry_have_independent_original_calls[True-False]" time="0.027" /><testcase classname="tests.unit.test_program_generator_admission" name="test_created_send_none_and_real_rejected_send_retry_have_independent_original_calls[False-True]" time="0.232" /><testcase classname="tests.unit.test_program_generator_admission" name="test_created_throw_initial_edge_finalizes_without_a_body_ingress_on_that_route[False]" time="0.057" /><testcase classname="tests.unit.test_program_generator_admission" name="test_created_throw_initial_edge_finalizes_without_a_body_ingress_on_that_route[True]" time="0.058" /><testcase classname="tests.unit.test_program_generator_admission" name="test_running_throw_preserves_normalizer_callback_failure_before_reentry_override" time="0.102" /><testcase classname="tests.unit.test_program_generator_admission" name="test_a_same_typed_other_bool_cannot_replace_the_real_running_guard_condition" time="0.058" /><testcase classname="tests.unit.test_program_generator_admission" name="test_retry_cannot_reuse_the_pre_rejection_state" time="0.083" /><testcase classname="tests.unit.test_program_generator_admission" name="test_running_true_to_start_is_an_exact_snapshot_gap_without_native_gate_authority" time="0.049" /><testcase classname="tests.unit.test_program_generator_admission" name="test_invalid_arity_is_a_real_only_raise_call_before_raw_and_handler_keeps_poststate[0]" time="0.018" /><testcase classname="tests.unit.test_program_generator_admission" name="test_invalid_arity_is_a_real_only_raise_call_before_raw_and_handler_keeps_poststate[4]" time="0.015" /><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route[NEXT-suspended]" time="0.021"><failure message="ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result">stage = 'suspended', kind = &lt;RawRequestKind.NEXT: 'NEXT'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind, send_none=False)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:222: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route[NEXT-closed]" time="0.025"><failure message="AssertionError: assert ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSION'...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)) == AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.closed.owner'), state_sites=(ExistingAc...ult(operation=OperationID(value='matrix.closed.predicate'), index=0), branch=OperationID(value='matrix.closed.branch'))&#10; +  where AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.closed.owner'), state_sites=(ExistingAc...ult(operation=OperationID(value='matrix.closed.predicate'), index=0), branch=OperationID(value='matrix.closed.branch')) = ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSION'...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)).contract">stage = 'closed', kind = &lt;RawRequestKind.NEXT: 'NEXT'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind, send_none=False)
+        require_valid(graph)
+        index, guard = ProgramIndex(graph), details["guards"][0]
+        view = _admission_view(index, guard)
+&gt;       assert view["predicate"] == guard["row"].contract
+E       AssertionError: assert ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSION'...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)) == AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.closed.owner'), state_sites=(ExistingAc...ult(operation=OperationID(value='matrix.closed.predicate'), index=0), branch=OperationID(value='matrix.closed.branch'))
+E        +  where AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.closed.owner'), state_sites=(ExistingAc...ult(operation=OperationID(value='matrix.closed.predicate'), index=0), branch=OperationID(value='matrix.closed.branch')) = ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSION'...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)).contract
+
+tests/unit/test_program_generator_admission.py:225: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route[SEND-suspended]" time="0.020"><failure message="ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result">stage = 'suspended', kind = &lt;RawRequestKind.SEND: 'SEND'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind, send_none=False)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:222: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route[SEND-closed]" time="0.003"><failure message="TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'">stage = 'closed', kind = &lt;RawRequestKind.SEND: 'SEND'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route(stage, kind):
+&gt;       graph, details = generator_admission_program(stage=stage, kind=kind, send_none=False)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_admission.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_admission_graphs.py:527: in generator_admission_program
+    return _later_admission_program(stage=stage, kind=kind, send_none=send_none,
+tests/fixtures/program_generator_admission_graphs.py:479: in _later_admission_program
+    rows = tuple(replace(row, contract=replace(row.contract,
+           ^^^^^
+tests/fixtures/program_generator_admission_graphs.py:479: in &lt;genexpr&gt;
+    rows = tuple(replace(row, contract=replace(row.contract,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = RequestProcessing(raw_use=UseID(value='preentry.raw'), operand_bindings=(), result=InvokeLiteralResult(edge=ControlEdg...'preentry.source'), state_use=UseID(value='preentry.state.1'))), rule=&lt;RequestProcessingRule.CHECK_SEND: 'CHECK_SEND'&gt;)
+changes = {'operands': (RequestOperandBinding(request_ordinal=0, operation_use=UseID(value='matrix.closed.operand')),), 'raw_use...geReference(operation=OperationID(value='preentry.source'), successor_index=0), result=CompletionResult(index=0)), ...}
+
+    def _replace(self, /, **changes):
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(self, **my_changes)'.
+    
+        # It's an error to have init=False fields in 'changes'.
+        # If a field is not in 'changes', read its value from the provided 'self'.
+    
+        for f in getattr(self, _FIELDS).values():
+            # Only consider normal fields or InitVars.
+            if f._field_type is _FIELD_CLASSVAR:
+                continue
+    
+            if not f.init:
+                # Error if this field is specified in changes.
+                if f.name in changes:
+                    raise TypeError(f'field {f.name} is declared with '
+                                    f'init=False, it cannot be specified with '
+                                    f'replace()')
+                continue
+    
+            if f.name not in changes:
+                if f._field_type is _FIELD_INITVAR and f.default is MISSING:
+                    raise TypeError(f"InitVar {f.name!r} "
+                                    f'must be specified with replace()')
+                changes[f.name] = getattr(self, f.name)
+    
+        # Create the new object, which calls __init__() and
+        # __post_init__() (if defined), using all of the init fields we've
+        # added and/or left in 'changes'.  If there are values supplied in
+        # changes that aren't fields, this will correctly raise a
+        # TypeError.
+&gt;       return self.__class__(**changes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'
+
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: TypeError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route[THROW-suspended]" time="0.040"><failure message="AssertionError: assert ProtocolOperation(scope=ProtocolScopeID(value='matrix.driver.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMIS...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)) == AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.suspended.owner'), state_sites=(Existin...eration=OperationID(value='matrix.suspended.predicate'), index=0), branch=OperationID(value='matrix.suspended.branch'))&#10; +  where AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.suspended.owner'), state_sites=(Existin...eration=OperationID(value='matrix.suspended.predicate'), index=0), branch=OperationID(value='matrix.suspended.branch')) = ProtocolOperation(scope=ProtocolScopeID(value='matrix.driver.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMIS...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)).contract">stage = 'suspended', kind = &lt;RawRequestKind.THROW: 'THROW'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind, send_none=False)
+        require_valid(graph)
+        index, guard = ProgramIndex(graph), details["guards"][0]
+        view = _admission_view(index, guard)
+&gt;       assert view["predicate"] == guard["row"].contract
+E       AssertionError: assert ProtocolOperation(scope=ProtocolScopeID(value='matrix.driver.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMIS...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)) == AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.suspended.owner'), state_sites=(Existin...eration=OperationID(value='matrix.suspended.predicate'), index=0), branch=OperationID(value='matrix.suspended.branch'))
+E        +  where AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.suspended.owner'), state_sites=(Existin...eration=OperationID(value='matrix.suspended.predicate'), index=0), branch=OperationID(value='matrix.suspended.branch')) = ProtocolOperation(scope=ProtocolScopeID(value='matrix.driver.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMIS...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)).contract
+
+tests/unit/test_program_generator_admission.py:225: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route[THROW-closed]" time="0.003"><failure message="TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'">stage = 'closed', kind = &lt;RawRequestKind.THROW: 'THROW'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route(stage, kind):
+&gt;       graph, details = generator_admission_program(stage=stage, kind=kind, send_none=False)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_admission.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_admission_graphs.py:527: in generator_admission_program
+    return _later_admission_program(stage=stage, kind=kind, send_none=send_none,
+tests/fixtures/program_generator_admission_graphs.py:479: in _later_admission_program
+    rows = tuple(replace(row, contract=replace(row.contract,
+           ^^^^^
+tests/fixtures/program_generator_admission_graphs.py:479: in &lt;genexpr&gt;
+    rows = tuple(replace(row, contract=replace(row.contract,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = RequestProcessing(raw_use=UseID(value='preentry.raw'), operand_bindings=(), result=InvokeLiteralResult(edge=ControlEdg...reentry.source'), state_use=UseID(value='preentry.state.1'))), rule=&lt;RequestProcessingRule.CHECK_THROW: 'CHECK_THROW'&gt;)
+changes = {'operands': (RequestOperandBinding(request_ordinal=0, operation_use=UseID(value='matrix.closed.operand')),), 'raw_use...geReference(operation=OperationID(value='preentry.source'), successor_index=0), result=CompletionResult(index=0)), ...}
+
+    def _replace(self, /, **changes):
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(self, **my_changes)'.
+    
+        # It's an error to have init=False fields in 'changes'.
+        # If a field is not in 'changes', read its value from the provided 'self'.
+    
+        for f in getattr(self, _FIELDS).values():
+            # Only consider normal fields or InitVars.
+            if f._field_type is _FIELD_CLASSVAR:
+                continue
+    
+            if not f.init:
+                # Error if this field is specified in changes.
+                if f.name in changes:
+                    raise TypeError(f'field {f.name} is declared with '
+                                    f'init=False, it cannot be specified with '
+                                    f'replace()')
+                continue
+    
+            if f.name not in changes:
+                if f._field_type is _FIELD_INITVAR and f.default is MISSING:
+                    raise TypeError(f"InitVar {f.name!r} "
+                                    f'must be specified with replace()')
+                changes[f.name] = getattr(self, f.name)
+    
+        # Create the new object, which calls __init__() and
+        # __post_init__() (if defined), using all of the init fields we've
+        # added and/or left in 'changes'.  If there are values supplied in
+        # changes that aren't fields, this will correctly raise a
+        # TypeError.
+&gt;       return self.__class__(**changes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'
+
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: TypeError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route[CLOSE-suspended]" time="0.049"><failure message="AssertionError: assert ProtocolOperation(scope=ProtocolScopeID(value='close.first.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSI...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)) == AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.suspended.owner'), state_sites=(Existin...eration=OperationID(value='matrix.suspended.predicate'), index=0), branch=OperationID(value='matrix.suspended.branch'))&#10; +  where AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.suspended.owner'), state_sites=(Existin...eration=OperationID(value='matrix.suspended.predicate'), index=0), branch=OperationID(value='matrix.suspended.branch')) = ProtocolOperation(scope=ProtocolScopeID(value='close.first.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSI...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)).contract">stage = 'suspended', kind = &lt;RawRequestKind.CLOSE: 'CLOSE'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind, send_none=False)
+        require_valid(graph)
+        index, guard = ProgramIndex(graph), details["guards"][0]
+        view = _admission_view(index, guard)
+&gt;       assert view["predicate"] == guard["row"].contract
+E       AssertionError: assert ProtocolOperation(scope=ProtocolScopeID(value='close.first.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSI...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)) == AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.suspended.owner'), state_sites=(Existin...eration=OperationID(value='matrix.suspended.predicate'), index=0), branch=OperationID(value='matrix.suspended.branch'))
+E        +  where AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.suspended.owner'), state_sites=(Existin...eration=OperationID(value='matrix.suspended.predicate'), index=0), branch=OperationID(value='matrix.suspended.branch')) = ProtocolOperation(scope=ProtocolScopeID(value='close.first.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSI...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)).contract
+
+tests/unit/test_program_generator_admission.py:225: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route[CLOSE-closed]" time="0.025"><failure message="AssertionError: assert ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSION'...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)) == AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.closed.owner'), state_sites=(ExistingAc...ult(operation=OperationID(value='matrix.closed.predicate'), index=0), branch=OperationID(value='matrix.closed.branch'))&#10; +  where AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.closed.owner'), state_sites=(ExistingAc...ult(operation=OperationID(value='matrix.closed.predicate'), index=0), branch=OperationID(value='matrix.closed.branch')) = ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSION'...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)).contract">stage = 'closed', kind = &lt;RawRequestKind.CLOSE: 'CLOSE'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_suspended_closed_cells_have_real_phase_branch_known_raw_and_current_host_route(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind, send_none=False)
+        require_valid(graph)
+        index, guard = ProgramIndex(graph), details["guards"][0]
+        view = _admission_view(index, guard)
+&gt;       assert view["predicate"] == guard["row"].contract
+E       AssertionError: assert ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSION'...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)) == AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.closed.owner'), state_sites=(ExistingAc...ult(operation=OperationID(value='matrix.closed.predicate'), index=0), branch=OperationID(value='matrix.closed.branch'))
+E        +  where AdmissionPredicate(subject=BodyStateCondition(instance_use=UseID(value='matrix.closed.owner'), state_sites=(ExistingAc...ult(operation=OperationID(value='matrix.closed.predicate'), index=0), branch=OperationID(value='matrix.closed.branch')) = ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=&lt;ProtocolClause.RAW_ADMISSION: 'RAW_ADMISSION'...')), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;)).contract
+
+tests/unit/test_program_generator_admission.py:225: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_next_delivers_this_none_and_send_delivers_the_same_caller_ordinal_zero" time="0.020"><failure message="ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result">def test_suspended_next_delivers_this_none_and_send_delivers_the_same_caller_ordinal_zero():
+        for kind in (RawRequestKind.NEXT, RawRequestKind.SEND):
+            graph, details = generator_admission_program(stage="suspended", kind=kind, send_none=False)
+&gt;           require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:268: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_throw_current_normalized_packet_reaches_caught_yield_or_propagated_raise[False]" time="0.042"><failure message="AttributeError: 'RequestProcessing' object has no attribute 'operands'">propagates = False
+
+    @pytest.mark.parametrize("propagates", (False, True))
+    def test_suspended_throw_current_normalized_packet_reaches_caught_yield_or_propagated_raise(propagates):
+        graph, details = generator_admission_program(stage="suspended", kind=RawRequestKind.THROW,
+                                                   throw_propagates=propagates)
+        require_valid(graph)
+        drive, = graph.body_drives
+        flow, index = ProtocolFlow(graph), ProgramIndex(graph)
+        assert flow.forwards(details["normal_result"], OwnedUse(drive.operation, drive.resume_inputs[0].source)) is True
+        raw = OwnedUse(details["processing"], details["raw_use"])
+&gt;       operand = OwnedUse(details["processing"], next(row.contract.operands[0].use
+            for row in graph.protocol_operations if row.operation == details["processing"]))
+
+tests/unit/test_program_generator_admission.py:294: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;tuple_iterator object at 0x72171896a0e0&gt;
+
+&gt;   operand = OwnedUse(details["processing"], next(row.contract.operands[0].use
+                                                   ^^^^^^^^^^^^^^^^^^^^^
+        for row in graph.protocol_operations if row.operation == details["processing"]))
+E   AttributeError: 'RequestProcessing' object has no attribute 'operands'
+
+tests/unit/test_program_generator_admission.py:294: AttributeError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_suspended_throw_current_normalized_packet_reaches_caught_yield_or_propagated_raise[True]" time="0.014"><failure message="ValueError: unbound_exit at program_region:driver: declared exits must be bound to actual control exits">propagates = True
+
+    @pytest.mark.parametrize("propagates", (False, True))
+    def test_suspended_throw_current_normalized_packet_reaches_caught_yield_or_propagated_raise(propagates):
+        graph, details = generator_admission_program(stage="suspended", kind=RawRequestKind.THROW,
+                                                   throw_propagates=propagates)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:289: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:driver: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_rejects_an_available_same_typed_other_bool[NEXT-suspended]" time="0.021"><failure message="ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result">stage = 'suspended', kind = &lt;RawRequestKind.NEXT: 'NEXT'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_each_later_cell_rejects_an_available_same_typed_other_bool(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:306: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_rejects_an_available_same_typed_other_bool[NEXT-closed]" time="0.031" /><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_rejects_an_available_same_typed_other_bool[SEND-suspended]" time="0.019"><failure message="ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result">stage = 'suspended', kind = &lt;RawRequestKind.SEND: 'SEND'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_each_later_cell_rejects_an_available_same_typed_other_bool(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:306: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_rejects_an_available_same_typed_other_bool[SEND-closed]" time="0.003"><failure message="TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'">stage = 'closed', kind = &lt;RawRequestKind.SEND: 'SEND'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_each_later_cell_rejects_an_available_same_typed_other_bool(stage, kind):
+&gt;       graph, details = generator_admission_program(stage=stage, kind=kind)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_admission.py:305: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_admission_graphs.py:527: in generator_admission_program
+    return _later_admission_program(stage=stage, kind=kind, send_none=send_none,
+tests/fixtures/program_generator_admission_graphs.py:479: in _later_admission_program
+    rows = tuple(replace(row, contract=replace(row.contract,
+           ^^^^^
+tests/fixtures/program_generator_admission_graphs.py:479: in &lt;genexpr&gt;
+    rows = tuple(replace(row, contract=replace(row.contract,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = RequestProcessing(raw_use=UseID(value='preentry.raw'), operand_bindings=(), result=InvokeLiteralResult(edge=ControlEdg...'preentry.source'), state_use=UseID(value='preentry.state.1'))), rule=&lt;RequestProcessingRule.CHECK_SEND: 'CHECK_SEND'&gt;)
+changes = {'operands': (RequestOperandBinding(request_ordinal=0, operation_use=UseID(value='matrix.closed.operand')),), 'raw_use...geReference(operation=OperationID(value='preentry.source'), successor_index=0), result=CompletionResult(index=0)), ...}
+
+    def _replace(self, /, **changes):
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(self, **my_changes)'.
+    
+        # It's an error to have init=False fields in 'changes'.
+        # If a field is not in 'changes', read its value from the provided 'self'.
+    
+        for f in getattr(self, _FIELDS).values():
+            # Only consider normal fields or InitVars.
+            if f._field_type is _FIELD_CLASSVAR:
+                continue
+    
+            if not f.init:
+                # Error if this field is specified in changes.
+                if f.name in changes:
+                    raise TypeError(f'field {f.name} is declared with '
+                                    f'init=False, it cannot be specified with '
+                                    f'replace()')
+                continue
+    
+            if f.name not in changes:
+                if f._field_type is _FIELD_INITVAR and f.default is MISSING:
+                    raise TypeError(f"InitVar {f.name!r} "
+                                    f'must be specified with replace()')
+                changes[f.name] = getattr(self, f.name)
+    
+        # Create the new object, which calls __init__() and
+        # __post_init__() (if defined), using all of the init fields we've
+        # added and/or left in 'changes'.  If there are values supplied in
+        # changes that aren't fields, this will correctly raise a
+        # TypeError.
+&gt;       return self.__class__(**changes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'
+
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: TypeError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_rejects_an_available_same_typed_other_bool[THROW-suspended]" time="0.049" /><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_rejects_an_available_same_typed_other_bool[THROW-closed]" time="0.003"><failure message="TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'">stage = 'closed', kind = &lt;RawRequestKind.THROW: 'THROW'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_each_later_cell_rejects_an_available_same_typed_other_bool(stage, kind):
+&gt;       graph, details = generator_admission_program(stage=stage, kind=kind)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_admission.py:305: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_admission_graphs.py:527: in generator_admission_program
+    return _later_admission_program(stage=stage, kind=kind, send_none=send_none,
+tests/fixtures/program_generator_admission_graphs.py:479: in _later_admission_program
+    rows = tuple(replace(row, contract=replace(row.contract,
+           ^^^^^
+tests/fixtures/program_generator_admission_graphs.py:479: in &lt;genexpr&gt;
+    rows = tuple(replace(row, contract=replace(row.contract,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = RequestProcessing(raw_use=UseID(value='preentry.raw'), operand_bindings=(), result=InvokeLiteralResult(edge=ControlEdg...reentry.source'), state_use=UseID(value='preentry.state.1'))), rule=&lt;RequestProcessingRule.CHECK_THROW: 'CHECK_THROW'&gt;)
+changes = {'operands': (RequestOperandBinding(request_ordinal=0, operation_use=UseID(value='matrix.closed.operand')),), 'raw_use...geReference(operation=OperationID(value='preentry.source'), successor_index=0), result=CompletionResult(index=0)), ...}
+
+    def _replace(self, /, **changes):
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(self, **my_changes)'.
+    
+        # It's an error to have init=False fields in 'changes'.
+        # If a field is not in 'changes', read its value from the provided 'self'.
+    
+        for f in getattr(self, _FIELDS).values():
+            # Only consider normal fields or InitVars.
+            if f._field_type is _FIELD_CLASSVAR:
+                continue
+    
+            if not f.init:
+                # Error if this field is specified in changes.
+                if f.name in changes:
+                    raise TypeError(f'field {f.name} is declared with '
+                                    f'init=False, it cannot be specified with '
+                                    f'replace()')
+                continue
+    
+            if f.name not in changes:
+                if f._field_type is _FIELD_INITVAR and f.default is MISSING:
+                    raise TypeError(f"InitVar {f.name!r} "
+                                    f'must be specified with replace()')
+                changes[f.name] = getattr(self, f.name)
+    
+        # Create the new object, which calls __init__() and
+        # __post_init__() (if defined), using all of the init fields we've
+        # added and/or left in 'changes'.  If there are values supplied in
+        # changes that aren't fields, this will correctly raise a
+        # TypeError.
+&gt;       return self.__class__(**changes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'
+
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: TypeError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_rejects_an_available_same_typed_other_bool[CLOSE-suspended]" time="0.058" /><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_rejects_an_available_same_typed_other_bool[CLOSE-closed]" time="0.031" /><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_cannot_reuse_prehelper_state_at_host[NEXT-suspended]" time="0.020"><failure message="ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result">stage = 'suspended', kind = &lt;RawRequestKind.NEXT: 'NEXT'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_each_later_cell_cannot_reuse_prehelper_state_at_host(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:322: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_cannot_reuse_prehelper_state_at_host[NEXT-closed]" time="0.031" /><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_cannot_reuse_prehelper_state_at_host[SEND-suspended]" time="0.019"><failure message="ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result">stage = 'suspended', kind = &lt;RawRequestKind.SEND: 'SEND'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_each_later_cell_cannot_reuse_prehelper_state_at_host(stage, kind):
+        graph, details = generator_admission_program(stage=stage, kind=kind)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_admission.py:322: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:driver.drive: body delivery is not the selected current processing result
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_cannot_reuse_prehelper_state_at_host[SEND-closed]" time="0.003"><failure message="TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'">stage = 'closed', kind = &lt;RawRequestKind.SEND: 'SEND'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_each_later_cell_cannot_reuse_prehelper_state_at_host(stage, kind):
+&gt;       graph, details = generator_admission_program(stage=stage, kind=kind)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_admission.py:321: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_admission_graphs.py:527: in generator_admission_program
+    return _later_admission_program(stage=stage, kind=kind, send_none=send_none,
+tests/fixtures/program_generator_admission_graphs.py:479: in _later_admission_program
+    rows = tuple(replace(row, contract=replace(row.contract,
+           ^^^^^
+tests/fixtures/program_generator_admission_graphs.py:479: in &lt;genexpr&gt;
+    rows = tuple(replace(row, contract=replace(row.contract,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = RequestProcessing(raw_use=UseID(value='preentry.raw'), operand_bindings=(), result=InvokeLiteralResult(edge=ControlEdg...'preentry.source'), state_use=UseID(value='preentry.state.1'))), rule=&lt;RequestProcessingRule.CHECK_SEND: 'CHECK_SEND'&gt;)
+changes = {'operands': (RequestOperandBinding(request_ordinal=0, operation_use=UseID(value='matrix.closed.operand')),), 'raw_use...geReference(operation=OperationID(value='preentry.source'), successor_index=0), result=CompletionResult(index=0)), ...}
+
+    def _replace(self, /, **changes):
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(self, **my_changes)'.
+    
+        # It's an error to have init=False fields in 'changes'.
+        # If a field is not in 'changes', read its value from the provided 'self'.
+    
+        for f in getattr(self, _FIELDS).values():
+            # Only consider normal fields or InitVars.
+            if f._field_type is _FIELD_CLASSVAR:
+                continue
+    
+            if not f.init:
+                # Error if this field is specified in changes.
+                if f.name in changes:
+                    raise TypeError(f'field {f.name} is declared with '
+                                    f'init=False, it cannot be specified with '
+                                    f'replace()')
+                continue
+    
+            if f.name not in changes:
+                if f._field_type is _FIELD_INITVAR and f.default is MISSING:
+                    raise TypeError(f"InitVar {f.name!r} "
+                                    f'must be specified with replace()')
+                changes[f.name] = getattr(self, f.name)
+    
+        # Create the new object, which calls __init__() and
+        # __post_init__() (if defined), using all of the init fields we've
+        # added and/or left in 'changes'.  If there are values supplied in
+        # changes that aren't fields, this will correctly raise a
+        # TypeError.
+&gt;       return self.__class__(**changes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'
+
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: TypeError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_cannot_reuse_prehelper_state_at_host[THROW-suspended]" time="0.050" /><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_cannot_reuse_prehelper_state_at_host[THROW-closed]" time="0.003"><failure message="TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'">stage = 'closed', kind = &lt;RawRequestKind.THROW: 'THROW'&gt;
+
+    @pytest.mark.parametrize("stage", ("suspended", "closed"))
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_each_later_cell_cannot_reuse_prehelper_state_at_host(stage, kind):
+&gt;       graph, details = generator_admission_program(stage=stage, kind=kind)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_admission.py:321: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_admission_graphs.py:527: in generator_admission_program
+    return _later_admission_program(stage=stage, kind=kind, send_none=send_none,
+tests/fixtures/program_generator_admission_graphs.py:479: in _later_admission_program
+    rows = tuple(replace(row, contract=replace(row.contract,
+           ^^^^^
+tests/fixtures/program_generator_admission_graphs.py:479: in &lt;genexpr&gt;
+    rows = tuple(replace(row, contract=replace(row.contract,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = RequestProcessing(raw_use=UseID(value='preentry.raw'), operand_bindings=(), result=InvokeLiteralResult(edge=ControlEdg...reentry.source'), state_use=UseID(value='preentry.state.1'))), rule=&lt;RequestProcessingRule.CHECK_THROW: 'CHECK_THROW'&gt;)
+changes = {'operands': (RequestOperandBinding(request_ordinal=0, operation_use=UseID(value='matrix.closed.operand')),), 'raw_use...geReference(operation=OperationID(value='preentry.source'), successor_index=0), result=CompletionResult(index=0)), ...}
+
+    def _replace(self, /, **changes):
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(self, **my_changes)'.
+    
+        # It's an error to have init=False fields in 'changes'.
+        # If a field is not in 'changes', read its value from the provided 'self'.
+    
+        for f in getattr(self, _FIELDS).values():
+            # Only consider normal fields or InitVars.
+            if f._field_type is _FIELD_CLASSVAR:
+                continue
+    
+            if not f.init:
+                # Error if this field is specified in changes.
+                if f.name in changes:
+                    raise TypeError(f'field {f.name} is declared with '
+                                    f'init=False, it cannot be specified with '
+                                    f'replace()')
+                continue
+    
+            if f.name not in changes:
+                if f._field_type is _FIELD_INITVAR and f.default is MISSING:
+                    raise TypeError(f"InitVar {f.name!r} "
+                                    f'must be specified with replace()')
+                changes[f.name] = getattr(self, f.name)
+    
+        # Create the new object, which calls __init__() and
+        # __post_init__() (if defined), using all of the init fields we've
+        # added and/or left in 'changes'.  If there are values supplied in
+        # changes that aren't fields, this will correctly raise a
+        # TypeError.
+&gt;       return self.__class__(**changes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'
+
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: TypeError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_cannot_reuse_prehelper_state_at_host[CLOSE-suspended]" time="0.058" /><testcase classname="tests.unit.test_program_generator_admission" name="test_each_later_cell_cannot_reuse_prehelper_state_at_host[CLOSE-closed]" time="0.031" /><testcase classname="tests.unit.test_program_generator_admission" name="test_closed_cannot_replay_the_old_same_typed_packet_or_return[NEXT]" time="0.029" /><testcase classname="tests.unit.test_program_generator_admission" name="test_closed_cannot_replay_the_old_same_typed_packet_or_return[SEND]" time="0.003"><failure message="TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'">kind = &lt;RawRequestKind.SEND: 'SEND'&gt;
+
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_closed_cannot_replay_the_old_same_typed_packet_or_return(kind):
+&gt;       graph, details = generator_admission_program(stage="closed", kind=kind, send_none=False)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_admission.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_admission_graphs.py:527: in generator_admission_program
+    return _later_admission_program(stage=stage, kind=kind, send_none=send_none,
+tests/fixtures/program_generator_admission_graphs.py:479: in _later_admission_program
+    rows = tuple(replace(row, contract=replace(row.contract,
+           ^^^^^
+tests/fixtures/program_generator_admission_graphs.py:479: in &lt;genexpr&gt;
+    rows = tuple(replace(row, contract=replace(row.contract,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = RequestProcessing(raw_use=UseID(value='preentry.raw'), operand_bindings=(), result=InvokeLiteralResult(edge=ControlEdg...'preentry.source'), state_use=UseID(value='preentry.state.1'))), rule=&lt;RequestProcessingRule.CHECK_SEND: 'CHECK_SEND'&gt;)
+changes = {'operands': (RequestOperandBinding(request_ordinal=0, operation_use=UseID(value='matrix.closed.operand')),), 'raw_use...geReference(operation=OperationID(value='preentry.source'), successor_index=0), result=CompletionResult(index=0)), ...}
+
+    def _replace(self, /, **changes):
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(self, **my_changes)'.
+    
+        # It's an error to have init=False fields in 'changes'.
+        # If a field is not in 'changes', read its value from the provided 'self'.
+    
+        for f in getattr(self, _FIELDS).values():
+            # Only consider normal fields or InitVars.
+            if f._field_type is _FIELD_CLASSVAR:
+                continue
+    
+            if not f.init:
+                # Error if this field is specified in changes.
+                if f.name in changes:
+                    raise TypeError(f'field {f.name} is declared with '
+                                    f'init=False, it cannot be specified with '
+                                    f'replace()')
+                continue
+    
+            if f.name not in changes:
+                if f._field_type is _FIELD_INITVAR and f.default is MISSING:
+                    raise TypeError(f"InitVar {f.name!r} "
+                                    f'must be specified with replace()')
+                changes[f.name] = getattr(self, f.name)
+    
+        # Create the new object, which calls __init__() and
+        # __post_init__() (if defined), using all of the init fields we've
+        # added and/or left in 'changes'.  If there are values supplied in
+        # changes that aren't fields, this will correctly raise a
+        # TypeError.
+&gt;       return self.__class__(**changes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'
+
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: TypeError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_closed_cannot_replay_the_old_same_typed_packet_or_return[THROW]" time="0.003"><failure message="TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'">kind = &lt;RawRequestKind.THROW: 'THROW'&gt;
+
+    @pytest.mark.parametrize("kind", tuple(RawRequestKind))
+    def test_closed_cannot_replay_the_old_same_typed_packet_or_return(kind):
+&gt;       graph, details = generator_admission_program(stage="closed", kind=kind, send_none=False)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_generator_admission.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_generator_admission_graphs.py:527: in generator_admission_program
+    return _later_admission_program(stage=stage, kind=kind, send_none=send_none,
+tests/fixtures/program_generator_admission_graphs.py:479: in _later_admission_program
+    rows = tuple(replace(row, contract=replace(row.contract,
+           ^^^^^
+tests/fixtures/program_generator_admission_graphs.py:479: in &lt;genexpr&gt;
+    rows = tuple(replace(row, contract=replace(row.contract,
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1779: in replace
+    return _replace(obj, **changes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = RequestProcessing(raw_use=UseID(value='preentry.raw'), operand_bindings=(), result=InvokeLiteralResult(edge=ControlEdg...reentry.source'), state_use=UseID(value='preentry.state.1'))), rule=&lt;RequestProcessingRule.CHECK_THROW: 'CHECK_THROW'&gt;)
+changes = {'operands': (RequestOperandBinding(request_ordinal=0, operation_use=UseID(value='matrix.closed.operand')),), 'raw_use...geReference(operation=OperationID(value='preentry.source'), successor_index=0), result=CompletionResult(index=0)), ...}
+
+    def _replace(self, /, **changes):
+        # We're going to mutate 'changes', but that's okay because it's a
+        # new dict, even if called with 'replace(self, **my_changes)'.
+    
+        # It's an error to have init=False fields in 'changes'.
+        # If a field is not in 'changes', read its value from the provided 'self'.
+    
+        for f in getattr(self, _FIELDS).values():
+            # Only consider normal fields or InitVars.
+            if f._field_type is _FIELD_CLASSVAR:
+                continue
+    
+            if not f.init:
+                # Error if this field is specified in changes.
+                if f.name in changes:
+                    raise TypeError(f'field {f.name} is declared with '
+                                    f'init=False, it cannot be specified with '
+                                    f'replace()')
+                continue
+    
+            if f.name not in changes:
+                if f._field_type is _FIELD_INITVAR and f.default is MISSING:
+                    raise TypeError(f"InitVar {f.name!r} "
+                                    f'must be specified with replace()')
+                changes[f.name] = getattr(self, f.name)
+    
+        # Create the new object, which calls __init__() and
+        # __post_init__() (if defined), using all of the init fields we've
+        # added and/or left in 'changes'.  If there are values supplied in
+        # changes that aren't fields, this will correctly raise a
+        # TypeError.
+&gt;       return self.__class__(**changes)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: RequestProcessing.__init__() got an unexpected keyword argument 'operands'
+
+/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py:1813: TypeError</failure></testcase><testcase classname="tests.unit.test_program_generator_admission" name="test_closed_cannot_replay_the_old_same_typed_packet_or_return[CLOSE]" time="0.033" /></testsuite></testsuites>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="18" time="1.181" timestamp="2026-10-18T17:42:50.440372+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_generator_stopiter" name="test_body_stopiteration_escape_uses_this_packet_and_both_own_constructor_results[internal]" time="0.218" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_body_stopiteration_escape_uses_this_packet_and_both_own_constructor_results[escaping]" time="0.036" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_caught_external_stopiteration_is_a_real_yield_not_an_escape_adapter_or_finished_fact" time="0.012"><failure message="ValueError: exit_binding at program_operation:driver.outcome.exit: missing or wrong kind of exit">def test_caught_external_stopiteration_is_a_real_yield_not_an_escape_adapter_or_finished_fact():
+        graph, details = stopiter_program(route="caught")
+&gt;       require_valid(graph)
+
+tests/unit/test_program_generator_stopiter.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='matrix.calls'), regions=(Region(id=RegionID(value='matrix.calls'), label='declared d...), source=StaticProtocolGap(reason=&lt;StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'&gt;))))
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: exit_binding at program_operation:driver.outcome.exit: missing or wrong kind of exit
+
+scar/ir/program/validation.py:731: ValueError</failure></testcase><testcase classname="tests.unit.test_program_generator_stopiter" name="test_created_stopiteration_is_initial_no_entry_termination_and_preserves_the_selected_original_packet[NORMAL]" time="0.018" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_created_stopiteration_is_initial_no_entry_termination_and_preserves_the_selected_original_packet[RAISE]" time="0.017" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_escape_constructor_host_cannot_replay_an_available_same_typed_old_packet[0-internal]" time="0.027" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_escape_constructor_host_cannot_replay_an_available_same_typed_old_packet[0-escaping]" time="0.023" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_escape_constructor_host_cannot_replay_an_available_same_typed_old_packet[1-internal]" time="0.027" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_escape_constructor_host_cannot_replay_an_available_same_typed_old_packet[1-escaping]" time="0.023" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_escape_host_cannot_reuse_the_state_from_before_its_driver_or_constructor[internal]" time="0.026" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_escape_host_cannot_reuse_the_state_from_before_its_driver_or_constructor[escaping]" time="0.022" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_yield_cannot_be_labelled_as_escaping_stopiteration_without_changing_any_core_source" time="0.026" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_same_core_graph_rejects_wrong_payload_role_or_wrong_body_outcome_rule[state-input]" time="0.022" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_same_core_graph_rejects_wrong_payload_role_or_wrong_body_outcome_rule[state-output]" time="0.022" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_same_core_graph_rejects_wrong_payload_role_or_wrong_body_outcome_rule[return-rule]" time="0.022" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_deleting_adapter_metadata_does_not_license_a_different_host_packet[internal]" time="0.027" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_deleting_adapter_metadata_does_not_license_a_different_host_packet[escaping]" time="0.022" /><testcase classname="tests.unit.test_program_generator_stopiter" name="test_initial_no_body_packet_cannot_be_relabelled_as_a_body_escape_adapter" time="0.003"><failure message="TypeError: outcome adapter input must be DriveResult or ContractResult">def test_initial_no_body_packet_cannot_be_relabelled_as_a_body_escape_adapter():
+        graph, details = stopiter_program(route="created")
+        terminal = _op(graph, details["host_terminals"][0])
+        interface, = graph.driver_interfaces
+        scope = ProtocolScope(ProtocolScopeID("stopiter.wrong.initial.adapter"), ProtocolProfile.GENERATOR_BODY_V1,
+                              DriverSubject(interface.region), _source_gap())
+        source = details["row"].contract.selected_input
+        row = ProtocolOperation(scope.id, C.HOST_ADAPTER, terminal.id, 0,
+&gt;           OutcomeAdapter(source, terminal.terminator.values[0], HostTerminal(terminal.id),
+                           A.GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR), _source_gap())
+
+tests/unit/test_program_generator_stopiter.py:191: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+&lt;string&gt;:7: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = OutcomeAdapter(input=InvokeLiteralResult(edge=ControlEdgeReference(operation=OperationID(value='preentry.source'), suc...)), rule=&lt;OutcomeAdapterRule.GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR: 'GENERATOR_ESCAPE_STOPITER_TO_RUNTIME_ERROR'&gt;)
+
+    def __post_init__(self) -&gt; None:
+        if type(self.input) not in (DriveResult, ContractResult):
+&gt;           raise TypeError("outcome adapter input must be DriveResult or ContractResult")
+E           TypeError: outcome adapter input must be DriveResult or ContractResult
+
+scar/ir/program/protocols.py:375: TypeError</failure></testcase></testsuite></testsuites>

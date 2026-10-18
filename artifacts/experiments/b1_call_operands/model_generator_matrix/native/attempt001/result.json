@@ -1,0 +1,3034 @@
+{
+  "assertions": 0,
+  "implementation": "CPython",
+  "matrix_rows": [
+    {
+      "body_log_after_request": [
+        "body-entry"
+      ],
+      "body_log_before": [],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "sent-value",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "ready",
+        "warnings": []
+      },
+      "request": {
+        "label": "NEXT",
+        "operation": "NEXT",
+        "raw_args": []
+      },
+      "setup": [],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry"
+      ],
+      "body_log_before": [],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "sent-value",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "ready",
+        "warnings": []
+      },
+      "request": {
+        "label": "SEND_NONE",
+        "operation": "SEND",
+        "raw_args": [
+          null
+        ]
+      },
+      "setup": [],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [],
+      "body_log_before": [],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_CREATED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "can't send non-None value to a just-started generator"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 86
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "TypeError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "SEND_NON_NONE",
+        "operation": "SEND",
+        "raw_args": [
+          "payload"
+        ]
+      },
+      "setup": [],
+      "state_after_request": "GEN_CREATED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [],
+      "body_log_before": [],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "instance-value"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            },
+            {
+              "file": "generator_matrix.py",
+              "function": "catching_generator",
+              "line": 128
+            }
+          ],
+          "traceback_mentions_generator_body": true,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_INSTANCE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "instance-value"
+            ],
+            "kind": "exception-instance",
+            "type": "ValueError"
+          }
+        ]
+      },
+      "setup": [],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [],
+      "body_log_before": [],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            },
+            {
+              "file": "generator_matrix.py",
+              "function": "catching_generator",
+              "line": 128
+            }
+          ],
+          "traceback_mentions_generator_body": true,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CLASS",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          }
+        ]
+      },
+      "setup": [],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [],
+      "body_log_before": [],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "class-value"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            },
+            {
+              "file": "generator_matrix.py",
+              "function": "catching_generator",
+              "line": 128
+            }
+          ],
+          "traceback_mentions_generator_body": true,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CLASS_AND_VALUE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          },
+          "class-value"
+        ]
+      },
+      "setup": [],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [],
+      "body_log_before": [],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_CREATED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "throw expected at most 3 arguments, got 4"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "TypeError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_INVALID_ARITY",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          },
+          "a",
+          null,
+          "extra"
+        ]
+      },
+      "setup": [],
+      "state_after_request": "GEN_CREATED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [],
+      "body_log_before": [],
+      "constructor_log_after_request": [
+        "ConstructorFailure.__init__ entered"
+      ],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "exception constructor failed"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            },
+            {
+              "file": "generator_matrix.py",
+              "function": "catching_generator",
+              "line": 128
+            },
+            {
+              "file": "generator_matrix.py",
+              "function": "__init__",
+              "line": 23
+            }
+          ],
+          "traceback_mentions_generator_body": true,
+          "type": "RuntimeError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CONSTRUCTOR_FAILURE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ConstructorFailure"
+          }
+        ]
+      },
+      "setup": [],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [],
+      "body_log_before": [],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "external-stop"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            },
+            {
+              "file": "generator_matrix.py",
+              "function": "catching_generator",
+              "line": 128
+            }
+          ],
+          "traceback_mentions_generator_body": true,
+          "type": "StopIteration"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_STOP_ITERATION",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "external-stop"
+            ],
+            "kind": "exception-instance",
+            "type": "StopIteration"
+          }
+        ]
+      },
+      "setup": [],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [],
+      "body_log_before": [],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": null,
+        "warnings": []
+      },
+      "request": {
+        "label": "CLOSE",
+        "operation": "CLOSE",
+        "raw_args": []
+      },
+      "setup": [],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-sent:None"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "sent-value",
+        "warnings": []
+      },
+      "request": {
+        "label": "NEXT",
+        "operation": "NEXT",
+        "raw_args": []
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-sent:None"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "sent-value",
+        "warnings": []
+      },
+      "request": {
+        "label": "SEND_NONE",
+        "operation": "SEND",
+        "raw_args": [
+          null
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-sent:payload"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "sent-value",
+        "warnings": []
+      },
+      "request": {
+        "label": "SEND_NON_NONE",
+        "operation": "SEND",
+        "raw_args": [
+          "payload"
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-caught:ValueError"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "caught-exception",
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_INSTANCE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "instance-value"
+            ],
+            "kind": "exception-instance",
+            "type": "ValueError"
+          }
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-caught:ValueError"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "caught-exception",
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CLASS",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          }
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-caught:ValueError"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "caught-exception",
+        "warnings": [
+          {
+            "category": "DeprecationWarning",
+            "message": "the (type, exc, tb) signature of throw() is deprecated, use the single-arg signature instead."
+          }
+        ]
+      },
+      "request": {
+        "label": "THROW_CLASS_AND_VALUE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          },
+          "class-value"
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "sent-value",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "throw expected at most 3 arguments, got 4"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "TypeError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_INVALID_ARITY",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          },
+          "a",
+          null,
+          "extra"
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-caught:RuntimeError"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [
+        "ConstructorFailure.__init__ entered"
+      ],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "caught-exception",
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CONSTRUCTOR_FAILURE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ConstructorFailure"
+          }
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-caught:StopIteration"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_SUSPENDED",
+      "followup_drive": {
+        "after": "GEN_SUSPENDED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "returned": "ready",
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "caught-exception",
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_STOP_ITERATION",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "external-stop"
+            ],
+            "kind": "exception-instance",
+            "type": "StopIteration"
+          }
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_SUSPENDED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": "generator-return-during-close",
+        "warnings": []
+      },
+      "request": {
+        "label": "CLOSE",
+        "operation": "CLOSE",
+        "raw_args": []
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 84
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "StopIteration"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "NEXT",
+        "operation": "NEXT",
+        "raw_args": []
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 86
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "StopIteration"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "SEND_NONE",
+        "operation": "SEND",
+        "raw_args": [
+          null
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 86
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "StopIteration"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "SEND_NON_NONE",
+        "operation": "SEND",
+        "raw_args": [
+          "payload"
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "instance-value"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_INSTANCE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "instance-value"
+            ],
+            "kind": "exception-instance",
+            "type": "ValueError"
+          }
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CLASS",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          }
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "class-value"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CLASS_AND_VALUE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          },
+          "class-value"
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "throw expected at most 3 arguments, got 4"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "TypeError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_INVALID_ARITY",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          },
+          "a",
+          null,
+          "extra"
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [
+        "ConstructorFailure.__init__ entered"
+      ],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "exception constructor failed"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            },
+            {
+              "file": "generator_matrix.py",
+              "function": "__init__",
+              "line": 23
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "RuntimeError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CONSTRUCTOR_FAILURE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ConstructorFailure"
+          }
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "external-stop"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "StopIteration"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_STOP_ITERATION",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "external-stop"
+            ],
+            "kind": "exception-instance",
+            "type": "StopIteration"
+          }
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "body_log_before": [
+        "body-entry",
+        "body-GeneratorExit"
+      ],
+      "constructor_log_after_request": [],
+      "constructor_log_before": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "returned": null,
+        "warnings": []
+      },
+      "request": {
+        "label": "CLOSE",
+        "operation": "CLOSE",
+        "raw_args": []
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "ready",
+            "warnings": []
+          }
+        },
+        {
+          "operation": "CLOSE",
+          "outcome": {
+            "returned": "generator-return-during-close",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CLOSED",
+      "state_case": "CLOSED"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "generator already executing"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 84
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "NEXT",
+        "operation": "NEXT",
+        "raw_args": []
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "generator already executing"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 86
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "SEND_NONE",
+        "operation": "SEND",
+        "raw_args": [
+          null
+        ]
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "generator already executing"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 86
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "SEND_NON_NONE",
+        "operation": "SEND",
+        "raw_args": [
+          "payload"
+        ]
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "generator already executing"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_INSTANCE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "instance-value"
+            ],
+            "kind": "exception-instance",
+            "type": "ValueError"
+          }
+        ]
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "generator already executing"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CLASS",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          }
+        ]
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "generator already executing"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CLASS_AND_VALUE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          },
+          "class-value"
+        ]
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "throw expected at most 3 arguments, got 4"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "TypeError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_INVALID_ARITY",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ValueError"
+          },
+          "a",
+          null,
+          "extra"
+        ]
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [
+        "ConstructorFailure.__init__ entered"
+      ],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "generator already executing"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_CONSTRUCTOR_FAILURE",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "kind": "exception-class",
+            "name": "ConstructorFailure"
+          }
+        ]
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "generator already executing"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "THROW_STOP_ITERATION",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "external-stop"
+            ],
+            "kind": "exception-instance",
+            "type": "StopIteration"
+          }
+        ]
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    },
+    {
+      "body_log_after_outer_resume": [
+        "body-entry",
+        "body-running-before-reentry",
+        "body-running-after-reentry"
+      ],
+      "body_log_before_outer_resume": [
+        "body-entry"
+      ],
+      "constructor_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_SUSPENDED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outer_resume_outcome": {
+        "returned": "after-reentry",
+        "warnings": []
+      },
+      "reentrant_outcome": {
+        "raised": {
+          "args": [
+            "generator already executing"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 90
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "ValueError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "CLOSE",
+        "operation": "CLOSE",
+        "raw_args": []
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_outer_resume": "GEN_SUSPENDED",
+      "state_after_reentrant_request_while_body_continues": "GEN_RUNNING",
+      "state_before_outer_resume": "GEN_SUSPENDED",
+      "state_case": "RUNNING_REENTRANT",
+      "state_during_request": "GEN_RUNNING"
+    }
+  ],
+  "platform": "Linux-6.17.0-29-generic-x86_64-with-glibc2.39",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "schema": "scar.cpython-generator-matrix-observation.v1",
+  "scope": "Synchronous Python generators only; small stdlib CPU observations; no SCAR execution or assertion of expected protocol semantics.",
+  "source_runtime_correspondence_verified": false,
+  "special_rows": [
+    {
+      "body_log_after_request": [],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "external-stop"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            },
+            {
+              "file": "generator_matrix.py",
+              "function": "uncaught_stop_generator",
+              "line": 239
+            }
+          ],
+          "traceback_mentions_generator_body": true,
+          "type": "StopIteration"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "EXTERNAL_THROW_STOPITERATION_UNCAUGHT",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "external-stop"
+            ],
+            "kind": "exception-instance",
+            "type": "StopIteration"
+          }
+        ]
+      },
+      "setup": [],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_CREATED",
+      "state_case": "CREATED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry"
+      ],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "generator raised StopIteration"
+          ],
+          "cause": {
+            "args": [
+              "external-stop"
+            ],
+            "type": "StopIteration"
+          },
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 88
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "RuntimeError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "EXTERNAL_THROW_STOPITERATION_UNCAUGHT",
+        "operation": "THROW",
+        "raw_args": [
+          {
+            "args": [
+              "external-stop"
+            ],
+            "kind": "exception-instance",
+            "type": "StopIteration"
+          }
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "armed",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_request": [
+        "body-entry",
+        "body-after-resume-before-StopIteration"
+      ],
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "generator raised StopIteration"
+          ],
+          "cause": {
+            "args": [
+              "body-internal-stop"
+            ],
+            "type": "StopIteration"
+          },
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 86
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "RuntimeError"
+        },
+        "warnings": []
+      },
+      "request": {
+        "label": "BODY_INTERNAL_STOPITERATION",
+        "operation": "SEND",
+        "raw_args": [
+          "trigger-body-stop"
+        ]
+      },
+      "setup": [
+        {
+          "operation": "NEXT",
+          "outcome": {
+            "returned": "armed",
+            "warnings": []
+          }
+        }
+      ],
+      "state_after_request": "GEN_CLOSED",
+      "state_before": "GEN_SUSPENDED",
+      "state_case": "SUSPENDED"
+    },
+    {
+      "body_log_after_first_close": [
+        "body-entry",
+        "caught-GeneratorExit-and-yielded"
+      ],
+      "body_log_after_second_close": [
+        "body-entry",
+        "caught-GeneratorExit-and-yielded"
+      ],
+      "case": "CLOSE_IGNORED_YIELD_RETRY",
+      "final_state": "GEN_CLOSED",
+      "first_close": {
+        "raised": {
+          "args": [
+            "generator ignored GeneratorExit"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 90
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "RuntimeError"
+        },
+        "warnings": []
+      },
+      "later_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "second_close": {
+        "returned": null,
+        "warnings": []
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_first_close": "GEN_SUSPENDED",
+      "state_after_second_close": "GEN_CLOSED",
+      "state_before_close": "GEN_SUSPENDED"
+    },
+    {
+      "body_log_after_first_close": [
+        "body-entry",
+        "finally-before-yield"
+      ],
+      "body_log_after_second_close": [
+        "body-entry",
+        "finally-before-yield"
+      ],
+      "case": "CLOSE_YIELD_FROM_FINALLY_RETRY",
+      "final_state": "GEN_CLOSED",
+      "first_close": {
+        "raised": {
+          "args": [
+            "generator ignored GeneratorExit"
+          ],
+          "cause": null,
+          "context": null,
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 90
+            }
+          ],
+          "traceback_mentions_generator_body": false,
+          "type": "RuntimeError"
+        },
+        "warnings": []
+      },
+      "later_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "second_close": {
+        "returned": null,
+        "warnings": []
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_first_close": "GEN_SUSPENDED",
+      "state_after_second_close": "GEN_CLOSED",
+      "state_before_close": "GEN_SUSPENDED"
+    },
+    {
+      "body_log_after_close": [
+        "body-entry",
+        "caught-GeneratorExit-then-raise"
+      ],
+      "case": "CLOSE_PROPAGATED_BODY_FAILURE",
+      "final_state": "GEN_CLOSED",
+      "followup_drive": {
+        "after": "GEN_CLOSED",
+        "before": "GEN_CLOSED",
+        "operation": "NEXT",
+        "outcome": {
+          "raised": {
+            "args": [],
+            "cause": null,
+            "context": null,
+            "traceback_frames": [
+              {
+                "file": "generator_matrix.py",
+                "function": "invoke",
+                "line": 84
+              }
+            ],
+            "traceback_mentions_generator_body": false,
+            "type": "StopIteration"
+          },
+          "warnings": []
+        }
+      },
+      "outcome": {
+        "raised": {
+          "args": [
+            "close cleanup failed"
+          ],
+          "cause": null,
+          "context": {
+            "args": [],
+            "type": "GeneratorExit"
+          },
+          "traceback_frames": [
+            {
+              "file": "generator_matrix.py",
+              "function": "invoke",
+              "line": 90
+            },
+            {
+              "file": "generator_matrix.py",
+              "function": "raising_close_generator",
+              "line": 300
+            }
+          ],
+          "traceback_mentions_generator_body": true,
+          "type": "RuntimeError"
+        },
+        "warnings": []
+      },
+      "setup": {
+        "returned": "armed",
+        "warnings": []
+      },
+      "state_after_close": "GEN_CLOSED",
+      "state_before_close": "GEN_SUSPENDED"
+    }
+  ],
+  "transformation_authorized": false
+}

@@ -1,5 +1,21 @@
 # Current evidence and remaining work
 
+## P2 declared matrix and component passed; frozen full pending (2026-10-18)
+
+[Plan](M1_GENERATOR_MATRIX_PLAN.md), [amendment](M1_ADMISSION_PREDICATE_CONTRACT.md)
+and [progress/failures](M1_GENERATOR_MATRIX_PROGRESS.md) now connect original
+state reads, this bool/branch, static caller inputs, final gate snapshots and
+current close/exception host payloads. All16 phase/request cells and their
+consumer counterexamples are covered in the supplied model, including actual
+static body reentry and initial/internal/escaping exception routes. Caller-context
+joint inputs share prepared indexes, flow and budget. Single-completion INVOKE
+uses explicit Program18 capability; legacy wires retain their family. Independent
+review passes within scope. **272 focused /657 component cases /36 criteria**
+pass at one646-source fingerprint. The clean frozen full run is next; the prior
+5,401 result below belongs to its older implementation. Source/native category,
+holder coherence and runtime identity remain unproved. P3–P5, D3 and full
+M0–M2 remain OPEN; no automatic LeWM recovery, transformation or new speedup.
+
 ## P2 protocol foundation accepted; complete P2 remains open (2026-10-18)
 
 [Scope and next steps](M1_PROTOCOL_FOUNDATION.md): exact protocol records attach

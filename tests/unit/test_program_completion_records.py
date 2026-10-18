@@ -94,8 +94,9 @@ def test_invoke_requires_one_distinct_normal_and_raise_completion_target():
     raise_same = CompletionSuccessor(ExitKind.RAISE, BlockID("same"), ())
     with pytest.raises(ValueError, match="distinct"):
         Terminator(TerminatorKind.INVOKE, (normal, raise_same))
-    with pytest.raises(ValueError):
-        Terminator(TerminatorKind.INVOKE, (normal,))
+    # General INVOKE may now have one actual completion (wire v18); its
+    # operation signature must still match, and old wire families reject it.
+    assert Terminator(TerminatorKind.INVOKE, (normal,)).successors == (normal,)
     with pytest.raises(ValueError):
         Terminator(TerminatorKind.INVOKE, (
             normal, CompletionSuccessor(ExitKind.NORMAL, BlockID("other"), ())))
@@ -118,7 +119,7 @@ def test_operation_invoke_checks_signatures_results_and_preserves_ordinary_use_i
     with pytest.raises(ValueError, match="invoke_arguments must reference"):
         invoke_operation(invoke_arguments=(UseID("not-an-operation-use"),))
 
-    with pytest.raises(ValueError, match="NORMAL and one RAISE"):
+    with pytest.raises(ValueError, match="completion signatures"):
         invoke_operation(completions=(
             CompletionSignature(ExitKind.NORMAL, ()),
             CompletionSignature(ExitKind.NORMAL, ()),

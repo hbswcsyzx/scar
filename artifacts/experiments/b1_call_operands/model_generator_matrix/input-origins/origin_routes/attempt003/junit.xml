@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="6" time="0.771" timestamp="2026-10-18T17:03:26.594089+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_input_origins" name="test_two_layer_call_invoke_routes_keep_none_and_non_none_callers_separate" time="0.001"><failure message="TypeError: Block.operations must contain OperationID">def test_two_layer_call_invoke_routes_keep_none_and_non_none_callers_separate():
+&gt;       graph, details = input_origin_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_input_origins.py:20: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_input_origin_graphs.py:223: in input_origin_program
+    middle_blocks[0] = Block(entry_block.id, entry_block.arguments,
+&lt;string&gt;:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Block(id=BlockID(value='inputs.middle.entry'), arguments=(ValueID(value='inputs.middle.raw'), ValueID(value='inputs.middle.payload')), operations=('inputs.middle.invoke.driver',))
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.id, BlockID):
+            raise TypeError("Block.id must be BlockID")
+        _tuple(self.arguments, "Block.arguments")
+        if any(not isinstance(item, ValueID) for item in self.arguments):
+            raise TypeError("Block.arguments must contain ValueID")
+        _unique(self.arguments, "Block.arguments")
+        _tuple(self.operations, "Block.operations")
+        if any(not isinstance(item, OperationID) for item in self.operations):
+&gt;           raise TypeError("Block.operations must contain OperationID")
+E           TypeError: Block.operations must contain OperationID
+
+scar/ir/program/model.py:739: TypeError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_reference_none_literal_is_a_leaf_only_for_the_exact_owned_use" time="0.001"><failure message="TypeError: Block.operations must contain OperationID">def test_reference_none_literal_is_a_leaf_only_for_the_exact_owned_use():
+&gt;       graph, details = input_origin_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_input_origins.py:76: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_input_origin_graphs.py:223: in input_origin_program
+    middle_blocks[0] = Block(entry_block.id, entry_block.arguments,
+&lt;string&gt;:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Block(id=BlockID(value='inputs.middle.entry'), arguments=(ValueID(value='inputs.middle.raw'), ValueID(value='inputs.middle.payload')), operations=('inputs.middle.invoke.driver',))
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.id, BlockID):
+            raise TypeError("Block.id must be BlockID")
+        _tuple(self.arguments, "Block.arguments")
+        if any(not isinstance(item, ValueID) for item in self.arguments):
+            raise TypeError("Block.arguments must contain ValueID")
+        _unique(self.arguments, "Block.arguments")
+        _tuple(self.operations, "Block.operations")
+        if any(not isinstance(item, OperationID) for item in self.operations):
+&gt;           raise TypeError("Block.operations must contain OperationID")
+E           TypeError: Block.operations must contain OperationID
+
+scar/ir/program/model.py:739: TypeError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_loop_backedge_keeps_prior_raw_producer_and_dynamic_visit_gap" time="0.001"><failure message="TypeError: Block.operations must contain OperationID">def test_loop_backedge_keeps_prior_raw_producer_and_dynamic_visit_gap():
+&gt;       graph, details = input_origin_program(loop=True)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_input_origins.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_input_origin_graphs.py:219: in input_origin_program
+    middle_blocks[-1] = Block(middle_blocks[-1].id,
+&lt;string&gt;:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Block(id=BlockID(value='inputs.middle.exit'), arguments=(ValueID(value='inputs.middle.exit.raw'), ValueID(value='inputs.middle.exit.payload')), operations=('inputs.middle.invoke.driver',))
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.id, BlockID):
+            raise TypeError("Block.id must be BlockID")
+        _tuple(self.arguments, "Block.arguments")
+        if any(not isinstance(item, ValueID) for item in self.arguments):
+            raise TypeError("Block.arguments must contain ValueID")
+        _unique(self.arguments, "Block.arguments")
+        _tuple(self.operations, "Block.operations")
+        if any(not isinstance(item, OperationID) for item in self.operations):
+&gt;           raise TypeError("Block.operations must contain OperationID")
+E           TypeError: Block.operations must contain OperationID
+
+scar/ir/program/model.py:739: TypeError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_static_recursion_is_finite_and_keeps_an_explicit_cycle_gap" time="0.001"><failure message="TypeError: Block.operations must contain OperationID">def test_static_recursion_is_finite_and_keeps_an_explicit_cycle_gap():
+&gt;       graph, details = input_origin_program(recursive=True, second_caller=False)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_input_origins.py:112: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_input_origin_graphs.py:223: in input_origin_program
+    middle_blocks[0] = Block(entry_block.id, entry_block.arguments,
+&lt;string&gt;:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Block(id=BlockID(value='inputs.middle.entry'), arguments=(ValueID(value='inputs.middle.raw'), ValueID(value='inputs.middle.payload')), operations=(OperationID(value='inputs.middle.recursive.call'), 'inputs.middle.invoke.driver'))
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.id, BlockID):
+            raise TypeError("Block.id must be BlockID")
+        _tuple(self.arguments, "Block.arguments")
+        if any(not isinstance(item, ValueID) for item in self.arguments):
+            raise TypeError("Block.arguments must contain ValueID")
+        _unique(self.arguments, "Block.arguments")
+        _tuple(self.operations, "Block.operations")
+        if any(not isinstance(item, OperationID) for item in self.operations):
+&gt;           raise TypeError("Block.operations must contain OperationID")
+E           TypeError: Block.operations must contain OperationID
+
+scar/ir/program/model.py:739: TypeError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_direct_call_layer_and_budget_cursor_preserve_pending_work" time="0.001"><failure message="TypeError: Block.operations must contain OperationID">def test_direct_call_layer_and_budget_cursor_preserve_pending_work():
+&gt;       graph, details = input_origin_program(invoke_middle=False)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_input_origins.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_input_origin_graphs.py:244: in input_origin_program
+    middle_blocks[0] = Block(entry_block.id, entry_block.arguments,
+&lt;string&gt;:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Block(id=BlockID(value='inputs.middle.entry'), arguments=(ValueID(value='inputs.middle.raw'), ValueID(value='inputs.middle.payload')), operations=('inputs.middle.call.driver', 'inputs.middle.call.done'))
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.id, BlockID):
+            raise TypeError("Block.id must be BlockID")
+        _tuple(self.arguments, "Block.arguments")
+        if any(not isinstance(item, ValueID) for item in self.arguments):
+            raise TypeError("Block.arguments must contain ValueID")
+        _unique(self.arguments, "Block.arguments")
+        _tuple(self.operations, "Block.operations")
+        if any(not isinstance(item, OperationID) for item in self.operations):
+&gt;           raise TypeError("Block.operations must contain OperationID")
+E           TypeError: Block.operations must contain OperationID
+
+scar/ir/program/model.py:739: TypeError</failure></testcase><testcase classname="tests.unit.test_program_input_origins" name="test_unknown_consumer_use_is_not_repaired_from_equal_values" time="0.001"><failure message="TypeError: Block.operations must contain OperationID">def test_unknown_consumer_use_is_not_repaired_from_equal_values():
+&gt;       graph, details = input_origin_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_input_origins.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_input_origin_graphs.py:223: in input_origin_program
+    middle_blocks[0] = Block(entry_block.id, entry_block.arguments,
+&lt;string&gt;:6: in __init__
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = Block(id=BlockID(value='inputs.middle.entry'), arguments=(ValueID(value='inputs.middle.raw'), ValueID(value='inputs.middle.payload')), operations=('inputs.middle.invoke.driver',))
+
+    def __post_init__(self) -&gt; None:
+        if not isinstance(self.id, BlockID):
+            raise TypeError("Block.id must be BlockID")
+        _tuple(self.arguments, "Block.arguments")
+        if any(not isinstance(item, ValueID) for item in self.arguments):
+            raise TypeError("Block.arguments must contain ValueID")
+        _unique(self.arguments, "Block.arguments")
+        _tuple(self.operations, "Block.operations")
+        if any(not isinstance(item, OperationID) for item in self.operations):
+&gt;           raise TypeError("Block.operations must contain OperationID")
+E           TypeError: Block.operations must contain OperationID
+
+scar/ir/program/model.py:739: TypeError</failure></testcase></testsuite></testsuites>
