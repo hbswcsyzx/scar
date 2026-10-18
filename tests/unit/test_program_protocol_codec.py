@@ -29,7 +29,7 @@ def test_f_capability_roundtrips_scope_only_and_n_r_port_graphs(target):
     graph, _ = generator_protocol_program(target=target)
     wire = codec.dumps(graph)
     document = json.loads(wire)
-    assert codec.SCHEMA_VERSION == 19
+    assert codec.SCHEMA_VERSION == 20
     # F does not select O; the independent old execution still selects v7.
     assert execution_codec.SCHEMA_VERSION >= 7
     old_wire = (Path(__file__).parents[1] / "fixtures/execution_v7_frozen.json").read_bytes()

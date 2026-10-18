@@ -22,17 +22,39 @@ def _binding_key(row):
 
 
 class _Analysis:
-    def __init__(self, ctx):
+    def __init__(self, ctx, *, prepare=True):
         self.ctx = ctx
         self.issues, self.gaps, self.obligations = [], [], []
         self.associations, self.sessions, self.cancellation = [], [], []
         self.deliveries = []
+        self.admissions = []
         self.cursor = None
+        # A single predicate view needs local diagnostics and port helpers,
+        # not another scan of the complete family inventory.
+        if not prepare:
+            return
+        from .protocol_connections import RequestStateCondition, RequestStateRule
+        from .protocols import AdmissionPredicate
         self.rows_by_operation = {}
+        initial = getattr(ctx, '_async_initial_predicates', None)
+        building_initial = initial is None
+        if building_initial:
+            initial = {}
         for row in ctx.graph.protocol_operations:
             self.rows_by_operation.setdefault(row.operation, []).append(row)
+            if (building_initial and type(row.contract) is AdmissionPredicate
+                    and type(row.contract.subject) is RequestStateCondition
+                    and row.contract.subject.rule is RequestStateRule.IS_INITIAL_STEP):
+                initial.setdefault(row.scope, []).append(row)
+        if building_initial:
+            initial = ctx._async_initial_predicates = {scope: tuple(rows) for scope, rows in initial.items()}
+            ctx.preparation['async_initial_predicate_index_rows'] = len(ctx.graph.protocol_operations)
+            ctx.preparation['async_initial_predicates'] = sum(len(rows) for rows in initial.values())
+        self.initial_predicates = initial
         self.creates = {row.operation: row for row in ctx.graph.async_request_creates}
-        markers, updates, bindings = {}, {}, {}
+        markers, updates, bindings, gates = {}, {}, {}, {}
+        for gate in ctx.graph.final_body_gates:
+            gates.setdefault(ctx.region_of.get(gate.operation), []).append(gate)
         for marker in ctx.graph.request_association_reads:
             markers.setdefault(ctx.region_of.get(marker.operation), []).append(marker)
         for update in ctx.graph.session_updates:
@@ -46,8 +68,60 @@ class _Analysis:
             'drives': tuple(ctx.drives_by_region.get(getattr(scope.subject, 'interface_region', getattr(scope.subject, 'region', None)), ())),
             'associations': tuple(markers.get(getattr(scope.subject, 'interface_region', getattr(scope.subject, 'region', None)), ())),
             'updates': tuple(updates.get(getattr(scope.subject, 'interface_region', getattr(scope.subject, 'region', None)), ())),
+            'gates': tuple(gates.get(getattr(scope.subject, 'interface_region', getattr(scope.subject, 'region', None)), ())),
             'bindings': tuple(bindings.get(scope.id, ()))} for scope in ctx.scopes.values()
             if scope.profile in (ProtocolProfile.ASYNC_GENERATOR_BODY_V1, ProtocolProfile.TASK_CANCEL_EXTERNAL_V1))
+
+    def request_admission(self, scope):
+        """Keep every original gate before looking for predicate attachments."""
+        from .protocol_connections import RequestStateCondition
+        from .protocols import AdmissionPredicate
+        rows = tuple(row for row in self.ctx.graph.protocol_operations if row.scope == scope.id
+            and type(row.contract) is AdmissionPredicate and type(row.contract.subject) is RequestStateCondition)
+        inventory = next(item for item in self.inventory if item['scope'] is scope)
+        for gate in inventory['gates']:
+            path = f'async.request_admission.{gate.operation}'
+            candidates, cursor, gaps = [], None, []
+            if not self.spend('request_admission_gates', path):
+                cursor = {'phase': 'request_admission', 'gate': gate.operation, 'predicate_ordinal': 0}
+            else:
+                for number, row in enumerate(rows):
+                    if not self.spend('request_admission_predicates', path):
+                        cursor = {'phase': 'request_admission', 'gate': gate.operation, 'predicate_ordinal': number}
+                        break
+                    view = request_state_view(self.ctx, row)
+                    for frontier in view['control_routes']['frontiers']:
+                        if not self.spend('request_admission_frontiers', path):
+                            cursor = {'phase': 'request_admission', 'gate': gate.operation, 'predicate_ordinal': number}
+                            break
+                        if frontier.get('gate') is gate:
+                            candidates.append({'predicate': row, 'view': view, 'frontier': frontier})
+                            code = ('async_request_complete_success_incompatible_at_snapshot'
+                                if frontier['request_target_compatible_at_snapshot'] is False else
+                                'async_request_admission_snapshot_unresolved' if frontier['currentness'] is not True else None)
+                            if code is not None:
+                                gaps.append(self.gap(code, path, predicate=row.operation, edge=frontier['edge']))
+                    if self.ctx.budget.truncated:
+                        cursor = cursor or {'phase': 'request_admission', 'gate': gate.operation, 'predicate_ordinal': number}
+                        break
+            if cursor is not None:
+                status = 'PARTIAL' if candidates else 'NOT_CHECKED'
+                if self.cursor is None:
+                    self.cursor = cursor
+            elif not candidates:
+                status = 'MISSING'
+                gaps.append(self.gap('async_request_admission_predicate_missing', path))
+            else:
+                status = ('PARTIAL' if any(item['view']['gaps'] or
+                    item['frontier']['request_target_compatible_at_snapshot'] is not True
+                    for item in candidates) else 'DECLARED')
+            result = {'scope': scope.id, 'gate': gate, 'operation': self.ctx.operations[gate.operation],
+                'drive': self.ctx.drives[gate.drive], 'predicate_count': len(rows),
+                'candidates': tuple(candidates), 'status': status, 'cursor': cursor, 'gaps': tuple(gaps),
+                'native_admission_verified': False, 'transformation_authorized': False}
+            self.admissions.append(result)
+            self.obligations.append({'scope': scope.id, 'clause': ProtocolClause.ASYNC_REQUEST_SOURCE,
+                'operation': gate.operation, 'gate': gate, 'admission': result, 'status': status})
 
     def request_projection(self, request, path):
         """Conditional field recipes rooted at R, not at the actual body."""
@@ -127,16 +201,18 @@ class _Analysis:
                 'conditions': ('normalization class/callback semantics unproved',)}
 
     def initial_step(self, scope, drive):
-        from .protocol_connections import RequestStateCondition, RequestStateRule
-        from .protocols import AdmissionPredicate
         selected = []
-        for row in self.ctx.graph.protocol_operations:
-            if row.scope != scope.id or type(row.contract) is not AdmissionPredicate or type(row.contract.subject) is not RequestStateCondition:
-                continue
-            if row.contract.subject.rule is not RequestStateRule.IS_INITIAL_STEP:
-                continue
+        for row in self.initial_predicates.get(scope.id, ()):
+            if not self.spend('initial_step_predicates', drive.operation):
+                return None
             view = request_state_view(self.ctx, row)
+            if self.ctx.budget.truncated:
+                if self.cursor is None:
+                    self.cursor = {'path': str(drive.operation), 'phase': 'initial_step_predicate_view'}
+                return None
             for frontier in view['control_routes']['frontiers']:
+                if not self.spend('initial_step_frontiers', drive.operation):
+                    return None
                 if frontier.get('drive') == drive:
                     truth = frontier['edge'].successor_index == 0
                     selected.append(truth)
@@ -226,7 +302,9 @@ class _Analysis:
             elif not alternatives or not all(item['match'] is True for item in alternatives):
                 self.gap('async_delivery_source_unresolved', path)
             self.deliveries.append({'scope': scope.id, 'drive': drive, 'slot': item.slot,
-                'actual': actual, 'initial_step': first, 'alternatives': tuple(alternatives)})
+                'actual': actual, 'initial_step': first, 'alternatives': tuple(alternatives),
+                'selection_basis': 'ORIGINAL_PREDICATE_EDGE', 'current_step_verified': False,
+                'conditions': ('historical branch selects the declared source, not current phase or gate admission',)})
 
     def spend(self, kind, path):
         if self.ctx.spend('async_' + kind):
@@ -240,7 +318,9 @@ class _Analysis:
         self.issues.append((code, str(path), message))
 
     def gap(self, code, path, **details):
-        self.gaps.append({'code': code, 'path': str(path), **details})
+        result = {'code': code, 'path': str(path), **details}
+        self.gaps.append(result)
+        return result
 
     def check(self, result, code, path):
         if result['match'] is False:
@@ -757,6 +837,7 @@ class _Analysis:
     def run(self):
         scopes = tuple(scope for scope in self.ctx.scopes.values() if scope.profile is ProtocolProfile.ASYNC_GENERATOR_BODY_V1)
         for scope in scopes:
+            self.request_admission(scope)
             if not self.spend('scopes', str(scope.id)):
                 for drive in self.ctx.drives_by_region.get(scope.subject.interface_region, ()):
                     self.obligations.append({'scope': scope.id, 'clause': ProtocolClause.ASYNC_REQUEST_ASSOCIATE,
@@ -771,6 +852,7 @@ class _Analysis:
         self.session_outcomes(scopes)
         self.cancellation_bindings()
         return {'issues': tuple(self.issues), 'associations': tuple(self.associations), 'deliveries': tuple(self.deliveries),
+                'request_admissions': tuple(self.admissions),
                 'session_outcomes': tuple(self.sessions), 'cancellation': tuple(self.cancellation),
                 'obligations': tuple(self.obligations), 'inventory': self.inventory,
                 'gaps': tuple(self.gaps), 'cursor': self.cursor,
@@ -818,7 +900,14 @@ def request_state_errors(ctx, row):
 
 def request_state_view(ctx, row):
     from .admission import admission_routes
-    analysis = _Analysis(ctx)
+    from .protocol_connections import RequestStateRule
+    cache = getattr(ctx, '_async_request_state_views', None)
+    if cache is None:
+        cache = ctx._async_request_state_views = {}
+    key = row.scope, row.clause, row.operation, row.slot
+    if key in cache:
+        return cache[key]
+    analysis = _Analysis(ctx, prepare=False)
     contract, operation = row.contract, ctx.operations[row.operation]
     branch = ctx.operations[contract.branch]
     result = ctx.port(contract.result)
@@ -828,19 +917,65 @@ def request_state_view(ctx, row):
     # here; currentness at each final gate is checked by admission_routes.
     support = analysis.support(contract.subject.state_sites, operation, 'async.request_state.read')
     routes = admission_routes(ctx, row)
-    gaps = tuple(analysis.gaps) + tuple(routes['gaps'])
+    interface = ctx.interfaces[ctx.region_of[operation.id]]
+    expected = analysis.formal(interface.region, interface.receiver)
+    actual = OwnedUse(operation.id, contract.subject.request_use)
+    request = ctx.bind(expected, actual, path='async.request_state.receiver')
+    gaps = [*analysis.gaps, *routes['gaps']]
+    original_gap_count = len(analysis.gaps)
+    if request['match'] is not True:
+        gaps.append('async_request_predicate_receiver_unresolved')
+    frontiers = []
+    for frontier in routes['frontiers']:
+        if frontier['kind'] != 'FINAL_GATE':
+            frontiers.append(frontier)
+            continue
+        if not analysis.spend('request_admission_bindings', row.operation):
+            gate_request = {'match': None, 'routes': (), 'gaps': ('protocol_budget_exhausted',), 'cursor': None}
+            same = gate_request
+        else:
+            gate = frontier['gate']
+            gate_operation = frontier['operation']
+            gate_request = (ctx.bind(expected, OwnedUse(gate_operation.id,
+                gate_operation.invoke_arguments[gate.session_argument]), path='async.request_state.gate_receiver')
+                if gate.session_argument is not None else
+                {'match': None, 'routes': (), 'gaps': ('async_gate_session_port_missing',), 'cursor': None})
+            same = ctx.correlate(request, gate_request)
+        truth = frontier['edge'].successor_index == 0
+        complete_support = (bool(frontier['state_support']) and
+            len(frontier['state_support']) == len(operation.accesses))
+        currentness = (None if ctx.budget.truncated or not complete_support else
+                       frontier['read_snapshot_current'])
+        compatible = None
+        if (contract.subject.rule is RequestStateRule.IS_COMPLETE and currentness is True
+                and same['match'] is True and boolean['match'] is True):
+            compatible = not truth
+            if not compatible:
+                gaps.append('async_request_complete_success_incompatible_at_snapshot')
+        elif currentness is not True:
+            gaps.append('async_request_admission_snapshot_unresolved')
+        frontiers.append({**frontier, 'truth': truth, 'request_binding': request,
+            'gate_request_binding': gate_request, 'same_request': same, 'currentness': currentness,
+            'request_target_compatible_at_snapshot': compatible,
+            'native_admission_verified': False,
+            'conditions': ('compatibility concerns only this predicate, never complete admission',
+                'initial-step selects L/S and does not establish body phase or occupancy')})
+    routes = {**routes, 'frontiers': tuple(frontiers)}
     if boolean['match'] is not True:
-        gaps += ('async_request_predicate_bool_unresolved',)
-    return {'predicate': row, 'operation': operation, 'subject': contract.subject,
+        gaps.append('async_request_predicate_bool_unresolved')
+    gaps.extend(analysis.gaps[original_gap_count:])
+    view = {'predicate': row, 'operation': operation, 'subject': contract.subject,
             'input': ctx.owned_use(operation.id, contract.subject.request_use),
             'result': result, 'branch': branch, 'condition': ctx.owned_use(branch.id, condition.use),
             'bool_must_copy': boolean['match'], 'binding': boolean, 'state_support': support,
             'successors': tuple(enumerate(branch.terminator.successors)),
-            'control_routes': routes, 'gaps': gaps,
+            'request_binding': request, 'control_routes': routes, 'gaps': tuple(gaps),
             'status': 'PARTIAL' if gaps else 'DECLARED',
             'conditions': ('request state implementation and source applicability unproved',),
             'native_phase_verified': False, 'source_runtime_verified': False,
             'transformation_authorized': False}
+    cache[key] = view
+    return view
 
 
 __all__ = ['async_connections', 'async_errors', 'request_state_errors', 'request_state_view']

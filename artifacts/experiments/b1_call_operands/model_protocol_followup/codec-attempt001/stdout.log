@@ -1,0 +1,8 @@
+
+==================================== ERRORS ====================================
+_______ ERROR collecting tests/unit/test_program_method_lookup_codec.py ________
+tests/unit/test_program_method_lookup_codec.py::test_program20_method_lookup_rules_roundtrip_original_ports: 'request' is a reserved name and cannot be used in @pytest.mark.parametrize
+=========================== short test summary info ============================
+ERROR tests/unit/test_program_method_lookup_codec.py - Failed: tests/unit/tes...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 1.56s

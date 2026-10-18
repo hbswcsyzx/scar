@@ -160,11 +160,12 @@ _allow(ProtocolProfile.COROUTINE_AWAIT_WRAPPER_V1, (ProtocolClause.WRAPPER_CALL,
 _allow(ProtocolProfile.DELEGATION_SITE_V1, (ProtocolClause.DELEGATE_ITER_LOOKUP,), ProtocolCall,
        {ProtocolCallRule.DELEGATE_ITER})
 _allow(ProtocolProfile.DELEGATION_SITE_V1, (ProtocolClause.DELEGATE_ADVANCE,), ProtocolCall,
-       {ProtocolCallRule.DELEGATE_NEXT, ProtocolCallRule.DELEGATE_SEND})
+       {ProtocolCallRule.DELEGATE_NEXT, ProtocolCallRule.DELEGATE_SEND,
+        ProtocolCallRule.DELEGATE_NEXT_LOOKUP, ProtocolCallRule.DELEGATE_SEND_LOOKUP})
 _allow(ProtocolProfile.DELEGATION_SITE_V1, (ProtocolClause.DELEGATE_THROW,), ProtocolCall,
-       {ProtocolCallRule.DELEGATE_THROW})
+       {ProtocolCallRule.DELEGATE_THROW, ProtocolCallRule.DELEGATE_THROW_LOOKUP})
 _allow(ProtocolProfile.DELEGATION_SITE_V1, (ProtocolClause.DELEGATE_CLOSE,), ProtocolCall,
-       {ProtocolCallRule.DELEGATE_CLOSE})
+       {ProtocolCallRule.DELEGATE_CLOSE, ProtocolCallRule.DELEGATE_CLOSE_LOOKUP})
 _allow(_ASYNC_PROFILE, (ProtocolClause.ASYNC_REQUEST_DELIVERY,), ProtocolCall,
        {ProtocolCallRule.ASYNC_REQUEST_AWAIT})
 _allow(ProtocolProfile.TASK_CANCEL_EXTERNAL_V1, (ProtocolClause.TASK_CANCEL_REQUEST,), ProtocolCall,

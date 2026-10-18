@@ -19,8 +19,8 @@ from scar.ir.program.structured import ControlEdgeReference
 
 from scar.ir.program.protocols import (
     AdmissionPredicate, BodyStateCondition, ContractResult, HostTerminal, NativeExit,
-    OperationSiteSubject, OwnedUse, ProtocolClause, ProtocolProfile,
-    ProtocolScope, ProtocolSourcePort, ReferenceIsNoneCondition, RequestProcessing,
+    OperationSiteSubject, OwnedUse, ProtocolCall, ProtocolCallRule, ProtocolClause,
+    ProtocolProfile, ProtocolScope, ProtocolSourcePort, ReferenceIsNoneCondition, RequestProcessing,
     RequestProcessingRule, StaticProtocolGap,
     _protocol_result_port, _protocol_source_port,
 )
@@ -474,6 +474,12 @@ PROTOCOL_CONNECTION_RECORD_TAGS = MappingProxyType({
 
 PROTOCOL_CONNECTION_CONTRACTS = (ResumeSourceBinding, RequestAssociation)
 PROTOCOL_CONNECTION_ADMISSION_SUBJECTS = (RequestStateCondition,)
+_DELEGATED_METHOD_LOOKUP_RULES = frozenset({
+    ProtocolCallRule.DELEGATE_NEXT_LOOKUP,
+    ProtocolCallRule.DELEGATE_SEND_LOOKUP,
+    ProtocolCallRule.DELEGATE_THROW_LOOKUP,
+    ProtocolCallRule.DELEGATE_CLOSE_LOOKUP,
+})
 
 
 def _bind_protocol_records() -> None:
@@ -491,6 +497,8 @@ def has_protocol_connection_capability(graph: object) -> bool:
     """
     if any(getattr(graph, name, ()) for name in (
             "protocol_call_inputs", "protocol_result_consumers", "protocol_bindings")):
+        return True
+    if has_delegated_method_lookup_capability(graph):
         return True
     scope_profiles = {
         row.id: row.profile for row in getattr(graph, "protocol_scopes", ())
@@ -527,6 +535,20 @@ def has_protocol_connection_capability(graph: object) -> bool:
     return False
 
 
+def has_delegated_method_lookup_capability(graph: object) -> bool:
+    """Return whether a graph declares one of the Program20 method lookups.
+
+    This is deliberately a closed rule check over canonical ProtocolCall rows.
+    Program19 knows the same record shape, but must not reinterpret these new
+    rules under its frozen wire capability.
+    """
+    return any(
+        type(getattr(row, "contract", None)) is ProtocolCall
+        and row.contract.rule in _DELEGATED_METHOD_LOOKUP_RULES
+        for row in getattr(graph, "protocol_operations", ())
+    )
+
+
 __all__ = [
     "AssociationPort", "AsyncSessionOutcome", "CallTrigger", "CancelDelivery",
     "CancelDeliveryRef", "CancelHandling", "ExactResultPort", "ExpectedSourcePort",
@@ -538,5 +560,5 @@ __all__ = [
     "RequestStateRule", "ResumeSourceBinding", "TaskCreatedTarget", "TaskStatusRead",
     "TaskStatusRule", "TaskTargetRead", "TaskTargetRole", "TaskTargetSource",
     "_bind_connection_model_ports", "_bind_protocol_records",
-    "has_protocol_connection_capability",
+    "has_delegated_method_lookup_capability", "has_protocol_connection_capability",
 ]

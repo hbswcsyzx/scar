@@ -24,12 +24,13 @@ from scar.ir.program.protocols import (
     ADMISSION_RECORD_TAGS, AdmissionPredicate, PROTOCOL_RECORD_TAGS,
 )
 from scar.ir.program.protocol_connections import (
-    PROTOCOL_CONNECTION_RECORD_TAGS, has_protocol_connection_capability,
+    PROTOCOL_CONNECTION_RECORD_TAGS, has_delegated_method_lookup_capability,
+    has_protocol_connection_capability,
 )
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 19
+SCHEMA_VERSION = 20
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -88,7 +89,10 @@ _V15_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V15_GRAPH_FIEL
 _V16_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V16_GRAPH_FIELDS
 _V17_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V17_GRAPH_FIELDS
 _V18_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V18_GRAPH_FIELDS
-_V19_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _GRAPH_FIELDS
+_V19_GRAPH_FIELDS = _GRAPH_FIELDS
+_V20_GRAPH_FIELDS = _V19_GRAPH_FIELDS
+_V19_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V19_GRAPH_FIELDS
+_V20_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V20_GRAPH_FIELDS
 _V17_PROTOCOL_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_RECORD_TAGS.items()
                              if record not in ADMISSION_RECORD_TAGS}
 _LITERAL_RECORD_TAGS = {**LITERAL_SOURCE_RECORD_TAGS,
@@ -240,6 +244,7 @@ def dumps(graph: ProgramGraph) -> str:
     has_literals = _has_literal_capability(graph)
     has_protocols = _has_protocol_capability(graph)
     has_protocol_connections = _has_protocol_connection_capability(graph)
+    has_method_lookup = has_delegated_method_lookup_capability(graph)
     has_admission = _has_admission_capability(graph)
     has_invoke_subset = _has_invoke_subset_capability(graph)
     tags = (_V11_RECORD_TAGS if has_driver else
@@ -253,7 +258,10 @@ def dumps(graph: ProgramGraph) -> str:
     if has_protocol_connections:
         tags = {**tags, **PROTOCOL_CONNECTION_RECORD_TAGS}
     encoded = encode(graph, record_tags=tags)
-    if has_protocol_connections:
+    if has_method_lookup:
+        document = {"schema": SCHEMA, "schema_version": 20,
+                    **{name: encoded[name] for name in _V20_GRAPH_FIELDS}}
+    elif has_protocol_connections:
         document = {"schema": SCHEMA, "schema_version": 19, **encoded}
     elif has_admission or has_invoke_subset:
         document = {"schema": SCHEMA, "schema_version": 18,
@@ -349,7 +357,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact v19 capability or strictly preserve historical v1–v18."""
+    """Decode exact capability profiles v1–v20 without upgrading old wire."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -360,7 +368,7 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
@@ -371,7 +379,7 @@ def loads(payload: str) -> ProgramGraph:
                        13: _V13_ENVELOPE_FIELDS, 14: _V14_ENVELOPE_FIELDS,
                        15: _V15_ENVELOPE_FIELDS, 16: _V16_ENVELOPE_FIELDS,
                        17: _V17_ENVELOPE_FIELDS, 18: _V18_ENVELOPE_FIELDS,
-                       19: _V19_ENVELOPE_FIELDS}[version]
+                       19: _V19_ENVELOPE_FIELDS, 20: _V20_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
@@ -382,7 +390,7 @@ def loads(payload: str) -> ProgramGraph:
                     12: _V12_GRAPH_FIELDS, 13: _V13_GRAPH_FIELDS,
                     14: _V14_GRAPH_FIELDS, 15: _V15_GRAPH_FIELDS, 16: _V16_GRAPH_FIELDS,
                     17: _V17_GRAPH_FIELDS, 18: _V18_GRAPH_FIELDS,
-                    19: _GRAPH_FIELDS}[version]
+                    19: _V19_GRAPH_FIELDS, 20: _V20_GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
     if version == 1:
         record = _upgrade_v1_record(record)
@@ -489,6 +497,9 @@ def loads(payload: str) -> ProgramGraph:
     if version >= 19:
         tags = {**tags, **PROTOCOL_CONNECTION_RECORD_TAGS}
     graph = decode(ProgramGraph, record, record_tags=tags)
+    has_method_lookup = has_delegated_method_lookup_capability(graph)
+    if version < 20 and has_method_lookup:
+        raise ValueError("historical schema cannot contain delegated method lookup capability")
     if version < 18 and _has_admission_capability(graph):
         raise ValueError("historical schema cannot contain admission predicate capability")
     if version < 18 and _has_invoke_subset_capability(graph):
@@ -499,6 +510,8 @@ def loads(payload: str) -> ProgramGraph:
         raise ValueError("historical schema cannot contain protocol connection capability")
     if version == 19 and not _has_protocol_connection_capability(graph):
         raise ValueError("schema version 19 requires explicit protocol connection capability")
+    if version == 20 and not has_method_lookup:
+        raise ValueError("schema version 20 requires explicit delegated method lookup capability")
     if version < 17 and _has_protocol_capability(graph):
         raise ValueError("historical schema cannot contain protocol capability")
     if version == 17 and not _has_protocol_capability(graph):

@@ -1,5 +1,21 @@
 # Current evidence and remaining work
 
+## P4 bounded followup checkpoint (2026-10-18)
+
+[Plan](M1_PROTOCOL_FOLLOWUP_PLAN.md) and [implementation/acceptance record](M1_PROTOCOL_FOLLOWUP_PROGRESS.md)
+connect independently declared method lookup results to actual callable Uses,
+preserve request predicate/gate inventories and distinguish historical L/S
+selection from current admission. A real atomic-phi false InitialAdvance proof
+was reproduced and repaired. Program20 isolates four new closed lookup rules;
+an independent Program19 oracle retains the historical wire. Final **746
+affected focused cases** pass at one stable **689-source** fingerprint, with
+no failures/errors/skips. Three read-only reviews close this bounded scope.
+All16 complete P4 groups, P5/M2 and fullM0–M2 remain OPEN. This is supplied-IR
+connection checking, not automatic whole-LeWM modeling or a verified speedup.
+No complete regression ran on this source; historical full results below stay
+attributed to their original revisions. Next: remaining family/combination
+connections under the unchanged denominator, then the original gate sequence.
+
 ## P4-2 scoped implementation checkpoint (2026-10-18)
 
 [Implementation notes](M1_PROTOCOL_CONNECTION_IMPLEMENTATION.md) connect new

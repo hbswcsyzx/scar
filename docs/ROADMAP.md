@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **P4 bounded followup checkpoint (2026-10-18):**
+> [Acceptance record](M1_PROTOCOL_FOLLOWUP_PROGRESS.md) covers independent method
+> lookup→call ports, request predicate/gate inventories, historical source
+> selection, budget accounting and Program20/legacy19 boundaries. A real
+> atomic-phi false first-advance proof is reproduced and repaired.746 affected
+> focused cases pass at one stable689-source fingerprint; no complete full ran.
+> All16 full groups remain OPEN, followed by P5, M2 and fullM0–M2. Automatic
+> LeWM modeling/transformation and a new speedup are not established. This
+> bounded followup does not shrink the remaining family/combination gate.
+
 > **P4-2 implementation in progress (2026-10-18):**
 > [Program19 connections](M1_PROTOCOL_CONNECTION_IMPLEMENTATION.md) now have
 > typed records, a shared original-port/guard/context resolver, independently

@@ -24,7 +24,14 @@ from .resumption import ResumeSlotKind, SuspendTerminator
 from .structured import ControlEdgeReference
 
 
-_LOOKUPS = (CR.AWAIT_LOOKUP, CR.DELEGATE_ITER)
+_METHOD_LOOKUP = {
+    CR.DELEGATE_NEXT: CR.DELEGATE_NEXT_LOOKUP,
+    CR.DELEGATE_SEND: CR.DELEGATE_SEND_LOOKUP,
+    CR.DELEGATE_THROW: CR.DELEGATE_THROW_LOOKUP,
+    CR.DELEGATE_CLOSE: CR.DELEGATE_CLOSE_LOOKUP,
+}
+_METHOD_LOOKUPS = tuple(_METHOD_LOOKUP.values())
+_LOOKUPS = (CR.AWAIT_LOOKUP, CR.DELEGATE_ITER, *_METHOD_LOOKUPS)
 _ADVANCES = (CR.DELEGATE_NEXT, CR.DELEGATE_SEND, CR.DELEGATE_THROW, CR.DELEGATE_CLOSE)
 _CONTINUATION_RULES = (*_LOOKUPS, CR.AWAIT_CALL, *_ADVANCES)
 _ADAPTERS = (AR.AWAIT_STOPITER_TO_EXPRESSION, AR.DELEGATE_ITEM_TO_PARENT_YIELD,
@@ -57,6 +64,40 @@ def _source_row(ctx, source):
     # The shared original-port resolver checks the selected own result too.
     ctx.port(source)
     return row
+
+
+def _formal_producer(ctx, source, candidates):
+    """Use the independently named formal, never the actual receiver, as anchor.
+
+    A direct completion landing already identifies its original result. For a
+    later copy/merge, retain the existing unique semantic inventory rule; more
+    than one candidate needs explicit per-case sources instead of guessing.
+    """
+    port = ctx.port(source)
+    if port is None or port.gap is not None:
+        return None
+    direct = []
+    for candidate in candidates:
+        if not ctx.spend("continuation_formal_candidates"):
+            return None
+        produced = ctx.port(candidate.contract.result)
+        if produced is not None and produced.gap is None and produced.values == port.values:
+            direct.append(candidate)
+    if len(direct) == 1:
+        return direct[0]
+    return candidates[0] if not direct and len(candidates) == 1 else None
+
+
+def _iterator_use(ctx, row, case):
+    """The original iterator operand for an atomic or expanded advance."""
+    producer = _source_row(ctx, case.receiver)
+    if type(case.receiver) is BlockArgument:
+        producer = _formal_producer(ctx, case.receiver,
+                                   getattr(ctx, "_continuation_normal_sources", ()))
+    if (producer is not None and type(producer.contract) is ProtocolCall
+            and producer.contract.rule in _METHOD_LOOKUPS):
+        return OwnedUse(producer.operation, producer.contract.receiver_use)
+    return OwnedUse(row.operation, row.contract.receiver_use)
 
 
 def _declared_none(ctx, raw):
@@ -131,11 +172,31 @@ def _first_advance(ctx, iterator, row, guard, advance_operations):
                 return False
         other = advance_operations.get(identity)
         if other is not None:
-            actual = OwnedUse(identity, other.contract.receiver_use)
-            match = ctx.bind(iterator, actual, guard=guard)["match"]
-            if match is None:
+            declaration = ctx.call_inputs.get(_site(other))
+            matches = []
+            for case in (() if declaration is None else declaration.cases):
+                choices = ctx.selected_edges(guard)
+                if case.guard is not None:
+                    if any(edge.operation == case.guard.operation and edge != case.guard for edge in choices):
+                        # Different visits cannot be identified by two mutually
+                        # exclusive static choices. Keep the occurrence gap.
+                        matches.append(None)
+                        continue
+                    choices = (*choices, case.guard)
+                actual = _iterator_use(ctx, other, case)
+                match = ctx.bind(iterator, actual, guard=choices)["match"]
+                if match is False and ctx.may_forwards(iterator, actual) is not False:
+                    # must-copy false does not prove absence on each incoming
+                    # route of an atomic receiver phi.
+                    unknown = True
+                matches.append(match)
+            if declaration is None:
+                actual = OwnedUse(identity, other.contract.receiver_use)
+                matches.append(ctx.bind(iterator, actual, guard=guard)["match"])
                 unknown = True
-            advanced = advanced or match is True
+            if not matches or any(match is None for match in matches) or len(set(matches)) > 1:
+                unknown = True
+            advanced = advanced or bool(matches) and all(match is True for match in matches)
         operation = ctx.operations[identity]
         if (identity != row.operation and other is None and (
                 operation.callee is not None or operation.terminator is not None
@@ -320,15 +381,26 @@ def continuation_connections(ctx):
     ctx.preparation["continuation_rows"] = len(ctx.graph.protocol_operations)
     ctx.preparation["continuation_advance_operations"] = len(advance_operations)
     lookup_inventory = {}
+    normal_sources = []
     pending_by_operation = {}
     for definition in ctx.graph.pending_completions:
         origin = ctx.values[definition.value].origin
         if type(origin) is OperationResult:
             pending_by_operation.setdefault(origin.operation, []).append(definition)
     for item in ctx.graph.protocol_operations:
-        if (type(item.contract) is ProtocolCall and item.contract.rule in (CR.AWAIT_LOOKUP, CR.DELEGATE_ITER)
+        if (type(item.contract) is ProtocolCall and item.contract.rule in (*_LOOKUPS, CR.AWAIT_CALL)
                 and _selected_kind(ctx, item.contract.result) is ExitKind.NORMAL):
             lookup_inventory.setdefault((item.scope, item.contract.rule), []).append(item)
+            normal_sources.append(item)
+    ctx._continuation_normal_sources = tuple(normal_sources)
+    method_consumers = {}
+    if any(type(row.contract) is ProtocolCall and row.contract.rule in _METHOD_LOOKUPS
+           for row in ctx.graph.protocol_operations):
+        # Reuse the independent fixed-output inventory and its already charged
+        # shared report, rather than inventing a lookup-to-call relation table.
+        from .protocol_connection_validation import common_connections
+        method_consumers = {report["site"]: report
+                            for report in common_connections(ctx)["consumers"]}
 
     def issue(code, path, message):
         issues.append((code, str(path), message))
@@ -395,6 +467,9 @@ def continuation_connections(ctx):
         try:
             if type(contract) is ProtocolCall:
                 role(contract.result, "reference" if _selected_kind(ctx, contract.result) is ExitKind.NORMAL else "packet", identity)
+                if contract.rule in _METHOD_LOOKUPS and contract.argument_uses:
+                    issue("protocol_continuation_arguments", identity,
+                          "method lookup names its iterator but has no request arguments")
                 declaration = ctx.call_inputs.get(identity)
                 if declaration is None:
                     missing("continuation_call_inputs_missing", identity)
@@ -407,11 +482,15 @@ def continuation_connections(ctx):
                             break
                         rule = contract.rule
                         producer = _source_row(ctx, case.receiver)
-                        if type(case.receiver) is BlockArgument and rule in (CR.AWAIT_CALL, *_ADVANCES):
-                            required = CR.AWAIT_LOOKUP if rule is CR.AWAIT_CALL else CR.DELEGATE_ITER
-                            candidates = lookup_inventory.get((row.scope, required), ())
-                            if len(candidates) == 1:
-                                original = candidates[0]
+                        if type(case.receiver) is BlockArgument and rule in (CR.AWAIT_CALL, *_ADVANCES, *_METHOD_LOOKUPS):
+                            required = ((CR.AWAIT_LOOKUP,) if rule is CR.AWAIT_CALL else
+                                        (CR.DELEGATE_ITER, CR.AWAIT_CALL, _METHOD_LOOKUP[rule])
+                                        if rule in _ADVANCES else (CR.DELEGATE_ITER, CR.AWAIT_CALL))
+                            candidates = tuple(candidate for kind in required
+                                for candidate in lookup_inventory.get((row.scope, kind), ()))
+                            direct = _formal_producer(ctx, case.receiver, tuple(normal_sources))
+                            original = direct if direct is not None else _formal_producer(ctx, case.receiver, candidates)
+                            if original is not None:
                                 expected = ContractResult(original.scope, original.clause, original.operation,
                                                           original.slot, original.contract.result)
                                 check(ctx.bind(expected, OwnedUse(row.operation, contract.receiver_use),
@@ -429,12 +508,14 @@ def continuation_connections(ctx):
                             # provenance needs independent incoming inventory.
                             check(None if producer is None and type(case.receiver) in (BlockArgument, StaticProtocolGap) else valid,
                                   identity, "await call receiver must be its exact NORMAL lookup result")
-                        elif rule in _ADVANCES:
+                        elif rule in (*_ADVANCES, *_METHOD_LOOKUPS):
+                            allowed = ((CR.DELEGATE_ITER, CR.AWAIT_CALL, _METHOD_LOOKUP[rule])
+                                       if rule in _ADVANCES else (CR.DELEGATE_ITER, CR.AWAIT_CALL))
                             valid = (producer is not None and type(producer.contract) is ProtocolCall
-                                     and producer.contract.rule in (CR.DELEGATE_ITER, CR.AWAIT_CALL)
+                                     and producer.contract.rule in allowed
                                      and _selected_kind(ctx, producer.contract.result) is ExitKind.NORMAL)
                             check(None if producer is None and type(case.receiver) in (BlockArgument, StaticProtocolGap) else valid,
-                                  identity, "advance receiver must be the selected iterator evaluation")
+                                  identity, "receiver must be this iterator evaluation or the matching own NORMAL method lookup")
                         else:
                             role(case.receiver, "reference", identity)
                         if rule in _LOOKUPS or rule is CR.AWAIT_CALL:
@@ -449,7 +530,10 @@ def continuation_connections(ctx):
                         if type(case.trigger) is InitialAdvance:
                             if rule is not CR.DELEGATE_NEXT or case.arguments:
                                 issue("protocol_continuation_trigger", identity, "InitialAdvance is only a zero-argument NEXT")
-                            if type(case.receiver) is not BlockArgument and case.receiver != case.trigger.iterator:
+                            expanded = (producer is not None and type(producer.contract) is ProtocolCall
+                                        and producer.contract.rule in _METHOD_LOOKUPS)
+                            if (not expanded and type(case.receiver) is not BlockArgument
+                                    and case.receiver != case.trigger.iterator):
                                 issue("protocol_continuation_trigger", identity, "initial marker must select the independently expected iterator")
                             marker = _source_row(ctx, case.trigger.iterator)
                             if (marker is None or type(marker.contract) is not ProtocolCall
@@ -457,13 +541,20 @@ def continuation_connections(ctx):
                                     or _selected_kind(ctx, marker.contract.result) is not ExitKind.NORMAL):
                                 issue("protocol_continuation_trigger", identity,
                                       "initial marker requires the exact own NORMAL iterator evaluation")
-                            check(ctx.bind(case.trigger.iterator, OwnedUse(row.operation, contract.receiver_use),
+                            check(ctx.bind(case.trigger.iterator, _iterator_use(ctx, row, case),
                                 guard=case.guard)["match"], identity,
                                 "initial marker does not name this call's actual iterator evaluation",
                                 "protocol_initial_advance")
                             check(_first_advance(ctx, case.trigger.iterator, row, case.guard, advance_operations), identity,
                                   "initial marker is reused after an advance without a new iterator evaluation",
                                   "protocol_initial_advance")
+                if contract.rule in _METHOD_LOOKUPS:
+                    if _selected_kind(ctx, contract.result) is ExitKind.RAISE:
+                        missing("method_lookup_exception_category_unproved", identity)
+                    else:
+                        ledger = method_consumers.get(identity)
+                        entry["method_call_consumers"] = _method_call_consumers(
+                            ctx, row, ledger, advance_operations, check, issue, missing)
             else:
                 _check_adapter(ctx, row, identity, check, issue, missing, role)
         except (AttributeError, IndexError, KeyError, TypeError, ValueError) as exc:
@@ -517,6 +608,67 @@ def continuation_connections(ctx):
               "conditions": ("native lookup, exception-category and iterator interpretation unproved",)}
     ctx._continuation_connections = result
     return result
+
+
+def _method_call_consumers(ctx, row, ledger, advances, check, issue, missing):
+    """Check fixed lookup output consumers before any target declarations.
+
+    The source is already the independently named lookup result. Discovering
+    its original Uses cannot select a different expected receiver for a call.
+    Atomic helpers on unrelated paths do not become expanded lookup consumers.
+    """
+    identity = _site(row)
+    if ledger is None:
+        missing("method_lookup_consumer_inventory_unresolved", identity)
+        return ()
+    source = ContractResult(row.scope, row.clause, row.operation, row.slot, row.contract.result)
+    consumers = []
+    for support in ledger.get("support", ()):
+        if not ctx.spend("continuation_method_consumers"):
+            missing("method_lookup_consumer_inventory_truncated", identity)
+            break
+        actual = support["use"]
+        call = advances.get(actual.operation)
+        if call is None:
+            continue
+        if actual.use != call.contract.receiver_use:
+            missing("method_lookup_not_callable_receiver", actual.operation)
+            continue
+        consumer = {"call": _site(call), "actual": actual, "source": source, "cases": ()}
+        consumers.append(consumer)
+        if _METHOD_LOOKUP[call.contract.rule] is not row.contract.rule:
+            issue("protocol_method_lookup_kind", identity,
+                  "bound method is consumed by a different fixed delegation request")
+            continue
+        declaration = ctx.call_inputs.get(_site(call))
+        if declaration is None:
+            missing("method_lookup_call_inputs_missing", _site(call))
+            continue
+        cases = []
+        for case in declaration.cases:
+            report = ctx.bind(source, actual, guard=case.guard)
+            if report["match"] is not True:
+                if report["match"] is None:
+                    missing("method_lookup_consumer_case_unresolved", _site(call))
+                continue
+            expected = _source_row(ctx, case.receiver)
+            if type(case.receiver) is BlockArgument:
+                expected = _formal_producer(ctx, case.receiver,
+                    getattr(ctx, "_continuation_normal_sources", ()))
+            match = (None if expected is None and type(case.receiver) in (BlockArgument, StaticProtocolGap)
+                     else expected == row)
+            check(match, _site(call), "call's independent expected receiver is not this lookup evaluation",
+                  "protocol_method_lookup_consumer")
+            cases.append({"guard": case.guard, "binding": report, "expected": case.receiver,
+                          "match": match})
+        consumer["cases"] = tuple(cases)
+        if not cases:
+            missing("method_lookup_consumer_case_unresolved", _site(call))
+    if not consumers:
+        missing("method_lookup_call_consumer_missing", identity)
+    if not ledger.get("known_inventory_complete", False):
+        missing("method_lookup_consumer_inventory_unresolved", identity)
+    return tuple(consumers)
 
 
 def _check_trigger(ctx, row, case, path, check, issue, missing):
