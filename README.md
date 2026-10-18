@@ -23,10 +23,15 @@ Initial findings, corrections and the earlier failed native expectation remain.
 
 The [P2 protocol foundation](docs/M1_PROTOCOL_FOUNDATION.md) now implements
 the fixed F records, original-port connections, selected-edge terminal sources
-and bounded obligation queries. Validation is in progress. Program17 preserves
+and bounded obligation queries. The foundation passes scoped acceptance. Program17 preserves
 legacy capability selection; Execution remains7. This is a partial checkpoint:
 the complete synchronous generator matrix and P3–P5 remain open, and supplied
 model checks do not establish automatic program recovery or transformations.
+
+[Acceptance](docs/M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md): **155 focused checks,
+334 component cases /11 criteria, and 5,401 clean frozen full tests** (`8a62a98`).
+All prior 5,294 case identities/78 fixtures survive; 617 source hashes/82 current
+fixtures match. Complete P2, automatic LeWM modeling and speedup remain open.
 
 The [exact literal content/source/evaluation interfaces](docs/M1_LITERAL_INTERFACES.md)
 pass [1,716 component checks /32 criteria and 5,294 clean frozen full tests](docs/M1_LITERAL_ACCEPTANCE.md)

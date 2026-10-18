@@ -1,0 +1,4 @@
+
+CondaError: Run 'conda init' before 'conda activate'
+
+artifacts/experiments/b1_call_operands/model_protocol_implementation/attempts/attempt001/command.sh: line 6: pytest: command not found

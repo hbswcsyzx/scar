@@ -1,10 +1,12 @@
 # SCAR roadmap and scope
 
-> **P2 implementation in progress (2026-10-18):** the
+> **P2 foundation accepted (2026-10-18):** the
 > [protocol foundation](M1_PROTOCOL_FOUNDATION.md) connects exact F records to
 > original ports, current evaluations, state and selected no-entry lifecycle
-> routes. Program17 compatibility, fixed obligations and composition are under
-> acceptance. This partial checkpoint does not close the16-cell P2 matrix,
+> routes. [Acceptance](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md):155 focused,
+>334 component/11criteria and5,401 clean frozen full tests (`8a62a98`);
+>617 source hashes/82 fixtures match, prior5,294 identities/78 fixtures survive.
+> This partial checkpoint does not close the16-cell P2 matrix,
 > P3–P5 or full M0–M2. Execution remains7. No new LeWM speedup is claimed.
 
 > **Current design work (2026-10-18):** the

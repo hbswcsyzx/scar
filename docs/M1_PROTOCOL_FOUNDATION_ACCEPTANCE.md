@@ -10,7 +10,7 @@
 - 两轮均绑定 617 个注册源码文件；测试前后哈希不变。
 - 组件及本轮定向的源码指纹：
   `e3234d73e5025c13f41bc7a873a5a71387ad2fb22b16fc70f97414d47c60ec79`。
-- 原 78 个 fixtures 将与冻结全仓结果逐个核对；当前 82 个，新增 v16 golden/
+- 原 78 个 fixtures 已与冻结全仓结果逐个核对；当前 82 个，新增 v16 golden/
   proof 及两份通用 supplied-model fixture。
 
 ## 独立复核与修订
@@ -31,8 +31,20 @@
 
 ## 冻结全仓与归档
 
-实现提交后仅执行一次完整回归；当前尚未执行，不预先授予本门最终 PASS。
-完成后在本节记录真实 revision、原 case/fixture 守恒、保护目录和只读归档核验。
+**PASS_WITH_SCOPE：仅关闭 P2 协议连接基础检查点。**
+
+干净实现提交 `8a62a9845b4249f9a67f1667331692615a3ce5c5` 只执行一次完整回归：
+
+- 5,401 passed；0 failed /0 error /0 skipped；5 warnings。
+- pytest 549.05s，外部 551.192s，峰值 RSS 1,026,944 KiB。
+- 617 个源码哈希与前后 worktree/revision 完全一致；82 个当前 fixtures。
+- 原 5,294 个 case identities、78 个 fixtures 全部保留；无移除源码文件。
+- LeWM `f70fed8` 和原 SCAR `84f165f` 前后均干净、未改动。
+- 仅在测试子进程结束后删除本次独占 basetemp；没有清理共享缓存或数据。
+
+环境沿用 `conda activate lewm`：Python3.14.7、pytest9.1.1、Torch2.13.0+cu132、
+NumPy2.5.2；未安装或升级依赖。耗时是验收成本，不是 workload 性能数据。
+组件和完整记录由归档只读检查器核对；检查器不启动任何测试或 workload。
 证据位置：`artifacts/experiments/b1_call_operands/model_protocol_implementation/`。
 
 ## 权限与剩余范围

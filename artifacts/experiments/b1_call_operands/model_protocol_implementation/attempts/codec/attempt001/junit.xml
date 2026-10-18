@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="31" time="1.441" timestamp="2026-10-18T15:37:57.771139+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_protocol_codec" name="test_f_capability_roundtrips_scope_only_and_n_r_port_graphs[start]" time="0.142" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_f_capability_roundtrips_scope_only_and_n_r_port_graphs[value]" time="0.105"><failure message="KeyError: 'result'">target = 'value'
+
+    @pytest.mark.parametrize("target", ["start", "value", "packet"])
+    def test_f_capability_roundtrips_scope_only_and_n_r_port_graphs(target):
+        graph, _ = generator_protocol_program(target=target)
+        wire = codec.dumps(graph)
+        document = json.loads(wire)
+        assert codec.SCHEMA_VERSION == 17
+        assert EXECUTION_SCHEMA_VERSION == 7  # O is a separate later capability.
+        assert document["schema_version"] == 17
+        assert codec.loads(wire) == graph
+        assert codec.dumps(codec.loads(wire)) == wire
+        assert document["protocol_scopes"]
+        if target == "start":
+            assert document["protocol_operations"] == []
+        else:
+            assert not graph.state_address_refinements and not graph.literal_evaluations
+            # Existing port types still carry their original tags when nested in F.
+            contracts = [row["contract"] for row in document["protocol_operations"]]
+&gt;           assert all(c["result"]["kind"] == "INVOKE_LITERAL_RESULT" for c in contracts)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_protocol_codec.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;list_iterator object at 0x7987365004c0&gt;
+
+&gt;   assert all(c["result"]["kind"] == "INVOKE_LITERAL_RESULT" for c in contracts)
+               ^^^^^^^^^^^
+E   KeyError: 'result'
+
+tests/unit/test_program_protocol_codec.py:44: KeyError</failure></testcase><testcase classname="tests.unit.test_program_protocol_codec" name="test_f_capability_roundtrips_scope_only_and_n_r_port_graphs[packet]" time="0.083" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_packet_contract_reference_and_distinct_owned_use_roundtrip[False]" time="0.012" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_packet_contract_reference_and_distinct_owned_use_roundtrip[True]" time="0.012" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_no_entry_preserves_accurate_selected_edge_and_host_raise[NORMAL-False]" time="0.035" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_no_entry_preserves_accurate_selected_edge_and_host_raise[RAISE-False]" time="0.034" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_no_entry_preserves_accurate_selected_edge_and_host_raise[NORMAL-True]" time="0.034" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_independent_frozen_v16_and_current_non_f_factory_are_exact_bytes" time="0.018" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[1]" time="0.014" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[2]" time="0.014" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[3]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[4]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[5]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[6]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[7]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[8]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[9]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[10]" time="0.014" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[11]" time="0.014" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[12]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[13]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[14]" time="0.014" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[15]" time="0.013" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_historical_schemas_reject_new_even_empty_fields[16]" time="0.014" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_empty_f_tables_do_not_upgrade_old_program_or_authorize_v17" time="0.010" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_v17_requires_both_tables_and_rejects_unknown_authority[protocol_scopes]" time="0.037" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_v17_requires_both_tables_and_rejects_unknown_authority[protocol_operations]" time="0.038" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_new_protocol_tag_cannot_enter_legacy_origin_or_wrong_variant" time="0.014" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_model_tables_are_exact_recursive_and_have_correct_natural_keys" time="0.001" /><testcase classname="tests.unit.test_program_protocol_codec" name="test_all_five_contract_variants_have_strict_reachable_record_tags" time="0.007" /></testsuite></testsuites>

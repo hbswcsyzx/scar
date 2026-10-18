@@ -1,0 +1,21 @@
+.......F....................                                             [100%]
+=================================== FAILURES ===================================
+_______ test_a_reference_operand_is_not_an_external_raw_request_boundary _______
+
+    def test_a_reference_operand_is_not_an_external_raw_request_boundary():
+        graph, details = request_processing_program()
+        row = details["rows"][0]
+        binding, = row.contract.operand_bindings
+        # Remove the binding when assigning that Use to the raw role so the
+        # constructor remains well-formed.  The unchanged core operation is valid.
+        bad = replace(row, contract=replace(row.contract, raw_use=binding.operation_use,
+                                           operand_bindings=()))
+>       assert {"protocol_raw_kind", "protocol_result_owner"} & _codes(_replace_row(graph, row, bad))
+E       AssertionError: assert ({'protocol_raw_kind', 'protocol_result_owner'} & {'protocol_raw_operand'})
+E        +  where {'protocol_raw_operand'} = _codes(ProgramGraph(root=RegionID(value='connection'), regions=(Region(id=RegionID(value='connection'), label='conditional na...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)))))
+E        +    where ProgramGraph(root=RegionID(value='connection'), regions=(Region(id=RegionID(value='connection'), label='conditional na...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)))) = _replace_row(ProgramGraph(root=RegionID(value='connection'), regions=(Region(id=RegionID(value='connection'), label='conditional na...), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)))), ProtocolOperation(scope=ProtocolScopeID(value='connection.scope'), clause=<ProtocolClause.THROW_NORMALIZATION: 'THROW_...'>), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)), ProtocolOperation(scope=ProtocolScopeID(value='connection.scope'), clause=<ProtocolClause.THROW_NORMALIZATION: 'THROW_...'>), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>)))
+
+tests/unit/test_program_protocol_connections.py:106: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_protocol_connections.py::test_a_reference_operand_is_not_an_external_raw_request_boundary
+1 failed, 27 passed in 0.91s

@@ -1,0 +1,16 @@
+{
+  "source_revision": "85aee70dd6217e61c03df54ef4ee154b0d662328",
+  "schema_version": 16,
+  "codec_path": "scar/ir/program/codec.py",
+  "codec_sha256": "6c2cfdd03cbc4f70f32a7bf483f5914e406d10171821792bb5234e821750e336",
+  "fixture_source_path": "tests/fixtures/program_literals.py",
+  "fixture_source_sha256": "42c6746a48c9aa23d279d6af4b88a49b070100cca85cd072dfc8c775c3e38f40",
+  "fixture_factory": "literal_program(payload=(1,b\"bytes\",None,complex(-0.0,2),\"\\ud800\\udc00\"))",
+  "fixture_bytes": 15059,
+  "fixture_sha256": "c1ad1ba55842b1b5451389275744212216a652231ace7e9106fd37ceb19f0351",
+  "isolation": "immutable git archive; child cwd and PYTHONPATH both archive; assert codec16 and module paths",
+  "child_cwd": "/tmp/scar-protocol-v16-archive-cjzf6pun",
+  "codec_actual_file": "/tmp/scar-protocol-v16-archive-cjzf6pun/scar/ir/program/codec.py",
+  "fixture_actual_file": "/tmp/scar-protocol-v16-archive-cjzf6pun/tests/fixtures/program_literals.py",
+  "note": "Historical meaningful literal graph, no F protocol fields. No workload/torch/test execution."
+}

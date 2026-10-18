@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## P2 protocol foundation implemented; acceptance in progress (2026-10-18)
+## P2 protocol foundation accepted; complete P2 remains open (2026-10-18)
 
 [Scope and next steps](M1_PROTOCOL_FOUNDATION.md): exact protocol records attach
 to the original CFG/Use/result/state ports. Current-evaluation copies, raw
@@ -9,8 +9,12 @@ edges are checked separately from type equality. Fixed profile/clause and known
 N/R denominators survive missing rows and bounded-query truncation. Program17
 keeps legacy family selection; Execution remains7. Independent review added
 missing-domain, cyclic-route and unrelated-host-output counterexamples.
-Focused and component acceptance is being completed before one clean frozen
-full run. Complete P2's16-cell matrix, P3–P5, D3 and full M0–M2 remain OPEN.
+[Acceptance](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md): **155 focused /334 component
+cases /11 criteria**; one clean frozen `8a62a98` passes **5,401 full tests,
+551.192s,1,026,944 KiB**, zero failures/errors/skips and five warnings.
+All prior5,294 identities/78 fixtures survive;617 source hashes/82 current
+fixtures match. Protected checkouts remain clean and unchanged.
+Complete P2's16-cell matrix, P3–P5, D3 and full M0–M2 remain OPEN.
 No automatic LeWM recovery, new backend, transformation or speedup is claimed.
 
 ## P1 protocol/occurrence contract frozen; implementation open (2026-10-18)

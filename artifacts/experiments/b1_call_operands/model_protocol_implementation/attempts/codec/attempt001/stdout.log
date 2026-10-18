@@ -1,0 +1,39 @@
+.F.............................                                          [100%]
+=================================== FAILURES ===================================
+______ test_f_capability_roundtrips_scope_only_and_n_r_port_graphs[value] ______
+
+target = 'value'
+
+    @pytest.mark.parametrize("target", ["start", "value", "packet"])
+    def test_f_capability_roundtrips_scope_only_and_n_r_port_graphs(target):
+        graph, _ = generator_protocol_program(target=target)
+        wire = codec.dumps(graph)
+        document = json.loads(wire)
+        assert codec.SCHEMA_VERSION == 17
+        assert EXECUTION_SCHEMA_VERSION == 7  # O is a separate later capability.
+        assert document["schema_version"] == 17
+        assert codec.loads(wire) == graph
+        assert codec.dumps(codec.loads(wire)) == wire
+        assert document["protocol_scopes"]
+        if target == "start":
+            assert document["protocol_operations"] == []
+        else:
+            assert not graph.state_address_refinements and not graph.literal_evaluations
+            # Existing port types still carry their original tags when nested in F.
+            contracts = [row["contract"] for row in document["protocol_operations"]]
+>           assert all(c["result"]["kind"] == "INVOKE_LITERAL_RESULT" for c in contracts)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_protocol_codec.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = <list_iterator object at 0x7987365004c0>
+
+>   assert all(c["result"]["kind"] == "INVOKE_LITERAL_RESULT" for c in contracts)
+               ^^^^^^^^^^^
+E   KeyError: 'result'
+
+tests/unit/test_program_protocol_codec.py:44: KeyError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_protocol_codec.py::test_f_capability_roundtrips_scope_only_and_n_r_port_graphs[value]
+1 failed, 30 passed in 1.44s

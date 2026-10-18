@@ -24,6 +24,11 @@ detector 或 backend。2026-10-17/18 更新下面的 C1/C2B 实施状态；既�
 现已限定冻结；P2–P5产品实现与完整第一阶段仍未关闭，实际provider/runtime导入
 和新LeWM优化没有因此完成。
 
+[P2基础连接](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md)后续限定通过155定向、334组件/
+11标准和干净`8a62a98`的一次5,401全仓。它接原端口、当前结果和no-entry生命周期；
+完整16格P2、O发生关联、其余家族及完整第一阶段仍未关闭，不改变下述五类实体
+和工具分工，也不是自动恢复或LeWM化简结果。
+
 此前冻结实现 `e6b4723` 的3,542项回归通过，见
 [C2B body验收](M1_RESUMPTION_BODY_ACCEPTANCE.md)；499项组件及403个源文件指纹匹配。
 此前`0ea05e6`的3,330项原始回归保持[C1证据](../artifacts/experiments/b1_call_operands/model_cleanup_interfaces/full/report.json)范围。

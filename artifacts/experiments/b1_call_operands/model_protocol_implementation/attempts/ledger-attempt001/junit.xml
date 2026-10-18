@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="6" time="0.785" timestamp="2026-10-18T15:56:21.539313+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_protocol_ledger" name="test_fixed_clause_denominator_and_exact_invoke_edge_survive_deleted_raise_row" time="0.211" /><testcase classname="tests.unit.test_program_protocol_ledger" name="test_budget_one_preserves_complete_clause_denominator_and_cursor" time="0.004" /><testcase classname="tests.unit.test_program_protocol_ledger" name="test_cross_scope_contract_result_must_match_the_selected_rows_own_port" time="0.003" /><testcase classname="tests.unit.test_program_protocol_ledger" name="test_generator_return_adapter_cannot_use_request_helper_result_as_body_return" time="0.013" /><testcase classname="tests.unit.test_program_protocol_ledger" name="test_unimplemented_source_inventory_remains_explicitly_unresolved" time="0.001"><failure message="AttributeError: 'ProgramGraph' object has no attribute 'region'. Did you mean: 'regions'?">def test_unimplemented_source_inventory_remains_explicitly_unresolved():
+        graph, details = request_processing_program()
+        base_scope = graph.protocol_scopes[0]
+        scope = ProtocolScope(
+            ProtocolScopeID("connection.await-site"), ProtocolProfile.AWAIT_SITE_V1,
+&gt;           OperationSiteSubject(graph.region, details["processing"]), base_scope.source,
+                                 ^^^^^^^^^^^^
+        )
+E       AttributeError: 'ProgramGraph' object has no attribute 'region'. Did you mean: 'regions'?
+
+tests/unit/test_program_protocol_ledger.py:113: AttributeError</failure></testcase><testcase classname="tests.unit.test_program_protocol_ledger" name="test_rule_builder_is_not_exposed_after_closed_tables_are_built" time="0.000" /></testsuite></testsuites>

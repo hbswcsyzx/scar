@@ -1,0 +1,14 @@
+{
+  "archive": [
+    "git",
+    "archive",
+    "85aee70dd6217e61c03df54ef4ee154b0d662328",
+    "scar",
+    "tests/fixtures"
+  ],
+  "revision": "85aee70dd6217e61c03df54ef4ee154b0d662328",
+  "parent_python": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "parent_version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "owned_archive_directory": "/tmp/scar-protocol-v16-archive-cjzf6pun"
+}

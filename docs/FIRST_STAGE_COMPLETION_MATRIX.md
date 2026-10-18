@@ -4,13 +4,19 @@
 它不把已实现组件重新命名为完整程序模型。阶段顺序见
 [WHOLE_PROGRAM_MODEL_PLAN.md](WHOLE_PROGRAM_MODEL_PLAN.md)。
 
+2026-10-18的[P2协议连接基础检查点](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md)限定通过：
+155定向、334组件/11标准，以及干净`8a62a98`的一次5,401全仓；原5,294case与
+78fixtures守恒，617源/82fixtures匹配。新增F合同和原端口/当前结果/no-entry
+分支/生命周期连接；没有新的O发生能力。完整P2矩阵、P3–P5及M2仍未完成。
+以下保留此前检查点的历史范围；不能据本批通过关闭下表任一未完成整体。
+
 当前[C2/D3审计](M1_PROTOCOL_FAMILY_AUDIT.md)已把真缺口定位为协议到原CFG/端口
 的义务，以及本次Drive到持续body执行段/首出口的发生关联。[计划](M1_PROTOCOL_FAMILY_PLAN.md)
 保留F01–F24/X25–X28；P0审计及[P1联合合同](M1_PROTOCOL_CONTRACT.md)冻结完成，
 F/O产品实施仍待P2–P5。五项旧IR与六项新启动throw
 观察不等于产品协议已验收；原错误断言保留，603源/78fixtures未变，无新全仓。
 
-最新限定接口：[L 内容/来源/原求值验收](M1_LITERAL_ACCEPTANCE.md)通过1,716组件/32标准、
+此前限定接口：[L 内容/来源/原求值验收](M1_LITERAL_ACCEPTANCE.md)通过1,716组件/32标准、
 冻结 `4bc55eb` 的5,294项全仓。原5,144 case/74 fixtures守恒；当前603源码/78 fixtures
 指纹一致。精确Data内容与原Data/Reference求值分开，source/code-slot声明不证明
 真实来源或对象身份；loop/call/resume、多state/forward与实际N/R已有有限组合。

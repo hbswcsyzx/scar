@@ -73,7 +73,9 @@ Closed 四列仅核当前结果到 host、无假 Drive/F；没有证明 Closed/s
 4. 只读核对旧 case identities、旧 fixtures、源码、保护目录和完整证据；归档、
    提交、推送。完整回归活跃期间不改源码、文档、报告，也不并行其他测试。
 
-当前结果以同目录的验收报告及机器记录为准；本文件不预先授予 PASS。
+本批已按[验收报告](M1_PROTOCOL_FOUNDATION_ACCEPTANCE.md)限定通过：155定向、
+334组件/11标准、干净`8a62a98`的一次5,401全仓；原5,294case/78fixtures守恒。
+这是基础检查点的 PASS_WITH_SCOPE，完整 P2 及其后各门仍 OPEN。
 
 ## 6. 后续顺序
 
