@@ -1,0 +1,88 @@
+{
+  "executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "numpy": "2.5.2",
+  "passed": 3,
+  "python": "3.14.7",
+  "schema": "scar.resource-ready-cpu-os-witnesses",
+  "schema_version": 1,
+  "scope": "three hand-written bounded witnesses; no SCAR recovery, GPU, or durability claim",
+  "status": "PASS",
+  "torch": "2.13.0+cu132",
+  "total": 3,
+  "witnesses": [
+    {
+      "assertion": "retained tensor and unchanged version did not imply stable contents",
+      "consumer_observed_after_release": 73,
+      "device": "cpu",
+      "name": "shared_tensor_buffer_with_delayed_thread_consumer",
+      "same_data_pointer": true,
+      "same_tensor_object": true,
+      "status": "PASS",
+      "version_after_numpy_write": 0,
+      "version_before": 0
+    },
+    {
+      "assertion": "an error after a partial write did not roll back the file",
+      "durability_or_fsync_tested": false,
+      "name": "partial_os_file_write",
+      "partial_bytes_visible": true,
+      "remaining_zero_filled_bytes": 4,
+      "requested_length": 8,
+      "status": "PASS",
+      "written_before_controlled_failure": 4
+    },
+    {
+      "assertion": "equal bounding intervals did not imply equal addressed elements",
+      "dense": {
+        "addressed_offsets": [
+          1,
+          2,
+          3
+        ],
+        "bounding_interval": [
+          1,
+          4
+        ],
+        "shape": [
+          3
+        ],
+        "strides": [
+          1
+        ]
+      },
+      "empty_zero_stride": {
+        "addressed_elements": 0,
+        "element_count": 0,
+        "shape": [
+          0,
+          3
+        ],
+        "strides": [
+          0,
+          0
+        ]
+      },
+      "name": "strided_numpy_geometry",
+      "status": "PASS",
+      "stride_two": {
+        "addressed_offsets": [
+          1,
+          3
+        ],
+        "bounding_interval": [
+          1,
+          4
+        ],
+        "shape": [
+          2
+        ],
+        "strides": [
+          2
+        ]
+      },
+      "unaddressed_holes_inside_same_interval": [
+        2
+      ]
+    }
+  ]
+}

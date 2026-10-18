@@ -1,6 +1,6 @@
 # R2.3-G scoped storage coverage 验收
 
-**状态：组件通过，单次 clean 冻结全仓待运行。** 基线 R2.2 `2d6f1d4`。
+**状态：组件及一次 clean 冻结全仓通过。** 基线 R2.2 `2d6f1d4`。
 [完整 R2.3 合同](M1_RESOURCE_READY_CONTRACT.md)保留 D/P/V 全部义务；
 [G 计划](M1_RESOURCE_COVERAGE_PLAN.md)只实现共享 selector 几何及原 MatRef 查询。
 
@@ -15,8 +15,16 @@ union/containment 和三值结果，以及 `ExecutionIndex.materialization_cover
 Verified：最终组件 **432 cases / 6 criteria / 9.768s PASS**，所有 **493** 个
 登记文件前后不变，指纹：
 `b2e1bcdb11b4d1df31832f4b7c2a77aa6d3d3b0f2ef45afb77df6db717460e48`。
-组件报告保留实际 dirty status/基线 HEAD 与 tested-files hash；后续 full 另绑
+组件报告保留实际 dirty status/基线 HEAD 与 tested-files hash；full 则另绑
 clean 实现提交，不能拿组件基线 HEAD 代表本次实现。
+
+冻结 `aa2b9178e7a23ccfd86695b68524bf3817fe1673` 的一次 full：**4,427 PASS**，
+0 failed/error/skipped、三条 warning；wall **473.15876185987145s**、pytest
+**470.96s**，最大 RSS **1,026,340 KiB**。所有493登记文件、50 fixture及clean
+HEAD/status前后一致。旧489文件除query.py扩展外488个不变，新增4个；全部
+旧4,387测试身份和50 fixture保留，新增40项仅属本几何/原MatRef查询。
+独占basetemp已在子进程终结后移除，LeWM及SCAR主工作区仍干净且HEAD未变。
+这些是验收成本，不是LeWM或其他工作负载的A/B性能。
 
 - union 覆盖及 stride holes；bbox 只在独立证明 contiguous 后使用。
 - strided empty/zero-stride、negative stride、各 dtype 元素到 byte 的转换。

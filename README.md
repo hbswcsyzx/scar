@@ -14,7 +14,8 @@ remain unfinished.
 The [R2.3 contract](docs/M1_RESOURCE_READY_CONTRACT.md) separates exact consumer
 denotation, source-derived production, read-interval validity and visibility.
 Its [shared geometry prerequisite](docs/M1_RESOURCE_COVERAGE_ACCEPTANCE.md)
-passes **432 component checks / 6 criteria**; frozen full regression is pending.
+passes **432 component checks / 6 criteria** and **4,427 clean frozen full tests**
+(`aa2b917`).
 The original MatRef query compares budgeted byte coverage only. D/P/V and
 complete first-stage modeling remain open; it grants no ready/transform authority.
 

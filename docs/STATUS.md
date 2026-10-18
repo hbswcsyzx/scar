@@ -1,6 +1,6 @@
 # Current evidence and remaining work
 
-## R2.3 contract and geometry component accepted; frozen full pending (2026-10-18)
+## R2.3 contract and geometry component/full accepted (2026-10-18)
 
 The [R2.3 relation contract](M1_RESOURCE_READY_CONTRACT.md) keeps source-derived
 contributions separate from lineage/invalidators, exact consumers and actual
@@ -9,7 +9,10 @@ passes **432 cases / 6 criteria / 9.768s**, with all **493** registered hashes
 unchanged. It connects original MatRefs to scoped, budgeted byte coverage;
 snapshot validation and strict decoding reuse existing ValueGraph machinery.
 Three real bounded CPU/OS witnesses pass; no GPU profiling or source recovery
-is claimed. One frozen full regression is pending. D/P/V, R3 and complete
+is claimed. Clean frozen `aa2b917` passes **4,427 full tests / 473.159s /
+1,026,340 KiB**, zero failures/errors/skips and three warnings. All 493 source
+and 50 fixture hashes match; all prior 4,387 case identities and 50 fixtures
+survive, owned basetemp removed and protected checkouts unchanged. D/P/V, R3 and complete
 M0–M2 remain open; COVERED grants no content/ready/free/transform authority
 and no LeWM speedup is measured.
 
