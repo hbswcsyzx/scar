@@ -1,5 +1,23 @@
 # Current evidence and remaining work
 
+## P4 known-callee return connection checkpoint (2026-10-18)
+
+[Plan](M1_CALL_RETURN_PLAN.md) and [acceptance record](M1_CALL_RETURN_PROGRESS.md)
+connect original callee Return/Raise Uses to exact caller output slots. The
+new prepared-index source_binding query supports nested/serial known-call
+copies, separately versioned state, unique caller export and simultaneous
+same-call result copies. Guards, terminal evidence and unknown reasons remain
+explicit; none of this grants runtime identity or transformation authority.
+
+Final **788 affected focused cases** pass (previous746 + new42), zero failures/
+errors/skips, one stable **696-source** fingerprint. The first unified786P/2F
+budget regression and intermediate failures remain archived. Reusing completed
+projections/exact caller bundles and charging new dependency jobs fixes the old
+4096-budget tests without changing their limits/assertions. All16 complete P4
+groups, P5/M2 and fullM0–M2 remain OPEN. Next verify return-then-downward helper
+composition, then the remaining packet/matcher and family connections. No new
+backend, full regression, automatic LeWM transformation or speedup here.
+
 ## P4 bounded followup checkpoint (2026-10-18)
 
 [Plan](M1_PROTOCOL_FOLLOWUP_PLAN.md) and [implementation/acceptance record](M1_PROTOCOL_FOLLOWUP_PROGRESS.md)

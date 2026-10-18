@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="3" time="7.452" timestamp="2026-10-18T22:24:29.689665+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_protocol_flow_determinism" name="test_current_none_answer_and_budget_are_identical_in_eight_fresh_hash_processes" time="6.489"><failure message="assert not True">def test_current_none_answer_and_budget_are_identical_in_eight_fresh_hash_processes():
+        root = Path(__file__).resolve().parents[2]
+        command = [sys.executable, '-c',
+            'import json; from tests.unit.test_program_protocol_flow_determinism import _snapshot; '
+            'print(json.dumps(_snapshot(), sort_keys=True))']
+        observed = []
+        for seed in range(8):
+            environment = dict(os.environ, PYTHONPATH=str(root), PYTHONDONTWRITEBYTECODE='1',
+                               PYTHONHASHSEED=str(seed))
+            result = subprocess.run(command, cwd=root, env=environment,
+                                    capture_output=True, text=True, timeout=20, check=True)
+            observed.append(json.loads(result.stdout))
+        assert all(row['none_results'] == [True] for row in observed), observed
+        assert all(row == observed[0] for row in observed), observed
+&gt;       assert not observed[0]['budget']['truncated']
+E       assert not True
+
+tests/unit/test_program_protocol_flow_determinism.py:56: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_protocol_flow_determinism" name="test_reordering_declaration_tables_preserves_current_none_and_budget_costs" time="0.411"><failure message="AssertionError: assert {'none_result...': False, ...} == {'none_result...': False, ...}&#10;  &#10;  Omitting 5 identical items, use -vv to show&#10;  Differing items:&#10;  {'budget': {'limit': 4096, 'used': 4096, 'costs': {'protocol_clauses': 1, 'created_close_finishes': 1, 'ports': 420, 'call_return_jobs': 190, ...}, 'truncated': True}} != {'budget': {'limit': 4096, 'used': 4096, 'costs': {'protocol_clauses': 1, 'created_close_finishes': 1, 'ports': 406, 'call_return_jobs': 191, ...}, 'truncated': True}}&#10;  Use -v to get more diff">def test_reordering_declaration_tables_preserves_current_none_and_budget_costs():
+        original, reordered = _snapshot(), _snapshot(reorder=True)
+        assert original['none_results'] == reordered['none_results'] == [True]
+&gt;       assert original == reordered
+E       AssertionError: assert {'none_result...': False, ...} == {'none_result...': False, ...}
+E         
+E         Omitting 5 identical items, use -vv to show
+E         Differing items:
+E         {'budget': {'limit': 4096, 'used': 4096, 'costs': {'protocol_clauses': 1, 'created_close_finishes': 1, 'ports': 420, 'call_return_jobs': 190, ...}, 'truncated': True}} != {'budget': {'limit': 4096, 'used': 4096, 'costs': {'protocol_clauses': 1, 'created_close_finishes': 1, 'ports': 406, 'call_return_jobs': 191, ...}, 'truncated': True}}
+E         Use -v to get more diff
+
+tests/unit/test_program_protocol_flow_determinism.py:65: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_protocol_flow_determinism" name="test_insufficient_budget_still_preserves_obligation_denominator_and_cursor" time="0.031" /></testsuite></testsuites>

@@ -1,0 +1,41 @@
+{
+  "budget_for_diagnosis_only": {
+    "limit": 65536,
+    "used": 4666,
+    "costs": {
+      "protocol_clauses": 1,
+      "created_close_finishes": 1,
+      "ports": 516,
+      "call_return_jobs": 238,
+      "copy_blocks": 248,
+      "copy_operations": 472,
+      "copy_edges": 978,
+      "copy_meet": 169,
+      "host_routes": 1,
+      "created_close_literals": 2,
+      "connection_consumer_inventory": 552,
+      "connection_bindings": 237,
+      "call_return_ancestors": 137,
+      "candidates": 140,
+      "nodes": 115,
+      "connection_source_routes": 93,
+      "request_context_steps": 128,
+      "call_return_actuals": 16,
+      "call_return_summaries": 4,
+      "call_return_exit_kinds": 12,
+      "call_return_exit_slots": 36,
+      "call_return_terminal_uses": 108,
+      "call_return_completion_edges": 4,
+      "call_return_completion_slots": 12,
+      "raw_definitions": 5,
+      "call_return_exports": 44,
+      "call_return_export_projections": 44,
+      "call_return_export_edges": 88,
+      "call_return_export_slots": 264,
+      "continuation_resume_slots": 1
+    },
+    "truncated": false
+  },
+  "not_acceptance": true,
+  "projection_cache_only": true
+}

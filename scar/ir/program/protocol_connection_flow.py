@@ -39,7 +39,19 @@ class ConnectionContext(ProtocolFlow):
         self._connection_origins = {}
         self._connection_bindings = {}
         self._connection_reports = {}
+        self._connection_depth = 0
+        from .call_returns import CallReturns
+        self._returns = CallReturns(self)
         self.preparation["prepared_program_index_reused"] = True
+
+    def _copy_context_key(self):
+        return self._returns.guards
+
+    def _copy_call_transfer(self, operation, current, *, mode):
+        return self._returns.transfer(operation, current, mode=mode)
+
+    def _fresh_copies(self, port, *, guard=None, mode="must"):
+        return self._returns.flow(port, guard=guard, mode=mode)
 
     def row(self, site):
         from .protocol_connections import ProtocolOperationRef
@@ -145,6 +157,23 @@ class ConnectionContext(ProtocolFlow):
                 "runtime_identity_verified": False, "transformation_authorized": False}
 
     def bind(self, expected, actual, *, guard=None, choices=(), path=""):
+        """Keep complete guards scoped to this query, including nested helpers."""
+        if type(choices) is not tuple:
+            raise TypeError("additional original choices require an exact tuple")
+        guards = self.selected_edges((*self.selected_edges(guard), *choices))
+        previous = self._returns.guards
+        if self._connection_depth == 0:
+            self._returns.gaps = []
+            self._returns.gap_events = []
+        self._connection_depth += 1
+        self._returns.guards = guards
+        try:
+            return self._bind(expected, actual, guard=guards or None, path=path)
+        finally:
+            self._returns.guards = previous
+            self._connection_depth -= 1
+
+    def _bind(self, expected, actual, *, guard=None, choices=(), path=""):
         """Tri-state exact copy/source check, preserving every known route.
 
         ``True`` is an original-port relation, not equality of dynamic objects.
@@ -211,7 +240,11 @@ class ConnectionContext(ProtocolFlow):
                 match = None if before is None else destination.value in before.get(actual.operation, ())
                 answer = _answer(match, routes=({"source": expected, "actual": actual,
                     "guard": guard, "context": None, "choices": {}, "match": match},),
-                    gaps=("protocol_connection_budget_exhausted",) if before is None else ())
+                    gaps=(("protocol_connection_budget_exhausted",) if self.budget.truncated else
+                          tuple(self._returns.gaps) or ("call_return_flow_unresolved",))
+                         if before is None else (),
+                    cursor={"phase": "connection_copies", "actual": actual}
+                           if self.budget.truncated else None)
             else:
                 answer = self._bind_cross_region(expected, port, actual, guard=guard)
         self._connection_bindings[key] = answer
@@ -290,6 +323,13 @@ class ConnectionContext(ProtocolFlow):
     def _bind_cross_region(self, expected, port, actual, *, guard):
         """Follow original call/formal paths; never equate local reachability with global reachability."""
         from .request_inputs import _context
+        export = self._returns.export_applicable(self.region_of[port.operation],
+                                                self.region_of[actual.operation])
+        if export is None:
+            return _answer(gaps=("call_return_budget_exhausted",),
+                           cursor={"phase": "call_return_ancestors", "actual": actual})
+        if export:
+            return self._returns.export(expected, port, actual, guard=guard)
         report = self.origins(actual, guard=guard)
         routes, gaps = [], list(report["gaps"])
         for recipe in report["recipes"]:

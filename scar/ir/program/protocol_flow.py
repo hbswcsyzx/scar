@@ -26,6 +26,9 @@ class ProtocolPort:
     edge: int | None = None
     body_use: object = None
     gap: object = None
+    # Query-local union of exact completion copies from one call evaluation.
+    # These reference original landing ValueIDs, never new graph producers.
+    completion_values: tuple = ()
 
 
 class ProtocolReferenceError(ValueError):
@@ -254,6 +257,18 @@ class ProtocolFlow:
         self._region_edges[region] = result
         return result
 
+    def _copy_context_key(self):
+        """Optional query context; the historical local engine has none."""
+        return ()
+
+    def _copy_call_transfer(self, operation, current, *, mode):
+        """Optional known-callee copy projection, never a new producer.
+
+        The default engine retains its historical local-only behavior. None
+        means unresolved, rather than an empty set of proved non-copies.
+        """
+        return frozenset(), {}
+
     def _fresh_copies(self, port, *, guard=None, mode="must"):
         """Finite copy analysis over original CFG, reset at each evaluation.
 
@@ -263,6 +278,11 @@ class ProtocolFlow:
         alternative; may mode unions possibilities for consumer inventory.
         """
         key = port.operation, port.phase, port.edge, port.values
+        if port.completion_values:
+            key = (*key, port.completion_values)
+        context_key = self._copy_context_key()
+        if context_key:
+            key = (*key, context_key)
         if mode not in ("must", "may"):
             raise ValueError("copy query mode must be must or may")
         if mode == "may":
@@ -337,11 +357,20 @@ class ProtocolFlow:
                     current = frozenset(port.values)
                 before[identity] = current
                 operation = self.operations[identity]
+                ordinary, completion_copies = frozenset(), {}
+                # A source result is a new evaluation. Its reset must win
+                # over any projection of the call's pre-evaluation inputs.
+                if not (identity == port.operation and port.phase in ("after", "edge", "edges")):
+                    transfer = self._copy_call_transfer(operation, current, mode=mode)
+                    if transfer is None:
+                        return None
+                    ordinary, completion_copies = transfer
                 current = current.difference(operation.results)
+                current = current.union(ordinary)
                 if identity == port.operation:
                     if port.phase == "after":
                         current = frozenset(port.values)
-                    elif port.phase == "edge":
+                    elif port.phase in ("edge", "edges"):
                         current = frozenset()
             for operation, number, target, assignments in outgoing[block_id]:
                 if not self.spend("copy_edges", len(assignments) + len(current)):
@@ -349,8 +378,11 @@ class ProtocolFlow:
                 renamed = current.difference(assignments)
                 renamed = renamed.union(formal for formal, actual in assignments.items()
                                         if actual in current)
+                renamed = renamed.union(completion_copies.get(number, ()))
                 if operation == port.operation and port.phase == "edge" and number == port.edge:
                     renamed = renamed.union(port.values)
+                if operation == port.operation and port.phase == "edges":
+                    renamed = renamed.union(dict(port.completion_values).get(number, ()))
                 edge_key = operation, number
                 if edges[edge_key] != renamed:
                     edges[edge_key] = frozenset(renamed)

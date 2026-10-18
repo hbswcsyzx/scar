@@ -1,0 +1,17 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_known_identity_call_returns_the_original_entry_reference _________
+
+    def test_known_identity_call_returns_the_original_entry_reference():
+        graph, details = call_return_program()
+        require_valid(graph)
+        index = ProgramIndex(graph)
+        report = ConnectionContext(graph, index=index).bind(details["expected"], details["actual"])
+>       assert report["match"] is True, report
+E       AssertionError: {'match': False, 'routes': ({'source': BlockArgument(block=BlockID(value='return.root.entry'), index=0), 'actual': Own...ume'), use=UseID(value='return.consume.ref')), 'guard': None, 'context': None, ...},), 'gaps': (), 'cursor': None, ...}
+E       assert False is True
+
+tests/unit/test_program_call_returns.py:13: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_call_returns.py::test_known_identity_call_returns_the_original_entry_reference
+1 failed in 0.71s

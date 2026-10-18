@@ -737,6 +737,14 @@ class ProgramIndex:
         from .input_origins import _input_origins
         return _input_origins(self, operation_id, use_id, accounting=ValidityBudget(budget))
 
+    def source_binding(self, expected, actual, *, guard=None, budget=4096):
+        """Exact single-slot source/copy routes, including known callee returns.
+
+        Supplied-model evidence only; not dynamic identity or rewrite authority.
+        """
+        from .call_returns import source_binding
+        return source_binding(self, expected, actual, guard=guard, budget=budget)
+
     def paired_input_origins(self, raw, pack_operand, *, budget=4096):
         """Exact raw-pack operand routes; not a predicate-input binding."""
         from .input_origins import paired_input_origins

@@ -1,0 +1,36 @@
+{
+  "base_revision": "b73d8c5d2150decf4787e6c3f4225d47471ff5f5",
+  "plan_sha256": "0346d32b990cb1fc7f495eafe7978584943e3f7f57e53c360394bfdb32c5fd70",
+  "protected": {
+    "le-wm": {
+      "path": "/home/zyf/AAA/le-wm",
+      "head": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+      "status": ""
+    },
+    "scar": {
+      "path": "/home/zyf/AAA/scar",
+      "head": "84f165fce1e2e37617c974ce9fee574ea816406b",
+      "status": ""
+    }
+  },
+  "fixed_obligation_groups": [
+    "F12",
+    "F13",
+    "F14",
+    "F15",
+    "F16",
+    "F17",
+    "F18",
+    "F19",
+    "F20",
+    "F21",
+    "F22",
+    "F23",
+    "F24",
+    "X25",
+    "X26",
+    "X27"
+  ],
+  "tests_started": 0,
+  "scope": "read-only verification and plan freeze before final affected focused"
+}

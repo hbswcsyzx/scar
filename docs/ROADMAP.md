@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **P4 known-callee return connection checkpoint (2026-10-18):**
+> [Acceptance](M1_CALL_RETURN_PROGRESS.md) covers exact callee exit→caller slots,
+> same-call copies, separate state versions and guarded internal-source export.
+> 788 affected focused cases (old746 + new42) pass at one stable696-source
+> fingerprint; the original budget regression is retained and repaired without
+> changing tests or limits. Next: verify return-then-downward call composition,
+> complete remaining matcher/family connections under the original16-group P4
+> denominator, then P5/M2. CompleteM0–M2 remains OPEN. No new full/LeWM speedup.
+
 > **P4 bounded followup checkpoint (2026-10-18):**
 > [Acceptance record](M1_PROTOCOL_FOLLOWUP_PROGRESS.md) covers independent method
 > lookup→call ports, request predicate/gate inventories, historical source
