@@ -1,0 +1,62 @@
+..............FF......                                                   [100%]
+=================================== FAILURES ===================================
+_ test_old_completed_reuse_has_true_post_and_subject_but_retains_every_opaque_or_write_blocker[old-helper-normal] _
+
+reject_raised = False
+
+    @pytest.mark.parametrize('reject_raised', (False, True), ids=('old-helper-normal', 'old-helper-raise'))
+    def test_old_completed_reuse_has_true_post_and_subject_but_retains_every_opaque_or_write_blocker(reject_raised):
+        program, model, details = _reuse_execution(reject_raised=reject_raised)
+        index = _index(program, model)
+        read = details['second_scope'][2][details['predicate']]
+        view = index.request_state_history(read, budget=131072)
+        update, = program.session_updates
+        candidate = _candidate(view, update)
+        assert candidate['source'].id == details['first_scope'][2][update.operation]
+        assert candidate['post_established'] is True
+        assert candidate['subject_binding']['match'] is True
+        expected_locations = {value.location for value in ProgramIndex(program).session_publication(update.operation).support}
+        predicate = next(op for op in program.operations if op.id == details['predicate'])
+        expected_locations.update(access.location for access in predicate.accesses)
+        assert set(candidate['locations']) == expected_locations
+        assert candidate['preservation']['preserved'] is None
+        assert candidate['expected_bool'] is view['expected_bool'] is None
+        assert view['observed_branch'] is True
+>       blockers = {item['operation'].id for item in candidate['preservation']['blockers']
+                    ^^^^^^^^^^^^^^^^^^^^
+                    if item['operation'] is not None}
+E       AttributeError: 'OperationOccurrenceID' object has no attribute 'id'
+
+tests/unit/test_execution_request_state_history.py:237: AttributeError
+_ test_old_completed_reuse_has_true_post_and_subject_but_retains_every_opaque_or_write_blocker[old-helper-raise] _
+
+reject_raised = True
+
+    @pytest.mark.parametrize('reject_raised', (False, True), ids=('old-helper-normal', 'old-helper-raise'))
+    def test_old_completed_reuse_has_true_post_and_subject_but_retains_every_opaque_or_write_blocker(reject_raised):
+        program, model, details = _reuse_execution(reject_raised=reject_raised)
+        index = _index(program, model)
+        read = details['second_scope'][2][details['predicate']]
+        view = index.request_state_history(read, budget=131072)
+        update, = program.session_updates
+        candidate = _candidate(view, update)
+        assert candidate['source'].id == details['first_scope'][2][update.operation]
+        assert candidate['post_established'] is True
+        assert candidate['subject_binding']['match'] is True
+        expected_locations = {value.location for value in ProgramIndex(program).session_publication(update.operation).support}
+        predicate = next(op for op in program.operations if op.id == details['predicate'])
+        expected_locations.update(access.location for access in predicate.accesses)
+        assert set(candidate['locations']) == expected_locations
+        assert candidate['preservation']['preserved'] is None
+        assert candidate['expected_bool'] is view['expected_bool'] is None
+        assert view['observed_branch'] is True
+>       blockers = {item['operation'].id for item in candidate['preservation']['blockers']
+                    ^^^^^^^^^^^^^^^^^^^^
+                    if item['operation'] is not None}
+E       AttributeError: 'OperationOccurrenceID' object has no attribute 'id'
+
+tests/unit/test_execution_request_state_history.py:237: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_request_state_history.py::test_old_completed_reuse_has_true_post_and_subject_but_retains_every_opaque_or_write_blocker[old-helper-normal]
+FAILED tests/unit/test_execution_request_state_history.py::test_old_completed_reuse_has_true_post_and_subject_but_retains_every_opaque_or_write_blocker[old-helper-raise]
+2 failed, 20 passed in 3.16s

@@ -234,6 +234,25 @@ class ExecutionIndex:
         current = ctx.current(point)
         return None if current is None else deepcopy(current)
 
+    def state_preservation(self, start, end, *, locations, budget=4096):
+        """Conditional whole-interval content support, separate from state SSA."""
+        from .state_preservation import state_preservation
+        from .validity_budget import ValidityBudget
+        shared = ValidityBudget(budget)
+        return deepcopy(state_preservation(self._ctx, start, end, locations, shared=shared))
+
+    def request_state_history(self, read, *, budget=4096):
+        """Relate original session posts to this READ without assuming truth."""
+        from .request_state_history import request_state_history
+        from .validity_budget import ValidityBudget
+        shared = ValidityBudget(budget)
+        if type(read) is not OperationOccurrenceID:
+            raise TypeError('request_state_history requires an exact OperationOccurrenceID')
+        read.__post_init__()
+        if read not in self._ctx.occurrences:
+            raise KeyError(read)
+        return deepcopy(request_state_history(self._content_context(), read, shared=shared))
+
     def state_address(self, effect, *, budget=4096):
         """Bind an address declaration to exact original dynamic state ports."""
         from .state_addresses import state_address

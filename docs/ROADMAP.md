@@ -1,5 +1,21 @@
 # SCAR roadmap and scope
 
+> **Exact state-content interval and post history (2026-10-19):**
+> [Frozen plan](M1_STATE_FACT_CONTINUATION_PLAN.md),
+> [actual failures, repairs and results](M1_STATE_FACT_CONTINUATION_PROGRESS.md)
+> add two derived read-only queries over original operations, state inputs,
+> call/full-slot transfers and effects. Post establishment, same-R binding,
+> preservation and this READ's observed bool remain separate. Review found
+> and first reproduced missing-source-input unsoundness, budget-prefix domain
+> loss and a missing child-transfer crash; all are repaired without changing
+> old tests/fixtures/codec. **1890 affected focused pass**, all1865 previous
+> identities retained,862 stable sources. Original R3 retains four concrete
+> blockers. No family newly closes: A-H/six accepted families stay accepted;
+> ten families/P4 component/frozen-full/P5/M2 original113/196 remain open.
+> [Next bounded native review](M1_STATE_FACT_NEXT_GATE.md) separates Running,
+> Closed reuse, current THROW/CLOSE and callback snapshots. Whole-LeWM
+> automatic recovery, a trusted transformation and new speedup remain unproved.
+
 > **Current scheduler packet / completed-request connection (2026-10-19):**
 > [Frozen plan](M1_CURRENT_ASYNC_PACKET_PLAN.md) and
 > [actual failures, fixes and acceptance](M1_CURRENT_ASYNC_PACKET_PROGRESS.md)

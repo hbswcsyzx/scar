@@ -1,5 +1,26 @@
 # SCAR execution model
 
+## State content must survive its original interval (2026-10-19)
+
+A state-version route does not prove that a field's contents survived. The
+new derived state_preservation query inventories each original operation,
+actual call, selected N/R transfer and full state tuple between exact points.
+Incomplete outer effects, opaque child effects, missing original inputs and
+unexcluded writes independently retain unknown. Different LocationIDs and
+address labels do not establish isolation.
+
+The derived request_state_history query joins an original SessionUpdate post,
+its complete support, same-request binding and preservation to this READ.
+The READ's observed bool/branch is separate evidence. Missing post inputs
+cannot be filled from captured outputs; budget1 keeps the full READ-domain
+inventory. See the [finite plan](M1_STATE_FACT_CONTINUATION_PLAN.md),
+[actual failures and results](M1_STATE_FACT_CONTINUATION_PROGRESS.md) and
+[next original obligations](M1_STATE_FACT_NEXT_GATE.md).1890 affected focused
+pass on862 stable sources, retaining all1865 prior identities. Original R3
+still lists four real preservation blockers. F14/F16, the other eight open
+families/P5/M2 and automatic whole-LeWM recovery remain open; no new backend,
+transformation or speedup is established.
+
 ## Current scheduler sources are independent of stored requests (2026-10-19)
 
 One async request R can store latent input L while each later invocation has
