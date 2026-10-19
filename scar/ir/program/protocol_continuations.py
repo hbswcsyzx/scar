@@ -563,8 +563,11 @@ def continuation_connections(ctx):
                             if original is not None:
                                 expected = ContractResult(original.scope, original.clause, original.operation,
                                                           original.slot, original.contract.result)
-                                check(ctx.bind(expected, OwnedUse(row.operation, contract.receiver_use),
-                                    guard=case.guard)["match"], identity,
+                                actual = OwnedUse(row.operation, contract.receiver_use)
+                                binding = (ctx.carried_source(expected, case.receiver, actual, guard=case.guard)
+                                    if _await_iterator_source(ctx, original) else
+                                    ctx.bind(expected, actual, guard=case.guard))
+                                check(binding["match"], identity,
                                     "merge formal is not the independently required lookup evaluation")
                                 producer = original
                             else:

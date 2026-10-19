@@ -1,0 +1,3 @@
+EARLIER
+ACTUAL exec_operation_occurrence:await.visits.caller.6.await.resume.call.0 ControlEdgeReference(operation=OperationID(value='await.visits.retry'), successor_index=0) True GAPS ('await_iterator_source_unresolved',)
+DEFINITION CONSUMERS 0

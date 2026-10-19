@@ -62,10 +62,12 @@ def _final_legs(ctx, definitions, operation, shared):
     return tuple(rows)
 
 
-def _consumer(ctx, definition, advance, known, anchors, shared, *, parent_port=None):
+def _consumer(ctx, definition, advance, known, anchors, shared, *, parent_port=None,
+              input_guard=None):
     from .await_links import _result, _use
     admitted = shared.spend('await_outcome_consumers', path='await.outcome.consumer')
-    selected = selected_choices(ctx, definition.get('choices', ()), known, anchors, shared) if admitted else None
+    selected = selected_choices(ctx, definition.get('choices', ()), known, anchors, shared,
+        input_guard=input_guard) if admitted else None
     actual = definition['actual']
     operation, reached = locate(ctx, advance, actual.operation, shared) if admitted else (None, None)
     if selected is not False and reached is False:
@@ -313,7 +315,8 @@ def _outcome_occurrences(ctx, definition, advance, shared):
             known = _map(advance, drive, body, *(source['occurrence'] for source in matched.values()),
                          *(leg['occurrence'] for leg in conversions))
             anchors = (advance, drive, *(leg['occurrence'] for leg in conversions))
-            consumers = tuple(_consumer(ctx, consumer, advance, known, anchors, shared)
+            consumers = tuple(_consumer(ctx, consumer, advance, known, anchors, shared,
+                              input_guard=definition.get('input_guard'))
                               for consumer in definition['consumers'])
             raised_terminals = _raised_terminals(ctx, definition.get('terminals', ()), drive,
                 advance, body, route['call_chain'], shared)

@@ -7,7 +7,7 @@ No result here grants runtime identity, source applicability or a rewrite.
 from scar.ir.execution.validity_budget import ValidityBudget
 
 from .model import (BlockArgument, InvokeLiteralResult, OperationResult,
-                    StateVersionValue, TerminatorKind)
+                    ReferenceValue, StateVersionValue, TerminatorKind)
 from .protocol_flow import ProtocolFlow, ProtocolPort, ProtocolReferenceError
 from .protocols import ContractResult, OwnedUse, StaticProtocolGap
 from .state_addresses import ExistingAccess, InvokeStateOperand
@@ -39,6 +39,7 @@ class ConnectionContext(ProtocolFlow):
         self._connection_origins = {}
         self._connection_bindings = {}
         self._connection_reports = {}
+        self._connection_guard_entries = {}
         self._connection_depth = 0
         from .call_returns import CallReturns
         self._returns = CallReturns(self)
@@ -53,7 +54,84 @@ class ConnectionContext(ProtocolFlow):
         return self._returns.transfer(operation, current, mode=mode)
 
     def _fresh_copies(self, port, *, guard=None, mode="must"):
+        ambiguity = self._guard_entry_ambiguity(port, guard)
+        if ambiguity is not None:
+            self._returns.gap(ambiguity)
+            return None
         return self._returns.flow(port, guard=guard, mode=mode)
+
+    def _guard_entry_ambiguity(self, port, guard):
+        """A selected later incoming cannot erase a loop's initial entry.
+
+        Diagnose the loss using the original CFG and outgoing choices. Never
+        feed a relaxed graph to the copy solver or grant a new copy True.
+        Acyclic exclusions and explicit own-completion conflicts stay False.
+        """
+        guards = self.selected_edges(guard)
+        if not guards or self.selection_ambiguity(guards) is not None:
+            return None
+        if port.phase == 'edge' and any(edge.operation == port.operation
+                and edge.successor_index != port.edge for edge in guards):
+            return None
+        region = self.region_of[port.operation]
+        guards = self.selected_edges(guards, region=region)
+        if not guards:
+            return None
+        key = region, guards
+        if key not in self._connection_guard_entries:
+            declaration, outgoing, _, _, _ = self._edges(region)
+            choices = {edge.operation: edge.successor_index for edge in guards}
+            targets = {self.operations[edge.operation].terminator.successors[
+                edge.successor_index].block: (edge.operation, edge.successor_index) for edge in guards}
+
+            def reachable(start, *, released=frozenset(), stop=None, outgoing_choices=True):
+                seen, pending = set(), [start]
+                while pending:
+                    if not self.spend('connection_guard_entry_blocks'):
+                        return None
+                    block = pending.pop()
+                    if block in seen:
+                        continue
+                    seen.add(block)
+                    if block == stop:
+                        return seen
+                    for edge in outgoing[block]:
+                        if not self.spend('connection_guard_entry_edges'):
+                            return None
+                        if outgoing_choices and edge[0] in choices and choices[edge[0]] != edge[1]:
+                            continue
+                        if (edge[2] not in released and edge[2] in targets
+                                and targets[edge[2]] != edge[:2]):
+                            continue
+                        pending.append(edge[2])
+                return seen
+
+            strict = reachable(declaration.entry)
+            if strict is None:
+                return 'protocol_connection_budget_exhausted'
+            cyclic = set()
+            for target, (operation, _) in targets.items():
+                parent = self.block_of[operation]
+                if target in strict or parent in strict:
+                    continue
+                # The incoming can belong to an earlier visit, before this
+                # source's own completion choices. This is only a cycle
+                # witness; the actual source reachability keeps all outgoing
+                # choices and every unrelated incoming constraint.
+                cycle = reachable(target, released={target}, stop=parent, outgoing_choices=False)
+                if cycle is None:
+                    return 'protocol_connection_budget_exhausted'
+                if parent in cycle:
+                    cyclic.add(target)
+            possible = reachable(declaration.entry, released=cyclic) if cyclic else strict
+            if possible is None:
+                return 'protocol_connection_budget_exhausted'
+            self._connection_guard_entries[key] = frozenset(strict), frozenset(possible)
+        strict, possible = self._connection_guard_entries[key]
+        block = self.block_of[port.operation]
+        if block in possible and block not in strict:
+            return 'selected_loop_entry_requires_occurrence_context'
+        return None
 
     def _copy_cache_begin(self, key):
         if getattr(self, '_copy_consumer_bounds', False):
@@ -111,6 +189,61 @@ class ConnectionContext(ProtocolFlow):
                 self.index, actual.operation, actual.use,
                 accounting=self.budget, _copy_flow=self, _guard=guard)
         return self._connection_origins[key]
+
+    def carried_source(self, expected, carrier, actual, *, guard=None):
+        """Keep a declared historical reference separate from currentness.
+
+        A current-copy False is still retained. An independently named formal
+        and an exact original historical recipe may make the source possible,
+        but cannot choose a dynamic evaluation or certify it True. State and
+        fresh method-lookup obligations keep their ordinary binding rules.
+        """
+        current = self.bind(expected, actual, guard=guard)
+        if current['match'] is not False or type(carrier) is not BlockArgument:
+            return current
+        port = expected.result_port if type(expected) is ContractResult else expected
+        if type(port) not in (OperationResult, InvokeLiteralResult):
+            return current
+
+        def unfinished(phase, copied=None):
+            return {**_answer(gaps=('carried_source_origin_inventory_unresolved',),
+                cursor={'phase': phase}), 'current_binding': current,
+                'carrier_binding': copied, 'historical_origins': None,
+                'matching_historical_recipes': ()}
+
+        formal, source = self.port(carrier), self.port(expected)
+        if (formal is None or source is None or formal.gap is not None
+                or source.gap is not None or not formal.values or not source.values
+                or any(not isinstance(self.values[value], ReferenceValue)
+                       for value in (*formal.values, *source.values))):
+            return unfinished('carried_source_ports') if self.budget.truncated else current
+        copied = self.bind(carrier, actual, guard=guard)
+        if copied['match'] is not True:
+            return unfinished('carried_source_carrier', copied) if self.budget.truncated else current
+        history = self.origins(actual, guard=guard)
+        matching = []
+        for recipe in history['recipes']:
+            if not self.spend('connection_carried_source_recipes'):
+                break
+            if (recipe['origin'] != port or recipe['kind'] != (
+                    'INVOKE_COMPLETION' if type(port) is InvokeLiteralResult else
+                    'OPERATION_RESULT' if type(port) is OperationResult else None)):
+                continue
+            for step in recipe['path']:
+                if not self.spend('connection_carried_source_steps'):
+                    break
+                if (step.get('kind') == 'CFG_COPY'
+                        and getattr(step.get('formal'), 'id', step.get('formal')) in formal.values):
+                    matching.append(recipe)
+                    break
+        incomplete = self.budget.truncated or not history['source_inventory_complete']
+        if not matching and not incomplete:
+            return current
+        answer = _answer(gaps=('carried_source_evaluation_unselected',
+            *(('carried_source_origin_inventory_unresolved',) if incomplete else ())),
+            cursor=history['cursor'] or ({'phase': 'carried_source'} if self.budget.truncated else None))
+        return {**answer, 'current_binding': current, 'carrier_binding': copied,
+                'historical_origins': history, 'matching_historical_recipes': tuple(matching)}
 
     def request_binding(self, raw, input, ordinal=0, *, guard=None):
         from .request_inputs import request_input_binding

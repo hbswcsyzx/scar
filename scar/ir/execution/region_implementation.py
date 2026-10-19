@@ -121,7 +121,9 @@ def _path(ctx, definition, source, selected, indexed, operation, shared, input_s
             'value': None, 'binding': {'match': None, 'gaps': ()},
             'status': _state(chosen, ('region_final_target_unobserved',)), 'gaps': ()}
         targets.append(projected)
-        if chosen is not False:
+        # An accurately unselected target is inventory, not an obligation of
+        # this selected return. Unknown/missing targets still need evidence.
+        if chosen is not False and projected['selected'] is not False:
             checks.append(projected['binding'])
     binding = _joint(checks)
     if shared.truncated and binding['match'] is not False:

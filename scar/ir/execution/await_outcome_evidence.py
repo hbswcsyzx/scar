@@ -217,7 +217,7 @@ def target(ctx, definition, anchor, source, shared):
         'status': status(reached, gaps=local, bindings=(binding,)), 'gaps': tuple(local)}
 
 
-def selected_choices(ctx, choices, known, anchors, shared):
+def selected_choices(ctx, choices, known, anchors, shared, *, input_guard=None):
     """Project a tuple in its exact original caller/child contexts."""
     from .await_links import _guard
     answers = []
@@ -225,13 +225,14 @@ def selected_choices(ctx, choices, known, anchors, shared):
         if not shared.spend('await_outcome_choices', path='await.outcome.choices'):
             return None
         occurrence = known.get(edge.operation)
-        if occurrence is not None:
+        if occurrence is not None and edge != input_guard:
             answers.append(choice(ctx, occurrence, edge))
             continue
         region = ctx.await_flow.region_of[edge.operation]
         candidates = tuple(anchor for anchor in anchors if anchor is not None
                            and ctx.activations[ctx.activation_of(anchor.id)].region == region)
-        answers.append(_guard(ctx, candidates[-1], edge, shared) if candidates else None)
+        answers.append(_guard(ctx, candidates[-1], edge, shared,
+            incoming=edge == input_guard) if candidates else None)
     return False if False in answers else None if None in answers else True
 
 

@@ -1,0 +1,1005 @@
+.F....FF....FFF.FFFFFFFF.F.FFFFFFFF.                                     [100%]
+=================================== FAILURES ===================================
+_ test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[earlier] _
+
+iterator_origin = 'earlier'
+
+    @pytest.mark.parametrize('iterator_origin', ('latest', 'earlier'), ids=('latest', 'earlier'))
+    def test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b(iterator_origin):
+        program, model, details = _source_visit_execution(iterator_origin=iterator_origin)
+        static = details['static']
+        assert len(program.resumable_creates) == 1
+        assert len(model.body_activation_origins) == len(model.body_drive_executions) == 1
+        assert details['body_origin'].creation == details['creation']
+        assert len({row.visit for row in details['gets']}) == 2
+        assert {row.operation for row in details['gets']} == {static['get'].id}
+        assert tuple(row.caller for row in details['identity_calls']) == tuple(row.id for row in details['gets'])
+        assert len({row.activation for row in details['identity_calls']}) == 2
+        assert len(static['get'].completions) == 1
+        assert static['get'].completions[0].kind is ExitKind.NORMAL
+        assert tuple(edge.kind for edge in static['get'].terminator.successors) == (ExitKind.NORMAL,)
+        assert details['get_values'][0].id != details['get_values'][1].id
+        assert static['get'].terminator.successors[0].arguments[0] == CompletionResult(0)
+        assert static['get'].terminator.successors[0].arguments[4] == static['previous_forward'].id
+        assert static['previous_forward'].id not in static['get'].invoke_arguments
+        assert type(static['previous']) is BlockArgument
+        expected_number = 1 if iterator_origin == 'latest' else 0
+        if iterator_origin == 'earlier':
+            first_inputs = tuple(row for row in program.protocol_call_inputs
+                                 if row.site.operation == static['advance_operation'])
+            assert first_inputs
+            assert all(case.receiver == static['previous'] for row in first_inputs for case in row.cases)
+            # The actual backedge saves the first own result, not the stable B seed.
+            saved, = tuple(use for use in static['retry'].uses
+                           if use.id == static['retry'].terminator.successors[0].arguments[3])
+            assert saved.value == static['landing'][0].id
+        # Current W/C always come from Get1's full logical state slots, even when
+        # the iterator is the earlier returned Reference.
+        proceed = static['retry'].terminator.successors[1]
+        assert tuple(next(use.value for use in static['retry'].uses if use.id == identity)
+                     for identity in proceed.arguments[-2:]) == tuple(value.id for value in static['landing'][2:4])
+        assert tuple(static['get'].terminator.successors[0].arguments[slot]
+                     for slot in (2, 3)) == (CompletionResult(1), CompletionResult(2))
+    
+        report = _query(program, model, details)
+>       _job, occurrence = _active(report, details)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_source_visits.py:451: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...t.resume.acquire'), successor_index=0), result=CompletionResult(index=0)), ...},), 'job_count': 1, 'outcomes': (), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ID(value='await.resume.acquire'): OperationOccurrenceID(value='await.visits.caller.4.await.resume.acquire'), ...}, ...}
+
+    def _active(report, details):
+        jobs = tuple(job for job in report['jobs'] if job['source'] == details['static']['source']
+                     and job['advance_operation'] == details['static']['advance_operation'])
+>       assert jobs
+E       assert ()
+
+tests/unit/test_execution_await_source_visits.py:386: AssertionError
+_ test_repeated_source_inventory_survives_shared_budget_and_detached_requery[latest] _
+
+iterator_origin = 'latest'
+
+    @pytest.mark.parametrize('iterator_origin', ('latest', 'earlier'), ids=('latest', 'earlier'))
+    def test_repeated_source_inventory_survives_shared_budget_and_detached_requery(iterator_origin):
+        program, model, details = _source_visit_execution(iterator_origin=iterator_origin)
+        require_valid(program)
+        validity = validate(model, program)
+        assert validity.valid, validity.issues
+        index = ExecutionIndex(model, program)
+        scope = details['static']['acquisition_scope']
+        complete = index.await_body_links(scope, budget=_BUDGET)
+        assert complete['budget']['truncated'] is False
+        _job, occurrence = _active(complete, details)
+        expected = details['gets'][1 if iterator_origin == 'latest' else 0].id
+        assert tuple(row['occurrence'].id for row in occurrence['matched_sources']) == (expected,)
+        consumer, implementation = _final_implementation(complete, details)
+        assert consumer['operation'].id == details['extraction']
+        assert len(implementation['frames']) == 2
+        full_cost = complete['budget']['used']
+        assert full_cost > 2
+        job_keys = tuple((row['source'], row['advance']) for row in complete['jobs'])
+        # The middle limit is derived from this actual complete query, without
+        # increasing the public budget or inventing a fixed implementation cost.
+        for limit in (1, full_cost // 2):
+            limited = index.await_body_links(scope, budget=limit)
+            assert limited['budget']['used'] <= limit
+            assert limited['budget']['truncated'] is True
+            assert limited['status'] == 'PARTIAL'
+            assert limited['cursor'] is not None
+            assert limited['inventory']['source_count'] == 1
+>           assert tuple((row['source'], row['advance']) for row in limited['jobs']) == job_keys
+E           AssertionError: assert ((ProtocolOpe...0'), slot=0))) == ((ProtocolOpe...'), slot=0)),)
+E             
+E             Left contains one more item: (ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITIO...use=<ProtocolClause.DELEGATE_ADVANCE: 'DELEGATE_ADVANCE'>, operation=OperationID(value='await.resume.call.0'), slot=0))
+E             Use -v to get more diff
+
+tests/unit/test_execution_await_source_visits.py:560: AssertionError
+_ test_repeated_source_inventory_survives_shared_budget_and_detached_requery[earlier] _
+
+iterator_origin = 'earlier'
+
+    @pytest.mark.parametrize('iterator_origin', ('latest', 'earlier'), ids=('latest', 'earlier'))
+    def test_repeated_source_inventory_survives_shared_budget_and_detached_requery(iterator_origin):
+        program, model, details = _source_visit_execution(iterator_origin=iterator_origin)
+        require_valid(program)
+        validity = validate(model, program)
+        assert validity.valid, validity.issues
+        index = ExecutionIndex(model, program)
+        scope = details['static']['acquisition_scope']
+        complete = index.await_body_links(scope, budget=_BUDGET)
+        assert complete['budget']['truncated'] is False
+>       _job, occurrence = _active(complete, details)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_source_visits.py:542: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...t.resume.acquire'), successor_index=0), result=CompletionResult(index=0)), ...},), 'job_count': 1, 'outcomes': (), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ID(value='await.resume.acquire'): OperationOccurrenceID(value='await.visits.caller.4.await.resume.acquire'), ...}, ...}
+
+    def _active(report, details):
+        jobs = tuple(job for job in report['jobs'] if job['source'] == details['static']['source']
+                     and job['advance_operation'] == details['static']['advance_operation'])
+>       assert jobs
+E       assert ()
+
+tests/unit/test_execution_await_source_visits.py:386: AssertionError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[self-zero-BodyRaise] _
+
+source_kind = 'self', zero_cut = True, body_raised = True
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+>           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:918: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:855: in _assert_round
+    _assert_raise(program, model, index, report, static, example)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='4f62303287a8...ume.create.0'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = <scar.ir.execution.query.ExecutionIndex object at 0x7032c532bb50>
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...t=RegionID(value='await.resume.caller')), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+example = {'number': 0, 'kind': <ExitKind.RAISE: 'RAISE'>, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...ipeline.caller.3'), BlockVisitID(value='await.pipeline.caller.4'), BlockVisitID(value='await.pipeline.caller.5')), ...}
+
+    def _assert_raise(program, model, index, report, static, example):
+        actual = _actual_outcome(report, static, example)
+        assert actual['conversion_legs'] == ()
+        assert actual['body_outcome'].id == example['body_drives'][-1].outcome
+        assert example['implementation_frames'] == () and example['extraction'] is None
+>       terminals = tuple(row for row in actual['terminals'] if row['selected'] is True)
+                                         ^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'terminals'
+
+tests/unit/test_execution_await_pipeline_reexecution.py:772: KeyError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[self-two-BodyReturn] _
+
+source_kind = 'self', zero_cut = False, body_raised = False
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+>       program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:912: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[self-two-BodyRaise] _
+
+source_kind = 'self', zero_cut = False, body_raised = True
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+>       program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:912: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-zero-BodyRaise] _
+
+source_kind = 'general', zero_cut = True, body_raised = True
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+>           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:918: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:855: in _assert_round
+    _assert_raise(program, model, index, report, static, example)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='c490b7928786....helper.call'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = <scar.ir.execution.query.ExecutionIndex object at 0x7032c5dda7b0>
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ontext')))),), parent=RegionID(value='await.resume.caller')), 'body_kind': <ResumableKind.GENERATOR: 'GENERATOR'>, ...}
+example = {'number': 0, 'kind': <ExitKind.RAISE: 'RAISE'>, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...ipeline.caller.3'), BlockVisitID(value='await.pipeline.caller.4'), BlockVisitID(value='await.pipeline.caller.5')), ...}
+
+    def _assert_raise(program, model, index, report, static, example):
+        actual = _actual_outcome(report, static, example)
+        assert actual['conversion_legs'] == ()
+        assert actual['body_outcome'].id == example['body_drives'][-1].outcome
+        assert example['implementation_frames'] == () and example['extraction'] is None
+>       terminals = tuple(row for row in actual['terminals'] if row['selected'] is True)
+                                         ^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'terminals'
+
+tests/unit/test_execution_await_pipeline_reexecution.py:772: KeyError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-two-BodyReturn] _
+
+source_kind = 'general', zero_cut = False, body_raised = False
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+>       program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:912: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...1), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-two-BodyRaise] _
+
+source_kind = 'general', zero_cut = False, body_raised = True
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+>       program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:912: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...1), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-zero-BodyReturn] _
+
+source_kind = 'wrapper', zero_cut = True, body_raised = False
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+>           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:918: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...ess(operation=OperationID(value='await.wrapper.advance.0.held.read'), index=0),)), guard=None),), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='95c1a2059f37...ume.create.0'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = <scar.ir.execution.query.ExecutionIndex object at 0x7032c55535b0>
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...cation=LocationID(value='resume.context')))),), parent=None), 'body_kind': <ResumableKind.COROUTINE: 'COROUTINE'>, ...}
+example = {'number': 0, 'kind': <ExitKind.NORMAL: 'NORMAL'>, 'caller_activation': RegionActivationID(value='await.pipeline.calle...ipeline.caller.4'), BlockVisitID(value='await.pipeline.caller.5'), BlockVisitID(value='await.pipeline.caller.6')), ...}
+
+    def _assert_round(program, model, index, report, static, example):
+        origin = index.body_activation_origin(example['body_activation'], budget=_BUDGET)
+        assert origin['association'] == example['body_origin']
+        assert origin['creation'].id == example['creation'] != example['decoy_creation']
+        assert example['body_origin'].creation == example['creation']
+        expected = 1 if static['zero_cut'] else 3
+        assert len(example['body_segments']) == len(example['body_drives']) == expected
+        assert len({drive.activation for drive in example['body_drives']}) == 1
+        segments = {row.id: row for row in model.segments}
+        for ordinal, (definition, association) in enumerate(zip(static['drivers'], example['body_drives'], strict=True)):
+            drive = index.drive_execution(association.drive, budget=_BUDGET)
+            assert drive['association'] == association
+            assert drive['activation'].id == example['body_activation']
+            assert drive['entry'].id == example['body_entries'][ordinal]
+            assert drive['outcome'].id == association.outcome
+            assert drive['instance']['creation_handle'] == origin['handle'] is not None
+            segment = segments[example['body_segments'][ordinal]]
+            assert segment.activation == example['body_activation']
+            if ordinal:
+                assert type(segment.ingress) is ResumeIngress
+                assert segment.ingress.suspension == example['body_drives'][ordinal - 1].outcome
+                transfer, = tuple(row for row in model.transfers if row.operation == segment.ingress.suspension)
+                assert transfer.target == association.entry
+                assert transfer.successor_index == definition['drive'].target.successor
+            else:
+                assert type(segment.ingress) is InitialEntry
+            assert index.call_activation(example['driver_calls'][ordinal].id)['association'] == example['driver_calls'][ordinal]
+        selected = _selected_advances(report, static, example)
+        assert {row['advance'].id for row in selected} == {
+            example['caller_operations'][item['caller_call'].id] for item in static['drivers'] if not item['direct']}
+        for occurrence in selected:
+            assert tuple(source['occurrence'].id for source in occurrence['matched_sources']) == (example['acquisition'],)
+            ordinal, = tuple(number for number, item in enumerate(static['drivers'])
+                if example['caller_operations'][item['caller_call'].id] == occurrence['advance'].id)
+            route, = occurrence['routes']
+            expected_calls = ((example['wrapper_calls'][ordinal], example['driver_calls'][ordinal])
+                if static['source_kind'] == 'wrapper' else (example['driver_calls'][ordinal],))
+            assert tuple(row['association'] for row in route['call_chain']) == expected_calls
+            assert route['drive_occurrence'].id == example['body_drives'][ordinal].drive
+            assert route['drive']['activation'].id == example['body_activation']
+            if static['source_kind'] == 'wrapper':
+                projection, = route['projections']
+                assert projection['constructor'].id == example['acquisition']
+>               assert projection['distinctness']['status'] == 'DECLARED_DISTINCT_OBJECTS'
+E               AssertionError: assert 'UNPROVED' == 'DECLARED_DISTINCT_OBJECTS'
+E                 
+E                 - DECLARED_DISTINCT_OBJECTS
+E                 + UNPROVED
+
+tests/unit/test_execution_await_pipeline_reexecution.py:845: AssertionError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-zero-BodyRaise] _
+
+source_kind = 'wrapper', zero_cut = True, body_raised = True
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+>           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:918: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...ess(operation=OperationID(value='await.wrapper.advance.0.held.read'), index=0),)), guard=None),), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='fedb690b61da...ume.create.0'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = <scar.ir.execution.query.ExecutionIndex object at 0x7032c4e18750>
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ontext')))),), parent=RegionID(value='await.resume.caller')), 'body_kind': <ResumableKind.COROUTINE: 'COROUTINE'>, ...}
+example = {'number': 0, 'kind': <ExitKind.RAISE: 'RAISE'>, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...ipeline.caller.3'), BlockVisitID(value='await.pipeline.caller.4'), BlockVisitID(value='await.pipeline.caller.5')), ...}
+
+    def _assert_round(program, model, index, report, static, example):
+        origin = index.body_activation_origin(example['body_activation'], budget=_BUDGET)
+        assert origin['association'] == example['body_origin']
+        assert origin['creation'].id == example['creation'] != example['decoy_creation']
+        assert example['body_origin'].creation == example['creation']
+        expected = 1 if static['zero_cut'] else 3
+        assert len(example['body_segments']) == len(example['body_drives']) == expected
+        assert len({drive.activation for drive in example['body_drives']}) == 1
+        segments = {row.id: row for row in model.segments}
+        for ordinal, (definition, association) in enumerate(zip(static['drivers'], example['body_drives'], strict=True)):
+            drive = index.drive_execution(association.drive, budget=_BUDGET)
+            assert drive['association'] == association
+            assert drive['activation'].id == example['body_activation']
+            assert drive['entry'].id == example['body_entries'][ordinal]
+            assert drive['outcome'].id == association.outcome
+            assert drive['instance']['creation_handle'] == origin['handle'] is not None
+            segment = segments[example['body_segments'][ordinal]]
+            assert segment.activation == example['body_activation']
+            if ordinal:
+                assert type(segment.ingress) is ResumeIngress
+                assert segment.ingress.suspension == example['body_drives'][ordinal - 1].outcome
+                transfer, = tuple(row for row in model.transfers if row.operation == segment.ingress.suspension)
+                assert transfer.target == association.entry
+                assert transfer.successor_index == definition['drive'].target.successor
+            else:
+                assert type(segment.ingress) is InitialEntry
+            assert index.call_activation(example['driver_calls'][ordinal].id)['association'] == example['driver_calls'][ordinal]
+        selected = _selected_advances(report, static, example)
+        assert {row['advance'].id for row in selected} == {
+            example['caller_operations'][item['caller_call'].id] for item in static['drivers'] if not item['direct']}
+        for occurrence in selected:
+            assert tuple(source['occurrence'].id for source in occurrence['matched_sources']) == (example['acquisition'],)
+            ordinal, = tuple(number for number, item in enumerate(static['drivers'])
+                if example['caller_operations'][item['caller_call'].id] == occurrence['advance'].id)
+            route, = occurrence['routes']
+            expected_calls = ((example['wrapper_calls'][ordinal], example['driver_calls'][ordinal])
+                if static['source_kind'] == 'wrapper' else (example['driver_calls'][ordinal],))
+            assert tuple(row['association'] for row in route['call_chain']) == expected_calls
+            assert route['drive_occurrence'].id == example['body_drives'][ordinal].drive
+            assert route['drive']['activation'].id == example['body_activation']
+            if static['source_kind'] == 'wrapper':
+                projection, = route['projections']
+                assert projection['constructor'].id == example['acquisition']
+>               assert projection['distinctness']['status'] == 'DECLARED_DISTINCT_OBJECTS'
+E               AssertionError: assert 'UNPROVED' == 'DECLARED_DISTINCT_OBJECTS'
+E                 
+E                 - DECLARED_DISTINCT_OBJECTS
+E                 + UNPROVED
+
+tests/unit/test_execution_await_pipeline_reexecution.py:845: AssertionError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-two-BodyReturn] _
+
+source_kind = 'wrapper', zero_cut = False, body_raised = False
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+>       program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:912: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+_ test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-two-BodyRaise] _
+
+source_kind = 'wrapper', zero_cut = False, body_raised = True
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+>       program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:912: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+_ test_second_round_missing_capture_never_borrows_the_complete_first_round[source-use] _
+
+source_kind = 'self', zero_cut = True, body_raised = False
+missing = 'source-use'
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised', 'missing'), _MISSING,
+                             ids=tuple(row[-1] for row in _MISSING))
+    def test_second_round_missing_capture_never_borrows_the_complete_first_round(
+            source_kind, zero_cut, body_raised, missing):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised, missing)
+        index = _index(program, model, details)
+        static = details['static']
+        report = _report(index, static)
+        first, second = details['rounds']
+        assert first['caller_activation'] == second['caller_activation']
+        assert first['body_activation'] != second['body_activation']
+        _assert_round(program, model, index, report, static, first)
+        assert report['status'] == 'PARTIAL'
+        if missing in ('source-use', 'helper-call', 'inner-call'):
+            selected = _selected_advances(report, static, second)
+            assert selected
+            assert all(row['status'] == 'PARTIAL' and row['gaps'] for row in selected)
+            assert all(source['occurrence'].id != first['acquisition']
+                       for row in selected for source in row['matched_sources'])
+            codes = _codes(gap for row in selected for gap in row['gaps'])
+            if missing == 'source-use':
+>               assert 'await_source_occurrence_unproved' in codes
+E               AssertionError: assert 'await_source_occurrence_unproved' in {'body_reference_identity_unproved'}
+
+tests/unit/test_execution_await_pipeline_reexecution.py:964: AssertionError
+_ test_second_round_missing_capture_never_borrows_the_complete_first_round[inner-call] _
+
+source_kind = 'wrapper', zero_cut = True, body_raised = False
+missing = 'inner-call'
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised', 'missing'), _MISSING,
+                             ids=tuple(row[-1] for row in _MISSING))
+    def test_second_round_missing_capture_never_borrows_the_complete_first_round(
+            source_kind, zero_cut, body_raised, missing):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised, missing)
+        index = _index(program, model, details)
+        static = details['static']
+        report = _report(index, static)
+        first, second = details['rounds']
+        assert first['caller_activation'] == second['caller_activation']
+        assert first['body_activation'] != second['body_activation']
+>       _assert_round(program, model, index, report, static, first)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:954: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...ess(operation=OperationID(value='await.wrapper.advance.0.held.read'), index=0),)), guard=None),), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='95c1a2059f37...ume.create.0'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = <scar.ir.execution.query.ExecutionIndex object at 0x7032c527fd10>
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...cation=LocationID(value='resume.context')))),), parent=None), 'body_kind': <ResumableKind.COROUTINE: 'COROUTINE'>, ...}
+example = {'number': 0, 'kind': <ExitKind.NORMAL: 'NORMAL'>, 'caller_activation': RegionActivationID(value='await.pipeline.calle...ipeline.caller.4'), BlockVisitID(value='await.pipeline.caller.5'), BlockVisitID(value='await.pipeline.caller.6')), ...}
+
+    def _assert_round(program, model, index, report, static, example):
+        origin = index.body_activation_origin(example['body_activation'], budget=_BUDGET)
+        assert origin['association'] == example['body_origin']
+        assert origin['creation'].id == example['creation'] != example['decoy_creation']
+        assert example['body_origin'].creation == example['creation']
+        expected = 1 if static['zero_cut'] else 3
+        assert len(example['body_segments']) == len(example['body_drives']) == expected
+        assert len({drive.activation for drive in example['body_drives']}) == 1
+        segments = {row.id: row for row in model.segments}
+        for ordinal, (definition, association) in enumerate(zip(static['drivers'], example['body_drives'], strict=True)):
+            drive = index.drive_execution(association.drive, budget=_BUDGET)
+            assert drive['association'] == association
+            assert drive['activation'].id == example['body_activation']
+            assert drive['entry'].id == example['body_entries'][ordinal]
+            assert drive['outcome'].id == association.outcome
+            assert drive['instance']['creation_handle'] == origin['handle'] is not None
+            segment = segments[example['body_segments'][ordinal]]
+            assert segment.activation == example['body_activation']
+            if ordinal:
+                assert type(segment.ingress) is ResumeIngress
+                assert segment.ingress.suspension == example['body_drives'][ordinal - 1].outcome
+                transfer, = tuple(row for row in model.transfers if row.operation == segment.ingress.suspension)
+                assert transfer.target == association.entry
+                assert transfer.successor_index == definition['drive'].target.successor
+            else:
+                assert type(segment.ingress) is InitialEntry
+            assert index.call_activation(example['driver_calls'][ordinal].id)['association'] == example['driver_calls'][ordinal]
+        selected = _selected_advances(report, static, example)
+        assert {row['advance'].id for row in selected} == {
+            example['caller_operations'][item['caller_call'].id] for item in static['drivers'] if not item['direct']}
+        for occurrence in selected:
+            assert tuple(source['occurrence'].id for source in occurrence['matched_sources']) == (example['acquisition'],)
+            ordinal, = tuple(number for number, item in enumerate(static['drivers'])
+                if example['caller_operations'][item['caller_call'].id] == occurrence['advance'].id)
+            route, = occurrence['routes']
+            expected_calls = ((example['wrapper_calls'][ordinal], example['driver_calls'][ordinal])
+                if static['source_kind'] == 'wrapper' else (example['driver_calls'][ordinal],))
+            assert tuple(row['association'] for row in route['call_chain']) == expected_calls
+            assert route['drive_occurrence'].id == example['body_drives'][ordinal].drive
+            assert route['drive']['activation'].id == example['body_activation']
+            if static['source_kind'] == 'wrapper':
+                projection, = route['projections']
+                assert projection['constructor'].id == example['acquisition']
+>               assert projection['distinctness']['status'] == 'DECLARED_DISTINCT_OBJECTS'
+E               AssertionError: assert 'UNPROVED' == 'DECLARED_DISTINCT_OBJECTS'
+E                 
+E                 - DECLARED_DISTINCT_OBJECTS
+E                 + UNPROVED
+
+tests/unit/test_execution_await_pipeline_reexecution.py:845: AssertionError
+_ test_second_round_missing_capture_never_borrows_the_complete_first_round[observer-payload] _
+
+source_kind = 'general', zero_cut = True, body_raised = True
+missing = 'observer-payload'
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised', 'missing'), _MISSING,
+                             ids=tuple(row[-1] for row in _MISSING))
+    def test_second_round_missing_capture_never_borrows_the_complete_first_round(
+            source_kind, zero_cut, body_raised, missing):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised, missing)
+        index = _index(program, model, details)
+        static = details['static']
+        report = _report(index, static)
+        first, second = details['rounds']
+        assert first['caller_activation'] == second['caller_activation']
+        assert first['body_activation'] != second['body_activation']
+>       _assert_round(program, model, index, report, static, first)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:954: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:855: in _assert_round
+    _assert_raise(program, model, index, report, static, example)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='c490b7928786....helper.call'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = <scar.ir.execution.query.ExecutionIndex object at 0x7032c4fe8470>
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ontext')))),), parent=RegionID(value='await.resume.caller')), 'body_kind': <ResumableKind.GENERATOR: 'GENERATOR'>, ...}
+example = {'number': 0, 'kind': <ExitKind.RAISE: 'RAISE'>, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...ipeline.caller.3'), BlockVisitID(value='await.pipeline.caller.4'), BlockVisitID(value='await.pipeline.caller.5')), ...}
+
+    def _assert_raise(program, model, index, report, static, example):
+        actual = _actual_outcome(report, static, example)
+        assert actual['conversion_legs'] == ()
+        assert actual['body_outcome'].id == example['body_drives'][-1].outcome
+        assert example['implementation_frames'] == () and example['extraction'] is None
+>       terminals = tuple(row for row in actual['terminals'] if row['selected'] is True)
+                                         ^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'terminals'
+
+tests/unit/test_execution_await_pipeline_reexecution.py:772: KeyError
+_ test_second_round_missing_capture_never_borrows_the_complete_first_round[observer-state] _
+
+source_kind = 'wrapper', zero_cut = True, body_raised = False
+missing = 'observer-state'
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised', 'missing'), _MISSING,
+                             ids=tuple(row[-1] for row in _MISSING))
+    def test_second_round_missing_capture_never_borrows_the_complete_first_round(
+            source_kind, zero_cut, body_raised, missing):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised, missing)
+        index = _index(program, model, details)
+        static = details['static']
+        report = _report(index, static)
+        first, second = details['rounds']
+        assert first['caller_activation'] == second['caller_activation']
+        assert first['body_activation'] != second['body_activation']
+>       _assert_round(program, model, index, report, static, first)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:954: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...ess(operation=OperationID(value='await.wrapper.advance.0.held.read'), index=0),)), guard=None),), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='95c1a2059f37...ume.create.0'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = <scar.ir.execution.query.ExecutionIndex object at 0x7032c5986c10>
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...cation=LocationID(value='resume.context')))),), parent=None), 'body_kind': <ResumableKind.COROUTINE: 'COROUTINE'>, ...}
+example = {'number': 0, 'kind': <ExitKind.NORMAL: 'NORMAL'>, 'caller_activation': RegionActivationID(value='await.pipeline.calle...ipeline.caller.4'), BlockVisitID(value='await.pipeline.caller.5'), BlockVisitID(value='await.pipeline.caller.6')), ...}
+
+    def _assert_round(program, model, index, report, static, example):
+        origin = index.body_activation_origin(example['body_activation'], budget=_BUDGET)
+        assert origin['association'] == example['body_origin']
+        assert origin['creation'].id == example['creation'] != example['decoy_creation']
+        assert example['body_origin'].creation == example['creation']
+        expected = 1 if static['zero_cut'] else 3
+        assert len(example['body_segments']) == len(example['body_drives']) == expected
+        assert len({drive.activation for drive in example['body_drives']}) == 1
+        segments = {row.id: row for row in model.segments}
+        for ordinal, (definition, association) in enumerate(zip(static['drivers'], example['body_drives'], strict=True)):
+            drive = index.drive_execution(association.drive, budget=_BUDGET)
+            assert drive['association'] == association
+            assert drive['activation'].id == example['body_activation']
+            assert drive['entry'].id == example['body_entries'][ordinal]
+            assert drive['outcome'].id == association.outcome
+            assert drive['instance']['creation_handle'] == origin['handle'] is not None
+            segment = segments[example['body_segments'][ordinal]]
+            assert segment.activation == example['body_activation']
+            if ordinal:
+                assert type(segment.ingress) is ResumeIngress
+                assert segment.ingress.suspension == example['body_drives'][ordinal - 1].outcome
+                transfer, = tuple(row for row in model.transfers if row.operation == segment.ingress.suspension)
+                assert transfer.target == association.entry
+                assert transfer.successor_index == definition['drive'].target.successor
+            else:
+                assert type(segment.ingress) is InitialEntry
+            assert index.call_activation(example['driver_calls'][ordinal].id)['association'] == example['driver_calls'][ordinal]
+        selected = _selected_advances(report, static, example)
+        assert {row['advance'].id for row in selected} == {
+            example['caller_operations'][item['caller_call'].id] for item in static['drivers'] if not item['direct']}
+        for occurrence in selected:
+            assert tuple(source['occurrence'].id for source in occurrence['matched_sources']) == (example['acquisition'],)
+            ordinal, = tuple(number for number, item in enumerate(static['drivers'])
+                if example['caller_operations'][item['caller_call'].id] == occurrence['advance'].id)
+            route, = occurrence['routes']
+            expected_calls = ((example['wrapper_calls'][ordinal], example['driver_calls'][ordinal])
+                if static['source_kind'] == 'wrapper' else (example['driver_calls'][ordinal],))
+            assert tuple(row['association'] for row in route['call_chain']) == expected_calls
+            assert route['drive_occurrence'].id == example['body_drives'][ordinal].drive
+            assert route['drive']['activation'].id == example['body_activation']
+            if static['source_kind'] == 'wrapper':
+                projection, = route['projections']
+                assert projection['constructor'].id == example['acquisition']
+>               assert projection['distinctness']['status'] == 'DECLARED_DISTINCT_OBJECTS'
+E               AssertionError: assert 'UNPROVED' == 'DECLARED_DISTINCT_OBJECTS'
+E                 
+E                 - DECLARED_DISTINCT_OBJECTS
+E                 + UNPROVED
+
+tests/unit/test_execution_await_pipeline_reexecution.py:845: AssertionError
+_ test_second_round_missing_capture_never_borrows_the_complete_first_round[resume-transfer] _
+
+source_kind = 'wrapper', zero_cut = False, body_raised = True
+missing = 'resume-transfer'
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised', 'missing'), _MISSING,
+                             ids=tuple(row[-1] for row in _MISSING))
+    def test_second_round_missing_capture_never_borrows_the_complete_first_round(
+            source_kind, zero_cut, body_raised, missing):
+>       program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised, missing)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:947: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+_ test_second_round_missing_capture_never_borrows_the_complete_first_round[terminal-use] _
+
+source_kind = 'self', zero_cut = False, body_raised = False
+missing = 'terminal-use'
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised', 'missing'), _MISSING,
+                             ids=tuple(row[-1] for row in _MISSING))
+    def test_second_round_missing_capture_never_borrows_the_complete_first_round(
+            source_kind, zero_cut, body_raised, missing):
+>       program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised, missing)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:947: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+_ test_previous_round_create_is_a_core_rejected_body_origin_not_a_protocol_match _
+
+    def test_previous_round_create_is_a_core_rejected_body_origin_not_a_protocol_match():
+        program, model, details = _pipeline_capture()
+        _index(program, model, details)
+        first, second = details['rounds']
+        wrong = replace(model, body_activation_origins=tuple(
+            replace(row, creation=first['creation']) if row.activation == second['body_activation'] else row
+            for row in model.body_activation_origins))
+        validation = validate(wrong, program)
+        assert not validation.valid
+>       assert 'body_instance_source' in _codes(validation.issues)
+E       AssertionError: assert 'body_instance_source' in {'body_creation_reused'}
+E        +  where {'body_creation_reused'} = _codes((ExecutionIssue(code='body_creation_reused', path='exec_region_activation:await.pipeline.round.1.body', message='one concrete Create cannot create two persistent body activations'),))
+E        +    where (ExecutionIssue(code='body_creation_reused', path='exec_region_activation:await.pipeline.round.1.body', message='one concrete Create cannot create two persistent body activations'),) = ValidationReport(issues=(ExecutionIssue(code='body_creation_reused', path='exec_region_activation:await.pipeline.round...verified', path='model', message='declared occurrence/identity links have not been established by a runtime adapter'))).issues
+
+tests/unit/test_execution_await_pipeline_reexecution.py:1018: AssertionError
+_ test_shared_budget_retains_both_round_anchors_and_all_original_outcome_keys[one] _
+
+budget = 1
+
+    @pytest.mark.parametrize('budget', (1, 128), ids=('one', 'middle'))
+    def test_shared_budget_retains_both_round_anchors_and_all_original_outcome_keys(budget):
+>       program, model, details = _pipeline_capture('general', False, False)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:1025: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...1), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+_ test_shared_budget_retains_both_round_anchors_and_all_original_outcome_keys[middle] _
+
+budget = 128
+
+    @pytest.mark.parametrize('budget', (1, 128), ids=('one', 'middle'))
+    def test_shared_budget_retains_both_round_anchors_and_all_original_outcome_keys(budget):
+>       program, model, details = _pipeline_capture('general', False, False)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:1025: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...1), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.AWAIT_ACQUISITION: 'AWAIT_ACQUISITION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+___ test_detached_results_and_fresh_external_catalog_keep_each_round_source ____
+
+    def test_detached_results_and_fresh_external_catalog_keep_each_round_source():
+>       program, model, details = _pipeline_capture('wrapper', False, False)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:1047: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:506: in _pipeline_capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_copy at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link uses another iterator, wrapper or current B source; protocol_await_body_tuple at ProtocolOperationRef(scope=ProtocolScopeID(value='await.resume.acquisition'), clause=<ProtocolClause.WRAPPER_CONSTRUCTION: 'WRAPPER_CONSTRUCTION'>, operation=OperationID(value='await.resume.acquire'), slot=0): body link inputs belong to different caller/CFG tuples
+
+scar/ir/program/validation.py:759: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_await_source_visits.py::test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[earlier]
+FAILED tests/unit/test_execution_await_source_visits.py::test_repeated_source_inventory_survives_shared_budget_and_detached_requery[latest]
+FAILED tests/unit/test_execution_await_source_visits.py::test_repeated_source_inventory_survives_shared_budget_and_detached_requery[earlier]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[self-zero-BodyRaise]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[self-two-BodyReturn]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[self-two-BodyRaise]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-zero-BodyRaise]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-two-BodyReturn]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-two-BodyRaise]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-zero-BodyReturn]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-zero-BodyRaise]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-two-BodyReturn]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-two-BodyRaise]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_second_round_missing_capture_never_borrows_the_complete_first_round[source-use]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_second_round_missing_capture_never_borrows_the_complete_first_round[inner-call]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_second_round_missing_capture_never_borrows_the_complete_first_round[observer-payload]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_second_round_missing_capture_never_borrows_the_complete_first_round[observer-state]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_second_round_missing_capture_never_borrows_the_complete_first_round[resume-transfer]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_second_round_missing_capture_never_borrows_the_complete_first_round[terminal-use]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_previous_round_create_is_a_core_rejected_body_origin_not_a_protocol_match
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_shared_budget_retains_both_round_anchors_and_all_original_outcome_keys[one]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_shared_budget_retains_both_round_anchors_and_all_original_outcome_keys[middle]
+FAILED tests/unit/test_execution_await_pipeline_reexecution.py::test_detached_results_and_fresh_external_catalog_keep_each_round_source
+23 failed, 13 passed in 24.90s

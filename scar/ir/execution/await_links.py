@@ -112,7 +112,8 @@ def _body_input(ctx, flow, occurrence, row, source_value, shared):
         return None, ('await_body_source_row_missing',)
     contract = row.contract
     if type(contract) is not AwaitAcquisition:
-        return _source_input(ctx, occurrence, row), ()
+        actual = _source_input(ctx, occurrence, row)
+        return actual, () if actual is not None else ('await_body_input_unobserved',)
     if type(contract.expansion) is not ExpandedAwaitCallee:
         from scar.ir.program.evaluated_sources import evaluated_sources
         from scar.ir.program.resumption import ResumableKind
@@ -121,7 +122,8 @@ def _body_input(ctx, flow, occurrence, row, source_value, shared):
         if (report['classification_complete'] and all(case['kind'] in (
                 ResumableKind.COROUTINE, ResumableKind.GENERATOR_COROUTINE)
                 for case in report['cases'])):
-            return _source_input(ctx, occurrence, row), ()
+            actual = _source_input(ctx, occurrence, row)
+            return actual, () if actual is not None else ('await_body_input_unobserved',)
         return None, ('await_acquisition_body_route_unproved',)
     ref = contract.expansion.qualification
     if type(ref) is StaticProtocolGap:
@@ -148,7 +150,7 @@ def _body_input(ctx, flow, occurrence, row, source_value, shared):
             matched.append(_use(ctx, candidate,
                 OwnedUse(qualifier.operation, qualifier.contract.input_use)))
     if len(matched) == 1 and not shared.truncated:
-        return matched[0], ()
+        return matched[0], () if matched[0] is not None else ('await_body_input_unobserved',)
     return None, ('await_general_body_source_occurrence_unproved',)
 
 
@@ -368,7 +370,7 @@ def _guard(ctx, anchor, edge, shared, *, incoming=False):
             # select the case merely because both carry the same object.
             return (occurrence.operation == edge.operation
                     and transfer.successor_index == edge.successor_index)
-        if occurrence.operation == edge.operation:
+        if not incoming and occurrence.operation == edge.operation:
             return transfer.successor_index == edge.successor_index
         visit = ctx.visits[occurrence.visit]
     return None
@@ -405,12 +407,15 @@ def _accepted_edge(ctx, source, advance, shared):
     return answers[0] if len(answers) == 1 else None
 
 
-def _required_choices(ctx, source, advance, choices, shared):
+def _required_choices(ctx, source, advance, choices, shared, *, input_guard=None):
     """Project each required static edge in this exact source/caller context."""
     answers = []
     for edge in choices:
         if not shared.spend('await_required_choices', path='await.choices'):
             return None
+        if edge == input_guard:
+            answers.append(_guard(ctx, advance, edge, shared, incoming=True))
+            continue
         if edge == source['accepted_edge']:
             answers.append(_accepted_edge(ctx, source, advance, shared))
             continue
@@ -447,6 +452,64 @@ def _copy_pair(ctx, expected, actual):
                               if _root(ctx, expected) is not None else None)}
 
 
+def _source_boundary(ctx, row, actual, shared):
+    """Nearest own result on the iterator's original copy ancestry.
+
+    Returning the same object does not make two call results the same source
+    evaluation. Stop at the actual result port before traversing a callee's
+    identity return. A separately forwarded value in that landing is not an
+    own result. Input-based boolean qualifications retain their own rules.
+    """
+    from .coordinates import BlockVisitID, OperationOccurrenceID
+    from .pending_payloads import copy_recipe
+    from scar.ir.program.protocol_await_records import AwaitIteratorQualification
+    if row is None or (type(row.contract) is AwaitIteratorQualification
+                       and row.contract.branch is not None):
+        return None, False
+    port = getattr(row.contract, 'result', None)
+    own_formals = ()
+    if type(port) is InvokeLiteralResult:
+        operation = ctx.core_operations[port.edge.operation]
+        edge = operation.terminator.successors[port.edge.successor_index]
+        if not shared.spend('await_source_boundary_slots', len(edge.arguments) + 1,
+                            path='await.source_boundary.slots'):
+            return None, True
+        block = ctx.blocks[edge.block]
+        own_formals = tuple(formal for argument, formal in zip(edge.arguments, block.arguments)
+            if type(argument) is CompletionResult and argument.index == port.result.index)
+    elif type(port) is not OperationResult:
+        return None, False
+    seen = set()
+    cursor = None if actual is None or type(actual) is Unresolved else actual.id
+    while cursor is not None and cursor not in seen:
+        if not shared.spend('await_source_boundary_steps', path='await.source_boundary'):
+            return None, True
+        seen.add(cursor)
+        value = ctx.values.get(cursor)
+        if value is None:
+            break
+        if type(port) is OperationResult:
+            operation = ctx.core_operations[port.operation]
+            if (value.value == operation.results[port.index]
+                    and type(value.origin) is OperationOccurrenceID):
+                occurrence = ctx.occurrences[value.origin]
+                if occurrence.operation == port.operation:
+                    return occurrence.id, True
+        elif value.value in own_formals and type(value.origin) is BlockVisitID:
+            transfer = ctx.incoming.get(value.origin)
+            if transfer is None:
+                return None, True
+            occurrence = ctx.occurrences[transfer.operation]
+            if (occurrence.operation == port.edge.operation
+                    and transfer.successor_index == port.edge.successor_index):
+                return occurrence.id, True
+        recipe, _, conflict = copy_recipe(ctx, cursor, shared)
+        if recipe is None or conflict:
+            break
+        cursor = recipe['source']
+    return None, True
+
+
 def _wrapper_projection(ctx, source, advance, route, projection, gaps, shared):
     """Constructor W -> exact getter W/B -> this route's Drive instance.
 
@@ -476,8 +539,9 @@ def _wrapper_projection(ctx, source, advance, route, projection, gaps, shared):
         if not shared.spend('await_wrapper_body_operands', path='await.wrapper.body'):
             break
         actual = _use(ctx, occurrence, projection.body)
-        if occurrence.id == constructor.id:
-            bodies.append((occurrence, actual))
+        if projection.body.operation == constructor.operation:
+            if occurrence.id == constructor.id:
+                bodies.append((occurrence, actual))
             continue
         # High-level zero-argument bound calls take B from the exact original
         # lookup receiver, not an invented call argument.
@@ -570,15 +634,20 @@ def await_identity_errors(ctx, shared):
                 gap(ctx, gaps, 'await_input_case_guard_unobserved', advance.id,
                     'this exact advance does not establish the original incoming case guard')
             target = OccurrencePoint(advance.id, OccurrencePhase.BEFORE)
+            boundary, constrained = _source_boundary(ctx, job.get('source_row'),
+                occurrence['iterator_value'], shared)
             for source in occurrence['source_candidates']:
                 if not shared.spend('await_source_candidates', path='await.source_candidates'):
                     break
+                if constrained and source['occurrence'].id != boundary:
+                    continue
                 expected, actual = source['value'], occurrence['iterator_value']
                 root = _root(ctx, expected)
                 if root is None or root != _root(ctx, actual):
                     continue
                 guard = _accepted_edge(ctx, source, advance, shared)
-                choices = _required_choices(ctx, source, advance, job.get('choices', ()), shared)
+                choices = _required_choices(ctx, source, advance, job.get('choices', ()), shared,
+                                            input_guard=job.get('input_guard'))
                 path = host_path(ctx, _port_point(ctx, source), target, budget=shared)
                 if guard is False or choices is False or path is None:
                     continue

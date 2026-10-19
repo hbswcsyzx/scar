@@ -302,7 +302,8 @@ def await_inventory(ctx, scope=None):
                         choices, conflict = forced, True
                     report = ({'match': False, 'routes': (), 'gaps': ('await_accept_edge_conflict',)}
                               if conflict else None if source_port is None or actual is None else
-                              ctx.bind(source_port, actual, guard=choices or None))
+                              ctx.carried_source(source_port, None if case is None else case.receiver,
+                                                 actual, guard=choices or None))
                     if report is not None and report['match'] is False:
                         possible = ctx.may_forwards(source_port, actual)
                         if possible is False and not conflict:
@@ -727,7 +728,8 @@ class _Await:
                 if source is None or iterator is None:
                     self.missing('await_link_success_source_missing', link.source)
                     continue
-                reports.append(ctx.bind(source, iterator, guard=choices or None))
+                carrier = None if job['case'] is None else job['case'].receiver
+                reports.append(ctx.carried_source(source, carrier, iterator, guard=choices or None))
                 drive = ctx.drives[link.drive]
                 owner = OwnedUse(drive.operation, drive.instance)
                 projection = link.projection
@@ -817,7 +819,7 @@ class _Await:
                         # closure. Check both independent input and actual
                         # success-output-to-owner legs instead.
                         reports.append(ctx.bind(body_expected, body_anchor, guard=choices or None))
-                        reports.append(ctx.bind(source, owner, guard=choices or None))
+                        reports.append(ctx.carried_source(source, carrier, owner, guard=choices or None))
                 else:
                     self.missing('await_wrapper_projection_unresolved', link.source)
                 for report in reports:

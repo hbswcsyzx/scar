@@ -7,7 +7,7 @@ identity edges. All derived work shares the caller's ConnectionContext budget.
 from collections import deque
 from copy import deepcopy
 
-from .copy_flow import flow, selected
+from .copy_flow import flow, inventory_flow, selected
 from .model import (CompletionResult, ExitKind, InvokeLiteralResult,
                     OperationResult, TerminatorKind)
 from .protocol_flow import ProtocolPort
@@ -154,6 +154,7 @@ def consumer_graph(ctx, source, choices=()):
     pending = deque([((), root_region, None, (), (), (), (root_region,))])
     frames, all_gaps, cursor = [], [], None
     inventory_complete, proofs_complete, checked = True, True, 0
+    conditional_inventory = False
     previous = ctx._returns.guards
     previous_bounds = getattr(ctx, '_copy_consumer_bounds', False)
     previous_events = getattr(ctx, '_copy_consumer_bound_events', [])
@@ -168,8 +169,13 @@ def consumer_graph(ctx, source, choices=()):
             # Keep root and raw call anchors even when the first charge fails.
             if ctx.spend('copy_consumer_frames', len(key) + 1):
                 if not key:
-                    may = flow(ctx, source, choices, mode='may')
-                    must = flow(ctx, source, choices, mode='must')
+                    membership = inventory_flow(ctx, source, choices)
+                    may = membership['before']
+                    conditional_inventory = membership['conditional']
+                    must = None if conditional_inventory else flow(ctx, source, choices, mode='must')
+                    if conditional_inventory:
+                        local.extend(membership['gaps'])
+                        inventory_complete = proofs_complete = False
                     may_seeds = () if port is None else port.values
                     must_seeds = may_seeds
                 else:
@@ -177,8 +183,9 @@ def consumer_graph(ctx, source, choices=()):
                     guard = ctx.selected_edges(choices, region=region)
                     may = ctx._fresh_copies(ProtocolPort(None, entry.operations[0],
                         may_seeds, 'before'), guard=guard or None, mode='may')
-                    must = ctx._fresh_copies(ProtocolPort(None, entry.operations[0],
-                        must_seeds, 'before'), guard=guard or None, mode='must')
+                    must = None if conditional_inventory else ctx._fresh_copies(
+                        ProtocolPort(None, entry.operations[0], must_seeds, 'before'),
+                        guard=guard or None, mode='must')
             if may is None or must is None:
                 local.append('copy_consumer_flow_unresolved')
                 proofs_complete = False

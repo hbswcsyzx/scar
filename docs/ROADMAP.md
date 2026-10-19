@@ -1,5 +1,19 @@
 # SCAR roadmap and scope
 
+> **N4 original E/H structural acceptance (2026-10-19):**
+> [Frozen plan](M1_AWAIT_REEVALUATION_PLAN.md),
+> [actual attempts and regression](M1_AWAIT_REEVALUATION_PROGRESS.md), and
+> [original-clause acceptance](M1_AWAIT_ORIGINAL_SCOPE_ACCEPTANCE.md) separate
+> a repeated operation's own result occurrence from shared object identity.
+> Same-caller pipeline backedges retain each round's Create/B, current state,
+> exact consumers and nested results. Conditional loop may inventory never
+> grants a must-copy or transformation.1845 affected focused pass, all1807
+> previous identities retained,853 stable sources. Original E/H close after
+> exact clause/selector/JUnit reconciliation; G/F17/F21/F23 stay closed.
+> [Follow-up](M1_AWAIT_REEVALUATION_FOLLOWUP.md) narrows F15 to two specific
+> negative cases. A/B/C/D/F,13 families, P5 and M2 original113/196 remain open.
+> Whole-LeWM automatic modeling, transformation and new speedup are unproved.
+
 > **P4 original F23 structural acceptance (2026-10-19):**
 > [Frozen plan](M1_DELEGATE_CLOSE_PLAN.md) and
 > [actual attempts / original obligations](M1_DELEGATE_CLOSE_PROGRESS.md)

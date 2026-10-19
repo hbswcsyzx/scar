@@ -1,5 +1,23 @@
 # SCAR execution model
 
+## Own-result occurrences and source-evaluated regions (2026-10-19)
+
+One Operation definition may execute repeatedly and return the same object.
+Its own result occurrences remain distinct from that shared identity. Actual
+copy ancestry chooses the evaluated result boundary, including a deliberately
+saved earlier result; latest execution time cannot choose the producer.
+Current state may independently come from the later invocation.
+
+Loop choices from different visits are retained as conditional context, not
+flattened into a proof that the source never existed. Conditional may-consumer
+inventory preserves original guards and bindings; it grants neither must-copy
+seeds nor completeness. Budget-truncated joins keep their unpaid obligations.
+See the [N4 evidence](M1_AWAIT_REEVALUATION_PROGRESS.md) and
+[original E/H structural acceptance](M1_AWAIT_ORIGINAL_SCOPE_ACCEPTANCE.md).
+1845 affected focused pass on853 stable sources, retaining all1807 prior
+identities. E/G/H and F17/F21/F23 are structurally accepted in their original
+scope; other families and automatic whole-program recovery remain open.
+
 ## Original control inventory and independently known current values (2026-10-19)
 
 Optional descriptions cannot determine whether an original execution path

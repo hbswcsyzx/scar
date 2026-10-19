@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="10" skipped="0" tests="38" time="67.836" timestamp="2026-10-19T12:28:17.050779+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_await_source_visits" name="test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[latest]" time="0.976" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b[earlier]" time="0.520"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">iterator_origin = 'earlier'
+
+    @pytest.mark.parametrize('iterator_origin', ('latest', 'earlier'), ids=('latest', 'earlier'))
+    def test_same_static_get_visits_select_the_actual_own_result_not_latest_or_common_b(iterator_origin):
+        program, model, details = _source_visit_execution(iterator_origin=iterator_origin)
+        static = details['static']
+        assert len(program.resumable_creates) == 1
+        assert len(model.body_activation_origins) == len(model.body_drive_executions) == 1
+        assert details['body_origin'].creation == details['creation']
+        assert len({row.visit for row in details['gets']}) == 2
+        assert {row.operation for row in details['gets']} == {static['get'].id}
+        assert tuple(row.caller for row in details['identity_calls']) == tuple(row.id for row in details['gets'])
+        assert len({row.activation for row in details['identity_calls']}) == 2
+        assert len(static['get'].completions) == 1
+        assert static['get'].completions[0].kind is ExitKind.NORMAL
+        assert tuple(edge.kind for edge in static['get'].terminator.successors) == (ExitKind.NORMAL,)
+        assert details['get_values'][0].id != details['get_values'][1].id
+        assert static['get'].terminator.successors[0].arguments[0] == CompletionResult(0)
+        assert static['get'].terminator.successors[0].arguments[4] == static['previous_forward'].id
+        assert static['previous_forward'].id not in static['get'].invoke_arguments
+        assert type(static['previous']) is BlockArgument
+        expected_number = 1 if iterator_origin == 'latest' else 0
+        if iterator_origin == 'earlier':
+            first_inputs = tuple(row for row in program.protocol_call_inputs
+                                 if row.site.operation == static['advance_operation'])
+            assert first_inputs
+            assert all(case.receiver == static['previous'] for row in first_inputs for case in row.cases)
+            # The actual backedge saves the first own result, not the stable B seed.
+            saved, = tuple(use for use in static['retry'].uses
+                           if use.id == static['retry'].terminator.successors[0].arguments[3])
+            assert saved.value == static['landing'][0].id
+        # Current W/C always come from Get1's full logical state slots, even when
+        # the iterator is the earlier returned Reference.
+        proceed = static['retry'].terminator.successors[1]
+        assert tuple(next(use.value for use in static['retry'].uses if use.id == identity)
+                     for identity in proceed.arguments[-2:]) == tuple(value.id for value in static['landing'][2:4])
+        assert tuple(static['get'].terminator.successors[0].arguments[slot]
+                     for slot in (2, 3)) == (CompletionResult(1), CompletionResult(2))
+    
+        report = _query(program, model, details)
+        _job, occurrence = _active(report, details)
+        assert tuple(row['occurrence'].id for row in occurrence['matched_sources']) == (
+            details['gets'][expected_number].id,)
+        assert occurrence['bindings']
+        assert all(binding['original_copy'] is True for binding in occurrence['bindings'])
+        assert occurrence['bindings'][0]['source_value'].id == details['get_values'][expected_number].id
+        route, = occurrence['routes']
+        assert tuple(row['association'] for row in route['call_chain']) == (details['driver_call'],)
+        assert route['drive']['activation'].id == details['body_activation']
+        assert route['drive']['association'] == details['drive']
+&gt;       consumer, implementation = _final_implementation(report, details)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_source_visits.py:461: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...all.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...},), 'occurrence_count': 1, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ID(value='await.resume.acquire'): OperationOccurrenceID(value='await.visits.caller.4.await.resume.acquire'), ...}, ...}
+
+    def _final_implementation(report, details):
+        rows = tuple(row for row in report['outcomes']
+            if row['definition']['drive_outcome'] == details['static']['drive_outcome']
+            and row['definition']['advance_operation'] == details['static']['advance_operation'])
+        occurrences = tuple(occurrence for row in rows for occurrence in row['occurrences']
+            if occurrence['advance'].id == details['advance']
+            and occurrence['drive'].id == details['drive'].drive)
+        assert len(occurrences) == 1
+&gt;       consumer, = tuple(row for row in occurrences[0]['consumers']
+        ^^^^^^^^^
+            if row['definition']['actual'] == details['static']['extract_input']
+            and row['definition']['requires_final_extraction'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_source_visits.py:407: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_source_visits" name="test_missing_get1_input_or_selected_transfer_keeps_both_sources_without_borrowing_get0[operand-use]" time="0.699" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_missing_get1_input_or_selected_transfer_keeps_both_sources_without_borrowing_get0[selected-transfer]" time="0.658" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_missing_get1_call_support_keeps_its_own_candidate_without_borrowing_get0[call-association]" time="0.759" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_missing_get1_call_support_keeps_its_own_candidate_without_borrowing_get0[callee-return-use]" time="0.660" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_repeated_source_inventory_survives_shared_budget_and_detached_requery[latest]" time="0.757" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_repeated_source_inventory_survives_shared_budget_and_detached_requery[earlier]" time="0.593"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">iterator_origin = 'earlier'
+
+    @pytest.mark.parametrize('iterator_origin', ('latest', 'earlier'), ids=('latest', 'earlier'))
+    def test_repeated_source_inventory_survives_shared_budget_and_detached_requery(iterator_origin):
+        program, model, details = _source_visit_execution(iterator_origin=iterator_origin)
+        require_valid(program)
+        validity = validate(model, program)
+        assert validity.valid, validity.issues
+        index = ExecutionIndex(model, program)
+        scope = details['static']['acquisition_scope']
+        complete = index.await_body_links(scope, budget=_BUDGET)
+        assert complete['budget']['truncated'] is False
+        _job, occurrence = _active(complete, details)
+        expected = details['gets'][1 if iterator_origin == 'latest' else 0].id
+        assert tuple(row['occurrence'].id for row in occurrence['matched_sources']) == (expected,)
+&gt;       consumer, implementation = _final_implementation(complete, details)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_source_visits.py:545: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...all.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...},), 'occurrence_count': 1, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(...ID(value='await.resume.acquire'): OperationOccurrenceID(value='await.visits.caller.4.await.resume.acquire'), ...}, ...}
+
+    def _final_implementation(report, details):
+        rows = tuple(row for row in report['outcomes']
+            if row['definition']['drive_outcome'] == details['static']['drive_outcome']
+            and row['definition']['advance_operation'] == details['static']['advance_operation'])
+        occurrences = tuple(occurrence for row in rows for occurrence in row['occurrences']
+            if occurrence['advance'].id == details['advance']
+            and occurrence['drive'].id == details['drive'].drive)
+        assert len(occurrences) == 1
+&gt;       consumer, = tuple(row for row in occurrences[0]['consumers']
+        ^^^^^^^^^
+            if row['definition']['actual'] == details['static']['extract_input']
+            and row['definition']['requires_final_extraction'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_source_visits.py:407: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_source_visits" name="test_declared_previous_carrier_retains_history_without_changing_current_copy_receipts" time="0.155" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_history_port_budget_exhaustion_preserves_cached_current_false_as_nested_receipt" time="0.156" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_owned_input_is_not_a_supported_historical_own_result_source" time="0.158" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_cyclic_entry_guard_does_not_erase_an_earlier_acyclic_incoming_conflict[compatible]" time="0.004" /><testcase classname="tests.unit.test_execution_await_source_visits" name="test_cyclic_entry_guard_does_not_erase_an_earlier_acyclic_incoming_conflict[conflicting]" time="0.005" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_same_caller_backedge_recreates_zero_cut_self_pipeline_and_uses_each_round_child_result" time="0.848" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[self-zero-BodyRaise]" time="0.359" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[self-two-BodyReturn]" time="2.269"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">source_kind = 'self', zero_cut = False, body_raised = False
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+&gt;           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:978: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:917: in _assert_round
+    actual, consumer = _consumer(report, static, example)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_execution_await_pipeline_reexecution.py:568: in _consumer
+    actual, consumer = _one_selected_consumer(report, static, example)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...resume.call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': (), ...}), 'occurrence_count': 2, ...}), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...alue='resume.context'))))), parent=None), 'body_kind': &lt;ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'&gt;, ...}
+example = {'number': 1, 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...caller.12'), BlockVisitID(value='await.pipeline.caller.13'), BlockVisitID(value='await.pipeline.caller.14'), ...), ...}
+
+    def _one_selected_consumer(report, static, example):
+&gt;       pair, = tuple((actual, consumer) for _definition, actual in _selected_outcomes(report, static, example)
+        ^^^^^
+            for consumer in actual['consumers']
+            if consumer['definition']['actual'] == static['extract_input']
+            and consumer['definition']['requires_final_extraction'] is True
+            and consumer['selected'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:586: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[self-two-BodyRaise]" time="2.831"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">source_kind = 'self', zero_cut = False, body_raised = True
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+&gt;           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:978: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:915: in _assert_round
+    _assert_raise(program, model, index, report, static, example)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='c136665bb23f...ume.create.0'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x71b4e3beb020&gt;
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...e.call.1')), 'source_candidates': ({...}, {...}), 'matched_sources': (), ...}), 'occurrence_count': 2, ...}, ...), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...t=RegionID(value='await.resume.caller')), 'body_kind': &lt;ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'&gt;, ...}
+example = {'number': 1, 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...caller.11'), BlockVisitID(value='await.pipeline.caller.12'), BlockVisitID(value='await.pipeline.caller.13'), ...), ...}
+
+    def _assert_raise(program, model, index, report, static, example):
+        actual = _actual_outcome(report, static, example)
+        assert actual['conversion_legs'] == ()
+        assert actual['body_outcome'].id == example['body_drives'][-1].outcome
+        assert example['implementation_frames'] == () and example['extraction'] is None
+        if 'terminals' in actual:
+            terminals = tuple(row for row in actual['terminals'] if row['selected'] is True)
+            assert terminals
+            for terminal in terminals:
+                assert terminal['operation'].id == example['driver_calls'][-1].completion
+                assert terminal['body_binding']['match'] is True
+                assert terminal['root_binding']['match'] is True
+                assert terminal['binding']['match'] is True
+                assert terminal['packet_use'].value == terminal['packet_value'].id
+                for state in terminal['states']:
+                    assert state['binding']['match'] is True
+        else:
+            # A primitive transparent D uses the original D5 advance-leg shape.
+            # It has no synchronous cleanup-continuation terminal inventory.
+            selected_definition, = tuple(definition for definition, occurrence
+                in _selected_outcomes(report, static, example) if occurrence is actual)
+            definition = selected_definition['definition']
+            leg, = tuple(row for row in definition['advance_legs'] if row['kind'] is ExitKind.RAISE)
+            assert leg['delivery_binding']['match'] is True
+            assert leg['own_result'].edge.operation == static['advance_operation']
+    
+        uses = {(row.operation, row.use): row for row in model.uses}
+        captured_operations = {row.id: row for row in model.operations}
+        operations = {row.id: row for row in program.operations}
+        body_terminal = operations[static['drivers'][-1]['outcome_source']]
+        body_slots = tuple(uses[(actual['body_outcome'].id, identity)]
+                           for identity in body_terminal.terminator.values)
+        drive = index.drive_execution(actual['drive'].id, budget=_BUDGET)
+        assert len(drive['outputs']) == len(body_slots) == 3
+        for binding, source in zip(drive['outputs'], body_slots, strict=True):
+            assert binding['source_occurrence'].id == actual['body_outcome'].id
+            assert binding['source_use'] == source
+            assert binding['source_value'].id == source.value
+            formal_route = index.formal_route(binding['formal'].id)
+            assert formal_route.transfer.operation == actual['drive'].id
+            assert type(formal_route.argument) is BodyDriveResult
+            assert formal_route.argument.index == body_slots.index(source)
+    
+        # Check every real D/(W) own packet and state result against the exact
+        # selected callee terminal Use and the caller's full completion slot.
+        chain = (example['driver_calls'][-1],) + (
+            (example['wrapper_calls'][-1],) if static['source_kind'] == 'wrapper' else ())
+        for association in chain:
+            call = index.call_activation(association.id)
+            terminal = operations[captured_operations[association.completion].operation]
+            parent = operations[captured_operations[association.caller].operation]
+            _, produced = _own_values(program, model, association.caller, parent)
+            assert call['completion'].id == association.completion
+            assert terminal.terminator.kind is TerminatorKind.RAISE
+            assert len(call['outputs']) == len(produced) == 3
+            before_terminal = index.occurrence(association.completion)['before']
+            for slot, binding in enumerate(call['outputs']):
+                assert binding['ordinal'] == slot
+                assert binding['callee_use'] == uses[(association.completion, terminal.terminator.values[slot])]
+                assert binding['caller_formal'] == produced[slot]
+                assert binding['edge_argument'] == CompletionResult(slot)
+                if slot:
+                    canonical = next(row for row in program.values if row.id == binding['callee_use_definition'].value)
+                    assert before_terminal[canonical.location] == binding['callee_use'].value
+        observer_owned = example['ending']['observer_uses'][0]
+&gt;       consumer, = tuple(row for row in actual['consumers']
+        ^^^^^^^^^
+            if row['definition']['actual'] == observer_owned and row['selected'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:845: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-zero-BodyReturn]" time="1.601" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-zero-BodyRaise]" time="0.896" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-two-BodyReturn]" time="4.259"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">source_kind = 'general', zero_cut = False, body_raised = False
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+&gt;           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:978: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:917: in _assert_round
+    actual, consumer = _consumer(report, static, example)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_execution_await_pipeline_reexecution.py:568: in _consumer
+    actual, consumer = _one_selected_consumer(report, static, example)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...e.call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': (), ...}), 'occurrence_count': 2, ...}, ...), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ocation=LocationID(value='resume.context'))))), parent=None), 'body_kind': &lt;ResumableKind.GENERATOR: 'GENERATOR'&gt;, ...}
+example = {'number': 1, 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...caller.13'), BlockVisitID(value='await.pipeline.caller.14'), BlockVisitID(value='await.pipeline.caller.15'), ...), ...}
+
+    def _one_selected_consumer(report, static, example):
+&gt;       pair, = tuple((actual, consumer) for _definition, actual in _selected_outcomes(report, static, example)
+        ^^^^^
+            for consumer in actual['consumers']
+            if consumer['definition']['actual'] == static['extract_input']
+            and consumer['definition']['requires_final_extraction'] is True
+            and consumer['selected'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:586: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[general-two-BodyRaise]" time="4.693"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">source_kind = 'general', zero_cut = False, body_raised = True
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+&gt;           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:978: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:915: in _assert_round
+    _assert_raise(program, model, index, report, static, example)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...1), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None)), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='360785bd345c....helper.call'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x71b4e24b0c50&gt;
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...e.call.1')), 'source_candidates': ({...}, {...}), 'matched_sources': (), ...}), 'occurrence_count': 2, ...}, ...), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...context'))))), parent=RegionID(value='await.resume.caller')), 'body_kind': &lt;ResumableKind.GENERATOR: 'GENERATOR'&gt;, ...}
+example = {'number': 1, 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...caller.12'), BlockVisitID(value='await.pipeline.caller.13'), BlockVisitID(value='await.pipeline.caller.14'), ...), ...}
+
+    def _assert_raise(program, model, index, report, static, example):
+        actual = _actual_outcome(report, static, example)
+        assert actual['conversion_legs'] == ()
+        assert actual['body_outcome'].id == example['body_drives'][-1].outcome
+        assert example['implementation_frames'] == () and example['extraction'] is None
+        if 'terminals' in actual:
+            terminals = tuple(row for row in actual['terminals'] if row['selected'] is True)
+            assert terminals
+            for terminal in terminals:
+                assert terminal['operation'].id == example['driver_calls'][-1].completion
+                assert terminal['body_binding']['match'] is True
+                assert terminal['root_binding']['match'] is True
+                assert terminal['binding']['match'] is True
+                assert terminal['packet_use'].value == terminal['packet_value'].id
+                for state in terminal['states']:
+                    assert state['binding']['match'] is True
+        else:
+            # A primitive transparent D uses the original D5 advance-leg shape.
+            # It has no synchronous cleanup-continuation terminal inventory.
+            selected_definition, = tuple(definition for definition, occurrence
+                in _selected_outcomes(report, static, example) if occurrence is actual)
+            definition = selected_definition['definition']
+            leg, = tuple(row for row in definition['advance_legs'] if row['kind'] is ExitKind.RAISE)
+            assert leg['delivery_binding']['match'] is True
+            assert leg['own_result'].edge.operation == static['advance_operation']
+    
+        uses = {(row.operation, row.use): row for row in model.uses}
+        captured_operations = {row.id: row for row in model.operations}
+        operations = {row.id: row for row in program.operations}
+        body_terminal = operations[static['drivers'][-1]['outcome_source']]
+        body_slots = tuple(uses[(actual['body_outcome'].id, identity)]
+                           for identity in body_terminal.terminator.values)
+        drive = index.drive_execution(actual['drive'].id, budget=_BUDGET)
+        assert len(drive['outputs']) == len(body_slots) == 3
+        for binding, source in zip(drive['outputs'], body_slots, strict=True):
+            assert binding['source_occurrence'].id == actual['body_outcome'].id
+            assert binding['source_use'] == source
+            assert binding['source_value'].id == source.value
+            formal_route = index.formal_route(binding['formal'].id)
+            assert formal_route.transfer.operation == actual['drive'].id
+            assert type(formal_route.argument) is BodyDriveResult
+            assert formal_route.argument.index == body_slots.index(source)
+    
+        # Check every real D/(W) own packet and state result against the exact
+        # selected callee terminal Use and the caller's full completion slot.
+        chain = (example['driver_calls'][-1],) + (
+            (example['wrapper_calls'][-1],) if static['source_kind'] == 'wrapper' else ())
+        for association in chain:
+            call = index.call_activation(association.id)
+            terminal = operations[captured_operations[association.completion].operation]
+            parent = operations[captured_operations[association.caller].operation]
+            _, produced = _own_values(program, model, association.caller, parent)
+            assert call['completion'].id == association.completion
+            assert terminal.terminator.kind is TerminatorKind.RAISE
+            assert len(call['outputs']) == len(produced) == 3
+            before_terminal = index.occurrence(association.completion)['before']
+            for slot, binding in enumerate(call['outputs']):
+                assert binding['ordinal'] == slot
+                assert binding['callee_use'] == uses[(association.completion, terminal.terminator.values[slot])]
+                assert binding['caller_formal'] == produced[slot]
+                assert binding['edge_argument'] == CompletionResult(slot)
+                if slot:
+                    canonical = next(row for row in program.values if row.id == binding['callee_use_definition'].value)
+                    assert before_terminal[canonical.location] == binding['callee_use'].value
+        observer_owned = example['ending']['observer_uses'][0]
+&gt;       consumer, = tuple(row for row in actual['consumers']
+        ^^^^^^^^^
+            if row['definition']['actual'] == observer_owned and row['selected'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:845: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-zero-BodyReturn]" time="0.865" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-zero-BodyRaise]" time="0.488" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-two-BodyReturn]" time="2.848"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">source_kind = 'wrapper', zero_cut = False, body_raised = False
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+&gt;           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:978: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:917: in _assert_round
+    actual, consumer = _consumer(report, static, example)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_execution_await_pipeline_reexecution.py:568: in _consumer
+    actual, consumer = _one_selected_consumer(report, static, example)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...e.call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': (), ...}), 'occurrence_count': 2, ...}, ...), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ocation=LocationID(value='resume.context'))))), parent=None), 'body_kind': &lt;ResumableKind.COROUTINE: 'COROUTINE'&gt;, ...}
+example = {'number': 1, 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...caller.12'), BlockVisitID(value='await.pipeline.caller.13'), BlockVisitID(value='await.pipeline.caller.14'), ...), ...}
+
+    def _one_selected_consumer(report, static, example):
+&gt;       pair, = tuple((actual, consumer) for _definition, actual in _selected_outcomes(report, static, example)
+        ^^^^^
+            for consumer in actual['consumers']
+            if consumer['definition']['actual'] == static['extract_input']
+            and consumer['definition']['requires_final_extraction'] is True
+            and consumer['selected'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:586: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer[wrapper-two-BodyRaise]" time="3.334"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">source_kind = 'wrapper', zero_cut = False, body_raised = True
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised'), _OTHER_CORNERS,
+        ids=tuple(f'{source}-{"zero" if zero else "two"}-Body{"Raise" if raised else "Return"}'
+                  for source, zero, raised in _OTHER_CORNERS))
+    def test_two_round_pipeline_keeps_source_body_kind_fullslots_and_current_consumer(
+            source_kind, zero_cut, body_raised):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised)
+        index = _index(program, model, details)
+        report = _report(index, details['static'])
+        assert report['issues'] == () and not report['budget']['truncated']
+        _assert_loop(program, model, index, details)
+        for example in details['rounds']:
+&gt;           _assert_round(program, model, index, report, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:978: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:915: in _assert_round
+    _assert_raise(program, model, index, report, static, example)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+program = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...cess(operation=OperationID(value='await.wrapper.advance.2.held.read'), index=0),)), guard=None)), exception_matches=())
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='2ab7713d7f80...ume.create.0'), source=MissingEvidence(reason='supplied two-round caller path; no native or runtime identity proof'))))
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x71b4e2def390&gt;
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...e.call.1')), 'source_candidates': ({...}, {...}), 'matched_sources': (), ...}), 'occurrence_count': 2, ...}, ...), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...context'))))), parent=RegionID(value='await.resume.caller')), 'body_kind': &lt;ResumableKind.COROUTINE: 'COROUTINE'&gt;, ...}
+example = {'number': 1, 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...caller.11'), BlockVisitID(value='await.pipeline.caller.12'), BlockVisitID(value='await.pipeline.caller.13'), ...), ...}
+
+    def _assert_raise(program, model, index, report, static, example):
+        actual = _actual_outcome(report, static, example)
+        assert actual['conversion_legs'] == ()
+        assert actual['body_outcome'].id == example['body_drives'][-1].outcome
+        assert example['implementation_frames'] == () and example['extraction'] is None
+        if 'terminals' in actual:
+            terminals = tuple(row for row in actual['terminals'] if row['selected'] is True)
+            assert terminals
+            for terminal in terminals:
+                assert terminal['operation'].id == example['driver_calls'][-1].completion
+                assert terminal['body_binding']['match'] is True
+                assert terminal['root_binding']['match'] is True
+                assert terminal['binding']['match'] is True
+                assert terminal['packet_use'].value == terminal['packet_value'].id
+                for state in terminal['states']:
+                    assert state['binding']['match'] is True
+        else:
+            # A primitive transparent D uses the original D5 advance-leg shape.
+            # It has no synchronous cleanup-continuation terminal inventory.
+            selected_definition, = tuple(definition for definition, occurrence
+                in _selected_outcomes(report, static, example) if occurrence is actual)
+            definition = selected_definition['definition']
+            leg, = tuple(row for row in definition['advance_legs'] if row['kind'] is ExitKind.RAISE)
+            assert leg['delivery_binding']['match'] is True
+            assert leg['own_result'].edge.operation == static['advance_operation']
+    
+        uses = {(row.operation, row.use): row for row in model.uses}
+        captured_operations = {row.id: row for row in model.operations}
+        operations = {row.id: row for row in program.operations}
+        body_terminal = operations[static['drivers'][-1]['outcome_source']]
+        body_slots = tuple(uses[(actual['body_outcome'].id, identity)]
+                           for identity in body_terminal.terminator.values)
+        drive = index.drive_execution(actual['drive'].id, budget=_BUDGET)
+        assert len(drive['outputs']) == len(body_slots) == 3
+        for binding, source in zip(drive['outputs'], body_slots, strict=True):
+            assert binding['source_occurrence'].id == actual['body_outcome'].id
+            assert binding['source_use'] == source
+            assert binding['source_value'].id == source.value
+            formal_route = index.formal_route(binding['formal'].id)
+            assert formal_route.transfer.operation == actual['drive'].id
+            assert type(formal_route.argument) is BodyDriveResult
+            assert formal_route.argument.index == body_slots.index(source)
+    
+        # Check every real D/(W) own packet and state result against the exact
+        # selected callee terminal Use and the caller's full completion slot.
+        chain = (example['driver_calls'][-1],) + (
+            (example['wrapper_calls'][-1],) if static['source_kind'] == 'wrapper' else ())
+        for association in chain:
+            call = index.call_activation(association.id)
+            terminal = operations[captured_operations[association.completion].operation]
+            parent = operations[captured_operations[association.caller].operation]
+            _, produced = _own_values(program, model, association.caller, parent)
+            assert call['completion'].id == association.completion
+            assert terminal.terminator.kind is TerminatorKind.RAISE
+            assert len(call['outputs']) == len(produced) == 3
+            before_terminal = index.occurrence(association.completion)['before']
+            for slot, binding in enumerate(call['outputs']):
+                assert binding['ordinal'] == slot
+                assert binding['callee_use'] == uses[(association.completion, terminal.terminator.values[slot])]
+                assert binding['caller_formal'] == produced[slot]
+                assert binding['edge_argument'] == CompletionResult(slot)
+                if slot:
+                    canonical = next(row for row in program.values if row.id == binding['callee_use_definition'].value)
+                    assert before_terminal[canonical.location] == binding['callee_use'].value
+        observer_owned = example['ending']['observer_uses'][0]
+&gt;       consumer, = tuple(row for row in actual['consumers']
+        ^^^^^^^^^
+            if row['definition']['actual'] == observer_owned and row['selected'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:845: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_second_round_missing_capture_never_borrows_the_complete_first_round[source-use]" time="0.782" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_second_round_missing_capture_never_borrows_the_complete_first_round[helper-call]" time="1.627" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_second_round_missing_capture_never_borrows_the_complete_first_round[inner-call]" time="0.843" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_second_round_missing_capture_never_borrows_the_complete_first_round[child-call]" time="0.889" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_second_round_missing_capture_never_borrows_the_complete_first_round[observer-payload]" time="0.739" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_second_round_missing_capture_never_borrows_the_complete_first_round[observer-state]" time="0.874" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_second_round_missing_capture_never_borrows_the_complete_first_round[resume-transfer]" time="3.219" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_second_round_missing_capture_never_borrows_the_complete_first_round[terminal-use]" time="2.331"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">source_kind = 'self', zero_cut = False, body_raised = False
+missing = 'terminal-use'
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'body_raised', 'missing'), _MISSING,
+                             ids=tuple(row[-1] for row in _MISSING))
+    def test_second_round_missing_capture_never_borrows_the_complete_first_round(
+            source_kind, zero_cut, body_raised, missing):
+        program, model, details = _pipeline_capture(source_kind, zero_cut, body_raised, missing)
+        index = _index(program, model, details)
+        static = details['static']
+        report = _report(index, static)
+        first, second = details['rounds']
+        assert first['caller_activation'] == second['caller_activation']
+        assert first['body_activation'] != second['body_activation']
+        _assert_round(program, model, index, report, static, first)
+        assert report['status'] == 'PARTIAL'
+        if missing in ('source-use', 'helper-call', 'inner-call'):
+            selected = _selected_advances(report, static, second)
+            assert selected
+            assert all(row['status'] == 'PARTIAL' and row['gaps'] for row in selected)
+            assert all(source['occurrence'].id != first['acquisition']
+                       for row in selected for source in row['matched_sources'])
+            codes = _codes(gap for row in selected for gap in row['gaps'])
+            if missing == 'source-use':
+                # The own result still identifies Get1. Its missing operand does
+                # not erase that result or permit Get0 to supply the B input.
+                for occurrence in selected:
+                    source, = occurrence['matched_sources']
+                    assert source['occurrence'].id == second['acquisition']
+                    assert source['body_input'] is None
+                    route, = occurrence['routes']
+                    projection, = route['projections']
+                    binding, = projection['bindings']
+                    assert binding['source_value'] == source['value']
+                    assert binding['formal'] == route['drive']['instance']['creation_handle']
+                    assert binding['original_copy'] is False
+                    assert binding['compatibility']['status'] == 'UNPROVED'
+                assert 'body_reference_identity_unproved' in codes
+                assert any(gap.code == 'use_unobserved' and gap.path == str(second['acquisition'])
+                           for gap in index.report.gaps)
+            elif missing == 'helper-call':
+                assert 'await_general_body_source_occurrence_unproved' in codes
+            else:
+                assert 'await_drive_call_chain_missing' in codes
+                assert all(row['routes'] == () for row in selected)
+        elif missing == 'child-call':
+            _, consumer = _consumer(report, static, second)
+            implementation = consumer['implementation']
+            assert implementation['status'] == 'PARTIAL'
+            assert len(implementation['frames']) == 2
+            assert implementation['frames'][0]['call']['association'] == second['implementation_root_call']
+            assert implementation['frames'][1]['call'] is None
+            assert 'region_call_activation_unobserved' in _codes(implementation['frames'][1]['gaps'])
+        elif missing == 'resume-transfer':
+            association = second['body_drives'][1]
+            drive = index.drive_execution(association.drive, budget=_BUDGET)
+            assert drive['association'] == association and drive['activation'].id == second['body_activation']
+            assert drive['status'] == 'PARTIAL'
+            assert 'body_resume_transfer_unobserved' in _codes(drive['gaps'])
+            assert 'resume_transfer_unobserved' in _codes(index.report.gaps)
+        elif missing == 'observer-state':
+            current = index.occurrence(second['observer'])
+            assert current['uses'][1] is None
+            assert current['uses'][0] is not None and current['uses'][2] is not None
+            assert index.occurrence(first['observer'])['uses'][1] is not None
+            assert 'use_unobserved' in _codes(index.report.gaps)
+        elif missing == 'observer-payload':
+            actual = _actual_outcome(report, static, second)
+            consumer, = tuple(row for row in actual['consumers']
+                if row['definition']['actual'] == second['ending']['observer_uses'][0])
+            assert consumer['selected'] is True and consumer['use'] is None
+            assert consumer['binding']['match'] is None and consumer['status'] == 'PARTIAL'
+            assert 'await_outcome_consumer_use_missing' in _codes(consumer['gaps'])
+        else:
+&gt;           _, consumer = _consumer(report, static, second)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_pipeline_reexecution.py:1074: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:568: in _consumer
+    actual, consumer = _one_selected_consumer(report, static, example)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...resume.call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': (), ...}), 'occurrence_count': 2, ...}), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...alue='resume.context'))))), parent=None), 'body_kind': &lt;ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'&gt;, ...}
+example = {'number': 1, 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...caller.12'), BlockVisitID(value='await.pipeline.caller.13'), BlockVisitID(value='await.pipeline.caller.14'), ...), ...}
+
+    def _one_selected_consumer(report, static, example):
+&gt;       pair, = tuple((actual, consumer) for _definition, actual in _selected_outcomes(report, static, example)
+        ^^^^^
+            for consumer in actual['consumers']
+            if consumer['definition']['actual'] == static['extract_input']
+            and consumer['definition']['requires_final_extraction'] is True
+            and consumer['selected'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:586: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_previous_round_create_is_a_core_rejected_body_origin_not_a_protocol_match" time="1.176" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_shared_budget_retains_both_round_anchors_and_all_original_outcome_keys[one]" time="7.426" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_shared_budget_retains_both_round_anchors_and_all_original_outcome_keys[middle]" time="7.474" /><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_detached_results_and_fresh_external_catalog_keep_each_round_source" time="5.512"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">def test_detached_results_and_fresh_external_catalog_keep_each_round_source():
+        program, model, details = _pipeline_capture('wrapper', False, False)
+        original = deepcopy(model)
+        index = _index(program, model, details)
+        first = _report(index, details['static'])
+        expected = _source_pairs(first)
+        assert expected
+        for job in first['jobs']:
+            for row in job['occurrences']:
+                row['matched_sources'] = ()
+        first['outcomes'] = ()
+        second = _report(index, details['static'])
+        fresh = _report(_index(program, model,
+            {**details, 'evidence_graphs': deepcopy(details['evidence_graphs'])}), details['static'])
+        assert _source_pairs(second) == _source_pairs(fresh) == expected
+        assert model == original
+        for example in details['rounds']:
+&gt;           _assert_round(program, model, index, second, details['static'], example)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:1160: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_pipeline_reexecution.py:917: in _assert_round
+    actual, consumer = _consumer(report, static, example)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/unit/test_execution_await_pipeline_reexecution.py:568: in _consumer
+    actual, consumer = _one_selected_consumer(report, static, example)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...e.call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': (), ...}), 'occurrence_count': 2, ...}, ...), ...}
+static = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ocation=LocationID(value='resume.context'))))), parent=None), 'body_kind': &lt;ResumableKind.COROUTINE: 'COROUTINE'&gt;, ...}
+example = {'number': 1, 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'caller_activation': RegionActivationID(value='await.pipeline.caller'...caller.12'), BlockVisitID(value='await.pipeline.caller.13'), BlockVisitID(value='await.pipeline.caller.14'), ...), ...}
+
+    def _one_selected_consumer(report, static, example):
+&gt;       pair, = tuple((actual, consumer) for _definition, actual in _selected_outcomes(report, static, example)
+        ^^^^^
+            for consumer in actual['consumers']
+            if consumer['definition']['actual'] == static['extract_input']
+            and consumer['definition']['requires_final_extraction'] is True
+            and consumer['selected'] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_pipeline_reexecution.py:586: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_pipeline_reexecution" name="test_deleting_all_body_links_keeps_both_reexecuted_advances_and_outcome_denominators" time="1.559" /></testsuite></testsuites>

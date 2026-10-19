@@ -9,6 +9,7 @@ from .model import (CompletionResult, ExitKind, InvokeLiteralResult, OperationRe
 from .protocols import HostTerminal, OutcomeAdapter, OwnedUse
 from .structured import ControlEdgeReference
 from .copy_flow import flow, required_choices, selected
+from .copy_flow import inventory_flow
 from .operation_results import result_legs
 
 
@@ -108,10 +109,28 @@ def packet_use(ctx, terminal):
 
 def bind_target(ctx, source, target, choices=()):
     if type(target) is HostTerminal:
-        reports = tuple(ctx.bind(source, use, guard=choices or None)
+        reports = tuple(case_binding(ctx, source, use, choices)
                         for use in terminal_payload(ctx, target))
         return {**combine(reports), 'target': target}
-    return {**ctx.bind(source, target, guard=choices or None), 'target': target}
+    return {**case_binding(ctx, source, target, choices), 'target': target}
+
+
+def case_binding(ctx, source, actual, choices):
+    """A possible multi-visit source is not a false payload-copy claim.
+
+    Preserve the ordinary binding as evidence of its flat static context.
+    Only a candidate in the conditional source-evaluated inventory may turn
+    that context into an explicit unmet obligation, never a copy True.
+    """
+    binding = ctx.bind(source, actual, guard=choices or None)
+    membership = inventory_flow(ctx, source, choices)
+    before = membership['before']
+    use = ctx.owned_use(actual.operation, actual.use)
+    if (membership['conditional'] and (membership.get('pending', False)
+            or before is not None and use.value in before.get(actual.operation, ()))):
+        return {**answer(gaps=(*binding.get('gaps', ()), *membership['gaps'])),
+                'guarded_binding': binding}
+    return binding
 
 
 def consumers(ctx, source, choices=()):
@@ -123,8 +142,10 @@ def consumers(ctx, source, choices=()):
     key = source, choices, ctx._returns.guards
     if key in ctx._await_outcome_consumers:
         return ctx._await_outcome_consumers[key]
-    before = flow(ctx, source, choices, mode='may')
+    membership = inventory_flow(ctx, source, choices)
+    before = membership['before']
     targets, support, gaps, seen = [], [], [], set()
+    gaps.extend(membership['gaps'])
     if key in getattr(ctx, '_await_flow_choice_conflicts', ()):
         gaps.append('await_source_choice_conflict')
     if before is None:
@@ -150,7 +171,12 @@ def consumers(ctx, source, choices=()):
                         and consumer.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE) else actual)
                     if target not in targets:
                         targets.append(target)
-                        support.append({'actual': target, 'binding': bind_target(ctx, source, target, choices)})
+                        binding = bind_target(ctx, source, target, choices)
+                        if membership['conditional']:
+                            binding = {**answer(False if binding['match'] is False else None,
+                                gaps=(*binding.get('gaps', ()), *membership['gaps'])),
+                                'guarded_binding': binding}
+                        support.append({'actual': target, 'binding': binding})
                     if consumer.callee is not None:
                         # Keep the actual call Use; a return-copy summary does
                         # not inventory that callee's internal consumers.
@@ -162,9 +188,10 @@ def consumers(ctx, source, choices=()):
     if graph['inventory']['known_inventory_complete']:
         gaps = [gap for gap in gaps if gap != 'await_consumer_callee_expansion_pending']
     result = {'source': source, 'targets': tuple(targets), 'support': tuple(support),
-        'consumer_graph': graph,
+        'consumer_graph': graph, 'inventory_membership': membership,
         'gaps': tuple(dict.fromkeys(gaps)), 'known_inventory_complete': before is not None
-        and not ctx.budget.truncated and 'await_consumer_callee_expansion_pending' not in gaps}
+        and not membership['conditional'] and not ctx.budget.truncated
+        and 'await_consumer_callee_expansion_pending' not in gaps}
     ctx._await_outcome_consumers[key] = result
     return result
 
@@ -189,7 +216,7 @@ def state_links(ctx, terminal, edge, choices=(), *, outward=False):
         post = InvokeLiteralResult(edge, CompletionResult(slot))
         actual = matches[0] if len(matches) == 1 else None
         report = (answer(gaps=('await_terminal_state_unresolved',)) if actual is None else
-                  ctx.bind(post, actual, guard=choices or None) if outward else
+                  case_binding(ctx, post, actual, choices) if outward else
                   _result_copy(ctx, actual, post, choices))
         rows.append({'slot': slot, 'source': post if outward else actual,
                      'target': actual if outward else post, 'binding': report, 'forwarded': False})
@@ -209,7 +236,7 @@ def state_links(ctx, terminal, edge, choices=(), *, outward=False):
         target = matches[0] if len(matches) == 1 else None
         source = OwnedUse(operation.id, argument)
         binding = (answer(gaps=('await_forwarded_terminal_state_unresolved',)) if target is None else
-                   ctx.bind(source, target, guard=choices or None))
+                   case_binding(ctx, source, target, choices))
         rows.append({'slot': None, 'position': position, 'source': source, 'target': target,
                      'landing_formal': formal, 'binding': binding, 'forwarded': True})
     return tuple(rows)
