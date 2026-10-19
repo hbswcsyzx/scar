@@ -37,11 +37,15 @@ def prepare_index(index):
     Templates are private and never mutated. Public reports detach them. This
     preparation and raw-anchor presentation cost is separate from derived work.
     """
-    calls, arguments = {r: [] for r in index.regions}, {}
+    calls, arguments, all_arguments = {r: [] for r in index.regions}, {}, {}
     for operation in index.graph.operations:
         term = operation.terminator
         invoke = term is not None and term.kind is TerminatorKind.INVOKE
         if operation.callee is None and not invoke:
+            all_arguments[operation.id] = tuple({'ordinal': ordinal,
+                'actual': OwnedUse(operation.id, use.id), 'formal': None,
+                'may': None, 'must': None, 'binding': _binding(None, None)}
+                for ordinal, use in enumerate(operation.uses))
             continue
         calls[index._blocks[index._operation_blocks[operation.id]]].append(operation)
         actuals = operation.invoke_arguments if invoke else operation.call_arguments
@@ -52,11 +56,14 @@ def prepare_index(index):
             'formal': None if entry is None else index.values[entry.arguments[ordinal]].origin,
             'may': None, 'must': None, 'binding': _binding(None, None)}
             for ordinal, identity in enumerate(actuals))
+        all_arguments[operation.id] = arguments[operation.id]
     index._copy_consumer_originals = ({region: tuple(rows) for region, rows in calls.items()}, arguments)
+    index._operation_argument_templates = all_arguments
     index._copy_consumer_preparation = {
         'copy_consumer_original_calls': sum(map(len, calls.values())),
         'copy_consumer_original_arguments': sum(map(len, arguments.values())),
         'copy_consumer_index_operations': len(index.operations),
+        'operation_original_argument_templates': sum(map(len, all_arguments.values())),
         'copy_consumer_return_joins_precomputed': 0}
 
 

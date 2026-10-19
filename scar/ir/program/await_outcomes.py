@@ -140,8 +140,12 @@ def _caller_consumers(ctx, advance, parent, choices, role, requires, issues):
         local.extend(leg_gaps)
         if binding['match'] is not True:
             local.append('await_consumer_must_binding_unproved')
+        from .region_implementation import region_implementation
+        implementation = region_implementation(ctx, source, operation, choices,
+            graph=ledger['consumer_graph'], parent_legs=legs)
         views.append({'actual': actual, 'advance_result': source, 'choices': choices,
             'consumer_graph': ledger['consumer_graph'],
+            'implementation': implementation,
             'binding': binding, 'final_rows': final_rows, 'legs': legs, 'role': role,
             'requires_final_extraction': requires,
             'status': 'CONTRADICTED' if any(leg['status'] == 'CONTRADICTED' for leg in legs) else

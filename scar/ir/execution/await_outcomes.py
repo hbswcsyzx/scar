@@ -88,8 +88,12 @@ def _consumer(ctx, definition, advance, known, anchors, shared, *, parent_port=N
             local.append('await_outcome_consumer_use_missing')
         bindings = (binding,)
         final = _final_legs(ctx, definition.get('legs', ()), operation, shared)
+    from .region_implementation import region_implementation
+    implementation = region_implementation(ctx, definition.get('implementation'),
+        operation, own, shared) if selected is not False else None
     return _finish({'definition': definition, 'operation': operation, 'use': use,
         'advance_value': own, 'binding': binding, 'legs': final, 'targets': targets,
+        'implementation': implementation,
         'gaps': tuple(local)}, selected=selected, children=(*final, *targets),
         bindings=(*bindings, definition.get('binding', {})))
 

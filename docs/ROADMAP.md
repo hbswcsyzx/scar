@@ -1,5 +1,16 @@
 # SCAR roadmap and scope
 
+> **P4 implementation/final-result connection progress (2026-10-19):**
+> [Plan](M1_AWAIT_FINAL_CHAIN_PLAN.md),
+> [evidence and limits](M1_AWAIT_FINAL_CHAIN_PROGRESS.md) connect the genuine
+> extraction interface to nested implementation results, exact return slots
+> and this invocation's actual consumer evidence. Input support, result copy,
+> static inventory and captured output witnesses remain separate. Original
+> [A–H partial evidence and missing combinations](M1_AWAIT_A_H_EVIDENCE_LEDGER.md)
+> are explicit. Next join the original three source routes, BodyRaise and C1
+> successors; complete A–H/16/P5/M2 remain OPEN. No automatic whole-LeWM
+> modeling, transformation or speedup is established by these supplied graphs.
+
 > **P4 cross-callee consumer progress (2026-10-19):**
 > [Frozen D6](M1_COPY_CONSUMER_GRAPH_CONTRACT.md) and
 > [evidence / original open scope](M1_COPY_CONSUMER_GRAPH_PROGRESS.md) retain

@@ -9,6 +9,7 @@ from .model import (CompletionResult, ExitKind, InvokeLiteralResult, OperationRe
 from .protocols import HostTerminal, OutcomeAdapter, OwnedUse
 from .structured import ControlEdgeReference
 from .copy_flow import flow, required_choices, selected
+from .operation_results import result_legs
 
 
 def flags():
@@ -42,27 +43,6 @@ def prepare(ctx):
     ctx.preparation['await_original_drive_successors'] = successor_total
     ctx.preparation['await_prepared_value_use_index_reused'] = True
     return ctx._await_outcome_raw
-
-
-def result_legs(ctx, operation):
-    """Original kind/ordinal, independently of optional metadata row count."""
-    term = operation.terminator
-    if term is not None and term.kind is TerminatorKind.INVOKE:
-        for number, edge in enumerate(term.successors):
-            signature = next(row for row in operation.completions if row.kind is edge.kind)
-            payloads = tuple(InvokeLiteralResult(ControlEdgeReference(operation.id, number),
-                CompletionResult(slot)) for slot, value_type in enumerate(signature.types)
-                if value_type.kind is not ValueKind.STATE)
-            yield {'edge': ControlEdgeReference(operation.id, number), 'kind': edge.kind,
-                   'own_result': payloads[0] if len(payloads) == 1 else None,
-                   'payloads': payloads, 'signature': signature}
-    elif term is None:
-        payloads = tuple(OperationResult(operation.id, slot)
-                         for slot, value in enumerate(operation.results)
-                         if not isinstance(ctx.values[value], StateVersionValue))
-        yield {'edge': None, 'kind': ExitKind.NORMAL,
-               'own_result': payloads[0] if len(payloads) == 1 else None,
-               'payloads': payloads, 'signature': None}
 
 
 def terminal_inventory(ctx, source, choices=()):

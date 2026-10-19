@@ -955,7 +955,8 @@ def await_connections(ctx):
                         *analysis.wrappers, *inventory['jobs']),
         'cursor': inventory['cursor'] or ({'phase': 'await_connections'} if ctx.budget.truncated else None),
         'source_inventory_complete': False, 'source_runtime_verified': False,
-        'runtime_identity_verified': False, 'transformation_authorized': False}
+        'runtime_identity_verified': False, 'value_identity_verified': False,
+        'transformation_authorized': False}
     ctx._connection_reports['await'] = result
     return result
 

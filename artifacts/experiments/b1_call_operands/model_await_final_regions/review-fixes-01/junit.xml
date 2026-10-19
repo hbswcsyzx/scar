@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="21" time="13.394" timestamp="2026-10-19T06:37:13.614048+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_final_regions" name="test_real_child_extractor_own_results_return_through_each_exact_parent_slot[zero-one-region]" time="0.394" /><testcase classname="tests.unit.test_program_await_final_regions" name="test_real_child_extractor_own_results_return_through_each_exact_parent_slot[zero-two-regions]" time="0.299" /><testcase classname="tests.unit.test_program_await_final_regions" name="test_real_child_extractor_own_results_return_through_each_exact_parent_slot[two-cut-one-region]" time="0.700" /><testcase classname="tests.unit.test_program_await_final_regions" name="test_real_child_extractor_own_results_return_through_each_exact_parent_slot[two-cut-two-regions]" time="0.782" /><testcase classname="tests.unit.test_program_await_final_regions" name="test_deleting_parent_final_adapter_keeps_regions_stages_outputs_and_real_consumers" time="1.483" /><testcase classname="tests.unit.test_program_await_final_regions" name="test_rethrowing_old_packet_keeps_false_candidate_without_fabricating_output_coverage" time="0.257" /><testcase classname="tests.unit.test_execution_await_final_regions" name="test_child_completion_returns_through_each_exact_call_frame_to_two_parent_consumers[normal-child]" time="0.879" /><testcase classname="tests.unit.test_execution_await_final_regions" name="test_child_completion_returns_through_each_exact_call_frame_to_two_parent_consumers[nested-raise-child]" time="0.921" /><testcase classname="tests.unit.test_execution_await_final_regions" name="test_missing_nested_child_call_keeps_its_frame_and_does_not_borrow_sibling_instance" time="0.834" /><testcase classname="tests.unit.test_execution_await_final_regions" name="test_missing_child_terminal_use_keeps_sibling_and_original_child_result_slot" time="0.883" /><testcase classname="tests.unit.test_execution_await_final_regions" name="test_missing_outer_return_capture_keeps_the_child_and_sibling_rows" time="0.779" /><testcase classname="tests.unit.test_execution_await_final_regions" name="test_wrong_child_raise_packet_is_a_failed_candidate_not_an_authorized_override" time="0.713" /><testcase classname="tests.unit.test_program_await_final_region_boundaries" name="test_budget_one_keeps_all_original_parent_output_slots_and_unchecked_cursor" time="0.180" /><testcase classname="tests.unit.test_program_await_final_region_boundaries" name="test_late_budget_cannot_turn_a_partial_output_suffix_into_complete_proof" time="0.215" /><testcase classname="tests.unit.test_program_await_final_region_boundaries" name="test_public_nested_region_results_and_hop_bindings_are_detached" time="0.340" /><testcase classname="tests.unit.test_program_await_final_region_boundaries" name="test_unused_same_type_output_candidate_does_not_poison_the_true_witness" time="0.334" /><testcase classname="tests.unit.test_program_await_final_region_input_support" name="test_output_copy_does_not_upgrade_a_may_only_packet_input_to_full_contribution" time="0.251" /><testcase classname="tests.unit.test_program_await_final_region_output_budget" name="test_second_original_terminal_budget_exhaustion_cannot_declare_the_true_prefix_complete" time="0.195" /><testcase classname="tests.unit.test_execution_await_final_region_output_evidence" name="test_complete_instances_report_actual_state_outputs_and_terminal_path_witnesses" time="0.793" /><testcase classname="tests.unit.test_execution_await_final_region_output_evidence" name="test_missing_first_instance_output_never_borrows_sibling_witness[outer-return]" time="0.715" /><testcase classname="tests.unit.test_execution_await_final_region_output_evidence" name="test_missing_first_instance_output_never_borrows_sibling_witness[state-terminal-use]" time="0.255"><failure message="AttributeError: 'OperationOccurrenceID' object has no attribute 'id'">missing = 'state-terminal-use'
+
+    @pytest.mark.parametrize("missing", ("outer-return", "state-terminal-use"))
+    def test_missing_first_instance_output_never_borrows_sibling_witness(missing):
+        if missing == "outer-return":
+            program, model, details = await_final_region_execution(
+                depth=1, instances=2, child_raised=False, missing_return=0)
+            target_slot = None
+        else:
+            program, model, details = await_final_region_execution(
+                depth=1, instances=2, child_raised=False)
+&gt;           program, model, target_slot = _drop_first_state_terminal_use(
+                program, model, details, details["implementation_instances"][0])
+
+tests/unit/test_execution_await_final_region_output_evidence.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_await_final_region_output_evidence.py:80: in _drop_first_state_terminal_use
+    model = replace(model, uses=tuple(row for row in model.uses
+                                ^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+.0 = &lt;tuple_iterator object at 0x7ecf3ae81a50&gt;
+
+    model = replace(model, uses=tuple(row for row in model.uses
+&gt;       if (row.operation, row.use) != (occurrence.id, owned.use)))
+                                        ^^^^^^^^^^^^^
+E   AttributeError: 'OperationOccurrenceID' object has no attribute 'id'
+
+tests/unit/test_execution_await_final_region_output_evidence.py:81: AttributeError</failure></testcase></testsuite></testsuites>

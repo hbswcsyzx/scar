@@ -1,5 +1,23 @@
 # SCAR execution model
 
+## Region implementation and actual result paths (2026-10-19)
+
+An interface contract and its implementation are separate views of the same
+original Operation/Region records. Each internal produced value has its own
+source, return kind and full slot; selected static call frames connect its
+terminal Uses to parent ports. Source-input support and output-copy support
+are independent obligations. Alternative contributors use OR; required
+original terminals use AND, with explicit local enumeration completeness.
+
+The execution projection follows each caller's exact CallActivation and
+completion. Its outputs contain actual Use/Value occurrences and dynamic
+witnesses, with static definitions retained separately. Missing capture
+cannot inherit a static True or borrow another instance. This is connection
+modeling, with native semantics, automatic source applicability and rewrite
+authority still unproved. See the [plan](M1_AWAIT_FINAL_CHAIN_PLAN.md),
+[source-bound progress](M1_AWAIT_FINAL_CHAIN_PROGRESS.md) and
+[original A–H evidence ledger](M1_AWAIT_A_H_EVIDENCE_LEDGER.md).
+
 ## Call-context copy-consumer projection (2026-10-19)
 
 The [D6 query](M1_COPY_CONSUMER_GRAPH_CONTRACT.md) keeps each original Use,
