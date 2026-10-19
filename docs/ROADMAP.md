@@ -1,5 +1,16 @@
 # SCAR roadmap and scope
 
+> **P4 await failure/qualification progress (2026-10-19):**
+> [Full-unit plan](M1_AWAIT_OUTCOME_PLAN.md),
+> [frozen qualification contract](M1_AWAIT_QUALIFICATION_CONTRACT.md), and
+> [evidence and remaining obligations](M1_AWAIT_OUTCOME_PROGRESS.md) distinguish
+> syntactic CFG legs from conditional feasibility and actual wrong acceptance.
+> 1454 affected focused pass (all1437 previous identities plus17 new),768 stable
+> sources. One old negative input is explicitly migrated; its case and unsafe
+> unqualified-return rejection remain. Final packet/state/consumer composition,
+> complete A–H, all16 original groups, P5 and M0–M2 remain OPEN. Supplied-IR
+> connection tests do not establish automatic whole-LeWM modeling or speedup.
+
 > **P4 await composition progress (2026-10-19):**
 > [Plan](M1_AWAIT_COMPOSITION_PLAN.md),
 > [narrow contract amendment](M1_AWAIT_COMPOSITION_AMENDMENT.md), and

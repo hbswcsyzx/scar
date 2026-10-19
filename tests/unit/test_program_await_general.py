@@ -65,7 +65,10 @@ def test_general_await_source_inventory_survives_a_missing_body_link():
 
 
 def test_general_await_known_generator_coroutine_cannot_continue_as_iterator():
-    graph, details = await_general_program(result_kind=ResumableKind.GENERATOR_COROUTINE)
+    # D3: preserve this unqualified-return rejection; a correctly guarded CFG
+    # keeps both syntactic legs and is tested separately from actual acceptance.
+    from tests.fixtures.program_await_qualification_graphs import unqualified_general_program
+    graph, details = unqualified_general_program()
     # The graph is structurally valid; the selected general-method result is
     # known to be the wrong resumable kind for the subsequent iterator call.
     assert "protocol_await_return_qualification" in {

@@ -182,6 +182,8 @@ def prepare_await_indexes(ctx):
                 ProtocolProfile.AWAIT_SITE_V1,
                 ProtocolProfile.COROUTINE_AWAIT_WRAPPER_V1}
     ctx.await_jobs = ()
+    ctx.await_qualification_sites = ()
+    ctx.await_flow = None
     ctx.await_protocol_rows = {}
     ctx.await_occurrences_by_site, ctx.await_calls_by_parent = {}, {}
     ctx.await_drives_by_activation = {}
@@ -205,6 +207,12 @@ def prepare_await_indexes(ctx):
         ctx.await_calls_by_parent.setdefault(parent, []).append(call)
     ctx.await_protocol_rows = {(row.scope, row.clause, row.operation, row.slot): row
             for row in ctx.program.protocol_operations}
+    from scar.ir.program.protocol_await_records import AwaitIteratorQualification
+    qualifiers = {}
+    for row in ctx.program.protocol_operations:
+        if type(row.contract) is AwaitIteratorQualification:
+            qualifiers.setdefault((row.scope, row.clause, row.operation), row)
+    ctx.await_qualification_sites = tuple(qualifiers.values())
 
 
 def project_await_links(ctx, scope, shared):
@@ -215,6 +223,7 @@ def project_await_links(ctx, scope, shared):
     if ctx.body_program_index is None:
         return
     flow = ConnectionContext(ctx.program, index=ctx.body_program_index, budget=shared)
+    ctx.await_flow = flow
     inventory = await_inventory(flow, scope)
     rows = ctx.await_protocol_rows
     jobs = []
@@ -609,8 +618,10 @@ def await_body_links(ctx, scope, *, shared):
         raise ValueError('await body links scope is not declared')
     project_await_links(ctx, scope, shared)
     await_identity_errors(ctx, shared)
+    from .await_qualification import qualification_occurrences
+    qualification = qualification_occurrences(ctx, ctx.await_flow, shared)
     from .resumable_query import drive_execution
-    jobs, cursor, checked, checked_jobs, all_gaps = [], None, 0, 0, []
+    jobs, cursor, checked, checked_jobs, all_gaps = [], qualification['cursor'], 0, 0, list(qualification['gaps'])
     pending_copies = []
     originals = tuple(job for job in ctx.await_jobs if job['scope'] == scope)
     for number, original in enumerate(originals):
@@ -695,9 +706,12 @@ def await_body_links(ctx, scope, *, shared):
     return deepcopy({'scope': scope, 'jobs': tuple(jobs), 'job_count': len(originals),
         'checked_job_count': checked_jobs, 'checked_occurrence_count': checked,
         'inventory': inventory, 'copy_support': tuple(copies), 'gaps': tuple(all_gaps),
+        'qualifications': qualification['occurrences'],
+        'qualification_inventory': {key: value for key, value in qualification.items()
+                                   if key not in ('occurrences', 'gaps')},
         'issues': tuple(ctx.issues),
         'status': 'CONTRADICTED' if ctx.issues else
-                  'PARTIAL' if incomplete or shared.truncated or not jobs or
+                  'PARTIAL' if incomplete or shared.truncated or all_gaps or not jobs or
                   any(job['status'] != 'DECLARED' for job in jobs) else 'DECLARED',
         'budget': {'limit': shared.limit, 'used': shared.used, 'truncated': shared.truncated,
                    'costs': dict(shared.costs), 'gaps': tuple(shared.gaps)},

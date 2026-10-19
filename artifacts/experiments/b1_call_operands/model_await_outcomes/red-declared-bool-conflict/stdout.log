@@ -1,0 +1,15 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_own_bool_literal_cannot_contradict_the_known_predicate_result ______
+
+    def test_own_bool_literal_cannot_contradict_the_known_predicate_result():
+        graph, details = predicate_literal_program()
+        _core_valid(graph)
+        assert details['predicate_literal'].site == details['qualification_row'].contract.result
+>       assert 'protocol_await_predicate_result' in {issue.code for issue in validate(graph)}
+E       AssertionError: assert 'protocol_await_predicate_result' in set()
+
+tests/unit/test_program_await_qualification_flow.py:90: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_qualification_flow.py::test_own_bool_literal_cannot_contradict_the_known_predicate_result
+1 failed in 0.90s

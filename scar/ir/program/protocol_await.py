@@ -77,14 +77,18 @@ def success_source(ctx, row):
 def _prepare(ctx):
     if hasattr(ctx, '_await_indexes'):
         return ctx._await_indexes
-    Acquisition, Qualification, Wrapper, Link, _, _ = _records()
+    Acquisition, Qualification, Wrapper, Link, Expanded, _ = _records()
     by_type = {kind: [] for kind in (Acquisition, Qualification, Wrapper)}
     advances, links, region_calls = [], [], {}
+    qualification_parents, normal_terminals = {}, {}
     advance_rules = (ProtocolCallRule.DELEGATE_NEXT, ProtocolCallRule.DELEGATE_SEND,
                      ProtocolCallRule.DELEGATE_THROW, ProtocolCallRule.DELEGATE_CLOSE)
     for row in ctx.graph.protocol_operations:
         if type(row.contract) in by_type:
             by_type[type(row.contract)].append(row)
+        if (type(row.contract) is Acquisition and type(row.contract.expansion) is Expanded
+                and type(row.contract.expansion.qualification) is ProtocolOperationRef):
+            qualification_parents.setdefault(row.contract.expansion.qualification, []).append(row)
         if type(row.contract) is ProtocolCall and row.contract.rule in advance_rules:
             advances.append(row)
     for binding in ctx.graph.protocol_bindings:
@@ -93,6 +97,10 @@ def _prepare(ctx):
     for operation in ctx.graph.operations:
         if operation.callee is not None:
             region_calls.setdefault(ctx.region_of[operation.id], []).append(operation)
+        if operation.terminator is not None and operation.terminator.kind is TerminatorKind.RETURN:
+            normal_terminals.setdefault(ctx.region_of[operation.id], []).append(operation.id)
+    ctx._await_qualification_parents = qualification_parents
+    ctx._await_normal_terminals = normal_terminals
     ctx._await_indexes = by_type, tuple(advances), tuple(links), region_calls
     ctx.preparation['await_local_contracts'] = sum(map(len, by_type.values()))
     ctx.preparation['await_advances'] = len(advances)
@@ -480,14 +488,15 @@ class _Await:
             return contract.expected, OwnedUse(row.operation, contract.operand_use), 'DIRECT_INPUT'
         return None, None, None
 
-    def used_source(self, row, choices):
+    def used_source(self, row, choices, iterator=None):
         """Eligibility only when a source is actually continued as success."""
         expected, anchor, role = self.body_source(row)
         if expected is None:
             return None
-        source = evaluated_sources(self.ctx, expected, anchor, choices, role=role)
+        source = dict(evaluated_sources(self.ctx, expected, anchor, choices, role=role))
         if role == 'GENERAL_RETURN':
-            bad_kinds = (ResumableKind.COROUTINE, ResumableKind.GENERATOR_COROUTINE, 'NON_ITERATOR')
+            from .await_qualification import BAD_ITERATORS
+            bad_kinds = BAD_ITERATORS
             code = 'protocol_await_return_qualification'
         elif role == 'WRAPPER_BODY':
             bad_kinds = (ResumableKind.GENERATOR, ResumableKind.GENERATOR_COROUTINE,
@@ -496,8 +505,18 @@ class _Await:
         else:
             bad_kinds = (ResumableKind.GENERATOR, ResumableKind.ASYNC_GENERATOR, 'NON_ITERATOR')
             code = 'protocol_await_acquisition_kind'
-        for case in source['cases']:
-            if case['kind'] in bad_kinds:
+        bad = tuple(case for case in source['cases'] if case['kind'] in bad_kinds)
+        protection = None
+        if bad and role == 'GENERAL_RETURN':
+            from .await_qualification import protected_advance
+            protection = protected_advance(self.ctx, expected, iterator, choices)
+            source['qualification_protection'] = protection
+        for case in bad:
+            if protection is not None and protection['match'] is True:
+                continue
+            if protection is not None and protection['match'] is None:
+                self.missing('await_qualification_protection_unproved', _site(row))
+            else:
                 self.issues.append((code, str(_site(row)), 'known unsuitable source is continued through a successful iterator route'))
         if not source['classification_complete']:
             self.missing('await_continued_source_kind_unproved', _site(row))
@@ -519,8 +538,14 @@ class _Await:
             branch_binding = ctx.bind(contract.result, OwnedUse(branch.id, branch.terminator.condition))
             self.check(branch_binding, 'protocol_await_qualification_branch', _site(row),
                        'qualification branch uses another bool evaluation')
+        from .await_qualification import qualification_view
+        feasibility = qualification_view(ctx, row)
+        if feasibility['predicate_conflict']:
+            self.issues.append(('protocol_await_predicate_result', str(_site(row)),
+                'own bool literal contradicts the declared qualification for this exact source'))
         view = {'record': row, 'source': source, 'accepted_source': accepted,
                 'accepted_edges': choices, 'branch_binding': branch_binding,
+                'feasibility': feasibility,
                 'status': 'PARTIAL' if len(self.gaps) > start else 'DECLARED',
                 'gaps': tuple(self.gaps[start:])}
         self.qualifications.append(view)
@@ -823,13 +848,17 @@ def _legacy_qualification(ctx):
                     continue
                 source = evaluated_sources(ctx, row.contract.result, actual,
                                            ctx.selected_edges(case.guard), role='GENERAL_RETURN')
-                bad = tuple(item for item in source['cases'] if item['kind'] in
-                            (ResumableKind.COROUTINE, ResumableKind.GENERATOR_COROUTINE, 'NON_ITERATOR'))
+                from .await_qualification import BAD_ITERATORS, protected_advance
+                bad = tuple(item for item in source['cases'] if item['kind'] in BAD_ITERATORS)
+                protection = (protected_advance(ctx, row.contract.result, actual,
+                    ctx.selected_edges(case.guard)) if bad else None)
                 if bad:
-                    issues.append(('protocol_await_return_qualification', str(_site(advance)),
-                                   'general __await__ returned a known unsuitable object that is continued as an iterator'))
+                    if protection['match'] is False:
+                        issues.append(('protocol_await_return_qualification', str(_site(advance)),
+                                       'general __await__ returned a known unsuitable object that is continued as an iterator'))
                 obligations.append({'record': row, 'advance': advance, 'case': case,
-                                    'source': source, 'binding': copied, 'known_bad_cases': bad})
+                                    'source': source, 'binding': copied, 'known_bad_cases': bad,
+                                    'qualification_protection': protection})
     return tuple(issues), tuple(obligations)
 
 
@@ -863,11 +892,16 @@ def await_connections(ctx):
                                     'success iterator cannot be used on the rejecting qualification edge'))
         if job['source'] is None or job['advance'] is None or job['binding'] is None:
             continue
-        key = job['source'], job['choices']
+        key = job['source'], job['choices'], job['iterator_use']
         if key not in checked_sources and job['binding']['match'] is True:
             checked_sources.add(key)
             try:
-                analysis.used_source(ctx.row(job['source']), job['choices'])
+                continued = analysis.used_source(ctx.row(job['source']), job['choices'], job['iterator_use'])
+                protection = None if continued is None else continued.get('qualification_protection')
+                if protection is not None:
+                    job['qualification_protection'] = protection
+                    if protection['match'] is True:
+                        job['applicability'] = 'CONDITIONAL_ON_DECLARED_QUALIFICATION'
             except (KeyError, TypeError, ValueError) as exc:
                 analysis.issues.append(('protocol_await_source', str(job['source']), str(exc)))
     try:
@@ -876,6 +910,11 @@ def await_connections(ctx):
         analysis.issues.append(('protocol_await_body_link', 'protocol_bindings', str(exc)))
     legacy_issues, legacy = _legacy_qualification(ctx)
     analysis.issues.extend(legacy_issues)
+    for item in legacy:
+        protection = item.get('qualification_protection')
+        if protection is not None and protection['match'] is None:
+            analysis.gaps.append({'code': 'await_qualification_protection_unproved',
+                                  'site': _site(item['advance']), 'gaps': protection['gaps']})
     gaps = (*analysis.gaps, *(gap for job in inventory['jobs'] for gap in job['gaps']))
     result = {'issues': tuple(analysis.issues), 'gaps': gaps,
         'status': 'CONTRADICTED' if analysis.issues else 'PARTIAL' if gaps else 'DECLARED',
