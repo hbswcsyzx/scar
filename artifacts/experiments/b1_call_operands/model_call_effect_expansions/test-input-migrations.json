@@ -1,0 +1,95 @@
+{
+  "base_revision": "51a6eb3354eb05f7c02c9ff189239166f2cd4081",
+  "amendment": "docs/M1_CALL_EFFECT_EXPANSION_CODEC_MIGRATION.md",
+  "amendment_sha256": "83573820e9a4ea7719551fb08cdfb14b0e6412d33e5871e30725e6a7557ddcb9",
+  "reader_maximum": {
+    "codec_prefix_files": [
+      "tests/unit/test_program_await_acquisition_records.py",
+      "tests/unit/test_program_lookup_fallback_codec.py",
+      "tests/unit/test_program_exception_match_codec.py",
+      "tests/unit/test_program_admission_codec.py",
+      "tests/unit/test_program_protocol_codec.py",
+      "tests/unit/test_program_await_acquisition_codec.py",
+      "tests/unit/test_program_session_occupancy_codec.py"
+    ],
+    "codec_prefix_before": "assert codec.SCHEMA_VERSION == 24",
+    "codec_prefix_after": "assert codec.SCHEMA_VERSION == 25",
+    "bare_files": [
+      "tests/unit/test_lifecycle_composition_codec.py",
+      "tests/unit/test_program_driver_codec.py",
+      "tests/unit/test_program_session_release_codec.py",
+      "tests/unit/test_program_resumption_codec.py",
+      "tests/unit/test_program_state_address_codec.py",
+      "tests/unit/test_program_publication_codec.py",
+      "tests/unit/test_program_no_body_codec.py",
+      "tests/unit/test_program_literal_codec.py"
+    ],
+    "bare_before": "assert SCHEMA_VERSION == 24",
+    "bare_after": "assert SCHEMA_VERSION == 25"
+  },
+  "future_version": [
+    {
+      "file": "tests/unit/test_program_await_acquisition_codec.py",
+      "before": "@pytest.mark.parametrize(\"version\", (True, 25))",
+      "after": "@pytest.mark.parametrize(\"version\", (True, 26))",
+      "old_case": "test_boolean_or_future_schema_version_is_not_a_capability[25]",
+      "new_case": "test_boolean_or_future_schema_version_is_not_a_capability[26]"
+    },
+    {
+      "file": "tests/unit/test_program_lookup_fallback_codec.py",
+      "before": "@pytest.mark.parametrize(\"version\", (25, True))",
+      "after": "@pytest.mark.parametrize(\"version\", (26, True))",
+      "old_case": "test_future_and_boolean_schema_versions_remain_rejected[25]",
+      "new_case": "test_future_and_boolean_schema_versions_remain_rejected[26]"
+    },
+    {
+      "file": "tests/unit/test_program_exception_match_codec.py",
+      "before": "@pytest.mark.parametrize(\"version\", (25, True))",
+      "after": "@pytest.mark.parametrize(\"version\", (26, True))",
+      "old_case": "test_future_and_boolean_schema_versions_remain_rejected[25]",
+      "new_case": "test_future_and_boolean_schema_versions_remain_rejected[26]"
+    },
+    {
+      "file": "tests/unit/test_program_method_lookup_codec.py",
+      "before": "@pytest.mark.parametrize(\"version\", [25, True])",
+      "after": "@pytest.mark.parametrize(\"version\", [26, True])",
+      "old_case": "test_program_graph_rejects_future_or_boolean_schema_versions[25]",
+      "new_case": "test_program_graph_rejects_future_or_boolean_schema_versions[26]"
+    },
+    {
+      "file": "tests/unit/test_program_session_occupancy_codec.py",
+      "before": "@pytest.mark.parametrize('version', (True, 25))",
+      "after": "@pytest.mark.parametrize('version', (True, 26))",
+      "old_case": "test_boolean_and_next_future_versions_do_not_enable_the_subject[25]",
+      "new_case": "test_boolean_and_next_future_versions_do_not_enable_the_subject[26]"
+    }
+  ],
+  "legacy_field_sets": [
+    {
+      "file": "tests/unit/test_program_exception_match_codec.py",
+      "before": "assert set(document) == {field.name for field in fields(ProgramGraph)} | {\"schema\", \"schema_version\"}",
+      "after": "assert set(document) == ({field.name for field in fields(ProgramGraph)} - {\"call_effect_expansions\"}) | {\"schema\", \"schema_version\"}"
+    },
+    {
+      "file": "tests/unit/test_program_lookup_fallback_codec.py",
+      "before": "assert set(document) == {field.name for field in fields(ProgramGraph)} | {\"schema\", \"schema_version\"}",
+      "after": "assert set(document) == ({field.name for field in fields(ProgramGraph)} - {\"call_effect_expansions\"}) | {\"schema\", \"schema_version\"}"
+    },
+    {
+      "file": "tests/unit/test_program_await_acquisition_codec.py",
+      "before": "assert set(document) == {item.name for item in fields(ProgramGraph)} | {\"schema\", \"schema_version\"}",
+      "after": "assert set(document) == ({item.name for item in fields(ProgramGraph)} - {\"call_effect_expansions\"}) | {\"schema\", \"schema_version\"}"
+    },
+    {
+      "file": "tests/unit/test_program_session_occupancy_codec.py",
+      "before": "assert set(document) == {field.name for field in fields(ProgramGraph)} | {'schema', 'schema_version'}",
+      "after": "assert set(document) == ({field.name for field in fields(ProgramGraph)} - {'call_effect_expansions'}) | {'schema', 'schema_version'}"
+    }
+  ],
+  "expected_literal_replacements": 24,
+  "expected_old_files": 16,
+  "previous_cases": 1956,
+  "expected_exact_identity_retention": 1951,
+  "expected_explicit_identity_migrations": 5,
+  "legacy_wire_fixtures_modified": false
+}

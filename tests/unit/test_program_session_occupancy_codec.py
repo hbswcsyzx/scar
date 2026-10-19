@@ -68,9 +68,9 @@ def test_program24_roundtrip_keeps_the_original_body_read_and_full_competition_g
     assert codec._has_session_occupancy_capability(graph)
     wire = codec.dumps(graph)
     document = json.loads(wire)
-    assert codec.SCHEMA_VERSION == 24 and document['schema_version'] == 24
+    assert codec.SCHEMA_VERSION == 25 and document['schema_version'] == 24
     assert execution_codec.SCHEMA_VERSION == 8
-    assert set(document) == {field.name for field in fields(ProgramGraph)} | {'schema', 'schema_version'}
+    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {'call_effect_expansions'}) | {'schema', 'schema_version'}
     encoded = _subject(document)
     assert encoded == encode(row.contract.subject, record_tags={
         **PROTOCOL_CONNECTION_RECORD_TAGS,
@@ -180,7 +180,7 @@ def test_deleting_the_occupancy_attachment_preserves_ports_without_claiming_prog
     assert codec.loads(wire).values == graph.values
 
 
-@pytest.mark.parametrize('version', (True, 25))
+@pytest.mark.parametrize('version', (True, 26))
 def test_boolean_and_next_future_versions_do_not_enable_the_subject(version):
     document = json.loads(codec.dumps(_graph()))
     document['schema_version'] = version

@@ -78,8 +78,8 @@ def test_v23_roundtrip_keeps_original_input_results_state_and_distinct_completio
     graph = _graph(kind)
     wire = codec.dumps(graph)
     document = json.loads(wire)
-    assert codec.SCHEMA_VERSION == 24 and document["schema_version"] == 23
-    assert set(document) == {item.name for item in fields(ProgramGraph)} | {"schema", "schema_version"}
+    assert codec.SCHEMA_VERSION == 25 and document["schema_version"] == 23
+    assert set(document) == ({item.name for item in fields(ProgramGraph)} - {"call_effect_expansions"}) | {"schema", "schema_version"}
     assert has_await_acquisition_capability(graph)
     recovered = codec.loads(wire)
     assert recovered == graph and codec.dumps(recovered) == wire
@@ -175,7 +175,7 @@ def test_v23_cannot_upgrade_an_old_document_with_no_new_capability():
         codec.loads(json.dumps(document))
 
 
-@pytest.mark.parametrize("version", (True, 25))
+@pytest.mark.parametrize("version", (True, 26))
 def test_boolean_or_future_schema_version_is_not_a_capability(version):
     document = json.loads(codec.dumps(_graph()))
     document["schema_version"] = version

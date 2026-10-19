@@ -1,5 +1,27 @@
 # SCAR execution model
 
+## Complete call effects and exact partial intervals (2026-10-19)
+
+The five core entities remain Operation / Value / StateLocation / Region /
+Resource. CallEffectExpansion is a thin original call-to-callee declaration
+that represents all effects in the original implementation CFG. It neither
+asserts purity nor proves automatic source/native recovery. Preservation
+checks the actual suffix, caller and prefix while retaining parent summaries;
+independent writes, opaque primitives, missing ports and budget gaps still block.
+Ordinary CALL state results now advance dynamic current; missing capture kills
+the old current, and INVOKE/BodyDrive keep their original EDGE rules.
+
+See the [plan](M1_CALL_EFFECT_EXPANSION_PLAN.md),
+[actual failures and results](M1_CALL_EFFECT_EXPANSION_PROGRESS.md), and
+[remaining original scope](M1_CALL_EFFECT_EXPANSION_NEXT_GATE.md).
+2016 affected focused tests pass on884 stable sources:1951 exact prior IDs
+plus5 explicit future-version migrations retain all1956 obligations, with45
+new tests and15 newly included existing call-order regressions. Program25 is
+capability-gated; original1–24 wire and Execution8 remain. No family newly
+closes; nine families/P4 component/full/P5/M2 original113/196 stay open.
+Supplied-model queries are not automatic whole-LeWM modeling, transformation
+or speedup evidence.
+
 ## One body, independent requests and current occupancy (2026-10-19)
 
 The five core entities remain Operation / Value / StateLocation / Region /

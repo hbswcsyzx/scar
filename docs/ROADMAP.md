@@ -1,5 +1,23 @@
 # SCAR roadmap and scope
 
+> **Current call-effect expansion progress (2026-10-19):**
+> [Plan](M1_CALL_EFFECT_EXPANSION_PLAN.md),
+> [actual attempts](M1_CALL_EFFECT_EXPANSION_PROGRESS.md), and
+> [next original scope](M1_CALL_EFFECT_EXPANSION_NEXT_GATE.md) distinguish a
+> whole-call summary from its declared complete callee implementation. Exact
+> suffix/caller/prefix checks keep real writes/opaque/missing ports unresolved;
+> ordinary CALL actual state results now update current, missing capture toNone.
+> **2016 affected focused pass**,884 stable sources:1951 exact prior IDs plus5
+> explicit migrations retain1956 obligations,45 new tests and15 existing
+> affected call-order regressions. Program25 is capability-gated; old wire and
+> Execution8 remain. Seven families/A–H stay conditionally accepted; none newly
+> closes. F16/other eight families/P4 component/full/P5/M2 original113/196 remain.
+> Next work reconciles original evidence before adding model interfaces;
+> hand-supplied graph counts cannot replace automatic recovery. The later
+> automatic gate is entry-driven Python-shell plus FX/Export-region connection,
+> after original M0–M2 and the required user explanation. No new backend,
+> trusted LeWM transformation or speedup is established.
+
 > **Current F16 occupancy/competition progress (2026-10-19):**
 > [Frozen plan](M1_ASYNC_SESSION_OWNERSHIP_PLAN.md),
 > [actual attempts](M1_ASYNC_SESSION_OWNERSHIP_PROGRESS.md), and

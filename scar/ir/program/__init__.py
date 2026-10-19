@@ -14,6 +14,7 @@ from scar.ir.program.native import (
     CoreInputPort, CoreOutputPort, EntryPortRef, ExitPortRef, NativeBoundary,
     NativeInputSlot, NativeOutputSlot,
 )
+from scar.ir.program.call_effect_expansion import CallEffectExpansion
 from scar.ir.program.providers import (
     ProviderArtifact, ProviderArtifactKind, ProviderBinding, ProviderCaptureMode,
     ProviderCollectionDomain, ProviderCollectionObservation, ProviderCondition,
@@ -101,6 +102,7 @@ from .resumption import (
 )
 
 __all__ = [
+    'CallEffectExpansion',
     'DelegateLookupFallback', 'NormalizedThrowSource',
     "BuiltinExceptionCategory", "ExceptionHandlerOperand", "ExceptionMatcher", "FixedBuiltinHandler",
     "CodeConstant", "ExactLiteralOrigin", "LiteralDefinition", "SourceExpression",

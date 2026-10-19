@@ -659,6 +659,10 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
     from .binding_validation import validate_bindings
     for issue in validate_bindings(graph):
         error(issue.code, issue.path, issue.message)
+    if not issues and graph.call_effect_expansions:
+        from .call_effect_expansion import call_effect_expansion_errors
+        for code, path, message in call_effect_expansion_errors(graph):
+            error(code, path, message)
     if not issues:
         from .control_validation import control_errors
         for code, path, message in control_errors(graph):

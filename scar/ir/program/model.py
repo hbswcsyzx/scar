@@ -39,6 +39,7 @@ from scar.ir.program.resources import (
 )
 from scar.ir.program.providers import ProviderBinding, ProviderEnvelope, ProviderRegion
 from scar.ir.program.native import BoundaryRelation, NativeBoundary
+from scar.ir.program.call_effect_expansion import CallEffectExpansion
 from scar.ir.program.state_modes import AccessMode
 from scar.ir.program.state_addresses import StateAddressRefinement
 from scar.ir.program.literal_sources import (ExactLiteralOrigin, LiteralDefinition,
@@ -864,10 +865,17 @@ class ProgramGraph:
     protocol_result_consumers: tuple[ProtocolResultConsumers, ...] = ()
     protocol_bindings: tuple[ProtocolBinding, ...] = ()
     exception_matches: tuple[ExceptionMatcher, ...] = ()
+    call_effect_expansions: tuple[CallEffectExpansion, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
             raise TypeError("ProgramGraph.root must be RegionID")
+        expansions = _tuple(self.call_effect_expansions, 'ProgramGraph.call_effect_expansions')
+        if any(type(row) is not CallEffectExpansion for row in expansions):
+            raise TypeError('call_effect_expansions requires exact CallEffectExpansion records')
+        for row in expansions:
+            row.__post_init__()
+        _unique(tuple(row.operation for row in expansions), 'call effect expansion operations')
         matches = _tuple(self.exception_matches, 'ProgramGraph.exception_matches')
         if any(type(row) is not ExceptionMatcher for row in matches):
             raise TypeError('ProgramGraph.exception_matches requires exact ExceptionMatcher records')

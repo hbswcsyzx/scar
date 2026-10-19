@@ -203,6 +203,14 @@ def derive_flow(ctx):
                 environment[value_id] = None if row is None else row.id
                 if row is None and occurrence is not None:
                     ctx.gap('result_unobserved', occurrence.id, f'no occurrence for result {value_id}')
+                value = ctx.core_values[value_id]
+                if (op.callee is not None and op.terminator is None
+                        and isinstance(value, StateVersionValue)):
+                    # Ordinary CALL state results are canonical transitions,
+                    # even without a StateAccess. A missing result kills the
+                    # old current version; it never proves content equality.
+                    state[value.location] = environment[value_id]
+                    state_definitions[value.location] = (value_id, visit.id)
             for access in op.accesses:
                 if access.after is not None:
                     state[access.location] = environment.get(access.after)

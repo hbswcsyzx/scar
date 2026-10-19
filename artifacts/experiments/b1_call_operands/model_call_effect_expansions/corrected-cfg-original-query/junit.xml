@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="14" time="2.070" timestamp="2026-10-19T17:28:10.961288+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_call_effect_expansion" name="test_valid_program_graph_subclass_retains_public_expansion_validation_and_read" time="0.053"><failure message="AssertionError: assert (ValidationIs...ogramGraph'),) == ()&#10;  &#10;  Left contains one more item: ValidationIssue(code='address_graph', path='graph', message='expected ProgramGraph')&#10;  Use -v to get more diff">def test_valid_program_graph_subclass_retains_public_expansion_validation_and_read():
+        graph, operation = _program()
+    
+        class Derived(ProgramGraph):
+            pass
+    
+        derived = Derived(**{field.name: getattr(graph, field.name) for field in fields(graph)})
+        # Establish the original subclass/core contract before adding the new row.
+&gt;       assert validate(derived) == ()
+E       AssertionError: assert (ValidationIs...ogramGraph'),) == ()
+E         
+E         Left contains one more item: ValidationIssue(code='address_graph', path='graph', message='expected ProgramGraph')
+E         Use -v to get more diff
+
+tests/unit/test_program_call_effect_expansion.py:164: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_outside_writes_do_not_pollute_the_actual_suffix_caller_prefix[normal-fullslots]" time="0.155"><failure message="assert (None is True)">raised = False
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('normal-fullslots', 'raise-fullslots'))
+    def test_outside_writes_do_not_pollute_the_actual_suffix_caller_prefix(raised):
+        graph, model, details = call_effect_expansion_execution(raised=raised)
+        index = _index(graph, model)
+        assert len(model.activations) == 6 and len(model.call_activations) == 4
+        assert len({row.activation for row in model.call_activations}) == 4
+        for instance in range(2):
+&gt;           _assert_interval(index, graph, model, details, instance)
+
+tests/unit/test_execution_call_effect_expansion.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x79cac80a1940&gt;
+graph = ProgramGraph(root=RegionID(value='preserve.parent'), regions=(Region(id=RegionID(value='preserve.parent'), label='supp..., CallEffectExpansion(operation=OperationID(value='expansion.second.call'), callee=RegionID(value='preserve.getter'))))
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='0e4f32785745...-authored call pairing; not source/runtime identity evidence'))), body_drive_executions=(), body_activation_origins=())
+details = {'static': {'locations': (LocationID(value='preserve.world'), LocationID(value='preserve.context')), 'world': Location...ll pairing; not source/runtime identity evidence'))), ...}), 'kind': &lt;ExitKind.NORMAL: 'NORMAL'&gt;, 'missing': None, ...}
+instance = 0
+
+    def _assert_interval(index, graph, model, details, instance=0):
+        static, example = details['static'], details['examples'][instance]
+        _outside_writes(graph, model, details, instance)
+        view = _query(index, details, instance)
+&gt;       assert view['preserved'] is True and view['reached'] is True
+E       assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:50: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_outside_writes_do_not_pollute_the_actual_suffix_caller_prefix[raise-fullslots]" time="0.063"><failure message="assert (None is True)">raised = True
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('normal-fullslots', 'raise-fullslots'))
+    def test_outside_writes_do_not_pollute_the_actual_suffix_caller_prefix(raised):
+        graph, model, details = call_effect_expansion_execution(raised=raised)
+        index = _index(graph, model)
+        assert len(model.activations) == 6 and len(model.call_activations) == 4
+        assert len({row.activation for row in model.call_activations}) == 4
+        for instance in range(2):
+&gt;           _assert_interval(index, graph, model, details, instance)
+
+tests/unit/test_execution_call_effect_expansion.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x79cac801f610&gt;
+graph = ProgramGraph(root=RegionID(value='preserve.parent'), regions=(Region(id=RegionID(value='preserve.parent'), label='supp..., CallEffectExpansion(operation=OperationID(value='expansion.second.call'), callee=RegionID(value='preserve.getter'))))
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='0e4f32785745...-authored call pairing; not source/runtime identity evidence'))), body_drive_executions=(), body_activation_origins=())
+details = {'static': {'locations': (LocationID(value='preserve.world'), LocationID(value='preserve.context')), 'world': Location...call pairing; not source/runtime identity evidence'))), ...}), 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'missing': None, ...}
+instance = 0
+
+    def _assert_interval(index, graph, model, details, instance=0):
+        static, example = details['static'], details['examples'][instance]
+        _outside_writes(graph, model, details, instance)
+        view = _query(index, details, instance)
+&gt;       assert view['preserved'] is True and view['reached'] is True
+E       assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:50: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_complete_expansion_refines_the_unknown_summary_without_rewriting_it" time="0.079"><failure message="assert (None is True)">def test_complete_expansion_refines_the_unknown_summary_without_rewriting_it():
+        graph, model, details = call_effect_expansion_execution(outer_complete=False)
+        index = _index(graph, model)
+        assert all(call.effects_complete is False for call in details['static']['calls'])
+        assert tuple(ProgramIndex(graph).call_effect_expansion(call.id)
+                     for call in details['static']['calls']) == graph.call_effect_expansions
+&gt;       _assert_interval(index, graph, model, details)
+
+tests/unit/test_execution_call_effect_expansion.py:115: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x79cac801fb10&gt;
+graph = ProgramGraph(root=RegionID(value='preserve.parent'), regions=(Region(id=RegionID(value='preserve.parent'), label='supp..., CallEffectExpansion(operation=OperationID(value='expansion.second.call'), callee=RegionID(value='preserve.getter'))))
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='4e1abb6d8b1d...-authored call pairing; not source/runtime identity evidence'))), body_drive_executions=(), body_activation_origins=())
+details = {'static': {'locations': (LocationID(value='preserve.world'), LocationID(value='preserve.context')), 'world': Location...ll pairing; not source/runtime identity evidence'))), ...}), 'kind': &lt;ExitKind.NORMAL: 'NORMAL'&gt;, 'missing': None, ...}
+instance = 0
+
+    def _assert_interval(index, graph, model, details, instance=0):
+        static, example = details['static'], details['examples'][instance]
+        _outside_writes(graph, model, details, instance)
+        view = _query(index, details, instance)
+&gt;       assert view['preserved'] is True and view['reached'] is True
+E       assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:50: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_an_independent_interval_writer_cannot_hide_behind_source_relative_consumers" time="0.068" /><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_a_real_opaque_primitive_inside_the_interval_is_not_an_expansion" time="0.075" /><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_missing_this_instances_required_edge_does_not_borrow_a_complete_sibling[association-state_preservation_call_missing]" time="0.073"><failure message="assert (None is True)">missing = 'association', code = 'state_preservation_call_missing'
+
+    @pytest.mark.parametrize('missing,code', (
+        ('association', 'state_preservation_call_missing'),
+        ('transfer', 'state_preservation_transfer_missing'),
+        ('use', 'state_preservation_state_missing'),
+        ('suffix-completion', 'state_preservation_call_completion_missing'),
+    ))
+    def test_missing_this_instances_required_edge_does_not_borrow_a_complete_sibling(missing, code):
+        graph, model, details = call_effect_expansion_execution(missing=missing)
+        index = _index(graph, model)
+        view = _query(index, details)
+        assert view['preserved'] is None
+        assert any(row['code'] == code for row in view['blockers'])
+        sibling = details['examples'][1]
+        forbidden = set(sibling['parent'][2].values()) | set(sibling['children'][0][2].values()) | set(sibling['children'][1][2].values())
+        assert all(row['operation'] not in forbidden for row in view['blockers'])
+        _flags(view)
+&gt;       _assert_interval(index, graph, model, details, 1)
+
+tests/unit/test_execution_call_effect_expansion.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x79cac812fe30&gt;
+graph = ProgramGraph(root=RegionID(value='preserve.parent'), regions=(Region(id=RegionID(value='preserve.parent'), label='supp..., CallEffectExpansion(operation=OperationID(value='expansion.second.call'), callee=RegionID(value='preserve.getter'))))
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='0e4f32785745...-authored call pairing; not source/runtime identity evidence'))), body_drive_executions=(), body_activation_origins=())
+details = {'static': {'locations': (LocationID(value='preserve.world'), LocationID(value='preserve.context')), 'world': Location...g; not source/runtime identity evidence'))), ...}), 'kind': &lt;ExitKind.NORMAL: 'NORMAL'&gt;, 'missing': 'association', ...}
+instance = 1
+
+    def _assert_interval(index, graph, model, details, instance=0):
+        static, example = details['static'], details['examples'][instance]
+        _outside_writes(graph, model, details, instance)
+        view = _query(index, details, instance)
+&gt;       assert view['preserved'] is True and view['reached'] is True
+E       assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:50: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_missing_this_instances_required_edge_does_not_borrow_a_complete_sibling[transfer-state_preservation_transfer_missing]" time="0.080"><failure message="assert (None is True)">missing = 'transfer', code = 'state_preservation_transfer_missing'
+
+    @pytest.mark.parametrize('missing,code', (
+        ('association', 'state_preservation_call_missing'),
+        ('transfer', 'state_preservation_transfer_missing'),
+        ('use', 'state_preservation_state_missing'),
+        ('suffix-completion', 'state_preservation_call_completion_missing'),
+    ))
+    def test_missing_this_instances_required_edge_does_not_borrow_a_complete_sibling(missing, code):
+        graph, model, details = call_effect_expansion_execution(missing=missing)
+        index = _index(graph, model)
+        view = _query(index, details)
+        assert view['preserved'] is None
+        assert any(row['code'] == code for row in view['blockers'])
+        sibling = details['examples'][1]
+        forbidden = set(sibling['parent'][2].values()) | set(sibling['children'][0][2].values()) | set(sibling['children'][1][2].values())
+        assert all(row['operation'] not in forbidden for row in view['blockers'])
+        _flags(view)
+&gt;       _assert_interval(index, graph, model, details, 1)
+
+tests/unit/test_execution_call_effect_expansion.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x79cac83d3ac0&gt;
+graph = ProgramGraph(root=RegionID(value='preserve.parent'), regions=(Region(id=RegionID(value='preserve.parent'), label='supp..., CallEffectExpansion(operation=OperationID(value='expansion.second.call'), callee=RegionID(value='preserve.getter'))))
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='0e4f32785745...-authored call pairing; not source/runtime identity evidence'))), body_drive_executions=(), body_activation_origins=())
+details = {'static': {'locations': (LocationID(value='preserve.world'), LocationID(value='preserve.context')), 'world': Location...ring; not source/runtime identity evidence'))), ...}), 'kind': &lt;ExitKind.NORMAL: 'NORMAL'&gt;, 'missing': 'transfer', ...}
+instance = 1
+
+    def _assert_interval(index, graph, model, details, instance=0):
+        static, example = details['static'], details['examples'][instance]
+        _outside_writes(graph, model, details, instance)
+        view = _query(index, details, instance)
+&gt;       assert view['preserved'] is True and view['reached'] is True
+E       assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:50: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_missing_this_instances_required_edge_does_not_borrow_a_complete_sibling[use-state_preservation_state_missing]" time="0.080"><failure message="assert (None is True)">missing = 'use', code = 'state_preservation_state_missing'
+
+    @pytest.mark.parametrize('missing,code', (
+        ('association', 'state_preservation_call_missing'),
+        ('transfer', 'state_preservation_transfer_missing'),
+        ('use', 'state_preservation_state_missing'),
+        ('suffix-completion', 'state_preservation_call_completion_missing'),
+    ))
+    def test_missing_this_instances_required_edge_does_not_borrow_a_complete_sibling(missing, code):
+        graph, model, details = call_effect_expansion_execution(missing=missing)
+        index = _index(graph, model)
+        view = _query(index, details)
+        assert view['preserved'] is None
+        assert any(row['code'] == code for row in view['blockers'])
+        sibling = details['examples'][1]
+        forbidden = set(sibling['parent'][2].values()) | set(sibling['children'][0][2].values()) | set(sibling['children'][1][2].values())
+        assert all(row['operation'] not in forbidden for row in view['blockers'])
+        _flags(view)
+&gt;       _assert_interval(index, graph, model, details, 1)
+
+tests/unit/test_execution_call_effect_expansion.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x79cac83d3df0&gt;
+graph = ProgramGraph(root=RegionID(value='preserve.parent'), regions=(Region(id=RegionID(value='preserve.parent'), label='supp..., CallEffectExpansion(operation=OperationID(value='expansion.second.call'), callee=RegionID(value='preserve.getter'))))
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='0e4f32785745...-authored call pairing; not source/runtime identity evidence'))), body_drive_executions=(), body_activation_origins=())
+details = {'static': {'locations': (LocationID(value='preserve.world'), LocationID(value='preserve.context')), 'world': Location...l pairing; not source/runtime identity evidence'))), ...}), 'kind': &lt;ExitKind.NORMAL: 'NORMAL'&gt;, 'missing': 'use', ...}
+instance = 1
+
+    def _assert_interval(index, graph, model, details, instance=0):
+        static, example = details['static'], details['examples'][instance]
+        _outside_writes(graph, model, details, instance)
+        view = _query(index, details, instance)
+&gt;       assert view['preserved'] is True and view['reached'] is True
+E       assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:50: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_missing_this_instances_required_edge_does_not_borrow_a_complete_sibling[suffix-completion-state_preservation_call_completion_missing]" time="0.066"><failure message="assert (None is True)">missing = 'suffix-completion'
+code = 'state_preservation_call_completion_missing'
+
+    @pytest.mark.parametrize('missing,code', (
+        ('association', 'state_preservation_call_missing'),
+        ('transfer', 'state_preservation_transfer_missing'),
+        ('use', 'state_preservation_state_missing'),
+        ('suffix-completion', 'state_preservation_call_completion_missing'),
+    ))
+    def test_missing_this_instances_required_edge_does_not_borrow_a_complete_sibling(missing, code):
+        graph, model, details = call_effect_expansion_execution(missing=missing)
+        index = _index(graph, model)
+        view = _query(index, details)
+        assert view['preserved'] is None
+        assert any(row['code'] == code for row in view['blockers'])
+        sibling = details['examples'][1]
+        forbidden = set(sibling['parent'][2].values()) | set(sibling['children'][0][2].values()) | set(sibling['children'][1][2].values())
+        assert all(row['operation'] not in forbidden for row in view['blockers'])
+        _flags(view)
+&gt;       _assert_interval(index, graph, model, details, 1)
+
+tests/unit/test_execution_call_effect_expansion.py:182: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x79cac808aa50&gt;
+graph = ProgramGraph(root=RegionID(value='preserve.parent'), regions=(Region(id=RegionID(value='preserve.parent'), label='supp..., CallEffectExpansion(operation=OperationID(value='expansion.second.call'), callee=RegionID(value='preserve.getter'))))
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='0e4f32785745...-authored call pairing; not source/runtime identity evidence'))), body_drive_executions=(), body_activation_origins=())
+details = {'static': {'locations': (LocationID(value='preserve.world'), LocationID(value='preserve.context')), 'world': Location... source/runtime identity evidence'))), ...}), 'kind': &lt;ExitKind.NORMAL: 'NORMAL'&gt;, 'missing': 'suffix-completion', ...}
+instance = 1
+
+    def _assert_interval(index, graph, model, details, instance=0):
+        static, example = details['static'], details['examples'][instance]
+        _outside_writes(graph, model, details, instance)
+        view = _query(index, details, instance)
+&gt;       assert view['preserved'] is True and view['reached'] is True
+E       assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:50: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_a_real_prefix_does_not_require_its_future_completion" time="0.063"><failure message="assert (None is True)">def test_a_real_prefix_does_not_require_its_future_completion():
+        graph, model, details = call_effect_expansion_execution(raised=True, missing='prefix-completion')
+        index = _index(graph, model)
+        assert type(details['examples'][0]['links'][1].completion) is Unresolved
+&gt;       _assert_interval(index, graph, model, details)
+
+tests/unit/test_execution_call_effect_expansion.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x79cac7f48e50&gt;
+graph = ProgramGraph(root=RegionID(value='preserve.parent'), regions=(Region(id=RegionID(value='preserve.parent'), label='supp..., CallEffectExpansion(operation=OperationID(value='expansion.second.call'), callee=RegionID(value='preserve.getter'))))
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='0e4f32785745...-authored call pairing; not source/runtime identity evidence'))), body_drive_executions=(), body_activation_origins=())
+details = {'static': {'locations': (LocationID(value='preserve.world'), LocationID(value='preserve.context')), 'world': Location...ot source/runtime identity evidence'))), ...}), 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'missing': 'prefix-completion', ...}
+instance = 0
+
+    def _assert_interval(index, graph, model, details, instance=0):
+        static, example = details['static'], details['examples'][instance]
+        _outside_writes(graph, model, details, instance)
+        view = _query(index, details, instance)
+&gt;       assert view['preserved'] is True and view['reached'] is True
+E       assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:50: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_budget_one_keeps_endpoints_and_never_grants_an_unchecked_expansion" time="0.061" /><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_a_checked_prefix_does_not_replace_the_remainder_of_the_actual_interval" time="0.062"><failure message="assert (None is True)">def test_a_checked_prefix_does_not_replace_the_remainder_of_the_actual_interval():
+        graph, model, details = call_effect_expansion_execution(raised=True)
+        index = _index(graph, model)
+&gt;       full = _assert_interval(index, graph, model, details)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_call_effect_expansion.py:212: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+index = &lt;scar.ir.execution.query.ExecutionIndex object at 0x79cac85be300&gt;
+graph = ProgramGraph(root=RegionID(value='preserve.parent'), regions=(Region(id=RegionID(value='preserve.parent'), label='supp..., CallEffectExpansion(operation=OperationID(value='expansion.second.call'), callee=RegionID(value='preserve.getter'))))
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='0e4f32785745...-authored call pairing; not source/runtime identity evidence'))), body_drive_executions=(), body_activation_origins=())
+details = {'static': {'locations': (LocationID(value='preserve.world'), LocationID(value='preserve.context')), 'world': Location...call pairing; not source/runtime identity evidence'))), ...}), 'kind': &lt;ExitKind.RAISE: 'RAISE'&gt;, 'missing': None, ...}
+instance = 0
+
+    def _assert_interval(index, graph, model, details, instance=0):
+        static, example = details['static'], details['examples'][instance]
+        _outside_writes(graph, model, details, instance)
+        view = _query(index, details, instance)
+&gt;       assert view['preserved'] is True and view['reached'] is True
+E       assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:50: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_call_effect_expansion" name="test_ordinary_calls_keep_data_state_ordinals_without_requiring_future_results" time="0.018"><failure message="assert (None is True)">def test_ordinary_calls_keep_data_state_ordinals_without_requiring_future_results():
+        for future_missing in (False, True):
+            graph, model, details = ordinary_call_effect_expansion_execution(future_missing=future_missing)
+            index = _index(graph, model)
+            assert all(call.terminator is None and call.effects_complete is False
+                       for call in details['static']['calls'])
+            view = index.state_preservation(details['start'], details['end'],
+                locations=details['static']['locations'], budget=_BUDGET)
+&gt;           assert view['preserved'] is True and view['reached'] is True
+E           assert (None is True)
+
+tests/unit/test_execution_call_effect_expansion.py:231: AssertionError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,264 @@
+"""Complete call implementations refine summaries over exact actual intervals."""
+import pytest
+
+from scar.ir.execution.common import Unresolved
+from scar.ir.execution.coordinates import OccurrencePhase, OccurrencePoint
+from scar.ir.program.model import AccessMode, CompletionResult, OperationResult, StateVersionValue
+from scar.ir.program.queries import ProgramIndex
+from tests.fixtures.execution_call_effect_expansion_graphs import (
+    call_effect_expansion_execution, ordinary_call_effect_expansion_execution,
+)
+from tests.unit.test_execution_state_preservation import _index
+
+
+_BUDGET = 262144
+_FLAGS = ('source_runtime_verified', 'runtime_identity_verified',
+          'value_identity_verified', 'transformation_authorized')
+
+
+def _flags(view):
+    assert all(view[key] is False for key in _FLAGS)
+
+
+def _query(index, details, instance=0, *, budget=_BUDGET):
+    example = details['examples'][instance]
+    return index.state_preservation(example['start'], example['end'],
+        locations=(details['static']['world'],), budget=budget)
+
+
+def _outside_writes(graph, model, details, instance):
+    static, example = details['static'], details['examples'][instance]
+    assert len(example['children']) == len(example['links']) == 2
+    assert example['children'][0][0] != example['children'][1][0]
+    assert {call.callee for call in static['calls']} == {static['child'].id}
+    for occurrence in example['outside_writes']:
+        actual, = tuple(row for row in model.operations if row.id == occurrence)
+        assert actual.operation == static['source'].id
+        after, = tuple(row for row in model.values
+                       if row.origin == occurrence and row.value == static['source'].accesses[0].after)
+        assert after.origin == occurrence
+    for call in static['calls']:
+        assert any(row.site.operation == call.id
+                   and any(effect.mode is AccessMode.READ_WRITE for effect in row.effects)
+                   for row in graph.state_address_refinements)
+
+
+def _assert_interval(index, graph, model, details, instance=0):
+    static, example = details['static'], details['examples'][instance]
+    _outside_writes(graph, model, details, instance)
+    view = _query(index, details, instance)
+    assert view['preserved'] is True and view['reached'] is True
+    assert view['blockers'] == view['gaps'] == ()
+    assert view['cursor'] is None and not view['budget']['truncated']
+    observed = {row['occurrence'].id for row in view['operations'] if row['occurrence'] is not None}
+    assert not set(example['outside_writes']) & observed
+    assert example['prefix'] in observed
+    assert example['children'][0][2][static['branch'].id] in observed
+    assert example['original_links'][0].completion in observed
+    expected_bindings = set()
+    values = {row.id: row for row in model.values}
+    for ordinal, link in enumerate(example['links']):
+        canonical = static['calls'][ordinal]
+        recorded, = tuple(row for row in view['calls'] if row['association'].id == link.id)
+        assert recorded['caller'].id == link.caller
+        assert recorded['entry'].id == example['children'][ordinal][1][0]
+        call = index.call_activation(link.id)
+        assert len(call['inputs']) == 4
+        for route in call['inputs']:
+            assert route['actual'] is not None and route['actual_value'] is not None
+            assert route['formal'] is not None
+            if type(route['formal_definition']) is StateVersionValue:
+                current = index.state_at(OccurrencePoint(link.caller, OccurrencePhase.BEFORE))
+                assert current[route['formal_definition'].location] == route['actual_value'].id
+                expected_bindings.add((route['actual_value'].id, route['formal'].id))
+        transfer, = tuple(row for row in model.transfers if row.operation == link.caller)
+        edge = canonical.terminator.successors[transfer.successor_index]
+        assert edge.kind is details['kind']
+        if type(link.completion) is Unresolved:
+            assert ordinal == 1 and details['missing'] == 'prefix-completion'
+            assert call['completion'] is None and call['outputs'] == ()
+        else:
+            assert call['completion'].id == link.completion
+            assert len(call['outputs']) == 3
+            assert tuple(row['edge_argument'] for row in call['outputs']) == tuple(
+                CompletionResult(slot) for slot in range(3))
+            for route in call['outputs']:
+                assert route['callee_use'] is not None and route['caller_formal'] is not None
+                original = route['caller_formal_definition']
+                if type(original) is StateVersionValue and ordinal == 0:
+                    expected_bindings.add((values[route['callee_use'].value].id, route['caller_formal'].id))
+        _flags(call)
+    bindings = {(row['source'].id, row['target'].id) for row in view['state_bindings']
+                if row['source'] is not None and row['target'] is not None}
+    assert expected_bindings <= bindings
+    assert set(static['locations']) <= {row['location'] for row in view['state_bindings']}
+    _flags(view)
+    return view
+
+
+@pytest.mark.parametrize('raised', (False, True), ids=('normal-fullslots', 'raise-fullslots'))
+def test_outside_writes_do_not_pollute_the_actual_suffix_caller_prefix(raised):
+    graph, model, details = call_effect_expansion_execution(raised=raised)
+    index = _index(graph, model)
+    assert len(model.activations) == 6 and len(model.call_activations) == 4
+    assert len({row.activation for row in model.call_activations}) == 4
+    for instance in range(2):
+        _assert_interval(index, graph, model, details, instance)
+
+
+def test_complete_expansion_refines_the_unknown_summary_without_rewriting_it():
+    graph, model, details = call_effect_expansion_execution(outer_complete=False)
+    index = _index(graph, model)
+    assert all(call.effects_complete is False for call in details['static']['calls'])
+    assert tuple(ProgramIndex(graph).call_effect_expansion(call.id)
+                 for call in details['static']['calls']) == graph.call_effect_expansions
+    _assert_interval(index, graph, model, details)
+    # A second honest supplied model without the relation restores the whole
+    # boundary obligation; no stale snapshot is reused after graph mutation.
+    bare_graph, bare_model, bare = call_effect_expansion_execution(outer_complete=False, expanded=False)
+    assert not bare_graph.call_effect_expansions
+    assert details['static']['calls'] == bare['static']['calls']
+    view = _query(_index(bare_graph, bare_model), bare)
+    assert view['preserved'] is None
+    parents = {row.caller for row in bare['examples'][0]['links']}
+    assert any(row['code'] == 'state_preservation_effects_incomplete' and row['operation'] in parents
+               for row in view['blockers'])
+    assert any(row['code'] == 'state_preservation_potential_clobber' and row['operation'] in parents
+               for row in view['blockers'])
+    _flags(view)
+
+
+def test_an_independent_interval_writer_cannot_hide_behind_source_relative_consumers():
+    graph, model, details = call_effect_expansion_execution(interval_write=True)
+    index = _index(graph, model)
+    writer = details['static']['writer']
+    definitions = {row.id: row for row in graph.values}
+    assert all(type(definitions[use.value]) is StateVersionValue
+               and definitions[use.value].location == details['static']['context'] for use in writer.uses)
+    assert details['static']['context'] != details['static']['world']
+    for instance, example in enumerate(details['examples']):
+        view = _query(index, details, instance)
+        assert view['preserved'] is None and view['reached'] is True
+        assert any(row['code'] == 'state_preservation_potential_clobber'
+                   and row['operation'] == example['parent'][2][writer.id] for row in view['blockers'])
+        _flags(view)
+
+
+def test_a_real_opaque_primitive_inside_the_interval_is_not_an_expansion():
+    graph, model, details = call_effect_expansion_execution(opaque=True)
+    index = _index(graph, model)
+    primitive = details['static']['primitive']
+    assert primitive.callee is None and len(primitive.completions) == 2
+    assert all(len(signature.types) == 3 for signature in primitive.completions)
+    assert not any(row.operation == primitive.id for row in graph.call_effect_expansions)
+    for instance, example in enumerate(details['examples']):
+        occurrence = example['parent'][2][primitive.id]
+        assert not any(link.caller == occurrence for link in model.call_activations)
+        view = _query(index, details, instance)
+        assert view['preserved'] is None and view['reached'] is True
+        assert any(row['code'] == 'state_preservation_primitive_invoke' and row['operation'] == occurrence
+                   for row in view['blockers'])
+        transfer, = tuple(row for row in model.transfers if row.operation == occurrence)
+        assert transfer.successor_index == 0
+        _flags(view)
+
+
+@pytest.mark.parametrize('missing,code', (
+    ('association', 'state_preservation_call_missing'),
+    ('transfer', 'state_preservation_transfer_missing'),
+    ('use', 'state_preservation_state_missing'),
+    ('suffix-completion', 'state_preservation_call_completion_missing'),
+))
+def test_missing_this_instances_required_edge_does_not_borrow_a_complete_sibling(missing, code):
+    graph, model, details = call_effect_expansion_execution(missing=missing)
+    index = _index(graph, model)
+    view = _query(index, details)
+    assert view['preserved'] is None
+    assert any(row['code'] == code for row in view['blockers'])
+    sibling = details['examples'][1]
+    forbidden = set(sibling['parent'][2].values()) | set(sibling['children'][0][2].values()) | set(sibling['children'][1][2].values())
+    assert all(row['operation'] not in forbidden for row in view['blockers'])
+    _flags(view)
+    _assert_interval(index, graph, model, details, 1)
+
+
+def test_a_real_prefix_does_not_require_its_future_completion():
+    graph, model, details = call_effect_expansion_execution(raised=True, missing='prefix-completion')
+    index = _index(graph, model)
+    assert type(details['examples'][0]['links'][1].completion) is Unresolved
+    _assert_interval(index, graph, model, details)
+    _assert_interval(index, graph, model, details, 1)
+
+
+def test_budget_one_keeps_endpoints_and_never_grants_an_unchecked_expansion():
+    graph, model, details = call_effect_expansion_execution()
+    index = _index(graph, model)
+    view = _query(index, details, budget=1)
+    assert view['start'] == details['examples'][0]['start']
+    assert view['end'] == details['examples'][0]['end']
+    assert view['locations'] == (details['static']['world'],)
+    assert view['preserved'] is None and view['cursor'] is not None
+    assert view['budget']['truncated'] is True and view['budget']['used'] <= 1
+    assert any(row['code'] == 'state_preservation_budget_exhausted' for row in view['blockers'])
+    _outside_writes(graph, model, details, 0)
+    assert all(len(index.call_activation(link.id)['outputs']) == 3
+               for example in details['examples'] for link in example['links'])
+    _flags(view)
+
+
+def test_a_checked_prefix_does_not_replace_the_remainder_of_the_actual_interval():
+    graph, model, details = call_effect_expansion_execution(raised=True)
+    index = _index(graph, model)
+    full = _assert_interval(index, graph, model, details)
+    limit = max(2, full['budget']['used'] - 1)
+    view = _query(index, details, budget=limit)
+    assert view['operations']
+    assert view['preserved'] is None and view['cursor'] is not None
+    assert view['budget']['truncated'] is True and view['budget']['used'] <= limit
+    assert {row['definition'].id for row in view['operations']} <= {
+        row['definition'].id for row in full['operations']}
+    _flags(view)
+
+
+def test_ordinary_calls_keep_data_state_ordinals_without_requiring_future_results():
+    for future_missing in (False, True):
+        graph, model, details = ordinary_call_effect_expansion_execution(future_missing=future_missing)
+        index = _index(graph, model)
+        assert all(call.terminator is None and call.effects_complete is False
+                   for call in details['static']['calls'])
+        location, = details['static']['locations']
+        first, second = details['links']
+        first_state, = tuple(row for row in model.values if row.origin == first.caller
+                             and row.value == details['static']['calls'][0].results[1])
+        assert index.state_at(OccurrencePoint(first.caller, OccurrencePhase.AFTER))[location] == first_state.id
+        assert index.state_at(OccurrencePoint(second.caller, OccurrencePhase.BEFORE))[location] == first_state.id
+        second_after = index.state_at(OccurrencePoint(second.caller, OccurrencePhase.AFTER))
+        if future_missing:
+            assert second_after[location] is None
+        else:
+            second_state, = tuple(row for row in model.values if row.origin == second.caller
+                                  and row.value == details['static']['calls'][1].results[1])
+            assert second_after[location] == second_state.id != first_state.id
+        view = index.state_preservation(details['start'], details['end'],
+            locations=details['static']['locations'], budget=_BUDGET)
+        assert view['preserved'] is True and view['reached'] is True
+        assert view['blockers'] == ()
+        observed = {row['occurrence'].id for row in view['operations'] if row['occurrence'] is not None}
+        assert details['children'][1][2][details['static']['prefix'].id] in observed
+        assert details['start'].operation not in observed and details['end'].operation not in observed
+        for ordinal, link in enumerate(details['links']):
+            call = index.call_activation(link.id)
+            assert len(call['inputs']) == 2
+            if ordinal == 1 and future_missing:
+                assert call['completion'] is None and call['outputs'] == ()
+                assert not any(row.origin == link.caller for row in model.values)
+            else:
+                assert len(call['outputs']) == 2
+                for slot, route in enumerate(call['outputs']):
+                    assert route['ordinal'] == slot
+                    assert route['caller_result_definition'].origin == OperationResult(
+                        details['static']['calls'][ordinal].id, slot)
+                    assert route['callee_use'] is not None and route['caller_result'] is not None
+                assert type(call['outputs'][1]['caller_result_definition']) is StateVersionValue
+            _flags(call)
+        _flags(view)

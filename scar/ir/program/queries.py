@@ -296,6 +296,7 @@ class ProgramIndex:
         return index
 
     def _prepare(self, graph, cleanup, resumption, lifecycle):
+        self._call_effect_expansions = {row.operation: row for row in graph.call_effect_expansions}
         self._exception_matches = {row.operation: row for row in graph.exception_matches}
         self._cleanup_facts = cleanup
         self._resumption_facts = resumption
@@ -1028,6 +1029,12 @@ class ProgramIndex:
         if target not in registry:
             raise KeyError(target)
         return tuple(self._provider_sources.get(target, ()))
+
+    def call_effect_expansion(self, operation_id: OperationID):
+        """Return the original full-effect declaration, never a purity proof."""
+        if operation_id not in self.operations:
+            raise KeyError(operation_id)
+        return self._call_effect_expansions.get(operation_id)
 
     def entry_arguments(self, region_id: RegionID):
         region = self.regions[region_id]

@@ -70,13 +70,16 @@ def _prepare(ctx):
     for call in ctx.resolved_call_activations.values():
         parents.setdefault(call['activation'].id, []).append(call)
     refinements = {row.site: row for row in ctx.program.state_address_refinements}
+    expansions = {row.operation: row for row in ctx.program.call_effect_expansions}
     preparation = {
         'operation_occurrences': len(occurrences), 'original_operation_positions': len(positions),
         'call_associations': len(ctx.resolved_call_activations),
         'state_address_refinements': len(refinements),
+        'call_effect_expansions': len(expansions),
         'scope': 'original port and association indexing only; all traversal is budgeted',
     }
-    cached = occurrences, positions, {key: tuple(rows) for key, rows in parents.items()}, refinements, preparation
+    cached = (occurrences, positions, {key: tuple(rows) for key, rows in parents.items()},
+              refinements, expansions, preparation)
     ctx._state_preservation_indexes = cached
     return cached
 
@@ -84,7 +87,8 @@ def _prepare(ctx):
 class _Walk:
     def __init__(self, ctx, start, end, locations, shared):
         self.ctx, self.start, self.end, self.locations, self.shared = ctx, start, end, locations, shared
-        self.index, self.positions, self.parents, self.refinements, self.preparation = _prepare(ctx)
+        (self.index, self.positions, self.parents, self.refinements,
+         self.expansions, self.preparation) = _prepare(ctx)
         self.operations, self.calls, self.transfers, self.state_bindings = [], [], [], []
         self.blockers, self.gaps, self.cursor = [], [], None
         self.incomplete = False
@@ -154,14 +158,25 @@ class _Walk:
         row = {'occurrence': occurrence, 'definition': definition, 'effects_complete': definition.effects_complete,
                'accesses': [], 'uses': [], 'results': [], 'scan_complete': False}
         self.operations.append(row)
+        expansion = self.expansions.get(definition.id)
+        if expansion is not None and (definition.callee != expansion.callee
+                or definition.terminator is not None
+                and definition.terminator.kind is not TerminatorKind.INVOKE):
+            expansion = None
+        if expansion is not None:
+            # This is a complete-effect representation declaration, not a
+            # preservation flag. Keep the original summary, and inspect all
+            # actual child CFG positions in the queried suffix/prefix instead.
+            row['effect_expansion'] = expansion
+            row['effect_basis'] = 'DECLARED_COMPLETE_CALLEE_CFG'
         if occurrence is None:
             self.incomplete = True
             self.block('operation_missing', None, 'this original block position was not captured',
                        definition=definition, visit=self.position[0])
-        if not definition.effects_complete:
+        if expansion is None and not definition.effects_complete:
             self.block('effects_incomplete', None if occurrence is None else occurrence.id,
                        'original operation does not declare complete effects', definition=definition)
-        if Behavior.WRITE in definition.behaviors and not any(
+        if expansion is None and Behavior.WRITE in definition.behaviors and not any(
                 access.mode is not AccessMode.READ for access in definition.accesses):
             self.block('potential_clobber', None if occurrence is None else occurrence.id,
                        'declared write has no independent isolation proof', definition=definition)
@@ -184,8 +199,13 @@ class _Walk:
                 return
             value = None if occurrence is None else self.ctx.results.get((occurrence.id, identity))
             row['results'].append({'definition': self.ctx.core_values[identity], 'value': value})
-            if occurrence is not None and value is None:
+            if occurrence is not None and value is None and expansion is None:
                 self.block('result_missing', occurrence.id, 'original result occurrence is missing', result=identity)
+            elif expansion is not None:
+                # Ordinary CALL results happen after the child. They are
+                # inventoried here but required by call_outputs only if this
+                # interval crosses that completion, never for a child prefix.
+                row['results'][-1]['checked_on_completion'] = True
         for ordinal, access in enumerate(definition.accesses):
             if not self.spend('accesses', None if occurrence is None else occurrence.id):
                 return
@@ -195,7 +215,7 @@ class _Walk:
             effect = None if occurrence is None else self.effect(AccessRef(occurrence.id, ordinal))
             row['accesses'].append({'index': ordinal, 'definition': access, 'effect': effect})
         term = definition.terminator
-        if term is not None and term.kind is TerminatorKind.INVOKE:
+        if term is not None and term.kind is TerminatorKind.INVOKE and expansion is None:
             if definition.callee is None:
                 self.block('primitive_invoke', None if occurrence is None else occurrence.id,
                     'primitive INVOKE has no whole-boundary preservation implementation')
@@ -487,6 +507,7 @@ class _Walk:
             'budget': {'limit': self.shared.limit, 'used': self.shared.used,
                 'costs': dict(self.shared.costs), 'truncated': self.shared.truncated},
             'preparation': dict(self.preparation), 'source_runtime_verified': False,
+            'effect_expansion_inventory': self.ctx.program.call_effect_expansions,
             'runtime_identity_verified': False, 'value_identity_verified': False,
             'transformation_authorized': False}
 
