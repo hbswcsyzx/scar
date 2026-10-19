@@ -1,0 +1,70 @@
+.....FF...............                                                   [100%]
+=================================== FAILURES ===================================
+_ test_real_general_and_wrapper_sources_reach_body_raise_cleanup_without_a_converter[general-zero-preserve] _
+
+source_kind = 'general', zero_cut = True, mode = 'preserve'
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'mode'), (
+        ('general', True, 'preserve'), ('general', False, 'replace_raise'),
+        ('wrapper', True, 'replace_raise'), ('wrapper', False, 'preserve'),
+    ), ids=('general-zero-preserve', 'general-two-new-raise',
+            'wrapper-zero-new-raise', 'wrapper-two-preserve'))
+    def test_real_general_and_wrapper_sources_reach_body_raise_cleanup_without_a_converter(
+            source_kind, zero_cut, mode):
+        graph, details = await_raise_source_program(source_kind=source_kind,
+            zero_cut=zero_cut, cleanup_mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+>       outcome = _outcome(report, details)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_raise_continuations.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'await_acquisition_kind_unproved', 'site': ProtocolOperationRef(scope=ProtocolScopeID...ID(value='await.raise.zero.raise'),)),), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ontext')))),), parent=RegionID(value='await.resume.caller')), 'body_kind': <ResumableKind.GENERATOR: 'GENERATOR'>, ...}
+
+    def _outcome(report, details):
+>       outcome, = tuple(row for row in report['outcomes']
+        ^^^^^^^^
+            if row['drive_outcome'] == details['drive_outcome']
+            and row['advance_operation'] == details['advance_operation'])
+E       ValueError: too many values to unpack (expected 1, got 2)
+
+tests/unit/test_program_await_raise_continuations.py:41: ValueError
+_ test_real_general_and_wrapper_sources_reach_body_raise_cleanup_without_a_converter[general-two-new-raise] _
+
+source_kind = 'general', zero_cut = False, mode = 'replace_raise'
+
+    @pytest.mark.parametrize(('source_kind', 'zero_cut', 'mode'), (
+        ('general', True, 'preserve'), ('general', False, 'replace_raise'),
+        ('wrapper', True, 'replace_raise'), ('wrapper', False, 'preserve'),
+    ), ids=('general-zero-preserve', 'general-two-new-raise',
+            'wrapper-zero-new-raise', 'wrapper-two-preserve'))
+    def test_real_general_and_wrapper_sources_reach_body_raise_cleanup_without_a_converter(
+            source_kind, zero_cut, mode):
+        graph, details = await_raise_source_program(source_kind=source_kind,
+            zero_cut=zero_cut, cleanup_mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+>       outcome = _outcome(report, details)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_raise_continuations.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'await_acquisition_kind_unproved', 'site': ProtocolOperationRef(scope=ProtocolScopeID... OperationID(value='finally.return')))), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...context'))))), parent=RegionID(value='await.resume.caller')), 'body_kind': <ResumableKind.GENERATOR: 'GENERATOR'>, ...}
+
+    def _outcome(report, details):
+>       outcome, = tuple(row for row in report['outcomes']
+        ^^^^^^^^
+            if row['drive_outcome'] == details['drive_outcome']
+            and row['advance_operation'] == details['advance_operation'])
+E       ValueError: too many values to unpack (expected 1, got 2)
+
+tests/unit/test_program_await_raise_continuations.py:41: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_raise_continuations.py::test_real_general_and_wrapper_sources_reach_body_raise_cleanup_without_a_converter[general-zero-preserve]
+FAILED tests/unit/test_program_await_raise_continuations.py::test_real_general_and_wrapper_sources_reach_body_raise_cleanup_without_a_converter[general-two-new-raise]
+2 failed, 20 passed in 41.84s

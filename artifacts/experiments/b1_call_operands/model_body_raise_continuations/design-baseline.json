@@ -1,0 +1,23 @@
+{
+  "base_revision": "753104593c67c0d0d1190288843eb0420ebcc072",
+  "previous_turn": "progress:1693 affected focused, original1671 identities retained, immutable archive checked before and after commit, exact remote SHA confirmed; initial worktree clean",
+  "scope_plan": "docs/M1_AWAIT_OUTCOME_PLAN.md",
+  "plan_sha256": "72480678e74735c9a8ee69b5eb59ce1243b83d86ae41403caeb2cdc3e479fc55",
+  "view_contract": "docs/M1_BODY_RAISE_CONTINUATION_PLAN.md",
+  "view_contract_sha256": "8706345a77737c83eca81fe7455ba4d149722eb18ae409a56b383e11540a82e8",
+  "query_contract": "docs/M1_COMPLETION_CONTINUATION_VIEW.md",
+  "query_contract_sha256": "35f76503458e355248f82eb70d1271dfd98be6496cff3b7fa8aa2134bcf2db53",
+  "previous_focused_cases": 1693,
+  "obligation_groups": ["F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24", "X25", "X26", "X27"],
+  "completed_obligation_groups": [],
+  "full_original_A_H_required": true,
+  "p4_complete": false,
+  "m0_m2_complete": false,
+  "new_backend": false,
+  "new_lewm_speedup": false,
+  "contract_review": "B finite independent read review accepted plan before authors implemented; source BodyRaise, current completion and acquisition failures remain distinct",
+  "protected": {
+    "le-wm": {"path": "/home/zyf/AAA/le-wm", "head": "f70fed80288462ca4d006cb3607ec6da6eaa851f", "status": ""},
+    "scar": {"path": "/home/zyf/AAA/scar", "head": "84f165fce1e2e37617c974ce9fee574ea816406b", "status": ""}
+  }
+}

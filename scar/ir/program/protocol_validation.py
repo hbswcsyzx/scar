@@ -686,6 +686,16 @@ def connection_errors(ctx):
                               and row.contract.input.outcome == source.outcome]
                     for terminal in host_terminals(ctx, source):
                         kind = ctx.operations[terminal.operation].terminator.kind
+                        relation = terminal_relation(ctx, source, terminal)
+                        if relation is not None:
+                            if relation['applicable'] is False:
+                                continue
+                            if relation['match'] is False:
+                                errors.append(('protocol_copy', str(terminal.operation),
+                                    'cleanup terminal is not its current body RAISE completion source'))
+                                continue
+                            if relation['match'] is True or relation['applicable'] is None:
+                                continue
                         selected = [row for row in routes
                                     if kind is TerminatorKind.RAISE
                                     or row.contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE]

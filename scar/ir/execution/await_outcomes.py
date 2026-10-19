@@ -4,7 +4,7 @@ Static definitions remain separate from occurrence evidence. Missing captures
 do not remove obligations; declared associations do not authorize rewriting.
 """
 from scar.ir.program.model import ExitKind, InvokeLiteralResult, TerminatorKind
-from scar.ir.program.protocols import HostTerminal, OwnedUse
+from scar.ir.program.protocols import DriveResult, HostTerminal, OwnedUse
 
 from .await_outcome_evidence import (append_gaps, choice, locate, pair, port_value,
                                     selected_choices, states, status, target)
@@ -123,12 +123,13 @@ def _terminal(ctx, definition, anchor, advance, parent_port, known, shared,
     if 'current_source' in definition:
         declared_source = definition['current_source']
         source_site = (declared_source.edge.operation if hasattr(declared_source, 'edge') else
+                       declared_source.outcome.drive if type(declared_source) is DriveResult else
                        getattr(declared_source, 'operation', None))
         current_operation, _ = (locate(ctx, anchor, source_site, shared)
                                 if source_site is not None else (None, None))
         from .await_outcome_evidence import port_value
         occurrences.update(_map(current_operation))
-        current_value = port_value(ctx, declared_source, occurrences)
+        current_value = port_value(ctx, declared_source, occurrences, shared)
         current_binding = pair(ctx, current_value, packet, shared)
         own_choice = selected_choices(ctx, definition.get('choices', ()), occurrences,
             (advance, anchor, operation), shared)
@@ -144,6 +145,8 @@ def _terminal(ctx, definition, anchor, advance, parent_port, known, shared,
                         else state_definitions, occurrences, shared)
     consumers = tuple(_consumer(ctx, receiver, advance, occurrences, (advance, operation), shared,
                                parent_port=parent_port) for receiver in definition.get('consumers', ()))
+    if 'current_source' in definition and shared.truncated:
+        local.append('await_completion_terminal_budget')
     return _finish({'definition': definition, 'operation': operation,
         'packet_use': packet_use, 'packet_value': packet, 'parent_value': parent,
         'binding': binding, 'current_value': current_value, 'current_binding': current_binding,
@@ -245,6 +248,33 @@ def _prepared(ctx, definition, advance, shared):
     return selected or tuple(row for row in candidates if row['advance_selected'] is None) or tuple(candidates)
 
 
+def _raised_terminals(ctx, definitions, drive, advance, body, call_chain, shared):
+    """A real body exception has no conversion operation to stand in for D."""
+    rows = []
+    for definition in definitions:
+        if not shared.spend('await_body_raise_terminals', path='await.body_raise.terminal'):
+            break
+        exact = ()
+        if drive is not None and shared.spend('await_body_raise_call_context', len(call_chain) + 1):
+            exact = tuple(call['completion'] for call in call_chain
+                          if call['activation'].id == ctx.activation_of(drive.id))
+        projected = _terminal(ctx, definition, drive, advance,
+            definition.get('advance_result'), _map(drive, advance), shared,
+            exact_completion=exact[0] if len(exact) == 1 else None, completion_required=True)
+        root_value = port_value(ctx, definition['root_source'], _map(drive), shared)
+        body_binding = pair(ctx, _payload(ctx, body), root_value, shared)
+        root = pair(ctx, root_value, projected['packet_value'], shared)
+        projected['root_binding'] = root
+        projected['body_binding'] = body_binding
+        retained = definition['current_source'] == definition['root_source']
+        if retained or root['match'] is None:
+            projected['gaps'] = (*projected['gaps'], *root['gaps'])
+        rows.append(_finish(projected, selected=projected['selected'],
+            children=(*projected['states'], *projected['consumers']),
+            bindings=(projected['binding'], body_binding, *((root,) if retained else ())), definition=definition))
+    return tuple(rows)
+
+
 def _outcome_occurrences(ctx, definition, advance, shared):
     from .await_links import _drive_routes
     admitted = shared.spend('await_outcome_parent_occurrences', path='await.outcome.parent')
@@ -268,7 +298,7 @@ def _outcome_occurrences(ctx, definition, advance, shared):
                     body.operation == definition['drive_outcome'].source)
         local = _base_gaps(definition, (*definition['conversion_legs'],
                           *definition['advance_legs'], *definition['consumers']))
-        conversions, consumers = (), ()
+        conversions, consumers, raised_terminals = (), (), ()
         if selected is not False:
             if not matched:
                 local.append('await_outcome_source_occurrence_unproved')
@@ -285,12 +315,17 @@ def _outcome_occurrences(ctx, definition, advance, shared):
             anchors = (advance, drive, *(leg['occurrence'] for leg in conversions))
             consumers = tuple(_consumer(ctx, consumer, advance, known, anchors, shared)
                               for consumer in definition['consumers'])
+            raised_terminals = _raised_terminals(ctx, definition.get('terminals', ()), drive,
+                advance, body, route['call_chain'], shared)
+            if 'terminals' in definition and shared.truncated:
+                local.append('await_body_raise_terminal_budget')
         row = _finish({'key': (definition['key'], advance.id, None if drive is None else drive.id),
             'advance': advance, 'source_candidates': tuple(candidates.values()),
             'matched_sources': tuple(matched.values()), 'call_chain': route['call_chain'],
             'drive': drive, 'body_outcome': body, 'conversion_legs': conversions,
+            **({} if 'terminals' not in definition else {'terminals': raised_terminals}),
             'consumers': consumers, 'gaps': tuple(local)}, selected=selected,
-            children=(*conversions, *consumers))
+            children=(*conversions, *consumers, *raised_terminals))
         if not admitted:
             row['status'] = 'NOT_CHECKED'
         rows.append(row)

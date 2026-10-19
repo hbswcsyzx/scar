@@ -28,9 +28,27 @@ def _use(ctx, occurrence, owned):
     return ctx.uses.get((occurrence.id, owned.use))
 
 
-def _result(ctx, occurrence, port):
+def _result(ctx, occurrence, port, *, shared=None):
     """This occurrence's own selected port, including nonzero N/R/slot."""
     if occurrence is None:
+        return None
+    from scar.ir.program.protocols import DriveResult
+    from scar.ir.program.drivers import BodyDriveResult
+    if type(port) is DriveResult:
+        transfer = ctx.outgoing.get(occurrence.id)
+        if port.outcome.drive != occurrence.operation or transfer is None:
+            return None
+        operation = ctx.core_operations[occurrence.operation]
+        edge = operation.terminator.successors[transfer.successor_index]
+        if edge.source != port.outcome.source:
+            return None
+        if shared is None or not shared.spend('await_drive_result_slots', len(edge.arguments) + 1,
+                                             path='await.body_raise.drive_result'):
+            return None
+        block = ctx.blocks[ctx.visits[transfer.target].block]
+        for actual, formal in zip(edge.arguments, block.arguments):
+            if type(actual) is BodyDriveResult and actual.index == port.index:
+                return ctx.results.get((transfer.target, formal))
         return None
     if type(port) is OperationResult:
         operation = ctx.core_operations[occurrence.operation]

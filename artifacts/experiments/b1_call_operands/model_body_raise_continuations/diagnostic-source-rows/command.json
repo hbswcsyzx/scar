@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_body_raise_continuations/inspect_source_rows.py"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "script_sha256": "ae947317b62309956d1ea3fb15ac72d0fd91f068f80dc594d1d42f03e4026f2d",
+  "scope": "source diagnosis only, not acceptance or native execution"
+}

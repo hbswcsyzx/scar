@@ -289,7 +289,34 @@ def outcome_connections(ctx, original_inventory, *, derive=True):
                         'PARTIAL' if leg_gaps or input_binding['match'] is None or ctx.budget.truncated else 'DECLARED',
                     'gaps': tuple(dict.fromkeys(leg_gaps))})
                 local.extend(leg_gaps)
-        if not producer_ids:
+        continued_raise = None
+        if not producer_ids and kind == 'EXCEPTION' and structured_region(ctx, payload):
+            from .await_structured_completion import structured_completion
+            packets, packet_gaps = _packets(ctx, payload, choices)
+            continued_raise = structured_completion(ctx, payload, packets, choices,
+                parents, advance, None, (), 'EXCEPTION', _caller_consumers, issues)
+            local.extend((*packet_gaps, *continued_raise['gaps']))
+            caller_views.extend(continued_raise['consumers'])
+            complete = not ctx.budget.truncated and bool(continued_raise['continuations']) and all(
+                item['continuation']['known_inventory_complete']
+                for item in continued_raise['continuations'])
+            for parent in parents:
+                alternatives = tuple(terminal for terminal in continued_raise['terminals']
+                    if terminal['advance_result'] == parent['own_result'])
+                checks = tuple(terminal['delivery_binding'] for terminal in alternatives)
+                statuses = tuple(terminal['status'] for terminal in alternatives)
+                unknown = not alternatives and not complete
+                advance_legs.append({**parent, 'alternatives': alternatives,
+                    'delivery_bindings': checks,
+                    'consumers': tuple(view for terminal in alternatives for view in terminal['consumers']),
+                    'status': 'CONTRADICTED' if 'CONTRADICTED' in statuses else
+                        'PARTIAL' if ctx.budget.truncated or unknown
+                            or any(item != 'DECLARED' for item in statuses) else
+                        'DECLARED' if alternatives else 'NOT_APPLICABLE',
+                    'gaps': (*(('await_body_raise_terminal_budget',) if ctx.budget.truncated else ()),
+                        *(('await_body_raise_continuation_unproved',) if unknown else
+                          tuple(dict.fromkeys(gap for terminal in alternatives for gap in terminal['gaps']))))})
+        if not producer_ids and continued_raise is None:
             # Even total deletion of semantic adapters cannot delete the
             # caller's actual consumers or the original BodyReturn obligation.
             for parent in parents:
@@ -333,7 +360,9 @@ def outcome_connections(ctx, original_inventory, *, derive=True):
         if any(leg['status'] == 'PARTIAL' for leg in advance_legs):
             local.append('await_advance_outcome_leg_unproved')
         checked += int(not ctx.budget.truncated)
-        rows.append({**row, 'conversion_legs': tuple(converted), 'advance_legs': tuple(advance_legs),
+        rows.append({**row, **({} if continued_raise is None else {
+                'continuations': continued_raise['continuations'], 'terminals': continued_raise['terminals']}),
+            'conversion_legs': tuple(converted), 'advance_legs': tuple(advance_legs),
             'consumers': tuple(caller_views),
             'status': 'CONTRADICTED' if any(leg['status'] == 'CONTRADICTED' for leg in converted)
                 or any(leg['status'] == 'CONTRADICTED' for leg in advance_legs)

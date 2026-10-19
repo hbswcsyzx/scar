@@ -163,15 +163,17 @@ def pair(ctx, source, target, shared):
         'support': tuple(support), 'compatibility': comparison, 'gaps': tuple(gaps), **_flags()}
 
 
-def port_value(ctx, port, occurrences):
+def port_value(ctx, port, occurrences, shared=None):
     from .await_links import _result, _use
+    from scar.ir.program.protocols import DriveResult
     if type(port) is ContractResult:
         port = port.result_port
     if type(port) is OwnedUse:
         return value_for_use(ctx, _use(ctx, occurrences.get(port.operation), port))
     site = (port.operation if type(port) is OperationResult else
-            port.edge.operation if type(port) is InvokeLiteralResult else None)
-    return _result(ctx, occurrences.get(site), port)
+            port.edge.operation if type(port) is InvokeLiteralResult else
+            port.outcome.drive if type(port) is DriveResult else None)
+    return _result(ctx, occurrences.get(site), port, shared=shared)
 
 
 def states(ctx, definitions, occurrences, shared):

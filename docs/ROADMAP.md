@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **P4 BodyRaise continuation progress (2026-10-19):**
+> [Plan](M1_BODY_RAISE_CONTINUATION_PLAN.md) and
+> [evidence / remaining work](M1_BODY_RAISE_CONTINUATION_PROGRESS.md) retain
+> independent source obligations while connecting an actual body exception
+> through explicit synchronous cleanup to the current caller completion and
+> state. Preserve, new Raise and new Return remain distinct from acquisition
+> failures and final extraction. Budget-truncated joins retain PARTIAL rather
+> than excluding unchecked consumers. Complete A–H, all sixteen groups, P5
+> and M2 remain OPEN. No automatic LeWM modeling or speedup is established.
+
 > **P4 post-conversion cleanup progress (2026-10-19):**
 > [Plan](M1_AWAIT_POST_CLEANUP_PLAN.md),
 > [query view](M1_COMPLETION_CONTINUATION_VIEW.md) and

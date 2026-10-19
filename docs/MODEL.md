@@ -1,5 +1,24 @@
 # SCAR execution model
 
+## Original exceptions and current completion (2026-10-19)
+
+A body's original exception and the completion delivered after cleanup are
+different relations. The original DriveResult remains an exact source, even
+when explicit cleanup replaces its payload or changes RAISE to RETURN. The
+current terminal must reach the caller's matching completion kind, full result
+slot and current state versions. This does not create a final-value extraction
+obligation for BodyRaise.
+
+The execution view follows the actual BodyDriveResult index and selected
+landing formal, then the exact call activation and terminal. Source-to-root,
+root preservation, current-source support and consumer delivery have separate
+receipts; missing evidence and interrupted joins stay unknown/PARTIAL. The
+shared budget pays for full-slot scans. See the
+[frozen plan](M1_BODY_RAISE_CONTINUATION_PLAN.md) and
+[evidence / remaining scope](M1_BODY_RAISE_CONTINUATION_PROGRESS.md).
+These supplied-model connections do not establish automatic source recovery,
+native identity or transformation authority.
+
 ## Completion identity across cleanup and suspension (2026-10-19)
 
 Operation / Value / StateLocation / Region / Resource remain the five entity

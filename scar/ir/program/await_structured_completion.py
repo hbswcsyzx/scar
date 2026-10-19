@@ -63,6 +63,8 @@ def structured_completion(ctx, source, packets, choices, parents, advance,
                 terminal_gaps.extend('await_conversion_state_contradicted'
                     if state['binding']['match'] is False else 'await_conversion_state_unproved'
                     for state in current_states if state['binding']['match'] is not True)
+                if ctx.budget.truncated:
+                    terminal_gaps.append('await_completion_terminal_budget')
                 gaps.extend(terminal_gaps)
                 matches = (copied['match'], delivery['match'],
                            *(state['binding']['match'] for state in current_states))
