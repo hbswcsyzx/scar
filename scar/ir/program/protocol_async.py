@@ -21,6 +21,16 @@ def _binding_key(row):
     return row.scope, row.expected_target, row.packet_source, row.consumer
 
 
+def _projection_context(projection):
+    """Keep every joined caller/choice route, including first-S selection."""
+    report = projection.get('context_report')
+    if report is not None:
+        return {**report, 'routes': tuple({**route, 'match': route.get('match', report['match'])}
+                                         for route in report['routes'])}
+    context = projection['context']
+    return {'match': context['match'], 'routes': (context,), 'gaps': (), 'cursor': None}
+
+
 class _Analysis:
     def __init__(self, ctx, *, prepare=True):
         self.ctx = ctx
@@ -207,8 +217,7 @@ class _Analysis:
                     or self.ctx.values[value].protocol is not ProtocolValueKind.EXCEPTION_PACKET for value in port.values):
                 self.gap('async_normalized_packet_construction_unresolved', path, processing=row)
                 continue
-            report = self.ctx.correlate({'match': projection['context']['match'],
-                'routes': (projection['context'],), 'gaps': (), 'cursor': None}, *source_checks, delivered)
+            report = self.ctx.correlate(_projection_context(projection), *source_checks, delivered)
             receipt = {'processing': row, 'delivered': delivered, 'binding': report,
                        'match': report['match']}
             if scheduler:
@@ -267,7 +276,17 @@ class _Analysis:
         if first is None:
             self.gap('async_request_step_source_unresolved', path, first_step=first)
             return
-        if first is False:
+        effective_selection = None
+        if first is True:
+            from .async_initial import effective_requests
+            effective_selection = effective_requests(self.ctx, scope,
+                OwnedUse(drive.operation, drive.scheduler_request), projections, first)
+            projections = effective_selection['projections']
+            for code in effective_selection['gaps']:
+                self.gap(code, path, selection=effective_selection)
+            if effective_selection['cursor'] is not None and self.cursor is None:
+                self.cursor = effective_selection['cursor']
+        else:
             scheduler = self.ctx.origins(OwnedUse(drive.operation, drive.scheduler_request))
             definitions = tuple({**detail, 'recipe': recipe} for recipe in scheduler['recipes']
                                 for detail in recipe['raw_requests'])
@@ -287,13 +306,12 @@ class _Analysis:
                     definition = raw['definition']
                     current_projection = projection
                     if first and 'context' in raw:
-                        context = self.ctx.correlate({'match': projection['context']['match'],
-                            'routes': (projection['context'],), 'gaps': (), 'cursor': None},
+                        context = self.ctx.correlate(_projection_context(projection),
                             {'match': raw['context']['match'], 'routes': (raw['context'],),
                              'gaps': raw['context']['gaps'], 'cursor': None})
-                        current_projection = {**projection, 'context': {
-                            **raw['context'], 'match': context['match']}}
-                    elif not first and definition.kind in (RawRequestKind.THROW, RawRequestKind.CLOSE):
+                        current_projection = {**projection, 'context_report': context}
+                    if (current_projection.get('scheduler', False)
+                            and definition.kind in (RawRequestKind.THROW, RawRequestKind.CLOSE)):
                         interface = self.ctx.interfaces[scope.subject.interface_region]
                         current_projection = {**projection,
                             'context': self.ctx.recipe_context(raw['recipe']),
@@ -313,8 +331,7 @@ class _Analysis:
                         pack = self.ctx.values[definition.value].origin.operation
                         expected = OwnedUse(pack, definition.operands[0])
                         delivery = self.ctx.bind(expected, actual, path=path)
-                        result = (self.ctx.correlate({'match': current_projection['context']['match'],
-                            'routes': (current_projection['context'],), 'gaps': (), 'cursor': None}, delivery)
+                        result = (self.ctx.correlate(_projection_context(current_projection), delivery)
                             if first else delivery)
                     else:
                         # Fixed NEXT semantics demands None. This comparison
@@ -333,8 +350,7 @@ class _Analysis:
                         if not view['source_inventory_complete']:
                             match = None
                         report = {'match': match, 'routes': tuple(contexts), 'gaps': view['gaps'], 'cursor': view['cursor']}
-                        result = (self.ctx.correlate({'match': current_projection['context']['match'],
-                            'routes': (current_projection['context'],), 'gaps': (), 'cursor': None},
+                        result = (self.ctx.correlate(_projection_context(current_projection),
                             report) if first else report)
                     if not projection.get('source_inventory_complete', True):
                         result = {**result, 'match': None, 'gaps': (*result['gaps'],
@@ -347,6 +363,7 @@ class _Analysis:
                 self.gap('async_delivery_source_unresolved', path)
             self.deliveries.append({'scope': scope.id, 'drive': drive, 'slot': item.slot,
                 'actual': actual, 'initial_step': first, 'alternatives': tuple(alternatives),
+                'effective_selection': effective_selection,
                 'selection_basis': 'ORIGINAL_PREDICATE_EDGE', 'current_step_verified': False,
                 'conditions': ('historical branch selects the declared source, not current phase or gate admission',)})
 
@@ -903,7 +920,18 @@ class _Analysis:
             if self.cursor is None and handoff['cursor'] is not None:
                 self.cursor = handoff['cursor']
         self.cancellation_bindings()
+        from .async_initial import initial_asend_connections
+        initial_asend = initial_asend_connections(self.ctx)
+        self.issues.extend(initial_asend['issues'])
+        for gap in initial_asend['gaps']:
+            if isinstance(gap, dict):
+                self.gaps.append(gap)
+            else:
+                self.gap(gap, 'async.initial_asend')
+        if self.cursor is None and initial_asend['cursor'] is not None:
+            self.cursor = initial_asend['cursor']
         return {'issues': tuple(self.issues), 'associations': tuple(self.associations), 'deliveries': tuple(self.deliveries),
+                'initial_asend': initial_asend,
                 'request_admissions': tuple(self.admissions),
                 'session_outcomes': tuple(self.sessions), 'session_consumers': self.session_consumers,
                 'handoffs': handoffs['handoffs'], 'cancellation': tuple(self.cancellation),

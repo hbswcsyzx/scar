@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="1.044" timestamp="2026-10-19T18:08:48.908235+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_async_initial_selection" name="test_initial_nonNone_scheduler_cannot_be_replaced_with_stored_none_latent" time="0.239"><failure message="AssertionError: assert 'async_delivery_source' in set()">def test_initial_nonNone_scheduler_cannot_be_replaced_with_stored_none_latent():
+        graph, _ = initial_scheduler_selection_program()
+        require_valid(_core(graph))
+&gt;       assert 'async_delivery_source' in {issue.code for issue in validate(graph)}
+E       AssertionError: assert 'async_delivery_source' in set()
+
+tests/unit/test_program_async_initial_selection.py:20: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_initial_selection" name="test_initial_nonNone_scheduler_supplies_the_original_resume_input" time="0.055"><failure message="ValueError: async_delivery_source at program_operation:driver.drive: no contextual latent request supplies this actual delivery">def test_initial_nonNone_scheduler_supplies_the_original_resume_input():
+        graph, details = initial_scheduler_selection_program(deliver_scheduler=True)
+&gt;       require_valid(graph)
+
+tests/unit/test_program_async_initial_selection.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.caller'), regions=(Region(id=RegionID(value='async.caller'), label='declared d...(value='driver.drive'), source=OperationID(value='resume.return'))),), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: async_delivery_source at program_operation:driver.drive: no contextual latent request supplies this actual delivery
+
+scar/ir/program/validation.py:763: ValueError</failure></testcase></testsuite></testsuites>

@@ -11,10 +11,10 @@ from types import MappingProxyType
 
 from scar.ir.program.drivers import DriverReceiverKind
 from scar.ir.program.protocols import (
-    AdmissionPredicate, DriverSubject, NoEntryOutcome, OperationSiteSubject, OutcomeAdapter,
+    AdmissionPredicate, BodyStateCondition, DriverSubject, NoEntryOutcome, OperationSiteSubject, OutcomeAdapter,
     OutcomeAdapterRule, PacketConstruction, PacketRule, ProtocolCall,
     ProtocolCallRule, ProtocolClause, ProtocolProfile, RequestProcessing,
-    RequestProcessingRule,
+    RequestProcessingRule, ReferenceIsNoneCondition,
 )
 from scar.ir.program.resumption import ResumableKind
 from .protocol_connections import (RequestAssociation, RequestStateCondition,
@@ -306,6 +306,10 @@ def contract_allowed(profile: ProtocolProfile, clause: ProtocolClause, contract:
     if rules is None:
         return False
     if contract_type is AdmissionPredicate:
+        if profile is _ASYNC_PROFILE:
+            return type(contract.subject) in (
+                RequestStateCondition, SessionOccupancyCondition,
+                BodyStateCondition, ReferenceIsNoneCondition)
         return ((type(contract.subject) in (RequestStateCondition, SessionOccupancyCondition)) ==
                 (profile is _ASYNC_PROFILE))
     if contract_type in (NoEntryOutcome, ResumeSourceBinding, RequestAssociation,

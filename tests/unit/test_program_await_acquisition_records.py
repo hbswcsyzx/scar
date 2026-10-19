@@ -200,4 +200,4 @@ def test_capability_detects_new_enums_inside_old_refs_without_string_false_posit
     changed = replace(graph, protocol_operations=(replace(row, clause=C.AWAIT_ACQUISITION),))
     assert has_await_acquisition_capability(changed)
     assert has_protocol_connection_capability(changed)
-    assert codec.SCHEMA_VERSION == 25
+    assert codec.SCHEMA_VERSION == 26

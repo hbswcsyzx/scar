@@ -32,7 +32,7 @@ def test_scoped_body_publication_roundtrips_as_v12_without_adding_other_d2_table
     graph = publication_program(target=target, create=True, extra_domain=True)
     payload = dumps(graph)
     document = json.loads(payload)
-    assert SCHEMA_VERSION == 25
+    assert SCHEMA_VERSION == 26
     assert document["schema_version"] == 12
     assert PUBLICATION_FIELDS <= set(document)
     assert document["driver_lifecycles"] and document["body_outcome_commits"]

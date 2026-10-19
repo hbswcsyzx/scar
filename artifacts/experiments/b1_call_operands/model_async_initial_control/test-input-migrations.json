@@ -1,0 +1,156 @@
+{
+  "base_revision": "96b8a322590217151ff6a5e839c7ab17d068f560",
+  "amendment": "docs/M1_ASYNC_INITIAL_CONTROL_CODEC_MIGRATION.md",
+  "amendment_sha256": "86873e7df02acd4724990783e5922cb1729058fd82ea4dd8942230a87e815e9d",
+  "expected_file_count": 17,
+  "expected_replacement_count": 22,
+  "preserved_baseline_test_count": 2016,
+  "exact_baseline_testcase_count": 2010,
+  "migrated_testcase_count": 6,
+  "replacements": [
+    {
+      "file": "tests/unit/test_program_await_acquisition_records.py",
+      "kind": "reader_maximum",
+      "before": "assert codec.SCHEMA_VERSION == 25",
+      "after": "assert codec.SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_lookup_fallback_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert codec.SCHEMA_VERSION == 25",
+      "after": "assert codec.SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_exception_match_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert codec.SCHEMA_VERSION == 25",
+      "after": "assert codec.SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_admission_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert codec.SCHEMA_VERSION == 25",
+      "after": "assert codec.SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_protocol_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert codec.SCHEMA_VERSION == 25",
+      "after": "assert codec.SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_await_acquisition_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert codec.SCHEMA_VERSION == 25",
+      "after": "assert codec.SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_session_occupancy_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert codec.SCHEMA_VERSION == 25",
+      "after": "assert codec.SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_lifecycle_composition_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert SCHEMA_VERSION == 25",
+      "after": "assert SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_driver_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert SCHEMA_VERSION == 25",
+      "after": "assert SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_session_release_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert SCHEMA_VERSION == 25",
+      "after": "assert SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_resumption_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert SCHEMA_VERSION == 25",
+      "after": "assert SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_state_address_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert SCHEMA_VERSION == 25",
+      "after": "assert SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_publication_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert SCHEMA_VERSION == 25",
+      "after": "assert SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_no_body_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert SCHEMA_VERSION == 25",
+      "after": "assert SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_literal_codec.py",
+      "kind": "reader_maximum",
+      "before": "assert SCHEMA_VERSION == 25",
+      "after": "assert SCHEMA_VERSION == 26"
+    },
+    {
+      "file": "tests/unit/test_program_call_effect_expansion_codec.py",
+      "kind": "reader_maximum_preserving_wire25",
+      "before": "assert codec.SCHEMA_VERSION == document['schema_version'] == 25",
+      "after": "assert codec.SCHEMA_VERSION == 26 and document['schema_version'] == 25"
+    },
+    {
+      "file": "tests/unit/test_program_await_acquisition_codec.py",
+      "kind": "future_version",
+      "before": "@pytest.mark.parametrize(\"version\", (True, 26))",
+      "after": "@pytest.mark.parametrize(\"version\", (True, 27))",
+      "old_case": "tests/unit/test_program_await_acquisition_codec.py::test_boolean_or_future_schema_version_is_not_a_capability[26]",
+      "new_case": "tests/unit/test_program_await_acquisition_codec.py::test_boolean_or_future_schema_version_is_not_a_capability[27]"
+    },
+    {
+      "file": "tests/unit/test_program_lookup_fallback_codec.py",
+      "kind": "future_version",
+      "before": "@pytest.mark.parametrize(\"version\", (26, True))",
+      "after": "@pytest.mark.parametrize(\"version\", (27, True))",
+      "old_case": "tests/unit/test_program_lookup_fallback_codec.py::test_future_and_boolean_schema_versions_remain_rejected[26]",
+      "new_case": "tests/unit/test_program_lookup_fallback_codec.py::test_future_and_boolean_schema_versions_remain_rejected[27]"
+    },
+    {
+      "file": "tests/unit/test_program_exception_match_codec.py",
+      "kind": "future_version",
+      "before": "@pytest.mark.parametrize(\"version\", (26, True))",
+      "after": "@pytest.mark.parametrize(\"version\", (27, True))",
+      "old_case": "tests/unit/test_program_exception_match_codec.py::test_future_and_boolean_schema_versions_remain_rejected[26]",
+      "new_case": "tests/unit/test_program_exception_match_codec.py::test_future_and_boolean_schema_versions_remain_rejected[27]"
+    },
+    {
+      "file": "tests/unit/test_program_method_lookup_codec.py",
+      "kind": "future_version",
+      "before": "@pytest.mark.parametrize(\"version\", [26, True])",
+      "after": "@pytest.mark.parametrize(\"version\", [27, True])",
+      "old_case": "tests/unit/test_program_method_lookup_codec.py::test_program_graph_rejects_future_or_boolean_schema_versions[26]",
+      "new_case": "tests/unit/test_program_method_lookup_codec.py::test_program_graph_rejects_future_or_boolean_schema_versions[27]"
+    },
+    {
+      "file": "tests/unit/test_program_session_occupancy_codec.py",
+      "kind": "future_version",
+      "before": "@pytest.mark.parametrize('version', (True, 26))",
+      "after": "@pytest.mark.parametrize('version', (True, 27))",
+      "old_case": "tests/unit/test_program_session_occupancy_codec.py::test_boolean_and_next_future_versions_do_not_enable_the_subject[26]",
+      "new_case": "tests/unit/test_program_session_occupancy_codec.py::test_boolean_and_next_future_versions_do_not_enable_the_subject[27]"
+    },
+    {
+      "file": "tests/unit/test_program_call_effect_expansion_codec.py",
+      "kind": "future_version",
+      "before": "@pytest.mark.parametrize('version', (True, 26))",
+      "after": "@pytest.mark.parametrize('version', (True, 27))",
+      "old_case": "tests/unit/test_program_call_effect_expansion_codec.py::test_boolean_or_next_future_version_cannot_enable_effect_expansion[26]",
+      "new_case": "tests/unit/test_program_call_effect_expansion_codec.py::test_boolean_or_next_future_version_cannot_enable_effect_expansion[27]"
+    }
+  ]
+}

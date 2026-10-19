@@ -26,7 +26,8 @@ from scar.ir.program.protocols import (
 from scar.ir.program.protocol_connections import (
     LOOKUP_FALLBACK_RECORD_TAGS, PROTOCOL_CONNECTION_RECORD_TAGS,
     SessionOccupancyCondition,
-    has_delegated_method_lookup_capability, has_lookup_fallback_capability,
+    has_async_initial_control_capability, has_delegated_method_lookup_capability,
+    has_lookup_fallback_capability,
     has_protocol_connection_capability,
 )
 from scar.ir.program.exception_matches import EXCEPTION_MATCH_RECORD_TAGS
@@ -37,7 +38,7 @@ from scar.ir.program.call_effect_expansion import CALL_EFFECT_EXPANSION_RECORD_T
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 25
+SCHEMA_VERSION = 26
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -64,7 +65,8 @@ _CONNECTION_FIELDS = frozenset({"protocol_call_inputs", "protocol_result_consume
                                 "protocol_bindings"})
 _EXCEPTION_MATCH_FIELDS = frozenset({"exception_matches"})
 _CALL_EFFECT_FIELDS = frozenset({"call_effect_expansions"})
-_V25_GRAPH_FIELDS = _GRAPH_FIELDS
+_V26_GRAPH_FIELDS = _GRAPH_FIELDS
+_V25_GRAPH_FIELDS = _V26_GRAPH_FIELDS
 _V24_GRAPH_FIELDS = _V25_GRAPH_FIELDS - _CALL_EFFECT_FIELDS
 _V23_GRAPH_FIELDS = _V24_GRAPH_FIELDS
 _V22_GRAPH_FIELDS = _V23_GRAPH_FIELDS
@@ -112,6 +114,7 @@ _V22_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V22_GRAPH_FIEL
 _V23_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V23_GRAPH_FIELDS
 _V24_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V24_GRAPH_FIELDS
 _V25_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V25_GRAPH_FIELDS
+_V26_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V26_GRAPH_FIELDS
 _V19_CONNECTION_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_CONNECTION_RECORD_TAGS.items()
                               if record is not SessionOccupancyCondition}
 _V17_PROTOCOL_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_RECORD_TAGS.items()
@@ -278,6 +281,7 @@ def dumps(graph: ProgramGraph) -> str:
     has_await_acquisition = has_await_acquisition_capability(graph)
     has_session_occupancy = _has_session_occupancy_capability(graph)
     has_call_effect_expansions = bool(graph.call_effect_expansions)
+    has_async_initial_control = has_async_initial_control_capability(graph)
     has_admission = _has_admission_capability(graph)
     has_invoke_subset = _has_invoke_subset_capability(graph)
     tags = (_V11_RECORD_TAGS if has_driver else
@@ -299,7 +303,10 @@ def dumps(graph: ProgramGraph) -> str:
     if has_call_effect_expansions:
         tags = {**tags, **CALL_EFFECT_EXPANSION_RECORD_TAGS}
     encoded = encode(graph, record_tags=tags)
-    if has_call_effect_expansions:
+    if has_async_initial_control:
+        document = {"schema": SCHEMA, "schema_version": 26,
+                    **{name: encoded[name] for name in _V26_GRAPH_FIELDS}}
+    elif has_call_effect_expansions:
         document = {"schema": SCHEMA, "schema_version": 25,
                     **{name: encoded[name] for name in _V25_GRAPH_FIELDS}}
     elif has_session_occupancy:
@@ -415,7 +422,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact capability profiles v1–v25 without upgrading old wire."""
+    """Decode exact capability profiles v1–v26 without upgrading old wire."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -426,7 +433,7 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
@@ -440,7 +447,7 @@ def loads(payload: str) -> ProgramGraph:
                        19: _V19_ENVELOPE_FIELDS, 20: _V20_ENVELOPE_FIELDS,
                        21: _V21_ENVELOPE_FIELDS, 22: _V22_ENVELOPE_FIELDS,
                        23: _V23_ENVELOPE_FIELDS, 24: _V24_ENVELOPE_FIELDS,
-                       25: _V25_ENVELOPE_FIELDS}[version]
+                       25: _V25_ENVELOPE_FIELDS, 26: _V26_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
@@ -454,7 +461,7 @@ def loads(payload: str) -> ProgramGraph:
                     19: _V19_GRAPH_FIELDS, 20: _V20_GRAPH_FIELDS,
                     21: _V21_GRAPH_FIELDS, 22: _V22_GRAPH_FIELDS,
                     23: _V23_GRAPH_FIELDS, 24: _V24_GRAPH_FIELDS,
-                    25: _V25_GRAPH_FIELDS}[version]
+                    25: _V25_GRAPH_FIELDS, 26: _V26_GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
     if version < 25:
         record.update({name: [] for name in _CALL_EFFECT_FIELDS})
@@ -574,6 +581,11 @@ def loads(payload: str) -> ProgramGraph:
     if version >= 25:
         tags = {**tags, **CALL_EFFECT_EXPANSION_RECORD_TAGS}
     graph = decode(ProgramGraph, record, record_tags=tags)
+    has_async_initial_control = has_async_initial_control_capability(graph)
+    if version < 26 and has_async_initial_control:
+        raise ValueError("historical schema cannot contain async initial control capability")
+    if version == 26 and not has_async_initial_control:
+        raise ValueError("schema version 26 requires explicit async initial control capability")
     if version == 25 and not graph.call_effect_expansions:
         raise ValueError("schema version 25 requires explicit call effect expansion capability")
     has_session_occupancy = _has_session_occupancy_capability(graph)

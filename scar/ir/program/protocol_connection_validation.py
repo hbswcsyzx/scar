@@ -323,7 +323,8 @@ def connection_reports(ctx):
     from .protocol_continuations import continuation_connections
     from .protocol_await import await_connections
     from .protocol_connections import RequestStateCondition, SessionOccupancyCondition
-    from .protocols import AdmissionPredicate
+    from .protocols import (AdmissionPredicate, BodyStateCondition, ProtocolProfile,
+                            ReferenceIsNoneCondition)
     reports = {"common": common_connections(ctx),
                "continuations": continuation_connections(ctx),
                "async": async_connections(ctx),
@@ -338,6 +339,11 @@ def connection_reports(ctx):
         elif type(row.contract) is AdmissionPredicate and type(row.contract.subject) is SessionOccupancyCondition:
             from .session_occupancy import occupancy_errors
             predicate_issues.extend(occupancy_errors(ctx, row))
+        elif (type(row.contract) is AdmissionPredicate
+              and type(row.contract.subject) in (BodyStateCondition, ReferenceIsNoneCondition)
+              and ctx.scopes[row.scope].profile is ProtocolProfile.ASYNC_GENERATOR_BODY_V1):
+            from .async_initial import async_predicate_errors
+            predicate_issues.extend(async_predicate_errors(ctx, row))
     return {"families": reports,
             "issues": (*predicate_issues, *(issue for report in reports.values() for issue in report["issues"])),
             "gaps": tuple(gap for report in reports.values() for gap in report["gaps"]),

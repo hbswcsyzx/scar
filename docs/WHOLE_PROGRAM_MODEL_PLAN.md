@@ -3,6 +3,13 @@
 日期：2026-10-16。这是当前优先计划，修订旧 N2 中先推进局部桥接的顺序。
 模型依据：[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)。用户无需逐门审批。
 
+2026-10-19 最新范围：[原 F16 条件性结构验收](M1_ASYNC_INITIAL_CONTROL_ACCEPTANCE.md)
+已以 2058 相关项/892 稳定源码核验，累计八族接受，剩余八族。
+P4 component/full、P5、M2 原113构造/196字段及完整 M0–M2 仍未完成。
+[下一门](M1_ASYNC_INITIAL_CONTROL_NEXT_GATE.md)先核 F18/F19 已有端口和真残项，
+不为正确的 opaque Unknown 无限加手工图。历史 M2 G1–G6 文字修订已限定关闭，
+不重复计算为新 GAP。阶段验收后先向用户解释，再进入 M3 自动入口建图。
+
 ## 1. 阶段顺序与当前判定
 
 ```text

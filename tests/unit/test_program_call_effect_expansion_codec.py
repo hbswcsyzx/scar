@@ -54,7 +54,7 @@ def test_program25_roundtrip_preserves_original_calls_effects_and_all_completion
     assert not codec._has_session_occupancy_capability(graph)
     wire = codec.dumps(graph)
     document = json.loads(wire)
-    assert codec.SCHEMA_VERSION == document['schema_version'] == 25
+    assert codec.SCHEMA_VERSION == 26 and document['schema_version'] == 25
     assert execution_codec.SCHEMA_VERSION == 8
     assert set(document) == {field.name for field in fields(ProgramGraph)} | {'schema', 'schema_version'}
     assert document['call_effect_expansions'] == [
@@ -199,7 +199,7 @@ def test_program25_can_coexist_with_occupancy_without_requiring_or_replacing_tha
     assert codec._has_session_occupancy_capability(recovered)
 
 
-@pytest.mark.parametrize('version', (True, 26))
+@pytest.mark.parametrize('version', (True, 27))
 def test_boolean_or_next_future_version_cannot_enable_effect_expansion(version):
     graph, _, _ = _program()
     document = json.loads(codec.dumps(graph))

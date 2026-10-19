@@ -1,0 +1,33 @@
+FF                                                                       [100%]
+=================================== FAILURES ===================================
+__ test_initial_nonNone_scheduler_cannot_be_replaced_with_stored_none_latent ___
+
+    def test_initial_nonNone_scheduler_cannot_be_replaced_with_stored_none_latent():
+        graph, _ = initial_scheduler_selection_program()
+        require_valid(_core(graph))
+>       assert 'async_delivery_source' in {issue.code for issue in validate(graph)}
+E       AssertionError: assert 'async_delivery_source' in set()
+
+tests/unit/test_program_async_initial_selection.py:20: AssertionError
+______ test_initial_nonNone_scheduler_supplies_the_original_resume_input _______
+
+    def test_initial_nonNone_scheduler_supplies_the_original_resume_input():
+        graph, details = initial_scheduler_selection_program(deliver_scheduler=True)
+>       require_valid(graph)
+
+tests/unit/test_program_async_initial_selection.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.caller'), regions=(Region(id=RegionID(value='async.caller'), label='declared d...(value='driver.drive'), source=OperationID(value='resume.return'))),), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: async_delivery_source at program_operation:driver.drive: no contextual latent request supplies this actual delivery
+
+scar/ir/program/validation.py:763: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_initial_selection.py::test_initial_nonNone_scheduler_cannot_be_replaced_with_stored_none_latent
+FAILED tests/unit/test_program_async_initial_selection.py::test_initial_nonNone_scheduler_supplies_the_original_resume_input
+2 failed in 1.05s

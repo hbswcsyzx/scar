@@ -88,11 +88,18 @@ def _hosts(ctx, view, source, path, gaps):
     if outcome is None:
         return ()
     body = ctx.core_operations[outcome.operation]
-    if type(body.terminator) is not SuspendTerminator:
+    suspended = type(body.terminator) is SuspendTerminator
+    terminal_return = not suspended and body.terminator.kind is TerminatorKind.RETURN
+    if not suspended and not terminal_return:
         gap(ctx, gaps, 'body_session_host_adapter_unproved', outcome.id,
             'terminal body outcome host adaptation is not yet projected by this bounded view')
         return ()
-    exported = value_for_use(ctx, _use(ctx, outcome, body.terminator.exported))
+    flavor = body.terminator.flavor if suspended else None
+    payload = (body.terminator.exported if suspended else next((identity
+        for identity in body.terminator.values
+        if not isinstance(ctx.core_values[next(use.value for use in body.uses
+            if use.id == identity)], StateVersionValue)), None))
+    exported = value_for_use(ctx, _use(ctx, outcome, payload))
     hosts = []
     for operation, occurrence, visit in path:
         if operation.terminator is None or operation.terminator.kind not in (
@@ -108,9 +115,9 @@ def _hosts(ctx, view, source, path, gaps):
         if occurrence is None:
             gap(ctx, gaps, 'body_session_host_missing', operation.id,
                 'original host consumer has no captured occurrence on this actual visit')
-        if body.terminator.flavor is SuspensionFlavor.AWAIT and operation.terminator.kind is TerminatorKind.RETURN:
+        if flavor is SuspensionFlavor.AWAIT and operation.terminator.kind is TerminatorKind.RETURN:
             row['bindings'] = (_pair(exported, target),)
-        elif body.terminator.flavor is SuspensionFlavor.AWAIT:
+        elif flavor is SuspensionFlavor.AWAIT:
             row['source_value'] = None
             row['kind'] = 'HOST_FAILURE'
             # A failed post helper returns its own actual exception packet;
@@ -146,6 +153,10 @@ def _hosts(ctx, view, source, path, gaps):
                 transfer = ctx.outgoing.get(adapter_occ.id)
                 for declaration in ctx.session_adapters_by_site.get(adapter_op.id, ()):
                     contract = declaration.contract
+                    if terminal_return and (contract.rule is not
+                            OutcomeAdapterRule.ASYNCGEN_RETURN_TO_STOP_ASYNC_ITERATION
+                            or type(contract.input) is not DriveResult or contract.input.index != 0):
+                        continue
                     if (type(contract.input) is DriveResult and contract.input.outcome == source
                             and (transfer is None and declaration.slot == 0 or transfer is not None
                                  and transfer.successor_index == declaration.slot)):

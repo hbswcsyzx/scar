@@ -1,6 +1,15 @@
 # 第一阶段完整性分母：模型、接口、协议
 
-最新限定检查点：[P3持续发生关联](M1_BODY_OCCURRENCE_ACCEPTANCE.md)接O01–O16
+最新限定检查点（2026-10-19）：[原 F16 验收](M1_ASYNC_INITIAL_CONTROL_ACCEPTANCE.md)
+以 2058 项相关回归、892 文件稳定指纹，核独立 request/body/有效参数联合控制、
+来源和实际端口。原 2016 义务由 2010 精确身份及六项迁移保留，新增 42 项。
+原十六族中 F12/F13/F14/F15/F16/F17/F21/F23 八族、await A–H 已条件性结构接受；
+其余 F18/F19/F20/F22/F24/X25/X26/X27、P4 component/full、P5 与 M2 原113/196
+仍开放。[下一门](M1_ASYNC_INITIAL_CONTROL_NEXT_GATE.md)先合账已有证据、再补真缺口。
+真实 opaque/内容保持 Unknown 不要求翻纯；已有声明图不代自动 LeWM 恢复。
+以下保留历史检查点，旧状态摘要不撤销后来的限定验收。**第一阶段仍未完成。**
+
+此前限定检查点：[P3持续发生关联](M1_BODY_OCCURRENCE_ACCEPTANCE.md)接O01–O16
 原端口、Create/owner/copy、activation/segment/首出口及conditional host顺序；
 255定向、606组件/18标准和干净`8138986`的5,822冻结全仓通过，668源/99fixtures
 守恒。首轮6失败full与test-only能力修复保留。P4/P5、原113构造/196字段及
@@ -80,6 +89,11 @@ Operation、Value、StateLocation、Region、Resource 是规范实体；输入/�
 第一阶段关闭要求是上表接口能组合并被机器校验，且 M2 的每个构造有明确
 phase/依赖/效果/完成规则与反例依据。静态模型可声明外部约束，但不得把声明
 当作已观测或已证明的实例。未知内部依赖保留具体边界，不吞掉周围已知结构。
+
+M2 的初始 `field_coverage.json` 是审计快照；后续
+`artifacts/experiments/b1_call_operands/model_stage1_audit/closure/review.md`
+已在限定文字修订范围关闭 G1–G6。不能把原 12 GAP 重报成当前新失败，也不能
+由该文字复审宣布 M2 实现或全门通过；113 构造/196 字段的接口合账仍需完成。
 
 ## 3. 第一阶段与后续阶段的分界
 

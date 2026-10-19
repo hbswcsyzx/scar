@@ -1,5 +1,21 @@
 # SCAR roadmap and scope
 
+> **Current initial-ASEND model acceptance (2026-10-19):**
+> [Plan](M1_ASYNC_INITIAL_CONTROL_PLAN.md),
+> [actual attempts](M1_ASYNC_INITIAL_CONTROL_PROGRESS.md),
+> [F16 acceptance](M1_ASYNC_INITIAL_CONTROL_ACCEPTANCE.md), and
+> [next original scope](M1_ASYNC_INITIAL_CONTROL_NEXT_GATE.md).
+> Independent R/B/effective operand and current-state dependencies now reach
+> original Start/Resume or reject own N/R/host; unknown input/caller coverage
+> remains unknown. **2058 affected focused pass**,892 stable sources:2010 exact
+> prior IDs plus6 explicit migrations retain2016 obligations,42 new cases.
+> F16 conditionally closes at supplied-model structural scope; eight of16
+> families remain, plus P4 component/full/P5 and M2 original113/196. Program26
+> preserves old wire and Execution8. Next: reconcile F18/F19 exact existing
+> evidence and true residuals, then return to the original whole-stage gates.
+> Hand-supplied models are not automatic source/native recovery. No new backend,
+> trusted LeWM transformation or speedup is established.
+
 > **Current call-effect expansion progress (2026-10-19):**
 > [Plan](M1_CALL_EFFECT_EXPANSION_PLAN.md),
 > [actual attempts](M1_CALL_EFFECT_EXPANSION_PROGRESS.md), and

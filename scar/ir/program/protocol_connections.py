@@ -560,6 +560,27 @@ def _bind_protocol_records() -> None:
         ResumeSourceBinding, RequestAssociation, RequestStateCondition, SessionOccupancyCondition)
 
 
+def has_async_initial_control_capability(graph: object) -> bool:
+    """Detect only Program26's new use of the existing Body/None subjects.
+
+    The profile/clause combination is the capability, not a new record shape
+    or a CHECK_INITIAL_ASEND row by itself. Historical body predicates under
+    their original profiles must keep their original wire version.
+    """
+    scope_profiles = {
+        row.id: row.profile for row in getattr(graph, "protocol_scopes", ())
+        if type(row) is ProtocolScope
+    }
+    return any(
+        type(getattr(row, "contract", None)) is AdmissionPredicate
+        and type(row.contract.subject) in (BodyStateCondition, ReferenceIsNoneCondition)
+        and row.clause in (ProtocolClause.ASYNC_REQUEST_SOURCE,
+                           ProtocolClause.ASYNC_REQUEST_DELIVERY)
+        and scope_profiles.get(row.scope) is ProtocolProfile.ASYNC_GENERATOR_BODY_V1
+        for row in getattr(graph, "protocol_operations", ())
+    )
+
+
 def has_protocol_connection_capability(graph: object) -> bool:
     """Return whether a graph uses a Program19 connection record or contract.
 
@@ -568,7 +589,7 @@ def has_protocol_connection_capability(graph: object) -> bool:
     An older protocol scope by itself does not select the new capability.
     """
     from .protocol_await_records import has_await_acquisition_capability
-    if has_await_acquisition_capability(graph):
+    if has_await_acquisition_capability(graph) or has_async_initial_control_capability(graph):
         # New scope-only declarations still need the prepared source inventory.
         return True
     if any(getattr(graph, name, ()) for name in (
@@ -638,5 +659,6 @@ __all__ = [
     "RequestStateRule", "ResumeSourceBinding", "TaskCreatedTarget", "TaskStatusRead",
     "TaskStatusRule", "TaskTargetRead", "TaskTargetRole", "TaskTargetSource",
     "_bind_connection_model_ports", "_bind_protocol_records",
-    "has_delegated_method_lookup_capability", "has_protocol_connection_capability",
+    "has_async_initial_control_capability", "has_delegated_method_lookup_capability",
+    "has_protocol_connection_capability",
 ]

@@ -4,9 +4,9 @@ from .ids import ProtocolScopeID
 from .model import InvokeLiteralResult, OperationResult, ProtocolValue, TerminatorKind
 from .protocol_flow import ProtocolFlow
 from .protocol_rules import required_clauses
-from .protocols import (AdmissionPredicate, DriverSubject, HostTerminal, NoEntryOutcome, OutcomeAdapter,
+from .protocols import (AdmissionPredicate, BodyStateCondition, DriverSubject, HostTerminal, NoEntryOutcome, OutcomeAdapter,
                         PacketConstruction, ProtocolCall, ProtocolClause,
-                        RequestProcessing, ReferenceIsNoneCondition, OwnedUse, StaticProtocolGap)
+                        ProtocolProfile, RequestProcessing, ReferenceIsNoneCondition, OwnedUse, StaticProtocolGap)
 from .protocol_validation import adapter_host_output, no_entry_route
 from .resumption import SuspendTerminator
 
@@ -21,16 +21,22 @@ def _row_view(ctx, row, index=None):
     predicate = None
     if type(contract) is AdmissionPredicate:
         from .protocol_connections import RequestStateCondition, SessionOccupancyCondition
+        async_body_or_input = (
+            ctx.scopes[row.scope].profile is ProtocolProfile.ASYNC_GENERATOR_BODY_V1
+            and type(contract.subject) in (BodyStateCondition, ReferenceIsNoneCondition))
         if type(contract.subject) is RequestStateCondition:
             from .protocol_async import request_state_view
             predicate = request_state_view(ctx, row)
         elif type(contract.subject) is SessionOccupancyCondition:
             from .session_occupancy import occupancy_view
             predicate = occupancy_view(ctx, row)
+        elif async_body_or_input:
+            from .async_initial import async_predicate_view
+            predicate = async_predicate_view(ctx, row)
         else:
             from .admission import admission_view
             predicate = admission_view(ctx, row)
-        if type(contract.subject) is ReferenceIsNoneCondition:
+        if type(contract.subject) is ReferenceIsNoneCondition and not async_body_or_input:
             from .control import ProtocolValueKind
             from .request_inputs import request_input_binding
             reports = []

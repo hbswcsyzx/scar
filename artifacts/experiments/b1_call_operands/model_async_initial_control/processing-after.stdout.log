@@ -1,0 +1,393 @@
+{
+  "source_sha256": "f8e32575b74ba5eec077c1f18f2da7fcbaf03f2443b1579c92a5e40e791bf990",
+  "scenarios": [
+    {
+      "raised": false,
+      "gaps": [],
+      "source_binding": {
+        "match": true,
+        "gaps": [],
+        "routes": [
+          {
+            "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+            "match": true,
+            "gaps": null
+          }
+        ]
+      },
+      "sources": [
+        {
+          "raw": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "operands": [
+            {
+              "match": true,
+              "gaps": [],
+              "routes": [
+                {
+                  "choices": "{}",
+                  "match": true,
+                  "gaps": null
+                }
+              ]
+            }
+          ],
+          "binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          }
+        }
+      ],
+      "operands": [
+        {
+          "raw": {
+            "match": null,
+            "gaps": [
+              {
+                "code": "request_input_binding_unresolved",
+                "raw": "OwnedUse(operation=OperationID(value='initial.driver.0.reject.initial.operand.none.reject'), use=UseID(value='initial.driver.0.reject.initial.operand.none.reject.raw'))",
+                "input": "OwnedUse(operation=OperationID(value='initial.driver.0.reject.initial.operand.none.reject'), use=UseID(value='initial.driver.0.reject.initial.check.operand'))",
+                "ordinal": 0
+              },
+              {
+                "code": "invoke_completion_dynamic_unlinked",
+                "message": "this is the original INVOKE completion port, not a selected dynamic execution",
+                "operation": "program_operation:initial.driver.0.reject.driver.association.read",
+                "successor_index": 0
+              },
+              {
+                "code": "cfg_visit_unselected",
+                "message": "the original CFG route is preserved, but no dynamic visit or loop iteration is selected"
+              },
+              {
+                "code": "static_call_occurrence_unlinked",
+                "message": "positional call mapping is static and does not select a dynamic activation",
+                "caller": "program_operation:initial.call.0",
+                "callee": "program_region:initial.driver.0.reject"
+              },
+              {
+                "code": "reference_literal_not_none",
+                "message": "a literal ReferenceValue source must be exact None",
+                "value": "program_value:initial.literal.non_none"
+              }
+            ],
+            "routes": []
+          },
+          "effective": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          }
+        }
+      ],
+      "predicates": [
+        {
+          "kind": "RequestStateCondition",
+          "view_complete": null,
+          "effective_complete": null,
+          "view_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "path_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "sources": []
+        },
+        {
+          "kind": "BodyStateCondition",
+          "view_complete": true,
+          "effective_complete": null,
+          "view_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "path_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "sources": []
+        },
+        {
+          "kind": "ReferenceIsNoneCondition",
+          "view_complete": true,
+          "effective_complete": true,
+          "view_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "path_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "sources": [
+            {
+              "scheduler": false,
+              "definition_kind": "SEND",
+              "projection_complete": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "raised": true,
+      "gaps": [],
+      "source_binding": {
+        "match": true,
+        "gaps": [],
+        "routes": [
+          {
+            "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+            "match": true,
+            "gaps": null
+          }
+        ]
+      },
+      "sources": [
+        {
+          "raw": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "operands": [
+            {
+              "match": true,
+              "gaps": [],
+              "routes": [
+                {
+                  "choices": "{}",
+                  "match": true,
+                  "gaps": null
+                }
+              ]
+            }
+          ],
+          "binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          }
+        }
+      ],
+      "operands": [
+        {
+          "raw": {
+            "match": null,
+            "gaps": [
+              {
+                "code": "request_input_binding_unresolved",
+                "raw": "OwnedUse(operation=OperationID(value='initial.driver.0.reject.initial.operand.none.reject'), use=UseID(value='initial.driver.0.reject.initial.operand.none.reject.raw'))",
+                "input": "OwnedUse(operation=OperationID(value='initial.driver.0.reject.initial.operand.none.reject'), use=UseID(value='initial.driver.0.reject.initial.check.operand'))",
+                "ordinal": 0
+              },
+              {
+                "code": "invoke_completion_dynamic_unlinked",
+                "message": "this is the original INVOKE completion port, not a selected dynamic execution",
+                "operation": "program_operation:initial.driver.0.reject.driver.association.read",
+                "successor_index": 0
+              },
+              {
+                "code": "cfg_visit_unselected",
+                "message": "the original CFG route is preserved, but no dynamic visit or loop iteration is selected"
+              },
+              {
+                "code": "static_call_occurrence_unlinked",
+                "message": "positional call mapping is static and does not select a dynamic activation",
+                "caller": "program_operation:initial.call.0",
+                "callee": "program_region:initial.driver.0.reject"
+              },
+              {
+                "code": "reference_literal_not_none",
+                "message": "a literal ReferenceValue source must be exact None",
+                "value": "program_value:initial.literal.non_none"
+              }
+            ],
+            "routes": []
+          },
+          "effective": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          }
+        }
+      ],
+      "predicates": [
+        {
+          "kind": "RequestStateCondition",
+          "view_complete": null,
+          "effective_complete": null,
+          "view_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "path_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "sources": []
+        },
+        {
+          "kind": "BodyStateCondition",
+          "view_complete": true,
+          "effective_complete": null,
+          "view_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "path_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "sources": []
+        },
+        {
+          "kind": "ReferenceIsNoneCondition",
+          "view_complete": true,
+          "effective_complete": true,
+          "view_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "path_binding": {
+            "match": true,
+            "gaps": [],
+            "routes": [
+              {
+                "choices": "{(((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.driver.association.read')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.pipeline.request.step.branch')): 0, (((OperationID(value='initial.call.0'), RegionID(value='async.initial.caller'), RegionID(value='initial.driver.0.reject')),), OperationID(value='initial.driver.0.reject.initial.body.created.branch')): 0, ((), OperationID(value='initial.request.0.create')): 0}",
+                "match": true,
+                "gaps": null
+              }
+            ]
+          },
+          "sources": [
+            {
+              "scheduler": false,
+              "definition_kind": "SEND",
+              "projection_complete": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

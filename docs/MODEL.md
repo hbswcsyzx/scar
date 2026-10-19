@@ -1,5 +1,27 @@
 # SCAR execution model
 
+## Initial async inputs and joint original control (2026-10-19)
+
+The five core entities remain Operation / Value / StateLocation / Region /
+Resource. Request initial state, associated body phase, stored L and current S
+are independent dependencies. First S uses L only for proved NEXT/None;
+nonNone S overrides L. Unknown input/caller coverage cannot become a Start
+proof. Joint control keeps original branches, caller tuples, all association
+state support, exact ordinal and each rejection helper's own N/R/host.
+Create/association projections remain separate from ordinary copy receipts.
+
+See the [frozen plan](M1_ASYNC_INITIAL_CONTROL_PLAN.md),
+[actual failures and results](M1_ASYNC_INITIAL_CONTROL_PROGRESS.md),
+[original F16 acceptance](M1_ASYNC_INITIAL_CONTROL_ACCEPTANCE.md), and
+[next original scope](M1_ASYNC_INITIAL_CONTROL_NEXT_GATE.md).
+2058 affected focused tests pass on892 stable sources:2010 exact prior IDs
+plus6 explicit future-version migrations retain all2016 prior obligations,
+with42 new tests. Program26 gates the new use of existing subjects; original
+1–25 wire and Execution8 remain. F16 passes conditional supplied-model
+structural acceptance; eight of the original16 families remain open, as do
+P4 component/full/P5/M2 original113/196. Real opaque/write boundaries remain
+unknown. This is not automatic whole-LeWM modeling, transformation or speedup.
+
 ## Complete call effects and exact partial intervals (2026-10-19)
 
 The five core entities remain Operation / Value / StateLocation / Region /

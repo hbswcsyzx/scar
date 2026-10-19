@@ -1,0 +1,17 @@
+F.                                                                       [100%]
+=================================== FAILURES ===================================
+_______ test_unknown_effective_input_cannot_become_a_created_start_proof _______
+
+    def test_unknown_effective_input_cannot_become_a_created_start_proof():
+        graph, details = created_unknown_scheduler_program()
+        joint, paths = _joint(graph, details)
+        assert any(item['view'].get('effective_sources', {}).get('source_inventory_complete') is False
+                   for item in joint['predicates'])
+>       assert not any(path['compatible_at_snapshot'] is True for path in paths)
+E       assert not True
+E        +  where True = any(<generator object test_unknown_effective_input_cannot_become_a_created_start_proof.<locals>.<genexpr> at 0x7d8c68124380>)
+
+tests/unit/test_program_async_initial_selection.py:70: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_initial_selection.py::test_unknown_effective_input_cannot_become_a_created_start_proof
+1 failed, 1 passed in 2.95s

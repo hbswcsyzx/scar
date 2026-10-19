@@ -12,10 +12,10 @@ from .lifecycle import DriveOutcomeRef
 from .protocol_flow import ProtocolFlow, ProtocolReferenceError
 from .protocol_rules import PROFILE_FAMILY, contract_allowed, profile_subject, required_clauses
 from .protocols import (
-    AdmissionPredicate, ContractResult, DriverSubject, DriveResult, HostTerminal, NativeExit,
+    AdmissionPredicate, BodyStateCondition, ContractResult, DriverSubject, DriveResult, HostTerminal, NativeExit,
     NoEntryOutcome, OperationSiteSubject, OutcomeAdapter, OutcomeAdapterRule,
     OwnedUse, PacketConstruction, PacketRule, ProtocolCall, ProtocolClause,
-    ProtocolCallRule, ProtocolProfile, RequestProcessing, RequestProcessingRule, StaticProtocolGap,
+    ProtocolCallRule, ProtocolProfile, ReferenceIsNoneCondition, RequestProcessing, RequestProcessingRule, StaticProtocolGap,
 )
 from .resumption import SuspendTerminator
 from .resumption import ResumeSlotKind, SuspensionFlavor
@@ -374,7 +374,10 @@ def protocol_errors(graph, *, context=None):
             error("protocol_state_site", path, exc)
         if type(contract) is AdmissionPredicate:
             from .protocol_connections import RequestStateCondition, SessionOccupancyCondition
-            if type(contract.subject) not in (RequestStateCondition, SessionOccupancyCondition):
+            async_body_or_input = (scope.profile is ProtocolProfile.ASYNC_GENERATOR_BODY_V1
+                and type(contract.subject) in (BodyStateCondition, ReferenceIsNoneCondition))
+            if (type(contract.subject) not in (RequestStateCondition, SessionOccupancyCondition)
+                    and not async_body_or_input):
                 from .admission import admission_errors
                 issues.extend(admission_errors(ctx, row))
             # R/B protocol predicates need the prepared original association

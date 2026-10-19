@@ -1,0 +1,48 @@
+"""Initial is a request phase, not permission to ignore current scheduler S."""
+from dataclasses import replace
+
+from scar.ir.execution.validity_budget import ValidityBudget
+from scar.ir.program.protocol_async import async_connections
+from scar.ir.program.protocol_connection_flow import ConnectionContext
+from scar.ir.program.queries import ProgramIndex
+from scar.ir.program.validation import require_valid, validate
+from tests.fixtures.program_async_initial_selection_graphs import initial_scheduler_selection_program
+
+
+def _core(graph):
+    return replace(graph, protocol_scopes=(), protocol_operations=(),
+                   protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=())
+
+
+def test_initial_nonNone_scheduler_cannot_be_replaced_with_stored_none_latent():
+    graph, _ = initial_scheduler_selection_program()
+    require_valid(_core(graph))
+    assert 'async_delivery_source' in {issue.code for issue in validate(graph)}
+
+
+def test_initial_nonNone_scheduler_supplies_the_original_resume_input():
+    graph, details = initial_scheduler_selection_program(deliver_scheduler=True)
+    require_valid(graph)
+    ctx = ConnectionContext(graph, index=ProgramIndex(graph), budget=ValidityBudget(131072))
+    report = async_connections(ctx)
+    assert not report['issues']
+    delivery, = report['deliveries']
+    assert delivery['initial_step'] is True
+    assert delivery['alternatives']
+    assert {item['definition'] for item in delivery['alternatives']} == {details['scheduler_definition']}
+    assert all(item['match'] is True for item in delivery['alternatives'])
+    assert report['source_runtime_verified'] is False
+    assert report['transformation_authorized'] is False
+
+
+def test_unknown_first_scheduler_never_authorizes_unconditional_latent_reuse():
+    graph, _ = initial_scheduler_selection_program(scheduler_unknown=True)
+    require_valid(graph)
+    ctx = ConnectionContext(graph, index=ProgramIndex(graph), budget=ValidityBudget(131072))
+    report = async_connections(ctx)
+    assert not report['issues']
+    delivery, = report['deliveries']
+    assert delivery['effective_selection']['source_inventory_complete'] is False
+    assert not any(item['match'] is True for item in delivery['alternatives'])
+    assert any(gap['code'] == 'async_initial_scheduler_none_unresolved' for gap in report['gaps'])
+    assert report['source_runtime_verified'] is report['transformation_authorized'] is False

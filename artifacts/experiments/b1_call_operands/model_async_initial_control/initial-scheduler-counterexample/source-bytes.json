@@ -1,0 +1,10 @@
+{
+  "tests/fixtures/program_async_initial_selection_graphs.py": {
+    "path": "initial-scheduler-counterexample/source-bytes/tests__fixtures__program_async_initial_selection_graphs.py.txt",
+    "sha256": "4efab05a1d95322bc9b347d7f31b733cfd74ce01e9063d1711c725a0aef572ff"
+  },
+  "tests/unit/test_program_async_initial_selection.py": {
+    "path": "initial-scheduler-counterexample/source-bytes/tests__unit__test_program_async_initial_selection.py.txt",
+    "sha256": "d5c9202c17fa3071cdb48ece3eb36f3fef17fcc8fa3f817bcce8405f6387ef84"
+  }
+}
