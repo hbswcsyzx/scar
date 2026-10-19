@@ -1,5 +1,17 @@
 # SCAR roadmap and scope
 
+> **P4 source-to-terminal connection progress (2026-10-19):**
+> [Plan](M1_AWAIT_SOURCE_TO_TERMINAL_PLAN.md) and
+> [evidence / remaining work](M1_AWAIT_SOURCE_TO_TERMINAL_PROGRESS.md) join the
+> independent general source and native wrapper routes to genuine body
+> terminals and nested final-result ports. Actual C1 Return preservation and
+> Raise replacement retain separate pending/payload/state evidence. Unproved
+> reference identity is visible; it is not removed to turn a test green.
+> Complete original A–H, all sixteen groups, P5 and M2 remain OPEN. In
+> particular, downstream cleanup after conversion is still a boundary; it
+> cannot be closed by the examples that perform cleanup before the terminal.
+> Automatic whole-LeWM modeling, transformation and speedup are not proved.
+
 > **P4 implementation/final-result connection progress (2026-10-19):**
 > [Plan](M1_AWAIT_FINAL_CHAIN_PLAN.md),
 > [evidence and limits](M1_AWAIT_FINAL_CHAIN_PROGRESS.md) connect the genuine

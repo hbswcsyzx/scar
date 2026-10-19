@@ -57,7 +57,7 @@ class _Routes:
                      f'original input port {identity} has an unresolved actual')
         return {'definition': definition, 'actual': actual, 'value': value}
 
-    def argument(self, occurrence, operation, successor, argument, destination):
+    def argument(self, occurrence, operation, successor, argument, destination, formal):
         """Keep projections with no copy Use as real typed boundary relations."""
         source = saved_actual_use(operation, argument)
         result = {'argument': argument, 'kind': type(argument).__name__,
@@ -81,9 +81,16 @@ class _Routes:
                 'index': argument.resume_slot,
                 'ingress': self.ctx.segments[destination.segment].ingress}
         elif type(argument) is PendingPayload:
+            from .pending_payloads import projection
             pending = operation.terminator.pending
+            receipt = projection(self.ctx, formal, self.budget)
             result['projection'] = {'pending': self.use(occurrence.id, pending),
-                                    'port': successor.port}
+                                    'port': successor.port,
+                                    'payload': receipt}
+            for code in () if receipt is None else receipt['gaps']:
+                self.gap(code, occurrence.id, 'original pending payload projection remains unresolved')
+            if self.budget.truncated and self.cursor is None:
+                self.cursor = {'stage': 'pending_payload', 'path': str(occurrence.id)}
         else:
             self.gap('composition_argument_unsupported', occurrence.id,
                      f'original {type(argument).__name__} marker retained without an interpretation')
@@ -186,7 +193,8 @@ class _Routes:
                 item['arguments'].append({'ordinal': ordinal,
                     'formal_definition': ctx.core_values[identity],
                     'formal': ctx.results.get((destination.id, identity)),
-                    **self.argument(occurrence, operation, successor, argument, destination)})
+                    **self.argument(occurrence, operation, successor, argument, destination,
+                                    ctx.results.get((destination.id, identity)))})
             item['scan_complete'] = True
 
     def scan_calls(self):

@@ -169,7 +169,8 @@ def outcome_connections(ctx, original_inventory, *, derive=True):
             if derive and not ctx.spend('await_original_outcome_edges'):
                 enumeration_complete = False
                 cursor = cursor or {'phase': 'await_outcome_inventory', 'drive': drive.id, 'successor': number}
-                break
+                # Retain this and the raw declared suffix keys. Exhaustion
+                # prevents detail proofs, never erases original anchors.
             body = ctx.operations[edge.source]
             outcome = DriveOutcomeRef(drive.id, edge.source)
             key = (job['scope'], job['source_operation'], job['advance_operation'],
@@ -190,9 +191,10 @@ def outcome_connections(ctx, original_inventory, *, derive=True):
             'source_operation': job['source_operation'], 'advance_operation': job['advance_operation'],
             'input_guard': job.get('input_guard'), 'choices': job['choices'],
             'drive_outcome': outcome, 'payload': payload, 'kind': kind}
-        if not derive or not ctx.spend('await_outcome_jobs'):
+        if not derive or ctx.budget.truncated or not ctx.spend('await_outcome_jobs'):
             rows.append({**row, 'conversion_legs': (), 'advance_legs': (), 'consumers': (), 'status': 'NOT_CHECKED',
-                         'gaps': ('await_static_details_deferred_without_capture',) if not derive else (), **flags()})
+                         'gaps': ('await_static_details_deferred_without_capture',) if not derive else
+                                 ('await_outcome_budget',), **flags()})
             if derive:
                 cursor = cursor or {'phase': 'await_outcome_jobs', 'key': key}
             continue

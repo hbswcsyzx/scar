@@ -99,6 +99,7 @@ def pair(ctx, source, target, shared):
     """A common *original copy ancestor*, separately from denotation checks."""
     from .await_links import _flags
     from .resumable_identity import compatible
+    from .pending_payloads import copy_recipe
     gaps, support, match, comparison = [], [], None, None
     present = all(value is not None and type(value) is not Unresolved for value in (source, target))
     if not shared.spend('await_outcome_copy_pairs', path='await.outcome.copy'):
@@ -106,13 +107,15 @@ def pair(ctx, source, target, shared):
     elif not present:
         gaps.append('await_outcome_value_unobserved')
     else:
-        ancestors, cursor, seen, left = {}, source.id, set(), []
+        ancestors, cursor, seen, left, conflict = {}, source.id, set(), [], False
         while cursor not in seen:
             if not shared.spend('await_outcome_copy_ancestors', path='await.outcome.copy.source'):
                 break
             seen.add(cursor)
             ancestors[cursor] = len(left)
-            recipe = ctx.body_original_copy_recipes.get(cursor)
+            recipe, missing, contradicted = copy_recipe(ctx, cursor, shared)
+            gaps.extend(missing)
+            conflict |= contradicted
             if recipe is None:
                 break
             left.append(recipe)
@@ -128,13 +131,17 @@ def pair(ctx, source, target, shared):
                     support = [*left[:ancestors[cursor]], *right]
                     match = True
                 break
-            recipe = ctx.body_original_copy_recipes.get(cursor)
+            recipe, missing, contradicted = copy_recipe(ctx, cursor, shared)
+            gaps.extend(missing)
+            conflict |= contradicted
             if recipe is None:
                 break
             right.append(recipe)
             cursor = recipe['source']
         if match is None:
             gaps.append('await_original_copy_unproved')
+        if conflict:
+            match = False
         if shared.spend('await_outcome_compatibility', path='await.outcome.compatibility'):
             comparison = compatible(ctx, source, target, gaps, 'await.outcome.copy')
             if comparison['status'] == 'CONFLICT':

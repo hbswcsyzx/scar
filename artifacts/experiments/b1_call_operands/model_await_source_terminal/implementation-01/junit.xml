@@ -1,0 +1,789 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="15" skipped="0" tests="50" time="94.117" timestamp="2026-10-19T07:16:09.626013+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_general_final" name="test_independent_general_source_is_acquired_before_start_and_reaches_all_final_slots[zero-depth1]" time="0.713" /><testcase classname="tests.unit.test_program_await_general_final" name="test_independent_general_source_is_acquired_before_start_and_reaches_all_final_slots[zero-depth2]" time="0.570" /><testcase classname="tests.unit.test_program_await_general_final" name="test_independent_general_source_is_acquired_before_start_and_reaches_all_final_slots[two-depth1]" time="1.409" /><testcase classname="tests.unit.test_program_await_general_final" name="test_independent_general_source_is_acquired_before_start_and_reaches_all_final_slots[two-depth2]" time="1.387" /><testcase classname="tests.unit.test_program_await_general_final" name="test_another_root_reference_cannot_supply_the_independent_A_contract" time="0.830" /><testcase classname="tests.unit.test_program_await_general_final" name="test_old_preacquisition_world_cannot_be_used_as_the_first_driver_current_state" time="0.454" /><testcase classname="tests.unit.test_program_await_general_final" name="test_deleting_all_body_links_keeps_every_original_advance_and_final_output_inventory" time="2.835" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_general_acquisition_before_start_owns_the_persistent_body_and_real_final_chain[zero-depth1-normal]" time="1.707" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_general_acquisition_before_start_owns_the_persistent_body_and_real_final_chain[zero-depth2-raise]" time="1.843" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_general_acquisition_before_start_owns_the_persistent_body_and_real_final_chain[two-depth1-raise]" time="4.048" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_general_acquisition_before_start_owns_the_persistent_body_and_real_final_chain[two-depth2-normal]" time="4.366" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_missing_first_acquisition_join_or_completion_cannot_borrow_the_other_instance[association]" time="3.012" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_missing_first_acquisition_join_or_completion_cannot_borrow_the_other_instance[completion]" time="3.120" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_missing_exact_nested_final_capture_keeps_the_other_general_instance[child_call]" time="3.283" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_missing_exact_nested_final_capture_keeps_the_other_general_instance[terminal_use]" time="3.303" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_same_code_outer_create_cannot_claim_the_method_created_persistent_body" time="4.170" /><testcase classname="tests.unit.test_execution_await_general_final" name="test_tiny_budget_retains_canonical_source_and_marks_unchecked_actual_chain" time="3.104" /><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_native_wrapper_source_to_real_body_return_to_every_child_own_slot[zero-E]" time="0.229"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">zero_cut = True, depth = 1
+
+    @pytest.mark.parametrize(("zero_cut", "depth"), _CORNERS,
+        ids=("zero-E", "zero-EG", "two-cut-E", "two-cut-EG"))
+    def test_native_wrapper_source_to_real_body_return_to_every_child_own_slot(zero_cut, depth):
+        program, details = await_wrapper_final_program(zero_cut=zero_cut, depth=depth)
+        report = _report(program, details)
+        assert report["inventory"]["source_count"] == 1
+        assert len(report["inventory"]["jobs"]) == len(details["call_rows"])
+        assert details["body_definition"].kind is ResumableKind.COROUTINE
+        body_scopes = tuple(row for row in program.protocol_scopes
+            if row.profile in (ProtocolProfile.COROUTINE_BODY_V1,
+                               ProtocolProfile.GENERATOR_COROUTINE_BODY_V1))
+        assert len(body_scopes) == (1 if zero_cut else 3)
+        assert all(row.profile is ProtocolProfile.COROUTINE_BODY_V1 for row in body_scopes)
+        assert all(row.contract.rule is OutcomeAdapterRule.COROUTINE_RETURN_TO_STOP_ITERATION
+                   for row in details["conversion_rows"])
+        assert all(type(row.contract) is CoroutineAwaitWrapper for row in details["constructor_rows"])
+        assert details["constructor_rows"][0].contract.expected_body == details["constructor_expected"]
+        assert details["constructor_body"].value != details["wrapper_records"][0]["entry"][0]
+        caller_blocks = {block.id: block for block in details["caller"].blocks}
+        executed = tuple(operation for block, _ in details["caller_path"]
+                         for operation in caller_blocks[block].operations)
+        assert executed.index(details["constructor"].id) &lt; executed.index(details["calls"][0].id)
+        suspends = tuple(operation for operation in program.operations
+                         if type(operation.terminator) is SuspendTerminator)
+        assert len(suspends) == (0 if zero_cut else 2)
+        assert all(row.terminator.flavor is SuspensionFlavor.AWAIT for row in suspends)
+        assert type(details["drivers"][0]["drive"].target) is BodyStart
+        for ordinal, item in enumerate(details["drivers"]):
+            wrapper = item["wrapper"]
+            assert item["caller_call"].callee == wrapper["region"].id
+            assert wrapper["inner_call"].callee == item["driver_region"].id
+            assert wrapper["inner_call"].uses[0].value == wrapper["read_body"]
+            assert wrapper["read"].uses[0].value == wrapper["entry"][0]
+            assert type(wrapper["projection"]) is WrapperHeldBody
+            assert wrapper["projection"].body_result == OperationResult(wrapper["read"].id, 0)
+            assert wrapper["projection"].body == OwnedUse(details["constructor"].id,
+                                                         details["constructor_body"].id)
+            if ordinal:
+                target = item["drive"].target
+                assert type(target) is BodyResume
+                assert target.suspend == details["drivers"][ordinal - 1]["outcome_source"]
+&gt;       outcome, consumer = _consumer(report, details)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'protocol_await_body_copy_unproved', 'site': ProtocolOperationRef(scope=ProtocolScope...ationID(value='await.zero.return'),)),), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...cation=LocationID(value='resume.context')))),), parent=None), 'body_kind': &lt;ResumableKind.COROUTINE: 'COROUTINE'&gt;, ...}
+
+    def _consumer(report, details):
+        outcome, = tuple(row for row in report["outcomes"]
+            if row["source"] == details["source"]
+            and row["advance_operation"] == details["advance_operation"]
+            and row["drive_outcome"] == details["drive_outcome"])
+&gt;       consumer, = tuple(row for row in outcome["consumers"]
+        ^^^^^^^^^
+            if row["actual"] == details["extract_input"]
+            and row["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_program_await_wrapper_final.py:31: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_native_wrapper_source_to_real_body_return_to_every_child_own_slot[zero-EG]" time="0.303"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">zero_cut = True, depth = 2
+
+    @pytest.mark.parametrize(("zero_cut", "depth"), _CORNERS,
+        ids=("zero-E", "zero-EG", "two-cut-E", "two-cut-EG"))
+    def test_native_wrapper_source_to_real_body_return_to_every_child_own_slot(zero_cut, depth):
+        program, details = await_wrapper_final_program(zero_cut=zero_cut, depth=depth)
+        report = _report(program, details)
+        assert report["inventory"]["source_count"] == 1
+        assert len(report["inventory"]["jobs"]) == len(details["call_rows"])
+        assert details["body_definition"].kind is ResumableKind.COROUTINE
+        body_scopes = tuple(row for row in program.protocol_scopes
+            if row.profile in (ProtocolProfile.COROUTINE_BODY_V1,
+                               ProtocolProfile.GENERATOR_COROUTINE_BODY_V1))
+        assert len(body_scopes) == (1 if zero_cut else 3)
+        assert all(row.profile is ProtocolProfile.COROUTINE_BODY_V1 for row in body_scopes)
+        assert all(row.contract.rule is OutcomeAdapterRule.COROUTINE_RETURN_TO_STOP_ITERATION
+                   for row in details["conversion_rows"])
+        assert all(type(row.contract) is CoroutineAwaitWrapper for row in details["constructor_rows"])
+        assert details["constructor_rows"][0].contract.expected_body == details["constructor_expected"]
+        assert details["constructor_body"].value != details["wrapper_records"][0]["entry"][0]
+        caller_blocks = {block.id: block for block in details["caller"].blocks}
+        executed = tuple(operation for block, _ in details["caller_path"]
+                         for operation in caller_blocks[block].operations)
+        assert executed.index(details["constructor"].id) &lt; executed.index(details["calls"][0].id)
+        suspends = tuple(operation for operation in program.operations
+                         if type(operation.terminator) is SuspendTerminator)
+        assert len(suspends) == (0 if zero_cut else 2)
+        assert all(row.terminator.flavor is SuspensionFlavor.AWAIT for row in suspends)
+        assert type(details["drivers"][0]["drive"].target) is BodyStart
+        for ordinal, item in enumerate(details["drivers"]):
+            wrapper = item["wrapper"]
+            assert item["caller_call"].callee == wrapper["region"].id
+            assert wrapper["inner_call"].callee == item["driver_region"].id
+            assert wrapper["inner_call"].uses[0].value == wrapper["read_body"]
+            assert wrapper["read"].uses[0].value == wrapper["entry"][0]
+            assert type(wrapper["projection"]) is WrapperHeldBody
+            assert wrapper["projection"].body_result == OperationResult(wrapper["read"].id, 0)
+            assert wrapper["projection"].body == OwnedUse(details["constructor"].id,
+                                                         details["constructor_body"].id)
+            if ordinal:
+                target = item["drive"].target
+                assert type(target) is BodyResume
+                assert target.suspend == details["drivers"][ordinal - 1]["outcome_source"]
+&gt;       outcome, consumer = _consumer(report, details)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'protocol_await_body_copy_unproved', 'site': ProtocolOperationRef(scope=ProtocolScope...ationID(value='await.zero.return'),)),), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...cation=LocationID(value='resume.context')))),), parent=None), 'body_kind': &lt;ResumableKind.COROUTINE: 'COROUTINE'&gt;, ...}
+
+    def _consumer(report, details):
+        outcome, = tuple(row for row in report["outcomes"]
+            if row["source"] == details["source"]
+            and row["advance_operation"] == details["advance_operation"]
+            and row["drive_outcome"] == details["drive_outcome"])
+&gt;       consumer, = tuple(row for row in outcome["consumers"]
+        ^^^^^^^^^
+            if row["actual"] == details["extract_input"]
+            and row["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_program_await_wrapper_final.py:31: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_native_wrapper_source_to_real_body_return_to_every_child_own_slot[two-cut-E]" time="0.911"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">zero_cut = False, depth = 1
+
+    @pytest.mark.parametrize(("zero_cut", "depth"), _CORNERS,
+        ids=("zero-E", "zero-EG", "two-cut-E", "two-cut-EG"))
+    def test_native_wrapper_source_to_real_body_return_to_every_child_own_slot(zero_cut, depth):
+        program, details = await_wrapper_final_program(zero_cut=zero_cut, depth=depth)
+        report = _report(program, details)
+        assert report["inventory"]["source_count"] == 1
+        assert len(report["inventory"]["jobs"]) == len(details["call_rows"])
+        assert details["body_definition"].kind is ResumableKind.COROUTINE
+        body_scopes = tuple(row for row in program.protocol_scopes
+            if row.profile in (ProtocolProfile.COROUTINE_BODY_V1,
+                               ProtocolProfile.GENERATOR_COROUTINE_BODY_V1))
+        assert len(body_scopes) == (1 if zero_cut else 3)
+        assert all(row.profile is ProtocolProfile.COROUTINE_BODY_V1 for row in body_scopes)
+        assert all(row.contract.rule is OutcomeAdapterRule.COROUTINE_RETURN_TO_STOP_ITERATION
+                   for row in details["conversion_rows"])
+        assert all(type(row.contract) is CoroutineAwaitWrapper for row in details["constructor_rows"])
+        assert details["constructor_rows"][0].contract.expected_body == details["constructor_expected"]
+        assert details["constructor_body"].value != details["wrapper_records"][0]["entry"][0]
+        caller_blocks = {block.id: block for block in details["caller"].blocks}
+        executed = tuple(operation for block, _ in details["caller_path"]
+                         for operation in caller_blocks[block].operations)
+        assert executed.index(details["constructor"].id) &lt; executed.index(details["calls"][0].id)
+        suspends = tuple(operation for operation in program.operations
+                         if type(operation.terminator) is SuspendTerminator)
+        assert len(suspends) == (0 if zero_cut else 2)
+        assert all(row.terminator.flavor is SuspensionFlavor.AWAIT for row in suspends)
+        assert type(details["drivers"][0]["drive"].target) is BodyStart
+        for ordinal, item in enumerate(details["drivers"]):
+            wrapper = item["wrapper"]
+            assert item["caller_call"].callee == wrapper["region"].id
+            assert wrapper["inner_call"].callee == item["driver_region"].id
+            assert wrapper["inner_call"].uses[0].value == wrapper["read_body"]
+            assert wrapper["read"].uses[0].value == wrapper["entry"][0]
+            assert type(wrapper["projection"]) is WrapperHeldBody
+            assert wrapper["projection"].body_result == OperationResult(wrapper["read"].id, 0)
+            assert wrapper["projection"].body == OwnedUse(details["constructor"].id,
+                                                         details["constructor_body"].id)
+            if ordinal:
+                target = item["drive"].target
+                assert type(target) is BodyResume
+                assert target.suspend == details["drivers"][ordinal - 1]["outcome_source"]
+&gt;       outcome, consumer = _consumer(report, details)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'protocol_await_body_copy_unproved', 'site': ProtocolOperationRef(scope=ProtocolScope...ionID(value='resume.second.return'),))), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ocation=LocationID(value='resume.context'))))), parent=None), 'body_kind': &lt;ResumableKind.COROUTINE: 'COROUTINE'&gt;, ...}
+
+    def _consumer(report, details):
+        outcome, = tuple(row for row in report["outcomes"]
+            if row["source"] == details["source"]
+            and row["advance_operation"] == details["advance_operation"]
+            and row["drive_outcome"] == details["drive_outcome"])
+&gt;       consumer, = tuple(row for row in outcome["consumers"]
+        ^^^^^^^^^
+            if row["actual"] == details["extract_input"]
+            and row["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_program_await_wrapper_final.py:31: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_native_wrapper_source_to_real_body_return_to_every_child_own_slot[two-cut-EG]" time="0.827"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">zero_cut = False, depth = 2
+
+    @pytest.mark.parametrize(("zero_cut", "depth"), _CORNERS,
+        ids=("zero-E", "zero-EG", "two-cut-E", "two-cut-EG"))
+    def test_native_wrapper_source_to_real_body_return_to_every_child_own_slot(zero_cut, depth):
+        program, details = await_wrapper_final_program(zero_cut=zero_cut, depth=depth)
+        report = _report(program, details)
+        assert report["inventory"]["source_count"] == 1
+        assert len(report["inventory"]["jobs"]) == len(details["call_rows"])
+        assert details["body_definition"].kind is ResumableKind.COROUTINE
+        body_scopes = tuple(row for row in program.protocol_scopes
+            if row.profile in (ProtocolProfile.COROUTINE_BODY_V1,
+                               ProtocolProfile.GENERATOR_COROUTINE_BODY_V1))
+        assert len(body_scopes) == (1 if zero_cut else 3)
+        assert all(row.profile is ProtocolProfile.COROUTINE_BODY_V1 for row in body_scopes)
+        assert all(row.contract.rule is OutcomeAdapterRule.COROUTINE_RETURN_TO_STOP_ITERATION
+                   for row in details["conversion_rows"])
+        assert all(type(row.contract) is CoroutineAwaitWrapper for row in details["constructor_rows"])
+        assert details["constructor_rows"][0].contract.expected_body == details["constructor_expected"]
+        assert details["constructor_body"].value != details["wrapper_records"][0]["entry"][0]
+        caller_blocks = {block.id: block for block in details["caller"].blocks}
+        executed = tuple(operation for block, _ in details["caller_path"]
+                         for operation in caller_blocks[block].operations)
+        assert executed.index(details["constructor"].id) &lt; executed.index(details["calls"][0].id)
+        suspends = tuple(operation for operation in program.operations
+                         if type(operation.terminator) is SuspendTerminator)
+        assert len(suspends) == (0 if zero_cut else 2)
+        assert all(row.terminator.flavor is SuspensionFlavor.AWAIT for row in suspends)
+        assert type(details["drivers"][0]["drive"].target) is BodyStart
+        for ordinal, item in enumerate(details["drivers"]):
+            wrapper = item["wrapper"]
+            assert item["caller_call"].callee == wrapper["region"].id
+            assert wrapper["inner_call"].callee == item["driver_region"].id
+            assert wrapper["inner_call"].uses[0].value == wrapper["read_body"]
+            assert wrapper["read"].uses[0].value == wrapper["entry"][0]
+            assert type(wrapper["projection"]) is WrapperHeldBody
+            assert wrapper["projection"].body_result == OperationResult(wrapper["read"].id, 0)
+            assert wrapper["projection"].body == OwnedUse(details["constructor"].id,
+                                                         details["constructor_body"].id)
+            if ordinal:
+                target = item["drive"].target
+                assert type(target) is BodyResume
+                assert target.suspend == details["drivers"][ordinal - 1]["outcome_source"]
+&gt;       outcome, consumer = _consumer(report, details)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:147: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'protocol_await_body_copy_unproved', 'site': ProtocolOperationRef(scope=ProtocolScope...ionID(value='resume.second.return'),))), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ocation=LocationID(value='resume.context'))))), parent=None), 'body_kind': &lt;ResumableKind.COROUTINE: 'COROUTINE'&gt;, ...}
+
+    def _consumer(report, details):
+        outcome, = tuple(row for row in report["outcomes"]
+            if row["source"] == details["source"]
+            and row["advance_operation"] == details["advance_operation"]
+            and row["drive_outcome"] == details["drive_outcome"])
+&gt;       consumer, = tuple(row for row in outcome["consumers"]
+        ^^^^^^^^^
+            if row["actual"] == details["extract_input"]
+            and row["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_program_await_wrapper_final.py:31: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_removing_all_wrapper_links_preserves_constructor_advance_and_final_denominator" time="1.725"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">def test_removing_all_wrapper_links_preserves_constructor_advance_and_final_denominator():
+        original, details = await_wrapper_final_program(zero_cut=False, depth=2)
+        removed, missing = await_wrapper_final_program(zero_cut=False, depth=2, attach_link=False)
+        assert original.operations == removed.operations and original.values == removed.values
+        assert original.regions == removed.regions
+        before, after = _report(original, details), _report(removed, missing)
+        assert after["inventory"]["source_count"] == before["inventory"]["source_count"] == 1
+        assert tuple(row["advance"] for row in after["inventory"]["jobs"]) == tuple(
+            row["advance"] for row in before["inventory"]["jobs"])
+        assert all(row["links"] == () for row in after["inventory"]["jobs"])
+&gt;       _, consumer = _consumer(after, missing)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_wrapper_final.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ('await_body_link_missing', 'await_body_link_missing', 'await_body_link_missing', 'await_body_l...ionID(value='resume.second.return'),))), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...ocation=LocationID(value='resume.context'))))), parent=None), 'body_kind': &lt;ResumableKind.COROUTINE: 'COROUTINE'&gt;, ...}
+
+    def _consumer(report, details):
+        outcome, = tuple(row for row in report["outcomes"]
+            if row["source"] == details["source"]
+            and row["advance_operation"] == details["advance_operation"]
+            and row["drive_outcome"] == details["drive_outcome"])
+&gt;       consumer, = tuple(row for row in outcome["consumers"]
+        ^^^^^^^^^
+            if row["actual"] == details["extract_input"]
+            and row["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_program_await_wrapper_final.py:31: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_prior_child_state_never_covers_the_primitive_current_state_result" time="0.091" /><testcase classname="tests.unit.test_program_await_wrapper_final" name="test_tiny_budget_keeps_the_wrapper_source_and_unproved_original_jobs" time="0.555" /><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_native_wrapper_two_instances_reach_their_own_current_final_ports[zero-E-N]" time="0.710"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">zero_cut = True, depth = 1, child_raised = False
+
+    @pytest.mark.parametrize(("zero_cut", "depth", "child_raised"), _CORNERS,
+        ids=("zero-E-N", "zero-EG-R", "two-cut-E-R", "two-cut-EG-N"))
+    def test_native_wrapper_two_instances_reach_their_own_current_final_ports(zero_cut, depth, child_raised):
+        program, model, details = await_wrapper_final_execution(
+            zero_cut=zero_cut, depth=depth, child_raised=child_raised, instances=2)
+        index = _index(program, model, details)
+        report = index.await_body_links(details["static"]["construction_scope"], budget=_BUDGET)
+        assert report["issues"] == ()
+        assert report["inventory"]["source_count"] == 1
+        assert report["job_count"] == len(details["static"]["call_rows"])
+        assert len({example["body_activation"] for example in details["instances"]}) == 2
+        segments = {segment.id: segment for segment in model.segments}
+        operations = {operation.id: operation for operation in program.operations}
+        expected = 1 if zero_cut else 3
+        for example in details["instances"]:
+            assert example["wrapper_object"] != example["body_object"]
+            assert len(example["body_segments"]) == len(example["body_drives"]) == expected
+            assert len({call.id for call in example["call_activations"]}) == expected * 2
+            assert example["creation"] == example["expected_creation"] != example["decoy_creation"]
+            assert {drive.activation for drive in example["body_drives"]} == {example["body_activation"]}
+            for ordinal, association in enumerate(example["body_drives"]):
+                segment = segments[example["body_segments"][ordinal]]
+                assert segment.activation == example["body_activation"]
+                if ordinal == 0:
+                    assert type(segment.ingress) is InitialEntry
+                else:
+                    assert type(segment.ingress) is ResumeIngress
+                    assert segment.ingress.suspension == example["body_drives"][ordinal - 1].outcome
+                drive = index.drive_execution(association.drive, budget=65536)
+                assert drive["association"] == association
+                assert drive["activation"].id == example["body_activation"]
+                assert drive["entry"].id == example["body_entries"][ordinal]
+                assert drive["instance"]["creation_handle"] is not None
+                advance = _advance(report, example, ordinal)
+                assert {row["occurrence"].id for row in advance["matched_sources"]} == {example["constructor"]}
+                route, = advance["routes"]
+                assert tuple(_association(row) for row in route["call_chain"]) == (
+                    example["wrapper_calls"][ordinal], example["driver_calls"][ordinal])
+                assert route["drive_occurrence"].id == association.drive
+                projection, = route["projections"]
+                assert projection["constructor"].id == example["constructor"]
+                assert projection["distinctness"]["status"] == "DECLARED_DISTINCT_OBJECTS"
+                bindings = {row["role"]: row for row in projection["bindings"]}
+                for role in ("wrapper_input", "getter_to_drive"):
+                    assert bindings[role]["original_copy"] is True
+                for role in ("native_held_body", "held_body_origin"):
+                    assert bindings[role]["original_copy"] is None
+                    assert bindings[role]["conditional_native_projection"] is True
+                    assert bindings[role]["compatibility"]["status"] == "DECLARED_SAME_OBJECT"
+            body_terminal = operations[details["static"]["drivers"][-1]["outcome_source"]]
+            assert body_terminal.terminator.kind is TerminatorKind.RETURN
+&gt;           occurrence, consumer = _consumer(report, details, example)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_wrapper_final.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(......}), 'source': MissingEvidence(reason='supplied wrapper/body/final call associations; no native runtime proof'), ...}
+example = {'caller_activation': RegionActivationID(value='await.wrapper.final.instance.0.caller'), 'caller_visits': (BlockVisitI...perationOccurrenceID(value='await.wrapper.final.instance.0.wrapper.0.1.await.wrapper.advance.0.failure.exit')}),), ...}
+
+    def _consumer(report, details, example):
+        definition, = tuple(row for row in report["outcomes"]
+            if row["definition"]["source"] == details["static"]["source"]
+            and row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] == details["static"]["advance_operation"])
+        occurrence, = tuple(row for row in definition["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+&gt;       consumer, = tuple(row for row in occurrence["consumers"]
+        ^^^^^^^^^
+            if row["definition"]["actual"] == details["static"]["extract_input"]
+            and row["definition"]["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_wrapper_final.py:47: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_native_wrapper_two_instances_reach_their_own_current_final_ports[zero-EG-R]" time="0.706"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">zero_cut = True, depth = 2, child_raised = True
+
+    @pytest.mark.parametrize(("zero_cut", "depth", "child_raised"), _CORNERS,
+        ids=("zero-E-N", "zero-EG-R", "two-cut-E-R", "two-cut-EG-N"))
+    def test_native_wrapper_two_instances_reach_their_own_current_final_ports(zero_cut, depth, child_raised):
+        program, model, details = await_wrapper_final_execution(
+            zero_cut=zero_cut, depth=depth, child_raised=child_raised, instances=2)
+        index = _index(program, model, details)
+        report = index.await_body_links(details["static"]["construction_scope"], budget=_BUDGET)
+        assert report["issues"] == ()
+        assert report["inventory"]["source_count"] == 1
+        assert report["job_count"] == len(details["static"]["call_rows"])
+        assert len({example["body_activation"] for example in details["instances"]}) == 2
+        segments = {segment.id: segment for segment in model.segments}
+        operations = {operation.id: operation for operation in program.operations}
+        expected = 1 if zero_cut else 3
+        for example in details["instances"]:
+            assert example["wrapper_object"] != example["body_object"]
+            assert len(example["body_segments"]) == len(example["body_drives"]) == expected
+            assert len({call.id for call in example["call_activations"]}) == expected * 2
+            assert example["creation"] == example["expected_creation"] != example["decoy_creation"]
+            assert {drive.activation for drive in example["body_drives"]} == {example["body_activation"]}
+            for ordinal, association in enumerate(example["body_drives"]):
+                segment = segments[example["body_segments"][ordinal]]
+                assert segment.activation == example["body_activation"]
+                if ordinal == 0:
+                    assert type(segment.ingress) is InitialEntry
+                else:
+                    assert type(segment.ingress) is ResumeIngress
+                    assert segment.ingress.suspension == example["body_drives"][ordinal - 1].outcome
+                drive = index.drive_execution(association.drive, budget=65536)
+                assert drive["association"] == association
+                assert drive["activation"].id == example["body_activation"]
+                assert drive["entry"].id == example["body_entries"][ordinal]
+                assert drive["instance"]["creation_handle"] is not None
+                advance = _advance(report, example, ordinal)
+                assert {row["occurrence"].id for row in advance["matched_sources"]} == {example["constructor"]}
+                route, = advance["routes"]
+                assert tuple(_association(row) for row in route["call_chain"]) == (
+                    example["wrapper_calls"][ordinal], example["driver_calls"][ordinal])
+                assert route["drive_occurrence"].id == association.drive
+                projection, = route["projections"]
+                assert projection["constructor"].id == example["constructor"]
+                assert projection["distinctness"]["status"] == "DECLARED_DISTINCT_OBJECTS"
+                bindings = {row["role"]: row for row in projection["bindings"]}
+                for role in ("wrapper_input", "getter_to_drive"):
+                    assert bindings[role]["original_copy"] is True
+                for role in ("native_held_body", "held_body_origin"):
+                    assert bindings[role]["original_copy"] is None
+                    assert bindings[role]["conditional_native_projection"] is True
+                    assert bindings[role]["compatibility"]["status"] == "DECLARED_SAME_OBJECT"
+            body_terminal = operations[details["static"]["drivers"][-1]["outcome_source"]]
+            assert body_terminal.terminator.kind is TerminatorKind.RETURN
+&gt;           occurrence, consumer = _consumer(report, details, example)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_wrapper_final.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac...call.0')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...},), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(......}), 'source': MissingEvidence(reason='supplied wrapper/body/final call associations; no native runtime proof'), ...}
+example = {'caller_activation': RegionActivationID(value='await.wrapper.final.instance.0.caller'), 'caller_visits': (BlockVisitI...perationOccurrenceID(value='await.wrapper.final.instance.0.wrapper.0.1.await.wrapper.advance.0.failure.exit')}),), ...}
+
+    def _consumer(report, details, example):
+        definition, = tuple(row for row in report["outcomes"]
+            if row["definition"]["source"] == details["static"]["source"]
+            and row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] == details["static"]["advance_operation"])
+        occurrence, = tuple(row for row in definition["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+&gt;       consumer, = tuple(row for row in occurrence["consumers"]
+        ^^^^^^^^^
+            if row["definition"]["actual"] == details["static"]["extract_input"]
+            and row["definition"]["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_wrapper_final.py:47: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_native_wrapper_two_instances_reach_their_own_current_final_ports[two-cut-E-R]" time="2.055"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">zero_cut = False, depth = 1, child_raised = True
+
+    @pytest.mark.parametrize(("zero_cut", "depth", "child_raised"), _CORNERS,
+        ids=("zero-E-N", "zero-EG-R", "two-cut-E-R", "two-cut-EG-N"))
+    def test_native_wrapper_two_instances_reach_their_own_current_final_ports(zero_cut, depth, child_raised):
+        program, model, details = await_wrapper_final_execution(
+            zero_cut=zero_cut, depth=depth, child_raised=child_raised, instances=2)
+        index = _index(program, model, details)
+        report = index.await_body_links(details["static"]["construction_scope"], budget=_BUDGET)
+        assert report["issues"] == ()
+        assert report["inventory"]["source_count"] == 1
+        assert report["job_count"] == len(details["static"]["call_rows"])
+        assert len({example["body_activation"] for example in details["instances"]}) == 2
+        segments = {segment.id: segment for segment in model.segments}
+        operations = {operation.id: operation for operation in program.operations}
+        expected = 1 if zero_cut else 3
+        for example in details["instances"]:
+            assert example["wrapper_object"] != example["body_object"]
+            assert len(example["body_segments"]) == len(example["body_drives"]) == expected
+            assert len({call.id for call in example["call_activations"]}) == expected * 2
+            assert example["creation"] == example["expected_creation"] != example["decoy_creation"]
+            assert {drive.activation for drive in example["body_drives"]} == {example["body_activation"]}
+            for ordinal, association in enumerate(example["body_drives"]):
+                segment = segments[example["body_segments"][ordinal]]
+                assert segment.activation == example["body_activation"]
+                if ordinal == 0:
+                    assert type(segment.ingress) is InitialEntry
+                else:
+                    assert type(segment.ingress) is ResumeIngress
+                    assert segment.ingress.suspension == example["body_drives"][ordinal - 1].outcome
+                drive = index.drive_execution(association.drive, budget=65536)
+                assert drive["association"] == association
+                assert drive["activation"].id == example["body_activation"]
+                assert drive["entry"].id == example["body_entries"][ordinal]
+                assert drive["instance"]["creation_handle"] is not None
+                advance = _advance(report, example, ordinal)
+                assert {row["occurrence"].id for row in advance["matched_sources"]} == {example["constructor"]}
+                route, = advance["routes"]
+                assert tuple(_association(row) for row in route["call_chain"]) == (
+                    example["wrapper_calls"][ordinal], example["driver_calls"][ordinal])
+                assert route["drive_occurrence"].id == association.drive
+                projection, = route["projections"]
+                assert projection["constructor"].id == example["constructor"]
+                assert projection["distinctness"]["status"] == "DECLARED_DISTINCT_OBJECTS"
+                bindings = {row["role"]: row for row in projection["bindings"]}
+                for role in ("wrapper_input", "getter_to_drive"):
+                    assert bindings[role]["original_copy"] is True
+                for role in ("native_held_body", "held_body_origin"):
+                    assert bindings[role]["original_copy"] is None
+                    assert bindings[role]["conditional_native_projection"] is True
+                    assert bindings[role]["compatibility"]["status"] == "DECLARED_SAME_OBJECT"
+            body_terminal = operations[details["static"]["drivers"][-1]["outcome_source"]]
+            assert body_terminal.terminator.kind is TerminatorKind.RETURN
+&gt;           occurrence, consumer = _consumer(report, details, example)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_wrapper_final.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac....call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...}), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(......}), 'source': MissingEvidence(reason='supplied wrapper/body/final call associations; no native runtime proof'), ...}
+example = {'caller_activation': RegionActivationID(value='await.wrapper.final.instance.0.caller'), 'caller_visits': (BlockVisitI...OperationOccurrenceID(value='await.wrapper.final.instance.0.wrapper.2.1.await.wrapper.advance.2.failure.exit')})), ...}
+
+    def _consumer(report, details, example):
+        definition, = tuple(row for row in report["outcomes"]
+            if row["definition"]["source"] == details["static"]["source"]
+            and row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] == details["static"]["advance_operation"])
+        occurrence, = tuple(row for row in definition["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+&gt;       consumer, = tuple(row for row in occurrence["consumers"]
+        ^^^^^^^^^
+            if row["definition"]["actual"] == details["static"]["extract_input"]
+            and row["definition"]["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_wrapper_final.py:47: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_native_wrapper_two_instances_reach_their_own_current_final_ports[two-cut-EG-N]" time="2.314"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">zero_cut = False, depth = 2, child_raised = False
+
+    @pytest.mark.parametrize(("zero_cut", "depth", "child_raised"), _CORNERS,
+        ids=("zero-E-N", "zero-EG-R", "two-cut-E-R", "two-cut-EG-N"))
+    def test_native_wrapper_two_instances_reach_their_own_current_final_ports(zero_cut, depth, child_raised):
+        program, model, details = await_wrapper_final_execution(
+            zero_cut=zero_cut, depth=depth, child_raised=child_raised, instances=2)
+        index = _index(program, model, details)
+        report = index.await_body_links(details["static"]["construction_scope"], budget=_BUDGET)
+        assert report["issues"] == ()
+        assert report["inventory"]["source_count"] == 1
+        assert report["job_count"] == len(details["static"]["call_rows"])
+        assert len({example["body_activation"] for example in details["instances"]}) == 2
+        segments = {segment.id: segment for segment in model.segments}
+        operations = {operation.id: operation for operation in program.operations}
+        expected = 1 if zero_cut else 3
+        for example in details["instances"]:
+            assert example["wrapper_object"] != example["body_object"]
+            assert len(example["body_segments"]) == len(example["body_drives"]) == expected
+            assert len({call.id for call in example["call_activations"]}) == expected * 2
+            assert example["creation"] == example["expected_creation"] != example["decoy_creation"]
+            assert {drive.activation for drive in example["body_drives"]} == {example["body_activation"]}
+            for ordinal, association in enumerate(example["body_drives"]):
+                segment = segments[example["body_segments"][ordinal]]
+                assert segment.activation == example["body_activation"]
+                if ordinal == 0:
+                    assert type(segment.ingress) is InitialEntry
+                else:
+                    assert type(segment.ingress) is ResumeIngress
+                    assert segment.ingress.suspension == example["body_drives"][ordinal - 1].outcome
+                drive = index.drive_execution(association.drive, budget=65536)
+                assert drive["association"] == association
+                assert drive["activation"].id == example["body_activation"]
+                assert drive["entry"].id == example["body_entries"][ordinal]
+                assert drive["instance"]["creation_handle"] is not None
+                advance = _advance(report, example, ordinal)
+                assert {row["occurrence"].id for row in advance["matched_sources"]} == {example["constructor"]}
+                route, = advance["routes"]
+                assert tuple(_association(row) for row in route["call_chain"]) == (
+                    example["wrapper_calls"][ordinal], example["driver_calls"][ordinal])
+                assert route["drive_occurrence"].id == association.drive
+                projection, = route["projections"]
+                assert projection["constructor"].id == example["constructor"]
+                assert projection["distinctness"]["status"] == "DECLARED_DISTINCT_OBJECTS"
+                bindings = {row["role"]: row for row in projection["bindings"]}
+                for role in ("wrapper_input", "getter_to_drive"):
+                    assert bindings[role]["original_copy"] is True
+                for role in ("native_held_body", "held_body_origin"):
+                    assert bindings[role]["original_copy"] is None
+                    assert bindings[role]["conditional_native_projection"] is True
+                    assert bindings[role]["compatibility"]["status"] == "DECLARED_SAME_OBJECT"
+            body_terminal = operations[details["static"]["drivers"][-1]["outcome_source"]]
+            assert body_terminal.terminator.kind is TerminatorKind.RETURN
+&gt;           occurrence, consumer = _consumer(report, details, example)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_wrapper_final.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac....call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...}), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(......}), 'source': MissingEvidence(reason='supplied wrapper/body/final call associations; no native runtime proof'), ...}
+example = {'caller_activation': RegionActivationID(value='await.wrapper.final.instance.0.caller'), 'caller_visits': (BlockVisitI...OperationOccurrenceID(value='await.wrapper.final.instance.0.wrapper.2.1.await.wrapper.advance.2.failure.exit')})), ...}
+
+    def _consumer(report, details, example):
+        definition, = tuple(row for row in report["outcomes"]
+            if row["definition"]["source"] == details["static"]["source"]
+            and row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] == details["static"]["advance_operation"])
+        occurrence, = tuple(row for row in definition["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+&gt;       consumer, = tuple(row for row in occurrence["consumers"]
+        ^^^^^^^^^
+            if row["definition"]["actual"] == details["static"]["extract_input"]
+            and row["definition"]["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_wrapper_final.py:47: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_wrapper_identity_conflicts_do_not_rebind_expected_b[W-is-B]" time="2.279" /><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_wrapper_identity_conflicts_do_not_rebind_expected_b[getter-decoy-Create]" time="2.136" /><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_missing_first_wrapper_call_keeps_its_obligation_and_cannot_borrow_another_instance" time="2.140"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">def test_missing_first_wrapper_call_keeps_its_obligation_and_cannot_borrow_another_instance():
+        program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, missing_wrapper_call=(0, 0))
+        report = _report(program, model, details)
+        missing, sibling = details["instances"]
+        occurrence = _advance(report, missing, 0)
+        assert occurrence["routes"] == ()
+        assert report["job_count"] == len(details["static"]["call_rows"])
+        for ordinal in range(3):
+            route, = _advance(report, sibling, ordinal)["routes"]
+            assert route["drive"]["activation"].id == sibling["body_activation"]
+&gt;       _, consumer = _consumer(report, details, sibling)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_wrapper_final.py:234: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac....call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...}), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(......}), 'source': MissingEvidence(reason='supplied wrapper/body/final call associations; no native runtime proof'), ...}
+example = {'caller_activation': RegionActivationID(value='await.wrapper.final.instance.1.caller'), 'caller_visits': (BlockVisitI...OperationOccurrenceID(value='await.wrapper.final.instance.1.wrapper.2.1.await.wrapper.advance.2.failure.exit')})), ...}
+
+    def _consumer(report, details, example):
+        definition, = tuple(row for row in report["outcomes"]
+            if row["definition"]["source"] == details["static"]["source"]
+            and row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] == details["static"]["advance_operation"])
+        occurrence, = tuple(row for row in definition["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+&gt;       consumer, = tuple(row for row in occurrence["consumers"]
+        ^^^^^^^^^
+            if row["definition"]["actual"] == details["static"]["extract_input"]
+            and row["definition"]["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_wrapper_final.py:47: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_missing_child_call_retains_exact_frame_and_sibling_final_chain" time="2.324"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">def test_missing_child_call_retains_exact_frame_and_sibling_final_chain():
+        program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, missing_child_call=(0, 0))
+        report = _report(program, model, details)
+        missing, sibling = details["instances"]
+&gt;       _, consumer = _consumer(report, details, missing)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_wrapper_final.py:244: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac....call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...}), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(......}), 'source': MissingEvidence(reason='supplied wrapper/body/final call associations; no native runtime proof'), ...}
+example = {'caller_activation': RegionActivationID(value='await.wrapper.final.instance.0.caller'), 'caller_visits': (BlockVisitI...OperationOccurrenceID(value='await.wrapper.final.instance.0.wrapper.2.1.await.wrapper.advance.2.failure.exit')})), ...}
+
+    def _consumer(report, details, example):
+        definition, = tuple(row for row in report["outcomes"]
+            if row["definition"]["source"] == details["static"]["source"]
+            and row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] == details["static"]["advance_operation"])
+        occurrence, = tuple(row for row in definition["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+&gt;       consumer, = tuple(row for row in occurrence["consumers"]
+        ^^^^^^^^^
+            if row["definition"]["actual"] == details["static"]["extract_input"]
+            and row["definition"]["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_wrapper_final.py:47: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_missing_leaf_terminal_use_cannot_borrow_sibling_payload_or_state[payload]" time="2.184"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">slot = 0
+
+    @pytest.mark.parametrize("slot", (0, 1), ids=("payload", "current-state"))
+    def test_missing_leaf_terminal_use_cannot_borrow_sibling_payload_or_state(slot):
+        program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, child_raised=True, missing_terminal_use=(0, 1, slot))
+        report = _report(program, model, details)
+        missing, sibling = details["instances"]
+&gt;       _, consumer = _consumer(report, details, missing)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_wrapper_final.py:263: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac....call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...}), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(......}), 'source': MissingEvidence(reason='supplied wrapper/body/final call associations; no native runtime proof'), ...}
+example = {'caller_activation': RegionActivationID(value='await.wrapper.final.instance.0.caller'), 'caller_visits': (BlockVisitI...OperationOccurrenceID(value='await.wrapper.final.instance.0.wrapper.2.1.await.wrapper.advance.2.failure.exit')})), ...}
+
+    def _consumer(report, details, example):
+        definition, = tuple(row for row in report["outcomes"]
+            if row["definition"]["source"] == details["static"]["source"]
+            and row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] == details["static"]["advance_operation"])
+        occurrence, = tuple(row for row in definition["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+&gt;       consumer, = tuple(row for row in occurrence["consumers"]
+        ^^^^^^^^^
+            if row["definition"]["actual"] == details["static"]["extract_input"]
+            and row["definition"]["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_wrapper_final.py:47: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_missing_leaf_terminal_use_cannot_borrow_sibling_payload_or_state[current-state]" time="2.137"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">slot = 1
+
+    @pytest.mark.parametrize("slot", (0, 1), ids=("payload", "current-state"))
+    def test_missing_leaf_terminal_use_cannot_borrow_sibling_payload_or_state(slot):
+        program, model, details = await_wrapper_final_execution(
+            zero_cut=False, depth=2, child_raised=True, missing_terminal_use=(0, 1, slot))
+        report = _report(program, model, details)
+        missing, sibling = details["instances"]
+&gt;       _, consumer = _consumer(report, details, missing)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_wrapper_final.py:263: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'scope': ProtocolScopeID(value='await.resume.acquisition'), 'jobs': ({'scope': ProtocolScopeID(value='await.resume.ac....call.2')), 'source_candidates': ({...}, {...}), 'matched_sources': ({...},), ...}), 'occurrence_count': 2, ...}), ...}
+details = {'static': {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(......}), 'source': MissingEvidence(reason='supplied wrapper/body/final call associations; no native runtime proof'), ...}
+example = {'caller_activation': RegionActivationID(value='await.wrapper.final.instance.0.caller'), 'caller_visits': (BlockVisitI...OperationOccurrenceID(value='await.wrapper.final.instance.0.wrapper.2.1.await.wrapper.advance.2.failure.exit')})), ...}
+
+    def _consumer(report, details, example):
+        definition, = tuple(row for row in report["outcomes"]
+            if row["definition"]["source"] == details["static"]["source"]
+            and row["definition"]["drive_outcome"] == details["drive_outcome"]
+            and row["definition"]["advance_operation"] == details["static"]["advance_operation"])
+        occurrence, = tuple(row for row in definition["occurrences"]
+            if row["advance"].id == example["advance"]
+            and row["drive"].id == example["body_drives"][-1].drive)
+&gt;       consumer, = tuple(row for row in occurrence["consumers"]
+        ^^^^^^^^^
+            if row["definition"]["actual"] == details["static"]["extract_input"]
+            and row["definition"]["requires_final_extraction"] is True)
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+tests/unit/test_execution_await_wrapper_final.py:47: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_old_child_input_state_does_not_match_its_new_own_result" time="2.158" /><testcase classname="tests.unit.test_execution_await_wrapper_final" name="test_budget_one_keeps_native_source_original_jobs_and_no_derived_authority" time="2.180" /><testcase classname="tests.unit.test_program_await_cleanup_final" name="test_two_real_cleanup_cuts_end_in_the_correct_await_source_and_consumer[resume-return]" time="0.875" /><testcase classname="tests.unit.test_program_await_cleanup_final" name="test_two_real_cleanup_cuts_end_in_the_correct_await_source_and_consumer[resume-return-nested-extractor]" time="0.884" /><testcase classname="tests.unit.test_program_await_cleanup_final" name="test_two_real_cleanup_cuts_end_in_the_correct_await_source_and_consumer[replace-body-raise]" time="1.217"><failure message="assert (())">body_raised = True, depth = 1
+
+    @pytest.mark.parametrize(('body_raised', 'depth'), ((False, 1), (False, 2), (True, 1)),
+                             ids=('resume-return', 'resume-return-nested-extractor', 'replace-body-raise'))
+    def test_two_real_cleanup_cuts_end_in_the_correct_await_source_and_consumer(body_raised, depth):
+        program, details = await_cleanup_final_program(body_raised=body_raised, depth=depth)
+        index = _index(program)
+        assert len(details['cuts']) == 2
+        assert details['drivers'][0]['outcome_source'] == details['cuts'][0]
+        assert details['drivers'][1]['drive'].target.suspend == details['cuts'][0]
+        assert details['drivers'][1]['outcome_source'] == details['cuts'][1]
+        assert details['drivers'][2]['drive'].target.suspend == details['cuts'][1]
+        assert details['drivers'][2]['outcome_source'] == details['body_terminal'].id
+        assert details['body_terminal'].terminator.kind is (
+            TerminatorKind.RAISE if body_raised else TerminatorKind.RETURN)
+        assert program.cleanup_enters
+        assert program.cleanup_replacements if body_raised else program.cleanup_resumes
+    
+        ports = {port.id: port for port in program.control_ports}
+        wanted = LanguageCompletionKind.RAISE if body_raised else LanguageCompletionKind.RETURN
+        definition, = tuple(row for row in program.pending_completions if ports[row.port].kind is wanted)
+        value = next(value for value in program.values if value.id == definition.value)
+        assert type(value.origin) is OperationResult
+        payload_source = OwnedUse(value.origin.operation, definition.payload)
+        terminal = details['body_terminal']
+        copied = index.source_binding(payload_source, OwnedUse(terminal.id, terminal.terminator.values[0]), budget=BUDGET)
+        assert copied['match'] is True
+    
+        report = index.protocol_obligations(details['acquisition_scope'], budget=BUDGET)['connections']['families']['await']
+        outcome = _outcome(report, details)
+        assert outcome['kind'] == ('EXCEPTION' if body_raised else 'RETURN_COMPLETION')
+        consumers = tuple(row for row in outcome['consumers'] if row['actual'] == details['extract_input'])
+&gt;       assert consumers and all(row['binding']['match'] is True for row in consumers)
+E       assert (())
+
+tests/unit/test_program_await_cleanup_final.py:62: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_await_cleanup_final" name="test_budget_one_retains_original_drive_successor_denominator_and_cursor" time="0.627" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer[cleanup-return-child-normal]" time="1.959" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer[cleanup-return-nested-child-raise]" time="2.204" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer[cleanup-body-raise]" time="2.324"><failure message="assert (())">body_raised = True, depth = 1, child_raised = False
+
+    @pytest.mark.parametrize(('body_raised', 'depth', 'child_raised'),
+        ((False, 1, False), (False, 2, True), (True, 1, False)),
+        ids=('cleanup-return-child-normal', 'cleanup-return-nested-child-raise', 'cleanup-body-raise'))
+    def test_actual_pending_payload_reaches_this_b_terminal_and_its_own_await_consumer(
+            body_raised, depth, child_raised):
+        program, model, details = await_cleanup_final_execution(body_raised=body_raised,
+            depth=depth, child_raised=child_raised)
+        index = _index(program, model)
+        projected = routes(index._content_context(), budget=ValidityBudget(BUDGET))
+        report = index.await_body_links(details['static']['acquisition_scope'], budget=BUDGET)
+        row = _row(report, details)
+        for example in details['instances']:
+            assert len(example['body_segments']) == 3
+            witness = _projection(projected, example)
+            assert witness['constructor'].id == example['pending_constructor']
+            assert witness['definition'] == example['pending_definition']
+            assert witness['selector'].operation == example['dispatch']
+            assert witness['payload_use'].operation == example['pending_constructor']
+            assert witness['payload_use'].use == example['pending_payload_use']
+            assert witness['payload_value'].id != next(use.value for use in model.uses
+                if use.operation == example['dispatch'] and use.use == witness['selector'].use)
+            assert witness['target_value'].id != witness['payload_value'].id
+            assert witness['binding']['match'] is True
+            assert witness['token_path']
+            occurrence = _occurrence(row, example)
+            assert occurrence['selected'] is True
+            assert occurrence['body_outcome'].id == example['body_outcome']
+            assert occurrence['drive'].id == example['body_drives'][-1].drive
+            consumers = tuple(consumer for consumer in occurrence['consumers']
+                              if consumer['definition']['actual'] == details['static']['extract_input'])
+&gt;           assert consumers and all(consumer['binding']['match'] is True for consumer in consumers)
+E           assert (())
+
+tests/unit/test_execution_await_cleanup_final.py:75: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_payload_use-return-payload]" time="1.967" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_payload_use-raise-payload]" time="2.186" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_dispatch-return-payload]" time="1.975" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_dispatch-raise-payload]" time="2.235" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_second_resume-return-payload]" time="1.941" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_missing_instance_zero_pending_evidence_cannot_borrow_the_complete_sibling[missing_second_resume-raise-payload]" time="2.146" /><testcase classname="tests.unit.test_execution_await_cleanup_final" name="test_dynamic_budget_one_keeps_the_static_outcome_key_and_unknown_cursor" time="1.841" /></testsuite></testsuites>

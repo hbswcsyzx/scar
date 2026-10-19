@@ -50,6 +50,8 @@ def _normal_create_handle(ctx, creation, declaration):
 
 
 def prepare_resumables(ctx):
+    from .pending_payloads import prepare as prepare_pending_payloads
+    prepare_pending_payloads(ctx)
     ctx.body_drives = {row.operation: row for row in ctx.program.body_drives}
     ctx.body_creates = {row.operation: row for row in ctx.program.resumable_creates}
     ctx.resumable_bodies = {row.region: row for row in ctx.program.resumable_bodies}
@@ -102,6 +104,7 @@ def prepare_resumables(ctx):
                 ctx.body_static_outputs[identity, edge.source] = (
                     ctx.body_program_index.drive_bindings(identity, edge.source))
     ctx.body_preparation = {
+        'pending_payloads': ctx.pending_payload_preparation,
         'program_indexes': int(ctx.body_program_index is not None),
         'static_drives': len(ctx.body_static_inputs),
         'captured_drives': len(ctx.body_drive_occurrences),

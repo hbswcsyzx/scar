@@ -105,6 +105,8 @@ def _prepare(ctx):
     ctx.preparation['await_local_contracts'] = sum(map(len, by_type.values()))
     ctx.preparation['await_advances'] = len(advances)
     ctx.preparation['await_body_links'] = len(links)
+    from .await_inventory_originals import prepare as prepare_original_inventory
+    prepare_original_inventory(ctx, advances, links)
     return ctx._await_indexes
 
 
@@ -332,7 +334,14 @@ def await_inventory(ctx, scope=None):
         if cursor is None and getattr(ctx, '_await_input_case_pending', None):
             site, pending = next(iter(ctx._await_input_case_pending.items()))
             cursor = {'phase': 'await_input_case_inventory', 'advance': site, 'pending': pending}
+        if ctx.budget.truncated:
+            from .await_inventory_originals import unchecked_suffix
+            jobs.extend(unchecked_suffix(ctx, jobs))
+        originals = {**ctx._await_original_anchor_inventory,
+            'sources': tuple((scope_id, owner, None if row is None else _site(row))
+                             for scope_id, owner, row in sources)}
         ctx._await_inventory = {'jobs': tuple(jobs), 'source_count': len(sources),
+            'original_anchors': originals,
             'known_inventory_complete': cursor is None and not ctx.budget.truncated,
             'cursor': cursor, 'source_inventory_complete': False}
     result = ctx._await_inventory
@@ -447,7 +456,7 @@ def _result_copy(ctx, source, target, choices=()):
     if source == target:
         return {'match': True, 'routes': (), 'gaps': ()}
     operation = ctx.operations[target_port.operation]
-    if operation.callee is None or ctx.region_of[port.operation] != operation.callee:
+    if operation.callee is None:
         return {'match': None, 'routes': (), 'gaps': ('await_result_callee_unresolved',)}
     kind = _kind(ctx, target)
     slot = target.index if type(target) is OperationResult else target.result.index
@@ -461,6 +470,12 @@ def _result_copy(ctx, source, target, choices=()):
             ctx._returns.guards = _selected(ctx, previous, choices, required)
         except ValueError:
             return {'match': False, 'routes': (), 'gaps': ('await_source_choice_conflict',)}
+        if ctx.region_of[port.operation] != operation.callee:
+            # Reuse the original known-callee exporter. Each intermediate
+            # frame must still have one unambiguous caller; the requested
+            # target never selects a caller by inspecting its data.
+            return ctx._returns.export(source, port, None,
+                guard=ctx._returns.guards, result=target)
         local = ctx.selected_edges(ctx._returns.guards, region=operation.callee)
         before = ctx._fresh_copies(port, guard=local or None)
         if before is None:

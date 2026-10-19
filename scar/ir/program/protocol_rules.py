@@ -87,11 +87,12 @@ PROFILE_CLAUSES = MappingProxyType({
     ),
 })
 
-# Acquisition can be modelled without its eventual consumer.  A full await
+# Acquisition/construction can be modelled without its eventual consumer. A full await
 # expression may additionally describe the original final extraction, in the
 # same caller region.  Optional permission never removes consumer obligations.
 PROFILE_OPTIONAL_CLAUSES = MappingProxyType({
     ProtocolProfile.AWAIT_ACQUISITION_V1: (ProtocolClause.AWAIT_RESULT_ADAPTER,),
+    ProtocolProfile.COROUTINE_WRAPPER_CONSTRUCTION_V1: (ProtocolClause.AWAIT_RESULT_ADAPTER,),
 })
 
 PROFILE_FAMILY = MappingProxyType({
@@ -237,6 +238,9 @@ _allow(_ASYNC_PROFILE, (ProtocolClause.ASYNC_ITEM_ADAPTER,), OutcomeAdapter,
 _allow(ProtocolProfile.AWAIT_SITE_V1, (ProtocolClause.AWAIT_RESULT_ADAPTER,), OutcomeAdapter,
        {OutcomeAdapterRule.AWAIT_STOPITER_TO_EXPRESSION})
 _allow(ProtocolProfile.AWAIT_ACQUISITION_V1,
+       (ProtocolClause.AWAIT_RESULT_ADAPTER,), OutcomeAdapter,
+       {OutcomeAdapterRule.AWAIT_STOPITER_TO_EXPRESSION})
+_allow(ProtocolProfile.COROUTINE_WRAPPER_CONSTRUCTION_V1,
        (ProtocolClause.AWAIT_RESULT_ADAPTER,), OutcomeAdapter,
        {OutcomeAdapterRule.AWAIT_STOPITER_TO_EXPRESSION})
 _allow(ProtocolProfile.COROUTINE_AWAIT_WRAPPER_V1,

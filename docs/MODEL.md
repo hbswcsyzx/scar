@@ -1,5 +1,27 @@
 # SCAR execution model
 
+## Nested result delivery and pending payload evidence (2026-10-19)
+
+The five entity families remain Operation / Value / StateLocation / Region /
+Resource. An internal result can reach an outer call only through original
+callee exits and that call's exact exit kind and full result slot. The existing
+call-return exporter now supports this result endpoint across intermediate
+unambiguous frames. A requested outer result cannot choose one of several
+callers by inspecting their data.
+
+PendingPayload is a typed projection, not token/payload equality: the actual
+dispatch selector follows its own original token ancestry to its constructor,
+then references that occurrence's original payload Use and selected port.
+Fresh scoped identity conflicts reject the projection. Missing identity stays
+explicit even when declared port-copy support holds. Raw original source keys
+survive budget truncation without pretending their associations were checked.
+
+See the [source-to-terminal plan](M1_AWAIT_SOURCE_TO_TERMINAL_PLAN.md),
+[pending relation](M1_PENDING_PAYLOAD_RELATION.md) and
+[progress and original remaining scope](M1_AWAIT_SOURCE_TO_TERMINAL_PROGRESS.md).
+These are supplied-model relations, with automatic source recovery, native
+identity and transformation authority still unproved.
+
 ## Region implementation and actual result paths (2026-10-19)
 
 An interface contract and its implementation are separate views of the same

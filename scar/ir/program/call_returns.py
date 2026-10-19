@@ -302,19 +302,31 @@ class CallReturns:
         self.export_bundles[key] = bundle
         return bundle
 
-    def export(self, expected, port, actual, *, guard=None):
+    def export(self, expected, port, actual, *, guard=None, result=None):
         """Lift an internal source only through unambiguous caller frames.
 
         A static source does not select one of several callers by inspecting
         the actual. Those cases require an occurrence/call-context contract.
+        A result target stops at that exact original call's kind/full slot;
+        no input Use or arbitrary later consumer stands in for a result.
         """
         from .protocol_connection_flow import _answer
         ctx, routes, unresolved = self.ctx, [], False
+        target_call = None
+        if result is not None:
+            if type(result) is OperationResult:
+                target_call, target_kind, target_slot = result.operation, ExitKind.NORMAL, result.index
+            elif type(result) is InvokeLiteralResult:
+                target_call, target_slot = result.edge.operation, result.result.index
+                target_kind = ctx.operations[target_call].terminator.successors[result.edge.successor_index].kind
+            else:
+                raise TypeError('result export requires an exact original call result')
+        anchor = result if result is not None else actual
         pending = deque([(port, (), frozenset())])
         while pending:
             if not ctx.spend('call_return_exports'):
                 return _answer(routes=routes, gaps=('call_return_budget_exhausted',),
-                               cursor={'phase': 'call_return_exports', 'actual': actual})
+                               cursor={'phase': 'call_return_exports', 'actual': anchor})
             source, frames, visited = pending.popleft()
             region = ctx.region_of[source.operation]
             callers = self.callers.get(region, ())
@@ -332,7 +344,7 @@ class CallReturns:
                               source.completion_values, ctx.selected_edges(guard))
             if not ctx.spend('call_return_export_projections'):
                 return _answer(routes=routes, gaps=('call_return_budget_exhausted',),
-                               cursor={'phase': 'call_return_export_projection', 'actual': actual})
+                               cursor={'phase': 'call_return_export_projection', 'actual': anchor})
             if projection_key not in self.export_projections:
                 gap_start = len(self.gap_events)
                 before = self.flow(source, guard=local)
@@ -348,13 +360,29 @@ class CallReturns:
             if summary is None:
                 unresolved = True
                 continue
+            if result is not None and call.id == target_call:
+                if not ctx.spend('call_return_export_result_support', len(projection) + len(frames) + 1):
+                    unresolved = True
+                    break
+                match = summary.get((target_kind, target_slot))
+                projected = tuple(projection)
+                frame = {'caller': call.id, 'caller_region': ctx.region_of[call.id],
+                    'callee': call.callee, 'result': result, 'kind': target_kind,
+                    'slot': target_slot, 'match': match,
+                    'guards': ctx.selected_edges(guard, region=call.callee) or None,
+                    'projection': projected}
+                routes.append({'source': expected, 'actual': result,
+                    'frames': (*frames, frame), 'match': match, 'guard': guard,
+                    'context': None, 'choices': {}, 'projection': projected})
+                unresolved |= match is None
+                continue
             lifted, frame, partial = self.export_bundle(call, summary, projection, guard=guard,
                                                         key=projection_key)
             unresolved |= partial
             if lifted is None:
                 continue
             path = (*frames, frame)
-            if ctx.region_of[call.id] == ctx.region_of[actual.operation]:
+            if result is None and ctx.region_of[call.id] == ctx.region_of[actual.operation]:
                 future = (ctx.block_of[call.id] == ctx.block_of[actual.operation]
                           and ctx.positions[call.id] >= ctx.positions[actual.operation])
                 local = ctx.selected_edges(guard, region=ctx.region_of[call.id]) or None
@@ -366,16 +394,19 @@ class CallReturns:
                 pending.append((lifted, path, visited | {call.id}))
         if ctx.budget.truncated:
             return _answer(routes=routes, gaps=(*self.gaps, 'call_return_budget_exhausted'),
-                           cursor={'phase': 'call_return_exports', 'actual': actual})
+                           cursor={'phase': 'call_return_exports', 'actual': anchor})
         # Each path already groups all known copies of this source at one
         # exact call. Different callers never enter this union.
         if any(route['match'] is True for route in routes):
             match = True
-        elif unresolved or any(route['match'] is None for route in routes):
+        elif unresolved or (result is not None and not routes) or any(route['match'] is None for route in routes):
             match = None
         else:
             match = False
-        return _answer(match, routes=routes, gaps=self.gaps if match is None else ())
+        gaps = self.gaps if match is None else ()
+        if result is not None and not routes and not gaps:
+            gaps = ('call_return_result_context_unresolved',)
+        return _answer(match, routes=routes, gaps=gaps)
 
 
 def source_binding(index, expected, actual, *, guard=None, budget=4096):
