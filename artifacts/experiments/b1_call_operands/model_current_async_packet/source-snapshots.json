@@ -1,0 +1,39 @@
+{
+  "attempts": {
+    "first-scheduler": {
+      "source_count": 858,
+      "overrides": {
+        "scar/ir/program/protocol_async.py": {
+          "path": "artifacts/experiments/b1_call_operands/model_current_async_packet/source-snapshots/first-scheduler/scar__ir__program__protocol_async.py.txt",
+          "sha256": "beed5cc8d9b2301ab90f2f0c94db5afffdcb2e1cae11de0d857eb72068cacdf9"
+        },
+        "tests/unit/test_program_async_scheduler_packets.py": {
+          "path": "artifacts/experiments/b1_call_operands/model_current_async_packet/source-snapshots/first-scheduler/tests__unit__test_program_async_scheduler_packets.py.txt",
+          "sha256": "7db0c8081ba20e99ff9b139224c187cb14fac3e5a6def90ada6878695fbbdd9c"
+        }
+      },
+      "unchanged_sources_from_final_revision": 856
+    },
+    "first-combined": {
+      "source_count": 858,
+      "overrides": {
+        "scar/ir/program/protocol_async.py": {
+          "path": "artifacts/experiments/b1_call_operands/model_current_async_packet/source-snapshots/first-combined/scar__ir__program__protocol_async.py.txt",
+          "sha256": "ac34f5796757c4dc8371111e12a085fc78a028b0b69726176854405167cd3f6e"
+        }
+      },
+      "unchanged_sources_from_final_revision": 857
+    },
+    "corrected-local": {
+      "source_count": 858,
+      "overrides": {},
+      "unchanged_sources_from_final_revision": 858
+    },
+    "verified-final": {
+      "source_count": 858,
+      "overrides": {},
+      "unchanged_sources_from_final_revision": 858
+    }
+  },
+  "tests_started": 0
+}

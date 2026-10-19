@@ -1,5 +1,21 @@
 # SCAR execution model
 
+## Current scheduler sources are independent of stored requests (2026-10-19)
+
+One async request R can store latent input L while each later invocation has
+its own scheduler input S. A normalized packet must originate at the selected
+source role, at the helper's own NORMAL result, and reach the exact resume
+slot. Interface-copy support, original producer support and complete caller/
+CFG context are separate checks. A later Use cannot be bound backwards as a
+producer. Historical branch selection grants no current phase authority.
+
+Likewise, a COMPLETE post, transmission of a state version, and the contents
+read from that state are separate relations. Supplied captures can verify
+the first two without proving the next boolean. See the
+[finite plan](M1_CURRENT_ASYNC_PACKET_PLAN.md),
+[actual attempts](M1_CURRENT_ASYNC_PACKET_PROGRESS.md) and
+[remaining phase connections](M1_COROUTINE_PHASE_NEXT_GATE.md).
+
 ## Exact result content must reach applicability checks (2026-10-19)
 
 A LiteralEvaluation describes known content at an exact existing result port;

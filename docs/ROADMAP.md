@@ -1,5 +1,19 @@
 # SCAR roadmap and scope
 
+> **Current scheduler packet / completed-request connection (2026-10-19):**
+> [Frozen plan](M1_CURRENT_ASYNC_PACKET_PLAN.md) and
+> [actual failures, fixes and acceptance](M1_CURRENT_ASYNC_PACKET_PROGRESS.md)
+> close the unconditional later THROW/CLOSE source gap, distinguish current S
+> from stored L, and prevent a budget-truncated candidate prefix from passing.
+> A complete supplied same-R first COMPLETE / second refusal chain checks
+> exact packet and full state delivery; it does not derive the second boolean.
+> **1865 affected focused pass**, all1854 prior identities retained,858 stable
+> sources. A-H/six accepted families remain; F14/F16 and the other eight
+> families/P4 component/frozen-full/P5/M2 original113/196 stay open.
+> [Next original phase obligations](M1_COROUTINE_PHASE_NEXT_GATE.md) include
+> cross-call state content preservation, competition and first-ASEND control.
+> Automatic whole-LeWM recovery, transformation and new speedup are unproved.
+
 > **Original await A-H and F12/F13/F15 structural acceptance (2026-10-19):**
 > [Frozen plan](M1_DIRECT_QUALIFICATION_AND_RESULT_PLAN.md),
 > [finite F12 supplement](M1_DIRECT_RESULT_F12_AMENDMENT.md),

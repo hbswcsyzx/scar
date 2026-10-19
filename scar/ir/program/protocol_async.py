@@ -184,9 +184,22 @@ class _Analysis:
             if self.ctx.reaches(result, actual.operation) is False:
                 continue
             raw = OwnedUse(row.operation, row.contract.raw_use)
-            # R's original association projection selects L; S cannot replace
-            # that role merely because it has the same RAW type.
-            latent = self.ctx.bind(projection['latent_projection'], raw, path=path)
+            scheduler = projection.get('scheduler', False)
+            if scheduler:
+                # Both observations must still copy the independently named
+                # interface S. Binding the later Drive Use backwards to the
+                # helper would confuse temporal order with source identity.
+                source = self.ctx.bind(projection['scheduler_projection'], raw, path=path)
+                current = self.ctx.bind(projection['scheduler_projection'],
+                    projection['scheduler_input'], path=path)
+                origin = self.ctx.bind(projection['scheduler_source'],
+                    projection['scheduler_input'], path=path)
+                source_checks = (source, current, origin)
+            else:
+                # R's original association projection selects L; S cannot
+                # replace that role merely because it has the same RAW type.
+                source = self.ctx.bind(projection['latent_projection'], raw, path=path)
+                source_checks = (source,)
             delivered = self.ctx.bind(result, actual, path=path)
             port = self.ctx.port(result)
             if port is not None and port.gap is None and any(
@@ -195,17 +208,29 @@ class _Analysis:
                 self.gap('async_normalized_packet_construction_unresolved', path, processing=row)
                 continue
             report = self.ctx.correlate({'match': projection['context']['match'],
-                'routes': (projection['context'],), 'gaps': (), 'cursor': None}, latent, delivered)
-            matches.append({'processing': row, 'latent': latent, 'delivered': delivered, 'binding': report,
-                            'match': report['match']})
+                'routes': (projection['context'],), 'gaps': (), 'cursor': None}, *source_checks, delivered)
+            receipt = {'processing': row, 'delivered': delivered, 'binding': report,
+                       'match': report['match']}
+            if scheduler:
+                receipt.update(scheduler=source, current_scheduler=current,
+                               scheduler_origin=origin)
+            else:
+                receipt['latent'] = source
+            matches.append(receipt)
         flags = tuple(row['match'] for row in matches)
         match = (False if flags and all(value is False for value in flags) else
                  True if flags and all(value is True for value in flags) else None)
         if not projection.get('source_inventory_complete', True):
             match = None
             self.gap('async_request_origin_inventory_unresolved', path)
+        # A successful prefix cannot stand for an unfinished candidate scan.
+        # The shared accounting also covers the bindings and context join.
+        if self.ctx.budget.truncated:
+            match = None
         if match is None:
-            self.gap('async_latent_packet_normalization_unresolved', path, definition=definition)
+            self.gap('async_scheduler_packet_normalization_unresolved'
+                if projection.get('scheduler', False) else 'async_latent_packet_normalization_unresolved',
+                path, definition=definition)
         return {'definition': definition, 'projection': projection, 'actual': actual,
                 'normalizations': tuple(matches), 'match': match,
                 'conditions': ('normalization class/callback semantics unproved',)}
@@ -268,15 +293,18 @@ class _Analysis:
                              'gaps': raw['context']['gaps'], 'cursor': None})
                         current_projection = {**projection, 'context': {
                             **raw['context'], 'match': context['match']}}
+                    elif not first and definition.kind in (RawRequestKind.THROW, RawRequestKind.CLOSE):
+                        interface = self.ctx.interfaces[scope.subject.interface_region]
+                        current_projection = {**projection,
+                            'context': self.ctx.recipe_context(raw['recipe']),
+                            'scheduler_projection': self.formal(interface.region, interface.scheduler_request),
+                            'scheduler_source': raw['recipe']['origin'],
+                            'scheduler_input': OwnedUse(drive.operation, drive.scheduler_request)}
                     if definition.kind in (RawRequestKind.THROW, RawRequestKind.CLOSE):
                         if slot.kind is not ResumeSlotKind.THROWN_PACKET:
                             self.issue('async_delivery_slot', path, 'THROW/CLOSE requires the original THROWN_PACKET slot')
                             continue
-                        if first:
-                            alternatives.append(self.packet_delivery(scope, definition, current_projection, actual, path))
-                        else:
-                            self.gap('async_scheduler_packet_normalization_unresolved', path, definition=definition)
-                            alternatives.append({'definition': definition, 'match': None, 'actual': actual})
+                        alternatives.append(self.packet_delivery(scope, definition, current_projection, actual, path))
                         continue
                     if slot.kind is not ResumeSlotKind.SENT_VALUE:
                         self.issue('async_delivery_slot', path, 'NEXT/SEND latent request needs its exact SENT_VALUE slot')

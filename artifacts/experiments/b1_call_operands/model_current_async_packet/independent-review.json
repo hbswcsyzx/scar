@@ -1,0 +1,35 @@
+{
+  "scope": "Read-only conditional structural review, not native execution or complete F14/F16 acceptance",
+  "reviewers_ran_interpreters": false,
+  "reviewers_modified_product": false,
+  "scheduler": {
+    "reviewer": "/root/cleanup_forward_review",
+    "product": "scar/ir/program/protocol_async.py",
+    "product_sha256": "1e7872d7b113c63d6adbddad67d13cc68f315b67f59fd1bb67582d7d3af3dffc",
+    "test": "tests/unit/test_program_async_scheduler_packets.py",
+    "test_sha256": "233a6aad79c6f7360fa23b1ac13eeb5d0292e6c3a85e04f77aae0bceaea41fa2",
+    "accepted_subset": [
+      "Entry S to helper raw and current Drive S, independently sourced current original S, own NORMAL packet and complete context coverage",
+      "Shared-budget truncation retains local receipts and makes aggregate unknown",
+      "First latent L path and historical predicate authority remain separate"
+    ]
+  },
+  "completed_reuse": {
+    "reviewer": "/root/value_resource_review",
+    "test": "tests/unit/test_program_async_completed_reuse.py",
+    "test_sha256": "f52cc603cbf6a4ba6636c6110fb3e95d0274641bb1009e8502373ba9c69f32b6",
+    "accepted_subset": [
+      "One R result feeds two real supplied call activations",
+      "First drive establishes COMPLETE and full current state reaches the second call via actual context RW",
+      "Distinct READ occurrences and supplied branch choices, second reject own N/R packets and full caller slots, no second drive",
+      "Absent second call association remains MISSING"
+    ],
+    "remaining": [
+      "Derive next READ contents from prior COMPLETE post across exact state/call/callback path",
+      "Known Create B branch; this fixture retains external B origin as Unresolved",
+      "Two-request competition and initial ASEND joint conditions"
+    ]
+  },
+  "full_family_closed": false,
+  "transformation_authorized": false
+}
