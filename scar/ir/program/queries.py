@@ -739,9 +739,11 @@ class ProgramIndex:
         return _input_origins(self, operation_id, use_id, accounting=ValidityBudget(budget))
 
     def source_binding(self, expected, actual, *, guard=None, budget=4096):
-        """Exact single-slot source/copy routes, including known callee returns.
+        """Single-slot routes through known returns and selected pending payloads.
 
-        Supplied-model evidence only; not dynamic identity or rewrite authority.
+        Packing/projection preserves the original selector, port and payload;
+        the pending token itself is not a payload alias. Supplied-model evidence
+        only; not dynamic identity or rewrite authority.
         """
         from .call_returns import source_binding
         return source_binding(self, expected, actual, guard=guard, budget=budget)

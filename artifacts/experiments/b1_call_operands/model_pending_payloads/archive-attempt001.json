@@ -1,0 +1,12 @@
+{
+  "command": "conda activate lewm; PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=. python artifacts/experiments/b1_call_operands/model_pending_payloads/checkpoint.py --write",
+  "returncode": 1,
+  "failed_assertion": "identities <= current",
+  "path": "first-connected/junit.xml",
+  "old_case": ["tests.unit.test_program_pending_cleanup", "test_second_cut_cannot_present_the_old_pending_token_as_fresh_replacement"],
+  "new_case": ["tests.unit.test_program_pending_cleanup", "test_second_cut_cannot_replace_raise_with_the_old_return_pending_token"],
+  "reason": "A newly introduced test was renamed when its actual core ownership was corrected: the same old RETURN token used as a RAISE replacement is rejected by pending_dispatch_cases before cleanup freshness. Preserve the failed original ID and explicitly map only this new attempt case.",
+  "original_965_case_identity_migrations": 0,
+  "product_or_test_source_changed_for_archive_repair": false,
+  "tests_started_by_archive_attempt": 0
+}

@@ -1,0 +1,96 @@
+...FF..............F..F.                                                 [100%]
+=================================== FAILURES ===================================
+_ test_other_ports_payload_does_not_poison_the_selected_dispatch_case[return] __
+
+kind = 'return'
+
+    @pytest.mark.parametrize("kind", ("return", "raise"))
+    def test_other_ports_payload_does_not_poison_the_selected_dispatch_case(kind):
+        graph, details = pending_payload_program(mixed=True, different_ports=True, kind=kind)
+        assert len(details["dispatch"].terminator.successors) == 2
+        assert len({definition.port for definition in details["definitions"]}) == 2
+>       report = _index(graph).source_binding(details["expected"], details["actual"])
+                 ^^^^^^^^^^^^^
+
+tests/unit/test_program_pending_payloads.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_pending_payloads.py:16: in _index
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='provider.pending.region'), regions=(Region(id=RegionID(value='provider.pending.regio...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:pending.payload.dispatch: each control input port needs its own exact use
+
+scar/ir/program/validation.py:749: ValueError
+__ test_other_ports_payload_does_not_poison_the_selected_dispatch_case[raise] __
+
+kind = 'raise'
+
+    @pytest.mark.parametrize("kind", ("return", "raise"))
+    def test_other_ports_payload_does_not_poison_the_selected_dispatch_case(kind):
+        graph, details = pending_payload_program(mixed=True, different_ports=True, kind=kind)
+        assert len(details["dispatch"].terminator.successors) == 2
+        assert len({definition.port for definition in details["definitions"]}) == 2
+>       report = _index(graph).source_binding(details["expected"], details["actual"])
+                 ^^^^^^^^^^^^^
+
+tests/unit/test_program_pending_payloads.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_pending_payloads.py:16: in _index
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='provider.pending.region'), regions=(Region(id=RegionID(value='provider.pending.regio...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:pending.payload.dispatch: each control input port needs its own exact use
+
+scar/ir/program/validation.py:749: ValueError
+_ test_original_return_payload_not_created_after_the_first_cut_crosses_both_cuts _
+
+    def test_original_return_payload_not_created_after_the_first_cut_crosses_both_cuts():
+>       graph, details = normal_pending_two_cuts_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_pending_cleanup.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def normal_pending_two_cuts_program():
+        """Carry the pre-cleanup pending Return across two cuts before resuming C1."""
+        graph = resumption_cleanup_program(replace_pending=False)
+        region, = graph.regions
+        values = {row.id: row for row in graph.values}
+        operations = {row.id: row for row in graph.operations}
+        landing = next(row for row in region.blocks if row.id == BlockID("finally.landing"))
+        landing_world, landing_pending, _, landing_saved, landing_context, _, landing_value = landing.arguments
+        context_location = values[landing_context].location
+>       world_location = values[landing_world].location
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProtocolValue' object has no attribute 'location'
+
+tests/fixtures/program_pending_cleanup_graphs.py:210: AttributeError
+__ test_second_cut_cannot_present_the_old_pending_token_as_fresh_replacement ___
+
+    def test_second_cut_cannot_present_the_old_pending_token_as_fresh_replacement():
+        graph, _ = pending_cleanup_two_cuts_program()
+        graph = _change_use(graph, "finally.second.suspend",
+                            "finally.second.suspend.replacement", "finally.second.input.pending")
+>       assert "cleanup_replacement_fresh" in _codes(graph)
+E       AssertionError: assert 'cleanup_replacement_fresh' in {'pending_dispatch_cases'}
+E        +  where {'pending_dispatch_cases'} = _codes(ProgramGraph(root=RegionID(value='finally'), regions=(Region(id=RegionID(value='finally'), label='hand-authored resuma...lue='finally.new-raise'), use=UseID(value='finally.new-raise.packet')),))), protocol_bindings=(), exception_matches=()))
+
+tests/unit/test_program_pending_cleanup.py:100: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_pending_payloads.py::test_other_ports_payload_does_not_poison_the_selected_dispatch_case[return]
+FAILED tests/unit/test_program_pending_payloads.py::test_other_ports_payload_does_not_poison_the_selected_dispatch_case[raise]
+FAILED tests/unit/test_program_pending_cleanup.py::test_original_return_payload_not_created_after_the_first_cut_crosses_both_cuts
+FAILED tests/unit/test_program_pending_cleanup.py::test_second_cut_cannot_present_the_old_pending_token_as_fresh_replacement
+4 failed, 20 passed in 1.22s

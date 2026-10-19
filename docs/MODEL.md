@@ -1,5 +1,29 @@
 # SCAR execution model
 
+## Pending payload provenance checkpoint (2026-10-19)
+
+Pending packing and dispatch are existing typed Operations, not new entities.
+A pending token carries a language destination and an already evaluated payload;
+the token, payload, saved handled context and current state remain separate.
+The source query now interprets the original selector/ControlPort/edge argument
+and landing formal as a semantic projection. It never turns every token into
+its payload alias or treats the same port as the same payload.
+
+Independent port possibility and source-relative payload support are transient
+query facts over original IDs. Same-port paths require all applicable sources;
+different ports are filtered before the meet. Source reevaluation clears old
+support while keeping old-token possibility. Original SavedInput and state/
+context validation govern temporal cuts; provenance witnesses keep constructor,
+owned payload, token path, exact dispatch and caller/CFG context.
+
+This extends the existing source/call-return pipeline without new records or
+wire family. Two connected C1 examples separately exercise old Return payloads
+across two cuts and a new RAISE payload retained by pending across the second
+cut. See the [frozen plan](M1_PENDING_PAYLOAD_PLAN.md) and
+[acceptance record](M1_PENDING_PAYLOAD_PROGRESS.md). Native/source applicability,
+dynamic occurrence identity and transformation authority remain unproved.
+The complete sixteen-group P4 and whole M0–M2 gate remain OPEN.
+
 ## Independent packet-route checkpoint (2026-10-18)
 
 Original lookup RAISE, original injection and matcher RAISE are three distinct

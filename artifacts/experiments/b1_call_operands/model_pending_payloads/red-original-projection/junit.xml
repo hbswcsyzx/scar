@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.661" timestamp="2026-10-19T00:07:35.339768+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_pending_payloads" name="test_original_payload_source_survives_pending_merge_and_real_dispatch_projection" time="0.181"><failure message="assert False is True">def test_original_payload_source_survives_pending_merge_and_real_dispatch_projection():
+        graph, details = pending_payload_program()
+        require_valid(graph)
+        assert type(details["projection"]) is PendingPayload
+        assert len(details["definitions"]) == 2
+        report = ProgramIndex(graph).source_binding(details["expected"], details["actual"])
+&gt;       assert report["match"] is True
+E       assert False is True
+
+tests/unit/test_program_pending_payloads.py:14: AssertionError</failure></testcase></testsuite></testsuites>

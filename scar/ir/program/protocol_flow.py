@@ -9,8 +9,9 @@ from dataclasses import dataclass
 
 from .drivers import BodyDriveResult
 from .driver_flow import body_outcome_uses
+from .control import ProtocolValueKind
 from .model import (BlockArgument, CompletionResult, CompletionSuccessor,
-                    InvokeLiteralResult, OperationResult, StateVersionValue,
+                    InvokeLiteralResult, OperationResult, ProtocolValue, ReferenceValue, StateVersionValue,
                     TerminatorKind)
 from .protocols import (ContractResult, DriveResult, HostTerminal, NativeExit,
                         OwnedUse, StaticProtocolGap)
@@ -330,9 +331,34 @@ class ProtocolFlow:
                     pending.extend(edge[2] for edge in outgoing[block])
             reached = frozenset(reachable)
             order = tuple(block for block in order if block in reached)
+        payload = None
+        # Pending tokens, states and ordinary Data sources retain the original
+        # fast path. Only Reference/exception-packet payloads can be projected.
+        if self.graph.pending_completions and any(
+                isinstance(self.values[value], ReferenceValue)
+                or isinstance(self.values[value], ProtocolValue)
+                and self.values[value].protocol is ProtocolValueKind.EXCEPTION_PACKET
+                for value in port.values):
+            from .pending_payload_flow import has_pending_region, prepare_pending_payload_flow
+            if has_pending_region(self, region):
+                payload = prepare_pending_payload_flow(self, region, outgoing, incoming, order, guards)
+                if payload is None:
+                    return None
+                outgoing = {block: [edge for edge in edges
+                    if payload.edges[(edge[0], edge[1])] is not None]
+                    for block, edges in outgoing.items() if block in reached}
+                incoming = {block: [(parent, edge) for parent, edge in parents
+                    if (edge[0], edge[1]) in payload.edges
+                    and payload.edges[(edge[0], edge[1])] is not None]
+                    for block, parents in incoming.items()}
+                order = tuple(block for block in order
+                              if self.blocks[block].operations[0] in payload.before)
+                reached = frozenset(order)
         universe = self._universes[region]
         initial = universe if mode == "must" else frozenset()
         edges = {(item[0], item[1]): initial for block in order for item in outgoing[block]}
+        support_edges = ({key: payload.edges[key] if mode == "must" else frozenset()
+                          for key in edges} if payload is not None else {})
         before = {}
         pending, queued = deque(order), set(reached)
         while pending:
@@ -343,6 +369,7 @@ class ProtocolFlow:
             block = self.blocks[block_id]
             if block_id == declaration.entry:
                 current = frozenset()
+                current_support = frozenset()
             else:
                 parents = [edges[(item[0], item[1])] for parent, item in incoming[block_id]
                            if parent in reached]
@@ -350,11 +377,18 @@ class ProtocolFlow:
                     return None
                 current = ((frozenset.intersection(*parents) if mode == "must"
                             else frozenset.union(*parents)) if parents else frozenset())
+                if payload is not None:
+                    parent_keys = [(item[0], item[1]) for parent, item in incoming[block_id]
+                                   if parent in reached]
+                    current_support = payload.meet(parent_keys, support_edges, mode=mode)
+                    if current_support is None:
+                        return None
             for identity in block.operations:
                 if not self.spend("copy_operations"):
                     return None
                 if identity == port.operation and port.phase == "before":
                     current = frozenset(port.values)
+                    current_support = frozenset()
                 before[identity] = current
                 operation = self.operations[identity]
                 ordinary, completion_copies = frozenset(), {}
@@ -365,13 +399,19 @@ class ProtocolFlow:
                     if transfer is None:
                         return None
                     ordinary, completion_copies = transfer
+                if payload is not None:
+                    current_support = payload.operation(identity, current, current_support)
+                    if current_support is None:
+                        return None
                 current = current.difference(operation.results)
                 current = current.union(ordinary)
                 if identity == port.operation:
                     if port.phase == "after":
                         current = frozenset(port.values)
+                        current_support = frozenset()
                     elif port.phase in ("edge", "edges"):
                         current = frozenset()
+                        current_support = frozenset()
             for operation, number, target, assignments in outgoing[block_id]:
                 if not self.spend("copy_edges", len(assignments) + len(current)):
                     return None
@@ -379,13 +419,22 @@ class ProtocolFlow:
                 renamed = renamed.union(formal for formal, actual in assignments.items()
                                         if actual in current)
                 renamed = renamed.union(completion_copies.get(number, ()))
+                edge_key = operation, number
+                if payload is not None:
+                    projected = payload.edge(edge_key, current_support)
+                    if projected is None:
+                        return None
+                    renamed_support, projected_values = projected
+                    renamed = renamed.union(projected_values)
                 if operation == port.operation and port.phase == "edge" and number == port.edge:
                     renamed = renamed.union(port.values)
                 if operation == port.operation and port.phase == "edges":
                     renamed = renamed.union(dict(port.completion_values).get(number, ()))
-                edge_key = operation, number
-                if edges[edge_key] != renamed:
+                if (edges[edge_key] != renamed or payload is not None
+                        and support_edges[edge_key] != renamed_support):
                     edges[edge_key] = frozenset(renamed)
+                    if payload is not None:
+                        support_edges[edge_key] = renamed_support
                     if target not in queued:
                         pending.append(target)
                         queued.add(target)

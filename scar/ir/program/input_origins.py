@@ -108,6 +108,7 @@ def _build_origin_route_indexes(index):
         "raw_by_value": MappingProxyType({key: tuple(rows) for key, rows in raw_by_value.items()}),
         "evaluations_by_site": MappingProxyType({
             key: tuple(rows) for key, rows in evaluations_by_site.items()}),
+        "pending_by_value": MappingProxyType({row.value: row for row in graph.pending_completions}),
     }
     counts = {
         "operations": len(index.operations),
@@ -120,6 +121,7 @@ def _build_origin_route_indexes(index):
         "body_drives": len(graph.body_drives),
         "raw_driver_requests": len(graph.raw_driver_requests),
         "literal_evaluations": len(graph.literal_evaluations),
+        "pending_completions": len(graph.pending_completions),
     }
     return indexes, counts
 
@@ -654,12 +656,28 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
                          "BodyDriveResult has no selected dynamic body outcome occurrence",
                          operation=pred.id, index=actual.index)))
             elif type(actual) is PendingPayload:
-                emit("PENDING_PAYLOAD", current, actual, producer=pred,
-                     boundary=edge_step, path_back=(*path_back, edge_step),
-                     route_gaps=(*route_gaps, gap(
-                         "pending_payload_dynamic_unlinked",
-                         "PendingPayload has no selected dynamic pending value",
-                         operation=pred.id, successor_index=successor_index)))
+                projection = _pending_projection_inputs(index, copy_flow, pred,
+                    successor_index, origin.index, current,
+                    accounting=accounting, guard=guard_edges)
+                if not projection['complete']:
+                    missing(gap('pending_payload_origin_inventory_unresolved',
+                        'not all selected pending-token origins have an original payload source',
+                        operation=pred.id, successor_index=successor_index,
+                        details=projection['gaps']))
+                for row in projection['candidates']:
+                    payload = row['payload']
+                    source = all_uses[payload.use][1]
+                    # The semantic witness joins packing and projection. The
+                    # intervening token path stays in the original recipe so
+                    # caller/CFG choices cannot disappear at this boundary.
+                    back = (*path_back, edge_step, row['witness'],
+                            *reversed(row['token_path']))
+                    pending.append((source.value, payload.operation, payload.use,
+                        back, next_trail, (*route_gaps, *row['gaps'])))
+                if projection['cursor'] is not None:
+                    cursor = {'phase': 'pending_payload_origins', 'operation': pred.id,
+                              'successor_index': successor_index,
+                              'partial': projection['cursor'], 'pending_tasks': len(pending)}
             else:
                 missing(gap("cfg_source_kind_unresolved", "unsupported original edge input kind",
                                 operation=pred.id, successor_index=successor_index,
@@ -699,6 +717,95 @@ def _input_origins_with_flow(index, operation_id: OperationID, use_id: UseID,
         "value_identity_verified": False,
         "transformation_authorized": False,
     }
+
+
+def _pending_projection_inputs(index, flow, operation, successor_index, argument_index,
+                               formal, *, accounting, guard):
+    """Resolve one owned semantic projection through original token recipes.
+
+    Private pending tokens cannot be CALL arguments or payload projections of
+    other pending tokens in a canonical-valid graph. Tracing the selector thus
+    reuses the bounded ordinary token-origin traversal, without recursively
+    inventing payload aliases or choosing a convenient constructor.
+    """
+    from .control import PendingDispatchTerminator
+    term = operation.terminator
+    if type(term) is not PendingDispatchTerminator:
+        return {'candidates': (), 'complete': False, 'cursor': None,
+                'gaps': ('pending_payload_dispatch_unresolved',)}
+    edge = term.successors[successor_index]
+    selector = OwnedUse(operation.id, term.pending)
+    choices = flow.selected_edges((*flow.selected_edges(guard),
+                                    ControlEdgeReference(operation.id, successor_index)))
+    cache = getattr(flow, '_pending_token_origin_recipes', None)
+    if cache is None:
+        cache = flow._pending_token_origin_recipes = {}
+    key = selector, choices, flow._copy_context_key()
+    if key not in cache:
+        cache[key] = _input_origins_with_flow(index, selector.operation, selector.use,
+            accounting=accounting, _copy_flow=flow, _guard=choices)
+    tokens = cache[key]
+    pending_by_value = _origin_route_indexes(index)[0]['pending_by_value']
+    candidates, gaps, cursor = [], [], tokens['cursor']
+    complete = tokens['source_inventory_complete'] and cursor is None
+    for number, recipe in enumerate(tokens['recipes']):
+        if not accounting.spend('pending_projection_candidates', path='input_origins.pending_projection'):
+            complete = False
+            cursor = {'phase': 'pending_projection_candidates', 'next_index': number,
+                      'total': len(tokens['recipes'])}
+            break
+        definition = pending_by_value.get(recipe['leaf'].id)
+        producer = recipe['leaf'].origin
+        if (recipe['kind'] != 'OPERATION_RESULT' or definition is None
+                or type(producer) is not OperationResult):
+            complete = False
+            gaps.append('pending_payload_token_origin_unresolved')
+            continue
+        if definition.port != edge.port:
+            continue  # Another case is not part of this selected port's AND.
+        if definition.payload is None:
+            complete = False
+            gaps.append('pending_payload_definition_missing')
+            continue
+        payload = OwnedUse(producer.operation, definition.payload)
+        flow.owned_use(payload.operation, payload.use)
+        token_path = recipe['path']
+        if not accounting.spend('pending_projection_context_steps', len(token_path),
+                                path='input_origins.pending_projection_context'):
+            complete = False
+            cursor = {'phase': 'pending_projection_context', 'next_index': number,
+                      'total': len(tokens['recipes'])}
+            break
+        local = list(choices)
+        for step in token_path:
+            if step.get('kind') == 'CFG_COPY':
+                local.append(ControlEdgeReference(step['operation'].id, step['successor_index']))
+        try:
+            local = flow.selected_edges(tuple(local))
+            token_match = flow.forwards(producer, selector,
+                guard=flow.selected_edges(local, region=recipe['leaf'].region) or None)
+        except ValueError:
+            token_match = None
+        local_gaps = (*recipe['gaps'], {
+            'code': 'pending_payload_dynamic_unlinked',
+            'message': 'original packing/projection is linked; dynamic token occurrence remains unproved',
+            'operation': operation.id, 'successor_index': successor_index})
+        witness = {'kind': 'PENDING_PAYLOAD_PROJECTION', 'operation': operation,
+            'successor_index': successor_index, 'argument_index': argument_index,
+            'selector': selector, 'port': edge.port, 'formal': formal,
+            'pending_definition': definition, 'constructor': index.operations[producer.operation],
+            'payload': payload, 'token_path': token_path, 'token_match': token_match,
+            'runtime_identity_verified': False, 'transformation_authorized': False}
+        candidates.append({'payload': payload, 'token_path': token_path,
+                           'witness': witness, 'gaps': local_gaps})
+    if not candidates:
+        complete = False
+        gaps.append('pending_payload_selected_case_unresolved')
+    if accounting.truncated:
+        complete = False
+        cursor = cursor or {'phase': 'pending_payload_origins', 'operation': operation.id}
+    return {'candidates': tuple(candidates), 'complete': complete,
+            'gaps': tuple(gaps), 'cursor': cursor}
 
 
 def _owned_use(index, value, name):

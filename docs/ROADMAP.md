@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **P4 pending-payload provenance checkpoint (2026-10-19):**
+> [Acceptance](M1_PENDING_PAYLOAD_PROGRESS.md) connects original pack/selected
+> dispatch projection in shared source flow and origin recipes, including
+> helper returns and real connected C1 two-cut cases. 1018 affected focused pass
+> (old965 unchanged,26 new,27 existing related tests),718 stable sources. No new
+> wire family; Program1–22/Execution8 and old fixtures stay unchanged. Next apply
+> the shared proofs to full C1/family/consumer and P3 occurrence combinations
+> under the unchanged16-group gate, then component/frozen-full and P5/M2.
+> All16 groups and fullM0–M2 remain OPEN; no new LeWM transformation or speedup.
+
 > **P4 independent packet fallback checkpoint (2026-10-18):**
 > [Acceptance](M1_LOOKUP_FALLBACK_PROGRESS.md) links independent E0/EL/EM to
 > original matcher/branch consumers, per-case source tuples and active C1

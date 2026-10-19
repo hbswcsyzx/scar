@@ -1,5 +1,26 @@
 # Current evidence and remaining work
 
+## P4 pending-payload source checkpoint (2026-10-19)
+
+[Plan](M1_PENDING_PAYLOAD_PLAN.md) and [acceptance](M1_PENDING_PAYLOAD_PROGRESS.md)
+interpret the existing owned PendingPayload projection in the shared source
+flow and origin traversal. Independent carrier/port possibility and source-
+relative support preserve all same-port alternatives, filter other ports, and
+reject vacuous success. Original token/state/context and payload remain distinct.
+Source reevaluation, constructor reevaluation, guards, known helper returns and
+private saved roles retain separate meanings without a new producer or wire.
+
+Final **1018 affected focused** pass with718 stable sources: original965 IDs/
+obligations unchanged,26 new tests and27 additional existing forwarding/cleanup
+tests; zero failures/errors/skips. Genuine missing-connection and new-fixture
+failures remain archived. Connected C1 examples verify old Return payload across
+two real cuts and new helper RAISE payload retained only by pending over the
+second cut, through actual dispatch to host. This is static supplied-IR evidence;
+full dynamic occurrence/native/source applicability and transformation stay
+unproved. All16 P4 groups, P5/M2 and fullM0–M2 remain OPEN. Next bridge these
+shared proofs into complete family/continuation inventories and P3 occurrences.
+No component/full, new backend, automatic whole-LeWM model or speedup here.
+
 ## P4 independent lookup-fallback packet checkpoint (2026-10-18)
 
 [Plan](M1_LOOKUP_FALLBACK_PLAN.md) and [acceptance](M1_LOOKUP_FALLBACK_PROGRESS.md)
