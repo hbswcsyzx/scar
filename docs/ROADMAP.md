@@ -1,5 +1,19 @@
 # SCAR roadmap and scope
 
+> **P4 shared-input/final-chain progress (2026-10-19):**
+> [Frozen plan](M1_SHARED_TUPLE_FINAL_PLAN.md) joins original incoming edges,
+> real copy-loop visits and two calls of one shared implementation to their
+> own final outputs. Original M1 structural G is now closed:1780 affected
+> focused pass, all1747 previous identities retained. Source prefixes,
+> universal-case inventory and current-visit guarded links were corrected.
+> [Progress and remaining matrix](M1_SHARED_TUPLE_FINAL_PROGRESS.md) retain
+> failed attempts separately. [Scope reconciliation](M1_PROTOCOL_SCOPE_RECONCILIATION.md)
+> credits already tested structural relations without using native/source
+> authority flags as replacement acceptance criteria. Other A–H obligations,
+> sixteen groups / P5 / M2 retain their actual remaining checks; see the
+> [next finite gates](M1_PROTOCOL_NEXT_GATES.md). Supplied graphs do not
+> establish automatic LeWM modeling or speedup.
+
 > **P4 acquisition-failure / caller cleanup progress (2026-10-19):**
 > [Plan](M1_FAILURE_CALLER_CONTINUATION_PLAN.md) and
 > [evidence / remaining work](M1_FAILURE_CALLER_CONTINUATION_PROGRESS.md)

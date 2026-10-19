@@ -1,5 +1,30 @@
 # SCAR execution model
 
+## Source evaluation, current incoming, and shared consumers (2026-10-19)
+
+An original input declaration and the original control-path inventory have
+different roles. One universal tuple declaration can apply to two incoming
+edges without merging those edges or creating two canonical declarations.
+The query derives the closest operand merge from original CFG/SSA, then
+attaches the same declaration separately to each input guard. An unfinished
+walk retains an explicit inventory cursor rather than claiming a total.
+
+Likewise, a result from one of two mutually exclusive calls can reach their
+common terminal. Its necessary source-evaluation prefix must accompany both
+consumer discovery and the subsequent exact payload/state binding. These
+conditions are derived from the original source's control reachability. They
+do not select a producer by inspecting equal values at the target. Static
+calls sharing one Region and actual calls sharing one definition remain
+separate frames and activations.
+
+See the [complete shared-input plan](M1_SHARED_TUPLE_FINAL_PLAN.md),
+[source-bound progress](M1_SHARED_TUPLE_FINAL_PROGRESS.md) and
+[structural versus automatic-recovery accounting](M1_PROTOCOL_SCOPE_RECONCILIATION.md).
+The original G supplied-model structural matrix passes on the final source:
+1780 affected focused cases retain all1747 previous identities. This closes
+that structural obligation; the other original families and whole-program
+automatic recovery remain open.
+
 ## An operation result and its enclosing region's exit (2026-10-19)
 
 The same execution has two different connection points: an Operation's own

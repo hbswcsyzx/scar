@@ -39,7 +39,14 @@ def _own_legs(ctx, operation, rows, choices, issues, *, required):
                          'status': 'PARTIAL', 'gaps': ('await_final_payload_slot_unresolved',)})
             gaps.append('await_final_payload_slot_unresolved')
             continue
-        conditions = selected(ctx, choices, original['edge'])
+        # The own result exists only after this particular call was reached.
+        # Two mutually exclusive calls can join one terminal; the incoming
+        # advance's conditions alone do not select the call that produced it.
+        # Derive the prefix from the source, never from a successful consumer.
+        required_prefix, prefix_complete = required_choices(ctx, own)
+        if not prefix_complete:
+            local.append('await_final_source_prefix_unresolved')
+        conditions = selected(ctx, choices, required_prefix, original['edge'])
         ledger = consumers(ctx, own, conditions)
         targets = list(ledger['targets'])
         matching = tuple(row for row in rows if row.contract.output == own)
@@ -82,7 +89,8 @@ def _own_legs(ctx, operation, rows, choices, issues, *, required):
         local.extend(ledger['gaps'])
         contradicted = any(binding['match'] is False for binding in bindings) or any(
                           state['binding']['match'] is False for state in states)
-        legs.append({**original, 'targets': tuple(targets), 'bindings': bindings, 'states': tuple(states),
+        legs.append({**original, 'choices': conditions,
+            'targets': tuple(targets), 'bindings': bindings, 'states': tuple(states),
             'status': 'CONTRADICTED' if contradicted else 'PARTIAL' if local or ctx.budget.truncated else 'DECLARED',
             'gaps': tuple(dict.fromkeys(local))})
         gaps.extend(local)

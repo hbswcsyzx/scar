@@ -610,13 +610,23 @@ def await_identity_errors(ctx, shared):
                     gap(ctx, gaps, 'await_required_choice_unobserved', advance.id,
                         'not every required edge is captured in this exact source/caller context')
                 for route in occurrence['routes']:
-                    projections = []
+                    projections, applicable_links = [], 0
                     for link in job['links']:
                         if not shared.spend('await_projection_links', path='await.projection'):
                             break
-                        selected = _guard(ctx, advance, link.guard, shared)
+                        input_guard = job.get('input_guard')
+                        same_merge = (input_guard is not None and link.guard is not None
+                            and ctx.core_operations[input_guard.operation].terminator.successors[
+                                input_guard.successor_index].block
+                            == ctx.core_operations[link.guard.operation].terminator.successors[
+                                link.guard.successor_index].block)
+                        # This tuple's current incoming cannot be established
+                        # by an older visit of another arm. Other source/helper
+                        # conditions retain their historical path semantics.
+                        selected = _guard(ctx, advance, link.guard, shared, incoming=same_merge)
                         if selected is False:
                             continue
+                        applicable_links += 1
                         if selected is None:
                             gap(ctx, gaps, 'await_link_guard_unobserved', advance.id,
                                 'original link guard is not captured on this exact call path')
@@ -647,6 +657,9 @@ def await_identity_errors(ctx, shared):
                             projections.append({'projection': None, 'bindings': (pair,),
                                                 'status': 'DECLARED'})
                             comparisons += 1
+                    if job['links'] and not applicable_links and not shared.truncated:
+                        gap(ctx, gaps, 'await_body_link_missing', advance.id,
+                            'declared links provide no applicable body projection for this current incoming')
                     route['projections'] = tuple(projections)
             if not job['links']:
                 gap(ctx, gaps, 'await_body_link_missing', advance.id,

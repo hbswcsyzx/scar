@@ -149,15 +149,23 @@ def _body_candidates(ctx, advance):
     return tuple(drives), complete
 
 
-def _original_case_guards(ctx, advance):
+def _original_case_guards(ctx, advance, *, iterator=None):
     """Closest original copy-merge, independent of any expected tuple.
 
     Stop at producer/caller boundaries; distinct merges need joint reasoning.
     Never form a Cartesian product or choose a source from observed Drives.
     """
     merges, pending = [], []
-    for identity in (advance.contract.receiver_use, *advance.contract.argument_uses):
-        value = ctx.values[ctx.owned_use(advance.operation, identity).value]
+    actuals = tuple(OwnedUse(advance.operation, identity) for identity in
+                    (advance.contract.receiver_use, *advance.contract.argument_uses))
+    if iterator is not None and iterator not in actuals:
+        # An explicitly expanded method call consumes a bound method. Its
+        # independently named lookup carries the iterator before that new
+        # producer. Do not reverse-select a lookup when its anchor is absent.
+        actuals = (iterator, *actuals)
+    for actual in actuals:
+        identity = actual.use
+        value = ctx.values[ctx.owned_use(actual.operation, identity).value]
         seen = set()
         while value.id not in seen:
             if not ctx.spend('await_input_inventory_values'):
@@ -214,6 +222,17 @@ def _input_case_inventory(ctx, advance):
             cases = tuple((None, guard, True) for guard in guards or (None,))
             if pending:
                 ctx._await_input_case_pending[site] = pending
+        elif len(attachment.cases) == 1 and attachment.cases[0].guard is None:
+            # A universal expected tuple is one declaration, not one original
+            # control path. Keep its canonical case while independently
+            # inventorying the actual operands' closest merge predecessors.
+            guards, pending = _original_case_guards(ctx, advance,
+                iterator=iterator_use(ctx, advance, attachment.cases[0]))
+            cases = tuple((attachment.cases[0], guard, False) for guard in guards or (None,))
+            unfinished = tuple(item for item in pending if item[1] not in (
+                'producer_boundary', 'caller_boundary', 'non_copy_port'))
+            if unfinished:
+                ctx._await_input_case_pending[site] = unfinished
         else:
             from .protocol_connection_validation import _guard_inventory
             _, _, missing = _guard_inventory(ctx, advance, attachment)

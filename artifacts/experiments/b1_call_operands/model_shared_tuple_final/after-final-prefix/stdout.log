@@ -1,0 +1,146 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_universal_tuple_preserves_both_original_incoming_keys_and_every_final_caller[zero-cut] _
+
+zero_cut = True
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_universal_tuple_preserves_both_original_incoming_keys_and_every_final_caller(zero_cut):
+        program, details = await_shared_final_program(zero_cut=zero_cut, depth=2, case_mode='universal')
+        report = _report(program, details)
+        shared = details['shared_final']
+        first = shared['first_advance']
+        guards = set(shared['guards'])
+        assert len(guards) == 2
+        assert shared['backedge'].operation == shared['retry_branch'].id
+        assert shared['backedge'].operation != first.id
+        assert len(details['drivers']) == (1 if zero_cut else 3)
+        assert sum(operation.terminator is not None
+            and operation.terminator.kind is TerminatorKind.SUSPEND
+            for operation in program.operations) == (0 if zero_cut else 2)
+    
+        # A universal declaration stays one original record.  It cannot define
+        # the number of real incoming control obligations or erase one of them.
+        attachments = tuple(row for row in program.protocol_call_inputs if row.site.operation == first.id)
+        assert {row.site.slot for row in attachments} == {row.slot for row in shared['first_rows']}
+        assert all(len(row.cases) == 1 and row.cases[0].guard is None for row in attachments)
+        jobs = _first_jobs(report, details)
+>       assert {(job['advance'].slot, job['input_guard']) for job in jobs} == {
+            (row.slot, guard) for row in shared['first_rows'] for guard in guards}
+E       AssertionError: assert {(0, None)} == {(0, ControlE...sor_index=0))}
+E         
+E         Extra items in the left set:
+E         (0, None)
+E         Extra items in the right set:
+E         (0, ControlEdgeReference(operation=OperationID(value='await.shared.arm.0.jump'), successor_index=0))
+E         (0, ControlEdgeReference(operation=OperationID(value='await.shared.arm.1.jump'), successor_index=0))
+E         Use -v to get more diff
+
+tests/unit/test_program_await_shared_final.py:112: AssertionError
+_ test_universal_tuple_preserves_both_original_incoming_keys_and_every_final_caller[two-cut] _
+
+zero_cut = False
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_universal_tuple_preserves_both_original_incoming_keys_and_every_final_caller(zero_cut):
+        program, details = await_shared_final_program(zero_cut=zero_cut, depth=2, case_mode='universal')
+        report = _report(program, details)
+        shared = details['shared_final']
+        first = shared['first_advance']
+        guards = set(shared['guards'])
+        assert len(guards) == 2
+        assert shared['backedge'].operation == shared['retry_branch'].id
+        assert shared['backedge'].operation != first.id
+        assert len(details['drivers']) == (1 if zero_cut else 3)
+        assert sum(operation.terminator is not None
+            and operation.terminator.kind is TerminatorKind.SUSPEND
+            for operation in program.operations) == (0 if zero_cut else 2)
+    
+        # A universal declaration stays one original record.  It cannot define
+        # the number of real incoming control obligations or erase one of them.
+        attachments = tuple(row for row in program.protocol_call_inputs if row.site.operation == first.id)
+        assert {row.site.slot for row in attachments} == {row.slot for row in shared['first_rows']}
+        assert all(len(row.cases) == 1 and row.cases[0].guard is None for row in attachments)
+        jobs = _first_jobs(report, details)
+>       assert {(job['advance'].slot, job['input_guard']) for job in jobs} == {
+            (row.slot, guard) for row in shared['first_rows'] for guard in guards}
+E       AssertionError: assert {(0, None), (1, None)} == {(1, ControlE...sor_index=0))}
+E         
+E         Extra items in the left set:
+E         (1, None)
+E         (0, None)
+E         Extra items in the right set:
+E         (0, ControlEdgeReference(operation=OperationID(value='await.shared.arm.1.jump'), successor_index=0))
+E         (0, ControlEdgeReference(operation=OperationID(value='await.shared.arm.0.jump'), successor_index=0))...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+tests/unit/test_program_await_shared_final.py:112: AssertionError
+_ test_universal_loop_uses_the_last_incoming_and_its_exact_shared_final_caller[zero-cut] _
+
+zero_cut = True
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_universal_loop_uses_the_last_incoming_and_its_exact_shared_final_caller(zero_cut):
+        selections = (dict(arms=(0, 1), extractor=0, child_raised=False),
+                      dict(arms=(1, 0), extractor=1, child_raised=True))
+        program, model, details = await_shared_final_execution(zero_cut=zero_cut, depth=2,
+            case_mode='universal', instances=2, instance_choices=selections)
+        index = _index(program, model)
+        report = index.await_body_links(details['static']['acquisition_scope'], budget=QUERY_BUDGET)
+        assert not report['budget']['truncated']
+        static = details['static']
+        shared = static['shared_final']
+        first = shared['first_advance']
+        jobs = tuple(job for job in report['jobs'] if job['source'] == static['source']
+                     and job['advance_operation'] == first.id)
+>       assert {(job['advance'].slot, job['input_guard']) for job in jobs} == {
+            (row.slot, guard) for row in shared['first_rows'] for guard in shared['guards']}
+E       AssertionError: assert {(0, None)} == {(0, ControlE...sor_index=0))}
+E         
+E         Extra items in the left set:
+E         (0, None)
+E         Extra items in the right set:
+E         (0, ControlEdgeReference(operation=OperationID(value='await.shared.arm.0.jump'), successor_index=0))
+E         (0, ControlEdgeReference(operation=OperationID(value='await.shared.arm.1.jump'), successor_index=0))
+E         Use -v to get more diff
+
+tests/unit/test_execution_await_shared_final.py:54: AssertionError
+_ test_universal_loop_uses_the_last_incoming_and_its_exact_shared_final_caller[two-cut] _
+
+zero_cut = False
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_universal_loop_uses_the_last_incoming_and_its_exact_shared_final_caller(zero_cut):
+        selections = (dict(arms=(0, 1), extractor=0, child_raised=False),
+                      dict(arms=(1, 0), extractor=1, child_raised=True))
+        program, model, details = await_shared_final_execution(zero_cut=zero_cut, depth=2,
+            case_mode='universal', instances=2, instance_choices=selections)
+        index = _index(program, model)
+        report = index.await_body_links(details['static']['acquisition_scope'], budget=QUERY_BUDGET)
+        assert not report['budget']['truncated']
+        static = details['static']
+        shared = static['shared_final']
+        first = shared['first_advance']
+        jobs = tuple(job for job in report['jobs'] if job['source'] == static['source']
+                     and job['advance_operation'] == first.id)
+>       assert {(job['advance'].slot, job['input_guard']) for job in jobs} == {
+            (row.slot, guard) for row in shared['first_rows'] for guard in shared['guards']}
+E       AssertionError: assert {(0, None), (1, None)} == {(1, ControlE...sor_index=0))}
+E         
+E         Extra items in the left set:
+E         (1, None)
+E         (0, None)
+E         Extra items in the right set:
+E         (0, ControlEdgeReference(operation=OperationID(value='await.shared.arm.1.jump'), successor_index=0))
+E         (0, ControlEdgeReference(operation=OperationID(value='await.shared.arm.0.jump'), successor_index=0))...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show
+
+tests/unit/test_execution_await_shared_final.py:54: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_shared_final.py::test_universal_tuple_preserves_both_original_incoming_keys_and_every_final_caller[zero-cut]
+FAILED tests/unit/test_program_await_shared_final.py::test_universal_tuple_preserves_both_original_incoming_keys_and_every_final_caller[two-cut]
+FAILED tests/unit/test_execution_await_shared_final.py::test_universal_loop_uses_the_last_incoming_and_its_exact_shared_final_caller[zero-cut]
+FAILED tests/unit/test_execution_await_shared_final.py::test_universal_loop_uses_the_last_incoming_and_its_exact_shared_final_caller[two-cut]
+4 failed in 16.14s
