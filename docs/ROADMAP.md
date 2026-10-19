@@ -1,5 +1,21 @@
 # SCAR roadmap and scope
 
+> **Original await A-H and F12/F13/F15 structural acceptance (2026-10-19):**
+> [Frozen plan](M1_DIRECT_QUALIFICATION_AND_RESULT_PLAN.md),
+> [finite F12 supplement](M1_DIRECT_RESULT_F12_AMENDMENT.md),
+> [actual attempts](M1_DIRECT_QUALIFICATION_AND_RESULT_PROGRESS.md) and
+> [clause-by-clause acceptance](M1_AWAIT_SOURCE_FAMILY_ACCEPTANCE.md) complete
+> the exact native-self, direct eligibility and foreign-Drive result evidence.
+> A real missed qualification consumed by a known own-result literal was fixed
+> using the existing source index; unknown content stays unknown.1854 affected
+> focused pass, all1845 prior identities retained,856 stable sources. A-H and
+> F12/F13/F15 close in their original conditional model scope; F17/F21/F23 stay
+> accepted. Ten other families, P4 component/frozen-full, P5 and M2 original
+> 113/196 remain. [Next F14/F16 review](M1_COROUTINE_REQUEST_NEXT_REVIEW.md)
+> credits existing three-step requests and narrows the real phase/reuse/
+> competition/first-send/scheduler-packet gaps. Automatic whole-LeWM modeling,
+> transformation and new speedup remain unproved.
+
 > **N4 original E/H structural acceptance (2026-10-19):**
 > [Frozen plan](M1_AWAIT_REEVALUATION_PLAN.md),
 > [actual attempts and regression](M1_AWAIT_REEVALUATION_PROGRESS.md), and

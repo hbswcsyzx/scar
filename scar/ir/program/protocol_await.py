@@ -888,9 +888,15 @@ def _legacy_qualification(ctx):
                 or _kind(ctx, row.contract.result) is not ExitKind.NORMAL):
             continue
         op = ctx.operations[row.operation]
-        # Preserve historical budgets for ordinary opaque helper profiles.
+        # An exact content receipt on this own result is already classified
+        # by the shared source view, even when the producer has no callee.
+        # Other opaque results retain their original fast path and budget.
         if op.id not in creates and op.callee is None:
-            continue
+            from scar.ir.literals import PythonLiteral
+            from .evaluated_sources import _prepare as source_indexes
+            literal = source_indexes(ctx)[1].get(row.contract.result)
+            if literal is None or type(literal.literal) is not PythonLiteral:
+                continue
         for advance in advances:
             attachment = ctx.call_inputs.get(_site(advance))
             if attachment is None:

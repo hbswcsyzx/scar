@@ -1,0 +1,25 @@
+{
+  "status": "CONDITIONAL_ORIGINAL_A_H_AND_F12_F13_F15_STRUCTURAL_ACCEPTANCE",
+  "source_sha256": "fd1069cea62d96ed451b0cedc8ae8c644add212e5ec8f31a6982a8eac86bfed6",
+  "focused_cases": 1854,
+  "closed_A_H": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+  ],
+  "closed_families": [
+    "F12",
+    "F13",
+    "F15",
+    "F17",
+    "F21",
+    "F23"
+  ],
+  "whole_program_model_complete": false,
+  "tests_started_by_reconciliation": 0
+}

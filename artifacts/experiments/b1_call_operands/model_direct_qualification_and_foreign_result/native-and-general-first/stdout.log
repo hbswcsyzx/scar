@@ -1,0 +1,39 @@
+..F.                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_general_await_exact_builtin_return_cannot_be_continued_as_an_iterator[own-normal-literal] _
+
+representation = 'own-normal-literal'
+
+    @pytest.mark.parametrize('representation', ('own-normal-literal', 'known-callee-return'))
+    def test_general_await_exact_builtin_return_cannot_be_continued_as_an_iterator(representation):
+        graph, details = await_acquisition_program()
+        call = details['await_call']['operation']
+        graph = replace(graph, resumable_creates=tuple(
+            row for row in graph.resumable_creates if row.operation != call.id))
+        assert not graph.resumable_creates
+        port = details['await_call']['ports'][0]
+        if representation == 'own-normal-literal':
+            graph = replace(graph, literal_evaluations=(*graph.literal_evaluations,
+                LiteralEvaluation(port, PythonLiteral.from_python(7))))
+            assert call.callee is None
+        else:
+            graph, implementation = _literal_return_callee(graph, details)
+            normal = implementation['terminals'][ExitKind.NORMAL]
+            assert normal.uses[0].value == implementation['literal'].id
+            assert implementation['literal'].origin == LiteralOrigin(7)
+            assert implementation['literal'].targets == ()
+            assert {exit_.kind for exit_ in implementation['region'].exits} == {ExitKind.NORMAL, ExitKind.RAISE}
+            assert implementation['call'].uses == call.uses
+            assert implementation['call'].terminator == call.terminator
+            assert implementation['call'].completions == call.completions
+        classification = _classified(graph, details)
+        assert classification['classification_complete'] is True
+        assert all(row['kind'] == 'NON_ITERATOR' for row in classification['cases'])
+        assert details['advance_receiver'].value == details['iterator_value']
+>       assert 'protocol_await_return_qualification' in {issue.code for issue in validate(graph)}
+E       AssertionError: assert 'protocol_await_return_qualification' in set()
+
+tests/unit/test_program_await_native_and_general_sources.py:398: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_native_and_general_sources.py::test_general_await_exact_builtin_return_cannot_be_continued_as_an_iterator[own-normal-literal]
+1 failed, 3 passed in 2.06s

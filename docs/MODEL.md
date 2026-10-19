@@ -1,5 +1,24 @@
 # SCAR execution model
 
+## Exact result content must reach applicability checks (2026-10-19)
+
+A LiteralEvaluation describes known content at an exact existing result port;
+it creates no producer, alias or object identity. Even an opaque operation's
+own NORMAL result may carry that fact. Qualification must consume it through
+the original copy and source paths. UninterpretedConstant remains unknown,
+and a declared unsuitable value is rejected only when an unprotected success
+path actually continues it as an iterator.
+
+The source/consumer model now expresses native self/no-wrapper completion,
+general bad-return qualifications and another real Drive's adapter result
+without new wire types. See the [actual attempts](M1_DIRECT_QUALIFICATION_AND_RESULT_PROGRESS.md)
+and [original-clause acceptance](M1_AWAIT_SOURCE_FAMILY_ACCEPTANCE.md):1854
+affected focused pass on856 stable sources, retaining all1845 prior identities.
+Original await A-H and F12/F13/F15 pass conditional structural acceptance;
+F17/F21/F23 remain accepted. Ten families/P5/M2 and automatic recovery remain
+open; the [next review](M1_COROUTINE_REQUEST_NEXT_REVIEW.md) lists exact phase
+and request-state connections instead of repeating already verified stepping.
+
 ## Own-result occurrences and source-evaluated regions (2026-10-19)
 
 One Operation definition may execute repeatedly and return the same object.
