@@ -108,8 +108,11 @@ def body_identity_errors(ctx):
             if expected is not None and actual_root != expected_root:
                 gap(ctx, gaps, 'body_instance_copy_unproved', identity, 'original copy recipe does not connect Drive owner to this Create handle')
         view['gaps'] = tuple(gaps)
+    from .resumable_sessions import body_session_identity_errors
+    session_comparisons = body_session_identity_errors(ctx)
     ctx.body_identity_preparation = {'binding_comparisons': comparisons,
         'copy_edge_comparisons': len(ctx.body_copy_compatibility),
+        'session_binding_comparisons': session_comparisons,
         'fresh_external_context': True, 'cost_scope': 'declared compatibility checks, not native identity proof'}
 
 

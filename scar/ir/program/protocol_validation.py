@@ -571,6 +571,11 @@ def _adapter_route_copy(ctx, row, terminal):
 def connection_errors(ctx):
     """Consumer obligations are derived from core markers, not row count."""
     errors = []
+    # AWAIT handoffs need their own selected source/incoming paths. Treating
+    # two legal sources merged at one host as an unguarded must-copy would
+    # reject the other incoming instead of checking this source's consumer.
+    from .async_session_sources import handoff_consumers
+    errors.extend(handoff_consumers(ctx)['issues'])
     for scope in ctx.scopes.values():
         if scope.profile is ProtocolProfile.CREATED_CLOSE_V1:
             from .created_close import created_close_view

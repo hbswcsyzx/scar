@@ -26,6 +26,7 @@ class _Analysis:
         self.ctx = ctx
         self.issues, self.gaps, self.obligations = [], [], []
         self.associations, self.sessions, self.cancellation = [], [], []
+        self.session_consumers = ()
         self.deliveries = []
         self.admissions = []
         self.cursor = None
@@ -62,6 +63,8 @@ class _Analysis:
         for binding in ctx.graph.protocol_bindings:
             scope = getattr(binding, 'scope', getattr(getattr(binding, 'delivery', None), 'scope', None))
             bindings.setdefault(scope, []).append(binding)
+        from .async_session_sources import source_inventory
+        original_sources = source_inventory(ctx)
         # Preparation inventories original rows only; semantic traversal below
         # remains budgeted. The denominator survives even budget=1.
         self.inventory = tuple({'scope': scope,
@@ -71,6 +74,9 @@ class _Analysis:
             'gates': tuple(gates.get(getattr(scope.subject, 'interface_region', getattr(scope.subject, 'region', None)), ())),
             'bindings': tuple(bindings.get(scope.id, ()))} for scope in ctx.scopes.values()
             if scope.profile in (ProtocolProfile.ASYNC_GENERATOR_BODY_V1, ProtocolProfile.TASK_CANCEL_EXTERNAL_V1))
+        self.inventory = tuple({**item, 'session_sources': tuple(source for source in original_sources
+            if source['scope'] == item['scope'].id and source['session_required'])}
+            for item in self.inventory)
 
     def request_admission(self, scope):
         """Keep every original gate before looking for predicate attachments."""
@@ -860,10 +866,19 @@ class _Analysis:
             except (KeyError, IndexError, TypeError, ValueError, AttributeError) as exc:
                 self.issue('async_scope_reference', scope.id, str(exc))
         self.session_outcomes(scopes)
+        from .async_session_sources import handoff_consumers, session_consumers
+        self.session_consumers = session_consumers(self, scopes)
+        handoffs = handoff_consumers(self.ctx)
+        self.issues.extend(handoffs['issues'])
+        for handoff in handoffs['handoffs']:
+            self.gaps.extend(handoff['gaps'])
+            if self.cursor is None and handoff['cursor'] is not None:
+                self.cursor = handoff['cursor']
         self.cancellation_bindings()
         return {'issues': tuple(self.issues), 'associations': tuple(self.associations), 'deliveries': tuple(self.deliveries),
                 'request_admissions': tuple(self.admissions),
-                'session_outcomes': tuple(self.sessions), 'cancellation': tuple(self.cancellation),
+                'session_outcomes': tuple(self.sessions), 'session_consumers': self.session_consumers,
+                'handoffs': handoffs['handoffs'], 'cancellation': tuple(self.cancellation),
                 'obligations': tuple(self.obligations), 'inventory': self.inventory,
                 'gaps': tuple(self.gaps), 'cursor': self.cursor,
                 'source_runtime_verified': False, 'runtime_identity_verified': False,

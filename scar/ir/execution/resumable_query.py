@@ -60,6 +60,12 @@ def drive_execution(ctx, identity, *, shared):
     for endpoint in (view['instance']['value'], view['instance']['creation_handle']):
         if endpoint is not None and hasattr(endpoint, 'id'):
             pending.append(endpoint.id)
+    from .resumable_sessions import session_endpoints, session_view
+    session = getattr(ctx, 'resolved_body_sessions', {}).get(identity)
+    if session is not None:
+        for endpoint in session_endpoints(session):
+            if endpoint is not None and hasattr(endpoint, 'id'):
+                pending.append(endpoint.id)
     copies, seen = [], set()
     while pending:
         target = pending.pop()
@@ -81,6 +87,8 @@ def drive_execution(ctx, identity, *, shared):
             cursor = {'field': 'instance', 'ordinal': 0, 'drive': identity}
         result['instance'] = dict(view['instance'], compatibility=None,
                                   persistent_compatibility=None, check_status='NOT_CHECKED')
+    if session is not None:
+        result['session'] = session_view(ctx, identity, shared)
     result['host_order'] = _host_cycle_view(ctx, shared)
     if shared.truncated and cursor is None:
         cursor = {'field': 'host_order', 'ordinal': 0, 'drive': identity}
@@ -88,7 +96,8 @@ def drive_execution(ctx, identity, *, shared):
                   forward_count=len(view['forwards']), checked_binding_count=checked,
                   budget=_budget(shared), cursor=cursor, preparation_work=_preparation(ctx))
     copy_gaps = tuple(gap for row in copies for gap in row['gaps'])
-    result['gaps'] = tuple(dict.fromkeys((*view['gaps'], *copy_gaps)))
+    session_gaps = () if session is None else result['session']['gaps']
+    result['gaps'] = tuple(dict.fromkeys((*view['gaps'], *copy_gaps, *session_gaps)))
     result['status'] = ('MISSING' if view['association'] is None else
                         'PARTIAL' if result['gaps'] or shared.truncated else 'DECLARED')
     return deepcopy(result)

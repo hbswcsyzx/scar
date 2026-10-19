@@ -1,5 +1,24 @@
 # Current evidence and remaining work
 
+## P4 continuous async source/consumer/occurrence checkpoint (2026-10-19)
+
+[Plan](M1_ASYNC_PIPELINE_PLAN.md) and [acceptance](M1_ASYNC_PIPELINE_PROGRESS.md)
+connect producer-first session obligations to selected static paths and actual
+Drive/update/host occurrences. One R/B spans three calls, one persistent body
+activation has three segments, and item completion remains its real RAISE
+adapter. Shared incoming tuples, exact scopes, missing capture and NORMAL-only
+post-state support retain distinct receipts. Fresh identity and necessary
+original copy ancestors are checked together; no second SSA/phase graph.
+
+Final **1308 affected focused** pass at728 stable sources: previous1032 unchanged
+case identities/obligations,22 new and254 related old P3/CALL/codec tests; zero
+failures/errors/skips. All failed fixture/API and genuine old-product red
+attempts remain archived. Program1–22/Execution8, old fixtures and tests remain
+unchanged. All16 P4 groups, P5/M2 and wholeM0–M2 remain OPEN. Next complete
+remaining wrapper/source/family and occurrence combinations under the original
+denominator before component/frozen-full. No automatic whole-LeWM model,
+transformation or new speedup is claimed; the protected original repos stay clean.
+
 ## P4 complete declared packet-continuation checkpoint (2026-10-19)
 
 [Plan](M1_PACKET_CONTINUATION_PLAN.md) and [acceptance](M1_PACKET_CONTINUATION_PROGRESS.md)

@@ -309,6 +309,11 @@ def prepare_value_copies(ctx):
         for value in (view['instance']['value'], view['instance']['creation_handle']):
             if value is not None and type(value) is not Unresolved:
                 pending.append(value.id)
+    from .resumable_sessions import session_endpoints
+    for session in getattr(ctx, 'resolved_body_sessions', {}).values():
+        for value in session_endpoints(session):
+            if value is not None and type(value) is not Unresolved:
+                pending.append(value.id)
     while pending:
         target = pending.pop()
         if target in needed or target not in predecessors:

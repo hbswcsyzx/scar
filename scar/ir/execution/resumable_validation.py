@@ -232,6 +232,8 @@ def body_errors(ctx):
             'entry_first': first, 'entry_bridge': entry_valid and entry_thread and first is not None,
             'outcome_bridge': outcome is not None and outcome_thread and transfer is not None,
             'path_complete': path_complete, 'canonical_gaps': tuple(gaps), 'gaps': tuple(gaps)}
+    from .resumable_sessions import prepare_body_sessions
+    prepare_body_sessions(ctx)
     prepare_value_copies(ctx)
     for view in ctx.resolved_body_origins.values():
         view['canonical_gaps'] = view['gaps']

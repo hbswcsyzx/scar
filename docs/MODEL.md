@@ -1,5 +1,31 @@
 # SCAR execution model
 
+## Async source/consumer/occurrence connection (2026-10-19)
+
+A consumer declaration is not an inventory of producer obligations. Original
+Drive/outcome edges define the source denominator independently of supplied
+SessionUpdate rows. For each exact source, selected CFG choices correlate the
+request R, persistent body B and latest current-state inputs as one tuple.
+Shared updates retain every applicable incoming case. AWAIT exports require
+their exact host handoff; item adapters change values and must not be modeled
+as a Reference-to-exception-packet copy.
+
+The five entity families remain unchanged. Static graph and execution evidence
+stay distinct: one B can have a persistent activation with several segments,
+while successive calls have distinct driver activations. An actual selected
+ControlTransfer/BlockVisit path locates this call's update and host occurrence.
+Existing CFG/CALL/body copy recipes and fresh scoped identity checks apply to
+its endpoints and necessary ancestors. Missing capture keeps the original
+source obligation; another same-site occurrence cannot silently replace it.
+
+State operand capture, NORMAL-only post support and per-scope source bindings
+are separate receipts. A post at its original update point grants no lifetime
+across subsequent calls; the existing invalidation rules remain in force.
+This is the bounded model under [review](M1_ASYNC_PIPELINE_PLAN.md); its
+[acceptance record](M1_ASYNC_PIPELINE_PROGRESS.md) distinguishes supplied-IR
+connections from unproved native/source/runtime identity. Whole-program M0–M2,
+automatic LeWM source recovery and transformation remain unfinished.
+
 ## Packet continuation connection checkpoint (2026-10-19)
 
 A pending pack and a cleanup action are intermediate operations. A successful

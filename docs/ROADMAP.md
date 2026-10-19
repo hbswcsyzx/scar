@@ -1,5 +1,17 @@
 # SCAR roadmap and scope
 
+> **P4 continuous async checkpoint (2026-10-19):**
+> [Acceptance](M1_ASYNC_PIPELINE_PROGRESS.md) joins original producer-first
+> session inventories, shared incoming tuples and exact actual update/host
+> occurrences over one R/B/three driver calls. Fresh scoped identity, original
+> copy ancestry, per-scope coverage, missing capture and N/R posts stay separate.
+> 1308 affected focused pass: old1032 retained,22 new,254 related old tests;
+> 728 stable sources. All16 groups and fullM0–M2 remain OPEN. Next resolve the
+> original wrapper iterator→body projection and remaining native/source/family,
+> normalization/handler/cancel and occurrence combinations; then component/
+> frozen-full, P5 and M2 original113 constructs/196 fields. Whole-LeWM automatic
+> modeling and speedup are not completed by supplied-IR connection tests.
+
 > **P4 packet-continuation checkpoint (2026-10-19):**
 > [Acceptance](M1_PACKET_CONTINUATION_PROGRESS.md) joins C1/conditional resume,
 > selected pending projection and actual consumers in the existing close and

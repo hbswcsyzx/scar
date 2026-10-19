@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="12" skipped="0" tests="28" time="3.536" timestamp="2026-10-19T01:28:25.860269+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_async_pipeline" name="test_await_host_return_must_consume_its_exact_body_export" time="0.078" /><testcase classname="tests.unit.test_program_async_pipeline" name="test_removing_whole_session_update_keeps_the_original_await_obligation" time="0.084" /><testcase classname="tests.unit.test_program_async_pipeline" name="test_main_pipeline_has_one_body_request_and_three_real_latest_state_calls" time="0.048"><failure message="KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')">def test_main_pipeline_has_one_body_request_and_three_real_latest_state_calls():
+        from scar.ir.program.model import ExitKind, StateVersionValue
+        from scar.ir.program.protocols import OwnedUse
+        from scar.ir.program.resumption import SuspensionFlavor
+    
+&gt;       graph, details = async_pipeline_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_pipeline.py:59: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_async_pipeline_graphs.py:411: in async_pipeline_program
+    item['path'] = _selected_path(graph, item['driver_region'], item['path_choices'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.pipeline'), regions=(Region(id=RegionID(value='async.pipeline'), label='declar...ID(value='pipeline.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+region = Region(id=RegionID(value='pipeline.driver.0'), label='declared driver fixture', entry=BlockID(value='pipeline.driver.0... ValueType(kind=&lt;ValueKind.STATE: 'STATE'&gt;, data_type=None, location=LocationID(value='driver.extra'))))), parent=None)
+choices = {OperationID(value='pipeline.driver.0.driver.gate'): 0, OperationID(value='pipeline.driver.0.driver.drive'): 0, OperationID(value='pipeline.driver.0.driver.association.read'): 0, OperationID(value='pipeline.request.step.branch'): 0}
+
+    def _selected_path(graph, region, choices):
+        """Expose explicitly selected original block edges to the occurrence fixture."""
+        blocks = {block.id: block for block in region.blocks}
+        operations = {op.id: op for op in graph.operations}
+        current, path, seen = region.entry, [], set()
+        while current not in seen:
+            seen.add(current)
+            operation = operations[blocks[current].operations[-1]]
+            if operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                path.append((current, None))
+                return tuple(path)
+&gt;           selected = choices[operation.id]
+                       ^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')
+
+tests/fixtures/program_async_pipeline_graphs.py:215: KeyError</failure></testcase><testcase classname="tests.unit.test_program_async_pipeline" name="test_main_public_query_keeps_await_handoffs_separate_from_item_completion" time="0.032"><failure message="KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')">def test_main_public_query_keeps_await_handoffs_separate_from_item_completion():
+        from scar.ir.program.lifecycle import SessionPost
+&gt;       graph, details = async_pipeline_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_pipeline.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_async_pipeline_graphs.py:411: in async_pipeline_program
+    item['path'] = _selected_path(graph, item['driver_region'], item['path_choices'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.pipeline'), regions=(Region(id=RegionID(value='async.pipeline'), label='declar...ID(value='pipeline.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+region = Region(id=RegionID(value='pipeline.driver.0'), label='declared driver fixture', entry=BlockID(value='pipeline.driver.0... ValueType(kind=&lt;ValueKind.STATE: 'STATE'&gt;, data_type=None, location=LocationID(value='driver.extra'))))), parent=None)
+choices = {OperationID(value='pipeline.driver.0.driver.gate'): 0, OperationID(value='pipeline.driver.0.driver.drive'): 0, OperationID(value='pipeline.driver.0.driver.association.read'): 0, OperationID(value='pipeline.request.step.branch'): 0}
+
+    def _selected_path(graph, region, choices):
+        """Expose explicitly selected original block edges to the occurrence fixture."""
+        blocks = {block.id: block for block in region.blocks}
+        operations = {op.id: op for op in graph.operations}
+        current, path, seen = region.entry, [], set()
+        while current not in seen:
+            seen.add(current)
+            operation = operations[blocks[current].operations[-1]]
+            if operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                path.append((current, None))
+                return tuple(path)
+&gt;           selected = choices[operation.id]
+                       ^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')
+
+tests/fixtures/program_async_pipeline_graphs.py:215: KeyError</failure></testcase><testcase classname="tests.unit.test_program_async_pipeline" name="test_real_helper_normal_post_and_raise_partial_states_stay_distinct" time="0.035"><failure message="KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')">def test_real_helper_normal_post_and_raise_partial_states_stay_distinct():
+        from scar.ir.program.lifecycle import SessionPost
+        from scar.ir.program.model import CompletionResult, ExitKind, StateVersionValue
+&gt;       graph, details = async_pipeline_program(helper_stage=1)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_pipeline.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/program_async_pipeline_graphs.py:411: in async_pipeline_program
+    item['path'] = _selected_path(graph, item['driver_region'], item['path_choices'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.pipeline'), regions=(Region(id=RegionID(value='async.pipeline'), label='declar...ID(value='pipeline.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+region = Region(id=RegionID(value='pipeline.driver.0'), label='declared driver fixture', entry=BlockID(value='pipeline.driver.0... ValueType(kind=&lt;ValueKind.STATE: 'STATE'&gt;, data_type=None, location=LocationID(value='driver.extra'))))), parent=None)
+choices = {OperationID(value='pipeline.driver.0.driver.gate'): 0, OperationID(value='pipeline.driver.0.driver.drive'): 0, OperationID(value='pipeline.driver.0.driver.association.read'): 0, OperationID(value='pipeline.request.step.branch'): 0}
+
+    def _selected_path(graph, region, choices):
+        """Expose explicitly selected original block edges to the occurrence fixture."""
+        blocks = {block.id: block for block in region.blocks}
+        operations = {op.id: op for op in graph.operations}
+        current, path, seen = region.entry, [], set()
+        while current not in seen:
+            seen.add(current)
+            operation = operations[blocks[current].operations[-1]]
+            if operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                path.append((current, None))
+                return tuple(path)
+&gt;           selected = choices[operation.id]
+                       ^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')
+
+tests/fixtures/program_async_pipeline_graphs.py:215: KeyError</failure></testcase><testcase classname="tests.unit.test_program_async_pipeline" name="test_shared_hold_post_preserves_both_selected_sources_and_exact_incoming_choices" time="0.012"><failure message="ValueError: completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge">def test_shared_hold_post_preserves_both_selected_sources_and_exact_incoming_choices():
+        graph, details = shared_async_update_program()
+&gt;       require_valid(_without_protocol(graph))
+
+tests/unit/test_program_async_pipeline.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge
+
+scar/ir/program/validation.py:749: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_pipeline" name="test_shared_post_missing_one_binding_does_not_remove_its_source" time="0.011"><failure message="ValueError: completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge">def test_shared_post_missing_one_binding_does_not_remove_its_source():
+        graph, details = shared_async_update_program(omit_binding=1)
+&gt;       report = _view(graph)
+                 ^^^^^^^^^^^^
+
+tests/unit/test_program_async_pipeline.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_pipeline.py:50: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...e=OperationID(value='driver.drive'), source=OperationID(value='pipeline.fork.arm.0.suspend'))),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge
+
+scar/ir/program/validation.py:749: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_pipeline" name="test_wrong_body_on_one_shared_incoming_is_a_known_source_conflict" time="0.011"><failure message="ValueError: completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge">def test_wrong_body_on_one_shared_incoming_is_a_known_source_conflict():
+        graph, _ = shared_async_update_program(wrong_body_arm=1)
+&gt;       require_valid(_without_protocol(graph))
+
+tests/unit/test_program_async_pipeline.py:167: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge
+
+scar/ir/program/validation.py:749: ValueError</failure></testcase><testcase classname="tests.unit.test_program_async_pipeline" name="test_budget_one_keeps_every_original_shared_source_and_cursor" time="0.011"><failure message="ValueError: completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge">def test_budget_one_keeps_every_original_shared_source_and_cursor():
+        graph, details = shared_async_update_program()
+&gt;       report = _view(graph, budget=1)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_pipeline.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_pipeline.py:50: in _view
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='driver'), regions=(Region(id=RegionID(value='driver'), label='declared driver fixtur...ve=OperationID(value='driver.drive'), source=OperationID(value='pipeline.fork.arm.1.suspend')))), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.0.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge; completion_private_target at program_operation:pipeline.fork.arm.1.suspend: each completion must enter its own target with one actual incoming edge
+
+scar/ir/program/validation.py:749: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_async_pipeline" name="test_one_body_activation_has_three_exact_await_and_async_yield_occurrences" time="0.033"><failure message="KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')">def test_one_body_activation_has_three_exact_await_and_async_yield_occurrences():
+&gt;       program, model, details = async_pipeline_execution()
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_pipeline.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_pipeline_graphs.py:116: in async_pipeline_execution
+    program, static = async_pipeline_program()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_pipeline_graphs.py:411: in async_pipeline_program
+    item['path'] = _selected_path(graph, item['driver_region'], item['path_choices'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.pipeline'), regions=(Region(id=RegionID(value='async.pipeline'), label='declar...ID(value='pipeline.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+region = Region(id=RegionID(value='pipeline.driver.0'), label='declared driver fixture', entry=BlockID(value='pipeline.driver.0... ValueType(kind=&lt;ValueKind.STATE: 'STATE'&gt;, data_type=None, location=LocationID(value='driver.extra'))))), parent=None)
+choices = {OperationID(value='pipeline.driver.0.driver.gate'): 0, OperationID(value='pipeline.driver.0.driver.drive'): 0, OperationID(value='pipeline.driver.0.driver.association.read'): 0, OperationID(value='pipeline.request.step.branch'): 0}
+
+    def _selected_path(graph, region, choices):
+        """Expose explicitly selected original block edges to the occurrence fixture."""
+        blocks = {block.id: block for block in region.blocks}
+        operations = {op.id: op for op in graph.operations}
+        current, path, seen = region.entry, [], set()
+        while current not in seen:
+            seen.add(current)
+            operation = operations[blocks[current].operations[-1]]
+            if operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                path.append((current, None))
+                return tuple(path)
+&gt;           selected = choices[operation.id]
+                       ^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')
+
+tests/fixtures/program_async_pipeline_graphs.py:215: KeyError</failure></testcase><testcase classname="tests.unit.test_execution_async_pipeline" name="test_missing_async_session_attachment_keeps_the_original_update_target" time="0.029"><failure message="KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')">def test_missing_async_session_attachment_keeps_the_original_update_target():
+&gt;       program, model, details = async_pipeline_execution()
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_pipeline.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_pipeline_graphs.py:116: in async_pipeline_execution
+    program, static = async_pipeline_program()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_pipeline_graphs.py:411: in async_pipeline_program
+    item['path'] = _selected_path(graph, item['driver_region'], item['path_choices'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.pipeline'), regions=(Region(id=RegionID(value='async.pipeline'), label='declar...ID(value='pipeline.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+region = Region(id=RegionID(value='pipeline.driver.0'), label='declared driver fixture', entry=BlockID(value='pipeline.driver.0... ValueType(kind=&lt;ValueKind.STATE: 'STATE'&gt;, data_type=None, location=LocationID(value='driver.extra'))))), parent=None)
+choices = {OperationID(value='pipeline.driver.0.driver.gate'): 0, OperationID(value='pipeline.driver.0.driver.drive'): 0, OperationID(value='pipeline.driver.0.driver.association.read'): 0, OperationID(value='pipeline.request.step.branch'): 0}
+
+    def _selected_path(graph, region, choices):
+        """Expose explicitly selected original block edges to the occurrence fixture."""
+        blocks = {block.id: block for block in region.blocks}
+        operations = {op.id: op for op in graph.operations}
+        current, path, seen = region.entry, [], set()
+        while current not in seen:
+            seen.add(current)
+            operation = operations[blocks[current].operations[-1]]
+            if operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                path.append((current, None))
+                return tuple(path)
+&gt;           selected = choices[operation.id]
+                       ^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')
+
+tests/fixtures/program_async_pipeline_graphs.py:215: KeyError</failure></testcase><testcase classname="tests.unit.test_execution_async_pipeline" name="test_missing_session_update_keeps_the_actual_body_result_as_missing_work" time="0.029"><failure message="KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')">def test_missing_session_update_keeps_the_actual_body_result_as_missing_work():
+&gt;       program, model, details = async_pipeline_execution()
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_pipeline.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_pipeline_graphs.py:116: in async_pipeline_execution
+    program, static = async_pipeline_program()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_pipeline_graphs.py:411: in async_pipeline_program
+    item['path'] = _selected_path(graph, item['driver_region'], item['path_choices'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.pipeline'), regions=(Region(id=RegionID(value='async.pipeline'), label='declar...ID(value='pipeline.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+region = Region(id=RegionID(value='pipeline.driver.0'), label='declared driver fixture', entry=BlockID(value='pipeline.driver.0... ValueType(kind=&lt;ValueKind.STATE: 'STATE'&gt;, data_type=None, location=LocationID(value='driver.extra'))))), parent=None)
+choices = {OperationID(value='pipeline.driver.0.driver.gate'): 0, OperationID(value='pipeline.driver.0.driver.drive'): 0, OperationID(value='pipeline.driver.0.driver.association.read'): 0, OperationID(value='pipeline.request.step.branch'): 0}
+
+    def _selected_path(graph, region, choices):
+        """Expose explicitly selected original block edges to the occurrence fixture."""
+        blocks = {block.id: block for block in region.blocks}
+        operations = {op.id: op for op in graph.operations}
+        current, path, seen = region.entry, [], set()
+        while current not in seen:
+            seen.add(current)
+            operation = operations[blocks[current].operations[-1]]
+            if operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                path.append((current, None))
+                return tuple(path)
+&gt;           selected = choices[operation.id]
+                       ^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')
+
+tests/fixtures/program_async_pipeline_graphs.py:215: KeyError</failure></testcase><testcase classname="tests.unit.test_execution_async_pipeline" name="test_missing_current_state_use_does_not_establish_the_session_post" time="0.030"><failure message="KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')">def test_missing_current_state_use_does_not_establish_the_session_post():
+&gt;       program, model, details = async_pipeline_execution()
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_pipeline.py:120: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_pipeline_graphs.py:116: in async_pipeline_execution
+    program, static = async_pipeline_program()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_pipeline_graphs.py:411: in async_pipeline_program
+    item['path'] = _selected_path(graph, item['driver_region'], item['path_choices'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.pipeline'), regions=(Region(id=RegionID(value='async.pipeline'), label='declar...ID(value='pipeline.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+region = Region(id=RegionID(value='pipeline.driver.0'), label='declared driver fixture', entry=BlockID(value='pipeline.driver.0... ValueType(kind=&lt;ValueKind.STATE: 'STATE'&gt;, data_type=None, location=LocationID(value='driver.extra'))))), parent=None)
+choices = {OperationID(value='pipeline.driver.0.driver.gate'): 0, OperationID(value='pipeline.driver.0.driver.drive'): 0, OperationID(value='pipeline.driver.0.driver.association.read'): 0, OperationID(value='pipeline.request.step.branch'): 0}
+
+    def _selected_path(graph, region, choices):
+        """Expose explicitly selected original block edges to the occurrence fixture."""
+        blocks = {block.id: block for block in region.blocks}
+        operations = {op.id: op for op in graph.operations}
+        current, path, seen = region.entry, [], set()
+        while current not in seen:
+            seen.add(current)
+            operation = operations[blocks[current].operations[-1]]
+            if operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                path.append((current, None))
+                return tuple(path)
+&gt;           selected = choices[operation.id]
+                       ^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')
+
+tests/fixtures/program_async_pipeline_graphs.py:215: KeyError</failure></testcase><testcase classname="tests.unit.test_execution_async_pipeline" name="test_tiny_budget_preserves_session_target_denominator_and_unchecked_cursor" time="0.030"><failure message="KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')">def test_tiny_budget_preserves_session_target_denominator_and_unchecked_cursor():
+&gt;       program, model, details = async_pipeline_execution()
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_pipeline.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_async_pipeline_graphs.py:116: in async_pipeline_execution
+    program, static = async_pipeline_program()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/program_async_pipeline_graphs.py:411: in async_pipeline_program
+    item['path'] = _selected_path(graph, item['driver_region'], item['path_choices'])
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.pipeline'), regions=(Region(id=RegionID(value='async.pipeline'), label='declar...ID(value='pipeline.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+region = Region(id=RegionID(value='pipeline.driver.0'), label='declared driver fixture', entry=BlockID(value='pipeline.driver.0... ValueType(kind=&lt;ValueKind.STATE: 'STATE'&gt;, data_type=None, location=LocationID(value='driver.extra'))))), parent=None)
+choices = {OperationID(value='pipeline.driver.0.driver.gate'): 0, OperationID(value='pipeline.driver.0.driver.drive'): 0, OperationID(value='pipeline.driver.0.driver.association.read'): 0, OperationID(value='pipeline.request.step.branch'): 0}
+
+    def _selected_path(graph, region, choices):
+        """Expose explicitly selected original block edges to the occurrence fixture."""
+        blocks = {block.id: block for block in region.blocks}
+        operations = {op.id: op for op in graph.operations}
+        current, path, seen = region.entry, [], set()
+        while current not in seen:
+            seen.add(current)
+            operation = operations[blocks[current].operations[-1]]
+            if operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                path.append((current, None))
+                return tuple(path)
+&gt;           selected = choices[operation.id]
+                       ^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: OperationID(value='pipeline.driver.0.pipeline.request.step.branch')
+
+tests/fixtures/program_async_pipeline_graphs.py:215: KeyError</failure></testcase><testcase classname="tests.unit.test_execution_body_values" name="test_actual_saved_data_binding_keeps_declared_versions_separate_from_numerical_equality[False]" time="0.255" /><testcase classname="tests.unit.test_execution_body_values" name="test_actual_saved_data_binding_keeps_declared_versions_separate_from_numerical_equality[True]" time="0.147" /><testcase classname="tests.unit.test_execution_body_values" name="test_query_rechecks_mutable_external_value_artifact_instead_of_using_old_denotations" time="0.109" /><testcase classname="tests.unit.test_execution_body_values" name="test_body_origin_with_no_captured_drive_or_origin_is_a_missing_query_not_a_crash" time="0.072" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_body_relationship_tables_reject_duplicate_natural_keys_without_inventing_ids[body_drive_executions-body_duplicate_drive]" time="0.063" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_body_relationship_tables_reject_duplicate_natural_keys_without_inventing_ids[body_activation_origins-body_duplicate_origin]" time="0.063" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_known_intermediate_reference_conflict_cannot_hide_behind_equal_create_and_owner_endpoints" time="0.103" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_missing_activation_does_not_suppress_known_wrong_kind_outcome" time="0.064" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_captured_body_without_any_driver_or_origin_still_has_missing_origin_inventory" time="0.059" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_canonical_copy_source_rejects_swapped_creators_even_without_any_object_denotations" time="0.117" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_known_contrary_create_source_is_not_hidden_by_an_absent_origin_association" time="0.116" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_distinct_drives_cannot_claim_one_exact_entry_outcome_or_segment" time="0.075" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_persistent_owner_conflict_is_rejected_even_with_external_origin_and_a_new_thread" time="0.106" /><testcase classname="tests.unit.test_execution_body_port_review" name="test_public_copy_support_retains_intermediate_call_recipe_and_truncation_never_reports_checked_cycle" time="0.080" /></testsuite></testsuites>

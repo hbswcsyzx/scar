@@ -1,0 +1,37 @@
+{
+  "base_revision": "a5ff0f937015c225ba5d46c71bdc4e75866316d4",
+  "plan_sha256": "076bea30322c3b1ab6b000ca3439fd903a87497a5bca5a4d6780d6bb1a20bb03",
+  "obligation_groups": [
+    "F12",
+    "F13",
+    "F14",
+    "F15",
+    "F16",
+    "F17",
+    "F18",
+    "F19",
+    "F20",
+    "F21",
+    "F22",
+    "F23",
+    "F24",
+    "X25",
+    "X26",
+    "X27"
+  ],
+  "protected": {
+    "le-wm": {
+      "path": "/home/zyf/AAA/le-wm",
+      "head": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+      "status": ""
+    },
+    "scar": {
+      "path": "/home/zyf/AAA/scar",
+      "head": "84f165fce1e2e37617c974ce9fee574ea816406b",
+      "status": ""
+    }
+  },
+  "scope": "P4 original continuous async pipeline and source/consumer/occurrence connections; no component/full or LeWM speedup",
+  "previous_goal_turn": "progress: a5ff0f9 committed and remote verified",
+  "subagents_execute_tests": false
+}
