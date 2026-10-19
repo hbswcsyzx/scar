@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="39" time="16.888" timestamp="2026-10-19T03:18:23.511268+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_wrapper" name="test_native_wrapper_has_real_constructor_getter_and_nested_driver_ports" time="0.227" /><testcase classname="tests.unit.test_program_await_wrapper" name="test_deleting_wrapper_link_preserves_source_and_advance_obligations" time="0.100" /><testcase classname="tests.unit.test_program_await_wrapper" name="test_second_create_has_a_distinct_normal_handle_and_latest_state_ports" time="0.049" /><testcase classname="tests.unit.test_program_await_wrapper" name="test_wrapper_projection_cannot_switch_original_constructor_getter_or_state[constructor_raise-protocol_await_wrapper_constructor]" time="0.079" /><testcase classname="tests.unit.test_program_await_wrapper" name="test_wrapper_projection_cannot_switch_original_constructor_getter_or_state[foreign_result-protocol_await_wrapper_read]" time="0.079" /><testcase classname="tests.unit.test_program_await_wrapper" name="test_wrapper_projection_cannot_switch_original_constructor_getter_or_state[missing_state-protocol_await_wrapper_state]" time="0.103" /><testcase classname="tests.unit.test_program_await_wrapper" name="test_wrapper_projection_cannot_switch_original_constructor_getter_or_state[no_projection-protocol_await_wrapper_projection]" time="0.064" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_explicit_native_wrapper_routes_distinct_w_to_held_b_without_copy_union" time="0.371" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_native_wrapper_cannot_declare_w_and_b_the_same_scoped_object" time="0.259" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_another_true_create_of_the_same_body_cannot_replace_wrappers_expected_b" time="0.298" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_missing_inner_call_never_guesses_the_only_visible_driver_activation" time="0.251" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_missing_association_retains_original_constructor_and_drive_obligations[drive]" time="0.252"><failure message="assert ()">missing = 'drive'
+
+    @pytest.mark.parametrize("missing", ("drive", "origin", "link"))
+    def test_missing_association_retains_original_constructor_and_drive_obligations(missing):
+        program, model, details = await_wrapper_execution(attach_link=missing != "link")
+        if missing == "drive":
+            model = replace(model, body_drive_executions=())
+        elif missing == "origin":
+            model = replace(model, body_activation_origins=())
+        report = _index(program, model, details).await_body_links(
+            details["construction_scope"], budget=65536)
+        assert report["inventory"]["source_count"] == 1 and report["job_count"] == 2
+        occurrence, route = _normal(report)
+&gt;       assert occurrence["matched_sources"]
+E       assert ()
+
+tests/unit/test_execution_await_wrapper.py:116: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_await_wrapper" name="test_missing_association_retains_original_constructor_and_drive_obligations[origin]" time="0.316" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_missing_association_retains_original_constructor_and_drive_obligations[link]" time="0.250" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_uncaptured_getter_preserves_source_and_never_invents_a_native_b_read" time="0.260" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_missing_constructor_capture_does_not_select_w_by_object_identity_alone" time="0.256" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_wrapper_distinctness_is_unproved_without_one_complete_object_scope[missing]" time="0.334" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_wrapper_distinctness_is_unproved_without_one_complete_object_scope[cross_artifact]" time="0.262" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_wrapper_tiny_budget_keeps_inventory_masks_unchecked_projections_and_has_cursor" time="0.251" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_wrapper_query_detaches_returns_and_rechecks_a_changed_external_identity_catalog" time="0.283" /><testcase classname="tests.unit.test_program_await_resume" name="test_two_cut_direct_and_await_calls_share_one_original_body_and_keep_final_extraction" time="0.183" /><testcase classname="tests.unit.test_program_await_resume" name="test_self_acquisition_accepts_the_existing_accurate_final_extraction_contract" time="0.087" /><testcase classname="tests.unit.test_execution_await_resume" name="test_real_first_and_final_outcomes_keep_one_body_and_the_exact_extraction[zero-cut]" time="0.352" /><testcase classname="tests.unit.test_execution_await_resume" name="test_real_first_and_final_outcomes_keep_one_body_and_the_exact_extraction[two-cut]" time="1.391" /><testcase classname="tests.unit.test_execution_await_resume" name="test_two_same_code_creates_do_not_select_the_other_body_origin" time="1.593" /><testcase classname="tests.unit.test_execution_await_resume" name="test_old_cut_cannot_be_used_as_the_second_resume_ingress" time="1.535"><failure message="AssertionError: assert ({'body_resume_source', 'resume_ingress', 'resume_target', 'segment_ingress'} &amp; {'transfer_resume'})">def test_old_cut_cannot_be_used_as_the_second_resume_ingress():
+        program, model, details = await_resume_execution()
+        _index(program, model)
+        example, = details['instances']
+        first = example['body_drives'][0].outcome
+        target = example['body_segments'][2]
+        wrong = replace(model, segments=tuple(replace(segment,
+            ingress=replace(segment.ingress, suspension=first)) if segment.id == target else segment
+            for segment in model.segments))
+        report = validate(wrong, program)
+        assert not report.valid
+&gt;       assert {'body_resume_source', 'resume_target', 'resume_ingress', 'segment_ingress'} &amp; {
+            issue.code for issue in report.issues}
+E       AssertionError: assert ({'body_resume_source', 'resume_ingress', 'resume_target', 'segment_ingress'} &amp; {'transfer_resume'})
+
+tests/unit/test_execution_await_resume.py:84: AssertionError</failure></testcase><testcase classname="tests.unit.test_execution_await_resume" name="test_same_body_does_not_allow_another_drive_entry_and_outcome" time="1.759" /><testcase classname="tests.unit.test_execution_await_resume" name="test_missing_exact_caller_pair_keeps_the_captured_body_and_missing_route" time="1.230" /><testcase classname="tests.unit.test_execution_await_resume" name="test_repeated_root_evaluation_never_borrows_a_sibling_body_activation" time="1.418" /><testcase classname="tests.unit.test_execution_await_resume" name="test_budget_one_keeps_sources_jobs_and_original_unexamined_occurrences" time="1.264" /><testcase classname="tests.unit.test_program_await_general" name="test_general_await_expands_real_lookup_call_qualification_and_iterator_return" time="0.005"><failure message="ValueError: the parent factory must retain its five original environment references">def test_general_await_expands_real_lookup_call_qualification_and_iterator_return():
+&gt;       graph, details = await_general_program()
+                         ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_general.py:11: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result_kind = &lt;ResumableKind.GENERATOR: 'GENERATOR'&gt;, attach_link = True
+
+    def await_general_program(*, result_kind=ResumableKind.GENERATOR, attach_link=True):
+        """Build A→parent GET/callee helper→qualified B→original NEXT/body graph."""
+        if type(result_kind) is not ResumableKind or result_kind not in (
+                ResumableKind.GENERATOR, ResumableKind.GENERATOR_COROUTINE):
+            raise ValueError("result_kind must be GENERATOR or GENERATOR_COROUTINE")
+        from scar.ir.program.protocol_await_records import AwaitBodyLink
+    
+        graph, details = await_self_pipeline_program()
+        factory = next(region for region in graph.regions if region.id == graph.root)
+        values = {value.id: value for value in graph.values}
+        body = replace(graph.resumable_bodies[0], kind=result_kind)
+        environment = graph.environments[0]
+        helper = _helper_region(factory.id, graph.locations[0].id, body, environment,
+                                graph.resumable_creates[0].rule)
+    
+        entry_block = next(block for block in factory.blocks if block.id == factory.entry)
+        parent_references = tuple(value for value in entry_block.arguments
+            if isinstance(values[value], ReferenceValue))
+        if len(parent_references) != 5:
+&gt;           raise ValueError("the parent factory must retain its five original environment references")
+E           ValueError: the parent factory must retain its five original environment references
+
+tests/fixtures/program_await_general_graphs.py:258: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_general" name="test_general_await_source_inventory_survives_a_missing_body_link" time="0.005"><failure message="ValueError: the parent factory must retain its five original environment references">def test_general_await_source_inventory_survives_a_missing_body_link():
+&gt;       graph, details = await_general_program(attach_link=False)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_general.py:47: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result_kind = &lt;ResumableKind.GENERATOR: 'GENERATOR'&gt;, attach_link = False
+
+    def await_general_program(*, result_kind=ResumableKind.GENERATOR, attach_link=True):
+        """Build A→parent GET/callee helper→qualified B→original NEXT/body graph."""
+        if type(result_kind) is not ResumableKind or result_kind not in (
+                ResumableKind.GENERATOR, ResumableKind.GENERATOR_COROUTINE):
+            raise ValueError("result_kind must be GENERATOR or GENERATOR_COROUTINE")
+        from scar.ir.program.protocol_await_records import AwaitBodyLink
+    
+        graph, details = await_self_pipeline_program()
+        factory = next(region for region in graph.regions if region.id == graph.root)
+        values = {value.id: value for value in graph.values}
+        body = replace(graph.resumable_bodies[0], kind=result_kind)
+        environment = graph.environments[0]
+        helper = _helper_region(factory.id, graph.locations[0].id, body, environment,
+                                graph.resumable_creates[0].rule)
+    
+        entry_block = next(block for block in factory.blocks if block.id == factory.entry)
+        parent_references = tuple(value for value in entry_block.arguments
+            if isinstance(values[value], ReferenceValue))
+        if len(parent_references) != 5:
+&gt;           raise ValueError("the parent factory must retain its five original environment references")
+E           ValueError: the parent factory must retain its five original environment references
+
+tests/fixtures/program_await_general_graphs.py:258: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_general" name="test_general_await_known_generator_coroutine_cannot_continue_as_iterator" time="0.004"><failure message="ValueError: the parent factory must retain its five original environment references">def test_general_await_known_generator_coroutine_cannot_continue_as_iterator():
+&gt;       graph, details = await_general_program(result_kind=ResumableKind.GENERATOR_COROUTINE)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_general.py:61: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result_kind = &lt;ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'&gt;
+attach_link = True
+
+    def await_general_program(*, result_kind=ResumableKind.GENERATOR, attach_link=True):
+        """Build A→parent GET/callee helper→qualified B→original NEXT/body graph."""
+        if type(result_kind) is not ResumableKind or result_kind not in (
+                ResumableKind.GENERATOR, ResumableKind.GENERATOR_COROUTINE):
+            raise ValueError("result_kind must be GENERATOR or GENERATOR_COROUTINE")
+        from scar.ir.program.protocol_await_records import AwaitBodyLink
+    
+        graph, details = await_self_pipeline_program()
+        factory = next(region for region in graph.regions if region.id == graph.root)
+        values = {value.id: value for value in graph.values}
+        body = replace(graph.resumable_bodies[0], kind=result_kind)
+        environment = graph.environments[0]
+        helper = _helper_region(factory.id, graph.locations[0].id, body, environment,
+                                graph.resumable_creates[0].rule)
+    
+        entry_block = next(block for block in factory.blocks if block.id == factory.entry)
+        parent_references = tuple(value for value in entry_block.arguments
+            if isinstance(values[value], ReferenceValue))
+        if len(parent_references) != 5:
+&gt;           raise ValueError("the parent factory must retain its five original environment references")
+E           ValueError: the parent factory must retain its five original environment references
+
+tests/fixtures/program_await_general_graphs.py:258: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_general" name="test_general_await_occurrence_joins_parent_helper_driver_and_create_origin" time="0.004"><failure message="ValueError: the parent factory must retain its five original environment references">def test_general_await_occurrence_joins_parent_helper_driver_and_create_origin():
+&gt;       program, model, details = await_general_execution()
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_general.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_general_graphs.py:16: in await_general_execution
+    program, static = await_general_program(attach_link=attach_link)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result_kind = &lt;ResumableKind.GENERATOR: 'GENERATOR'&gt;, attach_link = True
+
+    def await_general_program(*, result_kind=ResumableKind.GENERATOR, attach_link=True):
+        """Build A→parent GET/callee helper→qualified B→original NEXT/body graph."""
+        if type(result_kind) is not ResumableKind or result_kind not in (
+                ResumableKind.GENERATOR, ResumableKind.GENERATOR_COROUTINE):
+            raise ValueError("result_kind must be GENERATOR or GENERATOR_COROUTINE")
+        from scar.ir.program.protocol_await_records import AwaitBodyLink
+    
+        graph, details = await_self_pipeline_program()
+        factory = next(region for region in graph.regions if region.id == graph.root)
+        values = {value.id: value for value in graph.values}
+        body = replace(graph.resumable_bodies[0], kind=result_kind)
+        environment = graph.environments[0]
+        helper = _helper_region(factory.id, graph.locations[0].id, body, environment,
+                                graph.resumable_creates[0].rule)
+    
+        entry_block = next(block for block in factory.blocks if block.id == factory.entry)
+        parent_references = tuple(value for value in entry_block.arguments
+            if isinstance(values[value], ReferenceValue))
+        if len(parent_references) != 5:
+&gt;           raise ValueError("the parent factory must retain its five original environment references")
+E           ValueError: the parent factory must retain its five original environment references
+
+tests/fixtures/program_await_general_graphs.py:258: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_general" name="test_general_await_missing_link_keeps_the_actual_helper_and_drive_capture" time="0.004"><failure message="ValueError: the parent factory must retain its five original environment references">def test_general_await_missing_link_keeps_the_actual_helper_and_drive_capture():
+&gt;       program, model, details = await_general_execution(attach_link=False)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_general.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_general_graphs.py:16: in await_general_execution
+    program, static = await_general_program(attach_link=attach_link)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result_kind = &lt;ResumableKind.GENERATOR: 'GENERATOR'&gt;, attach_link = False
+
+    def await_general_program(*, result_kind=ResumableKind.GENERATOR, attach_link=True):
+        """Build A→parent GET/callee helper→qualified B→original NEXT/body graph."""
+        if type(result_kind) is not ResumableKind or result_kind not in (
+                ResumableKind.GENERATOR, ResumableKind.GENERATOR_COROUTINE):
+            raise ValueError("result_kind must be GENERATOR or GENERATOR_COROUTINE")
+        from scar.ir.program.protocol_await_records import AwaitBodyLink
+    
+        graph, details = await_self_pipeline_program()
+        factory = next(region for region in graph.regions if region.id == graph.root)
+        values = {value.id: value for value in graph.values}
+        body = replace(graph.resumable_bodies[0], kind=result_kind)
+        environment = graph.environments[0]
+        helper = _helper_region(factory.id, graph.locations[0].id, body, environment,
+                                graph.resumable_creates[0].rule)
+    
+        entry_block = next(block for block in factory.blocks if block.id == factory.entry)
+        parent_references = tuple(value for value in entry_block.arguments
+            if isinstance(values[value], ReferenceValue))
+        if len(parent_references) != 5:
+&gt;           raise ValueError("the parent factory must retain its five original environment references")
+E           ValueError: the parent factory must retain its five original environment references
+
+tests/fixtures/program_await_general_graphs.py:258: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_cases" name="test_same_iterator_in_both_arms_preserves_two_whole_case_tuples" time="0.011"><failure message="ValueError: control_binding at program_operation:await.case.branch: each control input port needs its own exact use">def test_same_iterator_in_both_arms_preserves_two_whole_case_tuples():
+        graph, details = await_case_program()
+&gt;       report = _await(graph, details)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_cases.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_cases.py:10: in _await
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.case.branch: each control input port needs its own exact use
+
+scar/ir/program/validation.py:749: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_cases" name="test_deleting_case_attachments_keeps_original_incoming_obligations" time="0.012"><failure message="ValueError: control_binding at program_operation:await.case.branch: each control input port needs its own exact use">def test_deleting_case_attachments_keeps_original_incoming_obligations():
+        graph, details = await_case_program()
+        graph = replace(graph, protocol_call_inputs=tuple(replace(row, cases=row.cases[:1])
+            if row.site.operation == details['call'].id else row for row in graph.protocol_call_inputs))
+&gt;       report = _await(graph, details)
+                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_cases.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_cases.py:10: in _await
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.case.branch: each control input port needs its own exact use
+
+scar/ir/program/validation.py:749: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_cases" name="test_actual_incoming_selects_one_case_even_when_both_carry_the_same_body[0]" time="0.017"><failure message="ValueError: control_binding at program_operation:await.case.branch: each control input port needs its own exact use">selected = 0
+
+    @pytest.mark.parametrize('selected', (0, 1))
+    def test_actual_incoming_selects_one_case_even_when_both_carry_the_same_body(selected):
+&gt;       program, model, details = await_case_execution(selected=selected)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_cases.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_case_graphs.py:26: in await_case_execution
+    model, scopes, source = _model(program, (
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.case.branch: each control input port needs its own exact use
+
+scar/ir/program/validation.py:749: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_await_cases" name="test_actual_incoming_selects_one_case_even_when_both_carry_the_same_body[1]" time="0.017"><failure message="ValueError: control_binding at program_operation:await.case.branch: each control input port needs its own exact use">selected = 1
+
+    @pytest.mark.parametrize('selected', (0, 1))
+    def test_actual_incoming_selects_one_case_even_when_both_carry_the_same_body(selected):
+&gt;       program, model, details = await_case_execution(selected=selected)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_cases.py:12: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_case_graphs.py:26: in await_case_execution
+    model, scopes, source = _model(program, (
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.case.branch: each control input port needs its own exact use
+
+scar/ir/program/validation.py:749: ValueError</failure></testcase></testsuite></testsuites>

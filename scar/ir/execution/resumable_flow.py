@@ -237,9 +237,6 @@ def prepare_value_copies(ctx):
     It records no new value or SSA identity. Unknown producer interiors stop the
     route; different arbitrary roots do not establish unequal Python objects.
     """
-    if not ctx.model.body_drive_executions:
-        ctx.body_value_predecessors, ctx.body_value_roots, ctx.body_copy_recipes = {}, {}, {}
-        return
     predecessors, recipes = {}, {}
 
     def copy(target, source, rule, support):

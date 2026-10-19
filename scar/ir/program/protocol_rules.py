@@ -87,6 +87,13 @@ PROFILE_CLAUSES = MappingProxyType({
     ),
 })
 
+# Acquisition can be modelled without its eventual consumer.  A full await
+# expression may additionally describe the original final extraction, in the
+# same caller region.  Optional permission never removes consumer obligations.
+PROFILE_OPTIONAL_CLAUSES = MappingProxyType({
+    ProtocolProfile.AWAIT_ACQUISITION_V1: (ProtocolClause.AWAIT_RESULT_ADAPTER,),
+})
+
 PROFILE_FAMILY = MappingProxyType({
     ProtocolProfile.GENERATOR_BODY_V1: (ResumableKind.GENERATOR, DriverReceiverKind.BODY),
     ProtocolProfile.COROUTINE_BODY_V1: (ResumableKind.COROUTINE, DriverReceiverKind.BODY),
@@ -229,6 +236,9 @@ _allow(_ASYNC_PROFILE, (ProtocolClause.ASYNC_ITEM_ADAPTER,), OutcomeAdapter,
         OutcomeAdapterRule.ASYNCGEN_RETURN_TO_STOP_ASYNC_ITERATION})
 _allow(ProtocolProfile.AWAIT_SITE_V1, (ProtocolClause.AWAIT_RESULT_ADAPTER,), OutcomeAdapter,
        {OutcomeAdapterRule.AWAIT_STOPITER_TO_EXPRESSION})
+_allow(ProtocolProfile.AWAIT_ACQUISITION_V1,
+       (ProtocolClause.AWAIT_RESULT_ADAPTER,), OutcomeAdapter,
+       {OutcomeAdapterRule.AWAIT_STOPITER_TO_EXPRESSION})
 _allow(ProtocolProfile.COROUTINE_AWAIT_WRAPPER_V1,
        (ProtocolClause.WRAPPER_RESULT_ROUTE,), OutcomeAdapter,
        {OutcomeAdapterRule.AWAIT_STOPITER_TO_EXPRESSION})
@@ -283,7 +293,8 @@ def contract_allowed(profile: ProtocolProfile, clause: ProtocolClause, contract:
     """Return whether this exact contract/rule shape is fixed for this profile."""
     if type(profile) is not ProtocolProfile or type(clause) is not ProtocolClause:
         return False
-    if clause not in PROFILE_CLAUSES[profile]:
+    if (clause not in PROFILE_CLAUSES[profile]
+            and clause not in PROFILE_OPTIONAL_CLAUSES.get(profile, ())):
         return False
     contract_type = type(contract)
     rules = ALLOWED_RULES.get(_key(profile, clause, contract_type))
@@ -299,6 +310,6 @@ def contract_allowed(profile: ProtocolProfile, clause: ProtocolClause, contract:
 
 
 __all__ = [
-    "ALLOWED_RULES", "PROFILE_CLAUSES", "PROFILE_FAMILY", "PROFILE_SUBJECT",
+    "ALLOWED_RULES", "PROFILE_CLAUSES", "PROFILE_OPTIONAL_CLAUSES", "PROFILE_FAMILY", "PROFILE_SUBJECT",
     "contract_allowed", "profile_subject", "required_clauses",
 ]

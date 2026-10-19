@@ -60,6 +60,34 @@ def compatible(ctx, source, target, gaps, path):
     return result
 
 
+def distinct_objects(ctx, left, right, gaps, path):
+    """A declared fresh-object rule requires different scoped object identities.
+
+    This is neither numerical inequality nor a new copy/alias relation.
+    Different occurrences or artifact locators alone never establish it.
+    """
+    a, b = _identity(ctx, left), _identity(ctx, right)
+    result = {'status': 'UNPROVED', 'left': left, 'right': right,
+        'left_identity': a, 'right_identity': b,
+        'source_runtime_verified': False, 'runtime_identity_verified': False,
+        'value_identity_verified': False, 'transformation_authorized': False}
+    if type(a) is ObjectIdentity and type(b) is ObjectIdentity:
+        if artifact_key(a.object.artifact) == artifact_key(b.object.artifact):
+            if a.object.object == b.object.object:
+                ctx.issue('body_reference_distinct_conflict', path,
+                    'fresh-object relation has the same declared ObjectID in one exact artifact scope')
+                result['status'] = 'CONFLICT'
+            else:
+                result['status'] = 'DECLARED_DISTINCT_OBJECTS'
+        else:
+            gap(ctx, gaps, 'body_reference_distinct_scope_unproved', path,
+                'cross-artifact object declarations do not establish distinctness')
+    else:
+        gap(ctx, gaps, 'body_reference_distinct_identity_unproved', path,
+            'distinctness requires both exact scoped ObjectIdentity declarations')
+    return result
+
+
 def body_identity_errors(ctx):
     """Called after content resolution on construction and each external refresh."""
     if not hasattr(ctx, 'resolved_body_drives'):
@@ -116,4 +144,4 @@ def body_identity_errors(ctx):
         'fresh_external_context': True, 'cost_scope': 'declared compatibility checks, not native identity proof'}
 
 
-__all__ = ['compatible', 'body_identity_errors']
+__all__ = ['compatible', 'distinct_objects', 'body_identity_errors']

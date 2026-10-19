@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **P4 await composition progress (2026-10-19):**
+> [Plan](M1_AWAIT_COMPOSITION_PLAN.md),
+> [narrow contract amendment](M1_AWAIT_COMPOSITION_AMENDMENT.md), and
+> [evidence and open obligations](M1_AWAIT_COMPOSITION_PROGRESS.md) test original
+> zero/multi-cut paths, general A-to-B acquisition, native wrapper/getter calls,
+> scoped object distinction, missing metadata and actual merge predecessors.
+> These are supplied-IR connection tests, with no new backend or LeWM speedup.
+> All16 original groups and complete A–H/M0–M2 remain OPEN; final focused counts
+> and exact source fingerprints are recorded in the linked progress report.
+
 > **P4 continuous async checkpoint (2026-10-19):**
 > [Acceptance](M1_ASYNC_PIPELINE_PROGRESS.md) joins original producer-first
 > session inventories, shared incoming tuples and exact actual update/host

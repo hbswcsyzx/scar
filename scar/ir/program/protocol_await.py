@@ -139,6 +139,81 @@ def _body_candidates(ctx, advance):
     return tuple(drives), complete
 
 
+def _original_case_guards(ctx, advance):
+    """Closest original copy-merge, independent of any expected tuple.
+
+    Stop at producer/caller boundaries; distinct merges need joint reasoning.
+    Never form a Cartesian product or choose a source from observed Drives.
+    """
+    merges, pending = [], []
+    for identity in (advance.contract.receiver_use, *advance.contract.argument_uses):
+        value = ctx.values[ctx.owned_use(advance.operation, identity).value]
+        seen = set()
+        while value.id not in seen:
+            if not ctx.spend('await_input_inventory_values'):
+                pending.append((identity, 'budget'))
+                break
+            seen.add(value.id)
+            origin = value.origin
+            if type(origin) is not BlockArgument:
+                pending.append((identity, 'producer_boundary'))
+                break
+            _, _, incoming, reached, _ = ctx._edges(value.region)
+            if not ctx.spend('await_input_inventory_edges', len(incoming[origin.block])):
+                pending.append((identity, 'budget'))
+                break
+            predecessors = tuple(edge for parent, edge in incoming[origin.block] if parent in reached)
+            if len(predecessors) > 1:
+                merges.append((origin.block, tuple(ControlEdgeReference(edge[0], edge[1])
+                                                  for edge in predecessors)))
+                break
+            if not predecessors:
+                pending.append((identity, 'caller_boundary'))
+                break
+            source = predecessors[0][3].get(value.id)
+            if source is None:
+                pending.append((identity, 'non_copy_port'))
+                break
+            value = ctx.values[source]
+        else:
+            pending.append((identity, 'copy_cycle'))
+    unique = []
+    for merge in merges:
+        if merge not in unique:
+            unique.append(merge)
+    if len(unique) > 1:
+        pending.append((None, 'multiple_merges_need_tuple_correlation'))
+    guards = unique[0][1] if len(unique) == 1 else ()
+    return guards, tuple(pending)
+
+
+def _input_case_inventory(ctx, advance):
+    """Keep original merge predecessors even after a case row is deleted.
+
+    An absent case is a transient obligation, never a fabricated expected
+    source tuple. The shared connection checker owns the guard inventory.
+    """
+    if not hasattr(ctx, '_await_input_case_inventory'):
+        ctx._await_input_case_inventory = {}
+        ctx._await_input_case_pending = {}
+    site = _site(advance)
+    if site not in ctx._await_input_case_inventory:
+        attachment = ctx.call_inputs.get(site)
+        if attachment is None:
+            guards, pending = _original_case_guards(ctx, advance)
+            cases = tuple((None, guard, True) for guard in guards or (None,))
+            if pending:
+                ctx._await_input_case_pending[site] = pending
+        else:
+            from .protocol_connection_validation import _guard_inventory
+            _, _, missing = _guard_inventory(ctx, advance, attachment)
+            cases = tuple((case, case.guard, False) for case in attachment.cases)
+            cases += tuple((None, ControlEdgeReference(operation, number), True)
+                           for operation, number in missing)
+        ctx._await_input_case_inventory[site] = cases
+    return ctx._await_input_case_inventory[site]
+
+
 def await_inventory(ctx, scope=None):
     """Source-first jobs, including missing rows/links and external boundaries.
 
@@ -189,13 +264,11 @@ def await_inventory(ctx, scope=None):
                     cursor = {'phase': 'await_inventory', 'source': source_ref,
                               'source_operation': owner, 'advance': _site(advance)}
                     break
-                attachment = ctx.call_inputs.get(_site(advance))
-                cases = (None,) if attachment is None else attachment.cases
-                for case in cases:
-                    actual = iterator_use(ctx, advance, case)
+                for case, input_guard, case_missing in _input_case_inventory(ctx, advance):
+                    actual = None if case_missing else iterator_use(ctx, advance, case)
                     conflict = False
                     try:
-                        choices = forced if case is None else _selected(ctx, forced, case.guard)
+                        choices = _selected(ctx, forced, input_guard)
                     except ValueError:
                         choices, conflict = forced, True
                     report = ({'match': False, 'routes': (), 'gaps': ('await_accept_edge_conflict',)}
@@ -214,6 +287,8 @@ def await_inventory(ctx, scope=None):
                         attached = tuple(link for link in links if link.source == source_ref
                                          and link.advance == _site(advance) and link.drive == drive)
                         gaps = []
+                        if case_missing:
+                            gaps.append('await_input_case_missing')
                         if report is None or report['match'] is not True:
                             gaps.append('await_iterator_source_unresolved')
                         if drive is not None and not attached:
@@ -225,6 +300,7 @@ def await_inventory(ctx, scope=None):
                         jobs.append({'scope': scope_id, 'source': source_ref,
                             'source_operation': owner, 'source_success': source_port,
                             'accepted_edges': forced, 'choices': choices, 'case': case,
+                            'input_guard': input_guard, 'input_case_missing': case_missing,
                             'advance': _site(advance), 'advance_operation': advance.operation,
                             'iterator_use': actual, 'drive': drive, 'links': attached,
                             'binding': report, 'status': 'PARTIAL' if gaps else 'DECLARED',
@@ -245,6 +321,9 @@ def await_inventory(ctx, scope=None):
                             ('await_source_row_missing' if source_row is None else
                              'await_source_advance_unresolved',), 'cursor': cursor,
                     'failure_only': failure_only})
+        if cursor is None and getattr(ctx, '_await_input_case_pending', None):
+            site, pending = next(iter(ctx._await_input_case_pending.items()))
+            cursor = {'phase': 'await_input_case_inventory', 'advance': site, 'pending': pending}
         ctx._await_inventory = {'jobs': tuple(jobs), 'source_count': len(sources),
             'known_inventory_complete': cursor is None and not ctx.budget.truncated,
             'cursor': cursor, 'source_inventory_complete': False}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="4" time="1.654" timestamp="2026-10-19T03:07:33.673061+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_wrapper" name="test_native_wrapper_has_real_constructor_getter_and_nested_driver_ports" time="0.226" /><testcase classname="tests.unit.test_program_await_wrapper" name="test_deleting_wrapper_link_preserves_source_and_advance_obligations" time="0.084" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_explicit_native_wrapper_routes_distinct_w_to_held_b_without_copy_union" time="0.337" /><testcase classname="tests.unit.test_execution_await_wrapper" name="test_native_wrapper_cannot_declare_w_and_b_the_same_scoped_object" time="0.286"><failure message="AssertionError: assert 'DECLARED' == 'CONTRADICTED'&#10;  &#10;  - CONTRADICTED&#10;  + DECLARED">def test_native_wrapper_cannot_declare_w_and_b_the_same_scoped_object():
+        program, model, details = await_wrapper_execution(same_object=True)
+        index = _index(program, model, details)
+        report = index.await_body_links(details["construction_scope"], budget=65536)
+        assert details["wrapper_object"] == details["body_object"]
+&gt;       assert report["status"] == "CONTRADICTED"
+E       AssertionError: assert 'DECLARED' == 'CONTRADICTED'
+E         
+E         - CONTRADICTED
+E         + DECLARED
+
+tests/unit/test_execution_await_wrapper.py:55: AssertionError</failure></testcase></testsuite></testsuites>

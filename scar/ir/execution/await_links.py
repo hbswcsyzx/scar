@@ -247,8 +247,9 @@ def project_await_links(ctx, scope, shared):
                 (ref.scope, ref.clause, ref.operation, ref.slot))
             selected = _selected_row(ctx, advance, advance_row) if admitted else None
             case = job.get('case')
-            case_guard = None if case is None else case.guard
-            case_selected = (_guard(ctx, advance, case_guard, shared) if admitted else None)
+            case_guard = job.get('input_guard', None if case is None else case.guard)
+            case_selected = (_guard(ctx, advance, case_guard, shared, incoming=True)
+                             if admitted else None)
             iterator_use = _use(ctx, advance, job.get('iterator_use'))
             if iterator_use is None and job.get('advance') is not None:
                 site = job['advance']
@@ -285,10 +286,11 @@ def _root(ctx, value):
     return ctx.body_value_roots.get(value.id)
 
 
-def _guard(ctx, anchor, edge, shared):
+def _guard(ctx, anchor, edge, shared, *, incoming=False):
     """Exact captured predecessor choice; no match by another activation's site."""
     if edge is None:
         return True
+    target = ctx.core_operations[edge.operation].terminator.successors[edge.successor_index].block
     visit, seen = ctx.visits[anchor.visit], set()
     while visit.id not in seen:
         if not shared.spend('await_guard_visits', path='await.guard'):
@@ -298,10 +300,16 @@ def _guard(ctx, anchor, edge, shared):
         if transfer is None:
             return None
         occurrence = ctx.occurrences[transfer.operation]
-        if occurrence.operation == edge.operation:
-            return transfer.successor_index == edge.successor_index
         if ctx.activation_of(occurrence.id) != ctx.activation_of(anchor.id):
             return None
+        if incoming and visit.block == target:
+            # The closest entry of this exact merge owns the current tuple.
+            # An older loop iteration or a different incoming arm cannot
+            # select the case merely because both carry the same object.
+            return (occurrence.operation == edge.operation
+                    and transfer.successor_index == edge.successor_index)
+        if occurrence.operation == edge.operation:
+            return transfer.successor_index == edge.successor_index
         visit = ctx.visits[occurrence.visit]
     return None
 
@@ -386,7 +394,7 @@ def _wrapper_projection(ctx, source, advance, route, projection, gaps, shared):
     chosen from the drive or inferred from the only visible body activation.
     """
     from .host_order import host_path
-    from .resumable_identity import compatible
+    from .resumable_identity import compatible, distinct_objects
     ref = projection.constructor
     row = ctx.await_protocol_rows.get((ref.scope, ref.clause, ref.operation, ref.slot))
     constructors = []
@@ -446,11 +454,14 @@ def _wrapper_projection(ctx, source, advance, route, projection, gaps, shared):
     if len(reads) != 1:
         gap(ctx, gaps, 'await_wrapper_read_occurrence_unproved', advance.id,
             'this exact call chain lacks one getter W/result B path to this Drive instance')
-    bindings = []
+    bindings, distinctness = [], None
     if len(bodies) == len(reads) == 1:
         read, wrapper_value, body_result = reads[0]
         expected_body = value_for_use(ctx, bodies[0][1])
         drive = ctx.resolved_body_drives[route['drive_occurrence'].id]
+        if shared.spend('await_wrapper_distinctness', path='await.wrapper.distinctness'):
+            distinctness = distinct_objects(ctx, wrapper, expected_body, gaps,
+                                           f'{advance.id}:native-wrapper-fresh-object')
         for left, right, role in ((wrapper, wrapper_value, 'wrapper_input'),
                 (body_result, drive['instance']['value'], 'getter_to_drive'),
                 (expected_body, body_result, 'native_held_body'),
@@ -473,6 +484,7 @@ def _wrapper_projection(ctx, source, advance, route, projection, gaps, shared):
                 'native wrapper B operand belongs to another concrete Create handle')
     return {'projection': projection, 'constructor': constructor, 'wrapper': wrapper,
         'body_operands': tuple(bodies), 'reads': tuple(reads), 'bindings': tuple(bindings),
+        'distinctness': distinctness,
         'status': 'DECLARED' if len(bodies) == len(reads) == 1 and not shared.truncated else 'PARTIAL'}
 
 
@@ -614,6 +626,8 @@ def await_body_links(ctx, scope, *, shared):
                 path=f'await.jobs[{number}].occurrences[{ordinal}]')
             compatibility_cost = len(prepared['bindings']) + len(prepared.get('matched_sources', ()))
             compatibility_cost += sum(len(projection['bindings'])
+                for route in prepared['routes'] for projection in route.get('projections', ()))
+            compatibility_cost += sum(projection.get('distinctness') is not None
                 for route in prepared['routes'] for projection in route.get('projections', ()))
             admitted = admitted and shared.spend('await_binding_projection', compatibility_cost + 1,
                 path=f'await.jobs[{number}].occurrences[{ordinal}].bindings')
