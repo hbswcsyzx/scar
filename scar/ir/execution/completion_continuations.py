@@ -19,6 +19,88 @@ from .pending_payloads import projection
 from .resumable_flow import value_for_use
 
 
+def _close_injection(ctx, source, anchor, transfer, shared):
+    """A declared old packet continued by this close's selected NORMAL edge.
+
+    This is an input-source permission, separate from own-result ownership.
+    Only an exact declared formal on the actual incoming chain is supported;
+    other source forms remain unproved. Same activation or equal type alone
+    cannot permit an arbitrary value forwarded at a call.
+    """
+    from scar.ir.program.model import BlockArgument, CompletionResult, ExitKind, InvokeLiteralResult
+    from scar.ir.program.protocol_connections import InjectedPacketTrigger, ProtocolOperationRef
+    from scar.ir.program.protocols import ProtocolCall, ProtocolCallRule
+    from .await_links import _guard
+
+    operation = ctx.core_operations[anchor.operation]
+    edge = operation.terminator.successors[transfer.successor_index]
+    definition = ctx.core_values[source.value]
+    if (edge.kind is not ExitKind.NORMAL or type(definition) is not ProtocolValue
+            or definition.protocol is not ProtocolValueKind.EXCEPTION_PACKET
+            or type(definition.origin) is not BlockArgument
+            or source.origin not in ctx.visits
+            or ctx.visits[source.origin].block != definition.origin.block):
+        return None
+
+    def active(guard):
+        if _guard(ctx, anchor, guard, shared, incoming=True) is not True:
+            return None
+        visit, seen = ctx.visits[anchor.visit], set()
+        while visit.id not in seen:
+            if not shared.spend('completion_injection_incoming_visits'):
+                return None
+            seen.add(visit.id)
+            if visit.id == source.origin:
+                return True
+            previous = ctx.incoming.get(visit.id)
+            if previous is None:
+                break
+            occurrence = ctx.occurrences[previous.operation]
+            if ctx.activation_of(occurrence.id) != ctx.activation_of(anchor.id):
+                break
+            visit = ctx.visits[occurrence.visit]
+        return None
+
+    for row in ctx.program.protocol_operations:
+        if not shared.spend('completion_injection_protocol_rows'):
+            return None
+        contract = row.contract
+        if (row.operation != anchor.operation or type(contract) is not ProtocolCall
+                or contract.rule is not ProtocolCallRule.DELEGATE_CLOSE
+                or type(contract.result) is not InvokeLiteralResult
+                or contract.result.edge.operation != anchor.operation
+                or contract.result.edge.successor_index != transfer.successor_index):
+            continue
+        site = ProtocolOperationRef(row.scope, row.clause, row.operation, row.slot)
+        for declaration in ctx.program.protocol_call_inputs:
+            if not shared.spend('completion_injection_input_declarations'):
+                return None
+            if declaration.site != site:
+                continue
+            for case in declaration.cases:
+                if not shared.spend('completion_injection_input_cases'):
+                    return None
+                if (type(case.trigger) is not InjectedPacketTrigger
+                        or case.trigger.packet != definition.origin or active(case.guard) is not True):
+                    continue
+                # Forwarded Use ports and own CompletionResult slots are
+                # distinct. Prove the exact captured input-to-forward copy.
+                for argument in edge.arguments:
+                    if not shared.spend('completion_injection_forward_ports'):
+                        return None
+                    if type(argument) is CompletionResult:
+                        continue
+                    use = ctx.uses.get((anchor.id, argument))
+                    actual = value_for_use(ctx, use)
+                    actual_type = (None if actual is None or type(actual) is Unresolved
+                                   else ctx.core_values[actual.value])
+                    if (type(actual_type) is ProtocolValue
+                            and actual_type.protocol is ProtocolValueKind.EXCEPTION_PACKET
+                            and pair(ctx, source, actual, shared)['match'] is True):
+                        return True
+    return None
+
+
 def _ownership(ctx, source, anchor, shared, parents):
     """Exact ordinary call ancestry to this anchor, never code/time matching."""
     if ctx.value_activation(source.id) == ctx.activation_of(anchor.id):
@@ -28,17 +110,20 @@ def _ownership(ctx, source, anchor, shared, parents):
         operation = ctx.core_operations[anchor.operation]
         transfer = ctx.outgoing.get(anchor.id)
         if operation.terminator is None or operation.terminator.kind is not TerminatorKind.INVOKE \
-                or transfer is None or source.origin != transfer.target:
+                or transfer is None:
             return None
+        if source.origin != transfer.target:
+            return _close_injection(ctx, source, anchor, transfer, shared)
         edge = operation.terminator.successors[transfer.successor_index]
         landing = ctx.blocks[ctx.visits[transfer.target].block]
         if not shared.spend('completion_source_result_slots',
                             len(edge.arguments) + len(operation.completions) + 1):
             return None
         signature = next(row for row in operation.completions if row.kind is edge.kind)
-        return True if any(type(actual) is CompletionResult and formal == source.value
+        owned = any(type(actual) is CompletionResult and formal == source.value
             and signature.types[actual.index] == value_type(ctx.core_values[source.value])
-            for actual, formal in zip(edge.arguments, landing.arguments)) else None
+            for actual, formal in zip(edge.arguments, landing.arguments))
+        return True if owned else _close_injection(ctx, source, anchor, transfer, shared)
     links = ctx.call_activations_by_caller.get(anchor.id, ())
     if not shared.spend('completion_source_anchor_links', len(links) + 1):
         return None

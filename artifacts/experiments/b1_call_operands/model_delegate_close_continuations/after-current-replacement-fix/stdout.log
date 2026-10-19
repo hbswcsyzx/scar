@@ -1,0 +1,172 @@
+.F.FF                                                                    [100%]
+=================================== FAILURES ===================================
+_ test_optional_close_tables_do_not_define_the_two_original_c1_continuations[inputs-and-consumers] _
+
+deleted = 'inputs-and-consumers'
+
+    @pytest.mark.parametrize('deleted', ('consumers', 'inputs-and-consumers'))
+    def test_optional_close_tables_do_not_define_the_two_original_c1_continuations(deleted):
+        program, details = packet_continuation_program(two_cuts=True, complete_transitions=True)
+        sites = {_site(row) for row in details['rows']}
+        assert len(sites) == 2
+        operations = {operation.id: operation for operation in program.operations}
+        by_kind = {}
+        for row in details['rows']:
+            result = row.contract.result
+            assert result.edge.operation == row.operation == details['helper']
+            assert result.edge.successor_index == row.slot
+            edge = operations[row.operation].terminator.successors[result.edge.successor_index]
+            by_kind[edge.kind] = _site(row)
+        assert set(by_kind) == {ExitKind.NORMAL, ExitKind.RAISE}
+        assert sum(type(operation.terminator) is SuspendTerminator
+                   for operation in program.operations) == 2
+    
+        baseline = _report(program, details)
+        original_entries = _close_entries(baseline, sites)
+        original_routes = _routes(original_entries)
+        original_consumers = _common_entries(baseline, 'consumers', sites)
+        for site, route in original_routes.items():
+            assert original_entries[site]['row'] in details['rows']
+            assert route['status'] == 'DECLARED'
+            assert route['known_inventory_complete'] is True
+            assert route['actions'] and route['projections']
+            assert details['replacement'] in _topology(route)['actions']
+            # Both own N and own R reach this same original second cut. A handled
+            # branch that never called close is not its NORMAL completion.
+            assert _topology(route)['suspensions'] == {details['second_suspend']}
+            assert details['host_packet'] in route['targets']
+            assert all(item['binding']['match'] is True
+                       for item in _host_checks(route, details['host_packet']))
+            _flags(route)
+    
+        normal_site, raise_site = by_kind[ExitKind.NORMAL], by_kind[ExitKind.RAISE]
+        normal_attachment, = tuple(row for row in program.protocol_call_inputs
+                                   if row.site == normal_site)
+        normal_case, = normal_attachment.cases
+        assert type(normal_case.trigger) is InjectedPacketTrigger
+        assert original_routes[normal_site]['source'] == normal_case.trigger.packet
+        assert original_routes[normal_site]['source'] != original_entries[normal_site]['row'].contract.result
+        assert original_routes[raise_site]['source'] == original_entries[raise_site]['row'].contract.result
+    
+        changed = replace(program,
+            protocol_call_inputs=tuple(row for row in program.protocol_call_inputs
+                if not (deleted == 'inputs-and-consumers' and row.site in sites)),
+            protocol_result_consumers=tuple(row for row in program.protocol_result_consumers
+                                           if row.site not in sites))
+        # Every canonical operation, value, state, control port, cleanup action,
+        # pending definition and cut is exactly the original record. Only the two
+        # optional declaration tables differ.
+        assert replace(changed, protocol_call_inputs=program.protocol_call_inputs,
+            protocol_result_consumers=program.protocol_result_consumers) == program
+        partial = _report(changed, details)
+        entries = _close_entries(partial, sites)
+        routes = _routes(entries)
+        consumers = _common_entries(partial, 'consumers', sites)
+        inputs = _common_entries(partial, 'inputs', sites)
+        for site in sites:
+            assert entries[site]['row'] == original_entries[site]['row']
+            assert _topology(routes[site]) == _topology(original_routes[site])
+            assert details['host_packet'] in routes[site]['targets']
+            _host_checks(routes[site], details['host_packet'])
+            _flags(routes[site])
+            assert consumers[site]['source'] == original_consumers[site]['source']
+            assert set(consumers[site]['targets']) == set(original_consumers[site]['targets'])
+            assert consumers[site]['declared'] == ()
+            assert 'protocol_result_consumers_missing' in consumers[site]['gaps']
+    
+        if deleted == 'consumers':
+            assert changed.protocol_call_inputs == program.protocol_call_inputs
+            for site in sites:
+                assert routes[site]['source'] == original_routes[site]['source']
+                assert routes[site]['status'] == 'DECLARED'
+                assert all(item['binding']['match'] is True
+                           for item in _host_checks(routes[site], details['host_packet']))
+            return
+    
+        assert all(inputs[site]['status'] == 'MISSING'
+                   and 'protocol_call_inputs_missing' in inputs[site]['gaps'] for site in sites)
+        assert routes[raise_site]['source'] == entries[raise_site]['row'].contract.result
+        assert all(item['binding']['match'] is True
+                   for item in _host_checks(routes[raise_site], details['host_packet']))
+        normal = routes[normal_site]
+        assert normal['source'] is None or type(normal['source']) is StaticProtocolGap
+        assert normal['source'] != entries[normal_site]['row'].contract.result
+        assert normal['status'] in ('MISSING', 'PARTIAL', 'NOT_CHECKED')
+        assert 'delegate_close_normal_injected_source_unresolved' in normal['gaps']
+        # An actual pending payload cannot select the deleted expected injection.
+        # Later independently known current sources may have their own proofs;
+        # checks relative to the unresolved original source must remain unknown.
+        root_checks = tuple(item for item in normal['checks'] if item['source'] == normal['source'])
+>       assert root_checks
+E       assert ()
+
+tests/unit/test_program_delegate_close_inventory.py:172: AssertionError
+_ test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[normal-injection] _
+
+close_raised = False
+
+    @pytest.mark.parametrize('close_raised', (False, True), ids=('normal-injection', 'raise-own-packet'))
+    def test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume(close_raised):
+>       program, model, details = _capture(close_raised=close_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_delegate_close_continuations.py:333: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_delegate_close_continuations.py:280: in _capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='delegate.close.host'), regions=(Region(id=RegionID(value='delegate.close.host'), lab...lue='finally.new-raise'), use=UseID(value='finally.new-raise.packet')),))), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: argument_origin at program_value:delegate.close.host.call.2.normal.arg.0: origin does not match owning argument; argument_origin at program_value:delegate.close.host.call.2.normal.arg.1: origin does not match owning argument; argument_origin at program_value:delegate.close.host.call.2.normal.arg.2: origin does not match owning argument; argument_origin at program_value:delegate.close.host.call.2.normal.arg.3: origin does not match owning argument
+
+scar/ir/program/validation.py:759: ValueError
+_ test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[raise-own-packet] _
+
+close_raised = True
+
+    @pytest.mark.parametrize('close_raised', (False, True), ids=('normal-injection', 'raise-own-packet'))
+    def test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume(close_raised):
+>       program, model, details = _capture(close_raised=close_raised)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_delegate_close_continuations.py:333: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_delegate_close_continuations.py:280: in _capture
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='delegate.close.host'), regions=(Region(id=RegionID(value='delegate.close.host'), lab...lue='finally.new-raise'), use=UseID(value='finally.new-raise.packet')),))), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: argument_origin at program_value:delegate.close.host.call.2.normal.arg.0: origin does not match owning argument; argument_origin at program_value:delegate.close.host.call.2.normal.arg.1: origin does not match owning argument; argument_origin at program_value:delegate.close.host.call.2.normal.arg.2: origin does not match owning argument; argument_origin at program_value:delegate.close.host.call.2.normal.arg.3: origin does not match owning argument
+
+scar/ir/program/validation.py:759: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_delegate_close_inventory.py::test_optional_close_tables_do_not_define_the_two_original_c1_continuations[inputs-and-consumers]
+FAILED tests/unit/test_execution_delegate_close_continuations.py::test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[normal-injection]
+FAILED tests/unit/test_execution_delegate_close_continuations.py::test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[raise-own-packet]
+3 failed, 2 passed in 1.90s

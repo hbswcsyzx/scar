@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="14" time="9.081" timestamp="2026-10-19T11:28:41.707534+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_delegate_close_inventory" name="test_optional_close_tables_do_not_define_the_two_original_c1_continuations[consumers]" time="0.543" /><testcase classname="tests.unit.test_program_delegate_close_inventory" name="test_optional_close_tables_do_not_define_the_two_original_c1_continuations[inputs-and-consumers]" time="0.278" /><testcase classname="tests.unit.test_program_delegate_close_inventory" name="test_unknown_packet_root_does_not_contradict_a_real_return_replacement" time="0.016" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[normal-injection]" time="0.844" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_selected_close_packet_crosses_its_actual_parent_c1_and_future_resume[raise-own-packet]" time="0.707" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[pending-use-normal-injection]" time="0.613" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[pending-use-raise-own-packet]" time="0.684" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[resume-transfer-normal-injection]" time="0.605" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[resume-transfer-raise-own-packet]" time="0.615" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[terminal-use-normal-injection]" time="0.628" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_missing_close_parent_occurrence_cannot_borrow_the_complete_sibling[terminal-use-raise-own-packet]" time="0.667" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_close_wrong_source_does_not_gain_the_current_packet_delivery[normal-own-none]" time="0.645" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_close_wrong_source_does_not_gain_the_current_packet_delivery[raise-old-injection]" time="0.630" /><testcase classname="tests.unit.test_execution_delegate_close_continuations" name="test_unresolved_normal_packet_forward_keeps_source_permission_unproved" time="0.604"><failure message="AttributeError: 'Unresolved' object has no attribute 'value'">def test_unresolved_normal_packet_forward_keeps_source_permission_unproved():
+        program, model, details = _capture(close_raised=False)
+        static = details['static']
+        absent, sibling = details['instances']
+        values = {row.id: row for row in program.values}
+        close = next(row for row in program.operations if row.id == static['helper'])
+        uses = {row.id: row for row in close.uses}
+        edge = close.terminator.successors[absent['selected_close']]
+        assert edge.kind is ExitKind.NORMAL
+        forward, = tuple(argument for argument in edge.arguments
+            if type(argument) is not CompletionResult
+            and isinstance(values[uses[argument].value], ProtocolValue)
+            and values[uses[argument].value].protocol is ProtocolValueKind.EXCEPTION_PACKET)
+        original = _use(model, absent['anchor'], forward)
+        assert original.value == absent['injected_value']
+        point = next(row.entry for row in model.activations if row.id == absent['parent_activation'])
+        unresolved = replace(original,
+            value=Unresolved('the selected NORMAL packet-forward operand is not observed', point))
+        changed = replace(model, uses=tuple(unresolved if row == original else row for row in model.uses))
+        assert changed.snapshot == model.snapshot
+        assert len(changed.uses) == len(model.uses)
+        index = _index(program, changed)
+        assert 'use_unresolved' in {gap.code for gap in index.report.gaps}
+&gt;       report = _query(index, absent)
+                 ^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_delegate_close_continuations.py:569: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_execution_delegate_close_continuations.py:310: in _query
+    return index.completion_continuations(example['source_value'], example['anchor'],
+scar/ir/execution/query.py:193: in completion_continuations
+    return completion_continuations(self._content_context(), source, anchor,
+scar/ir/execution/completion_continuations.py:174: in completion_continuations
+    owned = _ownership(ctx, source, anchor, shared, parents) if supported else None
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/completion_continuations.py:115: in _ownership
+    return _close_injection(ctx, source, anchor, transfer, shared)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ctx = &lt;scar.ir.execution.validation._Context object at 0x7e30e3834ec0&gt;
+source = ValueOccurrence(id=ValueOccurrenceID(value='delegate.close.instance.0.P.segment.1.0.finally.landing.sent'), value=ValueID(value='finally.landing.sent'), origin=BlockVisitID(value='delegate.close.instance.0.P.segment.1.0'))
+anchor = OperationOccurrence(id=OperationOccurrenceID(value='delegate.close.instance.0.P.segment.1.1.finally.invoke'), visit=BlockVisitID(value='delegate.close.instance.0.P.segment.1.1'), operation=OperationID(value='finally.invoke'))
+transfer = ControlTransfer(operation=OperationOccurrenceID(value='delegate.close.instance.0.P.segment.1.1.finally.invoke'), successor_index=0, target=BlockVisitID(value='delegate.close.instance.0.P.segment.1.2'))
+shared = &lt;scar.ir.execution.validity_budget.ValidityBudget object at 0x7e30e2caf450&gt;
+
+    def _close_injection(ctx, source, anchor, transfer, shared):
+        """A declared old packet continued by this close's selected NORMAL edge.
+    
+        This is an input-source permission, separate from own-result ownership.
+        Only an exact declared formal on the actual incoming chain is supported;
+        other source forms remain unproved. Same activation or equal type alone
+        cannot permit an arbitrary value forwarded at a call.
+        """
+        from scar.ir.program.model import BlockArgument, CompletionResult, ExitKind, InvokeLiteralResult
+        from scar.ir.program.protocol_connections import InjectedPacketTrigger, ProtocolOperationRef
+        from scar.ir.program.protocols import ProtocolCall, ProtocolCallRule
+        from .await_links import _guard
+    
+        operation = ctx.core_operations[anchor.operation]
+        edge = operation.terminator.successors[transfer.successor_index]
+        definition = ctx.core_values[source.value]
+        if (edge.kind is not ExitKind.NORMAL or type(definition) is not ProtocolValue
+                or definition.protocol is not ProtocolValueKind.EXCEPTION_PACKET
+                or type(definition.origin) is not BlockArgument
+                or source.origin not in ctx.visits
+                or ctx.visits[source.origin].block != definition.origin.block):
+            return None
+    
+        def active(guard):
+            if _guard(ctx, anchor, guard, shared, incoming=True) is not True:
+                return None
+            visit, seen = ctx.visits[anchor.visit], set()
+            while visit.id not in seen:
+                if not shared.spend('completion_injection_incoming_visits'):
+                    return None
+                seen.add(visit.id)
+                if visit.id == source.origin:
+                    return True
+                previous = ctx.incoming.get(visit.id)
+                if previous is None:
+                    break
+                occurrence = ctx.occurrences[previous.operation]
+                if ctx.activation_of(occurrence.id) != ctx.activation_of(anchor.id):
+                    break
+                visit = ctx.visits[occurrence.visit]
+            return None
+    
+        for row in ctx.program.protocol_operations:
+            if not shared.spend('completion_injection_protocol_rows'):
+                return None
+            contract = row.contract
+            if (row.operation != anchor.operation or type(contract) is not ProtocolCall
+                    or contract.rule is not ProtocolCallRule.DELEGATE_CLOSE
+                    or type(contract.result) is not InvokeLiteralResult
+                    or contract.result.edge.operation != anchor.operation
+                    or contract.result.edge.successor_index != transfer.successor_index):
+                continue
+            site = ProtocolOperationRef(row.scope, row.clause, row.operation, row.slot)
+            for declaration in ctx.program.protocol_call_inputs:
+                if not shared.spend('completion_injection_input_declarations'):
+                    return None
+                if declaration.site != site:
+                    continue
+                for case in declaration.cases:
+                    if not shared.spend('completion_injection_input_cases'):
+                        return None
+                    if (type(case.trigger) is not InjectedPacketTrigger
+                            or case.trigger.packet != definition.origin or active(case.guard) is not True):
+                        continue
+                    # Forwarded Use ports and own CompletionResult slots are
+                    # distinct. Prove the exact captured input-to-forward copy.
+                    for argument in edge.arguments:
+                        if not shared.spend('completion_injection_forward_ports'):
+                            return None
+                        if type(argument) is CompletionResult:
+                            continue
+                        use = ctx.uses.get((anchor.id, argument))
+                        actual = value_for_use(ctx, use)
+&gt;                       actual_type = None if actual is None else ctx.core_values[actual.value]
+                                                                                  ^^^^^^^^^^^^
+E                       AttributeError: 'Unresolved' object has no attribute 'value'
+
+scar/ir/execution/completion_continuations.py:95: AttributeError</failure></testcase></testsuite></testsuites>

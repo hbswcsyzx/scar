@@ -1,5 +1,20 @@
 # SCAR roadmap and scope
 
+> **P4 original F23 structural acceptance (2026-10-19):**
+> [Frozen plan](M1_DELEGATE_CLOSE_PLAN.md) and
+> [actual attempts / original obligations](M1_DELEGATE_CLOSE_PROGRESS.md)
+> retain both selected close/C1 inventories without optional input/consumer
+> attachments. Unknown original source and independently known replacement
+> current value remain separate. Exact actual NORMAL input permission, own
+> RAISE slots, full packet/state delivery, instance-local missing facts and
+> Unresolved operands are checked.1807 affected focused pass, all1793 prior
+> identities retained,851 stable sources. F23 closes conditionally; F17/F21/G
+> stay closed, the other13 families and A–H/P5/M2 remain open.
+> [Next N4 read review](M1_AWAIT_REEVALUATION_NEXT_REVIEW.md) separates a current
+> acquisition's own result boundary from shared object identity and retains
+> the original whole-pipeline reevaluation requirement. Automatic whole-LeWM
+> modeling, transformation and new speedup remain unproved.
+
 > **P4 original F17/F21 structural acceptance (2026-10-19):**
 > [Frozen plan](M1_ASYNC_DELEGATE_EDGE_PLAN.md) and
 > [actual evidence / remaining scope](M1_ASYNC_DELEGATE_EDGE_PROGRESS.md)

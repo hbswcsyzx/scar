@@ -1,5 +1,32 @@
 # SCAR execution model
 
+## Original control inventory and independently known current values (2026-10-19)
+
+Optional descriptions cannot determine whether an original execution path
+exists. Removing input or consumer declarations leaves its Operation results,
+selected completion edges, StateLocation versions, cleanup actions and host
+ports in the model. The query enumerates that original control inventory and
+reports a missing source separately. It cannot choose an expected source by
+looking at an actual consumer's payload.
+
+An unknown original source and a known later replacement are compatible facts.
+A proved active CleanupReplace may establish a new current value and role,
+including a Return that replaces a Raise. The original source gap and its
+boundary receipt remain. Enter/Resume cannot acquire that permission by
+reading an otherwise unproved payload. Thus current-copy True is distinct
+from original-source preservation True, False or unknown.
+
+An operation may also continue an independently declared input rather than
+return it as an own result. That association requires its exact input source,
+current incoming choice, captured source visit and selected forward Use.
+Same activation and equal type are insufficient. Actual missing Uses and
+explicit Unresolved operands retain evidence gaps without removing canonical
+dependencies. See the [frozen close/C1 plan](M1_DELEGATE_CLOSE_PLAN.md) and
+[actual attempts and acceptance boundary](M1_DELEGATE_CLOSE_PROGRESS.md).
+The final1807 affected focused cases retain all1793 prior identities on851
+stable sources. This completes original F23 conditional structural acceptance;
+the other13 families and automatic whole-program recovery remain open.
+
 ## Current values, state posts, and actual uses (2026-10-19)
 
 An async request's COMPLETE state post and its delivered value are independent

@@ -8,7 +8,7 @@ from .control import LanguageCompletionKind
 from .driver_flow import body_drive_target
 from .drivers import BodyResume
 from .model import OperationResult, TerminatorKind
-from .protocols import HostTerminal, OwnedUse
+from .protocols import HostTerminal, OwnedUse, StaticProtocolGap
 from .resumption import ResumeSlotKind, SuspendTerminator
 
 
@@ -621,8 +621,22 @@ def _completion_walk(ctx, source, *, start, choices=(), cuts=(),
                     packet = ctx.bind(expected, payload, choices=candidate_choices)
                 match = None if packet is None else packet['match']
                 candidate['packet_match'] = match
-                if match is not True and delivered and type(action) is CleanupReplace:
+                if (match is not True and type(action) is CleanupReplace
+                        and (delivered or type(expected) is StaticProtocolGap)):
+                    # A known active replacement has its own current payload
+                    # even when the earlier source was not declared/captured.
+                    # Keep that original gap; Enter/Resume cannot fill it by
+                    # selecting their actual payload as an expected source.
                     if payload is not None and declared.kind in (LanguageCompletionKind.RETURN, LanguageCompletionKind.RAISE):
+                        if type(expected) is StaticProtocolGap:
+                            # The independently unknown old source still has
+                            # an obligation at this replacement boundary.
+                            # Recording only the new current source would
+                            # silently discard that missing root evidence.
+                            checks.append({'source': expected, 'target': payload,
+                                'kind': 'C1_PENDING', 'binding': packet if packet is not None
+                                else ctx.bind(expected, payload, choices=candidate_choices),
+                                **fields(expected, candidate_choices)})
                         override = {'action': action, 'definition': candidate['definition'],
                                     'source': payload, 'previous_source': expected,
                                     'token_binding': candidate['token_binding'],

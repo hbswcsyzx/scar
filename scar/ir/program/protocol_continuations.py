@@ -18,7 +18,7 @@ from .protocol_connections import (
 from .protocols import (
     ContractResult, DriverSubject, HostTerminal, OutcomeAdapter,
     OutcomeAdapterRule as AR, OwnedUse, ProtocolCall, ProtocolCallRule as CR,
-    ProtocolClause as C, StaticProtocolGap,
+    ProtocolClause as C, StaticGapReason, StaticProtocolGap,
 )
 from .resumption import ResumeSlotKind, SuspendTerminator
 from .structured import ControlEdgeReference
@@ -257,16 +257,21 @@ def _close_frontier(ctx, row, case, pending_by_operation, check, issue, missing)
     replacement exception. Opaque interposition remains a precise boundary.
     """
     selected = _selected_kind(ctx, row.contract.result)
+    guard = None if case is None else case.guard
     if selected is ExitKind.NORMAL:
-        if type(case.trigger) is not InjectedPacketTrigger:
+        if case is None or type(case.trigger) is not InjectedPacketTrigger:
             missing("delegate_close_normal_injected_source_unresolved", _site(row))
-            return {"status": "MISSING", "targets": ()}
-        source = case.trigger.packet
+            # The source declaration can be absent while the original close
+            # edge, C1 actions and eventual host still exist. Keep that CFG
+            # inventory without choosing the expected packet from its uses.
+            source = StaticProtocolGap(StaticGapReason.SOURCE_SCOPE_INVENTORY_UNRESOLVED)
+        else:
+            source = case.trigger.packet
     else:
         source = row.contract.result
     choices = (ControlEdgeReference(row.operation, row.slot),)
     def packet_match(target):
-        report = ctx.bind(source, target, guard=case.guard, choices=choices)
+        report = ctx.bind(source, target, guard=guard, choices=choices)
         if report["match"] is False and ctx.may_forwards(source, target) is True:
             # The selected completion and an earlier input case can meet at a
             # later C1 merge. A possible copy is not a must proof, but neither
@@ -333,7 +338,7 @@ def _close_frontier(ctx, row, case, pending_by_operation, check, issue, missing)
                         missing("delegate_close_route_truncated", _site(row))
                         return {"status": "NOT_CHECKED", "targets": tuple(targets)}
                     token = ctx.bind(ctx.values[definition.value].origin, actual,
-                                     guard=case.guard, choices=choices)
+                                     guard=guard, choices=choices)
                     if token["match"] is not True:
                         if token["match"] is None or ctx.may_forwards(ctx.values[definition.value].origin, actual) is True:
                             missing("delegate_close_c1_guard_correlation_unresolved", identity)
@@ -402,10 +407,13 @@ def _close_route(ctx, row, case, pending_by_operation, check, issue, missing):
                 'known_inventory_complete': False, 'source_inventory_complete': False,
                 'frontier_only': False}
     choices = ctx.selected_edges((ControlEdgeReference(row.operation, row.slot),
-                                 *((case.guard,) if case.guard is not None else ())))
+                                 *((case.guard,) if case is not None and case.guard is not None else ())))
     edge = ctx.operations[row.operation].terminator.successors[port.edge]
     result = packet_continuations(ctx, frontier['source'], start=(edge.block, 0),
                                   choices=choices, cuts=(row.operation,))
+    if type(frontier['source']) is StaticProtocolGap:
+        result = {**result, 'gaps': tuple(dict.fromkeys((*result['gaps'],
+            'delegate_close_normal_injected_source_unresolved')))}
     for item in result['checks']:
         check(item['binding']['match'], _site(row),
               "close continuation does not preserve its independently selected packet at the actual consumer",
@@ -530,6 +538,9 @@ def continuation_connections(ctx):
                 declaration = ctx.call_inputs.get(identity)
                 if declaration is None:
                     missing("continuation_call_inputs_missing", identity)
+                    if contract.rule is CR.DELEGATE_CLOSE:
+                        entry['close_routes'] = [
+                            _close_route(ctx, row, None, pending_by_operation, check, issue, missing)]
                 else:
                     for number, case in enumerate(declaration.cases):
                         if not ctx.spend("continuation_cases"):
