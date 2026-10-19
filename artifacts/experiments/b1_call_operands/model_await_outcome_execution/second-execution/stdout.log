@@ -1,0 +1,211 @@
+........FFFF..F......                                                    [100%]
+=================================== FAILURES ===================================
+_ test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers[lookup_raise-LOOKUP-await.general.helper.lookup] _
+
+failure_stage = 'lookup_raise', selected_stage = 'LOOKUP'
+stage_operation = 'await.general.helper.lookup'
+
+    @pytest.mark.parametrize(("failure_stage", "selected_stage", "stage_operation"), _STAGES)
+    def test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers(
+            failure_stage, selected_stage, stage_operation):
+        program, model, details = await_outcome_failure_execution(failure_stage)
+        require_valid(program)
+        index = ExecutionIndex(model, program)
+        source, parent_packet, parent_states = _parent_raise_values(program, model, details)
+        view = index.await_body_links(details["acquisition_scope"], budget=65536)
+        assert view["source_runtime_verified"] is False
+        assert view["runtime_identity_verified"] is False
+        assert view["transformation_authorized"] is False
+    
+        # The static D4 paths remain the denominator of the occurrence join.
+        static = _static_await(program, details["acquisition_scope"])
+        static_keys = {row["key"] for row in static["failure_paths"]}
+        dynamic = _paths(view, source)
+        assert { _static_definition(row)["key"] for row in dynamic } == static_keys
+    
+        own = _stage_path(view, source, "ACQUISITION_RAISE")
+        assert own["stage"] == source
+        assert own["source"] == source
+        own_terminal = _dynamic_terminal(own, details["get_failure"].id)
+>       host_occurrence = _operation_occurrence(
+            model, details["parent_operations"][details["get_failure"].id])
+
+tests/unit/test_execution_await_outcome_failures.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='a62a0bcc5fc4...authored call pairing; not source/runtime identity evidence')),), body_drive_executions=(), body_activation_origins=())
+operation_id = OperationOccurrenceID(value='await.outcome.lookup_raise.parent.2.factory.awaitable.failure.raise')
+
+    def _operation_occurrence(model, operation_id):
+        matches = tuple(row for row in model.operations if row.operation == operation_id)
+>       assert len(matches) == 1
+E       assert 0 == 1
+E        +  where 0 = len(())
+
+tests/unit/test_execution_await_outcome_failures.py:81: AssertionError
+_ test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers[method_call_raise-METHOD_CALL-await.general.helper.call] _
+
+failure_stage = 'method_call_raise', selected_stage = 'METHOD_CALL'
+stage_operation = 'await.general.helper.call'
+
+    @pytest.mark.parametrize(("failure_stage", "selected_stage", "stage_operation"), _STAGES)
+    def test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers(
+            failure_stage, selected_stage, stage_operation):
+        program, model, details = await_outcome_failure_execution(failure_stage)
+        require_valid(program)
+        index = ExecutionIndex(model, program)
+        source, parent_packet, parent_states = _parent_raise_values(program, model, details)
+        view = index.await_body_links(details["acquisition_scope"], budget=65536)
+        assert view["source_runtime_verified"] is False
+        assert view["runtime_identity_verified"] is False
+        assert view["transformation_authorized"] is False
+    
+        # The static D4 paths remain the denominator of the occurrence join.
+        static = _static_await(program, details["acquisition_scope"])
+        static_keys = {row["key"] for row in static["failure_paths"]}
+        dynamic = _paths(view, source)
+        assert { _static_definition(row)["key"] for row in dynamic } == static_keys
+    
+        own = _stage_path(view, source, "ACQUISITION_RAISE")
+        assert own["stage"] == source
+        assert own["source"] == source
+        own_terminal = _dynamic_terminal(own, details["get_failure"].id)
+>       host_occurrence = _operation_occurrence(
+            model, details["parent_operations"][details["get_failure"].id])
+
+tests/unit/test_execution_await_outcome_failures.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='a62a0bcc5fc4...authored call pairing; not source/runtime identity evidence')),), body_drive_executions=(), body_activation_origins=())
+operation_id = OperationOccurrenceID(value='await.outcome.method_call_raise.parent.2.factory.awaitable.failure.raise')
+
+    def _operation_occurrence(model, operation_id):
+        matches = tuple(row for row in model.operations if row.operation == operation_id)
+>       assert len(matches) == 1
+E       assert 0 == 1
+E        +  where 0 = len(())
+
+tests/unit/test_execution_await_outcome_failures.py:81: AssertionError
+_ test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers[qualification_reject-QUALIFICATION_REJECT-await.general.helper.qualify.branch] _
+
+failure_stage = 'qualification_reject', selected_stage = 'QUALIFICATION_REJECT'
+stage_operation = 'await.general.helper.qualify.branch'
+
+    @pytest.mark.parametrize(("failure_stage", "selected_stage", "stage_operation"), _STAGES)
+    def test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers(
+            failure_stage, selected_stage, stage_operation):
+        program, model, details = await_outcome_failure_execution(failure_stage)
+        require_valid(program)
+        index = ExecutionIndex(model, program)
+        source, parent_packet, parent_states = _parent_raise_values(program, model, details)
+        view = index.await_body_links(details["acquisition_scope"], budget=65536)
+        assert view["source_runtime_verified"] is False
+        assert view["runtime_identity_verified"] is False
+        assert view["transformation_authorized"] is False
+    
+        # The static D4 paths remain the denominator of the occurrence join.
+        static = _static_await(program, details["acquisition_scope"])
+        static_keys = {row["key"] for row in static["failure_paths"]}
+        dynamic = _paths(view, source)
+        assert { _static_definition(row)["key"] for row in dynamic } == static_keys
+    
+        own = _stage_path(view, source, "ACQUISITION_RAISE")
+        assert own["stage"] == source
+        assert own["source"] == source
+        own_terminal = _dynamic_terminal(own, details["get_failure"].id)
+>       host_occurrence = _operation_occurrence(
+            model, details["parent_operations"][details["get_failure"].id])
+
+tests/unit/test_execution_await_outcome_failures.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='ce4698909817...authored call pairing; not source/runtime identity evidence')),), body_drive_executions=(), body_activation_origins=())
+operation_id = OperationOccurrenceID(value='await.outcome.qualification_reject.parent.2.factory.awaitable.failure.raise')
+
+    def _operation_occurrence(model, operation_id):
+        matches = tuple(row for row in model.operations if row.operation == operation_id)
+>       assert len(matches) == 1
+E       assert 0 == 1
+E        +  where 0 = len(())
+
+tests/unit/test_execution_await_outcome_failures.py:81: AssertionError
+___ test_parent_own_raise_is_kept_without_a_call_activation_or_body_advance ____
+
+    def test_parent_own_raise_is_kept_without_a_call_activation_or_body_advance():
+        program, model, details = await_outcome_failure_execution(
+            "qualification_reject", capture_call=False)
+        require_valid(program)
+        index = ExecutionIndex(model, program)
+        source, parent_packet, parent_states = _parent_raise_values(program, model, details)
+        view = index.await_body_links(details["acquisition_scope"], budget=65536)
+    
+        own = _stage_path(view, source, "ACQUISITION_RAISE")
+        assert own["source"] == source
+        assert own["stage"] == source
+        terminal = _dynamic_terminal(own, details["get_failure"].id)
+>       host_occurrence = _operation_occurrence(
+            model, details["parent_operations"][details["get_failure"].id])
+
+tests/unit/test_execution_await_outcome_failures.py:246: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+model = ExecutionModel(snapshot=ProgramSnapshot(artifact=ProviderArtifact(uri='memory:canonical-program', sha256='ce4698909817...r_associations=(), contribution_supports=(), call_activations=(), body_drive_executions=(), body_activation_origins=())
+operation_id = OperationOccurrenceID(value='await.outcome.qualification_reject.parent.2.factory.awaitable.failure.raise')
+
+    def _operation_occurrence(model, operation_id):
+        matches = tuple(row for row in model.operations if row.operation == operation_id)
+>       assert len(matches) == 1
+E       assert 0 == 1
+E        +  where 0 = len(())
+
+tests/unit/test_execution_await_outcome_failures.py:81: AssertionError
+_ test_original_parent_anchor_counts_are_not_derived_route_or_budget_prefix_counts[outcomes-outcome_inventory-advance_operation] _
+
+field = 'outcomes', inventory_field = 'outcome_inventory'
+parent_field = 'advance_operation'
+
+    @pytest.mark.parametrize("field,inventory_field,parent_field", (
+        ("outcomes", "outcome_inventory", "advance_operation"),
+        ("failure_paths", "failure_path_inventory", "source_operation"),
+    ))
+    def test_original_parent_anchor_counts_are_not_derived_route_or_budget_prefix_counts(
+            field, inventory_field, parent_field):
+        program, model, details = await_resume_execution(zero_cut=True, instances=2)
+        scope = details["static"]["acquisition_scope"]
+        original = _static(program, scope)[field]
+        assert original
+        expected = {row["key"]: sum(occurrence.operation == row[parent_field]
+            for occurrence in model.operations) for row in original}
+        assert all(count == 2 for count in expected.values())
+        index = _index(program, model)
+        complete = index.await_body_links(scope, budget=QUERY_BUDGET)
+        assert set(_keys(complete, field)) == set(expected)
+        inventory = complete[inventory_field]
+        assert inventory["occurrence_count"] == sum(expected.values())
+        assert inventory["observed_occurrence_count"] == sum(expected.values())
+        assert inventory["checked_occurrence_count"] == sum(expected.values())
+        assert inventory["pending_occurrence_count"] == 0
+        for row in complete[field]:
+            assert row["occurrence_count"] == expected[row["key"]]
+    
+        bounded = index.await_body_links(scope, budget=1)
+        inventory = bounded[inventory_field]
+        assert inventory["known_inventory_complete"] is False
+        assert inventory["jobs_total"] is None
+        assert inventory["pending_count"] is None
+        assert inventory["occurrence_count"] is None
+        assert inventory["pending_occurrence_count"] is None
+        assert inventory["observed_occurrence_count"] == sum(
+            expected[row["key"]] for row in bounded[field])
+        assert inventory["checked_occurrence_count"] <= inventory["observed_occurrence_count"]
+>       assert inventory["cursor"] is not None
+E       assert None is not None
+
+tests/unit/test_execution_await_outcome_boundaries.py:86: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_await_outcome_failures.py::test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers[lookup_raise-LOOKUP-await.general.helper.lookup]
+FAILED tests/unit/test_execution_await_outcome_failures.py::test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers[method_call_raise-METHOD_CALL-await.general.helper.call]
+FAILED tests/unit/test_execution_await_outcome_failures.py::test_expanded_failure_uses_exact_helper_completion_parent_raise_and_consumers[qualification_reject-QUALIFICATION_REJECT-await.general.helper.qualify.branch]
+FAILED tests/unit/test_execution_await_outcome_failures.py::test_parent_own_raise_is_kept_without_a_call_activation_or_body_advance
+FAILED tests/unit/test_execution_await_outcome_boundaries.py::test_original_parent_anchor_counts_are_not_derived_route_or_budget_prefix_counts[outcomes-outcome_inventory-advance_operation]
+5 failed, 16 passed in 17.96s

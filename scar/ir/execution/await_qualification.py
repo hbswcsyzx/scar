@@ -7,16 +7,18 @@ from .coordinates import OccurrencePhase, OccurrencePoint
 from .resumable_flow import gap, value_for_use
 
 
-def qualification_occurrences(ctx, flow, shared):
+def qualification_occurrences(ctx, flow, shared, *, scope=None):
     from .await_links import _flags, _result, _root, _use
     from .host_order import host_path
     from scar.ir.program.protocols import OwnedUse
 
-    sites = ctx.await_qualification_sites
-    total = sum(len(ctx.await_occurrences_by_site.get(row.operation, ())) for row in sites)
+    sites = (tuple((row, ctx.await_occurrences_by_site.get(row.operation, ()))
+                   for row in ctx.await_qualification_sites) if scope is None else
+             getattr(ctx, 'await_qualifications_by_scope', {}).get(scope, ()))
+    total = sum(len(occurrences) for _, occurrences in sites)
     rows, gaps, checked, cursor = [], [], 0, None
-    for row in sites:
-        for occurrence in ctx.await_occurrences_by_site.get(row.operation, ()):
+    for row, occurrences in sites:
+        for occurrence in occurrences:
             local = []
             if not shared.spend('await_qualification_occurrences', path='await.qualification.occurrences'):
                 rows.append({'record': row, 'occurrence': occurrence, 'feasibility': None,

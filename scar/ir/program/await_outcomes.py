@@ -150,7 +150,7 @@ def _caller_consumers(ctx, advance, parent, choices, role, requires, issues):
     return tuple(views), tuple(dict.fromkeys(gaps))
 
 
-def outcome_connections(ctx, original_inventory):
+def outcome_connections(ctx, original_inventory, *, derive=True):
     from .protocol_await import _result_copy
     by_input, _, successor_total = prepare(ctx)
     seeds, seen = [], set()
@@ -161,7 +161,7 @@ def outcome_connections(ctx, original_inventory):
             continue
         drive = ctx.operations[job['drive']]
         for number, edge in enumerate(drive.terminator.successors):
-            if not ctx.spend('await_original_outcome_edges'):
+            if derive and not ctx.spend('await_original_outcome_edges'):
                 enumeration_complete = False
                 cursor = cursor or {'phase': 'await_outcome_inventory', 'drive': drive.id, 'successor': number}
                 break
@@ -173,6 +173,8 @@ def outcome_connections(ctx, original_inventory):
                 continue
             seen.add(key)
             seeds.append((key, job, number, body, outcome))
+    if not derive:
+        ctx.preparation['await_deferred_original_outcome_keys'] = len(seeds)
     rows, issues, gaps, checked = [], [], [], 0
     for key, job, number, body, outcome in seeds:
         payload = DriveResult(outcome, 0)
@@ -183,10 +185,11 @@ def outcome_connections(ctx, original_inventory):
             'source_operation': job['source_operation'], 'advance_operation': job['advance_operation'],
             'input_guard': job.get('input_guard'), 'choices': job['choices'],
             'drive_outcome': outcome, 'payload': payload, 'kind': kind}
-        if not ctx.spend('await_outcome_jobs'):
+        if not derive or not ctx.spend('await_outcome_jobs'):
             rows.append({**row, 'conversion_legs': (), 'advance_legs': (), 'consumers': (), 'status': 'NOT_CHECKED',
-                         'gaps': (), **flags()})
-            cursor = cursor or {'phase': 'await_outcome_jobs', 'key': key}
+                         'gaps': ('await_static_details_deferred_without_capture',) if not derive else (), **flags()})
+            if derive:
+                cursor = cursor or {'phase': 'await_outcome_jobs', 'key': key}
             continue
         local, converted, advance_legs, caller_views = list(job['gaps']), [], [], []
         required, complete = required_choices(ctx, payload)

@@ -1,5 +1,17 @@
 # SCAR roadmap and scope
 
+> **P4 per-occurrence outcome/failure progress (2026-10-19):**
+> [Frozen D5 view](M1_AWAIT_OUTCOME_EXECUTION_CONTRACT.md) and
+> [source-bound evidence and remaining original obligations](M1_AWAIT_OUTCOME_EXECUTION_PROGRESS.md)
+> connect static obligations to exact captured caller/Drive/converter/packet/
+> state/final-consumer occurrences. Whole packet delivery and parent delivery
+> have separate copy supports; absent/sibling captures and inactive legs do not
+> supply missing evidence. Zero captures keep original keys and deferred-proof
+> reasons without fake budget exhaustion. 1501 affected focused pass on783
+> stable sources; all1477 earlier case identities are required by the archive.
+> Whole-program modeling, complete A–H/16 groups, P5 and M2 remain OPEN.
+> Supplied-IR tests do not establish automatic LeWM modeling or speedup.
+
 > **P4 source-first outcome/consumer progress (2026-10-19):**
 > [Frozen D4 view](M1_AWAIT_OUTCOME_VIEW_CONTRACT.md) and
 > [evidence and original open obligations](M1_AWAIT_OUTCOME_LINK_PROGRESS.md)

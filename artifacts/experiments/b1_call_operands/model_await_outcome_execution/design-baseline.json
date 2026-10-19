@@ -1,0 +1,20 @@
+{
+  "base_revision": "287c906c95658d25200d057fe9002fc3d1f8479c",
+  "previous_turn": "progress:1477 focused cases, source-first outcome and failure archive287c906 pushed; clean tree and remote SHA verified",
+  "scope_plan": "docs/M1_AWAIT_OUTCOME_PLAN.md",
+  "plan_sha256": "72480678e74735c9a8ee69b5eb59ce1243b83d86ae41403caeb2cdc3e479fc55",
+  "view_contract": "docs/M1_AWAIT_OUTCOME_EXECUTION_CONTRACT.md",
+  "view_contract_sha256": "5f49d6efb28d2902d02800c986978b332312abe08890cbbf40aa51879dbcd07f",
+  "previous_focused_cases": 1477,
+  "obligation_groups": ["F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24", "X25", "X26", "X27"],
+  "completed_obligation_groups": [],
+  "full_original_A_H_required": true,
+  "p4_complete": false,
+  "m0_m2_complete": false,
+  "new_backend": false,
+  "new_lewm_speedup": false,
+  "protected": {
+    "le-wm": {"path": "/home/zyf/AAA/le-wm", "head": "f70fed80288462ca4d006cb3607ec6da6eaa851f", "status": ""},
+    "scar": {"path": "/home/zyf/AAA/scar", "head": "84f165fce1e2e37617c974ce9fee574ea816406b", "status": ""}
+  }
+}

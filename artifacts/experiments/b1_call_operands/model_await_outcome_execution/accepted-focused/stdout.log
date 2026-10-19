@@ -1,0 +1,98 @@
+........................................................................ [  4%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+........................................................................ [ 19%]
+........................................................................ [ 23%]
+........................................................................ [ 28%]
+........................................................................ [ 33%]
+........................................................................ [ 38%]
+........................................................................ [ 43%]
+........................................................................ [ 47%]
+........................................................................ [ 52%]
+........................................................................ [ 57%]
+........................................................................ [ 62%]
+........................................................................ [ 67%]
+........................................................................ [ 71%]
+........................................................................ [ 76%]
+........................................................................ [ 81%]
+........................................................................ [ 86%]
+........................................................................ [ 91%]
+.................FF..................................................... [ 95%]
+.............................................................            [100%]
+=================================== FAILURES ===================================
+_ test_wholly_missing_capture_preserves_source_and_never_invents_a_drive[1-False] _
+
+rows = False, budget = 1
+
+    @pytest.mark.parametrize('rows', (False, True))
+    @pytest.mark.parametrize('budget', (1, 65536))
+    def test_wholly_missing_capture_preserves_source_and_never_invents_a_drive(rows, budget):
+        graph, scope, owner = _uncaptured_acquisition(rows=rows)
+        model = ExecutionModel(snapshot_for(graph))
+        index = ExecutionIndex(model, graph)
+        original_receipt = deepcopy(index.report)
+        report = index.await_body_links(scope.id, budget=budget)
+    
+        assert report['inventory']['source_count'] == 1
+        assert report['job_count'] == 1
+        job = report['jobs'][0]
+        assert job['source_operation'] == owner
+        assert job['source_occurrence_count'] == 0
+        assert job['checked_source_occurrence_count'] == 0
+        assert job['pending_source_occurrence_count'] == 0
+        assert job['occurrences'] == ()
+        assert 'await_advance_occurrence_missing' in job['gaps']
+        assert report['status'] == 'PARTIAL'
+        assert report['issues'] == ()
+        assert report['source_runtime_verified'] is False
+        assert report['runtime_identity_verified'] is False
+        assert report['value_identity_verified'] is False
+        assert report['transformation_authorized'] is False
+        assert report['budget']['used'] <= budget
+        # No captured source/advance means there is no derived path search to
+        # truncate. One job projection fits even in budget=1; missing capture is
+        # still PARTIAL and must not be misreported as budget exhaustion.
+>       assert report['budget']['truncated'] is False
+E       assert True is False
+
+tests/unit/test_execution_await_inventory.py:68: AssertionError
+_ test_wholly_missing_capture_preserves_source_and_never_invents_a_drive[1-True] _
+
+rows = True, budget = 1
+
+    @pytest.mark.parametrize('rows', (False, True))
+    @pytest.mark.parametrize('budget', (1, 65536))
+    def test_wholly_missing_capture_preserves_source_and_never_invents_a_drive(rows, budget):
+        graph, scope, owner = _uncaptured_acquisition(rows=rows)
+        model = ExecutionModel(snapshot_for(graph))
+        index = ExecutionIndex(model, graph)
+        original_receipt = deepcopy(index.report)
+        report = index.await_body_links(scope.id, budget=budget)
+    
+        assert report['inventory']['source_count'] == 1
+        assert report['job_count'] == 1
+        job = report['jobs'][0]
+        assert job['source_operation'] == owner
+        assert job['source_occurrence_count'] == 0
+        assert job['checked_source_occurrence_count'] == 0
+        assert job['pending_source_occurrence_count'] == 0
+        assert job['occurrences'] == ()
+        assert 'await_advance_occurrence_missing' in job['gaps']
+        assert report['status'] == 'PARTIAL'
+        assert report['issues'] == ()
+        assert report['source_runtime_verified'] is False
+        assert report['runtime_identity_verified'] is False
+        assert report['value_identity_verified'] is False
+        assert report['transformation_authorized'] is False
+        assert report['budget']['used'] <= budget
+        # No captured source/advance means there is no derived path search to
+        # truncate. One job projection fits even in budget=1; missing capture is
+        # still PARTIAL and must not be misreported as budget exhaustion.
+>       assert report['budget']['truncated'] is False
+E       assert True is False
+
+tests/unit/test_execution_await_inventory.py:68: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_await_inventory.py::test_wholly_missing_capture_preserves_source_and_never_invents_a_drive[1-False]
+FAILED tests/unit/test_execution_await_inventory.py::test_wholly_missing_capture_preserves_source_and_never_invents_a_drive[1-True]
+2 failed, 1499 passed in 149.39s (0:02:29)

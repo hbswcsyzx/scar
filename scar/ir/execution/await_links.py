@@ -213,6 +213,35 @@ def prepare_await_indexes(ctx):
         if type(row.contract) is AwaitIteratorQualification:
             qualifiers.setdefault((row.scope, row.clause, row.operation), row)
     ctx.await_qualification_sites = tuple(qualifiers.values())
+    # Raw joins only: a source scope reaches its declared qualification via
+    # that source occurrence's exact CallActivation, never another same-site
+    # helper activation. Feasibility/path checking remains query-budgeted.
+    from scar.ir.program.protocol_await_records import ExpandedAwaitCallee
+    scoped, expanded = {}, {}
+    for qualifier in ctx.await_qualification_sites:
+        scoped.setdefault(qualifier.scope, {})[qualifier.operation] = (
+            qualifier, tuple(ctx.await_occurrences_by_site.get(qualifier.operation, ())))
+    for row in ctx.program.protocol_operations:
+        expansion = getattr(row.contract, 'expansion', None)
+        if type(expansion) is not ExpandedAwaitCallee:
+            continue
+        ref = expansion.qualification
+        if type(ref) is StaticProtocolGap:
+            continue
+        qualifier = ctx.await_protocol_rows.get((ref.scope, ref.clause, ref.operation, ref.slot))
+        if qualifier is not None:
+            key = row.scope, qualifier.operation
+            expanded.setdefault(key, (qualifier, set()))[1].add(row.operation)
+    for (owner, site), (qualifier, parents) in expanded.items():
+        allowed = {call['activation'].id for parent in parents
+                   for occurrence in ctx.await_occurrences_by_site.get(parent, ())
+                   for identity in ctx.call_activations_by_caller.get(occurrence.id, ())
+                   for call in (ctx.resolved_call_activations[identity],)}
+        occurrences = tuple(occurrence for occurrence in ctx.await_occurrences_by_site.get(site, ())
+                            if ctx.activation_of(occurrence.id) in allowed)
+        scoped.setdefault(owner, {})[site] = qualifier, occurrences
+    ctx.await_qualifications_by_scope = {owner: tuple(rows.values()) for owner, rows in scoped.items()}
+    ctx.await_preparation['scope_qualification_records'] = sum(len(rows) for rows in scoped.values())
 
 
 def project_await_links(ctx, scope, shared):
@@ -225,6 +254,7 @@ def project_await_links(ctx, scope, shared):
     flow = ConnectionContext(ctx.program, index=ctx.body_program_index, budget=shared)
     ctx.await_flow = flow
     inventory = await_inventory(flow, scope)
+    ctx.await_static_inventory = inventory
     rows = ctx.await_protocol_rows
     jobs = []
     for inventory_job in inventory['jobs']:
@@ -619,7 +649,7 @@ def await_body_links(ctx, scope, *, shared):
     project_await_links(ctx, scope, shared)
     await_identity_errors(ctx, shared)
     from .await_qualification import qualification_occurrences
-    qualification = qualification_occurrences(ctx, ctx.await_flow, shared)
+    qualification = qualification_occurrences(ctx, ctx.await_flow, shared, scope=scope)
     from .resumable_query import drive_execution
     jobs, cursor, checked, checked_jobs, all_gaps = [], qualification['cursor'], 0, 0, list(qualification['gaps'])
     pending_copies = []
@@ -703,7 +733,13 @@ def await_body_links(ctx, scope, *, shared):
     incomplete = inventory.get('known_inventory_complete') is False
     if incomplete and cursor is None:
         cursor = inventory.get('cursor')
+    from .await_outcomes import project_outcomes
+    outcomes = project_outcomes(ctx, scope, shared)
+    all_gaps.extend(outcomes.pop('gaps'))
+    if cursor is None:
+        cursor = outcomes['outcome_inventory']['cursor'] or outcomes['failure_path_inventory']['cursor']
     return deepcopy({'scope': scope, 'jobs': tuple(jobs), 'job_count': len(originals),
+        **outcomes,
         'checked_job_count': checked_jobs, 'checked_occurrence_count': checked,
         'inventory': inventory, 'copy_support': tuple(copies), 'gaps': tuple(all_gaps),
         'qualifications': qualification['occurrences'],

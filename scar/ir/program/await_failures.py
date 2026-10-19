@@ -12,10 +12,12 @@ def _ref(row):
     return ProtocolOperationRef(row.scope, row.clause, row.operation, row.slot)
 
 
-def _seeds(ctx):
+def _seeds(ctx, scope_id=None):
     """Original scope subjects survive deletion of all own RAISE rows."""
     seeds, seen, missing = [], set(), []
     for scope in ctx.graph.protocol_scopes:
+        if scope_id is not None and scope.id != scope_id:
+            continue
         if scope.profile not in (ProtocolProfile.AWAIT_ACQUISITION_V1,
                                   ProtocolProfile.COROUTINE_WRAPPER_CONSTRUCTION_V1):
             continue
@@ -77,17 +79,19 @@ def _seeds(ctx):
     return tuple(seeds), tuple(dict.fromkeys(missing))
 
 
-def failure_paths(ctx):
+def failure_paths(ctx, *, scope=None, derive=True):
     from .protocol_await import _result_copy
-    seeds, preparation_gaps = _seeds(ctx)
+    seeds, preparation_gaps = _seeds(ctx, scope)
     paths, issues, gaps, checked, cursor = [], [], list(preparation_gaps), 0, None
     for seed in seeds:
         path = {key: value for key, value in seed.items()
                 if key not in ('source_row', 'own', 'parent_result', 'parent_edge')}
         local = []
-        if not ctx.spend('await_failure_paths'):
-            paths.append({**path, 'terminals': (), 'status': 'NOT_CHECKED', 'gaps': (), **flags()})
-            cursor = cursor or {'phase': 'await_failure_paths', 'key': seed['key']}
+        if not derive or not ctx.spend('await_failure_paths'):
+            paths.append({**path, 'terminals': (), 'status': 'NOT_CHECKED',
+                'gaps': ('await_static_details_deferred_without_capture',) if not derive else (), **flags()})
+            if derive:
+                cursor = cursor or {'phase': 'await_failure_paths', 'key': seed['key']}
             continue
         # A BRANCH supplies only an original control edge. Use its original
         # first landing formal as a traversal anchor, never a fake result.
