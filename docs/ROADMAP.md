@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **P4 post-conversion cleanup progress (2026-10-19):**
+> [Plan](M1_AWAIT_POST_CLEANUP_PLAN.md),
+> [query view](M1_COMPLETION_CONTINUATION_VIEW.md) and
+> [evidence / remaining work](M1_AWAIT_POST_CLEANUP_PROGRESS.md) connect ordinary
+> synchronous cleanup to exact current completion/caller state ports, separately
+> from a parent body's two actual later cuts. Original/current sources, unknown
+> preservation and consumer delivery remain separate obligations. Existing
+> packet queries and original tests are preserved. Complete A–H, all sixteen
+> groups, P5 and M2 remain OPEN; automatic LeWM modeling and speedup are unproved.
+
 > **P4 source-to-terminal connection progress (2026-10-19):**
 > [Plan](M1_AWAIT_SOURCE_TO_TERMINAL_PLAN.md) and
 > [evidence / remaining work](M1_AWAIT_SOURCE_TO_TERMINAL_PROGRESS.md) join the

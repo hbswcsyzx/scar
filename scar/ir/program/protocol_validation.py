@@ -598,6 +598,7 @@ def _adapter_route_copy(ctx, row, terminal):
 def connection_errors(ctx):
     """Consumer obligations are derived from core markers, not row count."""
     errors = []
+    from .completion_adapter_routes import terminal_relation
     if hasattr(ctx, 'index'):
         from .protocol_await import await_connections
         errors.extend(await_connections(ctx)['issues'])
@@ -665,6 +666,14 @@ def connection_errors(ctx):
                             if row.contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE
                             and type(row.contract.input) is DriveResult
                             and row.contract.input.outcome == source.outcome]
+                        replacements = [terminal_relation(ctx, row.contract.output, terminal)
+                            for row in adapters if type(row.contract.input) is DriveResult
+                            and row.contract.input.outcome == source.outcome
+                            and row.contract.rule in _EXCEPTION_ADAPTER_RULES]
+                        if any(relation is not None and relation['match'] is not False
+                               and (relation['overridden'] is True or relation['applicable'] is None)
+                               for relation in replacements):
+                            continue
                         if not any(_close_reaches_terminal(ctx, row, terminal) for row in close_routes):
                             errors.append(('protocol_host_adapter', str(drive.operation),
                                            'body Return needs its explicit Python completion adapter'))
@@ -691,6 +700,19 @@ def connection_errors(ctx):
                     or type(row.contract.output) not in (OperationResult, InvokeLiteralResult)):
                 continue
             for terminal in host_terminals(ctx, row.contract.output):
+                relation = terminal_relation(ctx, row.contract.output, terminal)
+                if relation is not None:
+                    if relation['applicable'] is False:
+                        continue
+                    if relation['match'] is False:
+                        errors.append(('protocol_copy', str(terminal.operation),
+                                       'cleanup terminal is not its current declared completion source'))
+                        continue
+                    if relation['match'] is True or relation['applicable'] is None:
+                        # Typed C1 may preserve or replace the old completion.
+                        # Unknown receipts retain a gap; they do not prove the
+                        # direct-copy assertion false or authorize a rewrite.
+                        continue
                 expected = TerminatorKind.RAISE
                 if row.contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE:
                     port = ctx.port(row.contract.output)

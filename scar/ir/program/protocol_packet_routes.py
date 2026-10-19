@@ -465,7 +465,8 @@ def _known_call_outputs(ctx, source, operation, choices):
             'outputs': tuple(outputs), 'scope': scope}
 
 
-def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
+def _completion_walk(ctx, source, *, start, choices=(), cuts=(),
+                     initial_role='packet', cross_resume=True, receipts=None):
     """Follow complete supplied-CFG packet obligations beyond a C1 frontier.
 
     Every expected source remains independent. Pending possibility filters only
@@ -476,7 +477,7 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
     from .cleanup import CleanupRouteTerminator
     from .control import PendingDispatchTerminator, PendingPayload
     choices = ctx.selected_edges(choices)
-    pending = [(start[0], start[1], source, 'packet', False, None, choices)]
+    pending = [(start[0], start[1], source, initial_role, False, None, choices, False)]
     seen, targets, checks, actions, projections = set(), [], [], [], []
     suspensions, overrides, boundaries, helpers, gaps = [], [], [], [], []
     conditions = ['supplied canonical CFG and original state/context ports only',
@@ -492,15 +493,26 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
     ranks = _continuation_ranks(ctx, region)
     contexts = {}
 
+    def fields(expected, current_choices=None):
+        return ({} if receipts is None else receipts.fields(expected,
+            route_choices if current_choices is None else current_choices, crossed_suspend))
+
+    def enqueue(following, operation):
+        if receipts is not None and not receipts.transition(following, operation):
+            return False
+        pending.append(following)
+        return True
+
     def boundary(operation, kind, expected, position):
         nonlocal complete
         complete = False
         boundaries.append({'operation': operation, 'kind': kind,
-                           'source': expected, 'position': position})
+                           'source': expected, 'position': position, **fields(expected)})
 
     def check(expected, target, kind):
         binding = ctx.bind(expected, target, choices=route_choices)
-        row = {'source': expected, 'target': target, 'kind': kind, 'binding': binding}
+        row = {'source': expected, 'target': target, 'kind': kind, 'binding': binding,
+               **fields(expected)}
         checks.append(row)
         if binding['match'] is None:
             gaps.append('packet_continuation_source_unresolved')
@@ -520,17 +532,21 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
                 gaps.append('packet_continuation_source_reevaluated')
             boundary(operation, 'CYCLE', expected, (ctx.block_of[operation.id], ctx.positions[operation.id]))
             return True
-        pending.append((edge.block, 0, expected, role, delivered, active_port, route_choices))
-        return True
+        crossed = (crossed_suspend or type(operation.terminator) is SuspendTerminator
+                   if receipts is not None else False)
+        return enqueue((edge.block, 0, expected, role, delivered, active_port,
+                        route_choices, crossed), operation)
 
     while pending:
         if not ctx.spend('packet_continuation_positions'):
             break
-        block_id, position, expected, role, delivered, active_port, route_choices = pending.pop()
-        key = block_id, position, expected, role, delivered, active_port, route_choices
+        block_id, position, expected, role, delivered, active_port, route_choices, crossed_suspend = pending.pop()
+        key = block_id, position, expected, role, delivered, active_port, route_choices, crossed_suspend
         if key in seen:
             continue
         seen.add(key)
+        if receipts is not None:
+            receipts.context = key
         block = ctx.blocks[block_id]
         if position >= len(block.operations):
             complete = False
@@ -568,7 +584,7 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
                 kind = successor.inputs[actual.slot].kind
                 if role == 'packet' and kind not in (ResumeSlotKind.THROWN_PACKET, ResumeSlotKind.DELEGATE_PACKET):
                     checks.append({'source': expected, 'target': target, 'kind': 'BODY_PACKET',
-                                   'binding': {'match': False, 'gaps': ()}})
+                                   'binding': {'match': False, 'gaps': ()}, **fields(expected)})
                 else:
                     check(expected, target, 'BODY_PACKET')
                 targets.append(target)
@@ -581,7 +597,7 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
             gaps.extend(missing)
             conditions.append('typed C1 callbacks retain their original unknown effects and current post-state')
             record = {'action': action, 'actual': actual, 'sources': sources,
-                      'active_port': active_port}
+                      'active_port': active_port, **fields(expected)}
             actions.append(record)
             next_sources = []
             for candidate in sources:
@@ -594,7 +610,8 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
                     gaps.append('packet_continuation_pending_token_currentness_unresolved')
                     checks.append({'source': expected, 'target': payload or actual,
                                    'kind': 'C1_PENDING', 'binding': {
-                                       'match': None, 'gaps': ('packet_continuation_pending_token_currentness_unresolved',)}})
+                                       'match': None, 'gaps': ('packet_continuation_pending_token_currentness_unresolved',)},
+                                   **fields(expected, candidate['choices'])})
                     boundary(operation, 'PENDING_TOKEN_CONTEXT', expected, (block_id, position))
                     continue
                 candidate_choices = candidate['choices']
@@ -609,7 +626,8 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
                         override = {'action': action, 'definition': candidate['definition'],
                                     'source': payload, 'previous_source': expected,
                                     'token_binding': candidate['token_binding'],
-                                    'source_applicability_verified': False}
+                                    'source_applicability_verified': False,
+                                    **fields(payload, candidate_choices)}
                         overrides.append(override)
                         gaps.append('packet_continuation_override_applicability_unproved')
                         next_sources.append((payload, 'packet' if declared.kind is LanguageCompletionKind.RAISE
@@ -621,15 +639,15 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
                         complete = False
                         continue
                     checks.append({'source': expected, 'target': payload or actual, 'kind': 'C1_PENDING',
-                                   'binding': {'match': False, 'gaps': ()}})
+                                   'binding': {'match': False, 'gaps': ()}, **fields(expected, candidate_choices)})
                 else:
                     checks.append({'source': expected, 'target': payload, 'kind': 'C1_PENDING',
-                                   'binding': {**packet, 'match': match}})
+                                   'binding': {**packet, 'match': match}, **fields(expected, candidate_choices)})
                     if match is None:
                         gaps.append('packet_continuation_source_unresolved')
                 next_sources.append((expected, role, delivered or match is True, declared.id, candidate_choices))
             for following in dict.fromkeys(next_sources):
-                pending.append((block_id, position + 1, *following))
+                enqueue((block_id, position + 1, *following, crossed_suspend), operation)
             continue
         if type(term) in (CleanupRouteTerminator, PendingDispatchTerminator):
             possible = _possible_pending(ctx, region, route_choices)
@@ -643,7 +661,11 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
                     break
                 if possible.edges.get((identity, number)) is None:
                     continue
-                if active_port is not None and edge.port != active_port:
+                # A route may select the replacement token before Replace
+                # consumes both old and new tokens. Only dispatch projects the
+                # tracked current completion. Preserve the legacy query mode.
+                if (active_port is not None and edge.port != active_port
+                        and (receipts is None or type(term) is PendingDispatchTerminator)):
                     continue
                 if identity in selected and selected[identity] != number:
                     continue
@@ -652,7 +674,7 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
                     if type(argument) is PendingPayload:
                         projections.append({'operation': operation, 'successor_index': number,
                             'argument_index': ordinal, 'selector': OwnedUse(identity, term.pending),
-                            'port': edge.port, 'formal': ctx.values[formal]})
+                            'port': edge.port, 'formal': ctx.values[formal], **fields(expected)})
                 following_port = None if type(term) is PendingDispatchTerminator else active_port
                 if not follow(operation, number, edge, expected, role, delivered, following_port):
                     break
@@ -663,7 +685,12 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
         if type(term) is SuspendTerminator:
             conditions.append('resume successors are declared conditional routes, not observed drives')
             suspensions.append({'operation': operation, 'saved': term.saved,
-                                'handoff': term.handoff, 'successors': term.successors})
+                                'handoff': term.handoff, 'successors': term.successors,
+                                **fields(expected)})
+            if not cross_resume:
+                gaps.append('completion_suspend_boundary')
+                boundary(operation, 'SUSPENSION', expected, (block_id, position))
+                continue
             if not term.successors:
                 gaps.append('packet_continuation_resume_missing')
                 complete = False
@@ -679,11 +706,14 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
                 complete = False
             for target in actuals:
                 if term.kind is not required:
+                    binding = {'match': False, 'gaps': ()}
                     checks.append({'source': expected, 'target': target, 'kind': 'HOST_TERMINAL',
-                                   'binding': {'match': False, 'gaps': ()}})
+                                   'binding': binding, **fields(expected)})
                 else:
-                    check(expected, target, 'HOST_RAISE' if role == 'packet' else 'HOST_RETURN')
+                    binding = check(expected, target, 'HOST_RAISE' if role == 'packet' else 'HOST_RETURN')
                 targets.append(target)
+                if receipts is not None:
+                    receipts.terminal(expected, role, target, route_choices, crossed_suspend, binding)
             continue
         if operation.callee is not None or term is not None and term.kind is TerminatorKind.INVOKE:
             summary = _known_call_outputs(ctx, expected, operation, route_choices)
@@ -704,7 +734,8 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
                     gaps.append('packet_continuation_call_result_unresolved')
                     boundary(operation, 'CALL_RESULT', expected, (block_id, position))
                 elif output['edge'] is None:
-                    pending.append((block_id, position + 1, expected, role, delivered, active_port, route_choices))
+                    enqueue((block_id, position + 1, expected, role, delivered,
+                             active_port, route_choices, crossed_suspend), operation)
                 else:
                     number = output['edge']
                     follow(operation, number, term.successors[number], expected, role, delivered, active_port)
@@ -714,7 +745,8 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
             boundary(operation, 'OPAQUE_OPERATION', expected, (block_id, position))
             continue
         if term is None:
-            pending.append((block_id, position + 1, expected, role, delivered, active_port, route_choices))
+            enqueue((block_id, position + 1, expected, role, delivered,
+                     active_port, route_choices, crossed_suspend), operation)
         else:
             successors = getattr(term, 'successors', None)
             if successors is None:
@@ -743,4 +775,50 @@ def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
             'source_inventory_complete': False, 'frontier_only': False,
             'source_runtime_verified': False, 'runtime_identity_verified': False,
             'native_applicability_verified': False,
-            'transformation_authorized': False}
+            'transformation_authorized': False,
+            **({} if receipts is None else {'terminals': tuple(receipts.terminals),
+                'transitions': tuple(receipts.transitions), 'start': start,
+                'value_identity_verified': False})}
+
+
+def packet_continuations(ctx, source, *, start, choices=(), cuts=()):
+    """Legacy packet query, preserving its original default behavior/cost."""
+    return _completion_walk(ctx, source, start=start, choices=choices, cuts=cuts)
+
+
+def completion_continuations(ctx, source, *, start=None, choices=(), cross_resume=False):
+    """Typed completion-payload evidence; future resume is explicitly opt-in."""
+    from .control import ProtocolValueKind
+    from .model import ProtocolValue, ReferenceValue
+    from .continuation_receipts import ContinuationReceipts
+    if type(cross_resume) is not bool:
+        raise TypeError('cross_resume requires an exact bool')
+    port = ctx.port(source)
+    role = None
+    if port is not None and port.values:
+        if all(type(ctx.values[value]) is ReferenceValue for value in port.values):
+            role = 'reference'
+        elif all(type(ctx.values[value]) is ProtocolValue and ctx.values[value].protocol
+                 is ProtocolValueKind.EXCEPTION_PACKET for value in port.values):
+            role = 'packet'
+    if role is None or port is None or port.operation is None or port.gap is not None:
+        return {'source': source, 'status': 'PARTIAL', 'targets': (), 'checks': (),
+            'terminals': (), 'transitions': (), 'actions': (), 'projections': (),
+            'suspensions': (), 'overrides': (), 'boundaries': (),
+            'gaps': ('completion_source_kind_unresolved',),
+            'cursor': {'phase': 'completion_source'} if ctx.budget.truncated else None,
+            'known_inventory_complete': False, 'source_inventory_complete': False,
+            'source_runtime_verified': False, 'runtime_identity_verified': False,
+            'value_identity_verified': False, 'transformation_authorized': False}
+    if start is None:
+        operation = ctx.operations[port.operation]
+        start = ((operation.terminator.successors[port.edge].block, 0)
+                 if port.phase == 'edge' else (ctx.block_of[port.operation],
+                    ctx.positions[port.operation] + (port.phase != 'before')))
+    if type(start) is not tuple or len(start) != 2 or type(start[1]) is not int:
+        raise TypeError('start requires an original (BlockID, operation index)')
+    block = ctx.blocks[start[0]]
+    if not 0 <= start[1] < len(block.operations):
+        raise ValueError('completion start is outside its original block')
+    return _completion_walk(ctx, source, start=start, choices=choices,
+        initial_role=role, cross_resume=cross_resume, receipts=ContinuationReceipts(ctx, source))

@@ -1,0 +1,429 @@
+FFFFFF.FFFFFFFF                                                          [100%]
+=================================== FAILURES ===================================
+_ test_preserved_conversion_normal_and_raise_cross_sync_c1_to_exact_parent_and_final_consumers[E] _
+
+depth = 1
+
+    @pytest.mark.parametrize('depth', (1, 2), ids=('E', 'E-G'))
+    def test_preserved_conversion_normal_and_raise_cross_sync_c1_to_exact_parent_and_final_consumers(depth):
+        graph, details = await_post_cleanup_program(mode='preserve', depth=depth)
+        index = _index(graph)
+        _sync_driver(graph, details)
+        report = _report(index, details)
+        outcome = _outcome(report, details)
+        assert outcome['kind'] == 'RETURN_COMPLETION'
+        continuations = []
+>       for definition, leg, continuation in _legs(outcome, details):
+                                             ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_post_cleanup.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = {'key': (ProtocolScopeID(value='await.resume.acquisition'), OperationID(value='await.resume.acquire'), OperationID(val...OperationID(value='await.resume.acquire'), slot=0), 'source_operation': OperationID(value='await.resume.acquire'), ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...alue='resume.context'))))), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _legs(outcome, details):
+        expected = details['post_cleanup']['legs']
+        assert {row['edge'] for row in outcome['conversion_legs']} == {row['edge'] for row in expected}
+        for definition in expected:
+            leg, = tuple(row for row in outcome['conversion_legs'] if row['edge'] == definition['edge'])
+            assert leg['kind'] is definition['kind']
+            assert leg['own_result'] == definition['own_result']
+>           candidates = tuple(row for row in leg['continuations']
+                                              ^^^^^^^^^^^^^^^^^^^^
+                               if row['packet']['source'] == definition['packet_source'])
+E           KeyError: 'continuations'
+
+tests/unit/test_program_await_post_cleanup.py:56: KeyError
+_ test_preserved_conversion_normal_and_raise_cross_sync_c1_to_exact_parent_and_final_consumers[E-G] _
+
+depth = 2
+
+    @pytest.mark.parametrize('depth', (1, 2), ids=('E', 'E-G'))
+    def test_preserved_conversion_normal_and_raise_cross_sync_c1_to_exact_parent_and_final_consumers(depth):
+        graph, details = await_post_cleanup_program(mode='preserve', depth=depth)
+        index = _index(graph)
+        _sync_driver(graph, details)
+        report = _report(index, details)
+        outcome = _outcome(report, details)
+        assert outcome['kind'] == 'RETURN_COMPLETION'
+        continuations = []
+>       for definition, leg, continuation in _legs(outcome, details):
+                                             ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_post_cleanup.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = {'key': (ProtocolScopeID(value='await.resume.acquisition'), OperationID(value='await.resume.acquire'), OperationID(val...OperationID(value='await.resume.acquire'), slot=0), 'source_operation': OperationID(value='await.resume.acquire'), ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...alue='resume.context'))))), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _legs(outcome, details):
+        expected = details['post_cleanup']['legs']
+        assert {row['edge'] for row in outcome['conversion_legs']} == {row['edge'] for row in expected}
+        for definition in expected:
+            leg, = tuple(row for row in outcome['conversion_legs'] if row['edge'] == definition['edge'])
+            assert leg['kind'] is definition['kind']
+            assert leg['own_result'] == definition['own_result']
+>           candidates = tuple(row for row in leg['continuations']
+                                              ^^^^^^^^^^^^^^^^^^^^
+                               if row['packet']['source'] == definition['packet_source'])
+E           KeyError: 'continuations'
+
+tests/unit/test_program_await_post_cleanup.py:56: KeyError
+_ test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion[finally-new-raise] _
+
+mode = 'replace_raise', role = 'packet', kind = <ExitKind.RAISE: 'RAISE'>
+
+    @pytest.mark.parametrize(('mode', 'role', 'kind'),
+        (('replace_raise', 'packet', ExitKind.RAISE), ('replace_return', 'reference', ExitKind.NORMAL)),
+        ids=('finally-new-raise', 'finally-new-return'))
+    def test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion(mode, role, kind):
+        graph, details = await_post_cleanup_program(mode=mode)
+>       index = _index(graph)
+                ^^^^^^^^^^^^^
+
+tests/unit/test_program_await_post_cleanup.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_post_cleanup.py:32: in _index
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:await.resume.driver.2.adapter.normal.exit: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:await.resume.driver.2.adapter.failure.exit: host exception is not this adapter result or its explicit packet
+
+scar/ir/program/validation.py:759: ValueError
+_ test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion[finally-new-return] _
+
+mode = 'replace_return', role = 'reference', kind = <ExitKind.NORMAL: 'NORMAL'>
+
+    @pytest.mark.parametrize(('mode', 'role', 'kind'),
+        (('replace_raise', 'packet', ExitKind.RAISE), ('replace_return', 'reference', ExitKind.NORMAL)),
+        ids=('finally-new-raise', 'finally-new-return'))
+    def test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion(mode, role, kind):
+        graph, details = await_post_cleanup_program(mode=mode)
+>       index = _index(graph)
+                ^^^^^^^^^^^^^
+
+tests/unit/test_program_await_post_cleanup.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_post_cleanup.py:32: in _index
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...1), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_host_adapter at program_operation:await.resume.driver.2.driver.drive: body Return needs its explicit Python completion adapter; protocol_host_adapter at program_operation:await.resume.driver.2.driver.drive: body Return needs its explicit Python completion adapter; protocol_host_adapter at program_operation:await.resume.driver.2.adapter.normal.exit: host terminal kind differs from this adapter completion; protocol_copy at program_operation:await.resume.driver.2.adapter.normal.exit: host exception is not this adapter result or its explicit packet; protocol_host_adapter at program_operation:await.resume.driver.2.adapter.failure.exit: host terminal kind differs from this adapter completion; protocol_copy at program_operation:await.resume.driver.2.adapter.failure.exit: host exception is not this adapter result or its explicit packet
+
+scar/ir/program/validation.py:759: ValueError
+_ test_an_opaque_operation_after_c1_is_an_exact_boundary_not_a_successful_frontier _
+
+    def test_an_opaque_operation_after_c1_is_an_exact_boundary_not_a_successful_frontier():
+        graph, details = await_post_cleanup_program(mode='opaque')
+        report = _report(_index(graph), details)
+        outcome = _outcome(report, details)
+>       rows = tuple(_legs(outcome, details))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_post_cleanup.py:257: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+outcome = {'key': (ProtocolScopeID(value='await.resume.acquisition'), OperationID(value='await.resume.acquire'), OperationID(val...OperationID(value='await.resume.acquire'), slot=0), 'source_operation': OperationID(value='await.resume.acquire'), ...}
+details = {'caller': Region(id=RegionID(value='await.resume.caller'), label='declared driver fixture', entry=BlockID(value='awai...alue='resume.context'))))), parent=None), 'body_kind': <ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'>, ...}
+
+    def _legs(outcome, details):
+        expected = details['post_cleanup']['legs']
+        assert {row['edge'] for row in outcome['conversion_legs']} == {row['edge'] for row in expected}
+        for definition in expected:
+            leg, = tuple(row for row in outcome['conversion_legs'] if row['edge'] == definition['edge'])
+            assert leg['kind'] is definition['kind']
+            assert leg['own_result'] == definition['own_result']
+>           candidates = tuple(row for row in leg['continuations']
+                                              ^^^^^^^^^^^^^^^^^^^^
+                               if row['packet']['source'] == definition['packet_source'])
+E           KeyError: 'continuations'
+
+tests/unit/test_program_await_post_cleanup.py:56: KeyError
+_ test_unrelated_terminal_packet_is_a_real_copy_contradiction_not_a_legal_override _
+
+    def test_unrelated_terminal_packet_is_a_real_copy_contradiction_not_a_legal_override():
+        graph, details = await_post_cleanup_program(mode='wrong_terminal')
+        core = _core(graph)
+        require_valid(core)
+        index = ProgramIndex(core)
+        for definition in details['post_cleanup']['legs']:
+>           report = index.completion_continuations(definition['packet_source'],
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                choices=definition['choices'], cross_resume=False, budget=BUDGET)
+E           AttributeError: 'ProgramIndex' object has no attribute 'completion_continuations'
+
+tests/unit/test_program_await_post_cleanup.py:276: AttributeError
+_ test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes[E-zero-B] _
+
+depth = 1, helper_zero_cut = True
+
+    @pytest.mark.parametrize(("depth", "helper_zero_cut"), ((1, True), (2, False)),
+                             ids=("E-zero-B", "EG-two-cut-B"))
+    def test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes(
+            depth, helper_zero_cut):
+        program, details = await_parent_post_cleanup_program(depth=depth, helper_zero_cut=helper_zero_cut)
+>       require_valid(program)
+
+tests/unit/test_program_await_parent_post_cleanup.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.parent.helper.call: each control input port needs its own exact use
+
+scar/ir/program/validation.py:759: ValueError
+_ test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes[EG-two-cut-B] _
+
+depth = 2, helper_zero_cut = False
+
+    @pytest.mark.parametrize(("depth", "helper_zero_cut"), ((1, True), (2, False)),
+                             ids=("E-zero-B", "EG-two-cut-B"))
+    def test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes(
+            depth, helper_zero_cut):
+        program, details = await_parent_post_cleanup_program(depth=depth, helper_zero_cut=helper_zero_cut)
+>       require_valid(program)
+
+tests/unit/test_program_await_parent_post_cleanup.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.parent.helper.call: each control input port needs its own exact use
+
+scar/ir/program/validation.py:759: ValueError
+_ test_two_parent_instances_keep_completed_h_call_separate_from_parent_future_resumes[E-zero-B] _
+
+depth = 1, helper_zero_cut = True
+
+    @pytest.mark.parametrize(("depth", "helper_zero_cut"), ((1, True), (2, False)),
+                             ids=("E-zero-B", "EG-two-cut-B"))
+    def test_two_parent_instances_keep_completed_h_call_separate_from_parent_future_resumes(
+            depth, helper_zero_cut):
+>       program, model, details = await_parent_post_cleanup_execution(
+            depth=depth, helper_zero_cut=helper_zero_cut, instances=2)
+
+tests/unit/test_execution_await_parent_post_cleanup.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_parent_post_cleanup_graphs.py:172: in await_parent_post_cleanup_execution
+    model = replace(model, snapshot=snapshot_for(program),
+                                    ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.parent.helper.call: each control input port needs its own exact use
+
+scar/ir/program/validation.py:759: ValueError
+_ test_two_parent_instances_keep_completed_h_call_separate_from_parent_future_resumes[EG-two-cut-B] _
+
+depth = 2, helper_zero_cut = False
+
+    @pytest.mark.parametrize(("depth", "helper_zero_cut"), ((1, True), (2, False)),
+                             ids=("E-zero-B", "EG-two-cut-B"))
+    def test_two_parent_instances_keep_completed_h_call_separate_from_parent_future_resumes(
+            depth, helper_zero_cut):
+>       program, model, details = await_parent_post_cleanup_execution(
+            depth=depth, helper_zero_cut=helper_zero_cut, instances=2)
+
+tests/unit/test_execution_await_parent_post_cleanup.py:64: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_parent_post_cleanup_graphs.py:172: in await_parent_post_cleanup_execution
+    model = replace(model, snapshot=snapshot_for(program),
+                                    ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.parent.helper.call: each control input port needs its own exact use
+
+scar/ir/program/validation.py:759: ValueError
+_ test_missing_parent_capture_cannot_borrow_the_other_instance_continuation[resume] _
+
+missing = 'resume'
+
+    @pytest.mark.parametrize("missing", ("resume", "terminal-use", "H-association"))
+    def test_missing_parent_capture_cannot_borrow_the_other_instance_continuation(missing):
+        switches = {"missing_resume": 0} if missing == "resume" else (
+            {"missing_terminal_use": 0} if missing == "terminal-use" else {"missing_helper_call": 0})
+>       program, model, details = await_parent_post_cleanup_execution(depth=2, instances=2, **switches)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_parent_post_cleanup.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_parent_post_cleanup_graphs.py:172: in await_parent_post_cleanup_execution
+    model = replace(model, snapshot=snapshot_for(program),
+                                    ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.parent.helper.call: each control input port needs its own exact use
+
+scar/ir/program/validation.py:759: ValueError
+_ test_missing_parent_capture_cannot_borrow_the_other_instance_continuation[terminal-use] _
+
+missing = 'terminal-use'
+
+    @pytest.mark.parametrize("missing", ("resume", "terminal-use", "H-association"))
+    def test_missing_parent_capture_cannot_borrow_the_other_instance_continuation(missing):
+        switches = {"missing_resume": 0} if missing == "resume" else (
+            {"missing_terminal_use": 0} if missing == "terminal-use" else {"missing_helper_call": 0})
+>       program, model, details = await_parent_post_cleanup_execution(depth=2, instances=2, **switches)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_parent_post_cleanup.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_parent_post_cleanup_graphs.py:172: in await_parent_post_cleanup_execution
+    model = replace(model, snapshot=snapshot_for(program),
+                                    ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.parent.helper.call: each control input port needs its own exact use
+
+scar/ir/program/validation.py:759: ValueError
+_ test_missing_parent_capture_cannot_borrow_the_other_instance_continuation[H-association] _
+
+missing = 'H-association'
+
+    @pytest.mark.parametrize("missing", ("resume", "terminal-use", "H-association"))
+    def test_missing_parent_capture_cannot_borrow_the_other_instance_continuation(missing):
+        switches = {"missing_resume": 0} if missing == "resume" else (
+            {"missing_terminal_use": 0} if missing == "terminal-use" else {"missing_helper_call": 0})
+>       program, model, details = await_parent_post_cleanup_execution(depth=2, instances=2, **switches)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_parent_post_cleanup.py:93: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_parent_post_cleanup_graphs.py:172: in await_parent_post_cleanup_execution
+    model = replace(model, snapshot=snapshot_for(program),
+                                    ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.parent.helper.call: each control input port needs its own exact use
+
+scar/ir/program/validation.py:759: ValueError
+_ test_actual_h_raise_does_not_fabricate_a_normal_f_source_or_parent_future_segments _
+
+    def test_actual_h_raise_does_not_fabricate_a_normal_f_source_or_parent_future_segments():
+>       program, model, details = await_parent_post_cleanup_execution(depth=2, instances=1, helper_raised=True)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_await_parent_post_cleanup.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_await_parent_post_cleanup_graphs.py:172: in await_parent_post_cleanup_execution
+    model = replace(model, snapshot=snapshot_for(program),
+                                    ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:242: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:134: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:await.parent.helper.call: each control input port needs its own exact use
+
+scar/ir/program/validation.py:759: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_post_cleanup.py::test_preserved_conversion_normal_and_raise_cross_sync_c1_to_exact_parent_and_final_consumers[E]
+FAILED tests/unit/test_program_await_post_cleanup.py::test_preserved_conversion_normal_and_raise_cross_sync_c1_to_exact_parent_and_final_consumers[E-G]
+FAILED tests/unit/test_program_await_post_cleanup.py::test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion[finally-new-raise]
+FAILED tests/unit/test_program_await_post_cleanup.py::test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion[finally-new-return]
+FAILED tests/unit/test_program_await_post_cleanup.py::test_an_opaque_operation_after_c1_is_an_exact_boundary_not_a_successful_frontier
+FAILED tests/unit/test_program_await_post_cleanup.py::test_unrelated_terminal_packet_is_a_real_copy_contradiction_not_a_legal_override
+FAILED tests/unit/test_program_await_parent_post_cleanup.py::test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes[E-zero-B]
+FAILED tests/unit/test_program_await_parent_post_cleanup.py::test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes[EG-two-cut-B]
+FAILED tests/unit/test_execution_await_parent_post_cleanup.py::test_two_parent_instances_keep_completed_h_call_separate_from_parent_future_resumes[E-zero-B]
+FAILED tests/unit/test_execution_await_parent_post_cleanup.py::test_two_parent_instances_keep_completed_h_call_separate_from_parent_future_resumes[EG-two-cut-B]
+FAILED tests/unit/test_execution_await_parent_post_cleanup.py::test_missing_parent_capture_cannot_borrow_the_other_instance_continuation[resume]
+FAILED tests/unit/test_execution_await_parent_post_cleanup.py::test_missing_parent_capture_cannot_borrow_the_other_instance_continuation[terminal-use]
+FAILED tests/unit/test_execution_await_parent_post_cleanup.py::test_missing_parent_capture_cannot_borrow_the_other_instance_continuation[H-association]
+FAILED tests/unit/test_execution_await_parent_post_cleanup.py::test_actual_h_raise_does_not_fabricate_a_normal_f_source_or_parent_future_segments
+14 failed, 1 passed in 8.08s

@@ -13,6 +13,7 @@ from .protocol_connections import ProtocolOperationRef
 from .protocols import (ContractResult, DriveResult, HostTerminal, OutcomeAdapterRule,
                         OwnedUse, StaticProtocolGap)
 from .structured import ControlEdgeReference
+from .completion_adapter_routes import packets as _packets, structured_region
 
 
 COMPLETION_RULES = (OutcomeAdapterRule.GENERATOR_RETURN_TO_STOP_ITERATION,
@@ -21,32 +22,6 @@ COMPLETION_RULES = (OutcomeAdapterRule.GENERATOR_RETURN_TO_STOP_ITERATION,
 
 def _ref(row):
     return ProtocolOperationRef(row.scope, row.clause, row.operation, row.slot)
-
-
-def _packets(ctx, source, choices):
-    """A constructor Reference is a packet component, never a packet alias."""
-    port = ctx.port(source)
-    if port is None:
-        return (), ('await_completion_result_unresolved',)
-    found, gaps = [], []
-    if port.values and all(isinstance(ctx.values[value], ProtocolValue)
-            and ctx.values[value].protocol is ProtocolValueKind.EXCEPTION_PACKET for value in port.values):
-        return ({'source': source, 'definition': None, 'exception_binding': None},), ()
-    for packet in ctx.packets.values():
-        if not ctx.spend('await_completion_packet_candidates'):
-            gaps.append('await_completion_packet_budget')
-            break
-        origin = ctx.values[packet.value].origin
-        if type(origin) is not OperationResult or ctx.region_of[origin.operation] != ctx.region_of[port.operation]:
-            continue
-        component = ctx.bind(source, OwnedUse(origin.operation, packet.exception), guard=choices or None)
-        if component['match'] is True:
-            found.append({'source': origin, 'definition': packet, 'exception_binding': component})
-        elif component['match'] is None:
-            gaps.append('await_completion_packet_component_unproved')
-    if not found:
-        gaps.append('await_completion_whole_packet_unproved')
-    return tuple(found), tuple(dict.fromkeys(gaps))
 
 
 def _own_legs(ctx, operation, rows, choices, issues, *, required):
@@ -225,6 +200,26 @@ def outcome_connections(ctx, original_inventory, *, derive=True):
                     and leg['kind'] is ExitKind.NORMAL else
                     (({'source': own, 'definition': None, 'exception_binding': None},), ()) if own is not None
                     else ((), ('await_conversion_payload_unresolved',)))
+                if own is not None and structured_region(ctx, own):
+                    from .await_structured_completion import structured_completion
+                    joined = structured_completion(ctx, own, packets, leg_choices,
+                        parents, advance, input_binding, own_rows, role, _caller_consumers, issues)
+                    leg_gaps = [*packet_gaps, *joined['gaps']]
+                    if not own_rows:
+                        leg_gaps.append('await_completion_adapter_leg_missing')
+                    if input_binding['match'] is not True:
+                        leg_gaps.append('await_conversion_input_unproved')
+                    converted.append({'operation': producer, **leg, 'role': role,
+                        'choices': leg_choices, 'rows': own_rows, 'input_binding': input_binding,
+                        'packets': packets, 'continuations': joined['continuations'],
+                        'terminals': joined['terminals'], 'states': joined['states'],
+                        'status': 'CONTRADICTED' if input_binding['match'] is False or any(
+                            terminal['status'] == 'CONTRADICTED' for terminal in joined['terminals']) else
+                            'PARTIAL' if leg_gaps or ctx.budget.truncated else 'DECLARED',
+                        'gaps': tuple(dict.fromkeys(leg_gaps))})
+                    caller_views.extend(joined['consumers'])
+                    local.extend(leg_gaps)
+                    continue
                 terminals, terminal_gaps = (((), ('await_conversion_payload_unresolved',)) if own is None
                                            else terminal_inventory(ctx, own, leg_choices))
                 terminal_views, states, leg_gaps = [], [], list((*packet_gaps, *terminal_gaps))

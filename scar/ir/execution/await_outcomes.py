@@ -119,17 +119,41 @@ def _terminal(ctx, definition, anchor, advance, parent_port, known, shared,
     if packet_use is None:
         local.append('await_outcome_terminal_packet_unobserved')
     occurrences = {**known, **_map(anchor if hasattr(anchor, 'operation') else None, advance, operation)}
+    current_value, current_binding = None, None
+    if 'current_source' in definition:
+        declared_source = definition['current_source']
+        source_site = (declared_source.edge.operation if hasattr(declared_source, 'edge') else
+                       getattr(declared_source, 'operation', None))
+        current_operation, _ = (locate(ctx, anchor, source_site, shared)
+                                if source_site is not None else (None, None))
+        from .await_outcome_evidence import port_value
+        occurrences.update(_map(current_operation))
+        current_value = port_value(ctx, declared_source, occurrences)
+        current_binding = pair(ctx, current_value, packet, shared)
+        own_choice = selected_choices(ctx, definition.get('choices', ()), occurrences,
+            (advance, anchor, operation), shared)
+        reached = (False if reached is False or own_choice is False else
+                   True if reached is True and own_choice is True else None)
+    delivery_binding = binding
+    if current_binding is not None:
+        matches = binding['match'], current_binding['match']
+        binding = {**binding, 'match': False if False in matches else None if None in matches else True,
+            'current_binding': current_binding, 'delivery_binding': delivery_binding,
+            'gaps': tuple(dict.fromkeys((*binding['gaps'], *current_binding['gaps'])))}
     state_rows = states(ctx, definition.get('states', ()) if state_definitions is None
                         else state_definitions, occurrences, shared)
     consumers = tuple(_consumer(ctx, receiver, advance, occurrences, (advance, operation), shared,
                                parent_port=parent_port) for receiver in definition.get('consumers', ()))
     return _finish({'definition': definition, 'operation': operation,
         'packet_use': packet_use, 'packet_value': packet, 'parent_value': parent,
-        'binding': binding, 'states': state_rows, 'consumers': consumers, 'gaps': tuple(local)},
-        selected=reached, children=(*state_rows, *consumers), bindings=(binding,), definition=definition)
+        'binding': binding, 'current_value': current_value, 'current_binding': current_binding,
+        'delivery_binding': delivery_binding,
+        'states': state_rows, 'consumers': consumers, 'gaps': tuple(local)},
+        selected=reached, children=(*state_rows, *consumers),
+        bindings=(binding,) if current_binding is None else (binding, current_binding), definition=definition)
 
 
-def _conversion(ctx, definition, advance, drive, body, shared, *, consumer_definitions=()):
+def _conversion(ctx, definition, advance, drive, body, shared, *, consumer_definitions=(), call_chain=()):
     from .await_links import _result, _use
     admitted = shared.spend('await_outcome_conversion_legs', path='await.outcome.conversion')
     operation, reached = locate(ctx, drive, definition['operation'], shared) if admitted else (None, None)
@@ -172,9 +196,16 @@ def _conversion(ctx, definition, advance, drive, body, shared, *, consumer_defin
             if not shared.spend('await_outcome_conversion_terminals', path='await.outcome.terminal'):
                 local.append('await_outcome_terminal_budget')
                 break
+            structured = 'current_source' in terminal
+            completions = ()
+            if structured and shared.spend('await_structured_completion_context', len(call_chain) + 1):
+                completions = tuple(call['completion'] for call in call_chain
+                    if operation is not None and call['activation'].id == ctx.activation_of(operation.id))
+            exact = completions[0] if len(completions) == 1 else None
             projected = _terminal(ctx, terminal, operation, advance,
                 terminal.get('advance_result'), _map(drive, operation), shared,
-                state_definitions=definition['states'])
+                state_definitions=terminal.get('states', ()) if structured else definition['states'],
+                exact_completion=exact, completion_required=structured)
             alternatives = tuple(pair(ctx, packet['value'], projected['packet_value'], shared)
                 for packet in packets if packet['selected'] is not False)
             proven = next((binding for binding in alternatives if binding['match'] is True), None)
@@ -188,10 +219,11 @@ def _conversion(ctx, definition, advance, drive, body, shared, *, consumer_defin
             else:
                 packet_binding = {**pair(ctx, None, projected['packet_value'], shared),
                     'alternatives': (), 'gaps': ('await_outcome_packet_delivery_unproved',)}
-            projected['packet_binding'] = packet_binding
+            projected['root_binding'] = packet_binding
+            projected['packet_binding'] = (projected['current_binding'] if structured else packet_binding)
             terminals.append(_finish(projected, selected=projected['selected'],
                 children=(*projected['states'], *projected['consumers']),
-                bindings=(projected['binding'], packet_binding), definition=terminal))
+                bindings=(projected['binding'], projected['packet_binding']), definition=terminal))
         state_rows = tuple(state for terminal in terminals for state in terminal['states'])
     elif selected is None:
         local.append('await_outcome_conversion_unobserved')
@@ -246,7 +278,7 @@ def _outcome_occurrences(ctx, definition, advance, shared):
                 local.append('await_outcome_body_outcome_missing')
         if selected is True:
             conversions = tuple(_conversion(ctx, leg, advance, drive, body, shared,
-                                consumer_definitions=definition['consumers'])
+                                consumer_definitions=definition['consumers'], call_chain=route['call_chain'])
                                 for leg in definition['conversion_legs'])
             known = _map(advance, drive, body, *(source['occurrence'] for source in matched.values()),
                          *(leg['occurrence'] for leg in conversions))

@@ -1,5 +1,23 @@
 # SCAR execution model
 
+## Completion identity across cleanup and suspension (2026-10-19)
+
+Operation / Value / StateLocation / Region / Resource remain the five entity
+families. A pending token is not its payload; the original completion source
+and its current replacement source have separate bindings. Cleanup can write
+new state versions: required terminal-to-caller state delivery does not assert
+state invariance. Missing current-source evidence cannot be hidden by a known
+outer copy or a consumer's independent local binding.
+
+Synchronous call completion and future resumable segments are distinct. The
+completion query reuses canonical continuation/copy relations; its dynamic
+projection follows this activation's actual transfers, exact call ancestry,
+Drive outcomes and ResumeIngress. Unknown effects, calls, unsupported source
+kinds and missing captures stay explicit boundaries. These are supplied-model
+relations, not native identity or optimization authority. See the
+[frozen view](M1_COMPLETION_CONTINUATION_VIEW.md) and
+[progress / original remaining scope](M1_AWAIT_POST_CLEANUP_PROGRESS.md).
+
 ## Nested result delivery and pending payload evidence (2026-10-19)
 
 The five entity families remain Operation / Value / StateLocation / Region /

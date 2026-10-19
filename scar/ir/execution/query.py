@@ -186,6 +186,13 @@ class ExecutionIndex:
         shared = ValidityBudget(budget)
         return await_body_links(self._content_context(), scope, shared=shared)
 
+    def completion_continuations(self, source, anchor, *, cross_resume=False, budget=4096):
+        """One exact call's actual continuation; crossing cuts is explicit."""
+        from .completion_continuations import completion_continuations
+        from .validity_budget import ValidityBudget
+        return completion_continuations(self._content_context(), source, anchor,
+            cross_resume=cross_resume, shared=ValidityBudget(budget))
+
     def call_entries(self, caller_id):
         """This caller's links, retaining a missing dynamic callee as a gap."""
         from .call_query import call_entries

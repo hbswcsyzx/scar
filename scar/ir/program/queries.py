@@ -755,6 +755,13 @@ class ProgramIndex:
         from .copy_consumers import copy_consumers
         return copy_consumers(self, source, guard=guard, budget=budget)
 
+    def completion_continuations(self, source, *, start=None, choices=(),
+                                 cross_resume=False, budget=4096):
+        """Typed payload continuation; declared future resume requires opt-in."""
+        from .completion_continuations import completion_continuations
+        return completion_continuations(self, source, start=start, choices=choices,
+            cross_resume=cross_resume, budget=budget)
+
     def exception_match(self, operation, *, budget=4096):
         """Original exception/handler tuple, own completions and bool branch."""
         from .exception_match_query import exception_match

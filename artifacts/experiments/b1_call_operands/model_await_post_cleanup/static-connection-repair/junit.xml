@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="25" time="8.615" timestamp="2026-10-19T08:23:57.719514+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_post_cleanup" name="test_preserved_conversion_normal_and_raise_cross_sync_c1_to_exact_parent_and_final_consumers[E]" time="1.059" /><testcase classname="tests.unit.test_program_await_post_cleanup" name="test_preserved_conversion_normal_and_raise_cross_sync_c1_to_exact_parent_and_final_consumers[E-G]" time="0.887" /><testcase classname="tests.unit.test_program_await_post_cleanup" name="test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion[finally-new-raise]" time="0.872"><failure message="assert ()">mode = 'replace_raise', role = 'packet', kind = &lt;ExitKind.RAISE: 'RAISE'&gt;
+
+    @pytest.mark.parametrize(('mode', 'role', 'kind'),
+        (('replace_raise', 'packet', ExitKind.RAISE), ('replace_return', 'reference', ExitKind.NORMAL)),
+        ids=('finally-new-raise', 'finally-new-return'))
+    def test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion(mode, role, kind):
+        graph, details = await_post_cleanup_program(mode=mode)
+        index = _index(graph)
+        _sync_driver(graph, details)
+        report = _report(index, details)
+        outcome = _outcome(report, details)
+        assert outcome['kind'] == 'RETURN_COMPLETION'  # B itself still really returned.
+        continuations = []
+        for definition, leg, continuation in _legs(outcome, details):
+            continuations.append(continuation)
+&gt;           assert continuation['overrides']
+E           assert ()
+
+tests/unit/test_program_await_post_cleanup.py:229: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_await_post_cleanup" name="test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion[finally-new-return]" time="0.992"><failure message="assert ()">mode = 'replace_return', role = 'reference', kind = &lt;ExitKind.NORMAL: 'NORMAL'&gt;
+
+    @pytest.mark.parametrize(('mode', 'role', 'kind'),
+        (('replace_raise', 'packet', ExitKind.RAISE), ('replace_return', 'reference', ExitKind.NORMAL)),
+        ids=('finally-new-raise', 'finally-new-return'))
+    def test_legal_finally_replacement_tracks_current_source_without_authorizing_old_completion(mode, role, kind):
+        graph, details = await_post_cleanup_program(mode=mode)
+        index = _index(graph)
+        _sync_driver(graph, details)
+        report = _report(index, details)
+        outcome = _outcome(report, details)
+        assert outcome['kind'] == 'RETURN_COMPLETION'  # B itself still really returned.
+        continuations = []
+        for definition, leg, continuation in _legs(outcome, details):
+            continuations.append(continuation)
+&gt;           assert continuation['overrides']
+E           assert ()
+
+tests/unit/test_program_await_post_cleanup.py:229: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_await_post_cleanup" name="test_an_opaque_operation_after_c1_is_an_exact_boundary_not_a_successful_frontier" time="0.788" /><testcase classname="tests.unit.test_program_await_post_cleanup" name="test_unrelated_terminal_packet_is_a_real_copy_contradiction_not_a_legal_override" time="0.178" /><testcase classname="tests.unit.test_program_await_post_cleanup" name="test_tiny_budget_keeps_the_declared_original_body_outcome_key_without_checked_proofs" time="0.723" /><testcase classname="tests.unit.test_program_await_post_cleanup" name="test_unknown_root_preservation_is_not_a_declared_override_or_false_extraction_obligation" time="0.081" /><testcase classname="tests.unit.test_program_await_post_cleanup" name="test_failed_or_unknown_parent_delivery_cannot_launder_a_true_consumer_copy" time="0.194" /><testcase classname="tests.unit.test_program_await_parent_post_cleanup" name="test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes[E-zero-B]" time="0.060"><failure message="ValueError: unbound_exit at program_region:await.parent.host: declared exits must be bound to actual control exits">depth = 1, helper_zero_cut = True
+
+    @pytest.mark.parametrize(("depth", "helper_zero_cut"), ((1, True), (2, False)),
+                             ids=("E-zero-B", "EG-two-cut-B"))
+    def test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes(
+            depth, helper_zero_cut):
+        program, details = await_parent_post_cleanup_program(depth=depth, helper_zero_cut=helper_zero_cut)
+&gt;       require_valid(program)
+
+tests/unit/test_program_await_parent_post_cleanup.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...), drive=OperationID(value='await.resume.driver.0.driver.drive'), projection=None, guard=None),), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:await.parent.host: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_await_parent_post_cleanup" name="test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes[EG-two-cut-B]" time="0.078"><failure message="ValueError: unbound_exit at program_region:await.parent.host: declared exits must be bound to actual control exits">depth = 2, helper_zero_cut = False
+
+    @pytest.mark.parametrize(("depth", "helper_zero_cut"), ((1, True), (2, False)),
+                             ids=("E-zero-B", "EG-two-cut-B"))
+    def test_completed_await_helper_reference_reaches_parent_return_only_across_parent_resumes(
+            depth, helper_zero_cut):
+        program, details = await_parent_post_cleanup_program(depth=depth, helper_zero_cut=helper_zero_cut)
+&gt;       require_valid(program)
+
+tests/unit/test_program_await_parent_post_cleanup.py:21: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.parent.host'), regions=(Region(id=RegionID(value='await.parent.host'), label='...0), drive=OperationID(value='await.resume.driver.2.driver.drive'), projection=None, guard=None)), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unbound_exit at program_region:await.parent.host: declared exits must be bound to actual control exits
+
+scar/ir/program/validation.py:759: ValueError</failure></testcase><testcase classname="tests.unit.test_program_packet_continuations" name="test_close_route_does_not_stop_successfully_at_c1_before_a_later_opaque_operation" time="0.113" /><testcase classname="tests.unit.test_program_packet_continuations" name="test_close_selected_normal_and_raise_continue_through_real_c1_to_the_host_packet[0]" time="0.126" /><testcase classname="tests.unit.test_program_packet_continuations" name="test_close_selected_normal_and_raise_continue_through_real_c1_to_the_host_packet[1]" time="0.132" /><testcase classname="tests.unit.test_program_packet_continuations" name="test_original_incomplete_transfer_scope_stays_partial_without_rewriting_the_old_fixture" time="0.109" /><testcase classname="tests.unit.test_program_packet_continuations" name="test_projected_packet_reaches_a_real_helper_and_only_an_exact_return_summary_can_continue[known]" time="0.178" /><testcase classname="tests.unit.test_program_packet_continuations" name="test_projected_packet_reaches_a_real_helper_and_only_an_exact_return_summary_can_continue[unknown]" time="0.144" /><testcase classname="tests.unit.test_program_packet_continuations" name="test_selected_raise_port_does_not_visit_the_sibling_ports_wrong_packet" time="0.009" /><testcase classname="tests.unit.test_program_packet_continuations" name="test_another_selected_input_guard_cannot_borrow_the_good_sibling_packet_route" time="0.009" /><testcase classname="tests.unit.test_program_packet_continuations" name="test_a_truncated_full_continuation_retains_a_cursor_and_cannot_close_its_consumer_inventory" time="0.129" /><testcase classname="tests.unit.test_program_packet_continuations" name="test_every_fallback_leg_keeps_both_receiver_cases_and_their_own_continuation_choices" time="0.108" /><testcase classname="tests.unit.test_program_packet_continuation_edges" name="test_fallback_e0_el_em_each_continue_to_its_selected_original_terminal[close]" time="0.111" /><testcase classname="tests.unit.test_program_packet_continuation_edges" name="test_fallback_e0_el_em_each_continue_to_its_selected_original_terminal[throw]" time="0.135" /><testcase classname="tests.unit.test_program_packet_continuation_edges" name="test_known_packet_helper_copy_does_not_hide_an_opaque_operation_inside_the_callee" time="0.184" /><testcase classname="tests.unit.test_program_packet_continuation_edges" name="test_shared_budget_exhaustion_keeps_a_cursor_and_never_declares_a_complete_route" time="0.054" /></testsuite></testsuites>
