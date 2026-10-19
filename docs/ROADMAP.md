@@ -1,5 +1,21 @@
 # SCAR roadmap and scope
 
+> **Original F14 conditional structural acceptance (2026-10-19):**
+> [Frozen plan](M1_NATIVE_COROUTINE_PLAN.md),
+> [actual failures and repairs](M1_NATIVE_COROUTINE_PROGRESS.md), and
+> [original-clause audit](M1_NATIVE_COROUTINE_ACCEPTANCE.md) connect native
+> Running/reuse/THROW/CLOSE/callback paths through original body and call ports.
+> Terminal F history stays distinct from mutable state contents/current P;
+> native source projection remains conditional, ordinary unknown copy unchanged.
+> Two concrete missing-port/path counterexamples were reproduced and repaired.
+> **1907 affected focused pass**, all1890 previous exact identities retained,
+> 870 stable sources. F14 joins six accepted families; A-H remains accepted.
+> Nine families/P4 component/frozen-full/P5/M2 original113/196 remain open.
+> [Next gate](M1_NATIVE_COROUTINE_NEXT_GATE.md) credits existing sameR reuse and
+> scheduler packet chains, preserving four content blockers and isolating two-R
+> competition/initial-ASEND joint control. This does not establish automatic
+> whole-LeWM modeling, a trusted transformation or a new speedup.
+
 > **Exact state-content interval and post history (2026-10-19):**
 > [Frozen plan](M1_STATE_FACT_CONTINUATION_PLAN.md),
 > [actual failures, repairs and results](M1_STATE_FACT_CONTINUATION_PROGRESS.md)

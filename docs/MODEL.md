@@ -1,5 +1,26 @@
 # SCAR execution model
 
+## Body activity, terminal history and current contents (2026-10-19)
+
+The five entities remain Operation / Value / StateLocation / Region / Resource.
+A new derived body_state_history query joins an exact READ to its active Drive
+interval or actual terminal commit, complete original ports and call ancestry.
+Terminal history uses the original explicit native/no-reset lifecycle contract;
+it does not prove mutable contents or request completion remains unchanged.
+Native self acquisition retains ordinary unknown copy and a separate conditional
+source-first projection receipt. Missing raw Uses or child paths cannot support
+a complete relation. No canonical identity, schema or backend was added.
+
+See the [frozen plan](M1_NATIVE_COROUTINE_PLAN.md),
+[actual failures and results](M1_NATIVE_COROUTINE_PROGRESS.md), and
+[original F14 acceptance](M1_NATIVE_COROUTINE_ACCEPTANCE.md):1907 affected focused
+pass on870 stable sources, retaining all1890 prior identities. F14 completes
+conditional supplied-model structural acceptance; the six prior families/A-H
+remain accepted. Nine families/P4 component/frozen-full/P5/M2 original113/196
+remain open. [Next original gate](M1_NATIVE_COROUTINE_NEXT_GATE.md) credits old
+request reuse/scheduler evidence and isolates real competition/Created-entry
+gaps. Automatic whole-LeWM recovery, transformation and speedup remain unproved.
+
 ## State content must survive its original interval (2026-10-19)
 
 A state-version route does not prove that a field's contents survived. The

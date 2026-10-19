@@ -1,0 +1,21 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_execution_coroutine_running.py::test_missing_this_instances_inner_chain_or_sent_source_cannot_borrow_its_sibling[raw-use]",
+    "tests/unit/test_execution_coroutine_closed.py::test_missing_source_gate_transfer_keeps_terminal_inventory_but_not_a_complete_call_chain",
+    "--junitxml=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_native_coroutine_connections/original-capture-gap-counterexamples/junit.xml"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": "affected focused only, not complete component/full",
+  "base_revision": "f26829c126f519043943af85c0faa62a9c76dd3b",
+  "runner_sha256": "0d6913390e36200b63457579a10a4f0816daefa39519b4802559e2f5e0473a55"
+}

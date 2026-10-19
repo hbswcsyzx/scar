@@ -1,0 +1,38 @@
+{
+  "scar/ir/execution/body_state_history.py": {
+    "path": "verified-final/source-bytes/scar__ir__execution__body_state_history.py.txt",
+    "sha256": "5de60ba0d8fef638079791baa383eb84e10e88a3357d04a83168e4ba4a406a8d"
+  },
+  "scar/ir/execution/query.py": {
+    "path": "verified-final/source-bytes/scar__ir__execution__query.py.txt",
+    "sha256": "b7ab306ab0f217495a891f3ebb0003bb1df8e46d4e61334c4c2927b0e5463e71"
+  },
+  "tests/fixtures/execution_coroutine_closed_graphs.py": {
+    "path": "verified-final/source-bytes/tests__fixtures__execution_coroutine_closed_graphs.py.txt",
+    "sha256": "e65dbe34aac2b874ec77d89a8bd5ea24c56a6d4bc59a8be4c4fb260a0db8b356"
+  },
+  "tests/fixtures/execution_coroutine_packets_graphs.py": {
+    "path": "verified-final/source-bytes/tests__fixtures__execution_coroutine_packets_graphs.py.txt",
+    "sha256": "bab06b41a1b30b1b4d7a9dfc03abac98419f879b3384ae1b3292d64552225428"
+  },
+  "tests/fixtures/execution_coroutine_running_graphs.py": {
+    "path": "verified-final/source-bytes/tests__fixtures__execution_coroutine_running_graphs.py.txt",
+    "sha256": "87dc3b605a8b445bf36ba85d13ecd9430d62ab3c9847f7dd7928b6c20f55430c"
+  },
+  "tests/fixtures/native_coroutine_common.py": {
+    "path": "verified-final/source-bytes/tests__fixtures__native_coroutine_common.py.txt",
+    "sha256": "32ac1bb8c43b6bdcc25df5cc6772405860fd9a030699603f4548ddd5bd40a0cb"
+  },
+  "tests/unit/test_execution_coroutine_closed.py": {
+    "path": "verified-final/source-bytes/tests__unit__test_execution_coroutine_closed.py.txt",
+    "sha256": "41f17ecd04b900de044b2db8eceb6f41d9d8fb1437e3a639d3b8bab3d122a197"
+  },
+  "tests/unit/test_execution_coroutine_packets.py": {
+    "path": "verified-final/source-bytes/tests__unit__test_execution_coroutine_packets.py.txt",
+    "sha256": "9578169584b55bc2847f0b58b3ea45eb17ca9a01390fc2b1b87e40e403b0c049"
+  },
+  "tests/unit/test_execution_coroutine_running.py": {
+    "path": "verified-final/source-bytes/tests__unit__test_execution_coroutine_running.py.txt",
+    "sha256": "9c7e404370265d00fbc73f9e8e6b4f28693e53ff66d15b314a4d817e9c72538e"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "base_revision": "f26829c126f519043943af85c0faa62a9c76dd3b",
+  "previous_turn": "VERIFIED_PROGRESS;1890 pass,all1865 retained,862 stable sources; exact remote SHA and clean protected repositories checked; checkpoint rechecked this turn.",
+  "scope_plan": "docs/M1_NATIVE_COROUTINE_PLAN.md",
+  "plan_sha256": "ef2f9800295c5fa23d26140711fdd8852bad2a19e210fb22a40440ea0d288167",
+  "view_contract": "docs/M1_PROTOCOL_FAMILY_PLAN.md",
+  "view_contract_sha256": "c516739abd42d200d5709dc87da0a4ff352f86543c22a7d7377586ef3e1c412c",
+  "query_contract": "docs/M1_PROTOCOL_NEXT_GATES.md",
+  "query_contract_sha256": "5359c32daf4f76f85d005fe50fef2e5c1022777be3dc66cf6fc8974130ef9898",
+  "previous_focused_cases": 1890,
+  "obligation_groups": [
+    "F12",
+    "F13",
+    "F14",
+    "F15",
+    "F16",
+    "F17",
+    "F18",
+    "F19",
+    "F20",
+    "F21",
+    "F22",
+    "F23",
+    "F24",
+    "X25",
+    "X26",
+    "X27"
+  ],
+  "completed_obligation_groups": [
+    "F12",
+    "F13",
+    "F15",
+    "F17",
+    "F21",
+    "F23"
+  ],
+  "previous_closed_A_H": [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H"
+  ],
+  "full_original_A_H_required": true,
+  "p4_complete": false,
+  "m0_m2_complete": false,
+  "new_backend": false,
+  "new_lewm_speedup": false,
+  "contract_review": "Original active-Drive interval versus original explicit terminal F/no-reset history; mutable content and current P are separate. Exact native two-AWAIT and current packet ports. No new schema/backend/LeWM rule.",
+  "protected": {
+    "le-wm": {
+      "path": "/home/zyf/AAA/le-wm",
+      "head": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+      "status": ""
+    },
+    "scar": {
+      "path": "/home/zyf/AAA/scar",
+      "head": "84f165fce1e2e37617c974ce9fee574ea816406b",
+      "status": ""
+    }
+  },
+  "prior_checkpoint_sha256": "81e846f5aa3b8b54626bf1ab48debc72d84bd9fd86187fabdec5b0580dbabb44",
+  "tests_started_by_prepare": 0
+}
