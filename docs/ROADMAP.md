@@ -1,5 +1,16 @@
 # SCAR roadmap and scope
 
+> **P4 packet-continuation checkpoint (2026-10-19):**
+> [Acceptance](M1_PACKET_CONTINUATION_PROGRESS.md) joins C1/conditional resume,
+> selected pending projection and actual consumers in the existing close and
+> fallback queries. First-frontier and full inventories remain distinct;
+> per-case guards and internal callee boundaries are checked separately from
+> output copies.1032 affected focused pass (previous1018 plus14 new),721 stable
+> sources; failed attempts remain. Next complete original family and P3
+> occurrence combinations, then unified component/frozen-full and P5/M2.
+> All16 P4 groups and fullM0–M2 remain OPEN. Exact nested truncation cursor,
+> automatic whole-LeWM modeling and a new speedup are not claimed.
+
 > **P4 pending-payload provenance checkpoint (2026-10-19):**
 > [Acceptance](M1_PENDING_PAYLOAD_PROGRESS.md) connects original pack/selected
 > dispatch projection in shared source flow and origin recipes, including

@@ -1,0 +1,26 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_close_route_does_not_stop_successfully_at_c1_before_a_later_opaque_operation _
+
+    def test_close_route_does_not_stop_successfully_at_c1_before_a_later_opaque_operation():
+        graph, details = packet_continuation_program(opaque_after_replace=True)
+>       _core_valid(graph)
+
+tests/unit/test_program_packet_continuations.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_packet_continuations.py:13: in _core_valid
+    require_valid(replace(graph, protocol_scopes=(), protocol_operations=(),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='finally'), regions=(Region(id=RegionID(value='finally'), label='hand-authored resuma...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: cleanup_corridor at program_operation:finally.resume: post-pop target is a route-only block directly in the parent scope; cleanup_corridor at program_operation:finally.raise-replace: post-pop target is a route-only block directly in the parent scope
+
+scar/ir/program/validation.py:749: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_packet_continuations.py::test_close_route_does_not_stop_successfully_at_c1_before_a_later_opaque_operation
+1 failed in 0.68s

@@ -1,5 +1,32 @@
 # SCAR execution model
 
+## Packet continuation connection checkpoint (2026-10-19)
+
+A pending pack and a cleanup action are intermediate operations. A successful
+copy into either does not discharge the rule's eventual consumer obligation.
+The existing five entity families remain unchanged. The missing relationship is
+the selected control path from that intermediate carrier to the actual
+projected Value, parent ingress or terminal Use.
+
+The [continuation plan](M1_PACKET_CONTINUATION_PLAN.md) retains next-frontier
+evidence separately from a full declared-path inventory. Independent pending
+carrier/port possibility selects feasible routing cases; source-relative copy
+support checks their actual payloads. Expected source support must never prune
+a wrong-source branch from the consumer denominator. Dead pending definitions
+are not active consumers merely because they were evaluated.
+
+Typed C1 primitives deliberately have unknown callback effects and explicit
+whole-domain post-state. Following their validated structural successor is
+conditional modeling, not a purity proof. Suspend successor recipes similarly
+describe a possible later activation, not another outcome of the current Drive.
+An ordinary opaque call, incomplete effects, unproved override/handler, cycle or
+truncation remains an explicit boundary. Source/native inventory, runtime
+identity and rewrite authority remain unproved even when the supplied path is
+fully connected. [Acceptance](M1_PACKET_CONTINUATION_PROGRESS.md) records1032
+affected focused passes (previous1018 retained plus14 new),721 stable sources
+and the original failed attempts. Full P4/M0–M2 remain open; this is not whole
+program source recovery or a transformation proof.
+
 ## Pending payload provenance checkpoint (2026-10-19)
 
 Pending packing and dispatch are existing typed Operations, not new entities.

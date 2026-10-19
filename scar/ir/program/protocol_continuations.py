@@ -221,7 +221,7 @@ def _first_advance(ctx, iterator, row, guard, advance_operations):
     return True if reached and not unknown else None
 
 
-def _close_route(ctx, row, case, pending_by_operation, check, issue, missing):
+def _close_frontier(ctx, row, case, pending_by_operation, check, issue, missing):
     """Selected close completion -> the next original packet consumer.
 
     NORMAL continues the independent injected packet; RAISE overrides it with
@@ -289,17 +289,9 @@ def _close_route(ctx, row, case, pending_by_operation, check, issue, missing):
                           "parent close continuation lost the selected current packet", "protocol_close_continuation")
                     targets.append(target)
             continue
-        definitions = pending_by_operation.get(identity, ())
-        if definitions:
-            for definition in definitions:
-                target = OwnedUse(identity, definition.payload)
-                match = packet_match(target)
-                unknown |= match is None
-                check(match, _site(row),
-                      "fresh pending completion does not contain this close route's packet", "protocol_close_continuation")
-                targets.append(target)
-            # A correct but discarded pack cannot excuse replacing the active
-            # pending with another exception. Continue to its real C1 action.
+        # Constructors are not the active handoff by themselves. Only the
+        # actual C1 token below selects its possible original payload sources;
+        # an unused good or bad pack cannot change this frontier's verdict.
         action = ctx.index.cleanup_action(identity)
         from .cleanup import CleanupEnter, CleanupReplace, CleanupResume
         if type(action) in (CleanupEnter, CleanupReplace, CleanupResume):
@@ -363,6 +355,36 @@ def _close_route(ctx, row, case, pending_by_operation, check, issue, missing):
     if unknown or not targets:
         missing("delegate_close_consumer_inventory_unresolved", _site(row))
     return {"status": "PARTIAL" if unknown or not targets else "DECLARED", "source": source, "targets": tuple(targets)}
+
+
+def _close_route(ctx, row, case, pending_by_operation, check, issue, missing):
+    """Keep the first-handoff receipt and check its actual later consumers."""
+    from .protocol_packet_routes import packet_continuations
+
+    frontier = _close_frontier(ctx, row, case, pending_by_operation, check, issue, missing)
+    frontier = {**frontier, 'frontier_only': True,
+                'source_runtime_verified': False, 'runtime_identity_verified': False,
+                'transformation_authorized': False}
+    if 'source' not in frontier:
+        return {**frontier, 'first_frontier': frontier, 'known_inventory_complete': False,
+                'source_inventory_complete': False, 'frontier_only': False}
+    port = ctx.port(row.contract.result)
+    if port is None or port.gap is not None or port.phase != 'edge':
+        return {**frontier, 'status': 'PARTIAL', 'first_frontier': frontier,
+                'known_inventory_complete': False, 'source_inventory_complete': False,
+                'frontier_only': False}
+    choices = ctx.selected_edges((ControlEdgeReference(row.operation, row.slot),
+                                 *((case.guard,) if case.guard is not None else ())))
+    edge = ctx.operations[row.operation].terminator.successors[port.edge]
+    result = packet_continuations(ctx, frontier['source'], start=(edge.block, 0),
+                                  choices=choices, cuts=(row.operation,))
+    for item in result['checks']:
+        check(item['binding']['match'], _site(row),
+              "close continuation does not preserve its independently selected packet at the actual consumer",
+              "protocol_close_continuation")
+    for gap in result['gaps']:
+        missing(gap, _site(row))
+    return {**result, 'first_frontier': frontier}
 
 
 def continuation_connections(ctx):

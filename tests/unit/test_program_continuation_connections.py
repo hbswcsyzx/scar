@@ -358,8 +358,12 @@ def test_close_normal_and_raise_merge_into_one_real_fresh_pending_and_current_cl
     routes = [item["close_routes"][0] for item in view["obligations"]
               if item["site"].operation == details["helper"]]
     assert len(routes) == 2
-    assert all(route["status"] == "DECLARED" for route in routes)
-    actions = [target for route in routes for target in route["targets"]
+    # The old assertion described only the first C1 handoff. The original
+    # fixture also contains incomplete-effect forwarding operations, so its
+    # newly inspected continuation cannot be reported as fully connected.
+    assert all(route["status"] == "PARTIAL" for route in routes)
+    assert all(route["first_frontier"]["status"] == "DECLARED" for route in routes)
+    actions = [target for route in routes for target in route["first_frontier"]["targets"]
                if isinstance(target, dict) and "action" in target]
     assert len(actions) == 2 and all(target["action"].operation == details["replacement"] for target in actions)
     assert all(target["sources"] and all(source["packet_match"] is True for source in target["sources"])

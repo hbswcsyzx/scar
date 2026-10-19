@@ -1,5 +1,24 @@
 # Current evidence and remaining work
 
+## P4 complete declared packet-continuation checkpoint (2026-10-19)
+
+[Plan](M1_PACKET_CONTINUATION_PLAN.md) and [acceptance](M1_PACKET_CONTINUATION_PROGRESS.md)
+connect the original C1 action to actual dispatch/projection and host/parent
+consumers. Old first-frontier receipts remain separate. Each fallback leg keeps
+all compatible receiver cases and their own guards; current pending provenance
+is correlated before payload checks. Known return-copy summaries cannot hide
+opaque callee internals: a separate reachable-scope inventory retains boundaries.
+
+Final **1032 affected focused** pass at721 stable sources: previous1018 case IDs
+and obligations retained,14 new; zero failures/errors/skips. Two invalid-fixture
+attempts, one actual missing-continuation red and the97P/2F first integration
+remain archived. Real two-cut C1/terminal, exact known helper and internal opaque
+examples pass within supplied-IR scope. Nested budget truncation remains partial;
+its exact inner cursor is still unavailable. Program1–22/Execution8 and original
+fixtures stay unchanged. All16 P4 groups, P5/M2 and completeM0–M2 remain OPEN.
+Next integrate these proofs into original family/P3 occurrence combinations.
+No component/full, automatic whole-LeWM model or new speedup is claimed here.
+
 ## P4 pending-payload source checkpoint (2026-10-19)
 
 [Plan](M1_PENDING_PAYLOAD_PLAN.md) and [acceptance](M1_PENDING_PAYLOAD_PROGRESS.md)

@@ -9,7 +9,7 @@ from .control import ProtocolValueKind
 from .drivers import RawRequestKind
 from .protocol_connections import (DelegateLookupFallback, InjectedPacketTrigger,
     NormalizedThrowSource, ProtocolOperationRef)
-from .protocol_packet_routes import packet_frontiers
+from .protocol_packet_routes import packet_continuations, packet_frontiers
 from .protocols import (ContractResult, OwnedUse, ProtocolCall, ProtocolCallRule as CR,
     ProtocolProfile, StaticGapReason, StaticProtocolGap)
 from .structured import ControlEdgeReference
@@ -124,6 +124,30 @@ def _guard_inventory(ctx, row, bindings, issues, gaps):
         if not reaches and not ctx.budget.truncated:
             issues.append(('protocol_lookup_fallback_guard', str(_site(row)),
                            'selected guard cannot reach the original lookup'))
+
+
+def _continuation_cases(source, cases, truncated):
+    """All compatible cases retain their own complete continuation result."""
+    rows = tuple(item['continuation'] for item in cases)
+    gaps = tuple(dict.fromkeys(gap for item in rows for gap in item['gaps']))
+    complete = bool(rows) and all(item['known_inventory_complete'] for item in rows) and not truncated
+    if not rows:
+        gaps += ('lookup_fallback_continuation_case_missing',)
+    if truncated:
+        gaps += ('lookup_fallback_budget_exhausted',)
+    contradicted = any(item['status'] == 'CONTRADICTED' for item in rows)
+    result = {'source': source, 'known_inventory_complete': complete,
+              'source_inventory_complete': False, 'frontier_only': False,
+              'gaps': gaps, 'cursor': next((item['cursor'] for item in rows if item['cursor'] is not None),
+                                         {'phase': 'lookup_fallback_continuation_cases'} if truncated else None),
+              'status': 'CONTRADICTED' if contradicted else 'PARTIAL' if gaps or not complete
+                        or any(item['status'] != 'DECLARED' for item in rows) else 'DECLARED',
+              'source_runtime_verified': False, 'runtime_identity_verified': False,
+              'native_applicability_verified': False, 'transformation_authorized': False}
+    for field in ('targets', 'checks', 'actions', 'projections', 'suspensions',
+                  'overrides', 'boundaries', 'helpers', 'conditions'):
+        result[field] = tuple(value for row in rows for value in row[field])
+    return result
 
 
 def lookup_fallbacks(ctx, row, matches, issue, missing):
@@ -253,14 +277,20 @@ def lookup_fallbacks(ctx, row, matches, issue, missing):
                             start=(branch.terminator.successors[number].block, 0),
                             choices=ctx.selected_edges((*selected, *own_normal, edge)),
                             cuts=(row.operation, matcher.operation))
-                        paths.append({'kind': kind, 'source': source, 'edge': edge, 'route': route})
+                        paths.append({'kind': kind, 'source': source, 'edge': edge,
+                                      'route': route, 'continuation_cases': [],
+                                      'continuation_start': (branch.terminator.successors[number].block, 0),
+                                      'continuation_choices': (*own_normal, edge)})
                 if matcher.raise_result is not None:
                     edge = matcher.raise_result.edge
                     operation = ctx.operations[matcher.operation]
                     route = packet_frontiers(ctx, matcher.raise_result,
                         start=(operation.terminator.successors[edge.successor_index].block, 0),
                         choices=ctx.selected_edges((*selected, edge)), cuts=(row.operation, matcher.operation))
-                    paths.append({'kind': 'MATCHER_RAISE', 'source': matcher.raise_result, 'edge': edge, 'route': route})
+                    paths.append({'kind': 'MATCHER_RAISE', 'source': matcher.raise_result, 'edge': edge,
+                                  'route': route, 'continuation_cases': [],
+                                  'continuation_start': (operation.terminator.successors[edge.successor_index].block, 0),
+                                  'continuation_choices': (edge,)})
             # Cases are alternatives. Correlate the complete tuple inside each
             # selected case; joining mutually exclusive cases as one AND can
             # reject a sound caller/CFG inventory. Preserve every case below.
@@ -297,13 +327,30 @@ def lookup_fallbacks(ctx, row, matches, issue, missing):
                 joint_routes.extend(joint['routes'])
                 input_cases.append({'case': case, 'choices': case_choices,
                                     'inputs': tuple(case_reports), 'correlation': joint})
+                for path in paths:
+                    if not ctx.spend('lookup_fallback_continuation_cases'):
+                        gaps.append('lookup_fallback_budget_exhausted')
+                        break
+                    choices = ctx.selected_edges((*case_choices, *path['continuation_choices']))
+                    continuation = packet_continuations(ctx, path['source'],
+                        start=path['continuation_start'], choices=choices,
+                        cuts=(row.operation, matcher.operation))
+                    path['continuation_cases'].append({'case': case, 'choices': choices,
+                                                       'continuation': continuation})
             for path in paths:
-                if path['route']['status'] == 'CONTRADICTED':
+                path['continuation_cases'] = tuple(path['continuation_cases'])
+                path['continuation'] = _continuation_cases(path['source'],
+                    path['continuation_cases'], ctx.budget.truncated)
+                if (path['route']['status'] == 'CONTRADICTED'
+                        or path['continuation']['status'] == 'CONTRADICTED'):
                     if binding is not None:
                         problems.append(('protocol_lookup_fallback_packet', str(site), 'fallback leg ' + path['kind'] + ' does not preserve its independent selected packet'))
                     else:
                         gaps.append('lookup_fallback_packet_route_unproved')
-                gaps.extend(path['route']['gaps'])
+                # The old receipt remains frontier-only. Its later-C1 gap is
+                # answered by the complete walk, not silently kept forever or
+                # treated as an independent proof of a final consumer.
+                gaps.extend(path['continuation']['gaps'])
             if ctx.budget.truncated:
                 gaps.append('lookup_fallback_budget_exhausted')
             entry.update(status='CONTRADICTED' if problems else 'PARTIAL' if gaps else 'DECLARED',
