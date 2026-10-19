@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="9" time="2.683" timestamp="2026-10-19T10:51:17.464658+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_delegate_next_send_edges" name="test_send_operand_selects_next_only_when_it_is_declared_none[none]" time="0.198" /><testcase classname="tests.unit.test_program_delegate_next_send_edges" name="test_send_operand_selects_next_only_when_it_is_declared_none[non-none]" time="0.025" /><testcase classname="tests.unit.test_program_delegate_next_send_edges" name="test_non_none_send_keeps_its_original_ordinal_at_the_bound_method_call" time="0.048" /><testcase classname="tests.unit.test_program_delegate_next_send_edges" name="test_advance_own_raise_packet_and_current_state_reach_their_host_without_extraction[next]" time="0.038" /><testcase classname="tests.unit.test_program_delegate_next_send_edges" name="test_advance_own_raise_packet_and_current_state_reach_their_host_without_extraction[send]" time="0.043" /><testcase classname="tests.unit.test_program_delegate_next_send_edges" name="test_a_real_previous_delegate_item_cannot_replace_the_extracted_final_value" time="0.075" /><testcase classname="tests.unit.test_program_async_current_item" name="test_old_candidates_do_not_replace_the_three_drive_current_item_chain" time="0.854" /><testcase classname="tests.unit.test_program_async_current_item" name="test_old_same_type_handoff_cannot_supply_this_async_yield_adapter_input" time="0.156" /><testcase classname="tests.unit.test_program_async_current_item" name="test_old_typed_packet_cannot_replace_this_item_adapters_own_host_packet" time="0.382"><failure message="AssertionError: assert 'protocol_copy' in set()">def test_old_typed_packet_cannot_replace_this_item_adapters_own_host_packet():
+        program, details = _current_item_program(wrong='packet')
+        require_valid(_without_protocol(program))
+        current = details['current_item']
+        core = ProgramIndex(_without_protocol(program))
+        assert core.source_binding(current['item'], current['adapter_input'])['match'] is True
+        assert core.source_binding(current['adapter_output'], current['packet_component'])['match'] is True
+        assert core.source_binding(current['packet_result'], current['host_payload'])['match'] is False
+        assert core.source_binding(OperationResult(current['old_pack'].id, 0),
+            current['host_payload'])['match'] is True
+&gt;       assert 'protocol_copy' in {issue.code for issue in validate(program)}
+E       AssertionError: assert 'protocol_copy' in set()
+
+tests/unit/test_program_async_current_item.py:193: AssertionError</failure></testcase></testsuite></testsuites>

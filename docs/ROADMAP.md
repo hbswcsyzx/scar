@@ -1,5 +1,19 @@
 # SCAR roadmap and scope
 
+> **P4 original F17/F21 structural acceptance (2026-10-19):**
+> [Frozen plan](M1_ASYNC_DELEGATE_EDGE_PLAN.md) and
+> [actual evidence / remaining scope](M1_ASYNC_DELEGATE_EDGE_PROGRESS.md)
+> connect the current async item through its own adapter/packet to the caller,
+> separately from request state completion. A real older packet is rejected as
+> its replacement. NEXT/SEND argument selection, own RAISE ports and real
+> loop-carried previous items retain their exact source obligations.1793
+> affected focused pass, all1780 prior identities retained,849 stable sources.
+> F17/F21 close as supplied-model conditional structural gates; original G
+> stays closed, the remaining14 families and other A–H/P5/M2 stay open.
+> [Next N3 review](M1_DELEGATE_CLOSE_NEXT_REVIEW.md) identifies control inventory
+> independent of optional close attachments and exact actual Drive evidence.
+> Automatic whole-LeWM modeling, transformation and speedup remain unproved.
+
 > **P4 shared-input/final-chain progress (2026-10-19):**
 > [Frozen plan](M1_SHARED_TUPLE_FINAL_PLAN.md) joins original incoming edges,
 > real copy-loop visits and two calls of one shared implementation to their

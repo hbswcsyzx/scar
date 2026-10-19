@@ -47,7 +47,11 @@ _CLOSE_ERROR_RULES = (
     OutcomeAdapterRule.ASYNCGEN_CLOSE_YIELD_ERROR,
 )
 _CLOSE_RULES = (OutcomeAdapterRule.CLOSE_RETURN_VALUE, *_CLOSE_ERROR_RULES)
-_ERROR_ADAPTER_RULES = (*_EXCEPTION_ADAPTER_RULES, *_CLOSE_ERROR_RULES)
+# ASYNC_YIELD also constructs an exception-valued request completion. Its
+# own result must reach the host just like the other packet adapters; a
+# correct COMPLETE session post cannot establish that separate value edge.
+_ERROR_ADAPTER_RULES = (*_EXCEPTION_ADAPTER_RULES, *_CLOSE_ERROR_RULES,
+                        OutcomeAdapterRule.ASYNCGEN_YIELD_TO_REQUEST_ITEM)
 
 
 def host_output_copy(ctx, source, terminal):

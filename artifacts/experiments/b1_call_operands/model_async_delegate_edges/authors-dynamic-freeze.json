@@ -1,0 +1,10 @@
+{
+  "all_authors_frozen_before_execution": true,
+  "root_exclusive_interpreter_execution": true,
+  "files": {
+    "tests/unit/test_program_delegate_next_send_edges.py": "c4c74ea38739a4eb4a9514c49fdb88d3eaf7a3a421f47f1002ef1d55f9fc1c4d",
+    "tests/unit/test_program_async_current_item.py": "fb80603c68cc343e58f230cf7f3923796bcb111baf8341c3c29091084ce085fc",
+    "tests/unit/test_execution_async_current_item.py": "90fc60c45f48274cc2862bbcbb2f5b5fe9d45233721a01b5417b1c2f1399aa97"
+  },
+  "scope": "nine static nodes plus actual current async item chain and three exact missing-Use nodes"
+}

@@ -1,5 +1,26 @@
 # SCAR execution model
 
+## Current values, state posts, and actual uses (2026-10-19)
+
+An async request's COMPLETE state post and its delivered value are independent
+relations. The current body export must reach this adapter's actual input,
+its own selected result, the current packet component, and the host/caller's
+exact packet and state ports. An older typed packet with a real producer does
+not replace that chain. Missing actual Uses keep its evidence PARTIAL even
+when the state post is proved.
+
+The existing Operation / Value / StateLocation / Region / Resource model also
+separates a delegate call's own RAISE from lookup or extraction failures, and
+the loop-carried previous item from the final extracted value. SEND(None) may
+choose NEXT; SEND(nonNone) retains its original argument ordinal. These are
+source and control obligations, independent of equal types or cached values.
+
+Original F17/F21 conditional structural gates pass in1793 affected focused
+cases, retaining all1780 prior identities. See the [frozen plan](M1_ASYNC_DELEGATE_EDGE_PLAN.md),
+[source-bound acceptance](M1_ASYNC_DELEGATE_EDGE_PROGRESS.md), and
+[next close/C1 review](M1_DELEGATE_CLOSE_NEXT_REVIEW.md). Remaining families,
+automatic source recovery and whole-program modeling are still open.
+
 ## Source evaluation, current incoming, and shared consumers (2026-10-19)
 
 An original input declaration and the original control-path inventory have

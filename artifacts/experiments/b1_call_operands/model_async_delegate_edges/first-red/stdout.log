@@ -1,0 +1,21 @@
+........F                                                                [100%]
+=================================== FAILURES ===================================
+___ test_old_typed_packet_cannot_replace_this_item_adapters_own_host_packet ____
+
+    def test_old_typed_packet_cannot_replace_this_item_adapters_own_host_packet():
+        program, details = _current_item_program(wrong='packet')
+        require_valid(_without_protocol(program))
+        current = details['current_item']
+        core = ProgramIndex(_without_protocol(program))
+        assert core.source_binding(current['item'], current['adapter_input'])['match'] is True
+        assert core.source_binding(current['adapter_output'], current['packet_component'])['match'] is True
+        assert core.source_binding(current['packet_result'], current['host_payload'])['match'] is False
+        assert core.source_binding(OperationResult(current['old_pack'].id, 0),
+            current['host_payload'])['match'] is True
+>       assert 'protocol_copy' in {issue.code for issue in validate(program)}
+E       AssertionError: assert 'protocol_copy' in set()
+
+tests/unit/test_program_async_current_item.py:193: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_current_item.py::test_old_typed_packet_cannot_replace_this_item_adapters_own_host_packet
+1 failed, 8 passed in 2.68s
