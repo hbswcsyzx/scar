@@ -10,6 +10,9 @@
 > unqualified-return rejection remain. Final packet/state/consumer composition,
 > complete A–H, all16 original groups, P5 and M0–M2 remain OPEN. Supplied-IR
 > connection tests do not establish automatic whole-LeWM modeling or speedup.
+> [Next connection review](M1_AWAIT_OUTCOME_CONTINUATION.md) records the remaining
+> source-first outcome/consumer design; its proposed interface is not frozen or
+> implemented and does not change the original gate denominator.
 
 > **P4 await composition progress (2026-10-19):**
 > [Plan](M1_AWAIT_COMPOSITION_PLAN.md),
