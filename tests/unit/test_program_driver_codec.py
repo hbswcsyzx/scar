@@ -39,7 +39,7 @@ def test_raw_only_create_without_drive_and_full_driver_each_select_v11(factory):
     graph = factory()
     payload = dumps(graph)
     document = json.loads(payload)
-    assert SCHEMA_VERSION == 23
+    assert SCHEMA_VERSION == 24
     assert document["schema_version"] == 11
     assert DRIVER_FIELDS <= set(document)
     assert loads(payload) == graph

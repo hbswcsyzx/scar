@@ -265,6 +265,18 @@ class ExecutionIndex:
             raise KeyError(read)
         return deepcopy(body_state_history(self._content_context(), read, shared=shared))
 
+    def session_occupancy_history(self, read, *, budget=4096):
+        """Original HOLD support for this actual session-occupancy READ."""
+        from .session_occupancy_history import session_occupancy_history
+        from .validity_budget import ValidityBudget
+        shared = ValidityBudget(budget)
+        if type(read) is not OperationOccurrenceID:
+            raise TypeError('session_occupancy_history requires an exact OperationOccurrenceID')
+        read.__post_init__()
+        if read not in self._ctx.occurrences:
+            raise KeyError(read)
+        return deepcopy(session_occupancy_history(self._content_context(), read, shared=shared))
+
     def state_address(self, effect, *, budget=4096):
         """Bind an address declaration to exact original dynamic state ports."""
         from .state_addresses import state_address

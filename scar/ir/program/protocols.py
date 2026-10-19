@@ -580,15 +580,16 @@ _AWAIT_CONTRACT_TYPES: tuple[type, ...] = ()
 def _bind_protocol_connection_types(
         resume_source_binding: type,
         request_association: type,
-        request_state_condition: type) -> None:
+        request_state_condition: type,
+        session_occupancy_condition: type) -> None:
     global ProtocolContract, AdmissionSubject
     global _CONNECTION_CONTRACT_TYPES, _CONNECTION_ADMISSION_SUBJECT_TYPES
     global _CONNECTION_RECORDS_BOUND
     from scar.ir.program.protocol_connections import (
-        RequestAssociation, RequestStateCondition, ResumeSourceBinding,
+        RequestAssociation, RequestStateCondition, ResumeSourceBinding, SessionOccupancyCondition,
     )
-    expected = (ResumeSourceBinding, RequestAssociation, RequestStateCondition)
-    supplied = (resume_source_binding, request_association, request_state_condition)
+    expected = (ResumeSourceBinding, RequestAssociation, RequestStateCondition, SessionOccupancyCondition)
+    supplied = (resume_source_binding, request_association, request_state_condition, session_occupancy_condition)
     if supplied != expected or any(type(item) is not type for item in supplied):
         raise TypeError("protocol connections must bind the canonical exact record classes")
     if _CONNECTION_RECORDS_BOUND:
@@ -602,7 +603,8 @@ def _bind_protocol_connection_types(
         RequestProcessing, ProtocolCall, PacketConstruction, OutcomeAdapter,
         NoEntryOutcome, AdmissionPredicate, ResumeSourceBinding, RequestAssociation,
     ]
-    AdmissionSubject = Union[BodyStateCondition, ReferenceIsNoneCondition, RequestStateCondition]
+    AdmissionSubject = Union[BodyStateCondition, ReferenceIsNoneCondition,
+                             RequestStateCondition, SessionOccupancyCondition]
     _CONNECTION_RECORDS_BOUND = True
 
 

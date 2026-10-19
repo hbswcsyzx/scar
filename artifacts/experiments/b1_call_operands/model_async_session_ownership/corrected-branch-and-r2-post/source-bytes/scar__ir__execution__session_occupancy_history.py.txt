@@ -1,0 +1,181 @@
+"""Current HOLD support, with conditional request/body provenance receipts.
+
+The original association is evaluated even when the checking request never
+enters a BodyDrive. Ordinary identity/copy remains distinct from this fixed
+protocol projection, and mutable contents still require interval preservation.
+"""
+from scar.ir.program.model import CompletionResult, ExitKind, InvokeLiteralResult
+from scar.ir.program.protocol_connections import RequestAssociation
+from scar.ir.program.protocols import DriverSubject
+from scar.ir.program.structured import ControlEdgeReference
+
+from .await_outcome_evidence import pair
+from .await_links import _result
+from .body_state_history import _BodyHistory
+from .common import Unresolved
+from .coordinates import OccurrencePhase, OccurrencePoint
+from .host_order import host_path
+from .request_state_history import _post_history
+from .resumable_flow import value_for_use
+
+
+class _Projections:
+    def __init__(self, ctx, shared):
+        self.ctx, self.shared = ctx, shared
+        self.structure = _BodyHistory(ctx, shared)
+        self.creates = tuple(ctx.program.async_request_creates)
+        self.associations = tuple(ctx.program.request_association_reads)
+        self.occurrences = {}
+        for row in ctx.occurrences.values():
+            self.occurrences.setdefault(row.operation, []).append(row)
+        self.inventory = tuple((row, occurrence) for row in self.associations
+                               for occurrence in self.occurrences.get(row.operation, ()))
+        self.rows = []
+        self.prepared = False
+
+    def use(self, operation, identity):
+        return value_for_use(self.ctx, self.ctx.uses.get((operation.id, identity)))
+
+    def own_normal(self, operation, port):
+        transfer = self.ctx.outgoing.get(operation.id)
+        if transfer is None:
+            return None
+        definition = self.ctx.core_operations[operation.operation]
+        edge = definition.terminator.successors[transfer.successor_index]
+        if edge.kind is not ExitKind.NORMAL:
+            return None
+        return _result(self.ctx, operation, InvokeLiteralResult(
+            ControlEdgeReference(definition.id, transfer.successor_index), CompletionResult(port.index)),
+            shared=self.shared)
+
+    def prepare(self):
+        if self.prepared:
+            return
+        self.prepared = True
+        ctx, shared = self.ctx, self.shared
+        scopes = {row.id: row for row in ctx.program.protocol_scopes}
+        interfaces = {row.region: row for row in ctx.program.driver_interfaces}
+        for marker, association in self.inventory:
+            if not shared.spend('session_occupancy_associations', path=str(association.id)):
+                return
+            region = ctx.block_regions[ctx.visits[association.visit].block]
+            interface = interfaces.get(region)
+            contracts = []
+            for row in ctx.program.protocol_operations:
+                if not shared.spend('session_occupancy_contract_rows', path=str(association.id)):
+                    return
+                scope = scopes.get(row.scope)
+                if (row.operation == marker.operation and type(row.contract) is RequestAssociation
+                        and scope is not None and type(scope.subject) is DriverSubject
+                        and scope.subject.interface_region == region):
+                    contracts.append(row)
+            if interface is None or len(contracts) != 1:
+                continue
+            declaration, = contracts
+            contract = declaration.contract
+            selected = ctx.outgoing.get(association.id)
+            if selected is None:
+                continue
+            body_port = InvokeLiteralResult(ControlEdgeReference(marker.operation, selected.successor_index),
+                                            CompletionResult(marker.body_result.index))
+            latent_port = InvokeLiteralResult(ControlEdgeReference(marker.operation, selected.successor_index),
+                                              CompletionResult(marker.latent_result.index))
+            if (contract.request_use != marker.request or contract.body != body_port
+                    or contract.latent != latent_port):
+                continue
+            request = self.use(association, marker.request)
+            parents = self.structure.parents.get(ctx.activation_of(association.id), ())
+            receiver_routes = tuple(route for call in parents for route in call['inputs']
+                if route['formal_definition'].id == interface.receiver)
+            receiver = receiver_routes[0]['formal'] if len(receiver_routes) == 1 else None
+            receiver_binding = pair(ctx, receiver, request, shared)
+            body, latent = self.own_normal(association, marker.body_result), self.own_normal(association, marker.latent_result)
+            ports = self.structure.operation_ports(association)
+            chain = self.structure.chain(association)
+            for creation in self.creates:
+                for occurrence in self.occurrences.get(creation.operation, ()):
+                    if not shared.spend('session_occupancy_create_sources', path=str(occurrence.id)):
+                        return
+                    result = self.own_normal(occurrence, creation.request_result)
+                    request_binding = pair(ctx, result, request, shared)
+                    if request_binding['match'] is not True:
+                        continue
+                    created_body = self.use(occurrence, creation.body)
+                    created_latent = self.use(occurrence, creation.latent)
+                    creation_ports = self.structure.operation_ports(occurrence)
+                    creation_chain = self.structure.chain(occurrence)
+                    body_compatibility = pair(ctx, created_body, body, shared)
+                    latent_compatibility = pair(ctx, created_latent, latent, shared)
+                    transfer = ctx.outgoing.get(occurrence.id)
+                    route = None if transfer is None else host_path(ctx,
+                        OccurrencePoint(occurrence.id, OccurrencePhase.EDGE, transfer.successor_index),
+                        OccurrencePoint(association.id, OccurrencePhase.BEFORE), budget=shared)
+                    supported = (all(value is not None and type(value) is not Unresolved for value in
+                        (created_body, created_latent, body, latent))
+                        and ports['supported'] and chain['supported']
+                        and receiver_binding['match'] is True
+                        and creation_ports['supported'] and creation_chain['supported']
+                        and chain['root'] == creation_chain['root']
+                        and body_compatibility['match'] is not False
+                        and latent_compatibility['match'] is not False
+                        and route is not None and not shared.truncated)
+                    self.rows.append({'declaration': declaration, 'association': marker,
+                        'association_occurrence': association, 'creation': creation,
+                        'creation_occurrence': occurrence, 'request_binding': request_binding,
+                        'receiver_binding': receiver_binding, 'receiver_routes': receiver_routes,
+                        'body': body, 'latent': latent, 'created_body': created_body,
+                        'created_latent': created_latent, 'ordinary_body_binding': body_compatibility,
+                        'ordinary_latent_binding': latent_compatibility, 'association_ports': ports,
+                        'association_chain': chain, 'creation_ports': creation_ports,
+                        'creation_chain': creation_chain, 'source_route': route,
+                        'supported': supported, 'conditional': True})
+
+    def bind(self, ctx, source, target, shared):
+        ordinary = pair(ctx, source, target, shared)
+        if ordinary['match'] is not None or shared.truncated:
+            return ordinary
+        self.prepare()
+        receipts = []
+        # Each endpoint may use its own association of a different request.
+        # Join only their independently recovered body inputs, never R1/R2 IDs.
+        for left in self.rows:
+            if not shared.spend('session_occupancy_left_projections', path='session.occupancy.body'):
+                break
+            if not left['supported']:
+                continue
+            source_binding = pair(ctx, source, left['body'], shared)
+            if source_binding['match'] is not True:
+                continue
+            for right in self.rows:
+                if not shared.spend('session_occupancy_right_projections', path='session.occupancy.body'):
+                    break
+                if not right['supported']:
+                    continue
+                target_binding = pair(ctx, right['body'], target, shared)
+                root_binding = pair(ctx, left['created_body'], right['created_body'], shared)
+                if target_binding['match'] is True and root_binding['match'] is True:
+                    receipts.append({'source': left, 'target': right,
+                        'source_binding': source_binding, 'target_binding': target_binding,
+                        'original_body_binding': root_binding})
+        if len(receipts) != 1 or shared.truncated or ctx.issues:
+            return {**ordinary, 'projection_inventory': tuple(self.rows),
+                    'conditional_projection': False}
+        return {**ordinary, 'match': True, 'ordinary_binding': ordinary,
+            'conditional_projection': True, 'projections': tuple(receipts),
+            'support': (*ordinary.get('support', ()),
+                        {'rule': 'CONDITIONAL_REQUEST_BODY_PROJECTION', 'receipt': receipts[0]}),
+            'conditions': ('original fixed Create/RequestAssociation field semantics remain conditional',
+                           'projection does not union identities or prove mutable state preservation')}
+
+
+def session_occupancy_history(ctx, read_id, *, shared):
+    projections = _Projections(ctx, shared)
+    result = _post_history(ctx, read_id, shared=shared, occupancy=True,
+                           bind_subject=projections.bind)
+    return {**result, 'request_create_inventory': projections.creates,
+        'association_inventory': projections.associations,
+        'actual_association_inventory': projections.inventory,
+        'body_projections': tuple(projections.rows),
+        'conditions': (*result['conditions'],
+            'HOLD may support occupied True; COMPLETE/ABANDON never establish globally empty',
+            'occupied alone is not request rejection: the initial-step control is separate')}

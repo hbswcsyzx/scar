@@ -232,6 +232,24 @@ class RequestStateCondition:
 
 
 @dataclass(frozen=True, slots=True)
+class SessionOccupancyCondition:
+    """An original READ checks whether B has an active protocol session.
+
+    This is independent of frame activity and the checking request's phase.
+    It stores neither a holder, a truth value nor a mutable occupancy fact.
+    """
+
+    body_use: UseID
+    state_sites: tuple[ExistingAccess, ...]
+
+    def __post_init__(self) -> None:
+        _identifier(self.body_use, UseID, "session occupancy body Use")
+        _state_sites(self.state_sites, "session occupancy state sites", read_only=True)
+        if not self.state_sites:
+            raise ValueError("session occupancy needs at least one original READ site")
+
+
+@dataclass(frozen=True, slots=True)
 class AsyncSessionOutcome:
     scope: ProtocolScopeID
     update: OperationID
@@ -515,6 +533,7 @@ PROTOCOL_CONNECTION_RECORD_TAGS = MappingProxyType({
     ProtocolResultConsumers: ("kind", "PROTOCOL_RESULT_CONSUMERS"),
     RequestAssociation: ("kind", "PROTOCOL_REQUEST_ASSOCIATION"),
     RequestStateCondition: ("kind", "PROTOCOL_REQUEST_STATE_CONDITION"),
+    SessionOccupancyCondition: ("kind", "SESSION_OCCUPANCY_CONDITION"),
     AsyncSessionOutcome: ("kind", "ASYNC_SESSION_OUTCOME"),
     TaskCreatedTarget: ("kind", "TASK_CREATED_TARGET"),
     TaskTargetRead: ("kind", "TASK_TARGET_READ"),
@@ -526,7 +545,7 @@ PROTOCOL_CONNECTION_RECORD_TAGS = MappingProxyType({
 
 
 PROTOCOL_CONNECTION_CONTRACTS = (ResumeSourceBinding, RequestAssociation)
-PROTOCOL_CONNECTION_ADMISSION_SUBJECTS = (RequestStateCondition,)
+PROTOCOL_CONNECTION_ADMISSION_SUBJECTS = (RequestStateCondition, SessionOccupancyCondition)
 _DELEGATED_METHOD_LOOKUP_RULES = frozenset({
     ProtocolCallRule.DELEGATE_NEXT_LOOKUP,
     ProtocolCallRule.DELEGATE_SEND_LOOKUP,
@@ -538,7 +557,7 @@ _DELEGATED_METHOD_LOOKUP_RULES = frozenset({
 def _bind_protocol_records() -> None:
     from scar.ir.program.protocols import _bind_protocol_connection_types
     _bind_protocol_connection_types(
-        ResumeSourceBinding, RequestAssociation, RequestStateCondition)
+        ResumeSourceBinding, RequestAssociation, RequestStateCondition, SessionOccupancyCondition)
 
 
 def has_protocol_connection_capability(graph: object) -> bool:
@@ -615,7 +634,7 @@ __all__ = [
     "PROTOCOL_CONNECTION_ADMISSION_SUBJECTS", "PROTOCOL_CONNECTION_CONTRACTS",
     "PROTOCOL_BINDING_TYPES", "ProtocolBinding", "ProtocolCallInputCase", "ProtocolCallInputs",
     "ProtocolOperationRef", "ProtocolResultConsumers", "RawOperandSource",
-    "RawRequestTrigger", "RequestAssociation", "RequestStateCondition",
+    "RawRequestTrigger", "RequestAssociation", "RequestStateCondition", "SessionOccupancyCondition",
     "RequestStateRule", "ResumeSourceBinding", "TaskCreatedTarget", "TaskStatusRead",
     "TaskStatusRule", "TaskTargetRead", "TaskTargetRole", "TaskTargetSource",
     "_bind_connection_model_ports", "_bind_protocol_records",

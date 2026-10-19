@@ -20,10 +20,13 @@ def _row_view(ctx, row, index=None):
     contract, gaps, ports = row.contract, [], []
     predicate = None
     if type(contract) is AdmissionPredicate:
-        from .protocol_connections import RequestStateCondition
+        from .protocol_connections import RequestStateCondition, SessionOccupancyCondition
         if type(contract.subject) is RequestStateCondition:
             from .protocol_async import request_state_view
             predicate = request_state_view(ctx, row)
+        elif type(contract.subject) is SessionOccupancyCondition:
+            from .session_occupancy import occupancy_view
+            predicate = occupancy_view(ctx, row)
         else:
             from .admission import admission_view
             predicate = admission_view(ctx, row)

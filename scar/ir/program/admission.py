@@ -12,7 +12,8 @@ from .protocols import (BodyStateCondition, BodyStatePredicateRule, OwnedUse,
 from .structured import ControlEdgeReference
 
 
-def admission_errors(ctx, row):
+def predicate_shape_errors(ctx, row, *, identity, state_sites=(), stateful=True):
+    """Ordinary READ/bool/branch shape, without choosing an R or B owner."""
     contract, operation = row.contract, ctx.operations[row.operation]
     issues = []
 
@@ -40,23 +41,37 @@ def admission_errors(ctx, row):
             error('admission_branch', 'predicate branch must be a real BRANCH in the same region')
         elif ctx.forwards(contract.result, OwnedUse(branch.id, branch.terminator.condition)) is False:
             error('admission_bool_source', 'branch condition is not this evaluation of the predicate bool')
-        subject = contract.subject
-        identity = subject.instance_use if type(subject) is BodyStateCondition else subject.input_use
         value = ctx.values[ctx.owned_use(operation.id, identity).value]
         if not isinstance(value, ReferenceValue):
             error('admission_input', 'predicate input must be its original Reference Use')
-        if type(subject) is ReferenceIsNoneCondition:
+        if not stateful:
             if operation.accesses:
                 error('admission_effect', 'reference-is-None does not read heap/state domains')
         else:
-            for site in subject.state_sites:
+            for site in state_sites:
                 if site.operation != operation.id or site.index >= len(operation.accesses):
                     error('admission_read', 'predicate state site must name its own original read')
-            interface = ctx.interfaces.get(ctx.region_of[operation.id])
-            if interface is not None and value.id not in ctx.driver_roles(interface.region)[0]:
-                error('admission_owner', 'body predicate input is not the bound driver receiver role')
     except (KeyError, TypeError, ValueError) as exc:
         error('admission_reference', str(exc))
+    return tuple(issues)
+
+
+def admission_errors(ctx, row):
+    subject = row.contract.subject
+    is_body = type(subject) is BodyStateCondition
+    identity = subject.instance_use if is_body else subject.input_use
+    issues = list(predicate_shape_errors(ctx, row, identity=identity,
+        state_sites=subject.state_sites if is_body else (), stateful=is_body))
+    if is_body:
+        try:
+            value = ctx.values[ctx.owned_use(row.operation, identity).value]
+            interface = ctx.interfaces.get(ctx.region_of[row.operation])
+            if interface is not None and value.id not in ctx.driver_roles(interface.region)[0]:
+                issues.append(('admission_owner', str(row.operation),
+                    'body predicate input is not the bound driver receiver role'))
+        except (KeyError, TypeError, ValueError):
+            # The ordinary shape checker retains the exact missing input error.
+            pass
     return tuple(issues)
 
 

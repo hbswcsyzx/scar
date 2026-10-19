@@ -1,5 +1,24 @@
 # SCAR roadmap and scope
 
+> **Current F16 occupancy/competition progress (2026-10-19):**
+> [Frozen plan](M1_ASYNC_SESSION_OWNERSHIP_PLAN.md),
+> [actual attempts](M1_ASYNC_SESSION_OWNERSHIP_PROGRESS.md), and
+> [exact codec-test migration](M1_ASYNC_SESSION_OWNERSHIP_CODEC_MIGRATION.md)
+> separate frame phase, active session and request initial/complete. Original
+> Create/association/BRANCH ports carry the complete tuple; R2 closes itself
+> before its own error helper N/R/fullstate, and R1 resumes its original body.
+> Conditional source provenance does not prove main cross-call preservation.
+> Program24 adds only the thin occupancy subject; old wire and Execution8 stay.
+> **1956 affected focused pass**,878 stable sources:1903 prior exact identities
+> plus4 explicit future-version migrations retain all1907 prior obligations;
+> 49 new cases. This is not the component or frozen-full gate.
+> F16 and the other eight open families/P4 component/frozen-full/P5/M2 original
+> 113/196 remain open; seven prior families/A–H remain accepted conditionally.
+> [Next gate](M1_ASYNC_SESSION_OWNERSHIP_NEXT_GATE.md) first reviews whole-call
+> summaries versus actual partial implementation/boundary effects, then the
+> original initial-ASEND joint control. Automatic whole-LeWM modeling,
+> trusted transformation and new speedup remain unproved.
+
 > **Original F14 conditional structural acceptance (2026-10-19):**
 > [Frozen plan](M1_NATIVE_COROUTINE_PLAN.md),
 > [actual failures and repairs](M1_NATIVE_COROUTINE_PROGRESS.md), and

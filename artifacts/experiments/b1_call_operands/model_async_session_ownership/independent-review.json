@@ -1,0 +1,63 @@
+{
+  "scope": "Finite source review of current supplied-model occupancy/competition and migration; not full-model, native applicability or source recovery acceptance",
+  "all_authors_frozen": true,
+  "interpreters_started_by_reviewers": 0,
+  "source_owner_review": {
+    "root": "Thin typed subject, predicate shape integration, HOLD-only dynamic post query, conditional body projection and shared slot budget; root alone executes serial tests",
+    "cleanup_forward_review": "Static original marker inventory, R source/Create/own N B, full association state tuple at true BRANCH, READ-to-branch inputs, exact public rejection and budget denominator",
+    "value_resource_review": "Program24 capability and old wire gating; exact18 old-test literals; reproduced uncharged slot scan; read-only final A/C review confirms complete tuple and R2-only COMPLETE",
+    "await_wrapper_chain": "One body/two independent requests; no R2 Drive; failure COMPLETE before own error helper N/R and full latest state; original R1 resumes and finishes"
+  },
+  "actual_review_findings": [
+    "Ordinary RAW READ result failed original packed-raw constructor validation; represented real native normal/raise INVOKE with opaque boundary, no fake NEXT pack",
+    "Header24 upgraded request fixture needed its true exception_matches field before testing capability rejection; only NEW test changed",
+    "Full association tuple was incorrectly supported at one-domain READ; original BRANCH carries all domains; READ dependency stays separate",
+    "Negative static graphs must be rejected by public ProgramIndex instead of queried after validation failure",
+    "own NORMAL scan after budget exhaustion was an actual reproduced failure; existing await_links._result now charges exact original edge slots before traversal",
+    "Native R2 failed first step closes R2 before error creation; current fixture explicitly writes new fullstate and publishes R2 COMPLETE without implying B-free or R1-complete"
+  ],
+  "reviewed_sources": {
+    "scar/ir/execution/query.py": "cf00c10aaf2fcc412fa019d7329ece6ea2ad3f375c7c9d3f934b41cf3574b3b5",
+    "scar/ir/execution/request_state_history.py": "7ff1171ac41044d1e3d2622355ab048a0dd0ad0c112ca4a7b81e4df41cf3487e",
+    "scar/ir/program/admission.py": "0c4c6750eaa3933033c90883dc12a327818388fde04a0741efde0dbf5eee9095",
+    "scar/ir/program/codec.py": "ccbdd1299224c569aa3b15f3275b3d0ba25ff5fe5c57ad100293e27c6739837d",
+    "scar/ir/program/protocol_async.py": "1af093e9a89a956e15670548a4a2ca6cf8b208bd002c9bbbc8d32a9080fa97a5",
+    "scar/ir/program/protocol_connection_validation.py": "2c5dd011e9bd36af14d87770ccfd728dae6cca2a39dca8da02b85e9e7c8d513d",
+    "scar/ir/program/protocol_connections.py": "c003f60941ef640c30602b381a138ed5337eabecd5f7a3d42c86d5e00fe547ce",
+    "scar/ir/program/protocol_query.py": "afb0bdd472b90694abf78562f5f48f675b5d0c40d58b85be076a5d11bd930784",
+    "scar/ir/program/protocol_rules.py": "86952b1f50809e035ab2a688ad0262a1392c8df541c9d1338ed0d946cdd0c967",
+    "scar/ir/program/protocol_validation.py": "760dd5f7d242871300af7a2e986f4dc1eafab08b883e50537ac735402f9839a9",
+    "scar/ir/program/protocols.py": "894f432e6b9ca4525fb6465b11199fef53fc70a5172fe7dde8d42027106e1885",
+    "scar/ir/program/session_occupancy.py": "ef73ff6654252eb2528751f4ffc798c2a619ff77d6a31d409225d9964903106d",
+    "scar/ir/execution/session_occupancy_history.py": "0298dac5a58245ed45d331a7259fedd13436c4cadca08fa87f69849161f48c70",
+    "tests/fixtures/program_async_competition_graphs.py": "ba8443ea441b0595ef6bb1ec6b390c598dd5ce3248a6d6607255224f0c7f56b0",
+    "tests/fixtures/execution_async_competition_graphs.py": "cc8d8a0ccb5400d536c4f23dfbd80571927c853ccc31c1ee00c7494412a08cfb",
+    "tests/unit/test_program_session_occupancy.py": "48815a932a202e895769ef9d5d6b7863e0fd99a75c2fb3ca5d4e4c5c1e4cfcfd",
+    "tests/unit/test_program_session_occupancy_codec.py": "d62d0afc0d3d84104c8673453516d3c645d976f9e48908d9ae10cd2f4369fe3c",
+    "tests/unit/test_execution_async_competition.py": "9bf3039070ce0f16f5dfb1b85aeb840168439ab26795b5088f26ed5814259fc3",
+    "tests/unit/test_execution_session_occupancy.py": "c273719c969f6823cfd1754029910b0f7902ade5107ef94db66e4217d895056f"
+  },
+  "unresolved": [
+    "Whole parent summary versus exact child prefix/suffix effects across main HOLD-to-READ interval",
+    "Original primitive boundary effects are not automatically pure",
+    "Original initial-ASEND joint conditions and old R3 four preservation blockers remain",
+    "No full component/frozen-full/P5/M2 gate on this source"
+  ],
+  "next_contract_read_only_review": {
+    "reviewer": "await_wrapper_chain; root independently read the named contracts",
+    "finding": "No existing field proves exhaustive effect implementation or separately ordered entry/exit residual effects; skipping parent INVOKE is not authorized",
+    "source_hashes": {
+      "scar/ir/execution/state_preservation.py": "d85db0865e75d087f9136f3bd92d0191500555c4ce4ca7201cb56c78b7b587c7",
+      "scar/ir/program/native.py": "17543d01b8351d74eefc665d48c74383bca27d820507fff98646dc3cef2a22b0",
+      "scar/ir/program/providers.py": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343",
+      "scar/ir/execution/region_implementation.py": "496c5500e5c8e1b4d8ca321e0b18788ea0775d8c65a1963427ccdd04130d24e4"
+    },
+    "new_authority": false,
+    "tests_started": 0
+  },
+  "f16_complete": false,
+  "p4_complete": false,
+  "transformation_authorized": false,
+  "new_backend": false,
+  "new_lewm_speedup": false
+}

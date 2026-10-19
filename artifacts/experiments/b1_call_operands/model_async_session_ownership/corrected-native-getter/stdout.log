@@ -1,0 +1,132 @@
+FFFF............................................                         [100%]
+=================================== FAILURES ===================================
+_ test_occupancy_uses_this_requests_association_body_without_authorizing_a_gate[reject-own-normal] _
+
+reject_raised = False
+
+    @pytest.mark.parametrize('reject_raised', (False, True), ids=('reject-own-normal', 'reject-own-raise'))
+    def test_occupancy_uses_this_requests_association_body_without_authorizing_a_gate(reject_raised):
+        graph, details = async_competition_program(reject_raised=reject_raised)
+        require_valid(_core(graph))
+        require_valid(graph)
+        supplied = details['occupancy']
+        row = supplied['row']
+        ctx = _context(graph)
+        assert occupancy_errors(ctx, row) == ()
+        view = occupancy_view(ctx, row)
+        assert type(view['subject']) is SessionOccupancyCondition
+        assert view['actual'] == supplied['body_use']
+        assert view['bool_must_copy'] is True
+        assert view['body_binding']['match'] is True
+>       assert view['binding']['match'] is True
+E       assert None is True
+
+tests/unit/test_program_session_occupancy.py:48: AssertionError
+_ test_occupancy_uses_this_requests_association_body_without_authorizing_a_gate[reject-own-raise] _
+
+reject_raised = True
+
+    @pytest.mark.parametrize('reject_raised', (False, True), ids=('reject-own-normal', 'reject-own-raise'))
+    def test_occupancy_uses_this_requests_association_body_without_authorizing_a_gate(reject_raised):
+        graph, details = async_competition_program(reject_raised=reject_raised)
+        require_valid(_core(graph))
+        require_valid(graph)
+        supplied = details['occupancy']
+        row = supplied['row']
+        ctx = _context(graph)
+        assert occupancy_errors(ctx, row) == ()
+        view = occupancy_view(ctx, row)
+        assert type(view['subject']) is SessionOccupancyCondition
+        assert view['actual'] == supplied['body_use']
+        assert view['bool_must_copy'] is True
+        assert view['body_binding']['match'] is True
+>       assert view['binding']['match'] is True
+E       assert None is True
+
+tests/unit/test_program_session_occupancy.py:48: AssertionError
+____ test_same_typed_request_reference_cannot_replace_the_association_body _____
+
+    def test_same_typed_request_reference_cannot_replace_the_association_body():
+        graph, details = async_competition_program()
+        supplied = details['occupancy']
+        association = supplied['association_operation']
+        request = next(use for use in association.uses if use.id == supplied['association'].request)
+        predicate = supplied['predicate']
+        altered = replace(predicate, uses=tuple(replace(use, value=request.value)
+            if use.id == supplied['body_use'].use else use for use in predicate.uses))
+        graph = replace(graph, operations=tuple(altered if operation.id == altered.id else operation
+                                               for operation in graph.operations))
+        require_valid(_core(graph))
+        issues = validate(graph)
+        assert 'async_session_occupancy_body' in {issue.code for issue in issues}
+>       view = occupancy_view(_context(graph), supplied['row'])
+                              ^^^^^^^^^^^^^^^
+
+tests/unit/test_program_session_occupancy.py:90: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_session_occupancy.py:24: in _context
+    return ConnectionContext(graph, index=ProgramIndex(graph), budget=ValidityBudget(budget))
+                                          ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x7c1153140c20>
+graph = ProgramGraph(root=RegionID(value='competition.caller'), regions=(Region(id=RegionID(value='competition.caller'), label...ue='competition.r1.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: async_session_occupancy_body at program_operation:competition.r2.driver.competition.occupied.predicate: occupancy input differs from every applicable independent request-body projection
+
+scar/ir/program/queries.py:279: ValueError
+_____________ test_another_bool_cannot_supply_the_occupancy_branch _____________
+
+    def test_another_bool_cannot_supply_the_occupancy_branch():
+        graph, details = async_competition_program()
+        supplied = details['occupancy']
+        branch = supplied['branch']
+        predicate = supplied['predicate']
+        region = next(value.region for value in graph.values if value.id == predicate.results[0])
+        other = DataValue(ValueID('occupancy.independent.bool'), region, LiteralOrigin(False), 'builtins.bool')
+        altered = replace(branch, uses=tuple(replace(use, value=other.id)
+            if use.id == branch.terminator.condition else use for use in branch.uses))
+        graph = replace(graph, values=(*graph.values, other), operations=tuple(
+            altered if operation.id == altered.id else operation for operation in graph.operations))
+        require_valid(_core(graph))
+        assert 'admission_bool_source' in {issue.code for issue in validate(graph)}
+>       view = occupancy_view(_context(graph), supplied['row'])
+                              ^^^^^^^^^^^^^^^
+
+tests/unit/test_program_session_occupancy.py:110: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_session_occupancy.py:24: in _context
+    return ConnectionContext(graph, index=ProgramIndex(graph), budget=ValidityBudget(budget))
+                                          ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <scar.ir.program.queries.ProgramIndex object at 0x7c1152631be0>
+graph = ProgramGraph(root=RegionID(value='competition.caller'), regions=(Region(id=RegionID(value='competition.caller'), label...ue='competition.r1.driver.2.driver.drive'), source=OperationID(value='pipeline.item.suspend')))), exception_matches=())
+
+    def __init__(self, graph: ProgramGraph):
+        # Reuse the validator's canonical CFG/dominators and derived cleanup
+        # result rather than running a second dataflow algorithm for queries.
+        from .validation import validate
+        cleanup, resumption, lifecycle, prepared = [], [], [], []
+        issues = validate(graph, _cleanup_facts=cleanup, _resumption_facts=resumption,
+                          _lifecycle_facts=lifecycle, _prepared_index=prepared)
+        if issues:
+>           raise ValueError("; ".join(f"{i.code} at {i.path}: {i.message}" for i in issues))
+E           ValueError: admission_bool_source at program_operation:competition.r2.driver.competition.occupied.predicate: branch condition is not this evaluation of the predicate bool
+
+scar/ir/program/queries.py:279: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_session_occupancy.py::test_occupancy_uses_this_requests_association_body_without_authorizing_a_gate[reject-own-normal]
+FAILED tests/unit/test_program_session_occupancy.py::test_occupancy_uses_this_requests_association_body_without_authorizing_a_gate[reject-own-raise]
+FAILED tests/unit/test_program_session_occupancy.py::test_same_typed_request_reference_cannot_replace_the_association_body
+FAILED tests/unit/test_program_session_occupancy.py::test_another_bool_cannot_supply_the_occupancy_branch
+4 failed, 44 passed in 95.33s (0:01:35)

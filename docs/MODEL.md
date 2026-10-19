@@ -1,5 +1,33 @@
 # SCAR execution model
 
+## One body, independent requests and current occupancy (2026-10-19)
+
+The five core entities remain Operation / Value / StateLocation / Region /
+Resource. Frame phase, active session and a request's initial/complete state
+are independent. The thin SessionOccupancyCondition names an original B Use
+and READ sites; it stores neither truth nor extra mutable state. The supplied
+one-B/two-R pipeline now carries R2's own COMPLETE before its error helper,
+normal/raise fullstate and catch, followed by the original R1 continuation.
+It adds no R2 BodyDrive and never derives B-free from R2-complete.
+
+Static source and full state tuple follow original Create/association and
+BRANCH ports. Dynamic session_occupancy_history separates conditional body
+provenance, current post support, interval preservation and observed bool.
+A complete local interval passes; the main cross-call interval still has
+whole-call summary and real primitive-boundary blockers. These cannot be
+removed by changing an opaque label or treating an observation as proof.
+
+See the [frozen plan](M1_ASYNC_SESSION_OWNERSHIP_PLAN.md),
+[exact codec migration](M1_ASYNC_SESSION_OWNERSHIP_CODEC_MIGRATION.md),
+[actual attempts](M1_ASYNC_SESSION_OWNERSHIP_PROGRESS.md), and
+[next contract review](M1_ASYNC_SESSION_OWNERSHIP_NEXT_GATE.md).
+Program24 is capability-gated; legacy wire meaning and Execution8 remain.
+1956 affected focused tests pass on878 stable sources:1903 previous exact
+identities plus4 explicit future-version migrations retain all1907 prior
+obligations, with49 new cases. This is not component or frozen-full acceptance.
+This is supplied-model progress, not completed F16/M0–M2 or automatic whole
+LeWM modeling. No new backend, trusted transformation or speedup is established.
+
 ## Body activity, terminal history and current contents (2026-10-19)
 
 The five entities remain Operation / Value / StateLocation / Region / Resource.

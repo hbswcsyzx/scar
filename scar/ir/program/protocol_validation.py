@@ -373,12 +373,12 @@ def protocol_errors(graph, *, context=None):
         except ValueError as exc:
             error("protocol_state_site", path, exc)
         if type(contract) is AdmissionPredicate:
-            from .protocol_connections import RequestStateCondition
-            if type(contract.subject) is not RequestStateCondition:
+            from .protocol_connections import RequestStateCondition, SessionOccupancyCondition
+            if type(contract.subject) not in (RequestStateCondition, SessionOccupancyCondition):
                 from .admission import admission_errors
                 issues.extend(admission_errors(ctx, row))
-            # Request predicates need the prepared original request/association
-            # index. The connection stage checks them after core validation.
+            # R/B protocol predicates need the prepared original association
+            # index. The connection stage checks their separate owner roles.
         elif type(contract) is RequestProcessing:
             try:
                 raw_use = _actual_protocol_use(ctx, operation, contract.raw_use)

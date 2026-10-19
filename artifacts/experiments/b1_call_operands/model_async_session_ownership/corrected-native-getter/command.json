@@ -1,0 +1,23 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_program_session_occupancy.py",
+    "tests/unit/test_program_session_occupancy_codec.py",
+    "tests/unit/test_execution_async_competition.py",
+    "tests/unit/test_execution_session_occupancy.py",
+    "--junitxml=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_async_session_ownership/corrected-native-getter/junit.xml"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "base_revision": "f22d64196d2f706c66e99f7acb4bcffa8373a98c",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": "affected focused only, not full component/native/automatic source recovery",
+  "runner_sha256": "25b43c3e9a2b6e61cfbcbd8e0eb4f9aef3c94a01c343b608b6b258a3f79c5e5e"
+}

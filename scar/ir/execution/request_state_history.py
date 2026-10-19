@@ -103,12 +103,20 @@ class _History:
 
 
 def request_state_history(ctx, read_id, *, shared):
+    return _post_history(ctx, read_id, shared=shared)
+
+
+def _post_history(ctx, read_id, *, shared, occupancy=False, bind_subject=None):
+    """One original post/port/preservation engine, with closed implications."""
+    from scar.ir.program.protocol_connections import SessionOccupancyCondition
+    subject_type = SessionOccupancyCondition if occupancy else RequestStateCondition
+    read_role = 'body_use' if occupancy else 'request_use'
     analysis = _History(ctx, shared)
     read = ctx.occurrences[read_id]
     operation = ctx.core_operations[read.operation]
     declarations = tuple(row for row in ctx.program.protocol_operations
         if row.operation == read.operation and type(row.contract) is AdmissionPredicate
-        and type(row.contract.subject) is RequestStateCondition)
+        and type(row.contract.subject) is subject_type)
     inventory = tuple(ctx.program.session_updates)
     occurrences = {}
     for occurrence in ctx.occurrences.values():
@@ -137,7 +145,7 @@ def request_state_history(ctx, read_id, *, shared):
         read_supported = operation.effects_complete
         if not operation.effects_complete:
             analysis.gap('state_history_read_effects_incomplete')
-        read_subject = analysis.use_value(read, predicate.contract.subject.request_use)
+        read_subject = analysis.use_value(read, getattr(predicate.contract.subject, read_role))
         current = ctx.current(OccurrencePoint(read.id, OccurrencePhase.BEFORE)) or {}
         for access in operation.accesses:
             if not analysis.spend('read_accesses', read.id):
@@ -229,7 +237,9 @@ def request_state_history(ctx, read_id, *, shared):
             if value is None or value.value != definition.id:
                 established = None if established is not False else False
                 gaps.append('state_history_post_state_port_unproved')
-        binding = pair(ctx, source_request, read_subject, shared)
+        subject = source_body if occupancy else source_request
+        binding = (pair(ctx, subject, read_subject, shared) if bind_subject is None
+                   else bind_subject(ctx, subject, read_subject, shared))
         candidate.update(post_established=established, source_point=point, subject_binding=binding)
         if established is True and locations and not shared.truncated:
             preservation = state_preservation(ctx, point,
@@ -241,9 +251,10 @@ def request_state_history(ctx, read_id, *, shared):
             gaps.append('state_history_post_not_established')
         if binding['match'] is not True:
             gaps.append('state_history_subject_unproved')
-        supported_rule = (predicate is not None
-            and predicate.contract.subject.rule is RequestStateRule.IS_COMPLETE
-            and update.post is SessionPost.COMPLETE)
+        supported_rule = (predicate is not None and (
+            update.post is SessionPost.HOLD if occupancy else
+            predicate.contract.subject.rule is RequestStateRule.IS_COMPLETE
+            and update.post is SessionPost.COMPLETE))
         if not supported_rule:
             gaps.append('state_history_post_implication_unresolved')
         if (supported_rule and read_supported and established is True

@@ -322,7 +322,7 @@ def connection_reports(ctx):
     from .protocol_async import async_connections, request_state_errors
     from .protocol_continuations import continuation_connections
     from .protocol_await import await_connections
-    from .protocol_connections import RequestStateCondition
+    from .protocol_connections import RequestStateCondition, SessionOccupancyCondition
     from .protocols import AdmissionPredicate
     reports = {"common": common_connections(ctx),
                "continuations": continuation_connections(ctx),
@@ -335,6 +335,9 @@ def connection_reports(ctx):
     for row in ctx.graph.protocol_operations:
         if type(row.contract) is AdmissionPredicate and type(row.contract.subject) is RequestStateCondition:
             predicate_issues.extend(request_state_errors(ctx, row))
+        elif type(row.contract) is AdmissionPredicate and type(row.contract.subject) is SessionOccupancyCondition:
+            from .session_occupancy import occupancy_errors
+            predicate_issues.extend(occupancy_errors(ctx, row))
     return {"families": reports,
             "issues": (*predicate_issues, *(issue for report in reports.values() for issue in report["issues"])),
             "gaps": tuple(gap for report in reports.values() for gap in report["gaps"]),

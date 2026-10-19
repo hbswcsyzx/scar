@@ -17,7 +17,8 @@ from scar.ir.program.protocols import (
     RequestProcessingRule,
 )
 from scar.ir.program.resumption import ResumableKind
-from .protocol_connections import RequestAssociation, RequestStateCondition, ResumeSourceBinding
+from .protocol_connections import (RequestAssociation, RequestStateCondition,
+                                    ResumeSourceBinding, SessionOccupancyCondition)
 from .protocol_await_records import (
     AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper,
 )
@@ -305,7 +306,7 @@ def contract_allowed(profile: ProtocolProfile, clause: ProtocolClause, contract:
     if rules is None:
         return False
     if contract_type is AdmissionPredicate:
-        return ((type(contract.subject) is RequestStateCondition) ==
+        return ((type(contract.subject) in (RequestStateCondition, SessionOccupancyCondition)) ==
                 (profile is _ASYNC_PROFILE))
     if contract_type in (NoEntryOutcome, ResumeSourceBinding, RequestAssociation,
                          AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper):

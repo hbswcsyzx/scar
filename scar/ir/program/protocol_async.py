@@ -931,18 +931,21 @@ def async_errors(ctx):
 
 def request_state_errors(ctx, row):
     """Reuse the ordinary read/bool checks without treating R as body phase."""
-    from dataclasses import replace
-    from .admission import admission_errors
-    from .protocols import BodyStateCondition, BodyStatePredicateRule
+    from .admission import predicate_shape_errors
     from .protocol_connections import RequestStateCondition
     if type(row.contract.subject) is not RequestStateCondition:
         raise TypeError('request state checks require exact RequestStateCondition')
     subject = row.contract.subject
-    proxy = replace(row, contract=replace(row.contract,
-        subject=BodyStateCondition(subject.request_use, subject.state_sites, BodyStatePredicateRule.IS_CREATED)))
-    # Only local shape/boolean provenance is reused. Body target compatibility
-    # is deliberately not interpreted as request-step compatibility.
-    issues = list(admission_errors(ctx, proxy))
+    issues = list(predicate_shape_errors(ctx, row, identity=subject.request_use,
+                                        state_sites=subject.state_sites))
+    try:
+        value = ctx.values[ctx.owned_use(row.operation, subject.request_use).value]
+        interface = ctx.interfaces.get(ctx.region_of[row.operation])
+        if interface is not None and value.id not in ctx.driver_roles(interface.region)[0]:
+            issues.append(('admission_owner', str(row.operation),
+                           'request predicate input is not the bound driver receiver role'))
+    except (KeyError, TypeError, ValueError):
+        pass
     operation = ctx.operations[row.operation]
     expected = {subject.request_use, *(access.before for access in operation.accesses)}
     if {use.id for use in operation.uses} != expected:
