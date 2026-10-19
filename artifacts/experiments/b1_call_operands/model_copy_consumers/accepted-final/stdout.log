@@ -1,0 +1,172 @@
+........................................................................ [  4%]
+........................................................................ [  9%]
+........................................................................ [ 13%]
+........................................................................ [ 18%]
+.....FF................................................................. [ 23%]
+........................................................................ [ 27%]
+........................................................................ [ 32%]
+........................................................................ [ 37%]
+........................................................................ [ 41%]
+........................................................................ [ 46%]
+........................................................................ [ 51%]
+........................................................................ [ 55%]
+........................................................................ [ 60%]
+........................................................................ [ 64%]
+........................................................................ [ 69%]
+........................................................................ [ 74%]
+........................................................................ [ 78%]
+........................................................................ [ 83%]
+........................................................................ [ 88%]
+........................................................................ [ 92%]
+........................................................................ [ 97%]
+.......................................                                  [100%]
+=================================== FAILURES ===================================
+_____ test_no_entry_selected_edge_must_match_its_original_slot_and_result ______
+
+    def test_no_entry_selected_edge_must_match_its_original_slot_and_result():
+        graph, details = no_entry_throw_program()
+        row = details["row"]
+        bad = replace(row, contract=replace(row.contract,
+            selected_edge=ControlEdgeReference(details["processing"], 1)))
+>       assert "protocol_no_entry_edge" in _codes(_replace_row(graph, row, bad))
+                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_protocol_connections.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_protocol_connections.py:28: in _codes
+    return {issue.code for issue in validate(graph)}
+                                    ^^^^^^^^^^^^^^^
+scar/ir/program/validation.py:703: in validate
+    lifecycle_issues, lifecycle_facts = analyze_lifecycles(graph, operation_blocks=operation_block)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/lifecycle_analysis.py:23: in analyze_lifecycles
+    terminal = derive_terminal_facts(graph, interface)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/lifecycle_flow.py:161: in derive_terminal_facts
+    protocol_seeds = no_entry_seeds(graph, interface.region)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_validation.py:709: in no_entry_seeds
+    if ctx.region_of[row.operation] != region or not no_entry_route(ctx, row)["complete"]:
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ctx = <scar.ir.program.protocol_flow.ProtocolFlow object at 0x761ea4ada710>
+row = ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=<ProtocolClause.INITIAL_THROW_DELIVERED: 'INIT...))), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))
+
+    def no_entry_route(ctx, row):
+        """The original selected path and payload, not a terminal-by-kind shortcut."""
+        contract = row.contract
+        operation = ctx.operations[row.operation]
+        edge = contract.selected_edge
+        block = ctx.blocks[ctx.block_of[operation.id]]
+        terminator = ctx.operations[block.operations[-1]]
+        if operation.id in ctx.drives or terminator.id in ctx.drives:
+            raise ValueError("a real BodyDrive cannot be a no-entry transition")
+        _state_sites(ctx, row)  # Invalid known sites must not turn into IndexError below.
+        is_invoke = operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
+        if is_invoke and edge is None:
+            raise ValueError("INVOKE no-entry transition must select its exact edge")
+        if edge is not None:
+            if edge.operation != terminator.id or edge.successor_index >= len(terminator.terminator.successors):
+                raise ValueError("no-entry selected edge must be the transition block's real successor")
+            if row.slot != edge.successor_index:
+>               raise ValueError("no-entry slot and selected edge differ")
+E               ValueError: no-entry slot and selected edge differ
+
+scar/ir/program/protocol_validation.py:197: ValueError
+_________ test_no_entry_cannot_borrow_the_other_branchs_host_exception _________
+
+    def test_no_entry_cannot_borrow_the_other_branchs_host_exception():
+        graph, details = no_entry_throw_program()
+        row = details["row"]
+        bad = replace(row, contract=replace(row.contract,
+            terminal=replace(row.contract.terminal, operation=details["terminals"][1])))
+>       assert {"protocol_copy", "protocol_no_entry_edge"} & _codes(_replace_row(graph, row, bad))
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_protocol_connections.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_protocol_connections.py:28: in _codes
+    return {issue.code for issue in validate(graph)}
+                                    ^^^^^^^^^^^^^^^
+scar/ir/program/validation.py:703: in validate
+    lifecycle_issues, lifecycle_facts = analyze_lifecycles(graph, operation_blocks=operation_block)
+                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/lifecycle_analysis.py:23: in analyze_lifecycles
+    terminal = derive_terminal_facts(graph, interface)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/lifecycle_flow.py:161: in derive_terminal_facts
+    protocol_seeds = no_entry_seeds(graph, interface.region)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/protocol_validation.py:709: in no_entry_seeds
+    if ctx.region_of[row.operation] != region or not no_entry_route(ctx, row)["complete"]:
+                                                     ^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+ctx = <scar.ir.program.protocol_flow.ProtocolFlow object at 0x761ea3cc2c10>
+row = ProtocolOperation(scope=ProtocolScopeID(value='preentry.scope'), clause=<ProtocolClause.INITIAL_THROW_DELIVERED: 'INIT...))), source=StaticProtocolGap(reason=<StaticGapReason.NATIVE_APPLICABILITY_UNPROVEN: 'NATIVE_APPLICABILITY_UNPROVEN'>))
+
+    def no_entry_route(ctx, row):
+        """The original selected path and payload, not a terminal-by-kind shortcut."""
+        contract = row.contract
+        operation = ctx.operations[row.operation]
+        edge = contract.selected_edge
+        block = ctx.blocks[ctx.block_of[operation.id]]
+        terminator = ctx.operations[block.operations[-1]]
+        if operation.id in ctx.drives or terminator.id in ctx.drives:
+            raise ValueError("a real BodyDrive cannot be a no-entry transition")
+        _state_sites(ctx, row)  # Invalid known sites must not turn into IndexError below.
+        is_invoke = operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
+        if is_invoke and edge is None:
+            raise ValueError("INVOKE no-entry transition must select its exact edge")
+        if edge is not None:
+            if edge.operation != terminator.id or edge.successor_index >= len(terminator.terminator.successors):
+                raise ValueError("no-entry selected edge must be the transition block's real successor")
+            if row.slot != edge.successor_index:
+                raise ValueError("no-entry slot and selected edge differ")
+            start = terminator.terminator.successors[edge.successor_index].block
+        else:
+            if len(terminator.terminator.successors) > 1:
+                raise ValueError("branched no-entry transition needs an exact selected edge")
+            start = block.id
+        source = contract.selected_input
+        source_port = ctx.port(source, referring=row)
+        if type(source) is InvokeLiteralResult and source.edge.operation == operation.id:
+            if edge != source.edge:
+                raise ValueError("no-entry input and transition select different completion edges")
+        terminal = ctx.port(contract.terminal)
+        if terminal is None or terminal.operation is None:
+            return {"complete": False, "gaps": ("native_terminal_route_unproved",)}
+        if ctx.region_of[terminal.operation] != ctx.region_of[operation.id]:
+            raise ValueError("no-entry host terminal belongs to another region")
+        destination = ctx.block_of[terminal.operation]
+        seen, pending, reached, alternatives = set(), [start], False, False
+        routes = {}
+        while pending:
+            if not ctx.spend("no_entry_path"):
+                return {"complete": False, "gaps": ("protocol_budget_exhausted",)}
+            identity = pending.pop()
+            if identity in seen:
+                continue
+            seen.add(identity)
+            current = ctx.blocks[identity]
+            if identity == destination:
+                reached = True
+                routes[identity] = ()
+                continue
+            if any(item in ctx.drives for item in current.operations):
+                raise ValueError("no-entry path cannot execute a BodyDrive")
+            last = ctx.operations[current.operations[-1]]
+            if not last.terminator.successors:
+                alternatives = True
+            routes[identity] = tuple(item.block for item in last.terminator.successors)
+            pending.extend(routes[identity])
+        if not reached:
+>           raise ValueError("no-entry terminal is not on its selected original CFG route")
+E           ValueError: no-entry terminal is not on its selected original CFG route
+
+scar/ir/program/protocol_validation.py:236: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_protocol_connections.py::test_no_entry_selected_edge_must_match_its_original_slot_and_result
+FAILED tests/unit/test_program_protocol_connections.py::test_no_entry_cannot_borrow_the_other_branchs_host_exception
+2 failed, 1549 passed in 153.11s (0:02:33)

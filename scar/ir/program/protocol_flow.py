@@ -265,6 +265,16 @@ class ProtocolFlow:
         """Optional query context; the historical local engine has none."""
         return ()
 
+    def _copy_cache_begin(self, key):
+        """Optional query metadata, stored with the original flow cache."""
+        return None
+
+    def _copy_cache_replay(self, key):
+        pass
+
+    def _copy_cache_commit(self, key, token):
+        pass
+
     def _copy_call_transfer(self, operation, current, *, mode):
         """Optional known-callee copy projection, never a new producer.
 
@@ -296,7 +306,9 @@ class ProtocolFlow:
             return None
         if guards:
             key = (*key, guards)
+        token = self._copy_cache_begin(key)
         if key in self._flows:
+            self._copy_cache_replay(key)
             return self._flows[key]
         region = self.region_of[port.operation]
         declaration, outgoing, incoming, reached, order = self._edges(region)
@@ -442,6 +454,7 @@ class ProtocolFlow:
                         pending.append(target)
                         queued.add(target)
         self._flows[key] = before
+        self._copy_cache_commit(key, token)
         return before
 
     def forwards(self, source, target, *, referring=None, guard=None):

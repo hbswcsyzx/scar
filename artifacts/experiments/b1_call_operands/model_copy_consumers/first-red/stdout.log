@@ -1,0 +1,510 @@
+FFFFFFFFFFFFFFFFFFFFFFFF                                                 [100%]
+=================================== FAILURES ===================================
+__ test_swapped_two_argument_callers_keep_distinct_frames_and_exact_ordinals ___
+
+    def test_swapped_two_argument_callers_keep_distinct_frames_and_exact_ordinals():
+        graph, details = swapped_shared_callee_program()
+>       report = _query(graph, details["source"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='copy-consumer.root'), regions=(Region(id=RegionID(value='copy-consumer.root'), label...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='copy-consumer.root.entry'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+___ test_duplicate_actuals_seed_both_formals_and_keep_distinct_internal_uses ___
+
+    def test_duplicate_actuals_seed_both_formals_and_keep_distinct_internal_uses():
+        graph, details = duplicate_actual_program()
+>       report = _query(graph, details["source"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='copy-consumer.root'), regions=(Region(id=RegionID(value='copy-consumer.root'), label...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='copy-consumer.root.entry'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+_______ test_duplicate_return_payload_uses_keep_two_distinct_exit_slots ________
+
+    def test_duplicate_return_payload_uses_keep_two_distinct_exit_slots():
+        graph, details = duplicate_return_program()
+>       report = _query(graph, details["source"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:95: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='copy-consumer.root'), regions=(Region(id=RegionID(value='copy-consumer.root'), label...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='copy-consumer.root.entry'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+____ test_distinct_return_payloads_keep_the_original_value_to_slot_mapping _____
+
+    def test_distinct_return_payloads_keep_the_original_value_to_slot_mapping():
+        graph, details = distinct_payload_return_program()
+>       report = _query(graph, details["source"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:111: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='copy-consumer.root'), regions=(Region(id=RegionID(value='copy-consumer.root'), label...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='copy-consumer.root.entry'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+_____ test_nested_calls_have_full_static_frame_keys_and_exact_parent_links _____
+
+    def test_nested_calls_have_full_static_frame_keys_and_exact_parent_links():
+        graph, details = nested_copy_consumer_program()
+>       report = _query(graph, details["expected"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='return.root'), regions=(Region(id=RegionID(value='return.root'), label='known caller...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='return.root.entry'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+___ test_invoke_returns_preserve_exit_kind_result_slot_and_landing_position ____
+
+    def test_invoke_returns_preserve_exit_kind_result_slot_and_landing_position():
+        graph, details = invoke_nr_copy_consumer_program(two_callers=False)
+>       report = _query(graph, details["source"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='return-state.root'), regions=(Region(id=RegionID(value='return-state.root'), label='...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='return-state.root.entry'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+_____ test_state_write_is_a_consumer_but_its_new_poststate_is_not_old_copy _____
+
+    def test_state_write_is_a_consumer_but_its_new_poststate_is_not_old_copy():
+        graph, details = invoke_nr_copy_consumer_program(normal_write=True)
+>       report = _query(graph, details["world_source"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:160: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='return-state.root'), regions=(Region(id=RegionID(value='return-state.root'), label='...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='return-state.root.entry'), index=5)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+___ test_mixed_return_paths_keep_both_original_exit_uses_and_conditionality ____
+
+    def test_mixed_return_paths_keep_both_original_exit_uses_and_conditionality():
+        graph, details = conditional_return_copy_consumer_program()
+>       report = _query(graph, details["expected"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:177: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='many.root'), regions=(Region(id=RegionID(value='many.root'), label='caller', entry=B...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='many.root.entry'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+_ test_loop_reexecution_does_not_turn_carried_previous_result_into_current_copy[False] _
+
+stale = False
+
+    @pytest.mark.parametrize("stale", (False, True))
+    def test_loop_reexecution_does_not_turn_carried_previous_result_into_current_copy(stale):
+        graph, details = repeated_copy_consumer_program(stale=stale)
+>       report = _query(graph, details["expected"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:195: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='repeat.root'), regions=(Region(id=RegionID(value='repeat.root'), label='source reset...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = OperationResult(operation=OperationID(value='repeat.generate'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+_ test_loop_reexecution_does_not_turn_carried_previous_result_into_current_copy[True] _
+
+stale = True
+
+    @pytest.mark.parametrize("stale", (False, True))
+    def test_loop_reexecution_does_not_turn_carried_previous_result_into_current_copy(stale):
+        graph, details = repeated_copy_consumer_program(stale=stale)
+>       report = _query(graph, details["expected"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:195: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='repeat.root'), regions=(Region(id=RegionID(value='repeat.root'), label='source reset...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = OperationResult(operation=OperationID(value='repeat.generate'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+________ test_recursive_call_is_kept_as_an_unresolved_original_boundary ________
+
+    def test_recursive_call_is_kept_as_an_unresolved_original_boundary():
+        graph, details = recursive_copy_consumer_program()
+>       report = _query(graph, details["expected"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='recursive.root'), regions=(Region(id=RegionID(value='recursive.root'), label='caller...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='recursive.root.entry'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+_ test_incomplete_internal_effects_keep_visible_copy_but_not_closed_inventory __
+
+    def test_incomplete_internal_effects_keep_visible_copy_but_not_closed_inventory():
+        graph, details = opaque_internal_consumer_program()
+>       report = _query(graph, details["source"])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:220: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='copy-consumer.root'), regions=(Region(id=RegionID(value='copy-consumer.root'), label...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='copy-consumer.root.entry'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+__ test_source_inside_shared_callee_preserves_all_original_caller_boundaries ___
+
+    def test_source_inside_shared_callee_preserves_all_original_caller_boundaries():
+        graph, details = source_in_shared_callee_program()
+        source = details["helper_sources"][0]
+>       report = _query(graph, source)
+                 ^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:233: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='return.root'), regions=(Region(id=RegionID(value='return.root'), label='known caller...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = OperationResult(operation=OperationID(value='return.helper.generate'), index=0)
+budget = 50000
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+______ test_budget_cursor_and_detached_results_preserve_pending_inventory ______
+
+    def test_budget_cursor_and_detached_results_preserve_pending_inventory():
+        graph, details = swapped_shared_callee_program()
+>       limited = _query(graph, details["source"], budget=1)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_copy_consumers.py:245: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='copy-consumer.root'), regions=(Region(id=RegionID(value='copy-consumer.root'), label...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+source = BlockArgument(block=BlockID(value='copy-consumer.root.entry'), index=0)
+budget = 1
+
+    def _query(graph, source, *, budget=50000):
+        require_valid(graph)
+>       return ProgramIndex(graph).copy_consumers(source, budget=budget)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumers.py:23: AttributeError
+_ test_budget_one_preserves_root_and_original_call_boundaries_without_prefix_totals _
+
+    def test_budget_one_preserves_root_and_original_call_boundaries_without_prefix_totals():
+        graph, details = call_return_program(depth=2)
+        root_region = next(region for region in graph.regions if region.id == graph.root)
+        original = {identity for block in root_region.blocks for identity in block.operations
+                    if next(operation for operation in graph.operations if operation.id == identity).callee is not None}
+        assert original
+>       report = _index(graph).copy_consumers(details["expected"], budget=1)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumer_boundaries.py:46: AttributeError
+__ test_late_budget_exhaustion_keeps_inventory_and_proof_completion_distinct ___
+
+    def test_late_budget_exhaustion_keeps_inventory_and_proof_completion_distinct():
+        graph, details = call_return_program(depth=2, calls="chain")
+        index = _index(graph)
+>       complete = index.copy_consumers(details["expected"], budget=QUERY_BUDGET)
+                   ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumer_boundaries.py:67: AttributeError
+__ test_nested_frame_input_and_consumer_reports_are_detached_between_queries ___
+
+    def test_nested_frame_input_and_consumer_reports_are_detached_between_queries():
+        graph, details = call_return_program(depth=2)
+        index = _index(graph)
+>       first = index.copy_consumers(details["expected"], budget=QUERY_BUDGET)
+                ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumer_boundaries.py:95: AttributeError
+_ test_internal_root_source_retains_all_original_callers_as_unresolved_boundaries _
+
+    def test_internal_root_source_retains_all_original_callers_as_unresolved_boundaries():
+        graph, details = call_return_program(calls="siblings", internal=True)
+        source, = details["helper_sources"]
+>       report = _index(graph).copy_consumers(source, budget=QUERY_BUDGET)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumer_boundaries.py:112: AttributeError
+__ test_unscoped_shared_callee_guard_does_not_supply_the_other_callers_entry ___
+
+    def test_unscoped_shared_callee_guard_does_not_supply_the_other_callers_entry():
+        graph, details = call_return_state_program(two_callers=True)
+        index = _index(graph)
+        helper = details["callee"]
+        entry = next(block for block in helper.blocks if block.id == helper.entry)
+        branch = next(operation for operation in graph.operations
+                      if operation.id == entry.operations[-1])
+        assert branch.terminator.kind is TerminatorKind.BRANCH
+        a, b = (details["callers"][label] for label in ("a", "b"))
+        assert a["operation"].callee == b["operation"].callee == helper.id
+        guard = ControlEdgeReference(branch.id, 0)
+    
+>       report = index.copy_consumers(a["arguments"][0], guard=guard, budget=QUERY_BUDGET)
+                 ^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'ProgramIndex' object has no attribute 'copy_consumers'
+
+tests/unit/test_program_copy_consumer_boundaries.py:144: AttributeError
+_ test_await_forwarding_call_keeps_its_child_use_and_real_extractor[zero-cut] __
+
+zero_cut = True
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_await_forwarding_call_keeps_its_child_use_and_real_extractor(zero_cut):
+        graph, details = await_consumer_call_program(zero_cut=zero_cut)
+>       report = _await(_index(graph), details)
+                        ^^^^^^^^^^^^^
+
+tests/unit/test_program_await_consumer_calls.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_consumer_calls.py:19: in _index
+    require_valid(_core(graph))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_definition_missing at program_value:await.consumer.forward.result.0: protocol result needs its unique typed constructor
+
+scar/ir/program/validation.py:749: ValueError
+__ test_await_forwarding_call_keeps_its_child_use_and_real_extractor[two-cut] __
+
+zero_cut = False
+
+    @pytest.mark.parametrize('zero_cut', (True, False), ids=('zero-cut', 'two-cut'))
+    def test_await_forwarding_call_keeps_its_child_use_and_real_extractor(zero_cut):
+        graph, details = await_consumer_call_program(zero_cut=zero_cut)
+>       report = _await(_index(graph), details)
+                        ^^^^^^^^^^^^^
+
+tests/unit/test_program_await_consumer_calls.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_consumer_calls.py:19: in _index
+    require_valid(_core(graph))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_definition_missing at program_value:await.consumer.forward.result.0: protocol result needs its unique typed constructor
+
+scar/ir/program/validation.py:749: ValueError
+____ test_two_nested_forwarders_keep_both_call_frames_and_all_return_slots _____
+
+    def test_two_nested_forwarders_keep_both_call_frames_and_all_return_slots():
+        graph, details = await_consumer_call_program(depth=2)
+>       row = _outcome(_await(_index(graph), details), details)
+                              ^^^^^^^^^^^^^
+
+tests/unit/test_program_await_consumer_calls.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_consumer_calls.py:19: in _index
+    require_valid(_core(graph))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_definition_missing at program_value:await.consumer.forward.result.0: protocol result needs its unique typed constructor; protocol_definition_missing at program_value:await.consumer.helper.1.call.result.0: protocol result needs its unique typed constructor
+
+scar/ir/program/validation.py:749: ValueError
+____ test_public_copy_consumer_query_reuses_the_exact_advance_raise_source _____
+
+    def test_public_copy_consumer_query_reuses_the_exact_advance_raise_source():
+        graph, details = await_consumer_call_program()
+>       index = _index(graph)
+                ^^^^^^^^^^^^^
+
+tests/unit/test_program_await_consumer_calls.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_consumer_calls.py:19: in _index
+    require_valid(_core(graph))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_definition_missing at program_value:await.consumer.forward.result.0: protocol result needs its unique typed constructor
+
+scar/ir/program/validation.py:749: ValueError
+_ test_deleting_final_rows_keeps_helper_inventory_and_original_final_consumers _
+
+    def test_deleting_final_rows_keeps_helper_inventory_and_original_final_consumers():
+        complete, details = await_consumer_call_program()
+        missing, removed = await_consumer_call_program(final_adapters=False)
+        assert complete.operations == missing.operations and complete.values == missing.values
+        assert complete.regions == missing.regions
+>       before = _outcome(_await(_index(complete), details), details)
+                                 ^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_consumer_calls.py:165: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_await_consumer_calls.py:19: in _index
+    require_valid(_core(graph))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='await.resume.caller'), regions=(Region(id=RegionID(value='await.resume.caller'), lab...tocol_operations=(), protocol_call_inputs=(), protocol_result_consumers=(), protocol_bindings=(), exception_matches=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_definition_missing at program_value:await.consumer.forward.result.0: protocol result needs its unique typed constructor
+
+scar/ir/program/validation.py:749: ValueError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_copy_consumers.py::test_swapped_two_argument_callers_keep_distinct_frames_and_exact_ordinals
+FAILED tests/unit/test_program_copy_consumers.py::test_duplicate_actuals_seed_both_formals_and_keep_distinct_internal_uses
+FAILED tests/unit/test_program_copy_consumers.py::test_duplicate_return_payload_uses_keep_two_distinct_exit_slots
+FAILED tests/unit/test_program_copy_consumers.py::test_distinct_return_payloads_keep_the_original_value_to_slot_mapping
+FAILED tests/unit/test_program_copy_consumers.py::test_nested_calls_have_full_static_frame_keys_and_exact_parent_links
+FAILED tests/unit/test_program_copy_consumers.py::test_invoke_returns_preserve_exit_kind_result_slot_and_landing_position
+FAILED tests/unit/test_program_copy_consumers.py::test_state_write_is_a_consumer_but_its_new_poststate_is_not_old_copy
+FAILED tests/unit/test_program_copy_consumers.py::test_mixed_return_paths_keep_both_original_exit_uses_and_conditionality
+FAILED tests/unit/test_program_copy_consumers.py::test_loop_reexecution_does_not_turn_carried_previous_result_into_current_copy[False]
+FAILED tests/unit/test_program_copy_consumers.py::test_loop_reexecution_does_not_turn_carried_previous_result_into_current_copy[True]
+FAILED tests/unit/test_program_copy_consumers.py::test_recursive_call_is_kept_as_an_unresolved_original_boundary
+FAILED tests/unit/test_program_copy_consumers.py::test_incomplete_internal_effects_keep_visible_copy_but_not_closed_inventory
+FAILED tests/unit/test_program_copy_consumers.py::test_source_inside_shared_callee_preserves_all_original_caller_boundaries
+FAILED tests/unit/test_program_copy_consumers.py::test_budget_cursor_and_detached_results_preserve_pending_inventory
+FAILED tests/unit/test_program_copy_consumer_boundaries.py::test_budget_one_preserves_root_and_original_call_boundaries_without_prefix_totals
+FAILED tests/unit/test_program_copy_consumer_boundaries.py::test_late_budget_exhaustion_keeps_inventory_and_proof_completion_distinct
+FAILED tests/unit/test_program_copy_consumer_boundaries.py::test_nested_frame_input_and_consumer_reports_are_detached_between_queries
+FAILED tests/unit/test_program_copy_consumer_boundaries.py::test_internal_root_source_retains_all_original_callers_as_unresolved_boundaries
+FAILED tests/unit/test_program_copy_consumer_boundaries.py::test_unscoped_shared_callee_guard_does_not_supply_the_other_callers_entry
+FAILED tests/unit/test_program_await_consumer_calls.py::test_await_forwarding_call_keeps_its_child_use_and_real_extractor[zero-cut]
+FAILED tests/unit/test_program_await_consumer_calls.py::test_await_forwarding_call_keeps_its_child_use_and_real_extractor[two-cut]
+FAILED tests/unit/test_program_await_consumer_calls.py::test_two_nested_forwarders_keep_both_call_frames_and_all_return_slots
+FAILED tests/unit/test_program_await_consumer_calls.py::test_public_copy_consumer_query_reuses_the_exact_advance_raise_source
+FAILED tests/unit/test_program_await_consumer_calls.py::test_deleting_final_rows_keeps_helper_inventory_and_original_final_consumers
+24 failed in 1.41s

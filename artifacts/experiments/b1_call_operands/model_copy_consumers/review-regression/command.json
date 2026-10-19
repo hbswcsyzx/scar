@@ -1,0 +1,24 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_program_copy_consumers.py",
+    "tests/unit/test_program_copy_consumer_boundaries.py",
+    "tests/unit/test_program_await_consumer_calls.py",
+    "tests/unit/test_program_control_graph.py",
+    "tests/unit/test_program_packet_call_carriers.py",
+    "tests/unit/test_program_copy_consumer_cache.py",
+    "tests/unit/test_program_copy_consumer_budget_work.py",
+    "--junitxml=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_copy_consumers/review-regression/junit.xml"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": "affected focused only, not complete component/full"
+}

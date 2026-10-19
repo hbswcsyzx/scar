@@ -1,5 +1,13 @@
 # SCAR roadmap and scope
 
+> **P4 cross-callee consumer progress (2026-10-19):**
+> [Frozen D6](M1_COPY_CONSUMER_GRAPH_CONTRACT.md) and
+> [evidence / original open scope](M1_COPY_CONSUMER_GRAPH_PROGRESS.md) retain
+> exact original Uses, complete call tuples, separate static frames and N/R
+> return slots. This is a copy-consumer projection, not full provenance or
+> automatic whole-LeWM modeling. Complete A–H/16/P5/M2 remain OPEN; no backend,
+> transformation or speedup is claimed.
+
 > **P4 per-occurrence outcome/failure progress (2026-10-19):**
 > [Frozen D5 view](M1_AWAIT_OUTCOME_EXECUTION_CONTRACT.md) and
 > [source-bound evidence and remaining original obligations](M1_AWAIT_OUTCOME_EXECUTION_PROGRESS.md)

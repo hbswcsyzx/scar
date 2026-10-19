@@ -144,11 +144,13 @@ class CallReturns:
         guards = ctx.selected_edges(self.guards, region=operation.callee)
         if guards and len(self.callers[operation.callee]) != 1:
             self.gap('call_return_guard_context_unresolved')
-            return None
+            return self.incomplete_bound(mode, 'call_return_guard_context_unresolved')
         # Descendant-region choices also affect a nested callee's projection.
         # Keeping only this callee's immediate guards would reuse a summary
         # computed under another nested helper's selected branch.
         key = operation.callee, seeds, mode, guards, self.guards
+        if getattr(ctx, '_copy_consumer_bounds', False):
+            key = (*key, 'copy-consumer-incomplete-bounds')
         if not ctx.spend('call_return_summaries'):
             return None
         if key not in self.summaries:
@@ -158,6 +160,9 @@ class CallReturns:
         summary = self.summaries[key]
         for gap in self.summary_gaps.get(key, ()):
             self.gap(gap)
+            if (getattr(ctx, '_copy_consumer_bounds', False)
+                    and gap != 'call_return_mixed_terminals'):
+                ctx._copy_consumer_bound_events.append((mode, gap))
         self.call_evidence[operation.id, key] = {'caller': operation.id,
             'caller_region': ctx.region_of[operation.id], 'callee': operation.callee,
             'summary_key': key, 'actual_formals': tuple((OwnedUse(operation.id, actual), formal)
@@ -165,7 +170,7 @@ class CallReturns:
                 if ctx.owned_use(operation.id, actual).value in current),
             'resolved': summary is not None}
         if summary is None:
-            return None
+            return self.incomplete_bound(mode, 'call_return_summary_unresolved')
         ordinary, completions = set(), {}
         if not invoke:
             for slot, value in enumerate(operation.results):
@@ -173,6 +178,8 @@ class CallReturns:
                     return None
                 status = summary.get((ExitKind.NORMAL, slot))
                 if status is None:
+                    if getattr(ctx, '_copy_consumer_bounds', False):
+                        continue
                     return None
                 if status:
                     ordinary.add(value)
@@ -190,11 +197,26 @@ class CallReturns:
                     if type(actual) is CompletionResult:
                         status = summary.get((edge.kind, actual.index))
                         if status is None:
+                            if getattr(ctx, '_copy_consumer_bounds', False):
+                                continue
                             return None
                         if status:
                             copies.add(formal)
                 completions[number] = frozenset(copies)
         return frozenset(ordinary), completions
+
+    def incomplete_bound(self, mode, gap):
+        """No invented result copies; only consumer queries admit this bound.
+
+        Missing results make the may inventory incomplete. Negative membership
+        under such a bound is UNKNOWN, never a non-copy proof. Ordinary binding
+        and validation retain their existing all-or-unknown transfer.
+        """
+        if (not getattr(self.ctx, '_copy_consumer_bounds', False)
+                or self.ctx.budget.truncated):
+            return None
+        self.ctx._copy_consumer_bound_events.append((mode, gap))
+        return frozenset(), {}
 
     def output_ports(self, call, summary):
         """Exact fresh source ports, with slot independent of landing ordinal."""

@@ -248,7 +248,22 @@ def control_errors(graph):
             definitions = (pending_definitions if value.protocol is P.PENDING_COMPLETION
                            else packet_definitions if value.protocol is P.EXCEPTION_PACKET
                            else {row.saved_context: row for row in graph.cleanup_enters})
-            if value.id not in definitions:
+            # A known ordinary call transports the callee's typed result; it
+            # is not a local packet constructor. Core call validation checks
+            # the whole argument/result signature separately. Pending tokens
+            # and cleanup contexts retain their lexical constructor rules.
+            operation = operations[value.origin.operation]
+            callee = regions.get(operation.callee)
+            normal = (() if callee is None else tuple(exit_ for exit_ in callee.exits
+                        if exit_.kind is ExitKind.NORMAL))
+            slot = value.origin.index
+            carrier = (value.protocol is P.EXCEPTION_PACKET
+                and operation.callee is not None and operation.terminator is None
+                and not operation.accesses and 0 <= slot < len(operation.results)
+                and operation.results[slot] == value.id and len(normal) == 1
+                and slot < len(normal[0].types)
+                and normal[0].types[slot] == ProtocolValueType(P.EXCEPTION_PACKET))
+            if value.id not in definitions and not carrier:
                 error("protocol_definition_missing", value.id, "protocol result needs its unique typed constructor")
     if issues:
         return issues

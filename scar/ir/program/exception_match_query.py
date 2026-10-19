@@ -130,11 +130,11 @@ def matcher_errors(ctx, matcher):
     return tuple(errors)
 
 
-def exception_match_errors(graph):
+def exception_match_errors(graph, *, context=None):
     if not graph.exception_matches:
         return ()
     from .protocol_flow import ProtocolFlow
-    ctx = ProtocolFlow(graph)
+    ctx = ProtocolFlow(graph) if context is None else context
     return tuple(error for matcher in graph.exception_matches for error in matcher_errors(ctx, matcher))
 
 

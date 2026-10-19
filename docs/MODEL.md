@@ -1,5 +1,15 @@
 # SCAR execution model
 
+## Call-context copy-consumer projection (2026-10-19)
+
+The [D6 query](M1_COPY_CONSUMER_GRAPH_CONTRACT.md) keeps each original Use,
+complete actual/formal tuples and original return slots in separate static
+call-path frames. A frame is not an invocation. May-copy, must-copy and unknown
+membership remain distinct; an unresolved callee cannot erase its boundary or
+authorize reuse. This projection reuses canonical CFG/SSA and return summaries;
+it is not complete provenance or automatic source recovery. See the
+[evidence and remaining scope](M1_COPY_CONSUMER_GRAPH_PROGRESS.md).
+
 ## Async source/consumer/occurrence connection (2026-10-19)
 
 A consumer declaration is not an inventory of producer obligations. Original

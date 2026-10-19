@@ -381,6 +381,8 @@ class ProgramIndex:
                     if term is not None and term.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
                         for index, actual in enumerate(term.values):
                             self._exit_ports[(region.id, term.exit, index)].append(self._uses[actual])
+        from .copy_consumers import prepare_index
+        prepare_index(self)
 
     def producer(self, value_id: ValueID):
         return self.values[value_id].origin
@@ -747,6 +749,11 @@ class ProgramIndex:
         """
         from .call_returns import source_binding
         return source_binding(self, expected, actual, guard=guard, budget=budget)
+
+    def copy_consumers(self, source, *, guard=None, budget=4096):
+        """Original copy Uses with distinct static call frames and full ports."""
+        from .copy_consumers import copy_consumers
+        return copy_consumers(self, source, guard=guard, budget=budget)
 
     def exception_match(self, operation, *, budget=4096):
         """Original exception/handler tuple, own completions and bool branch."""

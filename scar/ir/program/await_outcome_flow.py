@@ -8,6 +8,7 @@ from .model import (CompletionResult, ExitKind, InvokeLiteralResult, OperationRe
                     ProtocolValue, StateVersionValue, TerminatorKind, ValueKind)
 from .protocols import HostTerminal, OutcomeAdapter, OwnedUse
 from .structured import ControlEdgeReference
+from .copy_flow import flow, required_choices, selected
 
 
 def flags():
@@ -24,10 +25,6 @@ def combine(reports):
     return answer(False if False in checks else None if not checks or None in checks else True,
                   gaps=tuple(gap for row in reports for gap in row.get('gaps', ())),
                   bindings=tuple(reports))
-
-
-def selected(ctx, *groups):
-    return ctx.selected_edges(tuple(edge for group in groups for edge in ctx.selected_edges(group)))
 
 
 def prepare(ctx):
@@ -66,88 +63,6 @@ def result_legs(ctx, operation):
         yield {'edge': None, 'kind': ExitKind.NORMAL,
                'own_result': payloads[0] if len(payloads) == 1 else None,
                'payloads': payloads, 'signature': None}
-
-
-def required_choices(ctx, source):
-    """Original edges necessary to reach this source evaluation point.
-
-    This is conditional on the source being evaluated, not a prediction that
-    it will be evaluated. An edge cut must make that original point unreachable.
-    """
-    port = ctx.port(source)
-    if port is None or port.operation is None or port.gap is not None:
-        return (), False
-    operation = ctx.operations[port.operation]
-    point = (operation.terminator.successors[port.edge].block if port.phase == 'edge'
-             else ctx.block_of[port.operation])
-    key = ctx.region_of[port.operation], point
-    if not hasattr(ctx, '_await_required_source_edges'):
-        ctx._await_required_source_edges = {}
-    if key not in ctx._await_required_source_edges:
-        region, outgoing, incoming, reached, _ = ctx._edges(key[0])
-        pending, ancestors = [point], set()
-        while pending:
-            if not ctx.spend('await_source_ancestor_blocks'):
-                return (), False
-            block = pending.pop()
-            if block in ancestors:
-                continue
-            ancestors.add(block)
-            for parent, _ in incoming[block]:
-                if not ctx.spend('await_source_ancestor_edges'):
-                    return (), False
-                pending.append(parent)
-        needed = []
-        for block in sorted(ancestors, key=lambda item: item.wire):
-            if not ctx.spend('await_source_control_candidates'):
-                return (), False
-            edges = outgoing[block]
-            relevant = tuple(edge for edge in edges if edge[2] in ancestors)
-            if len(edges) < 2 or len(relevant) != 1:
-                continue
-            chosen = relevant[0]
-            todo, seen = [region.entry], set()
-            while todo:
-                if not ctx.spend('await_source_control_cut_blocks'):
-                    return (), False
-                current = todo.pop()
-                if current in seen:
-                    continue
-                seen.add(current)
-                for edge in outgoing[current]:
-                    if not ctx.spend('await_source_control_cut_edges'):
-                        return (), False
-                    if edge[:2] != chosen[:2]:
-                        todo.append(edge[2])
-            if point in reached and point not in seen:
-                needed.append(ControlEdgeReference(chosen[0], chosen[1]))
-        ctx._await_required_source_edges[key] = tuple(needed), point in reached
-    edges, complete = ctx._await_required_source_edges[key]
-    if port.phase == 'edge':
-        edges = selected(ctx, edges, ControlEdgeReference(port.operation, port.edge))
-    return edges, complete
-
-
-def flow(ctx, source, choices=(), *, mode='must'):
-    port = ctx.port(source)
-    if port is None or port.gap is not None or port.operation is None:
-        return None
-    previous = ctx._returns.guards
-    try:
-        required, complete = required_choices(ctx, source)
-        if not complete:
-            return None
-        try:
-            ctx._returns.guards = selected(ctx, previous, choices, required)
-        except ValueError:
-            if not hasattr(ctx, '_await_flow_choice_conflicts'):
-                ctx._await_flow_choice_conflicts = set()
-            ctx._await_flow_choice_conflicts.add((source, ctx.selected_edges(choices), previous))
-            return {}
-        local = ctx.selected_edges(ctx._returns.guards, region=ctx.region_of[port.operation])
-        return ctx._fresh_copies(port, guard=local or None, mode=mode)
-    finally:
-        ctx._returns.guards = previous
 
 
 def terminal_inventory(ctx, source, choices=()):
@@ -262,7 +177,12 @@ def consumers(ctx, source, choices=()):
                         gaps.append('await_consumer_callee_expansion_pending')
     if ctx.budget.truncated:
         gaps.append('await_consumer_inventory_budget')
+    from .copy_consumers import consumer_graph
+    graph = consumer_graph(ctx, source, choices)
+    if graph['inventory']['known_inventory_complete']:
+        gaps = [gap for gap in gaps if gap != 'await_consumer_callee_expansion_pending']
     result = {'source': source, 'targets': tuple(targets), 'support': tuple(support),
+        'consumer_graph': graph,
         'gaps': tuple(dict.fromkeys(gaps)), 'known_inventory_complete': before is not None
         and not ctx.budget.truncated and 'await_consumer_callee_expansion_pending' not in gaps}
     ctx._await_outcome_consumers[key] = result

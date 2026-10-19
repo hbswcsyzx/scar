@@ -45,6 +45,8 @@ class ConnectionContext(ProtocolFlow):
         self.preparation["prepared_program_index_reused"] = True
 
     def _copy_context_key(self):
+        if getattr(self, '_copy_consumer_bounds', False):
+            return self._returns.guards, 'copy-consumer-incomplete-bounds'
         return self._returns.guards
 
     def _copy_call_transfer(self, operation, current, *, mode):
@@ -52,6 +54,26 @@ class ConnectionContext(ProtocolFlow):
 
     def _fresh_copies(self, port, *, guard=None, mode="must"):
         return self._returns.flow(port, guard=guard, mode=mode)
+
+    def _copy_cache_begin(self, key):
+        if getattr(self, '_copy_consumer_bounds', False):
+            if not hasattr(self, '_copy_consumer_bound_flows'):
+                self._copy_consumer_bound_flows = {}
+            return len(self._copy_consumer_bound_events)
+        return None
+
+    def _copy_cache_replay(self, key):
+        if getattr(self, '_copy_consumer_bounds', False):
+            gaps = self._copy_consumer_bound_flows[key]
+            self._copy_consumer_bound_events.extend(gaps)
+            for _, gap in gaps:
+                self._returns.gap(gap)
+
+    def _copy_cache_commit(self, key, token):
+        if token is not None:
+            # Applies to solver subjobs too, not just the public flow wrapper.
+            self._copy_consumer_bound_flows[key] = tuple(
+                dict.fromkeys(self._copy_consumer_bound_events[token:]))
 
     def row(self, site):
         from .protocol_connections import ProtocolOperationRef

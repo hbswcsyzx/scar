@@ -699,12 +699,8 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
                 graph, operation_blocks=operation_block, region_domains=region_domains):
             error(code, path, message)
     if not issues:
-        from .protocol_validation import protocol_errors
-        for code, path, message in protocol_errors(graph):
-            error(code, path, message)
-    if not issues and graph.exception_matches:
-        from .exception_match_query import exception_match_errors
-        for code, path, message in exception_match_errors(graph):
+        from .protocol_validation import no_entry_preconditions
+        for code, path, message in no_entry_preconditions(graph):
             error(code, path, message)
     if not issues:
         from .lifecycle_analysis import analyze_lifecycles
@@ -721,15 +717,29 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
         for code, path, message in native_errors(graph):
             error(code, path, message)
     prepared = None
+    ctx = None
     if not issues:
         from .protocol_connections import has_protocol_connection_capability
-        if has_protocol_connection_capability(graph) or graph.exception_matches:
+        # Return-aware protocol checks require the same validated core as the
+        # connection views. Preparing here avoids recursive public validation
+        # and retains the old protocol checks even without new attachments.
+        if (has_protocol_connection_capability(graph) or graph.exception_matches
+                or graph.protocol_operations and any(op.callee is not None for op in graph.operations)):
             from .queries import ProgramIndex
             from .protocol_connection_flow import ConnectionContext
-            from .protocol_connection_validation import connection_reports
             prepared = ProgramIndex._from_validated_core(
                 graph, cleanup_facts, resumption_facts, lifecycle_facts)
             ctx = ConnectionContext(graph, index=prepared)
+        from .protocol_validation import protocol_errors
+        for code, path, message in protocol_errors(graph, context=ctx):
+            error(code, path, message)
+    if not issues and graph.exception_matches:
+        from .exception_match_query import exception_match_errors
+        for code, path, message in exception_match_errors(graph, context=ctx):
+            error(code, path, message)
+    if not issues and ctx is not None:
+        if has_protocol_connection_capability(graph) or graph.exception_matches:
+            from .protocol_connection_validation import connection_reports
             for code, path, message in connection_reports(ctx)["issues"]:
                 error(code, path, message)
     if not issues and _prepared_index is not None and prepared is not None:

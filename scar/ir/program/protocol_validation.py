@@ -177,7 +177,7 @@ def _producer_row(ctx, source):
     return ctx.rows[source.scope, source.clause, source.operation, source.slot]
 
 
-def no_entry_route(ctx, row):
+def no_entry_route(ctx, row, *, check_payload=True):
     """The original selected path and payload, not a terminal-by-kind shortcut."""
     contract = row.contract
     operation = ctx.operations[row.operation]
@@ -235,7 +235,8 @@ def no_entry_route(ctx, row):
     if not reached:
         raise ValueError("no-entry terminal is not on its selected original CFG route")
     payloads = ctx.terminal_uses(contract.terminal)
-    copies = tuple(ctx.forwards(source, target, referring=row) for target in payloads)
+    copies = (tuple(ctx.forwards(source, target, referring=row) for target in payloads)
+              if check_payload else tuple(None for _ in payloads))
     if copies and any(match is False for match in copies):
         raise ValueError("no-entry terminal payload is not the selected original result")
     gaps = []
@@ -286,6 +287,37 @@ def no_entry_route(ctx, row):
         gaps.append("no_entry_transition_effect_unproved")
     return {"complete": not gaps, "gaps": tuple(gaps), "source": source_port,
             "terminal": terminal, "selected_edge": edge}
+
+
+def _no_entry_contract(ctx, row, *, check_payload=True):
+    contract, operation = row.contract, ctx.operations[row.operation]
+    owner = ctx.owned_use(operation.id, contract.instance_use)
+    raw = ctx.owned_use(operation.id, contract.effective_request_use)
+    if not isinstance(ctx.values[owner.value], ReferenceValue):
+        raise ValueError("no-entry instance must be an original Reference Use")
+    if (not isinstance(ctx.values[raw.value], ProtocolValue)
+            or ctx.values[raw.value].protocol is not ProtocolValueKind.RAW_DRIVER_REQUEST):
+        raise ValueError("no-entry effective request must have the original raw type")
+    return no_entry_route(ctx, row, check_payload=check_payload)
+
+
+def no_entry_preconditions(graph):
+    """Check seed-consumer foreign keys/routes before lifecycle derivation.
+
+    This structural admission grants no payload copy or lifecycle seed. Full
+    semantic checks still run with the prepared return-aware context later.
+    """
+    rows = tuple((number, row) for number, row in enumerate(graph.protocol_operations)
+                 if type(row.contract) is NoEntryOutcome)
+    if not rows:
+        return ()
+    ctx, errors = ProtocolFlow(graph), []
+    for number, row in rows:
+        try:
+            _no_entry_contract(ctx, row, check_payload=False)
+        except (KeyError, AttributeError, TypeError, ValueError) as exc:
+            errors.append(('protocol_no_entry_edge', f'protocol_operations[{number}]', str(exc)))
+    return tuple(errors)
 
 
 def protocol_errors(graph, *, context=None):
@@ -507,14 +539,7 @@ def protocol_errors(graph, *, context=None):
                 error("protocol_contract_result", path, exc)
         elif type(contract) is NoEntryOutcome:
             try:
-                owner = ctx.owned_use(operation.id, contract.instance_use)
-                raw = ctx.owned_use(operation.id, contract.effective_request_use)
-                if not isinstance(ctx.values[owner.value], ReferenceValue):
-                    raise ValueError("no-entry instance must be an original Reference Use")
-                if (not isinstance(ctx.values[raw.value], ProtocolValue)
-                        or ctx.values[raw.value].protocol is not ProtocolValueKind.RAW_DRIVER_REQUEST):
-                    raise ValueError("no-entry effective request must have the original raw type")
-                no_entry_route(ctx, row)
+                _no_entry_contract(ctx, row)
             except (TypeError, ValueError) as exc:
                 error("protocol_no_entry_edge", path, exc)
     if not issues:
@@ -696,8 +721,9 @@ def connection_errors(ctx):
 def no_entry_seeds(graph, region):
     """Conditional E/F/T sources, only on the exact validated transition edge.
 
-    This helper is called after protocol_errors by lifecycle validation.  It
-    grants no runtime proof; broad helper calls still invalidate session facts.
+    Structural admission precedes this analysis. Full return-aware protocol
+    validation follows core preparation. A locally unresolved/invalid payload
+    cannot grant a seed here; the later validator reports its contradiction.
     """
     rows = [row for row in graph.protocol_operations if type(row.contract) is NoEntryOutcome
             and row.clause in (ProtocolClause.INITIAL_THROW_DELIVERED,
@@ -706,11 +732,16 @@ def no_entry_seeds(graph, region):
         return {}
     ctx, result = ProtocolFlow(graph), {}
     for row in rows:
-        if ctx.region_of[row.operation] != region or not no_entry_route(ctx, row)["complete"]:
+        if ctx.region_of[row.operation] != region:
             continue
-        edge = row.contract.selected_edge
-        key = (row.operation, None if edge is None else edge.successor_index)
-        result[key] = ctx.owned_use(row.operation, row.contract.instance_use).value
+        try:
+            if not _no_entry_contract(ctx, row)["complete"]:
+                continue
+            edge = row.contract.selected_edge
+            key = (row.operation, None if edge is None else edge.successor_index)
+            result[key] = ctx.owned_use(row.operation, row.contract.instance_use).value
+        except (TypeError, ValueError):
+            continue
     return result
 
 
