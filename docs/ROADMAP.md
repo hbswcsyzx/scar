@@ -1,5 +1,17 @@
 # SCAR roadmap and scope
 
+> **P4 source-first outcome/consumer progress (2026-10-19):**
+> [Frozen D4 view](M1_AWAIT_OUTCOME_VIEW_CONTRACT.md) and
+> [evidence and original open obligations](M1_AWAIT_OUTCOME_LINK_PROGRESS.md)
+> connect original BodyReturn/conversion packets, final N/R consumers, split
+> acquisition failures and forwarded current state. Whole adapter deletion and
+> budget1 preserve original obligations or explicit unknown totals/cursors.
+> 1477 affected focused pass (all1454 previous identities plus23 new),776 stable
+> sources; old tests/fixtures and Program23/Execution8 record codecs unchanged.
+> Execution projection, complete cross-callee consumers and original A–H/16
+> groups/P5/M2 remain OPEN; this does not establish automatic LeWM modeling or
+> speedup. Final exact SHA and retained failed attempts are in the report.
+
 > **P4 await failure/qualification progress (2026-10-19):**
 > [Full-unit plan](M1_AWAIT_OUTCOME_PLAN.md),
 > [frozen qualification contract](M1_AWAIT_QUALIFICATION_CONTRACT.md), and

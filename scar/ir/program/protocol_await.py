@@ -428,6 +428,14 @@ def _result_copy(ctx, source, target, choices=()):
     """Exact source to a known call's kind/slot, all original terminal Uses."""
     if type(target) is ContractResult:
         target = target.result_port
+    choices = ctx.selected_edges(choices)
+    # Even an identical port cannot exist on the other selected completion.
+    for endpoint in (source, target):
+        endpoint = endpoint.result_port if type(endpoint) is ContractResult else endpoint
+        if type(endpoint) is InvokeLiteralResult and any(
+                edge.operation == endpoint.edge.operation and edge != endpoint.edge
+                for edge in choices):
+            return {'match': False, 'routes': (), 'gaps': ('await_result_edge_conflict',)}
     if type(target) is OwnedUse:
         return ctx.bind(source, target, guard=choices or None)
     if type(target) not in (OperationResult, InvokeLiteralResult):
@@ -443,12 +451,24 @@ def _result_copy(ctx, source, target, choices=()):
         return {'match': None, 'routes': (), 'gaps': ('await_result_callee_unresolved',)}
     kind = _kind(ctx, target)
     slot = target.index if type(target) is OperationResult else target.result.index
-    local = ctx.selected_edges(choices, region=operation.callee)
-    before = ctx._fresh_copies(port, guard=local or None)
-    if before is None:
-        return {'match': None, 'routes': (), 'gaps': ('await_result_flow_unresolved',)}
-    evidence = []
-    summary = ctx._returns.project(operation.callee, before, evidence_sink=evidence)
+    previous = ctx._returns.guards
+    try:
+        from .await_outcome_flow import required_choices
+        required, complete = required_choices(ctx, source)
+        if not complete:
+            return {'match': None, 'routes': (), 'gaps': ('await_result_source_prefix_unresolved',)}
+        try:
+            ctx._returns.guards = _selected(ctx, previous, choices, required)
+        except ValueError:
+            return {'match': False, 'routes': (), 'gaps': ('await_source_choice_conflict',)}
+        local = ctx.selected_edges(ctx._returns.guards, region=operation.callee)
+        before = ctx._fresh_copies(port, guard=local or None)
+        if before is None:
+            return {'match': None, 'routes': (), 'gaps': ('await_result_flow_unresolved',)}
+        evidence = []
+        summary = ctx._returns.project(operation.callee, before, evidence_sink=evidence)
+    finally:
+        ctx._returns.guards = previous
     match = None if summary is None else summary.get((kind, slot))
     return {'match': match, 'routes': (), 'projection': tuple(evidence),
             'gaps': () if match is not None else ('await_result_terminal_unresolved',)}
@@ -915,13 +935,22 @@ def await_connections(ctx):
         if protection is not None and protection['match'] is None:
             analysis.gaps.append({'code': 'await_qualification_protection_unproved',
                                   'site': _site(item['advance']), 'gaps': protection['gaps']})
-    gaps = (*analysis.gaps, *(gap for job in inventory['jobs'] for gap in job['gaps']))
+    from .await_outcomes import outcome_connections
+    from .await_failures import failure_paths
+    outcomes = outcome_connections(ctx, inventory)
+    failures = failure_paths(ctx)
+    analysis.issues.extend((*outcomes['issues'], *failures['issues']))
+    gaps = (*analysis.gaps, *(gap for job in inventory['jobs'] for gap in job['gaps']),
+            *outcomes['gaps'], *failures['gaps'])
     result = {'issues': tuple(analysis.issues), 'gaps': gaps,
         'status': 'CONTRADICTED' if analysis.issues else 'PARTIAL' if gaps else 'DECLARED',
         'inventory': inventory, 'jobs': inventory['jobs'],
         'acquisitions': tuple(analysis.acquisitions), 'qualifications': tuple(analysis.qualifications),
         'wrappers': tuple(analysis.wrappers), 'body_links': tuple(analysis.body_links),
         'legacy_qualifications': legacy,
+        'outcomes': outcomes['outcomes'], 'outcome_inventory': outcomes['outcome_inventory'],
+        'failure_paths': failures['failure_paths'],
+        'failure_path_inventory': failures['failure_path_inventory'],
         'obligations': (*analysis.acquisitions, *analysis.qualifications,
                         *analysis.wrappers, *inventory['jobs']),
         'cursor': inventory['cursor'] or ({'phase': 'await_connections'} if ctx.budget.truncated else None),
