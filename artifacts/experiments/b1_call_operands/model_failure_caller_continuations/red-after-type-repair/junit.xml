@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="2.201" timestamp="2026-10-19T09:33:29.041675+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_failure_cleanup" name="test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[preserve]" time="0.679"><failure message="KeyError: 'source_result'">mode = 'preserve'
+
+    @pytest.mark.parametrize('mode', ('preserve', 'replace_raise', 'replace_return'))
+    def test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion(mode):
+        graph, details = await_failure_cleanup_program(stage='qualification_reject', mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+        definition = details['failure_cleanup']
+        _source(graph, definition)
+&gt;       selected = _path(report, details)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_failure_cleanup.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'await_acquisition_kind_unproved', 'site': ProtocolOperationRef(scope=ProtocolScopeID...perationID(value='resume.suspend'),)),), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'acquisition_scope': ProtocolScopeID(value='await.self.acquisition'), 'advance_scope': ProtocolScopeID(value='await.s..., UseID(value='factory.call.input.1'), UseID(value='factory.call.input.2'), UseID(value='factory.call.input.3'))), ...}
+own = False
+
+    def _path(report, details, *, own=False):
+        definition = details['failure_cleanup']
+        stage = ('WRAPPER_CONSTRUCTION_RAISE' if definition['stage'] == 'wrapper_constructor_raise'
+            else 'ACQUISITION_RAISE') if own else STAGES[definition['stage']]
+        path, = tuple(row for row in report['failure_paths']
+            if row['scope'] == definition['source_ref'].scope
+            and row['source_operation'] == definition['source_operation'].id
+            and getattr(row['stage'], 'value', row['stage']) == stage)
+&gt;       assert path['source_result'] == definition['source_result']
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'source_result'
+
+tests/unit/test_program_await_failure_cleanup.py:49: KeyError</failure></testcase><testcase classname="tests.unit.test_program_await_failure_cleanup" name="test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[replace_raise]" time="0.394"><failure message="KeyError: 'source_result'">mode = 'replace_raise'
+
+    @pytest.mark.parametrize('mode', ('preserve', 'replace_raise', 'replace_return'))
+    def test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion(mode):
+        graph, details = await_failure_cleanup_program(stage='qualification_reject', mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+        definition = details['failure_cleanup']
+        _source(graph, definition)
+&gt;       selected = _path(report, details)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_failure_cleanup.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'await_acquisition_kind_unproved', 'site': ProtocolOperationRef(scope=ProtocolScopeID...perationID(value='resume.suspend'),)),), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'acquisition_scope': ProtocolScopeID(value='await.self.acquisition'), 'advance_scope': ProtocolScopeID(value='await.s..., UseID(value='factory.call.input.1'), UseID(value='factory.call.input.2'), UseID(value='factory.call.input.3'))), ...}
+own = False
+
+    def _path(report, details, *, own=False):
+        definition = details['failure_cleanup']
+        stage = ('WRAPPER_CONSTRUCTION_RAISE' if definition['stage'] == 'wrapper_constructor_raise'
+            else 'ACQUISITION_RAISE') if own else STAGES[definition['stage']]
+        path, = tuple(row for row in report['failure_paths']
+            if row['scope'] == definition['source_ref'].scope
+            and row['source_operation'] == definition['source_operation'].id
+            and getattr(row['stage'], 'value', row['stage']) == stage)
+&gt;       assert path['source_result'] == definition['source_result']
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'source_result'
+
+tests/unit/test_program_await_failure_cleanup.py:49: KeyError</failure></testcase><testcase classname="tests.unit.test_program_await_failure_cleanup" name="test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[replace_return]" time="0.438"><failure message="KeyError: 'source_result'">mode = 'replace_return'
+
+    @pytest.mark.parametrize('mode', ('preserve', 'replace_raise', 'replace_return'))
+    def test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion(mode):
+        graph, details = await_failure_cleanup_program(stage='qualification_reject', mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+        definition = details['failure_cleanup']
+        _source(graph, definition)
+&gt;       selected = _path(report, details)
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_failure_cleanup.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+report = {'issues': (), 'gaps': ({'code': 'await_acquisition_kind_unproved', 'site': ProtocolOperationRef(scope=ProtocolScopeID...perationID(value='resume.suspend'),)),), 'associations_total': None, ...}, 'known_inventory_complete': True, ...}, ...}
+details = {'acquisition_scope': ProtocolScopeID(value='await.self.acquisition'), 'advance_scope': ProtocolScopeID(value='await.s..., UseID(value='factory.call.input.1'), UseID(value='factory.call.input.2'), UseID(value='factory.call.input.3'))), ...}
+own = False
+
+    def _path(report, details, *, own=False):
+        definition = details['failure_cleanup']
+        stage = ('WRAPPER_CONSTRUCTION_RAISE' if definition['stage'] == 'wrapper_constructor_raise'
+            else 'ACQUISITION_RAISE') if own else STAGES[definition['stage']]
+        path, = tuple(row for row in report['failure_paths']
+            if row['scope'] == definition['source_ref'].scope
+            and row['source_operation'] == definition['source_operation'].id
+            and getattr(row['stage'], 'value', row['stage']) == stage)
+&gt;       assert path['source_result'] == definition['source_result']
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'source_result'
+
+tests/unit/test_program_await_failure_cleanup.py:49: KeyError</failure></testcase></testsuite></testsuites>

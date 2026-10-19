@@ -21,6 +21,24 @@ from .resumable_flow import value_for_use
 
 def _ownership(ctx, source, anchor, shared, parents):
     """Exact ordinary call ancestry to this anchor, never code/time matching."""
+    if ctx.value_activation(source.id) == ctx.activation_of(anchor.id):
+        # An INVOKE's selected result belongs to its caller activation. This
+        # does not establish anything about an unobserved callee or its inputs.
+        from scar.ir.program.model import CompletionResult, value_type
+        operation = ctx.core_operations[anchor.operation]
+        transfer = ctx.outgoing.get(anchor.id)
+        if operation.terminator is None or operation.terminator.kind is not TerminatorKind.INVOKE \
+                or transfer is None or source.origin != transfer.target:
+            return None
+        edge = operation.terminator.successors[transfer.successor_index]
+        landing = ctx.blocks[ctx.visits[transfer.target].block]
+        if not shared.spend('completion_source_result_slots',
+                            len(edge.arguments) + len(operation.completions) + 1):
+            return None
+        signature = next(row for row in operation.completions if row.kind is edge.kind)
+        return True if any(type(actual) is CompletionResult and formal == source.value
+            and signature.types[actual.index] == value_type(ctx.core_values[source.value])
+            for actual, formal in zip(edge.arguments, landing.arguments)) else None
     links = ctx.call_activations_by_caller.get(anchor.id, ())
     if not shared.spend('completion_source_anchor_links', len(links) + 1):
         return None

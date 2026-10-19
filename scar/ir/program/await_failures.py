@@ -8,6 +8,48 @@ from .protocols import OwnedUse, ProtocolClause, ProtocolProfile, StaticProtocol
 from .structured import ControlEdgeReference
 
 
+def _caller_cleanup(ctx, source, choices, issues):
+    """Current caller completion, without retyping the callee's incoming R."""
+    from .completion_adapter_routes import continuation_rows, structured_region
+    from .model import StateVersionValue
+    if not structured_region(ctx, source):
+        return None
+    continuations, missing = continuation_rows(ctx, source, choices)
+    terminals, gaps = [], list(missing)
+    for row in continuations:
+        for receipt in row['continuation']['terminals']:
+            if not ctx.spend('await_failure_caller_terminals'):
+                gaps.append('await_failure_caller_budget')
+                break
+            operation = ctx.operations[receipt['terminal'].operation]
+            state_uses = []
+            if ctx.spend('await_failure_caller_state_uses', len(operation.terminator.values) + 1):
+                for ordinal, identity in enumerate(operation.terminator.values):
+                    actual = OwnedUse(operation.id, identity)
+                    value = ctx.values[ctx.owned_use(operation.id, identity).value]
+                    if type(value) is StateVersionValue:
+                        state_uses.append({'ordinal': ordinal, 'actual': actual,
+                            'value': value, 'location': value.location})
+            local = list(receipt['gaps'])
+            if ctx.budget.truncated:
+                local.append('await_failure_caller_state_budget')
+            if receipt['binding']['match'] is False:
+                issues.append(('protocol_await_failure_current_source', str(operation.id),
+                    'caller terminal is not its current cleanup completion source'))
+            terminals.append({**receipt, 'state_uses': tuple(state_uses),
+                'requires_final_extraction': False,
+                'status': 'CONTRADICTED' if receipt['binding']['match'] is False else
+                    'PARTIAL' if local or ctx.budget.truncated else receipt['status'],
+                'gaps': tuple(dict.fromkeys(local))})
+            gaps.extend(local)
+    if not terminals:
+        gaps.append('await_failure_caller_terminal_unproved')
+    if ctx.budget.truncated:
+        gaps.append('await_failure_caller_budget')
+    return {'caller_continuations': continuations, 'caller_terminals': tuple(terminals),
+            'gaps': tuple(dict.fromkeys(gaps))}
+
+
 def _ref(row):
     return ProtocolOperationRef(row.scope, row.clause, row.operation, row.slot)
 
@@ -86,6 +128,7 @@ def failure_paths(ctx, *, scope=None, derive=True):
     for seed in seeds:
         path = {key: value for key, value in seed.items()
                 if key not in ('source_row', 'own', 'parent_result', 'parent_edge')}
+        path.update(source_result=seed['parent_result'], source_edge=seed['parent_edge'])
         local = []
         if not derive or not ctx.spend('await_failure_paths'):
             paths.append({**path, 'terminals': (), 'status': 'NOT_CHECKED',
@@ -103,8 +146,12 @@ def failure_paths(ctx, *, scope=None, derive=True):
             anchor = next((leg['own_result'] for leg in result_legs(ctx, stage)
                            if leg['edge'] == seed['edge']), None)
         whole_choices = selected(ctx, seed['choices'], seed['edge'], seed['parent_edge'])
-        endpoints, endpoint_gaps = (((), ('await_failure_anchor_missing',)) if anchor is None
-                                   else terminal_inventory(ctx, anchor, whole_choices))
+        caller = _caller_cleanup(ctx, seed['parent_result'], whole_choices, issues)
+        endpoints, endpoint_gaps = (((), ()) if caller is not None and seed['own'] else
+            ((), ('await_failure_anchor_missing',)) if anchor is None else
+            terminal_inventory(ctx, anchor, whole_choices))
+        if caller is not None:
+            local.extend(caller['gaps'])
         local.extend(endpoint_gaps)
         if seed['source_row'] is None:
             local.append('await_failure_source_row_missing')
@@ -122,6 +169,14 @@ def failure_paths(ctx, *, scope=None, derive=True):
         elif any(target not in receipts.targets for target in receiver_ledger['targets']):
             local.append('await_failure_consumer_receipt_incomplete')
         local.extend(receiver_ledger['gaps'])
+        source_bindings = () if caller is None else tuple(view['binding'] for view in receiver_views)
+        for binding in source_bindings:
+            if binding['match'] is False:
+                local.append('await_failure_source_consumer_contradicted')
+                issues.append(('protocol_await_failure_source_consumer', str(seed['key']),
+                    'original incoming failure does not reach its declared source consumer'))
+            elif binding['match'] is None:
+                local.append('await_failure_source_consumer_unproved')
         terminals = []
         for terminal in endpoints:
             if not ctx.spend('await_failure_terminals'):
@@ -134,7 +189,22 @@ def failure_paths(ctx, *, scope=None, derive=True):
             states = state_links(ctx, terminal, seed['parent_edge'], whole_choices, outward=seed['own'])
             terminal_gaps = list(local)
             bindings = (report, *(state['binding'] for state in states),
-                        *(consumer['binding'] for consumer in receiver_views))
+                        *(() if caller is not None else (consumer['binding'] for consumer in receiver_views)))
+            stage_fields = {}
+            if caller is not None and not seed['own']:
+                stage_source = None if stage.terminator.kind is TerminatorKind.BRANCH else anchor
+                stage_binding = None if stage_source is None else (
+                    answer(gaps=('await_failure_stage_packet_missing',)) if packet is None else
+                    ctx.bind(stage_source, packet, guard=whole_choices))
+                origins = (None if stage_source is not None or packet is None else
+                           ctx.origins(packet, guard=whole_choices))
+                stage_fields = {'stage_source': stage_source, 'stage_binding': stage_binding,
+                    'control_anchor': seed['edge'] if stage_source is None else None,
+                    'stage_origins': origins}
+                if stage_binding is not None:
+                    bindings = (*bindings, stage_binding)
+                elif origins is None or not origins['source_inventory_complete'] or not origins['recipes']:
+                    terminal_gaps.append('await_failure_stage_origins_unproved')
             if not raised:
                 terminal_gaps.append('await_failure_terminal_not_raise')
             for binding in bindings:
@@ -145,16 +215,20 @@ def failure_paths(ctx, *, scope=None, derive=True):
                     issues.append(('protocol_await_failure_copy', str(seed['key']),
                         'failure packet/state/consumer is not the same exact original completion'))
             terminals.append({'terminal': terminal, 'packet': packet, 'binding': report,
-                'states': states, 'consumers': receiver_views,
+                'states': states, 'consumers': receiver_views, **stage_fields,
                 'status': 'CONTRADICTED' if any(binding['match'] is False for binding in bindings) else
                           'PARTIAL' if terminal_gaps or not raised or ctx.budget.truncated else 'DECLARED',
                 'gaps': tuple(dict.fromkeys(terminal_gaps)), **flags()})
             gaps.extend(terminal_gaps)
         checked += int(not ctx.budget.truncated)
         local.extend(gap for terminal in terminals for gap in terminal['gaps'])
-        paths.append({**path, 'terminals': tuple(terminals),
-            'status': 'CONTRADICTED' if any(terminal['status'] == 'CONTRADICTED' for terminal in terminals) else
-                      'PARTIAL' if local or ctx.budget.truncated or not terminals else 'DECLARED',
+        children = (*terminals, *(() if caller is None else caller['caller_terminals']))
+        paths.append({**path, 'terminals': tuple(terminals), **({} if caller is None else {
+                'caller_continuations': caller['caller_continuations'],
+                'caller_terminals': caller['caller_terminals'], 'source_consumers': receiver_views}),
+            'status': 'CONTRADICTED' if any(binding['match'] is False for binding in source_bindings)
+                or any(terminal['status'] == 'CONTRADICTED' for terminal in children) else
+                      'PARTIAL' if local or ctx.budget.truncated or not children else 'DECLARED',
             'gaps': tuple(dict.fromkeys(local)), **flags()})
         gaps.extend(local)
         if ctx.budget.truncated:

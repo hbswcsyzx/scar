@@ -70,7 +70,7 @@ def _consumer(ctx, definition, advance, known, anchors, shared, *, parent_port=N
     operation, reached = locate(ctx, advance, actual.operation, shared) if admitted else (None, None)
     if selected is not False and reached is False:
         selected = False
-    own = _result(ctx, advance, definition.get('advance_result', parent_port))
+    own = _result(ctx, advance, definition.get('advance_result', parent_port), shared=shared)
     local = _base_gaps(definition, definition.get('legs', ()))
     use, final, bindings = None, (), ()
     if type(actual) is HostTerminal:
@@ -112,7 +112,7 @@ def _terminal(ctx, definition, anchor, advance, parent_port, known, shared,
             'terminal is not this exact source CallActivation completion')
     packet_use = _use(ctx, operation, definition.get('packet'))
     packet = value_for_use(ctx, packet_use)
-    parent = _result(ctx, advance, parent_port)
+    parent = _result(ctx, advance, parent_port, shared=shared)
     binding = pair(ctx, parent if own else packet, packet if own else parent, shared)
     if operation is None:
         local.append('await_outcome_terminal_unobserved')
@@ -332,6 +332,95 @@ def _outcome_occurrences(ctx, definition, advance, shared):
     return tuple(rows)
 
 
+def _failure_stage(ctx, definition, projected, stage, entry, shared):
+    """The helper's incoming packet proof is separate from its exported result."""
+    if 'stage_source' not in definition:
+        return projected
+    local, packets = list(projected['gaps']), []
+    stage_source = definition['stage_source']
+    source_value = port_value(ctx, stage_source, _map(stage), shared) if stage_source is not None else None
+    binding = pair(ctx, source_value, projected['packet_value'], shared) if stage_source is not None else None
+    origins = definition.get('stage_origins')
+    if origins is not None:
+        from scar.ir.program.model import OperationResult
+        for recipe in origins['recipes']:
+            if not shared.spend('await_failure_stage_packets'):
+                break
+            origin = recipe['leaf'].origin
+            operation, reached = (locate(ctx, entry, origin.operation, shared, entry=True)
+                if type(origin) is OperationResult and entry is not None else (None, None))
+            packet = port_value(ctx, origin, _map(operation), shared) if type(origin) is OperationResult else None
+            packet_definition = ctx.await_flow.packets.get(recipe['leaf'].id)
+            uses = (None, None) if packet_definition is None or operation is None else tuple(
+                ctx.uses.get((operation.id, identity))
+                for identity in (packet_definition.exception, packet_definition.traceback))
+            values = tuple(value_for_use(ctx, use) for use in uses)
+            support = pair(ctx, packet, projected['packet_value'], shared)
+            missing = () if all(use is not None for use in uses) and all(
+                value is not None for value in values) else ('await_failure_stage_packet_uses_missing',)
+            packets.append(_finish({'definition': recipe, 'operation': operation, 'value': packet,
+                'exception_use': uses[0], 'traceback_use': uses[1],
+                'exception_value': values[0], 'traceback_value': values[1],
+                'binding': support, 'gaps': missing}, selected=reached, bindings=(support,)))
+        if not any(row['selected'] is True for row in packets):
+            local.append('await_failure_stage_packet_unobserved')
+    if shared.truncated:
+        local.append('await_failure_stage_budget')
+    return _finish({**projected, 'stage_source_value': source_value,
+        'stage_binding': binding, 'stage_packets': tuple(packets), 'gaps': tuple(local)},
+        selected=projected['selected'], children=(*projected['states'], *projected['consumers'], *packets),
+        bindings=(projected['binding'], *((binding,) if binding is not None else ())), definition=definition)
+
+
+def _failure_caller(ctx, definition, source, parent_port, selected, shared):
+    """Follow the caller, never treat its Return as acquisition NORMAL."""
+    from .completion_continuations import completion_continuations
+    from .await_links import _flags
+    local, reports, terminals = [], [], []
+    if selected is not False:
+        own_selected = choice(ctx, source, definition['source_edge'])
+        root = port_value(ctx, parent_port, _map(source), shared) if own_selected is True else None
+        if root is None:
+            local.append('await_failure_caller_source_unobserved')
+        else:
+            report = completion_continuations(ctx, root.id, source.id,
+                cross_resume=False, shared=shared)
+            reports.append(report)
+            local.extend(report['gaps'])
+            for terminal in report['terminals']:
+                if not shared.spend('await_failure_caller_terminal_joins', len(definition['caller_terminals']) + 1):
+                    break
+                candidates = tuple(item for item in definition['caller_terminals']
+                    if item['terminal'] == terminal['terminal'] and item['actual'] == terminal['actual'])
+                original = candidates[0] if len(candidates) == 1 else None
+                states_, missing = [], []
+                if original is None:
+                    missing.append('await_failure_caller_terminal_definition_unproved')
+                for state in () if original is None else original['state_uses']:
+                    if not shared.spend('await_failure_caller_state_captures'):
+                        break
+                    use = ctx.uses.get((terminal['operation'].id, state['actual'].use))
+                    value = value_for_use(ctx, use)
+                    match = None if value is None else value.value == state['value'].id
+                    gaps = () if match is True else ('await_failure_current_state_unobserved'
+                        if match is None else 'await_failure_current_state_conflict',)
+                    states_.append({'definition': state, 'use': use, 'value': value,
+                        'capture_match': match, 'status': 'DECLARED' if match is True else
+                            'PARTIAL' if match is None else 'CONTRADICTED', 'gaps': gaps, **_flags()})
+                if shared.truncated:
+                    missing.append('await_failure_caller_state_budget')
+                terminals.append(_finish({**terminal, 'definition': original,
+                    'state_uses': tuple(states_), 'requires_final_extraction': False,
+                    'gaps': (*terminal['gaps'], *missing)},
+                    children=tuple(states_), bindings=(terminal['binding'],), definition=original))
+    consumers = tuple(_consumer(ctx, consumer, source, _map(source), (source,), shared,
+        parent_port=parent_port) for consumer in definition.get('source_consumers', ())) if selected is not False else ()
+    if shared.truncated:
+        local.append('await_failure_caller_budget')
+    return {'caller_continuations': tuple(reports), 'caller_terminals': tuple(terminals),
+            'source_consumers': consumers, 'gaps': tuple(local)}
+
+
 def _failure_occurrence(ctx, definition, source, shared):
     admitted = shared.spend('await_failure_parent_occurrences', path='await.failure.parent')
     own = definition['stage_operation'] == definition['source_operation']
@@ -360,6 +449,9 @@ def _failure_occurrence(ctx, definition, source, shared):
             stage = operation
     elif admitted:
         local.append('await_failure_call_activation_missing')
+    from scar.ir.program.await_outcome_flow import result_legs
+    parent_port = next((leg['own_result'] for leg in result_legs(ctx.await_flow,
+        ctx.core_operations[source.operation]) if leg['kind'] is ExitKind.RAISE), None)
     if selected is True:
         known = _map(source, stage)
         for terminal in definition['terminals']:
@@ -368,19 +460,23 @@ def _failure_occurrence(ctx, definition, source, shared):
                 break
             # Payload ordinal zero is the original source R completion, not
             # the first State slot nor a landing-position assumption.
-            from scar.ir.program.await_outcome_flow import result_legs
-            parent_port = next((leg['own_result'] for leg in result_legs(ctx.await_flow,
-                ctx.core_operations[source.operation]) if leg['kind'] is ExitKind.RAISE), None)
-            terminals.append(_terminal(ctx, terminal, source if own else stage, source,
+            projected = _terminal(ctx, terminal, source if own else stage, source,
                 parent_port, known, shared, own=own,
-                exact_completion=None if own else call['completion'], completion_required=not own))
+                exact_completion=None if own else call['completion'], completion_required=not own)
+            terminals.append(_failure_stage(ctx, terminal, projected, stage, entry, shared))
     elif selected is None:
         local.append('await_failure_path_unobserved')
+    caller = (_failure_caller(ctx, definition, source, parent_port, selected, shared)
+              if 'caller_continuations' in definition else None)
+    if caller is not None:
+        local.extend(caller['gaps'])
     consumers = tuple(consumer for terminal in terminals for consumer in terminal['consumers'])
     row = _finish({'key': (definition['key'], source.id), 'source': source,
         'call_chain': () if call is None else (call,), 'stage': stage, 'prefix': tuple(prefix),
+        **({} if caller is None else {key: value for key, value in caller.items() if key != 'gaps'}),
         'terminals': tuple(terminals), 'consumers': consumers, 'gaps': tuple(local)},
-        selected=selected, children=tuple(terminals), definition=definition)
+        selected=selected, children=(*terminals, *(() if caller is None else (
+            *caller['caller_terminals'], *caller['source_consumers']))), definition=definition)
     if not admitted:
         row['status'] = 'NOT_CHECKED'
     return row

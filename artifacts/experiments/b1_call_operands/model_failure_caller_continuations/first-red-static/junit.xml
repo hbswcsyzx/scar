@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="3" time="2.283" timestamp="2026-10-19T09:32:15.925455+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_failure_cleanup" name="test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[preserve]" time="0.741"><failure message="AttributeError: type object 'ValueKind' has no attribute 'PROTOCOL'">mode = 'preserve'
+
+    @pytest.mark.parametrize('mode', ('preserve', 'replace_raise', 'replace_return'))
+    def test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion(mode):
+        graph, details = await_failure_cleanup_program(stage='qualification_reject', mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+        definition = details['failure_cleanup']
+&gt;       _source(graph, definition)
+
+tests/unit/test_program_await_failure_cleanup.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+definition = {'interface': CleanupInterface(scope=ControlScopeID(value='await.failure-cleanup.cleanup.scope'), protected=ControlSco...), effects_complete=False, terminator=None, callee=None, call_arguments=(), completions=(), invoke_arguments=())), ...}
+
+    def _source(graph, definition):
+        source = next(row for row in graph.operations if row.id == definition['source_operation'].id)
+        result = definition['source_result']
+        assert type(result) is InvokeLiteralResult
+        edge = source.terminator.successors[result.edge.successor_index]
+        assert edge.kind is ExitKind.RAISE and result.result == CompletionResult(0)
+        signature, = tuple(row for row in source.completions if row.kind is ExitKind.RAISE)
+&gt;       assert signature.types[0].kind is ValueKind.PROTOCOL
+                                          ^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'ValueKind' has no attribute 'PROTOCOL'
+
+tests/unit/test_program_await_failure_cleanup.py:61: AttributeError</failure></testcase><testcase classname="tests.unit.test_program_await_failure_cleanup" name="test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[replace_raise]" time="0.417"><failure message="AttributeError: type object 'ValueKind' has no attribute 'PROTOCOL'">mode = 'replace_raise'
+
+    @pytest.mark.parametrize('mode', ('preserve', 'replace_raise', 'replace_return'))
+    def test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion(mode):
+        graph, details = await_failure_cleanup_program(stage='qualification_reject', mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+        definition = details['failure_cleanup']
+&gt;       _source(graph, definition)
+
+tests/unit/test_program_await_failure_cleanup.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+definition = {'interface': CleanupInterface(scope=ControlScopeID(value='await.failure-cleanup.cleanup.scope'), protected=ControlSco...), effects_complete=False, terminator=None, callee=None, call_arguments=(), completions=(), invoke_arguments=())), ...}
+
+    def _source(graph, definition):
+        source = next(row for row in graph.operations if row.id == definition['source_operation'].id)
+        result = definition['source_result']
+        assert type(result) is InvokeLiteralResult
+        edge = source.terminator.successors[result.edge.successor_index]
+        assert edge.kind is ExitKind.RAISE and result.result == CompletionResult(0)
+        signature, = tuple(row for row in source.completions if row.kind is ExitKind.RAISE)
+&gt;       assert signature.types[0].kind is ValueKind.PROTOCOL
+                                          ^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'ValueKind' has no attribute 'PROTOCOL'
+
+tests/unit/test_program_await_failure_cleanup.py:61: AttributeError</failure></testcase><testcase classname="tests.unit.test_program_await_failure_cleanup" name="test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[replace_return]" time="0.423"><failure message="AttributeError: type object 'ValueKind' has no attribute 'PROTOCOL'">mode = 'replace_return'
+
+    @pytest.mark.parametrize('mode', ('preserve', 'replace_raise', 'replace_return'))
+    def test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion(mode):
+        graph, details = await_failure_cleanup_program(stage='qualification_reject', mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+        definition = details['failure_cleanup']
+&gt;       _source(graph, definition)
+
+tests/unit/test_program_await_failure_cleanup.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+definition = {'interface': CleanupInterface(scope=ControlScopeID(value='await.failure-cleanup.cleanup.scope'), protected=ControlSco...), effects_complete=False, terminator=None, callee=None, call_arguments=(), completions=(), invoke_arguments=())), ...}
+
+    def _source(graph, definition):
+        source = next(row for row in graph.operations if row.id == definition['source_operation'].id)
+        result = definition['source_result']
+        assert type(result) is InvokeLiteralResult
+        edge = source.terminator.successors[result.edge.successor_index]
+        assert edge.kind is ExitKind.RAISE and result.result == CompletionResult(0)
+        signature, = tuple(row for row in source.completions if row.kind is ExitKind.RAISE)
+&gt;       assert signature.types[0].kind is ValueKind.PROTOCOL
+                                          ^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'ValueKind' has no attribute 'PROTOCOL'
+
+tests/unit/test_program_await_failure_cleanup.py:61: AttributeError</failure></testcase></testsuite></testsuites>

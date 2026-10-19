@@ -1,0 +1,97 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_ test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[preserve] _
+
+mode = 'preserve'
+
+    @pytest.mark.parametrize('mode', ('preserve', 'replace_raise', 'replace_return'))
+    def test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion(mode):
+        graph, details = await_failure_cleanup_program(stage='qualification_reject', mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+        definition = details['failure_cleanup']
+>       _source(graph, definition)
+
+tests/unit/test_program_await_failure_cleanup.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+definition = {'interface': CleanupInterface(scope=ControlScopeID(value='await.failure-cleanup.cleanup.scope'), protected=ControlSco...), effects_complete=False, terminator=None, callee=None, call_arguments=(), completions=(), invoke_arguments=())), ...}
+
+    def _source(graph, definition):
+        source = next(row for row in graph.operations if row.id == definition['source_operation'].id)
+        result = definition['source_result']
+        assert type(result) is InvokeLiteralResult
+        edge = source.terminator.successors[result.edge.successor_index]
+        assert edge.kind is ExitKind.RAISE and result.result == CompletionResult(0)
+        signature, = tuple(row for row in source.completions if row.kind is ExitKind.RAISE)
+>       assert signature.types[0].kind is ValueKind.PROTOCOL
+                                          ^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'ValueKind' has no attribute 'PROTOCOL'
+
+tests/unit/test_program_await_failure_cleanup.py:61: AttributeError
+_ test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[replace_raise] _
+
+mode = 'replace_raise'
+
+    @pytest.mark.parametrize('mode', ('preserve', 'replace_raise', 'replace_return'))
+    def test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion(mode):
+        graph, details = await_failure_cleanup_program(stage='qualification_reject', mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+        definition = details['failure_cleanup']
+>       _source(graph, definition)
+
+tests/unit/test_program_await_failure_cleanup.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+definition = {'interface': CleanupInterface(scope=ControlScopeID(value='await.failure-cleanup.cleanup.scope'), protected=ControlSco...), effects_complete=False, terminator=None, callee=None, call_arguments=(), completions=(), invoke_arguments=())), ...}
+
+    def _source(graph, definition):
+        source = next(row for row in graph.operations if row.id == definition['source_operation'].id)
+        result = definition['source_result']
+        assert type(result) is InvokeLiteralResult
+        edge = source.terminator.successors[result.edge.successor_index]
+        assert edge.kind is ExitKind.RAISE and result.result == CompletionResult(0)
+        signature, = tuple(row for row in source.completions if row.kind is ExitKind.RAISE)
+>       assert signature.types[0].kind is ValueKind.PROTOCOL
+                                          ^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'ValueKind' has no attribute 'PROTOCOL'
+
+tests/unit/test_program_await_failure_cleanup.py:61: AttributeError
+_ test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[replace_return] _
+
+mode = 'replace_return'
+
+    @pytest.mark.parametrize('mode', ('preserve', 'replace_raise', 'replace_return'))
+    def test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion(mode):
+        graph, details = await_failure_cleanup_program(stage='qualification_reject', mode=mode)
+        index = _index(graph)
+        report = _report(index, details)
+        definition = details['failure_cleanup']
+>       _source(graph, definition)
+
+tests/unit/test_program_await_failure_cleanup.py:161: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='factory'), regions=(Region(id=RegionID(value='factory'), label='declared driver fixt...'factory.call'), slot=1), drive=OperationID(value='driver.drive'), projection=None, guard=None)), exception_matches=())
+definition = {'interface': CleanupInterface(scope=ControlScopeID(value='await.failure-cleanup.cleanup.scope'), protected=ControlSco...), effects_complete=False, terminator=None, callee=None, call_arguments=(), completions=(), invoke_arguments=())), ...}
+
+    def _source(graph, definition):
+        source = next(row for row in graph.operations if row.id == definition['source_operation'].id)
+        result = definition['source_result']
+        assert type(result) is InvokeLiteralResult
+        edge = source.terminator.successors[result.edge.successor_index]
+        assert edge.kind is ExitKind.RAISE and result.result == CompletionResult(0)
+        signature, = tuple(row for row in source.completions if row.kind is ExitKind.RAISE)
+>       assert signature.types[0].kind is ValueKind.PROTOCOL
+                                          ^^^^^^^^^^^^^^^^^^
+E       AttributeError: type object 'ValueKind' has no attribute 'PROTOCOL'
+
+tests/unit/test_program_await_failure_cleanup.py:61: AttributeError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_await_failure_cleanup.py::test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[preserve]
+FAILED tests/unit/test_program_await_failure_cleanup.py::test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[replace_raise]
+FAILED tests/unit/test_program_await_failure_cleanup.py::test_qualification_reject_packet_reaches_get_raise_then_the_callers_current_completion[replace_return]
+3 failed in 2.28s

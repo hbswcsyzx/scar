@@ -1,5 +1,28 @@
 # SCAR execution model
 
+## An operation result and its enclosing region's exit (2026-10-19)
+
+The same execution has two different connection points: an Operation's own
+typed result, and its enclosing Region's eventual exit. An acquisition can
+complete with RAISE while caller cleanup subsequently completes with RETURN.
+The original result kind, slot and source identity remain unchanged. This is
+one reason a recursive operation/data graph also needs explicit control and
+StateLocation edges before dependency reduction is safe.
+
+The failure view now separates stage packet-to-helper, helper-to-acquisition
+and acquisition-to-current-caller relations. Qualification rejection is a
+control edge to an original packet constructor, rather than a data-copy edge
+from a candidate reference. Original consumers and replacement consumers have
+different sources. Current state Uses reference canonical SSA, without an
+assertion that cleanup leaves earlier state unchanged.
+
+Actual own-result ownership requires the selected CompletionResult ordinal,
+its exact landing formal and ValueOccurrence in this activation. A forwarded
+value or another activation's value cannot obtain that ownership. See the
+[frozen failure continuation plan](M1_FAILURE_CALLER_CONTINUATION_PLAN.md) and
+[source-bound progress / limits](M1_FAILURE_CALLER_CONTINUATION_PROGRESS.md).
+This connection model still carries no automatic transformation authority.
+
 ## Original exceptions and current completion (2026-10-19)
 
 A body's original exception and the completion delivered after cleanup are

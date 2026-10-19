@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **P4 acquisition-failure / caller cleanup progress (2026-10-19):**
+> [Plan](M1_FAILURE_CALLER_CONTINUATION_PLAN.md) and
+> [evidence / remaining work](M1_FAILURE_CALLER_CONTINUATION_PROGRESS.md)
+> separate the original acquisition RAISE from its caller's current completion.
+> Helper packet delivery, source consumers, caller replacement and current
+> state captures are independent obligations. Selected-result ownership uses
+> exact typed slots rather than landing positions; forwarded and sibling
+> values remain unproved. Complete A–H, sixteen groups, P5 and M2 stay OPEN;
+> these supplied graphs do not establish automatic LeWM modeling or speedup.
+
 > **P4 BodyRaise continuation progress (2026-10-19):**
 > [Plan](M1_BODY_RAISE_CONTINUATION_PLAN.md) and
 > [evidence / remaining work](M1_BODY_RAISE_CONTINUATION_PROGRESS.md) retain

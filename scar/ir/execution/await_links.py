@@ -62,6 +62,9 @@ def _result(ctx, occurrence, port, *, shared=None):
             return None
         operation = ctx.core_operations[occurrence.operation]
         edge = operation.terminator.successors[transfer.successor_index]
+        if shared is not None and not shared.spend('await_invoke_result_slots', len(edge.arguments) + 1,
+                                                   path='await.invoke.result'):
+            return None
         block = ctx.blocks[ctx.visits[transfer.target].block]
         for actual, formal in zip(edge.arguments, block.arguments):
             if type(actual) is CompletionResult and actual.index == port.result.index:

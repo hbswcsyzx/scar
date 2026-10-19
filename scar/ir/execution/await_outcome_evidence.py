@@ -180,8 +180,8 @@ def states(ctx, definitions, occurrences, shared):
     rows = []
     for definition in definitions:
         admitted = shared.spend('await_outcome_states', path='await.outcome.states')
-        source = port_value(ctx, definition['source'], occurrences) if admitted else None
-        target = port_value(ctx, definition['target'], occurrences) if admitted else None
+        source = port_value(ctx, definition['source'], occurrences, shared) if admitted else None
+        target = port_value(ctx, definition['target'], occurrences, shared) if admitted else None
         binding = pair(ctx, source, target, shared)
         local = list(binding['gaps'])
         rows.append({'definition': definition, 'source': source, 'target': target,
