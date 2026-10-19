@@ -22,6 +22,8 @@ from .protocols import (
 )
 from .resumption import ResumeSlotKind, SuspendTerminator
 from .structured import ControlEdgeReference
+from .protocol_await_records import (AwaitAcquisition, AwaitIteratorQualification,
+                                     CoroutineAwaitWrapper)
 
 
 _METHOD_LOOKUP = {
@@ -37,6 +39,32 @@ _CONTINUATION_RULES = (*_LOOKUPS, CR.AWAIT_CALL, *_ADVANCES)
 _ADAPTERS = (AR.AWAIT_STOPITER_TO_EXPRESSION, AR.DELEGATE_ITEM_TO_PARENT_YIELD,
              AR.DELEGATE_STOPITER_TO_PARENT_VALUE, AR.DELEGATE_ONLY_HOST_ITEM,
              AR.DELEGATE_ONLY_HOST_EXCEPTION)
+
+
+def _await_iterator_source(ctx, row):
+    if row is None or type(row.contract) not in (
+            AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper):
+        return False
+    from .protocol_await import success_source
+    return success_source(ctx, row)[0] is not None
+
+
+def _await_expected_row(ctx, expected):
+    """Resolve only the independently declared candidate/acceptance source."""
+    from .protocol_await import success_source
+    matches = []
+    for candidate in ctx.graph.protocol_operations:
+        if type(candidate.contract) not in (
+                AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper):
+            continue
+        if not ctx.spend('continuation_await_expected_sources'):
+            return None
+        source, _ = success_source(ctx, candidate)
+        if source is None:
+            continue
+        if expected == source:
+            matches.append(candidate)
+    return matches[0] if len(matches) == 1 else None
 
 
 def _site(row):
@@ -414,6 +442,10 @@ def continuation_connections(ctx):
                 and _selected_kind(ctx, item.contract.result) is ExitKind.NORMAL):
             lookup_inventory.setdefault((item.scope, item.contract.rule), []).append(item)
             normal_sources.append(item)
+        elif (_await_iterator_source(ctx, item)
+                and not (type(item.contract) is AwaitIteratorQualification and item.contract.branch is not None)
+                and _selected_kind(ctx, item.contract.result) is ExitKind.NORMAL):
+            normal_sources.append(item)
     ctx._continuation_normal_sources = tuple(normal_sources)
     method_consumers = {}
     if any(type(row.contract) is ProtocolCall and row.contract.rule in _METHOD_LOOKUPS
@@ -507,6 +539,8 @@ def continuation_connections(ctx):
                             break
                         rule = contract.rule
                         producer = _source_row(ctx, case.receiver)
+                        if producer is None and rule in (*_ADVANCES, *_METHOD_LOOKUPS):
+                            producer = _await_expected_row(ctx, case.receiver)
                         if type(case.receiver) is BlockArgument and rule in (CR.AWAIT_CALL, *_ADVANCES, *_METHOD_LOOKUPS):
                             required = ((CR.AWAIT_LOOKUP,) if rule is CR.AWAIT_CALL else
                                         (CR.DELEGATE_ITER, CR.AWAIT_CALL, _METHOD_LOOKUP[rule])
@@ -536,7 +570,8 @@ def continuation_connections(ctx):
                         elif rule in (*_ADVANCES, *_METHOD_LOOKUPS):
                             allowed = ((CR.DELEGATE_ITER, CR.AWAIT_CALL, _METHOD_LOOKUP[rule])
                                        if rule in _ADVANCES else (CR.DELEGATE_ITER, CR.AWAIT_CALL))
-                            valid = (producer is not None and type(producer.contract) is ProtocolCall
+                            valid = (_await_iterator_source(ctx, producer) or
+                                     producer is not None and type(producer.contract) is ProtocolCall
                                      and producer.contract.rule in allowed
                                      and _selected_kind(ctx, producer.contract.result) is ExitKind.NORMAL)
                             check(None if producer is None and type(case.receiver) in (BlockArgument, StaticProtocolGap) else valid,
@@ -561,9 +596,10 @@ def continuation_connections(ctx):
                                     and case.receiver != case.trigger.iterator):
                                 issue("protocol_continuation_trigger", identity, "initial marker must select the independently expected iterator")
                             marker = _source_row(ctx, case.trigger.iterator)
-                            if (marker is None or type(marker.contract) is not ProtocolCall
+                            if (not _await_iterator_source(ctx, marker) and (
+                                    marker is None or type(marker.contract) is not ProtocolCall
                                     or marker.contract.rule not in (CR.DELEGATE_ITER, CR.AWAIT_CALL)
-                                    or _selected_kind(ctx, marker.contract.result) is not ExitKind.NORMAL):
+                                    or _selected_kind(ctx, marker.contract.result) is not ExitKind.NORMAL)):
                                 issue("protocol_continuation_trigger", identity,
                                       "initial marker requires the exact own NORMAL iterator evaluation")
                             check(ctx.bind(case.trigger.iterator, _iterator_use(ctx, row, case),

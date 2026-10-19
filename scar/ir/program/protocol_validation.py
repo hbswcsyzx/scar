@@ -330,6 +330,8 @@ def protocol_errors(graph, *, context=None):
         if not contract_allowed(scope.profile, row.clause, row.contract):
             error("protocol_rule", path, "contract/rule is not allowed in this fixed profile/clause")
         contract = row.contract
+        from .protocol_await import await_contract_errors
+        issues.extend(await_contract_errors(ctx, row))
         try:
             _state_sites(ctx, row)
         except ValueError as exc:
@@ -571,6 +573,9 @@ def _adapter_route_copy(ctx, row, terminal):
 def connection_errors(ctx):
     """Consumer obligations are derived from core markers, not row count."""
     errors = []
+    if hasattr(ctx, 'index'):
+        from .protocol_await import await_connections
+        errors.extend(await_connections(ctx)['issues'])
     # AWAIT handoffs need their own selected source/incoming paths. Treating
     # two legal sources merged at one host as an unguarded must-copy would
     # reject the other incoming instead of checking this source's consumer.

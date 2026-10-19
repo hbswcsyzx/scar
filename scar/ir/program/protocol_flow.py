@@ -132,7 +132,10 @@ class ProtocolFlow:
 
     def row_result(self, row):
         from .protocols import AdmissionPredicate, OutcomeAdapter, ProtocolCall, RequestProcessing
-        if type(row.contract) in (AdmissionPredicate, RequestProcessing, ProtocolCall):
+        from .protocol_await_records import (AwaitAcquisition, AwaitIteratorQualification,
+                                             CoroutineAwaitWrapper)
+        if type(row.contract) in (AdmissionPredicate, RequestProcessing, ProtocolCall,
+                                 AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper):
             return row.contract.result
         if type(row.contract) is OutcomeAdapter and type(row.contract.output) in (
                 OperationResult, InvokeLiteralResult, StaticProtocolGap):

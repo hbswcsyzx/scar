@@ -536,8 +536,8 @@ _bind_model_ports(OperationResult, InvokeLiteralResult)
 from scar.ir.program.protocol_connections import (
     AsyncSessionOutcome, CancelDelivery, CancelDeliveryRef, CancelHandling,
     DelegateLookupFallback, NormalizedThrowSource,
-    InitialAdvance, InjectedPacketTrigger, PROTOCOL_BINDING_TYPES,
-    ProtocolBinding, ProtocolCallInputCase, ProtocolCallInputs,
+    InitialAdvance, InjectedPacketTrigger,
+    ProtocolCallInputCase, ProtocolCallInputs,
     ProtocolOperationRef, ProtocolResultConsumers, RawOperandSource,
     RawRequestTrigger, RequestAssociation, RequestStateCondition,
     RequestStateRule, ResumeSourceBinding, TaskCreatedTarget,
@@ -546,6 +546,10 @@ from scar.ir.program.protocol_connections import (
 )
 _bind_connection_model_ports(OperationResult, InvokeLiteralResult, BlockArgument)
 _bind_protocol_records()
+
+from scar.ir.program.protocol_await_records import AwaitBodyLink, _bind_await_records
+_bind_await_records()
+from scar.ir.program.protocol_connections import ProtocolBinding, PROTOCOL_BINDING_TYPES
 
 from scar.ir.program.exception_matches import ExceptionMatcher
 
@@ -905,6 +909,8 @@ class ProgramGraph:
                 key = (type(row), row.delivery, row.handler_packet)
             elif type(row) is DelegateLookupFallback:
                 key = (type(row), row.lookup, row.matcher, row.guard)
+            elif type(row) is AwaitBodyLink:
+                key = (type(row), row.source, row.advance, row.drive, row.guard)
             else:
                 key = (type(row), row.scope, row.result)
             binding_keys.append(key)

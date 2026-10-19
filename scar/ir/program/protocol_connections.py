@@ -394,6 +394,21 @@ class DelegateLookupFallback:
 ProtocolBinding: TypeAlias = AsyncSessionOutcome | CancelDelivery | CancelHandling | TaskStatusRead | DelegateLookupFallback
 PROTOCOL_BINDING_TYPES = (AsyncSessionOutcome, CancelDelivery, CancelHandling, TaskStatusRead, DelegateLookupFallback)
 
+
+def _bind_await_binding_type(await_body_link: type) -> None:
+    """Install the one Program23 global relation, never an open route union."""
+    global ProtocolBinding, PROTOCOL_BINDING_TYPES
+    from .protocol_await_records import AwaitBodyLink
+    if await_body_link is not AwaitBodyLink:
+        raise TypeError("await binding must be the canonical AwaitBodyLink class")
+    if AwaitBodyLink in PROTOCOL_BINDING_TYPES:
+        return
+    PROTOCOL_BINDING_TYPES = (*PROTOCOL_BINDING_TYPES, AwaitBodyLink)
+    ProtocolBinding = Union[
+        AsyncSessionOutcome, CancelDelivery, CancelHandling, TaskStatusRead,
+        DelegateLookupFallback, AwaitBodyLink,
+    ]
+
 LOOKUP_FALLBACK_RECORD_TAGS = MappingProxyType({
     NormalizedThrowSource: ('kind', 'NORMALIZED_THROW_SOURCE'),
     DelegateLookupFallback: ('kind', 'DELEGATE_LOOKUP_FALLBACK'),
@@ -533,6 +548,10 @@ def has_protocol_connection_capability(graph: object) -> bool:
     indexed queries can apply the expensive P4 stage only for this capability.
     An older protocol scope by itself does not select the new capability.
     """
+    from .protocol_await_records import has_await_acquisition_capability
+    if has_await_acquisition_capability(graph):
+        # New scope-only declarations still need the prepared source inventory.
+        return True
     if any(getattr(graph, name, ()) for name in (
             "protocol_call_inputs", "protocol_result_consumers", "protocol_bindings")):
         return True

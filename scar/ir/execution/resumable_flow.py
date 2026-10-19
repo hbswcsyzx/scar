@@ -321,6 +321,7 @@ def prepare_value_copies(ctx):
         needed.add(target)
         pending.append(predecessors[target])
     ctx.body_value_predecessors, ctx.body_value_roots = predecessors, roots
+    ctx.body_original_copy_recipes = recipes
     # Keep original recipe evidence. Only the ancestor closure actually used by
     # declared body links is checked; unrelated synchronous calls stay outside
     # this gate. No per-drive full-model scan or pair enumeration is required.

@@ -234,6 +234,8 @@ def body_errors(ctx):
             'path_complete': path_complete, 'canonical_gaps': tuple(gaps), 'gaps': tuple(gaps)}
     from .resumable_sessions import prepare_body_sessions
     prepare_body_sessions(ctx)
+    from .await_links import prepare_await_indexes
+    prepare_await_indexes(ctx)
     prepare_value_copies(ctx)
     for view in ctx.resolved_body_origins.values():
         view['canonical_gaps'] = view['gaps']

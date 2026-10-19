@@ -18,6 +18,9 @@ from scar.ir.program.protocols import (
 )
 from scar.ir.program.resumption import ResumableKind
 from .protocol_connections import RequestAssociation, RequestStateCondition, ResumeSourceBinding
+from .protocol_await_records import (
+    AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper,
+)
 
 
 PROFILE_CLAUSES = MappingProxyType({
@@ -73,6 +76,14 @@ PROFILE_CLAUSES = MappingProxyType({
     ProtocolProfile.TASK_CANCEL_EXTERNAL_V1: (
         ProtocolClause.TASK_CANCEL_REQUEST, ProtocolClause.CANCEL_DELIVERY,
         ProtocolClause.CANCEL_HANDLER_OR_TERMINAL, ProtocolClause.TASK_STATUS_ROUTE,
+    ),
+    ProtocolProfile.AWAIT_ACQUISITION_V1: (ProtocolClause.AWAIT_ACQUISITION,),
+    ProtocolProfile.AWAIT_METHOD_IMPLEMENTATION_V1: (
+        ProtocolClause.AWAIT_LOOKUP, ProtocolClause.AWAIT_CALL,
+        ProtocolClause.AWAIT_ITERATOR_QUALIFICATION,
+    ),
+    ProtocolProfile.COROUTINE_WRAPPER_CONSTRUCTION_V1: (
+        ProtocolClause.WRAPPER_CONSTRUCTION,
     ),
 })
 
@@ -157,6 +168,16 @@ _allow(ProtocolProfile.COROUTINE_AWAIT_WRAPPER_V1, (ProtocolClause.WRAPPER_LOOKU
        {ProtocolCallRule.AWAIT_LOOKUP})
 _allow(ProtocolProfile.COROUTINE_AWAIT_WRAPPER_V1, (ProtocolClause.WRAPPER_CALL,), ProtocolCall,
        {ProtocolCallRule.AWAIT_CALL})
+_allow(ProtocolProfile.AWAIT_ACQUISITION_V1, (ProtocolClause.AWAIT_ACQUISITION,),
+       AwaitAcquisition)
+_allow(ProtocolProfile.AWAIT_METHOD_IMPLEMENTATION_V1, (ProtocolClause.AWAIT_LOOKUP,),
+       ProtocolCall, {ProtocolCallRule.AWAIT_LOOKUP})
+_allow(ProtocolProfile.AWAIT_METHOD_IMPLEMENTATION_V1, (ProtocolClause.AWAIT_CALL,),
+       ProtocolCall, {ProtocolCallRule.AWAIT_CALL})
+_allow(ProtocolProfile.AWAIT_METHOD_IMPLEMENTATION_V1,
+       (ProtocolClause.AWAIT_ITERATOR_QUALIFICATION,), AwaitIteratorQualification)
+_allow(ProtocolProfile.COROUTINE_WRAPPER_CONSTRUCTION_V1,
+       (ProtocolClause.WRAPPER_CONSTRUCTION,), CoroutineAwaitWrapper)
 _allow(ProtocolProfile.DELEGATION_SITE_V1, (ProtocolClause.DELEGATE_ITER_LOOKUP,), ProtocolCall,
        {ProtocolCallRule.DELEGATE_ITER})
 _allow(ProtocolProfile.DELEGATION_SITE_V1, (ProtocolClause.DELEGATE_ADVANCE,), ProtocolCall,
@@ -271,7 +292,8 @@ def contract_allowed(profile: ProtocolProfile, clause: ProtocolClause, contract:
     if contract_type is AdmissionPredicate:
         return ((type(contract.subject) is RequestStateCondition) ==
                 (profile is _ASYNC_PROFILE))
-    if contract_type in (NoEntryOutcome, ResumeSourceBinding, RequestAssociation):
+    if contract_type in (NoEntryOutcome, ResumeSourceBinding, RequestAssociation,
+                         AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper):
         return True
     return getattr(contract, "rule", None) in rules
 

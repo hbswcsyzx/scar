@@ -179,6 +179,13 @@ class ExecutionIndex:
         shared = ValidityBudget(budget)
         return body_activation_origin(self._content_context(), identity, shared=shared)
 
+    def await_body_links(self, scope, *, budget=4096):
+        """Source-first await inventory joined through exact captured calls."""
+        from .await_links import await_body_links
+        from .validity_budget import ValidityBudget
+        shared = ValidityBudget(budget)
+        return await_body_links(self._content_context(), scope, shared=shared)
+
     def call_entries(self, caller_id):
         """This caller's links, retaining a missing dynamic callee as a gap."""
         from .call_query import call_entries

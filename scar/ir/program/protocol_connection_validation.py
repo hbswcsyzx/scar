@@ -284,14 +284,17 @@ def _result_consumers(ctx, row, attachment):
 def common_connections(ctx):
     if "common" in ctx._connection_reports:
         return ctx._connection_reports["common"]
+    from .protocol_await_records import (AwaitAcquisition, AwaitIteratorQualification,
+                                         CoroutineAwaitWrapper)
+    result_contracts = (AdmissionPredicate, RequestProcessing, ProtocolCall, OutcomeAdapter,
+                        AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper)
     issues, gaps, inputs, consumers = [], [], [], []
     for site, attachment in (*ctx.call_inputs.items(), *ctx.result_consumers.items()):
         try:
             row = ctx.row(site)
             if site in ctx.call_inputs and type(row.contract) is not ProtocolCall:
                 raise ValueError("call input attachment requires an existing ProtocolCall row")
-            if site in ctx.result_consumers and type(row.contract) not in (
-                    AdmissionPredicate, RequestProcessing, ProtocolCall, OutcomeAdapter):
+            if site in ctx.result_consumers and type(row.contract) not in result_contracts:
                 raise ValueError("result consumer attachment requires a row with its own exact result/output")
         except (KeyError, TypeError, ValueError) as exc:
             issues.append(("protocol_connection_site", str(site), str(exc)))
@@ -301,7 +304,7 @@ def common_connections(ctx):
             inputs.append(report)
             issues.extend(report["issues"])
             gaps.extend(report["gaps"])
-        if type(row.contract) in (AdmissionPredicate, RequestProcessing, ProtocolCall, OutcomeAdapter):
+        if type(row.contract) in result_contracts:
             report = _result_consumers(ctx, row, ctx.result_consumers.get(_site(row)))
             consumers.append(report)
             issues.extend(report["issues"])
@@ -318,11 +321,13 @@ def connection_reports(ctx):
     """All fixed families share one immutable index, flow and accounting."""
     from .protocol_async import async_connections, request_state_errors
     from .protocol_continuations import continuation_connections
+    from .protocol_await import await_connections
     from .protocol_connections import RequestStateCondition
     from .protocols import AdmissionPredicate
     reports = {"common": common_connections(ctx),
                "continuations": continuation_connections(ctx),
-               "async": async_connections(ctx)}
+               "async": async_connections(ctx),
+               "await": await_connections(ctx)}
     if ctx.graph.exception_matches:
         from .exception_match_query import exception_match_reports
         reports['exception_matches'] = exception_match_reports(ctx)

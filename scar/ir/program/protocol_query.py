@@ -15,6 +15,8 @@ _GROUPS = tuple(f'F{i:02}' for i in range(1, 25)) + tuple(f'X{i:02}' for i in ra
 
 
 def _row_view(ctx, row, index=None):
+    from .protocol_await_records import (AwaitAcquisition, AwaitIteratorQualification,
+                                         CoroutineAwaitWrapper)
     contract, gaps, ports = row.contract, [], []
     predicate = None
     if type(contract) is AdmissionPredicate:
@@ -67,7 +69,8 @@ def _row_view(ctx, row, index=None):
                 predicate['status'] = 'PARTIAL'
         ports.append(predicate['result'])
         gaps.extend(predicate['gaps'])
-    elif type(contract) in (RequestProcessing, ProtocolCall):
+    elif type(contract) in (RequestProcessing, ProtocolCall, AwaitAcquisition,
+                            AwaitIteratorQualification, CoroutineAwaitWrapper):
         ports.append(ctx.port(contract.result))
     elif type(contract) is OutcomeAdapter:
         ports.extend((ctx.port(contract.input, referring=row), ctx.port(contract.output)))
@@ -93,6 +96,22 @@ def _row_view(ctx, row, index=None):
 
 
 def _derived(ctx, scope, clause):
+    from .protocols import ProtocolProfile
+    profile_clauses = {
+        ProtocolProfile.AWAIT_ACQUISITION_V1: ProtocolClause.AWAIT_ACQUISITION,
+        ProtocolProfile.COROUTINE_WRAPPER_CONSTRUCTION_V1: ProtocolClause.WRAPPER_CONSTRUCTION,
+    }
+    if profile_clauses.get(scope.profile) is clause:
+        operation = ctx.operations[scope.subject.operation]
+        return ({'operation': operation, 'successors': operation.terminator.successors,
+                 'source_first': True, 'gaps': ()},)
+    if scope.profile is ProtocolProfile.AWAIT_METHOD_IMPLEMENTATION_V1:
+        operation = ctx.operations[scope.subject.operation]
+        if clause is ProtocolClause.AWAIT_LOOKUP:
+            return ({'operation': operation, 'source_first': True, 'gaps': ()},)
+        rows = ctx.rows_by_clause.get((scope.id, clause), ())
+        return ({'stage': clause, 'scope': scope, 'source_first': True,
+                 'gaps': () if rows else ('await_method_stage_missing',)},)
     region = (scope.subject.interface_region if type(scope.subject) is DriverSubject
               else scope.subject.region)
     drives = ctx.drives_by_region.get(region, ())
@@ -132,6 +151,9 @@ def protocol_obligations(graph, scope=None, *, budget=4096, _index=None):
     from .protocol_connection_validation import connection_reports
     index = ProgramIndex(graph) if _index is None else _index
     ctx = ConnectionContext(graph, index=index, budget=shared)
+    from .protocol_await_records import (AwaitAcquisition, AwaitIteratorQualification,
+                                         CoroutineAwaitWrapper)
+    from .protocols import ProtocolProfile
     if scope is not None and scope not in ctx.scopes:
         raise KeyError(scope)
     selected = tuple(row for row in graph.protocol_scopes if scope is None or row.id == scope)
@@ -153,12 +175,22 @@ def protocol_obligations(graph, scope=None, *, budget=4096, _index=None):
                 for item in original:
                     gaps.extend(item.get('gaps', ()))
                 expected, known = set(), {}
+                if ((declaration.profile is ProtocolProfile.AWAIT_ACQUISITION_V1
+                        and clause is ProtocolClause.AWAIT_ACQUISITION)
+                        or (declaration.profile is ProtocolProfile.COROUTINE_WRAPPER_CONSTRUCTION_V1
+                            and clause is ProtocolClause.WRAPPER_CONSTRUCTION)):
+                    operation = ctx.operations[declaration.subject.operation]
+                    if operation.terminator is not None:
+                        expected.update((operation.id, number)
+                                        for number in range(len(operation.terminator.successors)))
                 for row in rows:
                     if not shared.spend('protocol_binding_rows', path='protocol.binding_inventory'):
                         break
                     expected.add((row.operation, row.slot))
                     known[row.operation, row.slot] = row
-                    if type(row.contract) in (RequestProcessing, ProtocolCall, OutcomeAdapter):
+                    if type(row.contract) in (RequestProcessing, ProtocolCall, OutcomeAdapter,
+                                             AwaitAcquisition, AwaitIteratorQualification,
+                                             CoroutineAwaitWrapper):
                         operation = ctx.operations[row.operation]
                         if operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE:
                             for number in range(len(operation.terminator.successors)):

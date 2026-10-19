@@ -13,6 +13,7 @@ from scar.ir.program.lifecycle import DriveOutcomeRef
 from scar.ir.program.model import (
     BlockArgument, CompletionResult, InvokeLiteralResult, OperationResult, ProgramGraph,
 )
+from scar.ir.program.protocol_await_records import AwaitBodyLink
 from scar.ir.program.protocol_connections import (
     AsyncSessionOutcome, CancelDelivery, CancelDeliveryRef, CancelHandling, DelegateLookupFallback,
     PROTOCOL_BINDING_TYPES,
@@ -73,7 +74,7 @@ def test_exact_record_variants_keep_canonical_port_roles():
     assert handling.delivery == delivery_ref
     assert status.state_sites == (InvokeStateOperand(OP, USE),)
     assert set(PROTOCOL_BINDING_TYPES) == {AsyncSessionOutcome, CancelDelivery,
-                                           CancelHandling, TaskStatusRead, DelegateLookupFallback}
+                                               CancelHandling, TaskStatusRead, DelegateLookupFallback, AwaitBodyLink}
     with pytest.raises(FrozenInstanceError):
         inputs.site = site
     with pytest.raises((AttributeError, TypeError)):

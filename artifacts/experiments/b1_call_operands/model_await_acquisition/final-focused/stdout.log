@@ -1,0 +1,116 @@
+........................................................................ [  5%]
+................................................F....................... [ 10%]
+........................................................................ [ 15%]
+........................................................................ [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 31%]
+........................................................................ [ 36%]
+........................................................................ [ 41%]
+........................................................................ [ 46%]
+........................................................................ [ 51%]
+...................F.................................................... [ 56%]
+........................................................................ [ 62%]
+..............F......................................................... [ 67%]
+.....................F.................................................. [ 72%]
+........................................................................ [ 77%]
+........................................................................ [ 82%]
+........................................................................ [ 87%]
+........................................................................ [ 93%]
+........................................................................ [ 98%]
+.........................                                                [100%]
+=================================== FAILURES ===================================
+_____________ test_exact_record_variants_keep_canonical_port_roles _____________
+
+    def test_exact_record_variants_keep_canonical_port_roles():
+        formal = BlockArgument(BlockID("p4.block"), 2)
+        site = ProtocolOperationRef(SCOPE, ProtocolClause.AWAIT_LOOKUP, OP, 0)
+        raw_operand = RawOperandSource(OWNED, 0)
+        inputs = ProtocolCallInputs(site, (
+            ProtocolCallInputCase(None, formal, (raw_operand,), RawRequestTrigger(OWNED)),
+        ))
+        consumers = ProtocolResultConsumers(site, (OWNED, HostTerminal(SOURCE)))
+        association = RequestAssociation(USE, EDGE_RESULT, OWNED,
+                                         (InvokeStateOperand(OP, USE),))
+        condition = RequestStateCondition(USE, (ExistingAccess(OP, 1),),
+                                          RequestStateRule.IS_INITIAL_STEP)
+        outcome = AsyncSessionOutcome(SCOPE, OP, DriveOutcomeRef(OP, SOURCE))
+        created = TaskCreatedTarget(RESULT, OWNED, GAP)
+        read = TaskTargetRead(OWNED, EDGE_RESULT, (InvokeStateOperand(OP, USE),),
+                              TaskTargetRole.CURRENT_AWAITED, GAP)
+        delivery = CancelDelivery(SCOPE, created, formal, OWNED)
+        delivery_ref = CancelDeliveryRef.from_delivery(delivery)
+        handling = CancelHandling(delivery_ref, OWNED, (ExistingAccess(OP, 1),), GAP)
+        status = TaskStatusRead(SCOPE, OWNED, EDGE_RESULT,
+                                (InvokeStateOperand(OP, USE),), TaskStatusRule.IS_DONE, GAP)
+    
+        assert type(inputs.cases[0].arguments[0]) is RawOperandSource
+        assert inputs.cases[0].receiver is formal
+        assert consumers.targets == (OWNED, HostTerminal(SOURCE))
+        assert association.body is EDGE_RESULT and association.latent is OWNED
+        assert condition.state_sites == (ExistingAccess(OP, 1),)
+        assert type(outcome.source) is DriveOutcomeRef
+        assert created.task_result is RESULT and read.target is EDGE_RESULT
+        assert delivery_ref == CancelDeliveryRef(SCOPE, created, formal, OWNED)
+        assert handling.delivery == delivery_ref
+        assert status.state_sites == (InvokeStateOperand(OP, USE),)
+>       assert set(PROTOCOL_BINDING_TYPES) == {AsyncSessionOutcome, CancelDelivery,
+                                               CancelHandling, TaskStatusRead, DelegateLookupFallback}
+E       AssertionError: assert {<class 'scar...kupFallback'>} == {<class 'scar...kupFallback'>}
+E         
+E         Extra items in the left set:
+E         <class 'scar.ir.program.protocol_await_records.AwaitBodyLink'>
+E         Use -v to get more diff
+
+tests/unit/test_program_protocol_connection_records.py:75: AssertionError
+_______ test_program_graph_rejects_future_or_boolean_schema_versions[23] _______
+
+version = 23
+
+    @pytest.mark.parametrize("version", [23, True])
+    def test_program_graph_rejects_future_or_boolean_schema_versions(version):
+        fixture_dir = Path(__file__).resolve().parents[1] / "fixtures"
+        document = json.loads((fixture_dir / "program_graph_v19_frozen.json").read_text())
+        document["schema_version"] = version
+>       with pytest.raises(ValueError, match="unsupported program graph schema version"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'unsupported program graph schema version'
+E         Actual message: 'program graph document has incorrect top-level fields'
+
+tests/unit/test_program_method_lookup_codec.py:123: AssertionError
+_________ test_future_and_boolean_schema_versions_remain_rejected[23] __________
+
+version = 23
+
+    @pytest.mark.parametrize("version", (23, True))
+    def test_future_and_boolean_schema_versions_remain_rejected(version):
+        _, document = _document()
+        document["schema_version"] = version
+>       with pytest.raises(ValueError, match="unsupported program graph schema version"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'unsupported program graph schema version'
+E         Actual message: 'schema version 23 requires explicit await acquisition capability'
+
+tests/unit/test_program_exception_match_codec.py:159: AssertionError
+_________ test_future_and_boolean_schema_versions_remain_rejected[23] __________
+
+version = 23
+
+    @pytest.mark.parametrize("version", (23, True))
+    def test_future_and_boolean_schema_versions_remain_rejected(version):
+        document = json.loads((FIXTURES / "program_graph_v21_frozen.json").read_text())
+        document["schema_version"] = version
+>       with pytest.raises(ValueError, match="unsupported program graph schema version"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'unsupported program graph schema version'
+E         Actual message: 'schema version 23 requires explicit await acquisition capability'
+
+tests/unit/test_program_lookup_fallback_codec.py:218: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_protocol_connection_records.py::test_exact_record_variants_keep_canonical_port_roles
+FAILED tests/unit/test_program_method_lookup_codec.py::test_program_graph_rejects_future_or_boolean_schema_versions[23]
+FAILED tests/unit/test_program_exception_match_codec.py::test_future_and_boolean_schema_versions_remain_rejected[23]
+FAILED tests/unit/test_program_lookup_fallback_codec.py::test_future_and_boolean_schema_versions_remain_rejected[23]
+4 failed, 1389 passed in 94.33s (0:01:34)

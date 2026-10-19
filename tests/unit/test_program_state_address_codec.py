@@ -44,7 +44,7 @@ def test_v15_roundtrip_keeps_single_access_mode_and_original_producers():
     graph, _ = state_address_program()
     assert AccessMode is CanonicalAccessMode is PublicAccessMode
     document = json.loads(dumps(graph))
-    assert SCHEMA_VERSION == 22
+    assert SCHEMA_VERSION == 23
     assert document["schema_version"] == 15
     assert document[ADDRESS_FIELD]
     decoded = loads(dumps(graph))

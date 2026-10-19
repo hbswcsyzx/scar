@@ -78,6 +78,9 @@ class ProtocolProfile(str, Enum):
     CREATED_CLOSE_V1 = "CREATED_CLOSE_V1"
     SUSPENDED_CLOSE_V1 = "SUSPENDED_CLOSE_V1"
     TASK_CANCEL_EXTERNAL_V1 = "TASK_CANCEL_EXTERNAL_V1"
+    AWAIT_ACQUISITION_V1 = "AWAIT_ACQUISITION_V1"
+    AWAIT_METHOD_IMPLEMENTATION_V1 = "AWAIT_METHOD_IMPLEMENTATION_V1"
+    COROUTINE_WRAPPER_CONSTRUCTION_V1 = "COROUTINE_WRAPPER_CONSTRUCTION_V1"
 
 
 class ProtocolClause(str, Enum):
@@ -117,6 +120,9 @@ class ProtocolClause(str, Enum):
     CANCEL_DELIVERY = "CANCEL_DELIVERY"
     CANCEL_HANDLER_OR_TERMINAL = "CANCEL_HANDLER_OR_TERMINAL"
     TASK_STATUS_ROUTE = "TASK_STATUS_ROUTE"
+    AWAIT_ACQUISITION = "AWAIT_ACQUISITION"
+    AWAIT_ITERATOR_QUALIFICATION = "AWAIT_ITERATOR_QUALIFICATION"
+    WRAPPER_CONSTRUCTION = "WRAPPER_CONSTRUCTION"
 
 
 class StaticGapReason(str, Enum):
@@ -480,7 +486,7 @@ class ProtocolOperation:
         _index(self.slot, "protocol operation slot")
         if type(self.contract) not in (
                 RequestProcessing, ProtocolCall, PacketConstruction, OutcomeAdapter, NoEntryOutcome,
-                AdmissionPredicate, *_CONNECTION_CONTRACT_TYPES):
+                AdmissionPredicate, *_CONNECTION_CONTRACT_TYPES, *_AWAIT_CONTRACT_TYPES):
             raise TypeError("protocol operation contract must be one exact protocol contract record")
         self.contract.__post_init__()
         if type(self.source) is ProviderFactReference:
@@ -568,6 +574,7 @@ AdmissionSubject: TypeAlias = Any
 _CONNECTION_CONTRACT_TYPES: tuple[type, ...] = ()
 _CONNECTION_ADMISSION_SUBJECT_TYPES: tuple[type, ...] = ()
 _CONNECTION_RECORDS_BOUND = False
+_AWAIT_CONTRACT_TYPES: tuple[type, ...] = ()
 
 
 def _bind_protocol_connection_types(
@@ -597,6 +604,30 @@ def _bind_protocol_connection_types(
     ]
     AdmissionSubject = Union[BodyStateCondition, ReferenceIsNoneCondition, RequestStateCondition]
     _CONNECTION_RECORDS_BOUND = True
+
+
+def _bind_await_contract_types(acquisition: type, qualification: type, wrapper: type) -> None:
+    """Extend the closed union after canonical port/connection late binding."""
+    global ProtocolContract, _AWAIT_CONTRACT_TYPES
+    from .protocol_await_records import (
+        AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper,
+    )
+    expected = (AwaitAcquisition, AwaitIteratorQualification, CoroutineAwaitWrapper)
+    supplied = (acquisition, qualification, wrapper)
+    if any(actual is not canonical for actual, canonical in zip(supplied, expected)):
+        raise TypeError("await contracts must bind canonical exact record classes")
+    if not _CONNECTION_RECORDS_BOUND:
+        raise RuntimeError("protocol connections must bind before await contracts")
+    if _AWAIT_CONTRACT_TYPES:
+        if _AWAIT_CONTRACT_TYPES != supplied:
+            raise RuntimeError("await contract classes cannot be rebound")
+        return
+    _AWAIT_CONTRACT_TYPES = supplied
+    ProtocolContract = Union[
+        RequestProcessing, ProtocolCall, PacketConstruction, OutcomeAdapter,
+        NoEntryOutcome, AdmissionPredicate, *_CONNECTION_CONTRACT_TYPES,
+        *supplied,
+    ]
 
 
 def _terminal(value: object, name: str) -> None:

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="2" time="0.973" timestamp="2026-10-19T02:09:19.330047+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_acquisition" name="test_general_await_normal_result_can_be_a_known_generator_iterator" time="0.343" /><testcase classname="tests.unit.test_program_await_acquisition" name="test_general_await_cannot_return_a_known_generator_coroutine_handle" time="0.033"><failure message="AssertionError: assert 'protocol_await_return_qualification' in set()&#10; +  where set() = _codes(ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...ostTerminal(operation=OperationID(value='continuation.extract.error')),))), protocol_bindings=(), exception_matches=()))">def test_general_await_cannot_return_a_known_generator_coroutine_handle():
+        graph, details = await_acquisition_program(
+            result_kind=ResumableKind.GENERATOR_COROUTINE)
+        require_valid(_without_protocol_records(graph))
+    
+        call = details["await_call"]["operation"]
+        assert details["create"].operation == call.id
+        assert details["create"].handle_result == NormalResultPort(0)
+        assert details["advance_receiver"].value == details["iterator_value"]
+    
+&gt;       assert "protocol_await_return_qualification" in _codes(graph)
+E       AssertionError: assert 'protocol_await_return_qualification' in set()
+E        +  where set() = _codes(ProgramGraph(root=RegionID(value='continuation'), regions=(Region(id=RegionID(value='continuation'), label='declared o...ostTerminal(operation=OperationID(value='continuation.extract.error')),))), protocol_bindings=(), exception_matches=()))
+
+tests/unit/test_program_await_acquisition.py:54: AssertionError</failure></testcase></testsuite></testsuites>

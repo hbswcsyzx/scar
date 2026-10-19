@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.533" timestamp="2026-10-19T02:07:47.668032+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_await_acquisition" name="test_general_await_normal_result_can_be_a_known_generator_iterator" time="0.003"><failure message="AttributeError: 'tuple' object has no attribute 'operations'">def test_general_await_normal_result_can_be_a_known_generator_iterator():
+&gt;       graph, details = await_acquisition_program(result_kind=ResumableKind.GENERATOR)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_await_acquisition.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result_kind = &lt;ResumableKind.GENERATOR: 'GENERATOR'&gt;
+
+    def await_acquisition_program(*, result_kind=ResumableKind.GENERATOR):
+        """Return a core graph where general ``__await__`` returns a known body.
+    
+        ``GENERATOR`` is an ordinary iterator result. ``GENERATOR_COROUTINE`` is
+        the known-invalid general ``__await__`` result for the qualification
+        negative. The returned result remains the exact AWAIT_CALL NORMAL port and
+        the exact receiver of the original first-advance operation.
+        """
+        if type(result_kind) is not ResumableKind or result_kind not in (
+                ResumableKind.GENERATOR, ResumableKind.GENERATOR_COROUTINE):
+            raise ValueError("result_kind must be GENERATOR or GENERATOR_COROUTINE")
+    
+        graph, details = continuation_site_program(kind="await", request="next")
+        graph = with_continuation_connections(graph, details)
+        call_view = details["await_call"]
+        call_id = call_view["operation"].id
+&gt;       call = next(operation for operation in graph.operations if operation.id == call_id)
+                                               ^^^^^^^^^^^^^^^^
+E       AttributeError: 'tuple' object has no attribute 'operations'
+
+tests/fixtures/program_await_acquisition_graphs.py:152: AttributeError</failure></testcase><testcase classname="tests.unit.test_program_await_acquisition" name="test_general_await_cannot_return_a_known_generator_coroutine_handle" time="0.002"><failure message="AttributeError: 'tuple' object has no attribute 'operations'">def test_general_await_cannot_return_a_known_generator_coroutine_handle():
+&gt;       graph, details = await_acquisition_program(
+            result_kind=ResumableKind.GENERATOR_COROUTINE)
+
+tests/unit/test_program_await_acquisition.py:45: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result_kind = &lt;ResumableKind.GENERATOR_COROUTINE: 'GENERATOR_COROUTINE'&gt;
+
+    def await_acquisition_program(*, result_kind=ResumableKind.GENERATOR):
+        """Return a core graph where general ``__await__`` returns a known body.
+    
+        ``GENERATOR`` is an ordinary iterator result. ``GENERATOR_COROUTINE`` is
+        the known-invalid general ``__await__`` result for the qualification
+        negative. The returned result remains the exact AWAIT_CALL NORMAL port and
+        the exact receiver of the original first-advance operation.
+        """
+        if type(result_kind) is not ResumableKind or result_kind not in (
+                ResumableKind.GENERATOR, ResumableKind.GENERATOR_COROUTINE):
+            raise ValueError("result_kind must be GENERATOR or GENERATOR_COROUTINE")
+    
+        graph, details = continuation_site_program(kind="await", request="next")
+        graph = with_continuation_connections(graph, details)
+        call_view = details["await_call"]
+        call_id = call_view["operation"].id
+&gt;       call = next(operation for operation in graph.operations if operation.id == call_id)
+                                               ^^^^^^^^^^^^^^^^
+E       AttributeError: 'tuple' object has no attribute 'operations'
+
+tests/fixtures/program_await_acquisition_graphs.py:152: AttributeError</failure></testcase></testsuite></testsuites>
