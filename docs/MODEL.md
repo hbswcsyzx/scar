@@ -17,6 +17,14 @@ versions and submission associations from completion order. See
 [NATIVE_OBSERVATION_MODEL.md](NATIVE_OBSERVATION_MODEL.md). They populate evidence
 without fabricating static SSA definitions; the full first-stage gate remains open.
 
+Object identity now has its own `ObjectInstance` registry within ValueGraph;
+`ObjectBinding` remains a content association. A known object can therefore
+have no known logical version. Exact marker-slot reference associations are
+conditional observations, not alias, content, direct-call or readiness proofs.
+The [real CPU replay](../artifacts/experiments/first_stage_object_reference_20261020/README.md)
+connects six objects and twelve ordered slots; production and whole-LeWM
+automatic correspondence remain open.
+
 ## Async close chains and handler-produced completions (2026-10-20)
 
 Five canonical entities remain unchanged. A fresh handler packet has control

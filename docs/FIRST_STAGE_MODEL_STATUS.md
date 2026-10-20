@@ -2,6 +2,13 @@
 
 日期：2026-10-20。**OPEN：完整 LeWM 自动建模未验收。**
 
+最新增量：独立 ObjectInstance 目录及准确 marker 参数引用桥已落地（`448b912`）。
+重放真实 CPU 原档，得到6个对象、12条逐槽对应、保留2个重复参数槽；独立 raw
+审计通过，没有制造 LogicalVersion/allocation。此为有条件的研究 profile，不是
+生产 Python→ATen 对应，也没有改善原源码覆盖分母。实际报告见
+[对象引用验收](../artifacts/experiments/first_stage_object_reference_20261020/README.md)。
+下一项仍是生产采集/来源状态连接和资源闭包，不能开始化简或性能 A/B。
+
 范围及验收由 [第一阶段合同](FIRST_STAGE_MODEL_CONTRACT.md)接管。旧协议组件
 报告保留原有限结论，不再作为下一项任务的自动选择器。F20 未开始实施。
 

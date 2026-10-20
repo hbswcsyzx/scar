@@ -1,0 +1,1 @@
+{"schema": "scar.object-reference-codec-replay", "valid": true, "bundle_sha256": "3ab343cd0aa34dff30dd15321ce13f8a5733bd3a8f730b67eab98d0df9c06d0c", "objects": 6, "logical_versions": 0, "whole_model_established": false, "canonical_bytes_preserved": true}
