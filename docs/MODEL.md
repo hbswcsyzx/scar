@@ -1,5 +1,27 @@
 # SCAR execution model
 
+## Stored payload, state version and own load result (2026-10-20)
+
+The five canonical entities remain Operation / Value / StateLocation / Region /
+Resource. StoredValueWrite/Read attach primitive-slot post/pre value relations
+to original address effects and payload/result ports. `stored_value_sources`
+joins actual occurrences, selected N/R state slots, current versions, address
+support and the original transparent interval; no second heap or copy union.
+Unknown effects/aliases still block old sources, while a later explicit write
+can establish a new one. Object identity remains distinct from data stability.
+
+See the [API](M1_STORED_VALUE_API.md), [acceptance](M1_STORED_VALUE_ACCEPTANCE.md),
+[exact codec migration](M1_STORED_VALUE_MIGRATION.md) and
+[next consumer gate](M1_STORED_VALUE_NEXT_GATE.md).
+961 direct affected tests pass on913 stable sources,40 new; old fixtures remain
+unchanged. Program27 is capability gated and preserves1–26 bytes, checked by an
+independently executed frozen Program26 encoder; Execution8 remains unchanged.
+Only16 legacy codec tests migrate version sentinels/old field projections,
+with seven explicit future-case identities retained as obligations. The query
+does not automatically recover arbitrary raw-slot contracts or connect every
+old consumer. F19, seven families, P4/full/P5/M2 and the whole first stage remain
+open. No automatic whole-LeWM model, trusted transform or new speedup is claimed.
+
 ## Current reference identity is distinct from source and content (2026-10-20)
 
 The five entities remain Operation / Value / StateLocation / Region / Resource.

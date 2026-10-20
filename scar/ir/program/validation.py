@@ -158,6 +158,11 @@ def validate(graph: ProgramGraph, *, _cleanup_facts=None, _resumption_facts=None
     for code, path, message in state_address_errors(graph):
         error(code, path, message)
 
+    if graph.stored_value_writes or graph.stored_value_reads:
+        from .stored_values import stored_value_errors
+        for code, path, message in stored_value_errors(graph):
+            error(code, path, message)
+
     from .literal_validation import literal_errors
     for code, path, message in literal_errors(graph):
         error(code, path, message)

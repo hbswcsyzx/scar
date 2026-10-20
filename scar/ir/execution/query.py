@@ -100,6 +100,14 @@ class ExecutionIndex:
         ctx = self._content_context()
         return deepcopy(object_identity(ctx, ctx.values[source], ctx.values[target], shared=shared))
 
+    def stored_value_sources(self, site, occurrence, *, budget=4096):
+        """Original primitive-slot payload sources, never a global copy union."""
+        from .stored_values import stored_value_sources, validate_request
+        from .validity_budget import ValidityBudget
+        validate_request(site, occurrence, budget)
+        return deepcopy(stored_value_sources(self._content_context(), site, occurrence,
+                                             shared=ValidityBudget(budget)))
+
     def literal_evaluation(self, site, occurrence, *, budget=4096):
         """Declared content at an exact original producer, never object reuse."""
         from .literals import literal_evaluation, validate_literal_request

@@ -1,5 +1,12 @@
 # 第一阶段完整性分母：模型、接口、协议
 
+最新值关系（2026-10-20）：[原存储值限定验收](M1_STORED_VALUE_ACCEPTANCE.md)通过961
+直接相关项，913稳定源码，40新增；原store payload/状态版本/load ownresult可作
+条件性实际来源查询。Program27只由新能力选择，独立冻结26字节oracle保持旧wire，
+Execution8不变；16旧codec的版本/字段断言及七个未来case有显式迁移，旧fixtures
+不变。自动恢复及旧消费者后续[通用桥](M1_STORED_VALUE_NEXT_GATE.md)未完成。
+本批不关闭F19第1项/整族、原七族、P4/P5/M2或整个第一阶段。
+
 最新身份连接（2026-10-20）：[当前对象身份限定验收](M1_FRAME_IDENTITY_GUARD_ACCEPTANCE.md)
 通过231项直接相关回归，907源文件稳定；217既有身份含上批全部196，新增14。
 五类实体不变，原test/fixture及Program26/Execution8不变。独立当前对象身份可

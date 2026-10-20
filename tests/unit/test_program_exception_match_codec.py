@@ -28,10 +28,10 @@ def _document(*, mode="ordinary", input_kind="reference"):
 @pytest.mark.parametrize("input_kind", ("reference", "packet"))
 def test_matchers_select_program21_without_a_fake_protocol_scope(mode, input_kind):
     graph, document = _document(mode=mode, input_kind=input_kind)
-    assert codec.SCHEMA_VERSION == 26
+    assert codec.SCHEMA_VERSION == 27
     assert not graph.protocol_scopes and not graph.protocol_operations
     assert document["schema_version"] == 21
-    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {"call_effect_expansions"}) | {"schema", "schema_version"}
+    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {"call_effect_expansions", "stored_value_writes", "stored_value_reads"}) | {"schema", "schema_version"}
     row, = document["exception_matches"]
     assert row["kind"] == "EXCEPTION_MATCHER"
     assert row["handler"]["kind"] == ("FIXED_BUILTIN_EXCEPTION_HANDLER" if mode == "ordinary"
@@ -152,7 +152,7 @@ def test_new_handler_record_cannot_hide_inside_an_old_program20_source_union():
         codec.loads(json.dumps(document))
 
 
-@pytest.mark.parametrize("version", (27, True))
+@pytest.mark.parametrize("version", (28, True))
 def test_future_and_boolean_schema_versions_remain_rejected(version):
     _, document = _document()
     document["schema_version"] = version

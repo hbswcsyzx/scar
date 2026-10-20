@@ -1,0 +1,644 @@
+{
+  "status": "VERIFIED_CONDITIONAL_STORED_VALUE_RELATIONS",
+  "base_revision": "5fd5a7f0b246f72ff708f53ba000728817a8feca",
+  "source_sha256": "51ff19e5d0619404596f8ab96267b3eb7d9b83f8bd376ea188db31e9704adb7e",
+  "source_files": 913,
+  "current_focused": {
+    "rows": 961,
+    "identities": 961,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0
+  },
+  "new_case_identities": 40,
+  "prior_case_catalog_retained": 2135,
+  "prior_full_catalog_rerun": false,
+  "previous_direct_obligations_retested": 231,
+  "prior_catalog_identities_retested_after_explicit_migration": 792,
+  "additional_preexisting_case_identities_now_selected": 129,
+  "current_case_catalog_size": 2304,
+  "case_catalog_includes_prior_not_currently_retested_obligations": true,
+  "case_catalog_is_whole_repository": false,
+  "case_id_migrations": [
+    {
+      "before": [
+        "tests.unit.test_program_async_initial_control_codec",
+        "test_boolean_or_future_schema_does_not_enable_async_initial_control[27]"
+      ],
+      "after": [
+        "tests.unit.test_program_async_initial_control_codec",
+        "test_boolean_or_future_schema_does_not_enable_async_initial_control[28]"
+      ]
+    },
+    {
+      "before": [
+        "tests.unit.test_program_await_acquisition_codec",
+        "test_boolean_or_future_schema_version_is_not_a_capability[27]"
+      ],
+      "after": [
+        "tests.unit.test_program_await_acquisition_codec",
+        "test_boolean_or_future_schema_version_is_not_a_capability[28]"
+      ]
+    },
+    {
+      "before": [
+        "tests.unit.test_program_call_effect_expansion_codec",
+        "test_boolean_or_next_future_version_cannot_enable_effect_expansion[27]"
+      ],
+      "after": [
+        "tests.unit.test_program_call_effect_expansion_codec",
+        "test_boolean_or_next_future_version_cannot_enable_effect_expansion[28]"
+      ]
+    },
+    {
+      "before": [
+        "tests.unit.test_program_exception_match_codec",
+        "test_future_and_boolean_schema_versions_remain_rejected[27]"
+      ],
+      "after": [
+        "tests.unit.test_program_exception_match_codec",
+        "test_future_and_boolean_schema_versions_remain_rejected[28]"
+      ]
+    },
+    {
+      "before": [
+        "tests.unit.test_program_lookup_fallback_codec",
+        "test_future_and_boolean_schema_versions_remain_rejected[27]"
+      ],
+      "after": [
+        "tests.unit.test_program_lookup_fallback_codec",
+        "test_future_and_boolean_schema_versions_remain_rejected[28]"
+      ]
+    },
+    {
+      "before": [
+        "tests.unit.test_program_method_lookup_codec",
+        "test_program_graph_rejects_future_or_boolean_schema_versions[27]"
+      ],
+      "after": [
+        "tests.unit.test_program_method_lookup_codec",
+        "test_program_graph_rejects_future_or_boolean_schema_versions[28]"
+      ]
+    },
+    {
+      "before": [
+        "tests.unit.test_program_session_occupancy_codec",
+        "test_boolean_and_next_future_versions_do_not_enable_the_subject[27]"
+      ],
+      "after": [
+        "tests.unit.test_program_session_occupancy_codec",
+        "test_boolean_and_next_future_versions_do_not_enable_the_subject[28]"
+      ]
+    }
+  ],
+  "legacy_test_line_migration_counts": {
+    "maximum_version": 15,
+    "future_version": 7,
+    "old_fields": 6
+  },
+  "legacy_test_migrations": {
+    "tests/unit/test_program_admission_codec.py": {
+      "before_sha256": "dfbab485191c431c2ac139fa2789e900f2d7383ff43edf4e95ba9b4741601872",
+      "after_sha256": "230968ec41758ea77043d8e510bb0c09be09da9ca4878ccce0eab86e62bb710c",
+      "edits": [
+        {
+          "line": 34,
+          "kind": "maximum_version",
+          "before": "    assert codec.SCHEMA_VERSION == 26",
+          "after": "    assert codec.SCHEMA_VERSION == 27"
+        }
+      ]
+    },
+    "tests/unit/test_program_async_initial_control_codec.py": {
+      "before_sha256": "c87212e67ebf37b39b359f759a505cad32eb82fb7af13f8b226d9a72f336ac6c",
+      "after_sha256": "bffa03dc31cd4aa1419fbfb7aee543d42f7f2d42ca32f2f6ad2e0dbdfc3ebde6",
+      "edits": [
+        {
+          "line": 75,
+          "kind": "maximum_version",
+          "before": "    assert codec.SCHEMA_VERSION == document['schema_version'] == 26",
+          "after": "    assert codec.SCHEMA_VERSION == 27 and document['schema_version'] == 26"
+        },
+        {
+          "line": 77,
+          "kind": "old_fields",
+          "before": "    assert set(document) == {field.name for field in fields(ProgramGraph)} | {'schema', 'schema_version'}",
+          "after": "    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {'stored_value_writes', 'stored_value_reads'}) | {'schema', 'schema_version'}"
+        },
+        {
+          "line": 201,
+          "kind": "future_version",
+          "before": "@pytest.mark.parametrize('version', (True, 27))",
+          "after": "@pytest.mark.parametrize('version', (True, 28))"
+        }
+      ]
+    },
+    "tests/unit/test_program_await_acquisition_codec.py": {
+      "before_sha256": "cac44f85bd6aa0565d511ca4cd2eb7c7f45fbca89a3ec60105ee8c2eecac4799",
+      "after_sha256": "751de2c7aad8dd593e511d77bd8ac854805bc2db850b97c26e80e3196bbf070a",
+      "edits": [
+        {
+          "line": 81,
+          "kind": "maximum_version",
+          "before": "    assert codec.SCHEMA_VERSION == 26 and document[\"schema_version\"] == 23",
+          "after": "    assert codec.SCHEMA_VERSION == 27 and document[\"schema_version\"] == 23"
+        },
+        {
+          "line": 82,
+          "kind": "old_fields",
+          "before": "    assert set(document) == ({item.name for item in fields(ProgramGraph)} - {\"call_effect_expansions\"}) | {\"schema\", \"schema_version\"}",
+          "after": "    assert set(document) == ({item.name for item in fields(ProgramGraph)} - {\"call_effect_expansions\", \"stored_value_writes\", \"stored_value_reads\"}) | {\"schema\", \"schema_version\"}"
+        },
+        {
+          "line": 178,
+          "kind": "future_version",
+          "before": "@pytest.mark.parametrize(\"version\", (True, 27))",
+          "after": "@pytest.mark.parametrize(\"version\", (True, 28))"
+        }
+      ]
+    },
+    "tests/unit/test_program_call_effect_expansion_codec.py": {
+      "before_sha256": "f86bd77a6345b1779f4980fe25ca5df6e8498ed59f01225528951369fed0e844",
+      "after_sha256": "b778685bd9a1378a20b48f6a31f4f03f28d0ad0ad80ca9226ba02b0e97206a09",
+      "edits": [
+        {
+          "line": 57,
+          "kind": "maximum_version",
+          "before": "    assert codec.SCHEMA_VERSION == 26 and document['schema_version'] == 25",
+          "after": "    assert codec.SCHEMA_VERSION == 27 and document['schema_version'] == 25"
+        },
+        {
+          "line": 59,
+          "kind": "old_fields",
+          "before": "    assert set(document) == {field.name for field in fields(ProgramGraph)} | {'schema', 'schema_version'}",
+          "after": "    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {'stored_value_writes', 'stored_value_reads'}) | {'schema', 'schema_version'}"
+        },
+        {
+          "line": 202,
+          "kind": "future_version",
+          "before": "@pytest.mark.parametrize('version', (True, 27))",
+          "after": "@pytest.mark.parametrize('version', (True, 28))"
+        }
+      ]
+    },
+    "tests/unit/test_program_driver_codec.py": {
+      "before_sha256": "0ae62f4a8bc0f87ba1e86950a8b2f03ffcef25674830cce54ad1fc1b2d341443",
+      "after_sha256": "2aeb7ac1c971f7afd7761a464820d9809d1203dd9bf1a114a3e41abd2a932c37",
+      "edits": [
+        {
+          "line": 42,
+          "kind": "maximum_version",
+          "before": "    assert SCHEMA_VERSION == 26",
+          "after": "    assert SCHEMA_VERSION == 27"
+        }
+      ]
+    },
+    "tests/unit/test_program_exception_match_codec.py": {
+      "before_sha256": "1c1f0e6cfd81aac392a74f16c81225fb7556f2b1501c1fa2715cb78dfc2f7029",
+      "after_sha256": "be0768f438b592779b0f7e82ad1c5a3eeaa7590462a8ca91d3d60ee3f4916a8b",
+      "edits": [
+        {
+          "line": 31,
+          "kind": "maximum_version",
+          "before": "    assert codec.SCHEMA_VERSION == 26",
+          "after": "    assert codec.SCHEMA_VERSION == 27"
+        },
+        {
+          "line": 34,
+          "kind": "old_fields",
+          "before": "    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {\"call_effect_expansions\"}) | {\"schema\", \"schema_version\"}",
+          "after": "    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {\"call_effect_expansions\", \"stored_value_writes\", \"stored_value_reads\"}) | {\"schema\", \"schema_version\"}"
+        },
+        {
+          "line": 155,
+          "kind": "future_version",
+          "before": "@pytest.mark.parametrize(\"version\", (27, True))",
+          "after": "@pytest.mark.parametrize(\"version\", (28, True))"
+        }
+      ]
+    },
+    "tests/unit/test_program_literal_codec.py": {
+      "before_sha256": "b119eef57cf2f624854014decb2ebd68dbf944177139e87cf950a9808a319d28",
+      "after_sha256": "43a09e700530472f85ee2655d9ef9fdb638a6aa772496a465ac68b5f040d402b",
+      "edits": [
+        {
+          "line": 19,
+          "kind": "maximum_version",
+          "before": "    assert SCHEMA_VERSION == 26",
+          "after": "    assert SCHEMA_VERSION == 27"
+        }
+      ]
+    },
+    "tests/unit/test_program_lookup_fallback_codec.py": {
+      "before_sha256": "2c0ee27b05d46ead801a737ecbb5af0700b2bec8b6fdc7c8fde9f4de42b6cb9d",
+      "after_sha256": "e820ed9de73296c9b79e85c96ec4b260c2e23ac10f4792bfac935574ef3a4bfb",
+      "edits": [
+        {
+          "line": 42,
+          "kind": "maximum_version",
+          "before": "    assert codec.SCHEMA_VERSION == 26",
+          "after": "    assert codec.SCHEMA_VERSION == 27"
+        },
+        {
+          "line": 45,
+          "kind": "old_fields",
+          "before": "    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {\"call_effect_expansions\"}) | {\"schema\", \"schema_version\"}",
+          "after": "    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {\"call_effect_expansions\", \"stored_value_writes\", \"stored_value_reads\"}) | {\"schema\", \"schema_version\"}"
+        },
+        {
+          "line": 214,
+          "kind": "future_version",
+          "before": "@pytest.mark.parametrize(\"version\", (27, True))",
+          "after": "@pytest.mark.parametrize(\"version\", (28, True))"
+        }
+      ]
+    },
+    "tests/unit/test_program_method_lookup_codec.py": {
+      "before_sha256": "9b69131e588e34df34ab3fb705cd4b39da4e8dc487ef88c0ab31682c70e43592",
+      "after_sha256": "9a65141f42df58612abe8e243ec5d09f2e28640351aa711c56f79653a2c3a396",
+      "edits": [
+        {
+          "line": 118,
+          "kind": "future_version",
+          "before": "@pytest.mark.parametrize(\"version\", [27, True])",
+          "after": "@pytest.mark.parametrize(\"version\", [28, True])"
+        }
+      ]
+    },
+    "tests/unit/test_program_no_body_codec.py": {
+      "before_sha256": "0d1341ae3a580dd48860e978cdd3c70775a31ff5fb6e41731b61f02bf5c75e2c",
+      "after_sha256": "bbbde89e38dcaa900edb0bdf0fee51278c2d5edc3fabbd1fb64167facb8c13fc",
+      "edits": [
+        {
+          "line": 35,
+          "kind": "maximum_version",
+          "before": "    assert SCHEMA_VERSION == 26",
+          "after": "    assert SCHEMA_VERSION == 27"
+        }
+      ]
+    },
+    "tests/unit/test_program_protocol_codec.py": {
+      "before_sha256": "0db3c115e865b7ba07cd20eed15d04c9ace189ef4085c162b60a31380e6d1c68",
+      "after_sha256": "9a8e133777d49c5e2489dfa98ca5619addfc794ffa7e577f6822ca836567cbf8",
+      "edits": [
+        {
+          "line": 32,
+          "kind": "maximum_version",
+          "before": "    assert codec.SCHEMA_VERSION == 26",
+          "after": "    assert codec.SCHEMA_VERSION == 27"
+        }
+      ]
+    },
+    "tests/unit/test_program_publication_codec.py": {
+      "before_sha256": "bd0c17ab943ea96de41ae94d5aa0887d727f536f4d89f44eb0f0b2ed2838ffb3",
+      "after_sha256": "cfb9b148a09123becbc50354e3e61964f86293bd09525d214c74e959a1cec720",
+      "edits": [
+        {
+          "line": 35,
+          "kind": "maximum_version",
+          "before": "    assert SCHEMA_VERSION == 26",
+          "after": "    assert SCHEMA_VERSION == 27"
+        }
+      ]
+    },
+    "tests/unit/test_program_resumption_codec.py": {
+      "before_sha256": "7d3fd11a557e15ad3fb647b869c9b6640ee2d029025a6a4e9b351e8de6254196",
+      "after_sha256": "e978036b6f2a130785a6f303de25d5a3cf7f52bf210c03ec020aac097a131471",
+      "edits": [
+        {
+          "line": 46,
+          "kind": "maximum_version",
+          "before": "    assert SCHEMA_VERSION == 26",
+          "after": "    assert SCHEMA_VERSION == 27"
+        }
+      ]
+    },
+    "tests/unit/test_program_session_occupancy_codec.py": {
+      "before_sha256": "4486e94e3966f6627d3e8de3dce4118d2bd5ccbb308fed9da302607802183f41",
+      "after_sha256": "3850e54102307c3361c7b63777d9a39f7cd39455232fccf8d94aee543b8f3169",
+      "edits": [
+        {
+          "line": 71,
+          "kind": "maximum_version",
+          "before": "    assert codec.SCHEMA_VERSION == 26 and document['schema_version'] == 24",
+          "after": "    assert codec.SCHEMA_VERSION == 27 and document['schema_version'] == 24"
+        },
+        {
+          "line": 73,
+          "kind": "old_fields",
+          "before": "    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {'call_effect_expansions'}) | {'schema', 'schema_version'}",
+          "after": "    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {'call_effect_expansions', 'stored_value_writes', 'stored_value_reads'}) | {'schema', 'schema_version'}"
+        },
+        {
+          "line": 183,
+          "kind": "future_version",
+          "before": "@pytest.mark.parametrize('version', (True, 27))",
+          "after": "@pytest.mark.parametrize('version', (True, 28))"
+        }
+      ]
+    },
+    "tests/unit/test_program_session_release_codec.py": {
+      "before_sha256": "02c08e3500aad551c1f668c1b325128637ef1515e4ea22929aac96d91b099318",
+      "after_sha256": "921d943278e66d0879e95754c30bdda846b88b3eb990e20720090053bdaaff91",
+      "edits": [
+        {
+          "line": 35,
+          "kind": "maximum_version",
+          "before": "    assert SCHEMA_VERSION == 26",
+          "after": "    assert SCHEMA_VERSION == 27"
+        }
+      ]
+    },
+    "tests/unit/test_program_state_address_codec.py": {
+      "before_sha256": "6af534773097ce1d792a0fa2372d9a17fb7c133d0afe0b5bbd5ba1065a75dde6",
+      "after_sha256": "dccbdcefcb560372223c5bf185ef3528296140a427588d639c832c1cd2818a51",
+      "edits": [
+        {
+          "line": 47,
+          "kind": "maximum_version",
+          "before": "    assert SCHEMA_VERSION == 26",
+          "after": "    assert SCHEMA_VERSION == 27"
+        }
+      ]
+    }
+  },
+  "all_prior_fixtures_unchanged": true,
+  "other_prior_tests_unchanged": true,
+  "program_schema": 27,
+  "execution_schema": 8,
+  "accepted_families": [
+    "F12",
+    "F13",
+    "F14",
+    "F15",
+    "F16",
+    "F17",
+    "F18",
+    "F21",
+    "F23"
+  ],
+  "open_families": [
+    "F19",
+    "F20",
+    "F22",
+    "F24",
+    "X25",
+    "X26",
+    "X27"
+  ],
+  "m2_denominator": {
+    "constructs": 113,
+    "fields": 196
+  },
+  "attempts": {
+    "corrected-original-ports": {
+      "returncode": 1,
+      "duration_seconds": 22.711725613102317,
+      "source_sha256_before": "469d8d58e71c82a217dfc4686f2bc6c246955bf698f00879c227fe0d0f92679b",
+      "source_sha256_after": "469d8d58e71c82a217dfc4686f2bc6c246955bf698f00879c227fe0d0f92679b",
+      "source_unchanged": true,
+      "source_count": 913,
+      "rows": 107,
+      "identities": 107,
+      "failures": 7,
+      "errors": 0,
+      "skips": 0
+    },
+    "corrected-packet-scopes": {
+      "returncode": 0,
+      "duration_seconds": 1.8373284805566072,
+      "source_sha256_before": "51ff19e5d0619404596f8ab96267b3eb7d9b83f8bd376ea188db31e9704adb7e",
+      "source_sha256_after": "51ff19e5d0619404596f8ab96267b3eb7d9b83f8bd376ea188db31e9704adb7e",
+      "source_unchanged": true,
+      "source_count": 913,
+      "rows": 7,
+      "identities": 7,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    "first-exact-store-read": {
+      "returncode": 0,
+      "duration_seconds": 1.655379825271666,
+      "source_sha256_before": "38f7674fb04b2ec43eb401434a680f418e5fa75bf825b7d91d0f631d71be80df",
+      "source_sha256_after": "38f7674fb04b2ec43eb401434a680f418e5fa75bf825b7d91d0f631d71be80df",
+      "source_unchanged": true,
+      "source_count": 913,
+      "rows": 1,
+      "identities": 1,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    "first-joint-stored-values": {
+      "returncode": 1,
+      "duration_seconds": 20.968221129849553,
+      "source_sha256_before": "38f7674fb04b2ec43eb401434a680f418e5fa75bf825b7d91d0f631d71be80df",
+      "source_sha256_after": "38f7674fb04b2ec43eb401434a680f418e5fa75bf825b7d91d0f631d71be80df",
+      "source_unchanged": true,
+      "source_count": 913,
+      "rows": 106,
+      "identities": 106,
+      "failures": 12,
+      "errors": 0,
+      "skips": 0
+    },
+    "verified-current": {
+      "returncode": 0,
+      "duration_seconds": 380.5244640568271,
+      "source_sha256_before": "51ff19e5d0619404596f8ab96267b3eb7d9b83f8bd376ea188db31e9704adb7e",
+      "source_sha256_after": "51ff19e5d0619404596f8ab96267b3eb7d9b83f8bd376ea188db31e9704adb7e",
+      "source_unchanged": true,
+      "source_count": 913,
+      "rows": 961,
+      "identities": 961,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    }
+  },
+  "f19_family_complete": false,
+  "first_stage_complete": false,
+  "automatic_stored_reference_provenance_complete": false,
+  "native_identity_verified": false,
+  "source_runtime_verified": false,
+  "transformation_authorized": false,
+  "new_lewm_speedup": null,
+  "files": {
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/baseline.json": "839ae2f58569b92d269c20744da442022c4c718d4fca65cbeee0b8e5772f6f6c",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/baseline_probe.py": "6dfd41f44e32802577c133dac4b30b94151782dbf64360707b887634d9d95463",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/case-catalog.json": "3ba9f3bd2f15659b10b311cf8ec628abbd23a8341e913281ef664acc41f76735",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/checkpoint.py": "8c5a889a70dfec7a34fbf4cf0f22e1c29e09ffad79a1acc27cce9e810ce8e88b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/command.json": "33662e484b596498dc1c04a49b0330524b5fcc7fa2924055450359bd99089374",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/junit.xml": "77e2130f36e2ea30201fbd843eda8fa3cf139a5923172949a68046daf805b836",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/result.json": "640c4d3a9b8b478bc0aa9ba9a8897b3a83d54ec3a0dc522986d35b71361b1dfd",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/scar__ir__execution__query.py.txt": "4dab57d40dd10d131696f525a109cd5be1ab4567bc6d0b6160f85bfbeeb1073a",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/scar__ir__execution__stored_values.py.txt": "f2a2ac1fd178c44f95fd6999536d0d6489b1b2a238a064ab37628c4951ee7c90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/scar__ir__program____init__.py.txt": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/scar__ir__program__codec.py.txt": "5bbdbecd76d3b0b2c223b7c34573f091c81aa0b40ef73bf85f013a7e398eeade",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/scar__ir__program__model.py.txt": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/scar__ir__program__stored_values.py.txt": "8fb11f28816e0e19997722f59b6156909f6b987a10aec58f929eb079b548cb6f",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/scar__ir__program__validation.py.txt": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__fixtures__execution_stored_values.py.txt": "76a1cff26580742139f9466879ecd69e3c54cea5df4a3f5955f8984cbe70bfb2",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_execution_stored_values.py.txt": "67bff7f0f14591d9cc95aa8bd0c8f8c3cebddbcccab3c1b3b03a2ff8b19983d2",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_admission_codec.py.txt": "230968ec41758ea77043d8e510bb0c09be09da9ca4878ccce0eab86e62bb710c",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_async_initial_control_codec.py.txt": "bffa03dc31cd4aa1419fbfb7aee543d42f7f2d42ca32f2f6ad2e0dbdfc3ebde6",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_await_acquisition_codec.py.txt": "751de2c7aad8dd593e511d77bd8ac854805bc2db850b97c26e80e3196bbf070a",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_call_effect_expansion_codec.py.txt": "b778685bd9a1378a20b48f6a31f4f03f28d0ad0ad80ca9226ba02b0e97206a09",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_driver_codec.py.txt": "2aeb7ac1c971f7afd7761a464820d9809d1203dd9bf1a114a3e41abd2a932c37",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_exception_match_codec.py.txt": "be0768f438b592779b0f7e82ad1c5a3eeaa7590462a8ca91d3d60ee3f4916a8b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_literal_codec.py.txt": "43a09e700530472f85ee2655d9ef9fdb638a6aa772496a465ac68b5f040d402b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_lookup_fallback_codec.py.txt": "e820ed9de73296c9b79e85c96ec4b260c2e23ac10f4792bfac935574ef3a4bfb",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_method_lookup_codec.py.txt": "9a65141f42df58612abe8e243ec5d09f2e28640351aa711c56f79653a2c3a396",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_no_body_codec.py.txt": "bbbde89e38dcaa900edb0bdf0fee51278c2d5edc3fabbd1fb64167facb8c13fc",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_protocol_codec.py.txt": "9a8e133777d49c5e2489dfa98ca5619addfc794ffa7e577f6822ca836567cbf8",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_publication_codec.py.txt": "cfb9b148a09123becbc50354e3e61964f86293bd09525d214c74e959a1cec720",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_resumption_codec.py.txt": "e978036b6f2a130785a6f303de25d5a3cf7f52bf210c03ec020aac097a131471",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_session_occupancy_codec.py.txt": "3850e54102307c3361c7b63777d9a39f7cd39455232fccf8d94aee543b8f3169",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_session_release_codec.py.txt": "921d943278e66d0879e95754c30bdda846b88b3eb990e20720090053bdaaff91",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_state_address_codec.py.txt": "dccbdcefcb560372223c5bf185ef3528296140a427588d639c832c1cd2818a51",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_stored_value_codec.py.txt": "a29a74bf4c3cf5819673a5e2fa2034fac837874d82be167402dec840a7e99d16",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes/tests__unit__test_program_stored_value_records.py.txt": "b1ac9b8931b6aeba931d8ec46a64515cf484d05ce6dda14085e368ccb21c93c9",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/source-bytes.json": "af536224cbd69124900d195b4ff25c65fa97e423fb67c4cd523a51934d6d4b6c",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/sources.after.json": "56e9c509ff21307c425cbf4a024915242bc54f517dd4ec050a05ce80a4126557",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/sources.before.json": "56e9c509ff21307c425cbf4a024915242bc54f517dd4ec050a05ce80a4126557",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-original-ports/stdout.log": "e0982d6223fd2554b15c96a50732e27503c7f4b7892f0c67900e032738a203a2",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/command.json": "6f21ea855a2c39ffb01139cd0842cf9847c8848c62b82c287c7d7dd3fc83e568",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/junit.xml": "c46d876f2633261fd8f5c7760faaae611d0ce89fcbe8f6e46ef0c626ac436a1f",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/result.json": "17f42383dc3ef019956f47dcb15cbfa4a45be45df69d620cffc26ff9e4fe8e86",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/scar__ir__execution__query.py.txt": "4dab57d40dd10d131696f525a109cd5be1ab4567bc6d0b6160f85bfbeeb1073a",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/scar__ir__execution__stored_values.py.txt": "f2a2ac1fd178c44f95fd6999536d0d6489b1b2a238a064ab37628c4951ee7c90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/scar__ir__program____init__.py.txt": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/scar__ir__program__codec.py.txt": "5bbdbecd76d3b0b2c223b7c34573f091c81aa0b40ef73bf85f013a7e398eeade",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/scar__ir__program__model.py.txt": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/scar__ir__program__stored_values.py.txt": "8fb11f28816e0e19997722f59b6156909f6b987a10aec58f929eb079b548cb6f",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/scar__ir__program__validation.py.txt": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__fixtures__execution_stored_values.py.txt": "c3b3d83e84d293947b61046663f18980279bbcf8b8401f83c93ea4294a2c27cf",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_execution_stored_values.py.txt": "67bff7f0f14591d9cc95aa8bd0c8f8c3cebddbcccab3c1b3b03a2ff8b19983d2",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_admission_codec.py.txt": "230968ec41758ea77043d8e510bb0c09be09da9ca4878ccce0eab86e62bb710c",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_async_initial_control_codec.py.txt": "bffa03dc31cd4aa1419fbfb7aee543d42f7f2d42ca32f2f6ad2e0dbdfc3ebde6",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_await_acquisition_codec.py.txt": "751de2c7aad8dd593e511d77bd8ac854805bc2db850b97c26e80e3196bbf070a",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_call_effect_expansion_codec.py.txt": "b778685bd9a1378a20b48f6a31f4f03f28d0ad0ad80ca9226ba02b0e97206a09",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_driver_codec.py.txt": "2aeb7ac1c971f7afd7761a464820d9809d1203dd9bf1a114a3e41abd2a932c37",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_exception_match_codec.py.txt": "be0768f438b592779b0f7e82ad1c5a3eeaa7590462a8ca91d3d60ee3f4916a8b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_literal_codec.py.txt": "43a09e700530472f85ee2655d9ef9fdb638a6aa772496a465ac68b5f040d402b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_lookup_fallback_codec.py.txt": "e820ed9de73296c9b79e85c96ec4b260c2e23ac10f4792bfac935574ef3a4bfb",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_method_lookup_codec.py.txt": "9a65141f42df58612abe8e243ec5d09f2e28640351aa711c56f79653a2c3a396",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_no_body_codec.py.txt": "bbbde89e38dcaa900edb0bdf0fee51278c2d5edc3fabbd1fb64167facb8c13fc",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_protocol_codec.py.txt": "9a8e133777d49c5e2489dfa98ca5619addfc794ffa7e577f6822ca836567cbf8",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_publication_codec.py.txt": "cfb9b148a09123becbc50354e3e61964f86293bd09525d214c74e959a1cec720",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_resumption_codec.py.txt": "e978036b6f2a130785a6f303de25d5a3cf7f52bf210c03ec020aac097a131471",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_session_occupancy_codec.py.txt": "3850e54102307c3361c7b63777d9a39f7cd39455232fccf8d94aee543b8f3169",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_session_release_codec.py.txt": "921d943278e66d0879e95754c30bdda846b88b3eb990e20720090053bdaaff91",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_state_address_codec.py.txt": "dccbdcefcb560372223c5bf185ef3528296140a427588d639c832c1cd2818a51",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_stored_value_codec.py.txt": "a29a74bf4c3cf5819673a5e2fa2034fac837874d82be167402dec840a7e99d16",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes/tests__unit__test_program_stored_value_records.py.txt": "b1ac9b8931b6aeba931d8ec46a64515cf484d05ce6dda14085e368ccb21c93c9",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/source-bytes.json": "b50859e4ce58334f806c4293bda86f199e2f762814e78a2eda33dd0a4c6d4b30",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/sources.after.json": "02b5c957cbf22f474cbece62a8cc8bec35a6cec2bec19473bd3953cb80e54c92",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/sources.before.json": "02b5c957cbf22f474cbece62a8cc8bec35a6cec2bec19473bd3953cb80e54c92",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/corrected-packet-scopes/stdout.log": "01dc2fbf11e7be7c30562ddf91970f34fc52f8ce1e161eb06ef0879ca030975e",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/design-baseline.json": "687a693398ccffef6b0ffe4d048898882e314be0bf56da934cddfbb48c688c11",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/command.json": "f1cccf3bea753af1e3d51727945bcf13c70a70dbb41fdd2415127286d27d44ca",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/junit.xml": "0e555d9242ac69a454f4d625281f2c3a9433e0f507a32682bf38c9b4510b4290",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/result.json": "56588d4f45100322444e891663feaa28011da878f065b0ef9a02836bb1ecae9a",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/scar__ir__execution__query.py.txt": "4dab57d40dd10d131696f525a109cd5be1ab4567bc6d0b6160f85bfbeeb1073a",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/scar__ir__execution__stored_values.py.txt": "f2a2ac1fd178c44f95fd6999536d0d6489b1b2a238a064ab37628c4951ee7c90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/scar__ir__program____init__.py.txt": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/scar__ir__program__codec.py.txt": "5bbdbecd76d3b0b2c223b7c34573f091c81aa0b40ef73bf85f013a7e398eeade",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/scar__ir__program__model.py.txt": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/scar__ir__program__stored_values.py.txt": "3fbb07fedeb49add9279f1608d7837986b08ccbaa46c149dd44d45ac0dd0e535",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/scar__ir__program__validation.py.txt": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/tests__fixtures__execution_stored_values.py.txt": "1137beebe39a3917d765fd84b17920e6f67792dac89f59099a1a7e95102d4719",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/tests__unit__test_execution_stored_values.py.txt": "67bff7f0f14591d9cc95aa8bd0c8f8c3cebddbcccab3c1b3b03a2ff8b19983d2",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/tests__unit__test_program_stored_value_codec.py.txt": "a29a74bf4c3cf5819673a5e2fa2034fac837874d82be167402dec840a7e99d16",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes/tests__unit__test_program_stored_value_records.py.txt": "28a2312b4481863a7f8bc231a0a9dcba4189949727998e46a7a6ab437ad641a7",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/source-bytes.json": "7d6944c5af31fd33d599885640e51604b627d13ee8e985a2c7c7533e3fd142ea",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/sources.after.json": "70c24adc395aa996279fe6d954b329cca7b37754fa677bf7d10ef6225451f4c0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/sources.before.json": "70c24adc395aa996279fe6d954b329cca7b37754fa677bf7d10ef6225451f4c0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-exact-store-read/stdout.log": "ad53ab05d354fd1d9cc8ec829a12b33f0faaa880da385e693f5830972392f9f5",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/command.json": "56272f86d53d1608f050c73f4fa84fc77bf67499c42d803fad29d6065092928f",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/junit.xml": "77fd0968dc83dec01ebb57b237975495f8c645515c42eb9844f7abe72939d0af",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/result.json": "f4cd393ce565229e96f74dc04da4be1060f8451e7acf17bc81d3ad75c4c6e048",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/scar__ir__execution__query.py.txt": "4dab57d40dd10d131696f525a109cd5be1ab4567bc6d0b6160f85bfbeeb1073a",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/scar__ir__execution__stored_values.py.txt": "f2a2ac1fd178c44f95fd6999536d0d6489b1b2a238a064ab37628c4951ee7c90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/scar__ir__program____init__.py.txt": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/scar__ir__program__codec.py.txt": "5bbdbecd76d3b0b2c223b7c34573f091c81aa0b40ef73bf85f013a7e398eeade",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/scar__ir__program__model.py.txt": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/scar__ir__program__stored_values.py.txt": "3fbb07fedeb49add9279f1608d7837986b08ccbaa46c149dd44d45ac0dd0e535",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/scar__ir__program__validation.py.txt": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/tests__fixtures__execution_stored_values.py.txt": "1137beebe39a3917d765fd84b17920e6f67792dac89f59099a1a7e95102d4719",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/tests__unit__test_execution_stored_values.py.txt": "67bff7f0f14591d9cc95aa8bd0c8f8c3cebddbcccab3c1b3b03a2ff8b19983d2",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/tests__unit__test_program_stored_value_codec.py.txt": "a29a74bf4c3cf5819673a5e2fa2034fac837874d82be167402dec840a7e99d16",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes/tests__unit__test_program_stored_value_records.py.txt": "28a2312b4481863a7f8bc231a0a9dcba4189949727998e46a7a6ab437ad641a7",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/source-bytes.json": "3c0a74e10bc0e0901ac994b81906af8cce545773c90bb03f8b1d4b2b2ae1352f",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/sources.after.json": "70c24adc395aa996279fe6d954b329cca7b37754fa677bf7d10ef6225451f4c0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/sources.before.json": "70c24adc395aa996279fe6d954b329cca7b37754fa677bf7d10ef6225451f4c0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/first-joint-stored-values/stdout.log": "326369eaac73e278eb336c739de378decc24f86368e5a921498615fbeee9b791",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/focused-selection.json": "a9e1ead00fa7f9405cc70e292f5e2b96f2762dbd9c2699ebf9e683420159cc1d",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/gate-expectations.json": "d1df2df0e260036475d53a2c8986deb7b1cfef1d1c236a412dd8bbd2120b0959",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/independent-review.json": "ccb54f75f59e90154f94bf6cd80b40da97749c331c9c84b1000d9e0181aa870e",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_admission_codec.py.txt": "dfbab485191c431c2ac139fa2789e900f2d7383ff43edf4e95ba9b4741601872",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_async_initial_control_codec.py.txt": "c87212e67ebf37b39b359f759a505cad32eb82fb7af13f8b226d9a72f336ac6c",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_await_acquisition_codec.py.txt": "cac44f85bd6aa0565d511ca4cd2eb7c7f45fbca89a3ec60105ee8c2eecac4799",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_call_effect_expansion_codec.py.txt": "f86bd77a6345b1779f4980fe25ca5df6e8498ed59f01225528951369fed0e844",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_driver_codec.py.txt": "0ae62f4a8bc0f87ba1e86950a8b2f03ffcef25674830cce54ad1fc1b2d341443",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_exception_match_codec.py.txt": "1c1f0e6cfd81aac392a74f16c81225fb7556f2b1501c1fa2715cb78dfc2f7029",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_literal_codec.py.txt": "b119eef57cf2f624854014decb2ebd68dbf944177139e87cf950a9808a319d28",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_lookup_fallback_codec.py.txt": "2c0ee27b05d46ead801a737ecbb5af0700b2bec8b6fdc7c8fde9f4de42b6cb9d",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_method_lookup_codec.py.txt": "9b69131e588e34df34ab3fb705cd4b39da4e8dc487ef88c0ab31682c70e43592",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_no_body_codec.py.txt": "0d1341ae3a580dd48860e978cdd3c70775a31ff5fb6e41731b61f02bf5c75e2c",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_protocol_codec.py.txt": "0db3c115e865b7ba07cd20eed15d04c9ace189ef4085c162b60a31380e6d1c68",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_publication_codec.py.txt": "bd0c17ab943ea96de41ae94d5aa0887d727f536f4d89f44eb0f0b2ed2838ffb3",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_resumption_codec.py.txt": "7d3fd11a557e15ad3fb647b869c9b6640ee2d029025a6a4e9b351e8de6254196",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_session_occupancy_codec.py.txt": "4486e94e3966f6627d3e8de3dce4118d2bd5ccbb308fed9da302607802183f41",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_session_release_codec.py.txt": "02c08e3500aad551c1f668c1b325128637ef1515e4ea22929aac96d91b099318",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/legacy-codec-before/test_program_state_address_codec.py.txt": "6af534773097ce1d792a0fa2372d9a17fb7c133d0afe0b5bbd5ba1065a75dde6",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/run_focused.py": "7e43dc72d04ce83af15eb8c11cb3e910e3e123ec19c27c717fbac3cc19b0f535",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/command.json": "663c184a1e7b947686d4d473a93646a3455016212ed8417da3050bacfc7f441b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/junit.xml": "8308a377fbaa29a21cc77f4bfe8ad4f6b20355fbaccb7f1a8734a34883708bb0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/result.json": "b33581f1a67fbfacf881a410d932423bce1123f686763755920698937358b7de",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/scar__ir__execution__query.py.txt": "4dab57d40dd10d131696f525a109cd5be1ab4567bc6d0b6160f85bfbeeb1073a",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/scar__ir__execution__stored_values.py.txt": "f2a2ac1fd178c44f95fd6999536d0d6489b1b2a238a064ab37628c4951ee7c90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/scar__ir__program____init__.py.txt": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/scar__ir__program__codec.py.txt": "5bbdbecd76d3b0b2c223b7c34573f091c81aa0b40ef73bf85f013a7e398eeade",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/scar__ir__program__model.py.txt": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/scar__ir__program__stored_values.py.txt": "8fb11f28816e0e19997722f59b6156909f6b987a10aec58f929eb079b548cb6f",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/scar__ir__program__validation.py.txt": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__fixtures__execution_stored_values.py.txt": "c3b3d83e84d293947b61046663f18980279bbcf8b8401f83c93ea4294a2c27cf",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_execution_stored_values.py.txt": "67bff7f0f14591d9cc95aa8bd0c8f8c3cebddbcccab3c1b3b03a2ff8b19983d2",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_admission_codec.py.txt": "230968ec41758ea77043d8e510bb0c09be09da9ca4878ccce0eab86e62bb710c",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_async_initial_control_codec.py.txt": "bffa03dc31cd4aa1419fbfb7aee543d42f7f2d42ca32f2f6ad2e0dbdfc3ebde6",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_await_acquisition_codec.py.txt": "751de2c7aad8dd593e511d77bd8ac854805bc2db850b97c26e80e3196bbf070a",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_call_effect_expansion_codec.py.txt": "b778685bd9a1378a20b48f6a31f4f03f28d0ad0ad80ca9226ba02b0e97206a09",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_driver_codec.py.txt": "2aeb7ac1c971f7afd7761a464820d9809d1203dd9bf1a114a3e41abd2a932c37",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_exception_match_codec.py.txt": "be0768f438b592779b0f7e82ad1c5a3eeaa7590462a8ca91d3d60ee3f4916a8b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_literal_codec.py.txt": "43a09e700530472f85ee2655d9ef9fdb638a6aa772496a465ac68b5f040d402b",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_lookup_fallback_codec.py.txt": "e820ed9de73296c9b79e85c96ec4b260c2e23ac10f4792bfac935574ef3a4bfb",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_method_lookup_codec.py.txt": "9a65141f42df58612abe8e243ec5d09f2e28640351aa711c56f79653a2c3a396",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_no_body_codec.py.txt": "bbbde89e38dcaa900edb0bdf0fee51278c2d5edc3fabbd1fb64167facb8c13fc",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_protocol_codec.py.txt": "9a8e133777d49c5e2489dfa98ca5619addfc794ffa7e577f6822ca836567cbf8",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_publication_codec.py.txt": "cfb9b148a09123becbc50354e3e61964f86293bd09525d214c74e959a1cec720",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_resumption_codec.py.txt": "e978036b6f2a130785a6f303de25d5a3cf7f52bf210c03ec020aac097a131471",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_session_occupancy_codec.py.txt": "3850e54102307c3361c7b63777d9a39f7cd39455232fccf8d94aee543b8f3169",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_session_release_codec.py.txt": "921d943278e66d0879e95754c30bdda846b88b3eb990e20720090053bdaaff91",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_state_address_codec.py.txt": "dccbdcefcb560372223c5bf185ef3528296140a427588d639c832c1cd2818a51",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_stored_value_codec.py.txt": "a29a74bf4c3cf5819673a5e2fa2034fac837874d82be167402dec840a7e99d16",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes/tests__unit__test_program_stored_value_records.py.txt": "b1ac9b8931b6aeba931d8ec46a64515cf484d05ce6dda14085e368ccb21c93c9",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/source-bytes.json": "f6c09709d63f60e291530a46e4a533fb3aeb2dc2d50061bf94ff15b5252ddc08",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/sources.after.json": "02b5c957cbf22f474cbece62a8cc8bec35a6cec2bec19473bd3953cb80e54c92",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/sources.before.json": "02b5c957cbf22f474cbece62a8cc8bec35a6cec2bec19473bd3953cb80e54c92",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/stderr.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "artifacts/experiments/b1_call_operands/model_stored_value_relations/verified-current/stdout.log": "1acce71a134c453820364fea9febbb52a5c5c245ec3d838ad27f033789d03c1b",
+    "docs/M1_STORED_VALUE_ACCEPTANCE.md": "41cfd332913914f666d6db7370951bcb696ed28933e8dda92415ecc0327c1827",
+    "docs/M1_STORED_VALUE_API.md": "145c7e7c1dde93b06942fcdc85368b774c8c4e9aaee73026d7b59da890906483",
+    "docs/M1_STORED_VALUE_DESIGN.md": "c89fd86bda215a3e60cca2c857e303bf163cbdab6c76849a70a4536ef278ca37",
+    "docs/M1_STORED_VALUE_MIGRATION.md": "5078f52525b6331bbb0643850e602dbc9e08262babaa733e9fd37f938a2a4981",
+    "docs/M1_STORED_VALUE_NEXT_GATE.md": "bdea9209f2084bdca8527af13b3e3eefa28c5e94e65c3d775195e4716708f49a",
+    "docs/M1_STORED_VALUE_PLAN.md": "27222b5e491ddb4054ea1d9ed6587c9460a8b4ec32a8175b7dc2adcd36d93bd9",
+    "docs/M1_STORED_VALUE_PROGRESS.md": "ba44f86c306c80ee46a51001eabeda28067cd1dd50025cc5921b61c1b4b9bc2d"
+  }
+}

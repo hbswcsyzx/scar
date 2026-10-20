@@ -15,6 +15,7 @@ from scar.ir.program.native import (
     NativeInputSlot, NativeOutputSlot,
 )
 from scar.ir.program.call_effect_expansion import CallEffectExpansion
+from scar.ir.program.stored_values import StoredValueRead, StoredValueWrite
 from scar.ir.program.providers import (
     ProviderArtifact, ProviderArtifactKind, ProviderBinding, ProviderCaptureMode,
     ProviderCollectionDomain, ProviderCollectionObservation, ProviderCondition,
@@ -102,6 +103,7 @@ from .resumption import (
 )
 
 __all__ = [
+    'StoredValueWrite', 'StoredValueRead',
     'CallEffectExpansion',
     'DelegateLookupFallback', 'NormalizedThrowSource',
     "BuiltinExceptionCategory", "ExceptionHandlerOperand", "ExceptionMatcher", "FixedBuiltinHandler",

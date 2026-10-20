@@ -526,6 +526,10 @@ class LiteralEvaluation:
         require_definition(self.definition)
 
 
+from scar.ir.program.stored_values import StoredValueRead, StoredValueWrite, _bind_model_results
+_bind_model_results(OperationResult, InvokeLiteralResult)
+
+
 # Protocol annotations resolve only after the canonical result port classes
 # exist. The private binding installs these exact classes, never copies of them.
 from scar.ir.program.protocols import (ProtocolOperation, ProtocolScope, _bind_model_ports)
@@ -866,10 +870,22 @@ class ProgramGraph:
     protocol_bindings: tuple[ProtocolBinding, ...] = ()
     exception_matches: tuple[ExceptionMatcher, ...] = ()
     call_effect_expansions: tuple[CallEffectExpansion, ...] = ()
+    stored_value_writes: tuple[StoredValueWrite, ...] = ()
+    stored_value_reads: tuple[StoredValueRead, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.root, RegionID):
             raise TypeError("ProgramGraph.root must be RegionID")
+        for name, row_type in (("stored_value_writes", StoredValueWrite),
+                               ("stored_value_reads", StoredValueRead)):
+            rows = _tuple(getattr(self, name), "ProgramGraph." + name)
+            if any(type(row) is not row_type for row in rows):
+                raise TypeError("ProgramGraph." + name + " requires exact " + row_type.__name__ + " records")
+            for row in rows:
+                row.__post_init__()
+        _unique(tuple((row.site, row.effect_index, row.completion) for row in self.stored_value_writes),
+                "stored value write keys")
+        _unique(tuple(row.result for row in self.stored_value_reads), "stored value read results")
         expansions = _tuple(self.call_effect_expansions, 'ProgramGraph.call_effect_expansions')
         if any(type(row) is not CallEffectExpansion for row in expansions):
             raise TypeError('call_effect_expansions requires exact CallEffectExpansion records')
@@ -1095,6 +1111,7 @@ class ProgramGraph:
 
 
 __all__ = [
+    "StoredValueWrite", "StoredValueRead",
     "ProtocolScope", "ProtocolOperation", "ProtocolOperationRef",
     "RawOperandSource", "RawRequestTrigger", "InjectedPacketTrigger", "InitialAdvance",
     "ProtocolCallInputCase", "ProtocolCallInputs", "ResumeSourceBinding",

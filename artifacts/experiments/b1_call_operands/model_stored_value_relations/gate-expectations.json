@@ -1,0 +1,15 @@
+{
+  "attempts": {
+    "first-exact-store-read": {"returncode": 0, "rows": 1, "failures": 0, "errors": 0, "skips": 0},
+    "first-joint-stored-values": {"returncode": 1, "rows": 106, "failures": 12, "errors": 0, "skips": 0},
+    "corrected-original-ports": {"returncode": 1, "rows": 107, "failures": 7, "errors": 0, "skips": 0},
+    "corrected-packet-scopes": {"returncode": 0, "rows": 7, "failures": 0, "errors": 0, "skips": 0},
+    "verified-current": {"returncode": 0, "rows": 961, "failures": 0, "errors": 0, "skips": 0}
+  },
+  "bound_documents": [
+    "docs/M1_STORED_VALUE_PLAN.md", "docs/M1_STORED_VALUE_DESIGN.md",
+    "docs/M1_STORED_VALUE_API.md", "docs/M1_STORED_VALUE_MIGRATION.md",
+    "docs/M1_STORED_VALUE_PROGRESS.md", "docs/M1_STORED_VALUE_ACCEPTANCE.md",
+    "docs/M1_STORED_VALUE_NEXT_GATE.md"
+  ]
+}

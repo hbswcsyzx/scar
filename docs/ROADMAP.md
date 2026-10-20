@@ -1,5 +1,16 @@
 # SCAR roadmap and scope
 
+> **Stored-value relation progress (2026-10-20):**
+> [Acceptance](M1_STORED_VALUE_ACCEPTANCE.md):961 affected cases pass on913 stable
+> sources,40 new. Original primitive store payload/state/load-result relations
+> and a bounded actual-source query now exist. Program27 is capability gated;
+> old1–26 wire and Execution8 remain, with an independent frozen26 byte oracle.
+> [Migration](M1_STORED_VALUE_MIGRATION.md) lists16 legacy codec edits/seven future
+> case IDs; old fixtures and other tests remain unchanged. [Next gate](M1_STORED_VALUE_NEXT_GATE.md)
+> connects accurate load results to generic existing consumers, then returns to
+> original F19 units. Automatic source/native recovery and all original open
+> families/P4/full/P5/M2/whole-stage obligations remain. No backend or speedup claim.
+
 > **Current reference identity/history progress (2026-10-20):**
 > [Limited acceptance](M1_FRAME_IDENTITY_GUARD_ACCEPTANCE.md) passes231 direct
 > affected cases on907 stable sources,14 new and all196 prior direct cases.

@@ -32,7 +32,7 @@ def test_session_release_roundtrip_preserves_all_canonical_producers(binding, po
     graph = session_release_program(binding=binding, post=post, strict_subset=True, extra_domain=True)
     payload = dumps(graph)
     document = json.loads(payload)
-    assert SCHEMA_VERSION == 26
+    assert SCHEMA_VERSION == 27
     assert document["schema_version"] == 14
     assert document["session_updates"] and document["terminal_frame_releases"]
     assert loads(payload) == graph

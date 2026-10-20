@@ -1,0 +1,478 @@
+"""Finite original slot accesses and supplied paths, without recovered semantics.
+
+StoredValueRead/Write explicitly declare the primitive pre/post value relation.
+Neither operation labels, CellContent, state SSA nor the supplied path creates it.
+"""
+from dataclasses import replace
+
+from scar.ir.execution.calls import CallActivation
+from scar.ir.execution.ids import CallActivationID
+from scar.ir.program.call_effect_expansion import CallEffectExpansion
+from scar.ir.program.control import ProtocolValueType
+from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
+from scar.ir.program.model import (
+    AccessMode, Behavior, Block, BlockArgument, CompletionResult,
+    CompletionSignature, CompletionSuccessor, DataValue, ExitKind, ExitPort,
+    Footprint, FootprintKind, InvokeLiteralResult, LiteralOrigin, Operation, OperationResult,
+    ProgramGraph, ProtocolValue, ReferenceValue, Region, StateAccess, StateLocation,
+    StateVersionValue, Successor, Terminator, TerminatorKind, Use, UseRole,
+    ValueKind, ValueType,
+)
+from scar.ir.program.state_addresses import (
+    AddressCoverage, AddressEffect, CellContent, DomainOwner, Element, ExistingAccess,
+    InvokeStateOperand, ReferenceOwner, StateAddressRefinement, UnknownOwner,
+    UnknownSelection, WholeOwner,
+)
+from scar.ir.program.stored_values import StoredValueRead, StoredValueWrite
+from scar.ir.program.structured import ControlEdgeReference
+from tests.fixtures.execution_call_graphs import _model
+from tests.fixtures.program_driver_graphs import PACKET, REFERENCE
+from tests.fixtures.program_protocol_graphs import _scope
+
+
+BOOL = ValueType(ValueKind.DATA, data_type='builtins.bool')
+WORLD, CONTEXT = LocationID('stored.world'), LocationID('stored.context')
+DOMAINS = (WORLD, CONTEXT)
+STATES = tuple(ValueType(ValueKind.STATE, location=location) for location in DOMAINS)
+
+
+class _Build:
+    def __init__(self, name):
+        self.region = RegionID(name)
+        self.values, self.operations, self.blocks = [], [], []
+        self.refinements, self.writes, self.reads = [], [], []
+
+    def value(self, name, origin, type_, *, owner=False):
+        identity = ValueID(name)
+        if type_ == REFERENCE:
+            value = ReferenceValue(identity, self.region, origin,
+                targets=(WORLD,) if owner else None,
+                selector=Footprint(FootprintKind.WHOLE) if owner else Footprint())
+        elif type(type_) is ProtocolValueType:
+            value = ProtocolValue(identity, self.region, origin, type_.protocol)
+        elif type_.kind is ValueKind.STATE:
+            value = StateVersionValue(identity, self.region, origin, type_.location)
+        else:
+            value = DataValue(identity, self.region, origin, type_.data_type)
+        self.values.append(value)
+        return value
+
+    def formals(self, name, types, *, owners=()):
+        return tuple(self.value(f'{name}.arg.{index}', BlockArgument(BlockID(name), index),
+            type_, owner=index in owners) for index, type_ in enumerate(types))
+
+    def uses(self, name, values):
+        return tuple(Use(UseID(f'{name}.{index}'), value.id,
+            UseRole.STATE_CONTENT if type(value) is StateVersionValue else
+            UseRole.PROTOCOL if type(value) is ProtocolValue else
+            UseRole.DATA if type(value) is DataValue else UseRole.REFERENCE)
+            for index, value in enumerate(values))
+
+    def add(self, name, uses=(), **fields):
+        operation = Operation(OperationID(name), name, (Behavior.CONTROL,), tuple(uses),
+                              effects_complete=True, **fields)
+        self.operations.append(operation)
+        return operation
+
+    def block(self, name, formals, operations):
+        block = Block(BlockID(name), tuple(value.id for value in formals),
+                      tuple(operation.id for operation in operations))
+        self.blocks.append(block)
+        return block
+
+    def terminal(self, name, kind, values):
+        uses = self.uses(name + '.use', values)
+        return self.add(name, uses, terminator=Terminator(
+            TerminatorKind.RETURN if kind is ExitKind.NORMAL else TerminatorKind.RAISE,
+            exit='normal' if kind is ExitKind.NORMAL else 'raise',
+            values=tuple(use.id for use in uses)))
+
+    def store(self, name, payload, owner, before, *, unknown_owner=False, unknown_selector=False, key=None):
+        identity = OperationID(name)
+        uses = self.uses(name + '.use', (payload, owner, before, *((key,) if key is not None else ())))
+        after = self.value(name + '.after', OperationResult(identity, 0), STATES[0])
+        operation = Operation(identity, name, (Behavior.READ, Behavior.WRITE), uses,
+            (after.id,), (StateAccess(WORLD, uses[2].id, AccessMode.READ_WRITE, after.id,
+                Footprint(FootprintKind.WHOLE), reference=None if unknown_owner else uses[1].id),),
+            effects_complete=True)
+        site = ExistingAccess(identity, 0)
+        address_owner = (UnknownOwner('the primitive owner was not resolved', (uses[1].id,))
+                         if unknown_owner else ReferenceOwner(uses[1].id))
+        path = ((UnknownSelection('the slot selector was not resolved', (uses[1].id,)),)
+                if unknown_selector else (Element(uses[3].id),) if key is not None else (CellContent(),))
+        self.refinements.append(StateAddressRefinement(site,
+            (AddressEffect(address_owner, path, AccessMode.READ_WRITE),),
+            AddressCoverage.DECLARED_COMPLETE))
+        row = StoredValueWrite(site, 0, uses[0].id)
+        self.writes.append(row)
+        self.operations.append(operation)
+        return operation, after, row
+
+    def read(self, name, owner, before, *, key=None):
+        identity = OperationID(name)
+        uses = self.uses(name + '.use', (owner, before, *((key,) if key is not None else ())))
+        result_site = OperationResult(identity, 0)
+        result = self.value(name + '.result', result_site, REFERENCE)
+        operation = Operation(identity, name, (Behavior.READ,), uses, (result.id,),
+            (StateAccess(WORLD, uses[1].id, AccessMode.READ,
+                         reference=uses[0].id),), effects_complete=True)
+        site = ExistingAccess(identity, 0)
+        self.refinements.append(StateAddressRefinement(site,
+            (AddressEffect(ReferenceOwner(uses[0].id),
+                (Element(uses[2].id),) if key is not None else (CellContent(),), AccessMode.READ),),
+            AddressCoverage.DECLARED_COMPLETE))
+        row = StoredValueRead(site, 0, result_site)
+        self.reads.append(row)
+        self.operations.append(operation)
+        return operation, result, row
+
+    def finish(self, entry, *, parent=None, raised=False):
+        exits = (ExitPort('normal', ExitKind.NORMAL, (REFERENCE, *STATES)),)
+        if raised:
+            exits += (ExitPort('raise', ExitKind.RAISE, (STATES[1], PACKET, STATES[0])),)
+        return Region(self.region, 'explicit primitive slot declarations', BlockID(entry),
+                      tuple(self.blocks), exits, parent=parent)
+
+
+def _graph(root, builders, *, expansions=()):
+    return ProgramGraph(root.region, tuple(region for builder, region in builders),
+        tuple(operation for builder, region in builders for operation in builder.operations),
+        tuple(value for builder, region in builders for value in builder.values),
+        tuple(StateLocation(location, 'original coherence carrier') for location in DOMAINS),
+        control_scopes=tuple(_scope(region.id, region.blocks) for builder, region in builders),
+        state_address_refinements=tuple(row for builder, region in builders for row in builder.refinements),
+        stored_value_writes=tuple(row for builder, region in builders for row in builder.writes),
+        stored_value_reads=tuple(row for builder, region in builders for row in builder.reads),
+        call_effect_expansions=expansions)
+
+
+def _occurrences(model, static):
+    return tuple(row.id for row in model.operations if row.operation == static.id)
+
+
+def _actual(model, occurrence, use):
+    actual, = tuple(row for row in model.uses if (row.operation, row.use) == (occurrence, use))
+    return next(value for value in model.values if value.id == actual.value)
+
+
+def stored_values_execution(*, mode='overwrite', instances=2):
+    """P/readP/Q/readQ; an optional real intervening effect obstructs readP."""
+    allowed = ('overwrite', 'opaque', 'alias', 'different-domain', 'unknown-owner', 'unknown-selector', 'reference-key')
+    if mode not in allowed:
+        raise ValueError('unsupported finite slot scenario')
+    b = _Build('stored.linear')
+    entry = b.formals('stored.linear.entry', (REFERENCE, REFERENCE, REFERENCE, REFERENCE, *STATES),
+                      owners=(2, 3))
+    p, q, owner, other, world, context = entry
+    reference_keys = ()
+    if mode == 'reference-key':
+        reference_keys = tuple(ReferenceValue(ValueID('stored.linear.key.' + label), b.region,
+            LiteralOrigin(None), targets=()) for label in ('write', 'read'))
+        b.values.extend(reference_keys)
+    first, current, first_row = b.store('stored.linear.write.p', p, owner, world,
+        unknown_owner=mode == 'unknown-owner', unknown_selector=mode == 'unknown-selector',
+        key=reference_keys[0] if reference_keys else None)
+    operations, barrier = [first], None
+    if mode == 'opaque':
+        uses = b.uses('stored.linear.opaque.use', (current, context))
+        identity = OperationID('stored.linear.opaque')
+        after = b.value(identity.value + '.after', OperationResult(identity, 0), STATES[0])
+        barrier = Operation(identity, 'unexpanded original callback',
+            (Behavior.READ, Behavior.WRITE), uses, (after.id,),
+            (StateAccess(WORLD, uses[0].id, AccessMode.READ_WRITE, after.id),
+             StateAccess(CONTEXT, uses[1].id, AccessMode.READ)), effects_complete=False)
+        b.operations.append(barrier)
+        current = after
+    elif mode in ('alias', 'different-domain'):
+        location = WORLD if mode == 'alias' else CONTEXT
+        before = current if mode == 'alias' else context
+        identity = OperationID('stored.linear.intervening.write')
+        uses = b.uses(identity.value + '.use', (other, before))
+        after = b.value(identity.value + '.after', OperationResult(identity, 0),
+                        STATES[0] if mode == 'alias' else STATES[1])
+        barrier = Operation(identity, 'a real write without an isolation proof',
+            (Behavior.READ, Behavior.WRITE), uses, (after.id,),
+            (StateAccess(location, uses[1].id, AccessMode.READ_WRITE, after.id,
+                reference=uses[0].id if mode == 'alias' else None),), effects_complete=True)
+        b.operations.append(barrier)
+        b.refinements.append(StateAddressRefinement(ExistingAccess(identity, 0),
+            (AddressEffect(ReferenceOwner(uses[0].id) if mode == 'alias' else DomainOwner(),
+                (CellContent(),) if mode == 'alias' else (WholeOwner(),), AccessMode.READ_WRITE),),
+            AddressCoverage.DECLARED_COMPLETE))
+        if mode == 'alias':
+            current = after
+        else:
+            context = after
+    if barrier is not None:
+        operations.append(barrier)
+    first_read, first_result, first_read_row = b.read('stored.linear.read.p', owner, current,
+        key=reference_keys[1] if reference_keys else None)
+    second, current, second_row = b.store('stored.linear.write.q', q, owner, current)
+    second_read, result, second_read_row = b.read('stored.linear.read.q', owner, current)
+    terminal = b.terminal('stored.linear.return', ExitKind.NORMAL, (result, current, context))
+    b.block('stored.linear.entry', entry, (*operations, first_read, second, second_read, terminal))
+    graph = _graph(b, ((b, b.finish('stored.linear.entry')),))
+    path = ((BlockID('stored.linear.entry'), None),)
+    model, scopes, source = _model(graph,
+        tuple((graph.root, path, f'stored.linear.{number}') for number in range(instances)))
+    examples = []
+    for activation, visits, ids in scopes:
+        examples.append({'activation': activation, 'visits': visits,
+            'reads': (ids[first_read.id], ids[second_read.id]),
+            'writes': (ids[first.id], ids[second.id]),
+            'payloads': (_actual(model, ids[first.id], first_row.payload),
+                         _actual(model, ids[second.id], second_row.payload))})
+    return graph, model, {'mode': mode, 'examples': tuple(examples), 'barrier': barrier,
+        'read_rows': (first_read_row, second_read_row), 'write_rows': (first_row, second_row),
+        'reads': (first_read, second_read), 'writes': (first, second), 'locations': DOMAINS,
+        'owner': owner, 'reference_keys': reference_keys, 'source': source}
+
+
+def stored_values_control_execution(*, route='branch', arm=0, iterations=2):
+    """A selected whole tuple, or repeated visits which swap P/Q each time."""
+    if route not in ('branch', 'loop') or arm not in (0, 1) or iterations not in (1, 2):
+        raise ValueError('unsupported finite control scenario')
+    b = _Build('stored.' + route)
+    prefix = 'stored.' + route
+    types = (REFERENCE, REFERENCE, REFERENCE, BOOL, *STATES)
+    entry = b.formals(prefix + '.entry', types, owners=(2,))
+    p, q, owner, condition, world, context = entry
+    if route == 'branch':
+        arms = tuple(b.formals(prefix + f'.arm.{number}', types, owners=(2,)) for number in range(2))
+        condition_use, = b.uses(prefix + '.condition', (condition,))
+        forwards = tuple(b.uses(prefix + f'.arm.{number}.forward', entry) for number in range(2))
+        choose = b.add(prefix + '.choose', (condition_use, *forwards[0], *forwards[1]),
+            terminator=Terminator(TerminatorKind.BRANCH, tuple(Successor(BlockID(prefix + f'.arm.{number}'),
+                tuple(use.id for use in forwards[number])) for number in range(2)), condition=condition_use.id))
+        b.block(prefix + '.entry', entry, (choose,))
+        merged = b.formals(prefix + '.merge', (REFERENCE, *STATES), owners=(0,))
+        writes, write_rows = [], []
+        for number, formal in enumerate(arms):
+            write, post, row = b.store(prefix + f'.write.{number}', formal[number], formal[2], formal[4])
+            forward = b.uses(prefix + f'.join.{number}.use', (formal[2], post, formal[5]))
+            jump = b.add(prefix + f'.join.{number}', forward,
+                terminator=Terminator(TerminatorKind.JUMP, (Successor(BlockID(prefix + '.merge'),
+                    tuple(use.id for use in forward)),)))
+            b.block(prefix + f'.arm.{number}', formal, (write, jump))
+            writes.append(write)
+            write_rows.append(row)
+        read, result, read_row = b.read(prefix + '.read', merged[0], merged[1])
+        returned = b.terminal(prefix + '.return', ExitKind.NORMAL, (result, merged[1], merged[2]))
+        b.block(prefix + '.merge', merged, (read, returned))
+        path = ((BlockID(prefix + '.entry'), arm), (BlockID(prefix + f'.arm.{arm}'), 0),
+                (BlockID(prefix + '.merge'), None))
+    else:
+        header = b.formals(prefix + '.header', types, owners=(2,))
+        initial = b.uses(prefix + '.enter.use', entry)
+        enter = b.add(prefix + '.enter', initial, terminator=Terminator(TerminatorKind.JUMP,
+            (Successor(BlockID(prefix + '.header'), tuple(use.id for use in initial)),)))
+        b.block(prefix + '.entry', entry, (enter,))
+        write, post, row = b.store(prefix + '.write', header[0], header[2], header[4])
+        read, result, read_row = b.read(prefix + '.read', header[2], post)
+        done = b.formals(prefix + '.done', (REFERENCE, *STATES))
+        condition_use, = b.uses(prefix + '.retry.condition', (header[3],))
+        back = b.uses(prefix + '.back.use',
+            (header[1], header[0], header[2], header[3], post, header[5]))
+        exit_uses = b.uses(prefix + '.done.use', (result, post, header[5]))
+        retry = b.add(prefix + '.retry', (condition_use, *back, *exit_uses),
+            terminator=Terminator(TerminatorKind.BRANCH, (
+                Successor(BlockID(prefix + '.header'), tuple(use.id for use in back)),
+                Successor(BlockID(prefix + '.done'), tuple(use.id for use in exit_uses))),
+                condition=condition_use.id))
+        b.block(prefix + '.header', header, (write, read, retry))
+        returned = b.terminal(prefix + '.return', ExitKind.NORMAL, done)
+        b.block(prefix + '.done', done, (returned,))
+        path = ((BlockID(prefix + '.entry'), 0),
+            *((BlockID(prefix + '.header'), 0) for number in range(iterations - 1)),
+            (BlockID(prefix + '.header'), 1), (BlockID(prefix + '.done'), None))
+        writes, write_rows = [write], [row]
+    graph = _graph(b, ((b, b.finish(prefix + '.entry')),))
+    model, scopes, source = _model(graph, ((graph.root, path, prefix + '.actual'),))
+    reads = _occurrences(model, read)
+    by_visit = {(operation.visit, operation.operation): operation.id for operation in model.operations}
+    selected_writes = tuple(row.id for row in model.operations if row.operation in {op.id for op in writes})
+    payloads = tuple(_actual(model, occurrence,
+        next(row.payload for row in write_rows if row.site.operation ==
+             next(op.operation for op in model.operations if op.id == occurrence)))
+        for occurrence in selected_writes)
+    return graph, model, {'route': route, 'arm': arm, 'iterations': iterations,
+        'read_row': read_row, 'read': read, 'reads': reads,
+        'write_rows': tuple(write_rows), 'writes': tuple(writes),
+        'selected_writes': selected_writes, 'payloads': payloads,
+        'by_visit': by_visit, 'scope': scopes[0], 'path': path, 'locations': DOMAINS, 'source': source}
+
+
+def stored_values_invoke_execution(*, raised=False, declare_raise=True):
+    """An explicit primitive write establishes the slot on each declared edge."""
+    b = _Build('stored.invoke')
+    entry = b.formals('stored.invoke.entry', (REFERENCE, REFERENCE, *STATES), owners=(1,))
+    payload, owner, world, context = entry
+    actuals = b.uses('stored.invoke.argument', entry)
+    normal_forward, raise_forward = b.uses('stored.invoke.owner.forward', (owner, owner))
+    normal_types, raise_types = (REFERENCE, *STATES), (STATES[1], PACKET, STATES[0])
+    normal = b.formals('stored.invoke.normal', (STATES[1], REFERENCE, REFERENCE, STATES[0]), owners=(1,))
+    failure = b.formals('stored.invoke.raise', (PACKET, STATES[0], REFERENCE, STATES[1]), owners=(2,))
+    invoke = b.add('stored.invoke.write', (*actuals, normal_forward, raise_forward),
+        invoke_arguments=tuple(use.id for use in actuals),
+        completions=(CompletionSignature(ExitKind.NORMAL, normal_types),
+                     CompletionSignature(ExitKind.RAISE, raise_types)),
+        terminator=Terminator(TerminatorKind.INVOKE, (
+            CompletionSuccessor(ExitKind.RAISE, BlockID('stored.invoke.raise'),
+                (CompletionResult(1), CompletionResult(2), raise_forward.id, CompletionResult(0))),
+            CompletionSuccessor(ExitKind.NORMAL, BlockID('stored.invoke.normal'),
+                (CompletionResult(2), normal_forward.id, CompletionResult(0), CompletionResult(1))))))
+    site = InvokeStateOperand(invoke.id, actuals[2].id)
+    b.refinements.append(StateAddressRefinement(site,
+        (AddressEffect(ReferenceOwner(actuals[1].id), (CellContent(),), AccessMode.READ_WRITE),),
+        AddressCoverage.DECLARED_COMPLETE))
+    b.refinements.append(StateAddressRefinement(InvokeStateOperand(invoke.id, actuals[3].id),
+        (AddressEffect(DomainOwner(), (WholeOwner(),), AccessMode.READ),),
+        AddressCoverage.DECLARED_COMPLETE))
+    for edge in (1, 0) if declare_raise else (1,):
+        b.writes.append(StoredValueWrite(site, 0, actuals[0].id, ControlEdgeReference(invoke.id, edge)))
+    b.block('stored.invoke.entry', entry, (invoke,))
+    normal_read, normal_result, normal_row = b.read('stored.invoke.normal.read', normal[1], normal[3])
+    normal_exit = b.terminal('stored.invoke.normal.return', ExitKind.NORMAL,
+                            (normal_result, normal[3], normal[0]))
+    b.block('stored.invoke.normal', normal, (normal_read, normal_exit))
+    raise_read, raise_result, raise_row = b.read('stored.invoke.raise.read', failure[2], failure[1])
+    raise_exit = b.terminal('stored.invoke.raise.return', ExitKind.RAISE,
+                           (failure[3], failure[0], failure[1]))
+    b.block('stored.invoke.raise', failure, (raise_read, raise_exit))
+    graph = _graph(b, ((b, b.finish('stored.invoke.entry', raised=True)),))
+    path = ((BlockID('stored.invoke.entry'), 0 if raised else 1),
+            (BlockID('stored.invoke.raise' if raised else 'stored.invoke.normal'), None))
+    model, scopes, source = _model(graph, ((graph.root, path, 'stored.invoke.actual'),))
+    ids = scopes[0][2]
+    read, row = (raise_read, raise_row) if raised else (normal_read, normal_row)
+    return graph, model, {'invoke': invoke, 'write_rows': tuple(b.writes),
+        'selected_edge': ControlEdgeReference(invoke.id, 0 if raised else 1),
+        'read': read, 'read_row': row, 'read_occurrence': ids[read.id],
+        'write_occurrence': ids[invoke.id], 'payload': _actual(model, ids[invoke.id], actuals[0].id),
+        'scope': scopes[0], 'locations': DOMAINS, 'source': source}
+
+
+def stored_values_calls_execution(*, raised=False, instances=2, missing=None):
+    """One shared implementation: first invocation writes, second reads."""
+    if missing not in (None, 'association', 'state'):
+        raise ValueError('unsupported finite call omission')
+    parent, child = _Build('stored.caller'), _Build('stored.shared')
+    entry = parent.formals('stored.caller.entry', (REFERENCE, REFERENCE, BOOL, BOOL, *STATES), owners=(1,))
+    child_entry = child.formals('stored.shared.entry', (BOOL, REFERENCE, REFERENCE, *STATES), owners=(2,))
+    write_args = child.formals('stored.shared.write', (REFERENCE, REFERENCE, *STATES), owners=(1,))
+    read_args = child.formals('stored.shared.read', (REFERENCE, REFERENCE, *STATES), owners=(1,))
+    condition, = child.uses('stored.shared.condition', (child_entry[0],))
+    write_forward = child.uses('stored.shared.write.forward', child_entry[1:])
+    read_forward = child.uses('stored.shared.read.forward', child_entry[1:])
+    choose = child.add('stored.shared.choose', (condition, *write_forward, *read_forward),
+        terminator=Terminator(TerminatorKind.BRANCH, (
+            Successor(BlockID('stored.shared.write'), tuple(use.id for use in write_forward)),
+            Successor(BlockID('stored.shared.read'), tuple(use.id for use in read_forward))), condition=condition.id))
+    child.block('stored.shared.entry', child_entry, (choose,))
+    store, post, write_row = child.store('stored.shared.store', write_args[0], write_args[1], write_args[2])
+    written = child.terminal('stored.shared.written', ExitKind.NORMAL, (write_args[0], post, write_args[3]))
+    child.block('stored.shared.write', write_args, (store, written))
+    # This read's own completion slots deliberately do not match landing positions.
+    actuals = child.uses('stored.shared.load.argument', (read_args[1], read_args[2], read_args[3]))
+    normal_types, raise_types = (REFERENCE, *STATES), (STATES[1], PACKET, STATES[0])
+    normal = child.formals('stored.shared.normal', (STATES[1], REFERENCE, STATES[0]))
+    failure = child.formals('stored.shared.raise', (STATES[0], PACKET, STATES[1]))
+    load = child.add('stored.shared.load', actuals, invoke_arguments=tuple(use.id for use in actuals),
+        completions=(CompletionSignature(ExitKind.NORMAL, normal_types),
+                     CompletionSignature(ExitKind.RAISE, raise_types)),
+        terminator=Terminator(TerminatorKind.INVOKE, (
+            CompletionSuccessor(ExitKind.RAISE, BlockID('stored.shared.raise'),
+                (CompletionResult(2), CompletionResult(1), CompletionResult(0))),
+            CompletionSuccessor(ExitKind.NORMAL, BlockID('stored.shared.normal'),
+                (CompletionResult(2), CompletionResult(0), CompletionResult(1))))))
+    read_site = InvokeStateOperand(load.id, actuals[1].id)
+    child.refinements.append(StateAddressRefinement(read_site,
+        (AddressEffect(ReferenceOwner(actuals[0].id), (CellContent(),), AccessMode.READ),),
+        AddressCoverage.DECLARED_COMPLETE))
+    child.refinements.append(StateAddressRefinement(InvokeStateOperand(load.id, actuals[2].id),
+        (AddressEffect(DomainOwner(), (WholeOwner(),), AccessMode.READ),), AddressCoverage.DECLARED_COMPLETE))
+    read_row = StoredValueRead(read_site, 0,
+        InvokeLiteralResult(ControlEdgeReference(load.id, 1), CompletionResult(0)))
+    child.reads.append(read_row)
+    child.block('stored.shared.read', read_args, (load,))
+    returned = child.terminal('stored.shared.return', ExitKind.NORMAL, (normal[1], normal[2], normal[0]))
+    failed = child.terminal('stored.shared.failed', ExitKind.RAISE, (failure[2], failure[1], failure[0]))
+    child.block('stored.shared.normal', normal, (returned,))
+    child.block('stored.shared.raise', failure, (failed,))
+    child_region = child.finish('stored.shared.entry', parent=parent.region, raised=True)
+
+    bridge = parent.formals('stored.caller.between', (REFERENCE, STATES[1], REFERENCE, STATES[0], BOOL), owners=(0,))
+    final = parent.formals('stored.caller.normal', (STATES[1], REFERENCE, STATES[0]))
+    fail_first = parent.formals('stored.caller.first.raise', raise_types)
+    fail_last = parent.formals('stored.caller.raise', (STATES[0], PACKET, STATES[1]))
+    first_args = parent.uses('stored.caller.first.argument', (entry[2], entry[0], entry[1], entry[4], entry[5]))
+    forwards = parent.uses('stored.caller.first.forward', (entry[1], entry[3]))
+    first = parent.add('stored.caller.first', (*first_args, *forwards), callee=child.region,
+        invoke_arguments=tuple(use.id for use in first_args),
+        completions=(CompletionSignature(ExitKind.NORMAL, normal_types), CompletionSignature(ExitKind.RAISE, raise_types)),
+        terminator=Terminator(TerminatorKind.INVOKE, (
+            CompletionSuccessor(ExitKind.RAISE, BlockID('stored.caller.first.raise'), tuple(CompletionResult(i) for i in range(3))),
+            CompletionSuccessor(ExitKind.NORMAL, BlockID('stored.caller.between'),
+                (forwards[0].id, CompletionResult(2), CompletionResult(0), CompletionResult(1), forwards[1].id)))))
+    parent.block('stored.caller.entry', entry, (first,))
+    first_failure = parent.terminal('stored.caller.first.failed', ExitKind.RAISE, fail_first)
+    parent.block('stored.caller.first.raise', fail_first, (first_failure,))
+    second_args = parent.uses('stored.caller.second.argument', (bridge[4], bridge[2], bridge[0], bridge[3], bridge[1]))
+    second = parent.add('stored.caller.second', second_args, callee=child.region,
+        invoke_arguments=tuple(use.id for use in second_args),
+        completions=(CompletionSignature(ExitKind.NORMAL, normal_types), CompletionSignature(ExitKind.RAISE, raise_types)),
+        terminator=Terminator(TerminatorKind.INVOKE, (
+            CompletionSuccessor(ExitKind.RAISE, BlockID('stored.caller.raise'),
+                (CompletionResult(2), CompletionResult(1), CompletionResult(0))),
+            CompletionSuccessor(ExitKind.NORMAL, BlockID('stored.caller.normal'),
+                (CompletionResult(2), CompletionResult(0), CompletionResult(1))))))
+    # Keep unknown aggregate summaries; the explicit relationship exhausts them
+    # with each actual child's original CFG, not a purity flag.
+    first = replace(first, effects_complete=False)
+    second = replace(second, effects_complete=False)
+    parent.operations = [first if op.id == first.id else second if op.id == second.id else op for op in parent.operations]
+    parent.block('stored.caller.between', bridge, (second,))
+    normal_exit = parent.terminal('stored.caller.return', ExitKind.NORMAL, (final[1], final[2], final[0]))
+    raise_exit = parent.terminal('stored.caller.failed', ExitKind.RAISE, (fail_last[2], fail_last[1], fail_last[0]))
+    parent.block('stored.caller.normal', final, (normal_exit,))
+    parent.block('stored.caller.raise', fail_last, (raise_exit,))
+    expansions = tuple(CallEffectExpansion(call.id, child.region) for call in (first, second))
+    graph = _graph(parent, ((parent, parent.finish('stored.caller.entry', raised=True)), (child, child_region)), expansions=expansions)
+    kind = ExitKind.RAISE if raised else ExitKind.NORMAL
+    parent_path = ((BlockID('stored.caller.entry'), 1), (BlockID('stored.caller.between'), 0 if raised else 1),
+                   (BlockID('stored.caller.raise' if raised else 'stored.caller.normal'), None))
+    write_path = ((BlockID('stored.shared.entry'), 0), (BlockID('stored.shared.write'), None))
+    read_path = ((BlockID('stored.shared.entry'), 1), (BlockID('stored.shared.read'), 0 if raised else 1),
+                 (BlockID('stored.shared.raise' if raised else 'stored.shared.normal'), None))
+    paths = tuple(path for number in range(instances) for path in (
+        (parent.region, parent_path, f'stored.calls.{number}.caller'),
+        (child.region, write_path, f'stored.calls.{number}.write'),
+        (child.region, read_path, f'stored.calls.{number}.read')))
+    model, scopes, source = _model(graph, paths)
+    examples, links = [], []
+    for number in range(instances):
+        caller, writing, reading = scopes[number * 3:number * 3 + 3]
+        calls = (
+            CallActivation(CallActivationID(f'stored.calls.{number}.first'), caller[2][first.id], writing[0],
+                           writing[1][0], writing[2][written.id], source),
+            CallActivation(CallActivationID(f'stored.calls.{number}.second'), caller[2][second.id], reading[0],
+                           reading[1][0], reading[2][failed.id if raised else returned.id], source))
+        links.extend(calls)
+        examples.append({'caller': caller, 'writing': writing, 'reading': reading, 'links': calls,
+            'read': reading[2][load.id], 'write': writing[2][store.id],
+            'payload': _actual(model, writing[2][store.id], write_row.payload)})
+    model = replace(model, call_activations=tuple(links))
+    if missing == 'association':
+        omitted = examples[0]['links'][1].id
+        model = replace(model, call_activations=tuple(row for row in model.call_activations if row.id != omitted))
+    elif missing == 'state':
+        omitted = examples[0]['caller'][2][second.id], second_args[3].id
+        model = replace(model, uses=tuple(row for row in model.uses if (row.operation, row.use) != omitted))
+    return graph, model, {'examples': tuple(examples), 'read': load, 'read_row': read_row,
+        'write': store, 'write_row': write_row, 'calls': (first, second),
+        'kind': kind, 'selected_edge': ControlEdgeReference(load.id, 0 if raised else 1),
+        'locations': DOMAINS, 'source': source, 'missing': missing}
+
+
+__all__ = ['stored_values_execution', 'stored_values_control_execution',
+           'stored_values_invoke_execution', 'stored_values_calls_execution']

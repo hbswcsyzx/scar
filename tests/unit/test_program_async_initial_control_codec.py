@@ -72,9 +72,9 @@ def test_program26_preserves_original_body_none_ports_and_uses_the_existing_subj
     operation = next(op for op in graph.operations if op.id == row.operation)
     wire = codec.dumps(graph)
     document = json.loads(wire)
-    assert codec.SCHEMA_VERSION == document['schema_version'] == 26
+    assert codec.SCHEMA_VERSION == 27 and document['schema_version'] == 26
     assert execution_codec.SCHEMA_VERSION == 8
-    assert set(document) == {field.name for field in fields(ProgramGraph)} | {'schema', 'schema_version'}
+    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {'stored_value_writes', 'stored_value_reads'}) | {'schema', 'schema_version'}
     assert document['call_effect_expansions'] == []
     assert has_async_initial_control_capability(graph)
     assert has_protocol_connection_capability(graph)
@@ -198,7 +198,7 @@ def test_program26_does_not_relax_original_subject_types_or_allow_new_phase_fact
         codec.loads(json.dumps(document))
 
 
-@pytest.mark.parametrize('version', (True, 27))
+@pytest.mark.parametrize('version', (True, 28))
 def test_boolean_or_future_schema_does_not_enable_async_initial_control(version):
     graph, _, _ = _program()
     document = json.loads(codec.dumps(graph))

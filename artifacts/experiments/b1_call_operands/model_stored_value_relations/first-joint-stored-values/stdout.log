@@ -1,0 +1,353 @@
+...............F...............FFFFFFF.FF...........F.F................. [ 67%]
+..................................                                       [100%]
+=================================== FAILURES ===================================
+_ test_an_unexcluded_intervening_effect_blocks_old_value_but_q_post_reestablishes_it[opaque] _
+
+mode = 'opaque'
+
+    @pytest.mark.parametrize('mode', ('opaque', 'alias', 'different-domain'))
+    def test_an_unexcluded_intervening_effect_blocks_old_value_but_q_post_reestablishes_it(mode):
+>       graph, model, details = stored_values_execution(mode=mode, instances=2)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:80: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:209: in stored_values_execution
+    model, scopes, source = _model(graph,
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.linear'), regions=(Region(id=RegionID(value='stored.linear'), label='explicit....q'), index=0), effect_index=0, result=OperationResult(operation=OperationID(value='stored.linear.read.q'), index=0))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: unaccounted_state_use at program_operation:stored.linear.opaque: state inputs require access, call or control bindings
+
+scar/ir/program/validation.py:768: ValueError
+_ test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots[own-normal] _
+
+raised = False
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('own-normal', 'own-raise'))
+    def test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots(raised):
+>       graph, model, details = stored_values_invoke_execution(raised=raised)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:338: in stored_values_invoke_execution
+    model, scopes, source = _model(graph, ((graph.root, path, 'stored.invoke.actual'),))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.invoke'), regions=(Region(id=RegionID(value='stored.invoke'), label='explicit..., index=0), effect_index=0, result=OperationResult(operation=OperationID(value='stored.invoke.raise.read'), index=0))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:stored.invoke.write: each control input port needs its own exact use; completion_reference_precision at program_value:stored.invoke.normal.arg.2: produced references need verified summaries before gaining target or identity precision
+
+scar/ir/program/validation.py:768: ValueError
+_ test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots[own-raise] _
+
+raised = True
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('own-normal', 'own-raise'))
+    def test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots(raised):
+>       graph, model, details = stored_values_invoke_execution(raised=raised)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:338: in stored_values_invoke_execution
+    model, scopes, source = _model(graph, ((graph.root, path, 'stored.invoke.actual'),))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.invoke'), regions=(Region(id=RegionID(value='stored.invoke'), label='explicit..., index=0), effect_index=0, result=OperationResult(operation=OperationID(value='stored.invoke.raise.read'), index=0))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:stored.invoke.write: each control input port needs its own exact use; completion_reference_precision at program_value:stored.invoke.normal.arg.2: produced references need verified summaries before gaining target or identity precision
+
+scar/ir/program/validation.py:768: ValueError
+_ test_an_undeclared_raise_post_cannot_borrow_the_declared_normal_establishment _
+
+    def test_an_undeclared_raise_post_cannot_borrow_the_declared_normal_establishment():
+>       graph, model, details = stored_values_invoke_execution(raised=True, declare_raise=False)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:229: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:338: in stored_values_invoke_execution
+    model, scopes, source = _model(graph, ((graph.root, path, 'stored.invoke.actual'),))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.invoke'), regions=(Region(id=RegionID(value='stored.invoke'), label='explicit..., index=0), effect_index=0, result=OperationResult(operation=OperationID(value='stored.invoke.raise.read'), index=0))))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: control_binding at program_operation:stored.invoke.write: each control input port needs its own exact use; completion_reference_precision at program_value:stored.invoke.normal.arg.2: produced references need verified summaries before gaining target or identity precision
+
+scar/ir/program/validation.py:768: ValueError
+_ test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion[load-normal] _
+
+raised = False
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('load-normal', 'load-raise'))
+    def test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion(raised):
+>       graph, model, details = stored_values_calls_execution(raised=raised, instances=2)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:444: in stored_values_calls_execution
+    model, scopes, source = _model(graph, paths)
+                            ^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.caller'), regions=(Region(id=RegionID(value='stored.caller'), label='explicit...eReference(operation=OperationID(value='stored.shared.load'), successor_index=1), result=CompletionResult(index=0))),))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: completion_reference_precision at program_value:stored.caller.between.arg.2: produced references need verified summaries before gaining target or identity precision; completion_reference_precision at program_value:stored.caller.normal.arg.1: produced references need verified summaries before gaining target or identity precision; completion_reference_precision at program_value:stored.shared.normal.arg.1: produced references need verified summaries before gaining target or identity precision
+
+scar/ir/program/validation.py:768: ValueError
+_ test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion[load-raise] _
+
+raised = True
+
+    @pytest.mark.parametrize('raised', (False, True), ids=('load-normal', 'load-raise'))
+    def test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion(raised):
+>       graph, model, details = stored_values_calls_execution(raised=raised, instances=2)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:444: in stored_values_calls_execution
+    model, scopes, source = _model(graph, paths)
+                            ^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.caller'), regions=(Region(id=RegionID(value='stored.caller'), label='explicit...eReference(operation=OperationID(value='stored.shared.load'), successor_index=1), result=CompletionResult(index=0))),))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: completion_reference_precision at program_value:stored.caller.between.arg.2: produced references need verified summaries before gaining target or identity precision; completion_reference_precision at program_value:stored.caller.normal.arg.1: produced references need verified summaries before gaining target or identity precision; completion_reference_precision at program_value:stored.shared.normal.arg.1: produced references need verified summaries before gaining target or identity precision
+
+scar/ir/program/validation.py:768: ValueError
+_ test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation[association] _
+
+missing = 'association'
+
+    @pytest.mark.parametrize('missing', ('association', 'state'))
+    def test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation(missing):
+>       graph, model, details = stored_values_calls_execution(instances=2, missing=missing)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:262: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:444: in stored_values_calls_execution
+    model, scopes, source = _model(graph, paths)
+                            ^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.caller'), regions=(Region(id=RegionID(value='stored.caller'), label='explicit...eReference(operation=OperationID(value='stored.shared.load'), successor_index=1), result=CompletionResult(index=0))),))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: completion_reference_precision at program_value:stored.caller.between.arg.2: produced references need verified summaries before gaining target or identity precision; completion_reference_precision at program_value:stored.caller.normal.arg.1: produced references need verified summaries before gaining target or identity precision; completion_reference_precision at program_value:stored.shared.normal.arg.1: produced references need verified summaries before gaining target or identity precision
+
+scar/ir/program/validation.py:768: ValueError
+_ test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation[state] _
+
+missing = 'state'
+
+    @pytest.mark.parametrize('missing', ('association', 'state'))
+    def test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation(missing):
+>       graph, model, details = stored_values_calls_execution(instances=2, missing=missing)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_stored_values.py:262: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_stored_values.py:444: in stored_values_calls_execution
+    model, scopes, source = _model(graph, paths)
+                            ^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_call_graphs.py:91: in _model
+    model = ExecutionModel(snapshot_for(program), runs=(ExecutionRun(run, source),),
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:265: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:150: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='stored.caller'), regions=(Region(id=RegionID(value='stored.caller'), label='explicit...eReference(operation=OperationID(value='stored.shared.load'), successor_index=1), result=CompletionResult(index=0))),))
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: completion_reference_precision at program_value:stored.caller.between.arg.2: produced references need verified summaries before gaining target or identity precision; completion_reference_precision at program_value:stored.caller.normal.arg.1: produced references need verified summaries before gaining target or identity precision; completion_reference_precision at program_value:stored.shared.normal.arg.1: produced references need verified summaries before gaining target or identity precision
+
+scar/ir/program/validation.py:768: ValueError
+_ test_program26_preserves_original_body_none_ports_and_uses_the_existing_subject_tags[body] _
+
+subject = 'body'
+
+    @pytest.mark.parametrize('subject', ('body', 'none'))
+    def test_program26_preserves_original_body_none_ports_and_uses_the_existing_subject_tags(subject):
+        graph, _, rows = _program()
+        cls = BodyStateCondition if subject == 'body' else ReferenceIsNoneCondition
+        row = next(row for row in rows if type(row.contract.subject) is cls)
+        operation = next(op for op in graph.operations if op.id == row.operation)
+        wire = codec.dumps(graph)
+        document = json.loads(wire)
+>       assert codec.SCHEMA_VERSION == document['schema_version'] == 26
+E       assert 27 == 26
+E        +  where 27 = codec.SCHEMA_VERSION
+
+tests/unit/test_program_async_initial_control_codec.py:75: AssertionError
+_ test_program26_preserves_original_body_none_ports_and_uses_the_existing_subject_tags[none] _
+
+subject = 'none'
+
+    @pytest.mark.parametrize('subject', ('body', 'none'))
+    def test_program26_preserves_original_body_none_ports_and_uses_the_existing_subject_tags(subject):
+        graph, _, rows = _program()
+        cls = BodyStateCondition if subject == 'body' else ReferenceIsNoneCondition
+        row = next(row for row in rows if type(row.contract.subject) is cls)
+        operation = next(op for op in graph.operations if op.id == row.operation)
+        wire = codec.dumps(graph)
+        document = json.loads(wire)
+>       assert codec.SCHEMA_VERSION == document['schema_version'] == 26
+E       assert 27 == 26
+E        +  where 27 = codec.SCHEMA_VERSION
+
+tests/unit/test_program_async_initial_control_codec.py:75: AssertionError
+___ test_boolean_or_future_schema_does_not_enable_async_initial_control[27] ____
+
+version = 27
+
+    @pytest.mark.parametrize('version', (True, 27))
+    def test_boolean_or_future_schema_does_not_enable_async_initial_control(version):
+        graph, _, _ = _program()
+        document = json.loads(codec.dumps(graph))
+        document['schema_version'] = version
+>       with pytest.raises(ValueError, match='unsupported program graph schema version'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'unsupported program graph schema version'
+E         Actual message: 'program graph document has incorrect top-level fields'
+
+tests/unit/test_program_async_initial_control_codec.py:206: AssertionError
+______ test_v15_roundtrip_keeps_single_access_mode_and_original_producers ______
+
+    def test_v15_roundtrip_keeps_single_access_mode_and_original_producers():
+        graph, _ = state_address_program()
+        assert AccessMode is CanonicalAccessMode is PublicAccessMode
+        document = json.loads(dumps(graph))
+>       assert SCHEMA_VERSION == 26
+E       assert 27 == 26
+
+tests/unit/test_program_state_address_codec.py:47: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_execution_stored_values.py::test_an_unexcluded_intervening_effect_blocks_old_value_but_q_post_reestablishes_it[opaque]
+FAILED tests/unit/test_execution_stored_values.py::test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots[own-normal]
+FAILED tests/unit/test_execution_stored_values.py::test_invoke_post_uses_its_exact_selected_completion_and_reordered_state_slots[own-raise]
+FAILED tests/unit/test_execution_stored_values.py::test_an_undeclared_raise_post_cannot_borrow_the_declared_normal_establishment
+FAILED tests/unit/test_execution_stored_values.py::test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion[load-normal]
+FAILED tests/unit/test_execution_stored_values.py::test_two_actual_activations_of_one_callee_keep_the_real_source_and_own_read_completion[load-raise]
+FAILED tests/unit/test_execution_stored_values.py::test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation[association]
+FAILED tests/unit/test_execution_stored_values.py::test_cross_call_missing_evidence_is_local_and_never_borrows_the_other_child_activation[state]
+FAILED tests/unit/test_program_async_initial_control_codec.py::test_program26_preserves_original_body_none_ports_and_uses_the_existing_subject_tags[body]
+FAILED tests/unit/test_program_async_initial_control_codec.py::test_program26_preserves_original_body_none_ports_and_uses_the_existing_subject_tags[none]
+FAILED tests/unit/test_program_async_initial_control_codec.py::test_boolean_or_future_schema_does_not_enable_async_initial_control[27]
+FAILED tests/unit/test_program_state_address_codec.py::test_v15_roundtrip_keeps_single_access_mode_and_original_producers
+12 failed, 94 passed in 20.10s

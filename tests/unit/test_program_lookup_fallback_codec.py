@@ -39,10 +39,10 @@ def _binding(document):
 @pytest.mark.parametrize("matcher", ("ordinary", "invoke", "raise-only"))
 def test_lookup_fallback_selects_program22_and_preserves_original_port_namespaces(kind, matcher):
     graph, document = _document(kind=kind, matcher=matcher)
-    assert codec.SCHEMA_VERSION == 26
+    assert codec.SCHEMA_VERSION == 27
     assert has_lookup_fallback_capability(graph)
     assert document["schema_version"] == 22
-    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {"call_effect_expansions"}) | {"schema", "schema_version"}
+    assert set(document) == ({field.name for field in fields(ProgramGraph)} - {"call_effect_expansions", "stored_value_writes", "stored_value_reads"}) | {"schema", "schema_version"}
     original, = (row for row in graph.protocol_bindings if type(row) is DelegateLookupFallback)
     encoded = _binding(document)
     assert encoded["lookup"]["kind"] == "PROTOCOL_OPERATION_REF"
@@ -211,7 +211,7 @@ def test_fallback_tags_are_separate_from_the_frozen_connection_tag_registry():
         LOOKUP_FALLBACK_RECORD_TAGS[DelegateLookupFallback] = ("kind", "ALTERED")
 
 
-@pytest.mark.parametrize("version", (27, True))
+@pytest.mark.parametrize("version", (28, True))
 def test_future_and_boolean_schema_versions_remain_rejected(version):
     document = json.loads((FIXTURES / "program_graph_v21_frozen.json").read_text())
     document["schema_version"] = version

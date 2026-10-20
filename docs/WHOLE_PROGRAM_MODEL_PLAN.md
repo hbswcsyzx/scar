@@ -3,7 +3,14 @@
 日期：2026-10-16。这是当前优先计划，修订旧 N2 中先推进局部桥接的顺序。
 模型依据：[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)。用户无需逐门审批。
 
-2026-10-20 最新范围：[当前对象身份限定验收](M1_FRAME_IDENTITY_GUARD_ACCEPTANCE.md)
+2026-10-20 最新范围：[原存储值限定验收](M1_STORED_VALUE_ACCEPTANCE.md)通过961
+相关项/913稳定源码，新增40。原访问上payload→state→load值关系与条件性执行查询
+已落；Program27保持旧1–26 wire/Execution8，旧codec版本迁移显式保原义务。
+[下一门](M1_STORED_VALUE_NEXT_GATE.md)先接准确load结果到通用旧消费者，检查构造
+内新owner的原Region/边界表达，再返回F19原组合。不将未采native/source当已自动
+恢复，不关闭原七族、P4/P5/M2或完整M0–M2，也不增加detector/backend。
+
+此前范围：[当前对象身份限定验收](M1_FRAME_IDENTITY_GUARD_ACCEPTANCE.md)
 已以231直接相关项/907稳定源码通过，保留上批全部196项、旧tests/fixtures与schema。
 独立身份声明可接当前frame的真实F历史，不恢复stored-reference来源或数据版本；
 原无声明None保持。[下一门](M1_FRAME_IDENTITY_GUARD_NEXT_GATE.md)据已有合同审查结果
