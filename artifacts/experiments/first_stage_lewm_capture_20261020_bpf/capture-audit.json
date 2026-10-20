@@ -1,0 +1,1541 @@
+{
+  "schema": "scar.first-stage-capture-audit",
+  "schema_version": 1,
+  "scope": "raw evidence recount and conditional within-window provider joins, not a canonical program model",
+  "whole_model_established": false,
+  "canonical_graph_imported": false,
+  "run": {
+    "command": [
+      "python",
+      "run_inference.py",
+      "--config-name=pusht",
+      "policy=pusht/weights.pt",
+      "eval.num_eval=1",
+      "eval.eval_budget=25",
+      "eval.goal_offset_steps=25",
+      "cache_dir=/gpu4-share/data/byx/lewm_data",
+      "hydra.job.chdir=False"
+    ],
+    "returncode": 0,
+    "wall_s": 302.04685678333044
+  },
+  "manifest_status": "CLOSED",
+  "manifest_failures": [],
+  "pid": 452006,
+  "eto_schema": "1.1.1-chakra.0.0.4",
+  "eto_nodes": 151228,
+  "eto_positive_rf_ids": 151226,
+  "kineto_positive_cpu_rf_ids": 151226,
+  "unique_same_id_name_matches": 151226,
+  "duplicate_eto_rf_ids": 0,
+  "duplicate_kineto_cpu_rf_ids": 0,
+  "eto_positive_rf_ids_not_uniquely_matched": 0,
+  "kineto_event_categories": {
+    "": 62,
+    "Trace": 1,
+    "ac2g": 54096,
+    "cpu_instant_event": 70872,
+    "cpu_op": 151226,
+    "cuda_driver": 50,
+    "cuda_runtime": 29964,
+    "gpu_memcpy": 543,
+    "gpu_memset": 1082,
+    "kernel": 22457,
+    "overhead": 99
+  },
+  "gpu_activity_runtime_correlation": [
+    {
+      "category": "gpu_memcpy",
+      "status": "unique",
+      "count": 543
+    },
+    {
+      "category": "gpu_memset",
+      "status": "unique",
+      "count": 1082
+    },
+    {
+      "category": "kernel",
+      "status": "unique",
+      "count": 22457
+    }
+  ],
+  "observed_device_context_stream_tuples": [
+    [
+      0,
+      1,
+      7
+    ],
+    [
+      0,
+      1,
+      13
+    ]
+  ],
+  "calls": {
+    "schema": "scar.call-edge-trace",
+    "schema_version": 1,
+    "process_id": 452006,
+    "project_root": "/home/zyf/AAA/le-wm",
+    "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+    "limits": {
+      "max_events": 250000,
+      "max_bytes": 256000000,
+      "max_codes": 4096,
+      "max_values": 64,
+      "max_path": 16,
+      "max_references": 8192
+    },
+    "events": 168630,
+    "event_attempts": 168630,
+    "invocations": 84315,
+    "invocation_attempts": 84315,
+    "codes": 851,
+    "bytes": 160215650,
+    "dropped_events": 0,
+    "dropped_codes": 0,
+    "unknown_exits": 65,
+    "suspended_exits": 4021,
+    "open_invocations": 0,
+    "active_frames": 0,
+    "errors": [],
+    "path_gaps": 0,
+    "io_failed": false,
+    "wall_ns": 298517320459,
+    "scope": "initial process and newly profiled threads; native calls/child processes/existing threads not complete",
+    "reference_contents_observed": false,
+    "callable_environment_established": false
+  },
+  "operands": {
+    "schema": "scar.call-operands-trace",
+    "schema_version": 1,
+    "process_id": 452006,
+    "project_root": "/home/zyf/AAA/le-wm",
+    "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+    "implementation": "cpython",
+    "rule": "CPYTHON_CALL_WINDOWS_V1",
+    "limits": {
+      "max_events": 2000000,
+      "max_bytes": 1200000000,
+      "max_loads": 64,
+      "max_namespace_items": 4096,
+      "max_references": 8192
+    },
+    "events": 312812,
+    "event_attempts": 312812,
+    "instructions": 207248,
+    "call_attempts": 100550,
+    "handshakes": 4069,
+    "gaps": 945,
+    "loads": 17037,
+    "references": 234853,
+    "bytes": 114228367,
+    "dropped_events": 0,
+    "errors": [],
+    "io_failed": false,
+    "previous_profile": false,
+    "base_manifest": [
+      {
+        "path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/call-codes.452006.jsonl",
+        "family": "codes",
+        "process_id": 452006,
+        "raw_sha256": "fcd1a7e12340333103855bbef69a63a266f926019a2be3a13ded1df6c3e00568",
+        "raw_bytes": 224911,
+        "lines": 851
+      },
+      {
+        "path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/call-events.452006.jsonl",
+        "family": "events",
+        "process_id": 452006,
+        "raw_sha256": "486d1524200ee94d5982b0dc122cb5754883f01017e2df1ff62cf66b6619c894",
+        "raw_bytes": 159990739,
+        "lines": 168630
+      },
+      {
+        "path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/call-meta.452006.json",
+        "family": "meta",
+        "process_id": 452006,
+        "raw_sha256": "6361acb9daec5a7624d3c97fb389266770c7a1dd7f435b7ea92bc70db83ed972",
+        "raw_bytes": 954,
+        "lines": 34
+      }
+    ],
+    "reference_contents_observed": false,
+    "callable_environment_established": false,
+    "transformation_authorized": false
+  },
+  "os": {
+    "files": [
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452004",
+        "raw_sha256": "af8de6aeac40af519a93dab4a3da3c7074ba9d43742b365600639143c5293dea",
+        "lines": 2530
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452006",
+        "raw_sha256": "46893b814479905c449c8451fee902651e9a2c2b9a121e6353aaa834bda3cf51",
+        "lines": 692422
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452009",
+        "raw_sha256": "9214c0d04851d2396200e0a4c71c1f7af8bcb67414785c4f7e8beb61023b118c",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452010",
+        "raw_sha256": "400e759295035d2c78481c88541e7a09a7c11576383464bf4a7d7038374533a4",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452011",
+        "raw_sha256": "476c325372f3b43def7aab3c57e2bff51510d33bee0f3c1b1ccf02ca1bfada5a",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452012",
+        "raw_sha256": "c46cbc2ac3826896cce99847482b722f835f4d2a405dea0574c7d05d15dce504",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452013",
+        "raw_sha256": "cebb665a96e4be27b2f00a0dae3c6f10b5346ccdd942549445eeedf9c8161fe0",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452014",
+        "raw_sha256": "dd11c8ed187cfbae54e04605d698b12e761980bbbd759ea2b2f0e64819666a09",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452015",
+        "raw_sha256": "9a61d800ebe491c494bda477f47bdf2f30bc48a91ce10d97056e072ea0aaea73",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452016",
+        "raw_sha256": "83d19d7562bbbfcada3e71549edf3ed16f3e282bdd3c07d8e34f89307cb8d037",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452017",
+        "raw_sha256": "83f324b91fe57505c564b60c37504346076bca71cf5a797db25649fa5e83848f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452018",
+        "raw_sha256": "0f0fb985b8495c7f971defc29a1635759eb5be753cc497526f91c03bbc3f6bdc",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452019",
+        "raw_sha256": "8c812d7047fa8f764dc9b71348ea950a0c9d33ccadcf1c1cae6ce5468598e8bc",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452020",
+        "raw_sha256": "706e5904121e6b2db58cfc623e365c9560d16f86ef60cdba5773fb4a831e9c86",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452021",
+        "raw_sha256": "c8fd2c88c3dc1ac94d033b438ca13c4d13d0a952d6bb41765e738a24e1ff45b7",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452022",
+        "raw_sha256": "a5cd284e1cc05f53589dd27e6909814c7999d6a090a4893a0a58136abac09120",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452023",
+        "raw_sha256": "2002b25960572085c7814a174812f3b090be4363dfdfdd39f97e5e429fff4e5a",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452024",
+        "raw_sha256": "d789d03cc937fb669e83d886168d1d5139aae1f8a53493c442f7346526ad7e20",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452025",
+        "raw_sha256": "ffeb8c4bc945c09bfc0109cff0665ea8d10e16915e42c8c85272475358e1cfcb",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452026",
+        "raw_sha256": "41083ceb594d9f0a887c20ac272826e727509b0dd22ad833a174c3325fdc0a6f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452027",
+        "raw_sha256": "5fc3c29c3c1d2cb488ec3523dddfd5c891ce3483f8929c1da129025d68e9c6f5",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452028",
+        "raw_sha256": "b1814133bc8131ef38b0c91ad4a653a7229d921fabbca397cb77e78b8857028a",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452029",
+        "raw_sha256": "004be2cfde2396f7d7ce02e9d8d65d5de4c76ec92a3b8eb287f39b55fb22c732",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452030",
+        "raw_sha256": "b82d9a84be45e14f3c09dde9514d9a657a926315cc0d57e88b046089027db2bb",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452031",
+        "raw_sha256": "5e622dccac15ba5e5f7b741342af2be9c7d7ea429a18ab841301dd852be6f014",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452032",
+        "raw_sha256": "e55900dacdb84b335e90cb979265d46f8a5620f0a25ca3c1001726d63cbb81b8",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452033",
+        "raw_sha256": "7bdec969a281a6ee016f09c399fb3da860902c91d18739a2de8acddc7f90b5a5",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452034",
+        "raw_sha256": "478bbb1b81b49c0a14401f0956e6da8e2366c6d364cd73ccc4f259b01ec46d4f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452035",
+        "raw_sha256": "66b6cc17daba013783da78a3bb5c7b75b41c704301cca408175c80e4d6bc7fc2",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452036",
+        "raw_sha256": "dfa607374e66b95cd67005c524fd55ed13da3b0976e1265bfdd6f9d1969f1fc7",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452037",
+        "raw_sha256": "59b1b907f4030a9ad9d5afbf12862d53ad2c314164417e82b5bda07014f4febd",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452038",
+        "raw_sha256": "9940e6cfc7f130b4db79161e38abadd9a5080a7c82413b58010f5cfc4e16b422",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452039",
+        "raw_sha256": "7f73fb3c1bceecf8ec32000be64c066d9c1480a01e3b62f214917d74a8b70634",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452040",
+        "raw_sha256": "3ac2739b40a7fee50aa405b3080b70ca06e897f71bc986db14cff63a9760b7ec",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452041",
+        "raw_sha256": "b127622652f230f8bdfcf72d642cff0e496a205a11c01de212e52fa2d91d1570",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452042",
+        "raw_sha256": "18041de72b374994f73931b8454d582ec34075c80f88b51ee18208d4af0ef556",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452043",
+        "raw_sha256": "a59dfd77260399e67430f5f6b57b877e525c3340888c4e6b67c5e7eea77bd5b7",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452044",
+        "raw_sha256": "8c8f080ff3541a0e16184b62f9fea93fe2833481145a05effc3ddf236b347925",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452045",
+        "raw_sha256": "f83cba48ca07fa5a85d31d2ee0f8a8b65328b48272f1488f881c9a472ad43db7",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452046",
+        "raw_sha256": "5dedba5c47a1a158bb2aedaef0bd1fbdc75d36bee1e7123d8644d987f63978b1",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452047",
+        "raw_sha256": "5567e8497ec89b5f12e80654392c5f9a07c61c6028a3009f0192f6fb4328cfe6",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452048",
+        "raw_sha256": "5f8eccf00fdef1c27f42d229adc0ea4a7192aef610e9849b07d7e83da9bd41be",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452049",
+        "raw_sha256": "6db8bd1fa7d28368485a7e91b49538bf556c6df4262a1bfdde5a047ad8f85a00",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452050",
+        "raw_sha256": "83074b12fdf2fd3120fb0a302fd843cbe1fae0cd2d322a710b96bb4c69ff0d1c",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452051",
+        "raw_sha256": "b5b8ece2dbdb5107197501c7fb83427ac9a3839818fea008d29a5951440e131d",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452052",
+        "raw_sha256": "5b044daaf7b1bc3f9910f9e277686fbddb46c410185bc4c1681090de14ad140d",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452053",
+        "raw_sha256": "280ac667b1c8e9bb68e12a39ae4754ff8761c52ab484c38b93e42644b3ae30fe",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452054",
+        "raw_sha256": "690654af88742f600a9f9052538c328d7cadce8c1678873bb5d3c43dc3322c15",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452055",
+        "raw_sha256": "a799691c9f66d26f7b5ebbcafe1f37a07a12889c5d957e5537c65b677799b7aa",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452056",
+        "raw_sha256": "2a58f9c0bd3ab4813e62d1f804e915745304389e24a64272b7a43922ab4e81ef",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452057",
+        "raw_sha256": "4106a2250879c81a5ade12dc2ce8773b5629451e06e76e5088536bbb48d680eb",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452058",
+        "raw_sha256": "41e3a5b2793486e9823f9ebc512b518faf1ad1bb3663e6e09ba708304e6522ef",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452059",
+        "raw_sha256": "c7d02e748812ff11ae951adbd813edd3022137561eaa46b8762b0e3cb88cff94",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452060",
+        "raw_sha256": "33f960a30863ea565e2bdde47f788d38500ba9b7bdb0d66ed795d08b90fa9b0b",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452061",
+        "raw_sha256": "5276b4f9dca12dcdd32fad40605f4f2406050118213b8a6bf3594d2a841f2ce2",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452062",
+        "raw_sha256": "845b665aa55d7bf09128cc7ec724f797d80785abdcc39890588db0b1d741a6ba",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452063",
+        "raw_sha256": "a9ef37f6d192dfc16fb0710b8bad5817ba1cbe1187b437b4713f75baf40c6c28",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452229",
+        "raw_sha256": "7b33ad2461a4457a8b9959831e87d397bbf91037c7ff6039e83ee6c70c9b9e71",
+        "lines": 82
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452341",
+        "raw_sha256": "a150d4ba31ba86615e27c4a1454d767ef4ab925de3fe9dd7047852722957caa8",
+        "lines": 9
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452571",
+        "raw_sha256": "32b39256d01640bfaf05f41099f3245c81905ea3578f8a691180c7fa87021fe1",
+        "lines": 6
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452572",
+        "raw_sha256": "07640847e7eb337f3fc08a8e702ad7651271cb4167fefeba3c8d447721b11598",
+        "lines": 70
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452573",
+        "raw_sha256": "ffbef0f65804249c113f1aa0f5d1e5a3b636ed97eb9f28086c1356f69135b61a",
+        "lines": 7
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452575",
+        "raw_sha256": "cbaffe096ad28f3952108d8508be226ead562b32a888e55af932adf224a6bd27",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.452664",
+        "raw_sha256": "6aeeba3839a3c76ea5c06023743e9ca11f9f734260db5bc5d7301ba44dfa3abb",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453048",
+        "raw_sha256": "c7c8741d75adc99f5508c0a0fa5eeb9508f7ec765bd44dbf11d8aee66bc4f4ba",
+        "lines": 181
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453051",
+        "raw_sha256": "e97b7babc79c411c08463fc15504d51330a826f0723dedc6c34913c2acf05d50",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453052",
+        "raw_sha256": "84a4d5c9230f0a5051e6065fc22ffbca6a49ddf506d52fa9e676ae84dc2f8dc6",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453053",
+        "raw_sha256": "ea665a2810e4a987d940f69bb922dcab0f1e025addf918a8d72db4b4f64e7cf6",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453054",
+        "raw_sha256": "26508da2c1eaae84eb5896109d14ae7b41b9c4715458ab388ba1d4d328fba3da",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453055",
+        "raw_sha256": "60400a329083291cac59e993ab258c25631aee5de3c10f76007bdc05f41260c6",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453056",
+        "raw_sha256": "0836fde6348c9f76c7701931464464885490d72dc3fe3d96eb56fc2750e1aeac",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453057",
+        "raw_sha256": "22167e83be4790a98a620ece7c1c632e9e5c9cafd973f6792a23de43cff4d183",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453058",
+        "raw_sha256": "7f14d2b55dce9b0eed13b2b42f1e30cd2f076e4f619ce58588dc9955d5e97d58",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453059",
+        "raw_sha256": "b3a9cac1aa925a8bf7ec0bbb1f53f7f0d34dcf3eb16ca8b902773a67d16efd55",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453060",
+        "raw_sha256": "e0bac692f30937c72a13407adcf288b0533281f89c5130a9e6c92792b11c86fb",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453061",
+        "raw_sha256": "ebe051880e68f81a677d5ff25fe0daffd88d87be2e14d274d787e5dfe29fab23",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453062",
+        "raw_sha256": "9075b6ce654f69d102311a102614d4e24e3d4bc64b5d1ea8cdad1162531d2de7",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453063",
+        "raw_sha256": "db23d50aa0821de283cb90d8bb38bf2bb24e3c076c918c35534bbc26066bc422",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453064",
+        "raw_sha256": "ab9f55a4b1f0228479a2d37dcb8031ef48f2bf9d1b003b7b015923974dcdef28",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453065",
+        "raw_sha256": "7ad7a502c8d34269de85734c120095e9576dd8a4acbe191c56ce2d2178d79f1a",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453066",
+        "raw_sha256": "148e516a0770c80aa19ab0b60e592f9307a9de43fcb747943f76b98064ed2317",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453067",
+        "raw_sha256": "8da4f7da442c8de5b0b2957ab5f93804d8715d6a5b98f96dd13d52fdad6d1626",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453068",
+        "raw_sha256": "c850b11388189ccdd9680e9467726f28676edcf9152a16ba10b6975ae98f1213",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453069",
+        "raw_sha256": "b35aaae4f5d15dfcdc02cac07faeaddd1baec32fddde8f2f7fdbbdd0dbf98647",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453070",
+        "raw_sha256": "540fb9ce8997b664b2678feec35b8012fc25e5eab686003396177c755c4d0365",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453071",
+        "raw_sha256": "3136f83fdee953cc30590a84e04af2ecc0f33df2c03f73b6ffedee015a565b27",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453072",
+        "raw_sha256": "da941bf7eec17250275419e260bd6f452ae12c9a95893b2c7eb9f1b2c16dc486",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453073",
+        "raw_sha256": "ab5c9d0d2ffcfffa4d9a2803317103d9b021027445ae9ad23082528e8d90465d",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453074",
+        "raw_sha256": "65914674c7a7adc30fa6aa4797c0e5dad079ff0c695130a9b4a58e402127af09",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453075",
+        "raw_sha256": "461f53e6678fdd4a308f1c43a700ade81fe9e2dd2bf0461e26121bfa5b1a52c4",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453076",
+        "raw_sha256": "e86d76479c501a8f944af93d6f770956ce6f76a63909819751033b6f6cb6e550",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453077",
+        "raw_sha256": "15fb670eb3359dd6e377edd4a4b9af901af95bf993addf7c1506746441fe4941",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453078",
+        "raw_sha256": "24ae8a19133165c393bd1fd3dc98a60d0a86fbe3dca66538595f2e2216772bb5",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453079",
+        "raw_sha256": "922208b75f6a7963c738a5770f30fb01e943db260813b281c42ee296c71cd668",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453080",
+        "raw_sha256": "b250d1a3c8791d583b1b69fb6913a0e0bcde9bc87800ee8c194623bcfd1539f4",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453081",
+        "raw_sha256": "b5709b7609ede2a245d65ed3925da1191cebaa0fa140da7ab7f153d7f606a61d",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453082",
+        "raw_sha256": "a779b6c5f5b59837b981af0e04094ba2bfb32d8ac6a62b4100e26af73a1e5d0c",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453083",
+        "raw_sha256": "42d3a8a5cb9e8a8699efbce31489f1954fe6f0112e1545b5d00d7c4188ab1a3b",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453084",
+        "raw_sha256": "7cfb5d7be014eb190e124c7a9074f7c40633e525412b1d3029304a3acf70cf41",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453085",
+        "raw_sha256": "df6bcf22b3e69e05f077d96f48fa093063445e057bb657128168a4a21e2f2928",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453086",
+        "raw_sha256": "98f0213652f8f544b347e0963f40fbf84eec86be59445af93e460e924a4673a0",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453087",
+        "raw_sha256": "94a7b851c6a26b7b753ce70aac5fb6de3fd37b108450bc3005e589c75fb1426f",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453088",
+        "raw_sha256": "3ecc673db0a35dad0966cc6a4363699770d8a6ad5605cdc5a34e1c25ce2280a3",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453089",
+        "raw_sha256": "99b84d2983f9b795df8d49b1727e0fd076a7a337cfbd137a90009465bfcd510e",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453090",
+        "raw_sha256": "18021b93f91a8f454666f5372de2b94fc6192957502663287b0dbec07d58b643",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453091",
+        "raw_sha256": "45b9c5e5cf167bc359a70659b7514c777a2becfba6d0ac53a0c2083edb4584d7",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453092",
+        "raw_sha256": "206f5ed550daf3c7ca8f008382d8682ff78af0a0863195d2dbeccbc292907ac3",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453093",
+        "raw_sha256": "5b200889ae97c6903d6592a2369f856045ffd96da6e5e5440802d295e7cf1c8a",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453094",
+        "raw_sha256": "f8e518866ca2650ee5ed3ab76da753eb460b48b1eec0cc67cb652b2f9dbb7d1a",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453095",
+        "raw_sha256": "a49d2dd5c1c9d1a00a740cc92cba1fc00e6570e81e001b2968ee72b2c095e5a8",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453096",
+        "raw_sha256": "1df791abd334fece0684e96e93342454a7c737ce3c5bfeb4f336d63b4049282d",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453097",
+        "raw_sha256": "8e3c2152f5355217873389577c8067dcf239698524f02e196e37093458bd9c84",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453098",
+        "raw_sha256": "80655ac4270c7f33cd33939285655874daa45facb99fcc9773ada66bb0b24d35",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453099",
+        "raw_sha256": "b2b49e0d5337b8451a4dbeda761b0ba5472f76518c867df0edd08504678340ab",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453100",
+        "raw_sha256": "57da9334a72e05ae2125986bca8ab861d77f467c75406b1dcd843faae7039265",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453101",
+        "raw_sha256": "16e136458ff2e1b3380525c54fe2bd212afe12e480ce51f3ee157f688a000fd9",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453102",
+        "raw_sha256": "956d8a8f42ee5351df6f9a2db89ed49463a665e7d173547da7cb48b3fc987730",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453103",
+        "raw_sha256": "1f7e8b942f554892d492c2a4eb6fa2fecd955049d634f348f2a4009963aa6268",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453104",
+        "raw_sha256": "c2dec27c71e3748d604cec54399b40280fd1f24a8af3d100ec70b512dabeae8e",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453105",
+        "raw_sha256": "179b649390e8c186ba55936e6f311b3a154879e90b1758eeb6f1d9bff96a1372",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453171",
+        "raw_sha256": "e6d75a177e5327194f6f7da7b6a0e87147195ea84cfdda9fa974ee628d060d88",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453172",
+        "raw_sha256": "4e49145822dff32168019951b33c807a0c7668d6f2bf0d4f6a37cdb9fd55ac7c",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453173",
+        "raw_sha256": "aca578989cbdb6feb112ad62fd0319e05654bffee65ce558ea85d10281b48e07",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453174",
+        "raw_sha256": "3f06f92a180e70b5c575e7c87fbf47c8101090b947a13cbae191b81f7ffe1609",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453175",
+        "raw_sha256": "a4387741242ff765631febb2fd57af73966d88770b18fd1d8e322cbd0aa3136d",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453176",
+        "raw_sha256": "94c92b4a0de052be31adef0d4a9798919f85fe5960d3284545115c5c82a39497",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453177",
+        "raw_sha256": "5c1d3a606b8f3a0e4a976be30649f98c3e2b356a686c72d9d16fa83b9768087b",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453178",
+        "raw_sha256": "5c8199999f2d870fc3050c4a76aab720aee68fdb263dcc9251cd130e03370f3f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453179",
+        "raw_sha256": "0c1a226e3a7283a82842302b88a53fdccf59ecd8d6daef4b45ae0f5c9dece939",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453180",
+        "raw_sha256": "76e2cbbda8fa8563861fc34fb71a004317fc89e4dd0eda5523ff6225eb948828",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453181",
+        "raw_sha256": "cfdbb42b28e7d0cea12bdf949bf8ff87384f8cf645eb48b7b54948adeb19bf9b",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453182",
+        "raw_sha256": "dd800769f445de47f3af1f6278dbaa65578662f9722361a9a3d3bc113128dc1b",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453183",
+        "raw_sha256": "7aee4cd80ae9eac0156bfc1c67e076ae457e891ddf03cf52ed5ba43894afcdec",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453184",
+        "raw_sha256": "3a3af859ca4a853c8ea2e0d7753c3ccf1df84d62ca598b58f36028536f79f69d",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453185",
+        "raw_sha256": "54d634c2324db2b97a80533a88a32e16e41ac4b4e034607d2cabe06518bc9949",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453186",
+        "raw_sha256": "464299ac727c6c9ecac77cf136c3fcea9c0d602a7176efc4c61090271ac932b7",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453187",
+        "raw_sha256": "f967212200865e2057b015522632676660aa7f76c7ade0bd9ca0ca4a842038ba",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453188",
+        "raw_sha256": "462cc109b5467d9e9e449f4ee98b77cdabd3774fb53758fa2bd75cccd5790cfa",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453189",
+        "raw_sha256": "a714a4645c3a4c99b4a6013209b9e18780485ed00e4ad51f1b5cc68b30794f60",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453190",
+        "raw_sha256": "fa8957f510399b752d3979545c81334916eeb955c5eab763856b1acc4bd1e9a1",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453191",
+        "raw_sha256": "3c27a9bda0203318ef50589664fb7cc384b866be9c4fc6b9658ae551bf156df4",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453192",
+        "raw_sha256": "18807af7e45f62247d3a7b6664aef48f1217fc32f89dde9307c734eb4aebfc91",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453193",
+        "raw_sha256": "14d5a005bf3b1d8692854a1e42b0b0222cfd7425511df03ee2cdcb944b6f9838",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453194",
+        "raw_sha256": "e1283768dcb85e12bb8ab1c33b49757ad3adc6a656a637a00aebe16a22edcd08",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453195",
+        "raw_sha256": "6e530b96b13e4f967fb544a4ed23c03f1337c748165e4abc6fee31041b09832f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453196",
+        "raw_sha256": "11e247b1b4fe2dcb3e67ac695591776768e1b03c2d1b4b9ee0e8a99078e2c610",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453197",
+        "raw_sha256": "1f654d9d07828c8758ed9006a42f1aadbe2eab184a0f9497a1446abbbe299592",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453198",
+        "raw_sha256": "6306a045df7d7bc28fe874ff1cb5feb3288b94ede926f1a3e4a7600e7eec2954",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453199",
+        "raw_sha256": "cedcf7466916f5fa7e30d61c3ade565a8d9b54395cde84016539a7f8d583237d",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453200",
+        "raw_sha256": "35454f4aa4c5040351846329a92e8e56eda33f62a2aaa48772cdfc1d1b09db58",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453201",
+        "raw_sha256": "4c8ac4ff26bb7b09b73264192d0a259092fcaef28f042c94bfaa57cadf37271d",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453202",
+        "raw_sha256": "fb1ecfe3b130c448b56e5663b9a1f580a52581a45e2559c7d6e06fe81f590be6",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453203",
+        "raw_sha256": "5f815b9eec4b6d4ecfb66b377f139d09eb8aff161dabaa3c8848e3856b3137c8",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453204",
+        "raw_sha256": "4af9fe464d2162282b4f5e2da14d0f0b4f31dc210380075b3fcfda1a46d11af9",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453205",
+        "raw_sha256": "586dd63ebf15945be406e2c2b6c0024c453a6f28ed315e6e2b7d9ef2cf2ee333",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453206",
+        "raw_sha256": "76180f63a1439641e9e0aba98599265efb953aaf8b72503975188e7ba9aa41b4",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453207",
+        "raw_sha256": "e73e7f1ef1e8db531b81c9ab33d2639b45afadcd3c036a1840ca6298628df814",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453208",
+        "raw_sha256": "b4f5d2f564c89ba3ecf0457e4b8d171bd7ab14f8c16ce34fae17ce9927727a3f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453209",
+        "raw_sha256": "a1d931ccbec191ae28ae452a1b70ee969f64cd8067753ec0af49a9eead41c3bc",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453210",
+        "raw_sha256": "20764f1bfc5f3988f03424830d2661c04ee7c3ad1549b201eb9c92a7b3d3fe4d",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453211",
+        "raw_sha256": "1ed54e57e9ea7fee727b64b9abaacd20dd28488a296312c2a97257d9ba3a516a",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453212",
+        "raw_sha256": "36fb4d8fdb2fa58b72b8ec342f8fd93ac2ab0c8ff75edf393f9507c38ebec34e",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453213",
+        "raw_sha256": "57d390248d5de849686cfba10ad401d881d6427cd933b895b90013d41dadb806",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453214",
+        "raw_sha256": "043c3ab20a84d92fd187a5c925a797f81ebd95928a867f96704086adeb267153",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453215",
+        "raw_sha256": "afc45e19ff3e28e3611a5340d9d188ff9a5aa256b759eb2f78a214f78356716f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453216",
+        "raw_sha256": "24cbc1bc7569651b5bd5093cf8cf8713cbef17b709962022268e4f65eb9ce0b2",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453217",
+        "raw_sha256": "dbaea54b3016c28ce0a7958e03a08d0fb87e26c0598f9b7c641142f02b66e64f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453218",
+        "raw_sha256": "d4bae57ccaa1b567aed2cdc9bc6f3067f1da90ea7995119455e48732d3eec9c0",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453219",
+        "raw_sha256": "c6a412ae2f867066f9a701261b161d862c046dde56d9d55680701b5c0c6181b2",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453220",
+        "raw_sha256": "de8dc02109fc38480915ac727f1633066a48729858c2d70fc8aa63249070da2c",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453221",
+        "raw_sha256": "bbd4765a1c6a542f58b5c104db5b7b2535356027e64602b80702eddf12d88aa9",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453222",
+        "raw_sha256": "bbe65d8e08a5ca1b4f764189a18a2241c35ee48e12d0191ddba82afd9ff34ec3",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453223",
+        "raw_sha256": "1cf9f7859580098065a4f17628b21d5d4b7808918e4ee91101174e93de0ab256",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453224",
+        "raw_sha256": "efd8c878fd368c370cc5693c1531710360c33f8f2cd4deee2e25f816e946b2fc",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.453225",
+        "raw_sha256": "ec9b0520ebb3151ed9d79e237aa8fb22c93cf4d305e0044ee49b45bdf7eab6c8",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454232",
+        "raw_sha256": "4e09b034b5a702f2cf684158e033273b9d4063020a199e8b5fac1bc6eb7fc150",
+        "lines": 6
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454233",
+        "raw_sha256": "1a5402c7a1739647348b14d9d476334cb5156e675c62f4c1119db9a4b1b7edc5",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454234",
+        "raw_sha256": "6cd6690fc4d4b9009e8c3f19b5d00b9242b3a6447067c7a9b30861c7f662f73d",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454235",
+        "raw_sha256": "a74003934e8c36da1abc780b7ac933fc1790402aa8b217a39861e387c5df9aa6",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454236",
+        "raw_sha256": "efe4689f9499a447001b4d668eae8c46c77a9b29bc66ab84a0c85ee06d1bb465",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454237",
+        "raw_sha256": "bc1dd9f68b397cbf2e3c26e22f0f2956b409279540b1d33429ecb146e404e09b",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454238",
+        "raw_sha256": "7999bbb6e4f297d4140385e07b0a3cccbb55c3e25c2f8cf581200f960643982c",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454239",
+        "raw_sha256": "966e4f97f64abeea95455d35c06231752ccc7f779232f7d23ae954089ee6511f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454240",
+        "raw_sha256": "92d641f46a934d8b781bd9de93331dca45b6a4907ee594aa0e258b42fe4fdc3a",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454241",
+        "raw_sha256": "38497508fa2490790953a1edd00f31619ea5903c9043fd165917d400593670f8",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454242",
+        "raw_sha256": "e574319aeec8e7ae5d7471471f20b4f8ccb0021995f7397d12b9f90518f0fcc9",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454243",
+        "raw_sha256": "e12350731effba3f4be2a1bb65a7534b0a8023a20ccbc2bb2c9aac16d127ae18",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454244",
+        "raw_sha256": "735d499e1d3604059c23024edd2556f8e6be476f9d9de917f5dbb0ebc4ca2915",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454245",
+        "raw_sha256": "77fee72b6d44c82c1a403061d1679595a57bcc67bac3efb08792428d291b2034",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454246",
+        "raw_sha256": "9e46f353d140b60800c72df1376a35dab94bdda861a9680d7ac01fd2a0d2b454",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454247",
+        "raw_sha256": "c8a0085c09f3c566e0f220843e1a592ab7d40b1ae2b17201956a74d6a2f5439c",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454248",
+        "raw_sha256": "f5e3eaa7603b6f4e734929007b1c2f31b464866ec0fad7e75379d0c3d98900f3",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454249",
+        "raw_sha256": "3f40f3af3ac7cb3787298fae3a5181e1a02e8a9945753be1ff9f47f93f1f5290",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454250",
+        "raw_sha256": "0d0330e6ddedaf95f42a0cf2b50ee1903452fcff871481854b882cce6ac57716",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454251",
+        "raw_sha256": "4eb325bf8750d9b1299d62419241dd7be8f76f5018a98dec03fae6d2914384ef",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454252",
+        "raw_sha256": "369bc18aae04123f782da92a027859946b33d79b91a46c857369e2a51bef0478",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454253",
+        "raw_sha256": "f175f8b9fc117259fef5f84399907fc620b6190d9bccaeedaf550afde7d7688e",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454254",
+        "raw_sha256": "212ed33f849625cee59f14df44a0666385fdbba5fd7db6db210dff1b09260636",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454255",
+        "raw_sha256": "caeb3b27a4cb142ad2685cd023541cb81001a1c2222a5ea1b34d90bfc57b87e4",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454256",
+        "raw_sha256": "2127512cc6753907e52df21169e4734edeff44452ba986b93d6a9d672f7009d6",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454257",
+        "raw_sha256": "8b336eea14ed3889dbb625ecdb369d5269399a8d6de4714dd85eea6a15f8f16b",
+        "lines": 3
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454258",
+        "raw_sha256": "ba19a4572066ee1614a8b6efb77e09633855278ba80d19bc28bafe391411638a",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454264",
+        "raw_sha256": "2e754b068988ce03a5f664d7e9a83cb874a11326d090eed2463235d425494174",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454265",
+        "raw_sha256": "c1d633fca3e43a51d958053c173b153152ea2c563326e22e65fe0cbf1bb43aa4",
+        "lines": 6860
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.454266",
+        "raw_sha256": "c2c573331238d1c6133153a4e65fabe22544730b7bb33bd552a7dacddeebfebd",
+        "lines": 1181
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456587",
+        "raw_sha256": "6db703961ca2c60fec2c9776950e040622401452a414cba45dbeb06bbb87feca",
+        "lines": 85
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456592",
+        "raw_sha256": "720a3c10fb423c0c2c0980d4a90e6a4b8ae07e0bc3a6d0004cfaf9c59bdba17d",
+        "lines": 219
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456593",
+        "raw_sha256": "a411399acf22ba2ee50899c26cca16da8719ddb608d43a30ec3a9f85b1c30f8a",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456596",
+        "raw_sha256": "626e53a9c387a68343616436529f865b636e0ce09ad540ae5ca940de71cf2441",
+        "lines": 65
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456597",
+        "raw_sha256": "71c15d3a50f8823bf9952a7934df908fdec04e3ee390280e5fe5a3b989e8748b",
+        "lines": 955
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456598",
+        "raw_sha256": "f7b800069a33b969a88e4c0ea67a18d38d1f478dca370193e6bc4e4ab746a866",
+        "lines": 4
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456599",
+        "raw_sha256": "bfdf74323fe3b85750a5c35aa5b4d66c3a9163d9920604fd7181d989eeb7df7f",
+        "lines": 280
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456600",
+        "raw_sha256": "a0e49eb58e303e6bcfb4ffb16fa0de6c365be4da8fea56da123ad241c5518c28",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456601",
+        "raw_sha256": "fae007da0f299b2e3b8432f2e2bfc830f56777c13e0a79de8d3a60f8692d532e",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456602",
+        "raw_sha256": "72b883e4b227e93503b28b48e63ba815bc85e2957b3b26133fb0cde252eda5e2",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456603",
+        "raw_sha256": "0e6d8b6b125983f5405a527e7a7355b323eec1d7e822addf843b55ef3de06933",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456604",
+        "raw_sha256": "318e4d6369e2485ad9495dc8dbf9bb9d7deb30024a7d353b2da1ea808698db5a",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456605",
+        "raw_sha256": "02ad6d42388daf6e70485659ed0dffab8246d14df6e47da326ba2d15fb31206d",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456606",
+        "raw_sha256": "c1a5d57ff8f2b3c7f1d22b1d548168ad53c19318df154c1918989be5f79d578e",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456607",
+        "raw_sha256": "241ee24345a60124684f702d7d34f55e84a46427c132796349343e58abe62385",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456608",
+        "raw_sha256": "85dcecea2c019dbe04324dbd035b40058a8dcec016a95a6354217ab6063d9e51",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456609",
+        "raw_sha256": "ed56f25e37c1ccb1d690b79649756df95146c92adb1e231b55ef1396f0aba371",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456610",
+        "raw_sha256": "5fa349e0560828adbe06a635b3e54985c73d46447ee5cc4cc1accb33c69278d0",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456611",
+        "raw_sha256": "1d572249dc33b4cf4be3218df664cd7b3b75ea6cf1dd2783186e37dcd8a26fb6",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456612",
+        "raw_sha256": "85841d3ee56238580a7997fb822a397db210281c14a28826a7b88ba9fa38202e",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456613",
+        "raw_sha256": "c14d7308e39b420c2100a802e7d688518c420ad84c8d6e0b2e80a6dd971c5da3",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456614",
+        "raw_sha256": "11064734c54855ccb3f98c61cb7afbb05d7cee8070f0e1a4b269c62390257bcc",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456615",
+        "raw_sha256": "88be217a8a2352cd1d8c4bc8f41a6ba7732f6d75ad53560ab74843123c14fed4",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456616",
+        "raw_sha256": "a4b660934e816d7c6ce35624b17ba8ec244d7b14859d33bf24a639bf2d66ef01",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456617",
+        "raw_sha256": "b5dfd9e350922e532138ca97dc0ff80ad47c5e69a9efc2efa1dfa201fbe810eb",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456618",
+        "raw_sha256": "4b298aaffc3f4ccbed6dbe67fee1472184fd1fc52a2bacb657f3ee35229de05f",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456619",
+        "raw_sha256": "42076fbc9ac0593c2b3df4adb51d2d7ded1f849614296d06cf78e7b6c013d5ab",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456620",
+        "raw_sha256": "420a3d454bc2074ae3133fba30e27cd5632cba9f8a31f7774ed76c228a548eb0",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456621",
+        "raw_sha256": "7f09872c2b08bc753e3430325e529cf31a429da68ee2e8a9a1829151536a168a",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456622",
+        "raw_sha256": "f311431ba6e64629386c38eebad4bdf1e7773b0c5be9850eb14d0774f7c1b2dd",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456623",
+        "raw_sha256": "49a3232acb787f78ead52a2915b9d7fdd9f818f7c1a92f6c59faf3da7c7a68a3",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456624",
+        "raw_sha256": "521feaa7edeba554d678b31fb87a14c5aedd371b9fe4e2bf8326b0247649cbd6",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456625",
+        "raw_sha256": "4e0672cdec054d2f9478093c32a50abd9f9d16fa8da175ecdd3e24216fef5d4e",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456626",
+        "raw_sha256": "5030d316d9afb1119c9152dd93748f3f91d45fe01b1c10ca6087f49fd53a4d5e",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456627",
+        "raw_sha256": "5a3439cc8b81f9cbc859b94ba96f6d157e77a6474be8ab97622f1ca46aa47abc",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456628",
+        "raw_sha256": "d737af2f8a66f990a3137a3c37cb8fada0ec3d9edee37e5c65a21033045adb9b",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456629",
+        "raw_sha256": "e5d475a9cae55d99f063c14961e00910339319020bcf90b1f0806dbeb70961cf",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456632",
+        "raw_sha256": "46bf3fb14afd541eae9a99af865d79c972b5739868366ccbbf370c9b8029a7a3",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456633",
+        "raw_sha256": "3a064d140e974145af13a4ad49f7035725c4d3eaff697ad0cf993681229cd7cc",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456634",
+        "raw_sha256": "efd3e23caf1bd953bc0d840b27840e04ed37f36589852e522fd25651fdac9393",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456635",
+        "raw_sha256": "cfdc4e1752e33c61216b0ec9a09c78e849d9b95bdeba27fad656790b2386a114",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456636",
+        "raw_sha256": "4aa05cac67517ff7ebdc4be4a85bd88ab8023cd21011102fb888818e02759c6d",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456637",
+        "raw_sha256": "d519551ba52bac74f8fe30e0b1ea18855710fc0df2de9c8b42c413ffb109a8e5",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456638",
+        "raw_sha256": "a6e1fbb48714ecd6ef90c6e87383a480e76609cee1a3369fc9ebc6d420422ad3",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456639",
+        "raw_sha256": "03259b14571657a136682c61af68a21a81b9a6a2fc9b1c7a06584c9fcdc779cf",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456640",
+        "raw_sha256": "537bb59009e1a81f9b49280eafcafc52ca206af94036b958522f4dd93fd8b4e8",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456641",
+        "raw_sha256": "e3bf4b17395a5ad6e5a2d95d7f86f0d030d5e98fc9a7537dfa5cd92bd7a9459c",
+        "lines": 2
+      },
+      {
+        "path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/os/syscalls.456642",
+        "raw_sha256": "49b9da0b6d4814dc88028da0af3f809de7ed1205a613a62cc07f623d0a5ac94a",
+        "lines": 8
+      }
+    ],
+    "lines": 705569,
+    "syscall_name_counts": {
+      "access": 17,
+      "brk": 5055,
+      "clone": 46,
+      "clone3": 202,
+      "close": 12744,
+      "dup": 8,
+      "dup2": 9,
+      "epoll_create1": 4,
+      "epoll_ctl": 2,
+      "epoll_wait": 2,
+      "eventfd2": 5,
+      "execve": 47,
+      "exit": 211,
+      "exit_group": 6,
+      "fcntl": 46,
+      "flock": 2,
+      "fstat": 12521,
+      "get_mempolicy": 2,
+      "getcwd": 19,
+      "getdents64": 3505,
+      "ioctl": 755,
+      "link": 1,
+      "linkat": 1,
+      "lseek": 11099,
+      "lstat": 31303,
+      "madvise": 247,
+      "mbind": 167,
+      "mkdir": 29,
+      "mmap": 3751,
+      "mprotect": 1680,
+      "mremap": 15,
+      "munmap": 796,
+      "newfstatat": 100,
+      "open": 7,
+      "openat": 14193,
+      "pipe2": 13,
+      "poll": 8028,
+      "pread64": 18963,
+      "read": 22533,
+      "readlink": 23,
+      "readlinkat": 3,
+      "rename": 3,
+      "rmdir": 3,
+      "stat": 42929,
+      "statfs": 1,
+      "statx": 8,
+      "symlink": 19,
+      "unlink": 24,
+      "unlinkat": 2,
+      "utimensat": 1,
+      "vfork": 4,
+      "wait4": 13,
+      "write": 482393,
+      "writev": 32004
+    },
+    "non_call_entry_lines": {
+      "signal_or_exit": 5
+    },
+    "resource_lifecycles_recovered": false
+  },
+  "sources": [
+    {
+      "logical_path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/run.json",
+      "actual_path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/run.json",
+      "raw_sha256": "224c42af39a9b9dac79f0644019fc599244a50918da79317d3c41b1e95b67713",
+      "raw_bytes": 328
+    },
+    {
+      "logical_path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/execution-evidence.452006.json",
+      "actual_path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/execution-evidence.452006.json",
+      "raw_sha256": "09da392311837e32da83380cbe8160bb484795b3f8331baa79c82f3ea63b7666",
+      "raw_bytes": 3613
+    },
+    {
+      "logical_path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/call-meta.452006.json",
+      "actual_path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/call-meta.452006.json",
+      "raw_sha256": "6361acb9daec5a7624d3c97fb389266770c7a1dd7f435b7ea92bc70db83ed972",
+      "raw_bytes": 954
+    },
+    {
+      "logical_path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/call-operand-meta.452006.json",
+      "actual_path": "artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/call-operand-meta.452006.json",
+      "raw_sha256": "e3143d2247ab6ce6156a3fdc6495c1f9a56a15bfae273eb9cb73ee550b6e3d8d",
+      "raw_bytes": 1918
+    },
+    {
+      "logical_path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/execution-trace.452006.72a7a04c0c2fe234c810ff8060ffaeb7.json",
+      "actual_path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/execution-trace.452006.72a7a04c0c2fe234c810ff8060ffaeb7.json",
+      "raw_sha256": "e39475c195a80283444d39c4a45e1e6d72c0d84ae3c5b3e00f1543381cc487d5",
+      "raw_bytes": 166718487
+    },
+    {
+      "logical_path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/kineto.452006.72a7a04c0c2fe234c810ff8060ffaeb7.json",
+      "actual_path": "/tmp/scar-structured-model-280qf4mi/artifacts/experiments/first_stage_lewm_capture_20261020_bpf/trace/kineto.452006.72a7a04c0c2fe234c810ff8060ffaeb7.json",
+      "raw_sha256": "a822b5c7ae6e70eef0e836376c5ffac5c1fb7ed9af6f69b9a7a48cff176a5503",
+      "raw_bytes": 109341942
+    }
+  ],
+  "gaps": [
+    "same RF ID/name is a scoped provider correspondence, not logical content identity",
+    "CUDA correlation alone does not identify the copied logical tensor",
+    "Python-to-Torch occurrence and OS causal mappings are not established",
+    "OS syscall counts/file list do not recover resource lifecycles or all hardware activity"
+  ]
+}

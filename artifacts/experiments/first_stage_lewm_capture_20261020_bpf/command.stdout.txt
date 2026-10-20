@@ -1,0 +1,9 @@
+10:56:08 | INFO  | atomic_chec~| [atomic_save] installed crash-safe checkpoint plugin (write to sibling .tmp + fsync + atomic rename)
+[2026-10-20 10:56:08,690][root][INFO] - Cached 'action' from '/gpu4-share/data/byx/lewm_data/datasets/pusht_expert_train.h5'
+[2026-10-20 10:56:08,954][root][INFO] - Cached 'proprio' from '/gpu4-share/data/byx/lewm_data/datasets/pusht_expert_train.h5'
+[2026-10-20 10:56:09,335][root][INFO] - Cached 'state' from '/gpu4-share/data/byx/lewm_data/datasets/pusht_expert_train.h5'
+10:56:19 | INFO  | utils.py    | Created ViT-tiny from scratch with config: {'hidden_size': 192, 'num_hidden_layers': 12, 'num_attention_heads': 3, 'intermediate_size': 768, 'image_size': 224, 'patch_size': 14}
+1869611 valid starting points found for evaluation.
+[209214]
+CEM solve time: 35.4919 seconds
+{'success_rate': 100.0, 'episode_successes': array([ True]), 'seeds': None}

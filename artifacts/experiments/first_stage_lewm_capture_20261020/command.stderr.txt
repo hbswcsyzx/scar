@@ -1,0 +1,4 @@
+[W1020 10:45:21.053995598 execution_trace_observer.cpp:989] Enabling Execution Trace Observer
+USDT:2026-10-20 10:45:21 439044:439044 SyncActivityProfilerHandler.cpp:52] profiler_start
+/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/__init__.py:215: UserWarning: ale-py not found; ALE/* envs are unavailable. Install with: pip install 'stable-worldmodel[env]' or pip install ale-py.
+  from stable_worldmodel.envs import ale  # noqa: F401

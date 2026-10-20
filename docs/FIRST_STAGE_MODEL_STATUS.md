@@ -70,3 +70,32 @@ hook，不能与 inject 整体简单叠装；ETO 的执行表示也不能当作�
 33 个旧 CLI 回归通过，共 38；具体范围见
 [采集说明与验收](FIRST_STAGE_NATIVE_EVIDENCE.md)。这只解决采集共存，尚未做
 完整规范图导入，S3/S4 仍 OPEN。下一项是原 LeWM 同配置真实采集及 OS 资源对照。
+
+## LeWM 同次真实采集（Observed / Verified，非整模型通过）
+
+产品 `1650431` 使用原 pusht checkpoint、单 episode、budget/goal offset 25 命令，
+conda lewm / Torch 2.13.0+cu132 / CUDA build 13.2 / RTX 4090。
+**exit 0，success_rate=100.0**；302.0469 秒为 instrumented wall，不是 clean 性能。
+
+| 自动取得的证据 | 实际结果 |
+| --- | --- |
+| Python entries / records / code descriptors | 84,315 / 168,630 / 851 |
+| ETO 节点 | 151,228 |
+| ETO→Kineto 正 RF ID/名称唯一匹配 | 151,226，重复正 ID 为 0 |
+| GPU kernel / 物理 memcpy / memset | 22,457 / 543 / 1,082 |
+| GPU activity→runtime correlation | 上述活动在本 capture 均有唯一匹配 |
+| OS 记录 | 253 个逐 TID 文件，705,569 行；含启动器/采集器及后代 |
+| 外部输出 | 实际生成本地 mp4 和结果文件；OS 中见 ffmpeg/libx264 与文件写/关闭 |
+| 正常采集收尾 | provider CLOSED、failures=[]；call/operand dropped=0 |
+| 如实保留的缺口 | 945 operand gaps、65 unknown exits；没有把零丢失称为精确建模 |
+
+第一次无 seccomp-BPF 的 strace 开销过高，停止监督器后未正常收尾，判 FAILED。
+完整失败记录保留，未当作 LeWM defect。验证轻过滤后完成第二次采集，目标源码、
+数据和环境未修改。详见 [实际结果与原始证据](../artifacts/experiments/first_stage_lewm_capture_20261020_bpf/README.md)。
+约 610.6 MB 生成元数据经逐文件字节哈希验证后无损归档为约 41.1 MB；未存 Tensor
+逐轮数值、未清共享缓存，未删除用户数据。
+
+**第一阶段仍 OPEN：** 原 source inventory 的 50 个局部图没有因此变成全程序图。
+尚缺 source 内部自动恢复、准确 Python→Torch 有序端口/当前状态/逻辑版本，以及
+OS/CUDA 资源身份、生命周期和输出因果闭包的规范连接。下一项只落实这些自动
+建模适配与源码结构复用，不开展图化简、candidate 或 backend。

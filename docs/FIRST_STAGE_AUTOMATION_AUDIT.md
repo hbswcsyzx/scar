@@ -2,6 +2,8 @@
 
 日期：2026-10-20。方法：主代理与两个独立只读审查，未运行新的目标程序。
 本报告定位实施起点，不是第一阶段验收报告。
+随后实施的采集共存见 [有限验收](FIRST_STAGE_NATIVE_EVIDENCE.md)，实际目标运行
+与整体进度统一记录在 [当前状态](FIRST_STAGE_MODEL_STATUS.md)；不倒改审计起点事实。
 
 ## 1. 设计与实现必须分开
 
@@ -75,3 +77,19 @@ S1/S2/S3/S4 都属于本次第一阶段内部检查点；不新增优化任务�
 
 对应生产接入按“同次采集共存→原字段保真导入→规范端口/资源绑定”执行，每项
 都检查丢失、预算和未解析关系。此为设计审计，尚未实现新适配器或新的真实 run。
+
+### 4.2 源码恢复的复用决定
+
+追加只读审查后决定：采用 CPython 编译结构作为有版本的结构 provider/CFG 对照，
+不继续把完整 Python AST 控制解释器作为第一阶段前置。现有
+`analysis/call_edges.py` 的 `_nested_codes()`、`_Sources.code()` 和
+`call_compilation.py` 已有递归 code 清单、编译参数及严格 descriptor 对应；
+`trace/code_snapshot.py` 已保存 free/cell/位置/异常表；`operand_bytecode.py`
+已读取 dis 与 exception handlers。应复用这些事实支撑源片段恢复，不重造 parser。
+
+它可以机械补齐 module/class/nested code 的编译归属、基本块、跳转和潜在异常
+边界；但 stack_effect 只给栈高度，不能证明有序 producer/use、closure 实例、
+descriptor/native 读写或真实 Resume 来源。因此暂不做通用 bytecode 值/效果
+解释器，不把编译清单升级为完整依赖。编译表示与 AST 有独立身份，通过带编译
+参数和源版本的 witness 对应，不能按行号直接合并。已有 source_compilation()
+只作诊断的公共含义保持；未实现的新导入必须在当前状态中如实列 OPEN。

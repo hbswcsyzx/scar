@@ -63,3 +63,10 @@ resource lifetime/ready、文件/环境/视频闭包仍需实施。不能把文�
 和绕过 builtins import hook 的全部 loader 不保证覆盖。host 返回不等于 GPU
 完成；provider 原始 buffer 没有 collector 强制的硬内存上限。仪器开销和潜在
 引用生命周期影响明示，不用于 clean benchmark 或变换证明。
+
+## 后续真实 LeWM 验证
+
+同配置真实 LeWM 已正常完成，见 [当前状态](FIRST_STAGE_MODEL_STATUS.md)：
+151,228 ETO 节点、151,226 ETO/Kineto 唯一 RF 对应及 GPU/OS 活动均有原始证据。
+首次 OS 采集失败与 seccomp-BPF 重试分开保留。此结果验收采集共存，不改变上述
+canonical model、逻辑身份、资源与全部路径仍未恢复的范围限制。
