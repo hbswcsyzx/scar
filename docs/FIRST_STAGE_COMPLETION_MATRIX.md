@@ -1,5 +1,13 @@
 # 第一阶段完整性分母：模型、接口、协议
 
+最新消费者桥（2026-10-20）：[限定验收](M1_VALUE_SOURCE_CONSUMERS_ACCEPTANCE.md)
+一次26模块292 PASS，21新增、917稳定指纹输入。查询局部多边来源保普通copy /
+stored关系分列，准确load可接上层payload、owner、call/join及body普通None后的
+独立薄分支。旧test/fixture、原copy/roots、Program27/Execution8保持。本门不把
+薄分支算公开F19历史，不关闭F19第1项/整族、原七族、P4/P5/M2原113/196或完整
+第一阶段；[下一门](M1_VALUE_SOURCE_CONSUMERS_NEXT_GATE.md)返回原F19，不继续
+增加同类来源工具箱。没有自动whole-LeWM恢复、变换或新加速结论。
+
 最新值关系（2026-10-20）：[原存储值限定验收](M1_STORED_VALUE_ACCEPTANCE.md)通过961
 直接相关项，913稳定源码，40新增；原store payload/状态版本/load ownresult可作
 条件性实际来源查询。Program27只由新能力选择，独立冻结26字节oracle保持旧wire，

@@ -108,6 +108,20 @@ class ExecutionIndex:
         return deepcopy(stored_value_sources(self._content_context(), site, occurrence,
                                              shared=ValidityBudget(budget)))
 
+    def value_source_pair(self, source, target, *, budget=4096):
+        """Original copy or conditional stored source; never a global identity union."""
+        from .value_sources import source_pair
+        from .validity_budget import ValidityBudget
+        shared = ValidityBudget(budget)
+        for value in (source, target):
+            if type(value) is not ValueOccurrenceID:
+                raise TypeError('value_source_pair requires exact ValueOccurrenceIDs')
+            value.__post_init__()
+            if value not in self._ctx.values:
+                raise KeyError(value)
+        ctx = self._content_context()
+        return deepcopy(source_pair(ctx, ctx.values[source], ctx.values[target], shared))
+
     def literal_evaluation(self, site, occurrence, *, budget=4096):
         """Declared content at an exact original producer, never object reuse."""
         from .literals import literal_evaluation, validate_literal_request

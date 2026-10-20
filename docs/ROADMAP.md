@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **Conditional source consumer progress (2026-10-20):**
+> [Acceptance](M1_VALUE_SOURCE_CONSUMERS_ACCEPTANCE.md):292 affected tests pass,
+> 21 new,917 stable fingerprint inputs. Original-copy and stored-read edges now
+> coexist in a bounded local source graph; loaded owners and an independent
+> ordinary-Unknown body branch consume it. Original pair/roots/tests/fixtures
+> and Program27/Execution8 remain unchanged. [Next](M1_VALUE_SOURCE_CONSUMERS_NEXT_GATE.md)
+> returns to original F19 units. The body test proves only the thin branch;
+> public F19 history, automatic source/native recovery, seven families,
+> P4/full/P5/M2 and the first stage remain open. No new backend or LeWM speedup.
+
 > **Stored-value relation progress (2026-10-20):**
 > [Acceptance](M1_STORED_VALUE_ACCEPTANCE.md):961 affected cases pass on913 stable
 > sources,40 new. Original primitive store payload/state/load-result relations

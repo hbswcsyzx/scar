@@ -1,5 +1,25 @@
 # SCAR execution model
 
+## Conditional value sources reach existing consumers (2026-10-20)
+
+Five canonical entities remain unchanged. A query-local multiedge source graph
+can follow both original copies and declared stored-value relations at the same
+actual value. An accurate load can therefore feed a later store, loaded owner,
+call result or ordinary join without changing original copy ancestry or roots.
+Body history has a separate conditional branch after ordinary Unknown; it keeps
+the original result and does not turn a local source proof into terminal history.
+
+See the [API](M1_VALUE_SOURCE_CONSUMERS_API.md),
+[limited acceptance](M1_VALUE_SOURCE_CONSUMERS_ACCEPTANCE.md) and
+[next original gate](M1_VALUE_SOURCE_CONSUMERS_NEXT_GATE.md). Original read/write
+and occurrence inventories survive budget/depth truncation. Fresh query-local
+caches cannot use ACTIVE cycles, old contexts or a successful checked prefix to
+grant True. Program27, Execution8 and all prior tests/fixtures remain unchanged.
+Automatic recovery, F19/public history, seven families and complete M0–M2 remain
+separate open obligations. No new backend or LeWM speedup is established.
+The final affected selection passes292 tests,21 new, on917 stable fingerprint
+inputs; this is a supplied-model gate, not full-repository or first-stage acceptance.
+
 ## Stored payload, state version and own load result (2026-10-20)
 
 The five canonical entities remain Operation / Value / StateLocation / Region /

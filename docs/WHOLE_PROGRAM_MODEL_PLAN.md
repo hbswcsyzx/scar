@@ -3,6 +3,13 @@
 日期：2026-10-16。这是当前优先计划，修订旧 N2 中先推进局部桥接的顺序。
 模型依据：[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)。用户无需逐门审批。
 
+2026-10-20 最新范围：[条件值来源消费者验收](M1_VALUE_SOURCE_CONSUMERS_ACCEPTANCE.md)
+通过292相关项/917稳定输入，21新增；原copy与stored边在准确occurrence的局部
+多边来源图并存，已接loaded owner与body普通None后的独立分支。原copy、schema
+及旧test/fixture保持。私有薄分支不代公开F19历史；七族/P4/P5/M2原113/196及
+M0–M2整阶段仍开放。[下一门](M1_VALUE_SOURCE_CONSUMERS_NEXT_GATE.md)返回原F19
+真实残项及组合，不继续扩大同类helper，不新增detector/backend/LeWM规则。
+
 2026-10-20 最新范围：[原存储值限定验收](M1_STORED_VALUE_ACCEPTANCE.md)通过961
 相关项/913稳定源码，新增40。原访问上payload→state→load值关系与条件性执行查询
 已落；Program27保持旧1–26 wire/Execution8，旧codec版本迁移显式保原义务。

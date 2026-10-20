@@ -172,7 +172,18 @@ class _BodyHistory:
         ordinary = pair(self.ctx, source, target, self.shared)
         if ordinary['match'] is not None or self.shared.truncated:
             return ordinary
+        stored = None
+        if self.ctx.program.stored_value_reads:
+            from .value_sources import source_pair
+            stored = source_pair(self.ctx, source, target, self.shared)
+            if stored['match'] is False or self.shared.truncated:
+                return {**stored, 'ordinary_binding': ordinary, 'stored_source_binding': stored}
+            if stored['match'] is True and stored['conditional_stored_source']:
+                return {**stored, 'ordinary_binding': ordinary, 'stored_source_binding': stored,
+                        'binding_kind': 'CONDITIONAL_STORED_VALUE_SOURCE'}
         identity = self.object_binding(source, target, ordinary=ordinary)
+        if stored is not None:
+            identity = {**identity, 'stored_source_binding': stored}
         if identity['match'] is not None or self.shared.truncated:
             return identity
         if view is None:

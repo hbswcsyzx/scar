@@ -193,34 +193,9 @@ class _Sources:
         return result
 
     def copies(self, source, target):
-        """Compare original ancestors without asserting unrelated candidates copy."""
-        from .pending_payloads import copy_recipe
-        from .resumable_identity import compatible
-        paths = []
-        for value in (source, target):
-            seen, links = {}, []
-            cursor = None if value is None else value.id
-            while cursor is not None and cursor not in seen:
-                if not self.spend('copy_ancestors'):
-                    return {'match': None, 'support': (), 'conflict': False}
-                seen[cursor] = len(links)
-                recipe, _, conflict = copy_recipe(self.ctx, cursor, self.shared)
-                if conflict:
-                    return {'match': None, 'support': (), 'conflict': True}
-                if recipe is None:
-                    break
-                links.append(recipe)
-                cursor = recipe['source']
-            paths.append((seen, links))
-        common = next((identity for identity in paths[0][0] if identity in paths[1][0]), None)
-        if common is None:
-            return {'match': None, 'support': (), 'conflict': False}
-        local = []
-        comparison = compatible(self.ctx, source, target, local, 'stored_value.original_copy')
-        conflict = comparison['status'] == 'CONFLICT'
-        support = tuple(link for seen, links in paths for link in links[:seen[common]])
-        return {'match': None if conflict else True, 'support': support,
-                'conflict': conflict, 'compatibility': comparison}
+        """Compare proven sources, including owners/keys obtained through loads."""
+        from .value_sources import source_pair
+        return source_pair(self.ctx, source, target, self.shared)
 
     def address(self, left, right):
         from .reference_identity import object_identity

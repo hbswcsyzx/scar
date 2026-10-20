@@ -1,0 +1,21 @@
+{
+  "base_revision": "fff1895fd3abc312409b9b95d40affa9b2c06f86",
+  "plan": "docs/M1_VALUE_SOURCE_CONSUMERS_PLAN.md",
+  "plan_sha256": "7a3af0dd20c0ae659859dd72b92b66caf3b4c7d5bde7f4ef6cf427acffd292c0",
+  "previous_checkpoint_sha256": "46bbc0b3154b9f73b82ef456d1379bc9f1ad0c5097fcc5dd4dc04f29b5c1f15b",
+  "source_sha256": "51ff19e5d0619404596f8ab96267b3eb7d9b83f8bd376ea188db31e9704adb7e",
+  "source_files": 913,
+  "known_focused_case_catalog": 2304,
+  "program_schema": 27,
+  "execution_schema": 8,
+  "conditionally_accepted_families": 9,
+  "open_families": 7,
+  "m2_original_constructs": 113,
+  "m2_original_fields": 196,
+  "lewm_protected_head": "f70fed80288462ca4d006cb3607ec6da6eaa851f",
+  "scar_main_protected_head": "84f165fce1e2e37617c974ce9fee574ea816406b",
+  "source_runtime_verified": false,
+  "native_target_executions": 0,
+  "transformation_authorized": false,
+  "whole_program_model_complete": false
+}
