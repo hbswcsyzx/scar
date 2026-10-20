@@ -1,0 +1,39 @@
+{
+  "reviewer": "await_wrapper_chain",
+  "mode": "read-only independent source and oracle review; no interpreter/test/probe/Git execution",
+  "source_frozen": true,
+  "source_sha256": "ec1969fbdbcd2d52029ada1005886ad01620a9e77812f637fa835756f71f1969",
+  "reviewed_files": {
+    "scar/ir/program/async_request_paths.py": "6f57aebaafa8b1d9abedcda34cb3df9f0cea9e9f1f6ee1e020ad269187dbfd2c",
+    "scar/ir/program/protocol_async.py": "1562c5b8faacb03b305a0ed5737ea1e1e932fa1269c70e87b2d8b090452040a4",
+    "scar/ir/program/queries.py": "2558316769e430deb66cb3a266357db023cfff541741b7cb23144910c583314f",
+    "tests/fixtures/program_async_finished_requests_graphs.py": "7ea24af8dfb56e3a07393b2b6962519c10b143d43bf7a6048d51c4d4375a76c6",
+    "tests/fixtures/execution_async_finished_requests_graphs.py": "bd52dad959b56e59c1c585edcb927076001509e5a1c38df6259c3c18094d7617",
+    "tests/unit/test_program_async_finished_requests.py": "f4ff8bb87d41495424389e9f32d5650de23cc2c23d16a1b647d919eb5eba215d",
+    "tests/unit/test_program_async_request_path_inventory.py": "3e26b1af1eb122f1c303fc2eb0fb7381e5fc48790922a291567c7de48d2cfa59"
+  },
+  "findings_resolved": [
+    "Inventory state oracle now covers actual host fullstate, including context outside lifecycle, and independently binds each selected helper own N/R state slot",
+    "Caller catch operations consume their own selected packet and advance context before new Create and same-R retry",
+    "Cycle/budget paths never claim local noDrive True from an incomplete prefix",
+    "Body-role projection keeps every original R recipe and correlated caller/choice/state support without adding an ordinary copy edge",
+    "Partial latent role and local-only noDrive meaning remain explicit"
+  ],
+  "unresolved_blocking_findings": [],
+  "remaining_original_requirements": [
+    "Dynamic RequestAssociation body projection to exact same-B/F history is not implemented; observed branch True leaves expected_bool None",
+    "Nonfinished native driver branch remains unexpanded with native_cfg_complete False",
+    "F19 graceful-close finally AWAIT/HOLD and both reply conversion layers",
+    "F19 illegal close-yield same/new requests and finally continuation to actual terminal",
+    "F19 complete request/native-bit/frame-F/release combinations; no new release positive in this batch",
+    "Seven open families including F19, P4 component/full, P5, M2 original113/196 and automatic source/native correspondence"
+  ],
+  "scope_notes": [
+    "wrongpacket is core-valid source_binding False; wrongstate is an existing canonical stale_state rejection, not new protocol inference",
+    "read review does not predict a running regression outcome",
+    "all source/native/runtime/transformation permissions remain false; no LeWM performance claim"
+  ],
+  "f19_family_complete": false,
+  "first_stage_complete": false,
+  "transformation_authorized": false
+}

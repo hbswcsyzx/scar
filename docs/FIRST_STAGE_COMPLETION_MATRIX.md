@@ -1,5 +1,10 @@
 # 第一阶段完整性分母：模型、接口、协议
 
+最新子链进展（2026-10-20）：[F19 finished请求限定验收](M1_ASYNC_FINISHED_REQUESTS_ACCEPTANCE.md)
+通过196直接受影响项，904源文件稳定；新独立路径库存、own N/R和当前状态已接。
+动态association→同B/F历史桥及非finished native内部仍缺，F19第1项与整族不关闭。
+九族接受/七族开放、P4/P5/M2原分母及第一阶段未完成的判定保持。
+
 最新限定检查点（2026-10-20）：[原 F18 验收](M1_ASYNC_TERMINAL_ACCEPTANCE.md)
 以 2104 项相关回归、899 文件稳定指纹，核源合法性、body内终止转换、准确后继
 异常包与当前state/消费者。旧2058精确身份全保，新增46；无旧test/fixture或

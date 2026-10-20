@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **F19 finished-request subchain progress (2026-10-20):**
+> [Plan](M1_ASYNC_CLOSE_CONTINUATIONS_PLAN.md),
+> [limited acceptance](M1_ASYNC_FINISHED_REQUESTS_ACCEPTANCE.md) and
+> [next work](M1_ASYNC_FINISHED_REQUESTS_NEXT_GATE.md).
+> 196 direct affected tests pass on904 stable sources,17 new. Independent local
+> paths retain original inventory/fullstate and incomplete body-role provenance.
+> Dynamic same-B/F history and nonfinished native paths remain open, so F19's
+> first unit and family do not close. Nine accepted/seven open families and
+> P4/full/P5/M2 original113/196 remain. No new backend or LeWM speedup claim.
+
 > **Current F18 model acceptance (2026-10-20):**
 > [Plan](M1_ASYNC_TERMINAL_PLAN.md), [actual attempts](M1_ASYNC_TERMINAL_PROGRESS.md),
 > [acceptance](M1_ASYNC_TERMINAL_ACCEPTANCE.md) and [next original gate](M1_ASYNC_TERMINAL_NEXT_GATE.md).

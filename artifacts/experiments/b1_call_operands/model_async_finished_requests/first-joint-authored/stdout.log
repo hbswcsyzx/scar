@@ -1,0 +1,8 @@
+
+==================================== ERRORS ====================================
+_____ ERROR collecting tests/unit/test_program_async_finished_requests.py ______
+tests/unit/test_program_async_finished_requests.py::test_real_async_terminal_then_new_request_keeps_body_only_projection_and_own_reply: 'request' is a reserved name and cannot be used in @pytest.mark.parametrize
+=========================== short test summary info ============================
+ERROR tests/unit/test_program_async_finished_requests.py - Failed: tests/unit...
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 1.15s

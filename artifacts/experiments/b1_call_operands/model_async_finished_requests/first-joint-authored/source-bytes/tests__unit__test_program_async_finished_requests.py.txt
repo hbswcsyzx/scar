@@ -1,0 +1,374 @@
+"""Finished async B, new request R and exact no-Drive response ports.
+
+These are supplied graph/capture checks. An observed True predicate is not a
+native phase proof, and a body-only association does not establish latent L.
+"""
+from dataclasses import replace
+import json
+
+import pytest
+
+from scar.ir.execution.query import ExecutionIndex
+from scar.ir.execution.validation import validate as validate_execution
+from scar.ir.program import codec
+from scar.ir.program.drivers import RawRequestKind
+from scar.ir.program.lifecycle import SessionPost
+from scar.ir.program.model import (
+    CompletionResult, ExitKind, InvokeLiteralResult, OperationResult,
+    StateVersionValue, TerminatorKind,
+)
+from scar.ir.program.protocols import HostTerminal, OwnedUse, StaticProtocolGap
+from scar.ir.program.queries import ProgramIndex
+from scar.ir.program.resumption import ResumableKind
+from scar.ir.program.structured import ControlEdgeReference
+from scar.ir.program.validation import require_valid, validate
+from tests.fixtures.execution_async_finished_requests_graphs import async_finished_requests_execution
+from tests.fixtures.program_async_finished_requests_graphs import async_finished_requests_program
+from tests.unit.test_execution_async_terminal import _call, _copied, _current, _own, _use, _value
+
+
+_BUDGET = 1048576
+_FLAGS = ('source_runtime_verified', 'runtime_identity_verified',
+          'value_identity_verified', 'transformation_authorized')
+
+
+def _core(graph):
+    return replace(graph, protocol_scopes=(), protocol_operations=(), protocol_bindings=(),
+        protocol_call_inputs=(), protocol_result_consumers=(), exception_matches=())
+
+
+def _checked(graph):
+    require_valid(_core(graph))
+    require_valid(graph)
+    return ProgramIndex(graph)
+
+
+def _finished_inventory(view, finished):
+    rows = tuple(row for row in view['inventory'] if row['key'] == finished['region'].id)
+    assert len(rows) == 1
+    item, = rows
+    assert item['interface'] == finished['interface']
+    assert item['region'] == finished['region']
+    assert item['entry'].id == finished['region'].entry
+    assert item['receiver'].id == finished['interface'].receiver
+    assert item['scheduler'].id == finished['interface'].scheduler_request
+    assert item['drives'] == ()
+    for name in (*_FLAGS, 'native_applicability_verified'):
+        assert view[name] is False
+    return item
+
+
+def _path(view, finished, *, raised=False, retry=False):
+    host = (finished['reuse_terminals'] if retry else finished['host_terminals'])[int(raised)]
+    rows = tuple(row for row in view['paths'] if row['terminal'] == HostTerminal(host.id))
+    assert len(rows) == 1
+    row, = rows
+    assert row['drive'] is None and row['declared_no_drive'] is True
+    assert host.id == row['operations'][-1].id
+    selected = {edge.operation: edge.successor_index for edge in row['choices']}
+    assert selected[finished['request_branch'].id] == (0 if retry else 1)
+    if not retry:
+        assert selected[finished['association'].id] == 0
+        assert selected[finished['branch'].id] == 0
+    constructor = finished['reuse_constructor'] if retry else finished['constructor']
+    assert selected[constructor.id] == int(raised)
+    return row
+
+
+def _ports(index, graph, finished, path, *, raised=False, retry=False):
+    constructor = finished['reuse_constructor'] if retry else finished['constructor']
+    host = (finished['reuse_terminals'] if retry else finished['host_terminals'])[int(raised)]
+    edge = ControlEdgeReference(constructor.id, int(raised))
+    invocation, = tuple(item for item in path['invocations'] if item['operation'] == constructor)
+    assert invocation['selected_edge'] == edge
+    signature = next(row for row in constructor.completions if row.kind is
+                     (ExitKind.RAISE if raised else ExitKind.NORMAL))
+    assert tuple(item['source'] for item in invocation['own_results']) == tuple(
+        InvokeLiteralResult(edge, CompletionResult(slot)) for slot in range(len(signature.types)))
+    assert tuple(item['slot'] for item in invocation['own_results']) == tuple(range(len(signature.types)))
+    values = {row.id: row for row in graph.values}
+    state_uses = {values[use.value].location: OwnedUse(host.id, use.id)
+                  for use in host.uses if use.id in host.terminator.values
+                  and type(values[use.value]) is StateVersionValue}
+    assert {item['location']: item['actual'] for item in path['states']} == state_uses
+    assert set(state_uses) == set(finished['interface'].lifecycle)
+    assert all(item['binding']['match'] is True for item in path['states'])
+    for slot, type_ in enumerate(signature.types):
+        location = getattr(type_, 'location', None)
+        if location is not None:
+            assert index.source_binding(InvokeLiteralResult(edge, CompletionResult(slot)),
+                state_uses[location], guard=path['choices'], budget=_BUDGET)['match'] is True
+    payload = OwnedUse(host.id, host.terminator.values[0])
+    if raised:
+        source = InvokeLiteralResult(edge, CompletionResult(0))
+    else:
+        definition = next(row for row in graph.exception_packets if row.value ==
+            next(use.value for use in host.uses if use.id == host.terminator.values[0]))
+        source = values[definition.value].origin
+        producer = next(row for row in graph.operations if row.id == source.operation)
+        assert index.source_binding(InvokeLiteralResult(edge, CompletionResult(0)),
+            OwnedUse(producer.id, definition.exception), guard=path['choices'], budget=_BUDGET)['match'] is True
+    assert index.source_binding(source, payload, guard=path['choices'], budget=_BUDGET)['match'] is True
+    # The previous request's same-typed terminal packet is a distinct source.
+    entry = next(block for block in finished['region'].blocks if block.id == finished['region'].entry)
+    previous = values[entry.arguments[2]].origin
+    assert index.source_binding(previous, payload, guard=path['choices'], budget=_BUDGET)['match'] is not True
+
+
+@pytest.mark.parametrize(('terminal', 'request'), (
+    ('return', 'throw'), ('return', 'close'), ('raise', 'throw'), ('raise', 'close')))
+def test_real_async_terminal_then_new_request_keeps_body_only_projection_and_own_reply(terminal, request):
+    graph, details = async_finished_requests_program(terminal=terminal, request=request)
+    index = _checked(graph)
+    finished = details['finished_request']
+    original = finished['original_terminal_driver']
+    body_terminal = next(row for row in graph.operations if row.id == original['outcome_source'])
+    assert body_terminal.terminator.kind is (TerminatorKind.RETURN if terminal == 'return' else TerminatorKind.RAISE)
+    assert graph.resumable_bodies[0].kind is ResumableKind.ASYNC_GENERATOR
+    assert len(graph.resumable_creates) == 1
+    assert len(graph.body_drives) == details['base_drive_count']
+    assert original['update'].post is SessionPost.COMPLETE
+    publication = index.body_publication(finished['source_publication'].operation)
+    assert publication.source.kind is body_terminal.terminator.kind
+    assert index.lifecycle_after(publication.commit.operation).terminal.is_finished(publication.instance.use.value)
+    region_ids = {identity for block in finished['region'].blocks for identity in block.operations}
+    assert not any(row.operation in region_ids for row in graph.body_drives)
+    assert not any(row.operation in region_ids for row in graph.body_outcome_commits)
+    assert not any(row.operation in region_ids for row in graph.no_body_finishes)
+    assert not any(row.operation in region_ids for row in graph.terminal_frame_releases)
+    complete_body = next(use.value for use in finished['complete'].uses if use.id == finished['update'].body)
+    # This local COMPLETE has no BodyOutcomeCommit and cannot seed a second F.
+    assert index.lifecycle_after(finished['complete'].id).terminal.is_finished(complete_body) is False
+    old_create = (details['drivers'][-1]['request']['create'] if terminal == 'return'
+                  else details['request']['create'])
+    assert finished['request_create'] != old_create
+    assert finished['latent'].kind is (RawRequestKind.THROW if request == 'throw' else RawRequestKind.CLOSE)
+    assert type(finished['association_row'].contract.latent) is StaticProtocolGap
+    assert not any(row.operation == finished['association'].id for row in graph.request_association_reads)
+    signature = next(row for row in finished['association'].completions if row.kind is ExitKind.NORMAL)
+    assert len(signature.types) == 1 + len(finished['interface'].lifecycle)
+    assert index.source_binding(finished['body_source'],
+        OwnedUse(finished['predicate'].id, finished['body_row'].contract.subject.instance_use),
+        budget=_BUDGET)['match'] is True
+    assert index.source_binding(finished['request_source'],
+        OwnedUse(finished['association'].id, finished['association_row'].contract.request_use),
+        budget=_BUDGET)['match'] is True
+    view = index.request_no_drive_paths(finished['scope'].id, budget=_BUDGET)
+    _finished_inventory(view, finished)
+    for raised in (False, True):
+        path = _path(view, finished, raised=raised)
+        _ports(index, graph, finished, path, raised=raised)
+        associations = tuple(row for row in path['associations'] if row['declaration'] == finished['association_row'])
+        assert len(associations) == 1
+        association, = associations
+        assert association['role'] == 'body'
+        assert association['body_projection']
+        assert association['body_binding']['match'] is True
+        assert association['overall_association_complete'] is False
+        assert association['gaps']
+    # Existing Program26 carries the body-only contract without inventing L.
+    if terminal == 'return' and request == 'throw':
+        wire = codec.dumps(graph)
+        assert json.loads(wire)['schema_version'] == 26
+        restored = codec.loads(wire)
+        assert restored == graph and codec.dumps(restored) == wire
+        row = next(row for row in restored.protocol_operations if row == finished['association_row'])
+        assert type(row.contract.latent) is StaticProtocolGap
+        assert row.contract.body == finished['body_source']
+        assert next(row for row in restored.operations if row.id == finished['association'].id).uses == finished['association'].uses
+
+
+def test_finished_request_constructor_failure_and_same_request_retry_keep_fresh_fullslots():
+    graph, details = async_finished_requests_program(terminal='return', request='throw',
+                                                    constructor_raised=True, retry=True)
+    index = _checked(graph)
+    finished = details['finished_request']
+    view = index.request_no_drive_paths(finished['scope'].id, budget=_BUDGET)
+    _ports(index, graph, finished, _path(view, finished, raised=True), raised=True)
+    _ports(index, graph, finished, _path(view, finished, raised=True, retry=True), raised=True, retry=True)
+    assert len(finished['caller_calls']) == 2
+    assert len(graph.body_drives) == details['base_drive_count']
+    # Both attempts receive the one new request result, not a second Create.
+    for call in finished['caller_calls']:
+        assert index.source_binding(finished['request_source'],
+            OwnedUse(call.id, call.invoke_arguments[0]), budget=_BUDGET)['match'] is True
+
+
+def test_old_same_typed_packet_is_not_the_new_finished_request_reply():
+    graph, details = async_finished_requests_program(terminal='raise', request='close')
+    finished = details['finished_request']
+    host = finished['host_terminals'][0]
+    entry = next(block for block in finished['region'].blocks if block.id == finished['region'].entry)
+    changed = replace(host, uses=tuple(replace(use, value=entry.arguments[2])
+        if use.id == host.terminator.values[0] else use for use in host.uses))
+    wrong = replace(graph, operations=tuple(changed if row.id == host.id else row for row in graph.operations))
+    require_valid(_core(wrong))
+    index = ProgramIndex(_core(wrong))
+    values = {row.id: row for row in graph.values}
+    packet = next(use.value for use in host.uses if use.id == host.terminator.values[0])
+    assert index.source_binding(values[packet].origin, OwnedUse(host.id, host.terminator.values[0]),
+                                budget=_BUDGET)['match'] is False
+
+
+def test_new_request_host_cannot_use_the_state_from_before_its_own_completion():
+    graph, details = async_finished_requests_program(terminal='return', request='close')
+    _checked(graph)
+    finished = details['finished_request']
+    host = finished['host_terminals'][0]
+    values = {row.id: row for row in graph.values}
+    entry = next(block for block in finished['region'].blocks if block.id == finished['region'].entry)
+    old_state = values[entry.arguments[3]]
+    current = next(use for use in host.uses if type(values[use.value]) is StateVersionValue
+                   and values[use.value].location == old_state.location)
+    changed = replace(host, uses=tuple(replace(use, value=old_state.id) if use.id == current.id else use
+                                      for use in host.uses))
+    wrong = replace(graph, operations=tuple(changed if row.id == host.id else row for row in graph.operations))
+    # This is a canonical current-SSA violation, distinct from the core-valid
+    # same-typed packet source counterexample above.
+    assert any(issue.code == 'stale_state' and str(current.id) in issue.path
+               for issue in validate(_core(wrong)))
+
+
+def test_tiny_budget_and_deleted_annotations_keep_all_original_request_path_anchors():
+    graph, details = async_finished_requests_program(terminal='return', request='close')
+    index = _checked(graph)
+    finished = details['finished_request']
+    full = index.request_no_drive_paths(budget=_BUDGET)
+    tiny = index.request_no_drive_paths(budget=1)
+    assert tiny['inventory'] == full['inventory']
+    assert tiny['paths_total'] is None and tiny['known_inventory_complete'] is False
+    assert tiny['budget']['truncated'] and tiny['cursor']
+    assert not any(row['declared_no_drive'] is True for row in tiny['paths'])
+    stripped = _core(graph)
+    require_valid(stripped)
+    removed = ProgramIndex(stripped).request_no_drive_paths(budget=_BUDGET)
+    original = _finished_inventory(full, finished)
+    retained = next(row for row in removed['inventory'] if row['key'] == finished['region'].id)
+    for field in ('interface', 'region', 'entry', 'receiver', 'scheduler',
+                  'operations', 'branches', 'invokes', 'hosts', 'drives'):
+        assert retained[field] == original[field]
+    assert {row['key'] for row in removed['paths']} == {row['key'] for row in full['paths']}
+
+
+def _execution(program, model):
+    require_valid(program)
+    report = validate_execution(model, program)
+    assert report.valid, report.issues
+    return ExecutionIndex(model, program)
+
+
+def _finished_capture(index, program, model, details, ordinal):
+    static, example = details['static'], details['instances'][ordinal]
+    finished = static['finished_request']
+    assert len(example['body_drives']) == len(example['body_segments']) == static['base_drive_count']
+    assert example['body_origin'].creation == example['creation']
+    assert {row.activation for row in example['body_drives']} == {example['body_activation']}
+    last = example['body_drives'][-1]
+    driven = index.drive_execution(last.drive, budget=_BUDGET)
+    assert driven['association'] == last and driven['entry_bridge'] is True
+    assert driven['path_complete'] is True
+    assert driven['session']['expected_post'] is SessionPost.COMPLETE
+    assert all(item['post_established'] is True for item in driven['session']['targets'])
+    assert last.outcome == example['body_occurrences'][-1][finished['original_terminal_driver']['outcome_source']]
+    body_ids = {row.drive for row in example['body_drives']}
+    for attempt_number, attempt in enumerate(example['finished_requests']):
+        assert not body_ids.intersection(attempt['operations'].values())
+        view = _call(index, program, model, attempt['call'])
+        assert view['caller'].id == attempt['caller']
+        assert view['activation'].id == attempt['activation']
+        assert view['completion'].id == attempt['host']
+        new_r = _own(program, model, example['new_request_creation'], finished['request_source'])
+        receiver = next(row for row in view['inputs'] if row['formal_definition'].id == finished['interface'].receiver)
+        _copied(index, model, receiver['actual_value'].id, new_r.id)
+        branch = attempt['operations'][finished['request_branch'].id]
+        transfer, = tuple(row for row in model.transfers if row.operation == branch)
+        assert transfer.successor_index == (0 if attempt_number else 1)
+        if not attempt_number:
+            body = _own(program, model, attempt['association'], finished['body_source'])
+            actual = _use(model, attempt['body_predicate'], finished['body_row'].contract.subject.instance_use)
+            assert actual.value == body.id
+            create = _operation(program, finished['request_operation'].id)
+            created_body = _use(model, example['new_request_creation'], finished['request_create'].body)
+            prior = static['drivers'][-1]
+            prior_call = example['caller_operations'][prior['caller_call'].id]
+            prior_actual = _use(model, prior_call, prior['caller_call'].invoke_arguments[0])
+            _copied(index, model, created_body.value, prior_actual.value)
+            assert attempt['complete'] is not None
+            _current(index, program, model, attempt['complete'])
+            assert create.id == finished['request_create'].operation
+        else:
+            assert attempt['association'] is attempt['body_predicate'] is attempt['complete'] is None
+        constructor = finished['reuse_constructor'] if attempt_number else finished['constructor']
+        selected = next(row for row in model.transfers if row.operation == attempt['constructor'])
+        host = finished['selected_hosts'][attempt_number]
+        selected_edge = ControlEdgeReference(constructor.id, selected.successor_index)
+        signature = next(row for row in constructor.completions if row.kind is
+                         constructor.terminator.successors[selected.successor_index].kind)
+        for slot, type_ in enumerate(signature.types):
+            own = _own(program, model, attempt['constructor'], InvokeLiteralResult(selected_edge, CompletionResult(slot)))
+            if slot == 0 and selected.successor_index == 0:
+                host_packet = _value(model, _use(model, attempt['host'], host.terminator.values[0]).value)
+                packet = next(row for row in program.exception_packets if row.value == host_packet.value)
+                producer = next(row for row in program.values if row.id == packet.value).origin.operation
+                assert _use(model, attempt['operations'][producer], packet.exception).value == own.id
+            else:
+                assert _use(model, attempt['host'], host.terminator.values[slot]).value == own.id
+        _current(index, program, model, attempt['constructor'])
+        _current(index, program, model, attempt['host'])
+        assert all(view[key] is False for key in _FLAGS)
+    final = finished['caller_terminal']
+    caller = example['finished_requests'][-1]['caller']
+    for slot, use in enumerate(final.terminator.values):
+        own = _own(program, model, caller, InvokeLiteralResult(
+            ControlEdgeReference(finished['caller_calls'][-1].id, 0), CompletionResult(slot)))
+        assert _use(model, example['final'], use).value == own.id
+    return example
+
+
+def _operation(program, identity):
+    return next(row for row in program.operations if row.id == identity)
+
+
+@pytest.mark.parametrize(('terminal', 'request', 'raised', 'retry'), (
+    ('return', 'throw', False, True), ('return', 'close', False, False),
+    ('raise', 'throw', False, False), ('raise', 'close', True, False)))
+def test_supplied_actual_finished_body_and_new_request_calls_have_no_additional_drive(
+        terminal, request, raised, retry):
+    program, model, details = async_finished_requests_execution(terminal=terminal,
+        request=request, constructor_raised=raised, retry=retry, instances=2)
+    index = _execution(program, model)
+    assert len(model.body_activation_origins) == len(program.resumable_creates) * 2 == 2
+    assert len(model.body_drive_executions) == details['static']['base_drive_count'] * 2
+    for ordinal in range(2):
+        _finished_capture(index, program, model, details, ordinal)
+    if terminal == 'return' and request == 'throw':
+        # The separate dynamic history query does not yet project an opaque
+        # request-held body through this body-only association. Preserve that
+        # real missing bridge instead of treating the supplied branch as F.
+        example = details['instances'][0]
+        read = example['finished_requests'][0]['body_predicate']
+        history = index.body_state_history(read, budget=_BUDGET)
+        assert history['observed_branch'] is True and history['expected_bool'] is None
+        publication = details['static']['finished_request']['source_publication']
+        candidates = tuple(row for row in history['terminal_candidates'] if row['commit'] == publication)
+        assert len(candidates) == 2
+        assert all(row['expected_bool'] is None for row in candidates)
+        assert any('body_state_subject_unproved' in row['gaps'] for row in candidates)
+        assert history['drive_inventory'] == program.body_drives
+        assert history['commit_inventory'] == program.body_outcome_commits
+        assert history['native_phase_verified'] is False
+
+
+def test_missing_new_request_call_cannot_borrow_the_complete_sibling_or_make_a_new_drive():
+    program, model, details = async_finished_requests_execution(terminal='raise', request='throw',
+                                                               missing_call=0, instances=2)
+    index = _execution(program, model)
+    _finished_capture(index, program, model, details, 1)
+    first, second = details['instances']
+    missing = index.call_entries(first['finished_requests'][0]['caller'])
+    assert missing['status'] == 'MISSING' and missing['entries'] == ()
+    assert any(getattr(gap, 'code', gap) == 'call_activation_missing' for gap in missing['gaps'])
+    kept = index.call_entries(second['finished_requests'][0]['caller'])
+    assert len(kept['entries']) == 1
+    assert kept['entries'][0]['activation'].id == second['finished_requests'][0]['activation']
+    assert len(model.body_drive_executions) == details['static']['base_drive_count'] * 2

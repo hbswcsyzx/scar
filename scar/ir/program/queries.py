@@ -735,6 +735,11 @@ class ProgramIndex:
         from .protocol_query import protocol_obligations
         return protocol_obligations(self.graph, scope, budget=budget, _index=self)
 
+    def request_no_drive_paths(self, scope=None, *, budget=4096):
+        """Original local request paths; no native/callee no-Drive inference."""
+        from .async_request_paths import request_no_drive_paths
+        return request_no_drive_paths(self, scope, budget=budget)
+
     def input_origins(self, operation_id, use_id, *, budget=4096):
         """Static original input routes, reusing this validated model index."""
         from scar.ir.execution.validity_budget import ValidityBudget

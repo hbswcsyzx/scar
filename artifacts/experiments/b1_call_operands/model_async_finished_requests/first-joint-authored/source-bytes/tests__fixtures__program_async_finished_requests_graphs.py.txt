@@ -1,0 +1,341 @@
+"""Real async body termination followed by independent request iterators.
+
+The selected paths are supplied contracts, not recovered CPython execution.
+The new request reads only its held body.  Its latent request has no fabricated
+getter result, and no new Drive, body activation or terminal fact is introduced.
+This supplies the finished-case fragment. The non-finished arm is an opaque
+boundary, not a complete implementation of native athrow/aclose's other arm.
+"""
+from dataclasses import replace
+
+from scar.ir.program.control import ExceptionPacketDefinition
+from scar.ir.program.drivers import (
+    AsyncRequestCreate, DriverInterface, DriverReceiverKind, NormalResultPort,
+    RawRequestDefinition, RawRequestKind,
+)
+from scar.ir.program.ids import BlockID, OperationID, ProtocolScopeID, ValueID
+from scar.ir.program.lifecycle import (
+    DriverLifecycle, LifecyclePostBinding, SessionPost, SessionUpdate,
+)
+from scar.ir.program.model import (
+    AccessMode, Behavior, BlockArgument, CompletionResult, CompletionSignature,
+    CompletionSuccessor, DataValue, ExitKind, Footprint, FootprintKind,
+    InvokeLiteralResult, LiteralOrigin, Operation, OperationResult, ProtocolValue, ReferenceValue,
+    StateAccess, StateVersionValue, Successor, Terminator, TerminatorKind, UseRole,
+    ValueKind, ValueType,
+)
+from scar.ir.program.protocol_connections import (
+    RequestAssociation, RequestStateCondition, RequestStateRule,
+)
+from scar.ir.program.protocols import (
+    AdmissionPredicate, BodyStateCondition, BodyStatePredicateRule, DriverSubject,
+    OwnedUse, ProtocolClause, ProtocolOperation, ProtocolProfile, ProtocolScope,
+    StaticGapReason, StaticProtocolGap,
+)
+from scar.ir.program.state_addresses import ExistingAccess, InvokeStateOperand
+from scar.ir.program.structured import ControlEdgeReference
+from tests.fixtures.program_async_initial_control_graphs import async_initial_control_program
+from tests.fixtures.program_async_pipeline_graphs import _selected_path
+from tests.fixtures.program_async_terminal_graphs import async_terminal_program
+from tests.fixtures.program_driver_graphs import (
+    PACKET, RAW, REFERENCE, _Builder, _use, driver_rule,
+)
+from tests.fixtures.program_protocol_graphs import _scope, _source_gap
+
+
+def _operation(graph, identity):
+    return next(row for row in graph.operations if row.id == identity)
+
+
+def _finished_driver(body, domains):
+    """An original R check, a body-only getter and own N/R constructors."""
+    states = tuple(ValueType(ValueKind.STATE, location=location) for location in domains)
+    b = _Builder('finished.request.driver', domains)
+    entry = b.formals('finished.driver.entry', (REFERENCE, RAW, PACKET, *states))
+    scope = ProtocolScope(ProtocolScopeID('finished.request.scope'),
+        ProtocolProfile.ASYNC_GENERATOR_BODY_V1, DriverSubject(b.region), _source_gap())
+    packets, rows, constructors, hosts = [], [], {}, {}
+
+    def terminal(name, arguments):
+        operation = b.terminal(name, arguments, fail=True)
+        # This is a newly supplied exact terminal; old opaque operations are
+        # left intact in the imported termination pipeline.
+        operation = replace(operation, effects_complete=True)
+        b.operations[-1] = operation
+        return operation
+
+    def guard(name, arguments, owner, rule, *, request=False, yes, no):
+        identity = OperationID(name + '.read')
+        boolean = DataValue(ValueID(name + '.bool'), b.region,
+                            OperationResult(identity, 0), 'builtins.bool')
+        b.values.append(boolean)
+        own = _use(name + '.owner', owner)
+        state_inputs = tuple(_use(name + f'.state.{index}', value, state=True)
+                             for index, value in enumerate(arguments[-len(domains):]))
+        predicate = Operation(identity, 'original current predicate read',
+            (Behavior.CONTROL, Behavior.READ), (own, *state_inputs), (boolean.id,),
+            tuple(StateAccess(location, use.id, AccessMode.READ)
+                  for location, use in zip(domains, state_inputs, strict=True)),
+            effects_complete=True)
+        b.operations.append(predicate)
+        condition = replace(_use(name + '.condition', boolean.id), role=UseRole.DATA)
+        forwards, edges = [], []
+        values = {value.id: value for value in b.values}
+        for number, target in enumerate((yes, no)):
+            uses = tuple(_use(name + f'.edge.{number}.{index}', value,
+                state=type(values[value]) is StateVersionValue,
+                protocol=type(values[value]) is ProtocolValue)
+                for index, value in enumerate(arguments))
+            forwards.extend(uses)
+            edges.append(Successor(BlockID(target), tuple(use.id for use in uses)))
+        branch = b.add(name + '.branch', (condition, *forwards), effects_complete=True,
+            terminator=Terminator(TerminatorKind.BRANCH, tuple(edges), condition=condition.id))
+        sites = tuple(ExistingAccess(predicate.id, index) for index in range(len(domains)))
+        subject = (RequestStateCondition(own.id, sites, rule) if request else
+                   BodyStateCondition(own.id, sites, rule))
+        row = ProtocolOperation(scope.id, ProtocolClause.ASYNC_REQUEST_SOURCE,
+            predicate.id, 0, AdmissionPredicate(subject, OperationResult(predicate.id, 0), branch.id),
+            _source_gap())
+        rows.append(row)
+        return predicate, branch, row
+
+    def error_boundary(name, arguments):
+        """Own normal exception Reference is packed; own Raise stays whole."""
+        normal = b.formals(name + '.normal', (REFERENCE, *states))
+        raised = b.formals(name + '.raise', (PACKET, *states))
+        inputs = tuple(_use(name + f'.input.{index}', value, state=index > 0)
+                       for index, value in enumerate((arguments[0], *arguments[-len(domains):])))
+        operation = b.add(name, inputs, effects_complete=False,
+            invoke_arguments=tuple(use.id for use in inputs),
+            completions=(CompletionSignature(ExitKind.NORMAL, (REFERENCE, *states)),
+                         CompletionSignature(ExitKind.RAISE, (PACKET, *states))),
+            terminator=Terminator(TerminatorKind.INVOKE, (
+                CompletionSuccessor(ExitKind.NORMAL, BlockID(name + '.normal'),
+                    tuple(CompletionResult(index) for index in range(1 + len(domains)))),
+                CompletionSuccessor(ExitKind.RAISE, BlockID(name + '.raise'),
+                    tuple(CompletionResult(index) for index in range(1 + len(domains)))))))
+        none = ReferenceValue(ValueID(name + '.none'), b.region, LiteralOrigin(None), targets=())
+        b.values.append(none)
+        exception, traceback = _use(name + '.exception', normal[0]), _use(name + '.traceback', none.id)
+        packet = b.value(name + '.packet', OperationResult(OperationID(name + '.pack'), 0), PACKET)
+        pack = b.add(name + '.pack', (exception, traceback), results=(packet,), effects_complete=True)
+        packets.append(ExceptionPacketDefinition(packet, exception.id, traceback.id))
+        normal_terminal = terminal(name + '.normal.host', (packet, *normal[1:]))
+        raised_terminal = terminal(name + '.raise.host', raised)
+        b.block(name + '.normal', normal, (pack, normal_terminal))
+        b.block(name + '.raise', raised, (raised_terminal,))
+        constructors[name] = operation
+        hosts[name] = (normal_terminal, raised_terminal)
+        return operation
+
+    reuse = b.formals('finished.driver.reuse', (REFERENCE, RAW, PACKET, *states))
+    associate = b.formals('finished.driver.associate', (REFERENCE, RAW, PACKET, *states))
+    initial_read, initial_branch, initial_row = guard('finished.request.complete', entry, entry[0],
+        RequestStateRule.IS_COMPLETE, request=True,
+        yes='finished.driver.reuse', no='finished.driver.associate')
+    b.block('finished.driver.entry', entry, (initial_read, initial_branch))
+    reuse_constructor = error_boundary('finished.reuse.error', reuse)
+    b.block('finished.driver.reuse', reuse, (reuse_constructor,))
+
+    # The NORMAL tuple has no latent result. Prefix forwarded ports make own
+    # result ordinals and landing positions intentionally different.
+    associated = b.formals('finished.driver.associated', (REFERENCE, RAW, PACKET, REFERENCE, *states))
+    association_failed = b.formals('finished.driver.association.failed', (PACKET, *states))
+    actuals = (_use('finished.association.request', associate[0]),
+        *(_use(f'finished.association.state.{index}', value, state=True)
+          for index, value in enumerate(associate[3:])))
+    forwarded = (_use('finished.association.forward.request', associate[0]),
+        _use('finished.association.forward.scheduler', associate[1], protocol=True),
+        _use('finished.association.forward.old_packet', associate[2], protocol=True))
+    association = b.add('finished.association', (*actuals, *forwarded), effects_complete=False,
+        invoke_arguments=tuple(use.id for use in actuals),
+        completions=(CompletionSignature(ExitKind.NORMAL, (REFERENCE, *states)),
+                     CompletionSignature(ExitKind.RAISE, (PACKET, *states))),
+        terminator=Terminator(TerminatorKind.INVOKE, (
+            CompletionSuccessor(ExitKind.NORMAL, BlockID('finished.driver.associated'),
+                (*(use.id for use in forwarded), *(CompletionResult(i) for i in range(1 + len(domains))))),
+            CompletionSuccessor(ExitKind.RAISE, BlockID('finished.driver.association.failed'),
+                tuple(CompletionResult(i) for i in range(1 + len(domains)))))))
+    b.block('finished.driver.associate', associate, (association,))
+    failed_host = terminal('finished.association.failed.host', association_failed)
+    b.block('finished.driver.association.failed', association_failed, (failed_host,))
+    source = InvokeLiteralResult(ControlEdgeReference(association.id, 0), CompletionResult(0))
+    association_row = ProtocolOperation(scope.id, ProtocolClause.ASYNC_REQUEST_ASSOCIATE,
+        association.id, 0, RequestAssociation(actuals[0].id, source,
+            StaticProtocolGap(StaticGapReason.SOURCE_SCOPE_INVENTORY_UNRESOLVED),
+            tuple(InvokeStateOperand(association.id, use.id) for use in actuals[1:])), _source_gap())
+    rows.append(association_row)
+
+    finished = b.formals('finished.driver.is_finished', (REFERENCE, RAW, PACKET, REFERENCE, *states))
+    unfinished = b.formals('finished.driver.unfinished', (REFERENCE, RAW, PACKET, REFERENCE, *states))
+    body_read, body_branch, body_row = guard('finished.body.closed', associated, associated[3],
+        BodyStatePredicateRule.IS_CLOSED, yes='finished.driver.is_finished', no='finished.driver.unfinished')
+    b.block('finished.driver.associated', associated, (body_read, body_branch))
+    # No native classification is attached to this unexpanded arm. Its opaque
+    # aggregate's supplied exits do not establish the native non-finished CFG.
+    unspecified = error_boundary('finished.unselected.error', unfinished)
+    b.block('finished.driver.unfinished', unfinished, (unspecified,))
+
+    identity = OperationID('finished.request.mark_complete')
+    request_use, body_use = _use('finished.complete.request', finished[0]), _use('finished.complete.body', finished[3])
+    uses, accesses, results, current = [request_use, body_use], [], [], []
+    for index, (location, before) in enumerate(zip(domains, finished[-len(domains):], strict=True)):
+        use = _use(f'finished.complete.state.{index}', before, state=True)
+        uses.append(use)
+        if index == 0:
+            after = StateVersionValue(ValueID(f'finished.complete.after.{index}'), b.region,
+                                      OperationResult(identity, len(results)), location)
+            b.values.append(after)
+            results.append(after.id)
+            current.append(after.id)
+            accesses.append(StateAccess(location, use.id, AccessMode.READ_WRITE, after.id,
+                                        Footprint(FootprintKind.WHOLE)))
+        else:
+            current.append(before)
+            accesses.append(StateAccess(location, use.id, AccessMode.READ,
+                                        footprint=Footprint(FootprintKind.WHOLE)))
+    complete = Operation(identity, 'complete this new request before replying',
+        (Behavior.CONTROL, Behavior.READ, Behavior.WRITE), tuple(uses), tuple(results),
+        tuple(accesses), effects_complete=True)
+    b.operations.append(complete)
+    update = SessionUpdate(identity, request_use.id, body_use.id,
+                           LifecyclePostBinding.AFTER_OPERATION, SessionPost.COMPLETE)
+    reply = error_boundary('finished.request.reply', (finished[0], *current))
+    b.block('finished.driver.is_finished', finished, (complete, reply))
+    region = b.finish('finished.driver.entry')
+    region = replace(region, exits=tuple(port for port in region.exits if port.kind is ExitKind.RAISE))
+    interface = DriverInterface(region.id, body.id, DriverReceiverKind.ASYNC_REQUEST,
+        entry[0], entry[1], domains, driver_rule())
+    return {'region': region, 'values': tuple(b.values), 'operations': tuple(b.operations),
+        'interface': interface, 'scope': scope, 'rows': tuple(rows), 'packets': tuple(packets),
+        'entry_formals': entry, 'association': association, 'association_row': association_row,
+        'body_source': source, 'predicate': body_read, 'body_row': body_row, 'branch': body_branch,
+        'request_predicate': initial_read, 'request_row': initial_row, 'request_branch': initial_branch,
+        'complete': complete, 'update': update, 'constructor': reply, 'reuse_constructor': reuse_constructor,
+        'unexpanded_unfinished': unspecified, 'native_cfg_complete': False,
+        'host_terminals': hosts['finished.request.reply'], 'reuse_terminals': hosts['finished.reuse.error']}
+
+
+def async_finished_requests_program(*, terminal='return', request='throw',
+                                    constructor_raised=False, retry=False):
+    """One genuine terminal B, then new R and optionally one same-R retry."""
+    if terminal not in ('return', 'raise') or request not in ('throw', 'close'):
+        raise ValueError('terminal is return/raise and request is throw/close')
+    if type(constructor_raised) is not bool or type(retry) is not bool:
+        raise TypeError('constructor_raised and retry are exact bools')
+    graph, details = (async_initial_control_program(scenario='suspended-new') if terminal == 'return'
+                      else async_terminal_program(route='ordinary'))
+    original = details['drivers'][-1]
+    caller = details['caller']
+    values = {row.id: row for row in graph.values}
+    selected_block = next(block for block in caller.blocks if block.id == details['caller_path'][-1][0])
+    old_terminal = _operation(graph, selected_block.operations[-1])
+    if old_terminal.terminator.kind is not TerminatorKind.RAISE:
+        raise AssertionError('the selected original driver must finish at its real caller RAISE landing')
+    # Original call landings carry R,B,packet and every current state.
+    old_r, owner, old_packet, *current_states = selected_block.arguments
+    domains = tuple(values[identity].location for identity in current_states)
+    state_types = tuple(ValueType(ValueKind.STATE, location=location) for location in domains)
+    part = _finished_driver(details['body'], domains)
+    b = _Builder(caller.id.value, domains)
+    b.values = [row for row in graph.values if row.region == caller.id]
+    none = ReferenceValue(ValueID('finished.caller.none'), caller.id, LiteralOrigin(None), targets=())
+    b.values.append(none)
+    kind = RawRequestKind.THROW if request == 'throw' else RawRequestKind.CLOSE
+    latent_uses = (_use('finished.latent.argument', none.id),) if request == 'throw' else ()
+    latent = b.value('finished.latent', OperationResult(OperationID('finished.latent.pack'), 0), RAW)
+    latent_pack = b.add('finished.latent.pack', latent_uses, results=(latent,), effects_complete=True)
+    latent_definition = RawRequestDefinition(latent, kind, tuple(use.id for use in latent_uses))
+    request_created = b.formals('finished.caller.request.created', (REFERENCE, REFERENCE, PACKET, *state_types))
+    request_failed = b.formals('finished.caller.request.failed', (PACKET, *state_types))
+    actuals = (_use('finished.create.body', owner), _use('finished.create.latent', latent, protocol=True),
+        *(_use(f'finished.create.state.{index}', value, state=True) for index, value in enumerate(current_states)))
+    forwards = (_use('finished.create.forward.body', owner),
+                _use('finished.create.forward.old_packet', old_packet, protocol=True))
+    create = b.add('finished.request.create', (*actuals, *forwards), effects_complete=True,
+        invoke_arguments=tuple(use.id for use in actuals),
+        completions=(CompletionSignature(ExitKind.NORMAL, (REFERENCE, *state_types)),
+                     CompletionSignature(ExitKind.RAISE, (PACKET, *state_types))),
+        terminator=Terminator(TerminatorKind.INVOKE, (
+            CompletionSuccessor(ExitKind.NORMAL, BlockID('finished.caller.request.created'),
+                (CompletionResult(0), *(use.id for use in forwards),
+                 *(CompletionResult(index + 1) for index in range(len(domains))))),
+            CompletionSuccessor(ExitKind.RAISE, BlockID('finished.caller.request.failed'),
+                tuple(CompletionResult(index) for index in range(1 + len(domains)))))))
+    new_request = AsyncRequestCreate(create.id, actuals[0].id, actuals[1].id,
+                                    NormalResultPort(0), driver_rule())
+    failed_host = b.terminal('finished.caller.create.failed.host', request_failed, fail=True)
+    b.block('finished.caller.request.failed', request_failed, (failed_host,))
+    calls, call_terminals, call_paths, caller_choices = [], [], [], {create.id: 0}
+    source_block, source_formals = 'finished.caller.request.created', request_created
+    for ordinal in range(2 if retry else 1):
+        label = f'finished.caller.call.{ordinal}'
+        current_r, current_b, previous_packet, *states_now = source_formals
+        raw = b.value(label + '.scheduler', OperationResult(OperationID(label + '.scheduler.pack'), 0), RAW)
+        pack = b.add(label + '.scheduler.pack', results=(raw,), effects_complete=True)
+        inputs = (_use(label + '.request', current_r), _use(label + '.raw', raw, protocol=True),
+            _use(label + '.previous_packet', previous_packet, protocol=True),
+            *(_use(label + f'.state.{index}', value, state=True) for index, value in enumerate(states_now)))
+        forward = (_use(label + '.forward.request', current_r), _use(label + '.forward.body', current_b))
+        landing = b.formals(label + '.raise', (REFERENCE, REFERENCE, PACKET, *state_types))
+        call = b.add(label, (*inputs, *forward), callee=part['region'].id, effects_complete=True,
+            invoke_arguments=tuple(use.id for use in inputs),
+            completions=(CompletionSignature(ExitKind.RAISE, (PACKET, *state_types)),),
+            terminator=Terminator(TerminatorKind.INVOKE, (
+                CompletionSuccessor(ExitKind.RAISE, BlockID(label + '.raise'),
+                    (*(use.id for use in forward), *(CompletionResult(i) for i in range(1 + len(domains))))),)))
+        b.block(source_block, source_formals, (pack, call))
+        caller_choices[call.id] = 0
+        chosen = part['reuse_terminals'][int(constructor_raised)] if ordinal else part['host_terminals'][int(constructor_raised)]
+        choices = {part['request_branch'].id: 0 if ordinal else 1,
+            part['association'].id: 0, part['branch'].id: 0,
+            part['constructor'].id: int(constructor_raised),
+            part['reuse_constructor'].id: int(constructor_raised)}
+        calls.append(call)
+        call_terminals.append(chosen)
+        call_paths.append(choices)
+        source_block, source_formals = label + '.raise', landing
+        if ordinal == int(retry):
+            final = b.terminal(label + '.host', landing[2:], fail=True)
+            b.block(source_block, source_formals, (final,))
+    new_values = tuple(row for row in b.values if row.id not in values)
+    replacement = replace(selected_block, operations=(*selected_block.operations[:-1], latent_pack.id, create.id))
+    caller = replace(caller, blocks=tuple(replacement if block.id == selected_block.id else block
+                                         for block in caller.blocks) + tuple(b.blocks))
+    region = replace(part['region'], parent=caller.id)
+    graph = replace(graph,
+        regions=tuple(caller if row.id == caller.id else row for row in graph.regions) + (region,),
+        values=(*graph.values, *new_values, *part['values']),
+        operations=(*(row for row in graph.operations if row.id != old_terminal.id), *b.operations, *part['operations']),
+        control_scopes=tuple(replace(scope, blocks=tuple(block.id for block in caller.blocks))
+            if scope.region == caller.id else scope for scope in graph.control_scopes) + (_scope(region.id, region.blocks),),
+        async_request_creates=(*graph.async_request_creates, new_request),
+        raw_driver_requests=(*graph.raw_driver_requests, latent_definition,
+            *(RawRequestDefinition(next(use.value for use in call.uses if use.id == call.invoke_arguments[1]),
+                                   RawRequestKind.NEXT, ()) for call in calls)),
+        driver_interfaces=(*graph.driver_interfaces, part['interface']),
+        driver_lifecycles=(*graph.driver_lifecycles, DriverLifecycle(region.id)),
+        session_updates=(*graph.session_updates, part['update']),
+        protocol_scopes=(*graph.protocol_scopes, part['scope']),
+        protocol_operations=(*graph.protocol_operations, *part['rows']),
+        exception_packets=(*graph.exception_packets, *part['packets']))
+    choices = {identity: edge for block_id, edge in details['caller_path'] if edge is not None
+               for identity in (next(block.operations[-1] for block in details['caller'].blocks if block.id == block_id),)}
+    choices.update(caller_choices)
+    paths = tuple(_selected_path(graph, region, selected) for selected in call_paths)
+    finished = {**part, 'region': region, 'terminal_kind': terminal, 'request_kind': kind,
+        'request_create': new_request, 'request_operation': create,
+        'request_source': InvokeLiteralResult(ControlEdgeReference(create.id, 0), CompletionResult(0)),
+        'latent': latent_definition, 'caller_calls': tuple(calls), 'caller_call': calls[0],
+        'selected_hosts': tuple(call_terminals), 'selected_host': call_terminals[0],
+        'paths': paths, 'path_choices': tuple(call_paths), 'caller_terminal': final,
+        'body_carrier': owner, 'old_request': old_r, 'old_packet': old_packet,
+        'latest_states': tuple(current_states), 'new_request_formal': request_created[0],
+        'original_terminal': old_terminal, 'original_terminal_driver': original,
+        'source_publication': original['publication'], 'retry': retry}
+    return graph, {**details, 'caller': caller,
+        'caller_path': _selected_path(graph, caller, choices), 'finished_request': finished,
+        'base_drive_count': len(details['drivers'])}
+
+
+__all__ = ['async_finished_requests_program']

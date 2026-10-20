@@ -1,5 +1,23 @@
 # SCAR execution model
 
+## Local request paths and conditional body roles (2026-10-20)
+
+Operation / Value / StateLocation / Region / Resource remain the core entities.
+The independent `request_no_drive_paths` query inventories original interfaces,
+branches, own N/R slots, hosts and Drives before its bounded local CFG walk.
+A completed local no-Drive route does not prove that opaque callees have no
+body effects. A body-only request projection preserves every R/Create recipe;
+missing latent roles and conditional field interpretations do not add copies.
+
+See the [interface](M1_ASYNC_FINISHED_REQUESTS_API.md),
+[limited acceptance](M1_ASYNC_FINISHED_REQUESTS_ACCEPTANCE.md) and
+[remaining work](M1_ASYNC_FINISHED_REQUESTS_NEXT_GATE.md).
+196 direct affected tests pass on904 stable sources, including17 new cases.
+The supplied true-terminal/new-request fragments keep exact packets, catch
+context and current state, while their dynamic same-B/F history bridge and
+nonfinished native arm remain incomplete. F19 and the whole first stage stay
+open. This is neither automatic whole-LeWM modeling nor speedup evidence.
+
 ## Async terminal sources and exact current consumers (2026-10-20)
 
 The five core entities remain Operation / Value / StateLocation / Region /

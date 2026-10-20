@@ -140,8 +140,13 @@ class _Analysis:
             self.obligations.append({'scope': scope.id, 'clause': ProtocolClause.ASYNC_REQUEST_SOURCE,
                 'operation': gate.operation, 'gate': gate, 'admission': result, 'status': status})
 
-    def request_projection(self, request, path):
+    def request_projection(self, request, path, *, role=None):
         """Conditional field recipes rooted at R, not at the actual body."""
+        if role is not None:
+            if role != 'body':
+                raise ValueError('request projection role must be body or the default full projection')
+            from .async_request_paths import body_request_projection
+            return body_request_projection(self, request, path)
         origins = self.ctx.origins(request)
         projections = []
         for recipe in origins['recipes']:
@@ -517,7 +522,8 @@ class _Analysis:
                 if not isinstance(self.ctx.values[use.value], ReferenceValue):
                     raise ValueError('request projection input requires Reference')
                 receiver = self.bind(self.formal(region, interface.receiver), request, 'async_request_source', path)
-                projections = self.request_projection(request, path)
+                body_only = type(contract.latent) is StaticProtocolGap
+                projections = self.request_projection(request, path, role='body' if body_only else None)
                 body = self.port(contract.body, owner=operation.id, normal=True, reference=True)
                 latent = self.port(contract.latent, owner=operation.id, normal=True)
                 if body is not None and body.gap is not None or latent is not None and latent.gap is not None:
@@ -533,6 +539,8 @@ class _Analysis:
                 view = {'scope': scope, 'declaration': declaration, 'operation': operation, 'request': request,
                         'receiver': receiver, 'body': contract.body, 'latent': contract.latent,
                         'projections': projections,
+                        'projection_role': 'body' if body_only else 'body_and_latent',
+                        'overall_association_complete': False if body_only else None,
                         'state_sites': contract.state_sites, 'gates': [],
                         'conditions': ('request association implementation and runtime object identity unproved',)}
                 for drive in self.ctx.drives_by_region.get(region, ()):
@@ -955,7 +963,9 @@ class _Analysis:
                 self.gap(gap, 'async.initial_asend')
         if self.cursor is None and initial_asend['cursor'] is not None:
             self.cursor = initial_asend['cursor']
+        from .async_request_paths import request_no_drive_inventory
         return {'issues': tuple(self.issues), 'associations': tuple(self.associations), 'deliveries': tuple(self.deliveries),
+                'request_no_drive_inventory': request_no_drive_inventory(self.ctx),
                 'initial_asend': initial_asend,
                 'return_source_inventory': self.return_inventory,
                 'return_sources': tuple(self.return_sources),

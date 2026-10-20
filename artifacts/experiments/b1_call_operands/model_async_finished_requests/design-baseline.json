@@ -1,0 +1,33 @@
+{
+  "base_revision": "b2f7e1ec58c5726a61753ffbe8d9ca125c89a162",
+  "scope_plan": "docs/M1_ASYNC_CLOSE_CONTINUATIONS_PLAN.md",
+  "plan_sha256": "57fced2079612140522e9b236cda6faadce3bda46dcc2e373c6c8f6cf617da40",
+  "prior_checkpoint": "artifacts/experiments/b1_call_operands/model_async_terminal_semantics/checkpoint.json",
+  "prior_checkpoint_sha256": "a9027072b698ffaf63ab7244cb507b28104dff0f4124ff753d11c976fc0050c1",
+  "prior_final_attempt": "verified-current",
+  "prior_source_sha256": "37dfff022d371ee43a66e24d481e09c4b6933a81230e51eb540c1fbabfd2faa8",
+  "prior_source_files": 899,
+  "prior_focused_cases": 2104,
+  "original_family_denominator": ["F12", "F13", "F14", "F15", "F16", "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24", "X25", "X26", "X27"],
+  "accepted_before": ["F12", "F13", "F14", "F15", "F16", "F17", "F18", "F21", "F23"],
+  "open_before_and_after_this_batch": ["F19", "F20", "F22", "F24", "X25", "X26", "X27"],
+  "m2_denominator": {"constructs": 113, "fields": 196},
+  "original_f19_units": {
+    "finished_body_new_request_and_retry": "CURRENT_PARTIAL_BATCH",
+    "graceful_close_finally_await_same_request": "OPEN",
+    "illegal_close_yield_retry_new_requests_finally_continuation": "OPEN",
+    "all_unit_connections_missing_capture_budget": "OPEN_UNTIL_ALL_UNITS"
+  },
+  "core_entities": ["Operation", "Value", "StateLocation", "Region", "Resource"],
+  "schema": {"program": 26, "execution": 8},
+  "new_detector": false,
+  "new_backend": false,
+  "lewm_specific_rules": false,
+  "source_runtime_verified": false,
+  "native_applicability_verified": false,
+  "transformation_authorized": false,
+  "protected": {
+    "le-wm": {"path": "/home/zyf/AAA/le-wm", "head": "f70fed80288462ca4d006cb3607ec6da6eaa851f", "status": ""},
+    "scar": {"path": "/home/zyf/AAA/scar", "head": "84f165fce1e2e37617c974ce9fee574ea816406b", "status": ""}
+  }
+}
