@@ -1,0 +1,138 @@
+FFFF.F                                                                   [100%]
+=================================== FAILURES ===================================
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-return] _
+
+route = 'graceful-return'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+>       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:27: in _checked
+    require_valid(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d....stage.2.close.reply.match.ge'), index=1)))), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:close.stage.2.close.reply.propagate.host: host outcome is neither this body RAISE packet nor its selected adapter result; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.normal.host: host outcome is neither this body RAISE packet nor its selected adapter result; protocol_copy at program_operation:close.stage.2.close.reply.propagate.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.raise.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.normal.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.propagate.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.raise.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.normal.host: host exception is not this adapter result or its explicit packet
+
+scar/ir/program/validation.py:768: ValueError
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ge] _
+
+route = 'graceful-ge'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+>       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:27: in _checked
+    require_valid(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d....stage.2.close.reply.match.ge'), index=1)))), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:close.stage.2.close.reply.propagate.host: host outcome is neither this body RAISE packet nor its selected adapter result; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.normal.host: host outcome is neither this body RAISE packet nor its selected adapter result; protocol_copy at program_operation:close.stage.2.close.reply.propagate.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.raise.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.normal.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.propagate.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.raise.host: host exception is not this adapter result or its explicit packet; protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.normal.host: host exception is not this adapter result or its explicit packet
+
+scar/ir/program/validation.py:768: ValueError
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ordinary] _
+
+route = 'graceful-ordinary'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+>       index = _checked(program)
+                ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/unit/test_program_async_close_chains.py:27: in _checked
+    require_valid(program)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='close.caller'), regions=(Region(id=RegionID(value='close.caller'), label='declared d....stage.2.close.reply.match.ge'), index=1)))), call_effect_expansions=(), stored_value_writes=(), stored_value_reads=())
+
+    def require_valid(graph: ProgramGraph) -> None:
+        issues = validate(graph)
+        if issues:
+>           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: protocol_copy at program_operation:close.stage.2.close.reply.stop_iteration.normal.host: host outcome is neither this body RAISE packet nor its selected adapter result
+
+scar/ir/program/validation.py:768: ValueError
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[illegal] _
+
+route = 'illegal'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+        program, details = _graph(route)
+        index = _checked(program)
+        stages = _driven(details)
+        definitions = {row.id: row for row in program.operations}
+        assert len(program.resumable_creates) == 1
+        assert len(stages) == 3
+        assert {stage['drive'] for stage in stages} <= set(program.body_drives)
+        assert len(program.async_request_creates) == (5 if route == 'illegal' else 2)
+        assert len(details['drivers']) == (6 if route == 'illegal' else 3)
+        first, middle, final = (definitions[stage['outcome_source']] for stage in stages)
+        assert type(first.terminator) is SuspendTerminator
+        assert first.terminator.flavor is SuspensionFlavor.ASYNC_YIELD
+        assert type(middle.terminator) is SuspendTerminator
+        assert middle.terminator.flavor is (SuspensionFlavor.ASYNC_YIELD if route == 'illegal' else SuspensionFlavor.AWAIT)
+        assert final.terminator.kind is (TerminatorKind.RETURN if route == 'graceful-return' else TerminatorKind.RAISE)
+        public, report = _report(index)
+        assert not public['budget']['truncated']
+        for ordinal, stage in enumerate(stages):
+            publication = index.body_publication(stage['publication'].operation)
+            assert publication.commit == stage['publication']
+            assert publication.source.operation == stage['outcome_source']
+            finished = index.lifecycle_after(publication.commit.operation).terminal.is_finished(publication.instance.use.value)
+            assert finished is (ordinal == 2)
+            source = _selected_source(report, stage)
+            expected = SessionPost.HOLD if ordinal == 1 and route != 'illegal' else SessionPost.COMPLETE
+>           assert source['expected_post'] is expected
+E           AssertionError: assert None is <SessionPost.COMPLETE: 'COMPLETE'>
+
+tests/unit/test_program_async_close_chains.py:74: AssertionError
+_ test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget _
+
+    def test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget():
+        program, details = _graph('illegal')
+        original = _checked(program)
+        _, full = _report(original)
+        selected = _driven(details)[1]
+        missing = replace(program, protocol_bindings=tuple(row for row in program.protocol_bindings
+            if not (type(row) is AsyncSessionOutcome and row.scope == selected['scope'].id
+                    and row.source == selected['publication'].outcome and row.update == selected['update'].operation)))
+        _, removed = _report(ProgramIndex(missing))
+        expected = {(row['scope'], row['source']) for row in full['session_consumers']}
+        assert {(row['scope'], row['source']) for row in removed['session_consumers']} == expected
+        absent = _selected_source(removed, selected)
+>       assert absent['expected_post'] is SessionPost.COMPLETE
+E       AssertionError: assert None is <SessionPost.COMPLETE: 'COMPLETE'>
+E        +  where <SessionPost.COMPLETE: 'COMPLETE'> = SessionPost.COMPLETE
+
+tests/unit/test_program_async_close_chains.py:127: AssertionError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-return]
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ge]
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ordinary]
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[illegal]
+FAILED tests/unit/test_program_async_close_chains.py::test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget
+5 failed, 1 passed in 39.35s

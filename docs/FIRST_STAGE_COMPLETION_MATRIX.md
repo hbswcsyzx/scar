@@ -1,5 +1,13 @@
 # 第一阶段完整性分母：模型、接口、协议
 
+最新F19完整链（2026-10-20）：[限定验收](M1_ASYNC_CLOSE_CHAINS_ACCEPTANCE.md)
+在相同922输入上通过30新项+302直接受影响既有项，两次冻结运行并集332。
+原三完整单位和缺采/预算/release反例贯通，原copy、schema及旧tests/fixtures保持。
+原16行现10限定接受/6开放；原F20/F22/F24/X25/X26/X27、P4 component/full、P5、
+M2原113/196及完整第一阶段仍开放。没有自动LeWM恢复/变换或新加速结论。
+[下一门F20](M1_YIELD_FROM_INITIAL_PLAN.md)已按完整父链规划，用户无需逐门验收。
+以下旧状态条目保留为历史，以本条为当前状态。
+
 最新消费者桥（2026-10-20）：[限定验收](M1_VALUE_SOURCE_CONSUMERS_ACCEPTANCE.md)
 一次26模块292 PASS，21新增、917稳定指纹输入。查询局部多边来源保普通copy /
 stored关系分列，准确load可接上层payload、owner、call/join及body普通None后的

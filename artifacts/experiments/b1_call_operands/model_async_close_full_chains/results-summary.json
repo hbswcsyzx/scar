@@ -1,0 +1,13 @@
+{
+  "new": 30,
+  "prior_affected": 302,
+  "current": 332,
+  "prior_catalog": 2325,
+  "prior_retested": 249,
+  "additional_preexisting": 53,
+  "known_catalog": 2408,
+  "source_files": 922,
+  "source_sha256": "d5d8919d624b2845f3d30d3023ae646d25a213d2c463286b1773e2f136f66edf",
+  "new_seconds": 357.11713200062513,
+  "regression_seconds": 571.6046089082956
+}

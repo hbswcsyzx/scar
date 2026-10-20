@@ -1,5 +1,15 @@
 # SCAR roadmap and scope
 
+> **F19 complete-chain conditional acceptance (2026-10-20):**
+> [Report](M1_ASYNC_CLOSE_CHAINS_ACCEPTANCE.md):30 new+302 affected prior PASS,
+> 922 stable inputs across two frozen runs. Terminal/new-request, graceful
+> finally/AWAIT and illegal close-yield/retry/finalization chains are joined.
+> Fresh reply construction is a guarded control dependency, not packet copy.
+> Ten of the original16 rows are conditionally accepted; six remain open, plus
+> P4 component/full/P5/M2 original113/196. Whole M0–M2 is incomplete. No new
+> backend, automatic LeWM recovery or speedup. [Next F20 plan](M1_YIELD_FROM_INITIAL_PLAN.md).
+> Earlier status entries below are retained as history.
+
 > **Conditional source consumer progress (2026-10-20):**
 > [Acceptance](M1_VALUE_SOURCE_CONSUMERS_ACCEPTANCE.md):292 affected tests pass,
 > 21 new,917 stable fingerprint inputs. Original-copy and stored-read edges now

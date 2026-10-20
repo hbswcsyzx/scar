@@ -641,14 +641,6 @@ class _Analysis:
                     expected = (SessionPost.HOLD if type(body.terminator) is SuspendTerminator and body.terminator.flavor is SuspensionFlavor.AWAIT
                                 else SessionPost.COMPLETE if kind in (TerminatorKind.RETURN, TerminatorKind.RAISE)
                                 or type(body.terminator) is SuspendTerminator and body.terminator.flavor is SuspensionFlavor.ASYNC_YIELD else None)
-                    from .protocols import OutcomeAdapter, OutcomeAdapterRule
-                    close_failure = any(candidate.scope == scope.id and type(candidate.contract) is OutcomeAdapter
-                        and candidate.contract.rule is OutcomeAdapterRule.ASYNCGEN_CLOSE_YIELD_ERROR
-                        and getattr(candidate.contract.input, 'outcome', None) == row.source
-                        for candidate in self.ctx.graph.protocol_operations)
-                    if close_failure:
-                        expected = None
-                        self.gap('async_close_failure_session_unresolved', path)
                     if kind is TerminatorKind.RETURN:
                         self.gap('async_return_source_classification_unproved', path)
                     elif kind is TerminatorKind.RAISE:

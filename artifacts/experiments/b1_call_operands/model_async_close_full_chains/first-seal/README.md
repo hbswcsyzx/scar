@@ -1,0 +1,1 @@
+First seal preserved byte for byte. Superseded because live canonical status/next-plan documents must remain editable; the final authority binds their immutable snapshots. Product source and both passing test attempts are unchanged.

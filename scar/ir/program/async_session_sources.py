@@ -18,10 +18,6 @@ def source_inventory(ctx):
     if cached is not None:
         return cached
     from .protocol_rules import PROFILE_FAMILY
-    close_failures = {(row.scope, row.contract.input.outcome) for row in ctx.graph.protocol_operations
-        if type(row.contract) is OutcomeAdapter
-        and row.contract.rule is OutcomeAdapterRule.ASYNCGEN_CLOSE_YIELD_ERROR
-        and type(row.contract.input) is DriveResult}
     result = []
     for scope in ctx.graph.protocol_scopes:
         if type(scope.subject) is not DriverSubject or scope.profile not in PROFILE_FAMILY:
@@ -37,8 +33,6 @@ def source_inventory(ctx):
                         or type(terminator) is SuspendTerminator
                         and terminator.flavor is SuspensionFlavor.ASYNC_YIELD else None)
                 outcome = DriveOutcomeRef(drive.operation, edge.source)
-                if (scope.id, outcome) in close_failures:
-                    post = None
                 result.append({'scope': scope.id, 'drive': drive,
                     'source': outcome, 'body_source': body,
                     'edge': ControlEdgeReference(operation.id, number), 'successor': edge,

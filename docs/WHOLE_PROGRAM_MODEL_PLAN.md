@@ -1,5 +1,12 @@
 # 完整程序模型的实施顺序与自主验收
 
+2026-10-20 当前状态：[F19完整链限定验收](M1_ASYNC_CLOSE_CHAINS_ACCEPTANCE.md)
+在相同922输入上通过30新项+302受影响既有项；三完整单位及交叉反例已接通。
+原16行现10限定接受/6开放；仍须F20/F22/F24/X25/X26/X27、P4 component/full、
+P5与M2原113/196。M0–M2整阶段未完；自动whole-LeWM恢复/变换及加速未证。
+下一门按[F20六路父链计划](M1_YIELD_FROM_INITIAL_PLAN.md)，先供合法完整图，
+不新增detector/backend。以下更早进展保留为历史。
+
 日期：2026-10-16。这是当前优先计划，修订旧 N2 中先推进局部桥接的顺序。
 模型依据：[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)。用户无需逐门审批。
 

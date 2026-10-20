@@ -671,6 +671,7 @@ def connection_errors(ctx):
     """Consumer obligations are derived from core markers, not row count."""
     errors = []
     from .completion_adapter_routes import terminal_relation
+    from .handled_completion_routes import handled_terminal_relation
     if hasattr(ctx, 'index'):
         from .protocol_await import await_connections
         errors.extend(await_connections(ctx)['issues'])
@@ -768,6 +769,12 @@ def connection_errors(ctx):
                                 continue
                             if relation['match'] is True or relation['applicable'] is None:
                                 continue
+                        handled = handled_terminal_relation(ctx, source, terminal)
+                        if handled is not None:
+                            if handled['applicable'] is not False and handled['match'] is False:
+                                errors.append(('protocol_copy', str(terminal.operation),
+                                    'handled terminal differs from its selected current completion'))
+                            continue
                         failure = _host_invoke_failure(ctx, source, terminal, routes)
                         if failure is not None:
                             if failure['match'] is False:
@@ -801,6 +808,12 @@ def connection_errors(ctx):
                         # Unknown receipts retain a gap; they do not prove the
                         # direct-copy assertion false or authorize a rewrite.
                         continue
+                handled = handled_terminal_relation(ctx, row.contract.output, terminal)
+                if handled is not None:
+                    if handled['applicable'] is not False and handled['match'] is False:
+                        errors.append(('protocol_copy', str(terminal.operation),
+                            'handled terminal differs from its selected current completion'))
+                    continue
                 expected = TerminatorKind.RAISE
                 if row.contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE:
                     port = ctx.port(row.contract.output)

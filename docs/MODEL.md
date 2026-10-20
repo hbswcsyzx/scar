@@ -1,5 +1,23 @@
 # SCAR execution model
 
+## Async close chains and handler-produced completions (2026-10-20)
+
+Five canonical entities remain unchanged. A fresh handler packet has control
+dependence on the original packet; it is not that packet's copy. The
+[new public API](M1_ASYNC_CLOSE_CHAINS_API.md) separates original copy segments,
+matcher own bool/selected edges, constructor own N/R and the current host packet.
+Static and actual views share query budgets and keep native interpretation,
+object identity and transformation authority separate.
+
+[Conditional F19 acceptance](M1_ASYNC_CLOSE_CHAINS_ACCEPTANCE.md): 30 new and302
+affected prior tests pass on the same922 inputs. All prior tests/fixtures,
+original copy semantics and Program27/Execution8 stay unchanged. Original16
+rows are now10 accepted/6 open; P4/full/P5/M2 original113/196 and complete M0–M2
+remain open. [Next F20](M1_YIELD_FROM_INITIAL_PLAN.md) is a complete first
+delegation inside one parent, not another source helper or optimization backend.
+Automatic whole-LeWM recovery and new speedup remain unverified. Older entries
+below preserve the history and are superseded by this status.
+
 ## Conditional value sources reach existing consumers (2026-10-20)
 
 Five canonical entities remain unchanged. A query-local multiedge source graph

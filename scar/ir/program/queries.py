@@ -773,6 +773,11 @@ class ProgramIndex:
         from .exception_match_query import exception_match
         return exception_match(self, operation, budget=budget)
 
+    def handled_completion(self, source, terminal, *, budget=4096):
+        """Separate packet copies from selected handler-produced completions."""
+        from .handled_completion_routes import handled_completion
+        return handled_completion(self, source, terminal, budget=budget)
+
     def paired_input_origins(self, raw, pack_operand, *, budget=4096):
         """Exact raw-pack operand routes; not a predicate-input binding."""
         from .input_origins import paired_input_origins

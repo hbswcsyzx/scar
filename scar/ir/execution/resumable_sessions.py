@@ -7,11 +7,11 @@ path, rather than a same-site candidate, determines this invocation's targets.
 from scar.ir.program.drivers import DriverReceiverKind
 from scar.ir.program.control import ProtocolValueKind
 from scar.ir.program.lifecycle import DriveOutcomeRef, LifecyclePostBinding, SessionPost
-from scar.ir.program.model import (CompletionResult, ExitKind, InvokeLiteralResult,
+from scar.ir.program.model import (BlockArgument, CompletionResult, ExitKind, InvokeLiteralResult,
                                    OperationResult, StateVersionValue, TerminatorKind)
 from scar.ir.program.protocol_connections import AsyncSessionOutcome
 from scar.ir.program.protocols import (DriverSubject, DriveResult, OutcomeAdapter,
-                                       OutcomeAdapterRule, ProtocolProfile)
+                                       OutcomeAdapterRule, OwnedUse, HostTerminal, ProtocolProfile)
 from scar.ir.program.resumption import SuspendTerminator, SuspensionFlavor
 
 from .common import Unresolved
@@ -105,6 +105,121 @@ def _post_failure(ctx, path):
                 packet = ctx.results.get((landing.id, formal))
         selected = (occurrence, packet)
     return selected
+
+
+def _handled_host(ctx, source, path, exported, target, host, shared):
+    """Project one original handled-completion receipt on this actual visit.
+
+    Each copy segment is checked later against the ordinary captured roots.
+    The old packet controls a handler; it never becomes an alias of a newly
+    constructed packet. No observed bool or equal packet type proves a copy.
+    """
+    if not shared.spend('handled_actual_path', len(path) + 1):
+        return None
+    if len({operation.id for operation, _, _ in path}) != len(path):
+        # This bounded projection cannot flatten repeated visits to one site.
+        return None
+    from scar.ir.program.handled_completion_routes import handled_terminal_relation
+    from scar.ir.program.protocol_connection_flow import ConnectionContext
+    static = ConnectionContext(ctx.program, index=ctx.body_program_index, budget=shared)
+    occurrences = {operation.id: occurrence for operation, occurrence, _ in path}
+    block_visits = {}
+    for _, _, visit in path:
+        block_visits.setdefault(visit.block, set()).add(visit.id)
+    choices = {operation: transfer.successor_index for operation, occurrence in occurrences.items()
+               if occurrence is not None and (transfer := ctx.outgoing.get(occurrence.id)) is not None}
+    # The source Drive's visit can precede every suffix visit. Its selected
+    # successor is fixed by this exact static outcome, never a nearby visit.
+    drive = ctx.core_operations[source.drive]
+    choices[source.drive] = next(i for i, edge in enumerate(drive.terminator.successors)
+                                if edge.source == source.source)
+    sources = [(DriveResult(source, 0), ())]
+    for operation, occurrence, _ in path:
+        if not shared.spend('handled_actual_sources'):
+            return None
+        transfer = None if occurrence is None else ctx.outgoing.get(occurrence.id)
+        for row in ctx.session_adapters_by_site.get(operation.id, ()):
+            if not shared.spend('handled_actual_adapters'):
+                return None
+            contract = row.contract
+            if (type(contract.input) is DriveResult and contract.input.outcome == source
+                    and transfer is not None and row.slot == transfer.successor_index):
+                actual = value_for_use(ctx, _use(ctx, occurrence, contract.input_use))
+                sources.append((contract.output, (_pair(exported, actual),)))
+
+    def endpoint(port):
+        if type(port) is DriveResult:
+            return exported if port.outcome == source and port.index == 0 else None
+        if type(port) is OwnedUse:
+            return value_for_use(ctx, _use(ctx, occurrences.get(port.operation), port.use))
+        if type(port) is OperationResult:
+            return _result(ctx, occurrences.get(port.operation), port)
+        if type(port) is InvokeLiteralResult:
+            occurrence = occurrences.get(port.edge.operation)
+            transfer = None if occurrence is None else ctx.outgoing.get(occurrence.id)
+            if transfer is not None:
+                edge = ctx.core_operations[occurrence.operation].terminator.successors[transfer.successor_index]
+                if not shared.spend('handled_actual_completion_slots', len(edge.arguments) + 1):
+                    return None
+            return _result(ctx, occurrence, port)
+        if type(port) is BlockArgument:
+            visits = block_visits.get(port.block, ())
+            if len(visits) == 1:
+                return ctx.results.get((next(iter(visits)), ctx.blocks[port.block].arguments[port.index]))
+        return None
+
+    selected = []
+    for original, prefix in sources:
+        relation = handled_terminal_relation(static, original, HostTerminal(host.operation))
+        if relation is None:
+            continue
+        for receipt in relation['receipts']:
+            if not shared.spend('handled_actual_receipts'):
+                return None
+            if receipt.get('match') is not True or not receipt.get('constructor'):
+                continue
+            if not shared.spend('handled_actual_choices', len(receipt['choices']) + 1):
+                return None
+            if not all(choices.get(edge.operation) == edge.successor_index for edge in receipt['choices']):
+                continue
+            constructor = occurrences.get(receipt['constructor'].id)
+            if constructor is None:
+                continue
+            if not shared.spend('handled_actual_bindings', len(receipt['bindings']) + 1):
+                return None
+            bindings = [*prefix]
+            bindings.extend(_pair(endpoint(row['source']), endpoint(row['target']))
+                            for row in receipt['bindings'])
+            # Keep an explicit current packet -> this exact host binding even
+            # when the static receipt reports it in a separate host field.
+            current = endpoint(receipt['current_source'])
+            bindings.append(_pair(current, target))
+            matchers = tuple({'definition': row['matcher'],
+                'operation': occurrences.get(row['matcher'].operation),
+                'branch': occurrences.get(row['branch'].id), 'true_edge': row['true_edge'],
+                'selected_edge': row['selected_edge'], 'truth': row['truth']}
+                for row in receipt['matchers'])
+            if any(row['operation'] is None or row['branch'] is None for row in matchers):
+                continue
+            for binding in bindings:
+                a, b = binding['source_value'], binding['target_value']
+                left = None if a is None or type(a) is Unresolved else ctx.body_value_roots.get(a.id)
+                right = None if b is None or type(b) is Unresolved else ctx.body_value_roots.get(b.id)
+                binding['copy_status'] = ('DECLARED_ORIGINAL_COPY' if left is not None and left == right else 'UNPROVED')
+                binding['compatibility'] = {'status': binding['copy_status'], 'source': a, 'target': b,
+                    'source_runtime_verified': False, 'value_identity_verified': False,
+                    'transformation_authorized': False}
+            selected.append({'kind': 'HANDLED_COMPLETION', 'source_value': current,
+                'bindings': tuple(bindings), 'handled_completion': {
+                    'receipt': receipt, 'matchers': matchers, 'constructor': constructor,
+                    'own_result': endpoint(receipt['own_port']), 'current_value': current,
+                    'supported': all(row['copy_status'] == 'DECLARED_ORIGINAL_COPY' for row in bindings),
+                    'structural_support': True,
+                    'source_runtime_verified': False, 'runtime_identity_verified': False,
+                    'native_applicability_verified': False, 'transformation_authorized': False}})
+    # A body packet and an adapter result are different roots. Ambiguity stays
+    # unproved rather than selecting the first equal-typed candidate.
+    return selected[0] if len(selected) == 1 and not shared.truncated else None
 
 
 def _hosts(ctx, view, source, path, gaps):
@@ -227,6 +342,9 @@ def _hosts(ctx, view, source, path, gaps):
 
 def prepare_body_sessions(ctx):
     ctx.resolved_body_sessions = {}
+    ctx.body_session_paths = {}
+    ctx.body_session_has_matcher = {}
+    ctx.session_matcher_sites = frozenset(row.operation for row in ctx.program.exception_matches)
     interfaces = {row.region: row for row in ctx.program.driver_interfaces}
     ctx.session_occurrences_by_visit_site = {(row.visit, row.operation): row for row in ctx.occurrences.values()}
     updates = {row.operation: row for row in ctx.program.session_updates}
@@ -252,9 +370,6 @@ def prepare_body_sessions(ctx):
         if (type(segment.ingress) is InitialEntry and visit.id not in ctx.incoming
                 and visit.block == ctx.regions[ctx.activations[segment.activation].region].entry):
             entries_by_activation.setdefault(segment.activation, []).append(visit)
-    close_failures = {row.contract.input.outcome for row in ctx.program.protocol_operations
-        if type(row.contract) is OutcomeAdapter and type(row.contract.input) is DriveResult
-        and row.contract.rule is OutcomeAdapterRule.ASYNCGEN_CLOSE_YIELD_ERROR}
     for identity, view in ctx.resolved_body_drives.items():
         activation = ctx.activation_of(identity)
         interface = interfaces.get(ctx.activations[activation].region)
@@ -283,8 +398,6 @@ def prepare_body_sessions(ctx):
                         if terminal.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE)
                         or type(terminal) is SuspendTerminator and terminal.flavor is SuspensionFlavor.ASYNC_YIELD
                         else None)
-            if source in close_failures:
-                expected = None
             if expected is None:
                 gap(ctx, gaps, 'body_session_source_classification_unproved', identity,
                     'this original outcome has no supported automatic session-post classification')
@@ -292,6 +405,9 @@ def prepare_body_sessions(ctx):
             gap(ctx, gaps, 'body_session_source_missing', identity,
                 'actual body outcome is missing; static alternatives remain obligations')
         path = _path(ctx, view['drive'], gaps)
+        ctx.body_session_paths[identity] = path
+        ctx.body_session_has_matcher[identity] = any(operation.id in ctx.session_matcher_sites
+                                                   for operation, _, _ in path)
         targets = []
         for operation, occurrence, visit in path:
             update = updates.get(operation.id)
@@ -426,8 +542,43 @@ def session_view(ctx, identity, shared):
         'request_binding': dict(source['request_binding']),
         'targets': tuple({**row, 'request': dict(row['request']), 'body': dict(row['body'])}
                          for row in source['targets']),
-        'hosts': tuple({**row, 'bindings': tuple(dict(item) for item in row['bindings'])}
+        'hosts': tuple({**row, **({'handled_completion': dict(row['handled_completion'])}
+                                if 'handled_completion' in row else {}),
+                       'bindings': tuple(dict(item) for item in row['bindings'])}
                        for row in source['hosts'])}
+    # Handler analysis is derived work. It uses this query's shared budget,
+    # never a second preparation-time budget or a persistent proof cache.
+    path = ctx.body_session_paths.get(identity, ())
+    outcome = ctx.resolved_body_drives[identity]['outcome']
+    if (ctx.body_session_has_matcher.get(identity) and source['source'] is not None
+            and outcome is not None):
+        body = ctx.core_operations[outcome.operation]
+        exported = None
+        if shared.spend('handled_actual_body_export', len(body.uses) + 1):
+            uses = {row.id: row for row in body.uses}
+            payload = (body.terminator.exported if type(body.terminator) is SuspendTerminator else
+                next(use for use in body.terminator.values
+                     if not isinstance(ctx.core_values[uses[use].value], StateVersionValue)))
+            exported = value_for_use(ctx, _use(ctx, outcome, payload))
+        gaps = list(result['gaps'])
+        for ordinal, row in enumerate(result['hosts']):
+            if row['operation'] is None:
+                continue
+            handled = _handled_host(ctx, source['source'], path, exported,
+                                    row['target_value'], row['operation'], shared)
+            if handled is not None:
+                row.update(handled)
+                prefix = f'{identity}:host[{ordinal}]:'
+                gaps = [gap for gap in gaps if not gap.path.startswith(prefix)]
+                if not row['handled_completion']['supported']:
+                    from .validation import ExecutionIssue
+                    gaps.append(ExecutionIssue('body_handled_operand_unproved', str(row['operation'].id),
+                        'one exact matcher/bool/constructor/packet copy segment is not captured'))
+            else:
+                row['handled_completion'] = {'supported': False, 'structural_support': None,
+                    'source_runtime_verified': False, 'runtime_identity_verified': False,
+                    'native_applicability_verified': False, 'transformation_authorized': False}
+        result['gaps'] = tuple(gaps)
     cursor = None
     if not shared.spend('body_session_request', path='body.session.request'):
         result['request_binding']['compatibility'] = None
@@ -446,6 +597,8 @@ def session_view(ctx, identity, shared):
                     row['post_established'] = False
                 else:
                     row['compatibility'] = None
+                    if 'handled_completion' in row:
+                        row['handled_completion']['supported'] = False
                     for binding in row['bindings']:
                         binding['compatibility'] = None
                         binding['copy_status'] = None

@@ -1,0 +1,632 @@
+FFFFFFFFFFFFFFFFFFF                                                      [100%]
+=================================== FAILURES ===================================
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-return] _
+
+route = 'graceful-return'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+>       program, details = _graph(route)
+                           ^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'graceful-return'
+
+    def _graph(route):
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/unit/test_program_async_close_chains.py:19: SyntaxError
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ge] _
+
+route = 'graceful-ge'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+>       program, details = _graph(route)
+                           ^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'graceful-ge'
+
+    def _graph(route):
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/unit/test_program_async_close_chains.py:19: SyntaxError
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ordinary] _
+
+route = 'graceful-ordinary'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+>       program, details = _graph(route)
+                           ^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'graceful-ordinary'
+
+    def _graph(route):
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/unit/test_program_async_close_chains.py:19: SyntaxError
+_ test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[illegal] _
+
+route = 'illegal'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f(route):
+>       program, details = _graph(route)
+                           ^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:49: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'illegal'
+
+    def _graph(route):
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/unit/test_program_async_close_chains.py:19: SyntaxError
+_ test_illegal_yield_request_complete_still_rejects_release_before_real_body_terminal _
+
+    def test_illegal_yield_request_complete_still_rejects_release_before_real_body_terminal():
+>       program, details = _graph('illegal')
+                           ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:98: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'illegal'
+
+    def _graph(route):
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/unit/test_program_async_close_chains.py:19: SyntaxError
+_ test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget _
+
+    def test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget():
+>       program, details = _graph('illegal')
+                           ^^^^^^^^^^^^^^^^^
+
+tests/unit/test_program_async_close_chains.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'illegal'
+
+    def _graph(route):
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/unit/test_program_async_close_chains.py:19: SyntaxError
+_ test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain[return-throw-False-True] _
+
+terminal = 'return', request_kind = 'throw', constructor_raised = False
+retry = True
+
+    @pytest.mark.parametrize(('terminal', 'request_kind', 'constructor_raised', 'retry'), (
+        ('return', 'throw', False, True), ('return', 'close', False, False),
+        ('raise', 'throw', False, False), ('raise', 'close', True, False)))
+    def test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain(
+            terminal, request_kind, constructor_raised, retry):
+        program, model, details = finished_frame_identity_execution(terminal=terminal, request=request_kind,
+            constructor_raised=constructor_raised, retry=retry, instances=2)
+        index = _index(program, model, details)
+        static = details['static']
+        finished = static['finished_request']
+        original = finished['original_terminal_driver']
+        source = next(row for row in program.operations if row.id == original['outcome_source'])
+        assert source.terminator.kind is (TerminatorKind.RETURN if terminal == 'return' else TerminatorKind.RAISE)
+        assert original['update'].post is SessionPost.COMPLETE
+        assert details['objects'][0] != details['objects'][1]
+        assert len(program.resumable_creates) == 1
+        assert len(model.body_drive_executions) == static['base_drive_count'] * 2
+        public = ProgramIndex(program)
+        paths = public.request_no_drive_paths(finished['scope'].id, budget=_BUDGET)
+        _finished_inventory(paths, finished)
+        # Both real reply-construction outcomes remain in the original CFG. The
+        # actual selected one is checked independently by _finished_capture below.
+        for raised in (False, True):
+            _ports(public, program, finished, _path(paths, finished, raised=raised), raised=raised)
+        for ordinal, endpoint in enumerate(details['frame_identities']):
+            _finished_capture(index, program, model, details, ordinal)
+            view = index.body_state_history(endpoint['read'], budget=_BUDGET)
+            assert view['expected_bool'] is True and view['observed_branch'] is True
+            assert view['drive_inventory'] == program.body_drives
+            assert view['commit_inventory'] == program.body_outcome_commits
+            assert view['budget']['truncated'] is False
+            candidate = _candidate(view, endpoint)
+            assert candidate['commit'] == endpoint['publication']
+            assert candidate['post_established'] is candidate['expected_bool'] is True
+            assert candidate['drive_support']['supported'] is True
+            assert candidate['source_chain']['supported'] is candidate['read_chain']['supported'] is True
+            assert candidate['source_chain']['root'] == candidate['read_chain']['root'] == endpoint['caller_activation']
+            assert candidate['terminal_route']
+            _guard(candidate['subject_binding'])
+            _guard(candidate['source_subject_binding'])
+            _guard(candidate['drive_support']['creation_binding'])
+            assert candidate['terminal_scope'].applicability.value == 'UNKNOWN'
+            assert candidate['content_preservation']['preserved'] is None
+            assert _candidate(view, details['frame_identities'][1 - ordinal])['expected_bool'] is None
+            assert all(view[flag] is False for flag in (*_FLAGS, 'native_phase_verified'))
+        # Remove only the explicit endpoint catalog declarations on the same graph
+        # and capture: observation and request metadata alone still do not prove F.
+        plain = replace(model, denotations=())
+        plain_index = _index(program, plain, details)
+        for endpoint in details['frame_identities']:
+            view = plain_index.body_state_history(endpoint['read'], budget=_BUDGET)
+            assert view['observed_branch'] is True and view['expected_bool'] is None
+            assert view['drive_inventory'] == program.body_drives
+            assert view['commit_inventory'] == program.body_outcome_commits
+>           assert _candidate(view, endpoint)['post_established'] is True
+E           assert None is True
+
+tests/unit/test_execution_async_close_chains.py:110: AssertionError
+_ test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain[return-close-False-False] _
+
+terminal = 'return', request_kind = 'close', constructor_raised = False
+retry = False
+
+    @pytest.mark.parametrize(('terminal', 'request_kind', 'constructor_raised', 'retry'), (
+        ('return', 'throw', False, True), ('return', 'close', False, False),
+        ('raise', 'throw', False, False), ('raise', 'close', True, False)))
+    def test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain(
+            terminal, request_kind, constructor_raised, retry):
+        program, model, details = finished_frame_identity_execution(terminal=terminal, request=request_kind,
+            constructor_raised=constructor_raised, retry=retry, instances=2)
+        index = _index(program, model, details)
+        static = details['static']
+        finished = static['finished_request']
+        original = finished['original_terminal_driver']
+        source = next(row for row in program.operations if row.id == original['outcome_source'])
+        assert source.terminator.kind is (TerminatorKind.RETURN if terminal == 'return' else TerminatorKind.RAISE)
+        assert original['update'].post is SessionPost.COMPLETE
+        assert details['objects'][0] != details['objects'][1]
+        assert len(program.resumable_creates) == 1
+        assert len(model.body_drive_executions) == static['base_drive_count'] * 2
+        public = ProgramIndex(program)
+        paths = public.request_no_drive_paths(finished['scope'].id, budget=_BUDGET)
+        _finished_inventory(paths, finished)
+        # Both real reply-construction outcomes remain in the original CFG. The
+        # actual selected one is checked independently by _finished_capture below.
+        for raised in (False, True):
+            _ports(public, program, finished, _path(paths, finished, raised=raised), raised=raised)
+        for ordinal, endpoint in enumerate(details['frame_identities']):
+            _finished_capture(index, program, model, details, ordinal)
+            view = index.body_state_history(endpoint['read'], budget=_BUDGET)
+            assert view['expected_bool'] is True and view['observed_branch'] is True
+            assert view['drive_inventory'] == program.body_drives
+            assert view['commit_inventory'] == program.body_outcome_commits
+            assert view['budget']['truncated'] is False
+            candidate = _candidate(view, endpoint)
+            assert candidate['commit'] == endpoint['publication']
+            assert candidate['post_established'] is candidate['expected_bool'] is True
+            assert candidate['drive_support']['supported'] is True
+            assert candidate['source_chain']['supported'] is candidate['read_chain']['supported'] is True
+            assert candidate['source_chain']['root'] == candidate['read_chain']['root'] == endpoint['caller_activation']
+            assert candidate['terminal_route']
+            _guard(candidate['subject_binding'])
+            _guard(candidate['source_subject_binding'])
+            _guard(candidate['drive_support']['creation_binding'])
+            assert candidate['terminal_scope'].applicability.value == 'UNKNOWN'
+            assert candidate['content_preservation']['preserved'] is None
+            assert _candidate(view, details['frame_identities'][1 - ordinal])['expected_bool'] is None
+            assert all(view[flag] is False for flag in (*_FLAGS, 'native_phase_verified'))
+        # Remove only the explicit endpoint catalog declarations on the same graph
+        # and capture: observation and request metadata alone still do not prove F.
+        plain = replace(model, denotations=())
+        plain_index = _index(program, plain, details)
+        for endpoint in details['frame_identities']:
+            view = plain_index.body_state_history(endpoint['read'], budget=_BUDGET)
+            assert view['observed_branch'] is True and view['expected_bool'] is None
+            assert view['drive_inventory'] == program.body_drives
+            assert view['commit_inventory'] == program.body_outcome_commits
+>           assert _candidate(view, endpoint)['post_established'] is True
+E           assert None is True
+
+tests/unit/test_execution_async_close_chains.py:110: AssertionError
+_ test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain[raise-throw-False-False] _
+
+terminal = 'raise', request_kind = 'throw', constructor_raised = False
+retry = False
+
+    @pytest.mark.parametrize(('terminal', 'request_kind', 'constructor_raised', 'retry'), (
+        ('return', 'throw', False, True), ('return', 'close', False, False),
+        ('raise', 'throw', False, False), ('raise', 'close', True, False)))
+    def test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain(
+            terminal, request_kind, constructor_raised, retry):
+        program, model, details = finished_frame_identity_execution(terminal=terminal, request=request_kind,
+            constructor_raised=constructor_raised, retry=retry, instances=2)
+        index = _index(program, model, details)
+        static = details['static']
+        finished = static['finished_request']
+        original = finished['original_terminal_driver']
+        source = next(row for row in program.operations if row.id == original['outcome_source'])
+        assert source.terminator.kind is (TerminatorKind.RETURN if terminal == 'return' else TerminatorKind.RAISE)
+        assert original['update'].post is SessionPost.COMPLETE
+        assert details['objects'][0] != details['objects'][1]
+        assert len(program.resumable_creates) == 1
+        assert len(model.body_drive_executions) == static['base_drive_count'] * 2
+        public = ProgramIndex(program)
+        paths = public.request_no_drive_paths(finished['scope'].id, budget=_BUDGET)
+        _finished_inventory(paths, finished)
+        # Both real reply-construction outcomes remain in the original CFG. The
+        # actual selected one is checked independently by _finished_capture below.
+        for raised in (False, True):
+            _ports(public, program, finished, _path(paths, finished, raised=raised), raised=raised)
+        for ordinal, endpoint in enumerate(details['frame_identities']):
+            _finished_capture(index, program, model, details, ordinal)
+            view = index.body_state_history(endpoint['read'], budget=_BUDGET)
+            assert view['expected_bool'] is True and view['observed_branch'] is True
+            assert view['drive_inventory'] == program.body_drives
+            assert view['commit_inventory'] == program.body_outcome_commits
+            assert view['budget']['truncated'] is False
+            candidate = _candidate(view, endpoint)
+            assert candidate['commit'] == endpoint['publication']
+            assert candidate['post_established'] is candidate['expected_bool'] is True
+            assert candidate['drive_support']['supported'] is True
+            assert candidate['source_chain']['supported'] is candidate['read_chain']['supported'] is True
+            assert candidate['source_chain']['root'] == candidate['read_chain']['root'] == endpoint['caller_activation']
+            assert candidate['terminal_route']
+            _guard(candidate['subject_binding'])
+            _guard(candidate['source_subject_binding'])
+            _guard(candidate['drive_support']['creation_binding'])
+            assert candidate['terminal_scope'].applicability.value == 'UNKNOWN'
+            assert candidate['content_preservation']['preserved'] is None
+            assert _candidate(view, details['frame_identities'][1 - ordinal])['expected_bool'] is None
+            assert all(view[flag] is False for flag in (*_FLAGS, 'native_phase_verified'))
+        # Remove only the explicit endpoint catalog declarations on the same graph
+        # and capture: observation and request metadata alone still do not prove F.
+        plain = replace(model, denotations=())
+        plain_index = _index(program, plain, details)
+        for endpoint in details['frame_identities']:
+            view = plain_index.body_state_history(endpoint['read'], budget=_BUDGET)
+            assert view['observed_branch'] is True and view['expected_bool'] is None
+            assert view['drive_inventory'] == program.body_drives
+            assert view['commit_inventory'] == program.body_outcome_commits
+>           assert _candidate(view, endpoint)['post_established'] is True
+E           assert None is True
+
+tests/unit/test_execution_async_close_chains.py:110: AssertionError
+_ test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain[raise-close-True-False] _
+
+terminal = 'raise', request_kind = 'close', constructor_raised = True
+retry = False
+
+    @pytest.mark.parametrize(('terminal', 'request_kind', 'constructor_raised', 'retry'), (
+        ('return', 'throw', False, True), ('return', 'close', False, False),
+        ('raise', 'throw', False, False), ('raise', 'close', True, False)))
+    def test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain(
+            terminal, request_kind, constructor_raised, retry):
+        program, model, details = finished_frame_identity_execution(terminal=terminal, request=request_kind,
+            constructor_raised=constructor_raised, retry=retry, instances=2)
+        index = _index(program, model, details)
+        static = details['static']
+        finished = static['finished_request']
+        original = finished['original_terminal_driver']
+        source = next(row for row in program.operations if row.id == original['outcome_source'])
+        assert source.terminator.kind is (TerminatorKind.RETURN if terminal == 'return' else TerminatorKind.RAISE)
+        assert original['update'].post is SessionPost.COMPLETE
+        assert details['objects'][0] != details['objects'][1]
+        assert len(program.resumable_creates) == 1
+        assert len(model.body_drive_executions) == static['base_drive_count'] * 2
+        public = ProgramIndex(program)
+        paths = public.request_no_drive_paths(finished['scope'].id, budget=_BUDGET)
+        _finished_inventory(paths, finished)
+        # Both real reply-construction outcomes remain in the original CFG. The
+        # actual selected one is checked independently by _finished_capture below.
+        for raised in (False, True):
+            _ports(public, program, finished, _path(paths, finished, raised=raised), raised=raised)
+        for ordinal, endpoint in enumerate(details['frame_identities']):
+            _finished_capture(index, program, model, details, ordinal)
+            view = index.body_state_history(endpoint['read'], budget=_BUDGET)
+            assert view['expected_bool'] is True and view['observed_branch'] is True
+            assert view['drive_inventory'] == program.body_drives
+            assert view['commit_inventory'] == program.body_outcome_commits
+            assert view['budget']['truncated'] is False
+            candidate = _candidate(view, endpoint)
+            assert candidate['commit'] == endpoint['publication']
+            assert candidate['post_established'] is candidate['expected_bool'] is True
+            assert candidate['drive_support']['supported'] is True
+            assert candidate['source_chain']['supported'] is candidate['read_chain']['supported'] is True
+            assert candidate['source_chain']['root'] == candidate['read_chain']['root'] == endpoint['caller_activation']
+            assert candidate['terminal_route']
+            _guard(candidate['subject_binding'])
+            _guard(candidate['source_subject_binding'])
+            _guard(candidate['drive_support']['creation_binding'])
+            assert candidate['terminal_scope'].applicability.value == 'UNKNOWN'
+            assert candidate['content_preservation']['preserved'] is None
+            assert _candidate(view, details['frame_identities'][1 - ordinal])['expected_bool'] is None
+            assert all(view[flag] is False for flag in (*_FLAGS, 'native_phase_verified'))
+        # Remove only the explicit endpoint catalog declarations on the same graph
+        # and capture: observation and request metadata alone still do not prove F.
+        plain = replace(model, denotations=())
+        plain_index = _index(program, plain, details)
+        for endpoint in details['frame_identities']:
+            view = plain_index.body_state_history(endpoint['read'], budget=_BUDGET)
+            assert view['observed_branch'] is True and view['expected_bool'] is None
+            assert view['drive_inventory'] == program.body_drives
+            assert view['commit_inventory'] == program.body_outcome_commits
+>           assert _candidate(view, endpoint)['post_established'] is True
+E           assert None is True
+
+tests/unit/test_execution_async_close_chains.py:110: AssertionError
+_ test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-return] _
+
+route = 'graceful-return'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports(route):
+>       program, model, details = async_close_chains_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:231: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'graceful-return', instances = 2, choices = None
+
+    def async_close_chains_execution(*, route='graceful-return', instances=2, choices=None):
+        """Re-supply the exact close-chain program, including only actual body segments.
+    
+        Choices are per invocation: ``drivers`` and ``body`` map original stage
+        ordinals to tuples of original edges; ``caller`` is its own edge tuple.
+        No choice from another visit is merged into an invocation's default path.
+        """
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/fixtures/execution_async_close_chains_graphs.py:122: SyntaxError
+_ test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-ge] _
+
+route = 'graceful-ge'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports(route):
+>       program, model, details = async_close_chains_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:231: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'graceful-ge', instances = 2, choices = None
+
+    def async_close_chains_execution(*, route='graceful-return', instances=2, choices=None):
+        """Re-supply the exact close-chain program, including only actual body segments.
+    
+        Choices are per invocation: ``drivers`` and ``body`` map original stage
+        ordinals to tuples of original edges; ``caller`` is its own edge tuple.
+        No choice from another visit is merged into an invocation's default path.
+        """
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/fixtures/execution_async_close_chains_graphs.py:122: SyntaxError
+_ test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-ordinary] _
+
+route = 'graceful-ordinary'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports(route):
+>       program, model, details = async_close_chains_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:231: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'graceful-ordinary', instances = 2, choices = None
+
+    def async_close_chains_execution(*, route='graceful-return', instances=2, choices=None):
+        """Re-supply the exact close-chain program, including only actual body segments.
+    
+        Choices are per invocation: ``drivers`` and ``body`` map original stage
+        ordinals to tuples of original edges; ``caller`` is its own edge tuple.
+        No choice from another visit is merged into an invocation's default path.
+        """
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/fixtures/execution_async_close_chains_graphs.py:122: SyntaxError
+_ test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[illegal] _
+
+route = 'illegal'
+
+    @pytest.mark.parametrize('route', ('graceful-return', 'graceful-ge', 'graceful-ordinary', 'illegal'))
+    def test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports(route):
+>       program, model, details = async_close_chains_execution(route=route, instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:231: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'illegal', instances = 2, choices = None
+
+    def async_close_chains_execution(*, route='graceful-return', instances=2, choices=None):
+        """Re-supply the exact close-chain program, including only actual body segments.
+    
+        Choices are per invocation: ``drivers`` and ``body`` map original stage
+        ordinals to tuples of original edges; ``caller`` is its own edge tuple.
+        No choice from another visit is merged into an invocation's default path.
+        """
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/fixtures/execution_async_close_chains_graphs.py:122: SyntaxError
+_ test_illegal_close_constructor_own_raise_keeps_preceding_request_complete_and_future_body _
+
+    def test_illegal_close_constructor_own_raise_keeps_preceding_request_complete_and_future_body():
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/unit/test_execution_async_close_chains.py:240: SyntaxError
+_ test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[payload_use] _
+
+missing = 'payload_use'
+
+    @pytest.mark.parametrize('missing', ('payload_use', 'dispatch', 'driver_call'))
+    def test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain(missing):
+>       program, model, details = async_close_chains_execution(route='illegal', instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'illegal', instances = 2, choices = None
+
+    def async_close_chains_execution(*, route='graceful-return', instances=2, choices=None):
+        """Re-supply the exact close-chain program, including only actual body segments.
+    
+        Choices are per invocation: ``drivers`` and ``body`` map original stage
+        ordinals to tuples of original edges; ``caller`` is its own edge tuple.
+        No choice from another visit is merged into an invocation's default path.
+        """
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/fixtures/execution_async_close_chains_graphs.py:122: SyntaxError
+_ test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[dispatch] _
+
+missing = 'dispatch'
+
+    @pytest.mark.parametrize('missing', ('payload_use', 'dispatch', 'driver_call'))
+    def test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain(missing):
+>       program, model, details = async_close_chains_execution(route='illegal', instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'illegal', instances = 2, choices = None
+
+    def async_close_chains_execution(*, route='graceful-return', instances=2, choices=None):
+        """Re-supply the exact close-chain program, including only actual body segments.
+    
+        Choices are per invocation: ``drivers`` and ``body`` map original stage
+        ordinals to tuples of original edges; ``caller`` is its own edge tuple.
+        No choice from another visit is merged into an invocation's default path.
+        """
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/fixtures/execution_async_close_chains_graphs.py:122: SyntaxError
+_ test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[driver_call] _
+
+missing = 'driver_call'
+
+    @pytest.mark.parametrize('missing', ('payload_use', 'dispatch', 'driver_call'))
+    def test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain(missing):
+>       program, model, details = async_close_chains_execution(route='illegal', instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:300: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'illegal', instances = 2, choices = None
+
+    def async_close_chains_execution(*, route='graceful-return', instances=2, choices=None):
+        """Re-supply the exact close-chain program, including only actual body segments.
+    
+        Choices are per invocation: ``drivers`` and ``body`` map original stage
+        ordinals to tuples of original edges; ``caller`` is its own edge tuple.
+        No choice from another visit is merged into an invocation's default path.
+        """
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/fixtures/execution_async_close_chains_graphs.py:122: SyntaxError
+_ test_tiny_budget_keeps_the_real_close_drive_and_all_its_original_consumer_ports _
+
+    def test_tiny_budget_keeps_the_real_close_drive_and_all_its_original_consumer_ports():
+>       program, model, details = async_close_chains_execution(route='illegal', instances=2)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_async_close_chains.py:336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+route = 'illegal', instances = 2, choices = None
+
+    def async_close_chains_execution(*, route='graceful-return', instances=2, choices=None):
+        """Re-supply the exact close-chain program, including only actual body segments.
+    
+        Choices are per invocation: ``drivers`` and ``body`` map original stage
+        ordinals to tuples of original edges; ``caller`` is its own edge tuple.
+        No choice from another visit is merged into an invocation's default path.
+        """
+>       from tests.fixtures.program_async_close_chains_graphs import async_close_chains_program
+E         File "/tmp/scar-structured-model-280qf4mi/tests/fixtures/program_async_close_chains_graphs.py", line 138
+E           prime = b.add('close.body.prime', (Behavior.CONTROL,), (export, *saved, world, ambient),
+E                        ^
+E       SyntaxError: '(' was never closed
+
+tests/fixtures/execution_async_close_chains_graphs.py:122: SyntaxError
+=========================== short test summary info ============================
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-return]
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ge]
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[graceful-ordinary]
+FAILED tests/unit/test_program_async_close_chains.py::test_real_close_chain_keeps_same_body_current_session_and_only_terminal_f[illegal]
+FAILED tests/unit/test_program_async_close_chains.py::test_illegal_yield_request_complete_still_rejects_release_before_real_body_terminal
+FAILED tests/unit/test_program_async_close_chains.py::test_illegal_source_inventory_survives_missing_post_relation_and_tiny_budget
+FAILED tests/unit/test_execution_async_close_chains.py::test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain[return-throw-False-True]
+FAILED tests/unit/test_execution_async_close_chains.py::test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain[return-close-False-False]
+FAILED tests/unit/test_execution_async_close_chains.py::test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain[raise-throw-False-False]
+FAILED tests/unit/test_execution_async_close_chains.py::test_finished_frame_history_and_exact_new_request_reply_share_one_actual_chain[raise-close-True-False]
+FAILED tests/unit/test_execution_async_close_chains.py::test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-return]
+FAILED tests/unit/test_execution_async_close_chains.py::test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-ge]
+FAILED tests/unit/test_execution_async_close_chains.py::test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[graceful-ordinary]
+FAILED tests/unit/test_execution_async_close_chains.py::test_actual_close_chain_has_three_body_segments_and_exact_finally_reply_ports[illegal]
+FAILED tests/unit/test_execution_async_close_chains.py::test_illegal_close_constructor_own_raise_keeps_preceding_request_complete_and_future_body
+FAILED tests/unit/test_execution_async_close_chains.py::test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[payload_use]
+FAILED tests/unit/test_execution_async_close_chains.py::test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[dispatch]
+FAILED tests/unit/test_execution_async_close_chains.py::test_missing_this_instances_finally_capture_cannot_borrow_the_complete_close_chain[driver_call]
+FAILED tests/unit/test_execution_async_close_chains.py::test_tiny_budget_keeps_the_real_close_drive_and_all_its_original_consumer_ports
+19 failed in 38.34s

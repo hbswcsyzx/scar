@@ -1,0 +1,18 @@
+{
+  "tests/fixtures/execution_async_close_chains_graphs.py": {
+    "path": "control-inputs-fixed/source-bytes/tests__fixtures__execution_async_close_chains_graphs.py.txt",
+    "sha256": "1b2875e9497ad6a7d074444be4ec99ddaa43c44d45fd4e898c2bd741337adc83"
+  },
+  "tests/fixtures/program_async_close_chains_graphs.py": {
+    "path": "control-inputs-fixed/source-bytes/tests__fixtures__program_async_close_chains_graphs.py.txt",
+    "sha256": "f60edcf668b24f887a5762a2e61b4bdf3fbf4976228a836f229f62e8f7487722"
+  },
+  "tests/unit/test_execution_async_close_chains.py": {
+    "path": "control-inputs-fixed/source-bytes/tests__unit__test_execution_async_close_chains.py.txt",
+    "sha256": "bb17cc654b1be94c0052e66bf7449ac1d72ce28015f925de5e25c76408f7b0c1"
+  },
+  "tests/unit/test_program_async_close_chains.py": {
+    "path": "control-inputs-fixed/source-bytes/tests__unit__test_program_async_close_chains.py.txt",
+    "sha256": "28572a09f7468c5bf39a8fc90a26bdf8f59b7bba80e7617a2d16fd9232c5ee26"
+  }
+}
