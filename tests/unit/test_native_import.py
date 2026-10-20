@@ -244,7 +244,7 @@ def test_provider_scope_is_many_to_one_and_does_not_imply_containment_or_time(tm
     assert result.report["runtime_gpu_matches"] == 1
 
 
-@pytest.mark.parametrize("mutation", ["duplicate_cpu", "other_pid", "user_scope", "wrong_key"])
+@pytest.mark.parametrize("mutation", ["duplicate_cpu", "other_pid", "runtime_other_pid", "user_scope", "wrong_key"])
 def test_provider_scope_does_not_guess_or_use_the_user_annotation_stack(tmp_path, mutation):
     eto, chrome = _documents()
     runtime = chrome["traceEvents"][4]
@@ -254,6 +254,8 @@ def test_provider_scope_does_not_guess_or_use_the_user_annotation_stack(tmp_path
         chrome["traceEvents"].append(duplicate)
     elif mutation == "other_pid":
         chrome["traceEvents"][2]["pid"] = 99
+    elif mutation == "runtime_other_pid":
+        runtime["pid"] = 99
     elif mutation == "user_scope":
         chrome["traceEvents"][2]["cat"] = "user_annotation"
     else:

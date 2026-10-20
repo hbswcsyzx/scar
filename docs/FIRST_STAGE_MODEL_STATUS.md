@@ -116,3 +116,14 @@ runtime→GPU关联经独立标准库脚本对原始字节重放通过。保留5
 Python occurrence/源码CFG、非Tensor完整端口、当前状态/逻辑版本与OS资源闭包
 仍未连接。下一项核验provider关联合同并接已有调用来源证据，不扩detector/backend。
 完整程序建模仍未验收，不能把本次原生观察图当作最小依赖程序或报告新加速比。
+
+## CPU→原生 scope 对应已接通（Verified；不代表源码或数据身份已接通）
+
+随后核验固定Torch/Kineto官方源码，并机械导入54,089条provider scope关联：
+30,007条runtime/driver、24,082条GPU活动。真实图现在205,424动态记录、483,425边。
+独立差分审核核对全部新增关联及原有图不变；7条未报告scope的runtime仍不补猜。
+见 [原始源码、命令与验收](../artifacts/experiments/first_stage_native_scope_20261020/README.md)。
+
+这解除上一段的External id合同缺口，**没有解除Python occurrence、logical/state、
+source内部恢复和OS资源生命周期缺口**。下一桥先做准确带实参marker的CPU实验，
+不按_cdata/shape/名称猜对应，不用测试数或图规模宣布全阶段完成。

@@ -434,6 +434,11 @@ class _Importer:
         unique. A worker's missing association is not borrowed from a parent.
         """
         for activity, external, reference, category in self.scope_requests:
+            if category in _RUNTIME and (type(activity.process_id) is not int
+                                         or activity.process_id != self.pid):
+                self.gap("provider_scope_process_unverified", reference,
+                         "host activity belongs to another or unresolved process; no scope borrowed")
+                continue
             if not _integer(external, positive=True):
                 self.gap("provider_scope_unreported", reference,
                          "provider did not report a positive linked CPU scope ID; no association invented")
