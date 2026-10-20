@@ -127,3 +127,14 @@ Python occurrence/源码CFG、非Tensor完整端口、当前状态/逻辑版本�
 这解除上一段的External id合同缺口，**没有解除Python occurrence、logical/state、
 source内部恢复和OS资源生命周期缺口**。下一桥先做准确带实参marker的CPU实验，
 不按_cdata/shape/名称猜对应，不用测试数或图规模宣布全阶段完成。
+
+## Python Tensor对象桥原理实验（Verified；生产桥尚未实施）
+
+同一provider带Tensor实参marker已在独立CPU testcase中验证：5次dispatch、
+10个marker、6个weak token，可按nonce和有序槽机械连接到ETO编号；重复实参、
+view、原地写与梯度均检查通过。真实marker直接parent是PythonDispatchMode包装
+scope，未按opname猜原ATen；Python上下文也保留包装调用链，未强并InvocationID。
+
+详见 [实验、首次审核失败和后续门槛](../artifacts/experiments/first_stage_marker_probe_20261020/README.md)。
+这仅验证准确连接原理。下一实施项是有界生产桥、所有权/异常/foreign mode验收；
+之后才重新采LeWM。source内部/状态/资源闭包依然OPEN，继续第一阶段。

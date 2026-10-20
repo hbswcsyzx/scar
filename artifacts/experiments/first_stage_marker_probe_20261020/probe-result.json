@@ -1,0 +1,12 @@
+{
+  "schema": "scar.marker-research-probe",
+  "whole_model_established": false,
+  "dispatch_calls": 5,
+  "markers": 10,
+  "grad_correct": true,
+  "result_correct": true,
+  "inplace_correct": true,
+  "tensor_contents_saved": false,
+  "tensor_version_used": false,
+  "scope": "fresh CPU process; no foreign modes/subclasses/lifecycle claims"
+}

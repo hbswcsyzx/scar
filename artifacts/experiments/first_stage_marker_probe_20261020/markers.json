@@ -1,0 +1,211 @@
+[
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:1:input",
+    "sequence": 1,
+    "phase": "input",
+    "context": {
+      "invocation": 4,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [
+          0,
+          0
+        ],
+        "ref": "weak:533247:14"
+      }
+    ]
+  },
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:1:output",
+    "sequence": 1,
+    "phase": "output",
+    "context": {
+      "invocation": 4,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [],
+        "ref": "weak:533247:47"
+      }
+    ]
+  },
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:2:input",
+    "sequence": 2,
+    "phase": "input",
+    "context": {
+      "invocation": 6,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [
+          0,
+          0
+        ],
+        "ref": "weak:533247:14"
+      },
+      {
+        "path": [
+          0,
+          1
+        ],
+        "ref": "weak:533247:14"
+      }
+    ]
+  },
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:2:output",
+    "sequence": 2,
+    "phase": "output",
+    "context": {
+      "invocation": 6,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [],
+        "ref": "weak:533247:57"
+      }
+    ]
+  },
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:3:input",
+    "sequence": 3,
+    "phase": "input",
+    "context": {
+      "invocation": 8,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [
+          0,
+          0
+        ],
+        "ref": "weak:533247:14"
+      }
+    ]
+  },
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:3:output",
+    "sequence": 3,
+    "phase": "output",
+    "context": {
+      "invocation": 8,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [],
+        "ref": "weak:533247:14"
+      }
+    ]
+  },
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:4:input",
+    "sequence": 4,
+    "phase": "input",
+    "context": {
+      "invocation": 10,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [
+          0,
+          0
+        ],
+        "ref": "weak:533247:15"
+      },
+      {
+        "path": [
+          0,
+          1
+        ],
+        "ref": "weak:533247:15"
+      }
+    ]
+  },
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:4:output",
+    "sequence": 4,
+    "phase": "output",
+    "context": {
+      "invocation": 10,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [],
+        "ref": "weak:533247:72"
+      }
+    ]
+  },
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:5:input",
+    "sequence": 5,
+    "phase": "input",
+    "context": {
+      "invocation": 12,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [
+          0,
+          0
+        ],
+        "ref": "weak:533247:72"
+      }
+    ]
+  },
+  {
+    "name": "scar-observation:ca14b98be75c028495a5a7862fcd880a:533247:5:output",
+    "sequence": 5,
+    "phase": "output",
+    "context": {
+      "invocation": 12,
+      "code": "pycode-v2:394c75735370c39f46409c8a018a04538c1f164c4cec08df9c5773565319a80c",
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_compile.py",
+      "bytecode_offset": 132,
+      "kind": "retained ancestor context, not a proven direct caller"
+    },
+    "tensor_references": [
+      {
+        "path": [],
+        "ref": "weak:533247:80"
+      }
+    ]
+  }
+]
