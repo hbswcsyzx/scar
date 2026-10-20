@@ -1223,7 +1223,7 @@ def _import_native(args) -> int:
     _compressed_document(output / "evidence-bundle.json.gz", result.bundle.to_dict())
     _compressed_document(output / "provider-references.json.gz", result.references)
     _compressed_document(output / "resource-observations.json.gz", result.resources)
-    _compressed_document(output / "import-report.json", result.report)
+    _compressed_document(output / "import-report.json.gz", result.report)
     print(json.dumps({"out": str(output), "whole_model_established": False,
                       "instances": len(result.bundle.evidence.instances),
                       "edges": len(result.bundle.evidence.edges),

@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/tmp/scar-structured-model-280qf4mi/scar/cli.py", line 1319, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/tmp/scar-structured-model-280qf4mi/scar/cli.py", line 536, in main
+    return args.func(args)
+           ~~~~~~~~~^^^^^^
+  File "/tmp/scar-structured-model-280qf4mi/scar/cli.py", line 1218, in _import_native
+    result = import_native_evidence(args.execution_trace, args.kineto,
+                                    max_bytes=args.max_bytes,
+                                    provider_revision=args.provider_revision)
+  File "/tmp/scar-structured-model-280qf4mi/scar/trace/native_import.py", line 496, in import_native_evidence
+    return _Importer(eto, chrome, {"eto": eto_artifact, "kineto": chrome_artifact}, max_bytes).finish()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/tmp/scar-structured-model-280qf4mi/scar/trace/native_import.py", line 437, in finish
+    self.eto_nodes()
+    ~~~~~~~~~~~~~~^^
+  File "/tmp/scar-structured-model-280qf4mi/scar/trace/native_import.py", line 235, in eto_nodes
+    raise ValueError("cycle in ETO ctrl_deps")
+ValueError: cycle in ETO ctrl_deps

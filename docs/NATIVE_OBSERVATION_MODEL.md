@@ -75,8 +75,8 @@ python -m scar.cli import-native \
   --out /path/to/fresh-import
 ```
 
-输出为 evidence-bundle、provider-references、resource-observations 的压缩 JSON
-及 import-report。引用目录归 EvidenceGraph 所有，sidecar 是其便于查看的导出，
+输出为 evidence-bundle、provider-references、resource-observations、import-report
+的压缩 JSON。引用目录归 EvidenceGraph 所有，sidecar 是其便于查看的导出，
 不是第二套数据依赖图。当前只解释经本机源码核对的固定 provider schema/revision；
 其它版本拒绝解释，其原始证据仍可保留。
 

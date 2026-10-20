@@ -99,3 +99,20 @@ conda lewm / Torch 2.13.0+cu132 / CUDA build 13.2 / RTX 4090。
 尚缺 source 内部自动恢复、准确 Python→Torch 有序端口/当前状态/逻辑版本，以及
 OS/CUDA 资源身份、生命周期和输出因果闭包的规范连接。下一项只落实这些自动
 建模适配与源码结构复用，不开展图化简、candidate 或 backend。
+
+## 原生观察的自动建图（Implemented / Verified；全阶段 OPEN）
+
+`fdae346` 的通用 `import-native` 已离线处理上述真实 LeWM ETO/Kineto，输出
+205,424动态记录、429,336条边；357,090有序引用槽、151,226 RF对应和24,082
+runtime→GPU关联经独立标准库脚本对原始字节重放通过。保留5,593个provider引用
+编号，**没有据此生成内容版本**。3个设备/流选择器也没有被当成已知生命周期。
+
+入口、实体边界见 [原生观察模型](NATIVE_OBSERVATION_MODEL.md)，实际命令、测试、
+首次CPU输入失败和修正、分析成本见
+[实验报告](../artifacts/experiments/first_stage_native_import_20261020/README.md)。
+本次只使用已有捕获，不重跑 GPU，不改变源 inventory 的分母。
+
+**当前具体断点：** 30,007条runtime的External id尚未建立经来源核验的CPU对应；
+Python occurrence/源码CFG、非Tensor完整端口、当前状态/逻辑版本与OS资源闭包
+仍未连接。下一项核验provider关联合同并接已有调用来源证据，不扩detector/backend。
+完整程序建模仍未验收，不能把本次原生观察图当作最小依赖程序或报告新加速比。

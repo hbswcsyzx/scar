@@ -190,6 +190,8 @@ def test_public_cli_imports_collected_files_and_preserves_existing_output(tmp_pa
     run = subprocess.run(command, capture_output=True, text=True)
     assert run.returncode == 0, run.stderr
     assert json.loads(run.stdout)["cpu_rf_matches"] == 4
+    with gzip.open(output / "import-report.json.gz", "rt") as stream:
+        assert json.load(stream)["whole_model_established"] is False
     with gzip.open(output / "evidence-bundle.json.gz", "rt") as stream:
         bundle = bundle_from_dict(json.load(stream))
     assert bundle.assert_valid()["valid"]
