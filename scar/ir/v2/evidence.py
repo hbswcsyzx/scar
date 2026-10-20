@@ -204,6 +204,9 @@ class EvidenceRelation(str, Enum):
     # Provider correlation associates a submitting observation with work. It
     # does not add containment, completion order or a happens-before edge.
     SUBMITS_WORK = "submits_work"
+    # A provider links an activity to a CPU profiling scope. This association
+    # does not establish parentage, containment, submission, control or order.
+    PROVIDER_SCOPE_ASSOCIATION = "provider_scope_association"
 
 
 _E = EvidenceNodeKind
@@ -244,6 +247,8 @@ _EVIDENCE_RELATION_ENDPOINTS = {
     EvidenceRelation.INPUT_REFERENCE: {(_E.OPERATION_INSTANCE, _E.PROVIDER_REFERENCE)},
     EvidenceRelation.OUTPUT_REFERENCE: {(_E.OPERATION_INSTANCE, _E.PROVIDER_REFERENCE)},
     EvidenceRelation.SUBMITS_WORK: {(_E.OPERATION_INSTANCE, _E.OPERATION_INSTANCE)},
+    EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION: {
+        (_E.OPERATION_INSTANCE, _E.OPERATION_INSTANCE)},
 }
 
 _PROVIDER_REFERENCE_RELATIONS = frozenset({
@@ -282,7 +287,8 @@ class EvidenceGraph:
     """Normalized execution records; no optimization selection is performed."""
 
     SCHEMA = "scar.ir.v2.evidence"
-    SCHEMA_VERSION = 4
+    SCHEMA_VERSION = 5
+    PROVIDER_REFERENCE_SCHEMA_VERSION = 4
     LEGACY_SCHEMA_VERSION = 3
 
     def __init__(self) -> None:
@@ -428,25 +434,27 @@ class EvidenceGraph:
             (((edge.source.kind, edge.source.wire), (edge.target.kind, edge.target.wire))
              for edge in self.edges.values()
              if edge.relation is EvidenceRelation.HAPPENS_BEFORE), "happens-before relation"))
-        # Parentage is containment and SUBMITS_WORK is provider association,
-        # not completion order: neither adds a happens-before relation.
+        # Parentage, submission and provider scope association do not establish
+        # completion order: none adds a happens-before relation.
         return self._validation_report(errors)
 
     def _schema_version(self) -> int:
         """Keep unchanged evidence graphs on their historical wire version."""
-        if self.provider_references:
-            return self.SCHEMA_VERSION
+        version = (self.PROVIDER_REFERENCE_SCHEMA_VERSION if self.provider_references
+                   else self.LEGACY_SCHEMA_VERSION)
         for edge in self.edges.values():
             if not isinstance(edge, EvidenceEdge):
                 continue
+            if edge.relation is EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION:
+                return self.SCHEMA_VERSION
             if ((isinstance(edge.relation, EvidenceRelation)
                  and edge.relation in _PROVIDER_REFERENCE_RELATIONS)
                     or (isinstance(edge.source, EvidenceEndpoint)
                         and edge.source.kind is _E.PROVIDER_REFERENCE)
                     or (isinstance(edge.target, EvidenceEndpoint)
                         and edge.target.kind is _E.PROVIDER_REFERENCE)):
-                return self.SCHEMA_VERSION
-        return self.LEGACY_SCHEMA_VERSION
+                version = self.PROVIDER_REFERENCE_SCHEMA_VERSION
+        return version
 
     def _validation_report(self, errors: list[str]) -> dict[str, Any]:
         version = self._schema_version()
@@ -456,7 +464,7 @@ class EvidenceGraph:
                   "control_events": len(self.control_events),
                   "external_references": len(self.external_references),
                   "edges": len(self.edges)}
-        if version == self.SCHEMA_VERSION:
+        if version >= self.PROVIDER_REFERENCE_SCHEMA_VERSION:
             counts["provider_references"] = len(self.provider_references)
         return {"schema": self.SCHEMA, "schema_version": version,
                 "valid": not errors, "errors": errors, "counts": counts}
@@ -488,7 +496,7 @@ class EvidenceGraph:
             "edges": [self.edges[key].as_dict() for key in sorted(self.edges)],
             "validation": self.validate(),
         }
-        if version == self.SCHEMA_VERSION:
+        if version >= self.PROVIDER_REFERENCE_SCHEMA_VERSION:
             document["provider_references"] = [
                 self.provider_references[key].as_dict()
                 for key in sorted(self.provider_references)

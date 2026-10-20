@@ -25,6 +25,7 @@ from scar.trace.files import open_binary
 
 
 _REVISION = "cf30153c4c131c8164ee7798e5022d810682e2cb"
+_KINETO_REVISION = "094d3c1d072362d0a919a77299459eee94f97931"
 _ETO_SCHEMA = "1.1.1-chakra.0.0.4"
 _GPU = frozenset(("kernel", "gpu_memcpy", "gpu_memset"))
 _RUNTIME = frozenset(("cuda_runtime", "cuda_driver"))
@@ -154,6 +155,9 @@ class _Importer:
         self.resource_index = {}
         self.runtime_instances = {}
         self.gpu_instances = []
+        self.cpu_scopes = {}
+        self.scope_requests = []
+        self.scope_matches = Counter()
         self.retained = []
         self.categories = Counter()
         self.cpu_rf_matches = 0
@@ -393,12 +397,17 @@ class _Importer:
             else:
                 self.gap("duration_clock_unknown", reference, "duration timestamp is not a valid finite nonnegative value")
             correlation = args.get("correlation")
+            external = args.get("External id")
+            # CUSTOM0 links native activities to ordinary CPU profiler scopes.
+            # USER_SCOPE/CUSTOM1, RF ID and CUDA correlation are distinct keys.
+            if (category == "cpu_op" and type(event.get("pid")) is int
+                    and event["pid"] == self.pid and _integer(external, positive=True)):
+                self.cpu_scopes.setdefault(external, []).append(instance)
+            if category in _RUNTIME or category in _GPU:
+                self.scope_requests.append((instance, external, reference, category))
             if category in _RUNTIME:
                 if type(event.get("pid")) is int and event["pid"] == self.pid and _integer(correlation, positive=True):
                     self.runtime_instances.setdefault(correlation, []).append(instance)
-                if args.get("External id") is not None:
-                    self.gap("cpu_runtime_external_id_unverified", reference,
-                             "external ID retained without an audited CPU/runtime mapping rule")
             if category in _GPU:
                 self.gpu_instances.append((instance, correlation, reference))
                 self.gpu_resources(instance, args, reference)
@@ -414,6 +423,34 @@ class _Importer:
             else:
                 self.gap("gpu_runtime_unmatched", reference,
                          "runtime correlation is absent or nonunique; no submission edge inferred")
+        self.scope_associations()
+
+    def scope_associations(self):
+        """Import linkedActivity, never a Python parent or execution ordering.
+
+        Pinned Kineto output_json.cpp writes linked CPU correlationId as
+        External id. Its CUSTOM0 map is separate from CUSTOM1 annotations.
+        One CPU scope may link many activities; only CPU candidates must be
+        unique. A worker's missing association is not borrowed from a parent.
+        """
+        for activity, external, reference, category in self.scope_requests:
+            if not _integer(external, positive=True):
+                self.gap("provider_scope_unreported", reference,
+                         "provider did not report a positive linked CPU scope ID; no association invented")
+                continue
+            candidates = self.cpu_scopes.get(external, ())
+            if len(candidates) != 1:
+                self.gap("provider_scope_ambiguous" if candidates else "provider_scope_missing",
+                         reference, "linked CPU scope is absent or nonunique in this capture/process")
+                continue
+            owner, = candidates
+            owner_reference = owner.metadata.get("kineto_reference", owner.metadata["raw_reference"])
+            self.edge(EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION, owner.id, activity.id,
+                      self.claim(owner_reference, reference, inferred=True, assumptions=(
+                          "supplied artifacts belong to one process capture",
+                          "installed provider implements the recorded Torch and Kineto source revisions",
+                          "CUSTOM0 linkedActivity and unique CPU External id; not parent, submission or ordering")))
+            self.scope_matches[category] += 1
 
     def gpu_resources(self, instance, args, reference):
         device = args.get("device")
@@ -453,6 +490,14 @@ class _Importer:
             "scope": self.scope, "provider_revision": _REVISION, "eto_schema": _ETO_SCHEMA,
             "pid": self.pid, "artifacts": self.artifacts,
             "cpu_rf_matches": self.cpu_rf_matches, "runtime_gpu_matches": self.runtime_gpu_matches,
+            "provider_scope_matches": sum(self.scope_matches.values()),
+            "provider_scope_matches_by_category": dict(sorted(self.scope_matches.items())),
+            "provider_scope_contract": {
+                "torch_revision": _REVISION, "kineto_revision": _KINETO_REVISION,
+                "correlation_kind": "CUSTOM0", "cpu_category": "cpu_op",
+                "relation": "provider linked CPU scope; no call/control/order/ready claim",
+                "source": "https://github.com/pytorch/kineto/blob/" + _KINETO_REVISION
+                          + "/libkineto/src/output_json.cpp#L786-L807"},
             "category_counts": dict(sorted(self.categories.items())),
             "inventory": {"eto_nodes": len(self.eto["nodes"]), "kineto_events": len(self.chrome["traceEvents"]),
                           "operation_instances": len(self.evidence.instances),

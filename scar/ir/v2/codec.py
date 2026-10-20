@@ -568,16 +568,25 @@ class _EvidenceDocumentV3:
     SCHEMA_VERSION = EvidenceGraph.LEGACY_SCHEMA_VERSION
 
 
+class _EvidenceDocumentV4:
+    SCHEMA = EvidenceGraph.SCHEMA
+    SCHEMA_VERSION = EvidenceGraph.PROVIDER_REFERENCE_SCHEMA_VERSION
+
+
 @_decoder
 def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
-    legacy = isinstance(data, dict) and data.get("schema_version") == _EvidenceDocumentV3.SCHEMA_VERSION
+    version = data.get("schema_version") if isinstance(data, dict) else None
+    legacy = type(version) is int and version == _EvidenceDocumentV3.SCHEMA_VERSION
+    document_type = _EvidenceDocumentV3 if legacy else (
+        _EvidenceDocumentV4 if type(version) is int
+        and version == _EvidenceDocumentV4.SCHEMA_VERSION else EvidenceGraph)
     collections = {
         "instances": OperationInstance, "observations": ValueObservation,
         "measurements": MeasurementRecord, "edges": EvidenceEdge,
     }
     if not legacy:
         collections["provider_references"] = ProviderReference
-    _document(data, _EvidenceDocumentV3 if legacy else EvidenceGraph, collections,
+    _document(data, document_type, collections,
               extra_fields=("control_events", "external_references"))
     graph = EvidenceGraph()
     for item in data.get("instances", ()):
@@ -632,7 +641,11 @@ def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
             _evidence(item["evidence"]))
         graph.edges[edge.edge_id] = edge
     graph.assert_valid()
-    if legacy and graph._schema_version() != _EvidenceDocumentV3.SCHEMA_VERSION:
+    required_version = graph._schema_version()
+    if version < required_version and required_version == EvidenceGraph.SCHEMA_VERSION:
+        raise ValueError(
+            f"evidence schema_version {version} cannot contain provider-scope-association vocabulary")
+    if legacy and required_version != _EvidenceDocumentV3.SCHEMA_VERSION:
         raise ValueError("evidence schema_version 3 cannot contain provider-reference or submits-work vocabulary")
     return graph
 

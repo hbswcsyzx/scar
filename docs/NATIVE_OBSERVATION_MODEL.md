@@ -82,3 +82,35 @@ python -m scar.cli import-native \
 
 新目录及关系使用 evidence schema 4；旧能力继续输出原 schema 3 并可读。旧
 region/content 投影若没有对应语义，明确拒绝而不将引用边当作 CONTROL 或内容。
+
+## 固定 provider 的 CPU scope 关联
+
+Torch 上述 revision 的 Kineto gitlink 是
+`094d3c1d072362d0a919a77299459eee94f97931`。已按原始源码核对并归档：普通 CPU
+scope 使用 CUSTOM0，USER_SCOPE 使用 CUSTOM1；Kineto 根据前者找到 linked CPU
+activity，Chrome 写出的 External id 来自该 activity 的 correlation ID。
+参见固定版本的 [Chrome 写出合同](https://github.com/pytorch/kineto/blob/094d3c1d072362d0a919a77299459eee94f97931/libkineto/src/output_json.cpp#L786-L807)
+与 [精确映射](https://github.com/pytorch/kineto/blob/094d3c1d072362d0a919a77299459eee94f97931/libkineto/src/CuptiActivityProfiler.cpp#L289-L320)。
+
+据此新增 **PROVIDER_SCOPE_ASSOCIATION**，方向为唯一 cpu_op occurrence→实际
+runtime/driver/GPU activity。匹配必须绑定 capture、声明的 provider revision、
+实际 host process 和 External id。CPU 候选必须唯一；一个 CPU scope 对应多个
+runtime 正常。不会使用 user_annotation、名字、时间包含、其它进程或父线程来补边。
+RF ID、External id、CUDA correlation 分属不同协议，不能交换使用。
+
+这不是 parent、containment、submission、control、HB 或 ready。缺少正 ID、缺失/
+重复 CPU 候选保留缺口；安装二进制实现声明源码版本仍是显式条件。仅有该新关系
+时才使用 evidence schema 5，原能力保持3/4。Program27/Execution8未改。
+
+## 后续连接顺序（Proposed，尚未实施）
+
+1. 本次 scope 合同先通过反例、旧版读取和真实原生数据独立审核，再接下一桥。
+2. 复用 recorder 已保留的真实调用身份和 provider 的带实参 RecordFunction marker，
+   研究 Python 引用槽→同次 ETO mapped reference 的准确连接；不靠_cdata数值、
+   shape或函数名猜身份。private API时点、dispatch原始RecordFunction与marker的
+   真正父子必须先做CPU小实验；不能假定marker包住原ATen调用。
+3. source inventory应保留已有源码语义/CFG子图，避免只剩digest而失去分支/循环
+   查询。再补尚缺的内部 source value/state 恢复和 OS 资源闭包。
+
+已否决“再包一层 source-call occurrence report”：现 FrameCallEdge/CallSiteLink
+已持有该来源关系，重复封装没有新增依赖边。上述步骤均属于第一阶段，不启动化简。

@@ -164,13 +164,21 @@ def test_provider_references_are_owned_versioned_and_never_external_placeholders
     assert evidence_from_dict(old).to_dict() == old
     graph = _import(tmp_path).bundle.evidence
     wire = graph.to_dict()
-    assert wire["schema_version"] == 4
+    assert wire["schema_version"] == 5
     assert len(graph.provider_references) == 2
     assert evidence_from_dict(deepcopy(wire)).to_dict() == wire
     downgraded = deepcopy(wire)
     downgraded["schema_version"] = 3
     with pytest.raises(ValueError):
         evidence_from_dict(downgraded)
+    downgraded["schema_version"] = 4
+    with pytest.raises(ValueError):
+        evidence_from_dict(downgraded)
+    compatible = deepcopy(wire)
+    compatible["schema_version"] = 4
+    compatible["edges"] = [row for row in compatible["edges"]
+                           if row["relation"] != "provider_scope_association"]
+    assert evidence_from_dict(compatible).to_dict()["schema_version"] == 4
     dangling = deepcopy(wire)
     dangling["provider_references"] = []
     with pytest.raises(ValueError):
@@ -215,3 +223,43 @@ def test_observed_references_cannot_silently_become_content_or_control_ports(tmp
     with pytest.raises(ValueError, match="do not establish a source content endpoint"):
         SourceEndpointRef(source, EvidenceEndpoint(EvidenceNodeKind.PROVIDER_REFERENCE,
                                                   reference_edge.target.reference))
+
+
+def test_provider_scope_is_many_to_one_and_does_not_imply_containment_or_time(tmp_path):
+    eto, chrome = _documents()
+    second = deepcopy(chrome["traceEvents"][4])
+    second["args"]["correlation"] = 124
+    second["ts"] = 5000
+    chrome["traceEvents"].append(second)
+    result = _import(tmp_path, eto, chrome)
+    graph = result.bundle.evidence
+    associations = [edge for edge in graph.edges.values()
+                    if edge.relation is EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION]
+    assert len(associations) == 2
+    assert len({edge.source.reference for edge in associations}) == 1
+    assert all(graph.instances[edge.target.reference].parent is None for edge in associations)
+    assert not any(edge.relation is EvidenceRelation.HAPPENS_BEFORE for edge in graph.edges.values())
+    assert result.report["provider_scope_matches"] == 2
+    # GPU activity may report its own linked CPU scope; CUDA correlation is independent.
+    assert result.report["runtime_gpu_matches"] == 1
+
+
+@pytest.mark.parametrize("mutation", ["duplicate_cpu", "other_pid", "user_scope", "wrong_key"])
+def test_provider_scope_does_not_guess_or_use_the_user_annotation_stack(tmp_path, mutation):
+    eto, chrome = _documents()
+    runtime = chrome["traceEvents"][4]
+    if mutation == "duplicate_cpu":
+        duplicate = deepcopy(chrome["traceEvents"][2])
+        duplicate["args"]["Record function id"] = 99
+        chrome["traceEvents"].append(duplicate)
+    elif mutation == "other_pid":
+        chrome["traceEvents"][2]["pid"] = 99
+    elif mutation == "user_scope":
+        chrome["traceEvents"][2]["cat"] = "user_annotation"
+    else:
+        runtime["args"]["External id"] = runtime["args"]["correlation"]
+    result = _import(tmp_path, eto, chrome)
+    assert result.report["provider_scope_matches"] == 0
+    assert not any(edge.relation is EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION
+                   for edge in result.bundle.evidence.edges.values())
+    assert result.report["gaps"]
