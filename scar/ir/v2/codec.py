@@ -120,6 +120,7 @@ from .values import (
     LogicalValue,
     Materialization,
     ObjectBinding,
+    ObjectInstance,
     ProvenanceRecord,
     ProvenanceRelation,
     StorageAllocation,
@@ -476,15 +477,32 @@ def semantic_from_dict(data: dict[str, Any]) -> SemanticGraph:
     return graph
 
 
+class _ValuesDocumentV1:
+    SCHEMA = ValueGraph.SCHEMA
+    SCHEMA_VERSION = ValueGraph.LEGACY_SCHEMA_VERSION
+
+
 @_decoder
 def values_from_dict(data: dict[str, Any]) -> ValueGraph:
-    _document(data, ValueGraph, {
+    version = data.get("schema_version") if isinstance(data, dict) else None
+    legacy = type(version) is int and version == _ValuesDocumentV1.SCHEMA_VERSION
+    collections = {
         "logical_values": LogicalValue, "versions": ValueVersion,
         "provenance": ProvenanceRecord, "allocations": StorageAllocation,
         "regions": StorageRegion, "materializations": Materialization,
         "bindings": ObjectBinding,
-    })
+    }
+    if not legacy:
+        collections["objects"] = ObjectInstance
+    _document(data, _ValuesDocumentV1 if legacy else ValueGraph, collections)
+    if not legacy and "objects" not in data:
+        raise ValueError("values schema_version 2 missing required field objects")
     graph = ValueGraph()
+    for item in data.get("objects", ()):
+        graph.add_object(ObjectInstance(
+            _required_id(item["id"], ObjectID), item["scope"],
+            tuple(_evidence(value) for value in item["evidence"]),
+            item.get("metadata", {})))
     for item in data.get("logical_values", ()):
         node = LogicalValue(_required_id(item["id"], LogicalValueID),
                             item["semantic_type"], item.get("description", ""),
@@ -573,13 +591,20 @@ class _EvidenceDocumentV4:
     SCHEMA_VERSION = EvidenceGraph.PROVIDER_REFERENCE_SCHEMA_VERSION
 
 
+class _EvidenceDocumentV5:
+    SCHEMA = EvidenceGraph.SCHEMA
+    SCHEMA_VERSION = EvidenceGraph.PROVIDER_SCOPE_SCHEMA_VERSION
+
+
 @_decoder
 def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
     version = data.get("schema_version") if isinstance(data, dict) else None
     legacy = type(version) is int and version == _EvidenceDocumentV3.SCHEMA_VERSION
     document_type = _EvidenceDocumentV3 if legacy else (
         _EvidenceDocumentV4 if type(version) is int
-        and version == _EvidenceDocumentV4.SCHEMA_VERSION else EvidenceGraph)
+        and version == _EvidenceDocumentV4.SCHEMA_VERSION else
+        _EvidenceDocumentV5 if type(version) is int
+        and version == _EvidenceDocumentV5.SCHEMA_VERSION else EvidenceGraph)
     collections = {
         "instances": OperationInstance, "observations": ValueObservation,
         "measurements": MeasurementRecord, "edges": EvidenceEdge,
@@ -642,11 +667,9 @@ def evidence_from_dict(data: dict[str, Any]) -> EvidenceGraph:
         graph.edges[edge.edge_id] = edge
     graph.assert_valid()
     required_version = graph._schema_version()
-    if version < required_version and required_version == EvidenceGraph.SCHEMA_VERSION:
-        raise ValueError(
-            f"evidence schema_version {version} cannot contain provider-scope-association vocabulary")
-    if legacy and required_version != _EvidenceDocumentV3.SCHEMA_VERSION:
-        raise ValueError("evidence schema_version 3 cannot contain provider-reference or submits-work vocabulary")
+    if version < required_version:
+        raise ValueError(f"evidence schema_version {version} cannot contain vocabulary "
+                         f"requiring schema_version {required_version}")
     return graph
 
 

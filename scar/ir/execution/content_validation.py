@@ -189,8 +189,8 @@ def _object(ctx, ref, path):
             ctx.issue('content_object', path, 'object is absent from the exact EvidenceGraph registry')
     else:
         graph = ctx.external_values(ref.artifact, path)
-        if graph is not None and not any(row.object_id == ref.object for row in graph.bindings):
-            ctx.issue('content_object', path, 'object is absent from exact ValueGraph bindings')
+        if graph is not None and not graph.has_object(ref.object):
+            ctx.issue('content_object', path, 'object is absent from the exact ValueGraph object registry')
 
 
 def _paired(ctx, artifact, instance, operation, ticket, path):

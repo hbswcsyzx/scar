@@ -139,7 +139,7 @@ class _Importer:
         self.eto, self.chrome, self.artifacts = eto, chrome, artifacts
         self.pid = eto["pid"]
         capture = _canonical_hash({"eto": artifacts["eto"]["sha256"],
-                                   "kineto": artifacts["kineto"]["sha256"],
+                                   "kineto": artifacts["kineto"]["sha256"] if chrome is not None else None,
                                    "revision": _REVISION, "pid": self.pid})
         self.scope = "native:" + capture
         self.semantic, self.evidence = SemanticGraph(), EvidenceGraph()
@@ -486,14 +486,18 @@ class _Importer:
 
     def finish(self):
         self.eto_nodes()
-        self.chrome_events()
+        if self.chrome is not None:
+            self.chrome_events()
+        else:
+            self.gap("kineto_not_supplied", self.pointer("eto", "#"),
+                     "ETO-only import; GPU/transfer/timing evidence was not supplied")
         # Do not serialize the bundle here: validation is linear in its existing
         # indexes; the public caller decides whether and how to persist it.
         self.bundle.assert_valid()
         report = {
             "schema": "scar.native-evidence-import", "schema_version": 1,
             "scope": self.scope, "provider_revision": _REVISION, "eto_schema": _ETO_SCHEMA,
-            "pid": self.pid, "artifacts": self.artifacts,
+            "pid": self.pid, "artifacts": self.artifacts, "kineto_supplied": self.chrome is not None,
             "cpu_rf_matches": self.cpu_rf_matches, "runtime_gpu_matches": self.runtime_gpu_matches,
             "provider_scope_matches": sum(self.scope_matches.values()),
             "provider_scope_matches_by_category": dict(sorted(self.scope_matches.items())),
@@ -504,7 +508,8 @@ class _Importer:
                 "source": "https://github.com/pytorch/kineto/blob/" + _KINETO_REVISION
                           + "/libkineto/src/output_json.cpp#L786-L807"},
             "category_counts": dict(sorted(self.categories.items())),
-            "inventory": {"eto_nodes": len(self.eto["nodes"]), "kineto_events": len(self.chrome["traceEvents"]),
+            "inventory": {"eto_nodes": len(self.eto["nodes"]),
+                          "kineto_events": len(self.chrome["traceEvents"]) if self.chrome is not None else 0,
                           "operation_instances": len(self.evidence.instances),
                           "provider_references": len(self.evidence.provider_references),
                           "resource_observations": len(self.resources),
@@ -531,12 +536,7 @@ class _Importer:
         return NativeImportResult(self.bundle, report, references, self.resources)
 
 
-def import_native_evidence(eto_path, kineto_path, *, max_bytes=512_000_000, provider_revision: str):
-    """Normalize one supplied native capture without executing or importing Torch.
-
-    max_bytes bounds combined decompressed source bytes, not Python object or
-    native-buffer memory. Unsupported/ambiguous joins remain explicit gaps.
-    """
+def _load_importer(eto_path, kineto_path, *, max_bytes, provider_revision):
     if type(max_bytes) is not int or max_bytes < 1:
         raise ValueError("max_bytes must be a positive exact integer")
     if type(provider_revision) is not str or provider_revision != _REVISION:
@@ -546,13 +546,27 @@ def import_native_evidence(eto_path, kineto_path, *, max_bytes=512_000_000, prov
         raise ValueError("unsupported ETO schema")
     if not _integer(eto.get("pid"), positive=True) or type(eto.get("nodes")) is not list:
         raise ValueError("ETO requires a positive exact PID and node array")
+    if kineto_path is None:
+        return _Importer(eto, None, {"eto": eto_artifact}, max_bytes)
     chrome, chrome_artifact = _read(kineto_path, max_bytes - eto_artifact["size_bytes"])
     if ("schemaVersion" in chrome and
             (type(chrome["schemaVersion"]) is not int or chrome["schemaVersion"] != 1)):
         raise ValueError("unsupported Kineto schemaVersion")
     if type(chrome.get("traceEvents")) is not list:
         raise ValueError("Kineto traceEvents must be an array")
-    return _Importer(eto, chrome, {"eto": eto_artifact, "kineto": chrome_artifact}, max_bytes).finish()
+    return _Importer(eto, chrome, {"eto": eto_artifact, "kineto": chrome_artifact}, max_bytes)
+
+
+def import_native_evidence(eto_path, kineto_path=None, *, max_bytes=512_000_000, provider_revision: str):
+    """Normalize supplied native observations without executing/importing Torch.
+
+    max_bytes bounds combined decompressed source bytes, not Python object or
+    native-buffer memory. Unsupported/ambiguous joins remain explicit gaps.
+    Omitting kineto_path imports ETO observations only, with an explicit gap;
+    it never fabricates an empty physical activity trace.
+    """
+    return _load_importer(eto_path, kineto_path, max_bytes=max_bytes,
+                          provider_revision=provider_revision).finish()
 
 
 __all__ = ["NativeImportResult", "import_native_evidence"]

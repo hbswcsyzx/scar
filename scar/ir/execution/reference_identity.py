@@ -119,13 +119,19 @@ def object_identity(ctx, source, target, *, shared):
             endpoint['registered'] = (EvidenceNodeKind.OBJECT, reference.object.wire) in graph.external_references
         else:
             registered = False
-            for binding in graph.bindings:
-                if not spend('registry_bindings', endpoint):
+            if graph.objects:
+                if spend('registry_objects', endpoint):
+                    registered = reference.object in graph.objects
+                else:
                     registered = None
-                    break
-                if binding.object_id == reference.object:
-                    registered = True
-                    break
+            if registered is False:
+                for binding in graph.bindings:
+                    if not spend('registry_bindings', endpoint):
+                        registered = None
+                        break
+                    if binding.object_id == reference.object:
+                        registered = True
+                        break
             endpoint['registered'] = registered
         if endpoint['registered'] is False:
             gap('object_identity_object_unregistered', endpoint)

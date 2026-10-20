@@ -2,6 +2,13 @@
 
 ## 2026-10-20：原生证据接入边界
 
+对象身份独立于内容的最小修正已接入：ValueGraph.objects 拥有 ObjectInstance，
+不要求 ValueVersion；旧 ObjectBinding 继续表示内容关联。使用目录时 Values2，
+无目录仍输出原 Values1。准确 marker 参数引用对应使用 evidence6；旧 scope/
+provider/基础能力仍分别输出5/4/3。所有 owner 消费者接受“显式对象目录 ∪ 旧
+bindings”，内容推导继续只用真正的内容链接。研究 profile 的对应是有条件的
+Inferred，不是生产 Python→ATen 或 LogicalVersion 证明。见上述原生模型文档。
+
 按 [第一阶段合同](FIRST_STAGE_MODEL_CONTRACT.md)先完成自动建模。
 [原生观察适配](NATIVE_OBSERVATION_MODEL.md)复用现 EvidenceGraph；provider 引用
 由该图的 ProviderReference 目录持有，新引用边和提交关联使用 evidence schema 4。

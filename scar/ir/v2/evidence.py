@@ -207,6 +207,10 @@ class EvidenceRelation(str, Enum):
     # A provider links an activity to a CPU profiling scope. This association
     # does not establish parentage, containment, submission, control or order.
     PROVIDER_SCOPE_ASSOCIATION = "provider_scope_association"
+    # A Python object was passed as a particular marker argument which the
+    # provider encoded with this reference. Only that observation is asserted;
+    # this is neither aliasing nor persistent content/storage equivalence.
+    OBJECT_REFERENCE_ASSOCIATION = "object_reference_association"
 
 
 _E = EvidenceNodeKind
@@ -249,6 +253,7 @@ _EVIDENCE_RELATION_ENDPOINTS = {
     EvidenceRelation.SUBMITS_WORK: {(_E.OPERATION_INSTANCE, _E.OPERATION_INSTANCE)},
     EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION: {
         (_E.OPERATION_INSTANCE, _E.OPERATION_INSTANCE)},
+    EvidenceRelation.OBJECT_REFERENCE_ASSOCIATION: {(_E.OBJECT, _E.PROVIDER_REFERENCE)},
 }
 
 _PROVIDER_REFERENCE_RELATIONS = frozenset({
@@ -287,7 +292,8 @@ class EvidenceGraph:
     """Normalized execution records; no optimization selection is performed."""
 
     SCHEMA = "scar.ir.v2.evidence"
-    SCHEMA_VERSION = 5
+    SCHEMA_VERSION = 6
+    PROVIDER_SCOPE_SCHEMA_VERSION = 5
     PROVIDER_REFERENCE_SCHEMA_VERSION = 4
     LEGACY_SCHEMA_VERSION = 3
 
@@ -445,15 +451,17 @@ class EvidenceGraph:
         for edge in self.edges.values():
             if not isinstance(edge, EvidenceEdge):
                 continue
-            if edge.relation is EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION:
+            if edge.relation is EvidenceRelation.OBJECT_REFERENCE_ASSOCIATION:
                 return self.SCHEMA_VERSION
+            if edge.relation is EvidenceRelation.PROVIDER_SCOPE_ASSOCIATION:
+                version = max(version, self.PROVIDER_SCOPE_SCHEMA_VERSION)
             if ((isinstance(edge.relation, EvidenceRelation)
                  and edge.relation in _PROVIDER_REFERENCE_RELATIONS)
                     or (isinstance(edge.source, EvidenceEndpoint)
                         and edge.source.kind is _E.PROVIDER_REFERENCE)
                     or (isinstance(edge.target, EvidenceEndpoint)
                         and edge.target.kind is _E.PROVIDER_REFERENCE)):
-                version = self.PROVIDER_REFERENCE_SCHEMA_VERSION
+                version = max(version, self.PROVIDER_REFERENCE_SCHEMA_VERSION)
         return version
 
     def _validation_report(self, errors: list[str]) -> dict[str, Any]:

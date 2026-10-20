@@ -102,13 +102,63 @@ RF ID、External id、CUDA correlation 分属不同协议，不能交换使用�
 重复 CPU 候选保留缺口；安装二进制实现声明源码版本仍是显式条件。仅有该新关系
 时才使用 evidence schema 5，原能力保持3/4。Program27/Execution8未改。
 
-## 后续连接顺序（Proposed，尚未实施）
+## 独立对象目录与参数引用对应（Implemented，有限研究 profile）
+
+审查发现旧 `ObjectBinding(object_id, value_version)` 只有内容关联，不能登记一个
+内容尚未知的 Python 对象。现在在**既有 ValueGraph** 内增加 `ObjectInstance`：
+
+| 记录 | 表示什么 | 不表示什么 |
+| --- | --- | --- |
+| ObjectInstance | 一个有采集作用域和身份证据的 Python 对象 | 内容版本、allocation、对象创建/释放 |
+| ObjectBinding | 对象在指定范围与已知内容版本的关联 | 对象身份的唯一注册途径 |
+| ProviderReference | ETO collector 的映射 token | Python 对象、存储寿命或内容身份 |
+| OBJECT_REFERENCE_ASSOCIATION | 某个准确 marker 参数槽中的对象引用对应 | 全时间 alias、内容相等、producer、effect 或 ready |
+
+`object_ids()/has_object()` 统一查询显式目录与历史 bindings；旧内容链接仍只读
+bindings，不因对象登记而获得版本。Bundle、content、resource handle/holder、
+identity query、source target 已使用同一所有者规则。identity 查询给目录查询计费；
+snapshot 继续按完整 artifact 字节重验。没有建立第二套对象图。
+
+Values 仅在非空对象目录时输出 schema 2；空目录保持 schema 1 原字段/计数。
+新引用对应边仅在使用时输出 evidence 6；scope 关联仍为5，provider 引用仍为4，
+旧图仍为3。旧 header 不接受新能力。Program27/Execution8 没有改版。
+
+`scar.trace.reference_import.import_reference_bridge` 机械重放已归档 CPU 研究
+collector 的 profile `scar.marker-research-probe-v1`。这**不是生产采集器**：它
+固定 supplied 文件字节/作用域，核对 marker nonce/PID/sequence/phase、唯一实际
+ETO node、弱引用 token、原 payload path、平铺后准确 Tensor 槽，以及录得的祖先
+invocation/code。重复实参保留逐槽边；snapshot token、缺槽、重复节点/路径、
+缺失 phase 或不一致进程会拒绝，不能用 shape、地址、函数名和时间修补。
+
+研究 marker 把 Tensor leaves 平铺为位置实参，因此原 path `[0,0]` 与 ETO 槽0
+不同。**output phase 也读取 marker.inputs**。边保留双侧原始 locator；JSONL
+定位使用原物理行号。marker 的 provider parent 与 Python 祖先上下文分别保留，
+不提升成直接 Python→ATen 调用。相同 Python weak token 对应多个 provider token
+只报告观察，不能擅自把对象的全部时间绑定成一个 TensorImpl。
+
+该桥按 **Inferred** 保存：输入属于同次声明 collector capture、collector 在持有
+同一个 Tensor 时取弱引用并传 marker 参数，仍是明确条件。研究 sidecar 缺少
+生产级 session/thread manifest、预算/丢失库存及生命周期收据；导入后不能倒称
+这些保证已经存在。它不保存 Tensor 内容、不读 `_version`，不产生 LogicalVersion。
+
+公共入口可省略 Kineto 做明确的 ETO-only 导入，报告 `kineto_not_supplied`；不能
+伪造空 Chrome trace，不能从活动数为零推出没有 GPU 工作。研究引用对应需同时
+给出以下参数（或使用 Python API）：
+
+```bash
+python -m scar.cli import-native --execution-trace ETO.json \
+  --reference-markers markers.json --call-events call-events.jsonl \
+  --call-codes call-codes.jsonl --call-meta call-meta.json \
+  --reference-profile scar.marker-research-probe-v1 \
+  --provider-revision cf30153c4c131c8164ee7798e5022d810682e2cb --out FRESH_DIR
+```
+
+## 后续连接顺序（Proposed）
 
 1. 本次 scope 合同先通过反例、旧版读取和真实原生数据独立审核，再接下一桥。
-2. 复用 recorder 已保留的真实调用身份和 provider 的带实参 RecordFunction marker，
-   研究 Python 引用槽→同次 ETO mapped reference 的准确连接；不靠_cdata数值、
-   shape或函数名猜身份。private API时点、dispatch原始RecordFunction与marker的
-   真正父子必须先做CPU小实验；不能假定marker包住原ATen调用。
+2. CPU marker 实验及有条件的离线引用对应已接入。生产采集还需 recorder 的有界
+   公共引用/context 接口、同次 manifest、独立预算/丢失及异常关闭；验证外部 mode、
+   subclass 和线程边界后才可接真实 LeWM。不能假定 marker 包住原 ATen 调用。
 3. source inventory应保留已有源码语义/CFG子图，避免只剩digest而失去分支/循环
    查询。再补尚缺的内部 source value/state 恢复和 OS 资源闭包。
 

@@ -188,7 +188,9 @@ def target_original(ctx, target, path):
         original = graph.materializations.get(identity)
     elif type(target) is ObjectRef:
         facet, identity = 'object', target.object
-        original = tuple(row for row in graph.bindings if row.object_id == identity) or None
+        original = graph.objects.get(identity)
+        if original is None:
+            original = tuple(row for row in graph.bindings if row.object_id == identity) or None
     elif type(target) is RegionRef:
         facet, identity, original = 'region', target.region, graph.regions.get(target.region)
     elif type(target) is AllocationTarget:

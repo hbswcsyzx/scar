@@ -290,7 +290,7 @@ def resource_errors(ctx) -> None:
             if value is not None and type(value) is not ReferenceValue:
                 issue("object_handle_value", path, "ObjectHandle must reference a canonical ReferenceValue")
             graph = ctx.external_values(endpoint.artifact, path)
-            if graph is not None and not any(item.object_id == endpoint.object for item in graph.bindings):
+            if graph is not None and not graph.has_object(endpoint.object):
                 issue("object_handle_identity", path, "object ID is absent from the exact external ValueGraph")
             value_available_at(endpoint.value, binding.start, path)
         elif type(endpoint) is NativeHandle:
@@ -509,7 +509,7 @@ def resource_errors(ctx) -> None:
                 holder = claim.holder
                 if type(holder) is ObjectHolder:
                     graph = ctx.external_values(holder.artifact, claim_path)
-                    if graph is not None and not any(item.object_id == holder.object for item in graph.bindings):
+                    if graph is not None and not graph.has_object(holder.object):
                         issue("ownership_holder", claim_path, "object holder is absent from its ValueGraph")
                 elif type(holder) is HandleHolder:
                     if holder.lifetime not in native_lifetimes:

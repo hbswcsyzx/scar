@@ -472,7 +472,13 @@ def main(argv=None) -> int:
     normalize.set_defaults(func=_normalize_v2)
     native = sub.add_parser("import-native", help="import collected ETO/Kineto evidence without running or importing the target")
     native.add_argument("--execution-trace", required=True, help="ETO JSON or lossless JSON.gz")
-    native.add_argument("--kineto", required=True, help="Kineto Chrome JSON or lossless JSON.gz")
+    native.add_argument("--kineto", help="Kineto Chrome JSON or lossless JSON.gz; omit for ETO-only evidence")
+    native.add_argument("--reference-markers", help="exact-argument marker sidecar (research profile only)")
+    native.add_argument("--call-events", help="call recorder JSONL paired with reference markers")
+    native.add_argument("--call-codes", help="call recorder code JSONL paired with reference markers")
+    native.add_argument("--call-meta", help="closed call recorder receipt paired with reference markers")
+    native.add_argument("--reference-profile", choices=("scar.marker-research-probe-v1",),
+                        help="explicit supplied collector contract; not production capture validation")
     native.add_argument("--provider-revision", required=True, help="recorded Torch git revision; not inferred from the analysis environment")
     native.add_argument("--max-bytes", type=int, default=512000000, help="combined decompressed input byte ceiling")
     native.add_argument("--out", required=True, help="fresh output directory")
@@ -1215,9 +1221,18 @@ def _import_native(args) -> int:
     output = Path(args.out).resolve()
     if output.exists():
         raise SystemExit("import-native requires a fresh output directory")
-    result = import_native_evidence(args.execution_trace, args.kineto,
-                                    max_bytes=args.max_bytes,
-                                    provider_revision=args.provider_revision)
+    bridge_args = (args.reference_markers, args.call_events, args.call_codes, args.call_meta, args.reference_profile)
+    if any(item is not None for item in bridge_args):
+        if not all(item is not None for item in bridge_args):
+            raise SystemExit("reference import requires markers, call-events, call-codes, call-meta and reference-profile together")
+        from scar.trace.reference_import import import_reference_bridge
+        result = import_reference_bridge(args.execution_trace, args.reference_markers,
+            args.call_events, args.call_codes, args.call_meta, reference_profile=args.reference_profile,
+            kineto_path=args.kineto, max_bytes=args.max_bytes, provider_revision=args.provider_revision)
+    else:
+        result = import_native_evidence(args.execution_trace, args.kineto,
+                                        max_bytes=args.max_bytes,
+                                        provider_revision=args.provider_revision)
     # These are observation graphs, not a fabricated static SSA program.
     output.mkdir(parents=True, exist_ok=False)
     _compressed_document(output / "evidence-bundle.json.gz", result.bundle.to_dict())
