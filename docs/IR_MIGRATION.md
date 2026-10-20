@@ -1,5 +1,15 @@
 # SCAR 当前 IR 到 IR v2 的迁移方案
 
+## 2026-10-20：原生证据接入边界
+
+按 [第一阶段合同](FIRST_STAGE_MODEL_CONTRACT.md)先完成自动建模。
+[原生观察适配](NATIVE_OBSERVATION_MODEL.md)复用现 EvidenceGraph；provider 引用
+由该图的 ProviderReference 目录持有，新引用边和提交关联使用 evidence schema 4。
+没有新能力的旧图继续使用 schema 3。Program27/Execution8 不变，不制造静态
+RETURN/Region、LogicalVersion 或 allocation generation 来填缺口。
+旧 region 投影未支持这类观察时显式拒绝，不能默认为 CONTROL；旧 source-content
+桥接不能把 provider 引用直接转为内容。完整 SSA/执行对应仍需后续机械恢复。
+
 ## 当前迁移决定（2026-10-16）
 
 规范：[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)。旧目录提案及下文历史

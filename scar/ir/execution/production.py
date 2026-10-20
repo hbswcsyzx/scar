@@ -136,6 +136,8 @@ def _validate_value_version(value: object, name: str) -> None:
 
 def _validate_evidence_reference(kind: EvidenceNodeKind, reference: object) -> None:
     """Strictly recheck the nested endpoint; EvidenceEndpoint uses isinstance."""
+    if kind is EvidenceNodeKind.PROVIDER_REFERENCE:
+        raise ValueError("provider reference tokens do not establish a source content endpoint")
     expected = {
         EvidenceNodeKind.OPERATION_INSTANCE: OperationInstanceID,
         EvidenceNodeKind.VALUE_OBSERVATION: str,

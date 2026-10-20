@@ -470,6 +470,13 @@ def main(argv=None) -> int:
     normalize.add_argument("--out", required=True)
     normalize.add_argument("--report", help="raw record conservation and ambiguity report")
     normalize.set_defaults(func=_normalize_v2)
+    native = sub.add_parser("import-native", help="import collected ETO/Kineto evidence without running or importing the target")
+    native.add_argument("--execution-trace", required=True, help="ETO JSON or lossless JSON.gz")
+    native.add_argument("--kineto", required=True, help="Kineto Chrome JSON or lossless JSON.gz")
+    native.add_argument("--provider-revision", required=True, help="recorded Torch git revision; not inferred from the analysis environment")
+    native.add_argument("--max-bytes", type=int, default=512000000, help="combined decompressed input byte ceiling")
+    native.add_argument("--out", required=True, help="fresh output directory")
+    native.set_defaults(func=_import_native)
     inspect_v2 = sub.add_parser("inspect-v2", help="join source/runtime evidence and report scoped effect requirements")
     inspect_v2.add_argument("source")
     inspect_v2.add_argument("--trace", required=True)
@@ -1200,6 +1207,28 @@ def _normalize_v2(args) -> int:
     report = _write_document(args.report or str(out) + ".coverage.json", result.coverage)
     print(json.dumps({"schema": result.bundle.SCHEMA, "out": str(out),
                       "report": str(report), "valid": validation["valid"]}))
+    return 0
+
+
+def _import_native(args) -> int:
+    from scar.trace.native_import import import_native_evidence
+    output = Path(args.out).resolve()
+    if output.exists():
+        raise SystemExit("import-native requires a fresh output directory")
+    result = import_native_evidence(args.execution_trace, args.kineto,
+                                    max_bytes=args.max_bytes,
+                                    provider_revision=args.provider_revision)
+    # These are observation graphs, not a fabricated static SSA program.
+    output.mkdir(parents=True, exist_ok=False)
+    _compressed_document(output / "evidence-bundle.json.gz", result.bundle.to_dict())
+    _compressed_document(output / "provider-references.json.gz", result.references)
+    _compressed_document(output / "resource-observations.json.gz", result.resources)
+    _compressed_document(output / "import-report.json", result.report)
+    print(json.dumps({"out": str(output), "whole_model_established": False,
+                      "instances": len(result.bundle.evidence.instances),
+                      "edges": len(result.bundle.evidence.edges),
+                      "cpu_rf_matches": result.report["cpu_rf_matches"],
+                      "runtime_gpu_matches": result.report["runtime_gpu_matches"]}))
     return 0
 
 

@@ -149,6 +149,8 @@ def _endpoint_key(endpoint):
 
 def _direction(relation):
     text = relation.value
+    if text in {"input_reference", "output_reference", "submits_work"}:
+        raise ValueError("provider reference/submission observations have no established region port mapping")
     if text in {"reads_slot", "consumes", "observed_read"}:
         return BoundaryDirection.INPUT
     if text in {"writes_slot", "produces", "observed_write", "overwrites", "materializes"}:

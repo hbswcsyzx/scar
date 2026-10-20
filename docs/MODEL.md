@@ -12,6 +12,11 @@ instances must be connected automatically. Supplied-model protocol acceptance
 does not establish this. F20 is not the automatic next task; it remains deferred
 until an end-to-end modeling gap requires it. Historical entries follow.
 
+Native observation adapters distinguish provider reference tokens from content
+versions and submission associations from completion order. See
+[NATIVE_OBSERVATION_MODEL.md](NATIVE_OBSERVATION_MODEL.md). They populate evidence
+without fabricating static SSA definitions; the full first-stage gate remains open.
+
 ## Async close chains and handler-produced completions (2026-10-20)
 
 Five canonical entities remain unchanged. A fresh handler packet has control

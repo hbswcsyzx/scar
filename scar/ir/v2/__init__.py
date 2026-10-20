@@ -93,6 +93,7 @@ from .evidence import (
     EvidenceRelation,
     EvidenceStatus,
     OperationInstance,
+    ProviderReference,
     ValueObservation,
 )
 from .correspondence import (
@@ -154,7 +155,7 @@ __all__ = [
     "SemanticEndpoint", "SemanticGraph", "SemanticNodeKind", "SemanticRelation",
     "SourceAtom", "ValueSlot", "EvidenceEdge", "EvidenceEndpoint",
     "EvidenceGraph", "EvidenceNodeKind", "EvidenceRelation", "EvidenceStatus",
-    "OperationInstance", "ValueObservation", "CostRequest", "GuardSpec",
+    "OperationInstance", "ProviderReference", "ValueObservation", "CostRequest", "GuardSpec",
     "CorrespondenceGraph", "CorrespondenceKind", "CorrespondenceRecord",
     "InstructionKind", "InvalidationSpec", "LiteralValue", "MeasurementMode",
     "OptimizationContext", "OptimizationGraph", "OptimizationRegion",
