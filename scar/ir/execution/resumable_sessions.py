@@ -83,6 +83,30 @@ def _result(ctx, occurrence, port):
     return None
 
 
+def _post_failure(ctx, path):
+    """The latest actual INVOKE RAISE owns its packet, even without metadata."""
+    selected = None
+    for helper, occurrence, _ in path:
+        transfer = None if occurrence is None else ctx.outgoing.get(occurrence.id)
+        if (transfer is None or helper.terminator is None
+                or helper.terminator.kind is not TerminatorKind.INVOKE):
+            continue
+        edge = helper.terminator.successors[transfer.successor_index]
+        if edge.kind is not ExitKind.RAISE:
+            continue
+        signature = next(row for row in helper.completions if row.kind is ExitKind.RAISE)
+        packet_slot = next((index for index, value_type in enumerate(signature.types)
+                           if getattr(value_type, 'protocol', None)
+                           is ProtocolValueKind.EXCEPTION_PACKET), None)
+        landing = ctx.visits[transfer.target]
+        packet = None
+        for actual, formal in zip(edge.arguments, ctx.blocks[landing.block].arguments):
+            if type(actual) is CompletionResult and actual.index == packet_slot:
+                packet = ctx.results.get((landing.id, formal))
+        selected = (occurrence, packet)
+    return selected
+
+
 def _hosts(ctx, view, source, path, gaps):
     outcome = view['outcome']
     if outcome is None:
@@ -90,7 +114,8 @@ def _hosts(ctx, view, source, path, gaps):
     body = ctx.core_operations[outcome.operation]
     suspended = type(body.terminator) is SuspendTerminator
     terminal_return = not suspended and body.terminator.kind is TerminatorKind.RETURN
-    if not suspended and not terminal_return:
+    terminal_raise = not suspended and body.terminator.kind is TerminatorKind.RAISE
+    if not suspended and not terminal_return and not terminal_raise:
         gap(ctx, gaps, 'body_session_host_adapter_unproved', outcome.id,
             'terminal body outcome host adaptation is not yet projected by this bounded view')
         return ()
@@ -100,6 +125,14 @@ def _hosts(ctx, view, source, path, gaps):
         if not isinstance(ctx.core_values[next(use.value for use in body.uses
             if use.id == identity)], StateVersionValue)), None))
     exported = value_for_use(ctx, _use(ctx, outcome, payload))
+    # A compiled body may already contain its complete exception conversion.
+    # Its actual final RAISE packet then propagates unchanged. A declared
+    # driver adapter, even when uncaptured, remains a separate obligation.
+    declared_adapter = any(type(declaration.contract.input) is DriveResult
+        and declaration.contract.input.outcome == source
+        for operation, _, _ in path
+        for declaration in ctx.session_adapters_by_site.get(operation.id, ()))
+    post_failure = _post_failure(ctx, path)
     hosts = []
     for operation, occurrence, visit in path:
         if operation.terminator is None or operation.terminator.kind not in (
@@ -115,33 +148,26 @@ def _hosts(ctx, view, source, path, gaps):
         if occurrence is None:
             gap(ctx, gaps, 'body_session_host_missing', operation.id,
                 'original host consumer has no captured occurrence on this actual visit')
-        if flavor is SuspensionFlavor.AWAIT and operation.terminator.kind is TerminatorKind.RETURN:
+        if operation.terminator.kind is TerminatorKind.RAISE and post_failure is not None:
+            # A later helper may replace even a terminal body's exception.
+            # Use its actual selected completion slot, never the earlier packet.
+            row['kind'] = 'HOST_FAILURE'
+            row['source_value'] = post_failure[1]
+            row['bindings'] = (_pair(post_failure[1], target),)
+        elif terminal_raise and not declared_adapter:
+            if operation.terminator.kind is TerminatorKind.RAISE:
+                row['kind'] = 'BODY_EXCEPTION_PROPAGATION'
+                row['bindings'] = (_pair(exported, target),)
+            else:
+                gap(ctx, gaps, 'body_session_exception_host_unproved', operation.id,
+                    'a terminal body exception has no original conversion to this normal host completion')
+        elif flavor is SuspensionFlavor.AWAIT and operation.terminator.kind is TerminatorKind.RETURN:
             row['bindings'] = (_pair(exported, target),)
         elif flavor is SuspensionFlavor.AWAIT:
             row['source_value'] = None
             row['kind'] = 'HOST_FAILURE'
-            # A failed post helper returns its own actual exception packet;
-            # the preceding awaitable is not that packet's value source.
-            for helper, helper_occ, _ in path:
-                update = ctx.session_updates_by_site.get(helper.id)
-                transfer = None if helper_occ is None else ctx.outgoing.get(helper_occ.id)
-                if update is None or transfer is None or update.binding is not LifecyclePostBinding.NORMAL_COMPLETION:
-                    continue
-                edge = helper.terminator.successors[transfer.successor_index]
-                if edge.kind is ExitKind.RAISE:
-                    landing = ctx.visits[transfer.target]
-                    signature = next(row for row in helper.completions if row.kind is ExitKind.RAISE)
-                    packet_slot = next((index for index, value_type in enumerate(signature.types)
-                                        if getattr(value_type, 'protocol', None) is ProtocolValueKind.EXCEPTION_PACKET), None)
-                    source_value = None
-                    for actual, formal in zip(edge.arguments, ctx.blocks[landing.block].arguments):
-                        if type(actual) is CompletionResult and actual.index == packet_slot:
-                            source_value = ctx.results.get((landing.id, formal))
-                    row['source_value'] = source_value
-                    row['bindings'] = (_pair(source_value, target),)
-            if not row['bindings']:
-                gap(ctx, gaps, 'body_session_host_failure_unproved', operation.id,
-                    'non-handoff host failure has no captured selected helper packet source')
+            gap(ctx, gaps, 'body_session_host_failure_unproved', operation.id,
+                'non-handoff host failure has no captured selected helper packet source')
         else:
             # Item-to-StopIteration is a value-changing adapter, not a copy of
             # a ReferenceValue into an exception packet. Check its real input

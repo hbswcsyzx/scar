@@ -54,7 +54,7 @@ _ERROR_ADAPTER_RULES = (*_EXCEPTION_ADAPTER_RULES, *_CLOSE_ERROR_RULES,
                         OutcomeAdapterRule.ASYNCGEN_YIELD_TO_REQUEST_ITEM)
 
 
-def host_output_copy(ctx, source, terminal):
+def host_output_copy(ctx, source, terminal, *, guard=None):
     """Exact whole-payload copy or explicit packet of this exception result.
 
     PacketConstruction is not mandatory: use the existing PacketDefinition and
@@ -65,7 +65,7 @@ def host_output_copy(ctx, source, terminal):
         return None
     matches = []
     for target in ctx.terminal_uses(terminal):
-        direct = ctx.forwards(source, target)
+        direct = ctx.forwards(source, target, guard=guard)
         if direct is True:
             matches.append(True)
             continue
@@ -79,8 +79,8 @@ def host_output_copy(ctx, source, terminal):
                     continue
                 if ctx.region_of[origin.operation] != ctx.region_of[target.operation]:
                     continue
-                delivered = ctx.forwards(origin, target)
-                component = ctx.forwards(source, OwnedUse(origin.operation, packet.exception))
+                delivered = ctx.forwards(origin, target, guard=guard)
+                component = ctx.forwards(source, OwnedUse(origin.operation, packet.exception), guard=guard)
                 if delivered is True and component is True:
                     found = True
                     break
@@ -583,6 +583,71 @@ def host_terminals(ctx, source):
     return tuple(found)
 
 
+def _host_invoke_failure(ctx, source, terminal, adapters):
+    """Reconcile later own RAISE ports on the existing exact source routes.
+
+    Control reachability alone is insufficient. Each route keeps its original
+    selected edges, packet completion slot and current host copy. Routes without
+    a later failure still owe the original body/adapter result. No new graph or
+    native applicability fact is introduced.
+    """
+    if not hasattr(ctx, 'index'):
+        return None
+    from .async_session_sources import source_inventory, source_routes
+    checks, found, complete = [], False, True
+    for original in source_inventory(ctx):
+        if original['source'] != source.outcome:
+            continue
+        view = source_routes(ctx, original)
+        complete &= view['known_inventory_complete']
+        for route in view['routes']:
+            if route['terminal'] != terminal:
+                continue
+            if not ctx.spend('host_own_failure_routes'):
+                return {'match': None}
+            if not ctx.spend('host_own_failure_choices', len(route['choices']) + 1):
+                return {'match': None}
+            selected = {choice.operation: choice for choice in route['choices']}
+            current, seen, ports = original['successor'].block, set(), ()
+            while current not in seen:
+                block = ctx.blocks[current]
+                if not ctx.spend('host_own_failure_blocks', len(block.operations) + 1):
+                    return {'match': None}
+                seen.add(current)
+                operation = ctx.operations[block.operations[-1]]
+                if operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE):
+                    if operation.id != terminal.operation:
+                        return {'match': None}
+                    break
+                choice = selected.get(operation.id)
+                if choice is None or not ctx.spend('host_own_failure_edges'):
+                    return {'match': None}
+                edge = operation.terminator.successors[choice.successor_index]
+                if operation.terminator.kind is TerminatorKind.INVOKE and edge.kind is ExitKind.RAISE:
+                    signature = next(row for row in operation.completions if row.kind is ExitKind.RAISE)
+                    if not ctx.spend('host_own_failure_slots', len(signature.types) + 1):
+                        return {'match': None}
+                    ports = tuple(InvokeLiteralResult(choice, CompletionResult(index))
+                        for index, value_type in enumerate(signature.types)
+                        if getattr(value_type, 'protocol', None) is ProtocolValueKind.EXCEPTION_PACKET)
+                current = edge.block
+            else:
+                return {'match': None}
+            found |= bool(ports)
+            if ports and ctx.operations[terminal.operation].terminator.kind is not TerminatorKind.RAISE:
+                matches = [False]
+            elif ports:
+                matches = [host_output_copy(ctx, port, terminal, guard=route['choices']) for port in ports]
+            else:
+                matches = [host_output_copy(ctx, source, terminal, guard=route['choices'])]
+                matches.extend(_adapter_route_copy(ctx, adapter, terminal) for adapter in adapters)
+            checks.append(True if True in matches else None if not matches or None in matches else False)
+    if not found:
+        return None
+    return {'match': False if False in checks else None if not complete or None in checks
+            or ctx.budget.truncated else True}
+
+
 def _close_reaches_terminal(ctx, row, terminal):
     output = row.contract.output
     if type(output) is HostTerminal:
@@ -703,6 +768,12 @@ def connection_errors(ctx):
                                 continue
                             if relation['match'] is True or relation['applicable'] is None:
                                 continue
+                        failure = _host_invoke_failure(ctx, source, terminal, routes)
+                        if failure is not None:
+                            if failure['match'] is False:
+                                errors.append(('protocol_copy', str(terminal.operation),
+                                    'host outcome is not the current selected own RAISE packet'))
+                            continue
                         selected = [row for row in routes
                                     if kind is TerminatorKind.RAISE
                                     or row.contract.rule is OutcomeAdapterRule.CLOSE_RETURN_VALUE]

@@ -29,10 +29,10 @@ def predicate_shape_errors(ctx, row, *, identity, state_sites=(), stateful=True)
         error('admission_effect', 'admission predicate is a declared callback-free read-only ordinary primitive')
     try:
         produced = ctx.port(contract.result)
-        if produced.operation != operation.id or row.slot != 0:
+        if row.slot != 0 or produced is not None and produced.operation != operation.id:
             error('admission_result', 'predicate must name its own ordinary result at row slot zero')
-        if not produced.values or any(not isinstance(ctx.values[value], DataValue)
-                or ctx.values[value].data_type != 'builtins.bool' for value in produced.values):
+        if produced is not None and (not produced.values or any(not isinstance(ctx.values[value], DataValue)
+                or ctx.values[value].data_type != 'builtins.bool' for value in produced.values)):
             error('admission_result', 'predicate result must be the original bool Data result')
         branch = ctx.operations.get(contract.branch)
         if (branch is None or branch.terminator is None

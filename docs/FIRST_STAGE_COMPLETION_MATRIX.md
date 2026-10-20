@@ -1,11 +1,12 @@
 # 第一阶段完整性分母：模型、接口、协议
 
-最新限定检查点（2026-10-19）：[原 F16 验收](M1_ASYNC_INITIAL_CONTROL_ACCEPTANCE.md)
-以 2058 项相关回归、892 文件稳定指纹，核独立 request/body/有效参数联合控制、
-来源和实际端口。原 2016 义务由 2010 精确身份及六项迁移保留，新增 42 项。
-原十六族中 F12/F13/F14/F15/F16/F17/F21/F23 八族、await A–H 已条件性结构接受；
-其余 F18/F19/F20/F22/F24/X25/X26/X27、P4 component/full、P5 与 M2 原113/196
-仍开放。[下一门](M1_ASYNC_INITIAL_CONTROL_NEXT_GATE.md)先合账已有证据、再补真缺口。
+最新限定检查点（2026-10-20）：[原 F18 验收](M1_ASYNC_TERMINAL_ACCEPTANCE.md)
+以 2104 项相关回归、899 文件稳定指纹，核源合法性、body内终止转换、准确后继
+异常包与当前state/消费者。旧2058精确身份全保，新增46；无旧test/fixture或
+Program26/Execution8改变，全部首败及两次静动来源反例保留。
+原十六族中 F12/F13/F14/F15/F16/F17/F18/F21/F23 九族、await A–H 条件性结构接受；
+其余 F19/F20/F22/F24/X25/X26/X27、P4 component/full、P5 与 M2 原113/196
+仍开放。[下一门](M1_ASYNC_TERMINAL_NEXT_GATE.md)已合账F19既有selector及完整链真缺口。
 真实 opaque/内容保持 Unknown 不要求翻纯；已有声明图不代自动 LeWM 恢复。
 以下保留历史检查点，旧状态摘要不撤销后来的限定验收。**第一阶段仍未完成。**
 

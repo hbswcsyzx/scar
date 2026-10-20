@@ -1,5 +1,24 @@
 # SCAR execution model
 
+## Async terminal sources and exact current consumers (2026-10-20)
+
+The five core entities remain Operation / Value / StateLocation / Region /
+Resource. Source syntax validity, frame-local exception conversion, the body's
+actual terminal packet and a later helper's own failure are separate facts.
+Static original CFG order and actual dynamic visit order select current ports;
+canonical ID order and optional session attachments cannot select the source.
+Source compilation reuses CPython without executing the target, preserving
+Return inventory and explicit byte/version/parser namespace gaps.
+
+See the [plan](M1_ASYNC_TERMINAL_PLAN.md), [actual attempts](M1_ASYNC_TERMINAL_PROGRESS.md),
+[F18 acceptance](M1_ASYNC_TERMINAL_ACCEPTANCE.md) and [next gate](M1_ASYNC_TERMINAL_NEXT_GATE.md).
+**2104 affected focused tests pass** on899 stable sources: all2058 previous exact
+identities retained,46 new; old tests/fixtures, Program26 and Execution8 unchanged.
+F18 conditionally closes at supplied-model structural scope; nine original
+families are accepted and seven remain open, with P4 component/full/P5 and M2
+original113/196. Native correspondence, automatic whole-LeWM recovery,
+transformation and new speedup remain unproved. Historical checkpoints follow.
+
 ## Initial async inputs and joint original control (2026-10-19)
 
 The five core entities remain Operation / Value / StateLocation / Region /

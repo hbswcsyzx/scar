@@ -36,6 +36,7 @@ class _Analysis:
         self.ctx = ctx
         self.issues, self.gaps, self.obligations = [], [], []
         self.associations, self.sessions, self.cancellation = [], [], []
+        self.return_sources, self.return_inventory = [], ()
         self.session_consumers = ()
         self.deliveries = []
         self.admissions = []
@@ -573,6 +574,41 @@ class _Analysis:
 
     def session_outcomes(self, scopes):
         from .protocol_connections import AsyncSessionOutcome
+        from .async_session_sources import source_inventory
+        # Legality is a property of the original body outcome, not of an
+        # optional SessionUpdate consumer attachment. Keep the whole source
+        # denominator before the shared semantic accounting starts.
+        self.return_inventory = tuple(source for source in source_inventory(self.ctx)
+            if source['session_required']
+            and source['body_source'].terminator.kind is TerminatorKind.RETURN)
+        self.return_sources = [{'source': source, 'checked': False, 'payload': None,
+                                'known_none': (), 'status': 'NOT_CHECKED'}
+                               for source in self.return_inventory]
+        from .driver_flow import body_outcome_uses
+        from .request_inputs import _none_content
+        for number, source in enumerate(self.return_inventory):
+            body = source['body_source']
+            if not self.spend('return_sources', body.id):
+                break
+            entry = self.return_sources[number]
+            entry['checked'] = True
+            actuals = body_outcome_uses(body)
+            if not actuals:
+                entry['status'] = 'PARTIAL'
+                self.gap('async_return_payload_unproved', body.id)
+                continue
+            payload = self.ctx.origins(OwnedUse(body.id, actuals[0]))
+            known = tuple(_none_content(recipe) for recipe in payload['recipes'])
+            entry.update(payload=payload, known_none=known)
+            if False in known:
+                entry['status'] = 'CONTRADICTED'
+                self.issue('async_return_value', body.id,
+                    'async-generator Return has a known non-None payload')
+            elif not payload['source_inventory_complete'] or not known or None in known:
+                entry['status'] = 'PARTIAL'
+                self.gap('async_return_payload_unproved', body.id)
+            else:
+                entry['status'] = 'DECLARED'
         bindings = [row for row in self.ctx.graph.protocol_bindings if type(row) is AsyncSessionOutcome]
         updates = {row.operation: row for row in self.ctx.graph.session_updates}
         indexed = {(row.scope, row.update, row.source): row for row in bindings}
@@ -607,17 +643,6 @@ class _Analysis:
                         self.gap('async_close_failure_session_unresolved', path)
                     if kind is TerminatorKind.RETURN:
                         self.gap('async_return_source_classification_unproved', path)
-                        from .driver_flow import body_outcome_uses
-                        from .request_inputs import _none_content
-                        actuals = body_outcome_uses(body)
-                        if actuals:
-                            payload = self.ctx.origins(OwnedUse(body.id, actuals[0]))
-                            known = tuple(_none_content(recipe) for recipe in payload['recipes'])
-                            if False in known:
-                                self.issue('async_return_value', body.id,
-                                    'async-generator Return has a known non-None payload')
-                            elif not payload['source_inventory_complete'] or not known or None in known:
-                                self.gap('async_return_payload_unproved', body.id)
                     elif kind is TerminatorKind.RAISE:
                         self.gap('async_terminal_exception_classification_unproved', path)
                     if expected is not None and update.post is not expected:
@@ -932,6 +957,8 @@ class _Analysis:
             self.cursor = initial_asend['cursor']
         return {'issues': tuple(self.issues), 'associations': tuple(self.associations), 'deliveries': tuple(self.deliveries),
                 'initial_asend': initial_asend,
+                'return_source_inventory': self.return_inventory,
+                'return_sources': tuple(self.return_sources),
                 'request_admissions': tuple(self.admissions),
                 'session_outcomes': tuple(self.sessions), 'session_consumers': self.session_consumers,
                 'handoffs': handoffs['handoffs'], 'cancellation': tuple(self.cancellation),

@@ -1,0 +1,25 @@
+{
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "script_sha256": "7d5eb8797c109e6547a90c70de9944507622f4470aa93e18ca8e56280baafbfe",
+  "source_sha256_before": "4b6dd7e5d54b14bec907d2c32b4cfcd1f3df5f572d899a67f393512ad8f7558e",
+  "source_sha256_after": "4b6dd7e5d54b14bec907d2c32b4cfcd1f3df5f572d899a67f393512ad8f7558e",
+  "text": "pass  # type: int\n",
+  "observations": [
+    {
+      "mode": "ordinary_compile",
+      "accepted": true
+    },
+    {
+      "mode": "ordinary_ast",
+      "accepted": true
+    },
+    {
+      "mode": "type_comment_ast",
+      "accepted": false,
+      "message": "invalid syntax"
+    }
+  ],
+  "target_bodies_executed": 0,
+  "tests_started": 0,
+  "transformation_authorized": false
+}

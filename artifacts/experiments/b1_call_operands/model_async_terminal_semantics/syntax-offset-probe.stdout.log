@@ -1,0 +1,79 @@
+{
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "python_executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "script_sha256": "f7bfce14d90d7c7206263dc927317224b7368385d8985c568157008461778574",
+  "source_sha256_before": "12b8bb35fda302bf5c68edb70db0abd4151bc90e799e4e15fe7790700711358a",
+  "source_sha256_after": "12b8bb35fda302bf5c68edb70db0abd4151bc90e799e4e15fe7790700711358a",
+  "observations": [
+    {
+      "label": "compiler-async-return-utf8",
+      "phase": "compile",
+      "text": "async def body():\n    caf\u00e9 = 1; return None\n    yield 1\n",
+      "line_text": "    caf\u00e9 = 1; return None",
+      "message": "'return' with value in async generator",
+      "lineno": 2,
+      "offset": 16,
+      "end_lineno": 2,
+      "end_offset": 27,
+      "line_characters": 25,
+      "line_utf8_bytes": 26,
+      "returns": [
+        {
+          "line": 2,
+          "column_utf8_bytes": 15,
+          "end_column_utf8_bytes": 26
+        }
+      ]
+    },
+    {
+      "label": "compiler-module-return-utf8",
+      "phase": "compile",
+      "text": "caf\u00e9 = 1; return None\n",
+      "line_text": "caf\u00e9 = 1; return None",
+      "message": "'return' outside function",
+      "lineno": 1,
+      "offset": 12,
+      "end_lineno": 1,
+      "end_offset": 23,
+      "line_characters": 21,
+      "line_utf8_bytes": 22,
+      "returns": [
+        {
+          "line": 1,
+          "column_utf8_bytes": 11,
+          "end_column_utf8_bytes": 22
+        }
+      ]
+    },
+    {
+      "label": "parser-invalid-expression-utf8",
+      "phase": "parse",
+      "text": "caf\u00e9 = ;\n",
+      "line_text": "caf\u00e9 = ;",
+      "message": "invalid syntax",
+      "lineno": 1,
+      "offset": 8,
+      "end_lineno": 1,
+      "end_offset": 9,
+      "line_characters": 8,
+      "line_utf8_bytes": 9
+    },
+    {
+      "label": "parser-invalid-return-utf8",
+      "phase": "parse",
+      "text": "def body():\n    caf\u00e9 = 1; return )\n",
+      "line_text": "    caf\u00e9 = 1; return )",
+      "message": "unmatched ')'",
+      "lineno": 2,
+      "offset": 22,
+      "end_lineno": 2,
+      "end_offset": 22,
+      "line_characters": 22,
+      "line_utf8_bytes": 23
+    }
+  ],
+  "target_bodies_executed": 0,
+  "tests_started": 0,
+  "source_runtime_verified": false,
+  "transformation_authorized": false
+}

@@ -1,5 +1,18 @@
 # SCAR roadmap and scope
 
+> **Current F18 model acceptance (2026-10-20):**
+> [Plan](M1_ASYNC_TERMINAL_PLAN.md), [actual attempts](M1_ASYNC_TERMINAL_PROGRESS.md),
+> [acceptance](M1_ASYNC_TERMINAL_ACCEPTANCE.md) and [next original gate](M1_ASYNC_TERMINAL_NEXT_GATE.md).
+> **2104 affected focused pass**,899 stable sources: all2058 previous exact
+> identities retained plus46 new; no old test/fixture or Program26/Execution8 change.
+> Source legality, body-local conversion and actual later-helper failure sources
+> connect by original CFG/actual occurrence rather than ID ordering or optional
+> attachments. F18 joins eight conditionally accepted families; seven original
+> families/P4 component/full/P5/M2 original113/196 remain open. Next F19 G0 has
+> exact existing selectors and three unfulfilled async closed/close continuation
+> chains. Supplied models are not automatic source/native recovery. No detector,
+> backend, trusted LeWM transformation or speedup is added. Earlier checkpoints follow.
+
 > **Current initial-ASEND model acceptance (2026-10-19):**
 > [Plan](M1_ASYNC_INITIAL_CONTROL_PLAN.md),
 > [actual attempts](M1_ASYNC_INITIAL_CONTROL_PROGRESS.md),

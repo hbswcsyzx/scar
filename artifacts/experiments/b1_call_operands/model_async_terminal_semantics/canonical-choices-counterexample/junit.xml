@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.909" timestamp="2026-10-20T04:12:15.425946+00:00" hostname="gpu1"><testcase classname="tests.unit.test_program_async_terminal_inventory" name="test_two_helper_raises_follow_cfg_order_rather_than_sorted_operation_ids[current-packet]" time="0.119"><failure message="AssertionError: (ValidationIssue(code='protocol_copy', path='program_operation:a.later.helper.raise.exit', message='host outcome is not the current selected own RAISE packet'),)&#10;assert not (ValidationIssue(code='protocol_copy', path='program_operation:a.later.helper.raise.exit', message='host outcome is not the current selected own RAISE packet'),)">old_packet = False
+
+    @pytest.mark.parametrize('old_packet', (False, True), ids=('current-packet', 'old-packet'))
+    def test_two_helper_raises_follow_cfg_order_rather_than_sorted_operation_ids(old_packet):
+        from scar.ir.program.model import ExitKind
+        from tests.fixtures.program_session_release_graphs import _Tail
+    
+        graph, details = async_driver_program(target='packet', helper=True)
+        earlier = next(row for row in graph.operations if row.id == details['updates'][0].operation)
+        first_edge = next(row for row in earlier.terminator.successors if row.kind is ExitKind.RAISE)
+        first_block = next(block for region in graph.regions for block in region.blocks if block.id == first_edge.block)
+        old = first_block.arguments[0]
+        first_host = first_block.operations[-1]
+        update = details['updates'][0]
+        tail = _Tail(graph, first_host,
+            body=next(use.value for use in earlier.uses if use.id == update.body),
+            request=next(use.value for use in earlier.uses if use.id == update.request))
+        # This executes later but sorts before the earlier async.session.helper.
+        tail.invoke('a.later.helper')
+        graph = tail.finish()
+        later = next(row for row in graph.operations if row.id.value == 'a.later.helper')
+        assert later.id.wire &lt; earlier.id.wire
+        if old_packet:
+            host = next(row for row in graph.operations if row.id.value == 'a.later.helper.raise.exit')
+            wrong = replace(host, uses=tuple(replace(use, value=old) if use.id == host.terminator.values[0]
+                                            else use for use in host.uses))
+            graph = replace(graph, operations=tuple(wrong if row is host else row for row in graph.operations))
+        issues = validate(graph)
+        if old_packet:
+            assert 'protocol_copy' in {issue.code for issue in issues}
+        else:
+&gt;           assert not issues, issues
+E           AssertionError: (ValidationIssue(code='protocol_copy', path='program_operation:a.later.helper.raise.exit', message='host outcome is not the current selected own RAISE packet'),)
+E           assert not (ValidationIssue(code='protocol_copy', path='program_operation:a.later.helper.raise.exit', message='host outcome is not the current selected own RAISE packet'),)
+
+tests/unit/test_program_async_terminal_inventory.py:175: AssertionError</failure></testcase><testcase classname="tests.unit.test_program_async_terminal_inventory" name="test_two_helper_raises_follow_cfg_order_rather_than_sorted_operation_ids[old-packet]" time="0.077"><failure message="AssertionError: assert 'protocol_copy' in set()">old_packet = True
+
+    @pytest.mark.parametrize('old_packet', (False, True), ids=('current-packet', 'old-packet'))
+    def test_two_helper_raises_follow_cfg_order_rather_than_sorted_operation_ids(old_packet):
+        from scar.ir.program.model import ExitKind
+        from tests.fixtures.program_session_release_graphs import _Tail
+    
+        graph, details = async_driver_program(target='packet', helper=True)
+        earlier = next(row for row in graph.operations if row.id == details['updates'][0].operation)
+        first_edge = next(row for row in earlier.terminator.successors if row.kind is ExitKind.RAISE)
+        first_block = next(block for region in graph.regions for block in region.blocks if block.id == first_edge.block)
+        old = first_block.arguments[0]
+        first_host = first_block.operations[-1]
+        update = details['updates'][0]
+        tail = _Tail(graph, first_host,
+            body=next(use.value for use in earlier.uses if use.id == update.body),
+            request=next(use.value for use in earlier.uses if use.id == update.request))
+        # This executes later but sorts before the earlier async.session.helper.
+        tail.invoke('a.later.helper')
+        graph = tail.finish()
+        later = next(row for row in graph.operations if row.id.value == 'a.later.helper')
+        assert later.id.wire &lt; earlier.id.wire
+        if old_packet:
+            host = next(row for row in graph.operations if row.id.value == 'a.later.helper.raise.exit')
+            wrong = replace(host, uses=tuple(replace(use, value=old) if use.id == host.terminator.values[0]
+                                            else use for use in host.uses))
+            graph = replace(graph, operations=tuple(wrong if row is host else row for row in graph.operations))
+        issues = validate(graph)
+        if old_packet:
+&gt;           assert 'protocol_copy' in {issue.code for issue in issues}
+E           AssertionError: assert 'protocol_copy' in set()
+
+tests/unit/test_program_async_terminal_inventory.py:173: AssertionError</failure></testcase></testsuite></testsuites>
