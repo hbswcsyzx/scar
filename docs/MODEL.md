@@ -1,6 +1,27 @@
 # SCAR execution model
 
+## Current reference identity is distinct from source and content (2026-10-20)
+
+The five entities remain Operation / Value / StateLocation / Region / Resource.
+`object_identity` compares independent scoped declarations at exact Reference
+occurrences; it creates no original copy edge. Conditional same-object support
+can connect the current frame to its own true-terminal F history while leaving
+mutable content, stored-field source and native identity unproved. Different
+candidate objects are local alternatives, not global copy conflicts.
+
+See the [interface](M1_FRAME_IDENTITY_GUARD_API.md),
+[limited acceptance](M1_FRAME_IDENTITY_GUARD_ACCEPTANCE.md) and
+[next design gate](M1_FRAME_IDENTITY_GUARD_NEXT_GATE.md).
+231 direct affected tests pass on907 stable sources:217 existing identities
+(all196 immediately previous cases) and14 new. Prior tests/fixtures and
+Program26/Execution8 remain unchanged; the old unannotated history stays None.
+The current identity branch does not recover store-payload/state/load provenance.
+F19's first unit, seven families, P4/full/P5/M2 and the whole first stage remain
+open. This is not automatic whole-LeWM modeling, transformation or speedup.
+
 ## Local request paths and conditional body roles (2026-10-20)
+
+Historical checkpoint; the subsequent current-identity branch is scoped above.
 
 Operation / Value / StateLocation / Region / Resource remain the core entities.
 The independent `request_no_drive_paths` query inventories original interfaces,

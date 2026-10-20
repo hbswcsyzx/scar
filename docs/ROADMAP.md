@@ -1,5 +1,16 @@
 # SCAR roadmap and scope
 
+> **Current reference identity/history progress (2026-10-20):**
+> [Limited acceptance](M1_FRAME_IDENTITY_GUARD_ACCEPTANCE.md) passes231 direct
+> affected cases on907 stable sources,14 new and all196 prior direct cases.
+> Independent current ObjectIdentity support stays separate from ordinary copy,
+> stored-field provenance and data versions. No old fixture/test or schema change.
+> [Next](M1_FRAME_IDENTITY_GUARD_NEXT_GATE.md): design the missing generic
+> store-payload/state/load relation after the existing-contract audit, then return
+> to the original F19 continuations. The current branch does not close F19's
+> first unit, any family, P4/full/P5/M2 original113/196 or the whole first stage.
+> No automatic LeWM recovery, backend, trusted transform or new speedup is claimed.
+
 > **F19 finished-request subchain progress (2026-10-20):**
 > [Plan](M1_ASYNC_CLOSE_CONTINUATIONS_PLAN.md),
 > [limited acceptance](M1_ASYNC_FINISHED_REQUESTS_ACCEPTANCE.md) and

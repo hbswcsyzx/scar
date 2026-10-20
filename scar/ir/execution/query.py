@@ -86,6 +86,20 @@ class ExecutionIndex:
             'gaps': tuple(ctx.gaps), 'source_runtime_verified': False,
             'transformation_authorized': False})
 
+    def object_identity(self, source, target, *, budget=4096):
+        """Compare current scoped Reference declarations without adding a copy."""
+        from .reference_identity import object_identity
+        from .validity_budget import ValidityBudget
+        shared = ValidityBudget(budget)
+        for value in (source, target):
+            if type(value) is not ValueOccurrenceID:
+                raise TypeError('object_identity requires exact ValueOccurrenceIDs')
+            value.__post_init__()
+            if value not in self._ctx.values:
+                raise KeyError(value)
+        ctx = self._content_context()
+        return deepcopy(object_identity(ctx, ctx.values[source], ctx.values[target], shared=shared))
+
     def literal_evaluation(self, site, occurrence, *, budget=4096):
         """Declared content at an exact original producer, never object reuse."""
         from .literals import literal_evaluation, validate_literal_request

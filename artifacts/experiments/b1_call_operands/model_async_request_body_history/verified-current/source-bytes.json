@@ -1,0 +1,22 @@
+{
+  "scar/ir/execution/body_state_history.py": {
+    "path": "verified-current/source-bytes/scar__ir__execution__body_state_history.py.txt",
+    "sha256": "e32fb1969826c4c984ef73c448e4a04c62ef51dc5a14442ef7e85e9724149012"
+  },
+  "scar/ir/execution/query.py": {
+    "path": "verified-current/source-bytes/scar__ir__execution__query.py.txt",
+    "sha256": "f4f458babc70e76223346e1a6deb28625f984c7bacc45fc4ab37cf00def1c6a3"
+  },
+  "scar/ir/execution/reference_identity.py": {
+    "path": "verified-current/source-bytes/scar__ir__execution__reference_identity.py.txt",
+    "sha256": "3ccf714d0cabe59692dd4d6d30862de6edf6e6df40b3fdb26ea4e4b53e061dc5"
+  },
+  "tests/fixtures/execution_frame_identity_graphs.py": {
+    "path": "verified-current/source-bytes/tests__fixtures__execution_frame_identity_graphs.py.txt",
+    "sha256": "87070b698c3d36af3de90ec84fb8d79910f23ef1aa81ee968a4930d6e9b3471d"
+  },
+  "tests/unit/test_execution_frame_identity_history.py": {
+    "path": "verified-current/source-bytes/tests__unit__test_execution_frame_identity_history.py.txt",
+    "sha256": "733b7df44406430baa272d5a2aaaa653b1b118044cc1691fecace137e0ee1d53"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "selectors": [
+    "tests/unit/test_execution_frame_identity_history.py",
+    "tests/unit/test_program_async_request_path_inventory.py",
+    "tests/unit/test_program_async_finished_requests.py",
+    "tests/unit/test_program_async_connections.py",
+    "tests/unit/test_program_request_admission.py",
+    "tests/unit/test_program_async_completed_reuse.py",
+    "tests/unit/test_program_async_scheduler_packets.py",
+    "tests/unit/test_program_async_initial_selection.py",
+    "tests/unit/test_program_async_initial_control.py",
+    "tests/unit/test_program_async_initial_control_codec.py",
+    "tests/unit/test_program_async_terminal_inventory.py",
+    "tests/unit/test_program_async_terminal.py",
+    "tests/unit/test_execution_async_initial_control.py",
+    "tests/unit/test_execution_async_terminal.py",
+    "tests/unit/test_program_input_origins.py",
+    "tests/unit/test_program_input_origin_pairs.py",
+    "tests/unit/test_program_protocol_connections_codec.py",
+    "tests/unit/test_program_protocol_flow_determinism.py",
+    "tests/unit/test_program_protocol_path_safety.py",
+    "tests/unit/test_execution_request_state_history.py",
+    "tests/unit/test_execution_coroutine_running.py",
+    "tests/unit/test_execution_coroutine_closed.py",
+    "tests/unit/test_execution_body_port_review.py"
+  ],
+  "scope": "Current-object comparison and conditional frame history; retain all196 previous direct cases plus running/closed history and existing hard-conflict/port regressions; not all2121 catalog IDs, component/full/P5/M2 or native/performance acceptance",
+  "selection_reason": "Only body_state_history and a new independent public query changed; existing history consumers, exact source ports and non-rescuable copy conflicts are the concrete risks. All previous tests/fixtures remain byte-identical; no unrelated full suite."
+}

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="13" time="127.580" timestamp="2026-10-20T05:27:58.099473+00:00" hostname="gpu1"><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_independent_current_frame_identity_supports_each_real_terminal_without_copy_or_peer_borrowing" time="7.623" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_same_request_body_write_and_independent_current_b2_cannot_use_old_b1_terminal_history" time="1.199"><failure message="ValueError: incomplete_alias at program_operation:frame.identity.current_body.write: unknown reference range cannot certify complete access; incomplete_alias at program_operation:frame.identity.current_body.write: complete access requires covering possible alias targets">def test_same_request_body_write_and_independent_current_b2_cannot_use_old_b1_terminal_history():
+&gt;       program, model, details = frame_identity_execution(instances=2, retry=True, body_write=True)
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/unit/test_execution_frame_identity_history.py:92: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/fixtures/execution_frame_identity_graphs.py:132: in frame_identity_execution
+    program, model, details = _with_body_write(program, model, details)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/fixtures/execution_frame_identity_graphs.py:100: in _with_body_write
+    changes = {'snapshot': snapshot_for(program)}
+                           ^^^^^^^^^^^^^^^^^^^^^
+scar/ir/execution/snapshot.py:11: in snapshot_for
+    wire = program_dumps(program).encode('utf-8')
+           ^^^^^^^^^^^^^^^^^^^^^^
+scar/ir/program/codec.py:261: in dumps
+    _require_record_and_graph_valid(graph)
+scar/ir/program/codec.py:146: in _require_record_and_graph_valid
+    require_valid(graph)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+graph = ProgramGraph(root=RegionID(value='async.initial.caller'), regions=(Region(id=RegionID(value='async.initial.caller'), l...3.driver.drive'), source=OperationID(value='pipeline.done.return')))), exception_matches=(), call_effect_expansions=())
+
+    def require_valid(graph: ProgramGraph) -&gt; None:
+        issues = validate(graph)
+        if issues:
+&gt;           raise ValueError("; ".join(f"{issue.code} at {issue.path}: {issue.message}" for issue in issues))
+E           ValueError: incomplete_alias at program_operation:frame.identity.current_body.write: unknown reference range cannot certify complete access; incomplete_alias at program_operation:frame.identity.current_body.write: complete access requires covering possible alias targets
+
+scar/ir/program/validation.py:763: ValueError</failure></testcase><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_missing_exact_identity_or_actual_port_keeps_source_inventory_and_the_complete_sibling[read_identity]" time="12.799" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_missing_exact_identity_or_actual_port_keeps_source_inventory_and_the_complete_sibling[read_use]" time="12.574" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_missing_exact_identity_or_actual_port_keeps_source_inventory_and_the_complete_sibling[read_state]" time="12.632" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_missing_exact_identity_or_actual_port_keeps_source_inventory_and_the_complete_sibling[create_input]" time="12.714" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_missing_exact_identity_or_actual_port_keeps_source_inventory_and_the_complete_sibling[drive_input]" time="12.562" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_identity_comparison_keeps_distinct_object_false_and_cross_artifact_unknown_local[different_object]" time="7.025" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_identity_comparison_keeps_distinct_object_false_and_cross_artifact_unknown_local[different_artifact]" time="7.157" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_tiny_budget_keeps_both_identity_endpoints_and_all_original_history_sources_unchecked" time="6.858" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_identity_query_rechecks_a_missing_catalog_and_rejects_changed_bytes_on_refresh" time="6.615" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_optional_request_projection_and_body_predicate_have_distinct_history_obligations[association]" time="13.657" /><testcase classname="tests.unit.test_execution_frame_identity_history" name="test_optional_request_projection_and_body_predicate_have_distinct_history_obligations[predicate]" time="13.252" /></testsuite></testsuites>

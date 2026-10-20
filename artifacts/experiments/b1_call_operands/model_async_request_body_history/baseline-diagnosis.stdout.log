@@ -1,0 +1,909 @@
+{
+  "base_revision": "0bf37d2a422f51eec2955fb44611760ef75d868e",
+  "script_sha256": "5893af0de2b3c14f3e954785aa6c31b7f7bad6932a13670545b59af8939ac698",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "source_sha256_before": "ec1969fbdbcd2d52029ada1005886ad01620a9e77812f637fa835756f71f1969",
+  "source_sha256_after": "ec1969fbdbcd2d52029ada1005886ad01620a9e77812f637fa835756f71f1969",
+  "observed_branch": true,
+  "expected_bool": null,
+  "status": "PARTIAL",
+  "gaps": [],
+  "budget": {
+    "limit": 1048576,
+    "used": 4505,
+    "costs": {
+      "body_state_read": 1,
+      "body_state_read_accesses": 3,
+      "state_history_branch_visits": 1,
+      "state_history_branch_operations": 1,
+      "await_outcome_copy_pairs": 369,
+      "await_outcome_copy_ancestors": 1406,
+      "await_outcome_copy_support": 689,
+      "await_outcome_compatibility": 369,
+      "body_state_active_sources": 8,
+      "body_state_terminal_sources": 8,
+      "body_state_owned_uses": 62,
+      "body_state_owned_landing_ports": 40,
+      "body_state_call_ancestry": 48,
+      "host_order_nodes": 152,
+      "host_order_edges": 652,
+      "body_state_call_input_ports": 164,
+      "await_outcome_recipe_compatibility": 344,
+      "body_state_call_output_ports": 96,
+      "body_state_drive_ports": 84,
+      "body_state_commit_state_ports": 8
+    },
+    "truncated": false
+  },
+  "terminal_candidates": [
+    {
+      "commit": "program_operation:initial.driver.0.publication.0",
+      "source": "exec_operation_occurrence:async.finished.request.0.driver.0.6.initial.driver.0.publication.0",
+      "expected_bool": null,
+      "post_established": null,
+      "status": "PARTIAL",
+      "gaps": [
+        "body_state_drive_owner_unproved",
+        "body_state_subject_unproved",
+        "body_state_terminal_post_unproved"
+      ],
+      "subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "source_subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "drive_support": {
+        "supported": false,
+        "gaps": [
+          "body_state_drive_owner_unproved"
+        ],
+        "creation_binding": {
+          "match": null,
+          "gaps": [
+            "await_original_copy_unproved",
+            "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+          ],
+          "support_count": 0,
+          "conditional_native_projection": false
+        },
+        "owned_supported": true,
+        "driver_chain": {
+          "supported": true,
+          "gaps": [],
+          "call_count": 1
+        },
+        "ports": [
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          }
+        ]
+      },
+      "source_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "read_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "has_terminal_route": true,
+      "content_preserved": null
+    },
+    {
+      "commit": "program_operation:initial.driver.0.publication.0",
+      "source": "exec_operation_occurrence:async.finished.request.1.driver.0.6.initial.driver.0.publication.0",
+      "expected_bool": null,
+      "post_established": null,
+      "status": "PARTIAL",
+      "gaps": [
+        "body_state_drive_owner_unproved",
+        "body_state_subject_unproved",
+        "body_state_terminal_route_unproved",
+        "body_state_terminal_post_unproved"
+      ],
+      "subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "source_subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "drive_support": {
+        "supported": false,
+        "gaps": [
+          "body_state_drive_owner_unproved"
+        ],
+        "creation_binding": {
+          "match": null,
+          "gaps": [
+            "await_original_copy_unproved",
+            "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+          ],
+          "support_count": 0,
+          "conditional_native_projection": false
+        },
+        "owned_supported": true,
+        "driver_chain": {
+          "supported": true,
+          "gaps": [],
+          "call_count": 1
+        },
+        "ports": [
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          }
+        ]
+      },
+      "source_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "read_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "has_terminal_route": false,
+      "content_preserved": null
+    },
+    {
+      "commit": "program_operation:initial.driver.1.publication.0",
+      "source": "exec_operation_occurrence:async.finished.request.0.driver.1.4.initial.driver.1.publication.0",
+      "expected_bool": null,
+      "post_established": null,
+      "status": "PARTIAL",
+      "gaps": [
+        "body_state_drive_owner_unproved",
+        "body_state_subject_unproved",
+        "body_state_terminal_post_unproved"
+      ],
+      "subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "source_subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "drive_support": {
+        "supported": false,
+        "gaps": [
+          "body_state_drive_owner_unproved"
+        ],
+        "creation_binding": {
+          "match": null,
+          "gaps": [
+            "await_original_copy_unproved",
+            "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+          ],
+          "support_count": 0,
+          "conditional_native_projection": false
+        },
+        "owned_supported": true,
+        "driver_chain": {
+          "supported": true,
+          "gaps": [],
+          "call_count": 1
+        },
+        "ports": [
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          }
+        ]
+      },
+      "source_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "read_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "has_terminal_route": true,
+      "content_preserved": null
+    },
+    {
+      "commit": "program_operation:initial.driver.1.publication.0",
+      "source": "exec_operation_occurrence:async.finished.request.1.driver.1.4.initial.driver.1.publication.0",
+      "expected_bool": null,
+      "post_established": null,
+      "status": "PARTIAL",
+      "gaps": [
+        "body_state_drive_owner_unproved",
+        "body_state_subject_unproved",
+        "body_state_terminal_route_unproved",
+        "body_state_terminal_post_unproved"
+      ],
+      "subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "source_subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "drive_support": {
+        "supported": false,
+        "gaps": [
+          "body_state_drive_owner_unproved"
+        ],
+        "creation_binding": {
+          "match": null,
+          "gaps": [
+            "await_original_copy_unproved",
+            "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+          ],
+          "support_count": 0,
+          "conditional_native_projection": false
+        },
+        "owned_supported": true,
+        "driver_chain": {
+          "supported": true,
+          "gaps": [],
+          "call_count": 1
+        },
+        "ports": [
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          }
+        ]
+      },
+      "source_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "read_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "has_terminal_route": false,
+      "content_preserved": null
+    },
+    {
+      "commit": "program_operation:initial.driver.2.publication.0",
+      "source": "exec_operation_occurrence:async.finished.request.0.driver.2.4.initial.driver.2.publication.0",
+      "expected_bool": null,
+      "post_established": null,
+      "status": "PARTIAL",
+      "gaps": [
+        "body_state_drive_owner_unproved",
+        "body_state_subject_unproved",
+        "body_state_terminal_post_unproved"
+      ],
+      "subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "source_subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "drive_support": {
+        "supported": false,
+        "gaps": [
+          "body_state_drive_owner_unproved"
+        ],
+        "creation_binding": {
+          "match": null,
+          "gaps": [
+            "await_original_copy_unproved",
+            "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+          ],
+          "support_count": 0,
+          "conditional_native_projection": false
+        },
+        "owned_supported": true,
+        "driver_chain": {
+          "supported": true,
+          "gaps": [],
+          "call_count": 1
+        },
+        "ports": [
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          }
+        ]
+      },
+      "source_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "read_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "has_terminal_route": true,
+      "content_preserved": null
+    },
+    {
+      "commit": "program_operation:initial.driver.2.publication.0",
+      "source": "exec_operation_occurrence:async.finished.request.1.driver.2.4.initial.driver.2.publication.0",
+      "expected_bool": null,
+      "post_established": null,
+      "status": "PARTIAL",
+      "gaps": [
+        "body_state_drive_owner_unproved",
+        "body_state_subject_unproved",
+        "body_state_terminal_route_unproved",
+        "body_state_terminal_post_unproved"
+      ],
+      "subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "source_subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "drive_support": {
+        "supported": false,
+        "gaps": [
+          "body_state_drive_owner_unproved"
+        ],
+        "creation_binding": {
+          "match": null,
+          "gaps": [
+            "await_original_copy_unproved",
+            "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+          ],
+          "support_count": 0,
+          "conditional_native_projection": false
+        },
+        "owned_supported": true,
+        "driver_chain": {
+          "supported": true,
+          "gaps": [],
+          "call_count": 1
+        },
+        "ports": [
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          }
+        ]
+      },
+      "source_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "read_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "has_terminal_route": false,
+      "content_preserved": null
+    },
+    {
+      "commit": "program_operation:initial.driver.3.publication.0",
+      "source": "exec_operation_occurrence:async.finished.request.0.driver.3.5.initial.driver.3.publication.0",
+      "expected_bool": null,
+      "post_established": null,
+      "status": "PARTIAL",
+      "gaps": [
+        "body_state_drive_owner_unproved",
+        "body_state_subject_unproved",
+        "body_state_terminal_post_unproved"
+      ],
+      "subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "source_subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "drive_support": {
+        "supported": false,
+        "gaps": [
+          "body_state_drive_owner_unproved"
+        ],
+        "creation_binding": {
+          "match": null,
+          "gaps": [
+            "await_original_copy_unproved",
+            "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+          ],
+          "support_count": 0,
+          "conditional_native_projection": false
+        },
+        "owned_supported": true,
+        "driver_chain": {
+          "supported": true,
+          "gaps": [],
+          "call_count": 1
+        },
+        "ports": [
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          }
+        ]
+      },
+      "source_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "read_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "has_terminal_route": true,
+      "content_preserved": null
+    },
+    {
+      "commit": "program_operation:initial.driver.3.publication.0",
+      "source": "exec_operation_occurrence:async.finished.request.1.driver.3.5.initial.driver.3.publication.0",
+      "expected_bool": null,
+      "post_established": null,
+      "status": "PARTIAL",
+      "gaps": [
+        "body_state_drive_owner_unproved",
+        "body_state_subject_unproved",
+        "body_state_terminal_route_unproved",
+        "body_state_terminal_post_unproved"
+      ],
+      "subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "source_subject_binding": {
+        "match": null,
+        "gaps": [
+          "await_original_copy_unproved",
+          "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+        ],
+        "support_count": 0,
+        "conditional_native_projection": false
+      },
+      "drive_support": {
+        "supported": false,
+        "gaps": [
+          "body_state_drive_owner_unproved"
+        ],
+        "creation_binding": {
+          "match": null,
+          "gaps": [
+            "await_original_copy_unproved",
+            "ExecutionIssue(code='body_reference_identity_unproved', path='await.outcome.copy', message='binding lacks both scoped ObjectID declarations')"
+          ],
+          "support_count": 0,
+          "conditional_native_projection": false
+        },
+        "owned_supported": true,
+        "driver_chain": {
+          "supported": true,
+          "gaps": [],
+          "call_count": 1
+        },
+        "ports": [
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "inputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "outputs",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          },
+          {
+            "kind": "forwards",
+            "match": true
+          }
+        ]
+      },
+      "source_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "read_chain": {
+        "supported": true,
+        "gaps": [],
+        "call_count": 1
+      },
+      "has_terminal_route": false,
+      "content_preserved": null
+    }
+  ],
+  "read": "exec_operation_occurrence:async.finished.request.0.extra.finished.request.0.2.finished.body.closed.read",
+  "drive_sources": 4,
+  "commit_sources": 4,
+  "new_detector": false,
+  "new_backend": false,
+  "native_target_executions": 0,
+  "source_runtime_verified": false,
+  "transformation_authorized": false
+}

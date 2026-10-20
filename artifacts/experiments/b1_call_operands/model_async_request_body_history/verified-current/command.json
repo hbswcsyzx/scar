@@ -1,0 +1,42 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-m",
+    "pytest",
+    "-q",
+    "tests/unit/test_execution_frame_identity_history.py",
+    "tests/unit/test_program_async_request_path_inventory.py",
+    "tests/unit/test_program_async_finished_requests.py",
+    "tests/unit/test_program_async_connections.py",
+    "tests/unit/test_program_request_admission.py",
+    "tests/unit/test_program_async_completed_reuse.py",
+    "tests/unit/test_program_async_scheduler_packets.py",
+    "tests/unit/test_program_async_initial_selection.py",
+    "tests/unit/test_program_async_initial_control.py",
+    "tests/unit/test_program_async_initial_control_codec.py",
+    "tests/unit/test_program_async_terminal_inventory.py",
+    "tests/unit/test_program_async_terminal.py",
+    "tests/unit/test_execution_async_initial_control.py",
+    "tests/unit/test_execution_async_terminal.py",
+    "tests/unit/test_program_input_origins.py",
+    "tests/unit/test_program_input_origin_pairs.py",
+    "tests/unit/test_program_protocol_connections_codec.py",
+    "tests/unit/test_program_protocol_flow_determinism.py",
+    "tests/unit/test_program_protocol_path_safety.py",
+    "tests/unit/test_execution_request_state_history.py",
+    "tests/unit/test_execution_coroutine_running.py",
+    "tests/unit/test_execution_coroutine_closed.py",
+    "tests/unit/test_execution_body_port_review.py",
+    "--junitxml=/tmp/scar-structured-model-280qf4mi/artifacts/experiments/b1_call_operands/model_async_request_body_history/verified-current/junit.xml"
+  ],
+  "cwd": "/tmp/scar-structured-model-280qf4mi",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "base_revision": "0bf37d2a422f51eec2955fb44611760ef75d868e",
+  "activation": "source /home/zyf/miniconda3/etc/profile.d/conda.sh; conda activate lewm",
+  "environment": {
+    "PYTHONPATH": ".",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "scope": "affected supplied-model queries; not full phase, native validation or performance",
+  "runner_sha256": "72bf14dd7ea18e8e79cd2b3c6ea0e309032679562ed534a32804d9fe8c687bfc"
+}

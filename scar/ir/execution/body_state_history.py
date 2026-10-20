@@ -152,12 +152,34 @@ class _BodyHistory:
                 **_flags()}
 
     def body_pair(self, view, source, target):
+        # Comparing another candidate's frame is not an asserted copy edge.
+        # Select the local identity comparison before pair() could register a
+        # global copy conflict for an ordinary, expected distinct object.
+        from .content import ObjectIdentity
+        from .content_validation import artifact_key
+        identities = []
+        for value in (source, target):
+            row = (None if value is None or type(value) is Unresolved else
+                   self.ctx.resolved_denotations.get(value.id))
+            identities.append(None if row is None else row['denotation'].identity)
+        left, right = identities
+        if (type(left) is ObjectIdentity and type(right) is ObjectIdentity
+                and artifact_key(left.object.artifact) == artifact_key(right.object.artifact)
+                and left.object.object != right.object.object):
+            # These declarations choose a comparison algorithm only. The
+            # bounded helper still checks the fresh catalogs and actual scope.
+            return self.object_binding(source, target)
         ordinary = pair(self.ctx, source, target, self.shared)
         if ordinary['match'] is not None or self.shared.truncated:
             return ordinary
+        identity = self.object_binding(source, target, ordinary=ordinary)
+        if identity['match'] is not None or self.shared.truncated:
+            return identity
+        if view is None:
+            return identity
         projection = self.native_projection(view)
         if not projection['supported']:
-            return {**ordinary, 'native_projection': projection}
+            return {**identity, 'native_projection': projection}
         handle, receiver = view['instance']['creation_handle'], view['instance']['value']
         routes = []
         for left, right in ((handle, receiver), (receiver, handle)):
@@ -171,7 +193,30 @@ class _BodyHistory:
                 return {**ordinary, 'match': True, 'ordinary_binding': ordinary,
                         'conditional_native_projection': True, 'native_projection': projection,
                         'projection_bindings': tuple(routes), 'support': support}
-        return {**ordinary, 'native_projection': projection, 'projection_bindings': tuple(routes)}
+        return {**identity, 'native_projection': projection, 'projection_bindings': tuple(routes)}
+
+    def object_binding(self, source, target, *, ordinary=None):
+        """A supplied current object identity, never a new original copy."""
+        from .reference_identity import object_identity
+        guard = object_identity(self.ctx, source, target, shared=self.shared)
+        match = guard['match']
+        if match is True and self.ctx.issues:
+            match = None
+        if self.shared.truncated:
+            match = None
+        support = (() if match is not True else ({
+            'rule': 'DECLARED_SCOPED_OBJECT_IDENTITY',
+            'source': source.id, 'target': target.id, 'identity_guard': guard},))
+        return {**_unknown_pair(), 'source_value': source, 'target_value': target,
+            'match': match, 'support': support, 'ordinary_binding': ordinary,
+            'identity_guard': guard,
+            'binding_kind': 'DECLARED_SCOPED_OBJECT_IDENTITY' if match is True else
+                            'DECLARED_SCOPED_DISTINCT_OBJECTS' if match is False else
+                            'UNPROVED_OBJECT_IDENTITY',
+            'conditional_object_identity': match is True,
+            'gaps': guard['gaps'],
+            'conditions': ('current same-object declarations are conditional; original copy is separate',
+                'no stored request field preservation or data-content equality is inferred')}
 
     def chain(self, occurrence, *, stop=None, segment=None):
         """Only exact synchronous ancestry; no temporal/callee instance guesses."""
@@ -259,10 +304,17 @@ class _BodyHistory:
             supported = False
             gaps.extend((*owned_ports['gaps'], *driver_chain['gaps']))
         origin = view['origin']
+        creation_ports, creation_chain = None, None
         if (origin is None or origin['association'] is None or origin['creation'] is None
                 or view['instance']['creation_handle'] is None):
             supported = False
             gaps.append('body_state_creation_unobserved')
+        if origin is not None and origin['creation'] is not None:
+            creation_ports = self.operation_ports(origin['creation'])
+            creation_chain = self.chain(origin['creation'])
+            if not creation_ports['supported'] or not creation_chain['supported']:
+                supported = False
+                gaps.extend((*creation_ports['gaps'], *creation_chain['gaps']))
         creation_binding = self.body_pair(view, view['instance']['value'],
                                          view['instance']['creation_handle'])
         if creation_binding['match'] is not True:
@@ -281,6 +333,7 @@ class _BodyHistory:
         return {'supported': supported and not self.shared.truncated,
                 'creation_binding': creation_binding, 'ports': tuple(ports),
                 'owned_ports': owned_ports, 'driver_chain': driver_chain,
+                'creation_ports': creation_ports, 'creation_chain': creation_chain,
                 'gaps': tuple(dict.fromkeys(gaps))}
 
 
@@ -398,7 +451,7 @@ def body_state_history(ctx, read_id, *, shared):
         transfer = ctx.incoming.get(source.visit)
         view = None if transfer is None else ctx.resolved_body_drives.get(transfer.operation)
         source_subject = analysis.use(source, commit.instance)
-        binding = pair(ctx, source_subject, subject, shared)
+        binding = analysis.body_pair(view, source_subject, subject)
         gaps = []
         established = (view is not None and view['drive'].operation == commit.outcome.drive
             and view['outcome'] is not None and view['outcome'].operation == commit.outcome.source
@@ -475,6 +528,7 @@ def body_state_history(ctx, read_id, *, shared):
     return {'read': read, 'predicate': predicate, 'predicate_inventory': declarations,
         'drive_inventory': drive_inventory, 'commit_inventory': commit_inventory,
         'no_body_finish_inventory': tuple(program.no_body_finishes),
+        'identity_inventory': tuple(ctx.model.denotations),
         'missing_sources': missing, 'read_scope': read_scope, 'locations': locations,
         'active_candidates': tuple(active), 'terminal_candidates': tuple(terminal),
         'source_keys': tuple(('active', row['drive'].id) for row in active)
@@ -490,5 +544,7 @@ def body_state_history(ctx, read_id, *, shared):
         'conditions': ('original BodyStateCondition/native profile semantics remain conditional',
             'terminal F uses the original explicit same-native-lifetime/no-reset scope',
             'F history does not prove mutable state content, current P or physical lifetime',
+            'same-object identity may use independent scoped denotations; unresolved basis remains conditional',
+            'object identity does not prove request-field provenance or a stable data version',
             'created-close NoBodyFinish and other predicate rules are inventory-only here'),
         'native_phase_verified': False, **_flags()}

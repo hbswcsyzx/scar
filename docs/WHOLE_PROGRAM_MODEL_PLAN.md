@@ -3,7 +3,14 @@
 日期：2026-10-16。这是当前优先计划，修订旧 N2 中先推进局部桥接的顺序。
 模型依据：[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)。用户无需逐门审批。
 
-2026-10-20 最新范围：[原 F18 条件性结构验收](M1_ASYNC_TERMINAL_ACCEPTANCE.md)
+2026-10-20 最新范围：[当前对象身份限定验收](M1_FRAME_IDENTITY_GUARD_ACCEPTANCE.md)
+已以231直接相关项/907稳定源码通过，保留上批全部196项、旧tests/fixtures与schema。
+独立身份声明可接当前frame的真实F历史，不恢复stored-reference来源或数据版本；
+原无声明None保持。[下一门](M1_FRAME_IDENTITY_GUARD_NEXT_GATE.md)据已有合同审查结果
+先设计原访问上的store payload→state→load result关系，再返回原F19组合。
+本批不关闭F19第1项/整族、P4/P5/M2或整个M0–M2，不引入detector/backend。
+
+此前范围：[原 F18 条件性结构验收](M1_ASYNC_TERMINAL_ACCEPTANCE.md)
 已以2104相关项/899稳定源码核验，累计九族接受，剩余七族。
 P4 component/full、P5、M2 原113构造/196字段及完整 M0–M2 仍未完成。
 [F19 finished子链](M1_ASYNC_FINISHED_REQUESTS_ACCEPTANCE.md)现有196直接相关项通过，
