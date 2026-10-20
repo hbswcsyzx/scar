@@ -1,5 +1,10 @@
 # 第一阶段完整性分母：模型、接口、协议
 
+**当前验收入口（2026-10-20）：** [第一阶段合同](FIRST_STAGE_MODEL_CONTRACT.md)
+同时要求设计、自动恢复、LeWM 实际全流程及软硬件资源覆盖。
+[当前状态](FIRST_STAGE_MODEL_STATUS.md)为 OPEN。下表是保留的历史组件分母，
+不能用这些 supplied-model 门的 PASS 代替自动模型验收，也不再据其编号盲目推进。
+
 最新F19完整链（2026-10-20）：[限定验收](M1_ASYNC_CLOSE_CHAINS_ACCEPTANCE.md)
 在相同922输入上通过30新项+302直接受影响既有项，两次冻结运行并集332。
 原三完整单位和缺采/预算/release反例贯通，原copy、schema及旧tests/fixtures保持。

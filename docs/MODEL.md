@@ -1,5 +1,17 @@
 # SCAR execution model
 
+## Current first-stage scope (2026-10-20)
+
+The user requires **complete program modeling and automatic LeWM abstraction**
+before any simplification. The governing scope and acceptance are now
+[FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md), with actual
+progress in [FIRST_STAGE_MODEL_STATUS.md](FIRST_STAGE_MODEL_STATUS.md).
+The five canonical structures are not the entire identity inventory: code,
+occurrences, objects, logical versions, allocations/materializations and resource
+instances must be connected automatically. Supplied-model protocol acceptance
+does not establish this. F20 is not the automatic next task; it remains deferred
+until an end-to-end modeling gap requires it. Historical entries follow.
+
 ## Async close chains and handler-produced completions (2026-10-20)
 
 Five canonical entities remain unchanged. A fresh handler packet has control

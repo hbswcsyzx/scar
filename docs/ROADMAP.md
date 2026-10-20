@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **Current scope correction (2026-10-20):** The first stage includes design,
+> automatic recovery and actual whole-LeWM software/hardware-resource coverage.
+> See the [contract](FIRST_STAGE_MODEL_CONTRACT.md) and
+> [current status](FIRST_STAGE_MODEL_STATUS.md). Do not advance to simplification,
+> detectors or backends. Do not postpone automatic recovery to a later user
+> stage. The next action is the automatic entry/coverage audit and integration;
+> F20 and other historical protocol plans are not an automatic work queue.
+> The first stage remains OPEN. Earlier entries are historical limited results.
+
 > **F19 complete-chain conditional acceptance (2026-10-20):**
 > [Report](M1_ASYNC_CLOSE_CHAINS_ACCEPTANCE.md):30 new+302 affected prior PASS,
 > 922 stable inputs across two frozen runs. Terminal/new-request, graceful
