@@ -44,6 +44,19 @@ typed body 不支持某个构造时，这些已有表达式/控制关系也无�
 后续可在 `_Inventory.snapshot()` 已持有 PreparedSource 时截取同一文档，避免
 重建源码；本次先对既有完整 LeWM 库存恢复，不为持久化重构所有调度入口。
 
+### 真实预算失败后的复用
+
+首轮真实回建在512,000,000字节 canonical JSON总预算下保存66/151文件，余85条
+明确记为预算gap，exit2；没有把未尝试文件丢掉。归档以gzip存储，实际约52MiB，
+没有写出约496MB的未压缩重复文本。
+
+`--reuse-archive PREVIOUS_DIR` 允许在**新目录**继续回建同一份库存：核对原input
+SHA/字节/schema、snapshot/context，使用既有reader严格读回已存图，再核对当前
+源码路径/namespace、decoded fingerprint 和Python版本。只有匹配才复用；缺行/
+未存条仍需prepare，漂移或损坏不能计为成功。缓存字节仍消耗新预算，不能绕限。
+同文件系统用独占hardlink保留已验证的不可变artifact，跨设备才复制；旧归档不改。
+沿用的是先前源码重建证据，不宣称当前又重跑了该文件的AST分析。
+
 ## 如何接原有调用关系
 
 没有函数名特判，查询链为：

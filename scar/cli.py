@@ -392,6 +392,7 @@ def main(argv=None) -> int:
     source_layers.add_argument("--max-files", type=int, default=256)
     source_layers.add_argument("--max-record-bytes", type=int, default=64000000)
     source_layers.add_argument("--max-total-bytes", type=int, default=512000000)
+    source_layers.add_argument("--reuse-archive", help="reuse validated records from the same inventory in an existing source archive")
     source_layers.set_defaults(func=_source_layers)
     call_links = sub.add_parser('link-calls',help='link recorded Python call sites and references to source and optional core inventory')
     call_links.add_argument('trace')
@@ -872,7 +873,8 @@ def _source_layers(args) -> int:
     try:
         manifest = reconstruct_source_layers(args.inventory, args.out,
             max_input_bytes=args.max_input_bytes, max_files=args.max_files,
-            max_record_bytes=args.max_record_bytes, max_total_bytes=args.max_total_bytes)
+            max_record_bytes=args.max_record_bytes, max_total_bytes=args.max_total_bytes,
+            reuse_archive=args.reuse_archive)
     except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)],
                           "whole_program_graph_established": False, "transformation_authorized": False}))

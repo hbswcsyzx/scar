@@ -10,6 +10,7 @@ but deliberately does not read source files or replay the whole inventory.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import errno
 import gzip
 import hashlib
 from io import BytesIO
@@ -18,6 +19,8 @@ import os
 from pathlib import Path
 import re
 import shutil
+import sys
+import tokenize
 from typing import Any
 
 from scar.analysis.program_lowering import prepare_source
@@ -267,10 +270,105 @@ def _write_gzip_exclusive(path: Path, payload: bytes) -> int:
         raise
 
 
+def _preflight_reuse_archive(
+    reuse_dir: Path,
+    *,
+    input_sha256: str,
+    input_decoded_bytes: int,
+    input_schema_version: int,
+    items: list[dict[str, Any]],
+    max_index_bytes: int,
+) -> tuple[Path, dict[str, dict[str, Any]]]:
+    """Read a prior sidecar index and bind every present row to this input."""
+    if reuse_dir.is_symlink() or not reuse_dir.is_dir():
+        raise ValueError("reuse source-layer archive must be a real directory")
+    index_path = reuse_dir / _INDEX_NAME
+    if index_path.is_symlink() or not index_path.is_file():
+        raise ValueError("reuse source-layer index is missing or unsafe")
+    if index_path.stat().st_size > max_index_bytes:
+        raise ValueError("reuse source-layer index byte budget exceeded")
+    try:
+        index_bytes = _read_file_limited(
+            index_path, max_index_bytes, "reuse source-layer index byte budget exceeded")
+        document = strict_loads(index_bytes.decode("utf-8", errors="strict"))
+    except (OSError, UnicodeError, ValueError, RecursionError) as error:
+        raise ValueError("reuse source-layer index is not strict UTF-8 JSON") from error
+    if _canonical(document) != index_bytes:
+        raise ValueError("reuse source-layer index is not canonical JSON")
+    rows = _validate_manifest(document)
+
+    input_meta = document["input"]
+    if (input_meta["raw_sha256"] != input_sha256
+            or input_meta["decoded_bytes"] != input_decoded_bytes
+            or input_meta["schema_version"] != input_schema_version):
+        raise ValueError("reuse archive belongs to a different inventory input")
+
+    expected = {item["snapshot"].path: item for item in items}
+    if len(rows) > len(expected):
+        raise ValueError("reuse archive contains paths outside the current inventory")
+    by_path: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        path = row["source_path"]
+        item = expected.get(path)
+        if item is None:
+            raise ValueError("reuse archive contains a path outside the current inventory")
+        snapshot = decode(SourceSnapshot, row["snapshot"])
+        context = decode(SourceContextDigest, row["context"]) if row["context"] is not None else None
+        if snapshot != item["snapshot"] or context != item["context"]:
+            raise ValueError("reuse archive snapshot/context differs from the inventory")
+        by_path[path] = row
+    return reuse_dir, by_path
+
+
+def _current_source_matches(snapshot: SourceSnapshot, context: SourceContextDigest) -> bool:
+    """Check a cached record against current decoded source and runtime version."""
+    if snapshot.python_version != f"{sys.version_info.major}.{sys.version_info.minor}":
+        return False
+    try:
+        source_path = Path(snapshot.path)
+        root_path = Path(context.namespace_root)
+        if str(source_path.resolve(strict=True)) != snapshot.path:
+            return False
+        if str(root_path.resolve(strict=True)) != context.namespace_root or not root_path.is_dir():
+            return False
+        with tokenize.open(str(source_path)) as stream:
+            text = stream.read()
+    except (OSError, UnicodeError, LookupError, RuntimeError, SyntaxError, ValueError):
+        return False
+    fingerprint = "sha256:" + hashlib.sha256(text.encode("utf-8")).hexdigest()
+    return fingerprint == snapshot.fingerprint
+
+
+def _link_or_copy_exclusive(source: Path, destination: Path) -> int:
+    """Publish an immutable cached archive without replacing an output file."""
+    linked = False
+    try:
+        os.link(source, destination)
+        linked = True
+        return destination.stat().st_size
+    except OSError as error:
+        if linked:
+            destination.unlink(missing_ok=True)
+        if error.errno != errno.EXDEV:
+            raise
+
+    created = False
+    try:
+        with source.open("rb") as source_file, destination.open("xb") as destination_file:
+            created = True
+            shutil.copyfileobj(source_file, destination_file, length=1024 * 1024)
+        return destination.stat().st_size
+    except BaseException:
+        if created:
+            destination.unlink(missing_ok=True)
+        raise
+
+
 def reconstruct_source_layers(
     inventory_path: str | Path,
     out_dir: str | Path,
     *,
+    reuse_archive: str | Path | None = None,
     max_input_bytes: int = 256_000_000,
     max_files: int = 256,
     max_record_bytes: int = 64_000_000,
@@ -282,7 +380,12 @@ def reconstruct_source_layers(
     ``snapshot/context`` records are strictly decoded. The call/body inventory
     is not replayed. Global input/path/digest defects fail before output is
     created; source drift and per-file/output-budget failures remain explicit
-    rows so the original file denominator is preserved.
+    rows so the original file denominator is preserved. A prior sidecar may
+    supply records only when its inventory identity and per-file records match,
+    its archive decodes strictly, and the current source fingerprint, resolved
+    path/root, and Python major/minor still match. Such records retain the
+    original source-replay evidence; they are not freshly prepared in this
+    call. Missing or gapped cache rows are rebuilt normally.
     """
     _check_budgets(max_input_bytes=max_input_bytes, max_files=max_files,
                    max_record_bytes=max_record_bytes, max_total_bytes=max_total_bytes)
@@ -295,6 +398,14 @@ def reconstruct_source_layers(
     except (UnicodeError, ValueError, RecursionError) as error:
         raise ValueError("inventory input is not strict UTF-8 JSON") from error
     version, items = _preflight_inventory(document, max_files=max_files)
+
+    reuse_root: Path | None = None
+    reuse_rows: dict[str, dict[str, Any]] = {}
+    if reuse_archive is not None:
+        reuse_root, reuse_rows = _preflight_reuse_archive(
+            Path(reuse_archive), input_sha256=input_sha256,
+            input_decoded_bytes=len(decoded), input_schema_version=version,
+            items=items, max_index_bytes=min(16_000_000, max_input_bytes))
 
     destination = Path(out_dir)
     if not destination.is_absolute():
@@ -329,6 +440,53 @@ def reconstruct_source_layers(
                 continue
             snapshot: SourceSnapshot = item["snapshot"]
             context: SourceContextDigest = item["context"]
+            cached_row = reuse_rows.get(snapshot.path)
+            if cached_row is not None and cached_row["status"] == "STORED":
+                cached_canonical_bytes = cached_row["canonical_bytes"]
+                if cached_canonical_bytes > max_record_bytes:
+                    row["gap"] = {"code": "RECORD_BYTE_BUDGET",
+                                  "detail": "cached canonical source-layer record exceeds max_record_bytes"}
+                    continue
+                if reservation + charged + cached_canonical_bytes > max_total_bytes:
+                    row["gap"] = {"code": "TOTAL_BYTE_BUDGET",
+                                  "detail": "cached source-layer records exceed max_total_bytes"}
+                    total_exhausted = True
+                    continue
+                try:
+                    assert reuse_root is not None
+                    cached_view = load_source_layers(
+                        reuse_root, snapshot.path,
+                        max_index_bytes=min(16_000_000, max_input_bytes),
+                        max_record_bytes=max_record_bytes)
+                    if cached_view.snapshot != snapshot or cached_view.context != context:
+                        raise ValueError("cached source-layer record differs from inventory context")
+                except (OSError, ValueError, TypeError, KeyError, SyntaxError,
+                        RecursionError, UnicodeError) as error:
+                    row["gap"] = {"code": "CACHE_VALIDATION_FAILED",
+                                  "detail": _safe_detail(error)}
+                    continue
+
+                if _current_source_matches(snapshot, context):
+                    archive_rel = cached_row["archive"]
+                    cached_archive = reuse_root / archive_rel
+                    archive_path = destination / archive_rel
+                    try:
+                        compressed_bytes = _link_or_copy_exclusive(cached_archive, archive_path)
+                        if compressed_bytes != cached_row["compressed_bytes"]:
+                            archive_path.unlink(missing_ok=True)
+                            raise ValueError("cached source-layer compressed size changed")
+                        row.update(
+                            status="STORED", archive=archive_rel,
+                            canonical_sha256=cached_row["canonical_sha256"],
+                            canonical_bytes=cached_canonical_bytes,
+                            compressed_bytes=compressed_bytes, gap=None)
+                        charged += cached_canonical_bytes
+                        continue
+                    except (OSError, ValueError) as error:
+                        row["gap"] = {"code": "CACHE_REUSE_FAILED",
+                                      "detail": _safe_detail(error)}
+                        continue
+
             try:
                 prepared = prepare_source(snapshot.path, project_root=context.namespace_root)
                 rebuilt_snapshot = prepared.semantics.sources.get(snapshot.path)

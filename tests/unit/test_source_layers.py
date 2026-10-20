@@ -5,6 +5,7 @@ import json
 
 import pytest
 
+import scar.analysis.source_layers as source_layers_module
 from scar.analysis.source_layers import load_source_layers, reconstruct_source_layers
 from scar.ir.control_flow_v2 import EdgeKind, SourceControlFlowGraph
 from scar.ir.semantics_v2 import BoundaryKind, Opcode, SourceSemanticsGraph
@@ -36,6 +37,11 @@ def _inventory(tmp_path, source, *, helper=None):
     raw = _canonical(document)
     path.write_bytes(gzip.compress(raw, mtime=0))
     return path, document, entry
+
+
+def _tree_bytes(root):
+    return {path.relative_to(root): path.read_bytes()
+            for path in root.rglob("*") if path.is_file()}
 
 
 def test_reconstruct_roundtrip_keeps_ordered_operands_and_loop_control(tmp_path):
@@ -221,3 +227,118 @@ def test_missing_source_context_stays_in_file_denominator(tmp_path):
     assert manifest["files"][0]["gap"]["code"] == "MISSING_CONTEXT"
     assert manifest["complete"] is False
 
+
+def test_partial_archive_reuses_stored_row_and_rebuilds_missing_row(tmp_path, monkeypatch):
+    inventory_path, original, entry = _inventory(
+        tmp_path,
+        "from helper import VALUE\ndef work():\n    return VALUE + 1\n",
+        helper="VALUE = 4\n",
+    )
+    cache = tmp_path / "source-layers-cache"
+    initial = reconstruct_source_layers(inventory_path, cache)
+    assert initial["files_total"] == 2 and initial["files_stored"] == 2
+
+    # Make a valid partial archive by retaining the entry's stored row and
+    # dropping the helper row. The new output must still use the inventory's
+    # full two-file denominator.
+    cache_index_path = cache / "index.json"
+    cache_index = json.loads(cache_index_path.read_text(encoding="utf-8"))
+    kept_path = str(entry.resolve())
+    removed = [row for row in cache_index["files"] if row["source_path"] != kept_path]
+    assert len(removed) == 1
+    (cache / removed[0]["archive"]).unlink()
+    cache_index["files"] = [row for row in cache_index["files"]
+                            if row["source_path"] == kept_path]
+    cache_index["files_total"] = 1
+    cache_index["files_stored"] = 1
+    cache_index["files_gapped"] = 0
+    cache_index["complete"] = True
+    cache_index_path.write_bytes(_canonical(cache_index))
+
+    cached_bytes = _tree_bytes(cache)
+    inventory_bytes = inventory_path.read_bytes()
+    source_bytes = {path: path.read_bytes() for path in (entry, tmp_path / "helper.py")}
+    actual_prepare = source_layers_module.prepare_source
+    prepared_paths = []
+
+    def counting_prepare(path, *, project_root):
+        prepared_paths.append(str(path))
+        return actual_prepare(path, project_root=project_root)
+
+    monkeypatch.setattr(source_layers_module, "prepare_source", counting_prepare)
+    output = tmp_path / "source-layers-reused"
+    manifest = reconstruct_source_layers(inventory_path, output, reuse_archive=cache)
+
+    assert manifest["complete"] is True
+    assert manifest["files_total"] == len(original["files"]) == 2
+    assert manifest["files_stored"] == 2
+    assert prepared_paths == [removed[0]["source_path"]]
+    assert inventory_path.read_bytes() == inventory_bytes
+    assert {path: path.read_bytes() for path in source_bytes} == source_bytes
+    assert _tree_bytes(cache) == cached_bytes
+    old_archive = cache / cache_index["files"][0]["archive"]
+    new_row = next(row for row in manifest["files"] if row["source_path"] == kept_path)
+    assert (output / new_row["archive"]).read_bytes() == old_archive.read_bytes()
+
+
+def test_changed_source_is_not_reused_from_prior_archive(tmp_path, monkeypatch):
+    inventory_path, _, source_path = _inventory(tmp_path, "def work():\n    return 1\n")
+    cache = tmp_path / "source-layers-cache"
+    reconstruct_source_layers(inventory_path, cache)
+    cached_bytes = _tree_bytes(cache)
+    source_path.write_text("def work():\n    return 2\n", encoding="utf-8")
+
+    actual_prepare = source_layers_module.prepare_source
+    prepared_paths = []
+
+    def counting_prepare(path, *, project_root):
+        prepared_paths.append(str(path))
+        return actual_prepare(path, project_root=project_root)
+
+    monkeypatch.setattr(source_layers_module, "prepare_source", counting_prepare)
+    output = tmp_path / "source-layers-current"
+    manifest = reconstruct_source_layers(inventory_path, output, reuse_archive=cache)
+
+    assert prepared_paths == [str(source_path.resolve())]
+    assert manifest["files_total"] == 1
+    assert manifest["files_stored"] == 0
+    assert manifest["files"][0]["status"] == "GAP"
+    assert _tree_bytes(cache) == cached_bytes
+
+
+def test_reuse_requires_same_input_and_charges_cached_record_budgets(tmp_path):
+    inventory_path, original, source_path = _inventory(tmp_path, "def work():\n    return 1\n")
+    cache = tmp_path / "source-layers-cache"
+    cached = reconstruct_source_layers(inventory_path, cache)
+    cache_row = cached["files"][0]
+
+    too_small_record = tmp_path / "reuse-record-limited"
+    record_limited = reconstruct_source_layers(
+        inventory_path, too_small_record, reuse_archive=cache, max_record_bytes=1)
+    assert record_limited["files"][0]["gap"]["code"] == "RECORD_BYTE_BUDGET"
+
+    decoded = gzip.decompress(inventory_path.read_bytes())
+    input_meta = cached["input"]
+    _, items = source_layers_module._preflight_inventory(
+        original, max_files=256)
+    reservation = source_layers_module._index_reservation(
+        input_meta["raw_sha256"], len(decoded), input_meta["schema_version"], items)
+    total_budget = reservation + cache_row["canonical_bytes"] - 1
+    too_small_total = tmp_path / "reuse-total-limited"
+    total_limited = reconstruct_source_layers(
+        inventory_path, too_small_total, reuse_archive=cache,
+        max_total_bytes=total_budget)
+    assert total_limited["files_total"] == 1
+    assert total_limited["files"][0]["gap"]["code"] == "TOTAL_BYTE_BUDGET"
+    assert total_limited["files"][0]["canonical_bytes"] == 0
+
+    # A concatenated empty gzip member preserves decoded JSON while changing
+    # the exact raw inventory identity.
+    different_compression = inventory_path.read_bytes() + gzip.compress(b"", mtime=0)
+    inventory_path.write_bytes(different_compression)
+    assert hashlib.sha256(different_compression).hexdigest() != input_meta["raw_sha256"]
+    rejected_output = tmp_path / "different-input-reuse"
+    with pytest.raises(ValueError, match="different inventory input"):
+        reconstruct_source_layers(inventory_path, rejected_output, reuse_archive=cache)
+    assert not rejected_output.exists()
+    assert source_path.is_file()
