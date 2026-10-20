@@ -33,12 +33,17 @@ def _trace(args) -> int:
     env.pop('SCAR_CALL_TRACE_OWNER_PID',None)
     env.pop('SCAR_CALL_OPERANDS',None)
     env.pop('SCAR_OPERAND_CAPTURE',None)
+    env.pop('SCAR_EXECUTION_EVIDENCE',None)
     operands = getattr(args, "call_operands", False)
+    execution_evidence = getattr(args, "execution_evidence", False)
+    if execution_evidence and not (getattr(args, "calls_only", False) or operands):
+        raise SystemExit("--execution-evidence requires --calls-only or --call-operands")
     if getattr(args,"calls_only",False) or operands:
         if args.lines:
             raise SystemExit("calls-only does not collect line tracing; use a separate trace")
         if (any(out.glob('call-events.*.jsonl*')) or any(out.glob('call-codes.*.jsonl*'))
-                or any(out.glob('call-operands.*.jsonl*')) or any(out.glob('call-operand-meta.*.json*'))):
+                or any(out.glob('call-operands.*.jsonl*')) or any(out.glob('call-operand-meta.*.json*'))
+                or (execution_evidence and any(out.glob('execution-evidence.*.json')))):
             raise SystemExit("calls-only requires a fresh output directory")
         env['SCAR_TRACE_CALL_EDGES'] = '1'
         env['SCAR_CALL_PROJECT_ROOT'] = str(Path(args.project_root or Path.cwd()).resolve())
@@ -56,6 +61,8 @@ def _trace(args) -> int:
             env['SCAR_OPERAND_CAPTURE'] = capture
             env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
             env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
+        if execution_evidence:
+            env['SCAR_EXECUTION_EVIDENCE'] = '1'
     if args.lines:
         env["SCAR_TRACE_LINES"] = "1"
     if args.resources:
@@ -288,6 +295,8 @@ def main(argv=None) -> int:
                        help="resource sampling interval in seconds (with --resources)")
     trace.add_argument('--calls-only',action='store_true',help='record bounded Python call sites and reference identities without Torch hooks or tensor values')
     trace.add_argument('--call-operands',action='store_true',help='record bounded instruction/load/call evidence; implies calls-only (CPython 3.14)')
+    trace.add_argument('--execution-evidence',action='store_true',
+                       help='collect native ETO/Kineto evidence alongside the call recorder when the target imports Torch; requires calls-only or call-operands')
     trace.add_argument('--operand-capture',choices=('windows','instructions'),default='windows',
                        help='capture bounded call windows (default) or every project instruction')
     trace.add_argument('--project-root',help='source boundary for lightweight call-site recording; defaults to target cwd')

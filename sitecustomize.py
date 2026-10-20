@@ -9,6 +9,13 @@ if os.environ.get("SCAR_TRACE_DIR"):
             if _scar_recorder is not None and os.environ.get('SCAR_CALL_OPERANDS') == '1':
                 from scar.trace.call_operands import install as _scar_install_operands
                 _scar_install_operands(_scar_recorder)
+            if _scar_recorder is not None and os.environ.get('SCAR_EXECUTION_EVIDENCE') == '1':
+                import atexit as _scar_atexit
+                from scar.trace.execution_evidence import install as _scar_install_evidence
+                _scar_evidence = _scar_install_evidence(os.environ['SCAR_TRACE_DIR'])
+                # Close provider artifacts before the earlier call-recorder
+                # callback. It remains the sole Python profile-hook owner.
+                _scar_atexit.register(_scar_evidence.close)
         else:
             from scar.trace.inject import install
             install()

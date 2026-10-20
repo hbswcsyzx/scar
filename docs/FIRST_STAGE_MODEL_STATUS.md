@@ -62,3 +62,11 @@ hook，不能与 inject 整体简单叠装；ETO 的执行表示也不能当作�
 **下一实施项：** 固定这份真实分母；统一 Python call/operand 与原生 ETO/Kineto
 采集的生命周期及准确来源，再接规范端口/资源。同时按真实阻塞补 typed source
 恢复，避免整 body 回滚。不先做 F20，不新增 detector/backend；S3/S4 仍 OPEN。
+
+## 同次采集的有限实现（Implemented / Verified）
+
+`trace --call-operands --execution-evidence` 现可保持原 Python hook，同时延迟
+启动原生 ETO/Kineto，不重跑目标、不采 Tensor 数值。5 个真实新 CPU 集成测试和
+33 个旧 CLI 回归通过，共 38；具体范围见
+[采集说明与验收](FIRST_STAGE_NATIVE_EVIDENCE.md)。这只解决采集共存，尚未做
+完整规范图导入，S3/S4 仍 OPEN。下一项是原 LeWM 同配置真实采集及 OS 资源对照。
