@@ -17,6 +17,16 @@ expression→statement上下文代码（`ccf6cac`），已恢复到持久worktre
 控制边；第一次审核的lambda phase误判及修正原样记录。这些只是源码结构关系，
 不等于动态值、状态或资源因果闭包，缺口并未因新增边而自动消失。
 
+公共`inventory-program --body-profile structured`已接原structured前端并输出显式
+inventory7（默认及旧1–6不变）。66项相关新旧测试通过；同LeWM入口/raw calls/
+source/预算的实际重建得到51个局部图、205个UNSUPPORTED、1,961个NOT_ATTEMPTED，
+code/source分组接入33/425，仅比旧baseline增加1个body和1组。独立比较通过，
+完整raw/source公开重放另记结果。参见
+[公共structured实际验收](../artifacts/experiments/first_stage_structured_inventory_20261022/README.md)。
+接线提升很小：closure环境45、heap写41、expanded call15、BoolOp13、IfExp8等
+仍造成整body回滚。不能把481条语言protocol或source图规模当完整模型完成率；
+下一项按这些实际语言/接口断点排序，实际状态/来源/资源闭包仍未完成。
+
 旧说明中CALL的同ID直连语句CFG建议已撤回：同ID类型不等于同粒度，parent_id也
 不是AST父节点。新查询按源码指纹、完整AST字段路径和scope关联原语句，保留
 短路、默认值、延迟body等边界，不宣称表达式必执行。S3/S4仍OPEN；原50个局部
