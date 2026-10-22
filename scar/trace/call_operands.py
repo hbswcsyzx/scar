@@ -124,6 +124,7 @@ class CallOperandObserver:
         self._planned_instruction_count = 0
         self._disabled_instruction_count = 0
         self._pending = {}
+        self.environment_observer = None
         self._arg0_missing = getattr(sys.monitoring, "MISSING", _MISSING)
         if self._arg0_missing is _MISSING:
             raise RuntimeError("sys.monitoring.MISSING is required for exact no-argument CALL capture")
@@ -131,7 +132,14 @@ class CallOperandObserver:
         self._acquire_tool()
         try:
             self._fd = os.open(self._event_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            from scar.trace.callable_environment import CallableEnvironmentObserver
+            self.environment_observer = CallableEnvironmentObserver(
+                recorder.out, self.pid, max_events=max_events, max_bytes=max_bytes,
+                max_references=max_references)
         except BaseException:
+            if self._fd is not None:
+                os.close(self._fd)
+                self._fd = None
             self._release_tool()
             raise
         recorder.operand_observer = self
@@ -344,8 +352,11 @@ class CallOperandObserver:
                 if matches:
                     self._emit("ENTRY_HANDSHAKE", invocation, self.recorder.index,
                                {"attempt_index": attempt_index, "entry_index": self.recorder.index})
+                    self.environment_observer.entry(target, attempt_index, invocation,
+                        self.recorder.index, frame.f_globals, frame.f_builtins)
                 else:
                     self._gap("EXPECTED_FUNCTION_ENTRY_NOT_MATCHED", parent_state[0])
+                    self.environment_observer.discard(attempt_index)
                 self._pending.pop(pending_key, None)
 
         if self.capture == _CAPTURE_WINDOWS:
@@ -398,6 +409,7 @@ class CallOperandObserver:
         pending = self._pending.pop((threading.get_ident(), invocation), None)
         if pending is not None:
             self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", invocation)
+            self.environment_observer.discard(pending[-1])
         code = code_reference()
         entry = self._code_states.get(id(code)) if code is not None else None
         if entry is None or entry["reference"]() is not code:
@@ -597,8 +609,10 @@ class CallOperandObserver:
                         self._mark_interference(frame, "MONITORING_MASK_OR_TOOL_CHANGED", monitoring=True)
                         return self._disabled_callback_result(code)
                     pending_key = (threading.get_ident(), owner)
-                    if self._pending.pop(pending_key, None) is not None:
+                    previous_pending = self._pending.pop(pending_key, None)
+                    if previous_pending is not None:
                         self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", owner)
+                        self.environment_observer.discard(previous_pending[-1])
                     if self.capture == _CAPTURE_WINDOWS:
                         sparse_plan = self._window_plan(code, code_key)
                         if sparse_plan is None:
@@ -744,6 +758,9 @@ class CallOperandObserver:
                         return self._disabled_callback_result(code)
                     if dispatch["kind"] == CallableKind.EXACT_FUNCTION.value and type(callable_object) is types.FunctionType:
                         target_code = observed_target_code
+                        self.environment_observer.dispatch(callable_object, attempt_index, owner,
+                            self.recorder.index, dispatch["code"],
+                            lambda value: self._reference(value, seen, event_index, snapshots))
                         if self._code_inside(target_code):
                             try:
                                 self._pending[pending_key] = (
@@ -753,6 +770,9 @@ class CallOperandObserver:
                                 )
                             except BaseException:
                                 self._gap("EXPECTED_FUNCTION_ENTRY_CANNOT_BE_TRACKED", owner)
+                                self.environment_observer.discard(attempt_index)
+                        else:
+                            self.environment_observer.discard(attempt_index)
                 except BaseException as error:
                     self._remember_error(error)
                     self._gap("CALL_CALLBACK_FAILURE_" + type(error).__name__)
@@ -770,6 +790,7 @@ class CallOperandObserver:
                     return
                 for (_, owner), _pending in tuple(self._pending.items()):
                     self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", owner)
+                    self.environment_observer.discard(_pending[-1])
                 self._pending.clear()
                 self._stopped = True
                 if not self._monitoring_interfered:
@@ -905,6 +926,8 @@ class CallOperandObserver:
             self._remember_error(error)
             raise
         finally:
+            if self.environment_observer is not None:
+                self.environment_observer.close()
             self._closed = True
             if self.recorder.operand_observer is self:
                 self.recorder.operand_observer = None

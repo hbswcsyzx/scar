@@ -69,3 +69,15 @@ Attribute/Subscript store 把 RHS、receiver、key 的求值/持有顺序和失�
 4个成功、20个继续拒绝、0错误，60.15秒。已补函数内注解的准确求值边界、异常/
 cause归一化及assert失败分支；12个随后遇JoinedStr、6个遇Dict、2个遇其它写。
 这仍是独立诊断范围，不作为全量程序或effects/资源闭包验收。
+
+
+## 2026-10-22：实际dispatch环境sidecar
+
+`trace --call-operands`同时采集function-environments.<pid>.jsonl及独立v1清单。
+CALL记录exact function、globals、saved builtins、defaults/kwdefaults与有序cells；
+ENTRY记录已有精确handshake下function/globals/builtins关联。非weak对象仅以仍活
+只读function owner字段is核对续身份；owner全失效则新代次，不能用裸地址续接。
+默认值只作事件内snapshot，不保存内容；原operand v1不重释、不改变其权威字段。
+事件/字节/单行和live-anchor预算有界，累计重复引用计数不消耗live表容量。
+见[一次实际CPU采集](../artifacts/experiments/first_stage_callable_environment_20261022/README.md)。
+尚需真实LeWM采集及source interface实际对应；字段存在不等于完整环境已证明。

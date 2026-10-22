@@ -1,0 +1,8 @@
+{
+  "command": [
+    "python",
+    "artifacts/experiments/first_stage_callable_environment_20261022/probe.py"
+  ],
+  "returncode": 0,
+  "wall_s": 1.3851822700016783
+}

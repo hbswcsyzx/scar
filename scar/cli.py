@@ -43,6 +43,8 @@ def _trace(args) -> int:
             raise SystemExit("calls-only does not collect line tracing; use a separate trace")
         if (any(out.glob('call-events.*.jsonl*')) or any(out.glob('call-codes.*.jsonl*'))
                 or any(out.glob('call-operands.*.jsonl*')) or any(out.glob('call-operand-meta.*.json*'))
+                or any(out.glob('function-environments.*.jsonl*'))
+                or any(out.glob('function-environment-meta.*.json*'))
                 or (execution_evidence and any(out.glob('execution-evidence.*.json')))):
             raise SystemExit("calls-only requires a fresh output directory")
         env['SCAR_TRACE_CALL_EDGES'] = '1'
