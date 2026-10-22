@@ -34,6 +34,7 @@ from scar.ir.program.call_edges import (
 )
 from scar.ir.program.frames import FrameExit as SourceFrameExit
 from scar.ir.program.functions import BodyLoweringProfile
+from scar.ir.program.structured import PythonProtocolKind
 from scar.ir.program.compilation import CallCompilationProfile
 from scar.ir.program.model import CompletionResult, ExitKind, TerminatorKind
 from scar.ir.program.source import SourceRole
@@ -122,6 +123,7 @@ class _Sources:
         self.signatures = {signature.definition: signature for signature in inventory.interfaces.signatures} if inventory else {}
         self.ports = {body.definition: body for body in inventory.interfaces.bodies} if inventory else {}
         self.frames = {frame.definition: frame for frame in inventory.frames} if inventory else {}
+        self.structured = {body.definition: body for body in inventory.structured} if inventory else {}
         self.core = {}
         for body in self.bodies.values():
             if body.graph is None:
@@ -336,7 +338,9 @@ class _Sources:
 
     def return_operand(self, owner, node, reference):
         interface = self.ports.get(owner)
-        if interface is None or interface.profile is not BodyLoweringProfile.BOUND_FRAME:
+        if interface is None or interface.profile not in (
+                BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY,
+                BodyLoweringProfile.STRUCTURED_ENV):
             # Preserve the v4 opaque-return correspondence, including its wire
             # UseID and ValueID, for complete historical report replay.
             return self.operand(owner, reference, "return")
@@ -345,16 +349,66 @@ class _Sources:
             self.operand_links[key] = self._frame_return_operand(owner, node, reference)
         return self.operand_links[key]
 
+    def frame_rules(self, owner):
+        """Use each source profile's actual frame model without fabricating one."""
+        interface = self.ports.get(owner)
+        if interface is None or owner not in self.core:
+            return None
+        body = self.bodies[owner]
+        if interface.profile is BodyLoweringProfile.BOUND_FRAME:
+            frame = self.frames.get(owner)
+            return frame.rules if frame is not None and frame.region == body.graph.root else None
+        if interface.profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+            model = self.structured.get(owner)
+            return model.frame_rules if model is not None and model.region == body.graph.root else None
+        return None
+
+    def _structured_frame_exits(self, owner):
+        """Project the validated FRAME_EXIT/terminal pair into its existing view.
+
+        StructuredBodyModel owns its protocols and frame_rules.  It is not a
+        FrameModel; this projection only names the original operations/Uses.
+        """
+        body, operations, uses, _ = self.core[owner]
+        model = self.structured.get(owner)
+        if model is None or model.region != body.graph.root:
+            return ()
+        operation_blocks = {operation: block for region in body.graph.regions
+                            for block in region.blocks for operation in block.operations}
+        links = {link.operation: link for link in body.metadata.operation_links}
+        transitions = []
+        for protocol in model.protocols:
+            if protocol.kind is not PythonProtocolKind.FRAME_EXIT:
+                continue
+            block = operation_blocks.get(protocol.operation)
+            held = operations.get(protocol.operation)
+            if (block is None or len(block.operations) < 2 or block.operations[-2] != protocol.operation
+                    or held is None or not held.uses):
+                continue
+            completion = operations.get(block.operations[-1])
+            if (completion is None or completion.terminator is None
+                    or completion.terminator.kind not in (TerminatorKind.RETURN, TerminatorKind.RAISE)
+                    or len(completion.terminator.values) != 2):
+                continue
+            held_link, completion_link = links.get(held.id), links.get(completion.id)
+            payload = uses.get(completion.terminator.values[0])
+            if (held_link is None or completion_link is None
+                    or held_link.source != protocol.source or completion_link.source != protocol.source
+                    or payload is None or payload.value != held.uses[0].value):
+                continue
+            transitions.append(SourceFrameExit(held.id, protocol.source, completion.id, held.uses[0].id))
+        return tuple(transitions)
+
     def _frame_return_operand(self, owner, node, reference):
-        if owner not in self.core or owner not in self.frames:
+        if owner not in self.core or self.frame_rules(owner) is None:
             return None, None
         body, operations, uses, blocks = self.core[owner]
-        frame = self.frames[owner]
-        if frame.region != body.graph.root:
-            return None, None
+        interface = self.ports[owner]
+        transitions = (self.frames[owner].transitions
+            if interface.profile is BodyLoweringProfile.BOUND_FRAME else self._structured_frame_exits(owner))
         returned_source = self.source(reference.path, node)
         matches = []
-        for transition in frame.transitions:
+        for transition in transitions:
             if not isinstance(transition, SourceFrameExit) or transition.source != returned_source:
                 continue
             operation = operations.get(transition.completion)
@@ -389,7 +443,9 @@ class _Sources:
 
     def parameter_port(self, definition, name):
         signature, ports = self.signatures.get(definition), self.ports.get(definition)
-        if signature and ports:
+        if (signature and ports and len(signature.parameters) == len(ports.parameters)
+                and tuple(parameter.slot for parameter in signature.parameters)
+                == tuple(port.slot for port in ports.parameters)):
             return next(((parameter.source, port.value) for parameter, port in zip(signature.parameters, ports.parameters)
                          if parameter.name == name), (None, None))
         return None, None
@@ -665,9 +721,9 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
     root = Path(project_root).resolve()
     _require(root.is_dir(), "project root must be a directory")
     if inventory is not None:
-        versions = (5, 6) if allow_v6 else (4, 5)
+        versions = (5, 6, 7, 8) if allow_v6 else (4, 5)
         _require(inventory.to_dict()["schema_version"] in versions and inventory.interfaces is not None,
-                 "operand/core linking requires a bound-frame v5/v6 inventory" if allow_v6 else
+                 "operand/core linking requires an explicit frame/structured v5-v8 inventory" if allow_v6 else
                  "call/core linking requires a bound-formal v4 or bound-frame v5 inventory")
         _require(inventory.discovery.project_root == str(root), "inventory project root differs from call replay")
     if frame_scan is None:

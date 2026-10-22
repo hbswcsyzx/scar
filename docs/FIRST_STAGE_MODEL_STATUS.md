@@ -4,6 +4,16 @@
 
 ### 2026-10-22恢复状态
 
+Dict/heap receiver的真实24body回查完成：20文件，8局部成功/16其余断点/0错误，
+96.72s。入口main成功，策略/求解推进到ListComp/解构。跨调用适配同步修复了
+structured/ENV未接旧frame路由的问题；显式formal、返回payload、环境端口分别处理。
+见[实际回查](../artifacts/experiments/first_stage_mapping_blockers_20261022/README.md)。
+
+真实函数环境采集已实现并做一次小CPU采集，原档/指标保存。新完整LeWM命令已
+实际启动但在dataset加载前因原/gpu4-share数据根缺失而失败，未进入推理；此次
+失败不得作完整episode或性能数据。继续使用之前成功的完整原档建模，并记录路径
+缺口；不改共享mount、LeWM、conda。
+
 最新资源导入已经真实完成（产品7bcece2）：70872条memory全部逐项保留，
 35598 allocation epochs、35274配对free、916复用地址槽、324窗口末open；
 独立原档/ValueGraph/lifetime审计PASS。旧捕获配置缺失使全部lifetime仍为

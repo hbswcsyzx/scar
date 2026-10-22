@@ -520,8 +520,13 @@ class StructuredBuilder(_Builder):
             node = self.build_function()
             for operation, callee, candidate, call in self.pending_targets:
                 definition = self.definition(self.functions[candidate]) if candidate in self.functions else None
+                old_callees = self.old_by_atom.get(self.source(call.func).atom_id, ())
+                if len(old_callees) > 1:
+                    raise _Unsupported(GapKind.SOURCE_MAPPING, call.func,
+                                       "callable has ambiguous computational source records")
                 self.targets.append(CallTarget(operation, callee, None, definition.id if definition else None,
-                    EvidenceKind.INFERRED, self.assumptions(), (), (), self.old_operation(call.func).binding_use))
+                    EvidenceKind.INFERRED, self.assumptions(), (), (),
+                    old_callees[0].binding_use if old_callees else None))
             graph = self.make_graph()
             require_valid(graph)
             structured = StructuredBodyModel(self.function_definition.id, self.function_context, self.source(node),
@@ -649,7 +654,8 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
                 PythonProtocolKind.MAKE_ASSERTION_ERROR, PythonProtocolKind.RERAISE,
                 PythonProtocolKind.RAISE_EXCEPTION, PythonProtocolKind.RAISE_WITH_CAUSE,
                 PythonProtocolKind.FSTRING_CONVERT, PythonProtocolKind.FSTRING_FORMAT,
-                PythonProtocolKind.BUILD_STRING):
+                PythonProtocolKind.BUILD_STRING, PythonProtocolKind.BUILD_MAP,
+                PythonProtocolKind.MAP_ADD, PythonProtocolKind.DICT_UPDATE):
             # Ownership, typed uses, state address and completion validation are
             # profile-specific; no legacy protocol is broadened by this branch.
             pass
@@ -662,6 +668,8 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
         validate_statement_protocols(model, graph, interface, metadata, semantic)
         from scar.analysis.source_string_lowering import validate_string_protocols
         validate_string_protocols(model, graph, interface, metadata, semantic)
+        from scar.analysis.source_mapping_lowering import validate_mapping_protocols
+        validate_mapping_protocols(model, graph, interface, metadata, semantic)
     expected_loops = {link.source.atom_id for link in metadata.operation_links
         if semantic.source_atoms[link.source.atom_id].kind in ("While", "For")
         and operations[link.operation].terminator is not None

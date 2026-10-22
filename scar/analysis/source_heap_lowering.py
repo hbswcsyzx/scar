@@ -8,8 +8,9 @@ must never invent a StaticValue or treat a free cell as a global name.
 The RHS has already been evaluated by the caller.  The rules below preserve
 RHS -> receiver -> index -> store evaluation, hold references across each
 possibly raising operation, and retain the same coarse-world state carrier.
-Missing legacy target-child overlays are recovered only for exact SG-backed
-Name and scalar Constant leaves.  Other missing expressions remain unsupported.
+Missing legacy target-child overlays are recovered from exact SG-backed
+Names, scalar Constants, attribute/index reads and fixed-argument calls.
+No legacy StaticValue or binding fact is fabricated for these expressions.
 """
 from __future__ import annotations
 
@@ -126,6 +127,42 @@ def expression_for_heap_target(builder, node, cursor):
         builder.add_value(value)
         builder.link_value(value, node, SourceRole.EXPRESSION)
         return cursor, value.id
+    children = None
+    if isinstance(node, ast.Attribute):
+        if node.attr.startswith("__") and not node.attr.endswith("__"):
+            _unsupported(node, "private attribute lookup requires exact compiler-class name mangling")
+        children = ((node.value, "receiver", 0),)
+        opcode = Opcode.ATTRIBUTE
+    elif isinstance(node, ast.Subscript) and not isinstance(node.slice, ast.Slice):
+        children = ((node.value, "receiver", 0), (node.slice, "index", 0))
+        opcode = Opcode.INDEX
+    elif (isinstance(node, ast.Call) and not any(isinstance(arg, ast.Starred) for arg in node.args)
+            and all(keyword.arg is not None for keyword in node.keywords)):
+        children = ((node.func, "callee", 0),)
+        children += tuple((child, "argument", index) for index, child in enumerate(node.args))
+        children += tuple((child.value, "keyword:" + child.arg, index)
+                          for index, child in enumerate(node.keywords))
+        opcode = Opcode.CALL
+    if children is not None:
+        # A computational overlay deliberately omits assignment-target children.
+        # Recover their actual ordered Uses from the source graph instead of
+        # requiring that overlay to invent values in the target subtree.
+        inputs = []
+        for child, role, index in children:
+            cursor, value = expression_for_heap_target(builder, child, cursor)
+            if cursor is None:
+                return None, None
+            inputs.append((value, child, role, index, None))
+        cursor, result, operation_id = builder.invoke(cursor, node, tuple(inputs))
+        _associate(builder, operation_id, node, definition, opcode)
+        builder.link_value(builder.values_by_id[result], node, SourceRole.EXPRESSION)
+        builder.gap(GapKind.DYNAMIC_DISPATCH, node,
+            "source-backed target expression operands are connected; actual dispatch, aliasing and effects remain unproved")
+        if isinstance(node, ast.Call):
+            callee = inputs[0][0]
+            builder.pending_targets.append((operation_id, callee, builder.reference_candidates.get(callee), node))
+            builder.gap(GapKind.DYNAMIC_TARGET, node, "source-backed call is not verified runtime dispatch")
+        return cursor, result
     _unsupported(node, "missing target-child computational semantics require a checked rule for " + type(node).__name__)
 
 

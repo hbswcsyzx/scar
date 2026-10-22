@@ -104,6 +104,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         return cursor, value
 
     def expr(self, node, cursor):
+        if isinstance(node, ast.Dict):
+            from scar.analysis.source_mapping_lowering import lower_dictionary
+            return lower_dictionary(self, node, cursor)
         if isinstance(node, ast.JoinedStr):
             from scar.analysis.source_string_lowering import lower_joined_string
             return lower_joined_string(self, node, cursor)

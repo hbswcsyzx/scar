@@ -26,9 +26,10 @@ from scar.ir.program.call_operand_routes import (
 from scar.ir.program.functions import BodyLoweringProfile, ParameterKind
 from scar.ir.program.model import (
     BlockArgument, CompletionResult, ExitKind, LiteralOrigin, OperationResult,
-    ReferenceValue, TerminatorKind,
+    ReferenceValue, StateVersionValue, TerminatorKind, UseRole,
 )
 from scar.ir.record_codec import encode
+from scar.ir.semantics_v2 import Opcode
 from scar.trace.code_snapshot import site as code_site
 
 
@@ -68,6 +69,52 @@ class _Core:
         self.sources = sources
         self.use_operations = {}
         self.use_sources = {}
+        self.value_records = {}
+
+    def values(self, definition):
+        if definition not in self.value_records:
+            self.value_records[definition] = {
+                value.id: value for value in self.sources.bodies[definition].graph.values}
+        return self.value_records[definition]
+
+    def formal_ports(self, definition):
+        """Check explicit Python formals independently of physical env offsets."""
+        body, _, _, blocks = self.sources.core[definition]
+        interface = self.sources.ports[definition]
+        signature = self.sources.signatures[definition]
+        values = self.values(definition)
+        region = next((region for region in body.graph.regions if region.id == body.graph.root), None)
+        _need(region is not None and interface.region == region.id
+              and interface.definition == signature.definition == definition,
+              Issue.SOURCE_CORE_BOUNDARY, 'formal interface has no matching root/definition')
+        entry = blocks[region.entry]
+        _need(len(signature.parameters) == len(interface.parameters)
+              and tuple(parameter.slot for parameter in signature.parameters)
+              == tuple(port.slot for port in interface.parameters),
+              Issue.SOURCE_CORE_BOUNDARY, 'explicit formal slots do not cover the declared signature')
+        for port in interface.parameters:
+            value = values.get(port.value)
+            _need(type(value) is ReferenceValue and isinstance(value.origin, BlockArgument)
+                  and value.region == region.id and value.origin.block == entry.id
+                  and 0 <= value.origin.index < len(entry.arguments)
+                  and entry.arguments[value.origin.index] == port.value,
+                  Issue.SOURCE_CORE_BOUNDARY, 'formal is not its exact declared entry reference port')
+        if interface.profile is BodyLoweringProfile.STRUCTURED_ENV:
+            environments = [environment for environment in body.graph.environments if environment.region == region.id]
+            _need(len(environments) == 1, Issue.SOURCE_CORE_BOUNDARY,
+                  'environment body has no unique existing environment interface')
+            environment, = environments
+            layouts = [layout for layout in body.graph.function_entries if layout.environment == environment.id]
+            _need(len(layouts) == 1 and layouts[0].parameters == interface.parameters
+                  and environment.code_definition == definition,
+                  Issue.SOURCE_CORE_BOUNDARY, 'explicit formal layout differs from the environment entry')
+            expected = (tuple(member.reference for member in environment.members)
+                        + tuple(port.value for port in interface.parameters) + (interface.world,))
+        else:
+            expected = tuple(port.value for port in interface.parameters) + (interface.world,)
+        _need(entry.arguments == expected and type(values.get(interface.world)) is StateVersionValue,
+              Issue.SOURCE_CORE_BOUNDARY, 'formal/environment/world partition differs from the actual entry')
+        return interface.parameters
 
     def return_root(self, edge):
         if (not edge.exit_verified or edge.exit is None
@@ -99,12 +146,13 @@ class _Core:
         body, operations, uses, blocks = sources.core[definition]
         interface, signature = sources.ports[definition], sources.signatures[definition]
         names = {parameter.slot: parameter.name for parameter in signature.parameters}
-        formal = {port.value: (port.slot, names[port.slot]) for port in interface.parameters}
+        formal = {port.value: (port.slot, names[port.slot]) for port in self.formal_ports(definition)}
         references = {value.id: value for value in body.graph.values if type(value) is ReferenceValue}
         source_links = defaultdict(list)
         for link in body.metadata.value_links:
             source_links[link.value].append(link.source)
-        call_results, routes = set(), []
+        call_results, completion_results, routes = set(), set(), []
+        source_opcodes = {link.operation: link.opcode for link in body.metadata.operation_links}
         for operation in operations.values():
             if operation.terminator is None:
                 continue
@@ -116,7 +164,10 @@ class _Core:
                         continue
                     if isinstance(operand, CompletionResult):
                         if edge.kind is ExitKind.NORMAL and operand.index == 0:
-                            call_results.add(destination)
+                            completion_results.add(destination)
+                            if (interface.profile is BodyLoweringProfile.BOUND_FRAME
+                                    or source_opcodes.get(operation.id) is Opcode.CALL):
+                                call_results.add(destination)
                     elif operand in uses and uses[operand].value in references:
                         routes.append(CoreReferenceRoute(destination, uses[operand].value,
                                                          operation.id, operand, successor, port))
@@ -131,6 +182,7 @@ class _Core:
                                                   parameter.source, slot, name))
             else:
                 kind = (CoreReferenceKind.CALL_RESULT if identity in call_results else
+                        CoreReferenceKind.OPAQUE_OPERATION if identity in completion_results else
                         CoreReferenceKind.BLOCK_ARGUMENT if isinstance(value.origin, BlockArgument) else
                         CoreReferenceKind.LITERAL if isinstance(value.origin, LiteralOrigin) else
                         CoreReferenceKind.OPAQUE_OPERATION)
@@ -247,8 +299,11 @@ def build_operand_routes(*, call_model, operand_model, inventory, sources, budge
     """
     if type(budget) is not OperandRouteBudget:
         raise ValueError('operand routing requires a typed independent budget')
-    if sources.inventory is not inventory or inventory.interfaces is None or inventory.profile is not BodyLoweringProfile.BOUND_FRAME:
-        raise ValueError('operand routes require the bound-frame inventory used by source verification')
+    supported_profiles = (BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY,
+                          BodyLoweringProfile.STRUCTURED_ENV)
+    if (sources.inventory is not inventory or inventory.interfaces is None
+            or inventory.profile not in supported_profiles or inventory.interfaces.profile is not inventory.profile):
+        raise ValueError('operand routes require the matching explicit frame/structured inventory used by source verification')
     core = _Core(sources)
     issues, templates, obligations, returned = [], [], [], []
     arguments, completions = [], []
@@ -271,16 +326,20 @@ def build_operand_routes(*, call_model, operand_model, inventory, sources, budge
                         if edge.target.status is CallLinkStatus.VERIFIED
                         and edge.target.definition in sources.core
                         and edge.target.definition in sources.ports
-                        and edge.target.definition in sources.frames))
+                        and sources.frame_rules(edge.target.definition) is not None))
     available = set()
     for definition in definitions:
-        template = core.template(definition)
+        try:
+            template = core.template(definition)
+        except _Boundary as error:
+            issue(error.kind, error.detail)
+            continue
         if not charge(len(template.routes), len(template.values)):
             continue
         templates.append(template)
         available.add(definition)
         body = sources.bodies[definition]
-        obligations.append(FrameRouteObligations(definition, template.region, sources.frames[definition].rules,
+        obligations.append(FrameRouteObligations(definition, template.region, sources.frame_rules(definition),
                            body.metadata.assumptions,
                            tuple(op.id for op in body.graph.operations if not op.effects_complete)))
     edges = {edge.entry.invocation: edge for edge in call_model.edges}
@@ -387,8 +446,15 @@ def build_operand_routes(*, call_model, operand_model, inventory, sources, budge
                   'verified body formal interface differs from the actual dispatch layout')
             body, operations, uses, _ = sources.core[call.execution_owner]
             operation = operations[call.core_operation]
-            _need(len(operation.invoke_arguments) == len(node.args) + 2,
+            _need(len(operation.invoke_arguments) == len(node.args) + 2
+                  and operation.invoke_arguments[0] == call.callee_use,
                   Issue.SOURCE_CORE_BOUNDARY, 'core CALL does not have one actual Use per position')
+            world_use = uses[operation.invoke_arguments[-1]]
+            values = core.values(call.execution_owner)
+            _need(world_use.role is UseRole.STATE_CONTENT and type(values.get(world_use.value)) is StateVersionValue
+                  and all(type(values.get(uses[use_id].value)) is ReferenceValue
+                          for use_id in operation.invoke_arguments[:-1]),
+                  Issue.SOURCE_CORE_BOUNDARY, 'core CALL actuals/world do not have their declared reference/state roles')
             if call.execution_owner not in core.use_sources:
                 core.use_sources[call.execution_owner] = {
                     (link.operation, link.use): link.source for link in body.metadata.use_links}
