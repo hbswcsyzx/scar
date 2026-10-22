@@ -278,11 +278,17 @@ def _lifetime_events(ctx):
             target_run = ctx.processes[target_process].run
         if run is not None and target_run is not None and run != target_run:
             ctx.issue('validity_lifetime_target_run', path, 'target belongs to another known run')
-        # No existing native profile interprets free/live from an arbitrary
-        # source line. The declaration is retained, including RETIRED, but is
-        # never silently upgraded to a physical lifetime proof.
-        ctx.gap('validity_lifetime_protocol_unverified', path,
-                'LIVE/RETIRED requires a parsed target/effect/native lifetime correspondence')
+        from .native_memory_binding import resolve_native_memory_claim
+        native = resolve_native_memory_claim(ctx, row, path)
+        if native is None or not native['matched']:
+            ctx.gap('validity_lifetime_protocol_unverified', path,
+                    'LIVE/RETIRED requires a parsed target/effect/native lifetime correspondence')
+        else:
+            # This checks the logical allocator receipt, not cudaMalloc/free
+            # or device quiescence. Unmapped source stage/effect gaps above
+            # stay visible; no stability or transformation authority is added.
+            ctx.gap('validity_native_memory_physical_lifetime_unverified', path,
+                    'profiler allocator receipt does not establish physical retirement or device readiness')
         ctx.resolved_lifetime_events[row.id] = {
             'row': row, 'target': row.target, 'at': row.at, 'stage': stage, 'effect': effect,
             'retired': row.kind is LifetimeEventKind.RETIRED,
@@ -290,6 +296,8 @@ def _lifetime_events(ctx):
             'conditions': ('declared lifetime event; native target/retirement semantics unverified',),
             'gaps': _conditions(ctx, gaps),
         }
+        if native is not None:
+            ctx.resolved_lifetime_events[row.id]['native_receipt'] = native
 
 
 def _associations(ctx):

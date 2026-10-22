@@ -8,7 +8,7 @@ hashes namespace every imported identity.
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from hashlib import sha256
 import json
 import math
@@ -38,6 +38,8 @@ class NativeImportResult:
     report: dict
     references: list[dict]
     resources: list[dict]
+    memory: object | None = field(default=None, repr=False)
+    raw_kineto_bytes: bytes | None = field(default=None, repr=False)
 
 
 def _pairs(items):
@@ -69,7 +71,7 @@ def _canonical_hash(document):
     return digest.hexdigest()
 
 
-def _read(path, remaining):
+def _read(path, remaining, *, retain_bytes=False):
     with open_binary(path) as stream:
         payload = stream.read(remaining + 1)
     if len(payload) > remaining:
@@ -83,7 +85,7 @@ def _read(path, remaining):
         raise ValueError("native evidence document must be a JSON object")
     artifact = {"path": str(Path(path).absolute()), "sha256": sha256(payload).hexdigest(),
                 "size_bytes": len(payload), "hash_basis": "decompressed retained raw bytes"}
-    return document, artifact
+    return (document, artifact, payload) if retain_bytes else (document, artifact)
 
 
 def _integer(value, *, positive=False):
@@ -135,8 +137,9 @@ def _element_types(name):
 
 
 class _Importer:
-    def __init__(self, eto, chrome, artifacts, maximum):
+    def __init__(self, eto, chrome, artifacts, maximum, *, kineto_bytes=None):
         self.eto, self.chrome, self.artifacts = eto, chrome, artifacts
+        self.kineto_bytes = kineto_bytes
         self.pid = eto["pid"]
         capture = _canonical_hash({"eto": artifacts["eto"]["sha256"],
                                    "kineto": artifacts["kineto"]["sha256"] if chrome is not None else None,
@@ -491,6 +494,8 @@ class _Importer:
         else:
             self.gap("kineto_not_supplied", self.pointer("eto", "#"),
                      "ETO-only import; GPU/transfer/timing evidence was not supplied")
+        from scar.trace.native_memory import append_memory_events
+        memory = append_memory_events(self)
         # Do not serialize the bundle here: validation is linear in its existing
         # indexes; the public caller decides whether and how to persist it.
         self.bundle.assert_valid()
@@ -515,6 +520,7 @@ class _Importer:
                           "resource_observations": len(self.resources),
                           "retained_non_duration_events": len(self.retained)},
             "retained_events": self.retained, "gaps": list(self.gaps.values()),
+            "memory": memory.report,
             "budget": {"max_bytes": self.maximum,
                        "decompressed_bytes": sum(item["size_bytes"] for item in self.artifacts.values())},
             "conditions": [
@@ -533,7 +539,7 @@ class _Importer:
             "python_correspondence_established": False, "transformation_authorized": False,
         }
         references = [item.as_dict() for item in self.evidence.provider_references.values()]
-        return NativeImportResult(self.bundle, report, references, self.resources)
+        return NativeImportResult(self.bundle, report, references, self.resources, memory, self.kineto_bytes)
 
 
 def _load_importer(eto_path, kineto_path, *, max_bytes, provider_revision):
@@ -548,13 +554,14 @@ def _load_importer(eto_path, kineto_path, *, max_bytes, provider_revision):
         raise ValueError("ETO requires a positive exact PID and node array")
     if kineto_path is None:
         return _Importer(eto, None, {"eto": eto_artifact}, max_bytes)
-    chrome, chrome_artifact = _read(kineto_path, max_bytes - eto_artifact["size_bytes"])
+    chrome, chrome_artifact, payload = _read(kineto_path, max_bytes - eto_artifact["size_bytes"], retain_bytes=True)
     if ("schemaVersion" in chrome and
             (type(chrome["schemaVersion"]) is not int or chrome["schemaVersion"] != 1)):
         raise ValueError("unsupported Kineto schemaVersion")
     if type(chrome.get("traceEvents")) is not list:
         raise ValueError("Kineto traceEvents must be an array")
-    return _Importer(eto, chrome, {"eto": eto_artifact, "kineto": chrome_artifact}, max_bytes)
+    return _Importer(eto, chrome, {"eto": eto_artifact, "kineto": chrome_artifact}, max_bytes,
+                     kineto_bytes=payload)
 
 
 def import_native_evidence(eto_path, kineto_path=None, *, max_bytes=512_000_000, provider_revision: str):

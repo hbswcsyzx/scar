@@ -1269,6 +1269,11 @@ def _import_native(args) -> int:
                                         provider_revision=args.provider_revision)
     # These are observation graphs, not a fabricated static SSA program.
     output.mkdir(parents=True, exist_ok=False)
+    from scar.trace.native_memory_export import export_native_memory
+    memory_fragment = export_native_memory(result, output)
+    if memory_fragment is not None:
+        _compressed_document(output / "native-memory-values.json.gz", result.bundle.values.to_dict())
+        _compressed_document(output / "native-memory-lifetimes.json.gz", memory_fragment)
     _compressed_document(output / "evidence-bundle.json.gz", result.bundle.to_dict())
     _compressed_document(output / "provider-references.json.gz", result.references)
     _compressed_document(output / "resource-observations.json.gz", result.resources)

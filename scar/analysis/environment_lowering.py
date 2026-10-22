@@ -104,6 +104,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         return cursor, value
 
     def expr(self, node, cursor):
+        if isinstance(node, ast.JoinedStr):
+            from scar.analysis.source_string_lowering import lower_joined_string
+            return lower_joined_string(self, node, cursor)
         if isinstance(node, ast.BoolOp):
             from scar.analysis.source_conditional_lowering import lower_bool_expression
             return lower_bool_expression(self, node, cursor)

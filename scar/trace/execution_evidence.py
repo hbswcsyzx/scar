@@ -89,6 +89,7 @@ class ExecutionEvidence:
             "execution_trace_observer": True, "extra_resources": False,
             "extra_tensor_data": False, "activities": None,
             "memory_dataflow_graph": False,
+            "experimental_config": None,
         }
         try:
             root = Path(out).absolute()
@@ -282,9 +283,21 @@ class ExecutionEvidence:
         self._observer_owned = True
         self._registration["owned"] = True
         self._observer.set_extra_resource_collection(False)
+        options = {}
+        experimental_type = getattr(getattr(torch._C, "_profiler", None), "_ExperimentalConfig", None)
+        if callable(experimental_type):
+            try:
+                experimental = experimental_type(adjust_timestamps=False)
+            except TypeError:
+                # Older providers retain their working profile path; absence
+                # of this receipt never qualifies allocator event ordering.
+                pass
+            else:
+                options["experimental_config"] = experimental
+                self._config["experimental_config"] = {"adjust_timestamps": False}
         self._profiler = profile(record_shapes=False, profile_memory=True,
                                  with_stack=False, with_modules=False,
-                                 execution_trace_observer=self._observer)
+                                 execution_trace_observer=self._observer, **options)
         self._config["activities"] = sorted(str(item) for item in self._profiler.activities)
         self._window["start_requested_ns"] = time.perf_counter_ns()
         self._enter_attempted = True
