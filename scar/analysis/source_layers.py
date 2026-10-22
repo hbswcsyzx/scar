@@ -165,7 +165,7 @@ def _preflight_inventory(document: Any, *, max_files: int) -> tuple[int, list[di
         raise ValueError("inventory header must be an object")
     version = document.get("schema_version")
     if (document.get("schema") != "scar.program-inventory" or type(version) is not int
-            or version not in (1, 2, 3, 4, 5, 6)):
+            or version not in (1, 2, 3, 4, 5, 6, 7)):
         raise ValueError("unsupported inventory schema/version")
     raw_files = document.get("files")
     if type(raw_files) is not list:
@@ -575,7 +575,7 @@ def _validate_manifest(document: Any) -> list[dict[str, Any]]:
             or set(input_meta) != {"schema", "schema_version", "raw_sha256", "decoded_bytes"}
             or input_meta["schema"] != "scar.program-inventory"
             or type(input_meta["schema_version"]) is not int
-            or input_meta["schema_version"] not in (1, 2, 3, 4, 5, 6)
+            or input_meta["schema_version"] not in (1, 2, 3, 4, 5, 6, 7)
             or type(input_meta["raw_sha256"]) is not str
             or not _SHA256.fullmatch(input_meta["raw_sha256"])
             or type(input_meta["decoded_bytes"]) is not int or input_meta["decoded_bytes"] < 0):

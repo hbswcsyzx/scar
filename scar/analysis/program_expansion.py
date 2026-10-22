@@ -39,9 +39,10 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
     from scar.analysis.function_interfaces import FunctionInterfaceBuilder
     from scar.ir.program.functions import BodyLoweringProfile
     from scar.ir.program.frame_validation import require_valid_frame_model
+    from scar.analysis.structured_lowering import require_valid_structured_body
     selected_profile = body_profile or BodyLoweringProfile.BOUND_FORMALS
     interfaces = FunctionInterfaceBuilder(profile=selected_profile) if interface_model else None
-    frames = []
+    frames, structured = [], []
     is_v6 = call_source_report is not None
     if is_v6:
         from scar.analysis.call_demand_schedule import (
@@ -268,9 +269,24 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                                                           semantic=loaded_context.semantic)
                                 if result.frame.definition != body.definition or result.interface.profile is not selected_profile:
                                     raise ValueError("frame correspondence differs from the selected body/profile")
+                        if selected_profile is BodyLoweringProfile.STRUCTURED_BODY:
+                            if result.frame is not None:
+                                raise ValueError("structured body cannot retain a legacy frame model")
+                            if body.graph is None:
+                                if result.structured is not None:
+                                    raise ValueError("failed body cannot retain a structured model")
+                            else:
+                                if result.structured is None:
+                                    raise ValueError("structured body needs its explicit protocol model")
+                                require_valid_structured_body(result.structured, body.graph, result.interface,
+                                    body.metadata, semantic=loaded_context.semantic, control=loaded_context.control)
+                                if result.structured.definition != body.definition:
+                                    raise ValueError("structured model differs from its body definition")
                         interfaces.record_body(body, result.interface)
                         if selected_profile is BodyLoweringProfile.BOUND_FRAME and result.frame is not None:
                             frames.append(result.frame)
+                        if selected_profile is BodyLoweringProfile.STRUCTURED_BODY and result.structured is not None:
+                            structured.append(result.structured)
                     except (ValueError, TypeError, KeyError) as error:
                         body = BodyInventory(definition, BodyStatus.UNSUPPORTED, None, None,
                             "body interface correspondence failed: " + str(error), charged)
@@ -321,7 +337,7 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             if path in unavailable:
                 file_issues.append(InventoryIssue(path, unavailable[path]))
             result = _attach_bodies(replace(file, gaps=tuple(file_issues)), file_bodies,
-                                    call_witnesses=frozen_witnesses)
+                                    call_witnesses=frozen_witnesses, body_profile=selected_profile)
             final.append(result)
             if runtime_builder is not None:
                 runtime_builder.file_emitted(result)
@@ -331,4 +347,5 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                     else ExpansionSchedule(context_budget, tuple(entries), unavailable_records))
         measurements = ExpansionMeasurements(store.restore_attempts, store.compressed_payload_bytes_restored,
                                              store.compressed_bytes_written, store.uncompressed_bytes_written)
-        return tuple(final), schedule, measurements, interfaces.finish(final) if interfaces is not None else None, tuple(frames)
+        return (tuple(final), schedule, measurements, interfaces.finish(final) if interfaces is not None else None,
+                tuple(frames), tuple(structured))

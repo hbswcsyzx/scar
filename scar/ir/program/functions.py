@@ -222,7 +222,8 @@ class FunctionInterfaces:
     profile: BodyLoweringProfile = BodyLoweringProfile.BOUND_FORMALS
 
     def __post_init__(self):
-        if self.profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME):
+        if self.profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME,
+                                BodyLoweringProfile.STRUCTURED_BODY):
             raise ValueError("function interfaces need a bound-formal profile")
         if len({s.definition for s in self.signatures}) != len(self.signatures):
             raise ValueError("duplicate function signature")

@@ -15,6 +15,7 @@ from pathlib import Path
 from scar.analysis.program_context_store import PreparedContextStore, ContextStoreLimit
 from scar.analysis.program_lowering import prepare_source
 from scar.ir.program.compilation import CallCompilationProfile
+from scar.ir.program.functions import BodyLoweringProfile
 
 
 def _fresh_failure(error):
@@ -149,12 +150,17 @@ class _SourceWorkspace:
 
 def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trace,
                          call_budget, context_budget, expected_call_sources=None,
-                         compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS):
+                         compilation_profile=CallCompilationProfile.RECORDED_FUTURE_FLAGS,
+                         body_profile=BodyLoweringProfile.BOUND_FRAME):
     from scar.analysis.call_seeds import _read_call_source_seeds
     from scar.analysis.program_expansion import expand_inventory
     from scar.analysis.program_inventory import ProgramInventory, _canonical
     from scar.analysis.source_discovery import _discover_sources_from_call_sources
     from scar.ir.program.functions import BodyLoweringProfile
+
+    if type(body_profile) is not BodyLoweringProfile or body_profile not in (
+            BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY):
+        raise ValueError("call-source inventory requires a frame or structured body profile")
 
     root = Path(project_root).resolve() if project_root is not None else Path(entry).absolute().parent.resolve()
     with _SourceWorkspace(root, context_budget, entry=entry, source_roots=source_roots,
@@ -167,14 +173,14 @@ def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trac
             source_roots=source_roots, source_witnesses=report.eligible_code_links(),
             max_files=budget.max_files, max_bytes=budget.max_bytes,
             max_directories=budget.max_directories)
-        files, schedule, measurements, interfaces, frames = expand_inventory(
+        files, schedule, measurements, interfaces, frames, structured = expand_inventory(
             discovery, None, budget, context_budget, discovery.files, interface_model=True,
-            body_profile=BodyLoweringProfile.BOUND_FRAME, call_source_report=report,
+            body_profile=body_profile, call_source_report=report,
             source_workspace=workspace)
         scope = _call_source_scope(report, files)
         result = ProgramInventory(discovery, files, budget, expansion=schedule,
             analysis_measurements=measurements, interfaces=interfaces,
-            profile=BodyLoweringProfile.BOUND_FRAME, frames=frames,
+            profile=body_profile, frames=frames, structured=structured,
             call_sources=report, call_source_scope=scope,
             source_analysis_measurements=workspace.measurements())
         result._check_profile()
@@ -234,10 +240,16 @@ def replay_inventory_from_calls(document, *, discovery, roots, budget, context_c
     schedule = decode(ExpansionScheduleV6, document["expansion"])
     _check_context_budget(schedule.budget, context_ceiling)
     interfaces = decode(FunctionInterfaces, document["interfaces"])
-    if (decode(BodyLoweringProfile, document["profile"]) is not BodyLoweringProfile.BOUND_FRAME
-            or interfaces.profile is not BodyLoweringProfile.BOUND_FRAME):
-        raise ValueError("inventory v6 requires the bound-frame profile")
-    decode(tuple[FrameModel, ...], document["frames"])
+    expected_profile = (BodyLoweringProfile.STRUCTURED_BODY if document["schema_version"] == 7
+                        else BodyLoweringProfile.BOUND_FRAME)
+    if (decode(BodyLoweringProfile, document["profile"]) is not expected_profile
+            or interfaces.profile is not expected_profile):
+        raise ValueError("inventory version differs from its call-source body profile")
+    if expected_profile is BodyLoweringProfile.BOUND_FRAME:
+        decode(tuple[FrameModel, ...], document["frames"])
+    else:
+        from scar.ir.program.structured import StructuredBodyModel
+        decode(tuple[StructuredBodyModel, ...], document["structured"])
     decode(CallSourceScope, document["call_source_scope"])
     model = CallSourceSeedReport._decode_replay_input(document["call_sources"],
         verification_budget=call_ceiling)
@@ -247,4 +259,5 @@ def replay_inventory_from_calls(document, *, discovery, roots, budget, context_c
     return inventory_from_calls(discovery.entry, project_root=discovery.project_root,
         source_roots=roots, budget=budget, call_trace=model.trace_directory,
         call_budget=model.budget, context_budget=schedule.budget,
-        expected_call_sources=document["call_sources"], compilation_profile=compilation_profile)
+        expected_call_sources=document["call_sources"], compilation_profile=compilation_profile,
+        body_profile=expected_profile)

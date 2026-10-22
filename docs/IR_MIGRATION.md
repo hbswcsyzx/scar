@@ -1,5 +1,18 @@
 # SCAR 当前 IR 到 IR v2 的迁移方案
 
+## 2026-10-22：公共structured库存的显式版本
+
+公共`inventory-program --body-profile structured`使用`scar.program-inventory` v7，
+复用原ProgramGraph/StructuredBodyModel和调用来源队列。v7 typed structured表
+逐一对应成功body/interface/root/source，无legacy frames；calls证据在calls模式
+保留，静态/runtime模式这两项为null。旧inventory1–6、默认frame及Program27/
+Execution8保持原语义。不要把本组件v7与历史ProgramGraph v7混淆。
+
+source-layer留存支持v7 header；expression→statement的结构对应仍是派生查询，
+不写回另一份CFG，也不证明表达式必执行。测试与真实执行范围见
+[structured公共入口验收](../artifacts/experiments/first_stage_structured_inventory_20261022/README.md)。
+全阶段、完整资源模型和优化授权仍未通过。
+
 ## 2026-10-20：原生证据接入边界
 
 对象身份独立于内容的最小修正已接入：ValueGraph.objects 拥有 ObjectInstance，

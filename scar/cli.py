@@ -381,6 +381,8 @@ def main(argv=None) -> int:
     inventory_program.add_argument("--out", required=True, help="compact source/body report JSON, optionally .gz")
     inventory_program.add_argument("--trace", help="augment candidate source scope from an existing runtime trace directory/JSONL/gzip")
     inventory_program.add_argument("--calls", help="raw call-edge trace directory; enable v6 entry-first source demand")
+    inventory_program.add_argument("--body-profile", choices=("frame", "structured"), default="frame",
+                                   help="body lowering profile; structured uses inventory v7, frame preserves v5/v6")
     inventory_program.set_defaults(func=_inventory_program)
     check_inventory = sub.add_parser("check-inventory", help="rebuild a source inventory from current files and discovery context")
     check_inventory.add_argument("report", help="inventory report JSON or JSON.gz")
@@ -803,6 +805,7 @@ def _inventory_analysis_measurements(result):
 
 def _inventory_program(args) -> int:
     from scar.analysis.program_inventory import inventory_program
+    from scar.ir.program.functions import BodyLoweringProfile
 
     output = Path(args.out).resolve()
     try:
@@ -813,7 +816,9 @@ def _inventory_program(args) -> int:
                                    runtime_trace=args.trace, runtime_budget=_runtime_inventory_budget(args),
                                    max_compile_attempts=args.max_compile_attempts,
                                    context_budget=_context_inventory_budget(args),
-                                   calls_trace=args.calls, call_budget=_call_budget(args))
+                                   calls_trace=args.calls, call_budget=_call_budget(args),
+                                   body_profile=(BodyLoweringProfile.STRUCTURED_BODY if args.body_profile == "structured"
+                                                 else BodyLoweringProfile.BOUND_FRAME))
         for file in result.discovery.files:
             source = Path(file.snapshot.path)
             if output == source or (output.exists() and source.samefile(output)):

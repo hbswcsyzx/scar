@@ -27,6 +27,8 @@ from scar.ir.program.call_demand import ExpansionScheduleV6, CallSourceScope
 from scar.ir.program.call_edges import CallEdgeBudget
 from scar.ir.program.functions import BodyLoweringProfile, FunctionInterfaces
 from scar.ir.program.frames import FrameModel
+from scar.ir.program.ids import RegionID
+from scar.ir.program.structured import StructuredBodyModel
 from scar.ir.program.codec import dumps as dump_graph
 from scar.ir.program.model import LiteralOrigin
 from scar.ir.program.discovery import DiscoveryRootMode, SourceDiscovery
@@ -83,6 +85,7 @@ class ProgramInventory:
     call_sources: CallSourceSeedReport | None = None
     call_source_scope: CallSourceScope | None = None
     source_analysis_measurements: dict | None = field(default=None, compare=False)
+    structured: tuple[StructuredBodyModel, ...] = ()
 
     def _check_profile(self):
         if self.call_sources is not None:
@@ -91,7 +94,7 @@ class ProgramInventory:
             if (type(self.call_sources) is not CallSourceSeedReport
                     or type(self.expansion) is not ExpansionScheduleV6
                     or type(self.call_source_scope) is not CallSourceScope
-                    or self.profile is not BodyLoweringProfile.BOUND_FRAME
+                    or self.profile not in (BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY)
                     or self.runtime_scope is not None):
                 raise ValueError("inventory v6 requires calls, typed scope, v6 expansion and frame profile")
             self.call_sources.model.__post_init__()
@@ -102,6 +105,27 @@ class ProgramInventory:
             raise ValueError("v6 call records require their bound raw/source report")
         if type(self.frames) is not tuple or any(type(model) is not FrameModel for model in self.frames):
             raise ValueError("inventory frames must be typed frame records")
+        if type(self.structured) is not tuple or any(type(model) is not StructuredBodyModel for model in self.structured):
+            raise ValueError("inventory structured bodies must be typed records")
+        if self.profile is BodyLoweringProfile.STRUCTURED_BODY:
+            if self.frames or self.interfaces is None or self.interfaces.profile is not self.profile or self.expansion is None:
+                raise ValueError("structured inventories need matching interfaces, expansion and no legacy frames")
+            if self.call_sources is None and type(self.expansion) is not ExpansionSchedule:
+                raise ValueError("static/runtime structured inventories need a source expansion schedule")
+            bodies = {body.definition: body for file in self.files for body in file.bodies if body.graph is not None}
+            ports = {interface.definition: interface for interface in self.interfaces.bodies}
+            definitions = {definition.id: definition for file in self.files for definition in file.definitions}
+            models = {model.definition: model for model in self.structured}
+            if len(models) != len(self.structured) or set(models) != set(bodies) or set(ports) != set(bodies):
+                raise ValueError("structured inventories require one model and interface per emitted body")
+            for definition, model in models.items():
+                model.__post_init__()
+                if (model.region != bodies[definition].graph.root or model.region != ports[definition].region
+                        or model.source != definitions[definition].source):
+                    raise ValueError("structured inventory model differs from its body/interface/source")
+            return
+        if self.structured:
+            raise ValueError("historical inventories cannot contain structured models")
         if self.profile is None:
             if self.frames or (self.interfaces is not None and self.interfaces.profile is not BodyLoweringProfile.BOUND_FORMALS):
                 raise ValueError("historical inventories cannot contain frame-profile records")
@@ -167,7 +191,15 @@ class ProgramInventory:
                 "issues": len(self.interfaces.issues),
                 "live_call_binding_established": False,
             }
-        if self.profile is not None:
+        if self.profile is BodyLoweringProfile.STRUCTURED_BODY:
+            summary["structured"] = {
+                "profile": self.profile.value, "bodies": len(self.structured),
+                "protocols": sum(len(model.protocols) for model in self.structured),
+                "loops": sum(len(model.loops) for model in self.structured),
+                "runtime_conditions_established": False, "release_established": False,
+                "completion_guaranteed": False,
+            }
+        elif self.profile is not None:
             summary["frames"] = {
                 "profile": self.profile.value, "bodies": len(self.frames),
                 "transitions": dict(sorted(Counter(transition.kind.value for model in self.frames
@@ -180,7 +212,7 @@ class ProgramInventory:
     def to_dict(self):
         self._check_profile()
         document = {
-            "schema": "scar.program-inventory", "schema_version": 6 if self.call_sources is not None else 5 if self.profile is not None else 4 if self.interfaces is not None else 3 if self.expansion is not None else 2 if self.runtime_scope is not None else 1,
+            "schema": "scar.program-inventory", "schema_version": 7 if self.profile is BodyLoweringProfile.STRUCTURED_BODY else 6 if self.call_sources is not None else 5 if self.profile is not None else 4 if self.interfaces is not None else 3 if self.expansion is not None else 2 if self.runtime_scope is not None else 1,
             "scope": "source-discovered candidate files, scoped interfaces and bounded automatic body lowering",
             "discovery": encode(self.discovery), "files": [_file_document(file) for file in self.files],
             "budget": encode(self.budget), "summary": self.summary(),
@@ -197,7 +229,12 @@ class ProgramInventory:
             document["interfaces"] = encode(self.interfaces)
         if self.profile is not None:
             document["profile"] = self.profile.value
-            document["frames"] = encode(self.frames)
+            if self.profile is BodyLoweringProfile.STRUCTURED_BODY:
+                document["structured"] = encode(self.structured)
+                document["call_sources"] = self.call_sources.to_dict() if self.call_sources is not None else None
+                document["call_source_scope"] = encode(self.call_source_scope)
+            else:
+                document["frames"] = encode(self.frames)
         if self.call_sources is not None:
             document["call_sources"] = self.call_sources.to_dict()
             document["call_source_scope"] = encode(self.call_source_scope)
@@ -212,7 +249,7 @@ class ProgramInventory:
         if type(document) is not dict:
             raise ValueError("inventory fields mismatch")
         version = document.get("schema_version")
-        if type(version) is not int or version not in (1, 2, 3, 4, 5, 6):
+        if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7):
             raise ValueError("inventory schema/version mismatch")
         expected_fields = {
                 "schema", "schema_version", "scope", "discovery", "files", "budget", "summary",
@@ -223,23 +260,47 @@ class ProgramInventory:
             expected_fields.add("expansion")
         if version >= 4:
             expected_fields.add("interfaces")
-        if version >= 5:
+        if version in (5, 6):
             expected_fields.update(("profile", "frames"))
-        if version == 6:
+        if version in (6, 7):
             expected_fields.update(("call_sources", "call_source_scope"))
+        if version == 7:
+            expected_fields.update(("profile", "structured"))
         if set(document) != expected_fields:
             raise ValueError("inventory fields mismatch")
         if document["schema"] != "scar.program-inventory":
             raise ValueError("inventory schema/version mismatch")
+        if version == 7:
+            if (document["scope"] != "source-discovered candidate files, scoped interfaces and bounded automatic body lowering"
+                    or document["target_executed"] is not False or document["transformation_authorized"] is not False
+                    or type(document["files"]) is not list or type(document["summary"]) is not dict):
+                raise ValueError("structured inventory header/type/authority mismatch")
+            if decode(BodyLoweringProfile, document["profile"]) is not BodyLoweringProfile.STRUCTURED_BODY:
+                raise ValueError("inventory v7 requires STRUCTURED_BODY_V1 profile")
+            interfaces = decode(FunctionInterfaces, document["interfaces"])
+            if interfaces.profile is not BodyLoweringProfile.STRUCTURED_BODY:
+                raise ValueError("structured inventory interface profile mismatch")
+            models = decode(tuple[StructuredBodyModel, ...], document["structured"])
+            if len({model.definition for model in models}) != len(models):
+                raise ValueError("duplicate structured inventory model")
+            if document["call_sources"] is None:
+                if document["call_source_scope"] is not None:
+                    raise ValueError("structured source inventory cannot carry an unbound call scope")
+            elif document["runtime_scope"] is not None:
+                raise ValueError("structured calls and legacy runtime observations are separate modes")
+            else:
+                decode(CallSourceScope, document["call_source_scope"])
         requested = decode(InventoryBudget, document["budget"])
         ceiling = InventoryBudget(max_files, max_bytes, max_directories, max_lowered_bodies, max_operations, max_call_witnesses)
         _check_budget(requested); _check_budget(ceiling)
         for field in requested.__dataclass_fields__:
             if getattr(requested, field) > getattr(ceiling, field):
                 raise ValueError("report exceeds independent verifier budget: " + field)
+        if version == 7:
+            _check_structured_declarations(document, interfaces, models, requested)
         discovery = decode(SourceDiscovery, document["discovery"])
         roots = discovery.source_roots if discovery.root_mode is DiscoveryRootMode.DECLARED else ()
-        if version == 6:
+        if version == 6 or version == 7 and document["call_sources"] is not None:
             from scar.analysis.call_demand import replay_inventory_from_calls
             rebuilt = replay_inventory_from_calls(document, discovery=discovery, roots=roots,
                 budget=requested, context_ceiling=context_verification_budget,
@@ -254,7 +315,8 @@ class ProgramInventory:
         if version >= 4:
             # Decode and validate typed interfaces before expensive source replay.
             interfaces = decode(FunctionInterfaces, document["interfaces"])
-            expected_profile = BodyLoweringProfile.BOUND_FRAME if version == 5 else BodyLoweringProfile.BOUND_FORMALS
+            expected_profile = (BodyLoweringProfile.STRUCTURED_BODY if version == 7 else
+                                BodyLoweringProfile.BOUND_FRAME if version == 5 else BodyLoweringProfile.BOUND_FORMALS)
             if interfaces.profile is not expected_profile:
                 raise ValueError("inventory version differs from its interface profile")
             runtime_options["interface_model"] = True
@@ -286,6 +348,50 @@ class ProgramInventory:
         if _canonical(rebuilt.to_dict()) != _canonical(document):
             raise ValueError("inventory differs from current source/discovery/context replay")
         return rebuilt
+
+
+def _check_structured_declarations(document, interfaces, models, budget):
+    """Reject contradictory v7 ownership before reading source or raw evidence.
+
+    This checks declared endpoints, not source truth. Exact construction is
+    independently replayed after the header, types and ceilings are admitted.
+    """
+    if len(document["files"]) > budget.max_files:
+        raise ValueError("structured inventory file count exceeds its budget")
+    definitions, bodies, operations = {}, {}, 0
+    body_fields = {"definition", "status", "graph", "metadata", "reason", "construction_operations"}
+    for file in document["files"]:
+        if type(file) is not dict or type(file.get("bodies")) is not list:
+            raise ValueError("structured inventory file/body fields mismatch")
+        for definition in decode(tuple[DefinitionInventory, ...], file.get("definitions")):
+            if definition.id in definitions:
+                raise ValueError("duplicate structured inventory definition")
+            definitions[definition.id] = definition
+        for body in file["bodies"]:
+            if type(body) is not dict or set(body) != body_fields:
+                raise ValueError("structured inventory body fields mismatch")
+            definition = decode(OperationDefinitionID, body["definition"])
+            status = decode(BodyStatus, body["status"])
+            if body["graph"] is None:
+                if status is BodyStatus.LOWERED_WITH_GAPS:
+                    raise ValueError("lowered structured body has no graph")
+                continue
+            graph = body["graph"]
+            if (status is not BodyStatus.LOWERED_WITH_GAPS or type(graph) is not dict
+                    or type(graph.get("operations")) is not list or definition in bodies):
+                raise ValueError("structured body graph/status/identity mismatch")
+            bodies[definition] = decode(RegionID, graph.get("root"))
+            operations += len(graph["operations"])
+    ports = {interface.definition: interface for interface in interfaces.bodies}
+    overlays = {model.definition: model for model in models}
+    if (len(bodies) > budget.max_lowered_bodies or operations > budget.max_operations):
+        raise ValueError("structured inventory graphs exceed construction budget")
+    if set(overlays) != set(bodies) or set(ports) != set(bodies):
+        raise ValueError("structured inventories require one model and interface per emitted body")
+    for definition, root in bodies.items():
+        if (definition not in definitions or overlays[definition].region != root
+                or ports[definition].region != root or overlays[definition].source != definitions[definition].source):
+            raise ValueError("structured inventory model differs from its body/interface/source")
 
 
 def _check_budget(budget):
@@ -612,7 +718,7 @@ def _body_connections(bodies):
     return linked, candidates, supported
 
 
-def _attach_bodies(file, bodies, *, call_witnesses=None):
+def _attach_bodies(file, bodies, *, call_witnesses=None, body_profile=None):
     linked, candidates, supported = _body_connections(bodies)
     definitions = tuple(replace(definition, body_supported=definition.id in supported) for definition in file.definitions)
     by_id = {definition.id:definition for definition in definitions}
@@ -626,7 +732,8 @@ def _attach_bodies(file, bodies, *, call_witnesses=None):
                   for call in file.calls)
     coverage = tuple(replace(entry, status=CoverageStatus.CONNECTED,
         reason="source atom connected to a generated body graph; dynamic effects/target may remain unknown")
-        if entry.source.atom_id in linked and entry.status is not CoverageStatus.UNSUPPORTED
+        if entry.source.atom_id in linked and (entry.status is not CoverageStatus.UNSUPPORTED
+                                              or body_profile is BodyLoweringProfile.STRUCTURED_BODY)
         and entry.phase is not ExecutionPhase.ANNOTATION
         and entry.ast_kind not in {"FunctionDef", "AsyncFunctionDef", "ClassDef", "Lambda"} else entry
         for entry in file.coverage)
@@ -636,21 +743,26 @@ def _attach_bodies(file, bodies, *, call_witnesses=None):
 def inventory_program(entry, *, project_root=None, source_roots=(), max_files=128, max_bytes=8_000_000,
                       max_directories=4096, max_lowered_bodies=256, max_operations=10000, max_call_witnesses=4096,
                       runtime_trace=None, runtime_budget=RuntimeTraceBudget(), max_compile_attempts=1024,
-                      context_budget=ContextStoreBudget(), calls_trace=None, call_budget=CallEdgeBudget()):
+                      context_budget=ContextStoreBudget(), calls_trace=None, call_budget=CallEdgeBudget(),
+                      body_profile=BodyLoweringProfile.BOUND_FRAME):
     budget = InventoryBudget(max_files, max_bytes, max_directories, max_lowered_bodies, max_operations, max_call_witnesses)
     _check_budget(budget)
     _check_context_budget(context_budget)
+    if type(body_profile) is not BodyLoweringProfile or body_profile not in (
+            BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY):
+        raise ValueError("public inventory requires an explicit frame or structured body profile")
     if calls_trace is not None:
         if runtime_trace is not None:
             raise ValueError("calls input and legacy runtime trace are separate inventory modes")
         from scar.analysis.call_demand import inventory_from_calls
         return inventory_from_calls(entry, project_root=project_root, source_roots=source_roots,
-            budget=budget, call_trace=calls_trace, call_budget=call_budget, context_budget=context_budget)
+            budget=budget, call_trace=calls_trace, call_budget=call_budget, context_budget=context_budget,
+            body_profile=body_profile)
     trace = read_runtime_trace(runtime_trace, budget=runtime_budget) if runtime_trace is not None else None
     return _inventory_from_inputs(entry, project_root=project_root, source_roots=source_roots,
                                   budget=budget, runtime=trace, max_compile_attempts=max_compile_attempts,
                                   context_budget=context_budget, interface_model=True,
-                                  body_profile=BodyLoweringProfile.BOUND_FRAME)
+                                  body_profile=body_profile)
 
 
 def _inventory_from_inputs(entry, *, project_root, source_roots, budget, runtime=None, max_compile_attempts=1024,
@@ -667,7 +779,8 @@ def _inventory_from_inputs(entry, *, project_root, source_roots, budget, runtime
     if interface_model and not global_expansion:
         raise ValueError("bound interfaces require global root-only expansion")
     if body_profile is not None and (type(body_profile) is not BodyLoweringProfile
-            or body_profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME)
+            or body_profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME,
+                                    BodyLoweringProfile.STRUCTURED_BODY)
             or not interface_model):
         raise ValueError("explicit bound profile requires the corresponding interface model")
     runtime_builder, paths = None, ()
@@ -685,13 +798,14 @@ def _inventory_from_inputs(entry, *, project_root, source_roots, budget, runtime
     if interface_model or (runtime_builder is not None and global_expansion):
         from scar.analysis.program_expansion import expand_inventory
         _check_context_budget(context_budget)
-        files, expansion, measurements, interfaces, frames = expand_inventory(discovery, runtime_builder, budget, context_budget,
+        files, expansion, measurements, interfaces, frames, structured = expand_inventory(discovery, runtime_builder, budget, context_budget,
                                             _ordered_files(discovery, runtime_paths=paths), interface_model=interface_model,
                                             body_profile=body_profile)
         result = ProgramInventory(discovery, files, budget, runtime_builder.finish() if runtime_builder is not None else None,
                                   expansion, measurements, interfaces,
-                                  BodyLoweringProfile.BOUND_FRAME if body_profile is BodyLoweringProfile.BOUND_FRAME else None,
-                                  frames)
+                                  body_profile if body_profile in (BodyLoweringProfile.BOUND_FRAME,
+                                                                  BodyLoweringProfile.STRUCTURED_BODY) else None,
+                                  frames, structured=structured)
         result._check_profile()
         return result
     files = []

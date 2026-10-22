@@ -85,7 +85,8 @@ def validate_body_interface(body, interface, signature):
 class FunctionInterfaceBuilder:
     def __init__(self, *, profile=BodyLoweringProfile.BOUND_FORMALS):
         if type(profile) is not BodyLoweringProfile or profile not in (
-                BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME):
+                BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME,
+                BodyLoweringProfile.STRUCTURED_BODY):
             raise ValueError("function interfaces require an explicit bound profile")
         self.profile = profile
         self.signatures, self.arguments, self.body_interfaces = {}, {}, {}
