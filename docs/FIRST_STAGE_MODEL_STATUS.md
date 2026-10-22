@@ -4,6 +4,12 @@
 
 ### 2026-10-22恢复状态
 
+全范围4096/100000op原重建运行超过30分钟，尚无新全量覆盖数。只读调用链审查已
+证实每成功structured/ENV body原有3次core全验与2次overlay全验，无loop也做循环
+支配分析。现已消除内部重复，lowerer仍在返回前全验，expansion核profile/definition/
+interface/region，公共读入/源码重放保留完整检查。未增加测试，尚无吞吐提速实测；
+不会把代码路径减少直接当测得的加速比。后续实际建模使用该版本。
+
 OS资源已从原成功LeWM的253份/705569行原档自动导入：12587 OFD、12588 handle
 代次、521 handle结束、968条private表内IO连接；其余syscall及共享/继承明确OPEN。
 独立原档hash/行/成功open集合核对PASS。首次输出重复artifact造成512MB上限失败，

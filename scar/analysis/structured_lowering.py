@@ -528,7 +528,6 @@ class StructuredBuilder(_Builder):
                     EvidenceKind.INFERRED, self.assumptions(), (), (),
                     old_callees[0].binding_use if old_callees else None))
             graph = self.make_graph()
-            require_valid(graph)
             structured = StructuredBodyModel(self.function_definition.id, self.function_context, self.source(node),
                                               tuple(self.protocols), tuple(self.loops))
         except _Unsupported as error:
@@ -538,6 +537,8 @@ class StructuredBuilder(_Builder):
         metadata = LoweringMetadata(self.entry, self.snapshot, tuple(self.operation_links), tuple(self.value_links),
                                     tuple(self.targets), tuple(self.gaps), self.assumptions(), tuple(self.use_links))
         if graph is not None:
+            # This complete check also validates the canonical core; callers of
+            # PreparedSource.lower receive a fully checked constructed body.
             require_valid_structured_body(structured, graph, self.interface, metadata,
                                            semantic=self.semantic, control=self.control)
         return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface, None, structured)
@@ -676,6 +677,10 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
         and operations[link.operation].terminator.kind is TerminatorKind.BRANCH}
     if len({loop.source.atom_id for loop in model.loops}) != len(model.loops) or {loop.source.atom_id for loop in model.loops} != expected_loops:
         raise ValueError("structured loop interfaces must cover each emitted source loop control")
+    if not model.loops:
+        # All body/protocol and loop-coverage checks are complete. The remaining
+        # predecessor/dominance analysis is used only by loop-interface checks.
+        return
     predecessors = {block: set() for block in blocks}
     incoming = []
     for operation in graph.operations:

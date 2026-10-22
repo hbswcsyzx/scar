@@ -39,7 +39,6 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
     from scar.analysis.function_interfaces import FunctionInterfaceBuilder
     from scar.ir.program.functions import BodyLoweringProfile
     from scar.ir.program.frame_validation import require_valid_frame_model
-    from scar.analysis.structured_lowering import require_valid_structured_body
     selected_profile = body_profile or BodyLoweringProfile.BOUND_FORMALS
     interfaces = FunctionInterfaceBuilder(profile=selected_profile) if interface_model else None
     frames, structured = [], []
@@ -278,9 +277,19 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                             else:
                                 if result.structured is None:
                                     raise ValueError("structured body needs its explicit protocol model")
-                                require_valid_structured_body(result.structured, body.graph, result.interface,
-                                    body.metadata, semantic=loaded_context.semantic, control=loaded_context.control)
-                                if result.structured.definition != body.definition:
+                                # PreparedSource.lower dispatches these profiles to
+                                # StructuredBuilder.run, which validates the core
+                                # and complete overlay before returning. The frozen
+                                # BodyInventory above retains those exact graph and
+                                # metadata objects; no rewriting intervenes here.
+                                # Public inventory/source replay still validates
+                                # externally supplied graphs independently.
+                                if (result.interface is None or result.interface.profile is not selected_profile
+                                        or result.interface.definition != body.definition
+                                        or result.interface.region != body.graph.root):
+                                    raise ValueError("structured interface differs from the selected body/profile")
+                                if (result.structured.definition != body.definition
+                                        or result.structured.region != result.interface.region):
                                     raise ValueError("structured model differs from its body definition")
                         interfaces.record_body(body, result.interface)
                         if selected_profile is BodyLoweringProfile.BOUND_FRAME and result.frame is not None:
