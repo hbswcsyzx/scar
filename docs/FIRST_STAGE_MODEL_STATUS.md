@@ -4,6 +4,11 @@
 
 ### 2026-10-22恢复状态
 
+注解/异常/断言也已接线并直接回查真实源码：19文件/24个原阻塞body，
+4个局部成功、20个仍拒绝、0错误，60.15秒；下一缺口主要JoinedStr12、Dict6。
+产品75fc24d，见[记录](../artifacts/experiments/first_stage_statement_blockers_20261022/README.md)。
+与下面90-body诊断均为独立范围，未另报全量新覆盖率，未扩大测试。
+
 随后的真实阻塞回查已完成：从上述环境inventory机械选出66个写入、15个BoolOp、
 9个IfExp，31文件/90body中**37个成功局部展开、53个继续拒绝、0构造错误**。
 新增receiver/key源接线和短路控制使用原canonical图，未扩测试；两分多钟完成。
@@ -45,7 +50,7 @@ code/source分组接入33/425，仅比旧baseline增加1个body和1组。独立�
 仍造成整body回滚。不能把481条语言protocol或source图规模当完整模型完成率；
 下一项按这些实际语言/接口断点排序，实际状态/来源/资源闭包仍未完成。
 
-### 下一实施项（仍为第一阶段S3）
+### 环境接线前的实施计划（已执行，保留历史）
 
 优先**自动函数环境入口及cell/namespace依赖**，不预定下一项就是短路表达式。
 这补全部函数的隐式输入断口，复用既有EnvironmentInterface、FunctionEntryLayout、

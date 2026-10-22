@@ -27,18 +27,21 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--inventory", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--terminal-family", action="append",
+                        help="exact observed terminal detail; default is heap/BoolOp/IfExp cohort")
     args = parser.parse_args()
     args.out.mkdir(exist_ok=False)
     with gzip.open(args.inventory, "rt") as stream:
         document = json.load(stream)
     assert document["schema_version"] == 8
+    selected_details = set(args.terminal_family) if args.terminal_family else DETAILS
     groups = defaultdict(list)
     for file in document["files"]:
         definitions = {row["id"]["wire"]: row for row in file["definitions"]}
         for body in file["bodies"]:
             terminal = [gap for gap in (body["metadata"] or {}).get("gaps", ())
                         if gap["kind"] in {"UNSUPPORTED_SYNTAX", "UNSUPPORTED_SIGNATURE", "SOURCE_MAPPING", "BUDGET"}]
-            if body["status"] == "UNSUPPORTED" and terminal and terminal[-1]["detail"] in DETAILS:
+            if body["status"] == "UNSUPPORTED" and terminal and terminal[-1]["detail"] in selected_details:
                 groups[file["snapshot"]["path"]].append((file, definitions[body["definition"]["wire"]], terminal[-1]["detail"]))
     counts, reasons, families, rows = Counter(), Counter(), Counter(), []
     with gzip.open(args.out / "bodies.jsonl.gz", "wt") as archive:
@@ -66,7 +69,7 @@ def main():
                 reasons[row["next_terminal"] or row["status"]] += 1
                 rows.append(row)
                 print(json.dumps({key: row.get(key) for key in ("path", "definition", "status", "next_terminal")}), flush=True)
-    result = {"scope": "automatic diagnostic cohort from three observed terminal families; not whole-program inventory",
+    result = {"scope": "automatic diagnostic cohort from observed terminal families; not whole-program inventory",
               "source_files": len(groups), "selected_bodies": len(rows), "families": dict(families),
               "counts": dict(counts), "next_terminals": dict(reasons), "bodies": rows,
               "max_operations_per_body": 10000, "target_executed": False,
