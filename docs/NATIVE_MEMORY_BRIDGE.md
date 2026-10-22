@@ -1,8 +1,16 @@
 # 第一阶段下一资源连接：profiler allocation 生命周期
 
-2026-10-22。设计已按本机原档审计；**尚未实施导入**。
+2026-10-22。设计已按本机原档实施；**真实导入与独立审计已完成，完整生命周期闭包仍未通过**。
 
-## 实际断口
+## 实施结果
+
+产品7bcece2，公共import-native实跑299.59s/exit0；70872条全部保留，
+35598分配代次、35274free、916复用槽、324窗口末open。标准库独立审计PASS。
+旧capture缺少adjust_timestamps配置，全部CONDITIONAL，ordering_qualified=0；
+canonical stage/effect与物理lifetime仍未连接。
+见[命令/原档对应与限制](../artifacts/experiments/first_stage_native_memory_20261022/README.md)。
+
+## 实施前的实际断口
 
 `native_import.chrome_events()` 当前对 `ph != X` 只保留原档 locator。
 真实LeWM Kineto中的 **70872条[memory]** 因而尚无allocation/lifetime模型。

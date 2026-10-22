@@ -4,6 +4,19 @@
 
 ### 2026-10-22恢复状态
 
+最新资源导入已经真实完成（产品7bcece2）：70872条memory全部逐项保留，
+35598 allocation epochs、35274配对free、916复用地址槽、324窗口末open；
+独立原档/ValueGraph/lifetime审计PASS。旧捕获配置缺失使全部lifetime仍为
+CONDITIONAL，canonical stage/effect/physical lifetime未连接；不能计完整闭包。
+见[真实内存导入](../artifacts/experiments/first_stage_native_memory_20261022/README.md)。
+
+格式字符串已直接回查19文件/22个相关body，16个局部成功、6个剩余其它阻塞、
+0 ERROR，55.59s。见[真实字符串回查](../artifacts/experiments/first_stage_string_blockers_20261022/README.md)。
+诊断cohort不与全量54相加；本轮未扩大测试。接下来同次LeWM采集补实际函数
+环境和明确profiler配置，源码侧补Dict等已有真实断点；仍不进入化简。
+
+以下“尚未导入”是实施前记录，以上结果接管对应状态。
+
 下一项同时补实际资源断口：原Kineto有70872条memory记录，native importer尚未
 建allocation/lifetime；本次独立重计已保存。先复用StorageAllocation/AllocationTarget
 接地址代次、provider顺序和生命周期义务，不能称cudaMalloc或拼Tensor内容。

@@ -29,20 +29,30 @@ def main():
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--terminal-family", action="append",
                         help="exact observed terminal detail; default is heap/BoolOp/IfExp cohort")
+    parser.add_argument("--follow-summary", type=Path, action="append", default=[],
+                        help="also select the next recorded terminal from a prior automatic cohort")
     args = parser.parse_args()
     args.out.mkdir(exist_ok=False)
     with gzip.open(args.inventory, "rt") as stream:
         document = json.load(stream)
     assert document["schema_version"] == 8
     selected_details = set(args.terminal_family) if args.terminal_family else DETAILS
+    follow = {}
+    for path in args.follow_summary:
+        summary = json.loads(path.read_text())
+        for row in summary["bodies"]:
+            if row.get("status") == "UNSUPPORTED" and row.get("next_terminal") in selected_details:
+                follow[row["path"], row["definition"]] = row["next_terminal"]
     groups = defaultdict(list)
     for file in document["files"]:
         definitions = {row["id"]["wire"]: row for row in file["definitions"]}
         for body in file["bodies"]:
             terminal = [gap for gap in (body["metadata"] or {}).get("gaps", ())
                         if gap["kind"] in {"UNSUPPORTED_SYNTAX", "UNSUPPORTED_SIGNATURE", "SOURCE_MAPPING", "BUDGET"}]
-            if body["status"] == "UNSUPPORTED" and terminal and terminal[-1]["detail"] in selected_details:
-                groups[file["snapshot"]["path"]].append((file, definitions[body["definition"]["wire"]], terminal[-1]["detail"]))
+            definition = definitions[body["definition"]["wire"]]
+            followed = follow.get((file["snapshot"]["path"], definition["qualname"]))
+            if body["status"] == "UNSUPPORTED" and terminal and (terminal[-1]["detail"] in selected_details or followed):
+                groups[file["snapshot"]["path"]].append((file, definition, followed or terminal[-1]["detail"]))
     counts, reasons, families, rows = Counter(), Counter(), Counter(), []
     with gzip.open(args.out / "bodies.jsonl.gz", "wt") as archive:
         for path, requests in groups.items():

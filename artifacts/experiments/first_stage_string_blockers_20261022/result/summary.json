@@ -1,0 +1,2551 @@
+{
+  "scope": "automatic diagnostic cohort from observed terminal families; not whole-program inventory",
+  "source_files": 19,
+  "selected_bodies": 22,
+  "families": {
+    "structured expression protocol still required for JoinedStr": 22
+  },
+  "counts": {
+    "UNSUPPORTED": 6,
+    "LOWERED_WITH_GAPS": 16
+  },
+  "next_terminals": {
+    "missing target-child computational semantics require a checked rule for Call": 1,
+    "LOWERED_WITH_GAPS": 16,
+    "structured expression protocol still required for DictComp": 1,
+    "structured expression protocol still required for Call": 1,
+    "structured heap/global/destructuring writes require their own typed protocol": 1,
+    "structured control/effect protocol still required for With": 2
+  },
+  "bodies": [
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/__init__.py",
+      "definition": "__getattr__",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "UNSUPPORTED",
+      "construction_operations": 50,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "UNSUPPORTED_SYNTAX",
+          "detail": "missing target-child computational semantics require a checked rule for Call"
+        }
+      ],
+      "next_terminal": "missing target-child computational semantics require a checked rule for Call"
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/backbone/decoders.py",
+      "definition": "CNNImageDecoder.forward",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 255,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/backbone/pos_embed.py",
+      "definition": "RotaryPositionEmbedding2D.extra_repr",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 55,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/backbone/video/predrnn.py",
+      "definition": "STLSTMCell.__init__",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 203,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/backbone/video/recurrent_vit.py",
+      "definition": "_PatchEmbed.__init__",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 128,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/callbacks/image_retrieval.py",
+      "definition": "ImageRetrieval.on_validation_epoch_end",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "UNSUPPORTED",
+      "construction_operations": 287,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "UNSUPPORTED_SYNTAX",
+          "detail": "structured expression protocol still required for DictComp"
+        }
+      ],
+      "next_terminal": "structured expression protocol still required for DictComp"
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/callbacks/registry.py",
+      "definition": "log",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "UNSUPPORTED",
+      "construction_operations": 71,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "UNSUPPORTED_SYNTAX",
+          "detail": "structured expression protocol still required for Call"
+        }
+      ],
+      "next_terminal": "structured expression protocol still required for Call"
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/callbacks/utils.py",
+      "definition": "get_data_from_batch_or_outputs",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 278,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/data/video.py",
+      "definition": "_compute_segment_plan",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "UNSUPPORTED",
+      "construction_operations": 210,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "UNSUPPORTED_SYNTAX",
+          "detail": "structured heap/global/destructuring writes require their own typed protocol"
+        }
+      ],
+      "next_terminal": "structured heap/global/destructuring writes require their own typed protocol"
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/utils/distance_metrics.py",
+      "definition": "compute_pairwise_distances",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 177,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/utils/flops.py",
+      "definition": "FLOPBudgetExceeded.__init__",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 113,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-pretraining/stable_pretraining/utils/gdrive_utils.py",
+      "definition": "on_upload_complete",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 78,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/buffer.py",
+      "definition": "ReplayBuffer._call_sampler",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 106,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/dataset.py",
+      "definition": "GoalDataset._sample_geometric_future_step",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 156,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "assertion source semantics use compiler optimize=0; live optimized-code correspondence remains unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/dataset.py",
+      "definition": "GoalDataset._sample_uniform_future_step",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 133,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "assertion source semantics use compiler optimize=0; live optimized-code correspondence remains unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/format.py",
+      "definition": "register_format",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 120,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "heap assignment receiver/key/order are connected; descriptor/index dispatch, aliasing and complete effects remain unproved"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/formats/video.py",
+      "definition": "VideoDataset._reader",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 55,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/solver/utils.py",
+      "definition": "prepare_init_action",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "UNSUPPORTED",
+      "construction_operations": 253,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "assertion source semantics use compiler optimize=0; live optimized-code correspondence remains unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "assertion source semantics use compiler optimize=0; live optimized-code correspondence remains unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "UNSUPPORTED_SYNTAX",
+          "detail": "structured control/effect protocol still required for With"
+        }
+      ],
+      "next_terminal": "structured control/effect protocol still required for With"
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+      "definition": "Discrete.check",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 74,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+      "definition": "Box.check",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 69,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/utils.py",
+      "definition": "_resolve",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "LOWERED_WITH_GAPS",
+      "construction_operations": 178,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        }
+      ],
+      "next_terminal": null
+    },
+    {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/utils.py",
+      "definition": "_load_config",
+      "original_terminal": "structured expression protocol still required for JoinedStr",
+      "status": "UNSUPPORTED",
+      "construction_operations": 55,
+      "gaps": [
+        {
+          "kind": "FRAME_EFFECT",
+          "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+        },
+        {
+          "kind": "CODE_VERSION",
+          "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "EFFECT_SUMMARY",
+          "detail": "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_DISPATCH",
+          "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+        },
+        {
+          "kind": "DYNAMIC_TARGET",
+          "detail": "candidate source is not verified runtime dispatch"
+        },
+        {
+          "kind": "UNSUPPORTED_SYNTAX",
+          "detail": "structured control/effect protocol still required for With"
+        }
+      ],
+      "next_terminal": "structured control/effect protocol still required for With"
+    }
+  ],
+  "max_operations_per_body": 10000,
+  "target_executed": false,
+  "whole_program_graph_established": false,
+  "runtime_environments_verified": false,
+  "transformation_authorized": false
+}
