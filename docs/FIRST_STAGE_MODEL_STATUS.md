@@ -11,6 +11,12 @@ expression→statement上下文代码（`ccf6cac`），已恢复到持久worktre
 本次17项通用source-context/source-layer/CLI测试通过；全LeWM库存重建与独立
 查询核验另见[本次报告](../artifacts/experiments/first_stage_source_context_20261022/README.md)。
 
+现已实际完成原151文件三图恢复与全10,235调用查询，原snapshot/三摘要全部匹配。
+9,116个调用有结构语句上下文，1,119个未连；原exact-CALL-ID匹配语句CFG为0。
+独立标准库审核全量PASS，核63,541条operand、82,299条结果producer和78,691条
+控制边；第一次审核的lambda phase误判及修正原样记录。这些只是源码结构关系，
+不等于动态值、状态或资源因果闭包，缺口并未因新增边而自动消失。
+
 旧说明中CALL的同ID直连语句CFG建议已撤回：同ID类型不等于同粒度，parent_id也
 不是AST父节点。新查询按源码指纹、完整AST字段路径和scope关联原语句，保留
 短路、默认值、延迟body等边界，不宣称表达式必执行。S3/S4仍OPEN；原50个局部
