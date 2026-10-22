@@ -4,6 +4,11 @@
 
 ### 2026-10-22恢复状态
 
+下一项同时补实际资源断口：原Kineto有70872条memory记录，native importer尚未
+建allocation/lifetime；本次独立重计已保存。先复用StorageAllocation/AllocationTarget
+接地址代次、provider顺序和生命周期义务，不能称cudaMalloc或拼Tensor内容。
+见[具体接线设计](NATIVE_MEMORY_BRIDGE.md)。源码侧继续JoinedStr/Dict/解构等实际断点。
+
 注解/异常/断言也已接线并直接回查真实源码：19文件/24个原阻塞body，
 4个局部成功、20个仍拒绝、0错误，60.15秒；下一缺口主要JoinedStr12、Dict6。
 产品75fc24d，见[记录](../artifacts/experiments/first_stage_statement_blockers_20261022/README.md)。
