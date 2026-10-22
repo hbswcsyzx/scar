@@ -2,6 +2,26 @@
 
 日期：2026-10-20。**OPEN：完整 LeWM 自动建模未验收。**
 
+### 2026-10-22恢复状态
+
+临时开发目录已不存在，旧查询session和相关进程均不存在，未提交的10月20日
+source-layer归档/日志不能作为当前可复核证据。Git提交保存了三图留存/复用及
+expression→statement上下文代码（`ccf6cac`），已恢复到持久worktree
+`~/AAA/scar-worktrees/structured-program-model`。不改LeWM或原SCAR checkout。
+本次17项通用source-context/source-layer/CLI测试通过；全LeWM库存重建与独立
+查询核验另见[本次报告](../artifacts/experiments/first_stage_source_context_20261022/README.md)。
+
+旧说明中CALL的同ID直连语句CFG建议已撤回：同ID类型不等于同粒度，parent_id也
+不是AST父节点。新查询按源码指纹、完整AST字段路径和scope关联原语句，保留
+短路、默认值、延迟body等边界，不宣称表达式必执行。S3/S4仍OPEN；原50个局部
+typed body、206个UNSUPPORTED、1,961个NOT_ATTEMPTED未因该连接而增加。
+
+设计仍按[合同实体表](FIRST_STAGE_MODEL_CONTRACT.md)：代码来源；Operation/Value/
+StateLocation/Region/Resource规范结构；运行occurrence与对象/环境；逻辑内容版本/
+来源；allocation/view/materialization；work/completion及证据。类型、角色和动作
+标签不混在一层。下一步补实际源码→core恢复、Uses/状态与资源生命周期闭包；
+不进入detector/backend/化简或性能A/B。以下保留10月20日已入库记录的原范围。
+
 最新增量：独立 ObjectInstance 目录及准确 marker 参数引用桥已落地（`448b912`）。
 重放真实 CPU 原档，得到6个对象、12条逐槽对应、保留2个重复参数槽；独立 raw
 审计通过，没有制造 LogicalVersion/allocation。此为有条件的研究 profile，不是

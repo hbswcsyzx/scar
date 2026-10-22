@@ -16,7 +16,7 @@ typed body 不支持某个构造时，这些已有表达式/控制关系也无�
 | --- | --- | --- |
 | SemanticGraph | 源码实体、作用域、版本化 span、OperationDefinitionID | 动态函数对象、实际 target、纯函数合同 |
 | SourceSemanticsGraph | ordered operand/result、StaticValue.producer、局部绑定和语法边界 | 跨迭代内容版本、精确可变对象 alias、实际 value occurrence |
-| SourceControlFlowGraph | suite/node/edge、分支/循环/失败与 gap；节点引用同 operation ID | 已执行路径、完整 exception 语义或可行性证明 |
+| SourceControlFlowGraph | suite/node/edge、分支/循环/失败与 gap；节点引用语句 operation ID | 表达式operation的相同粒度、已执行路径、完整exception语义或可行性证明 |
 
 这三张来源图是现有模型的观察层，不替代 canonical ProgramGraph，也不为一次
 实际执行制造静态 Region/RETURN。静态 ValueID 和动态 ObjectID/ValueVersion 继续
@@ -66,13 +66,36 @@ verified CallSiteLink.call
   → FileInventory.calls[operation].semantic_operation
   → SourceSemanticsGraph.operations[id]
   → operands(role,index).value → StaticValue.producer
-  → SourceControlFlowGraph.nodes[*].operations / suite / edges
+
+同一调用的source atom + 指纹匹配AST字段路径 + lexical scope
+  → 包含求值的原语句 → 原SourceControlFlowGraph node / suite / edges
 ```
 
-semantic_operation 为 None 的 fallback 不能提升成计算语义；同 operation 可能
-关联多个控制节点，必须保留全部。block 字符串不是 CFG NodeID。动态 actual/
-formal、visit、状态和 slot 仍需原 call/operand/canonical receipts，不能用同一个
-weak token 或静态 producer 自动补齐。
+**撤回旧exact-ID连接建议：** CFG以语句为粒度，CALL是另一个表达式定义；共享
+ID类型不保证表达式ID出现在nodes.operations。frontend的parent_id是lexical scope，
+不是AST父节点。不能将CALL塞进原CFG来冒充必执行，也不能只按包含行号拼接。
+
+`index_source_control_contexts`复用既有三图，按指纹匹配的原AST kind/full span/
+source atom重建parent/field/index。`index.query(call.source, execution_owner)`返回
+原语句anchor、相对字段路径、scope、原CFG节点及gap。记录恒为execution_proven=false。
+默认参数的路径保留无行号arguments等结构wrapper；同一行多条语句不合并；函数
+call-time body不继承class/with定义时边界；comprehension首iterable归外层，其余
+scope没有唯一原身份就明确未定。短路、注解策略、循环、失败与挂起边界均保留。
+
+无计算语义的调用仍可按SourceReference查询，不补造StaticValue；scope查询不符
+保留原字段路径、清空控制对应并报gap。block字符串不是CFG NodeID。动态actual/
+formal、visit、状态和slot仍需原call/operand/canonical receipts，不能用weak token
+或静态producer自动补齐。
+
+## 2026-10-22恢复与验收记录
+
+临时worktree及未提交的10月20日源码归档/实验日志在环境重启后已不在磁盘；
+代码`93176e1`、`93a4171`、`ccf6cac`仍在Git。历史叙述不能替代当前证据。现在在
+持久目录`~/AAA/scar-worktrees/structured-program-model`恢复，原仓库不改。
+本次真实重建使用原已入库151文件库存，在同一prepare结果上查询上下文，再交给
+原公共归档writer核snapshot/三图digest并保存，避免第二遍prepare/重读typed图。
+这是实验观察器，不改变生产writer。命令、日志和最终结果见
+[本次验收](../artifacts/experiments/first_stage_source_context_20261022/README.md)。
 
 ## 验收条件与范围
 
