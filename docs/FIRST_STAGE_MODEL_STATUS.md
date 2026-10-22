@@ -4,6 +4,14 @@
 
 ### 2026-10-22恢复状态
 
+随后的真实阻塞回查已完成：从上述环境inventory机械选出66个写入、15个BoolOp、
+9个IfExp，31文件/90body中**37个成功局部展开、53个继续拒绝、0构造错误**。
+新增receiver/key源接线和短路控制使用原canonical图，未扩测试；两分多钟完成。
+这是独立cohort预算，**不能直接与全量54相加**。代码2b805c2及逐项图/下一断点见
+[真实源码回查](../artifacts/experiments/first_stage_source_blockers_20261022/README.md)。
+当前优先剩余解构、异常、声明、import及复杂目标表达式，运行state/resource闭包
+仍未完成；下一动作继续第一阶段建模，不进入优化。
+
 最新真实 environment inventory8 已生成（产品545fa4c）：同151文件/原raw/
 256尝试/10000op预算，54个局部图、202个UNSUPPORTED、1961个NOT_ATTEMPTED；
 core/source分组34/425。原45个环境拒绝只有3个最终成功，25个继续卡heap写，
