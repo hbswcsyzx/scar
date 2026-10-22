@@ -424,8 +424,9 @@ def main(argv=None) -> int:
     operand_links = sub.add_parser('link-operands',help='automatically link original operand occurrences to core parameter and return ports')
     operand_links.add_argument('trace')
     operand_links.add_argument('--project-root',required=True)
-    operand_links.add_argument('--inventory',required=True,help='automatic bound-frame v5/v6 inventory to replay')
+    operand_links.add_argument('--inventory',required=True,help='automatic frame/structured/environment v5-v8 inventory to replay')
     operand_links.add_argument('--out',required=True)
+    operand_links.add_argument('--environments-out',help='also bind retained function-environment identities to existing entry ports; fresh JSON/JSON.gz output')
     operand_links.set_defaults(func=_link_operands_cli)
     check_operand_links = sub.add_parser('check-operand-links',help='independently rebuild conditional operand routes from raw trace/source/inventory')
     check_operand_links.add_argument('report')
@@ -1171,7 +1172,8 @@ def _link_operands_cli(args):
         limit = _call_report_limit(args.max_call_report_bytes)
         inventory, binding = _call_inventory_input(args.inventory, args, max_input_bytes=limit)
         report = link_call_operands(args.trace, args.project_root, inventory,
-            frame_budget=frame_budget, operand_budget=operand_budget, route_budget=route_budget)
+            frame_budget=frame_budget, operand_budget=operand_budget, route_budget=route_budget,
+            include_environments=bool(getattr(args, 'environments_out', None)))
         output = Path(args.out).resolve()
         if not (output.name.endswith('.json') or output.name.endswith('.json.gz')):
             raise ValueError('operand report must end in .json or .json.gz')
@@ -1180,12 +1182,22 @@ def _link_operands_cli(args):
         if any(output == path.resolve() or output.exists() and path.exists() and output.samefile(path)
                for path in chain(Path(args.trace).resolve().iterdir(), protected)):
             raise ValueError('operand report must differ from raw trace, source and inventory inputs')
+        environments_output = None
+        if getattr(args, 'environments_out', None):
+            environments_output = Path(args.environments_out).resolve()
+            if (environments_output == output or environments_output.exists()
+                    or not environments_output.name.endswith(('.json', '.json.gz'))
+                    or any(environments_output == path.resolve() for path in
+                           chain(Path(args.trace).resolve().iterdir(), protected))):
+                raise ValueError('environment output must be a fresh JSON path distinct from all inputs and the operand output')
         if output.exists():
             existing = _call_json(output, max_bytes=limit)
             if type(existing) is not dict or existing.get('schema') != 'scar.call-operand-links-envelope':
                 raise ValueError('refusing to overwrite a non-operand-report output')
         _write_call_document(output, {'schema':'scar.call-operand-links-envelope','schema_version':1,
             'inventory':binding,'analysis':report.to_dict()}, limit)
+        if environments_output is not None:
+            _write_call_document(environments_output, report.environments, limit)
     except (OSError,ValueError,TypeError,KeyError,AttributeError,SyntaxError,RecursionError) as error:
         print(json.dumps({'status':'INVALID','errors':[str(error)],'transformation_authorized':False}))
         return 2

@@ -54,6 +54,9 @@ class CallOperandReport:
     frame_model: CallEdgeModel
     operands: CallOperandTrace
     routing: OperandRouteModel
+    # Independent raw sidecar projection.  The historical v1 operand report
+    # remains byte-compatible; callers explicitly retain this separate record.
+    environments: dict | None = None
 
     def summary(self):
         return {
@@ -126,12 +129,14 @@ class CallOperandReport:
 
 
 def link_call_operands(trace, project_root, inventory, *, frame_budget=CallEdgeBudget(),
-                       operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget()):
+                       operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
+                       include_environments=False):
     """Automatically reconstruct original call operands and typed core routes."""
     from scar.analysis.call_operand_reader import read_call_operands
     from scar.analysis.call_operand_routes import build_operand_routes
 
     _require(inventory is not None, "operand/core linking requires an automatic frame inventory")
+    _require(type(include_environments) is bool, "include_environments must be an exact bool")
     _require(type(route_budget) is OperandRouteBudget, "route budget must be typed")
     route_budget.__post_init__()
     root = Path(project_root).resolve()
@@ -144,7 +149,16 @@ def link_call_operands(trace, project_root, inventory, *, frame_budget=CallEdgeB
     )
     routing = build_operand_routes(call_model=model, operand_model=operands, inventory=inventory,
                                    sources=sources, budget=route_budget)
-    return CallOperandReport(model, operands, routing)
+    environments = None
+    if include_environments:
+        from scar.analysis.callable_environment_import import import_callable_environments
+        environments = import_callable_environments(trace, inventory=inventory, sources=sources,
+            call_model=model, operand_model=operands,
+            max_raw_bytes=operand_budget.max_raw_bytes,
+            max_events=operand_budget.max_events,
+            max_line_bytes=operand_budget.max_line_bytes,
+            max_references=operand_budget.max_references)
+    return CallOperandReport(model, operands, routing, environments)
 
 
 __all__ = ["CallOperandReport", "link_call_operands"]

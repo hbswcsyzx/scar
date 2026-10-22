@@ -81,3 +81,12 @@ ENTRY记录已有精确handshake下function/globals/builtins关联。非weak对�
 事件/字节/单行和live-anchor预算有界，累计重复引用计数不消耗live表容量。
 见[一次实际CPU采集](../artifacts/experiments/first_stage_callable_environment_20261022/README.md)。
 尚需真实LeWM采集及source interface实际对应；字段存在不等于完整环境已证明。
+
+
+公共`link-operands --environments-out <fresh.json.gz>`可在同次source/call/operand分析
+中导入实际环境；API `link_call_operands(..., include_environments=True)`返回独立
+`report.environments`。原v1 operand wire不变，环境文件绑定原inventory digest与完整
+原档manifests。新adapter不额外重建source或重读全部frame，保持原验证范围。
+structured/ENV返回值使用真实FRAME_EXIT/RETURN配对；formal由显式slot/value
+连接，环境前缀不会平移Python显式实参索引。defaults仍为dispatch snapshot，
+细状态、完整环境和内容/效果权威均为False。
