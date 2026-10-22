@@ -484,6 +484,15 @@ def main(argv=None) -> int:
     normalize.add_argument("--out", required=True)
     normalize.add_argument("--report", help="raw record conservation and ambiguity report")
     normalize.set_defaults(func=_normalize_v2)
+    os_resources = sub.add_parser("import-os-resources", help="import retained per-TID strace files into existing resource and handle identities")
+    os_resources.add_argument("directory", help="strace -ff -ttt -T files, optionally gzip")
+    os_resources.add_argument("--scope", default="capture", help="namespace, additionally bound to the artifact manifest hash")
+    os_resources.add_argument("--root-tid", type=int, help="explicit captured target process declaration")
+    os_resources.add_argument("--max-bytes", type=int, default=512000000)
+    os_resources.add_argument("--max-lines", type=int, default=2000000)
+    os_resources.add_argument("--max-report-bytes", type=int, default=512000000)
+    os_resources.add_argument("--out", required=True, help="fresh output directory")
+    os_resources.set_defaults(func=_import_os_resources)
     native = sub.add_parser("import-native", help="import collected ETO/Kineto evidence without running or importing the target")
     native.add_argument("--execution-trace", required=True, help="ETO JSON or lossless JSON.gz")
     native.add_argument("--kineto", help="Kineto Chrome JSON or lossless JSON.gz; omit for ETO-only evidence")
@@ -949,13 +958,19 @@ def _write_call_document(output, document, max_bytes):
             stream=gzip.GzipFile(fileobj=raw,mode='wb',mtime=0,filename='') if output.suffix=='.gz' else raw
             try:
                 written=0
+                pending=bytearray()
                 encoder=json.JSONEncoder(sort_keys=True,ensure_ascii=True,allow_nan=False,separators=(',',':'))
                 for piece in encoder.iterencode(document):
                     data=piece.encode('utf-8')
                     written+=len(data)
                     if written+1>max_bytes:
                         raise ValueError('call report exceeds independent write byte ceiling: '+str(max_bytes))
-                    stream.write(data)
+                    pending.extend(data)
+                    if len(pending)>=65536:
+                        stream.write(pending)
+                        pending.clear()
+                if pending:
+                    stream.write(pending)
                 stream.write(b'\n')
             finally:
                 if stream is not raw:
@@ -1261,6 +1276,21 @@ def _normalize_v2(args) -> int:
     report = _write_document(args.report or str(out) + ".coverage.json", result.coverage)
     print(json.dumps({"schema": result.bundle.SCHEMA, "out": str(out),
                       "report": str(report), "valid": validation["valid"]}))
+    return 0
+
+
+def _import_os_resources(args) -> int:
+    from scar.trace.os_resources import import_os_resources
+    output = Path(args.out).resolve()
+    if output.exists():
+        raise SystemExit("import-os-resources requires a fresh output directory")
+    fragment = import_os_resources(args.directory, scope=args.scope, root_tid=args.root_tid,
+                                  max_bytes=args.max_bytes, max_lines=args.max_lines)
+    output.mkdir(parents=True)
+    (output / "os-resource-profile.json").write_bytes(fragment.protocol_bytes)
+    _write_call_document(output / "os-resources.json.gz", fragment.to_dict(), args.max_report_bytes)
+    (output / "summary.json").write_text(json.dumps(fragment.summary, indent=2) + "\n")
+    print(json.dumps({"out": str(output), **fragment.summary}))
     return 0
 
 

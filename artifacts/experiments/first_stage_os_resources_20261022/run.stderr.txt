@@ -1,0 +1,15 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/cli.py", line 1411, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/cli.py", line 565, in main
+    return args.func(args)
+           ~~~~~~~~~^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/cli.py", line 1285, in _import_os_resources
+    _write_call_document(output / "os-resources.json.gz", fragment.to_dict(), args.max_report_bytes)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/cli.py", line 966, in _write_call_document
+    raise ValueError('call report exceeds independent write byte ceiling: '+str(max_bytes))
+ValueError: call report exceeds independent write byte ceiling: 512000000

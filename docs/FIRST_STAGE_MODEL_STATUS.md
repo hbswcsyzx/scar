@@ -4,6 +4,13 @@
 
 ### 2026-10-22恢复状态
 
+OS资源已从原成功LeWM的253份/705569行原档自动导入：12587 OFD、12588 handle
+代次、521 handle结束、968条private表内IO连接；其余syscall及共享/继承明确OPEN。
+独立原档hash/行/成功open集合核对PASS。首次输出重复artifact造成512MB上限失败，
+改索引化来源及64KB写缓冲后61.48s成功，gzip8.5MiB，未加大上限或增加测试套件。
+见[实际OS导入](../artifacts/experiments/first_stage_os_resources_20261022/README.md)。
+canonical source/effect、mmap/pipe/device/ready与完整模型仍未通过。
+
 新LeWM采集失败已归档：未加载dataset，因历史数据根未挂载而returncode1。
 启动窗口实际得到209 function dispatch/63 entry，零drop/error；明确关闭profiler
 时间调整的配置已写入，148条原生memory receipt对应核验通过。此窗口无推理/GPU
