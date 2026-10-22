@@ -4,6 +4,15 @@
 
 ### 2026-10-22恢复状态
 
+新LeWM采集失败已归档：未加载dataset，因历史数据根未挂载而returncode1。
+启动窗口实际得到209 function dispatch/63 entry，零drop/error；明确关闭profiler
+时间调整的配置已写入，148条原生memory receipt对应核验通过。此窗口无推理/GPU
+计算结论，不能冒充完整episode。32MB自己的原档已核hash无损压到2.6MB。
+见[失败与保留](../artifacts/experiments/first_stage_lewm_environment_capture_20261022/README.md)。
+
+全范围源码重建正运行（51ac4d3），取消原256-body尝试上限，改4096/100000op；
+复用原成功episode calls，不执行目标或添加测试。结束后才报告新的全量数值。
+
 Dict/heap receiver的真实24body回查完成：20文件，8局部成功/16其余断点/0错误，
 96.72s。入口main成功，策略/求解推进到ListComp/解构。跨调用适配同步修复了
 structured/ENV未接旧frame路由的问题；显式formal、返回payload、环境端口分别处理。
