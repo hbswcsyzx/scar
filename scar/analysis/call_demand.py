@@ -159,7 +159,7 @@ def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trac
     from scar.ir.program.functions import BodyLoweringProfile
 
     if type(body_profile) is not BodyLoweringProfile or body_profile not in (
-            BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY):
+            BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
         raise ValueError("call-source inventory requires a frame or structured body profile")
 
     root = Path(project_root).resolve() if project_root is not None else Path(entry).absolute().parent.resolve()
@@ -240,7 +240,8 @@ def replay_inventory_from_calls(document, *, discovery, roots, budget, context_c
     schedule = decode(ExpansionScheduleV6, document["expansion"])
     _check_context_budget(schedule.budget, context_ceiling)
     interfaces = decode(FunctionInterfaces, document["interfaces"])
-    expected_profile = (BodyLoweringProfile.STRUCTURED_BODY if document["schema_version"] == 7
+    expected_profile = (BodyLoweringProfile.STRUCTURED_ENV if document["schema_version"] == 8 else
+                        BodyLoweringProfile.STRUCTURED_BODY if document["schema_version"] == 7
                         else BodyLoweringProfile.BOUND_FRAME)
     if (decode(BodyLoweringProfile, document["profile"]) is not expected_profile
             or interfaces.profile is not expected_profile):

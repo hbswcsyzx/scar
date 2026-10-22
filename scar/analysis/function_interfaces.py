@@ -68,17 +68,29 @@ def validate_body_interface(body, interface, signature):
     values = {v.id:v for v in graph.values}
     if tuple(p.slot for p in interface.parameters) != tuple(p.slot for p in signature.parameters):
         raise ValueError("body interface does not cover the signature")
-    if entry.arguments != (*tuple(p.value for p in interface.parameters),interface.world):
+    offset = 0
+    if interface.profile is BodyLoweringProfile.STRUCTURED_ENV:
+        environments = {environment.id: environment for environment in graph.environments}
+        layouts = [layout for layout in graph.function_entries
+                   if environments[layout.environment].region == interface.region]
+        if len(layouts) != 1 or layouts[0].parameters != interface.parameters:
+            raise ValueError("environment body needs its exact function entry layout")
+        environment = environments[layouts[0].environment]
+        prefix = tuple(member.reference for member in environment.members)
+        offset = len(prefix)
+    else:
+        prefix = ()
+    if entry.arguments != (*prefix,*tuple(p.value for p in interface.parameters),interface.world):
         raise ValueError("formal/world ports differ from the body entry")
     for index,(parameter,port) in enumerate(zip(signature.parameters,interface.parameters)):
         value = values[port.value]
-        if not isinstance(value,ReferenceValue) or value.origin != BlockArgument(entry.id,index):
+        if not isinstance(value,ReferenceValue) or value.origin != BlockArgument(entry.id,index + offset):
             raise ValueError("formal port is not an entry reference")
         if not any(link.value == port.value and link.slot == parameter.slot and link.source == parameter.source
                    and link.role is SourceRole.PARAMETER for link in body.metadata.value_links):
             raise ValueError("formal port lacks exact parameter source correspondence")
     world = values[interface.world]
-    if not isinstance(world,StateVersionValue) or world.origin != BlockArgument(entry.id,len(interface.parameters)):
+    if not isinstance(world,StateVersionValue) or world.origin != BlockArgument(entry.id,len(interface.parameters) + offset):
         raise ValueError("body world port is not its own entry state")
 
 
@@ -86,7 +98,7 @@ class FunctionInterfaceBuilder:
     def __init__(self, *, profile=BodyLoweringProfile.BOUND_FORMALS):
         if type(profile) is not BodyLoweringProfile or profile not in (
                 BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME,
-                BodyLoweringProfile.STRUCTURED_BODY):
+                BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
             raise ValueError("function interfaces require an explicit bound profile")
         self.profile = profile
         self.signatures, self.arguments, self.body_interfaces = {}, {}, {}

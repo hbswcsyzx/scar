@@ -269,7 +269,7 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                                                           semantic=loaded_context.semantic)
                                 if result.frame.definition != body.definition or result.interface.profile is not selected_profile:
                                     raise ValueError("frame correspondence differs from the selected body/profile")
-                        if selected_profile is BodyLoweringProfile.STRUCTURED_BODY:
+                        if selected_profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
                             if result.frame is not None:
                                 raise ValueError("structured body cannot retain a legacy frame model")
                             if body.graph is None:
@@ -285,7 +285,7 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                         interfaces.record_body(body, result.interface)
                         if selected_profile is BodyLoweringProfile.BOUND_FRAME and result.frame is not None:
                             frames.append(result.frame)
-                        if selected_profile is BodyLoweringProfile.STRUCTURED_BODY and result.structured is not None:
+                        if selected_profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV) and result.structured is not None:
                             structured.append(result.structured)
                     except (ValueError, TypeError, KeyError) as error:
                         body = BodyInventory(definition, BodyStatus.UNSUPPORTED, None, None,

@@ -20,6 +20,7 @@ class BodyLoweringProfile(str, Enum):
     BOUND_FORMALS = "BOUND_FORMALS_V1"
     BOUND_FRAME = "BOUND_FRAME_V1"
     STRUCTURED_BODY = "STRUCTURED_BODY_V1"
+    STRUCTURED_ENV = "STRUCTURED_ENV_V1"
 
 
 class FunctionKind(str, Enum):
@@ -86,7 +87,7 @@ class BodyEntryInterface:
 
     def __post_init__(self):
         if self.profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME,
-                                BodyLoweringProfile.STRUCTURED_BODY):
+                                BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
             raise ValueError("bound entry needs the bound-formal profile")
         if len({p.slot for p in self.parameters}) != len(self.parameters) or len({p.value for p in self.parameters}) != len(self.parameters):
             raise ValueError("body formal ports must be unique")
@@ -223,7 +224,7 @@ class FunctionInterfaces:
 
     def __post_init__(self):
         if self.profile not in (BodyLoweringProfile.BOUND_FORMALS, BodyLoweringProfile.BOUND_FRAME,
-                                BodyLoweringProfile.STRUCTURED_BODY):
+                                BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
             raise ValueError("function interfaces need a bound-formal profile")
         if len({s.definition for s in self.signatures}) != len(self.signatures):
             raise ValueError("duplicate function signature")

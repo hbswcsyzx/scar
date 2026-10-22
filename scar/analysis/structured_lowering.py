@@ -501,6 +501,12 @@ class StructuredBuilder(_Builder):
     def interface_region_entry(self):
         return self.values_by_id[self.interface.world].origin.block
 
+    def make_graph(self):
+        """Assemble canonical core; newer profiles may add existing interfaces."""
+        return ProgramGraph(self.function_context, tuple(self.regions), tuple(self.operations), tuple(self.values),
+            (StateLocation(self.world, "coarse Python/external world", stability=Stability.UNKNOWN),),
+            binding_definitions=tuple(self.binding_definitions), binding_reads=tuple(self.binding_reads))
+
     def run(self):
         if self.entry not in self.functions:
             raise ValueError("entry must name a selected function body")
@@ -511,9 +517,7 @@ class StructuredBuilder(_Builder):
                 definition = self.definition(self.functions[candidate]) if candidate in self.functions else None
                 self.targets.append(CallTarget(operation, callee, None, definition.id if definition else None,
                     EvidenceKind.INFERRED, self.assumptions(), (), (), self.old_operation(call.func).binding_use))
-            graph = ProgramGraph(self.function_context, tuple(self.regions), tuple(self.operations), tuple(self.values),
-                (StateLocation(self.world, "coarse Python/external world", stability=Stability.UNKNOWN),),
-                binding_definitions=tuple(self.binding_definitions), binding_reads=tuple(self.binding_reads))
+            graph = self.make_graph()
             require_valid(graph)
             structured = StructuredBodyModel(self.function_definition.id, self.function_context, self.source(node),
                                               tuple(self.protocols), tuple(self.loops))
@@ -544,7 +548,8 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
     if not checked_control["valid"]:
         raise ValueError("structured loop source control must be independently well formed")
     require_valid(graph)
-    if (interface.profile is not BodyLoweringProfile.STRUCTURED_BODY or model.region != graph.root
+    environment_profile = interface.profile is BodyLoweringProfile.STRUCTURED_ENV
+    if (interface.profile not in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV) or model.region != graph.root
             or model.definition != interface.definition or model.region != interface.region):
         raise ValueError("structured body/interface/root identities differ")
     operations = {op.id: op for op in graph.operations}
@@ -566,7 +571,8 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
         if links[operation.id].semantic_operation is None
         and operation.id not in binding_producers | binding_readers
         and (operation.terminator is None or operation.terminator.kind is TerminatorKind.INVOKE)}
-    if {protocol.operation for protocol in model.protocols} != synthetic:
+    protocol_ids = {protocol.operation for protocol in model.protocols}
+    if (not synthetic <= protocol_ids or not environment_profile and protocol_ids != synthetic):
         raise ValueError("every synthetic source operation requires its exact typed protocol")
     for protocol in model.protocols:
         if protocol.operation not in operations or links.get(protocol.operation) is None or links[protocol.operation].source != protocol.source:
@@ -587,7 +593,9 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
                 raise ValueError("frame protocol must advance its whole coarse world")
             if protocol.kind is PythonProtocolKind.FRAME_ENTER:
                 entry = blocks[regions[graph.root].entry]
-                if entry.operations[0] != operation.id or tuple(use.value for use in inputs) != tuple(port.value for port in interface.parameters):
+                expected_enter = (entry.arguments[:-1] if environment_profile else
+                                  tuple(port.value for port in interface.parameters))
+                if entry.operations[0] != operation.id or tuple(use.value for use in inputs) != expected_enter:
                     raise ValueError("frame enter must first hold the exact bound formals")
             elif protocol.kind is PythonProtocolKind.FRAME_BIND:
                 if (len(inputs) != 2 or not isinstance(values[inputs[0].value], LocalBindingValue)
@@ -628,8 +636,18 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
             expected = _BOOL if protocol.kind is PythonProtocolKind.TRUTH else _REF
             if signature.types != (expected, value_type(values[interface.world])):
                 raise ValueError("Python protocol normal completion payload type differs")
+        elif environment_profile and protocol.kind in (
+                PythonProtocolKind.LOOKUP_GLOBAL, PythonProtocolKind.READ_FREE_CELL,
+                PythonProtocolKind.READ_LOCAL_CELL, PythonProtocolKind.MAKE_CELL,
+                PythonProtocolKind.STORE_CELL, PythonProtocolKind.STORE_GLOBAL):
+            # Ownership, typed uses, state address and completion validation are
+            # profile-specific; no legacy protocol is broadened by this branch.
+            pass
         else:
             raise ValueError("opaque protocol has no implemented structured control interface")
+    if environment_profile:
+        from scar.analysis.source_environment_validation import validate_environment_body
+        validate_environment_body(model, graph, interface, metadata, semantic)
     expected_loops = {link.source.atom_id for link in metadata.operation_links
         if semantic.source_atoms[link.source.atom_id].kind in ("While", "For")
         and operations[link.operation].terminator is not None

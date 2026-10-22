@@ -1,0 +1,51 @@
+# 自动函数环境接线：第一阶段 S3 子项
+
+2026-10-22。状态：实施中；不构成完整程序验收。
+
+## 问题与边界
+
+同一份 function code 可对应不同 function object、globals、saved builtins、
+defaults 和 closure cells。现有源 body 只接受显式形参和 world，遇 freevar
+整段回滚；普通 global 读也缺少实际 namespace owner。不能删除拒绝条件后
+把 freevar 当成 global，也不能根据同 code 合并闭包。
+
+本项复用既有 EnvironmentInterface、FunctionEntryLayout、ReferenceValue、
+StateVersionValue 和 StateAddressRefinement。没有新的环境图或 producer 表。
+
+## 源码如何机械恢复
+
+1. 固定源码 snapshot；AST 定位函数的完整来源和 qualified scope。
+2. 只编译、不执行目标；由 compiler 得到准确的 co_freevars/co_cellvars 顺序，
+   与 symtable 分类核对。保留可 pickle 的普通布局，不在 context 缓存 CodeType。
+3. 新 profile STRUCTURED_ENV_V1 的入口依次为五个固定环境角色、captured cells、
+   显式形参和 coarse world。新 SourceProgram4 / inventory8；旧 v3/v7 不改义。
+4. 普通 local 仍用原绑定协议；free/nonlocal 使用入口 cell reference；本地
+   cell 在每次调用中 MAKE_CELL，不能冒充 captured input。global/builtin 使用
+   globals 优先、saved builtins 后备的明确协议；Global/Nonlocal 是编译期声明。
+5. cell/namespace 访问连接本操作自己的 owner/key Use 和既有 world 的 PARTIAL
+   地址细化；不宣称精确完整 effects、独立状态域或 alias 排除。LOOKUP_GLOBAL
+   两个地址是可能读集，不能称每次真的读取了两个 namespace。
+6. 查询、创建和存储保留正常/异常完成及各自后态。空 cell 不编码为 None；
+   free cell 与 local cell 的空值错误不同。frame 协议保留环境和本地 cell 引用。
+
+## 静态与动态不能混为一个验收
+
+本项入口端口只声明源函数需要哪些环境，不证明真实 invocation 的 actual。
+旧 CALL 原档不包含 globals/defaults/cell 身份，不能由 f_locals 追补。后续采集
+应在 dispatch 观测 exact function 的环境，保留观测阶段，另核 entry 对应。
+不弱引用的 cell/namespace 可由仍存活 function 的不可重绑 association 锚定；
+可重绑 defaults 不能用 function 加裸地址证明跨时身份。不得强引用留住目标对象。
+cell 身份连续也不证明 contents 不变，双次观测相等也不排除中间 ABA。
+
+## 本项验收节点
+
+| 节点 | 自动输入与交付 | 必须检查 |
+| --- | --- | --- |
+| E1 入口与源布局 | 普通 Python 源文件 → compiler layout/typed body | 顺序、formal/captured/own cell 分离；不执行目标 |
+| E2 读写与失败 | local/free/global、共享捕获、写入、global/nonlocal 声明 | owner/key、正常/异常后态、frame 持有；错误接线必须拒绝 |
+| E3 公共入口与历史兼容 | model-program/inventory-program environment；旧 frame/structured | v4/v8 精确版本；原始源码重建验证；旧产物不重释 |
+| E4 真实回归 | 原 LeWM 入口/raw calls/151 文件/256 body 尝试/10000 op 预算 | 新旧分母一致；逐个旧环境失败的下一阻塞点，不能预期 +45 body |
+
+E1–E4 的通过不等于真实环境 actual 已闭合，更不等于 S4 全程序通过。
+运行身份、逻辑来源、OS/CUDA 资源、ready 与输出生命周期继续按第一阶段合同验收。
+本项不新增 detector/backend，也不进行优化或性能 A/B。
