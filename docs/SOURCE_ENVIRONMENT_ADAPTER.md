@@ -64,3 +64,8 @@ Attribute/Subscript store 把 RHS、receiver、key 的求值/持有顺序和失�
 传bool，避免短路结果再次truth。普通frame/structured profile仍走原步骤；新ENV
 实现的复现绑定产品commit，历史产物须用其记录的commit复建，不能把不同adapter
 版本的exact-replay差异冒充源码变化或已证明等价。
+
+再按原inventory自动选出8个AnnAssign、11个Raise、5个Assert：19文件/24body，
+4个成功、20个继续拒绝、0错误，60.15秒。已补函数内注解的准确求值边界、异常/
+cause归一化及assert失败分支；12个随后遇JoinedStr、6个遇Dict、2个遇其它写。
+这仍是独立诊断范围，不作为全量程序或effects/资源闭包验收。

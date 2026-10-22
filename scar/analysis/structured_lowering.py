@@ -645,7 +645,9 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
                 PythonProtocolKind.LOOKUP_GLOBAL, PythonProtocolKind.READ_FREE_CELL,
                 PythonProtocolKind.READ_LOCAL_CELL, PythonProtocolKind.MAKE_CELL,
                 PythonProtocolKind.STORE_CELL, PythonProtocolKind.STORE_GLOBAL,
-                PythonProtocolKind.STORE_ATTRIBUTE, PythonProtocolKind.STORE_SUBSCRIPT):
+                PythonProtocolKind.STORE_ATTRIBUTE, PythonProtocolKind.STORE_SUBSCRIPT,
+                PythonProtocolKind.MAKE_ASSERTION_ERROR, PythonProtocolKind.RERAISE,
+                PythonProtocolKind.RAISE_EXCEPTION, PythonProtocolKind.RAISE_WITH_CAUSE):
             # Ownership, typed uses, state address and completion validation are
             # profile-specific; no legacy protocol is broadened by this branch.
             pass
@@ -654,6 +656,8 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
     if environment_profile:
         from scar.analysis.source_environment_validation import validate_environment_body
         validate_environment_body(model, graph, interface, metadata, semantic)
+        from scar.analysis.source_statement_lowering import validate_statement_protocols
+        validate_statement_protocols(model, graph, interface, metadata, semantic)
     expected_loops = {link.source.atom_id for link in metadata.operation_links
         if semantic.source_atoms[link.source.atom_id].kind in ("While", "For")
         and operations[link.operation].terminator is not None

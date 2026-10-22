@@ -165,8 +165,23 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
     def statements(self, statements, cursor):
         # These declarations affect compiler binding classification; neither
         # performs a namespace read/write merely by being encountered.
-        executable = [node for node in statements if not isinstance(node, (ast.Global, ast.Nonlocal))]
-        return super().statements(executable, cursor)
+        from scar.analysis.source_statement_lowering import annotated_assignment, assert_statement, raise_statement
+        for node in statements:
+            if isinstance(node, (ast.Global, ast.Nonlocal)):
+                continue
+            if cursor is None:
+                cursor = super().statements((node,), cursor)
+            elif isinstance(node, ast.AnnAssign):
+                cursor = annotated_assignment(self, node, cursor)
+            elif isinstance(node, ast.Assert):
+                self.gap(GapKind.CODE_VERSION, node,
+                    "assertion source semantics use compiler optimize=0; live optimized-code correspondence remains unproved")
+                cursor = assert_statement(self, node, cursor)
+            elif isinstance(node, ast.Raise):
+                cursor = raise_statement(self, node, cursor)
+            else:
+                cursor = super().statements((node,), cursor)
+        return cursor
 
     def _make_cell(self, cursor, node, name, initial=None):
         inputs = () if initial is None else ((initial, node, "initial-cell-content", 0, None),)
