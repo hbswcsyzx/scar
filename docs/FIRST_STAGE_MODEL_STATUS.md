@@ -20,12 +20,41 @@ expression→statement上下文代码（`ccf6cac`），已恢复到持久worktre
 公共`inventory-program --body-profile structured`已接原structured前端并输出显式
 inventory7（默认及旧1–6不变）。66项相关新旧测试通过；同LeWM入口/raw calls/
 source/预算的实际重建得到51个局部图、205个UNSUPPORTED、1,961个NOT_ATTEMPTED，
-code/source分组接入33/425，仅比旧baseline增加1个body和1组。独立比较通过，
-完整raw/source公开重放另记结果。参见
+code/source分组接入33/425，仅比旧baseline增加1个body和1组。独立比较通过；
+公开check-inventory完整raw/source重放也已REPLAYED（exit0，645.19s），并非
+只读摘要或只验证声明。参见
 [公共structured实际验收](../artifacts/experiments/first_stage_structured_inventory_20261022/README.md)。
 接线提升很小：closure环境45、heap写41、expanded call15、BoolOp13、IfExp8等
 仍造成整body回滚。不能把481条语言protocol或source图规模当完整模型完成率；
 下一项按这些实际语言/接口断点排序，实际状态/来源/资源闭包仍未完成。
+
+### 下一实施项（仍为第一阶段S3）
+
+优先**自动函数环境入口及cell/namespace依赖**，不预定下一项就是短路表达式。
+这补全部函数的隐式输入断口，复用既有EnvironmentInterface、FunctionEntryLayout、
+ReferenceOwner、CellContent/NamespaceKey和canonical Uses/state；不新增环境图。
+
+1. 以symtable分类，复用已有准确compiler/source见证取得co_freevars/co_cellvars及
+   顺序；不能按变量名或自行排序猜closure tuple。隐式编译器依赖也需保留。
+2. 在原入口ReferenceValue/StateVersion参数中声明五个固定环境role及captured
+   cells；被调用body的free-variable slot与外层formal slot独立，实际alias允许。
+3. freevar读连cell引用owner和CellContent，global/builtin读连准确namespace；
+   每条正常/异常路径携自己的后态。不能删除freevar guard后退回普通global读。
+4. 新source profile复用既有入口完整分区检查，替换固定formals+world和index+1
+   actual假设；旧SourceProgram3/inventory7按V1固定重放，不静默重释旧产物。
+5. 单独采集当前callable及环境actual身份。现monitoring CALL可拿到callable，
+   旧calls-only及f_locals只给code/内容，不能补造函数对象或cell身份。静态参数化
+   依赖通过与动态actual闭合通过分别报告；不以静态入口存在称动态已连接。
+
+验收先用普通Python testcase自动恢复：同code的两个closure、多个函数共享cell、
+cell被改写/删除、global/builtin重绑、代码版本/环境不符及错误cell顺序。测试不手
+补IR；同时检查真实LeWM每个旧环境阻塞body的环境连接与下一终止点。**45个首个
+环境拒绝不代表下一轮必新增45个成功图。** 随后同范围、同预算重建并记录结果。
+
+再按证据补owner明确的attribute/subscript写、失败后态/释放与source slot对应，
+destructuring另验。之后补BoolOp/IfExp的取值/条件上下文及expanded calls，禁止
+多执行truth或预执行未选分支。实际Uses/逻辑来源、OS/CUDA资源和ready/输出闭包
+继续使用原S3/S4合同，不因完成某语言子集而进入化简。
 
 旧说明中CALL的同ID直连语句CFG建议已撤回：同ID类型不等于同粒度，parent_id也
 不是AST父节点。新查询按源码指纹、完整AST字段路径和scope关联原语句，保留

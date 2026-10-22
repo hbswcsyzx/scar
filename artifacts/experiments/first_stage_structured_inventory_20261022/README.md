@@ -69,7 +69,10 @@ IfExp、9个Dict、7个Subscript及其它声明/异常/注解/格式化/映射�
 **剩余4,408 operation预算而仍失败，不能用继续加预算代替协议恢复。**
 
 `replay.sh`使用公开`check-inventory`按原raw/source重建v7并逐文档比较；这是与
-上述独立重计不同的验收，结果以最终`replay.*`记录为准，未结束前不称其通过。
+上述独立重计不同的验收。现已实际**REPLAYED**，exit0、wall645.19s、peak907,624KiB，
+stderr为空。源码准备151次、每文件最多1次，raw/source/profile/预算、图、overlay、
+覆盖及摘要完全匹配。`replay.*`保留完整命令、实现SHA与原始输出。这只证明该
+有界模型可重建，不证明缺失的程序/资源依赖已恢复，也不是LeWM加速比。
 
 ## 明确未完成
 
