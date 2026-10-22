@@ -4,6 +4,15 @@
 
 ### 2026-10-22恢复状态
 
+最新真实 environment inventory8 已生成（产品545fa4c）：同151文件/原raw/
+256尝试/10000op预算，54个局部图、202个UNSUPPORTED、1961个NOT_ATTEMPTED；
+core/source分组34/425。原45个环境拒绝只有3个最终成功，25个继续卡heap写，
+其余展开到新的语言/slot阻塞；逐条记录及独立全量标准库比较已保存。
+见[环境接线实际报告](../artifacts/experiments/first_stage_environment_inventory_20261022/README.md)。
+本轮未另跑完整public重放或扩展测试；whole-program、runtime环境actual、细状态、
+逻辑来源和资源闭包仍未通过。下一项按新66个首个写阻塞和15/9个BoolOp/IfExp
+补真实来源与控制路径。以下是此前同日结果；不以它们覆盖最新数值。
+
 临时开发目录已不存在，旧查询session和相关进程均不存在，未提交的10月20日
 source-layer归档/日志不能作为当前可复核证据。Git提交保存了三图留存/复用及
 expression→statement上下文代码（`ccf6cac`），已恢复到持久worktree
