@@ -49,3 +49,18 @@ cell 身份连续也不证明 contents 不变，双次观测相等也不排除�
 E1–E4 的通过不等于真实环境 actual 已闭合，更不等于 S4 全程序通过。
 运行身份、逻辑来源、OS/CUDA 资源、ready 与输出生命周期继续按第一阶段合同验收。
 本项不新增 detector/backend，也不进行优化或性能 A/B。
+
+## 实际断点后的扩展（2026-10-22）
+
+同 scope 全量环境接线得到54个局部图。随后只针对新产物中实际失败的66个写入、
+15个BoolOp、9个IfExp自动回查31个源码文件，不重复全仓测试。90个body中37个
+成功展开、53个继续显式拒绝，无构造错误；这是诊断 cohort，不是新全量inventory。
+
+Attribute/Subscript store 把 RHS、receiver、key 的求值/持有顺序和失败后态接入
+原world；旧 computational overlay 没有目标子表达式时，只接受原SG中唯一来源
+的Name/scalar leaf，不伪造旧StaticValue。复杂缺失子表达式和解构仍待补。
+
+条件表达式使用原CFG的路径和有序Uses；值上下文返回选中对象，条件上下文直接
+传bool，避免短路结果再次truth。普通frame/structured profile仍走原步骤；新ENV
+实现的复现绑定产品commit，历史产物须用其记录的commit复建，不能把不同adapter
+版本的exact-replay差异冒充源码变化或已证明等价。

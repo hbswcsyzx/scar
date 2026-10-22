@@ -201,7 +201,8 @@ class StructuredBuilder(_Builder):
             use = self.use(operation_id, binding, node, "local-binding", 0)
             value = ReferenceValue(self.fresh(ValueID, "local-reference"), self.function_context,
                                    OperationResult(operation_id, 0))
-            self.add_value(value); self.link_value(value, node, SourceRole.EXPRESSION, semantic_value=old.result)
+            self.add_value(value); self.link_value(value, node, SourceRole.EXPRESSION,
+                                                  semantic_value=old.result if old is not None else None)
             self.emit(cursor, Operation(operation_id, "read-local", (Behavior.COMPUTE,), (use,),
                                         (value.id,), effects_complete=True), node, SourceRole.EXPRESSION, old=old)
             self.binding_reads.append(BindingRead(operation_id, use.id, value.id))
@@ -309,15 +310,21 @@ class StructuredBuilder(_Builder):
             tuple(LoopBindingPort(self.values_by_id[loop.header.env[name]].slot, loop.header.env[name])
                   for name in loop.names), tuple(loop.backedges), tuple(loop.breaks), tuple(loop.continues)))
 
+    def condition(self, node, cursor):
+        cursor, value = self.expr(node, cursor)
+        if cursor is None:
+            return None, None
+        cursor, boolean, _ = self.invoke_protocol(cursor, node, (value,),
+                                                  PythonProtocolKind.TRUTH, result_type=_BOOL)
+        return cursor, boolean
+
     def while_statement(self, node, cursor):
         names = tuple(sorted(cursor.env))
         header = self.new_block(node, named=names)
         self.jump(cursor, header, names, node)
-        tested, condition = self.expr(node.test, header)
+        tested, boolean = self.condition(node.test, header)
         if tested is None:
             return None
-        tested, boolean, _ = self.invoke_protocol(tested, node.test, (condition,),
-                                                  PythonProtocolKind.TRUTH, result_type=_BOOL)
         body, natural = self.new_block(node), self.new_block(node)
         self.branch(tested, boolean, body, natural, node)
         loop = _Loop(node, LoopKind.WHILE, header, names, body.block, natural.block)
@@ -407,11 +414,9 @@ class StructuredBuilder(_Builder):
                     self.finish_exit(cursor, node, value, ExitKind.NORMAL)
                 cursor = None
             elif isinstance(node, ast.If):
-                cursor, condition = self.expr(node.test, cursor)
+                cursor, boolean = self.condition(node.test, cursor)
                 if cursor is None:
                     continue
-                cursor, boolean, _ = self.invoke_protocol(cursor, node.test, (condition,),
-                                                         PythonProtocolKind.TRUTH, result_type=_BOOL)
                 yes, no = self.new_block(node), self.new_block(node)
                 self.branch(cursor, boolean, yes, no, node)
                 names = tuple(sorted(cursor.env))
@@ -639,7 +644,8 @@ def require_valid_structured_body(model, graph, interface, metadata, *, semantic
         elif environment_profile and protocol.kind in (
                 PythonProtocolKind.LOOKUP_GLOBAL, PythonProtocolKind.READ_FREE_CELL,
                 PythonProtocolKind.READ_LOCAL_CELL, PythonProtocolKind.MAKE_CELL,
-                PythonProtocolKind.STORE_CELL, PythonProtocolKind.STORE_GLOBAL):
+                PythonProtocolKind.STORE_CELL, PythonProtocolKind.STORE_GLOBAL,
+                PythonProtocolKind.STORE_ATTRIBUTE, PythonProtocolKind.STORE_SUBSCRIPT):
             # Ownership, typed uses, state address and completion validation are
             # profile-specific; no legacy protocol is broadened by this branch.
             pass

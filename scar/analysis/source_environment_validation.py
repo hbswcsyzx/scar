@@ -22,8 +22,9 @@ from scar.ir.v2.semantic import OperationKind, SemanticRelation
 
 
 _KINDS = frozenset((Kind.LOOKUP_GLOBAL, Kind.READ_FREE_CELL, Kind.READ_LOCAL_CELL,
-                    Kind.MAKE_CELL, Kind.STORE_CELL, Kind.STORE_GLOBAL))
-_STORES = frozenset((Kind.STORE_CELL, Kind.STORE_GLOBAL))
+                    Kind.MAKE_CELL, Kind.STORE_CELL, Kind.STORE_GLOBAL,
+                    Kind.STORE_ATTRIBUTE, Kind.STORE_SUBSCRIPT))
+_STORES = frozenset((Kind.STORE_CELL, Kind.STORE_GLOBAL, Kind.STORE_ATTRIBUTE, Kind.STORE_SUBSCRIPT))
 
 
 def validate_environment_body(model, graph, interface, metadata, semantic):
@@ -109,6 +110,11 @@ def validate_environment_body(model, graph, interface, metadata, semantic):
             need(link.semantic_operation is None and len(inputs) <= 1
                  and all(use.value in {port.value for port in interface.parameters} for use in inputs)
                  and Behavior.MEMORY in operation.behaviors, "own-cell creation has an invalid initializer")
+            continue
+        if kind in (Kind.STORE_ATTRIBUTE, Kind.STORE_SUBSCRIPT):
+            from scar.analysis.source_heap_validation import validate_heap_store
+            validate_heap_store(operation, kind, link, rows.get(operation.id), semantic)
+            expected_rows.add(operation.id)
             continue
         source = semantic.definitions.get(link.semantic_operation)
         atom = semantic.source_atoms[link.source.atom_id]

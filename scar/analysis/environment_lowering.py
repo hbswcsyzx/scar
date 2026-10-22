@@ -104,24 +104,40 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         return cursor, value
 
     def expr(self, node, cursor):
+        if isinstance(node, ast.BoolOp):
+            from scar.analysis.source_conditional_lowering import lower_bool_expression
+            return lower_bool_expression(self, node, cursor)
+        if isinstance(node, ast.IfExp):
+            from scar.analysis.source_conditional_lowering import lower_if_expression
+            return lower_if_expression(self, node, cursor)
         if isinstance(node, ast.Name):
-            old = self.old_operation(node)
-            if node.id in self.cell_references:
-                return self._cell_read(node, cursor, old)
-            if node.id in cursor.env:
-                return self.read_local(node, cursor, old)
-            if node.id in self.locals:
-                raise _Unsupported(GapKind.SOURCE_MAPPING, node,
-                    "ordinary local binding is missing from the function frame: " + node.id)
-            # Compiler/symbol-table classification was checked at entry.  A
-            # mismatched private spelling must not silently become a global.
-            if node.id not in self.global_names:
-                raise _Unsupported(GapKind.SOURCE_MAPPING, node,
-                    "Name has no exact compiler environment classification: " + node.id)
-            return self._global_read(node, cursor, old)
+            return self.read_source_name(node, cursor, self.old_operation(node))
         return super().expr(node, cursor)
 
+    def condition(self, node, cursor):
+        if isinstance(node, (ast.BoolOp, ast.IfExp)) or isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+            from scar.analysis.source_conditional_lowering import lower_condition_expression
+            return lower_condition_expression(self, node, cursor)
+        return super().condition(node, cursor)
+
+    def read_source_name(self, node, cursor, old=None):
+        """A target child may have SG provenance without a computational overlay."""
+        if node.id in self.cell_references:
+            return self._cell_read(node, cursor, old)
+        if node.id in cursor.env:
+            return self.read_local(node, cursor, old)
+        if node.id in self.locals:
+            raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                "ordinary local binding is missing from the function frame: " + node.id)
+        if node.id not in self.global_names:
+            raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                "Name has no exact compiler environment classification: " + node.id)
+        return self._global_read(node, cursor, old)
+
     def store(self, target, value, cursor):
+        if isinstance(target, (ast.Attribute, ast.Subscript)):
+            from scar.analysis.source_heap_lowering import store_heap_target
+            return store_heap_target(self, target, value, cursor)
         if isinstance(target, ast.Name) and target.id in self.cell_references:
             cursor, _, operation_id = self.invoke(cursor, target, (
                 (self.cell_references[target.id], target, "cell-owner", 0, None),
