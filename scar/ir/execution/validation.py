@@ -47,10 +47,12 @@ class ValidationReport:
 
 
 class _Context:
-    def __init__(self, model, program, value_graphs, evidence_graphs, semantic_graphs=None, artifact_bytes=None):
+    def __init__(self, model, program, value_graphs, evidence_graphs, semantic_graphs=None, artifact_bytes=None,
+                 provider_selector_resolver=None):
         self.model, self.program = model, program
         self.issues, self.gaps = [], []
         self._gap_keys = set()
+        self.provider_selector_resolver = provider_selector_resolver
         self.value_graphs = {} if value_graphs is None else value_graphs
         self.evidence_graphs = {} if evidence_graphs is None else evidence_graphs
         self.semantic_graphs = {} if semantic_graphs is None else semantic_graphs
@@ -58,7 +60,7 @@ class _Context:
         self.snapshots = ExternalSnapshots(self.value_graphs, self.evidence_graphs, self.semantic_graphs,
                                            self.artifact_bytes)
         for name in ('runs', 'processes', 'threads', 'activations', 'segments', 'visits',
-                     'operations', 'values', 'resources', 'realizations', 'requirements', 'handles', 'accesses',
+                     'operations', 'values', 'resources', 'realizations', 'requirements', 'handles', 'accesses', 'provider_accesses',
                      'submissions', 'outcomes', 'quiescences', 'retentions', 'queue_prefixes',
                      'queue_order_profiles', 'event_records', 'queue_waits',
                      'denotations', 'work_evidence_bindings', 'observation_requirements',
@@ -451,9 +453,12 @@ def refresh_external_context(base_ctx):
     return ctx
 
 
-def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None):
+def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None,
+             provider_selector_resolver=None):
     if type(model) is not ExecutionModel:
         return ValidationReport((ExecutionIssue('record', 'model', 'expected exact ExecutionModel'),), ()), None
+    if provider_selector_resolver is not None and not callable(provider_selector_resolver):
+        return ValidationReport((ExecutionIssue('provider_selector_resolver', 'model', 'expected an explicit bound read-only resolver'),), ()), None
     for name, catalog in (('value_graphs', value_graphs), ('evidence_graphs', evidence_graphs),
                           ('semantic_graphs', semantic_graphs), ('artifact_bytes', artifact_bytes)):
         if catalog is not None and (type(catalog) is not dict or any(type(key) is not str for key in catalog)):
@@ -465,7 +470,8 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
         wire = program_dumps(program).encode('utf-8')
     except (TypeError, ValueError, AttributeError) as error:
         return ValidationReport((ExecutionIssue('record_or_program', 'model', str(error)),), ()), None
-    ctx = _Context(model, program, value_graphs, evidence_graphs, semantic_graphs, artifact_bytes)
+    ctx = _Context(model, program, value_graphs, evidence_graphs, semantic_graphs, artifact_bytes,
+                   provider_selector_resolver)
     artifact = model.snapshot.artifact
     if (artifact.schema != 'scar.program-graph' or artifact.sha256 != hashlib.sha256(wire).hexdigest()
             or artifact.size_bytes != len(wire) or model.snapshot.schema_version != json.loads(wire)['schema_version']):
@@ -493,14 +499,18 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
     return ValidationReport(tuple(ctx.issues), tuple(ctx.gaps)), ctx
 
 
-def validate(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None):
+def validate(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None,
+             provider_selector_resolver=None):
     return _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
-                    semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes)[0]
+                    semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes,
+                    provider_selector_resolver=provider_selector_resolver)[0]
 
 
-def require_valid(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None):
+def require_valid(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None,
+                  provider_selector_resolver=None):
     report = validate(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
-                      semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes)
+                      semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes,
+                      provider_selector_resolver=provider_selector_resolver)
     if report.issues:
         raise ValueError('; '.join(f'{row.code} at {row.path}: {row.message}' for row in report.issues))
     return report

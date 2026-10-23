@@ -57,6 +57,8 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | 原source/body缺口按实际调用投影 | 原817groups/100,438calls逐项守恒；74body-linked、91source-only UNSUPPORTED、260source-only NOT_ATTEMPTED | 只是已保存metadata投影；不是canonical graph重验或新语言协议支持 |
 | 同次Tensor物理证据采集与导入 | 新完整LeWM episode成功；79,592 markers、109,288槽，108,682槽接物理epoch | 606槽为带provider ID但无storage pointer的空CPU Tensor；逻辑内容/ready与空表示接口仍OPEN |
 | IR分块存储与查询索引 | CPU原档逐条往返PASS；源码SQLite建库/局部查询PASS；完整LeWM联合导入及实档审核PASS，2,259,781记录/195chunks | 42,767条endpoint引用未语义索引；SQLite不是第二个可写IR来源，不代表完整模型通过 |
+| 原OS work到资源端点关联 | 35ports/22producer work/13pipe/3executor有限核验完成；root独立134selector及原preimage核对exit0 | 原gate汇总footer错误exit1保留，finalizer0单列；35table containers与source/state/ready仍OPEN，不是全ExecutionModel验证 |
+| 实际调用协议分类 | 两Run各100,550attempts完整分类；945项目内无握手目标全8个generator codes | 不把OTHER当native，不把生成器创建当同步body进入；尚无创建对象/drive/结果的完整关联 |
 
 详细依据分别在 `artifacts/experiments/first_stage_lewm_dispatch_20261023`、
 `first_stage_joined_dispatch_20261023`、`first_stage_native_schema_20261023`、
@@ -92,6 +94,9 @@ SQLite查询索引已实现并通过真实分片归档构建与局部查询：43
   仍需各自正确的定义与区域接口。
 - 跨调用数据：源码 body、调用帧和 native Tensor 引用已有局部连接，但 actual/
   formal、return、function environment 及可变状态必须逐槽接入。
+  已核96,481条无握手分为88,176 OTHER、40方法、7,320项目外函数与945项目内
+  generator-target calls，不能把它们都按普通Python函数入口处理；详见
+  [调用协议审计](CALL_PROTOCOL_FRONTIERS.md)。原GAP/问题不靠重命名消除。
 - 同一次运行：已验收source composition/bindings固定272038，最新物理capture为
   369749。两组动态事实不能拼成一个完成模型。当前两项source接线原档验收完成后，
   必须把源码定义/完整compiler witness与当前运行事实分开，通过明确的跨运行版本

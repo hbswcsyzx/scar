@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+import re
 from typing import TypeAlias
 
 from scar.ir.program.ids import ResourceDefinitionID, ResourceRequirementID
@@ -21,6 +22,7 @@ from .ids import (
     ExternalRealmID, HandleBindingID, HostThreadInstanceID, NativeHandleLifetimeID,
     OperationOccurrenceID, ProcessInstanceID, RealizationID, RegionActivationID,
     ResourceAccessID, ResourceBindingID, ResourceInstanceID, RunID, ValueOccurrenceID,
+    ProviderResourceAccessID, WorkTicketID,
 )
 
 
@@ -267,6 +269,53 @@ class NativeHandle:
 
 
 @dataclass(frozen=True, slots=True)
+class ProviderRecordSelector:
+    """A manifest chunk reference plus actual JSONL line and line-local pointer.
+
+    The chunk locator addresses ordinary manifest JSON. Line/ordinal address
+    the referenced JSONL provider; they are never a fictional JSON array.
+    Resolution requires an explicit bound provider reader, never URI opening.
+    """
+    chunk: ProviderFactReference
+    table: str
+    ordinal: int
+    line: int
+    pointer_within_line: str
+
+    def __post_init__(self):
+        _record(self.chunk, ProviderFactReference, "selector manifest chunk")
+        _exact(self.table, str, "selector table")
+        if re.fullmatch(r"[a-z][a-z0-9_]*", self.table) is None:
+            raise ValueError("selector table must be an explicit table name")
+        if re.fullmatch(r"#/tables/" + re.escape(self.table) + r"/chunks/(0|[1-9][0-9]*)", self.chunk.locator) is None:
+            raise ValueError("selector chunk must address its real manifest table member")
+        _index(self.ordinal, "selector ordinal")
+        _index(self.line, "selector line")
+        if self.line == 0:
+            raise ValueError("selector JSONL line must be one-based")
+        _exact(self.pointer_within_line, str, "line-local pointer")
+        pointer = self.pointer_within_line
+        if not (pointer == "/record" or pointer.startswith("/record/")) or re.search(r"~(?![01])", pointer):
+            raise ValueError("selector requires a valid pointer inside the actual record envelope")
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderHandle:
+    namespace: HandleNamespace
+    container: InstanceTarget | Unresolved
+    selector: ProviderRecordSelector
+    lifetime: NativeHandleLifetimeID
+    source: FactSource
+
+    def __post_init__(self):
+        _record(self.namespace, HandleNamespace, "provider handle namespace")
+        _variant(self.container, (InstanceTarget, Unresolved), "provider handle table container")
+        _record(self.selector, ProviderRecordSelector, "provider handle selector")
+        _id(self.lifetime, NativeHandleLifetimeID, "provider handle lifetime")
+        _source(self.source)
+
+
+@dataclass(frozen=True, slots=True)
 class UnresolvedHandle:
     value: ValueOccurrenceID | None
     gap: Unresolved
@@ -277,7 +326,7 @@ class UnresolvedHandle:
         _record(self.gap, Unresolved, "unresolved handle gap")
 
 
-HandleEndpoint: TypeAlias = ObjectHandle | NativeHandle | UnresolvedHandle
+HandleEndpoint: TypeAlias = ObjectHandle | NativeHandle | ProviderHandle | UnresolvedHandle
 
 
 @dataclass(frozen=True, slots=True)
@@ -393,7 +442,7 @@ class HandleBinding:
 
     def __post_init__(self):
         _id(self.id, HandleBindingID, "handle binding ID")
-        _variant(self.handle, (ObjectHandle, NativeHandle, UnresolvedHandle), "handle endpoint")
+        _variant(self.handle, (ObjectHandle, NativeHandle, ProviderHandle, UnresolvedHandle), "handle endpoint")
         _target(self.target)
         _point(self.start, "handle start point")
         _variant(self.end, (EndedAt, Unresolved), "handle end")
@@ -505,12 +554,41 @@ class AllocationPlacement:
         _source(self.source)
 
 
+class ProviderAccessPurpose(str, Enum):
+    EXECUTOR = "EXECUTOR"
+    INPUT_SELECTOR = "INPUT_SELECTOR"
+    OUTPUT_SELECTOR = "OUTPUT_SELECTOR"
+
+
+@dataclass(frozen=True, slots=True)
+class ProviderResourceAccess:
+    id: ProviderResourceAccessID
+    work: WorkTicketID
+    purpose: ProviderAccessPurpose
+    target: ResourceTarget
+    handle: ExplicitHandle | ImplicitBinding | Unresolved
+    point: EvidencePoint
+    selector: ProviderRecordSelector
+    source: FactSource
+
+    def __post_init__(self):
+        _id(self.id, ProviderResourceAccessID, "provider resource access ID")
+        _id(self.work, WorkTicketID, "provider resource access work")
+        _exact(self.purpose, ProviderAccessPurpose, "provider access purpose")
+        _target(self.target)
+        _variant(self.handle, (ExplicitHandle, ImplicitBinding, Unresolved), "provider access handle")
+        _record(self.point, EvidencePoint, "provider access point")
+        _record(self.selector, ProviderRecordSelector, "provider access selector")
+        _source(self.source)
+
+
 __all__ = [
     "RunRealm", "ProcessRealm", "ExternalRealm", "IdentityRealm",
     "InstanceTarget", "AllocationTarget", "ProcessTarget", "ThreadTarget", "ResourceTarget",
     "CreatedAt", "ImportedAt", "ResourceOrigin", "ResourceInstance", "ResourceRealization",
     "RequirementBinding", "HandleNamespace", "ObjectHandle", "NativeHandle", "UnresolvedHandle",
-    "HandleEndpoint", "ProtocolRight", "RightsClaim", "ObjectHolder", "HandleHolder",
+    "HandleEndpoint", "ProviderRecordSelector", "ProviderHandle", "ProviderAccessPurpose", "ProviderResourceAccess",
+    "ProtocolRight", "RightsClaim", "ObjectHolder", "HandleHolder",
     "ActivationHolder", "TargetHolder", "OwnershipHolder", "ReleaseAuthority", "Sharing",
     "OwnershipClaim", "EndedAt", "HandleBinding", "ExplicitHandle", "ImplicitBinding",
     "CapacityAt", "RelationAt", "ProtocolCondition", "ConstraintRef", "ConstraintEvidence",

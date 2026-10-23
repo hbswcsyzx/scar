@@ -6,6 +6,33 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：已观察资源端点接线与调用协议边界核对
+
+R2.1已实现ProviderRecordSelector/ProviderHandle/ProviderResourceAccess及原work的
+provider executor分支。selector是已发布JSONL的证据定位，资源身份仍取原target；
+核心不把全部provider handle误限为POSIX整数。FD整数域检查留在OS adapter。
+ProgramGraph v28/execution v9显式隔离新能力，旧wire含义保持。
+
+当前369749原R1上的35个producer ports、22个producer work、13对pipe、3个实际
+executor已经完成有限端点/codec检查，delta443,446bytes；35个FD-table container
+仍Unresolved。原gate在全部端点检查与6个旧版本拒绝检查后，metrics footer发生
+变量遮蔽错误exit1；独立finalizer从已写proofs复核后exit0，没有重复扫百万表。
+root另以stdlib独立核134 selectors的selected chunk两层SHA/line/ordinal/preimage及
+所有上述端点，3.08s、RSS98,328KiB、exit0。不是完整ExecutionModel语义通过；共享
+FD、table epoch、source/state、VM、ready仍OPEN。详见OS_RESOURCE_ASSOCIATIONS_R2.md。
+
+另完成两个Run的完整operand原档分类（各312,812events/100,550attempts）：原路由
+96,481条HANDSHAKE_BOUNDARY实际分成88,176 OTHER、40 EXACT_METHOD、7,320项目外
+exact function、945项目内generator-target calls；后者8个code全有CO_GENERATOR。
+这是原数据揭示的调用阶段建模问题：generator创建与body drive不能套同步入口。
+没有据flags推断创建成功/对象/参数，也不把OTHER统称native。逐code与完整收据见
+CALL_PROTOCOL_FRONTIERS.md。旧GAP/路由报告未改写，完整阶段不因分类而通过。
+
+当前Run静态源码复用的五文件实现已AST冻结，尚未实档验收；通用解包/Slice/
+词法作用域仍在实现。下一步按同一producer快照做369749 source→marker→参数/
+返回/environment实档连接，再补明确的call协议和资源状态断口。未运行新目标、
+优化或性能A/B；原LeWM与原scar checkout再次实查git status干净。
+
 ### 2026-10-23：外部源码正式接线与参数/返回/环境路由实档验收
 
 原272038 capture的source attachments公共resolver连接已PASS。原composition文档及

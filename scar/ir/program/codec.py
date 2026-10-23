@@ -36,10 +36,11 @@ from scar.ir.program.protocol_await_records import (
 )
 from scar.ir.program.call_effect_expansion import CALL_EFFECT_EXPANSION_RECORD_TAGS
 from scar.ir.program.stored_values import STORED_VALUE_RECORD_TAGS, has_stored_value_capability
+from scar.ir.program.resources import ResourceRole
 
 
 SCHEMA = "scar.program-graph"
-SCHEMA_VERSION = 27
+SCHEMA_VERSION = 28
 _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
 _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
 _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
@@ -68,6 +69,7 @@ _EXCEPTION_MATCH_FIELDS = frozenset({"exception_matches"})
 _CALL_EFFECT_FIELDS = frozenset({"call_effect_expansions"})
 _STORED_VALUE_FIELDS = frozenset({"stored_value_writes", "stored_value_reads"})
 _V27_GRAPH_FIELDS = _GRAPH_FIELDS
+_V28_GRAPH_FIELDS = _V27_GRAPH_FIELDS
 _V26_GRAPH_FIELDS = _V27_GRAPH_FIELDS - _STORED_VALUE_FIELDS
 _V25_GRAPH_FIELDS = _V26_GRAPH_FIELDS
 _V24_GRAPH_FIELDS = _V25_GRAPH_FIELDS - _CALL_EFFECT_FIELDS
@@ -119,6 +121,7 @@ _V24_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V24_GRAPH_FIEL
 _V25_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V25_GRAPH_FIELDS
 _V26_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V26_GRAPH_FIELDS
 _V27_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V27_GRAPH_FIELDS
+_V28_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V28_GRAPH_FIELDS
 _V19_CONNECTION_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_CONNECTION_RECORD_TAGS.items()
                               if record is not SessionOccupancyCondition}
 _V17_PROTOCOL_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_RECORD_TAGS.items()
@@ -260,6 +263,11 @@ def _has_invoke_subset_capability(graph: ProgramGraph) -> bool:
                and len(operation.terminator.successors) == 1 for operation in graph.operations)
 
 
+def _has_handle_table_capability(graph: ProgramGraph) -> bool:
+    return (any(row.role is ResourceRole.HANDLE_TABLE for row in graph.resources)
+            or any(row.role is ResourceRole.HANDLE_TABLE for row in graph.resource_requirements))
+
+
 def dumps(graph: ProgramGraph) -> str:
     """Select only present capabilities; preserve historical field/tag/byte profiles."""
     _require_record_and_graph_valid(graph)
@@ -310,7 +318,10 @@ def dumps(graph: ProgramGraph) -> str:
     if has_stored_values:
         tags = {**tags, **STORED_VALUE_RECORD_TAGS}
     encoded = encode(graph, record_tags=tags)
-    if has_stored_values:
+    if _has_handle_table_capability(graph):
+        document = {"schema": SCHEMA, "schema_version": 28,
+                    **{name: encoded[name] for name in _V28_GRAPH_FIELDS}}
+    elif has_stored_values:
         document = {"schema": SCHEMA, "schema_version": 27,
                     **{name: encoded[name] for name in _V27_GRAPH_FIELDS}}
     elif has_async_initial_control:
@@ -432,7 +443,7 @@ def _upgrade_v1_record(record: dict[str, Any]) -> dict[str, Any]:
 
 
 def loads(payload: str) -> ProgramGraph:
-    """Decode exact capability profiles v1–v27 without upgrading old wire."""
+    """Decode exact capability profiles v1–v28 without upgrading old wire."""
     if type(payload) is not str:
         raise TypeError("program graph JSON payload must be str")
     document: Any = _loads(payload)
@@ -443,7 +454,7 @@ def loads(payload: str) -> ProgramGraph:
     if document["schema"] != SCHEMA:
         raise ValueError("unsupported program graph schema")
     version = document["schema_version"]
-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27):
+    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28):
         raise ValueError("unsupported program graph schema version")
     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
@@ -458,7 +469,7 @@ def loads(payload: str) -> ProgramGraph:
                        21: _V21_ENVELOPE_FIELDS, 22: _V22_ENVELOPE_FIELDS,
                        23: _V23_ENVELOPE_FIELDS, 24: _V24_ENVELOPE_FIELDS,
                        25: _V25_ENVELOPE_FIELDS, 26: _V26_ENVELOPE_FIELDS,
-                       27: _V27_ENVELOPE_FIELDS}[version]
+                       27: _V27_ENVELOPE_FIELDS, 28: _V28_ENVELOPE_FIELDS}[version]
     if set(document) != expected_fields:
         raise ValueError("program graph document has incorrect top-level fields")
     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
@@ -473,7 +484,7 @@ def loads(payload: str) -> ProgramGraph:
                     21: _V21_GRAPH_FIELDS, 22: _V22_GRAPH_FIELDS,
                     23: _V23_GRAPH_FIELDS, 24: _V24_GRAPH_FIELDS,
                     25: _V25_GRAPH_FIELDS, 26: _V26_GRAPH_FIELDS,
-                    27: _V27_GRAPH_FIELDS}[version]
+                    27: _V27_GRAPH_FIELDS, 28: _V28_GRAPH_FIELDS}[version]
     record = {name: document[name] for name in graph_fields}
     if version < 27:
         record.update({name: [] for name in _STORED_VALUE_FIELDS})
@@ -597,6 +608,11 @@ def loads(payload: str) -> ProgramGraph:
     if version >= 27:
         tags = {**tags, **STORED_VALUE_RECORD_TAGS}
     graph = decode(ProgramGraph, record, record_tags=tags)
+    has_handle_table = _has_handle_table_capability(graph)
+    if version < 28 and has_handle_table:
+        raise ValueError("historical schema cannot contain handle-table resource role")
+    if version == 28 and not has_handle_table:
+        raise ValueError("schema version 28 requires explicit handle-table resource capability")
     has_stored_values = has_stored_value_capability(graph)
     if version < 27 and has_stored_values:
         raise ValueError("historical schema cannot contain stored value capability")

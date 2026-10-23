@@ -10,9 +10,10 @@ from .effects import effect_context, resolve_canonical_effect
 from .ids import (
     OperationOccurrenceID, QueuePrefixID, ResourceAccessID, ValueOccurrenceID,
     WorkQuiescenceID,
+    ProviderResourceAccessID,
 )
 from .resources import (
-    AllocationTarget, InstanceTarget, ProcessRealm, ProcessTarget, RunRealm, ThreadTarget,
+    AllocationTarget, InstanceTarget, ProcessRealm, ProcessTarget, RunRealm, ThreadTarget, ProviderAccessPurpose,
 )
 from .work import (
     BorrowRelease, DirectExecution, ExternalWorkSource, HandleTarget,
@@ -161,6 +162,15 @@ def work_errors(ctx):
         return binding.target, access
 
     def access_for_work(identity, work, path, role=None):
+        if type(identity) is ProviderResourceAccessID:
+            access = ctx.provider_accesses.get(identity)
+            if access is None or access.work != work.id:
+                issue('provider_resource_access', path, 'provider access must belong to this exact work ticket')
+                return None
+            if role is ResourceRole.EXECUTOR and access.purpose is not ProviderAccessPurpose.EXECUTOR:
+                issue('provider_executor_purpose', path, 'work executor must select an EXECUTOR provider access')
+            point_for_work(access.point, work, path)
+            return access.target
         target, access = access_target(identity, path, role)
         if access is not None:
             run, _ = operation_scope(access.operation, path)
@@ -221,6 +231,21 @@ def work_errors(ctx):
 
     acyclic(ctx.queue_prefixes, lambda row: (row.previous,) if type(row.previous) is QueuePrefixID else (), 'prefix_cycle')
     acyclic(ctx.submissions, lambda row: row.dependencies, 'dependency_cycle')
+
+    for access in ctx.model.provider_accesses:
+        path = f'provider_accesses[{access.id}]'
+        work = ticket(access.work, path)
+        if work is None:
+            continue
+        _, process = point_for_work(access.point, work, path)
+        expected_process = scopes.get(work.id, (None, None))[1]
+        if process is not None and expected_process is not None and process != expected_process:
+            issue('provider_access_process', path, 'provider access belongs to another process than its work')
+        if access.purpose is ProviderAccessPurpose.EXECUTOR and type(work.scheduling) is DirectExecution:
+            if type(work.scheduling.thread) is not Unresolved:
+                if type(access.target) is not ThreadTarget or access.target.thread != work.scheduling.thread:
+                    issue('provider_direct_executor', path, 'direct work executor must match its exact host-thread incarnation')
+        gap('provider_access_canonical_alignment', path, 'provider access is not a canonical Use/effect/requirement binding')
 
     for work in ctx.model.submissions:
         path = f'submissions[{work.id}]'

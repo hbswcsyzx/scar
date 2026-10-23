@@ -62,6 +62,10 @@ class ResourceAccessID(Identifier):
     prefix = "exec_resource_access"
 
 
+class ProviderResourceAccessID(Identifier):
+    prefix = "exec_provider_resource_access"
+
+
 class RealizationID(Identifier):
     prefix = "exec_realization"
 
@@ -159,7 +163,7 @@ __all__ = [
     "ExecutionSegmentID", "BlockVisitID", "OperationOccurrenceID",
     "ValueOccurrenceID", "ResourceInstanceID", "ExternalRealmID",
     "NativeHandleLifetimeID", "ResourceBindingID", "HandleBindingID",
-    "ResourceAccessID", "RealizationID",
+    "ResourceAccessID", "ProviderResourceAccessID", "RealizationID",
     "WorkTicketID", "WorkOutcomeID", "WorkQuiescenceID", "WorkRetentionID", "QueuePrefixID",
     "QueueOrderProfileID", "EventRecordID", "QueueWaitID",
     "DenotationID", "WorkEvidenceBindingID", "ContentReadID",

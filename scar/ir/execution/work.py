@@ -21,7 +21,7 @@ from .coordinates import (
 from .ids import (
     HandleBindingID, HostThreadInstanceID, QueuePrefixID, ResourceAccessID,
     ResourceInstanceID, WorkOutcomeID, WorkQuiescenceID, WorkRetentionID,
-    WorkTicketID,
+    WorkTicketID, ProviderResourceAccessID,
 )
 from .resources import (
     AllocationTarget, ReleaseAuthority, ResourceTarget, Sharing, _exact, _id,
@@ -152,7 +152,7 @@ Scheduling: TypeAlias = Queued | DirectExecution | Unresolved
 class WorkSubmission:
     id: WorkTicketID
     origin: SubmissionOrigin
-    executor: ResourceAccessID | Unresolved
+    executor: ResourceAccessID | ProviderResourceAccessID | Unresolved
     scheduling: Scheduling
     dependencies: tuple[WorkTicketID, ...]
     dependencies_coverage: Completeness
@@ -167,7 +167,7 @@ class WorkSubmission:
     def __post_init__(self):
         _id(self.id, WorkTicketID, "work ticket ID")
         _variant(self.origin, (WithinOperation, ExternalWorkSource), "work submission origin")
-        _variant(self.executor, (ResourceAccessID, Unresolved), "work executor")
+        _variant(self.executor, (ResourceAccessID, ProviderResourceAccessID, Unresolved), "work executor")
         _variant(self.scheduling, (Queued, DirectExecution, Unresolved), "work scheduling")
         _exact(self.dependencies, tuple, "work dependencies")
         for item in self.dependencies:

@@ -24,7 +24,8 @@ from .resources import (
     InstanceTarget, NativeHandle, ObjectHandle, ObjectHolder, ProcessRealm,
     ProcessTarget, ProtocolCondition, RelationAt, ResourceAccessBinding,
     ResourceInstance, ResourceRealization, RequirementBinding, RightsClaim,
-    RunRealm, TargetHolder, ThreadTarget, UnresolvedHandle,
+    RunRealm, TargetHolder, ThreadTarget, UnresolvedHandle, ProviderHandle,
+    ProviderAccessPurpose,
 )
 
 
@@ -54,6 +55,25 @@ def resource_errors(ctx) -> None:
 
     def gap(code, path, message):
         ctx.gap("resource_" + code, path, message)
+
+    missing_selector = object()
+    selector_results = {}
+
+    def selector_value(selector, path):
+        resolver = ctx.provider_selector_resolver
+        if resolver is None:
+            gap("provider_selector_unresolved", path, "selector bytes require an explicitly bound provider reader")
+            return missing_selector
+        if selector not in selector_results:
+            try:
+                resolution = resolver(selector)
+                if type(resolution) is not dict or "value" not in resolution:
+                    raise ValueError("provider resolver did not return its selected value/receipt")
+                selector_results[selector] = resolution["value"]
+            except (ValueError, TypeError, KeyError, IndexError, OSError) as error:
+                issue("provider_selector", path, str(error))
+                return missing_selector
+        return selector_results[selector]
 
     def path_for(table, key):
         return f"{table}[{key}]"
@@ -303,6 +323,21 @@ def resource_errors(ctx) -> None:
             else:
                 check_realm(endpoint.namespace.realm, path, binding.start)
             value_available_at(endpoint.value, binding.start, path)
+        elif type(endpoint) is ProviderHandle:
+            check_realm(endpoint.namespace.realm, path, binding.start)
+            if type(endpoint.container) is InstanceTarget:
+                table = ctx.resources.get(endpoint.container.instance)
+                if table is None or table.kind is not ResourceKind.OTHER or table.role is not ResourceRole.HANDLE_TABLE:
+                    issue("provider_handle_table", path, "provider handle needs its exact HANDLE_TABLE resource")
+                else:
+                    check_target_realm(endpoint.container, binding.start, path)
+            else:
+                ctx.check_point(endpoint.container.point, path)
+                gap("provider_handle_table_unresolved", path, endpoint.container.reason)
+            # A generic provider handle may use structured or non-FD tokens.
+            # Token-domain constraints belong to its concrete provider adapter.
+            selector_value(endpoint.selector, path)
+            gap("provider_handle_effect_alignment", path, "provider selector is not a canonical ValueOccurrence/state/effect route")
         elif type(endpoint) is UnresolvedHandle:
             if endpoint.value is not None and endpoint.value not in ctx.values:
                 issue("unresolved_handle_value", path, "unresolved handle names an unknown value occurrence")
@@ -468,13 +503,33 @@ def resource_errors(ctx) -> None:
     # Validate handle endpoints, state support, holder references and lifetimes.
     native_lifetimes = {}
     for identity, row in ctx.handles.items():
-        if type(row.handle) is not NativeHandle:
+        if type(row.handle) not in (NativeHandle, ProviderHandle):
             continue
-        endpoint = (row.target, row.handle.namespace)
+        endpoint = (row.target, row.handle.namespace, row.handle.container if type(row.handle) is ProviderHandle else None)
         previous = native_lifetimes.setdefault(row.handle.lifetime, endpoint)
         if previous != endpoint:
             issue("native_lifetime_target", path_for("handles", identity),
                   "one native handle lifetime cannot change target or namespace")
+
+    for identity, access in ctx.provider_accesses.items():
+        path = path_for("provider_accesses", identity)
+        if access.id != identity:
+            issue("table_key", path, "provider access table key differs from its row identity")
+        ctx.check_point(access.point, path)
+        kind_role = target_kind_role(access.target, path)
+        check_target_realm(access.target, access.point, path)
+        if access.purpose is ProviderAccessPurpose.EXECUTOR and kind_role is not None:
+            if kind_role[1] is not ResourceRole.EXECUTOR:
+                issue("provider_executor_role", path, "executor association must target an actual EXECUTOR")
+        if type(access.handle) is ExplicitHandle:
+            handle = ctx.handles.get(access.handle.binding)
+            if handle is None or handle.target != access.target:
+                issue("provider_access_handle", path, "explicit provider handle is absent or targets another resource")
+        elif type(access.handle) is Unresolved:
+            ctx.check_point(access.handle.point, path)
+            gap("provider_access_handle_unresolved", path, access.handle.reason)
+        selector_value(access.selector, path)
+        gap("provider_access_state_alignment", path, "provider resource selection does not establish canonical resource state/effects")
     for identity, row in ctx.handles.items():
         path = path_for("handles", identity)
         if row.id != identity:

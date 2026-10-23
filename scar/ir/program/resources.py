@@ -24,6 +24,7 @@ class ResourceRole(str, Enum):
     STORAGE_ENDPOINT = "STORAGE_ENDPOINT"
     FILE_ENTITY = "FILE_ENTITY"
     OPEN_FILE_DESCRIPTION = "OPEN_FILE_DESCRIPTION"
+    HANDLE_TABLE = "HANDLE_TABLE"
     OPAQUE_RESOURCE = "OPAQUE_RESOURCE"
 
 
@@ -32,6 +33,7 @@ def _require_kind_role(kind, role):
         ResourceRole.MEMORY_POOL: ResourceKind.MEMORY,
         ResourceRole.FILE_ENTITY: ResourceKind.FILE,
         ResourceRole.OPEN_FILE_DESCRIPTION: ResourceKind.FILE,
+        ResourceRole.HANDLE_TABLE: ResourceKind.OTHER,
     }.get(role)
     if expected is not None and kind is not expected:
         raise ValueError("resource kind is incompatible with its protocol role")

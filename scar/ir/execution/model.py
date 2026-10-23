@@ -12,7 +12,7 @@ from .coordinates import (
 from .ids import OperationOccurrenceID
 from .resources import (
     AllocationPlacement, HandleBinding, RequirementBinding, ResourceAccessBinding,
-    ResourceInstance, ResourceRealization,
+    ResourceInstance, ResourceRealization, ProviderResourceAccess,
 )
 from .order import EventRecord, QueueOrderProfile, QueueWait
 from .work import QueuePrefix, ResourceOutcome, WorkQuiescence, WorkRetention, WorkSubmission
@@ -77,6 +77,7 @@ class ExecutionModel:
     requirements: tuple[RequirementBinding, ...] = ()
     handles: tuple[HandleBinding, ...] = ()
     accesses: tuple[ResourceAccessBinding, ...] = ()
+    provider_accesses: tuple[ProviderResourceAccess, ...] = ()
     placements: tuple[AllocationPlacement, ...] = ()
     evidence_bindings: tuple[OccurrenceEvidenceBinding, ...] = ()
     submissions: tuple[WorkSubmission, ...] = ()
@@ -122,6 +123,7 @@ TABLE_TYPES = {
     'operations': OperationOccurrence, 'values': ValueOccurrence, 'uses': UseOccurrence,
     'transfers': ControlTransfer, 'resources': ResourceInstance, 'realizations': ResourceRealization,
     'requirements': RequirementBinding, 'handles': HandleBinding, 'accesses': ResourceAccessBinding,
+    'provider_accesses': ProviderResourceAccess,
     'placements': AllocationPlacement, 'evidence_bindings': OccurrenceEvidenceBinding,
     'submissions': WorkSubmission, 'outcomes': ResourceOutcome, 'quiescences': WorkQuiescence,
     'retentions': WorkRetention, 'queue_prefixes': QueuePrefix,
