@@ -91,6 +91,31 @@ SQLite查询索引已实现并通过真实分片归档构建与局部查询：43
 
 ## 5. 当前最关键的断口
 
+### 已审查并开始实施的下一门（2026-10-23）
+
+以下三份设计已由主agent逐项审查，开始实施；文档中的Proposed描述设计来源，
+不构成实现或验收结果。原停止条件、S3/S4和所有未解决分母保持不变。
+
+1. [SourceProgram5正式发布](SOURCE_LANGUAGE_PUBLICATION.md)：将两个已保存且独立
+   验证的真实body通过显式CP2/分片2/composition3准入，保留原图实际namespace、
+   compiler witness origin、未变source/component及旧失败检查点。构造成本缺失为
+   UNKNOWN，不把节点数当lowerer执行成本。正式publisher输出后才进入当前Run绑定。
+2. [当前运行消费](SOURCE_BODY_RUNTIME_ADMISSION.md)：提取原单origin准入规则；
+   公共orchestrator自己读一次当前raw frame/operands，并在其内部让binder/SBA共享
+   owned reader结果。不能接受外部dataclass或validated=True替代原始输入校验。
+   相同已保留Run的原source membership证明只按完整receipt复用，历史guard不冒称
+   本次live测量；新端口/activation及计数从实际reader结果重新推导。只做一次联合
+   实档门，保存producer冻结、原输入与产物SHA、实际exit、time/RSS及所有frontier。
+3. [OS来源自动查找](OS_SOURCE_LOOKUP_REVIEW.md)：从既有R2端口及coordinates机械
+   生成birth需求，以原R1 public selector/resolver核准确positive witness，准备
+   明确新producer的证据封装再调用原FD consumer。候选位置只用于查询；未命中不
+   证明不存在。零/多个pre-exec witness的旧consumer限制仍显式保留。独立实际门
+   验证helper→prepare→原builder/public reader，不再手填actor或ordinal。
+
+前两项共同负责源码/当前调用连接；第三项负责资源关联自动化。均不新增
+detector/backend，不执行新LeWM，不通过存储发布或局部PASS提升整体验收状态。
+下一次采集仍须等必需的新字段共同确定后统一进行。
+
 - 依赖源码：历史106外部source已归档，当前242groups/86,688calls已通过共同resolver
   接同版本静态定义；大部分仍source-only。模块初始化、genexpr/lambda、延迟annotation
   及完整库接口仍需各自正确的定义与区域、effects和状态连接，不能把知道来源当内部展开。
