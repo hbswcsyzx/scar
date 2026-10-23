@@ -1,0 +1,11 @@
+{
+  "completed_source_binder_reexecuted": false,
+  "first_stage_complete": false,
+  "fresh_frame_and_operand_reader_required": true,
+  "original_outputs_overwritten": false,
+  "parent_exit": 1,
+  "parent_failure": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_attempt02_20261023/failure.json",
+  "parent_failure_sha256": "379424a86c89617f567a5a57d91a7f0ebc407c63470a661d41dff69fb24a596b",
+  "publisher_reexecuted": false,
+  "repair_scope": "CP2 actual-field adapter and explicit completed-source checkpoint continuation"
+}

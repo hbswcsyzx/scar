@@ -1,0 +1,12 @@
+{"elapsed_s": 9.666217638005037, "event": "PHASE_END", "max_rss_kib": 99028, "phase": "parent-coordinate-membership-revalidation", "pid": 643721, "seconds": 8.86780612700386}
+{"elapsed_s": 20.016631136997603, "event": "HEARTBEAT", "max_rss_kib": 517524, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 27.809444986996823, "event": "CODE_WITNESS_LOADED", "max_rss_kib": 566860, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 28.17945902000065, "event": "admit_source_program", "max_rss_kib": 566860, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 36.596830658003455, "event": "admit_source_program", "max_rss_kib": 574892, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 40.27325737099454, "event": "HEARTBEAT", "max_rss_kib": 701972, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 60.559215219007456, "event": "HEARTBEAT", "max_rss_kib": 701972, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 74.3498779329966, "event": "compose_changed_file", "max_rss_kib": 701972, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 80.6302695570048, "event": "HEARTBEAT", "max_rss_kib": 701972, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 81.37816279300023, "event": "compose_changed_file", "max_rss_kib": 701972, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 100.63676466600737, "event": "HEARTBEAT", "max_rss_kib": 860848, "phase": "formal-source-program-publication", "pid": 643721}
+{"detail": "'Operation' object has no attribute 'wire'", "elapsed_s": 102.62891427100112, "error_type": "AttributeError", "event": "FAILED", "max_rss_kib": 900908, "phase": "formal-source-program-publication", "pid": 643721}

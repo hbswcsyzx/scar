@@ -1,0 +1,10 @@
+{
+  "target_pid": 650375,
+  "target_command": "python artifacts/experiments/first_stage_source_publication_current_attempt03_20261023/run.py ",
+  "signal": "SIGINT",
+  "reason": "Inspect own analysis stack after code review identified per-code source-graph resolution without per-file batching; preserve all checkpoints before a minimal read batching fix. Not an observation-timeout restart.",
+  "euid": 1000,
+  "time_ns": 1792756054766475829,
+  "target_workload_executed": false,
+  "first_stage_complete": false
+}

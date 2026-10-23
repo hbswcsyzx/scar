@@ -269,3 +269,101 @@ AST parsing and whitespace checks are implementation checks only. The parent
 owns the single combined publication → current source → marker → SBA gate and
 will derive all new associations, routes, ports and resource costs from real
 outputs before marking this bridge Verified.
+
+## 8. Actual failure and completed-source continuation
+
+The combined attempt02 exited1 after963.19s. Its source binder had completed
+and published855 codes,817 groups and100438 entries/exits:76 body-linked groups/
+6674 calls,591 source-only groups/88800 calls and150 unresolved groups/4964 calls.
+The whole attempt is **Failed**, not Verified. The marker stage then treated a
+CP2 reference envelope as if it embedded CP1's `structured` field and raised
+KeyError before marker/SBA completion. The original failure and outputs remain
+in `first_stage_source_publication_current_attempt02_20261023`.
+
+The narrow dispatch fix retains CompositionIndex's canonical graph/hash checks
+and reads the actual structured source through InventoryPartitions.typed_body.
+It compares the typed body's original definition, metadata, root, source and
+namespace to the qualified binding. No field is synthesized in the envelope.
+
+`connect_current_capture` now accepts an optional complete triple:
+`resume_source_directory`, `resume_source_report_sha256`,
+`resume_source_bindings_sha256`. All three must be present together. The original
+OLD source report/producer inputs remain the original SameRunSourceProof basis;
+the failed attempt is not promoted to that role. Continuation still independently
+opens current raw frame/operands once and reconstructs the owned original proof.
+
+The pinned completed source checkpoint must have the exact new composition,
+coordinate artifact, reader budget/issues, original installed source-proof
+receipt and unchanged recorded source guards. The normal SourceBodyAccess
+constructor and bind_scan then check its current manifests/metadata, complete
+descriptors and original capture anchors, group/status weights and entry/exit
+counts against that owned raw scan. Its retained gzip invocation/orphan streams
+are separately checked for compressed size and complete decoded SHA/bytes/rows;
+this byte check is not called semantic row replay. Marker consumption keeps its
+existing row-level validation. SBA privately reuses the actual accessor bound
+by this orchestration, never a caller-supplied accessor/scan or validation flag.
+
+The returned `source_directory` names the original checkpoint directory;
+`source_checkpoint` records the exact receipts and validation scope. No source
+JSONL is copied, no successful source report is rewritten and the840-body source
+binder is not rerun. Normal mode still calls that binder. This continuation and
+the CP2 dispatch fix are Implemented/AST-checked; their real gate is pending.
+
+## 9. Next bounded source-table throughput change (Proposed only)
+
+Read-only inspection found `_source_tables` calls inventory_body for all2217
+bodies and hashes840 graphs before using only the current demanded bodies.
+A later minimal change can retain the full source/header/definition denominator
+while deriving demand from fresh sink.groups and complete verified captured-
+code/source links under the original source/compiler/entry guards. Only those
+qualified demanded body keys need actual graph reads for this binding task.
+
+Keep a distinct header catalog and a demanded verified canonical-reference map.
+A header/status/locator is not graph proof; an unrequested body must remain
+explicitly not requested, never be represented by a fake graph=None or an
+unsupported status. Assert every body key used by binding is in the demanded
+validated map; a missing demanded graph remains its real frontier. Check all
+151 source/header scopes and2217 body declarations exactly, preserve output
+ordering and count denominators, and keep public full validation/replay intact.
+SourceBodyAccess still reads and independently validates each applicable actual
+body (currently76). Reuse of74 prior namespace/canonical proofs is another
+possible optimization only under an exact immutable parent and body-only delta;
+on-demand reads are the smaller general first change. Neither approach is a
+target-program backend. No such source-table change was implemented here.
+
+## 10. Observed code-order reload hotspot and narrow batch repair
+
+Root deliberately interrupted attempt03 with SIGINT after2234.18s (exit130,
+not a timeout). Its captured stack identifies checkpoint continuation in
+`SourceBodyAccess.bind_scan` → `CompositionIndex.definition_reference` →
+`_project_definition_references` → source-layer/control validation. The
+code-ordered loop repeatedly demanded different definitions from the same files
+after the normal small source-view LRU had evicted them. The original
+interruption, failure and stack are retained; this gate is not complete.
+
+The narrow repair precollects only current formal INVENTORY definition demands.
+Each demand is joined to the actual current full CodeCapture, original complete
+descriptor, original VERIFIED CodeSourceLink, exact snapshot/context/source and
+composition element. It calls the already existing public
+`prefetch_definition_references` once per demanded file. That function performs
+the original source-graph/snapshot/source-atom validation and caches original
+qualified references and original small semantic records. No source validator
+is bypassed and no semantic record is manufactured. The subsequent per-group
+descriptor/guard/source/locator/reference checks remain intact.
+
+Progress uses the existing CodeWitnessStore notification callback: per-file
+prefetch begin/end, requested definitions/files, completed public prefetch calls,
+elapsed seconds, and per64-group/end binding progress. Receipts explicitly say
+physical source reads are not measured; public prefetch calls are not relabeled
+disk reads. No full trace payload is printed.
+
+The normal orchestrator shares this exact CompositionIndex with dispatch, so
+dispatch's project `definition_reference`/`resolve_definition` calls reuse the
+same already-validated small definition cache. Dispatch still independently
+checks each demanded source file's original context. A standalone fresh-index
+dispatch call can still exhibit per-code definition loading; extending its
+batch admission is a separate proposed change, not silently performed here.
+This repair is Implemented/AST-checked, with no actual new gate or claimed
+speedup yet. It does not change section9's still-unimplemented840-body binder
+read strategy, source-layer/core validation, canonical body validation, target
+execution or the completed-source checkpoint contract.

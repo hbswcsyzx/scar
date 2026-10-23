@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections import Counter
 from copy import deepcopy
+import gzip
 import hashlib
 from pathlib import Path
 import sys
@@ -257,6 +258,7 @@ class _OwnedCurrent:
         self._key, self.operands, self.coordinates = key, operands, coordinates
         self.builds = {meta["process_id"]: meta["python"] for meta in operands.frame_scan.metadata}
         self.proof = None
+        self._bound_source_access = None
 
     def require(self, trace, root, frame_budget, operand_budget=None, coordinates=None):
         _need(self._key is _KEY and self.operands.directory == str(Path(trace).resolve())
@@ -277,6 +279,15 @@ class _OwnedCurrent:
             (sink.entry if entered else sink.exit)(row)
         return operands.frame_scan, sink
 
+    def checked_source_access(self, composition, source_directory, coordinates, code_witnesses):
+        access = self._bound_source_access
+        if access is not None:
+            _need(access.bound and access.composition is composition and access.coordinates is coordinates
+                  and access.code_witnesses is code_witnesses
+                  and access.report_root == Path(source_directory).resolve(),
+                  "owned checkpoint accessor differs from this exact continuation scope")
+        return access
+
 
 def _require_owned_source_report(composition, report, bindings):
     """An output declaration cannot grant the installed proof's authority."""
@@ -293,11 +304,73 @@ def _require_owned_source_report(composition, report, bindings):
     return None
 
 
+def _checkpoint_stream(directory, declaration, *, max_bytes=1_000_000_000):
+    """Check retained output bytes/rows, without claiming to replay their meaning."""
+    name = declaration["path"]
+    _need(name in ("invocations.jsonl.gz", "orphan-exits.jsonl.gz")
+          and all(type(declaration[field]) is int and 0 <= declaration[field] <= max_bytes
+                  for field in ("raw_bytes", "compressed_bytes", "rows")),
+          "checkpoint stream declaration exceeds the supported bounded profile")
+    path = directory / name
+    _need(path.is_file() and not path.is_symlink(), "checkpoint stream is not an ordinary file")
+    before = path.stat()
+    _need(before.st_size == declaration["compressed_bytes"], "checkpoint compressed stream size differs")
+    digest, size, rows = hashlib.sha256(), 0, 0
+    with gzip.open(path, "rb") as stream:
+        while True:
+            block = stream.read(min(1_048_576, declaration["raw_bytes"] - size + 1))
+            if not block:
+                break
+            size += len(block); rows += block.count(b"\n"); digest.update(block)
+            _need(size <= declaration["raw_bytes"], "checkpoint decoded stream exceeds its exact declaration")
+    after = path.stat()
+    _need((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+          == (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+          and (digest.hexdigest(), size, rows)
+              == (declaration["raw_sha256"], declaration["raw_bytes"], declaration["rows"]),
+          "checkpoint output stream SHA/bytes/rows changed")
+    return {"path": str(path), "compressed_bytes": before.st_size,
+            "raw_sha256": digest.hexdigest(), "raw_bytes": size, "rows": rows,
+            "semantic_row_replay_performed_here": False}
+
+
+def _resume_source(owner, composition, directory, report_sha, bindings_sha, code_witnesses):
+    from scar.analysis.source_body_access import SourceBodyAccess
+    directory = Path(directory).resolve(strict=True)
+    report, report_ref = _read(directory / "report.json", report_sha, schema="scar.source-invocations")
+    bindings, binding_ref = _read(directory / "bindings.json", bindings_sha,
+                                  schema="scar.source-invocation-bindings")
+    _need(_require_owned_source_report(composition, report, bindings) == owner.proof.receipt(),
+          "completed checkpoint has no identical installed original same-Run source proof")
+    _need(report["coordinate_binding"] == encode(owner.coordinates.artifact)
+          and report["call_budget"] == encode(owner.operands.frame_budget)
+          and report["raw_scan_issues"] == encode(owner.operands.frame_scan.issues)
+          and report["current_source_checks"] == owner.proof.guards().records,
+          "completed checkpoint changed coordinates, reader budget/issues or recorded guard scope")
+    access = SourceBodyAccess(composition, directory, owner.coordinates, code_witnesses)
+    _need(access.report_receipt["sha256"] == report_ref.sha256
+          and access.report_receipt["bytes"] == report_ref.size_bytes
+          and access.bindings_receipt["sha256"] == binding_ref.sha256
+          and access.bindings_receipt["bytes"] == binding_ref.size_bytes,
+          "checkpoint documents changed between exact receipt and public accessor validation")
+    access.bind_scan(owner.operands.frame_scan, owner.operands.entries, owner.operands.exits)
+    streams = [_checkpoint_stream(directory, report[name]) for name in ("invocations", "orphan_exits")]
+    owner._bound_source_access = access
+    return report, {"rule": "EXACT_COMPLETED_SOURCE_CHECKPOINT_V1",
+        "source_report": encode(report_ref), "source_bindings": encode(binding_ref),
+        "streams": streams, "current_raw_scan_repeated_independently": True,
+        "source_binder_reexecuted": False, "same_run_source_proof": owner.proof.receipt(),
+        "source_body_accessor_rebound_to_current_owned_scan": True,
+        "guards_refreshed": False, "transformation_authorized": False}
+
+
 def connect_current_capture(composition, coordinates, trace_directory, out_dir, *,
                             previous_source_directory, previous_report_sha256, previous_bindings_sha256,
                             previous_producer, previous_participating_producer, code_witnesses,
                             dispatch_bridge=None, frame_budget=None, operand_budget=None, route_budget=None,
-                            include_environments=True, progress=None):
+                            include_environments=True, progress=None,
+                            resume_source_directory=None, resume_source_report_sha256=None,
+                            resume_source_bindings_sha256=None):
     """Open/verify current raw once, then privately share it across source/SBA."""
     from scar.analysis.call_operand_reader import read_call_operands
     from scar.analysis.call_operands import _link_call_operands_owned
@@ -321,6 +394,9 @@ def connect_current_capture(composition, coordinates, trace_directory, out_dir, 
           and type(route_budget) is OperandRouteBudget and type(include_environments) is bool,
           "orchestration requires exact typed reader budgets and environment selection")
     _need(progress is None or callable(progress), "progress must be callable")
+    resume_fields = (resume_source_directory, resume_source_report_sha256, resume_source_bindings_sha256)
+    _need(all(value is None for value in resume_fields) or all(value is not None for value in resume_fields),
+          "completed source checkpoint requires its explicit directory and both exact document SHAs")
     output = Path(out_dir).resolve()
     _need(not output.exists(), "orchestration output must be fresh")
     root = composition.inventory_component("discovery")["project_root"]
@@ -334,19 +410,30 @@ def connect_current_capture(composition, coordinates, trace_directory, out_dir, 
     composition.install_static_source_proof(proof)
     output.mkdir(exist_ok=False)
     if progress is not None: progress({"stage": "OWNED_RAW_READ_VERIFIED", "proof_reuse": proof.receipt()})
-    source = _bind_source_invocations_owned(owner, composition, coordinates, trace_directory,
-        output / "source", call_budget=frame_budget, witness_mode="reused_code")
-    dispatch = (bind_dispatch_sources(output / "source", dispatch_bridge, coordinates,
+    checkpoint = None
+    source_directory = output / "source"
+    if resume_source_directory is None:
+        source = _bind_source_invocations_owned(owner, composition, coordinates, trace_directory,
+            source_directory, call_budget=frame_budget, witness_mode="reused_code")
+    else:
+        source_directory = Path(resume_source_directory).resolve(strict=True)
+        source, checkpoint = _resume_source(owner, composition, source_directory,
+            resume_source_report_sha256, resume_source_bindings_sha256, code_witnesses)
+        if progress is not None: progress({"stage": "COMPLETED_SOURCE_CHECKPOINT_VERIFIED", "checkpoint": checkpoint})
+    dispatch = (bind_dispatch_sources(source_directory, dispatch_bridge, coordinates,
         output / "dispatch", composition_index=composition) if dispatch_bridge is not None else None)
     report = _link_call_operands_owned(owner, trace_directory, root, composition=composition,
-        source_bindings=output / "source", coordinates=coordinates, code_witnesses=code_witnesses,
+        source_bindings=source_directory, coordinates=coordinates, code_witnesses=code_witnesses,
         frame_budget=frame_budget, operand_budget=operand_budget, route_budget=route_budget,
         include_environments=include_environments, progress=progress)
     counts = {"frame_scans": 1, "operand_scans": 1, "environment_scans": int(include_environments),
         "captured_codes": len(operands.frame_scan.captures), "entries": len(operands.entries),
         "exits": len(operands.exits), "operand_events": len(operands.events)}
     return {"source_report": source, "dispatch_report": dispatch, "operand_report": report,
-            "reader_counts": counts, "proof_reuse": proof.receipt()}
+            "source_directory": str(source_directory), "source_checkpoint": checkpoint,
+            "reader_counts": {**counts, "source_binder_runs": int(checkpoint is None),
+                              "completed_source_checkpoints": int(checkpoint is not None)},
+            "proof_reuse": proof.receipt()}
 
 
 __all__ = ["connect_current_capture", "SameRunSourceProof"]

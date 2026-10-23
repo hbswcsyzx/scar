@@ -1,0 +1,86 @@
+--- prior-frozen/source_body_access.py
++++ current/source_body_access.py
+@@ -15,6 +15,7 @@
+ import json
+ from pathlib import Path
+ import re
++import time
+ from types import SimpleNamespace
+ 
+ from scar.analysis.code_witness import CodeWitnessStore, CodeWitnessUnavailable
+@@ -273,7 +274,57 @@
+         self.unbound_processes = {pid for pid, family in members.processes
+                                   if members.processes[pid, family] is None}
+         captures = {(row.process_id, row.code.key): row for row in scan.captures}
+-        for key, row in self.by_group.items():
++        self.code_witnesses._notify("SOURCE_BODY_ACCESS_BIND_BEGIN", groups=len(self.by_group),
++                                    captured_codes=len(scan.captures))
++        # The ordinary per-row checks below still establish every original
++        # descriptor, guard, locator and reference equality. Prefetch only the
++        # exact demanded project definitions, grouped by file, so random code
++        # order cannot repeatedly reload/validate a large source graph.
++        demands = defaultdict(set)
++        verified_links = {link.code: link for link in self.original_links
++                          if link.status is CallLinkStatus.VERIFIED}
++        original_codes = {}
++        for original in self.original_captures:
++            previous = original_codes.setdefault(original.code.key, original.code)
++            _need(previous == original.code, "original descriptor key has contradictory complete code records")
++        if self.formal:
++            for key, row in self.by_group.items():
++                if row.get("source_origin") != "INVENTORY" or row["definition"] is None:
++                    continue
++                capture, link = captures.get(key), verified_links.get(row["code"])
++                element = row["composition_element"]
++                reference = decode(SourceDefinitionReference, row["definition"])
++                _need(capture is not None and encode(capture) == row["code_capture"]
++                      and original_codes.get(capture.code.key) == capture.code and link is not None
++                      and type(element) is dict and set(element) == {"file_index", "identity", "body_index"}
++                      and type(element["file_index"]) is int and element["body_index"] is None
++                      and 0 <= element["file_index"] < len(self.composition.document["files"])
++                      and link.code == capture.code.key and link.definition == reference.definition
++                      and link.snapshot == reference.snapshot and link.source == reference.source
++                      and encode(link.definition) == element["identity"]
++                      and encode(link.snapshot) == row["snapshot"] and encode(link.source) == row["source"]
++                      and self.composition.document["files"][element["file_index"]]["snapshot"] == row["snapshot"]
++                      and self.composition.document["files"][element["file_index"]]["context"] == encode(reference.context),
++                      "definition prefetch demand differs from original verified code/source/project scope")
++                demands[element["file_index"]].add(link.definition)
++        self.source_prefetch_counts = {"project_source_files_requested": len(demands),
++            "project_definition_references_requested": sum(map(len, demands.values())),
++            "public_prefetch_file_calls_completed": 0,
++            "physical_source_reads_measured": False, "elapsed_s": 0.0}
++        prefetch_started = time.monotonic()
++        for file_index in sorted(demands):
++            definitions = tuple(sorted(demands[file_index], key=lambda definition: definition.wire))
++            self.code_witnesses._notify("SOURCE_DEFINITION_PREFETCH_FILE_BEGIN", file_index=file_index,
++                definition_requests=len(definitions), counts=dict(self.source_prefetch_counts))
++            self.composition.prefetch_definition_references(tuple((file_index, definition) for definition in definitions))
++            self.source_prefetch_counts["public_prefetch_file_calls_completed"] += 1
++            self.source_prefetch_counts["elapsed_s"] = time.monotonic() - prefetch_started
++            self.code_witnesses._notify("SOURCE_DEFINITION_PREFETCH_FILE_END", file_index=file_index,
++                definition_requests=len(definitions), counts=dict(self.source_prefetch_counts))
++        for group_index, (key, row) in enumerate(self.by_group.items()):
++            if group_index % 64 == 0:
++                self.code_witnesses._notify("SOURCE_BODY_ACCESS_BIND_GROUPS", groups_checked=group_index,
++                                            groups=len(self.by_group))
+             capture = captures.get(key)
+             _need(capture is not None and encode(capture) == row["code_capture"],
+                   "source binding captured descriptor/anchor differs from current raw code")
+@@ -360,6 +411,8 @@
+         self.scan_counts = {"code_captures": len(scan.captures), "entered_code_groups": len(groups),
+                             "invocations": len(entries), "exits": len(exits)}
+         self.bound = True
++        self.code_witnesses._notify("SOURCE_BODY_ACCESS_BIND_END", counts=dict(self.scan_counts),
++                                    source_prefetch=dict(self.source_prefetch_counts))
+ 
+     def code_link(self, captured):
+         _need(self.bound, "a fresh raw scan must bind before source use")
+@@ -480,6 +533,7 @@
+             "source_guard_scope": self.report.get("source_guard_scope", "ORIGINAL_SOURCE_REPORT_BINDING_SCOPE"),
+             "current_source_guards_refreshed_here": False,
+             "current_raw_scan_verified": self.bound, "raw_counts": getattr(self, "scan_counts", {}),
++            "source_definition_prefetch": getattr(self, "source_prefetch_counts", {}),
+             "unbound_processes": sorted(getattr(self, "unbound_processes", ())),
+             "source_invocation_rows_consumed": False,
+             "namespaces": namespaces, "bare_definition_conflicts": sorted(value.wire for value in self.collisions),

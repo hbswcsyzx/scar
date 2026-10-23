@@ -1,0 +1,7 @@
+{
+  "detail": "",
+  "elapsed_s": 2234.1753032599954,
+  "first_stage_complete": false,
+  "phase": "same-retained-run-owned-reader-connections",
+  "type": "KeyboardInterrupt"
+}

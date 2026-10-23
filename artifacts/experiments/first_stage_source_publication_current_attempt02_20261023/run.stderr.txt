@@ -1,0 +1,25 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_attempt02_20261023/run.py", line 307, in <module>
+    main()
+    ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_attempt02_20261023/run.py", line 260, in main
+    connected = connect_current_capture(INDEX, coordinates, CAPTURE / 'trace', RESULT / 'connections',
+        previous_source_directory=OLD / 'result/source',
+    ...<7 lines>...
+        operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
+        include_environments=True, progress=notify)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/current_source_evidence.py", line 339, in connect_current_capture
+    dispatch = (bind_dispatch_sources(output / "source", dispatch_bridge, coordinates,
+                ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        output / "dispatch", composition_index=composition) if dispatch_bridge is not None else None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/dispatch_sources.py", line 600, in bind_dispatch_sources
+    source_scope.binding(binding)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/dispatch_sources.py", line 390, in binding
+    self.project.binding(restored)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/dispatch_sources.py", line 314, in binding
+    if checkpoint["structured"] is not None else None),
+       ~~~~~~~~~~^^^^^^^^^^^^^^
+KeyError: 'structured'

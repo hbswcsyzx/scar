@@ -303,15 +303,19 @@ class _PartitionedSourceScope:
             raw_body = self.composition.inventory_body(*key)
             graph, metadata = self.composition.typed_body(*key)
             locators = self.composition.inventory_body_locators(*key, raw_body["graph"])
-            checkpoint_ref = raw_file["bodies"][ref["body_index"]]["checkpoint"]
-            checkpoint = self.composition.inventory.checkpoint(checkpoint_ref)
+            # CP2 is a reference envelope. The public partition reader follows
+            # its exact SourceProgram5 artifact; CP1 keeps its embedded fields.
+            typed = self.composition.inventory.typed_body(*key)
             namespace = locators["namespace"]
             _need(raw_body["definition"] == definition["identity"] and graph.root == region
+                  and typed.body.graph is not None and typed.body.graph.root == region
+                  and typed.body.definition == definition_id and typed.body.metadata == metadata
+                  and typed.namespace == namespace
                   and encode(metadata.source) == binding["snapshot"]
                   and namespace["body"]["definition"] == definition["identity"]
                   and namespace["body"]["entry"] == metadata.entry
-                  and namespace["body"]["source"] == (checkpoint["structured"]["source"]
-                      if checkpoint["structured"] is not None else None),
+                  and namespace["body"]["source"] == (encode(typed.structured.source)
+                      if typed.structured is not None else None),
                   "body root/definition/metadata/namespace differs from its original checkpoint")
             expected_fields = {"canonical_locator": locators["graph_locator"],
                 "inventory_locator": locators["inventory_locator"], "metadata_locator": locators["metadata_locator"],

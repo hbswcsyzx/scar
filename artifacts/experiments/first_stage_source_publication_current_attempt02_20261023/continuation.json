@@ -1,0 +1,11 @@
+{
+  "current_raw_connection_previously_started": false,
+  "first_stage_complete": false,
+  "original_outputs_overwritten": false,
+  "parent_exit": 1,
+  "parent_failure": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/failure.json",
+  "parent_failure_sha256": "7d75b06d6dbd8ab38db5d482de75c69344538ebbc17b4bbc46e520aa94d4a3af",
+  "publisher_reexecuted": false,
+  "repair_scope": "experiment audit only: Operation.id.wire rather than Operation.wire",
+  "source_production_changed": false
+}

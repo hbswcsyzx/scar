@@ -1,0 +1,12 @@
+{"elapsed_s": 9.666217638005037, "event": "PHASE_END", "max_rss_kib": 99028, "phase": "parent-coordinate-membership-revalidation", "pid": 643721, "seconds": 8.86780612700386}
+{"elapsed_s": 20.016631136997603, "event": "HEARTBEAT", "max_rss_kib": 517524, "meaning": "process liveness only", "phase": "formal-source-program-publication", "pid": 643721}
+{"code_witness_activity": {"compile_attempts": 0, "complete_descriptor_matches": 0, "module_loads": 1, "source_bytes_read": 0}, "elapsed_s": 27.809444986996823, "event": "CODE_WITNESS_LOADED", "max_rss_kib": 566860, "module_key": "8e40fca22a28c5a2a268b3c17656b174cbb035aef331880a54a4351a4ef506c9", "phase": "formal-source-program-publication", "pid": 643721}
+{"body_index": 11, "definition": "opdef:op:958f52c21714db9099c836ab", "elapsed_s": 28.17945902000065, "event": "admit_source_program", "file_index": 140, "max_rss_kib": 566860, "phase": "formal-source-program-publication", "pid": 643721}
+{"body_index": 26, "definition": "opdef:op:2bbbf0465da144672babb952", "elapsed_s": 36.596830658003455, "event": "admit_source_program", "file_index": 140, "max_rss_kib": 574892, "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 40.27325737099454, "event": "HEARTBEAT", "max_rss_kib": 701972, "meaning": "process liveness only", "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 60.559215219007456, "event": "HEARTBEAT", "max_rss_kib": 701972, "meaning": "process liveness only", "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 74.3498779329966, "event": "compose_changed_file", "file_index": 140, "max_rss_kib": 701972, "phase": "formal-source-program-publication", "pid": 643721, "status": "BEGIN"}
+{"elapsed_s": 80.6302695570048, "event": "HEARTBEAT", "max_rss_kib": 701972, "meaning": "process liveness only", "phase": "formal-source-program-publication", "pid": 643721}
+{"elapsed_s": 81.37816279300023, "event": "compose_changed_file", "file_index": 140, "max_rss_kib": 701972, "phase": "formal-source-program-publication", "pid": 643721, "status": "END"}
+{"elapsed_s": 100.63676466600737, "event": "HEARTBEAT", "max_rss_kib": 860848, "meaning": "process liveness only", "phase": "formal-source-program-publication", "pid": 643721}
+{"detail": "'Operation' object has no attribute 'wire'", "elapsed_s": 102.62891427100112, "error_type": "AttributeError", "event": "FAILED", "max_rss_kib": 900908, "phase": "formal-source-program-publication", "pid": 643721}

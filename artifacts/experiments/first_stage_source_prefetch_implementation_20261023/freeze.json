@@ -1,0 +1,20 @@
+{
+  "actual_gate_run": false,
+  "base_revision": "3b576d8e3fb68e45e5fa5402642b3a24fd78fda6",
+  "compiler_archives_module_unchanged": true,
+  "created_at": "2026-10-23T11:55:39.414922+00:00",
+  "module": {
+    "ast_parse": "PASS",
+    "bytes": 37208,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_body_access.py",
+    "sha256": "6fa6d9cf7362afb433ca6b8067fe88883d067efa5d1b813c799ac9356a70ea47"
+  },
+  "narrow_patch_sha256": "056f2def0567783c59956696b1f6628bc4731558905eb2ed0ff8e25dbce9f6e2",
+  "prior_checkpoint_modules_unchanged": true,
+  "schema": "scar.source-prefetch-implementation-freeze",
+  "schema_version": 1,
+  "source_compiled": false,
+  "source_or_marshal_loaded": false,
+  "target_run": false,
+  "validation": "AST_AND_READ_ONLY_SOURCE_REVIEW"
+}

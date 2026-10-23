@@ -1,0 +1,32 @@
+{
+  "actual_gate_run": false,
+  "base_revision": "93ccd689971366dda736e73f7ca36af95e986f19",
+  "created_at": "2026-10-23T11:05:24.482915+00:00",
+  "modules": [
+    {
+      "ast_parse": "PASS",
+      "bytes": 54675,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/dispatch_sources.py",
+      "sha256": "039a57281a860d1d66aa5d4ebf36294fce7751c001065091789fea6d094c6cb7"
+    },
+    {
+      "ast_parse": "PASS",
+      "bytes": 28572,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/current_source_evidence.py",
+      "sha256": "a892d77ac41bedbc6dbee122ffcd29f99df35763346f77976b30933b4419539f"
+    },
+    {
+      "ast_parse": "PASS",
+      "bytes": 14906,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_operands.py",
+      "sha256": "12cb6a2301ebae6d2c41c93b3b29a827315f557ec998ad4352494dd93d264638"
+    }
+  ],
+  "narrow_patch_sha256": "29bf472052c1ffd9613a1e409252ae96e2464a991450eec49a89cb6ef402544f",
+  "new_compile": false,
+  "previous_implementation": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_runtime_implementation_20261023/freeze.json",
+  "schema": "scar.source-checkpoint-implementation-freeze",
+  "schema_version": 1,
+  "source_prepare": false,
+  "target_run": false
+}

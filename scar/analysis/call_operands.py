@@ -209,9 +209,12 @@ def _link_call_operands(trace, project_root, inventory=None, *, frame_budget=Cal
     notify("OPERAND_READ_END", invocations=len(operands.entries), events=len(operands.events))
     access = None
     if partitioned:
-        access = SourceBodyAccess(composition, source_bindings, coordinates, code_witnesses)
+        access = (_owner.checked_source_access(composition, source_bindings, coordinates, code_witnesses)
+                  if _owner is not None else None)
+        if access is None:
+            access = SourceBodyAccess(composition, source_bindings, coordinates, code_witnesses)
+            access.bind_scan(operands.frame_scan, operands.entries, operands.exits)
         _require(root == access.root, "partition source project root differs from current operand replay")
-        access.bind_scan(operands.frame_scan, operands.entries, operands.exits)
         inventory = access
         notify("SOURCE_BODY_ACCESS_BOUND", counts=access.scan_counts, selected_bodies=len(access.selected))
     model, sources = _link_call_model(
