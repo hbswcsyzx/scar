@@ -1,0 +1,1048 @@
+{
+  "actual_imports": [
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_compilation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_edges.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_operand_reader.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_operand_routes.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_operands.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_seeds.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_trace_reader.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/callable_environment_import.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/candidates.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/code_witness.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/constants.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/control_flow_v2.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/correspondence_v2.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/current_source_evidence.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/dispatch_sources.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/environment_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/function_interfaces.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/graph_candidates.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/graph_loops.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/invariance.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/inventory.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/inventory_partitions.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/liveness.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/loops.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/materialization.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/memory.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_composition.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_inventory.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/rejection_audit.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/repetition.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/runtime_inventory.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/runtime_sources.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_attachments.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_body_access.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_discovery.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_environment_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_heap_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_invocations.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_layers.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_mapping_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_program_publication.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_semantics_v2.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_statement_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_string_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/static_candidates.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/structured_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/synchronization.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/topdown.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/cfg.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/control_flow_v2.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/correspondence.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/effects.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/entities.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/events.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/calls.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/common.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/composition.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/content.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/coordinates.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/coverage.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/ids.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/observations.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/order.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/production.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/resources.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/resumables.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/snapshot.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/validity.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/work.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/frontend_v2.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/graph.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/ids.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/literals.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/binding_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/bindings.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_demand.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_edges.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_effect_expansion.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_operand_routes.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_operands.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_seeds.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/cleanup.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/cleanup_forward.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/cleanup_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/codec.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/compilation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/control.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/control_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/discovery.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/driver_flow.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/driver_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/drivers.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/environment_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/environments.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/exception_matches.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/expansion.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/frames.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/functions.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/ids.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/inventory.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/lifecycle.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/lifecycle_analysis.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/lifecycle_flow.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/lifecycle_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/literal_sources.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/literal_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/model.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/native.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/native_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/no_body_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_await_records.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_connections.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_flow.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_rules.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocols.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/provider_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/providers.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resource_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resources.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resumption.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resumption_flow.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resumption_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/runtime_sources.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/session_flow.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/session_release_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_language.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_references.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/state_address_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/state_addresses.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/state_modes.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/stored_values.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/structured.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/proofs.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/provenance.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/record_codec.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/semantics_v2.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/static.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/_validation.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/codec.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/common.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/contracts.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/correspondence.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/evidence.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/ids.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/optimization.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/schemas.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/semantic.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/values.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/versions.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/capture_coordinates.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/code_snapshot.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/dispatch_evidence.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/files.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/operand_bytecode.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_resources.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/reader.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/session.py"
+  ],
+  "all_imported_sources_unchanged": true,
+  "checked": [
+    {
+      "bytes": 6548,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_attempt04_20261023/prepare.py",
+      "sha256": "1991614b30ecdd05112aab6b3b34c28d5aa02b16cc52cc2b4b2df514e36b4882"
+    },
+    {
+      "bytes": 4625,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_attempt04_20261023/report_archive.py",
+      "sha256": "a13fae9ddea04d74b53c3ce2f899f8710f36ea81717489ece9b2d8e4ec42da5b"
+    },
+    {
+      "bytes": 17098,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_attempt04_20261023/run.py",
+      "sha256": "fa8a3d40ccf0a26a7a7eee074716ae93860eb08e1dd2dd20352e0af07f2750d6"
+    },
+    {
+      "bytes": 603,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_attempt04_20261023/run.sh",
+      "sha256": "6b723a3019bc2795604dac5742f9906814eaee7e560863ed873b977d0f486369"
+    },
+    {
+      "bytes": 86,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/__init__.py",
+      "sha256": "06c291b537285645ebef96a29bd5de6440ed2649c5a5c2fcb1d91e8cc058ba4c"
+    },
+    {
+      "bytes": 1587,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/__init__.py",
+      "sha256": "d00d3f539d292f3bf90d84a49d20f81a1723fb7284e7303a3a200bbd8582652b"
+    },
+    {
+      "bytes": 5901,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_compilation.py",
+      "sha256": "9913057f2594541ba960bdb0221a1b613ff3a7f3526aa7db5643547aec9eef05"
+    },
+    {
+      "bytes": 55428,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_edges.py",
+      "sha256": "639eeb6ddafaeb7e74b406b0190d425ba5fe3acde66d15f88b01a7919324ca01"
+    },
+    {
+      "bytes": 18120,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_operand_reader.py",
+      "sha256": "5dc26ce1e4e3fb2eed5fcaf4cda9fd0650f3c794d49c61d171f0dd933f08bf3d"
+    },
+    {
+      "bytes": 38341,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_operand_routes.py",
+      "sha256": "1fcf016dc0941c64682c1c6a452ad12e1f0f7e61ef3ad0dd62f93c6aa286a7fb"
+    },
+    {
+      "bytes": 14906,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_operands.py",
+      "sha256": "12cb6a2301ebae6d2c41c93b3b29a827315f557ec998ad4352494dd93d264638"
+    },
+    {
+      "bytes": 9364,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_seeds.py",
+      "sha256": "e8c480b6146500cec09cd529170bcba80e33f70628c6b37737069062f3e77de7"
+    },
+    {
+      "bytes": 22103,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_trace_reader.py",
+      "sha256": "684c16a34b27e233407e64cfa5a313515d95fbcea13152ae253a21e1b9bb0416"
+    },
+    {
+      "bytes": 25860,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/callable_environment_import.py",
+      "sha256": "eb902edcd18f54a68b26fd141de936484703fdf772f6de856229bdd82b8cef86"
+    },
+    {
+      "bytes": 625,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/candidates.py",
+      "sha256": "6dd95a2fd55a1f28f489bcb2e90280c88c73f5464400e3512ba20c29a3a17f53"
+    },
+    {
+      "bytes": 16601,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/code_witness.py",
+      "sha256": "fb4b2be1274750ebbc0a3971d8c43bca261e5769d088765ee42f6f05d3c26a52"
+    },
+    {
+      "bytes": 20341,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/constants.py",
+      "sha256": "bdefa5e32789f2e735232a5a32a5c20ff20581d77c3b18ba0555c97fca248d4f"
+    },
+    {
+      "bytes": 59355,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/control_flow_v2.py",
+      "sha256": "595917215df8ff593142a1e6beb517acc891c78b6b7693d5260e7ca4de09f367"
+    },
+    {
+      "bytes": 20920,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/correspondence_v2.py",
+      "sha256": "74da61b7413e0fb46ae353bc967743d64484e80a51cbf9debbadebf59abf0d9a"
+    },
+    {
+      "bytes": 28572,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/current_source_evidence.py",
+      "sha256": "a892d77ac41bedbc6dbee122ffcd29f99df35763346f77976b30933b4419539f"
+    },
+    {
+      "bytes": 54675,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/dispatch_sources.py",
+      "sha256": "039a57281a860d1d66aa5d4ebf36294fce7751c001065091789fea6d094c6cb7"
+    },
+    {
+      "bytes": 21905,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/environment_lowering.py",
+      "sha256": "ae89cdbbe428e137ef1c372eb0625dd4989f691fdb7b06ee9ef469a88d7ec13b"
+    },
+    {
+      "bytes": 10085,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/function_interfaces.py",
+      "sha256": "cf1245d1405628e1c719fd6099bc37c10055ee62007394946c1b3244e811b7ac"
+    },
+    {
+      "bytes": 9734,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/graph_candidates.py",
+      "sha256": "0cba159cd741159dc6349e9249030d477c91a7bbe0933e1dc923630a1bdbd564"
+    },
+    {
+      "bytes": 10618,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/graph_loops.py",
+      "sha256": "27930dea62b3aea8d7d0c79c42d04b9478bd4cf2d5b67a67db0fe4459c36c7c1"
+    },
+    {
+      "bytes": 247,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/invariance.py",
+      "sha256": "3a89e48d684a0f687f83b5c8304c0b550ff450e31e681fab0a5efea87efb4b7c"
+    },
+    {
+      "bytes": 5620,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/inventory.py",
+      "sha256": "246c292b9c4d71e20e1eb01ec6d76cef3b68bfa22bae16be8f20b92bbf7a7093"
+    },
+    {
+      "bytes": 32907,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/inventory_partitions.py",
+      "sha256": "84f615d016c1e41dcbfaac3e24fe5e35e98856341c58b9858af6fe7aeeb1a057"
+    },
+    {
+      "bytes": 3228,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/liveness.py",
+      "sha256": "125177d1f67870489bc278e0fae0ff2828181581f73020ab0a3c4cdcb24a317d"
+    },
+    {
+      "bytes": 4416,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/loops.py",
+      "sha256": "3a0d17920ffdd9eecf0a45d676e1191d49dd880f6c9b0e154105ebd3e5a16cac"
+    },
+    {
+      "bytes": 7762,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/materialization.py",
+      "sha256": "457d798746b7ca63daf4db9cd9b9bc7409cd534a1026e56d5a8547e15edd6f12"
+    },
+    {
+      "bytes": 3211,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/memory.py",
+      "sha256": "dd95d0743048b80540053a3e7631cb8602ec399e4a381b3be92fd12c31d5a36b"
+    },
+    {
+      "bytes": 74224,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_composition.py",
+      "sha256": "fd0a6de6f2646e3a6118b8f1c3b7fb640b45a8c289a421af8a6ece8494f376ff"
+    },
+    {
+      "bytes": 60606,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_inventory.py",
+      "sha256": "0a2e80c69f1af56400caedd39d308d96ff64f9a60a1dfd3295c498e5524831dc"
+    },
+    {
+      "bytes": 66613,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py",
+      "sha256": "8366051f1f9584d2b44363c3310580b6e51594de182849bb43245218a697bee4"
+    },
+    {
+      "bytes": 6354,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/rejection_audit.py",
+      "sha256": "720155d11974203527adf95d07ddcebebe8de0ae19b23ecbdcbe0fbdc5c107ba"
+    },
+    {
+      "bytes": 11012,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/repetition.py",
+      "sha256": "482256e38c5cef6f1dfced78606561e2a32bd59967eed9bd11be1c1ffbb727a5"
+    },
+    {
+      "bytes": 12294,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/runtime_inventory.py",
+      "sha256": "8360727acde8135dc4b883777661ac42fa6cc561f7e099bfd9fe96cd6da064cc"
+    },
+    {
+      "bytes": 19041,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/runtime_sources.py",
+      "sha256": "d31380d3175dd18eb0a8d46b7398bd9b029c8d2207bd1dcaada7ed32220adf81"
+    },
+    {
+      "bytes": 39545,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_attachments.py",
+      "sha256": "2720936fbfb6734085862e9118e1b613f2df79b04421443e3d594cd0ed91aa66"
+    },
+    {
+      "bytes": 37208,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_body_access.py",
+      "sha256": "6fa6d9cf7362afb433ca6b8067fe88883d067efa5d1b813c799ac9356a70ea47"
+    },
+    {
+      "bytes": 46767,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_discovery.py",
+      "sha256": "7b4e1af9ed88fe8fe1ede7ccf087ae1b8924ba451054e4ed19f700ab353f36ad"
+    },
+    {
+      "bytes": 13422,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_environment_validation.py",
+      "sha256": "d543bd8a8cbbf9ea51c675658eef1753576855e370ea61c2946c45a2eda4472a"
+    },
+    {
+      "bytes": 2211,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_heap_validation.py",
+      "sha256": "2ce2113cbe6e8a201fc6fe4f9bdb18225e56bbfb53424aa5d63b640dbff9c2bd"
+    },
+    {
+      "bytes": 59390,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_invocations.py",
+      "sha256": "0c90a637860c8ad414568ecede776464e9ec813643bcf27798fb763f8a63b9fe"
+    },
+    {
+      "bytes": 5180,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language.py",
+      "sha256": "9b2ef877bbfc9d752313cf54738ddcdf9b424f519b6c836f37d738ddf44497c1"
+    },
+    {
+      "bytes": 20143,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language_validation.py",
+      "sha256": "59ee23fc1cccc0a1d134679a5b48e6342c58d02d8c04d8bcae75b67479e8fef0"
+    },
+    {
+      "bytes": 42939,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_layers.py",
+      "sha256": "483f0949a1bf714a67e4f0e328dcc622f85075ab9636044feefcfd21807b572f"
+    },
+    {
+      "bytes": 12366,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_mapping_lowering.py",
+      "sha256": "2f9f3973dc2fe64ac95cd22010af4fb1c871d6cf520690388adf93cb415cdbf4"
+    },
+    {
+      "bytes": 20529,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_program_publication.py",
+      "sha256": "e224b51d870f446146a3ab6ec958705510916f7d47c7f0636e48b3471ed4a61e"
+    },
+    {
+      "bytes": 33881,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_semantics_v2.py",
+      "sha256": "2c20b09a3affc372f1103904bdf100dd3e0963c6ed89463bd57dbcae1e512a96"
+    },
+    {
+      "bytes": 12089,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_statement_lowering.py",
+      "sha256": "9d6b86482d3d6202534803b095233cc8228aeb54a1e964e85e0e8764d12c8b26"
+    },
+    {
+      "bytes": 11191,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_string_lowering.py",
+      "sha256": "33061d4dd8680eb33e696a6d9312323d4aadd225ebf036fc453c45b9dd6b5407"
+    },
+    {
+      "bytes": 7417,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/static_candidates.py",
+      "sha256": "973b77a3965e5d003cb55951914458ce19425f271a20ae926aa50d58360ad0ec"
+    },
+    {
+      "bytes": 55023,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/structured_lowering.py",
+      "sha256": "ff0efe4a806c22607753458eac11795103dbdf110d9867b400cc20638b8e2931"
+    },
+    {
+      "bytes": 4912,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/synchronization.py",
+      "sha256": "6c09397ee2335e405b1fc7b33e99bfe24d42276e248a544d603668b4229809ab"
+    },
+    {
+      "bytes": 16134,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/topdown.py",
+      "sha256": "211266a77b3ebc88bda1e29887ab019ae17cadd3c590db775e8ee4eb9ed568aa"
+    },
+    {
+      "bytes": 1445,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/__init__.py",
+      "sha256": "104501dea2488611e70e31a3579604c3e5249c1315bfc60591e1c26cd91a27fe"
+    },
+    {
+      "bytes": 7725,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/cfg.py",
+      "sha256": "8cf0ba8584735ff87ab0ef9ea049fea9169450e5c4f956faf3e4f55ccc0f74df"
+    },
+    {
+      "bytes": 31560,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/control_flow_v2.py",
+      "sha256": "d31fed629ff80fb80294343bb1904c9375c5a976d3073e274c6e4b6c5a52e92e"
+    },
+    {
+      "bytes": 5784,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/correspondence.py",
+      "sha256": "4d657909fed7734337510262f7788bab09cee3753a1f7b49b930a6f5a2ed47c5"
+    },
+    {
+      "bytes": 2834,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/effects.py",
+      "sha256": "56f9500bc2e0ae08a59ab2b93e67adcbb33518e0e9376b5a772c5f555f06022f"
+    },
+    {
+      "bytes": 4408,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/entities.py",
+      "sha256": "92ac005de66ea22b8217115285f34d9619f14705f644d8c22dece3791c48b341"
+    },
+    {
+      "bytes": 2281,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/events.py",
+      "sha256": "e7a7a0458f71fa2822e4c23aadd2dc4e713a48da5262707a381e41d243580017"
+    },
+    {
+      "bytes": 1756,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/__init__.py",
+      "sha256": "6f5096f7edee3c263001a204f4c3c14f5f373344edc0389730474ed59e380b0e"
+    },
+    {
+      "bytes": 2085,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/calls.py",
+      "sha256": "a287446babd077c072f51182d12ecc5e670bd2e1700b6396e914e134d95a183f"
+    },
+    {
+      "bytes": 2313,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/common.py",
+      "sha256": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8"
+    },
+    {
+      "bytes": 1377,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/composition.py",
+      "sha256": "6190ab8faa17c4b2823a061ce5179fb850fa9dd32c77806f04bc478052171852"
+    },
+    {
+      "bytes": 10997,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/content.py",
+      "sha256": "1eee1822056e59a0be9f4f3a1524f97948df91497ad57072c7c0ca53c670cf9e"
+    },
+    {
+      "bytes": 10753,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/coordinates.py",
+      "sha256": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09"
+    },
+    {
+      "bytes": 22116,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/coverage.py",
+      "sha256": "53da83b9cb3b67ae63a12163d74e58cf9d9d6d76511e2d4011a6918d43c59411"
+    },
+    {
+      "bytes": 3959,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/ids.py",
+      "sha256": "bf88d2d9cb0d82ad38021ff853eea93ddd057890e79b1ffe73026260f9a684ea"
+    },
+    {
+      "bytes": 3932,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/observations.py",
+      "sha256": "8c8237c855680e78f6e1c256a30086105636c2af5ad6fb59958385840ed7d882"
+    },
+    {
+      "bytes": 4625,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/order.py",
+      "sha256": "e4ce65c33bb8169e643eb5bebd8bf5f3620d8d2cc5c8d333b62b52e2e4aea43a"
+    },
+    {
+      "bytes": 10458,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/production.py",
+      "sha256": "abd9700207262eed121af4a7edb064c01afe903cbd3898f99d8d4653bee24097"
+    },
+    {
+      "bytes": 19262,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/resources.py",
+      "sha256": "4fc743695164cc6700b00190ea8f6b1398328c2abf41e68a6eb626dddea09139"
+    },
+    {
+      "bytes": 2236,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/resumables.py",
+      "sha256": "fdb741f337f7537533c77b2461dcbd424e9723f3ef3e4402907499519c52203f"
+    },
+    {
+      "bytes": 8916,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/snapshot.py",
+      "sha256": "7757c299a965e37f5e73eeaa1f4ed304da6b7bfb970cded5d274fdc4e8483107"
+    },
+    {
+      "bytes": 7730,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/validity.py",
+      "sha256": "55df8f7cc20c06b246e92822ea51ea4fcf9a64647ede17613e4325b8b8d0f120"
+    },
+    {
+      "bytes": 12864,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/work.py",
+      "sha256": "67faa8771822b3994fc7ad34a7527c2888c0fc5859bf99b4a887627094ec8f0f"
+    },
+    {
+      "bytes": 47032,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/frontend_v2.py",
+      "sha256": "dd258588e3c68f121c7652b6d5c639d3f851f9b401e61920ad15a410867695f9"
+    },
+    {
+      "bytes": 36440,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/graph.py",
+      "sha256": "ba39496a99441ee855d5cd761afb202afd9cb916480e28dadc2d9587b36ad301"
+    },
+    {
+      "bytes": 3055,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/ids.py",
+      "sha256": "3507c19a291f10a3ddeffa22ba2be274b33c15f28904786ea5ca9c87c2e74f5e"
+    },
+    {
+      "bytes": 21708,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/literals.py",
+      "sha256": "a2ef2cb826378d034143134f3c85f0e3fb91c9adb67415ce88e74b64812f24f9"
+    },
+    {
+      "bytes": 10277,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/__init__.py",
+      "sha256": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b"
+    },
+    {
+      "bytes": 32060,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/binding_validation.py",
+      "sha256": "498e7515e4951013822befc419c85b842159be70c1ced08e5cd6ab74d8cd99cd"
+    },
+    {
+      "bytes": 3302,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/bindings.py",
+      "sha256": "8bb4dfaddbeaf0fb70f675da4db60ba655f9b8f4ee56047f0b9a95f0009e3a46"
+    },
+    {
+      "bytes": 10375,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_demand.py",
+      "sha256": "7307de2bdfbebcdce3e66e6146012eb3e4321fefac01730c2ae034ead04b59c6"
+    },
+    {
+      "bytes": 13751,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_edges.py",
+      "sha256": "b2a414942e7d236596e088bdf36396a86afaf247cc1cf3b069978d93f0499063"
+    },
+    {
+      "bytes": 3165,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_effect_expansion.py",
+      "sha256": "c4f7778bb29570f151ebe8ebdd22c781492b382c6e90cf9341b00fd30413ba79"
+    },
+    {
+      "bytes": 13293,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_operand_routes.py",
+      "sha256": "339dbd3433c1beadc5e4a038ff8f447f637c498036946696a650b9e0579e829e"
+    },
+    {
+      "bytes": 14524,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_operands.py",
+      "sha256": "3f7a8ce71c2e2ba706b5fac952cfeb1b6ebc381fb0531058f6eab844fe8cbd14"
+    },
+    {
+      "bytes": 19352,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_seeds.py",
+      "sha256": "c20e12f2d5d3ee95a8f58cffcae2fbd827f929589955b983e726ecd7a526a0fb"
+    },
+    {
+      "bytes": 6282,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/cleanup.py",
+      "sha256": "79b5888885bf8c4ad50df77e8f6dc7ffff4e5aa8956aca9010a98a055cbd372c"
+    },
+    {
+      "bytes": 6328,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/cleanup_forward.py",
+      "sha256": "ff99ec4320a1e65079c0988d483faec604838f0e84a260962d85a3a1955629a2"
+    },
+    {
+      "bytes": 26115,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/cleanup_validation.py",
+      "sha256": "2bc12af79a58a08728196e0a9ec7907da9b16a810a444d46c009f91b63a948c3"
+    },
+    {
+      "bytes": 40826,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/codec.py",
+      "sha256": "63689ab9741b613f8ab0549c4618a4bc8a03e073da52c91dcf9a9342ecb4f443"
+    },
+    {
+      "bytes": 242,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/compilation.py",
+      "sha256": "2924eb78ece2c6fa3c993f84a0f84f29768ad9d19b835b3e34ab3aba9c57058c"
+    },
+    {
+      "bytes": 9227,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/control.py",
+      "sha256": "88d2640c7cb23c454f95888ced4130784fd829e8d1d60292a17000278fbe4ef2"
+    },
+    {
+      "bytes": 19918,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/control_validation.py",
+      "sha256": "3217ddedc8c00f5d19b299cd40f1ee7b5b53f3545f2ec7992d07312b6ee51fa5"
+    },
+    {
+      "bytes": 16780,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/discovery.py",
+      "sha256": "d9bfc4b5218413a3dc72ea7cc65be8f4746c87b07576bca495a8091d60556617"
+    },
+    {
+      "bytes": 4516,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/driver_flow.py",
+      "sha256": "1815918ff1419257a33d19060ec3d7ca941fb84f80af8fc8733612d4c3f244aa"
+    },
+    {
+      "bytes": 23277,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/driver_validation.py",
+      "sha256": "cdd8439fb1cd63c3ecd52c42f796a4c0cf15ec53591b0859f25137bee2f0e4d6"
+    },
+    {
+      "bytes": 12741,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/drivers.py",
+      "sha256": "d1a4844d3b00fefed05e2fb743daaf32c9082ae8f0fec3a9db6bce255561aabd"
+    },
+    {
+      "bytes": 6999,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/environment_validation.py",
+      "sha256": "edfefa6a74b80fbbe425de3dce2a0d4750ab971c42f372072f7252c6d19da834"
+    },
+    {
+      "bytes": 7546,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/environments.py",
+      "sha256": "14e9c16d89db388793236a3636adaac0557c410a5c633c65f7558d413db029f8"
+    },
+    {
+      "bytes": 4372,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/exception_matches.py",
+      "sha256": "bbdbdbc098da785e6b86713a829f513ebe809ebd28f8cb60be98f62eb7b21bd0"
+    },
+    {
+      "bytes": 4323,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/expansion.py",
+      "sha256": "7b9c9e1fcc091d994e820b2c6e9dd5d0b18ae323f0801098396556d7ccd78e04"
+    },
+    {
+      "bytes": 8049,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/frames.py",
+      "sha256": "4c24a8719043778fdfaec6285c5b579a8855b6b0c8b31bde6c9ec2e81613cba2"
+    },
+    {
+      "bytes": 10570,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/functions.py",
+      "sha256": "aa6440229e87cfbf67d57d9d268c1d6b4c89b824ff379c24509caa1af94b922f"
+    },
+    {
+      "bytes": 1613,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/ids.py",
+      "sha256": "d13dcf373b8ca771bb107becad41fc6bd1dd6d8f1bf146ea4c48b0e962e342c8"
+    },
+    {
+      "bytes": 5129,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/inventory.py",
+      "sha256": "826868c6754cc0490c0477f6f0f0ec09e5f45b70b360a6624ba45b03f6bf26ba"
+    },
+    {
+      "bytes": 5507,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/lifecycle.py",
+      "sha256": "326422e0b5c0a89fef3abda0f27037928d6c20bfc5adbd9afc875236678d17d7"
+    },
+    {
+      "bytes": 1619,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/lifecycle_analysis.py",
+      "sha256": "153c309f0cd32a6b6b719f0266dbc68209a107c9746bb88c2463194d7d650dd7"
+    },
+    {
+      "bytes": 13823,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/lifecycle_flow.py",
+      "sha256": "9fc23f943b8389764876856579db2e82797b2fb375a8c9ecc701b785b094d7f7"
+    },
+    {
+      "bytes": 7010,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/lifecycle_validation.py",
+      "sha256": "49dee4e82ebe09964a1a72c0d5d19fc91b67645822e7b1abc4961d13ba381daa"
+    },
+    {
+      "bytes": 3842,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/literal_sources.py",
+      "sha256": "9b3e99c0335d4177ee1814301a0be0da52039dfa10575bb78e46f411ba5c7a06"
+    },
+    {
+      "bytes": 3996,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/literal_validation.py",
+      "sha256": "1c0cc6ce2464804dfb29fced4cdf9ba7f4f0ffa65407b62073e0f17fd91436ca"
+    },
+    {
+      "bytes": 56397,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/model.py",
+      "sha256": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0"
+    },
+    {
+      "bytes": 8354,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/native.py",
+      "sha256": "17543d01b8351d74eefc665d48c74383bca27d820507fff98646dc3cef2a22b0"
+    },
+    {
+      "bytes": 5120,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/native_validation.py",
+      "sha256": "7fb36d01c70dc36889cf6dea65aa23763c0dd5139afc1bccdee65324e5e2743b"
+    },
+    {
+      "bytes": 9243,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/no_body_validation.py",
+      "sha256": "22669aec4d7c608b1b60c7d161908452f1135e4a1b434b7b80fccccca12607ea"
+    },
+    {
+      "bytes": 10593,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_await_records.py",
+      "sha256": "af6513c1589025467d5e75f78f9a9b539159ca18efb4532f6199a3026db0a2c5"
+    },
+    {
+      "bytes": 27630,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_connections.py",
+      "sha256": "a632e35f625abb2a6725361d29fa3180233a6eae3873e9a050ff92b634ca6cfb"
+    },
+    {
+      "bytes": 29640,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_flow.py",
+      "sha256": "9cb0bbe7c2d0ac3ebf6d9da413d88126b1d4dacb4e69d1db4ac27cf52b7498d4"
+    },
+    {
+      "bytes": 16795,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_rules.py",
+      "sha256": "828ad23a2a14f6aa56ca4bbaa2f1fc45cc68f927dd895e12a71ae3c57692b865"
+    },
+    {
+      "bytes": 52909,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocol_validation.py",
+      "sha256": "814b68bfb9d3299aa6c89346314b55241992940ab26b6437242806950be07cbd"
+    },
+    {
+      "bytes": 30175,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/protocols.py",
+      "sha256": "894f432e6b9ca4525fb6465b11199fef53fc70a5172fe7dde8d42027106e1885"
+    },
+    {
+      "bytes": 7468,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/provider_validation.py",
+      "sha256": "1db55a3b5ab2c67f32496601a946b97263083b3d19af58bdedba3a83ef3e7877"
+    },
+    {
+      "bytes": 12334,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/providers.py",
+      "sha256": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343"
+    },
+    {
+      "bytes": 5892,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resource_validation.py",
+      "sha256": "f2709a6d9e9898bc5ecb87ae2396510750550fde1bb071f8ab9808569f352c39"
+    },
+    {
+      "bytes": 7545,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resources.py",
+      "sha256": "4cfd796ec46731bcdb170da7b8ab2ea3a78d9938fe10ce5bda26663d262deb22"
+    },
+    {
+      "bytes": 9452,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resumption.py",
+      "sha256": "ef9d208d57ff6d3cd834529df7b68f377d1ac210f3f262b421c15aeadf5109ac"
+    },
+    {
+      "bytes": 2304,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resumption_flow.py",
+      "sha256": "c7c6b5c8e6d84d568fa87e52f71f9b66a6c1a50930633d0e97ea8613ce014cbc"
+    },
+    {
+      "bytes": 17070,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/resumption_validation.py",
+      "sha256": "3e8f0a60bc9b636af1b4e25abc1caeaadfa208dc54b6abf9db89e8d468bf182a"
+    },
+    {
+      "bytes": 10865,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/runtime_sources.py",
+      "sha256": "74843e78617e5a76f6f671df344b5843af3d332323893a97407d6ee06cb537a6"
+    },
+    {
+      "bytes": 11636,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/session_flow.py",
+      "sha256": "13e90d83f74bd46281a678c778c559ad1d6d52d3d5722137be38848f853a7387"
+    },
+    {
+      "bytes": 6687,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/session_release_validation.py",
+      "sha256": "b96e989a611a518630e2c33bbf61b5f69d4cc015b54166d27f78a6486482e0fc"
+    },
+    {
+      "bytes": 4845,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source.py",
+      "sha256": "dbff369035e06452de1f6c0e741e68553f188addac8483859ae47a444f5a002b"
+    },
+    {
+      "bytes": 5920,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_language.py",
+      "sha256": "a6588f7c12299d503582520603fc5b4756f7434910ce2ccd7be8128f22ef06e6"
+    },
+    {
+      "bytes": 5912,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_references.py",
+      "sha256": "3b3f466571b83f298588e3bdb0329240c21371082e678b0df431af56b364d69e"
+    },
+    {
+      "bytes": 16239,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/state_address_validation.py",
+      "sha256": "03c1d4f8b3e9fe991f902a4e775051b2fbc8f048b49e4758fb3431833937a096"
+    },
+    {
+      "bytes": 9581,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/state_addresses.py",
+      "sha256": "6ff4052771e4c92cf248f298131037f9a25a5bda8059e1547da44410d3577b61"
+    },
+    {
+      "bytes": 227,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/state_modes.py",
+      "sha256": "8d841907f306ee66996b9b45b3c7b5a6a4c799361e818851dff66534e0ee519e"
+    },
+    {
+      "bytes": 16100,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/stored_values.py",
+      "sha256": "8fb11f28816e0e19997722f59b6156909f6b987a10aec58f929eb079b548cb6f"
+    },
+    {
+      "bytes": 6530,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/structured.py",
+      "sha256": "c100dd3b51665e462336efe0d555d60806922b1ec7c34c8c2b9c904755eca87f"
+    },
+    {
+      "bytes": 45594,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/validation.py",
+      "sha256": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90"
+    },
+    {
+      "bytes": 3665,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/proofs.py",
+      "sha256": "57d0ba9768d0a5e9db79d4f468c41ae73058e46df18e6f28cdb4039581ecf527"
+    },
+    {
+      "bytes": 53719,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/provenance.py",
+      "sha256": "f8f11d353a05c9b2ec893ae5ab3da7be747b4a2ea3b28a21eb1f7891237523c1"
+    },
+    {
+      "bytes": 7478,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/record_codec.py",
+      "sha256": "0954c05e53a6dcb31f449461db71c63fdcdd9f95a9c053424d86bf5217a89ef3"
+    },
+    {
+      "bytes": 28661,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/semantics_v2.py",
+      "sha256": "5d943b7d48b159cfb8512ffff228236aee29d3c4f795ff0319d44489a81a4094"
+    },
+    {
+      "bytes": 21470,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/static.py",
+      "sha256": "30be3dc04e6f03d8c91e8469dbd50771120b3c91ecedc3ea2cfdb4fd0cd495ca"
+    },
+    {
+      "bytes": 5226,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/__init__.py",
+      "sha256": "6d1da8e107dfb8fb6a424fd2e6004f8ef71e8d18add1324d939334d94eefbd91"
+    },
+    {
+      "bytes": 6576,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/_validation.py",
+      "sha256": "f1c640101d6d9ffc8baa7a647cad2862353fcdcd196c698f1f97b7764be04ede"
+    },
+    {
+      "bytes": 44003,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/codec.py",
+      "sha256": "8b1392d3840daee80f21a88b87e09443f06f186cc2ed4bec9d0cd001c45dee9b"
+    },
+    {
+      "bytes": 4677,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/common.py",
+      "sha256": "691a7ec169c81cb51e271731ea11ee4c2aed38b5553b1f48f072a8ff368979b9"
+    },
+    {
+      "bytes": 7129,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/contracts.py",
+      "sha256": "c7aaae3ea0e292e425cfbe820d4508363b9e26e0c94427cefc5a4bb0ae6e15b1"
+    },
+    {
+      "bytes": 5260,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/correspondence.py",
+      "sha256": "7882dfa21e7877f41dc441f40875433d6b340f4fdb657df547ca57fc34953de5"
+    },
+    {
+      "bytes": 24584,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/evidence.py",
+      "sha256": "c789c7aca05e217f95d4ca7bef6c761d9a5244a9779fed5174a0f4132c09630d"
+    },
+    {
+      "bytes": 3963,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/ids.py",
+      "sha256": "d11e038a6a4c7de6dee5c8050182a97ddb4a6a6a399c466836ca64d6d9cb0a23"
+    },
+    {
+      "bytes": 44870,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/optimization.py",
+      "sha256": "429313a4b30d82fb0dbbb908d48caec5d4849142ac72cc1ab10cdf2bd919620f"
+    },
+    {
+      "bytes": 12417,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/schemas.py",
+      "sha256": "de5c56960aa70ad5633758ccd61f9bc6ae3f66a97aea67b85d994b66e1ad0682"
+    },
+    {
+      "bytes": 24191,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/semantic.py",
+      "sha256": "9d0af8a2b4a868df00388ccb910cdabdc93066aad7ff0e593d1c8d0e969885ab"
+    },
+    {
+      "bytes": 22415,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/values.py",
+      "sha256": "e12586470c294701c315d6108a80746f08a14ba26a4ca6dcf6374f458d1078b5"
+    },
+    {
+      "bytes": 4606,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/versions.py",
+      "sha256": "e6f31b33c3854244c52e26977942beb57909f4526752396f052c56555c57b98d"
+    },
+    {
+      "bytes": 95,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/__init__.py",
+      "sha256": "5151c57e95553b9bcc4a21568a77c29fbc95075cc68671ae1597afeeb9245f73"
+    },
+    {
+      "bytes": 36731,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/capture_coordinates.py",
+      "sha256": "5a34c9624ecb0e23a28f0150bfce68eadbce2adf30cbb4ec21f706874943008c"
+    },
+    {
+      "bytes": 9612,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/code_snapshot.py",
+      "sha256": "3a00de3ef3dbac1e0ceca379f89dc501e95f9256dc59d77b318cc6f9f4c332cb"
+    },
+    {
+      "bytes": 14193,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/dispatch_evidence.py",
+      "sha256": "05d3527a2a06005ed5b557c457dc851529c8efe249d37900bc1335ae9b5fb388"
+    },
+    {
+      "bytes": 833,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/files.py",
+      "sha256": "cc0dee95dde97b488272e4b23ccb23df9cd84fca98fe5c2bb05003e8dad6e8b0"
+    },
+    {
+      "bytes": 8463,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/operand_bytecode.py",
+      "sha256": "17b6ba703296c279e893ff6c44481108a2dc1899c2702195b6c2a82458997743"
+    },
+    {
+      "bytes": 58928,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_resources.py",
+      "sha256": "c52f45a62693e3e78875b3a23b7c56e0a4cdb48862436981f8d98941a4900c1b"
+    },
+    {
+      "bytes": 1016,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/reader.py",
+      "sha256": "a36b508f5a4744570af2b9b095ffce9045b4a3c83e5e0dc90d4f6a3359c2d8b3"
+    },
+    {
+      "bytes": 43790,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/session.py",
+      "sha256": "c08a75b4bd2ee520b302373b406392c4f083a413a7b46692dcedff2dcdd3747a"
+    }
+  ],
+  "unused_candidates_not_authority": true
+}

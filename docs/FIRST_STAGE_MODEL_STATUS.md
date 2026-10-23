@@ -6,6 +6,27 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：正式两body到当前运行的完整连接门已通过
+
+`first_stage_source_publication_current_attempt04_20261023` 实际exit0，
+wall20:36.46、RSS2632476KiB；当前raw独立读取855 codes、817 groups、100438 entries/
+exits、312812 operands，environment读取一次共16403 events。准确复用attempt02已完成
+source checkpoint，重新绑定owned scan和公共source accessor，未重跑binder；不是接受
+调用方提供的validated布尔值。retained source guards没有冒称fresh live测量。
+
+原840图namespace全部保留，两新body正式成为842中的成员，分别连接900与150次调用；
+当前body groups/calls为76/6674，source-only591/88800，unresolved150/4964。
+79592 marker/109288 slot守恒，20592 body-linked、58514 source-linked、6仅invocation、
+480无ancestor；仍是retained ancestry，不是direct Python→ATen调用证据。
+入口参数17022、returns6223，27+27条件路由、3347 entry的10087环境ports及100523
+route issues保留。compile0/prepare0/target0；canonical report104486803 bytes，按有限
+chunks保存，SHA `a14a15f8bc7c56288926588c5f0bb04c8f7296c96b21d9c5e7f7f7f08899f7de`。
+
+本门只验证原source/结构、scope及引用端口连接；tuple异常引用缺口已由隔离新guard
+揭示，未授予原v5图完整lifetime证明。状态、内容版本/来源与资源ready继续OPEN。
+前轮静态audit字段错误、CP2字段错误及自有低吞吐任务中断均保留；没有抹去失败或
+将离线时间称作LeWM加速。下一步按已知通用表示与跨层值连接断口继续建模。
+
 ### 2026-10-23：自动源码恢复队列的真实派工与缺口定位
 
 通用 `source_frontend_worklist.py` 已通过一次真实自动规划/worker门：原2217 bodies、
