@@ -6,6 +6,23 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：真实view几何接线修正与native/core内容断口
+
+发现physical adapter原样保存`torch.strided`，而规范StorageRegion的bounds/overlap只认
+`strided`。现仅在准确provider profile/revision下转换这一拼写，保原provider_layout及
+原physical/ETO来源；其它layout不升级为strided。唯一有界实档门exit0，wall1.08s、
+RSS76292KiB：4条原Region复用原AllocationID/epoch2的640B receipt，得到full[0,640)、
+row0[0,40)、scalar[0,4)、row1[40,80)；overlap与同allocation两row的disjoint均核过。
+旧artifact未改，没有新Allocation或内容/ready资格。此门不重跑完整importer、不宣称
+所有108682物理槽已用新producer重建，详见[TENSOR_LAYOUT_ADMISSION.md](TENSOR_LAYOUT_ADMISSION.md)。
+
+有界原档与源码审计另定位内容表为何为0：native_import只写provider引用，schema只写
+PARTIAL形式端口，physical importer只写Allocation/Region；还没有自动构造实际native
+端口到已有core NativeBoundary/ValueOccurrence/UseOccurrence的桥。仅新增nonce IDs或
+用token/形状串LogicalValue会绕过而非补齐这一缺口。下一项须沿准确owned dispatch、
+native operator/schema和有序slot接回原core，再明确内容版本/外写/ready的真实缺字段。
+见[NATIVE_VALUE_CHAIN_AUDIT.md](NATIVE_VALUE_CHAIN_AUDIT.md)；未新增一套IR或优化器。
+
 ### 2026-10-23：正式两body到当前运行的完整连接门已通过
 
 `first_stage_source_publication_current_attempt04_20261023` 实际exit0，

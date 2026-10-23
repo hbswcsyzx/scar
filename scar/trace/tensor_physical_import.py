@@ -33,6 +33,19 @@ def _integer(value, minimum=0):
     return type(value) is int and value >= minimum
 
 
+def canonical_tensor_layout(source_layout, *, profile, provider_revision):
+    """Translate the pinned provider's layout spelling, not tensor contents.
+
+    Unknown provider layouts remain opaque. This conversion alone establishes
+    neither capture membership, allocation bounds, aliasing nor readiness.
+    """
+    _need(profile == PROFILE and provider_revision == PROVIDER_REVISION,
+          "layout conversion requires the exact physical provider profile/revision")
+    _need(type(source_layout) is str and source_layout and source_layout != "strided",
+          "layout must retain its original provider spelling")
+    return "strided" if source_layout == "torch.strided" else source_layout
+
+
 def import_tensor_physical(result, observations_path, metadata_path, *, coordinates=None,
                            max_bytes=1_000_000_000, max_rows=1_000_000, max_line_bytes=2_000_000):
     """Augment the supplied, validated native bundle without inventing content.
@@ -103,6 +116,7 @@ def import_tensor_physical(result, observations_path, metadata_path, *, coordina
         "source_status": meta.get("status"), "source_gaps": meta.get("gaps"),
         "source_frontier": meta.get("frontier"), "associations": [], "epochs": [],
         "legacy_kineto_allocation_correspondence_established": False,
+        "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
         "logical_versions_established": False, "materializations_established": False,
         "state_effects_established": False, "resource_readiness_established": False,
         "whole_model_established": False, "transformation_authorized": False}
@@ -188,7 +202,7 @@ def import_tensor_physical(result, observations_path, metadata_path, *, coordina
 
     for epoch in epochs:
         allocation(epoch)
-    total_slots = 0
+    total_slots, layout_counts = 0, Counter()
     for name, row in markers.items():
         marker = native_markers[name]
         context = contexts.get(marker.id.wire)
@@ -228,9 +242,13 @@ def import_tensor_physical(result, observations_path, metadata_path, *, coordina
                   "marker Tensor pointer contradicts provider epoch")
             region_id = StorageRegionID(scope + f":region:{row['index']}:{ordinal}")
             loc = reference(row, "/arguments/" + str(ordinal))
+            layout = canonical_tensor_layout(tensor["layout"], profile=meta["profile"],
+                                             provider_revision=meta["provider_revision"])
+            layout_counts[layout] += 1
             region = StorageRegion(region_id, record.id, raw[2], tuple(tensor["sizes"]),
-                tuple(tensor["strides"]), tensor["dtype"], epoch[0], layout=tensor["layout"],
+                tuple(tensor["strides"]), tensor["dtype"], epoch[0], layout=layout,
                 metadata={"physical_observation": loc, "eto_reference": slot["raw_reference"],
+                    "provider_layout": tensor["layout"], "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
                     "marker_instance": marker.id.wire, "argument_ordinal": ordinal,
                     "impl_ptr": tensor["impl_ptr"], "provider_tensor_id": tensor["provider_tensor_id"],
                     "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
@@ -289,9 +307,10 @@ def import_tensor_physical(result, observations_path, metadata_path, *, coordina
         argument_slots=total_slots, physical_slot_associations=len(pending_regions),
         allocation_epochs=len(pending), evidence_edges=len(pending_edges), gaps=dict(gaps),
         source_allocation_receipts=meta["counts"]["allocation_nodes"],
+        canonical_region_layout_counts=dict(layout_counts),
         interface_only_claim="observation-scoped object/argument geometry and provider physical epochs")
     result.report["tensor_physical"] = report
     return report
 
 
-__all__ = ["import_tensor_physical"]
+__all__ = ["import_tensor_physical", "canonical_tensor_layout"]
