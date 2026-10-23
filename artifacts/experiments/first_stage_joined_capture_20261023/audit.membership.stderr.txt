@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_capture_20261023/audit.py", line 77, in <module>
+    require(members.get(artifact['sha256']) == artifact, 'evidence point lacks exact raw membership')
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_capture_20261023/audit.py", line 28, in require
+    raise AssertionError(message)
+AssertionError: evidence point lacks exact raw membership

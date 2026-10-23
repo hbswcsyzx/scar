@@ -126,7 +126,7 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
         manifest = json.loads(manifests[0].read_bytes())
         members = coordinates.report['membership']
         def member_path(logical):
-            matches = [row['artifact']['uri'] for row in members if row['logical_path'] == logical]
+            matches = [row.get('local_path', row['artifact']['uri']) for row in members if row['logical_path'] == logical]
             if len(matches) != 1:
                 raise ValueError('member has no exact bound artifact: ' + logical)
             return matches[0]

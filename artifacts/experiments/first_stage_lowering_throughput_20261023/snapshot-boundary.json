@@ -1,0 +1,13 @@
+{
+  "schema": "scar.sealed-source-boundary",
+  "schema_version": 1,
+  "ordinary_changed_source_rejected": true,
+  "ordinary_rejection": "structured loop source control must be independently well formed",
+  "explicit_snapshot_unchanged": true,
+  "public_validation_changed_source_rejected": true,
+  "public_rejection": "structured loop source control must be independently well formed",
+  "changed_source_reseal_rejected": true,
+  "reseal_rejection": "invalid source control-flow graph: semantic graph digest differs",
+  "target_executed": false,
+  "whole_program_model_established": false
+}

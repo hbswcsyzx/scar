@@ -1,0 +1,2079 @@
+{
+  "schema": "scar.lossless-capture-archive",
+  "schema_version": 1,
+  "verified_roundtrip": true,
+  "files": [
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89841",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89841.gz",
+      "raw_sha256": "301a66b16b18551624de2696342bcd1fdbab54bdff90834e8ca7e81ad2e24733",
+      "raw_bytes": 290676,
+      "compressed_bytes": 28286,
+      "gzip_sha256": "94ee66c779d8934cbf9ff0d1508ce99738126227030e5b2b3ba05a7dd411c9ff"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89842",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89842.gz",
+      "raw_sha256": "ba42673d5d9cf9a380965a2d008a7fefbe724cb57b6934b67c5d02f3d5bb76f2",
+      "raw_bytes": 58813278,
+      "compressed_bytes": 5660178,
+      "gzip_sha256": "699213c04cc9c9c133d45df9f8480617f81b5906f00652be26316be4c79d1c37"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89847",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89847.gz",
+      "raw_sha256": "1370c8e5dbcb8667cc003d794d89fc9cdf004db6705f381f6f9b25dba00393a4",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "6738643e82035701ba2c9049d0e569491842d6e41f7f498610cbf0781946dffd"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89848",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89848.gz",
+      "raw_sha256": "4cc171f21f5d33e2fd018651576bf41d985f2d32b76c494783909ead0f4e46f0",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "aab5c21fdd21029a5d080fa9fd90e1500be24632394051399eb531fff7e17275"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89849",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89849.gz",
+      "raw_sha256": "cd79dd5a1344e4523406987ccb01cd0c42c4c85feea04467eff2db7b479bcf88",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "b3d30486dc423c540e1bfeabab6e9d5c521975a904f904f0b9f5b6d5ec1e000d"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89850",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89850.gz",
+      "raw_sha256": "6f3b0f5c741e1c1c8e4cfe924731d499da72c39070f5012d44fa24db9ff3667d",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "6a5985cefb426b3160ab7304bd99390c889a7f37ec4703338c0737151457bec8"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89851",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89851.gz",
+      "raw_sha256": "bc598ad7fb6161104480977081fcc3fe5785a25f9e55da3cd4199333b1df5bd5",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "2cf13a9f34550b8cec7d440731f04e18aa3bfff42b1424ec7f7b11728603dc36"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89852",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89852.gz",
+      "raw_sha256": "54a65b853d25f7eeb718c5c9823d6d0f5f11e0c4b1b9b48428dfe291c82e3948",
+      "raw_bytes": 125,
+      "compressed_bytes": 120,
+      "gzip_sha256": "68a8d00f26df59e060248ab6ac5508910b37dbd2ded3e03c607971d4ae6050c2"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89853",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89853.gz",
+      "raw_sha256": "e60af15720f2f518dbb34f4ace731965e62ce3f9c376a496c7d9f70b3d244707",
+      "raw_bytes": 125,
+      "compressed_bytes": 119,
+      "gzip_sha256": "7078d17ba1f5b9872627060aab72dc02831c005414c1efd97d6d70d26f7b1c7c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89854",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89854.gz",
+      "raw_sha256": "8b4820c50bb87f8005aa1b211095359cd8e8d8b19e34f6d3929859b886dc445d",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "e3c79f6ddee2e7aaf994979eec0a896ed782df9443395af1218e4ab327d1d063"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89855",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89855.gz",
+      "raw_sha256": "e8b4917b154e362f10750ccfae74b6624afbf3378000484b2689a295004ecadf",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "968dc44984d662e4fa518a65c776b13b695d85ea062cee3612ba69d7206f0910"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89856",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89856.gz",
+      "raw_sha256": "7e6464817904a6115683e348445aaceee2ce6f6c2e3bfb62f1a09679f1e8661c",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "bccfa70668625b4a493d065739e572cda6145b772d0df762a96295e8593234e6"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89857",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89857.gz",
+      "raw_sha256": "56ebb802664128e792a4056acabff45a3337275c6eb0e057634260ea0d845cd0",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "cf6a116823f1eefe6ebfd2aa12533591c3e672cc7f1f2f39e399ad65aec41e83"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89858",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89858.gz",
+      "raw_sha256": "485123bbbcd0cb28d7151fc7b7f9655fd99f16ec39e4135702aef4856076b42a",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "85206a6a239bfbd565184f71685b32d29858f43b8d98c2da4fb78a5881f334ab"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89859",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89859.gz",
+      "raw_sha256": "cbcfd53fde57df038d0e691c60bd6e3f55ec6ff1ee509840a54df23380c05563",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "fdfdee075dd187f01564cb6990bff1b99ec0bdd7a85b4e96c459dfb9a86a4483"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89860",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89860.gz",
+      "raw_sha256": "cd5402375aa0a7a817ce4bab77c0d1212fbb7b169dd2f59550f8af9285d264a3",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "427203b7501731414ae88d58811bb5e1b432fdc63c9faf66e68be81a34b1c746"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89861",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89861.gz",
+      "raw_sha256": "333e14720de31b45e4bb19d2769020c809c10115a64899ef3979bd81d6ede23b",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "4470b6e515379cb2d038b271f20baedded3a7d14203fe2dc0d9a0f50130a4425"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89862",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89862.gz",
+      "raw_sha256": "97bd0ba5aff3bd428a8692878ea5ddc291a05986274cdc68fe4a139eafdd1a22",
+      "raw_bytes": 125,
+      "compressed_bytes": 120,
+      "gzip_sha256": "fa9683f0d12544065c2416bce7e0d05bcf1d1b04fb8f0e362cb5a4d1567983b7"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89863",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89863.gz",
+      "raw_sha256": "45f9f5d245c80f1e7d3a4a9f699f756d0cb5ec06975896d136d87b2ad0c8f5dd",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "559b72ccdcd8c8cc70668fb46930cc0a099d2b54a87e18b47bdf608f46251538"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89864",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89864.gz",
+      "raw_sha256": "92d4568c4e5da70593677f0d8118b506300e620eebd5bba9ad2f8840ff83557a",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "22062045f40948c428fdfc2c2927de9602badec121e229bd81b2514c2debae81"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89865",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89865.gz",
+      "raw_sha256": "0a338cfeb58fb8baa85a58d18c4692eeac394f1028e61f23899891cb98d3fb06",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "17625a3ce07666a35e17b7dee7c9be27b4ae24c8b06386ed33cee17b7edde94b"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89866",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89866.gz",
+      "raw_sha256": "03fff2bf1dae35b21e5fdf3bdf9c57d505a1706f2256ef37c1e4521ca6ba4c5c",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "3ceca90fef472440bf2c5cdede43ccc37f71df64421525a145c438e06466cc71"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89867",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89867.gz",
+      "raw_sha256": "7d83dfe9c2a33621e51510ec01a911de2a2bcdd03a380401c14ddb3860ee688c",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "54e8a2f0216f607155d79c746d5e192132f458449ec0af3b683dfc6315adf845"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89868",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89868.gz",
+      "raw_sha256": "7ccb27a135cc8a9445922f03cb8fd243b645d6c04a9610c8b4b36cd93ded06d0",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "e660a565ccd82d95883ebf271397828c99bda440c2b7fd52c7b2335c8c8e480b"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89869",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89869.gz",
+      "raw_sha256": "fd074911b9f8ec6d9884a0bb6a3a66af9a579e3eced834166c2de80f64a2f39b",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "a8adfc530066d90091a316f738adeae15d4d6b813e4acd3de4ac136f6a97a64c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89870",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89870.gz",
+      "raw_sha256": "79bbd8be638a206bbac20222965bc6d3053bdd0a6bb1101914b133ea6c1f4233",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "387e3f246524285d0caaa705f76a780c149d19986c237c844553a3fd4060e4a4"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89871",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89871.gz",
+      "raw_sha256": "a501182ff9e92cb0caff88851c966fc5cfa4219649c2a57de131818510b38b62",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "5926ac2d1c2a3b0d7fa6dbc1b87f6f2035f29d8f817bb2914348a7c09d6eab4c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89872",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89872.gz",
+      "raw_sha256": "ecb8553ddef534e2f89540c38dfe986c347094e439e4ae85cbe721e4cef3bfea",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "93d9d4887d40a96e9e633c6ff0c6dc4a44e39b5478a8fe5413217b6210982878"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89873",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89873.gz",
+      "raw_sha256": "ec0529c72fe4ed9e981864dc7f1d3f66f290a833d4cf7e2fe7ee9609b250ed52",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "ec7fe2eb4c0c068a77f9229cd3855f3025b7d366a9b5b846688dfa0975fcc1ed"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89874",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89874.gz",
+      "raw_sha256": "b5193c6e5afb16593f023e4f0cd301aa2fbea2da77275f3403fa3551036e678f",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "fff43244eb62bbedacff33af7bb926b0e5d332c80a86e9c1d1636d9411437772"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89875",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89875.gz",
+      "raw_sha256": "b83e1c78f6e819834377fd8687cc3b56a986e4acaf3b6f78a5d10a427f199bdf",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "d82299d0641fb1558470159e380f1bde75bb98a8ad43966f8038d650d80713ec"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89876",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89876.gz",
+      "raw_sha256": "8fe93b02bbbc1815f4b178c8d81cc6675052f0e6b5d45e37f3f2ca6e5a96bb30",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "1067e4a9ba5fd198122de6c56c702fe2f0da2e82b6d5240492642ba72ff90bbc"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89877",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89877.gz",
+      "raw_sha256": "2d31b48c253d5453b9103898a145f4a415001be6e02cbb899114dc302dec9cd5",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "164038a88cdafbaeadbda656ab2889fd4eb106a5a0f9b765b29a5565b6910119"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89878",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89878.gz",
+      "raw_sha256": "27a108e29fec917c5639e6d2c03984af5e70ed1b2265abb913c45fe916175a8e",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "7aaecd58c063c4ac3cbed056643bc0517006e6160b49504312f05e5a99519ffa"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89879",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89879.gz",
+      "raw_sha256": "897bdd0d0003877586630c4478e86375cbe21919063887e89864b7c28b10eabf",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "e977fb4a5c1768dce5a8a6953550b858483020023adf0832b0525e6a1cd612e6"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89880",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89880.gz",
+      "raw_sha256": "f666cad4dd322885b2fef0457498c7995870e861caa08c7aec6d279d7db947b1",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "16762c17a363e519077e0d80285b390b08d73c63e1560bb76a5b02647a4b2e31"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89881",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89881.gz",
+      "raw_sha256": "b42af7072a50301588a480d513f3564819f54762708842c07f490b1ec6521414",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "1d718112cc95e8d6d9aa96afaa512017197583455c1f7dca70a46e41606a348d"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89882",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89882.gz",
+      "raw_sha256": "dcb30fa4a8615d4652bfb54eb1b8e0dab950ddec39bafe0589ab52fb8c5b80c0",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "899186668d362998b2b2b66309e62eac0acc87eb47646e1900e391a25e1c187a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89883",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89883.gz",
+      "raw_sha256": "5cb776b95861414a3fdc7f383638290d9851e92773550c1aa8cd508ba2c514c9",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "cdb05fa6dc28ec7270c40e5b5d1b24926552ebc37a492fca3dae287ad3f5f628"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89884",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89884.gz",
+      "raw_sha256": "e3b2316e94f68d868361d635020f10d6329869f097c5d8b6e88e41f695e99230",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "186280f5c6ec42c7fc86b096348678d51af36c6da16de1b5d5d470ba6a718ef9"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89885",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89885.gz",
+      "raw_sha256": "30d541eac3a2fe6dcede4f99c63eb776ed0cdfd4e91ca5f476f5ca87e39497d6",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "296cd06b0209a060c8011b6174159e3bdd4c4605908ca38c6a7d3ab00f9ae196"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89886",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89886.gz",
+      "raw_sha256": "2ac6d06ce43472d4441457d3e5917f63c66c64dacf226f888db22dca397d4435",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "57ec273d9a4e7cf84fd2e7e1874966c46385b5b31123a720d1eb016aa1b8b129"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89887",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89887.gz",
+      "raw_sha256": "22bff52183508a2342fb8dd6d8da3220bf7c8055dbdf20da579e98247523e03b",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "3343602c2a0cbb79f88ba8c17f45bc4fe723aa80437c01a374a26457d4bba2f2"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89888",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89888.gz",
+      "raw_sha256": "08fc62e5d9a1f430eff606fda3ac106140921d6ef02dc2c11fbcea7b38b42f8a",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "4610a3d4f6b7b642a37c3e6575fe16d610b32cd9115712c6ba8a478e789d3220"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89889",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89889.gz",
+      "raw_sha256": "9244d4ac9528a05fdfa935545b7ef4930ba33f1da483c45a4c40de1bbef84018",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "54483b5e1a81e887f88b2d28d59f627276ffc38105a1500b84df38abc2fa2a45"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89890",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89890.gz",
+      "raw_sha256": "e19b3c938f23e2ed3fe7d833e36ab37d725877be66e389d1c8475d52dc25ee81",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "abe705aec09ee57cc4b90459caf2f226025f92edb41a96f07ae0095af2f35754"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89891",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89891.gz",
+      "raw_sha256": "9fb196dc153d02255c5e9187fd8c80215378756fb3d2e566c9875b1a1e9bafaf",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "7171e0b122eb167be5a5ec5886cc445f3c80835366b80d2da2d5848adb9188a7"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89892",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89892.gz",
+      "raw_sha256": "ca05085823822860fe623c1cabe5aad737a1d80ce2994a8a75af69c97764cd0c",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "51bf4c1aaea9b0f377dd7b09f9a29488ed65959193df256a5df015347f816d76"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89893",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89893.gz",
+      "raw_sha256": "a37560a75e5fc6f994b75c5fac30f260d86247ac4991c444ab96a6f29ffe62c0",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "2bb5bfaf4558e3ac36a8035e283a9fd17d8367ebc2da7d7dac1d2c2c35828a52"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89894",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89894.gz",
+      "raw_sha256": "938de36b3b9e3202876424897f8c445a22a807f560b271947931a1d15b541bf6",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "0d736e54aa837c270cf9d411fdee014726cb6eab99d792d6fd0171aefdeb59de"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89895",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89895.gz",
+      "raw_sha256": "c1f4c76f05721413ca491fded2ebfe6fe2d0934d1e32469d8e2bf934d53e7aac",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "9a7a0ce411d007522228ef443064d182e855684657fb08906fffc3a78f3b0560"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89896",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89896.gz",
+      "raw_sha256": "4fbdc1f13ac2dd9130e5fdc36f6b25986715f3bb2c498150a1d37bcfb44d38fc",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "b6995f48cbf60a071410eada64742f2f176b6f8034a226ad4ca8b228dd933c12"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89897",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89897.gz",
+      "raw_sha256": "a0fb39bc4928526579242cace07f10ec059365782e803b45872f273dce537ad2",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "6fafc4d0e48c989dfde5e606cba0022d0ddbc10caa714377fab8df569a5752a7"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89898",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89898.gz",
+      "raw_sha256": "e92b0f5532c372a6cb4e4c5470c743fc6d06040711459882f0d10c68341f0577",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "aefc09202d63b2374e5b6c13562b69a8af732bdfbc904651d08e58cff24bbeaa"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89899",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89899.gz",
+      "raw_sha256": "8d95c476bf954e4849fe8a1e666eeb924c89cf0eec7d93104f09d229e27c3f6a",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "717c5b33620e6ce18b7ac5c6a6d6186dbc5236689bd122ec8e09ff0040fc4d6c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89900",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89900.gz",
+      "raw_sha256": "e69d4f7a87d964eea614c6445057551cede6d55e8c08240a257fa4879bd3a210",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "bcd9169a8a958101766d14c0e9f3c864a7e8f8b12828c920fbdb46208f93ddc6"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89901",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89901.gz",
+      "raw_sha256": "6831664882ccac1a9aba7061d369c1e04e70cf9e20c975d040b90f7449ab4ce5",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "d3a3f140d642fc3f2fd307000da854f0a78dc032653c2e6c5f620216dd067bde"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89904",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.89904.gz",
+      "raw_sha256": "0a782e1192421d8bcc79f84714bc52cf6fd893750b7ff90d7e4e5301fd8c847c",
+      "raw_bytes": 6397,
+      "compressed_bytes": 1458,
+      "gzip_sha256": "657f4eb7ad9d1a84b7398f08e317e4284161b3e527827843795f51f502950c42"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90288",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90288.gz",
+      "raw_sha256": "2f01489bc64c8df0a93ba11ba2cabb0cfc0222aa805c88de98ef871396c621c4",
+      "raw_bytes": 805,
+      "compressed_bytes": 344,
+      "gzip_sha256": "87ca9df61c10f6ad96dba08de95786b1b3b8ba7c8fc5123e7b4f5c7a5b2ee552"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90324",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90324.gz",
+      "raw_sha256": "b96445370774c3a1d4ee9b1dc3a5d4343a485ff0af7887723d5e551ffe463671",
+      "raw_bytes": 422,
+      "compressed_bytes": 230,
+      "gzip_sha256": "04ea5901401bfb4e1c318f328adceeef976ccd8c7c52cbc527bf6835a7d51014"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90325",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90325.gz",
+      "raw_sha256": "e2a4cf031884fe194e997882811fb8c6c6ffa50e8aed9426a2e12220068efdae",
+      "raw_bytes": 4947,
+      "compressed_bytes": 778,
+      "gzip_sha256": "adba5113e196a46dbf2a1a3ea9b1b58fff1bd8de626e909a81aa446bc578765d"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90326",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90326.gz",
+      "raw_sha256": "5b4e86d946face0b8488cb7065c3cdaea03b1221ea3cbe89ca593b603bc8584b",
+      "raw_bytes": 511,
+      "compressed_bytes": 330,
+      "gzip_sha256": "373c6a3076901c7764ef077648c88a523a8728dadb9c7d0719f81e2bf4476ef6"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90329",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90329.gz",
+      "raw_sha256": "c80d12f6a4fef6153b74ca8943e746a5072bc7623baefec68852abde589b7415",
+      "raw_bytes": 521,
+      "compressed_bytes": 244,
+      "gzip_sha256": "ad3beffa93c6f90b9479f61afcfd8feed6d84f7a5198cdc845811aa90017f1ba"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90337",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90337.gz",
+      "raw_sha256": "f7cb81e4c6c4e778092aa9b0f6513a7facb8f33d33cfe8dd16cdaf0219352476",
+      "raw_bytes": 386,
+      "compressed_bytes": 232,
+      "gzip_sha256": "f1c2a1e799bcb9746731f6abd1a330c90eefdbd107c5d7203c924030288f968a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90510",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90510.gz",
+      "raw_sha256": "d1c2e0ba85502641a0e96a7e484ef0dd1056af70dfc082f098537a2efde1eacc",
+      "raw_bytes": 14954,
+      "compressed_bytes": 2364,
+      "gzip_sha256": "95cdc609c6628e6711ca4b5421b28269d8060281b4c7f28a0a5e615e8744597c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90513",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90513.gz",
+      "raw_sha256": "3b253d5cf615c9182560a81eb2133bbda7ae3db794b4e768444b4620d61832e1",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "2bc644fe41be30d80447b3291a516bfdcbbd18bdf0054436bb50e655acc935a3"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90514",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90514.gz",
+      "raw_sha256": "ce9581a7cf1fa66ba8af1b2b1c23e715df5b22191f6dd6037286bb873ae7a821",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "c65e1c4795411c06ac337272c96c212e5feb9e41643f6608f0cf2f2a19b3caa6"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90515",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90515.gz",
+      "raw_sha256": "e8c75c9e3d294775dca2b0314b5cb688f07abb84875b5ef659614c49ca32ca88",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "33f9c684d7cd5195dbb62c00aabd9a8bacaa8eb68f2c40f6f9baa87b4c954ee9"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90516",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90516.gz",
+      "raw_sha256": "8da84c1bcd81f9af117d45713ccdeb2addbc6e1e06d823586130957e6a70c82e",
+      "raw_bytes": 343,
+      "compressed_bytes": 233,
+      "gzip_sha256": "46e890ddc9cc073593dc64ac0b106448af8a01947e88768554e7deb1e47418a8"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90517",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90517.gz",
+      "raw_sha256": "8c3e16e0f14765a2d83a9a9d2f90a4581dc84f8869e16cdc6ca72fd3976fb838",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "ae56449a87ccf55adb3b4ea82f6cc7d4f2d917f31015b1642ba7417a839ef8f5"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90518",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90518.gz",
+      "raw_sha256": "52465ac3e8ddf61c0c8f34d24141cf9e5d7325a7f3bfbfb597a4c5a92e5c45d8",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "99840dfe959815dd6039955e7bf8db19b190b9d9590b03eeebc918260a1ebb98"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90519",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90519.gz",
+      "raw_sha256": "6a035ed6c388aae551e04480166fbe4af6a452104be0f8d513e43d20af2eac55",
+      "raw_bytes": 343,
+      "compressed_bytes": 237,
+      "gzip_sha256": "83c5c323aa5368950c982b3d68209b9a3de7ad7d6424d79af24c62311bea195a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90520",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90520.gz",
+      "raw_sha256": "90e2f098f6a4b2d6d7bd63b0b02187fa8085ad1f5dd89d8c6604dba09ce9233a",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "56eea940ccda749a70e949bae738685f81b24d8c2e1fe5354cac7ec7acb44ef5"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90521",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90521.gz",
+      "raw_sha256": "ac49f08ca1c51899ff3b6b68205e59756929107314296ae5852562cb7be2f88f",
+      "raw_bytes": 343,
+      "compressed_bytes": 232,
+      "gzip_sha256": "61891bdbe54e1e3f62b2a9f266564d1dcacd40335baabcc4acb6d03b0807a555"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90522",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90522.gz",
+      "raw_sha256": "53c423e48638b2b7f7d6472719a3536f5236afad2caf7f9e2bdf1f854d609b4a",
+      "raw_bytes": 343,
+      "compressed_bytes": 233,
+      "gzip_sha256": "acfa99456a5b3beabf51a3d2575190f9260599dd285c27859ce9e61264dd909d"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90523",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90523.gz",
+      "raw_sha256": "9e95d8759f68c3e8afbc7f8fc918fa364dfe2d24eb57df17fd6b21e74787bc8f",
+      "raw_bytes": 343,
+      "compressed_bytes": 232,
+      "gzip_sha256": "a7a2b9d3c2892c26a9a1e41562e9f624264e5d5eeece0cf8fe1ee9c8a07d8179"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90524",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90524.gz",
+      "raw_sha256": "3684ac9215540d365d791d2f806b56cfdf9064b53965eba6ffa5c5c5762814f3",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "0e62f08dd89634b159b124d1c9155d8aa3c5ce81bf7b42f786934eb5980aafbb"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90525",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90525.gz",
+      "raw_sha256": "55f21390449fd754614ae2fc4f77f003b763c1a16cb29789577d004a3da60f71",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "d54faf835d3085b97a0115d378f052b56f860c1201464eb192fe25aa7a70db79"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90526",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90526.gz",
+      "raw_sha256": "dc93008600d68a56bb79afc3e7cfa127f4d62e51bc4d70b687b13dd35505bbf1",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "419f4f2cfb97b9a77f8da83e224cd827dcbeb59bd74f32f9f9c9bb4425f5aaec"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90527",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90527.gz",
+      "raw_sha256": "bc8877744950669f3b170381ecd4da141cd00a7daaea40e9b8d44767d2a4d346",
+      "raw_bytes": 343,
+      "compressed_bytes": 237,
+      "gzip_sha256": "eda526d08b70ee5656b53dff6e0f949d8a773aa7932d71ada62805e4cff741e8"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90528",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90528.gz",
+      "raw_sha256": "7089da0d0f0c412d60c8f7a199dabc7ef0e5f197f8b38068abf06e7712bd234d",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "0acec993df217c68bdbce8e29c2d9c2da83feb40ec166c272e2b67a04e20808f"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90529",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90529.gz",
+      "raw_sha256": "507f00708b968760745100f06ec805449f9c634fa8d5665e29ab9b61715105d2",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "f06eabc2bcb388851fdbf653c0069666a1ad14bc9be35e2e4108cb7b10e0b8e9"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90530",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90530.gz",
+      "raw_sha256": "96340e35370aab5b92a55d7bfdab66ec6fc966340f6b107044afe81fc4102786",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "c6fbaa63eaebb142e01c6627e9467501bfccb83f855d3067628f71510774a696"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90531",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90531.gz",
+      "raw_sha256": "728017dd84f3700bac68d950081bbe829676ba810bd268fc1c8d2af69c045aaf",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "5d28e143c89a4d3051c2726e777e49dac8125bdcb8d3b09791217ce5ff843fd4"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90532",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90532.gz",
+      "raw_sha256": "0fbb7bfa73be5c82fd58840e00d4681be4f8cdd4d71bbfbc48524668daf406b5",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "0732323d31a6f66303639ff52d73d1496f76a7fe4f2da429d3b9b6d1cb236b8e"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90533",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90533.gz",
+      "raw_sha256": "2fd122a7cec91a12e8ab148ce6edac791dec4cb41de3f84b1aa612b935fcf6e5",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "76d57be9af599d7292d98c2a1ad51a9e753110f1a004a805e648d37787dbbbe9"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90534",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90534.gz",
+      "raw_sha256": "e44b19f6de13a77c210b6acf97bdde870d0556987eb08f86f7d8c0ef5f4287c3",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "dc9925271817e4e4ad41ec19db1755adaca6e71addb7f4f4d469a0b64cfa2894"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90535",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90535.gz",
+      "raw_sha256": "4e608cf878df12d5d0c52c549b9e4d007fe6a86c3d5a45df633c53e8f9d48d7d",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "4cc6f8c50d8477496c8c516a9d65ce76a7f94871afaee0d0c7524621ac588862"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90536",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90536.gz",
+      "raw_sha256": "9a9fae3db3defb4cc3a71bc2628456e69856ffc13ebb0ec58a1e93f048da3eed",
+      "raw_bytes": 343,
+      "compressed_bytes": 233,
+      "gzip_sha256": "d212efe1b2cb3f1f53572e68b01c28fa0f2ffe5edebb8344fa8ac10be7449331"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90537",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90537.gz",
+      "raw_sha256": "019a7c1b240f99c618ca73f15f09b4d9d676372acae1763076d733190329fd6b",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "e95e6f9b1ab92779b7b7a17a750ccbb7e05c07986169c489a75e83392b68634e"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90538",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90538.gz",
+      "raw_sha256": "00726eb3377fbd0c6f2da575565a732c4954e2825737fd8481f5255f2306a63e",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "130f5bde30652884f0d45fe3cae536e00a43b7ecba9a4c4883c621a92938317c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90539",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90539.gz",
+      "raw_sha256": "6bc35fcf1e8503e7d6659a9c7d4f99e721dc0d3f38c848a90d09c719c512adbd",
+      "raw_bytes": 343,
+      "compressed_bytes": 233,
+      "gzip_sha256": "56843c10ee5895396027791b4530a70435d6c96e7a7dbe7e485d49b0d990576b"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90540",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90540.gz",
+      "raw_sha256": "6099d10fd1dc38f28219d193fc6f24442f7814f35fa5c37eaa601a98ffef98ab",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "3b1eb3f39840e185129279f7a08a3af2c9410b53d22c631b6a6a1d546b2b0931"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90541",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90541.gz",
+      "raw_sha256": "5cfa7d0e4b756ba294b316086fe0b635f6a0287c8691ed48aa342d2edddb6f99",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "0f0ac12921f22addc0cbe1792979291537ae9be8e6e76754c471ad5644093aa7"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90542",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90542.gz",
+      "raw_sha256": "9215d7113cfe91082d53423632e8c626eaaa1a9f5ff12b13a301fc3edbc4d0e4",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "80da63f48653d93cdd7ee7ee90773bb93fd685208f9fecd4db4365fa94417f88"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90543",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90543.gz",
+      "raw_sha256": "e6b775e2888127ab37f1e9cade6e8aee3354edb858f25820859230597c8e960f",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "a313c61e18c502f2f24100462de72242c62dc4cef7a7e63aefa7ed77ec65e201"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90544",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90544.gz",
+      "raw_sha256": "eb5099b5d94fcbe2bbfe045295c52b5535909cb9164651e59c55b888e7855cab",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "11034c9e08009de8a4e7961baa13710a7c0e2112d29d3ad85c5306c9dfcc428a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90545",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90545.gz",
+      "raw_sha256": "9761f76d45dfa6efae6f08dac2dfcddf853c900d3d32b6a02fe9fe843f9dc562",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "7d83f35046780546caad3a615d04bb23437ead4e4752c751fa891617434cbc9e"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90546",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90546.gz",
+      "raw_sha256": "2a0e7de93bc3949a86d838b4ab3078f67f295c32383cce94246f24a628eb0f34",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "fcc1240205dfde183bd18265dc71798a0a7739c433fe5365342381369b2899fe"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90547",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90547.gz",
+      "raw_sha256": "479945b86a74bb531fbc68b08bf19eca0a99b456e0388153bd65dfaa85edba7a",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "3054c87e115039aa576be580fa6decfdeaa7dacc07c261cea4ec7dfe12c5aab9"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90548",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90548.gz",
+      "raw_sha256": "33721202db67ff1f8b9a5303a0bddd42bc7140b5db36d6326a8ad324b577c915",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "cec7141f6529a60067c4fabc13de167958d9897d251a7b12835ba70fd5a4caf4"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90549",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90549.gz",
+      "raw_sha256": "5379ef8edd3a9962f26a89ea3af75842b7aae02a6e6e4e5b0f1c0f6ff8c9c6a5",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "7d114df7721849fa12666a7eda148ebffc6fa54fc4d33767c0fe7c548f92f63c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90550",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90550.gz",
+      "raw_sha256": "0bc83d33fa8935a460e6bfa9e8250eb5120d20a0145fc36b43951782cce8977a",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "633976c30d1481b26ff3e77c9c0c968e513444f1c08017aa5d0ae16e45788748"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90551",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90551.gz",
+      "raw_sha256": "825843637fc1d76f474c1250f3235c69b258349d9c40f6dd3eb5206d15da0e60",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "f1eb9bb4575f600590ff86bd8177d1470c532f3deff291892f630430735e9fe9"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90552",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90552.gz",
+      "raw_sha256": "1a3c703034699aaca08696d0152966b8bb39a67cebffa81904e221b9718fe8d2",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "e4ef6ebec0eca97a0500da7708ab56abdf380ca62307ec7c07f1688a0a569e15"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90553",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90553.gz",
+      "raw_sha256": "7e6e684c90a75a67017806a3752e73d7dc79c03777187ce09ce69e4b73dbbbca",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "b79aa92540c93e7e71116e6f29018dabf8b4100864af283f88956424ce27e494"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90554",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90554.gz",
+      "raw_sha256": "5de2a14c86c5a2192e68b9342f30d39e221c8e10e8d929b27fe9e46383180d86",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "d5a4976d70c459016f1aa0ae59b86343466f8b63c05208ce8091252219cd4bce"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90555",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90555.gz",
+      "raw_sha256": "9c93396a24717575a16fd48d59ed4a044f4ee3b3d1d69cf139b427677cecdc99",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "1963c974af69ac44b3b9d88b9be27abd9eea31c7ae35766f039e0acd30bd3b9b"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90556",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90556.gz",
+      "raw_sha256": "60f910b8625ecfc94f566918ce8eb66ad98a14a0c8bc2ed9ab443ee3ad1ee45f",
+      "raw_bytes": 343,
+      "compressed_bytes": 237,
+      "gzip_sha256": "9596628d1fb46014c35cf3b821f0e78412bb6002e4b42a976e01cd7c42fa846f"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90557",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90557.gz",
+      "raw_sha256": "88c0871b248d71f85d2ec1359f780f97ea158bddbc8315502280f482e15cf0bf",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "64f361ba3e507965664c74c26a489f36cefac375105ad777544b7ddde8a53a6a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90558",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90558.gz",
+      "raw_sha256": "66e4ef2ad51769e7152096ccf3544f2604c0c49ac9b735716b9f73f23af0ccd9",
+      "raw_bytes": 343,
+      "compressed_bytes": 236,
+      "gzip_sha256": "a4528cb31462e6ecdd9cc1cf346d5b203d7767708559749b2d8c6d4566a55971"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90559",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90559.gz",
+      "raw_sha256": "45114ba2028345f195ade4242b291a5a1e8fa7f577ecf5c84720976649ec3e9d",
+      "raw_bytes": 343,
+      "compressed_bytes": 237,
+      "gzip_sha256": "1d0875362f4391d15be3bdad5423816fd4fc5f9da161a741182d136f14c37e81"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90560",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90560.gz",
+      "raw_sha256": "e6d0f5ff9e898236e0f97a3ce841c3619c88a293d5df1f28f5394d8d95b32752",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "a84141206e27220acb6a1fefbba890c790b7e3738bdc8eaad1391bcfe7a92a00"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90561",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90561.gz",
+      "raw_sha256": "4aa55b3bc462c3cfff9142a9be5bac7d19924d8b8d24645fb8f643f00ef7daa1",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "2f875d6099fa7f46613d25720dbf68db5c8a07bf9eb1b037f82d2db4a921a738"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90562",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90562.gz",
+      "raw_sha256": "53eaaf7436e5076a2ae29d1bea53a4ea164d78067e0d07de49c77c9fcd2e40aa",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "721bb0373976a2c51270a2d58287852fa5ee123f5cb157e0650940babe840dbb"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90563",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90563.gz",
+      "raw_sha256": "8b52ccb6701c692a4a27b2ce157e34976ff4ec4ed186c5e9bd351f4967d1d33c",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "f184f0ebf038f4b31d73c422bad9ed949881eb1c0391d5068d19eee572aa43fb"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90564",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90564.gz",
+      "raw_sha256": "be88e3a6d840caf38a4964743948e747819e2074d4dcd523fbe77285b19e68c1",
+      "raw_bytes": 343,
+      "compressed_bytes": 235,
+      "gzip_sha256": "6ed6a222516f126ce4a9f1aac2a7696b8236bd1fd653c47cf39ea178c505c1e2"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90565",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90565.gz",
+      "raw_sha256": "541331b135263f4ebdceea502b506ae99e5d7c4c35de4b2a5e8da85b41196438",
+      "raw_bytes": 343,
+      "compressed_bytes": 234,
+      "gzip_sha256": "d7257967211601ed97f9193b18eb40777fe27af02914ba21477863f3d7080a10"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90566",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90566.gz",
+      "raw_sha256": "04660cf94ac755712fe55d609e74459221afffc7ddf6d267eadd79e150bfac64",
+      "raw_bytes": 343,
+      "compressed_bytes": 237,
+      "gzip_sha256": "0e959d1390318ebd397647d6733a8f936fff1e1ddf6f73bbcfe8e024bbd5aae4"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90567",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90567.gz",
+      "raw_sha256": "12968f7d420345ff05698deffc98ba808a2979718bd8aa6eb2e545249f6d0f02",
+      "raw_bytes": 343,
+      "compressed_bytes": 232,
+      "gzip_sha256": "c392566726c34accf1f4b932a28753056be0da9338a3ea7764c9876e1d4a18ba"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90592",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90592.gz",
+      "raw_sha256": "96df9c4517ce0f70158ee7cf9105681ce2ef0301365f765787eb2c8553abdb62",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "d499987772042139bab1ed5b55e9efbc51c63f5676b4852c40adfaeaa603e868"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90593",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90593.gz",
+      "raw_sha256": "c0ef58148f79162f147952bc40cb186e76f0792ff90043c94760379342b53515",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "8b67b7927613ae40172131689e7c76433ba746b3e2fba7dd59a1f67b4d6741fd"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90594",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90594.gz",
+      "raw_sha256": "3fd0e59115edc3b3e272ad5d7c5c6f8392fae599ec41cf212c9f369d0441de5e",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "2a4240bc3a240e7393ecb518fb1111d25618509480dd84bd39cf7191dc134c67"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90595",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90595.gz",
+      "raw_sha256": "475393defcd43eac3447ea38ce3cb0b0869f953ccdbedf25deb9fc81d5faa507",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "682740025e51572388624b8095ecc1476682dfdab39e674ffd8d346593fb193a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90596",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90596.gz",
+      "raw_sha256": "d2a71f73ceeb7886c89967be2c3c7473935f6b5300559838f90b97db891f4a5e",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "f10c0993fbf18b29e240eff8e1ca913e0f8b9fd0c8b576c41fddf5a11166607a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90597",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90597.gz",
+      "raw_sha256": "191c7b59327fcc069500d4044bff41951b6462b6fb91e95eab4b7da291f1ac20",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "d1b1bf49690f060b3ffdca6587c115de656e4da0020c4324b1adc28e17345101"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90598",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90598.gz",
+      "raw_sha256": "34e80723956d787bdbd4f2448657e2cb97824ee624accb228d6b5534c45bd8ac",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "ceec50c8eeb5bdd4bb529de0dc34c49b6bc267dd157b40a03abdb60f9f23ec29"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90599",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90599.gz",
+      "raw_sha256": "b5d4187f69d6b23990a78ac5fdf25b723a268c4ad2dc5710fff15a6667630352",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "a32b7757908c2a10562f167ac18439aff9e8e15d03ab025b208c3a8c1e203c7a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90600",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90600.gz",
+      "raw_sha256": "0681e8133d64df1b5b3d24497500bd018e38ce3fa2b5f47241add77f73d77b5e",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "cc7be44fe954d1ddadf81eb5a7e222a42dcb2c430daf4cc99a4a5ab0b6171ff6"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90601",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90601.gz",
+      "raw_sha256": "2178fd9fd6fdad78d3dad0fe85b082ee28d24f0e9af71b46c7b91a0384162aec",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "caccc76b0889e376c380e6671a08c3a13a7c921ddba79b5eb236d2d0de177623"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90602",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90602.gz",
+      "raw_sha256": "4887faf3fff3408337f899e1a11bd1557cf2560cd81048015ee1795da254a7ed",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "68ea9fbd3a78474c8396b553b84174798aa50677e64dd0b0c40b3308363f1b8c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90603",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90603.gz",
+      "raw_sha256": "763e6165fb53a54eded6b3f104a95e0328e8e7069954614434da2e6466de4cba",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "4404a5fb58e624b46d2f99c2ad562f38e203247ff654b1f6bee62f3a66b8bae1"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90604",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90604.gz",
+      "raw_sha256": "8aa6205b20da7035218ae9c027c0d0e3d13bdcdd986ae3d2c66f142c8396eafc",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "180bf17390503b6f58b3ea8b08646ce713c0c1747abf607aad911782d91b48c2"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90605",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90605.gz",
+      "raw_sha256": "9e3a917985105998150118c2af412b71b65649ee973c6588c88f4fd898eaa5e3",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "a8787e2ff1115d5a8ca2e5c560d43ecdd8bf3514156eb056d214d56c27ae6de0"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90606",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90606.gz",
+      "raw_sha256": "f3042e20eabd95dc0d98f0dd435d06196e8bac97fec4f7f847556aae9538f295",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "a08f1d9a87ad14dffbd82fd939077695c140e41550820e172920913b008f7594"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90607",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90607.gz",
+      "raw_sha256": "e25e295780d9ae76e6de651b53a36221922f09e4202b33ec4c8419be86748a8b",
+      "raw_bytes": 125,
+      "compressed_bytes": 120,
+      "gzip_sha256": "22015b20996d287d4d44477114689008696f665dbb26efd1fadd4e50f0364d29"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90608",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90608.gz",
+      "raw_sha256": "a3529679c0df2b2bbe5375852c3fd8a293867495881ce9efadfd3407de4fe372",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "f47be04c705ba8dc72b7dcf67a704c095a14c2cc787aecdce53ab2bf5980bfbe"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90609",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90609.gz",
+      "raw_sha256": "af7be11be66537d4c01c20db9c5b9d074280b06235cf5204287108b15e8470a1",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "c21117111a8d86d420de5e9532f2f56cd4d73a1fb03caa5bcd347343e6b70322"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90610",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90610.gz",
+      "raw_sha256": "e4927b6f3bf70e4a523a98faf2f527924e124652d5994092cf29274ebe9d0286",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "68fd66094f2e6a96fa9f28cf68f6b76824e57f36cf870ce90615d24a5a14f6ab"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90611",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90611.gz",
+      "raw_sha256": "1733aa2e07576c2a5e920e45ec47401f1c275f03f83366dddadfe1cdcf0d35b3",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "5ac5a70185ed41b96bb694e3be1e4ef870ae97fdc1b6c8bf5b50cda0884e7a50"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90612",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90612.gz",
+      "raw_sha256": "bd4ef3623bd12c97ffc649f888673dca0c2015594ed278e1ecd90ef7aed98114",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "b1a619a8b893587499ef67a218f1dc7a2f8a4009349a8a82b72d2ba82fee7a2e"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90613",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90613.gz",
+      "raw_sha256": "ad002c6340fd7749e9ce487e64ce2b02acbd9e625acf34fa55ccdb51e88fc7a5",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "ee32c3d97e903ccb51bffce5dddfd2cbacb3ae71a1ba88441505eefc5e347353"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90614",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90614.gz",
+      "raw_sha256": "47c4146148a6a9ed166411d8ec7cb7524bc883ae0aa493a3b39348ee91a3a1ba",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "2bc6b0f4ea9780b0f8fb30e29632aebb38e43b5d82936f1fdc4e3e9283ae1caa"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90615",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90615.gz",
+      "raw_sha256": "8a60ead06a8d47bb37461cf21bcec75fe89eec3834e1ebc30172e9d84ad562df",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "502cad5786211e3200bd899fed603d1873f394f6aafab763b4657103c1a2c1a8"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90616",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90616.gz",
+      "raw_sha256": "5780329d22ecf8db033fad93a86eb71977b2c202469bdd94eaaf255379dca822",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "232ddbb9ba6cb4b0048f8082be2d817934b8d9d0976b2bc3cfe335f058e2edbd"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90617",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90617.gz",
+      "raw_sha256": "e0f405a97521c6dab2a1581a3b0ca876ff67d9350d9e0552875cf0e3dfff057f",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "f8b7b52e0d6b0d2421299c4d304ed58b411b21ce79c0cdf2bc055ab206dd9615"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90618",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90618.gz",
+      "raw_sha256": "0e3cbea9b348848d7006b0c2bfc9aebc3141b505d6704665eb2806336dc81582",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "b25a6a2967876ff9e71bb8349a12101563aabad4fa1739319973847741b66b35"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90619",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90619.gz",
+      "raw_sha256": "8eada50f0be68e088015d9bb98d94dc0d25f2daf5fcdedf753220d2869d5381f",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "b815714a43565ada958664fe88e0a5b40bcf614dcb0b737cd23dba6b0471e32b"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90620",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90620.gz",
+      "raw_sha256": "3c0995877c44b67411c24ed4c7150659dcbc67797aa4125f6414883ebda528b3",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "59c7c09f203e05b68fe50b02e173640adc679ba8248d9cc49e3d09a6dcf13d5b"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90621",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90621.gz",
+      "raw_sha256": "8a098825655bdd26d1472096417621272e72bca6300b474479bdca905c801856",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "73b4a15705754b586c053a551aaf02677401b118b8dbb5a73f30c49a92ca3060"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90622",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90622.gz",
+      "raw_sha256": "99abd1bc807b014e5738aa68ac0c4d34c6b2b72d16387ad988b087b479611d1c",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "e31d1ca79b664d3863c026549a6b9ae7f681c8c5e79d45487749f99eb5c1c914"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90623",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90623.gz",
+      "raw_sha256": "3e486b64aec30897350375323fef4175561705d2ee2bf2bc84b53a5290ac1c93",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "63c96cd7d93a7b0bf2bb4dbb15169e47fd047d83d867f5d385046283bb9e9620"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90624",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90624.gz",
+      "raw_sha256": "16467aa98c1d6d360d57f6d67a784ba650bc84043c3e290ece595e7234ee9f17",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "952942df31ebc5a2e6581a9e613e5cd7268386eb335f4963d2191fc4fa34f573"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90625",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90625.gz",
+      "raw_sha256": "76b1b5cad72773e73204d4ee2a21c2817d5ad3fb917ccbdb9f5f3c624e4351f4",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "3a410d0070305e95b0eae57db88d53df7b04c359d970f70aac5d1946e3e3cb62"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90626",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90626.gz",
+      "raw_sha256": "0e5412efa87388168c648e40c36257cb2ec40af06b390cd20323c2769629ae42",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "251424ca603015bb2859a9e46a951da1ad94a08170c9c9c013b7c5b495320d86"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90627",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90627.gz",
+      "raw_sha256": "19cdeb99191f22f62fed166d6aff7bd98c320d1a0be9de4e1594fb424a61fb33",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "94ff5b0113f15cae43acdf287c4c75e9de7df4621616e7444c65be6eeea56a5d"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90628",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90628.gz",
+      "raw_sha256": "e9ae3217bde1214132e627269e2ee8f92d3b277184905708320b9dd5e9f009d4",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "13fc46640dcba82c1f984c51427a6eb2d6c1fe253a3e1ef437d88bc5407b6885"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90629",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90629.gz",
+      "raw_sha256": "aac0fb1ec578865fb1019930c82bf356e0b9556de01004656c02c5be32285b59",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "4102cbbceb404336bf5bcf1ac8fd2d5fb5ab56fb959980f72f670afc67a78c96"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90630",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90630.gz",
+      "raw_sha256": "5928c5e837c9cd2c81f1e0b9fe8b91ee96f61675ae0ea10bacfb01ec3ac98178",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "044ae20e8d667b061d407db656a3dc8d68efda80430081ca0e1611dd1e3eb79a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90631",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90631.gz",
+      "raw_sha256": "78e05dd7ee5c92d178a974d7ddbebb0c8b0025f1344a47a3a9a5bd402231def8",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "02c3df75d7116b23d76e25c6478277e870797be21f113ffc0e022e62a5691636"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90632",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90632.gz",
+      "raw_sha256": "a6f0715d9bdb3a4d12a91a464b0cf813c3c81fd0c69d318494241ce9ce5c45c9",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "eaf61f91558e706ab361789b4b8da63f5dfe32940770ba15a2c40c376ccceb09"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90633",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90633.gz",
+      "raw_sha256": "e8ab68c80fedce0e72ec81f95a201b96ca8a459c26ded9eec7eea9a9ae222f4e",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "46854405ac6f4801e3e277814a21111b6c3d4887d48252f488250c2cfd43c2b7"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90634",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90634.gz",
+      "raw_sha256": "a5d64933cdf7e547c57eea69ef805b0e7dc52650e91f2f4cde0f028eabf73a79",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "5a4f68b99248a89b4f965dae444429150b12458dc633961c0f5a2c731b3da5b4"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90635",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90635.gz",
+      "raw_sha256": "3dde41db508cb15e223dd166052a887955b2d9a007ddf8d770aa9fc84e950faa",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "562cbb55689b0c57087c46fb4b3aa8b665b75cc4f23241365165d2a8f206f111"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90636",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90636.gz",
+      "raw_sha256": "750b35e65ecafc6d26c8305cdead39f62810f4c46e038a6f227b0fd989054694",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "e55d0532c639faba6a6305afd3668d27f1cb3362d7ced9b49b8611433a9a8792"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90637",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90637.gz",
+      "raw_sha256": "e934b78f13ee909d39b5c66075f7493ae699064450d403e184326f0e96572814",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "984672a20361576cb789c74d5d8ddfc40aefc1d5d8161a911205b3f177a77fbd"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90638",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90638.gz",
+      "raw_sha256": "c9e084bdb456c95412c8de165f85692bcf32d8758666919794d5928bfa9078bd",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "b3a60ea27445f011dbfbc186c6f5273ac9ee3bf3b931a0b18488b333e7ce8df4"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90639",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90639.gz",
+      "raw_sha256": "ce99b0bcbb949378fe56faedf42cfb924fc8c9785fa883d02ef69a0e5e9337a4",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "ac6120c01149684af89099795cfb8add5462f1904116c60c6e055c2f0b2496f0"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90640",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90640.gz",
+      "raw_sha256": "f4c706bb5db900b5bb20551981fffe10ab72386caf97eb005fb84f6cf5ec0460",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "97ef47f4cd3c90bfdc33779862a106ddfd7344c77330c0567e8f60cc10eef5a8"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90641",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90641.gz",
+      "raw_sha256": "d98b1bc6dcfa37041eedf56444a6b64d27c7d87f6699ba0f586ee3e425cc64dd",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "f6ed22f6d5de9892287eefcaa7f3d09b3eca317389cb43f7fe117752701b2e54"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90642",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90642.gz",
+      "raw_sha256": "314759e38414f9bc163206a0d161c23ec59df94ffcca626d5d47f53186fd858f",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "f9f698f363e9db2b4f9f16575ace52ea78468fd4a746694c6c7c870c8c117dc1"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90643",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90643.gz",
+      "raw_sha256": "83cc0d5e49950fdb563ad9f7c781f2ff50d4bac0b15af59a7ffcf7758039c56d",
+      "raw_bytes": 125,
+      "compressed_bytes": 123,
+      "gzip_sha256": "3aba0be1ee1c549693fcfd938f78af78c7009acf1454cb9c8b4302a98998f5e6"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90644",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90644.gz",
+      "raw_sha256": "064a5c8b03511d576967e27ebc2078fe6bb580d026872342eb056dd656a5f251",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "fd34587cd8c5584e78db2f43e1c3f01b992a60f26b3217ed3dd1c17bba8e2dc4"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90645",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90645.gz",
+      "raw_sha256": "80c1e84618f331e372fab6a7dc21af9959540297325e6983a46a0f49a191d5db",
+      "raw_bytes": 125,
+      "compressed_bytes": 124,
+      "gzip_sha256": "a007360e0d15895d23b661e41cab7fb2a3925f373a554942a0bf67a56af446a2"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90646",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.90646.gz",
+      "raw_sha256": "d5ff5f0994c267151adf88a5bf7f3fd3fbd79678510c7ece61ec924150ca10de",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "8a29610fa3cdbcd674a372bc2f4d391f4e39d96f0e1fb358cf07e13861e29395"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91128",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91128.gz",
+      "raw_sha256": "1d435ed037d149a7f3858f4b82871f8262ec84fdc12b2da95cd3d434093e16aa",
+      "raw_bytes": 267,
+      "compressed_bytes": 194,
+      "gzip_sha256": "c152f2cbc2b7b95c6a928d41e975e9f2fbc6ab562a521d7a88172559b410bfcf"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91129",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91129.gz",
+      "raw_sha256": "27e454e110eb0b2f01387b60f61140e329f6cecb780f5595a0e974327c3e0812",
+      "raw_bytes": 439,
+      "compressed_bytes": 286,
+      "gzip_sha256": "f96450c435300e42eb744b7c2aadf015108d98315c82bdc612a0c518940da153"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91130",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91130.gz",
+      "raw_sha256": "a2b2d35f03315415a94648ac51592278568e6c4235439190f2462c88a4393e36",
+      "raw_bytes": 332,
+      "compressed_bytes": 206,
+      "gzip_sha256": "485bafa160c23c6f632e30ed9f9aec79d242bd8b1e7b8922a11d7060f971c67c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91131",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91131.gz",
+      "raw_sha256": "d3123c81e5010cc4254627744baa616bfd221c21af1693cf634ce650717ed0af",
+      "raw_bytes": 267,
+      "compressed_bytes": 193,
+      "gzip_sha256": "5b875d1b8f5f3c833de0b836ffa8cd74190908e2855bd58362dcc4cd02cc593f"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91132",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91132.gz",
+      "raw_sha256": "4104717509625972a606e67c2cfe86858d719837348d9451e9fb6edfe4e6a3cc",
+      "raw_bytes": 210,
+      "compressed_bytes": 172,
+      "gzip_sha256": "3c9e4f997a20b80eaffbb3de4f380c349c37625a645fb0b5fdfbef05b39f5041"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91133",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91133.gz",
+      "raw_sha256": "6c129afd4f38d9cad179e92a7af34e76b56d9e8d16293d11e19cfac855cb1345",
+      "raw_bytes": 210,
+      "compressed_bytes": 166,
+      "gzip_sha256": "a8614089b6a24d113abc3c3bf3f2f2bb625c58957b9341468cc5fa4997c7e7f9"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91134",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91134.gz",
+      "raw_sha256": "f014fa0f7307fe339d094b38fd2b87f3691b621d3b9431a2f526638a393b6895",
+      "raw_bytes": 267,
+      "compressed_bytes": 195,
+      "gzip_sha256": "3b4a34397564e5d3cefd8769b8b89ce3dfe01cd2656fe9e32b6a10c2b9d8cb92"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91135",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91135.gz",
+      "raw_sha256": "fe330fc82aa7b287208acbbedab9cdc89f915c7dbd740d0d107d3f5c7f9e12ee",
+      "raw_bytes": 267,
+      "compressed_bytes": 194,
+      "gzip_sha256": "f3e22268af1cc3d6d32edb6d4105b275aae9f2d49a179901dc640cefc65ce70d"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91136",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91136.gz",
+      "raw_sha256": "9a53127cd364e68ed89f0c91dddab6114230d0412995e9f2898cbf1b86438e90",
+      "raw_bytes": 267,
+      "compressed_bytes": 193,
+      "gzip_sha256": "d18fba584ae96f5b2a200c2e234f420ecc68d44cdba5a1686484bbbfb701d0b3"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91137",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91137.gz",
+      "raw_sha256": "026875cd257665eadc467eb93405c0babea17c595d7acb6d28c8dad007ba4ddd",
+      "raw_bytes": 267,
+      "compressed_bytes": 197,
+      "gzip_sha256": "9807148e517e6f3186a1d0e4b7f2d761d3dea8d841be3725ba70317b6f0f1c6c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91138",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91138.gz",
+      "raw_sha256": "ec183199ef893427b07ec318330a33cd7b32059f6069783da51cb1a28f80fd57",
+      "raw_bytes": 267,
+      "compressed_bytes": 195,
+      "gzip_sha256": "c4f23a9881943a0b3b25f7641b6dd0addb7009c17f9eb0a7615a30b023d58c1e"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91139",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91139.gz",
+      "raw_sha256": "c79f9b868ac1236471e2954623fd05e36f9e279bebc897f298935f312f4e14e1",
+      "raw_bytes": 267,
+      "compressed_bytes": 194,
+      "gzip_sha256": "4f835b3401f31d89f753792ddd19a4148bb60c7f08e79c61d2bf249547bd8d3a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91140",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91140.gz",
+      "raw_sha256": "0a05c19176ea5c4ebe00d1f90e13b06ad114e23c04efc15c753b2f87699cf8b8",
+      "raw_bytes": 267,
+      "compressed_bytes": 193,
+      "gzip_sha256": "41384523bd0a9130cadce6d4168dfe5d3c641c59e1470f6fe45a49c40b0bfc06"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91141",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91141.gz",
+      "raw_sha256": "a8e7c97eab969766a231107eea37b7db9445b1d59848af12ed436d7a824d70ce",
+      "raw_bytes": 267,
+      "compressed_bytes": 196,
+      "gzip_sha256": "f402ae3121791b8654dbd0c73f4779d1dbc47b2369e22731c7ae9e03baa6c2e9"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91142",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91142.gz",
+      "raw_sha256": "bbd306904ac6131cac60a4ebd83140e3189e02a73a8624749f6fdb306e7928a5",
+      "raw_bytes": 267,
+      "compressed_bytes": 195,
+      "gzip_sha256": "1b32052f33331f401fcecbbfcc076a5f8019f63b9e495f13a65556a979bb952a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91143",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91143.gz",
+      "raw_sha256": "54f49cf1e9ea4e39996fea265ed652bca268934eba4dc531cb0a41b479d42803",
+      "raw_bytes": 267,
+      "compressed_bytes": 196,
+      "gzip_sha256": "d95cc9f5f64c610242f1b83034f842428831775f924a42efacc230dd5928a40c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91144",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91144.gz",
+      "raw_sha256": "6faddc78b0572042023ab99710aa8c5def18e75d7d497752981def8c7324de0c",
+      "raw_bytes": 267,
+      "compressed_bytes": 195,
+      "gzip_sha256": "f7b0437c2d6af976caeb617f5b4f607b4b3fbd1e2474371679845e2cc5a78980"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91145",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91145.gz",
+      "raw_sha256": "a79ff01a825e760bb3be3bd91baf1f8141b5657766c0a90f2465fbcf396f3c8b",
+      "raw_bytes": 210,
+      "compressed_bytes": 172,
+      "gzip_sha256": "60eaebf669732d99c6cffb508d1be700253761ea8be45b265b29163ca11b7d06"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91146",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91146.gz",
+      "raw_sha256": "1df315a345e1b1b06c4f8eaffca50080aed46d1a62f15cf5bb6449acf6e4dd66",
+      "raw_bytes": 210,
+      "compressed_bytes": 172,
+      "gzip_sha256": "33ddd1973f64f31ba096b451225dd7e55cb34a5c1479d164eb7fa370a845cf27"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91147",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91147.gz",
+      "raw_sha256": "d9cf84da6c6e068f708352137b1468890ddcd38a0bd25240da2dc9fc2eca35fe",
+      "raw_bytes": 210,
+      "compressed_bytes": 170,
+      "gzip_sha256": "1aa728b14e55a01afe09c3bc1de576d0ed493a5aea3ab5308eefd9ee430f9add"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91148",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91148.gz",
+      "raw_sha256": "7f3eb94a03e3ad29443033a99a65203a728918db61a42cb36a481c37d5e58f05",
+      "raw_bytes": 210,
+      "compressed_bytes": 171,
+      "gzip_sha256": "c642c90ba58ce2d6c0f0844fe85300289a55250c8c099889e9140606c3e268f1"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91149",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91149.gz",
+      "raw_sha256": "77c7284079e8a51d88476b54789f74e3087f14f3a0f9cb4a8399db8704528ffa",
+      "raw_bytes": 210,
+      "compressed_bytes": 171,
+      "gzip_sha256": "0c63e682c0d0cb6051dd8a81764317b45a3926103d11cbc75edaeb8b7561f49c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91150",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91150.gz",
+      "raw_sha256": "18a3b5a6400079eb46851ba12a7f2fb824de3de399b63e9088bee97184f44d32",
+      "raw_bytes": 210,
+      "compressed_bytes": 171,
+      "gzip_sha256": "ebcdbae0926594794bb996cf28a2b9bd7e55b1c14b93c247a11dd9f9d0114f42"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91151",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91151.gz",
+      "raw_sha256": "118240734f1d6fcc5087f83eb683d5f0ab38d484cca580e1180bc18952bd914f",
+      "raw_bytes": 210,
+      "compressed_bytes": 171,
+      "gzip_sha256": "93c74076a3efb934d9008819a60273deae2d91487d9c9bde089a94d8fdb2eb29"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91152",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91152.gz",
+      "raw_sha256": "c811dcea3f7b83be7695b7eb01f8318e04f4eddde57f4ca2e4e132a53b970893",
+      "raw_bytes": 210,
+      "compressed_bytes": 172,
+      "gzip_sha256": "f3a0062484752a7c6e9f32386fc1f29341a7ace951a0a58d47899b531948152a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91153",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91153.gz",
+      "raw_sha256": "2350f73d2ebcf98636ce0a6c3ac373e6abaefc4af724f8119f00e8b48be275f0",
+      "raw_bytes": 210,
+      "compressed_bytes": 171,
+      "gzip_sha256": "900821547798d03a976103adb33fb927269827a40be5406f470b4ed3ad61f756"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91154",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91154.gz",
+      "raw_sha256": "47a5003675eab02d274652a72bcbaf588ba773a299a40c64ccb60f6bdfa4ba35",
+      "raw_bytes": 210,
+      "compressed_bytes": 167,
+      "gzip_sha256": "c2f700bc0e46c0f1ca2f179e70856c867dc1986b19a79cbee89e9956f3f1cbba"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91166",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91166.gz",
+      "raw_sha256": "288f9120ea70d769f87660358b48c22fa544264447f440c6e0fe2f65342de86c",
+      "raw_bytes": 72,
+      "compressed_bytes": 89,
+      "gzip_sha256": "94976c9d7d3a929b2916302ec99869ffa6fdda185ae5913a8e4a3bf42675918a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91167",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91167.gz",
+      "raw_sha256": "b3d1592ccfc3255f0673199bad07fd6886895733ad942afe2c9c65dfdfd1a16e",
+      "raw_bytes": 322361,
+      "compressed_bytes": 10115,
+      "gzip_sha256": "328d187bf4429424efdbca89ef14912b608638f85bd769532b93ae03a2157275"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91169",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91169.gz",
+      "raw_sha256": "56d264d8880f64ff96fcb72b18485798d06498ef4392d8cd77994ef32b5d865a",
+      "raw_bytes": 113532,
+      "compressed_bytes": 8234,
+      "gzip_sha256": "39186ef85e1b33bcf7c9fd7a1df87452ab78c8891ad2019aa217b1cc3d91b0cd"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91788",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91788.gz",
+      "raw_sha256": "19a42b2f56c4592f19762a5be5c868174d5e4a58b21d61542e11e65d676cca29",
+      "raw_bytes": 5590,
+      "compressed_bytes": 1185,
+      "gzip_sha256": "4fda0c2c31601c21ea67c4c6dacd5c331b01578ec68a3f8e2ce42ff9b1063622"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91796",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91796.gz",
+      "raw_sha256": "05cdfafdbce7b1817ec2cba58b4231e6f27f40d9184d32ae11bfb332894ccbc6",
+      "raw_bytes": 16589,
+      "compressed_bytes": 3416,
+      "gzip_sha256": "9f5c24dbd878d1ff4c4c0f3c6555aeac7614605f9b73ec9bd51f45f56f46b1be"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91797",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91797.gz",
+      "raw_sha256": "b2e6e970717adb69edf8df296e991661bd87bbe88fcfa021d69a5123778fa25c",
+      "raw_bytes": 175,
+      "compressed_bytes": 172,
+      "gzip_sha256": "dbf1cbb893d0e45766a64eb8dfa24fffdb2d03b7e04359dad800c608765fdfff"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91799",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91799.gz",
+      "raw_sha256": "abc92726a981cb655d25fe911a2cb7fcdaf02e3777cfd40203488ba8dba61e48",
+      "raw_bytes": 6626,
+      "compressed_bytes": 941,
+      "gzip_sha256": "426b669827da2061852a90c1b30e85430f66ce98394d824c484f896fcb2e907c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91800",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91800.gz",
+      "raw_sha256": "735f8f073e40ba683e0e875c0b7165597d8abc7fb0f9f7e9eb79e3121423add0",
+      "raw_bytes": 91592,
+      "compressed_bytes": 9414,
+      "gzip_sha256": "cefad9cc6f4d501d0e70b0d852b6ee561eeaf3cf2fdb4886b73e48093ecadc07"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91801",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91801.gz",
+      "raw_sha256": "e246e153c459144a7bda8d66ddd4f163dfa2497e6e9bd0ba56a1304a8817d34d",
+      "raw_bytes": 430,
+      "compressed_bytes": 257,
+      "gzip_sha256": "c50733f1eb82d0fd796d8db1aaf34e51825c9f94a16704761fffb096153f898a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91802",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91802.gz",
+      "raw_sha256": "6d15004dfc18b487f03b585432370fb2839f04ef256c74f3271fa08c1ec8cb59",
+      "raw_bytes": 21531,
+      "compressed_bytes": 3116,
+      "gzip_sha256": "8538a2f9096be75055d496af202f506fb7061c9783fa39667e83d68eb57392c5"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91803",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91803.gz",
+      "raw_sha256": "52b9e55a4c379f15b5dd3c4d209d295886deaedeb853f73d5bca392c05c4f9b6",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "a52dd177b77b4c11f66ae270b836e6c535602f8d3e7bf34d6975f30908805eef"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91804",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91804.gz",
+      "raw_sha256": "ed49c7468c59fa26e6603976bb857a6287409456c0af67a351e086aef70ca61c",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "c98edb1f7fb8cb65a334cb7297c5a5b4fa55add0084972fbaeede62b72d2eb05"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91805",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91805.gz",
+      "raw_sha256": "5571f1ba909760f5d151d38a87debd6c1354d6afea514679749d00bfe989df15",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "723d5b13e2df5f697e63b6e3634e97861acc57e6beccd21e3874a9d5e4813df6"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91806",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91806.gz",
+      "raw_sha256": "6583043bf746d585394e5aa5843b353ffac2e17869fc798e2772e87f317bd77f",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "bee116809f22f8f729bdd124fb6fd8361773cd07c34969cfc1c9226e327820a6"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91807",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91807.gz",
+      "raw_sha256": "da7a2703bfd22053e4c7a557324d379dfe7491a330ae77a5b3db9a9291ca7666",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "4bb8ddf29ba1d40398a1544037466fcffa7879c9c4566321839d6a67ed460268"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91808",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91808.gz",
+      "raw_sha256": "892e3f6ba65454942e7bb57bd95bc04b13e1b6f3dbefdca1e11ffa118c720440",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "5ebecdbba5544deb55f51cd70d1c2d4a58f7d5f9145df18af5de34c20fcc716c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91809",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91809.gz",
+      "raw_sha256": "11f84bfc2760a1992c2bd4ad76a3553c9cf1b4780c1437b3587cf6a9018d91d1",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "27876aaf4cbdbac2a1f2462e7d0e22927e981aa565365b64db80c90b0fdc1b3c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91810",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91810.gz",
+      "raw_sha256": "249eac58a50ce23aa89a53f7d22169240ad722ffee69509649ced1ad37ea1312",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "ffdf6ea79fd7f22e7703a640780d01aa83706a37550ecd543103187cd31ca0a8"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91811",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91811.gz",
+      "raw_sha256": "039278e3c3a007db5fd24c1846a4cd926ee5acf635a0b80585cf752c5115138b",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "f1f4a75af3a4e6efa56a3d0a2df09825fdce85e9bd43ffe6fa81d34215883d4f"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91812",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91812.gz",
+      "raw_sha256": "e2867ed351236cac39b8fb02efdaa55212b8ce0d4afd42267c987e897d80a413",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "81ae392cf6f0e8214967601288457023ded5ce4a2e8c2796dc2e5cbb477fb5e3"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91813",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91813.gz",
+      "raw_sha256": "f4b4c41dcbc0e70128fa73d81fe42f755b22522fe599de2dac69515ea27d4a48",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "f9ea9ab30da475a14914c9febcdae7a7b21ca5af33fddf610fc4c2f111846c7a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91814",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91814.gz",
+      "raw_sha256": "fea412d299a10f7ecaf6d2a1981e3771e6b163df73e2efefd740109429f19634",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "77838eed6fab278abac3d97e8d4b8ec54bdfd097084b270017a15cc3885da823"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91815",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91815.gz",
+      "raw_sha256": "37b63a017646cd7abc570528e825a1327d8f2cb8e15e6137ead99e595f9f95db",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "578344f7357b98492879296012375db273ef88ae65501717f2f0cbb6fa872268"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91816",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91816.gz",
+      "raw_sha256": "2df37fa56983cba2fc2f09b84cb551a6d0d03e1364023d448135f9f2d99703b8",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "403edd648a8ec481a71aa3cb94ad217b5beb5c8d24d44970cde26c104ed2cbca"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91817",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91817.gz",
+      "raw_sha256": "2655f70bddaa8fd717fb1207ec43e1877c4941d8429b6a2348c57dfb96332612",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "fa659c5921a8ee7589ddf9c846f92f6a97034efde74069eb0f88fd5dd835ccfe"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91818",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91818.gz",
+      "raw_sha256": "dfa6ca3f406334011df2077d023bf873049b81c363a403de6679579c6e54e648",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "f1b89dccd8a74c8a56c885b92abaf199cd5e7d359551230311766b120efa2662"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91819",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91819.gz",
+      "raw_sha256": "494a73dcba47134d47b1c4a71d16b2ab11fff0d6ec94a87e284562d5e55dbae4",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "222343e3f3129b0cb9387a03543bbb884b6e313ab03f1f30408a6ca6a5f16681"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91820",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91820.gz",
+      "raw_sha256": "ff8535eebfe202489d5caae5bda07cfebe9e91cc7f66c0cb6d32c8292b8850d4",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "c2e6487bf12e566d12024d6206b6deb7c9f6a7f43cebc7956f6677e8891220a2"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91821",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91821.gz",
+      "raw_sha256": "877704144038f82d24135d63b30d9f736278ff0d2f4c9a5795e92c078f00e560",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "af9693075380b279df2c226a702820049ca764feeff143af676a272d40db3c07"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91822",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91822.gz",
+      "raw_sha256": "f825bf37fddab1b8b5eadb624506a511889f2a2e4ca5802c7f42daa6ca8fbb9e",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "3e6c0b82912f23791abe535b55826618e0c3b9e1b9c545a00944075c669b2d88"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91823",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91823.gz",
+      "raw_sha256": "fddd8e89cbe4d1348393536379c3080c5791b62fcf7e226945374e2179cc5848",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "e25c2b56b86cfd9bfd858c7126bed84256ba60cc68c07594ef282593d19d9ea2"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91824",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91824.gz",
+      "raw_sha256": "4db2690868333d469c49795cec66f0051e049994634e7012fa3412e33e1406fb",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "35f9aab32429a7e542906f82235141ea71e6bc8294742ef11afa1bee404a9a60"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91825",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91825.gz",
+      "raw_sha256": "bbc0b7523eae5eae709f419fd9a6d20318cf8b6559afb455916e389615e4bfbd",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "5fd1570e28ded761091bbdd1737b4ebab27aaf5968dbff1d4235926143830a51"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91826",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91826.gz",
+      "raw_sha256": "a94373b2b6fdb4272df2c59c4faf9d40bbaca4cf5d4c9e7812b6b5536cca194b",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "64b7e1d0691a19a72b45b3b621bb2bbf57e29cf30e9438dbf3b8719f70a74e3e"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91827",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91827.gz",
+      "raw_sha256": "fb23d443a30d8bfc464e6fc61bb1ad94dc5d91600ae3d82930ce2017fbca9c0a",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "c52f1b813a2112b89b17eb2027e3b0a07f8615bedd8b80be80f12ee6c1c68dcb"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91828",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91828.gz",
+      "raw_sha256": "800137582b25349f228202bb793e681fcba724c3307c662b3757985000bf7778",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "3d42d31778e0c3661fa9d89e25deda5a8e0da7043758b656792722ef4275b421"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91829",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91829.gz",
+      "raw_sha256": "2d51d82cdf33fc351d20b62ca7ca1a3e982831b0280495dfcd4e5da5413b4c11",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "679fb030ebdb573506f96c3b5acf1833d15eee3c2e5e7aa477b64745e5c72b75"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91830",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91830.gz",
+      "raw_sha256": "72587bdfb48402ba9aa7aafbeb7038f57d89e03b9e3292de49643f5df5e43daa",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "010a99ddf3c5b2c3acfeee0c978e0ed344742f08dd1e379d445fa78469f31b0f"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91831",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91831.gz",
+      "raw_sha256": "93c2681f6f1aa6abda26401406489e84fbb184dc0fb78729d7e64fc00c566421",
+      "raw_bytes": 125,
+      "compressed_bytes": 119,
+      "gzip_sha256": "27d84af5ccf4dd647f4f87115f8868f759be9460784f5f8a4ca2e1da62798a9d"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91832",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91832.gz",
+      "raw_sha256": "9239b8418338048375a6fe69438620a264a75b66af05bf819e32586961c9b674",
+      "raw_bytes": 125,
+      "compressed_bytes": 119,
+      "gzip_sha256": "0446203ed68f8ed124532882dd1a26b2bac41efa68526ad3dec919ba620b7a83"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91833",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91833.gz",
+      "raw_sha256": "4c6bff3968a558a901c2c91d553df75bebd1b0f20e5c995c9db5a040e8162239",
+      "raw_bytes": 125,
+      "compressed_bytes": 119,
+      "gzip_sha256": "27c0aa64cc10a9fa13dea903a1b0b1ffdb9f495a4517668d82b3a509c90f62a2"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91834",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91834.gz",
+      "raw_sha256": "59e93c91261d624c3208500a111f94320bd2c866f5114b33fa72d821460068b5",
+      "raw_bytes": 125,
+      "compressed_bytes": 120,
+      "gzip_sha256": "b4f5219f98b082778793c8dcf7be0d47de7ff77514cf9f35965317b78d782d84"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91835",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91835.gz",
+      "raw_sha256": "7d3162cf046270f7cac395711e7ef4af5a6e25b3f0379d5809d526ca182910c2",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "a68fecfbc6824fdd42d684639d6a74b2f7f746f3ab3c93803843d308327ae0be"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91836",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91836.gz",
+      "raw_sha256": "5422fe88f26cd9fd19014c3843cba75e33f2a3e23d96dbb9bc9f9b3eac300888",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "e1c6bd6a88b496ce3ea040fb9d9116cc5f6c4fe3e4d0e2719ce26a7119076f02"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91837",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91837.gz",
+      "raw_sha256": "5276cf954a7e058d2e5f901f03ad7a6a36b971bc7a306e60b11c4ec97df84ff8",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "0792e75de04046916f5cec77f91d7cbc3d4b723c843326a0cf93f4d6703d0d8a"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91838",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91838.gz",
+      "raw_sha256": "0fd19df7a4ecbea7e336c20ebd82786a349058c6537d22832e7285f9f5c2e376",
+      "raw_bytes": 125,
+      "compressed_bytes": 119,
+      "gzip_sha256": "26b8e9c49b881f2942ea5e2e5b03a44b1de1472ef1a2d74d2571bdf5a4492be3"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91839",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91839.gz",
+      "raw_sha256": "b9dbfd1e992aa98551f1534cb893bef7832f44b33aa6123ae3c97a40ade1b552",
+      "raw_bytes": 125,
+      "compressed_bytes": 119,
+      "gzip_sha256": "96a40ed4193574b70eb1e2010cf8983258d74b74b41f6826fa349bf7a1bacdf5"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91840",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91840.gz",
+      "raw_sha256": "f9777f6017c742fd4f42e30554a4936a2c1d6fcb49f1d7bed51a85e273fd4748",
+      "raw_bytes": 125,
+      "compressed_bytes": 121,
+      "gzip_sha256": "52961d92b82554d0a8149d94f974a6d2f595b97079dab84fa76f65e68cfbbbef"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91841",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91841.gz",
+      "raw_sha256": "ca8a4bc206d73ae35dac8b031b0cef076f79d0f457779b749c0591cc77a27b24",
+      "raw_bytes": 125,
+      "compressed_bytes": 119,
+      "gzip_sha256": "1563ca7606986725383fd44f5b4b211256142ae4ea671517b211c81665397a6e"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91842",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91842.gz",
+      "raw_sha256": "362bbc0a78e3ca4bcbc4d042c3525df4efad4a0e718b31bd0873e794b1fb3198",
+      "raw_bytes": 125,
+      "compressed_bytes": 122,
+      "gzip_sha256": "9201a40aa1cbfe64e75ccbc717d8344c240a01d33983f379e58a686d5508c49c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91843",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/os/syscalls.91843.gz",
+      "raw_sha256": "1f77e2a3959d8c3ede5683910e76f6900b81db941b0acbd64c7b51b2d86aa4a0",
+      "raw_bytes": 674,
+      "compressed_bytes": 307,
+      "gzip_sha256": "67818b63772ad02b7363c004aabf87d4ae4db2bd0b960e1778feae1ff7be377c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/call-codes.89842.jsonl",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/call-codes.89842.jsonl.gz",
+      "raw_sha256": "d94937805df29a98677e508e01f127f765d1356224adc861b40b14aafcb92cf2",
+      "raw_bytes": 225300,
+      "compressed_bytes": 52976,
+      "gzip_sha256": "6169ffc327232d5bcd67468cafd2e0496cc28437e7762c9acf8f0868b7c64571"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/call-events.89842.jsonl",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/call-events.89842.jsonl.gz",
+      "raw_sha256": "3536dc4702f7b5c1aa013ef2310e8cdd9140b74bf99f0e5adb2c6b3250165644",
+      "raw_bytes": 162237381,
+      "compressed_bytes": 7635316,
+      "gzip_sha256": "02c03c23958cb11a5807ad36155cb0c8e354cd5b4d416e6fe1b0936c983381c8"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/call-operands.89842.jsonl",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/call-operands.89842.jsonl.gz",
+      "raw_sha256": "f57e1233163219271da29ab53e13e5eea19b850fb64740a982e087a7c2c8c363",
+      "raw_bytes": 113682257,
+      "compressed_bytes": 3497437,
+      "gzip_sha256": "89d75d9b4459dc104ee20673632bddca9743402cdf48f411cfcd3936a34b95ae"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/function-environments.89842.jsonl",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/function-environments.89842.jsonl.gz",
+      "raw_sha256": "ad0d889e62761b573aa192068bfd42167908843be87834f0e284633fe25b946f",
+      "raw_bytes": 15621212,
+      "compressed_bytes": 475914,
+      "gzip_sha256": "071e682cb869627e5388a1edaf3e820694d9c8e57170b7bd07db3f7fc1adaa2c"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/execution-trace.89842.49db475aa78ee95f91f3a299b7a4f539.json",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/execution-trace.89842.49db475aa78ee95f91f3a299b7a4f539.json.gz",
+      "raw_sha256": "5864eae1d9605af1c7ba6a2f68a0e62041bfa679f7508a9a0bfbccaddc5f72a4",
+      "raw_bytes": 166711795,
+      "compressed_bytes": 6698962,
+      "gzip_sha256": "177ca2a3b3fa593af3204649474979f9a20f0b22c9c06e41f7c6c13dcef4828d"
+    },
+    {
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/kineto.89842.49db475aa78ee95f91f3a299b7a4f539.json",
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_environment_mounted_20261022/trace/kineto.89842.49db475aa78ee95f91f3a299b7a4f539.json.gz",
+      "raw_sha256": "d364360b0cf46e0e39b08ae2af492439d9822dc9f1ad45b67a70897d4eb9d2cf",
+      "raw_bytes": 108758824,
+      "compressed_bytes": 6573137,
+      "gzip_sha256": "5ffdfc035f11281e1c26a8cd3390bf10c8f623def9aebbb46e7aa745d5f8ada7"
+    }
+  ]
+}

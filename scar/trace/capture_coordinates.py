@@ -198,7 +198,10 @@ class _Files:
                     compressed.update(payload)
             _need(entry["gzip_sha256"] == compressed.hexdigest() and entry["compressed_bytes"] == local.stat().st_size,
                   "archive compressed hash/byte count differs for " + logical)
-        artifact = ProviderArtifact(str(local), digest.hexdigest(), size, schema)
+        # The raw evidence identity keeps its collector-declared logical URI.
+        # Compression/relocation belongs to retention, not to this execution's
+        # identity. Verified local paths are published separately for readers.
+        artifact = ProviderArtifact(logical, digest.hexdigest(), size, schema)
         self.verified[logical] = artifact
         return artifact
 
@@ -479,14 +482,16 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     process_members, os_threads, membership = {}, {}, []
     for logical, artifact in members.items():
         process_members[_key(artifact), pid] = target
-        membership.append({"logical_path": logical, "artifact": encode(artifact), "process": encode(target.id),
+        membership.append({"logical_path": logical, "local_path": str(files.local(logical)[0]),
+                           "artifact": encode(artifact), "process": encode(target.id),
                            "basis": "exact collector/base/retained artifacts plus target-process creation/publication witnesses"})
     for logical, tid, artifact in os_files:
         if tid in pid_for_tid:
             process = process_rows[pid_for_tid[tid]]
             process_members[_key(artifact), tid] = process
             os_threads[_key(artifact), tid] = thread_rows[tid]
-            membership.append({"logical_path": logical, "artifact": encode(artifact), "process": encode(process.id),
+            membership.append({"logical_path": logical, "local_path": str(files.local(logical)[0]),
+                               "artifact": encode(artifact), "process": encode(process.id),
                                "thread": encode(thread_rows[tid].id), "basis": "unique explicit Linux clone ancestry from the witnessed target exec"})
     native_keys = frozenset(_key(artifact) for artifact in members.values())
     # Linux native TID lookup is explicit.  It never applies to Python ident,
