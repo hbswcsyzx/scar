@@ -1,9 +1,10 @@
 # 自动准入已观察到的依赖源码
 
-状态：**Implemented；真实离线准入部分完成，独立 artifact／raw 审计通过**。日期：2026-10-23。
+状态：**Implemented；首次准入预算缺口已由精确增量补齐，两次独立审计通过**。日期：2026-10-23。
 只新增 `scar/analysis/dependency_sources.py` 与本文档。没有修改旧 CLI、resolver、
-workspace、wire 或原有的建模任务。实现后已获准针对现有 capture 执行一次离线
-源码准入及三图导出；没有运行测试、GPU、目标程序或新的采集。第一阶段仍 **OPEN**。
+workspace、wire 或原有的建模任务。首次准入后，独立增量入口只补 20 个 snapshot／
+27 个缺图，原 producer 与原报告不变。没有运行测试、GPU、目标程序或新的采集。
+第一阶段仍 **OPEN**。
 
 ## 1. 本次必要连接
 
@@ -146,7 +147,7 @@ fresh_output_directory/
 ## 6. 当前验收边界与下一步
 
 真实离线验收位于 `artifacts/experiments/first_stage_dependency_sources_20261023`。
-单次运行 exit 0，保存 86 个 source snapshots、79 个原三图 artifacts。
+首次运行 exit 0，保存 86 个 source snapshots、79 个原三图 artifacts。
 817 个 entered process/code groups／100,438 次调用中：199 groups／65,554 次原
 CodeSourceLink VERIFIED，553 groups／12,933 次保留给原 program pipeline，65 groups／
 21,951 次 unresolved。其中 44 groups／21,148 次是 archive 总预算阻止后续 20 个
@@ -162,7 +163,19 @@ CodeSourceLink VERIFIED，553 groups／12,933 次保留给原 program pipeline�
 composition 或 invocation wire。所有 body、effect、状态、observer origin、
 实际参数绑定、统一 execution model 和 transformation 权威字段保持 false。
 
-## 7. 最小增量继续方案（Proposed，未运行）
+后续一次精确增量及独立审计已通过：只做 27 次 prepare、44 个新增 groups 匹配，
+继承全部原 artifacts／199 witnesses。现有 **106 snapshots／106 三图包**，
+SOURCE_VERIFIED **243 groups／86,702 次调用**；仍保留 803 次非文件名调用和
+14 次 current drift。增量 wall **437.87s**／峰值 RSS **758,140KiB**，独立审计
+wall **38.03s**／峰值 RSS **792,892KiB**。详见
+[增量实现](DEPENDENCY_CONTINUATION.md) 与
+[真实报告](../artifacts/experiments/first_stage_dependency_continuation_20261023/README.md)。
+
+<a id="7-最小增量继续方案proposed未运行"></a>
+
+## 7. 精确增量继续（Implemented／Verified）
+
+以下保留实施前的最小设计；实际实现和测量已在上述增量报告验收，原预算失败报告未覆盖。
 
 只补缺失证据，不重新准入全部 106 文件，也不重新 prepare 已保存的 79 图文件。
 新入口／manifest 是独立 sidecar 的增量扩展；旧 v1 报告不可覆盖或原地补值。
@@ -208,7 +221,7 @@ hash 核验；不能再枚举／保存全部 metadata 后占用本次增量图�
 
 79 个已有图的实际 canonical/raw 加权比为 497.73；27 文件推算新增图约 **644MB**，
 按各文件比率 P90 推算约 **1,036MB**。这是实测样本的估计，**不是硬上限**。
-最大剩余文件 `torch/nn/functional.py` 为 277,195 source bytes，现 256MB record
+最大剩余文件 `torch/nn/functional.py` 为 277,195 source bytes，原 256MB record
 上限不能保证足够。完整逐文件 bytes 与比率在实验 `cohort_stats.json`。
 
 实施时在每文件首次导出记录实际 canonical bytes、累计预算与 artifact SHA；预算
@@ -217,4 +230,6 @@ hash 核验；不能再枚举／保存全部 metadata 后占用本次增量图�
 说明所选 cap 的含义，并保持预算拒绝为预算 frontier，不改称 unsupported。
 
 这个继续方案不需要等待 SQLite，也不修改原 public validate／replay 的完整校验。
-当前只完成设计，**没有实现或启动任何增量任务**。
+实际采用独立 graph 1.2GB／record 512MB、snapshot 8MB、report 64MB 预算。
+实测新增图 **591,960,596 canonical bytes**、snapshot **2,098,293 bytes**，均已独立
+审计通过，无新增预算拒绝。脚本、模块与审计 SHA 在新实验 `SHA256SUMS` 中保存。

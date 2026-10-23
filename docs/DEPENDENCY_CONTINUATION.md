@@ -1,9 +1,11 @@
 # 精确增量继续外部源码建模
 
-状态：**Implemented，尚未运行真实增量验收**。日期：2026-10-23。
+状态：**Implemented；一次真实 27 文件离线增量与独立审计通过**。日期：2026-10-23。
 本轮只新增 `scar/analysis/dependency_continuation.py` 和本文档。
 原 `dependency_sources.py`、resolver、workspace、public validate／replay、inventory
 与任何目标程序均未修改。没有新增 detector／backend，没有运行目标／GPU／测试。
+真实执行和逐项证据见
+[增量报告](../artifacts/experiments/first_stage_dependency_continuation_20261023/README.md)。
 第一阶段完整程序建模仍 **OPEN**。
 
 ## 1. 为什么需要这个入口
@@ -170,4 +172,27 @@ graph 预算拒绝不会阻止已保留 snapshot 的 compiler matching，也不�
 199 原 witness 继承与仅 44 新匹配 groups、27 文件 prepare 次数及实际预算。
 任何预算未完成都保留原原因；不能把 attempted 或 source VERIFIED 改称完整程序建模。
 
-**截至本文写入时：尚未启动该增量运行，没有新的实际完成率或吞吐数据。**
+## 8. Observed／Verified：本轮真实结果
+
+一次运行 exit 0，wall **437.87s**、峰值 RSS **758,140KiB**；随后一次只读独立审计
+exit 0，wall **38.03s**、峰值 RSS **792,892KiB**。两个 stderr 均为空。
+模块保持冻结 `e87ddba3cca2d350890947ae80c92a43a043ca534c4a829824fdb4c5f1a2123a`，
+原 producer SHA 未改变。
+原实验脚本、模块副本、日志、报告、47 新 artifacts 的存储文件 SHA 已写入实验
+`SHA256SUMS`；独立审计结果 `audit.json` SHA 为
+`8c61c34dcd0579fcfb9d28589baa11acdacbf167ddf844d972ed89f2cbc38604`。
+
+- 继承原 86 snapshots／79 三图／199 compiler witnesses；恰好 **27 次 prepare**，
+  仅 **44 个新 groups／21,148 次调用**进入原 matcher，全部 VERIFIED。
+- 新增 **20 snapshots／2,098,293 canonical bytes** 和 **27 三图包／591,960,596
+  canonical bytes**。全部 47 artifacts 的 SHA／source／context／引用审计通过。
+- 106 个需求普通源码文件均有 snapshot／三图；current guard 仍 **105／106**，
+  历史 execution_evidence.py callback 14 次的当前 drift 原样保留。
+- 完整 raw 再次核对：855 descriptors、817 entered groups、100,438 enter／exit。
+  最终 SOURCE_VERIFIED 243 groups／86,702 次，原 program pipeline 保留
+  553 groups／12,933 次；21 个非文件名 groups／803 次仍 unresolved。
+- graph／snapshot／report／compile 无新增预算拒绝，未重建已有 79 图或重复原 compiler
+  matching。post-audit 未再次全量解析 parent 图，未执行 public source reprepare。
+
+这些是 source fragments 的真实补齐结果，**不是完整程序建模或优化完成**。
+非文件名来源、跨 fragments 的 body／state／resource 连接仍属于第一阶段未完成任务。
