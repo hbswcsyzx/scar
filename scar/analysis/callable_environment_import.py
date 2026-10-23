@@ -323,6 +323,10 @@ def import_callable_environments(trace, *, inventory, sources, call_model, opera
               "environment entry disagrees with original operand handshake")
         invocation = InvocationKey(key[0], entry["thread_id"], entry["invocation_id"])
         candidate["invocation"] = encode(invocation)
+        access = getattr(sources, "source_access", None)
+        if access is not None and invocation.process_id in access.unbound_processes:
+            unresolved.append({**candidate, "reason": "CAPTURE_PROCESS_MEMBERSHIP_UNRESOLVED"})
+            continue
         if not all(entry[name] for name in ("function_match", "globals_match", "builtins_match")):
             unresolved.append({**candidate, "reason": "ENTRY_READONLY_ASSOCIATION_MISMATCH"})
             continue
@@ -344,6 +348,10 @@ def import_callable_environments(trace, *, inventory, sources, call_model, opera
             continue
         environment = environments[0]
         code = sources.objects.get(dispatch["code_key"])
+        if code is None and getattr(sources, "source_access", None) is not None:
+            unresolved.append({**candidate, "definition": encode(definition),
+                               "reason": "CODE_WITNESS_UNAVAILABLE"})
+            continue
         names = () if code is None else tuple(code.co_freevars)
         cells = environment.members[5:]
         if (code is None or len(environment.members) != len(dispatch["members"])
@@ -364,12 +372,17 @@ def import_callable_environments(trace, *, inventory, sources, call_model, opera
                 missing.append({**record, "reason": "DISPATCH_DEFAULTS_SNAPSHOT_IS_NOT_ENTRY_BINDING"})
             else:
                 ports.append(record)
-        bindings.append({"invocation": encode(invocation), "definition": encode(definition),
+        binding = {"invocation": encode(invocation), "definition": encode(definition),
             "region": encode(environment.region), "environment": encode(environment.id),
             "dispatch_anchor": dispatch_anchor, "entry_anchor": entry_anchor,
             "operand_attempt_anchor": encode(attempt.anchor), "operand_handshake_anchor": encode(handshake.anchor),
             "frame_entry_anchor": encode(edge.entry.anchor), "ports": ports, "unresolved": missing,
-            "conditions": list(_CONDITIONS), "status": "CONDITIONAL_REFERENCE_IDENTITY"})
+            "conditions": list(_CONDITIONS), "status": "CONDITIONAL_REFERENCE_IDENTITY"}
+        access = getattr(sources, "source_access", None)
+        if access is not None:
+            fi, bi = access.selected[definition]
+            binding["body_namespace"] = access.composition.document["files"][fi]["bodies"][bi]["namespace"]
+        bindings.append(binding)
     for key, attempt in attempts.items():
         if attempt.dispatch.kind is CallableKind.EXACT_FUNCTION and key not in dispatches:
             unresolved.append({"process_id": key[0], "attempt_index": key[1],
@@ -386,13 +399,17 @@ def import_callable_environments(trace, *, inventory, sources, call_model, opera
                "unresolved_entry_defaults": sum(len(record["unresolved"]) for record in bindings),
                "unresolved_records": len(unresolved),
                "unresolved_reasons": dict(sorted(Counter(record["reason"] for record in unresolved).items()))}
-    return {"schema": "scar.callable-environment-bindings", "schema_version": 1,
+    access = getattr(sources, "source_access", None)
+    result = {"schema": "scar.callable-environment-bindings", "schema_version": 2 if access is not None else 1,
             "scope": "existing source environment entry reference ports; conditional identity only",
             "valid": True, "files": files, "metadata": metadata,
             "inventory_sha256": call_model.inventory_sha256,
             "original_operand_files": encode(operand_model.files), "original_frame_files": encode(call_model.files),
             "bindings": bindings, "unresolved": unresolved, "summary": summary,
             "whole_program_graph_established": False, "state_versions_established": False, **_AUTHORITY}
+    if access is not None:
+        result["source_body_access"] = access.receipt()
+    return result
 
 
 __all__ = ["import_callable_environments"]

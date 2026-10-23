@@ -1,0 +1,50 @@
+{
+  "schema": "scar.artifact-audit-producer",
+  "schema_version": 1,
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "executable": "/home/zyf/miniconda3/envs/lewm/bin/python",
+  "revision": "c2578996ccd5d796e8f913d17ddaa3ed83a8f304",
+  "scope": "metadata projection only, no canonical body revalidation or target execution",
+  "artifacts": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_body_frontiers_20261023/README.md",
+      "bytes": 1846,
+      "sha256": "bfb18cfa2ed3b70ae7cd9c1ce289b8260c0e5b9acc7f2c79950b16041f620117"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_body_frontiers_20261023/audit.py",
+      "bytes": 5751,
+      "sha256": "a675826b2f65ab13ed29805db587655b275fc6a08d9331d485ad1843b0d0d144"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_body_frontiers_20261023/groups.jsonl.gz",
+      "bytes": 114398,
+      "sha256": "110e846cba2f8713b532ec4d24ffb213e98d73d813d07c9b67394af5625f7315"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_body_frontiers_20261023/input-shards.json",
+      "bytes": 80005,
+      "sha256": "9c38309e85a64955bb1a37bd5ae055fc22956663278d08e61d2360caee240efb"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_body_frontiers_20261023/result.json",
+      "bytes": 31865,
+      "sha256": "af3be4a1eeb880f630d8ba338bda1d0c312f0de3cc3e3d9db88548bc8ab6a14a"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_body_frontiers_20261023/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_body_frontiers_20261023/stdout.json",
+      "bytes": 2239,
+      "sha256": "fe46bc477607f872e746861790727314d7239a2fc8d4ff83edd76ccf1a0ffa08"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_body_frontiers_20261023/time.txt",
+      "bytes": 793,
+      "sha256": "306cf5e288d4546b32cf26f5c3e911125099aac96f43797c424a59edbb10896a"
+    }
+  ]
+}

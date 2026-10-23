@@ -9,7 +9,8 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, OrderedDict
-from dataclasses import dataclass
+from copy import deepcopy
+from dataclasses import dataclass, replace
 import gzip
 import hashlib
 from io import BytesIO
@@ -18,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from scar.analysis.source_layers import SourceLayerView, load_source_layers
+from scar.analysis.source_attachments import SourceAttachments, SourceAttachmentBudget
 from scar.analysis.inventory_partitions import InventoryPartitions
 from scar.ir.program.codec import loads as load_graph
 from scar.ir.program.ids import OperationID, RegionID
@@ -26,6 +28,7 @@ from scar.ir.program.inventory import (
 )
 from scar.ir.program.model import ProgramGraph
 from scar.ir.program.source import LoweringMetadata
+from scar.ir.program.source_references import SourceDefinitionReference
 from scar.ir.record_codec import decode, encode, loads as strict_loads
 from scar.ir.semantics_v2 import SourceSnapshot
 from scar.ir.v2.ids import (
@@ -518,10 +521,12 @@ class CompositionIndex:
     """Bounded lazy queries over the original graphs, with no copied producers."""
 
     def __init__(self, index_path: str | Path, *, max_input_bytes: int = 512_000_000,
-                 max_record_bytes: int = 128_000_000, cached_files: int = 2):
+                 max_record_bytes: int = 128_000_000, cached_files: int = 2,
+                 source_attachments=(), attachment_budget=SourceAttachmentBudget()):
         if type(cached_files) is not int or cached_files < 1:
             raise ValueError("cached_files must be positive")
         self.document, _ = _read(Path(index_path), max_input_bytes)
+        self._original_document_sha256 = hashlib.sha256(_canonical(self.document)).hexdigest()
         if self.document.get("schema") != "scar.program-composition" or self.document.get("schema_version") not in (1, 2):
             raise ValueError("unsupported composition index")
         for key, value in _AUTHORITY.items():
@@ -549,6 +554,149 @@ class CompositionIndex:
         self.max_record_bytes, self.cached_files = max_record_bytes, cached_files
         self._views: OrderedDict[int, SourceLayerView] = OrderedDict()
         self._bodies: OrderedDict[tuple[int, int], tuple[ProgramGraph, LoweringMetadata]] = OrderedDict()
+        if type(source_attachments) is not tuple or type(attachment_budget) is not SourceAttachmentBudget:
+            raise TypeError("explicit source attachment tuples and typed independent budget required")
+        self._attachments = []
+        if source_attachments:
+            if not self.partitioned:
+                raise ValueError("formal source attachments require the explicit partitioned composition namespace")
+            discovery = self.inventory_component("discovery")
+            if type(discovery) is not dict or type(discovery.get("project_root")) is not str:
+                raise ValueError("source attachments require the original project-root declaration")
+            for declaration in source_attachments:
+                if type(declaration) is not tuple or len(declaration) != 2:
+                    raise ValueError("each source attachment requires its exact (report path, SHA256)")
+                self._attachments.append(SourceAttachments(declaration[0], expected_report_sha256=declaration[1],
+                    project_root=discovery["project_root"], budget=attachment_budget))
+        self._project_definition_refs = {}
+        self._project_definitions = {}
+        self._project_snapshot_indexes = {_canonical(row["snapshot"]): index
+                                          for index, row in enumerate(self.document["files"])}
+
+    @property
+    def has_source_attachments(self):
+        return bool(self._attachments)
+
+    def source_inputs(self):
+        """Explicit input receipts; the original composition document stays intact."""
+        if hashlib.sha256(_canonical(self.document)).hexdigest() != self._original_document_sha256:
+            raise ValueError("composition document changed after its bound original receipt")
+        return {"composition_canonical_sha256": self._original_document_sha256,
+                "inventory": deepcopy(self.document["inventory"]),
+                "attachments": [attachment.receipts() for attachment in self._attachments]}
+
+    def verify_source_attachments(self, scanned, groups):
+        return [attachment.verify_capture(scanned, groups) for attachment in self._attachments]
+
+    def attachment_capture_declarations(self):
+        return [attachment.capture_declaration() for attachment in self._attachments]
+
+    def attached_code_witness(self, process_id, code):
+        found = [(attachment, attachment.code_witness(process_id, code)) for attachment in self._attachments]
+        found = [(attachment, witness) for attachment, witness in found if witness is not None]
+        verified = [(attachment, witness) for attachment, witness in found
+                    if witness["record"]["status"] == "SOURCE_VERIFIED"]
+        chosen = verified or found
+        if not chosen:
+            return None
+        first = chosen[0][1]
+        for _, witness in chosen[1:]:
+            if (witness["record"]["captured_code"] != first["record"]["captured_code"]
+                    or witness["record"]["code_source_link"] != first["record"]["code_source_link"]):
+                raise ValueError("source attachments contain contradictory full code/source witnesses")
+        return first
+
+    def attached_definition_reference(self, process_id, code):
+        references = [attachment.definition_reference(process_id, code) for attachment in self._attachments]
+        references = [reference for reference in references if reference is not None]
+        if any(reference.identity_key() != references[0].identity_key() for reference in references[1:]):
+            raise ValueError("source attachments disagree on the original source-qualified definition")
+        return references[0] if references else None
+
+    def definition_reference(self, file_index, definition_id):
+        """Reference an original project definition; file_index remains an internal view."""
+        key = file_index, definition_id
+        if key in self._project_definition_refs:
+            return self._project_definition_refs[key]
+        self._project_definition_references(file_index, (definition_id,))
+        return self._project_definition_refs[key]
+
+    def prefetch_definition_references(self, requests):
+        """Batch only demanded original project definitions by source file.
+
+        This is an internal frontend read optimization, not source compilation
+        or a new graph producer. Each requested definition still receives all
+        original graph/snapshot/source-atom checks before a compact record is
+        retained. No whole source graphs are pinned beyond the normal LRU.
+        """
+        grouped = {}
+        for file_index, definition_id in requests:
+            if type(file_index) is not int or type(definition_id) is not OperationDefinitionID:
+                raise TypeError("exact source-file index and original definition ID required")
+            if (file_index, definition_id) not in self._project_definition_refs:
+                grouped.setdefault(file_index, set()).add(definition_id)
+        for file_index in sorted(grouped):
+            self._project_definition_references(file_index, tuple(grouped[file_index]))
+
+    def _project_definition_references(self, file_index, definition_ids):
+        raw = self.inventory_file(file_index)
+        definitions = decode(tuple[DefinitionInventory, ...], raw["definitions"])
+        indexed = {definition.id: definition for definition in definitions}
+        if len(indexed) != len(definitions) or any(identity not in indexed for identity in definition_ids):
+            raise ValueError("definition is not one original inventory/source record")
+        view = self.source(file_index)
+        if view.artifact_locator is None or view.snapshot != decode(SourceSnapshot, raw["snapshot"]):
+            raise ValueError("source view has no exact original artifact/snapshot locator")
+        indexes = {item.id: index for index, item in enumerate(view.semantic.definitions.values())}
+        root = replace(view.artifact_locator, pointer="#/source/context/namespace_root")
+        providers = (replace(view.artifact_locator, pointer="#/metadata"),)
+        for definition_id in definition_ids:
+            definition = indexed[definition_id]
+            semantic = view.semantic.definitions.get(definition_id)
+            atom = view.semantic.source_atoms.get(definition.source.atom_id)
+            if (semantic is None or atom is None or atom.reference != definition.source
+                    or definition.source.atom_id not in semantic.source_atoms):
+                raise ValueError("project definition/source differs from the original semantic graph")
+            graph = replace(view.artifact_locator, pointer=f"#/payload/semantic/definitions/{indexes[definition_id]}")
+            reference = SourceDefinitionReference(root, providers, graph, view.snapshot, view.context,
+                                                   definition_id, definition.source)
+            self._project_definition_refs[file_index, definition_id] = reference
+            self._project_definitions[_canonical(encode(reference))] = deepcopy(semantic)
+
+    def _project_reference_view(self, reference):
+        file_index = self._project_snapshot_indexes.get(_canonical(encode(reference.snapshot)))
+        if file_index is None:
+            return None
+        expected = self.definition_reference(file_index, reference.definition)
+        if expected != reference:
+            raise ValueError("formal project definition locator differs from the bound original")
+        return self.source(file_index)
+
+    def resolve_definition(self, reference):
+        if type(reference) is not SourceDefinitionReference:
+            raise TypeError("formal source definition reference required")
+        reference.__post_init__()
+        key = _canonical(encode(reference))
+        if key in self._project_definitions:
+            return deepcopy(self._project_definitions[key])
+        view = self._project_reference_view(reference)
+        if view is not None:
+            return deepcopy(view.semantic.definitions[reference.definition])
+        for attachment in self._attachments:
+            if attachment.owns_reference(reference):
+                return attachment.resolve_definition(reference)
+        raise ValueError("formal definition has no bound original source attachment")
+
+    def source_view(self, reference):
+        if type(reference) is not SourceDefinitionReference:
+            raise TypeError("formal source definition reference required")
+        view = self._project_reference_view(reference)
+        if view is not None:
+            return deepcopy(view)
+        for attachment in self._attachments:
+            if attachment.owns_reference(reference):
+                return attachment.source_view(reference)
+        raise ValueError("formal source graph has no exact bound attachment")
 
     @property
     def inventory_file_count(self):

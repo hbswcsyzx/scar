@@ -402,6 +402,10 @@ def build_operand_routes(*, call_model, operand_model, inventory, sources, budge
                   and handshake.thread_id == attempt.thread_id
                   and handshake.hook_epoch == attempt.hook_epoch,
                   Issue.HANDSHAKE_BOUNDARY, 'handshake does not identify the active direct caller/entry interval')
+            if getattr(sources, 'source_access', None) is not None:
+                _need(attempt.site.code in sources.objects and edge.entry.code in sources.objects,
+                      Issue.SOURCE_CORE_BOUNDARY,
+                      'CODE_WITNESS_UNAVAILABLE: verified source alone cannot certify a CALL instruction window')
             _need(len(edge.path) == 1 and edge.path[0].site == attempt.site
                   and edge.path[0].status is CallLinkStatus.VERIFIED
                   and edge.path[0].core_operation is not None

@@ -2,6 +2,11 @@
 
 2026-10-22。状态：实施中；不构成完整程序验收。
 
+2026-10-23 补充：[分片 source/body 路由接入](CALL_SOURCE_ROUTES.md) 沿用原环境
+importer 的身份/handshake/cell/defaults 检查，CodeType 由版本固定 owned marshal
+witness 恢复；新分片路径输出带 CP namespace 的 schema2。当前实现仅完成 AST/源
+审查，尚未运行 840-body inventory 的实档路由验收。
+
 ## 问题与边界
 
 同一份 function code 可对应不同 function object、globals、saved builtins、

@@ -118,6 +118,15 @@ class _Sources:
         self.context_errors = {}
         self.site_links, self.operand_links = {}, {}
         self.total_source_bytes = 0
+        from scar.analysis.source_body_access import SourceBodyAccess
+        self.source_access = inventory if type(inventory) is SourceBodyAccess else None
+        if self.source_access is not None:
+            _require(self.source_access.bound, "partitioned source access has no current raw scan")
+            self.inventory_files = {}
+            self.bodies, self.signatures = inventory.bodies, inventory.signatures
+            self.ports, self.frames, self.structured = inventory.ports, inventory.frames, inventory.structured
+            self.core = inventory.core
+            return
         self.inventory_files = {file.snapshot.path: file for file in inventory.files} if inventory else {}
         self.bodies = {body.definition: body for file in inventory.files for body in file.bodies} if inventory else {}
         self.signatures = {signature.definition: signature for signature in inventory.interfaces.signatures} if inventory else {}
@@ -138,6 +147,26 @@ class _Sources:
             return self.contexts[filename]
         if filename in self.context_errors:
             raise ValueError(self.context_errors[filename])
+        if self.source_access is not None:
+            _require(len(self.contexts) < self.budget.max_source_files, "source file budget exceeded")
+            indexed, text, tree = self.source_access.source_context(filename)
+            size = len(text.encode("utf-8"))
+            _require(self.total_source_bytes + size <= self.budget.max_source_bytes, "source byte budget exceeded")
+            self.total_source_bytes += size
+            references = {(item.ast_kind, item.source.start_line, item.source.end_line,
+                           item.source.start_column, item.source.end_column): item.source
+                          for item in indexed.coverage}
+            nodes, returns = defaultdict(list), defaultdict(list)
+            for node in ast.walk(tree):
+                if hasattr(node, "end_lineno"):
+                    nodes[_span(node)].append(node)
+                if isinstance(node, ast.Return) and node.value is not None:
+                    for position in dict.fromkeys((_span(node), _span(node.value))):
+                        returns[position].append(node)
+            context = _LightSource(Path(filename), text, tree, indexed.snapshot, references,
+                                   dict(nodes), {key: tuple(value) for key, value in returns.items()})
+            self.contexts[filename], self.indexes[filename] = context, indexed
+            return context
         path = Path(filename)
         _require(path.is_absolute() and path.resolve().is_relative_to(self.root), "code filename is outside project root")
         _require(path == path.resolve() and path.is_file(), "code filename is missing or noncanonical")
@@ -182,6 +211,22 @@ class _Sources:
         return context
 
     def code(self, captured):
+        if self.source_access is not None:
+            # Source correspondence and executable-bytecode evidence are distinct.
+            # Missing CodeType never changes VERIFIED source into a mismatch.
+            result = self.source_access.code_link(captured)
+            self.links[captured.key] = result
+            if captured.key not in self.objects and result.status is CallLinkStatus.VERIFIED:
+                code = self.source_access.code_object(captured, result)
+                if code is not None:
+                    try:
+                        self.context(captured.filename)
+                    except (OSError, ValueError, SyntaxError, KeyError, RecursionError) as error:
+                        self.context_errors[captured.filename] = str(error)
+                        self.source_access.frontiers[captured.key] = "SOURCE_CONTEXT_UNAVAILABLE: " + str(error)
+                    else:
+                        self.objects[captured.key] = code
+            return result
         if captured.key in self.links:
             return self.links[captured.key]
         try:
@@ -289,6 +334,10 @@ class _Sources:
         code_link = self.code(description)
         if code_link.status is not CallLinkStatus.VERIFIED:
             return CallSiteLink(captured, code_link.status, issues=code_link.issues)
+        if captured.code not in self.objects:
+            return CallSiteLink(captured, CallLinkStatus.INCOMPLETE,
+                issues=(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY,
+                               "CODE_WITNESS_UNAVAILABLE: source correspondence remains verified"),))
         actual = decode(CapturedSite, site(self.objects[captured.code], captured.offset))
         if actual != captured or captured.position is None:
             return CallSiteLink(captured, CallLinkStatus.MISMATCH,
@@ -458,7 +507,9 @@ class _Sources:
             return None
         if actual.opname not in ("RETURN_VALUE", "RETURN_CONST") or actual.position is None:
             return None
-        context = self.contexts[code_link.snapshot.path]
+        context = self.contexts.get(code_link.snapshot.path)
+        if context is None:
+            return None
         matches = context.return_nodes_by_position.get(actual.position, ())
         return matches[0] if len(matches) == 1 else None
 
@@ -720,12 +771,16 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
     _require(isinstance(budget, CallEdgeBudget), "link_calls requires a typed replay budget")
     root = Path(project_root).resolve()
     _require(root.is_dir(), "project root must be a directory")
+    from scar.analysis.source_body_access import SourceBodyAccess
+    partitioned_access = inventory if type(inventory) is SourceBodyAccess else None
     if inventory is not None:
         versions = (5, 6, 7, 8) if allow_v6 else (4, 5)
-        _require(inventory.to_dict()["schema_version"] in versions and inventory.interfaces is not None,
+        version = partitioned_access.schema_version if partitioned_access is not None else inventory.to_dict()["schema_version"]
+        _require(version in versions and inventory.interfaces is not None,
                  "operand/core linking requires an explicit frame/structured v5-v8 inventory" if allow_v6 else
                  "call/core linking requires a bound-formal v4 or bound-frame v5 inventory")
-        _require(inventory.discovery.project_root == str(root), "inventory project root differs from call replay")
+        inventory_root = str(partitioned_access.root) if partitioned_access is not None else inventory.discovery.project_root
+        _require(inventory_root == str(root), "inventory project root differs from call replay")
     if frame_scan is None:
         trace_path, files, captures, entries, exits, metadata, trace_issues = _read_trace(trace, root, budget)
     else:
@@ -760,6 +815,8 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
             stack.pop(position)
     incomplete_processes = {meta["process_id"] for meta in metadata
                             if meta["dropped_events"] or meta["dropped_codes"] or meta["errors"] or meta.get("io_failed")}
+    if partitioned_access is not None:
+        incomplete_processes.update(partitioned_access.unbound_processes)
     issues, edges = list(trace_issues), []
     for entry in entries:
         descriptor = descriptors.get(entry.code)
@@ -824,7 +881,7 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
             if exit.code != entry.code or exit.return_site.code != entry.code or exit.anchor.index <= entry.anchor.index:
                 edge_issues.append(_issue(CallEdgeIssueKind.INVOCATION_MISMATCH,
                                           "frame exit code/order differs from its entry", exit.anchor))
-            elif target.status is CallLinkStatus.VERIFIED:
+            elif target.status is CallLinkStatus.VERIFIED and entry.code in sources.objects:
                 replay_site = decode(CapturedSite, site(sources.objects[entry.code], exit.return_site.offset))
                 exit_verified = (replay_site == exit.return_site and not entry.suspended
                                  and exit.completion is FrameCompletion.NORMAL
@@ -832,9 +889,16 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
                 if replay_site != exit.return_site:
                     edge_issues.append(_issue(CallEdgeIssueKind.POSITION_MISMATCH,
                                               "frame return site differs from verified current code", exit.anchor))
+            elif target.status is CallLinkStatus.VERIFIED:
+                edge_issues.append(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY,
+                    "CODE_WITNESS_UNAVAILABLE: normal return instruction cannot be certified", exit.anchor))
         target_body = sources.bodies.get(target.definition)
         region = target_body.graph.root if (target.status is CallLinkStatus.VERIFIED
                                            and target_body and target_body.graph and not entry.suspended) else None
+        if partitioned_access is not None and entry.invocation.process_id in partitioned_access.unbound_processes:
+            region, exit_verified = None, False
+            edge_issues.append(_issue(CallEdgeIssueKind.SOURCE_BOUNDARY,
+                "CAPTURE_PROCESS_MEMBERSHIP_UNRESOLVED", entry.anchor))
         if region is None:
             edge_issues.append(_issue(CallEdgeIssueKind.TARGET_BODY_MISSING,
                                       "verified callee has no emitted synchronous body port", entry.anchor))
@@ -848,6 +912,7 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
                           if include_identity_routes else ((), ()))
     model = CallEdgeModel(trace_path, str(root), budget, files, captures, tuple(edges), exits,
                           tuple(sources.links.values()), references, routes, tuple(issues), metadata,
+                          partitioned_access.inventory_sha256 if partitioned_access is not None else
                           _sha(inventory.to_dict()) if inventory is not None else None)
     return model, sources
 

@@ -26,6 +26,8 @@ from typing import Any
 from scar.analysis.program_lowering import prepare_source
 from scar.ir.control_flow_v2 import SourceControlFlowGraph
 from scar.ir.program.inventory import SourceContextDigest
+from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+from scar.ir.program.source_references import SourceArtifactLocator
 from scar.ir.record_codec import decode, encode, loads as strict_loads
 from scar.ir.semantics_v2 import SourceSemanticsGraph, SourceSnapshot
 from scar.ir.v2.codec import semantic_from_dict
@@ -55,6 +57,7 @@ class SourceLayerView:
     semantics: SourceSemanticsGraph
     control: SourceControlFlowGraph
     metadata: dict[str, Any]
+    artifact_locator: SourceArtifactLocator | None = None
 
 
 def _check_budgets(**budgets: int) -> None:
@@ -741,20 +744,6 @@ def load_source_layers(
     payload = envelope["payload"]
     if type(payload) is not dict or set(payload) != {"semantic", "semantics", "control"}:
         raise ValueError("source-layer payload fields mismatch")
-    semantic = semantic_from_dict(payload["semantic"])
-    semantics = SourceSemanticsGraph.from_dict(payload["semantics"], semantic)
-    control = SourceControlFlowGraph.from_dict(payload["control"])
-    control.assert_valid(semantic, semantics)
-    if semantics.sources.get(snapshot.path) != snapshot:
-        raise ValueError("source-layer semantics snapshot differs from source record")
-    if control.sources.get(snapshot.path) is None or control.sources[snapshot.path].fingerprint != snapshot.fingerprint:
-        raise ValueError("source-layer control source version differs from source record")
-    actual_digests = (_digest(semantic.to_dict()), _digest(semantics.to_dict()),
-                      _digest(control.to_dict()))
-    expected_digests = (context.semantic_sha256, context.semantics_sha256,
-                        context.control_sha256)
-    if actual_digests != expected_digests:
-        raise ValueError("source-layer graph digest differs from index context")
     metadata = dict(envelope["metadata"])
     metadata.update({
         "archive_sha256": row["canonical_sha256"],
@@ -763,7 +752,96 @@ def load_source_layers(
         "input_inventory_schema_version": document["input"]["schema_version"],
         "source_replay_on_load": False,
     })
-    return SourceLayerView(snapshot, context, semantic, semantics, control, metadata)
+    declaration = ProviderFactReference(ProviderArtifact(str(index_path.resolve()),
+        hashlib.sha256(index_bytes).hexdigest(), len(index_bytes), _SCHEMA),
+        "#/files/" + str(rows.index(row)))
+    locator = SourceArtifactLocator(ProviderArtifact(str(archive_path.resolve()),
+        hashlib.sha256(compressed_payload).hexdigest(), len(compressed_payload), "scar.source-layers.record"),
+        row["canonical_sha256"], decoded_size, "gzip-canonical-json", declaration=declaration)
+    return _decoded_source_layer_view(snapshot, context, payload, metadata, locator)
 
 
-__all__ = ["SourceLayerView", "reconstruct_source_layers", "load_source_layers"]
+def _decoded_source_layer_view(snapshot, context, payload, metadata, locator=None):
+    """Shared graph validation, without changing either producer's envelope."""
+    _validate_snapshot(snapshot); _validate_context(context)
+    if type(payload) is not dict or set(payload) != {"semantic", "semantics", "control"}:
+        raise ValueError("source-layer payload fields mismatch")
+    semantic = semantic_from_dict(payload["semantic"])
+    semantics = SourceSemanticsGraph.from_dict(payload["semantics"], semantic)
+    control = SourceControlFlowGraph.from_dict(payload["control"])
+    control.assert_valid(semantic, semantics)
+    if semantics.sources.get(snapshot.path) != snapshot:
+        raise ValueError("source-layer semantics snapshot differs from source record")
+    if control.sources.get(snapshot.path) is None or control.sources[snapshot.path].fingerprint != snapshot.fingerprint:
+        raise ValueError("source-layer control source version differs from source record")
+    actual_digests = (_digest(semantic.to_dict()), _digest(semantics.to_dict()), _digest(control.to_dict()))
+    if actual_digests != (context.semantic_sha256, context.semantics_sha256, context.control_sha256):
+        raise ValueError("source-layer graph digest differs from index context")
+    return SourceLayerView(snapshot, context, semantic, semantics, control, metadata, locator)
+
+
+def load_source_graph_artifact(path, *, schema, canonical_sha256, canonical_bytes,
+                               compressed_bytes, source_root, snapshot, context,
+                               snapshot_locator, declaration, max_record_bytes=128_000_000):
+    """Read an original dependency graph artifact without source preparation.
+
+    The caller binds the original manifest declaration and admitted path. This
+    reader preserves both existing dependency envelopes and their true origin;
+    it does not manufacture an inventory/source-replay receipt.
+    """
+    _check_budgets(max_record_bytes=max_record_bytes, canonical_bytes=canonical_bytes,
+                   compressed_bytes=compressed_bytes)
+    if schema not in ("scar.dependency-source-graphs", "scar.dependency-continuation-source-graphs"):
+        raise ValueError("unsupported dependency source graph schema")
+    if not _SHA256.fullmatch(canonical_sha256) or canonical_bytes > max_record_bytes:
+        raise ValueError("source graph hash/record budget mismatch")
+    if type(snapshot) is not SourceSnapshot or type(context) is not SourceContextDigest:
+        raise TypeError("source graph requires the bound original snapshot/context")
+    if type(declaration) is not ProviderFactReference:
+        raise TypeError("source graph requires its original artifact declaration")
+    path = Path(path)
+    if path.is_symlink() or not path.is_file() or str(path.resolve()) != str(path):
+        raise ValueError("source graph artifact must be an ordinary canonical path")
+    before = path.stat()
+    if before.st_size != compressed_bytes:
+        raise ValueError("source graph compressed-byte receipt mismatch")
+    payload, physical_sha = _read_bounded(path, limit=max_record_bytes)
+    after = path.stat()
+    if ((before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)
+            != (after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns)
+            or len(payload) != canonical_bytes or hashlib.sha256(payload).hexdigest() != canonical_sha256):
+        raise ValueError("source graph artifact changed or differs from its original receipt")
+    document = strict_loads(payload.decode("utf-8", errors="strict"))
+    if (_canonical(document) != payload or document.get("schema") != schema
+            or type(document.get("schema_version")) is not int or document["schema_version"] != 1):
+        raise ValueError("source graph canonical schema/version mismatch")
+    flags = ("target_executed_by_resolver", "transitive_dependency_closure_established",
+             "canonical_bodies_established", "actual_formal_routing_established",
+             "function_environment_established", "effects_established", "state_versions_established",
+             "observer_origin_established", "provider_version_at_capture_established",
+             "whole_program_graph_established", "first_stage_complete", "transformation_authorized")
+    if (any(document.get(name) is not False for name in flags)
+            or document.get("independent_source_replay_established") is not False):
+        raise ValueError("source graph artifact overstates its authority")
+    if (document["source_root"] != source_root or decode(SourceSnapshot, document["snapshot"]) != snapshot
+            or decode(SourceContextDigest, document["context"]) != context
+            or document["namespace_root"] != context.namespace_root):
+        raise ValueError("source graph root/snapshot/context differs from its declaration")
+    if schema == "scar.dependency-source-graphs":
+        if (snapshot_locator.get("origin") != "PARENT"
+                or document["source_snapshot_artifact"] != snapshot_locator["artifact"]):
+            raise ValueError("original graph snapshot artifact differs from its parent declaration")
+    elif document["source_snapshot_locator"] != snapshot_locator:
+        raise ValueError("continuation graph snapshot locator differs from its original declaration")
+    metadata = {"archive_sha256": canonical_sha256, "archive_bytes": canonical_bytes,
+                "source_replay_on_load": False, "source_layer_producer": document["source_layer_producer"],
+                "independent_source_replay_established": False, "whole_program_graph_established": False,
+                "fine_state_effects_established": False, "transformation_authorized": False}
+    locator = SourceArtifactLocator(ProviderArtifact(str(path), physical_sha, compressed_bytes, schema),
+        canonical_sha256, canonical_bytes, "gzip-canonical-json", declaration=declaration)
+    view = _decoded_source_layer_view(snapshot, context,
+        {name: document[name] for name in ("semantic", "semantics", "control")}, metadata, locator)
+    return view, locator
+
+
+__all__ = ["SourceLayerView", "reconstruct_source_layers", "load_source_layers", "load_source_graph_artifact"]

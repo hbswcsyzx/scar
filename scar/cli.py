@@ -545,15 +545,18 @@ def main(argv=None) -> int:
     capture_model.add_argument("--max-lines", type=int, default=2000000)
     capture_model.add_argument("--schema-contracts", action="store_true", help="recover ordered provider ports using the exact matching installed Torch schema parser")
     capture_model.add_argument("--bundle-partitions", action="store_true", help="store native graph records as bounded chunks instead of one nested bundle JSON")
+    capture_model.add_argument("--os-interface-work", action="store_true", help="retain kernel interfaces and typed work in bounded partitions; effects and resource closure remain explicit")
     capture_model.add_argument("--out", required=True, help="fresh assembled capture directory with per-stage progress")
     capture_model.set_defaults(func=_import_capture)
     os_resources = sub.add_parser("import-os-resources", help="import retained per-TID strace files into existing resource and handle identities")
     os_resources.add_argument("directory", help="strace -ff -ttt -T files, optionally gzip")
     os_resources.add_argument("--scope", default="capture", help="namespace, additionally bound to the artifact manifest hash")
     os_resources.add_argument("--root-tid", type=int, help="explicit captured target process declaration")
+    os_resources.add_argument("--capture-root", help="bind the original collector capture containing this os/ directory to verified shared Run/Process/Thread coordinates")
+    os_resources.add_argument("--interface-work", action="store_true", help="publish schema2 interface and typed-work tables in bounded chunks")
     os_resources.add_argument("--max-bytes", type=int, default=512000000)
     os_resources.add_argument("--max-lines", type=int, default=2000000)
-    os_resources.add_argument("--max-report-bytes", type=int, default=512000000)
+    os_resources.add_argument("--max-report-bytes", type=int, default=512000000, help="legacy single-report ceiling; interface-work uses the independent partition budgets")
     os_resources.add_argument("--out", required=True, help="fresh output directory")
     os_resources.set_defaults(func=_import_os_resources)
     native = sub.add_parser("import-native", help="import collected ETO/Kineto evidence without running or importing the target")
@@ -1430,6 +1433,7 @@ def _import_capture(args) -> int:
     from scar.trace.capture_import import import_capture
     report = import_capture(args.directory, args.out, max_bytes=args.max_bytes, max_lines=args.max_lines,
         schema_contracts=args.schema_contracts, bundle_partitions=args.bundle_partitions,
+        os_interface_work=args.os_interface_work,
         progress=lambda record: print(json.dumps(record), flush=True))
     print(json.dumps({"out": str(Path(args.out).resolve()), "coordinate_identity_consistent": report["coordinate_identity_consistent"],
                       "whole_model_established": report["whole_model_established"]}))
@@ -1437,15 +1441,34 @@ def _import_capture(args) -> int:
 
 
 def _import_os_resources(args) -> int:
-    from scar.trace.os_resources import import_os_resources
+    from scar.trace.os_resources import import_os_resources, publish_os_interfaces
     output = Path(args.out).resolve()
     if output.exists():
         raise SystemExit("import-os-resources requires a fresh output directory")
-    fragment = import_os_resources(args.directory, scope=args.scope, root_tid=args.root_tid,
-                                  max_bytes=args.max_bytes, max_lines=args.max_lines)
+    coordinates, root_tid = None, args.root_tid
+    if args.capture_root is not None:
+        from scar.trace.capture_coordinates import bind_capture_coordinates
+        capture = Path(args.capture_root).resolve()
+        if Path(args.directory).resolve() != capture / 'os':
+            raise SystemExit("capture-root must contain the exact imported os/ directory")
+        coordinates = bind_capture_coordinates(capture, max_bytes=args.max_bytes,
+            max_lines=args.max_lines, profile_uri=str(output / 'capture-coordinates.json'))
+        declared_pid = coordinates.target_process.pid
+        if root_tid is not None and root_tid != declared_pid:
+            raise SystemExit("root-tid contradicts the original collector target declaration")
+        root_tid = declared_pid
+    fragment = import_os_resources(args.directory, scope=args.scope, root_tid=root_tid,
+        max_bytes=args.max_bytes, max_lines=args.max_lines, coordinates=coordinates,
+        interface_work=args.interface_work)
     output.mkdir(parents=True)
+    if coordinates is not None:
+        (output / 'capture-coordinates.json').write_bytes(coordinates.payload)
     (output / "os-resource-profile.json").write_bytes(fragment.protocol_bytes)
-    _write_call_document(output / "os-resources.json.gz", fragment.to_dict(), args.max_report_bytes)
+    if args.interface_work:
+        publish_os_interfaces(fragment, output / 'interfaces',
+            progress=lambda record: print(json.dumps(record), flush=True))
+    else:
+        _write_call_document(output / "os-resources.json.gz", fragment.to_dict(), args.max_report_bytes)
     (output / "summary.json").write_text(json.dumps(fragment.summary, indent=2) + "\n")
     print(json.dumps({"out": str(output), **fragment.summary}))
     return 0

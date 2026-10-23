@@ -85,7 +85,8 @@ def _check_os_coordinates(fragment, coordinates):
 
 
 def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000,
-                   schema_contracts=False, bundle_partitions=False, progress=None):
+                   schema_contracts=False, bundle_partitions=False, os_interface_work=False,
+                   progress=None):
     """Import an unmodified successful collector capture, without target execution.
 
     The membership binder validates the original artifacts once.  The existing
@@ -95,7 +96,10 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
     from scar.trace.capture_coordinates import bind_capture_coordinates
     from scar.trace.native_import import import_native_evidence
     from scar.trace.native_memory_export import export_native_memory
-    from scar.trace.os_resources import import_os_resources
+    from scar.trace.os_resources import import_os_resources, publish_os_interfaces
+
+    if type(os_interface_work) is not bool:
+        raise TypeError('os_interface_work must be an exact bool')
 
     capture, out = Path(capture_dir).resolve(), Path(output_dir).resolve()
     if out.exists():
@@ -213,12 +217,19 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
         os_out = out / 'os'
         os_out.mkdir()
         os_fragment = import_os_resources(capture / 'os', scope='capture-import',
-            root_tid=manifest['pid'], max_bytes=max_bytes, max_lines=max_lines, coordinates=coordinates)
+            root_tid=manifest['pid'], max_bytes=max_bytes, max_lines=max_lines, coordinates=coordinates,
+            interface_work=os_interface_work)
         os_check = _check_os_coordinates(os_fragment, coordinates)
         (os_out / 'os-resource-profile.json').write_bytes(os_fragment.protocol_bytes)
-        _write(os_out / 'os-resources.json.gz', os_fragment.to_dict())
+        if os_interface_work:
+            stage('os_interfaces', 'RUNNING')
+            publish_os_interfaces(os_fragment, os_out / 'interfaces',
+                progress=lambda record: stage('os_interfaces', 'WRITING', detail=record))
+            stage('os_interfaces', 'PUBLISHED_WITH_OPEN_OBLIGATIONS')
+        else:
+            _write(os_out / 'os-resources.json.gz', os_fragment.to_dict())
         _write(os_out / 'summary.json', os_fragment.summary)
-        outputs.extend(_stored(path) for path in sorted(os_out.iterdir()))
+        outputs.extend(_stored(path) for path in sorted(os_out.rglob('*')) if path.is_file())
         os_summary = dict(os_fragment.summary, coordinate_check=os_check)
         stage('os_resources', 'IMPORTED', **os_fragment.summary)
         del os_fragment
@@ -240,6 +251,10 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
         if bundle_partitions:
             report['native_bundle_storage'] = {'kind': 'partitioned',
                 'manifest': str(native_out / 'bundle-partitions' / 'manifest.json'),
+                'publication_is_model_completeness': False}
+        if os_interface_work:
+            report['os_interface_storage'] = {'kind': 'partitioned',
+                'manifest': str(os_out / 'interfaces' / 'manifest.json'),
                 'publication_is_model_completeness': False}
         _write(out / 'capture-model.json', report)
         stage('capture', 'IMPORTED_WITH_OPEN_OBLIGATIONS', coordinate_identity_consistent=True)

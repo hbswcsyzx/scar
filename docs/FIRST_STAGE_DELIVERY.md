@@ -53,6 +53,7 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | 分片源码与marker连接 | 79,592 markers/109,288原slot引用全部保留；10,992条body/activation/namespace关联、17,456 source-only | retained ancestor不是direct call；50,664条仅invocation、480条无ancestor；actual/formal/state未闭合 |
 | 更大范围源码归档 | 分片恢复exit0；151文件/2217定义，840原图、787 UNSUPPORTED、590 NOT_ATTEMPTED | 原256MB单JSON失败保留；新归档发布不消除未支持语言与接口缺口 |
 | 外部依赖源码准入及精确增量 | 106需求文件全部有snapshot/三图；243 groups/86,702次调用有完整代码来源匹配；增量及独立审核PASS | 仅补27文件、继承原199 witnesses；803次非文件名与14次current source drift保留；不是body/effect完整性 |
+| 原source/body缺口按实际调用投影 | 原817groups/100,438calls逐项守恒；74body-linked、91source-only UNSUPPORTED、260source-only NOT_ATTEMPTED | 只是已保存metadata投影；不是canonical graph重验或新语言协议支持 |
 | 同次Tensor物理证据采集与导入 | 新完整LeWM episode成功；79,592 markers、109,288槽，108,682槽接物理epoch | 606槽为带provider ID但无storage pointer的空CPU Tensor；逻辑内容/ready与空表示接口仍OPEN |
 | IR分块存储与查询索引 | CPU原档逐条往返PASS；源码SQLite建库/局部查询PASS；完整LeWM联合导入及实档审核PASS，2,259,781记录/195chunks | 42,767条endpoint引用未语义索引；SQLite不是第二个可写IR来源，不代表完整模型通过 |
 
@@ -90,9 +91,32 @@ SQLite查询索引已实现并通过真实分片归档构建与局部查询：43
   仍需各自正确的定义与区域接口。
 - 跨调用数据：源码 body、调用帧和 native Tensor 引用已有局部连接，但 actual/
   formal、return、function environment 及可变状态必须逐槽接入。
+- 同一次运行：已验收source composition/bindings固定272038，最新物理capture为
+  369749。两组动态事实不能拼成一个完成模型。当前两项source接线原档验收完成后，
+  必须把源码定义/完整compiler witness与当前运行事实分开，通过明确的跨运行版本
+  检查接入369749；只允许复用相同版本的静态证明，不复用旧Invocation/ValueOccurrence。
+- 源body内部：新增`first_stage_body_frontiers_20261023`只读投影确认，原项目实际有
+  2,902次调用的body为UNSUPPORTED，260次为NOT_ATTEMPTED。按原理由，优先审查
+  通用unpacking/heap writes、GeneratorExp、Slice及comprehension-local解析，不能
+  根据业务函数名增加特例。完整分类、原locator及1.56s实测见该实验README。
 - 物理表示：allocation 记录不等于 Tensor→allocation 的证明；物理副本不是
   LogicalValueVersion。host 返回不能证明 GPU ready。
 - 外部资源：OS handle/事件清单仍有共享、继承、mmap、设备和完成关系未闭合；
   不能用“有文件/线程节点”代替使用者及数据依赖。
 
 因此第一阶段仍 OPEN。其后的化简、修改指导和成本选择均不在本轮执行范围。
+
+## 6. 当前已经启动但尚未验收的连接
+
+以下只能记Implemented/Running，不能并入第3节Verified结果：
+
+1. `first_stage_source_attachments_20261023`：原272038的106份依赖源码经共同限定
+   定义resolver接source bindings与marker；保留historical compiler proof与guard差异。
+2. `first_stage_partitioned_operand_routes_20261023`：相同272038的原frame/operand/
+   environment读入，按需求最多20个编译键，接回既有严格actual/formal/return算法。
+3. `first_stage_os_interface_work_20261023`：369749的全部原OS记录通过公共CLI导入，
+   原152,564条旧FD子集外接口有work记录，新增typed work以bounded chunks保存；
+   共享FD-table、VM、source/native effects和ready仍须独立连接。
+
+实现与每次运行保存独立producer、原输入SHA、脚本、time/RSS、失败和验收报告。
+新模式没有执行新LeWM episode、优化、detector/backend或全仓测试套件。

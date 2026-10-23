@@ -21,6 +21,7 @@ from scar.ir.execution.common import EvidencePoint
 from scar.ir.execution.coordinates import ExecutionRun, HostThreadInstance, RegionActivation
 from scar.ir.program.call_edges import CallRecordAnchor, InvocationKey
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+from scar.ir.program.source_references import SourceDefinitionReference
 from scar.ir.record_codec import decode, encode, loads as strict_loads
 from scar.trace.capture_coordinates import CaptureCoordinates
 from scar.trace.dispatch_evidence import PRODUCTION_PROFILE
@@ -103,7 +104,7 @@ def _inputs(source_directory, bridge_path, coordinates, max_bytes):
           and _canonical(coordinates.report) == coordinates.payload, "coordinate payload is inconsistent")
     root = Path(source_directory).resolve()
     report, report_artifact = _read_document(root / "report.json", "scar.source-invocations", 16_000_000,
-                                           versions=(1, 2))
+                                           versions=(1, 2, 3))
     _need(report.get("current_capture_raw_scan_verified") is True
           and report.get("old_capture_dynamic_facts_used_for_current_run") is False,
           "source report does not bind a completed current-capture raw scan")
@@ -114,6 +115,11 @@ def _inputs(source_directory, bridge_path, coordinates, max_bytes):
         versions=(report["schema_version"],))
     _need(bindings.get("witness_mode") == report["witness_mode"]
           and bindings.get("transformation_authorized") is False, "source binding header differs from its report")
+    if report["schema_version"] == 3:
+        _need(report.get("source_definition_reference_format") == "scar.source-definition-reference.v1"
+              and bindings.get("source_definition_reference_format") == report["source_definition_reference_format"]
+              and bindings.get("source_inputs") == report.get("source_inputs"),
+              "formal source definition format/input receipts differ")
     bridge, bridge_artifact = _read_document(bridge_path, "scar.dispatch-observation-import", max_bytes)
     _need(bridge.get("profile") == PRODUCTION_PROFILE and bridge.get("production_collector") is True
           and bridge.get("capture_membership_verified") is True
@@ -325,6 +331,120 @@ class _PartitionedSourceScope:
             "definition_scope": "exact original snapshot/context + DefinitionID; not path/line matching"}
 
 
+class _FormalSourceScope:
+    """Resolve v3 definitions without extending the original inventory root.
+
+    Project bodies retain their original v2 witness checks. Dependency source
+    definitions resolve through the same public CompositionIndex resolver;
+    source-only evidence never creates a typed body or region activation.
+    """
+
+    def __init__(self, composition, report):
+        self.project = _PartitionedSourceScope(composition, report)
+        self.composition, self.counts = composition, Counter()
+        _need(composition.has_source_attachments
+              and report["source_inputs"] == composition.source_inputs(),
+              "formal source inputs differ from the explicitly bound attachments")
+        _need(report["witness_mode"] == "same_capture"
+              and report.get("attachment_capture_checks"),
+              "formal attachments have no declared complete same-capture check")
+        declaration = {key: report[key] for key in
+                       ("trace_files", "collection_metadata", "raw_scan_issues")}
+        _need(all(value == declaration for value in composition.attachment_capture_declarations()),
+              "attachment source witnesses belong to a different raw capture")
+        expected_scan = {"trace_files_sha256": hashlib.sha256(_canonical(report["trace_files"])).hexdigest(),
+                         "captured_codes": report["summary"]["code_captures"],
+                         "entered_code_groups": report["summary"]["entered_code_groups"],
+                         "entered_invocations": report["summary"]["invocations"]}
+        _need(len(report["attachment_capture_checks"]) == len(composition.attachment_capture_declarations())
+              and all(type(receipt) is dict and all(receipt.get(key) == value
+                      for key, value in expected_scan.items())
+                      for receipt in report["attachment_capture_checks"]),
+              "attachment raw-scan receipt denominator differs from the source report")
+
+    def binding(self, binding):
+        origin = binding.get("source_origin")
+        _need(origin in ("INVENTORY", "SOURCE_ATTACHMENT"), "unsupported formal source origin")
+        reference = (decode(SourceDefinitionReference, binding["definition"])
+                     if binding["definition"] is not None else None)
+        if origin == "INVENTORY":
+            _need(binding.get("attachment_witness") is None,
+                  "project definition cannot acquire an external compiler witness")
+            element = binding.get("composition_element")
+            restored = {**binding, "definition": element}
+            self.project.binding(restored)
+            _need((reference is None) == (element is None),
+                  "project definition lost its original composition view")
+            if reference is not None:
+                from scar.ir.v2.ids import OperationDefinitionID
+                expected = self.composition.definition_reference(element["file_index"],
+                    decode(OperationDefinitionID, element["identity"]))
+                _need(reference == expected, "project formal definition differs from its original graph")
+                self.composition.resolve_definition(reference)
+                self.counts["project_formal_definitions_verified"] += 1
+            return
+
+        from scar.ir.program.call_edges import CodeCapture, CodeSourceLink, CallLinkStatus
+        _need(binding.get("composition_element") is None and binding["body"] is None
+              and all(binding.get(name) is None for name in (
+                  "descriptor_witness_pointer", "code_source_witness_pointer", "admission_pointer",
+                  "descriptor_witness_locator", "code_source_witness_locator", "admission_locator"))
+              and binding.get("static_body_witness_pointers") == []
+              and binding.get("static_body_witness_locators") == [],
+              "source-only attachment cannot masquerade as an inventory/body admission")
+        witness = self.composition.attached_code_witness(binding["process_id"], binding["code"])
+        _need(witness is not None and witness["record"]["status"] == "SOURCE_VERIFIED",
+              "external definition has no bound original source witness")
+        record = witness["record"]
+        capture = decode(CodeCapture, binding["code_capture"])
+        _need(capture.process_id == binding["process_id"] and capture.code.key == binding["code"]
+              and record["captured_code"] == encode(capture.code)
+              and record["descriptor_anchor"] == encode(capture.anchor)
+              and record["entered_invocations"] == binding["entered_invocations"]
+              and binding["complete_descriptor_match"] is True,
+              "external source definition has no exact descriptor/group identity")
+        link = decode(CodeSourceLink, record["code_source_link"])
+        _need(link.status is CallLinkStatus.VERIFIED and link.code == binding["code"]
+              and binding["snapshot"] == encode(link.snapshot) and binding["source"] == encode(link.source)
+              and binding["source_verification"] == "REUSED_HISTORICAL_CODE_SOURCE_WITNESS"
+              and binding["witness_status"] == "VERIFIED" and binding["witness_issues"] == encode(link.issues)
+              and binding["current_source_check"] is None,
+              "historical source witness was changed or promoted to a current-source proof")
+        expected_witness = {
+            "record_locator": encode(witness["record_locator"]),
+            "descriptor_locator": encode(witness["descriptor_locator"]),
+            "code_source_locator": encode(witness["code_source_locator"]),
+            "code_source_link": record["code_source_link"], "witness_scope": witness["witness_scope"],
+            "source_compiler_witness_reused": record["source_compiler_witness_reused"],
+            "source_compiler_matching_performed": record["source_compiler_matching_performed"],
+            "guard_scope": witness["guard_scope"], "guard": witness["guard"],
+            "guard_locator": encode(witness["guard_locator"]) if witness["guard_locator"] is not None else None,
+        }
+        _need(binding.get("attachment_witness") == expected_witness,
+              "external witness/guard locator differs from the original attachment")
+        expected = self.composition.attached_definition_reference(binding["process_id"], binding["code"])
+        _need(reference == expected
+              and binding["definition_locator"] == (encode(reference.graph) if reference is not None else None),
+              "external formal definition differs from its bound original source graph")
+        if reference is not None:
+            _need(reference.definition == link.definition and encode(reference.snapshot) == binding["snapshot"]
+                  and encode(reference.source) == binding["source"],
+                  "external graph identity differs from its full CodeSourceLink")
+            self.composition.resolve_definition(reference)
+            self.counts["external_source_only_definitions_verified"] += 1
+        else:
+            self.counts["external_verified_codes_without_definition"] += 1
+        self.counts["historical_compiler_witnesses_reused"] += 1
+        if witness["guard"] is not None and witness["guard"].get("matches") is False:
+            self.counts["admission_time_source_drift_preserved"] += 1
+
+    def audit(self):
+        return {"formal_definition_reference_format": "scar.source-definition-reference.v1",
+                "explicit_source_inputs_verified": True, "project": self.project.audit(),
+                **dict(self.counts), "source_recompiled": False, "source_reprepared": False,
+                "attachment_guard_refreshed": False, "typed_bodies_added": False}
+
+
 def _load_invocations(root, report, bindings, artifacts, coordinates, pid, process, wanted, maximum, max_rows):
     declaration = report["invocations"]
     _need(declaration["path"] == "invocations.jsonl.gz", "unsupported invocation artifact path")
@@ -363,7 +483,7 @@ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, proce
                   and point.source == raw_source and point.source.locator == "#/lines/" + str(anchor.line_number),
                   "invocation raw source or common execution coordinate differs")
             activation = decode(RegionActivation, row["region_activation"]) if row["region_activation"] is not None else None
-            if version == 2:
+            if version in (2, 3):
                 namespace = binding["body"]["namespace"] if binding["body"] is not None else None
                 _need("region_namespace" in row and row["region_namespace"] == namespace,
                       "invocation region namespace differs from its verified source body")
@@ -377,7 +497,7 @@ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, proce
                 _need(binding["body"] is not None and activation.region.as_dict() == binding["body"]["reference"]["identity"]
                       and activation.process == process.id and activation.entry == point,
                       "source region activation differs from its original body/entry")
-                if version == 2:
+                if version in (2, 3):
                     expected_id = coordinates.run.id.value + ":source-frame:" + hashlib.sha256(_canonical({
                         "process": encode(point.process), "invocation": encode(invocation),
                         "entry": encode(point.source)})).hexdigest()
@@ -390,7 +510,7 @@ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, proce
                     "code": row["code"], "binding_index": index, "activation": activation,
                     "anchor": anchor, "status": row["status"], "frontiers": row["frontiers"],
                     "suspended": row["suspended"]}
-                if version == 2:
+                if version in (2, 3):
                     selected[invocation]["region_namespace"] = row["region_namespace"]
     _need((digest.hexdigest(), size, count) == (declaration["raw_sha256"], declaration["raw_bytes"], declaration["rows"]),
           "complete invocation raw SHA/bytes/row receipt differs")
@@ -419,11 +539,12 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
      artifacts, native, pid, process) = _inputs(source_directory, dispatch_bridge, coordinates, max_input_bytes)
     version = source_report["schema_version"]
     source_scope = None
-    if version == 2:
-        source_scope = _PartitionedSourceScope(composition_index, source_report)
+    if version in (2, 3):
+        source_scope = (_FormalSourceScope(composition_index, source_report) if version == 3
+                        else _PartitionedSourceScope(composition_index, source_report))
         for index, binding in enumerate(bindings["bindings"]):
             _need(type(binding["binding_index"]) is int and binding["binding_index"] == index,
-                  "source schema2 binding table ordinal differs")
+                  "source binding table ordinal differs")
             source_scope.binding(binding)
     observations = bridge["observations"]
     _need(type(observations) is list and len(observations) <= max_observations
@@ -476,8 +597,11 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
                            "native_thread": None, "native_thread_reference": None,
                            "qualified_slot_path_indices": slot_indices[observation["marker_instance"]],
                            "frontiers": missing, "status": "UNRESOLVED"}
-                    if version == 2:
+                    if version in (2, 3):
                         row["region_namespace"] = None
+                    if version == 3:
+                        row["source_origin"] = None
+                        row["composition_element"] = None
                     if observation["native_tid_verified"] is True:
                         thread = coordinates.thread_for(native["kineto"], observation["native_tid"], "linux_native_tid")
                         if type(thread) is HostThreadInstance:
@@ -510,8 +634,11 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
                                 "#/bindings/" + str(source["binding_index"])))
                             row["source_invocation_line_sha256"] = source["line_sha256"]
                             row["definition"], row["body"] = binding["definition"], binding["body"]
-                            if version == 2:
+                            if version in (2, 3):
                                 row["region_namespace"] = source["region_namespace"]
+                            if version == 3:
+                                row["source_origin"] = binding["source_origin"]
+                                row["composition_element"] = binding["composition_element"]
                             row["status"] = "RETAINED_INVOCATION_LINKED"
                             if binding["definition"] is None:
                                 missing.append("SOURCE_DEFINITION_UNAVAILABLE")
@@ -571,7 +698,10 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
                 "unqualified payload leaves remain upstream gaps; compact bridge does not carry their individual raw descriptions"],
             **_AUTHORITY}
         if source_scope is not None:
-            report["partitioned_source_scope_audit"] = source_scope.audit()
+            report["formal_source_scope_audit" if version == 3 else "partitioned_source_scope_audit"] = source_scope.audit()
+        if version == 3:
+            report["source_definition_reference_format"] = source_report["source_definition_reference_format"]
+            report["source_inputs"] = source_report["source_inputs"]
         (stage / "report.json").write_bytes(_canonical(report))
         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
         output.mkdir(exist_ok=False)
@@ -584,7 +714,10 @@ def query_dispatch_source(output_directory, marker_instance):
     """Resolve one marker's original references; verify the selected output row."""
     root = Path(output_directory)
     report, _ = _read_document(root / "report.json", "scar.dispatch-source-associations", 16_000_000,
-                              versions=(1, 2))
+                              versions=(1, 2, 3))
+    if report["schema_version"] == 3:
+        _need(report.get("source_definition_reference_format") == "scar.source-definition-reference.v1",
+              "unsupported queried formal definition reference format")
     declaration = report["index"]
     index, artifact = _read_document(root / declaration["path"], "scar.dispatch-source-index", 64_000_000)
     _need((artifact.sha256, artifact.size_bytes) == (declaration["raw_sha256"], declaration["raw_bytes"]),

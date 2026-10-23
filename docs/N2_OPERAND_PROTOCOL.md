@@ -4,6 +4,11 @@
 本协议补充原始 v1 frame trace，不改变它的文件、记录或历史重放规则。
 完整交付还要求原始两文件程序自动采集、源码对应和 actual→formal→return 查询。
 
+2026-10-23 的分片接线见 [CALL_SOURCE_ROUTES.md](CALL_SOURCE_ROUTES.md)：复用本协议
+及既有精确 CALL/window/handshake 规则，通过原 SourceBodyAccess 与 owned CodeWitness
+读取原 CP/端口。新 report schema2 显式限定 namespace，旧 v1 replay 不改义；新接线
+当前仅完成 AST/源审查，尚未运行实档验收。
+
 ## 1. 文件与身份
 
 每个采集 PID 写入两个独立文件：

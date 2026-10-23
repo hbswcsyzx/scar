@@ -32,6 +32,8 @@ from scar.ir.program.call_edges import (
 from scar.ir.program.call_seeds import EnteredCodeGroup, SeedCollectionMetadata
 from scar.ir.program.ids import RegionID
 from scar.ir.program.inventory import DefinitionInventory
+from scar.ir.program.source_references import SourceDefinitionReference
+from scar.ir.v2.ids import OperationDefinitionID
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import SourceSnapshot
@@ -550,6 +552,74 @@ def _binding_rows(composition, model, scope, sink, captures, members, witness_mo
     return rows, indexes
 
 
+def _formal_binding_rows(composition, bindings, captures, members):
+    """Use one shared original-definition resolver; no new inventory or body."""
+    composition.prefetch_definition_references((
+        (row["definition"]["file_index"], decode(OperationDefinitionID, row["definition"]["identity"]))
+        for row in bindings if row["definition"] is not None))
+    for row in bindings:
+        row["source_origin"] = "INVENTORY"
+        row["composition_element"] = row["definition"]
+        row["attachment_witness"] = None
+        row["attachment_frontiers"] = []
+        key = row["process_id"], row["code"]
+        attached = composition.attached_code_witness(*key)
+        if attached is not None and attached["record"]["status"] != "PROGRAM_SCOPE_RETAINED":
+            row["attachment_frontiers"] = [gap["code"] for gap in attached["record"]["frontiers"]]
+        if attached is not None and attached["record"]["status"] == "SOURCE_VERIFIED":
+            record = attached["record"]
+            capture = captures.get(key)
+            _need(attached["capture_verified"] is True and capture is not None
+                  and record["captured_code"] == encode(capture.code)
+                  and record["descriptor_anchor"] == encode(capture.anchor)
+                  and record["entered_invocations"] == row["entered_invocations"],
+                  "attached source witness has no exact current-capture descriptor/group proof")
+            _need(row["definition"] is None and row["body"] is None,
+                  "attachment contradicts an already bound project definition/body")
+            link = record["code_source_link"]
+            reference = composition.attached_definition_reference(*key)
+            row.update(source_origin="SOURCE_ATTACHMENT", composition_element=None,
+                complete_descriptor_match=True, source_verification="REUSED_HISTORICAL_CODE_SOURCE_WITNESS",
+                witness_status="VERIFIED", witness_issues=link["issues"],
+                snapshot=link["snapshot"], source=link["source"],
+                definition=encode(reference) if reference is not None else None, body=None,
+                definition_locator=encode(reference.graph) if reference is not None else None,
+                descriptor_witness_pointer=None, code_source_witness_pointer=None, admission_pointer=None,
+                static_body_witness_pointers=[], descriptor_witness_locator=None,
+                code_source_witness_locator=None, admission_locator=None, static_body_witness_locators=[],
+                current_source_check=None, frontiers=list(row["attachment_frontiers"]))
+            row["attachment_witness"] = {
+                "record_locator": encode(attached["record_locator"]),
+                "descriptor_locator": encode(attached["descriptor_locator"]),
+                "code_source_locator": encode(attached["code_source_locator"]),
+                "code_source_link": link, "witness_scope": attached["witness_scope"],
+                "source_compiler_witness_reused": record["source_compiler_witness_reused"],
+                "source_compiler_matching_performed": record["source_compiler_matching_performed"],
+                "guard_scope": attached["guard_scope"], "guard": attached["guard"],
+                "guard_locator": encode(attached["guard_locator"]) if attached["guard_locator"] is not None else None,
+            }
+            if reference is not None:
+                row["status"] = "SOURCE_LINKED_REUSED_WITNESS"
+                row["frontiers"].append("CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT")
+            else:
+                row["status"] = "UNRESOLVED"
+                row["frontiers"].append("VERIFIED_CODE_WITHOUT_DEFINITION_WITNESS")
+            if members.processes[key[0], "events"] is None:
+                row["frontiers"].append("CAPTURE_PROCESS_MEMBERSHIP_UNRESOLVED")
+        else:
+            for frontier in row["attachment_frontiers"]:
+                if frontier not in row["frontiers"]:
+                    row["frontiers"].append(frontier)
+            if row["definition"] is not None:
+                element = row["definition"]
+                reference = composition.definition_reference(element["file_index"],
+                    decode(OperationDefinitionID, element["identity"]))
+                _need(encode(reference.snapshot) == row["snapshot"] and encode(reference.source) == row["source"],
+                      "formal project definition differs from its original code/source witness")
+                row["definition"] = encode(reference)
+    return bindings
+
+
 def _parent(entry, sink, incomplete_processes):
     direct = entry.caller_invocation
     ancestor = entry.ancestor_invocation
@@ -641,6 +711,9 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
     _need(type(call_budget) is CallEdgeBudget, "call_budget must be CallEdgeBudget")
     _need(type(witness_mode) is str and witness_mode in ("same_capture", "reused_code"),
           "witness_mode must be same_capture or reused_code")
+    _need(not composition.has_source_attachments or witness_mode == "same_capture",
+          "formal source attachments currently require exact same-capture evidence")
+    source_version = 3 if composition.has_source_attachments else 2 if composition.partitioned else 1
     call_budget.__post_init__()
     output = Path(out_dir).resolve()
     _need(not output.exists() and not output.is_symlink(), "output directory already exists")
@@ -668,10 +741,13 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
     members.bind(scanned.files)
     if seed_model is not None and witness_mode == "same_capture":
         _verify_seed_model(seed_model, scanned, sink, members)
+    attachment_capture_checks = composition.verify_source_attachments(scanned, tuple(sink.groups.values()))
     captures = {(capture.process_id, capture.code.key): capture for capture in scanned.captures}
     source_guard = _SourceGuard(call_budget) if witness_mode == "reused_code" else None
     bindings, binding_indexes = _binding_rows(composition, seed_model, scope, sink, captures,
                                              members, witness_mode, source_guard)
+    if composition.has_source_attachments:
+        bindings = _formal_binding_rows(composition, bindings, captures, members)
     incomplete = {meta["process_id"] for meta in scanned.metadata if meta["dropped_events"]
                   or meta["dropped_codes"] or meta["errors"] or meta.get("io_failed")}
     incomplete.update(invocation.process_id for invocation in sink.exits if invocation not in sink.entries)
@@ -738,15 +814,19 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
         stage = Path(temporary)
         invocation_file = _write_rows(stage / "invocations.jsonl.gz", invocation_rows())
         orphan_file = _write_rows(stage / "orphan-exits.jsonl.gz", orphan_rows())
-        binding_payload = _canonical({"schema": "scar.source-invocation-bindings", "schema_version": 2 if composition.partitioned else 1,
-                                      "witness_mode": witness_mode, "bindings": bindings, **_AUTHORITY})
+        binding_document = {"schema": "scar.source-invocation-bindings", "schema_version": source_version,
+                            "witness_mode": witness_mode, "bindings": bindings, **_AUTHORITY}
+        if source_version == 3:
+            binding_document.update(source_definition_reference_format="scar.source-definition-reference.v1",
+                                    source_inputs=composition.source_inputs())
+        binding_payload = _canonical(binding_document)
         (stage / "bindings.json").write_bytes(binding_payload)
         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
         _need(invocation_file["rows"] == sum(group.count for group in sink.groups.values())
               == sum(meta["invocations"] for meta in scanned.metadata),
               "published invocation denominator differs from complete raw replay")
         report = {
-            "schema": "scar.source-invocations", "schema_version": 2 if composition.partitioned else 1,
+            "schema": "scar.source-invocations", "schema_version": source_version,
             "scope": "observed frame entries to original source/body; reused code/source witness",
             "inventory": composition.document["inventory"],
             "composition_canonical_sha256": _sha(composition.document),
@@ -787,6 +867,10 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
                 "a recorded frame parent interval is not an actual/formal/return, environment, effect or ATen callsite proof",
             ], **_AUTHORITY,
         }
+        if source_version == 3:
+            report.update(source_definition_reference_format="scar.source-definition-reference.v1",
+                source_inputs=composition.source_inputs(), attachment_capture_checks=attachment_capture_checks,
+                attachment_scope="original source fragments; no added inventory files or typed bodies")
         (stage / "report.json").write_bytes(_canonical(report))
         # All scanning, cross-input checking and row creation have succeeded.
         # Reserve the caller's destination exclusively, publish data first, and
