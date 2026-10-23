@@ -1,5 +1,43 @@
 # 既有OS handles的真实FD来源投影
 
+**2026-10-23 correction：FD值与table连续性分开资格化。** 原4类strace filter遗漏
+`unshare`/`close_range`，旧context视图的35个InstanceTarget不能再继承为可信关联。
+**OFD coidentity/end/lifetime仍是条件性的baseline声明；此处不是完整FD全集覆盖。**
+原FD scalar提取、全部真实chunk/preimage/字段守恒结果保留；下文schema1实验为历史
+记录，原artifact不改。当前新增显式schema2/mode `FD_VALUES_ONLY_R2`，只接受public
+`OSResourceRefinement`原R2选择，全部container保持Unresolved。旧v1不被静默改读为v2。
+
+```python
+inputs = FDValuesInputs(
+    selected_manifest=original_r2_manifest,
+    original_projection=historical_fd_projection_manifest,
+    original_selected_manifest=historical_context_manifest,  # provenance only
+    archive=original_archive,
+    coordinates=original_coordinates,
+)
+r2 = OSResourceRefinement.read(base, original_r2_manifest)
+result = requalify_os_fd_values(base, r2, inputs, fresh_output)
+view = OSFDValuesProjection.read(base, r2, inputs, result["manifest_receipt"]["path"])
+```
+
+重资格producer逐原handle/preimage与FD端口核对，并对原35记录仅移除container断言，
+其它字段与public R2完全相同。旧context manifest只作为准确bytes/hash的历史preimage，
+不调用其loader、不导入其3个context资源。原3个verified payload chunks以hardlink
+保留同bytes，reader使用新manifest namespace的真实selector；无需再扫描82MB raw。
+新header明确保留原提取producer及raw收据，不将“此次0raw读取”冒称重新提取。版本化
+reader复核原payload descriptors、R2/Run/receipts、逐原行preimage与稀疏有序index。
+
+纠错真实gate已exit0：`first_stage_fd_values_correction_20261023/gate-attempt01`，wall
+65.15s/maxRSS277160KiB。12684原handles全部publiccodec/字段守恒、全部container
+Unresolved；12649真实FD端口逐槽selector核验，原35 endpoint精确等于public R2，
+25selected Work/38access不变。旧context read/build两条拒绝均核验，原raw打开0次。
+这是限定FD证据复核的成本，不是目标benchmark或完整资源模型。
+
+FD数值真实并不证明R1旧OFD target/end/coidentity完整：原filter还遗漏TN-only网络
+producer/SCM_RIGHTS接收，已选ioctl也可能含未解释的FD输出。故target/end原字段保持，
+资格明确为`PRESERVED_BASELINE_DECLARATIONS_NOT_REPROVED`；无新Resource/Work、ready或
+完整模型声明。详见[OS_CAPTURE_COVERAGE.md](OS_CAPTURE_COVERAGE.md)。
+
 2026-10-23。**Implemented + Verified（既有handle范围）**：唯一新生产文件
 `scar/trace/os_fd_source_projection.py`；R1/R2/core、coordinates、FD contexts、source helper、
 runtime和CLI未改。唯一真实投影gate已exit0，见末节；完整模型仍OPEN。

@@ -1,0 +1,880 @@
+1792756993.325030 execve("/home/zyf/miniconda3/envs/lewm/bin/python", ["/home/zyf/miniconda3/envs/lewm/bin/python", "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/child.py"], 0x7ffc093b4350 /* 78 vars */) = 0 <0.000372>
+1792756993.325573 brk(NULL)             = 0x5f87e0f4d000 <0.000012>
+1792756993.325654 mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7b35000 <0.000016>
+1792756993.325711 readlinkat(AT_FDCWD, "/proc/self/exe", "/home/zyf/miniconda3/envs/lewm/bin/python3.14", 4096) = 45 <0.000033>
+1792756993.325795 access("/etc/ld.so.preload", R_OK) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.325843 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/glibc-hwcaps/x86-64-v3/libpthread.so.0", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000018>
+1792756993.325907 newfstatat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/glibc-hwcaps/x86-64-v3/", 0x7ffdaa492c70, 0) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.325963 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/glibc-hwcaps/x86-64-v2/libpthread.so.0", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.326009 newfstatat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/glibc-hwcaps/x86-64-v2/", 0x7ffdaa492c70, 0) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.326067 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/libpthread.so.0", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.326112 newfstatat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/", {st_mode=S_IFDIR|0775, st_size=4096, ...}, 0) = 0 <0.000014>
+1792756993.326163 openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY|O_CLOEXEC) = 3 <0.000020>
+1792756993.326212 fstat(3, {st_mode=S_IFREG|0644, st_size=64803, ...}) = 0 <0.000012>
+1792756993.326256 mmap(NULL, 64803, PROT_READ, MAP_PRIVATE, 3, 0) = 0x758ac7b25000 <0.000017>
+1792756993.326300 close(3)              = 0 <0.000011>
+1792756993.326345 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libpthread.so.0", O_RDONLY|O_CLOEXEC) = 3 <0.000016>
+1792756993.326391 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0H1\0\0\0\0\0\0\0\0\0\0@\08\0\v\0@\0\34\0\33\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\240\v\0\0\0\0\0\0\240\v\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\25\1\0\0\0\0\0\0\25\1\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\230\0\0\0\0\0\0\0\230\0\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\230-\0\0\0\0\0\0\230=\0\0\0\0\0\0"..., 832) = 832 <0.000013>
+1792756993.326436 fstat(3, {st_mode=S_IFREG|0644, st_size=14408, ...}) = 0 <0.000012>
+1792756993.326480 mmap(NULL, 16400, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac7b20000 <0.000016>
+1792756993.326522 mmap(0x758ac7b21000, 4096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1000) = 0x758ac7b21000 <0.000021>
+1792756993.326569 mmap(0x758ac7b22000, 4096, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x758ac7b22000 <0.000017>
+1792756993.326612 mmap(0x758ac7b23000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x758ac7b23000 <0.000015>
+1792756993.326670 close(3)              = 0 <0.000011>
+1792756993.326708 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/libdl.so.2", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.326759 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libdl.so.2", O_RDONLY|O_CLOEXEC) = 3 <0.000016>
+1792756993.326807 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0H1\0\0\0\0\0\0\0\0\0\0@\08\0\v\0@\0\34\0\33\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\7\0\0\0\0\0\0\0\7\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\25\1\0\0\0\0\0\0\25\1\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\230\0\0\0\0\0\0\0\230\0\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\230-\0\0\0\0\0\0\230=\0\0\0\0\0\0"..., 832) = 832 <0.000012>
+1792756993.326868 fstat(3, {st_mode=S_IFREG|0644, st_size=14408, ...}) = 0 <0.000012>
+1792756993.326913 mmap(NULL, 16400, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac7b1b000 <0.000022>
+1792756993.326964 mmap(0x758ac7b1c000, 4096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1000) = 0x758ac7b1c000 <0.000032>
+1792756993.327037 mmap(0x758ac7b1d000, 4096, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x758ac7b1d000 <0.000018>
+1792756993.327084 mmap(0x758ac7b1e000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x758ac7b1e000 <0.000031>
+1792756993.327160 close(3)              = 0 <0.000012>
+1792756993.327200 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/libutil.so.1", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000018>
+1792756993.327251 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libutil.so.1", O_RDONLY|O_CLOEXEC) = 3 <0.000017>
+1792756993.327298 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0H1\0\0\0\0\0\0\0\0\0\0@\08\0\v\0@\0\34\0\33\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\370\5\0\0\0\0\0\0\370\5\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\20\0\0\0\0\0\0\25\1\0\0\0\0\0\0\25\1\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\230\0\0\0\0\0\0\0\230\0\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\230-\0\0\0\0\0\0\230=\0\0\0\0\0\0"..., 832) = 832 <0.000013>
+1792756993.327343 fstat(3, {st_mode=S_IFREG|0644, st_size=14408, ...}) = 0 <0.000013>
+1792756993.327392 mmap(NULL, 16400, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac7b16000 <0.000016>
+1792756993.327434 mmap(0x758ac7b17000, 4096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1000) = 0x758ac7b17000 <0.000018>
+1792756993.327479 mmap(0x758ac7b18000, 4096, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x758ac7b18000 <0.000017>
+1792756993.327522 mmap(0x758ac7b19000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x758ac7b19000 <0.000016>
+1792756993.327578 close(3)              = 0 <0.000012>
+1792756993.327616 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/libm.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.327665 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libm.so.6", O_RDONLY|O_CLOEXEC) = 3 <0.000016>
+1792756993.327710 read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0h\201\16\0\0\0\0\0\0\0\0\0@\08\0\v\0@\0\37\0\36\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\350\366\0\0\0\0\0\0\350\366\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0\0\1\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0\1\0\0\0\0\0\265\343\7\0\0\0\0\0\265\343\7\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\360\10\0\0\0\0\0\0\360\10\0\0\0\0\0\0\360\10\0\0\0\0\0P\177\5\0\0\0\0\0P\177\5\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\0|\16\0\0\0\0\0\0|\16\0\0\0\0\0"..., 832) = 832 <0.000013>
+1792756993.327754 fstat(3, {st_mode=S_IFREG|0644, st_size=952616, ...}) = 0 <0.000012>
+1792756993.327796 mmap(NULL, 950296, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac7a2d000 <0.000020>
+1792756993.327843 mmap(0x758ac7a3d000, 520192, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x10000) = 0x758ac7a3d000 <0.000019>
+1792756993.327889 mmap(0x758ac7abc000, 360448, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x8f000) = 0x758ac7abc000 <0.000017>
+1792756993.327933 mmap(0x758ac7b14000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0xe7000) = 0x758ac7b14000 <0.000015>
+1792756993.327998 close(3)              = 0 <0.000016>
+1792756993.328048 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/../lib/libc.so.6", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000017>
+1792756993.328101 openat(AT_FDCWD, "/lib/x86_64-linux-gnu/libc.so.6", O_RDONLY|O_CLOEXEC) = 3 <0.000016>
+1792756993.328153 read(3, "\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\220\243\2\0\0\0\0\0@\0\0\0\0\0\0\0\20^ \0\0\0\0\0\0\0\0\0@\08\0\16\0@\0@\0?\0\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\20\3\0\0\0\0\0\0\20\3\0\0\0\0\0\0\10\0\0\0\0\0\0\0\3\0\0\0\4\0\0\0\240g\35\0\0\0\0\0\240g\35\0\0\0\0\0\240g\35\0\0\0\0\0\34\0\0\0\0\0\0\0\34\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\220s\2\0\0\0\0\0\220s\2\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0\200\2\0\0\0\0\0\0\200\2\0\0\0\0\0"..., 832) = 832 <0.000012>
+1792756993.328197 pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\20\3\0\0\0\0\0\0\20\3\0\0\0\0\0\0\10\0\0\0\0\0\0\0\3\0\0\0\4\0\0\0\240g\35\0\0\0\0\0\240g\35\0\0\0\0\0\240g\35\0\0\0\0\0\34\0\0\0\0\0\0\0\34\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\220s\2\0\0\0\0\0\220s\2\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0\200\2\0\0\0\0\0\0\200\2\0\0\0\0\0\0\200\2\0\0\0\0\09}\30\0\0\0\0\09}\30\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\33\0\0\0\0\0\0\0\33\0\0\0\0\0\0\0\33\0\0\0\0\0"..., 784, 64) = 784 <0.000012>
+1792756993.328240 fstat(3, {st_mode=S_IFREG|0755, st_size=2125328, ...}) = 0 <0.000012>
+1792756993.328282 pread64(3, "\6\0\0\0\4\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\20\3\0\0\0\0\0\0\20\3\0\0\0\0\0\0\10\0\0\0\0\0\0\0\3\0\0\0\4\0\0\0\240g\35\0\0\0\0\0\240g\35\0\0\0\0\0\240g\35\0\0\0\0\0\34\0\0\0\0\0\0\0\34\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\220s\2\0\0\0\0\0\220s\2\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0\200\2\0\0\0\0\0\0\200\2\0\0\0\0\0\0\200\2\0\0\0\0\09}\30\0\0\0\0\09}\30\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\33\0\0\0\0\0\0\0\33\0\0\0\0\0\0\0\33\0\0\0\0\0"..., 784, 64) = 784 <0.000011>
+1792756993.328324 mmap(NULL, 2170256, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac7800000 <0.000016>
+1792756993.328367 mmap(0x758ac7828000, 1605632, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x28000) = 0x758ac7828000 <0.000020>
+1792756993.328414 mmap(0x758ac79b0000, 323584, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1b0000) = 0x758ac79b0000 <0.000028>
+1792756993.328468 mmap(0x758ac79ff000, 24576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1fe000) = 0x758ac79ff000 <0.000018>
+1792756993.328520 mmap(0x758ac7a05000, 52624, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x758ac7a05000 <0.000015>
+1792756993.328576 close(3)              = 0 <0.000012>
+1792756993.328627 mmap(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7a2b000 <0.000016>
+1792756993.328683 mmap(NULL, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7a28000 <0.000015>
+1792756993.328808 mprotect(0x758ac79ff000, 16384, PROT_READ) = 0 <0.000020>
+1792756993.328878 mprotect(0x758ac7b14000, 4096, PROT_READ) = 0 <0.000016>
+1792756993.328922 mprotect(0x758ac7b19000, 4096, PROT_READ) = 0 <0.000014>
+1792756993.328963 mprotect(0x758ac7b1e000, 4096, PROT_READ) = 0 <0.000014>
+1792756993.329004 mprotect(0x758ac7b23000, 4096, PROT_READ) = 0 <0.000021>
+1792756993.329731 mprotect(0x5f87ab1e9000, 385024, PROT_READ) = 0 <0.000027>
+1792756993.329793 mprotect(0x758ac7b75000, 8192, PROT_READ) = 0 <0.000019>
+1792756993.329877 munmap(0x758ac7b25000, 64803) = 0 <0.000026>
+1792756993.329996 open("/proc/sys/vm/overcommit_memory", O_RDONLY) = 3 <0.000022>
+1792756993.330062 read(3, "0\n", 32)    = 2 <0.000021>
+1792756993.330116 close(3)              = 0 <0.000014>
+1792756993.330185 brk(NULL)             = 0x5f87e0f4d000 <0.000011>
+1792756993.330222 brk(0x5f87e0f6e000)   = 0x5f87e0f6e000 <0.000014>
+1792756993.330276 openat(AT_FDCWD, "/usr/lib/locale/locale-archive", O_RDONLY|O_CLOEXEC) = 3 <0.000017>
+1792756993.330327 fstat(3, {st_mode=S_IFREG|0644, st_size=3055776, ...}) = 0 <0.000012>
+1792756993.330369 mmap(NULL, 3055776, PROT_READ, MAP_PRIVATE, 3, 0) = 0x758ac7400000 <0.000016>
+1792756993.330424 close(3)              = 0 <0.000011>
+1792756993.330467 openat(AT_FDCWD, "/usr/share/locale/locale.alias", O_RDONLY|O_CLOEXEC) = 3 <0.000020>
+1792756993.330518 fstat(3, {st_mode=S_IFREG|0644, st_size=2996, ...}) = 0 <0.000012>
+1792756993.330565 read(3, "# Locale name alias data base.\n# Copyright (C) 1996-2024 Free Software Foundation, Inc.\n#\n# This program is free software; you can redistribute it and/or modify\n# it under the terms of the GNU General Public License as published by\n# the Free Software Foun"..., 4096) = 2996 <0.000013>
+1792756993.330621 read(3, "", 4096)     = 0 <0.000011>
+1792756993.330658 close(3)              = 0 <0.000012>
+1792756993.330702 openat(AT_FDCWD, "/usr/lib/locale/C.UTF-8/LC_CTYPE", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.330749 openat(AT_FDCWD, "/usr/lib/locale/C.utf8/LC_CTYPE", O_RDONLY|O_CLOEXEC) = 3 <0.000015>
+1792756993.330795 fstat(3, {st_mode=S_IFREG|0644, st_size=360460, ...}) = 0 <0.000012>
+1792756993.330836 mmap(NULL, 360460, PROT_READ, MAP_PRIVATE, 3, 0) = 0x758ac77a7000 <0.000016>
+1792756993.330878 close(3)              = 0 <0.000011>
+1792756993.330924 openat(AT_FDCWD, "/usr/lib/x86_64-linux-gnu/gconv/gconv-modules.cache", O_RDONLY|O_CLOEXEC) = 3 <0.000015>
+1792756993.330969 fstat(3, {st_mode=S_IFREG|0644, st_size=27028, ...}) = 0 <0.000011>
+1792756993.331010 mmap(NULL, 27028, PROT_READ, MAP_SHARED, 3, 0) = 0x758ac7b2e000 <0.000017>
+1792756993.331065 close(3)              = 0 <0.000012>
+1792756993.331264 openat(AT_FDCWD, "/proc/self/maps", O_RDONLY|O_CLOEXEC) = 3 <0.000028>
+1792756993.331331 fstat(3, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0 <0.000012>
+1792756993.331374 read(3, "5f87aaccf000-5f87aad5d000 r--p 00000000 fc:05 15082380                   /home/zyf/miniconda3/envs/lewm/bin/python3.14\n5f87aad5d000-5f87ab054000 r-xp 0008e000 fc:05 15082380                   /home/zyf/miniconda3/envs/lewm/bin/python3.14\n5f87ab054000-5f87a"..., 1024) = 1024 <0.000027>
+1792756993.331439 read(3, "nux-gnu/libc.so.6\n758ac7828000-758ac79b0000 r-xp 00028000 fc:00 6460596                    /usr/lib/x86_64-linux-gnu/libc.so.6\n758ac79b0000-758ac79ff000 r--p 001b0000 fc:00 6460596                    /usr/lib/x86_64-linux-gnu/libc.so.6\n758ac79ff000-758ac7a"..., 1024) = 1024 <0.000018>
+1792756993.331499 read(3, "000 fc:00 6460599                    /usr/lib/x86_64-linux-gnu/libm.so.6\n758ac7b16000-758ac7b17000 r--p 00000000 fc:00 6460612                    /usr/lib/x86_64-linux-gnu/libutil.so.1\n758ac7b17000-758ac7b18000 r-xp 00001000 fc:00 6460612                  "..., 1024) = 1024 <0.000017>
+1792756993.331549 read(3, "            /usr/lib/x86_64-linux-gnu/libdl.so.2\n758ac7b1f000-758ac7b20000 rw-p 00003000 fc:00 6460598                    /usr/lib/x86_64-linux-gnu/libdl.so.2\n758ac7b20000-758ac7b21000 r--p 00000000 fc:00 6460608                    /usr/lib/x86_64-linux-gn"..., 1024) = 1024 <0.000018>
+1792756993.331602 read(3, "000 00:00 0                          [vvar_vclock]\n758ac7b3d000-758ac7b3f000 r-xp 00000000 00:00 0                          [vdso]\n758ac7b3f000-758ac7b40000 r--p 00000000 fc:00 6460593                    /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2\n758ac"..., 1024) = 896 <0.000017>
+1792756993.331653 close(3)              = 0 <0.000014>
+1792756993.331884 mmap(NULL, 1048576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7300000 <0.000018>
+1792756993.331930 mmap(NULL, 266240, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7766000 <0.000014>
+1792756993.331976 mmap(NULL, 135168, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7745000 <0.000014>
+1792756993.332718 brk(0x5f87e0f8f000)   = 0x5f87e0f8f000 <0.000017>
+1792756993.333864 mmap(NULL, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7b2a000 <0.000021>
+1792756993.334540 brk(0x5f87e0fb0000)   = 0x5f87e0fb0000 <0.000020>
+1792756993.334905 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/pyvenv.cfg", O_RDONLY) = -1 ENOENT (No such file or directory) <0.000021>
+1792756993.334973 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/pyvenv.cfg", O_RDONLY) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.335047 readlink("/home/zyf/miniconda3/envs/lewm/bin/python", "python3.14", 4096) = 10 <0.000017>
+1792756993.335119 readlink("/home/zyf/miniconda3/envs/lewm/bin/python3.14", 0x7ffdaa48df60, 4096) = -1 EINVAL (Invalid argument) <0.000013>
+1792756993.335174 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/python._pth", O_RDONLY) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.335229 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/python3.14._pth", O_RDONLY) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.335283 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/bin/pybuilddir.txt", O_RDONLY) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.335351 stat("/home/zyf/miniconda3/envs/lewm/bin/lib/python314.zip", 0x7ffdaa492c10) = -1 ENOENT (No such file or directory) <0.000026>
+1792756993.335426 stat("/home/zyf/miniconda3/envs/lewm/lib/python314.zip", 0x7ffdaa492f40) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.335478 stat("/home/zyf/miniconda3/envs/lib/python314.zip", 0x7ffdaa492f40) = -1 ENOENT (No such file or directory) <0.000013>
+1792756993.335526 stat("/home/zyf/miniconda3/lib/python314.zip", 0x7ffdaa492f40) = -1 ENOENT (No such file or directory) <0.000013>
+1792756993.335574 stat("/home/zyf/lib/python314.zip", 0x7ffdaa492f40) = -1 ENOENT (No such file or directory) <0.000013>
+1792756993.335621 stat("/home/lib/python314.zip", 0x7ffdaa492f40) = -1 ENOENT (No such file or directory) <0.000013>
+1792756993.335675 stat("/home/zyf/miniconda3/envs/lewm/bin/lib/python3.14/os.py", 0x7ffdaa492f40) = -1 ENOENT (No such file or directory) <0.000013>
+1792756993.335724 stat("/home/zyf/miniconda3/envs/lewm/bin/lib/python3.14/os.pyc", 0x7ffdaa492f40) = -1 ENOENT (No such file or directory) <0.000013>
+1792756993.335774 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/os.py", {st_mode=S_IFREG|0664, st_size=41958, ...}) = 0 <0.000014>
+1792756993.335831 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000013>
+1792756993.335884 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000013>
+1792756993.337125 mmap(NULL, 1048576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7200000 <0.000022>
+1792756993.337378 brk(0x5f87e0fd1000)   = 0x5f87e0fd1000 <0.000018>
+1792756993.337933 openat(AT_FDCWD, "/etc/localtime", O_RDONLY|O_CLOEXEC) = 3 <0.000022>
+1792756993.337988 fstat(3, {st_mode=S_IFREG|0644, st_size=114, ...}) = 0 <0.000012>
+1792756993.338041 fstat(3, {st_mode=S_IFREG|0644, st_size=114, ...}) = 0 <0.000012>
+1792756993.338086 read(3, "TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\0UTC\0TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\0UTC\0\nUTC0\n", 4096) = 114 <0.000013>
+1792756993.338129 lseek(3, -60, SEEK_CUR) = 54 <0.000011>
+1792756993.338167 read(3, "TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\0\0UTC\0\nUTC0\n", 4096) = 60 <0.000011>
+1792756993.338208 close(3)              = 0 <0.000012>
+1792756993.338412 stat("/home/zyf/miniconda3/envs/lewm/lib/python314.zip", 0x7ffdaa4926d0) = -1 ENOENT (No such file or directory) <0.000017>
+1792756993.338487 stat("/home/zyf/miniconda3/envs/lewm/lib", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.338558 stat("/home/zyf/miniconda3/envs/lewm/lib/python314.zip", 0x7ffdaa492b80) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.338625 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.338687 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.338761 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.338825 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000018>
+1792756993.338873 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000012>
+1792756993.338922 getdents64(3, 0x5f87e0fb9e40 /* 202 entries */, 32768) = 6864 <0.000100>
+1792756993.339163 getdents64(3, 0x5f87e0fb9e40 /* 0 entries */, 32768) = 0 <0.000013>
+1792756993.339206 close(3)              = 0 <0.000025>
+1792756993.339298 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__init__.cpython-314-x86_64-linux-gnu.so", 0x7ffdaa492b80) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.339362 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__init__.abi3.so", 0x7ffdaa492b80) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.339419 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__init__.so", 0x7ffdaa492b80) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.339474 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__init__.py", {st_mode=S_IFREG|0664, st_size=5945, ...}) = 0 <0.000015>
+1792756993.339587 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__init__.py", {st_mode=S_IFREG|0664, st_size=5945, ...}) = 0 <0.000017>
+1792756993.339669 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__pycache__/__init__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.339719 fcntl(3, F_GETFD)     = 0x1 (flags FD_CLOEXEC) <0.000012>
+1792756993.339759 fstat(3, {st_mode=S_IFREG|0664, st_size=6733, ...}) = 0 <0.000012>
+1792756993.339806 mmap(NULL, 135168, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7724000 <0.000017>
+1792756993.339856 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.339900 read(3, "+\16\r\n\0\0\0\0\303\222\230j9\27\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\6\0\0\0\0\0\0\0\363\364\0\0\0\200\0R\0t\0^\0R\1I\1t\1^\0R\1I\2t\2^\1R\2I\3H\4t\4\37\0/\0t\5R\3t\6R\4t\7R\5.\1t\10]\4P\10\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\t\25\0!\0R\6\27\0R\7]\n]\v4\4\0\0\0\0\0\0t\fR\10\27\0t\rR\t\27\0t\16]\1P\36\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0!\0]\0164\1\0\0\0\0\0\0\37\0]\2P \0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0R\n8X\0\0d\36\0\0\34\0^\1R\vI\21H\22t\22\37\0R\f\27\0t\23]\1P\36\0\0\0\0\0\0\0\0\0\0"..., 6734) = 6733 <0.000022>
+1792756993.339954 read(3, "", 1)        = 0 <0.000011>
+1792756993.339997 close(3)              = 0 <0.000017>
+1792756993.340045 munmap(0x758ac7724000, 135168) = 0 <0.000027>
+1792756993.341088 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000021>
+1792756993.341166 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.341238 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.341296 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000017>
+1792756993.341343 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000011>
+1792756993.341392 getdents64(3, 0x5f87e0fc6150 /* 126 entries */, 32768) = 4264 <0.000063>
+1792756993.341545 getdents64(3, 0x5f87e0fc6150 /* 0 entries */, 32768) = 0 <0.000012>
+1792756993.341584 close(3)              = 0 <0.000020>
+1792756993.341669 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/aliases.py", {st_mode=S_IFREG|0664, st_size=16255, ...}) = 0 <0.000017>
+1792756993.341774 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/aliases.py", {st_mode=S_IFREG|0664, st_size=16255, ...}) = 0 <0.000017>
+1792756993.341848 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__pycache__/aliases.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.341896 fstat(3, {st_mode=S_IFREG|0664, st_size=12962, ...}) = 0 <0.000011>
+1792756993.341941 brk(0x5f87e100f000)   = 0x5f87e100f000 <0.000015>
+1792756993.341988 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.342042 read(3, "+\16\r\n\0\0\0\0\303\222\230j\177?\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\363\234\n\0\0\200\0R\0t\0/\0R\1R\2b\1R\3R\2b\1R\4R\2b\1R\5R\2b\1R\6R\2b\1R\7R\2b\1R\10R\2b\1R\tR\2b\1R\nR\2b\1R\vR\2b\1R\fR\2b\1R\rR\2b\1R\16R\17b\1R\20R\17b\1R\21R\22b\1R\23R\22b\1R\24R\25b\1/\0R\26R\25b\1R\27R\30b\1R\31R\32b\1R\33R\32b\1R\34R\32b\1R\35R\32b\1R\36R\32b\1R\37R\32b\1R R\32b\1R!R\32b\1R\"R#b\1R$R#b\1R%R#b\1R&R'b\1R(R'b\1R)R'b\1R*R'b\1"..., 12963) = 12962 <0.000023>
+1792756993.342107 read(3, "", 1)        = 0 <0.000011>
+1792756993.342149 close(3)              = 0 <0.000012>
+1792756993.342506 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.342580 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/utf_8.py", {st_mode=S_IFREG|0664, st_size=1005, ...}) = 0 <0.000016>
+1792756993.342678 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/utf_8.py", {st_mode=S_IFREG|0664, st_size=1005, ...}) = 0 <0.000017>
+1792756993.342753 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__pycache__/utf_8.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.342803 fstat(3, {st_mode=S_IFREG|0664, st_size=2325, ...}) = 0 <0.000012>
+1792756993.342850 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.342891 read(3, "+\16\r\n\0\0\0\0\303\222\230j\355\3\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\0\0\0\0\363\342\0\0\0\200\0R\0t\0^\0R\1I\1t\1]\1P\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\3R\fR\2\27\0l\1t\4\25\0!\0R\3\27\0R\4]\1P\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0t\5\25\0!\0R\5\27\0R\6]\1P\f\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0t\7\25\0!\0R\7\27\0R\10]\1P\20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0t\10\25\0!\0R\t\27\0R\n]\1P\22\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0"..., 2326) = 2325 <0.000014>
+1792756993.342936 read(3, "", 1)        = 0 <0.000011>
+1792756993.342977 close(3)              = 0 <0.000012>
+1792756993.343360 fstat(0, {st_mode=S_IFCHR|0666, st_rdev=makedev(0x1, 0x3), ...}) = 0 <0.000016>
+1792756993.343414 fcntl(0, F_GETFD)     = 0 <0.000011>
+1792756993.343455 fstat(0, {st_mode=S_IFCHR|0666, st_rdev=makedev(0x1, 0x3), ...}) = 0 <0.000011>
+1792756993.343498 ioctl(0, TCGETS, 0x7ffdaa493120) = -1 ENOTTY (Inappropriate ioctl for device) <0.000014>
+1792756993.343615 lseek(0, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.343657 ioctl(0, TCGETS, 0x7ffdaa4933b0) = -1 ENOTTY (Inappropriate ioctl for device) <0.000012>
+1792756993.343729 fcntl(1, F_GETFD)     = 0 <0.000013>
+1792756993.343772 fstat(1, {st_mode=S_IFREG|0664, st_size=0, ...}) = 0 <0.000012>
+1792756993.343824 lseek(1, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.343863 ioctl(1, TCGETS, 0x7ffdaa4933b0) = -1 ENOTTY (Inappropriate ioctl for device) <0.000012>
+1792756993.343923 lseek(1, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.343963 fcntl(2, F_GETFD)     = 0 <0.000011>
+1792756993.344001 fstat(2, {st_mode=S_IFREG|0664, st_size=0, ...}) = 0 <0.000034>
+1792756993.344074 brk(0x5f87e104f000)   = 0x5f87e104f000 <0.000015>
+1792756993.344123 lseek(2, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.344160 ioctl(2, TCGETS, 0x7ffdaa4933b0) = -1 ENOTTY (Inappropriate ioctl for device) <0.000012>
+1792756993.344218 lseek(2, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.346013 brk(0x5f87e1070000)   = 0x5f87e1070000 <0.000032>
+1792756993.348356 stat("/home/zyf/miniconda3/envs/lewm/bin/pyvenv.cfg", 0x7ffdaa492300) = -1 ENOENT (No such file or directory) <0.000023>
+1792756993.348434 stat("/home/zyf/miniconda3/envs/lewm/pyvenv.cfg", 0x7ffdaa492320) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.348547 stat("/home/zyf/.local/lib/python3.14/site-packages", 0x7ffdaa492660) = -1 ENOENT (No such file or directory) <0.000018>
+1792756993.348619 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000018>
+1792756993.348697 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000022>
+1792756993.348751 fstat(3, {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000012>
+1792756993.348810 getdents64(3, 0x5f87e1062820 /* 340 entries */, 32768) = 14272 <0.000170>
+1792756993.349109 getdents64(3, 0x5f87e1062820 /* 0 entries */, 32768) = 0 <0.000012>
+1792756993.349150 close(3)              = 0 <0.000015>
+1792756993.349228 lstat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/__editable__.stable_pretraining-0.1.8.pth", {st_mode=S_IFREG|0664, st_size=107, ...}) = 0 <0.000018>
+1792756993.349303 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/__editable__.stable_pretraining-0.1.8.pth", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.349353 fstat(3, {st_mode=S_IFREG|0664, st_size=107, ...}) = 0 <0.000012>
+1792756993.349399 brk(0x5f87e10a3000)   = 0x5f87e10a3000 <0.000015>
+1792756993.349445 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.349486 read(3, "import __editable___stable_pretraining_0_1_8_finder; __editable___stable_pretraining_0_1_8_finder.install()", 108) = 107 <0.000013>
+1792756993.349528 read(3, "", 1)        = 0 <0.000011>
+1792756993.349569 close(3)              = 0 <0.000013>
+1792756993.349669 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.349736 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/utf_8_sig.py", {st_mode=S_IFREG|0664, st_size=4133, ...}) = 0 <0.000015>
+1792756993.349827 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/utf_8_sig.py", {st_mode=S_IFREG|0664, st_size=4133, ...}) = 0 <0.000016>
+1792756993.349893 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__pycache__/utf_8_sig.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.349945 fstat(3, {st_mode=S_IFREG|0664, st_size=7195, ...}) = 0 <0.000013>
+1792756993.349992 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.350048 read(3, "+\16\r\n\0\0\0\0\303\222\230j%\20\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\0\0\0\0\363\324\0\0\0\200\0R\0t\0^\0R\1I\1t\1R\rR\2\27\0l\1t\2R\rR\3\27\0l\1t\3\25\0!\0R\4\27\0R\5]\1P\10\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0t\4\25\0!\0R\6\27\0R\7]\1P\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0t\6\25\0!\0R\10\27\0R\t]\1P\16\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0t\7\25\0!\0R\n\27\0R\v]\1P\20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0t\10R\f\27\0t\tR\1#\0)\16"..., 7196) = 7195 <0.000018>
+1792756993.350100 read(3, "", 1)        = 0 <0.000012>
+1792756993.350143 close(3)              = 0 <0.000013>
+1792756993.350522 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000021>
+1792756993.350597 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.350655 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000014>
+1792756993.350716 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.350771 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000017>
+1792756993.350819 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000012>
+1792756993.350866 getdents64(3, 0x5f87e1064f70 /* 77 entries */, 32768) = 4904 <0.000053>
+1792756993.350972 getdents64(3, 0x5f87e1064f70 /* 0 entries */, 32768) = 0 <0.000013>
+1792756993.351013 close(3)              = 0 <0.000020>
+1792756993.351097 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000017>
+1792756993.351160 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000014>
+1792756993.351220 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000014>
+1792756993.351273 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000017>
+1792756993.351326 fstat(3, {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000012>
+1792756993.351374 getdents64(3, 0x5f87e1065780 /* 340 entries */, 32768) = 14272 <0.000151>
+1792756993.351621 getdents64(3, 0x5f87e1065780 /* 0 entries */, 32768) = 0 <0.000012>
+1792756993.351660 close(3)              = 0 <0.000015>
+1792756993.351769 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/__editable___stable_pretraining_0_1_8_finder.py", {st_mode=S_IFREG|0664, st_size=3430, ...}) = 0 <0.000016>
+1792756993.351867 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/__editable___stable_pretraining_0_1_8_finder.py", {st_mode=S_IFREG|0664, st_size=3430, ...}) = 0 <0.000017>
+1792756993.351934 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/__pycache__/__editable___stable_pretraining_0_1_8_finder.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000020>
+1792756993.351986 fstat(3, {st_mode=S_IFREG|0664, st_size=6280, ...}) = 0 <0.000012>
+1792756993.352047 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.352089 read(3, "+\16\r\n\0\0\0\0\1*\251jf\r\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\4\0\0\0\0\0\0\1\363\264\0\0\0a\0\200\0000\0t\0$\0^\0R\1I\1H\2t\2\37\0^\0R\2I\3t\3^\0R\3I\4H\5t\5H\6t\6\37\0^\0R\4I\4H\7t\10\37\0^\0R\5I\tH\nt\n\37\0^\0R\6I\vH\ft\f\37\0^\0R\7I\rH\16t\16\37\0R\10R\t/\1t\17R\n]\20R\v&\0\0\0/\0t\21R\f]\20R\r&\0\0\0R\23t\22\25\0!\0R\16\27\0R\0174\2\0\0\0\0\0\0t\23\25\0!\0R\20\27\0R\0214\2\0\0\0\0\0\0t\24R\22\27\0t\25R\2#\0)\24\351\0\0\0\0)\1\332\vannotationsN)\2\332\nModuleS"..., 6281) = 6280 <0.000015>
+1792756993.352137 read(3, "", 1)        = 0 <0.000011>
+1792756993.352178 close(3)              = 0 <0.000013>
+1792756993.352639 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.352714 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/__future__.py", {st_mode=S_IFREG|0664, st_size=5218, ...}) = 0 <0.000016>
+1792756993.352803 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/__future__.py", {st_mode=S_IFREG|0664, st_size=5218, ...}) = 0 <0.000017>
+1792756993.352868 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/__future__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.352916 fstat(3, {st_mode=S_IFREG|0664, st_size=4773, ...}) = 0 <0.000011>
+1792756993.352961 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.353000 read(3, "+\16\r\n\0\0\0\0\303\222\230jb\24\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\0\0\0\0\363*\1\0\0\200\0R\0t\0.\0R\rO\1t\1R\1.\1]\1,\0\0\0\0\0\0\0\0\0\0\0t\2^\20t\3^\0t\4R\2t\5R\3t\6R\4t\7R\5t\10R\6t\tR\7t\nR\10t\vR\tt\f\25\0!\0R\n\27\0R\v4\2\0\0\0\0\0\0t\r]\r!\0R\16R\17]\0034\3\0\0\0\0\0\0t\16]\r!\0R\20R\21]\0044\3\0\0\0\0\0\0t\17]\r!\0R\22R\23]\0054\3\0\0\0\0\0\0t\20]\r!\0R\24R\23]\0064\3\0\0\0\0\0\0t\21]\r!\0R\24R\25]\0074\3\0\0\0\0\0\0t\22]\r!\0R\26R\23]\0104\3\0\0\0\0\0\0t\23"..., 4774) = 4773 <0.000032>
+1792756993.353069 read(3, "", 1)        = 0 <0.000012>
+1792756993.353112 close(3)              = 0 <0.000013>
+1792756993.353299 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000018>
+1792756993.353369 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.cpython-314-x86_64-linux-gnu.so", 0x7ffdaa490690) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.353428 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.abi3.so", 0x7ffdaa490690) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.353477 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.so", 0x7ffdaa490690) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.353525 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py", {st_mode=S_IFREG|0664, st_size=4767, ...}) = 0 <0.000014>
+1792756993.353615 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py", {st_mode=S_IFREG|0664, st_size=4767, ...}) = 0 <0.000017>
+1792756993.353679 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__pycache__/__init__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.353735 fstat(3, {st_mode=S_IFREG|0664, st_size=4610, ...}) = 0 <0.000012>
+1792756993.353781 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.353821 read(3, "+\16\r\n\0\0\0\0\304\222\230j\237\22\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\0\0\0\0\3638\2\0\0\200\0R\0t\0.\0R\16O\1t\1^\0R\1I\2t\2^\0R\1I\3t\3\33\0^\0R\1I\4t\5R\2]\5n\6\0\0\0\0\0\0\0\0R\3]\5n\7\0\0\0\0\0\0\0\0\33\0]\10P\23\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0R\4R\0054\2\0\0\0\0\0\0]\5n\10\0\0\0\0\0\0\0\0]\5]\3P\26\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0R\2&\0\0\0\33\0^\0R\1I\17t\20R\7]\20n\6\0\0\0\0\0\0\0\0R\3]\20n\7\0\0\0\0\0\0\0\0\33\0]\10P\23\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0R\4R\0104\2"..., 4611) = 4610 <0.000014>
+1792756993.353866 read(3, "", 1)        = 0 <0.000012>
+1792756993.353907 close(3)              = 0 <0.000013>
+1792756993.354145 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.354220 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/warnings.py", {st_mode=S_IFREG|0664, st_size=1966, ...}) = 0 <0.000016>
+1792756993.354309 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/warnings.py", {st_mode=S_IFREG|0664, st_size=1966, ...}) = 0 <0.000016>
+1792756993.354372 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/warnings.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.354420 fstat(3, {st_mode=S_IFREG|0664, st_size=2491, ...}) = 0 <0.000011>
+1792756993.354465 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.354505 read(3, "+\16\r\n\0\0\0\0\303\222\230j\256\7\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\363\270\1\0\0\200\0^\0R\1I\0t\0.\0R\10O\1t\1^\0R\2I\2H\3t\3H\4t\4H\5t\5H\6t\6H\7t\7H\10t\10H\tt\tH\nt\nH\vt\vH\ft\fH\rt\rH\16t\16H\17t\17H\20t\20H\21t\21H\22t\22H\23t\23H\24t\24H\25t\25H\26t\26H\27t\27H\30t\30H\31t\31H\32t\32H\33t\33H\34t\34H\35t\35H\36t\36H\37t\37H t H!t!H\"t\"H#t#H$t$H%t%H&t&H't'H(t(H)t)H*t*H+t+H,t,H-t-H.t.\37\0\33\0^\0R\3I/H0t0"..., 2492) = 2491 <0.000013>
+1792756993.354549 read(3, "", 1)        = 0 <0.000011>
+1792756993.354590 close(3)              = 0 <0.000013>
+1792756993.354721 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.354786 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/_py_warnings.py", {st_mode=S_IFREG|0664, st_size=30631, ...}) = 0 <0.000016>
+1792756993.354871 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/_py_warnings.py", {st_mode=S_IFREG|0664, st_size=30631, ...}) = 0 <0.000016>
+1792756993.354933 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/_py_warnings.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.354982 fstat(3, {st_mode=S_IFREG|0664, st_size=36975, ...}) = 0 <0.000012>
+1792756993.355033 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.355083 read(3, "+\16\r\n\0\0\0\0\303\222\230j\247w\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\0\0\0\0\363P\2\0\0\200\0R\0t\0^\0R\1I\1t\1^\0R\1I\2t\2^\0R\1I\3t\3.\0R3O\1t\4R\1s\5R\4\27\0t\6.\0t\7R\5t\10/\0t\t]\3P\24\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0!\0004\0\0\0\0\0\0\0t\v^\1t\f]\1P\32\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0P\34\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\17\25\0!\0R\6\27\0R\0074\2\0\0\0\0\0\0t\20\25\0!\0R\10\27\0R\t]\0204\3\0\0\0\0\0\0t\21]\21!\0004\0\0\0\0\0\0\0t\22]\2P&\0\0\0\0\0\0\0\0\0\0\0\0"..., 36976) = 36975 <0.000050>
+1792756993.355167 read(3, "", 1)        = 0 <0.000011>
+1792756993.355208 close(3)              = 0 <0.000013>
+1792756993.355912 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000021>
+1792756993.355982 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.356059 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.356115 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000018>
+1792756993.356170 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000011>
+1792756993.356220 getdents64(3, 0x5f87e1079410 /* 14 entries */, 32768) = 456 <0.000022>
+1792756993.356280 getdents64(3, 0x5f87e1079410 /* 0 entries */, 32768) = 0 <0.000012>
+1792756993.356320 close(3)              = 0 <0.000014>
+1792756993.356375 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/_abc.py", {st_mode=S_IFREG|0664, st_size=1354, ...}) = 0 <0.000016>
+1792756993.356465 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/_abc.py", {st_mode=S_IFREG|0664, st_size=1354, ...}) = 0 <0.000016>
+1792756993.356530 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__pycache__/_abc.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.356579 fstat(3, {st_mode=S_IFREG|0664, st_size=1662, ...}) = 0 <0.000012>
+1792756993.356625 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.356666 read(3, "+\16\r\n\0\0\0\0\304\222\230jJ\5\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\6\0\0\0\0\0\0\0\363J\0\0\0\200\0R\0t\0^\1R\1I\1H\2t\2\37\0^\0R\2I\3t\3\25\0!\0R\3\27\0R\4]\3P\10\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0R\0057\3\0\0\0\0\0\0t\5R\2#\0)\6z>Subset of importlib.abc used to reduce importlib.util imports.)\1\332\n_bootstrapNc\0\0\0\0\0\0\0\0\0\0\0\0\1\0\0\0\0\0\0\0\3630\0\0\0a\0\200\0]\0t\1R\0t\2^\6t\3\26\0o\0R\1t\4R\2\27\0t\5R\3\27"..., 1663) = 1662 <0.000013>
+1792756993.356710 read(3, "", 1)        = 0 <0.000011>
+1792756993.356750 close(3)              = 0 <0.000012>
+1792756993.356934 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000018>
+1792756993.357001 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/types.py", {st_mode=S_IFREG|0664, st_size=11464, ...}) = 0 <0.000021>
+1792756993.357098 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/types.py", {st_mode=S_IFREG|0664, st_size=11464, ...}) = 0 <0.000016>
+1792756993.357163 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/types.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.357224 fstat(3, {st_mode=S_IFREG|0664, st_size=15836, ...}) = 0 <0.000012>
+1792756993.357270 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.357309 read(3, "+\16\r\n\0\0\0\0\303\222\230j\310,\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\6\0\0\0\0\0\0\0\363\256\4\0\0\200\0R\0t\0\33\0^\0R\1I\0015\2\37\0R\27R\f\27\0l\1t;R\r\27\0t<R\30R\16\27\0l\1t=R\17\27\0t>R\20\27\0t?\25\0!\0R\21\27\0R\0224\2\0\0\0\0\0\0t@\25\0!\0R\23\27\0R\0244\2\0\0\0\0\0\0tAR\25\27\0tB]C!\0004\0\0\0\0\0\0\0\20\0U\0u\2.\0u\2F\35\0\0q\0P\211\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0R\0264\1\0\0\0\0\0\0'\0\0\0\0\0\0\0d\3\0\0\34\0K\33\0\0T\0N\2K\37\0\0\t\0\36\0u\2p\0tER\2#\0 \0]\2\6\0E\1d\344\0\0\34\0"..., 15837) = 15836 <0.000015>
+1792756993.357356 read(3, "", 1)        = 0 <0.000011>
+1792756993.357397 close(3)              = 0 <0.000013>
+1792756993.357996 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000026>
+1792756993.358073 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.cpython-314-x86_64-linux-gnu.so", 0x7ffdaa490d30) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.358136 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.abi3.so", 0x7ffdaa490d30) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.358185 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.so", 0x7ffdaa490d30) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.358233 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py", {st_mode=S_IFREG|0664, st_size=46807, ...}) = 0 <0.000016>
+1792756993.358325 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py", {st_mode=S_IFREG|0664, st_size=46807, ...}) = 0 <0.000017>
+1792756993.358389 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__pycache__/__init__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.358443 fstat(3, {st_mode=S_IFREG|0664, st_size=61642, ...}) = 0 <0.000012>
+1792756993.358490 brk(0x5f87e10c5000)   = 0x5f87e10c5000 <0.000015>
+1792756993.358536 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.358581 read(3, "+\16\r\n\0\0\0\0\304\222\230j\327\266\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\6\0\0\0\0\0\0\0\363\364\1\0\0\200\0R\0t\0^\0R\1I\1t\1^\0R\1I\2t\2^\0R\1I\3t\3^\0R\1I\4t\4^\0R\1I\5t\5^\0R\1I\6t\6^\0R\2I\0075\2\37\0^\0R\3I\10H\tt\tH\nt\n\37\0^\0R\4I\vH\ft\f\37\0^\0R\5I\rH\16t\16H\17t\17H\20t\20H\21t\21H\22t\22H\23t\23\37\0^\0R\6I\24H\25t\25\37\0\33\0^\0R\1I\26t\26\33\0^\0R\1I\30t\30^\0R\7I\31H\32t\32H\33t\33H\34t\34H\35t\35H\36t\36H\37t\37H t H!t!\37\0.\0R\30O\1t\"\25\0!\0R\17\27\0R\10"..., 61643) = 61642 <0.000062>
+1792756993.358675 read(3, "", 1)        = 0 <0.000011>
+1792756993.358717 close(3)              = 0 <0.000013>
+1792756993.359779 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000020>
+1792756993.359864 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.359927 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000014>
+1792756993.360052 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000018>
+1792756993.360122 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.360181 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000014>
+1792756993.360282 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.360344 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.360404 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000014>
+1792756993.360481 mmap(NULL, 1048576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7100000 <0.000018>
+1792756993.360592 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.360657 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.360716 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000015>
+1792756993.360806 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.360868 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.360926 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000015>
+1792756993.361025 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000020>
+1792756993.361159 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000027>
+1792756993.361258 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000017>
+1792756993.361439 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000027>
+1792756993.361536 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000023>
+1792756993.361626 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000024>
+1792756993.361780 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000025>
+1792756993.361873 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000024>
+1792756993.361977 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000038>
+1792756993.362189 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000026>
+1792756993.362284 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/operator.py", {st_mode=S_IFREG|0664, st_size=11158, ...}) = 0 <0.000023>
+1792756993.362424 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/operator.py", {st_mode=S_IFREG|0664, st_size=11158, ...}) = 0 <0.000025>
+1792756993.362522 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/operator.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000035>
+1792756993.362612 fstat(3, {st_mode=S_IFREG|0664, st_size=18991, ...}) = 0 <0.000020>
+1792756993.362682 lseek(3, 0, SEEK_CUR) = 0 <0.000015>
+1792756993.362742 read(3, "+\16\r\n\0\0\0\0\303\222\230j\226+\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\363j\3\0\0\200\0R\0t\0.\0R\1N\1R\2N\1R\3N\1R\4N\1R\5N\1R\6N\1R\7N\1R\10N\1R\tN\1R\nN\1R\vN\1R\fN\1R\rN\1R\16N\1R\17N\1R\20N\1R\21N\1R\22N\1R\23N\1R\24N\1R\25N\1R\26N\1R\27N\1R\30N\1R\31N\1R\32N\1R\33N\1R\34N\1R\35N\1R\36N\1R\37N\1R N\1R!N\1R\"N\1R#N\1R$N\1R%N\1R&N\1R'N\1R(N\1R)N\1R*N\1R+N\1R,N\1R-N\1R.N\1R/N\1R0N\1R1N\1R2N\1R3N\1R4"..., 18992) = 18991 <0.000025>
+1792756993.362802 read(3, "", 1)        = 0 <0.000012>
+1792756993.362851 close(3)              = 0 <0.000014>
+1792756993.363727 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000040>
+1792756993.363837 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/glob.py", {st_mode=S_IFREG|0664, st_size=20775, ...}) = 0 <0.000016>
+1792756993.363932 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/glob.py", {st_mode=S_IFREG|0664, st_size=20775, ...}) = 0 <0.000017>
+1792756993.363998 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/glob.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000029>
+1792756993.364063 fstat(3, {st_mode=S_IFREG|0664, st_size=26108, ...}) = 0 <0.000012>
+1792756993.364112 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.364158 read(3, "+\16\r\n\0\0\0\0\303\222\230j'Q\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\10\0\0\0\0\0\0\0\363\"\2\0\0\200\0R\0t\0^\0R\1I\1t\1^\0R\1I\2t\2^\0R\1I\3t\3^\0R\1I\4t\4^\0R\1I\5t\5^\0R\1I\6t\6^\0R\1I\7t\7^\0R\1I\10t\10^\0R\1I\tt\t.\0R(O\1t\nR\2R\1R\3R\1R\4R\5R\6R\5/\4R\7\27\0l\2t\vR\2R\1R\3R\1R\4R\5R\6R\5/\4R\10\27\0l\2t\fR)R\t\27\0l\1t\rR)R\n\27\0l\1t\16R)R\v\27\0l\1t\17R\ft\20R\r\27\0t\21R\16\27\0t\22R)R\17\27\0l\1t\23R\20\27\0t\24R\21\27\0t\25R)R\22\27\0l\1"..., 26109) = 26108 <0.000025>
+1792756993.364216 read(3, "", 1)        = 0 <0.000011>
+1792756993.364257 close(3)              = 0 <0.000012>
+1792756993.364504 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000018>
+1792756993.364570 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/contextlib.py", {st_mode=S_IFREG|0664, st_size=27801, ...}) = 0 <0.000015>
+1792756993.364659 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/contextlib.py", {st_mode=S_IFREG|0664, st_size=27801, ...}) = 0 <0.000016>
+1792756993.364723 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/contextlib.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.364775 fstat(3, {st_mode=S_IFREG|0664, st_size=31131, ...}) = 0 <0.000013>
+1792756993.364824 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.364870 read(3, "+\16\r\n\0\0\0\0\303\222\230j\231l\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\7\0\0\0\0\0\0\0\363$\2\0\0\200\0R\0t\0^\0R\1I\1t\1^\0R\1I\2t\2^\0R\1I\3t\3^\0R\1I\4t\4^\0R\2I\5H\6t\6\37\0^\0R\3I\7H\10t\10\37\0^\0R\4I\tH\nt\nH\vt\v\37\0.\0R+O\1t\f\25\0!\0R\21\27\0R\7]\1P\32\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0t\16\25\0!\0R\22\27\0R\10]\1P\32\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0t\17\25\0!\0R\23\27\0R\n]\0204\3\0\0\0\0\0\0t\21\25\0!\0R\24\27\0R\25]\0204\3\0\0\0\0\0\0t\22"..., 31132) = 31131 <0.000022>
+1792756993.364946 read(3, "", 1)        = 0 <0.000012>
+1792756993.364999 close(3)              = 0 <0.000029>
+1792756993.365338 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000024>
+1792756993.365434 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/collections/__init__.cpython-314-x86_64-linux-gnu.so", 0x7ffdaa48e8a0) = -1 ENOENT (No such file or directory) <0.000019>
+1792756993.365508 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/collections/__init__.abi3.so", 0x7ffdaa48e8a0) = -1 ENOENT (No such file or directory) <0.000018>
+1792756993.365572 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/collections/__init__.so", 0x7ffdaa48e8a0) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.365632 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/collections/__init__.py", {st_mode=S_IFREG|0664, st_size=53021, ...}) = 0 <0.000015>
+1792756993.365722 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/collections/__init__.py", {st_mode=S_IFREG|0664, st_size=53021, ...}) = 0 <0.000017>
+1792756993.365787 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/collections/__pycache__/__init__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.365837 fstat(3, {st_mode=S_IFREG|0664, st_size=74864, ...}) = 0 <0.000022>
+1792756993.365893 lseek(3, 0, SEEK_CUR) = 0 <0.000025>
+1792756993.365949 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.365990 brk(0x5f87e10e9000)   = 0x5f87e10e9000 <0.000021>
+1792756993.366053 read(3, "+\16\r\n\0\0\0\0\303\222\230j\35\317\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\6\0\0\0\0\0\0\0\363X\3\0\0\200\0R\0t\0.\0R,O\1t\1^\0R\7I\2t\2^\0R\7I\3t\4]\2]\4P\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0R\10&\0\0\0]\2t\6^\0R\tI\7H\10t\t\37\0^\0R\nI\7H\nt\v\37\0^\0R\vI\7H\ft\r\37\0^\0R\fI\16H\17t\20\37\0^\0R\rI\21H\22t\23\37\0^\0R\16I\21H\24t\25\37\0^\0R\17I\26H\27t\30\37\0^\0R\20I\31H\32t\33\37\0\33\0^\0R\21I\34H\35t\35\37\0]\2P<\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0P?\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 74865) = 74864 <0.000053>
+1792756993.366146 read(3, "", 1)        = 0 <0.000013>
+1792756993.366194 close(3)              = 0 <0.000014>
+1792756993.367013 brk(0x5f87e10bc000)   = 0x5f87e10bc000 <0.000051>
+1792756993.367163 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000020>
+1792756993.367240 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/keyword.py", {st_mode=S_IFREG|0664, st_size=1073, ...}) = 0 <0.000016>
+1792756993.367336 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/keyword.py", {st_mode=S_IFREG|0664, st_size=1073, ...}) = 0 <0.000017>
+1792756993.367406 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/keyword.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.367461 fstat(3, {st_mode=S_IFREG|0664, st_size=1526, ...}) = 0 <0.000013>
+1792756993.367511 lseek(3, 0, SEEK_CUR) = 0 <0.000013>
+1792756993.367557 read(3, "+\16\r\n\0\0\0\0\303\222\230j1\4\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\3\0\0\0\0\0\0\0\363\362\0\0\0\200\0R\0t\0.\0R%O\1t\1.\0R\1N\1R\2N\1R\3N\1R\4N\1R\5N\1R\6N\1R\7N\1R\10N\1R\tN\1R\nN\1R\vN\1R\fN\1R\rN\1R\16N\1R\17N\1R\20N\1R\21N\1R\22N\1R\23N\1R\24N\1R\25N\1R\26N\1R\27N\1R\30N\1R\31N\1R\32N\1R\33N\1R\34N\1R\35N\1R\36N\1R\37N\1R N\1R!N\1R\"N\1R#N\1t\2.\0R&O\1t\3]\4!\0]\0024\1\0\0\0\0\0\0P\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\6]\4!\0]\0034\1\0\0\0\0"..., 1527) = 1526 <0.000014>
+1792756993.367607 read(3, "", 1)        = 0 <0.000012>
+1792756993.367652 close(3)              = 0 <0.000013>
+1792756993.367786 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.367859 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/reprlib.py", {st_mode=S_IFREG|0664, st_size=8064, ...}) = 0 <0.000016>
+1792756993.367951 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/reprlib.py", {st_mode=S_IFREG|0664, st_size=8064, ...}) = 0 <0.000017>
+1792756993.368026 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/reprlib.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000021>
+1792756993.368092 fstat(3, {st_mode=S_IFREG|0664, st_size=11675, ...}) = 0 <0.000013>
+1792756993.368145 lseek(3, 0, SEEK_CUR) = 0 <0.000013>
+1792756993.368191 brk(0x5f87e10df000)   = 0x5f87e10df000 <0.000016>
+1792756993.368242 read(3, "+\16\r\n\0\0\0\0\303\222\230j\200\37\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\363|\0\0\0\200\0R\0t\0.\0R\10O\1t\1^\0R\2I\2t\2^\0R\3I\3H\4t\4\37\0^\0R\4I\5H\6t\6\37\0R\tR\5\27\0l\1t\7\25\0!\0R\6\27\0R\0014\2\0\0\0\0\0\0t\10R\7\27\0t\t]\10!\0004\0\0\0\0\0\0\0t\n]\nP\26\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\vR\2#\0)\nzGRedo the builtin repr() (representation) but with limits on most sizes.\332\4ReprN)\1\332\6isli"..., 11676) = 11675 <0.000024>
+1792756993.368302 read(3, "", 1)        = 0 <0.000012>
+1792756993.368347 close(3)              = 0 <0.000013>
+1792756993.368485 brk(0x5f87e10bc000)   = 0x5f87e10bc000 <0.000027>
+1792756993.369181 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000022>
+1792756993.369264 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/functools.py", {st_mode=S_IFREG|0664, st_size=43564, ...}) = 0 <0.000017>
+1792756993.369362 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/functools.py", {st_mode=S_IFREG|0664, st_size=43564, ...}) = 0 <0.000017>
+1792756993.369429 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/functools.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.369481 fstat(3, {st_mode=S_IFREG|0664, st_size=48005, ...}) = 0 <0.000012>
+1792756993.369529 brk(0x5f87e10e3000)   = 0x5f87e10e3000 <0.000015>
+1792756993.369577 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.369623 read(3, "+\16\r\n\0\0\0\0\303\222\230j,\252\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\v\0\0\0\0\0\0\0\363:\3\0\0\200\0R\0t\0.\0R=O\1t\1^\0R\5I\2H\3t\3\37\0^\0R\6I\4H\5t\5\37\0^\0R\7I\6H\7t\7\37\0^\0R\10I\10H\tt\t\37\0^\0R\tI\nH\vt\vH\ft\fH\rt\rH\16t\16\37\0^\0R\nI\17H\20t\20\37\0R>t\21R?t\22]\21]\0223\2R\v\27\0l\1t\23]\21]\0223\2R\f\27\0l\1t\24R\r\27\0t\25R\16\27\0t\26R\17\27\0t\27R\20\27\0t\30R\21\27\0t\31R\22\27\0t\32R\23\27\0t\33R\24\27\0t\34R\25\27\0t\35R\26\27\0t\36R\27\27\0t\37R\30\27\0t R\31R\32]\0253\2"..., 48006) = 48005 <0.000052>
+1792756993.369710 read(3, "", 1)        = 0 <0.000012>
+1792756993.369753 close(3)              = 0 <0.000013>
+1792756993.371075 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000022>
+1792756993.371155 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.cpython-314-x86_64-linux-gnu.so", 0x7ffdaa48f4d0) = -1 ENOENT (No such file or directory) <0.000018>
+1792756993.371221 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.abi3.so", 0x7ffdaa48f4d0) = -1 ENOENT (No such file or directory) <0.000018>
+1792756993.371280 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.so", 0x7ffdaa48f4d0) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.371333 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.py", {st_mode=S_IFREG|0664, st_size=17876, ...}) = 0 <0.000015>
+1792756993.371437 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.py", {st_mode=S_IFREG|0664, st_size=17876, ...}) = 0 <0.000019>
+1792756993.371512 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__pycache__/__init__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000021>
+1792756993.371574 fstat(3, {st_mode=S_IFREG|0664, st_size=19960, ...}) = 0 <0.000014>
+1792756993.371636 lseek(3, 0, SEEK_CUR) = 0 <0.000014>
+1792756993.371688 read(3, "+\16\r\n\0\0\0\0\304\222\230j\324E\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\10\0\0\0\0\0\0\0\363\222\3\0\0\200\0R\0t\0^\0R\1I\1t\1^\1R\2I\2H\3t\3H\4t\4\37\0^\0R\1I\5t\5^\0R\1I\6t\6.\0R\3N\1R\4N\1R\5N\1R\6N\1R\7N\1R\10N\1R\tN\1R\nN\1R\vN\1R\fN\1R\rN\1R\16N\1R\17N\1R\20N\1R\21N\1R\22N\1R\23N\1R\24N\1R\25N\1R\26N\1R\27N\1R\30N\1R\31N\1R\32N\1R\33N\1R\34N\1R\35N\1R\36N\1R\37N\1R N\1R!N\1t\7R\"t\10]\1P\22\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0]\1P\24\0\0\0\0\0\0\0\0\0\0"..., 19961) = 19960 <0.000028>
+1792756993.371757 read(3, "", 1)        = 0 <0.000012>
+1792756993.371813 close(3)              = 0 <0.000015>
+1792756993.371997 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000024>
+1792756993.372093 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/enum.py", {st_mode=S_IFREG|0664, st_size=85450, ...}) = 0 <0.000018>
+1792756993.372198 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/enum.py", {st_mode=S_IFREG|0664, st_size=85450, ...}) = 0 <0.000019>
+1792756993.372275 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/enum.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000020>
+1792756993.372336 fstat(3, {st_mode=S_IFREG|0664, st_size=88021, ...}) = 0 <0.000015>
+1792756993.372393 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.372441 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.372486 brk(0x5f87e110d000)   = 0x5f87e110d000 <0.000017>
+1792756993.372542 read(3, "+\16\r\n\0\0\0\0\303\222\230j\312M\1\0\343\0\0\0\0\0\0\0\0\0\0\0\0\t\0\0\0\0\0\0\0\363\340\2\0\0\200\0^\0R\1I\0t\0^\0R\1I\1t\2^\0R\2I\3H\4t\4H\5t\5\37\0.\0RAO\1t\6R\1;\1t\7;\1t\10;\1t\t;\1t\nt\v\25\0!\0R\22\27\0R\17]\f4\3\0\0\0\0\0\0t\r\25\0!\0R\23\27\0R\16]\f4\3\0\0\0\0\0\0t\16R\24\27\0t\17R\25\27\0t\20R\26\27\0t\21R\27\27\0t\22R\30\27\0t\23R\31\27\0t\24R\32\27\0t\25R\33\27\0t\26R\34\27\0t\27RBR\35\27\0l\1t\30\25\0!\0R\36\27\0R\0374\2\0\0\0\0\0\0t\31]\31!\0004\0\0\0\0\0\0\0t\31\25\0!\0R \27\0R!"..., 88022) = 88021 <0.000079>
+1792756993.372662 read(3, "", 1)        = 0 <0.000012>
+1792756993.372712 close(3)              = 0 <0.000015>
+1792756993.373249 brk(0x5f87e10e5000)   = 0x5f87e10e5000 <0.000046>
+1792756993.374648 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000022>
+1792756993.374723 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.374791 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.374845 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000018>
+1792756993.374895 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000012>
+1792756993.374938 getdents64(3, 0x5f87e10caa80 /* 8 entries */, 32768) = 248 <0.000020>
+1792756993.374993 getdents64(3, 0x5f87e10caa80 /* 0 entries */, 32768) = 0 <0.000017>
+1792756993.375042 close(3)              = 0 <0.000014>
+1792756993.375099 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_compiler.py", {st_mode=S_IFREG|0664, st_size=26855, ...}) = 0 <0.000016>
+1792756993.375194 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_compiler.py", {st_mode=S_IFREG|0664, st_size=26855, ...}) = 0 <0.000017>
+1792756993.375261 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__pycache__/_compiler.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000029>
+1792756993.375322 fstat(3, {st_mode=S_IFREG|0664, st_size=29658, ...}) = 0 <0.000012>
+1792756993.375369 brk(0x5f87e110b000)   = 0x5f87e110b000 <0.000015>
+1792756993.375418 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.375462 read(3, "+\16\r\n\0\0\0\0\304\222\230j\347h\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\10\0\0\0\0\0\0\0\363\230\1\0\0\200\0R\0t\0^\0R\1I\1t\1^\1R\2I\2H\3t\3\37\0^\1R\3I\0045\2\37\0^\1R\4I\5H\6t\6\37\0]\1P\16\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0]\78X\0\0g\10\0\0\34\0Q\0R\0054\0\0\0\0\0\0\0h\1]\10]\t0\2t\n]\v]\f0\2t\r]\16]\0170\2t\20]\n]\21]\0220\2,\7\0\0\0\0\0\0\0\0\0\0t\23]\24]\25]\26]\0273\3]\30]\25]\31]\0323\3]\33]\33]\v]\0343\3/\3t\35]\36R\0013\2.\1t\37]\3P@\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0003\1R\6\27\0"..., 29659) = 29658 <0.000032>
+1792756993.375527 read(3, "", 1)        = 0 <0.000011>
+1792756993.375569 close(3)              = 0 <0.000013>
+1792756993.375935 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000020>
+1792756993.376006 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_parser.py", {st_mode=S_IFREG|0664, st_size=40353, ...}) = 0 <0.000018>
+1792756993.376114 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_parser.py", {st_mode=S_IFREG|0664, st_size=40353, ...}) = 0 <0.000017>
+1792756993.376183 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__pycache__/_parser.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.376256 fstat(3, {st_mode=S_IFREG|0664, st_size=45248, ...}) = 0 <0.000018>
+1792756993.376352 lseek(3, 0, SEEK_CUR) = 0 <0.000013>
+1792756993.376412 read(3, "+\16\r\n\0\0\0\0\304\222\230j\241\235\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\27\0\0\0\0\0\0\0\363\204\2\0\0\200\0R\0t\0^\1R\1I\0015\2\37\0R\2t\2R\3t\3]\4!\0R\0044\1\0\0\0\0\0\0t\5]\4!\0R\0054\1\0\0\0\0\0\0t\6]\4!\0R\0064\1\0\0\0\0\0\0t\7]\4!\0R\0074\1\0\0\0\0\0\0t\10]\4!\0R\0104\1\0\0\0\0\0\0t\t]\4!\0]\n]\v]\f0\0034\1\0\0\0\0\0\0t\r]\4!\0]\16]\17]\20]\21]\22]\0230\0064\1\0\0\0\0\0\0t\24R\t]\21]\25!\0R\n4\1\0\0\0\0\0\0003\2R\v]\21]\25!\0R\f4\1\0\0\0\0\0\0003\2R\r]\21]\25!\0R\0164\1\0\0\0\0\0\0003\2"..., 45249) = 45248 <0.000046>
+1792756993.376504 read(3, "", 1)        = 0 <0.000013>
+1792756993.376554 close(3)              = 0 <0.000015>
+1792756993.376650 mmap(NULL, 208896, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7712000 <0.000021>
+1792756993.377439 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000034>
+1792756993.377549 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_constants.py", {st_mode=S_IFREG|0664, st_size=6036, ...}) = 0 <0.000018>
+1792756993.377654 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_constants.py", {st_mode=S_IFREG|0664, st_size=6036, ...}) = 0 <0.000019>
+1792756993.377731 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__pycache__/_constants.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000021>
+1792756993.377794 fstat(3, {st_mode=S_IFREG|0664, st_size=5618, ...}) = 0 <0.000014>
+1792756993.377852 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.377899 read(3, "+\16\r\n\0\0\0\0\304\222\230j\224\27\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\24\0\0\0\0\0\0\0\363\2\2\0\0\200\0R\0t\0R\1t\1^\0R\2I\2H\3t\3H\4t\4\37\0\25\0!\0R\3\27\0R\4]\0054\3\0\0\0\0\0\0t\6]\6t\7\25\0!\0R\5\27\0R\6]\0104\3\0\0\0\0\0\0t\t]\t!\0]\3R\0074\2\0\0\0\0\0\0t\3R\10\27\0t\n]\n!\0R+!\0\4\0t\v]\vR,R\t1\2\10\0]\n!\0R\nR\vR\fR\rR\16R\17R\20R\21R\22R\23R\24R\0254\f\0\0\0\0\0\0t\f]\n!\0R\26R\27R\30R\31R\32R\33R\34R\35R\36R\37R R!R\"R#R$R%R&R'4\22\0\0\0\0\0\0t\r]\16]\17]\20"..., 5619) = 5618 <0.000016>
+1792756993.377962 read(3, "", 1)        = 0 <0.000014>
+1792756993.378021 close(3)              = 0 <0.000017>
+1792756993.378521 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000025>
+1792756993.378613 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_casefix.py", {st_mode=S_IFREG|0664, st_size=5444, ...}) = 0 <0.000019>
+1792756993.378718 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_casefix.py", {st_mode=S_IFREG|0664, st_size=5444, ...}) = 0 <0.000018>
+1792756993.378795 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__pycache__/_casefix.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000020>
+1792756993.378856 fstat(3, {st_mode=S_IFREG|0664, st_size=1803, ...}) = 0 <0.000015>
+1792756993.378914 lseek(3, 0, SEEK_CUR) = 0 <0.000016>
+1792756993.378977 read(3, "+\16\r\n\0\0\0\0\304\222\230jD\25\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\363>\1\0\0\200\0/\0^iR1b\1^sR2b\1^\265R3b\1R\1R4b\1R\2R5b\1R\4R6b\1R\7R7b\1R\tR8b\1R\vR9b\1R\rR:b\1R\17R;b\1R\5R<b\1R\21R=b\1R\3R>b\1R\23R?b\1R\25R@b\1R\27RAb\1/\0R\30RBb\1R\31RCb\1R\fRDb\1R\20REb\1R\32RFb\1R\24RGb\1R\22RHb\1R\26RIb\1R\16RJb\1R\33RKb\1R\35RLb\1R\37RMb\1R!RNb\1R#ROb\1R&RPb\1R(RQb\1R\34RRb\1C\1/\0"..., 1804) = 1803 <0.000015>
+1792756993.379046 read(3, "", 1)        = 0 <0.000012>
+1792756993.379096 close(3)              = 0 <0.000015>
+1792756993.379664 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000022>
+1792756993.379749 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/copyreg.py", {st_mode=S_IFREG|0664, st_size=7716, ...}) = 0 <0.000019>
+1792756993.379861 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/copyreg.py", {st_mode=S_IFREG|0664, st_size=7716, ...}) = 0 <0.000019>
+1792756993.379938 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/copyreg.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000022>
+1792756993.380001 fstat(3, {st_mode=S_IFREG|0664, st_size=7911, ...}) = 0 <0.000016>
+1792756993.380074 lseek(3, 0, SEEK_CUR) = 0 <0.000016>
+1792756993.380128 read(3, "+\16\r\n\0\0\0\0\303\222\230j$\36\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\6\0\0\0\0\0\0\0\363\356\0\0\0\200\0R\0t\0.\0R\17O\1t\1/\0t\2R\20R\2\27\0l\1t\3R\3\27\0t\4R\4\27\0t\5]\3!\0]\6]\5]\0064\3\0\0\0\0\0\0\37\0R\5\27\0t\7]\3!\0]\10!\0]\t]\n,\7\0\0\0\0\0\0\0\0\0\0004\1\0\0\0\0\0\0]\0074\2\0\0\0\0\0\0\37\0R\6\27\0t\v]\3!\0]\f]\v4\2\0\0\0\0\0\0\37\0R\7\27\0t\rR\21t\16]\10!\0]\tP\36\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\1\0\0\0\0\0\0t\20R\10\27\0t\21R\t\27\0t\22R\n\27\0t\23R\v\27\0t\24/\0t\25/\0t\26/\0"..., 7912) = 7911 <0.000017>
+1792756993.380187 read(3, "", 1)        = 0 <0.000012>
+1792756993.380234 close(3)              = 0 <0.000015>
+1792756993.380445 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000021>
+1792756993.380525 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/fnmatch.py", {st_mode=S_IFREG|0664, st_size=6791, ...}) = 0 <0.000019>
+1792756993.380628 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/fnmatch.py", {st_mode=S_IFREG|0664, st_size=6791, ...}) = 0 <0.000019>
+1792756993.380705 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/fnmatch.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000020>
+1792756993.380765 fstat(3, {st_mode=S_IFREG|0664, st_size=7857, ...}) = 0 <0.000014>
+1792756993.380821 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.380871 read(3, "+\16\r\n\0\0\0\0\303\222\230j\207\32\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\0\0\0\0\363\26\1\0\0\200\0R\0t\0^\0R\1I\1t\1^\0R\1I\2t\2^\0R\1I\3t\3^\0R\1I\4t\4^\0R\1I\5t\5.\0R\20O\1t\6R\2\27\0t\7]\1P\20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0!\0R\3R\4R\0057\2\0\0\0\0\0\0R\6\27\0004\0\0\0\0\0\0\0t\tR\7\27\0t\nR\10\27\0t\vR\t\27\0t\fR\n\27\0t\r]\5P\34\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0!\0R\v4\1\0\0\0\0\0\0P\36\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\20]\1P\20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 7858) = 7857 <0.000017>
+1792756993.380929 read(3, "", 1)        = 0 <0.000012>
+1792756993.380977 close(3)              = 0 <0.000015>
+1792756993.381671 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000034>
+1792756993.381775 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000018>
+1792756993.381845 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/grp.cpython-314-x86_64-linux-gnu.so", {st_mode=S_IFREG|0775, st_size=56488, ...}) = 0 <0.000017>
+1792756993.381940 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/grp.cpython-314-x86_64-linux-gnu.so", O_RDONLY|O_CLOEXEC) = 3 <0.000020>
+1792756993.381995 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\350\323\0\0\0\0\0\0\0\0\0\0@\08\0\10\0@\0#\0\"\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\240\23\0\0\0\0\0\0\240\23\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\21\10\0\0\0\0\0\0\21\10\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0000\0\0\0\0\0\0\0000\0\0\0\0\0\0\0000\0\0\0\0\0\0\364\10\0\0\0\0\0\0\364\10\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\260<\0\0\0\0\0\0\260L\0\0\0\0\0\0"..., 832) = 832 <0.000017>
+1792756993.382053 fstat(3, {st_mode=S_IFREG|0775, st_size=56488, ...}) = 0 <0.000014>
+1792756993.382106 mmap(NULL, 21136, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac7a22000 <0.000020>
+1792756993.382158 mmap(0x758ac7a24000, 4096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x758ac7a24000 <0.000023>
+1792756993.382212 mmap(0x758ac7a25000, 4096, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x3000) = 0x758ac7a25000 <0.000022>
+1792756993.382271 mmap(0x758ac7a26000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x3000) = 0x758ac7a26000 <0.000016>
+1792756993.382337 close(3)              = 0 <0.000013>
+1792756993.382404 mprotect(0x758ac7a26000, 4096, PROT_READ) = 0 <0.000019>
+1792756993.382553 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000020>
+1792756993.382626 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.382698 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.382758 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000019>
+1792756993.382812 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000012>
+1792756993.382859 getdents64(3, 0x5f87e10d2ef0 /* 7 entries */, 32768) = 208 <0.000020>
+1792756993.382917 getdents64(3, 0x5f87e10d2ef0 /* 0 entries */, 32768) = 0 <0.000013>
+1792756993.382961 close(3)              = 0 <0.000014>
+1792756993.383023 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/_os.py", {st_mode=S_IFREG|0664, st_size=18161, ...}) = 0 <0.000019>
+1792756993.383126 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/_os.py", {st_mode=S_IFREG|0664, st_size=18161, ...}) = 0 <0.000017>
+1792756993.383197 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__pycache__/_os.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.383251 fstat(3, {st_mode=S_IFREG|0664, st_size=22434, ...}) = 0 <0.000013>
+1792756993.383303 lseek(3, 0, SEEK_CUR) = 0 <0.000013>
+1792756993.383349 read(3, "+\16\r\n\0\0\0\0\304\222\230j\361F\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\0\0\0\0\363t\2\0\0\200\0R\0t\0^\0R\1I\0015\2\37\0^\0R\2I\2H\3t\3H\4t\4\37\0^\0R\3I\5H\6t\6H\7t\7H\10t\10H\tt\t\37\0^\0R\4I\nt\n^\0R\4I\vt\v\33\0^\0R\4I\ft\f\33\0^\0R\4I\16t\16\33\0^\0R\4I\17t\17R\5\27\0t\20]\f'\0\0\0\0\0\0\0d\24\0\0\34\0]\21!\0]\fR\0064\2\0\0\0\0\0\0'\0\0\0\0\0\0\0d\5\0\0\34\0R\7\27\0t\22M\2R\4t\22]\16'\0\0\0\0\0\0\0d\24\0\0\34\0]\21!\0]\16R\0104\2\0\0\0\0\0\0'\0\0\0\0\0\0\0d\5\0\0\34\0R\t"..., 22435) = 22434 <0.000018>
+1792756993.383403 read(3, "", 1)        = 0 <0.000013>
+1792756993.383449 close(3)              = 0 <0.000013>
+1792756993.383751 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000018>
+1792756993.383826 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.383889 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/fcntl.cpython-314-x86_64-linux-gnu.so", {st_mode=S_IFREG|0775, st_size=54960, ...}) = 0 <0.000016>
+1792756993.383969 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/fcntl.cpython-314-x86_64-linux-gnu.so", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.384039 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0000\316\0\0\0\0\0\0\0\0\0\0@\08\0\10\0@\0\"\0!\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\30\23\0\0\0\0\0\0\30\23\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\0 \0\0\0\0\0\0\261\22\0\0\0\0\0\0\261\22\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\250\26\0\0\0\0\0\0\250\26\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\260\\\0\0\0\0\0\0\260l\0\0\0\0\0\0"..., 832) = 832 <0.000014>
+1792756993.384089 fstat(3, {st_mode=S_IFREG|0775, st_size=54960, ...}) = 0 <0.000012>
+1792756993.384133 mmap(NULL, 29040, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac7a1a000 <0.000018>
+1792756993.384179 mmap(0x758ac7a1c000, 8192, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x2000) = 0x758ac7a1c000 <0.000027>
+1792756993.384233 mmap(0x758ac7a1e000, 8192, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x4000) = 0x758ac7a1e000 <0.000016>
+1792756993.384281 mmap(0x758ac7a20000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x5000) = 0x758ac7a20000 <0.000015>
+1792756993.384340 close(3)              = 0 <0.000011>
+1792756993.384397 mprotect(0x758ac7a20000, 4096, PROT_READ) = 0 <0.000018>
+1792756993.384532 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.384599 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.384658 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000014>
+1792756993.385196 lstat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/conda-site.pth", {st_mode=S_IFREG|0664, st_size=115, ...}) = 0 <0.000021>
+1792756993.385274 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/conda-site.pth", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.385325 fstat(3, {st_mode=S_IFREG|0664, st_size=115, ...}) = 0 <0.000012>
+1792756993.385371 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.385412 read(3, "/home/zyf/miniconda3/envs/lewm/lib/python3.1/site-packages\n/home/zyf/miniconda3/envs/lewm/lib/python/site-packages\n", 116) = 115 <0.000014>
+1792756993.385456 read(3, "", 1)        = 0 <0.000011>
+1792756993.385496 close(3)              = 0 <0.000012>
+1792756993.385559 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.1/site-packages", 0x7ffdaa492660) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.385621 stat("/home/zyf/miniconda3/envs/lewm/lib/python/site-packages", 0x7ffdaa492680) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.385678 lstat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/distutils-precedence.pth", {st_mode=S_IFREG|0664, st_size=151, ...}) = 0 <0.000016>
+1792756993.385740 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/distutils-precedence.pth", O_RDONLY|O_CLOEXEC) = 3 <0.000017>
+1792756993.385804 fstat(3, {st_mode=S_IFREG|0664, st_size=151, ...}) = 0 <0.000014>
+1792756993.385857 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.385900 read(3, "import os; var = 'SETUPTOOLS_USE_DISTUTILS'; enabled = os.environ.get(var, 'local') == 'local'; enabled and __import__('_distutils_hack').add_shim(); \n", 152) = 151 <0.000014>
+1792756993.385946 read(3, "", 1)        = 0 <0.000012>
+1792756993.385988 close(3)              = 0 <0.000014>
+1792756993.386257 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000022>
+1792756993.386336 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.386400 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000015>
+1792756993.386457 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/_distutils_hack/__init__.cpython-314-x86_64-linux-gnu.so", 0x7ffdaa4919f0) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.386515 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/_distutils_hack/__init__.abi3.so", 0x7ffdaa4919f0) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.386571 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/_distutils_hack/__init__.so", 0x7ffdaa4919f0) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.386625 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/_distutils_hack/__init__.py", {st_mode=S_IFREG|0664, st_size=6755, ...}) = 0 <0.000015>
+1792756993.386730 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/_distutils_hack/__init__.py", {st_mode=S_IFREG|0664, st_size=6755, ...}) = 0 <0.000018>
+1792756993.386800 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/_distutils_hack/__pycache__/__init__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000021>
+1792756993.386860 fstat(3, {st_mode=S_IFREG|0664, st_size=11690, ...}) = 0 <0.000012>
+1792756993.386908 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.386957 read(3, "+\16\r\n\0\0\0\0+$\251jc\32\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\6\0\0\0\0\0\0\0\363\22\1\0\0\200\0^\0R\1I\0t\0^\0R\1I\1t\1R\2t\2R\3\27\0t\3R\4\27\0t\4R\5\27\0t\5R\6\27\0t\6R\7\27\0t\7\25\0!\0R\10\27\0R\t4\2\0\0\0\0\0\0t\10\25\0!\0R\n\27\0R\v4\2\0\0\0\0\0\0t\t]\tP\24\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\20\0F\32\0\0t\v]\f!\0]\tR\f]\v\f\0002\2]\tP\32\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0004\3\0\0\0\0\0\0\37\0K\34\0\0\t\0\36\0]\t!\0004\0\0\0\0\0\0\0t\16R\r\27\0t\17\25\0!\0R\16\27\0R\0174\2\0\0\0\0\0\0"..., 11691) = 11690 <0.000022>
+1792756993.387012 read(3, "", 1)        = 0 <0.000013>
+1792756993.387064 close(3)              = 0 <0.000014>
+1792756993.387356 lstat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/stable_worldmodel.pth", {st_mode=S_IFREG|0664, st_size=38, ...}) = 0 <0.000021>
+1792756993.387434 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/stable_worldmodel.pth", O_RDONLY|O_CLOEXEC) = 3 <0.000021>
+1792756993.387491 fstat(3, {st_mode=S_IFREG|0664, st_size=38, ...}) = 0 <0.000013>
+1792756993.387541 lseek(3, 0, SEEK_CUR) = 0 <0.000013>
+1792756993.387585 read(3, "/home/zyf/AAA/le-wm/stable-worldmodel/", 39) = 38 <0.000014>
+1792756993.387631 read(3, "", 1)        = 0 <0.000012>
+1792756993.387675 close(3)              = 0 <0.000014>
+1792756993.387735 stat("/home/zyf/AAA/le-wm/stable-worldmodel", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.387898 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.387974 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.388048 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000018>
+1792756993.388123 stat("/home/zyf/AAA/le-wm/stable-worldmodel", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.388189 stat("/home/zyf/AAA/le-wm/stable-worldmodel", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.388258 stat("/home/zyf/AAA/le-wm/stable-worldmodel", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.388315 openat(AT_FDCWD, "/home/zyf/AAA/le-wm/stable-worldmodel", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000019>
+1792756993.388367 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000013>
+1792756993.388414 getdents64(3, 0x5f87e10d90b0 /* 13 entries */, 32768) = 416 <0.000025>
+1792756993.388476 getdents64(3, 0x5f87e10d90b0 /* 0 entries */, 32768) = 0 <0.000012>
+1792756993.388517 close(3)              = 0 <0.000014>
+1792756993.388640 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000031>
+1792756993.388725 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.388791 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000022>
+1792756993.388861 stat("/home/zyf/AAA/le-wm/stable-worldmodel", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000014>
+1792756993.388967 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/child.py", {st_mode=S_IFREG|0664, st_size=726, ...}) = 0 <0.000018>
+1792756993.389040 openat(AT_FDCWD, "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/child.py", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.389097 fstat(3, {st_mode=S_IFREG|0664, st_size=726, ...}) = 0 <0.000012>
+1792756993.389143 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.389183 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.389221 lseek(3, 0, SEEK_END) = 726 <0.000011>
+1792756993.389259 lseek(3, 0, SEEK_CUR) = 726 <0.000012>
+1792756993.389301 lseek(3, 0, SEEK_SET) = 0 <0.000012>
+1792756993.389353 read(3, "\"\"\"Authorized no-state diagnostic child; Linux amd64 only.\"\"\"\nimport ctypes\nimport json\nimport platform\n\nassert platform.machine()=='x86_64'\nlibc=ctypes.CDLL(None,use_errno=True)\nlibc.syscall.restype=ctypes.c_long\nresults=[]\nfor name,number,args in [('unsh"..., 131072) = 726 <0.000013>
+1792756993.389399 read(3, "", 130346)   = 0 <0.000012>
+1792756993.389450 lseek(3, 0, SEEK_SET) = 0 <0.000012>
+1792756993.389491 close(3)              = 0 <0.000013>
+1792756993.389537 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/child.py", {st_mode=S_IFREG|0664, st_size=726, ...}) = 0 <0.000016>
+1792756993.389614 readlink("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/child.py", 0x7ffdaa481860, 4096) = -1 EINVAL (Invalid argument) <0.000015>
+1792756993.389671 readlink("/home", 0x7ffdaa482450, 1023) = -1 EINVAL (Invalid argument) <0.000013>
+1792756993.389716 readlink("/home/zyf", 0x7ffdaa482450, 1023) = -1 EINVAL (Invalid argument) <0.000012>
+1792756993.389759 readlink("/home/zyf/AAA", 0x7ffdaa482450, 1023) = -1 EINVAL (Invalid argument) <0.000012>
+1792756993.389802 readlink("/home/zyf/AAA/scar-worktrees", 0x7ffdaa482450, 1023) = -1 EINVAL (Invalid argument) <0.000012>
+1792756993.389845 readlink("/home/zyf/AAA/scar-worktrees/structured-program-model", 0x7ffdaa482450, 1023) = -1 EINVAL (Invalid argument) <0.000012>
+1792756993.389889 readlink("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts", 0x7ffdaa482450, 1023) = -1 EINVAL (Invalid argument) <0.000013>
+1792756993.389932 readlink("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments", 0x7ffdaa482450, 1023) = -1 EINVAL (Invalid argument) <0.000014>
+1792756993.389977 readlink("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", 0x7ffdaa482450, 1023) = -1 EINVAL (Invalid argument) <0.000013>
+1792756993.390023 readlink("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/child.py", 0x7ffdaa482450, 1023) = -1 EINVAL (Invalid argument) <0.000014>
+1792756993.390093 openat(AT_FDCWD, "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/child.py", O_RDONLY) = 3 <0.000017>
+1792756993.390142 ioctl(3, FIOCLEX)     = 0 <0.000011>
+1792756993.390180 fstat(3, {st_mode=S_IFREG|0664, st_size=726, ...}) = 0 <0.000012>
+1792756993.390222 ioctl(3, TCGETS, 0x7ffdaa493850) = -1 ENOTTY (Inappropriate ioctl for device) <0.000012>
+1792756993.390281 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.390319 fstat(3, {st_mode=S_IFREG|0664, st_size=726, ...}) = 0 <0.000011>
+1792756993.390361 read(3, "\"\"\"Authorized no-state diagnostic child; Linux amd64 only.\"\"\"\nimport ctypes\nimport json\nimport platform\n\nassert platform.machine()=='x86_64'\nlibc=ctypes.CDLL(None,use_errno=True)\nlibc.syscall.restype=ctypes.c_long\nresults=[]\nfor name,number,args in [('unsh"..., 4096) = 726 <0.000012>
+1792756993.390405 lseek(3, 0, SEEK_SET) = 0 <0.000011>
+1792756993.390449 read(3, "\"\"\"Authorized no-state diagnostic child; Linux amd64 only.\"\"\"\nimport ctypes\nimport json\nimport platform\n\nassert platform.machine()=='x86_64'\nlibc=ctypes.CDLL(None,use_errno=True)\nlibc.syscall.restype=ctypes.c_long\nresults=[]\nfor name,number,args in [('unsh"..., 4096) = 726 <0.000012>
+1792756993.390704 read(3, "", 4096)     = 0 <0.000013>
+1792756993.390750 close(3)              = 0 <0.000024>
+1792756993.390974 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000020>
+1792756993.391051 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.391127 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.391190 openat(AT_FDCWD, "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000018>
+1792756993.391239 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000012>
+1792756993.391282 getdents64(3, 0x5f87e10ee430 /* 8 entries */, 32768) = 272 <0.000019>
+1792756993.391334 getdents64(3, 0x5f87e10ee430 /* 0 entries */, 32768) = 0 <0.000012>
+1792756993.391374 close(3)              = 0 <0.000013>
+1792756993.391433 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.391492 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes/__init__.cpython-314-x86_64-linux-gnu.so", 0x7ffdaa492a70) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.391558 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes/__init__.abi3.so", 0x7ffdaa492a70) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.391612 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes/__init__.so", 0x7ffdaa492a70) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.391663 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes/__init__.py", {st_mode=S_IFREG|0664, st_size=22131, ...}) = 0 <0.000015>
+1792756993.391757 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes/__init__.py", {st_mode=S_IFREG|0664, st_size=22131, ...}) = 0 <0.000017>
+1792756993.391825 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes/__pycache__/__init__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.391876 fstat(3, {st_mode=S_IFREG|0664, st_size=29671, ...}) = 0 <0.000012>
+1792756993.391923 brk(0x5f87e113a000)   = 0x5f87e113a000 <0.000016>
+1792756993.391973 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.392019 read(3, "+\16\r\n\0\0\0\0\303\222\230jsV\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\6\0\0\0\0\0\0\0\363\372\f\0\0\200\0R\0t\0^\0R\1I\1t\2^\0R\1I\3t\4^\0R\1I\5t\6^\0R\1I\7t\10R\2t\t^\0R\3I\nH\vt\vH\ft\fH\rt\r\37\0^\0R\4I\nH\16t\16\37\0^\0R\5I\nH\17t\20\37\0^\0R\6I\nH\tt\21\37\0^\0R\7I\nH\22t\22H\23t\23\37\0^\0R\10I\nH\24t\24\37\0^\0R\tI\nH\25t\25\37\0^\0R\nI\nH\26t\26\37\0^\0R\vI\27H\30t\31\37\0]\t]\218w\0\0d\v\0\0\34\0]\32!\0R\f]\t]\0214\3\0\0\0\0\0\0h\1]\2P6\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 29672) = 29671 <0.000024>
+1792756993.392081 read(3, "", 1)        = 0 <0.000012>
+1792756993.392124 close(3)              = 0 <0.000013>
+1792756993.392461 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.392535 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.392593 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/sysconfig/__init__.cpython-314-x86_64-linux-gnu.so", 0x7ffdaa491e40) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.392652 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/sysconfig/__init__.abi3.so", 0x7ffdaa491e40) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.392703 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/sysconfig/__init__.so", 0x7ffdaa491e40) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.392752 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/sysconfig/__init__.py", {st_mode=S_IFREG|0664, st_size=29162, ...}) = 0 <0.000016>
+1792756993.392844 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/sysconfig/__init__.py", {st_mode=S_IFREG|0664, st_size=29162, ...}) = 0 <0.000029>
+1792756993.392924 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/sysconfig/__pycache__/__init__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.392975 fstat(3, {st_mode=S_IFREG|0664, st_size=28845, ...}) = 0 <0.000012>
+1792756993.393030 lseek(3, 0, SEEK_CUR) = 0 <0.000013>
+1792756993.393083 read(3, "+\16\r\n\0\0\0\0\304\222\230j\352q\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\31\0\0\0\0\0\0\0\363\276\6\0\0\200\0R\0t\0^\0R\1I\1t\1^\0R\1I\2t\2^\0R\1I\3t\3^\0R\2I\4H\5t\5\37\0.\0RYO\1t\6R\3R\0040\2t\7R\5R\6R\7R\10R\tR\nR\vR\fR\rR\16R\17R\20R\21R\22R\23R\24R\25/\10R\26R\6R\27R\10R\30R\nR\30R\fR\30R\16R\31R\20R\31R\22R\23R\24R\25/\10R\32R\6R\33R\10R\34R\nR\35R\fR\35R\16R\36R\20R\36R\22R\37R\24R\25/\10R R\6R\7R\10R\tR\nR\vR\fR\rR\16R\17R\20R\21R\22R\23R\24R\25/\10R!R\6R\33R\10R\34R\n"..., 28846) = 28845 <0.000023>
+1792756993.393140 read(3, "", 1)        = 0 <0.000011>
+1792756993.393182 close(3)              = 0 <0.000013>
+1792756993.393388 mmap(NULL, 1048576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7000000 <0.000018>
+1792756993.393524 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000018>
+1792756993.393593 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.393650 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/threading.py", {st_mode=S_IFREG|0664, st_size=56923, ...}) = 0 <0.000015>
+1792756993.393739 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/threading.py", {st_mode=S_IFREG|0664, st_size=56923, ...}) = 0 <0.000017>
+1792756993.393801 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/threading.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.393850 fstat(3, {st_mode=S_IFREG|0664, st_size=66483, ...}) = 0 <0.000011>
+1792756993.393895 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.393935 lseek(3, 0, SEEK_CUR) = 0 <0.000011>
+1792756993.393978 read(3, "+\16\r\n\0\0\0\0\303\222\230j[\336\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\0\0\0\0\363d\5\0\0\200\0R\0t\0^\0R\1I\1t\2^\0R\1I\3t\4^\0R\1I\5t\5^\0R\1I\6t\6^\0R\2I\7H\10t\t\37\0^\0R\3I\nH\vt\v\37\0^\0R\4I\fH\rt\16\37\0\33\0^\0R\5I\17H\20t\21\37\0.\0R@O\1t\24]\5P*\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\26]\5P.\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\30]\5P2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\32]\5P6\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0t\34]\5P:\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"..., 66484) = 66483 <0.000066>
+1792756993.394082 read(3, "", 1)        = 0 <0.000012>
+1792756993.394126 close(3)              = 0 <0.000012>
+1792756993.394594 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000020>
+1792756993.394668 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.394726 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/_weakrefset.py", {st_mode=S_IFREG|0664, st_size=3962, ...}) = 0 <0.000015>
+1792756993.394812 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/_weakrefset.py", {st_mode=S_IFREG|0664, st_size=3962, ...}) = 0 <0.000016>
+1792756993.394874 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/_weakrefset.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.394924 fstat(3, {st_mode=S_IFREG|0664, st_size=9396, ...}) = 0 <0.000012>
+1792756993.394971 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.395013 read(3, "+\16\r\n\0\0\0\0\303\222\230jz\17\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\4\0\0\0\0\0\0\0\3638\0\0\0\200\0^\0R\1I\0H\1t\1\37\0^\0R\2I\2H\3t\3\37\0R\3.\1t\4\25\0!\0R\4\27\0R\0034\2\0\0\0\0\0\0t\5R\5#\0)\6\351\0\0\0\0\251\1\332\3ref)\1\332\fGenericAlias\332\7WeakSetc\0\0\0\0\0\0\0\0\0\0\0\0\3\0\0\0\0\0\0\0\363\0\1\0\0a\0\200\0]\0t\1R\0t\2^\vt\3\26\0o\0R!R\2\27\0l\1t\4R\3\27\0t\5R\4\27\0t\6R\5\27\0t\7R\6\27\0t\10R\7\27\0t\tR\10\27\0t\nR\t\27\0t\vR\n\27\0t\fR\v\27\0t\rR\f\27\0t\16R\r\27"..., 9397) = 9396 <0.000016>
+1792756993.395068 read(3, "", 1)        = 0 <0.000011>
+1792756993.395115 close(3)              = 0 <0.000013>
+1792756993.396003 lstat("/home", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0 <0.000021>
+1792756993.396081 lstat("/home/zyf", {st_mode=S_IFDIR|0750, st_size=4096, ...}) = 0 <0.000016>
+1792756993.396148 lstat("/home/zyf/miniconda3", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.396206 lstat("/home/zyf/miniconda3/envs", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.396261 lstat("/home/zyf/miniconda3/envs/lewm", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000014>
+1792756993.396316 lstat("/home/zyf/miniconda3/envs/lewm/bin", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.396376 lstat("/home/zyf/miniconda3/envs/lewm/bin/python", {st_mode=S_IFLNK|0777, st_size=10, ...}) = 0 <0.000015>
+1792756993.396437 readlink("/home/zyf/miniconda3/envs/lewm/bin/python", "python3.14", 4096) = 10 <0.000015>
+1792756993.396495 lstat("/home/zyf/miniconda3/envs/lewm/bin/python3.14", {st_mode=S_IFREG|0775, st_size=36129912, ...}) = 0 <0.000015>
+1792756993.396567 stat("/home/zyf/miniconda3/envs/lewm/bin/Modules/Setup", 0x7ffdaa491940) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.396629 stat("/home/zyf/miniconda3/envs/lewm/bin/Modules/Setup.local", 0x7ffdaa491940) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.396756 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.396828 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.396891 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.396949 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_ctypes.cpython-314-x86_64-linux-gnu.so", {st_mode=S_IFREG|0775, st_size=987528, ...}) = 0 <0.000017>
+1792756993.397035 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_ctypes.cpython-314-x86_64-linux-gnu.so", O_RDONLY|O_CLOEXEC) = 3 <0.000030>
+1792756993.397103 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\210\10\17\0\0\0\0\0\0\0\0\0@\08\0\10\0@\0$\0#\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\370o\0\0\0\0\0\0\370o\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0p\0\0\0\0\0\0\0p\0\0\0\0\0\0\0p\0\0\0\0\0\0\361\372\0\0\0\0\0\0\361\372\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0p\1\0\0\0\0\0\0p\1\0\0\0\0\0\0p\1\0\0\0\0\0\204n\0\0\0\0\0\0\204n\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\320\344\1\0\0\0\0\0\320\344\1\0\0\0\0\0"..., 832) = 832 <0.000014>
+1792756993.397152 fstat(3, {st_mode=S_IFREG|0775, st_size=987528, ...}) = 0 <0.000012>
+1792756993.397205 mmap(NULL, 136096, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac76f0000 <0.000022>
+1792756993.397257 mmap(0x758ac76f7000, 65536, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x7000) = 0x758ac76f7000 <0.000027>
+1792756993.397314 mmap(0x758ac7707000, 28672, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x17000) = 0x758ac7707000 <0.000021>
+1792756993.397363 mmap(0x758ac770e000, 12288, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x1e000) = 0x758ac770e000 <0.000017>
+1792756993.397418 mmap(0x758ac7711000, 928, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0x758ac7711000 <0.000016>
+1792756993.397477 close(3)              = 0 <0.000012>
+1792756993.397521 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/../../glibc-hwcaps/x86-64-v3/libffi.so.8", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000017>
+1792756993.397573 newfstatat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/../../glibc-hwcaps/x86-64-v3/", 0x7ffdaa490a40, 0) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.397622 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/../../glibc-hwcaps/x86-64-v2/libffi.so.8", O_RDONLY|O_CLOEXEC) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.397670 newfstatat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/../../glibc-hwcaps/x86-64-v2/", 0x7ffdaa490a40, 0) = -1 ENOENT (No such file or directory) <0.000014>
+1792756993.397722 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/../../libffi.so.8", O_RDONLY|O_CLOEXEC) = 3 <0.000017>
+1792756993.397772 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\10\343\0\0\0\0\0\0\0\0\0\0@\08\0\10\0@\0\35\0\34\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0H!\0\0\0\0\0\0H!\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0000\0\0\0\0\0\0\0000\0\0\0\0\0\0\0000\0\0\0\0\0\0\261j\0\0\0\0\0\0\261j\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\240\0\0\0\0\0\0\0\240\0\0\0\0\0\0\0\240\0\0\0\0\0\0\270\24\0\0\0\0\0\0\270\24\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\360\272\0\0\0\0\0\0\360\312\0\0\0\0\0\0"..., 832) = 832 <0.000013>
+1792756993.397820 fstat(3, {st_mode=S_IFREG|0775, st_size=59976, ...}) = 0 <0.000013>
+1792756993.397865 mmap(NULL, 54520, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac6ff2000 <0.000016>
+1792756993.397911 mmap(0x758ac6ff5000, 28672, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x3000) = 0x758ac6ff5000 <0.000025>
+1792756993.397963 mmap(0x758ac6ffc000, 8192, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0xa000) = 0x758ac6ffc000 <0.000015>
+1792756993.398006 mmap(0x758ac6ffe000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0xb000) = 0x758ac6ffe000 <0.000016>
+1792756993.398079 close(3)              = 0 <0.000014>
+1792756993.398152 mprotect(0x758ac6ffe000, 4096, PROT_READ) = 0 <0.000019>
+1792756993.398272 mprotect(0x758ac770e000, 4096, PROT_READ) = 0 <0.000016>
+1792756993.398370 openat(AT_FDCWD, "/proc/self/status", O_RDONLY) = 3 <0.000030>
+1792756993.398435 fstat(3, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0 <0.000012>
+1792756993.398481 read(3, "Name:\tpython\nUmask:\t0002\nState:\tR (running)\nTgid:\t661276\nNgid:\t0\nPid:\t661276\nPPid:\t661271\nTracerPid:\t661271\nUid:\t1000\t1000\t1000\t1000\nGid:\t1000\t1000\t1000\t1000\nFDSize:\t64\nGroups:\t4 24 27 30 44 46 101 993 1000 1001 \nNStgid:\t661276\nNSpid:\t661276\nNSpgid:\t661250"..., 1024) = 1024 <0.000032>
+1792756993.398549 read(3, "rable\nSpeculationIndirectBranch:\tconditional enabled\nCpus_allowed:\tffffff,ffffffff\nCpus_allowed_list:\t0-55\nMems_allowed:\t00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,00000000,"..., 1024) = 543 <0.000012>
+1792756993.398594 read(3, "", 1024)     = 0 <0.000012>
+1792756993.398634 close(3)              = 0 <0.000014>
+1792756993.398675 statfs("/selinux", 0x7ffdaa491e00) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.398723 openat(AT_FDCWD, "/proc/mounts", O_RDONLY) = 3 <0.000026>
+1792756993.398784 fstat(3, {st_mode=S_IFREG|0444, st_size=0, ...}) = 0 <0.000012>
+1792756993.398828 read(3, "sysfs /sys sysfs rw,nosuid,nodev,noexec,relatime 0 0\nproc /proc proc rw,nosuid,nodev,noexec,relatime 0 0\nudev /dev devtmpfs rw,nosuid,relatime,size=198009140k,nr_inodes=49502285,mode=755,inode64 0 0\ndevpts /dev/pts devpts rw,nosuid,noexec,relatime,gid=5,mo"..., 1024) = 1024 <0.000052>
+1792756993.398915 read(3, "xproto=5,direct,pipe_ino=32799 0 0\nmqueue /dev/mqueue mqueue rw,nosuid,nodev,noexec,relatime 0 0\nhugetlbfs /dev/hugepages hugetlbfs rw,nosuid,nodev,relatime,pagesize=2M 0 0\ndebugfs /sys/kernel/debug debugfs rw,nosuid,nodev,noexec,relatime 0 0\ntracefs /sys/"..., 1024) = 1024 <0.000047>
+1792756993.398996 read(3, "sc rw,nosuid,nodev,noexec,relatime 0 0\nsunrpc /run/rpc_pipefs rpc_pipefs rw,relatime 0 0\ntracefs /sys/kernel/debug/tracing tracefs rw,nosuid,nodev,noexec,relatime 0 0\ntmpfs /run/user/1000 tmpfs rw,nosuid,nodev,relatime,size=39610236k,nr_inodes=9902559,mode"..., 1024) = 961 <0.000050>
+1792756993.399085 read(3, "", 1024)     = 0 <0.000013>
+1792756993.399129 close(3)              = 0 <0.000025>
+1792756993.399183 mmap(NULL, 4096, PROT_READ|PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x758ac7b29000 <0.000018>
+1792756993.399473 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000022>
+1792756993.399560 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.399625 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/struct.py", {st_mode=S_IFREG|0664, st_size=285, ...}) = 0 <0.000017>
+1792756993.399723 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/struct.py", {st_mode=S_IFREG|0664, st_size=285, ...}) = 0 <0.000018>
+1792756993.399795 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/struct.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.399859 fstat(3, {st_mode=S_IFREG|0664, st_size=322, ...}) = 0 <0.000012>
+1792756993.399905 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.399946 read(3, "+\16\r\n\0\0\0\0\303\222\230j\35\1\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\2\0\0\0\0\0\0\0\3630\0\0\0\200\0.\0R\5O\1t\0^\0R\1I\0015\2\37\0^\0R\2I\1H\2t\2\37\0^\0R\3I\1H\3t\3\37\0R\4#\0)\6\332\10calcsize)\1\332\1*)\1\332\v_clearcache)\1\332\7__doc__N)\10r\2\0\0\0\332\4pack\332\tpack_into\332\6unpack\332\vunpack_from\332\viter_unpack\332\6Struct\332\5error)\4\332\7__all__\332\7_structr\4\0\0\0r\5\0\0\0\251\0\363\0\0\0\0\332\30lib/python"..., 323) = 322 <0.000013>
+1792756993.399991 read(3, "", 1)        = 0 <0.000011>
+1792756993.400041 close(3)              = 0 <0.000013>
+1792756993.400156 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.400226 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.400288 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.400341 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_struct.cpython-314-x86_64-linux-gnu.so", {st_mode=S_IFREG|0775, st_size=234392, ...}) = 0 <0.000015>
+1792756993.400414 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_struct.cpython-314-x86_64-linux-gnu.so", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.400463 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\330\212\3\0\0\0\0\0\0\0\0\0@\08\0\10\0@\0#\0\"\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\3204\0\0\0\0\0\0\3204\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\0@\0\0\0\0\0\0\351M\0\0\0\0\0\0\351M\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\220\0\0\0\0\0\0\0\220\0\0\0\0\0\0\0\220\0\0\0\0\0\0\3505\0\0\0\0\0\0\3505\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\20\307\0\0\0\0\0\0\20\327\0\0\0\0\0\0"..., 832) = 832 <0.000013>
+1792756993.400508 fstat(3, {st_mode=S_IFREG|0775, st_size=234392, ...}) = 0 <0.000012>
+1792756993.400552 mmap(NULL, 60792, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac6fe3000 <0.000020>
+1792756993.400598 mmap(0x758ac6fe7000, 20480, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x4000) = 0x758ac6fe7000 <0.000020>
+1792756993.400645 mmap(0x758ac6fec000, 16384, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x9000) = 0x758ac6fec000 <0.000016>
+1792756993.400686 mmap(0x758ac6ff0000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0xc000) = 0x758ac6ff0000 <0.000015>
+1792756993.400752 close(3)              = 0 <0.000011>
+1792756993.400820 mprotect(0x758ac6ff0000, 4096, PROT_READ) = 0 <0.000018>
+1792756993.401869 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000021>
+1792756993.401943 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.402051 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000025>
+1792756993.402148 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000029>
+1792756993.402230 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000014>
+1792756993.402301 getdents64(3, 0x5f87e1115500 /* 10 entries */, 32768) = 304 <0.000030>
+1792756993.402383 getdents64(3, 0x5f87e1115500 /* 0 entries */, 32768) = 0 <0.000018>
+1792756993.402452 close(3)              = 0 <0.000020>
+1792756993.402564 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes/_endian.py", {st_mode=S_IFREG|0664, st_size=2557, ...}) = 0 <0.000033>
+1792756993.402752 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes/_endian.py", {st_mode=S_IFREG|0664, st_size=2557, ...}) = 0 <0.000034>
+1792756993.402874 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ctypes/__pycache__/_endian.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000036>
+1792756993.402965 fstat(3, {st_mode=S_IFREG|0664, st_size=3677, ...}) = 0 <0.000023>
+1792756993.403201 lseek(3, 0, SEEK_CUR) = 0 <0.000026>
+1792756993.403304 read(3, "+\16\r\n\0\0\0\0\303\222\230j\375\t\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\10\0\0\0\0\0\0\0\363l\1\0\0\200\0^\0R\1I\0t\0^\0R\2I\1H\2t\2H\3t\3H\4t\4\37\0]\5!\0]\0024\1\0\0\0\0\0\0t\6R\3\27\0t\7\25\0!\0R\4\27\0R\0054\2\0\0\0\0\0\0t\10\25\0!\0R\6\27\0R\7]\10]\5!\0]\0034\1\0\0\0\0\0\0004\4\0\0\0\0\0\0t\t\25\0!\0R\10\27\0R\t]\10]\5!\0]\0044\1\0\0\0\0\0\0004\4\0\0\0\0\0\0t\n]\0P\26\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0R\n8X\0\0d#\0\0\34\0R\vt\f]\3t\r\25\0!\0R\f\27\0R\r]\3]\tR\0167\4\0\0\0\0\0\0t\16]\4"..., 3678) = 3677 <0.000027>
+1792756993.403390 read(3, "", 1)        = 0 <0.000024>
+1792756993.403472 close(3)              = 0 <0.000023>
+1792756993.404334 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000029>
+1792756993.404452 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.404525 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.cpython-314-x86_64-linux-gnu.so", 0x7ffdaa492a70) = -1 ENOENT (No such file or directory) <0.000021>
+1792756993.404601 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.abi3.so", 0x7ffdaa492a70) = -1 ENOENT (No such file or directory) <0.000016>
+1792756993.404675 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.so", 0x7ffdaa492a70) = -1 ENOENT (No such file or directory) <0.000015>
+1792756993.404731 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.py", {st_mode=S_IFREG|0664, st_size=14132, ...}) = 0 <0.000027>
+1792756993.404834 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.py", {st_mode=S_IFREG|0664, st_size=14132, ...}) = 0 <0.000017>
+1792756993.404900 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__pycache__/__init__.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000018>
+1792756993.404951 fstat(3, {st_mode=S_IFREG|0664, st_size=14210, ...}) = 0 <0.000011>
+1792756993.405002 lseek(3, 0, SEEK_CUR) = 0 <0.000020>
+1792756993.405057 brk(0x5f87e115c000)   = 0x5f87e115c000 <0.000022>
+1792756993.405111 read(3, "+\16\r\n\0\0\0\0\304\222\230j47\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\22\0\0\0\0\0\0\0\363\26\1\0\0\200\0R\0t\0R\1t\1.\0R\35O\1t\2R\2t\3^\1R\3I\4H\5t\5H\6t\6\37\0^\1R\4I\7H\10t\10\37\0^\0R\5I\tt\t]\10!\0R\6R\7R\7R\7R\5R\5R\5R\0107\7\0\0\0\0\0\0t\nR\tR\6R\nR\7R\vR\7R\fR\7R\rR\5R\16R\5R\17R\5R\20R\5R\21R\6/\tR\22\27\0l\2t\vR\tR\6R\nR\7R\vR\7R\fR\7R\rR\5R\16R\5R\17R\5R\20R\5R\21R\6/\tR\23\27\0l\2t\f]\5!\0R\5R\5R\0247\2\0\0\0\0\0\0t\rR\25\27\0t\16R\rR\5R\26R\5"..., 14211) = 14210 <0.000023>
+1792756993.405171 read(3, "", 1)        = 0 <0.000012>
+1792756993.405214 close(3)              = 0 <0.000013>
+1792756993.405320 brk(0x5f87e1139000)   = 0x5f87e1139000 <0.000025>
+1792756993.405431 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000018>
+1792756993.405495 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000014>
+1792756993.405580 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000022>
+1792756993.405662 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json", O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3 <0.000026>
+1792756993.405733 fstat(3, {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000012>
+1792756993.405781 getdents64(3, 0x5f87e1118700 /* 9 entries */, 32768) = 272 <0.000025>
+1792756993.405843 getdents64(3, 0x5f87e1118700 /* 0 entries */, 32768) = 0 <0.000012>
+1792756993.405885 close(3)              = 0 <0.000018>
+1792756993.405955 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/decoder.py", {st_mode=S_IFREG|0664, st_size=12877, ...}) = 0 <0.000026>
+1792756993.406094 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/decoder.py", {st_mode=S_IFREG|0664, st_size=12877, ...}) = 0 <0.000023>
+1792756993.406179 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__pycache__/decoder.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.406234 fstat(3, {st_mode=S_IFREG|0664, st_size=14466, ...}) = 0 <0.000012>
+1792756993.406283 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.406326 brk(0x5f87e115c000)   = 0x5f87e115c000 <0.000016>
+1792756993.406376 read(3, "+\16\r\n\0\0\0\0\304\222\230jM2\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\20\0\0\0\0\0\0\0\363X\2\0\0\200\0R\0t\0^\0R\1I\1t\1^\0R\2I\2H\3t\3\37\0\33\0^\0R\3I\4H\5t\6\37\0R\4R\5.\2t\10]\1P\22\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0]\1P\24\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0,\7\0\0\0\0\0\0\0\0\0\0]\1P\26\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0,\7\0\0\0\0\0\0\0\0\0\0t\f]\r!\0R\0064\1\0\0\0\0\0\0t\16]\r!\0R\0074\1\0\0\0\0\0\0t\17]\r!\0R\0104\1\0\0\0\0\0\0t\20\25\0!\0R\t\27\0R\5]\0214\3\0\0\0\0\0\0t\22R\n]\20"..., 14467) = 14466 <0.000021>
+1792756993.406435 read(3, "", 1)        = 0 <0.000012>
+1792756993.406480 close(3)              = 0 <0.000013>
+1792756993.406695 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000019>
+1792756993.406776 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/scanner.py", {st_mode=S_IFREG|0664, st_size=2434, ...}) = 0 <0.000017>
+1792756993.406875 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/scanner.py", {st_mode=S_IFREG|0664, st_size=2434, ...}) = 0 <0.000017>
+1792756993.406942 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__pycache__/scanner.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.406995 fstat(3, {st_mode=S_IFREG|0664, st_size=3537, ...}) = 0 <0.000017>
+1792756993.407075 lseek(3, 0, SEEK_CUR) = 0 <0.000014>
+1792756993.407128 read(3, "+\16\r\n\0\0\0\0\304\222\230j\202\t\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\5\0\0\0\0\0\0\0\363\340\0\0\0\200\0R\0t\0^\0R\1I\1t\1\33\0^\0R\2I\2H\3t\4\37\0R\3.\1t\6]\1P\16\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0!\0R\4]\1P\20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0]\1P\22\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0,\7\0\0\0\0\0\0\0\0\0\0]\1P\24\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0,\7\0\0\0\0\0\0\0\0\0\0004\2\0\0\0\0\0\0t\vR\5\27\0t\f]\4;\1'\0\0\0\0\0\0\0g\3\0\0\34\0\37\0]\ft\3R\1#\0 \0]\5\6\0d\6\0\0\34\0\37\0R\1t\4\35\0"..., 3538) = 3537 <0.000015>
+1792756993.407180 read(3, "", 1)        = 0 <0.000013>
+1792756993.407227 close(3)              = 0 <0.000014>
+1792756993.407359 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000020>
+1792756993.407438 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.407506 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000023>
+1792756993.407578 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_json.cpython-314-x86_64-linux-gnu.so", {st_mode=S_IFREG|0775, st_size=300800, ...}) = 0 <0.000016>
+1792756993.407661 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_json.cpython-314-x86_64-linux-gnu.so", O_RDONLY|O_CLOEXEC) = 3 <0.000021>
+1792756993.407725 read(3, "\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0@\0\0\0\0\0\0\0\200\216\4\0\0\0\0\0\0\0\0\0@\08\0\10\0@\0\"\0!\0\1\0\0\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\340\"\0\0\0\0\0\0\340\"\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\5\0\0\0\0000\0\0\0\0\0\0\0000\0\0\0\0\0\0\0000\0\0\0\0\0\0001S\0\0\0\0\0\0001S\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\4\0\0\0\0\220\0\0\0\0\0\0\0\220\0\0\0\0\0\0\0\220\0\0\0\0\0\0\370\25\0\0\0\0\0\0\370\25\0\0\0\0\0\0\0\20\0\0\0\0\0\0\1\0\0\0\6\0\0\0\270\253\0\0\0\0\0\0\270\273\0\0\0\0\0\0"..., 832) = 832 <0.000014>
+1792756993.407778 fstat(3, {st_mode=S_IFREG|0775, st_size=300800, ...}) = 0 <0.000014>
+1792756993.407829 mmap(NULL, 50640, PROT_READ, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0x758ac6fd6000 <0.000020>
+1792756993.407880 mmap(0x758ac6fd9000, 24576, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x3000) = 0x758ac6fd9000 <0.000022>
+1792756993.407933 mmap(0x758ac6fdf000, 8192, PROT_READ, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x9000) = 0x758ac6fdf000 <0.000017>
+1792756993.407981 mmap(0x758ac6fe1000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0xa000) = 0x758ac6fe1000 <0.000017>
+1792756993.408061 close(3)              = 0 <0.000014>
+1792756993.408131 mprotect(0x758ac6fe1000, 4096, PROT_READ) = 0 <0.000024>
+1792756993.409049 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000022>
+1792756993.409136 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/encoder.py", {st_mode=S_IFREG|0664, st_size=16990, ...}) = 0 <0.000018>
+1792756993.409245 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/encoder.py", {st_mode=S_IFREG|0664, st_size=16990, ...}) = 0 <0.000017>
+1792756993.409314 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__pycache__/encoder.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.409368 fstat(3, {st_mode=S_IFREG|0664, st_size=17022, ...}) = 0 <0.000012>
+1792756993.409423 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.409477 read(3, "+\16\r\n\0\0\0\0\304\222\230j^B\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\16\0\0\0\0\0\0\0\363$\2\0\0\200\0R\0t\0^\0R\1I\1t\1\33\0^\0R\2I\2H\3t\4\37\0\33\0^\0R\3I\2H\6t\7\37\0\33\0^\0R\4I\2H\10t\t\37\0]\1P\24\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0!\0R\0054\1\0\0\0\0\0\0t\v]\1P\24\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0!\0R\0064\1\0\0\0\0\0\0t\f]\1P\24\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0!\0R\0074\1\0\0\0\0\0\0t\rR\10R\tR\nR\vR\fR\rR\16R\17R\20R\21R\22R\23R\24R\25/\7t\16]\17!\0^ 4\1\0\0\0\0\0\0\20\0F*"..., 17023) = 17022 <0.000022>
+1792756993.409534 read(3, "", 1)        = 0 <0.000012>
+1792756993.409579 close(3)              = 0 <0.000013>
+1792756993.410138 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000022>
+1792756993.410221 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000016>
+1792756993.410284 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/platform.py", {st_mode=S_IFREG|0664, st_size=49385, ...}) = 0 <0.000015>
+1792756993.410375 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/platform.py", {st_mode=S_IFREG|0664, st_size=49385, ...}) = 0 <0.000017>
+1792756993.410442 openat(AT_FDCWD, "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__pycache__/platform.cpython-314.pyc", O_RDONLY|O_CLOEXEC) = 3 <0.000019>
+1792756993.410495 fstat(3, {st_mode=S_IFREG|0664, st_size=48367, ...}) = 0 <0.000012>
+1792756993.410543 lseek(3, 0, SEEK_CUR) = 0 <0.000012>
+1792756993.410592 read(3, "+\16\r\n\0\0\0\0\303\222\230j\351\300\0\0\343\0\0\0\0\0\0\0\0\0\0\0\0\24\0\0\0\0\0\0\0\363\356\2\0\0\200\0R\0t\0R\1t\1R\2t\2^\0R\3I\3t\3^\0R\3I\4t\4^\0R\3I\5t\5^\0R\3I\6t\6^\0R\3I\7t\7^\0R\3I\10t\10\33\0^\0R\3I\ts\tR\4^\nR\5^\24R\6^\24R\7^\36R\10^\36R\t^(R\n^2R\v^2R\f^\310R\r^\310/\nt\vR\16\27\0t\fRJR\20\27\0l\1t\rRKR\21\27\0l\1t\16RLR\25\27\0l\1t\17R\26\27\0t\20.\0RMO\1t\21.\0RNO\1t\22R\27\27\0t\23R\30\27\0t\24R\31\27\0t\25ROR\32\27\0l\1t\26R\33\27\0t\27RPR\34\27\0"..., 48368) = 48367 <0.000044>
+1792756993.410678 read(3, "", 1)        = 0 <0.000012>
+1792756993.410723 close(3)              = 0 <0.000013>
+1792756993.411143 stat("/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000021>
+1792756993.411224 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000017>
+1792756993.411291 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.411353 stat("/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages", {st_mode=S_IFDIR|0775, st_size=20480, ...}) = 0 <0.000015>
+1792756993.411416 stat("/home/zyf/AAA/le-wm/stable-worldmodel", {st_mode=S_IFDIR|0775, st_size=4096, ...}) = 0 <0.000015>
+1792756993.412228 write(1, "{\"probe\": \"no-state-actual-syscalls\", \"results\": [{\"arguments\": [0], \"errno\": 0, \"return\": 0, \"syscall\": \"unshare\"}, {\"arguments\": [4294967295, 4294967295, 0], \"errno\": 0, \"return\": 0, \"syscall\": \"close_range\"}]}\n", 213) = 213 <0.000036>
+1792756993.418187 munmap(0x758ac7100000, 1048576) = 0 <0.000114>
+1792756993.418345 munmap(0x758ac7000000, 1048576) = 0 <0.000047>
+1792756993.418424 munmap(0x758ac7712000, 208896) = 0 <0.000039>
+1792756993.418537 munmap(0x758ac7300000, 1048576) = 0 <0.000097>
+1792756993.418666 munmap(0x758ac7b2a000, 16384) = 0 <0.000017>
+1792756993.418735 exit_group(0)         = ?

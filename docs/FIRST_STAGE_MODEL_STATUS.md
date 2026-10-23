@@ -37,6 +37,16 @@ container形成显式FD_VALUES_ONLY_R2模式，剥离原35条未证container结�
 完整程序建模继续OPEN；source与FD数值结果不因这个缺口一概丢弃，依赖该缺失前提的
 关系必须分别撤回。没有实际优化/目标改写，因此不存在已应用变换需要回滚的问题。
 
+纠错现已实际验收：显式schema2 `FD_VALUES_ONLY_R2` 门exit0、wall65.15s、
+RSS277160KiB。全部12684个handle经public codec和非endpoint字段核对；35个原端点
+准确恢复为public R2，12649个FD端口的真实selector逐行核对，全部container均为
+Unresolved。原3个payload chunks通过准确byte校验后hardlink复用，本进程audit hook
+禁止全部原archive数据路径，实际raw reopens=0；不重扫82MB日志。
+旧context v1 reader和无coverage builder各一次实际拒绝，防止原结论被静默重新授予。
+OFD/coidentity/end及完整资源生命周期仍未重证，原target字段守恒不授这些资格。
+确切来源与余项见 [OS_CAPTURE_COVERAGE.md](OS_CAPTURE_COVERAGE.md)；新header为
+199812bytes、SHA `bb0b7b16d503ea09dc95fe728c8826c302b3f8c86c79243a34070aad936ea624`。
+
 ### 2026-10-23：全部既有OS handle获得真实FD来源
 
 通用`os_fd_source_projection.py`唯一实际gate exit0，wall73.74s/RSS296,208KiB。

@@ -1,5 +1,18 @@
 # OS FD-table context：隔离的只读精化
 
+**2026-10-23 correction：旧schema1的continuity资格撤销。** 原capture只选择
+`%file,%process,%memory,%desc`；strace6.8的`unshare`与`close_range`不属于这些类。
+本机隔离probe确认两个真实已调用的接口均被原filter漏掉。旧35端口gate的byte/typed/FK
+结果仍是历史事实，但其InstanceTarget关联不能作为可信continuity结论；下文历史验收
+不代表该缺失前提已满足。原artifact不改，当前publicreader显式拒绝schema1。
+
+当前schema2的builder/read均必须收到`OSCaptureCoverage.read(...)`资格对象；它独立绑定
+原coordinates、archive、collector实际exec argv、provider binary/version/architecture及
+launch nonce，机械核显式required names或`trace=all`，不会由零计数/类名/任意trust bool
+授予资格。本次旧capture没有这组独立launch绑定，无法补发该资格。见
+[OS_CAPTURE_COVERAGE.md](OS_CAPTURE_COVERAGE.md)。原35 FD端口应使用public R2原选择，
+container为Unresolved；现有FD值通过显式`FD_VALUES_ONLY_R2` schema2保留。
+
 2026-10-23。**Implemented + Verified（限定端口范围）**：新增
 `scar/trace/os_fd_table_contexts.py`，没有修改R1、R2、core、coordinates、import或CLI。
 唯一真实35端口gate已exit0，见第6节。此前static-freeze保持原样记录；既有投影的实际
@@ -49,9 +62,11 @@ inputs = FDTableContextInputs(
 result = build_os_fd_table_contexts(
     base, original_r2_manifest, inputs, fresh_output,
     budgets=FDTableContextBudgets(), progress=progress_callback,
+    capture_coverage=independently_capture_bound_coverage,
 )
 view = OSFDTableContexts.read(
     base, original_r2_manifest, inputs, result["manifest_receipt"]["path"],
+    capture_coverage=independently_capture_bound_coverage,
 )
 selected = view.record("handles", original_handle_ordinal)
 work = view.record("submissions", original_work_ordinal)

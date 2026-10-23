@@ -1,0 +1,132 @@
+{
+  "architecture": "x86_64",
+  "binary_sha256": "28f957c227012de0b18d1bd7fff2d396cb693ea60ed8013be68de071e84b5001",
+  "child_sha256": "79d3093aa0b86e3e46747f304099347c879c9a882f2edae753b5b8479e209523",
+  "modes": [
+    {
+      "actual_exit": 0,
+      "argv": [
+        "/usr/bin/strace",
+        "--seccomp-bpf",
+        "-ff",
+        "-qq",
+        "-ttt",
+        "-T",
+        "-s",
+        "256",
+        "-e",
+        "trace=%file,%process,%memory,%desc",
+        "-o",
+        "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/original_four_classes/syscalls",
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/child.py"
+      ],
+      "child": {
+        "probe": "no-state-actual-syscalls",
+        "results": [
+          {
+            "arguments": [
+              0
+            ],
+            "errno": 0,
+            "return": 0,
+            "syscall": "unshare"
+          },
+          {
+            "arguments": [
+              4294967295,
+              4294967295,
+              0
+            ],
+            "errno": 0,
+            "return": 0,
+            "syscall": "close_range"
+          }
+        ]
+      },
+      "mode": "original_four_classes",
+      "observed": {
+        "close_range": [],
+        "unshare": []
+      },
+      "raw_receipts": [
+        {
+          "bytes": 124543,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/original_four_classes/syscalls.661276",
+          "sha256": "d51167863b37e7171cfeb9b70cbe63094869310f688d033999980e148a590c57"
+        }
+      ]
+    },
+    {
+      "actual_exit": 0,
+      "argv": [
+        "/usr/bin/strace",
+        "--seccomp-bpf",
+        "-ff",
+        "-qq",
+        "-ttt",
+        "-T",
+        "-s",
+        "256",
+        "-e",
+        "trace=unshare,close_range",
+        "-o",
+        "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/explicit_names/syscalls",
+        "/home/zyf/miniconda3/envs/lewm/bin/python",
+        "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/child.py"
+      ],
+      "child": {
+        "probe": "no-state-actual-syscalls",
+        "results": [
+          {
+            "arguments": [
+              0
+            ],
+            "errno": 0,
+            "return": 0,
+            "syscall": "unshare"
+          },
+          {
+            "arguments": [
+              4294967295,
+              4294967295,
+              0
+            ],
+            "errno": 0,
+            "return": 0,
+            "syscall": "close_range"
+          }
+        ]
+      },
+      "mode": "explicit_names",
+      "observed": {
+        "close_range": [
+          {
+            "artifact": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/explicit_names/syscalls.661282",
+            "line": 2,
+            "rendering": "1792756993.468675 close_range(4294967295, 4294967295, 0) = 0 <0.000014>"
+          }
+        ],
+        "unshare": [
+          {
+            "artifact": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/explicit_names/syscalls.661282",
+            "line": 1,
+            "rendering": "1792756993.468521 unshare(0)            = 0 <0.000025>"
+          }
+        ]
+      },
+      "raw_receipts": [
+        {
+          "bytes": 127,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_strace_filter_probe_20261023/explicit_names/syscalls.661282",
+          "sha256": "0f40c1cd423abf0ca83c2b3835422d025d26f1f079dd9db97b9f0a511e314bcd"
+        }
+      ]
+    }
+  ],
+  "old_episode_evidence": false,
+  "schema": "scar.local-strace-filter-probe",
+  "schema_version": 1,
+  "status": "CONFIRMED_FOUR_CLASS_FILTER_OMITS_BOTH_INVOKED_SYSCALLS",
+  "version": "strace -- version 6.8\nCopyright (c) 1991-2024 The strace developers <https://strace.io>.\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\nOptional features enabled: stack-trace=libunwind stack-demangle m32-mpers mx32-mpers\n"
+}

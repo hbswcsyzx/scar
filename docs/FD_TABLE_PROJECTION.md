@@ -1,5 +1,11 @@
 # FD-table context：一次有界补证结果
 
+**2026-10-23 correction：下述35/35资格结论失效。** 原capture filter漏掉了
+`unshare`/`close_range`；已保留raw的0计数不是absence证明。实际文件/行/事件/原SHA
+投影结果仍真实，原artifact未改，但不能据此授予FD-table连续性。当前context public
+reader拒绝旧v1；FD数值通过public R2的`FD_VALUES_ONLY_R2`继续保留，container全部
+Unresolved。见[OS_CAPTURE_COVERAGE.md](OS_CAPTURE_COVERAGE.md)。下文为原始历史记录。
+
 2026-10-23。承接`FD_TABLE_CONTEXT_REVIEW.md`，仅执行已授权的既有raw离线投影。
 生产IR、adapter、coordinates和原R1/R2产物未修改。**现在35/35个既有端口具备在原
 capture契约下绑定container的证据条件；实际绑定尚未实施，原R2仍有35个Unresolved。**

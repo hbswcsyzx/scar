@@ -26,10 +26,11 @@ from scar.ir.record_codec import decode, encode, loads as strict_loads
 from scar.store.bundle_partitions import BundleBudgets, _line
 from scar.trace import os_resources as parser
 from scar.trace.os_resource_refinement import OSResourceBase, OSResourceRefinement
+from scar.trace.os_capture_coverage import require_fd_continuity_coverage
 
 
 SCHEMA = "scar.os-fd-table-context-refinement"
-VERSION = 1
+VERSION = 2
 _RAW_SCHEMA = "strace.syscalls.text.v1"
 _RELEVANT = frozenset(("execve", "execveat", "clone", "clone3", "fork", "vfork", "unshare", "close_range"))
 
@@ -106,9 +107,13 @@ def _line_number(source):
     return int(match[1])
 
 
-def _prepare(base, r2_manifest, inputs, limits, progress):
+def _prepare(base, r2_manifest, inputs, limits, progress, capture_coverage=None):
     _need(type(base) is OSResourceBase and type(inputs) is FDTableContextInputs
           and type(limits) is FDTableContextBudgets, "explicit base/inputs/budgets required")
+    # Selection coverage is a prerequisite, never inferred from zero counters.
+    # In particular the historical four strace classes omit unshare/close_range.
+    require_fd_continuity_coverage(capture_coverage,run=encode(base.run.id),
+        coordinates=inputs.coordinates,archive=inputs.archive)
     root = Path(inputs.capture_root).resolve()
     _need(not Path(inputs.capture_root).is_symlink() and root.is_dir(), "capture root absent or symlinked")
     names = ("archive", "coordinates", "r1_summary", "r1_audit", "projection_summary", "projection_files",
@@ -116,6 +121,7 @@ def _prepare(base, r2_manifest, inputs, limits, progress):
     docs, receipts = {}, {}
     for name in names:
         docs[name], receipts[name] = _document(getattr(inputs, name), limits.max_metadata_bytes)
+    receipts["capture_coverage"]=decode(ProviderArtifact,capture_coverage.profile_receipt)
     base_wire, base_receipt = _document(base.reader.manifest_receipt["path"], limits.max_metadata_bytes, base.artifact.schema)
     _need(base_wire == base.manifest and base_receipt == base.artifact, "explicit base receipt/document changed")
     r2_wire, r2_receipt = _document(r2_manifest, limits.max_document_bytes, "scar.os-resource-refinement")
@@ -406,6 +412,7 @@ class OSFDTableContexts:
         _need(document == _expected(prepared), "published context refinement differs from independently qualified proof/selection")
         self = object.__new__(cls)
         self.base, self.r2 = prepared[:2]
+        self.capture_coverage_verified = True
         self.document = document
         self.context_resources = {decode(ResourceInstance, wire).id: decode(ResourceInstance, wire)
                                   for wire in document["context_resources"]}
@@ -425,10 +432,12 @@ class OSFDTableContexts:
         return self
 
     @classmethod
-    def read(cls, base, r2_manifest, inputs, path, *, budgets=None, progress=None):
+    def read(cls, base, r2_manifest, inputs, path, *, budgets=None, progress=None, capture_coverage=None):
         limits = budgets or FDTableContextBudgets()
         document, _ = _document(path, limits.max_document_bytes, SCHEMA)
-        return cls._qualified(_prepare(base, r2_manifest, inputs, limits, progress), document)
+        _need(document.get("schema_version")==VERSION,
+              "legacy context v1 continuity was not capture-coverage-qualified; original artifact retained, qualification rejected")
+        return cls._qualified(_prepare(base, r2_manifest, inputs, limits, progress,capture_coverage), document)
 
     def record(self, table, ordinal):
         """R2 public selection, with only an admitted handle.container replaced."""
@@ -458,9 +467,9 @@ class OSFDTableContexts:
                 "contexts_selected": len(self.context_resources), "complete_registry": False}
 
 
-def build_os_fd_table_contexts(base, r2_manifest, inputs, fresh_out, *, budgets=None, progress=None):
+def build_os_fd_table_contexts(base, r2_manifest, inputs, fresh_out, *, budgets=None, progress=None, capture_coverage=None):
     limits = budgets or FDTableContextBudgets()
-    prepared = _prepare(base, r2_manifest, inputs, limits, progress)
+    prepared = _prepare(base, r2_manifest, inputs, limits, progress,capture_coverage)
     document = _expected(prepared)
     OSFDTableContexts._qualified(prepared, document)  # Selected typed/FK checks, never a fake full model.
     encoding = BundleBudgets(max_record_bytes=limits.max_document_bytes,

@@ -1,5 +1,11 @@
 # OS source自动查询与witness准备
 
+**2026-10-23 correction：positive source查找与continuity资格不同。** 本文两条真实
+birth selector/result/flags/Run及自动需求生成结果仍成立；旧gate下游FD contexts的
+35个container关联因capture filter遗漏`unshare`/`close_range`而不具备连续性资格。
+原artifact不改，当前context reader拒绝旧v1；不再将这个局部门称为container已证明。
+见[OS_CAPTURE_COVERAGE.md](OS_CAPTURE_COVERAGE.md)。
+
 2026-10-23。新增`scar/trace/os_source_lookup.py`；未修改R1/R2/core、coordinates或
 `os_fd_table_contexts.py`。唯一真实自动化gate已exit0，见末节；全模型仍OPEN。
 
