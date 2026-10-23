@@ -2,6 +2,38 @@
 
 日期：2026-10-20。**OPEN：完整 LeWM 自动建模未验收。**
 
+### 2026-10-23：成功全流程采集与统一运行身份
+
+本节接管下面历史运行中的状态：此前两个未结束的全量源码分析进程已不存在，
+没有可验收的最终产物，不能继续称其“正在运行”。数据挂载恢复后已重新成功运行
+原 pusht 单 episode 命令，未修改 LeWM。新采集产品版本 `7de08ee`，returncode 0，
+生成 episode 结果和视频；291.93s 是重度插桩墙钟，不能作为干净 benchmark 或加速比。
+见[实际完整采集](../artifacts/experiments/first_stage_lewm_environment_mounted_20261022/README.md)。
+
+新增公共 `import-capture` 从同一次原档先核 collector/nonce/原始 hash、进程创建与
+文件发布证据，再让内存和 OS 适配器在构造时使用同一组 Run/Process/Thread。
+真实导入 exit 0、373.43s：262 个证据成员、5 个进程、252 个线程，保留全部
+70,872 条 profiler 内存记录、253 份/720,049 行 OS 记录。151,226 个 CPU RF
+对应和 24,082 个 runtime→GPU 对应来自原 provider；不提升为 Python 调用关系。
+OS 中还有 654 个所检查端点的进程未解析，明确保留；不能只用 PID 猜接。
+见[联合导入和核验](../artifacts/experiments/first_stage_joined_capture_20261023/README.md)。
+
+源码侧新增 `compose-program`，只引用原 source/CFG/body 的身份和摘要，提供递归
+展开、有序 Uses/状态访问查询及条件调用目标，不新造 producer 或全程序根。
+真实原 151 文件组合已完成：122,323 source atoms、54 个已有局部 typed body。
+原 202 UNSUPPORTED/1,961 NOT_ATTEMPTED、module initializer 与跨函数绑定缺口
+均保留；这不是新的 body 覆盖率，也不是完整 ProgramSnapshot。
+见[组合查询](PROGRAM_COMPOSITION.md)。
+
+一次固定真实源码 profile 证明现有索引改进未测得提速（5.9606→6.1337s），主要
+剩余成本是逐函数重复全文件源层校验。正在改为显式、独立封存的每文件分析会话：
+只复用已全验的私有源层，公共读入/重放和新 body 构造仍完整校验。吞吐数据仅用于
+建模前端，不是优化 LeWM；后续全量结果产生后才更新覆盖数。
+
+**当前优先顺序**：完成封存会话及同范围全量源码重建；把真实 Python 调用与
+Torch 输入/输出逐槽身份接通；再将来源、状态、资源使用和完成关系逐项闭合。
+第一阶段 S3/S4 仍 OPEN，不进入候选检测、变换或性能 A/B。
+
 ### 2026-10-22恢复状态
 
 全范围4096/100000op原重建运行超过30分钟，尚无新全量覆盖数。只读调用链审查已

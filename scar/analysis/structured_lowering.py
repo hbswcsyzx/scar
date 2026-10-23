@@ -46,11 +46,15 @@ class _Loop:
 
 
 class StructuredBuilder(_Builder):
-    def __init__(self, context, entry, *, source=None, max_operations=10000):
+    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None):
+        if sealed_source is not None:
+            sealed_source._require_inputs(context.semantic, context.control)
+        self.sealed_source = sealed_source
         super().__init__(context.path, entry, context.text, context.semantic, context.semantics,
                          context.control, max_operations, selected_source=source,
                          tree=context.tree, symbol_tables=context.symbol_tables,
-                         expand_candidates=False, profile=BodyLoweringProfile.STRUCTURED_BODY)
+                         expand_candidates=False, profile=BodyLoweringProfile.STRUCTURED_BODY,
+                         source_index=context._lowering_index if sealed_source is not None else None)
         self.binding_definitions = []
         self.binding_reads = []
         self.known_binding_states = {}
@@ -97,8 +101,7 @@ class StructuredBuilder(_Builder):
         for value_id in existing:
             value = self.values_by_id[value_id]
             shifted = replace(value, origin=BlockArgument(cursor.block, value.origin.index + len(tokens)))
-            self.values[self.values.index(value)] = shifted
-            self.values_by_id[value_id] = shifted
+            self.replace_value(shifted)
         self.block_arguments[cursor.block] = tuple(tokens) + existing
         return cursor
 
@@ -467,7 +470,7 @@ class StructuredBuilder(_Builder):
         self.locals = {symbol.get_name() for symbol in table.get_symbols() if symbol.is_local()}
         parameters = [argument for argument, _ in formal_nodes(node)]
         cursor = self.new_block(node)
-        state = self.values.pop(); self.value_links.pop()
+        state = self.pop_value()
         args, ports, refs = [], [], []
         for index, parameter in enumerate(parameters):
             value = ReferenceValue(self.fresh(ValueID, "formal"), self.function_context, BlockArgument(cursor.block, index))
@@ -532,15 +535,15 @@ class StructuredBuilder(_Builder):
                                               tuple(self.protocols), tuple(self.loops))
         except _Unsupported as error:
             self.gap(error.kind, error.node, error.detail)
-            self.operation_links.clear(); self.value_links.clear(); self.use_links.clear(); self.targets.clear()
+            self.operation_links.clear(); self.clear_value_links(); self.use_links.clear(); self.targets.clear()
             self.interface = None
         metadata = LoweringMetadata(self.entry, self.snapshot, tuple(self.operation_links), tuple(self.value_links),
                                     tuple(self.targets), tuple(self.gaps), self.assumptions(), tuple(self.use_links))
         if graph is not None:
             # This complete check also validates the canonical core; callers of
             # PreparedSource.lower receive a fully checked constructed body.
-            require_valid_structured_body(structured, graph, self.interface, metadata,
-                                           semantic=self.semantic, control=self.control)
+            _require_valid_structured_body(structured, graph, self.interface, metadata,
+                semantic=self.semantic, control=self.control, sealed_source=self.sealed_source)
         return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface, None, structured)
 
     @staticmethod
@@ -551,13 +554,28 @@ class StructuredBuilder(_Builder):
 
 def require_valid_structured_body(model, graph, interface, metadata, *, semantic, control):
     """Validate typed overlay endpoints; exact source replay is a separate gate."""
+    # Public validation always checks caller-owned mutable source layers.
+    return _require_valid_structured_body(model, graph, interface, metadata,
+                                          semantic=semantic, control=control)
+
+
+def _require_valid_structured_body(model, graph, interface, metadata, *, semantic, control,
+                                   sealed_source=None):
     from scar.ir.v2._validation import record_errors
     errors = record_errors(model, StructuredBodyModel, "structured")
     if errors:
         raise ValueError("; ".join(errors))
-    checked_control = control.validate(semantic=semantic)
-    if not checked_control["valid"]:
-        raise ValueError("structured loop source control must be independently well formed")
+    if sealed_source is None:
+        checked_control = control.validate(semantic=semantic)
+        if not checked_control["valid"]:
+            raise ValueError("structured loop source control must be independently well formed")
+    else:
+        from scar.analysis.program_lowering import _SealedLoweringSession
+        if type(sealed_source) is not _SealedLoweringSession:
+            raise TypeError("source reuse requires the local sealed construction session")
+        sealed_source._require_inputs(semantic, control)
+    # Every newly constructed core, interface, protocol and correspondence is
+    # still checked below. Only the unchanged private source layer is reused.
     require_valid(graph)
     environment_profile = interface.profile is BodyLoweringProfile.STRUCTURED_ENV
     if (interface.profile not in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV) or model.region != graph.root

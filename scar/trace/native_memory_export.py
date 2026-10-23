@@ -83,7 +83,7 @@ class _FragmentContext:
         return graph
 
 
-def export_native_memory(result, output):
+def export_native_memory(result, output, *, coordinates=None):
     """Return JSON-safe existing IR records and validate every raw correspondence."""
     memory = result.memory
     if memory is None or memory.source_document is None:
@@ -107,11 +107,23 @@ def export_native_memory(result, output):
     values_artifact = external_artifact(result.bundle.values, str((Path(output) / "native-memory-values.json.gz").resolve()))
     # These coordinates denote the supplied native capture window. They do not
     # silently merge it with a Python run or manufacture source occurrences.
-    run_id = RunID(result.report["scope"] + ":run")
-    process_id = ProcessInstanceID(result.report["scope"] + ":process:" + str(result.report["pid"]))
-    capture_source = ProviderFactReference(kineto, "#/traceEvents")
-    run = ExecutionRun(run_id, capture_source)
-    process = ProcessInstance(process_id, run_id, result.report["pid"], capture_source)
+    if coordinates is None:
+        run_id = RunID(result.report["scope"] + ":run")
+        process_id = ProcessInstanceID(result.report["scope"] + ":process:" + str(result.report["pid"]))
+        capture_source = ProviderFactReference(kineto, "#/traceEvents")
+        run = ExecutionRun(run_id, capture_source)
+        process = ProcessInstance(process_id, run_id, result.report["pid"], capture_source)
+    else:
+        # The membership binder checked exact bytes and OS/collector receipts.
+        # Matching a PID alone never selects the shared process instance.
+        from scar.trace.capture_coordinates import CaptureCoordinates
+        if type(coordinates) is not CaptureCoordinates:
+            raise TypeError("native memory coordinates must be a bound CaptureCoordinates")
+        process = coordinates.process_for(kineto, result.report["pid"])
+        if process is None:
+            raise ValueError("Kineto bytes/process are not members of the supplied capture")
+        run = coordinates.run
+        run_id, process_id = run.id, process.id
     payloads = {kineto.sha256: result.raw_kineto_bytes, profile_artifact.sha256: profile_payload}
     if capture is not None:
         payloads[capture.sha256] = capture_payload
@@ -145,11 +157,14 @@ def export_native_memory(result, output):
     result.report["memory"]["lifetime_binding"] = summary
     if ctx.issue_counts or statuses.get("MISMATCH"):
         raise ValueError("native allocation lifetime correspondence contradicted original evidence: " + repr(summary))
-    return {"schema": "scar.native-memory-execution-fragment", "schema_version": 1,
+    fragment = {"schema": "scar.native-memory-execution-fragment", "schema_version": 1,
         "runs": encode((run,)), "processes": encode((process,)), "target_lifetime_events": encode(tuple(rows)),
         "values_artifact": encode(values_artifact), "kineto_artifact": encode(kineto),
         "profile_artifact": encode(profile_artifact), "capture_manifest_artifact": encode(capture),
         "validation": summary, "whole_model_established": False}
+    if coordinates is not None:
+        fragment["coordinate_binding"] = encode(coordinates.artifact)
+    return fragment
 
 
 __all__ = ["export_native_memory", "PROFILE_SCHEMA", "KINETO_SCHEMA"]

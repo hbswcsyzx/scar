@@ -8,12 +8,15 @@ from __future__ import annotations
 
 import ast
 from collections import Counter, defaultdict
+from copy import deepcopy
 from dataclasses import dataclass
+from functools import cached_property
 import hashlib
 import json
 from pathlib import Path
 import symtable
 import tokenize
+from types import MappingProxyType
 
 from scar.analysis.control_flow_v2 import _build_generated_source_layers, validate_source_control_flow
 from scar.analysis.source_semantics_v2 import validate_source_semantics
@@ -203,24 +206,135 @@ class PreparedSource:
     tree: ast.Module
     symbol_tables: dict
 
+    @cached_property
+    def _lowering_index(self):
+        # Used only by the isolated, explicitly sealed lowering session.
+        # Ordinary PreparedSource inputs remain mutable and do not reuse it.
+        return _source_lowering_index(self.path, self.tree, self.semantic, self.semantics)
+
+    def seal_for_lowering(self):
+        """Snapshot current source inputs for one isolated construction session.
+
+        The session owns private copies and returns only constructed body
+        records. Later mutation of this PreparedSource does not alter that
+        explicit snapshot; ordinary lower() always checks current source inputs.
+        """
+        return _SealedLoweringSession(self)
+
     def lower(self, entry, *, source: SourceReference | None = None, max_operations=10000,
               expand_candidates=True, profile=BodyLoweringProfile.LEGACY):
-        _check_arguments(entry, max_operations)
-        if profile is BodyLoweringProfile.STRUCTURED_ENV:
-            if expand_candidates:
-                raise ValueError("environment source bodies require root-only expansion")
-            from scar.analysis.environment_lowering import StructuredEnvironmentBuilder
-            return StructuredEnvironmentBuilder(self, entry, source=source, max_operations=max_operations).run()
-        if profile is BodyLoweringProfile.STRUCTURED_BODY:
-            if expand_candidates:
-                raise ValueError("structured source bodies require root-only expansion")
-            from scar.analysis.structured_lowering import StructuredBuilder
-            return StructuredBuilder(self, entry, source=source, max_operations=max_operations).run()
-        builder = _Builder(self.path, entry, self.text, self.semantic, self.semantics,
-                           self.control, max_operations, selected_source=source,
-                           tree=self.tree, symbol_tables=self.symbol_tables,
-                           expand_candidates=expand_candidates, profile=profile)
-        return builder.run()
+        return _lower_prepared(self, entry, source=source, max_operations=max_operations,
+                               expand_candidates=expand_candidates, profile=profile)
+
+
+def _lower_prepared(context, entry, *, source, max_operations, expand_candidates, profile,
+                    sealed_source=None):
+    _check_arguments(entry, max_operations)
+    if profile is BodyLoweringProfile.STRUCTURED_ENV:
+        if expand_candidates:
+            raise ValueError("environment source bodies require root-only expansion")
+        from scar.analysis.environment_lowering import StructuredEnvironmentBuilder
+        return StructuredEnvironmentBuilder(context, entry, source=source, max_operations=max_operations,
+                                             sealed_source=sealed_source).run()
+    if profile is BodyLoweringProfile.STRUCTURED_BODY:
+        if expand_candidates:
+            raise ValueError("structured source bodies require root-only expansion")
+        from scar.analysis.structured_lowering import StructuredBuilder
+        return StructuredBuilder(context, entry, source=source, max_operations=max_operations,
+                                 sealed_source=sealed_source).run()
+    builder = _Builder(context.path, entry, context.text, context.semantic, context.semantics,
+                       context.control, max_operations, selected_source=source,
+                       tree=context.tree, symbol_tables=context.symbol_tables,
+                       expand_candidates=expand_candidates, profile=profile)
+    return builder.run()
+
+
+class _SealedLoweringSession:
+    """Private source snapshot, with no public graph getters or graph output.
+
+    Construction executes no target code or callbacks. Builders only read the
+    private source layers; emitted body records contain frozen IDs/references,
+    never mutable source definitions, graph registries or source AST objects.
+    This is local construction validation, not public source replay authority.
+    """
+
+    __slots__ = ("__prepared", "__validated")
+
+    def __init__(self, prepared):
+        self.__validated = False
+        semantic, semantics, control, tree = deepcopy((
+            prepared.semantic, prepared.semantics, prepared.control, prepared.tree))
+        expected_tree = ast.parse(prepared.text, filename=str(prepared.path))
+        if ast.dump(tree, include_attributes=True) != ast.dump(expected_tree, include_attributes=True):
+            raise ValueError("sealed source AST differs from the fixed source text")
+        fingerprint = "sha256:" + hashlib.sha256(prepared.text.encode()).hexdigest()
+        snapshot = semantics.sources.get(str(prepared.path))
+        if snapshot is None or snapshot.fingerprint != fingerprint:
+            raise ValueError("sealed source layers differ from the fixed source text")
+        # Validate every source layer and both cross-layer digests once. These
+        # mutable copies never escape this session, so per-body construction
+        # need not repeat that same source-only work.
+        semantic.assert_valid()
+        semantics.assert_valid(semantic)
+        control.assert_valid(semantic, semantics)
+        self.__prepared = PreparedSource(prepared.path, prepared.root, prepared.text,
+            semantic, semantics, control, tree, _symbol_tables(prepared.text, prepared.path))
+        self.__validated = True
+
+    def lower(self, entry, *, source=None, max_operations=10000, expand_candidates=True,
+              profile=BodyLoweringProfile.LEGACY):
+        if profile not in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+            raise ValueError("sealed construction is limited to structured source profiles")
+        return _lower_prepared(self.__prepared, entry, source=source, max_operations=max_operations,
+            expand_candidates=expand_candidates, profile=profile, sealed_source=self)
+
+    def _require_inputs(self, semantic, control):
+        if (not self.__validated or semantic is not self.__prepared.semantic
+                or control is not self.__prepared.control):
+            raise ValueError("source validation receipt belongs to a different sealed snapshot")
+
+
+@dataclass(frozen=True)
+class _SourceLoweringIndex:
+    atoms: object
+    by_atom: object
+    old_by_atom: object
+    slots: object
+    functions: object
+    function_candidates: object
+    function_nodes: tuple
+
+
+def _source_lowering_index(path, tree, semantic, semantics):
+    """Build file-wide read-only lookup tables once for each prepared source."""
+    atoms = {_span_atom(atom): atom.reference for atom in semantic.source_atoms.values()
+             if atom.reference.path == str(path)}
+    by_atom, old_by_atom, candidates = defaultdict(list), defaultdict(list), defaultdict(list)
+    for definition in semantic.definitions.values():
+        by_atom[definition.code_id].append(definition)
+    for operation in semantics.operations.values():
+        old_by_atom[operation.source.atom_id].append(operation)
+    functions = {}
+
+    def collect(statements, prefix=""):
+        for node in statements:
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                name = prefix + node.name
+                candidates[name].append(node)
+                functions[name] = node
+            elif isinstance(node, ast.ClassDef):
+                collect(node.body, prefix + node.name + ".")
+
+    collect(tree.body)
+    return _SourceLoweringIndex(
+        MappingProxyType(atoms),
+        MappingProxyType({key: tuple(value) for key, value in by_atom.items()}),
+        MappingProxyType({key: tuple(value) for key, value in old_by_atom.items()}),
+        MappingProxyType({(slot.owner, slot.name): slot.slot_id for slot in semantic.slots.values()}),
+        MappingProxyType(functions),
+        MappingProxyType({key: tuple(value) for key, value in candidates.items()}),
+        tuple(node for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))),
+    )
 
 
 def _canonical(document):
@@ -243,7 +357,7 @@ class _Cursor:
 class _Builder:
     def __init__(self, path, entry, text, semantic, semantics, control, max_operations,
                  selected_source=None, tree=None, symbol_tables=None, expand_candidates=True,
-                 profile=BodyLoweringProfile.LEGACY):
+                 profile=BodyLoweringProfile.LEGACY, source_index=None):
         if type(expand_candidates) is not bool:
             raise ValueError("expand_candidates must be an exact boolean")
         self.expand_candidates = expand_candidates
@@ -260,24 +374,17 @@ class _Builder:
         self.snapshot = semantics.sources[str(path)]
         self.tree = tree if tree is not None else ast.parse(text, filename=str(path))
         self.symbol_tables = symbol_tables if symbol_tables is not None else _symbol_tables(text, path)
-        self.atoms = {_span_atom(atom): atom.reference for atom in semantic.source_atoms.values()
-                      if atom.reference.path == str(path)}
-        self.by_atom = defaultdict(list)
-        self.old_by_atom = defaultdict(list)
-        for definition in semantic.definitions.values():
-            self.by_atom[definition.code_id].append(definition)
-        for operation in semantics.operations.values():
-            self.old_by_atom[operation.source.atom_id].append(operation)
-        self.slots = {(slot.owner, slot.name): slot.slot_id for slot in semantic.slots.values()}
-        self.functions = {}
-        self.function_candidates = defaultdict(list)
-        self._collect_functions(self.tree.body)
+        index = source_index if source_index is not None else _source_lowering_index(
+            path, self.tree, semantic, semantics)
+        self.atoms, self.by_atom, self.old_by_atom = index.atoms, index.by_atom, index.old_by_atom
+        self.slots = index.slots
+        # Selecting a nested definition adds an entry alias only to this body.
+        self.functions = dict(index.functions)
+        self.function_candidates = index.function_candidates
         if selected_source is not None:
             if selected_source.path != str(path) or selected_source.fingerprint != self.snapshot.fingerprint:
                 raise ValueError("selected definition source differs from prepared snapshot")
-            selected = [node for node in ast.walk(self.tree)
-                        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
-                        and self.source(node) == selected_source]
+            selected = [node for node in index.function_nodes if self.source(node) == selected_source]
             if len(selected) != 1:
                 raise ValueError("selected source must identify exactly one function definition")
             self.functions[entry] = selected[0]
@@ -286,7 +393,9 @@ class _Builder:
         self.regions, self.operations, self.values = [], [], []
         self.operations_emitted = 0
         self.values_by_id = {}
+        self.value_positions = {}
         self.operation_links, self.value_links, self.use_links = [], [], []
+        self.value_link_set = set()
         self.targets, self.gaps = [], []
         self.world = LocationID(_key("python-world", str(path), self.snapshot.fingerprint))
         self.state_type = ValueType(ValueKind.STATE, location=self.world)
@@ -297,15 +406,6 @@ class _Builder:
         self.function_blocks = []
         self.pending_targets = []
 
-    def _collect_functions(self, statements, prefix=""):
-        for node in statements:
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                name = prefix + node.name
-                self.function_candidates[name].append(node)
-                self.functions[name] = node
-            elif isinstance(node, ast.ClassDef):
-                self._collect_functions(node.body, prefix + node.name + ".")
-
     def source(self, node):
         try:
             return self.atoms[_span(node)]
@@ -313,13 +413,13 @@ class _Builder:
             raise _Unsupported(GapKind.SOURCE_MAPPING, node, "source atom is not uniquely represented")
 
     def old_operation(self, node):
-        records = self.old_by_atom[self.source(node).atom_id]
+        records = self.old_by_atom.get(self.source(node).atom_id, ())
         if len(records) != 1:
             raise _Unsupported(GapKind.SOURCE_MAPPING, node, "expression needs one source computational record")
         return records[0]
 
     def definition(self, node):
-        choices = [d for d in self.by_atom[self.source(node).atom_id.wire]
+        choices = [d for d in self.by_atom.get(self.source(node).atom_id.wire, ())
                    if d.metadata.get("phase") == "call_time"]
         if len(choices) != 1:
             raise _Unsupported(GapKind.SOURCE_MAPPING, node, "function body needs one versioned source definition")
@@ -336,12 +436,33 @@ class _Builder:
 
     def link_value(self, value, node, role, *, slot=None, semantic_value=None):
         link = ValueSource(value.id, self.source(node), role, slot, semantic_value)
-        if link not in self.value_links:
+        if link not in self.value_link_set:
             self.value_links.append(link)
+            self.value_link_set.add(link)
 
     def add_value(self, value):
+        self.value_positions[value.id] = len(self.values)
         self.values.append(value)
         self.values_by_id[value.id] = value
+
+    def replace_value(self, value):
+        self.values[self.value_positions[value.id]] = value
+        self.values_by_id[value.id] = value
+
+    def pop_value(self):
+        """Remove the trailing value and its trailing correspondence together."""
+        value = self.values.pop()
+        link = self.value_links.pop()
+        if link.value != value.id:
+            raise ValueError("trailing value/source correspondence differs")
+        self.value_link_set.remove(link)
+        del self.value_positions[value.id]
+        del self.values_by_id[value.id]
+        return value
+
+    def clear_value_links(self):
+        self.value_links.clear()
+        self.value_link_set.clear()
 
     def new_block(self, node, *, named=(), role=SourceRole.CONTROL, extra_types=()):
         block = self.fresh(BlockID, "block")
@@ -487,7 +608,7 @@ class _Builder:
                 raise _Unsupported(GapKind.UNBOUND_LOCAL, node, "local has no definition on every incoming path: " + node.id)
             self.gap(GapKind.EFFECT_SUMMARY, node, "global/builtin name lookup remains an effectful source operation")
             cursor, value, _ = self.invoke(cursor, node, (), old=old)
-            if node.id in self.functions and len(self.function_candidates[node.id]) == 1:
+            if node.id in self.functions and len(self.function_candidates.get(node.id, ())) == 1:
                 self.reference_candidates[value] = node.id
             return cursor, value
 
@@ -679,8 +800,7 @@ class _Builder:
                                "closure/cell bindings need explicit state-location interfaces")
         cursor = self.new_block(node)
         # Function entry has parameters followed by the explicit world state.
-        state = self.values.pop()
-        self.value_links.pop()
+        state = self.pop_value()
         args, ports = [], []
         cursor.env = {}
         for index, parameter in enumerate(parameters):
@@ -804,7 +924,7 @@ class _Builder:
             # A rejected body has diagnostics, not dangling links into a graph
             # that was never emitted. Preserve the source layers and all gaps.
             self.operation_links.clear()
-            self.value_links.clear()
+            self.clear_value_links()
             self.use_links.clear()
             self.targets.clear()
             self.interface = None
@@ -854,6 +974,8 @@ class _Builder:
                 self.operation_links, self.value_links, self.use_links, self.pending_targets, self.gaps), checkpoint):
             del items[length:]
         self.values_by_id = {value.id: value for value in self.values}
+        self.value_positions = {value.id: index for index, value in enumerate(self.values)}
+        self.value_link_set = set(self.value_links)
 
 
 def _span_atom(atom):

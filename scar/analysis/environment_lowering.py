@@ -47,8 +47,9 @@ def captured_cell_slot(definition, name):
 class StructuredEnvironmentBuilder(StructuredBuilder):
     """The structured body rules with canonical environment and address ports."""
 
-    def __init__(self, context, entry, *, source=None, max_operations=10000):
-        super().__init__(context, entry, source=source, max_operations=max_operations)
+    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None):
+        super().__init__(context, entry, source=source, max_operations=max_operations,
+                         sealed_source=sealed_source)
         self.profile = BodyLoweringProfile.STRUCTURED_ENV
         self.prepared_source = context
         self.environment = None
@@ -99,7 +100,7 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
             (NamespaceKey(operation.uses[2].id),), AccessMode.READ) for index in (0, 1)))
         self.gap(GapKind.EFFECT_SUMMARY, node,
             "globals lookup precedes saved-builtins fallback; runtime namespace contents and complete effects remain unproved")
-        if node.id in self.functions and len(self.function_candidates[node.id]) == 1:
+        if node.id in self.functions and len(self.function_candidates.get(node.id, ())) == 1:
             self.reference_candidates[value] = node.id
         return cursor, value
 
@@ -241,7 +242,7 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         self.global_names = {symbol.get_name() for symbol in symbols if symbol.is_global()}
         parameters = [argument for argument, _ in formal_nodes(node)]
         cursor = self.new_block(node)
-        state = self.values.pop(); self.value_links.pop(); del self.values_by_id[state.id]
+        state = self.pop_value()
         args, ports, refs, members = [], [], [], []
 
         def environment_reference(role, name=None, position=None):

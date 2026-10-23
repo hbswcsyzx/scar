@@ -386,6 +386,15 @@ def main(argv=None) -> int:
     inventory_program.add_argument("--body-profile", choices=("frame", "structured", "environment"), default="frame",
                                    help="body lowering profile: frame v5/v6, structured v7, environment v8")
     inventory_program.set_defaults(func=_inventory_program)
+    composition = sub.add_parser("compose-program", help="connect retained source structure and typed function bodies using their original identities")
+    composition.add_argument("--inventory", required=True)
+    composition.add_argument("--source-layers", required=True)
+    composition.add_argument("--out", required=True, help="fresh directory for recursive composition references and coverage frontiers")
+    composition.add_argument("--max-input-bytes", type=int, default=512000000)
+    composition.add_argument("--max-files", type=int, default=256)
+    composition.add_argument("--max-record-bytes", type=int, default=128000000)
+    composition.add_argument("--max-output-bytes", type=int, default=256000000)
+    composition.set_defaults(func=_compose_program)
     check_inventory = sub.add_parser("check-inventory", help="rebuild a source inventory from current files and discovery context")
     check_inventory.add_argument("report", help="inventory report JSON or JSON.gz")
     check_inventory.set_defaults(func=_check_inventory)
@@ -484,6 +493,12 @@ def main(argv=None) -> int:
     normalize.add_argument("--out", required=True)
     normalize.add_argument("--report", help="raw record conservation and ambiguity report")
     normalize.set_defaults(func=_normalize_v2)
+    capture_model = sub.add_parser("import-capture", help="assemble original Python/Torch/OS capture evidence in one verified execution coordinate space")
+    capture_model.add_argument("directory", help="successful SCAR collector capture directory containing trace/ and os/")
+    capture_model.add_argument("--max-bytes", type=int, default=1000000000)
+    capture_model.add_argument("--max-lines", type=int, default=2000000)
+    capture_model.add_argument("--out", required=True, help="fresh assembled capture directory with per-stage progress")
+    capture_model.set_defaults(func=_import_capture)
     os_resources = sub.add_parser("import-os-resources", help="import retained per-TID strace files into existing resource and handle identities")
     os_resources.add_argument("directory", help="strace -ff -ttt -T files, optionally gzip")
     os_resources.add_argument("--scope", default="capture", help="namespace, additionally bound to the artifact manifest hash")
@@ -739,6 +754,20 @@ def _check_program(args) -> int:
         destination.write_text(payload + "\n", encoding="utf-8")
     print(payload)
     return 0 if report["status"] == "WELL_FORMED" else 2
+
+
+def _compose_program(args) -> int:
+    from scar.analysis.program_composition import compose_program
+    try:
+        report = compose_program(args.inventory, args.source_layers, args.out,
+            max_input_bytes=args.max_input_bytes, max_files=args.max_files,
+            max_record_bytes=args.max_record_bytes, max_output_bytes=args.max_output_bytes)
+    except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)],
+                          "transformation_authorized": False}))
+        return 2
+    print(json.dumps({"status": "INDEXED_WITH_FRONTIERS", "out": args.out, **report}))
+    return 0
 
 
 def _model_program(args) -> int:
@@ -1276,6 +1305,15 @@ def _normalize_v2(args) -> int:
     report = _write_document(args.report or str(out) + ".coverage.json", result.coverage)
     print(json.dumps({"schema": result.bundle.SCHEMA, "out": str(out),
                       "report": str(report), "valid": validation["valid"]}))
+    return 0
+
+
+def _import_capture(args) -> int:
+    from scar.trace.capture_import import import_capture
+    report = import_capture(args.directory, args.out, max_bytes=args.max_bytes, max_lines=args.max_lines,
+        progress=lambda record: print(json.dumps(record), flush=True))
+    print(json.dumps({"out": str(Path(args.out).resolve()), "coordinate_identity_consistent": report["coordinate_identity_consistent"],
+                      "whole_model_established": report["whole_model_established"]}))
     return 0
 
 

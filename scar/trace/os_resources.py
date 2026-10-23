@@ -368,7 +368,7 @@ def _clone_flags(call):
     return match[1].strip()
 
 
-def import_os_resources(directory, *, scope, run=None, root_tid=None,
+def import_os_resources(directory, *, scope, run=None, root_tid=None, coordinates=None,
                         max_bytes=512_000_000, max_lines=2_000_000):
     """Import one retained capture; scope always includes the artifact manifest hash.
 
@@ -382,6 +382,12 @@ def import_os_resources(directory, *, scope, run=None, root_tid=None,
         raise ValueError("OS import budgets must be positive exact integers")
     if run is not None and type(run) is not RunID:
         raise TypeError("run must be an exact RunID or None")
+    if coordinates is not None:
+        from scar.trace.capture_coordinates import CaptureCoordinates
+        if type(coordinates) is not CaptureCoordinates:
+            raise TypeError("OS coordinates must be a bound CaptureCoordinates")
+        if run is not None and run != coordinates.run.id:
+            raise ValueError("OS run declaration contradicts bound capture coordinates")
     files, artifacts, lines, calls = _scan(Path(directory), max_bytes, max_lines)
     if root_tid is not None and root_tid not in {tid for _, tid in files}:
         raise ValueError("declared root_tid has no retained per-TID artifact")
@@ -392,6 +398,8 @@ def import_os_resources(directory, *, scope, run=None, root_tid=None,
             "assumptions": ["retained files belong to one declared capture", "Linux syscall contract",
                 "no unobserved shared FD-table actor in connected private intervals"],
             "canonical_source_connected": False, "complete_resource_model": False}}
+    if coordinates is not None:
+        manifest["contract"]["coordinate_binding"] = encode(coordinates.artifact)
     payload = json.dumps(manifest, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
     digest = hashlib.sha256(payload).hexdigest()
     bound_scope = scope + ":os:" + digest
@@ -424,6 +432,21 @@ def import_os_resources(directory, *, scope, run=None, root_tid=None,
     threads = tuple(HostThreadInstance(HostThreadInstanceID(bound_scope + ":thread:" + str(tid)),
         process_for_tid[tid], tid, ProviderFactReference(artifact, "#"))
         for (_, tid), artifact in zip(files, artifacts, strict=True) if tid in process_for_tid)
+    if coordinates is not None:
+        # Preserve resource/handle identities.  Only the coordinates used by
+        # their evidence points change, at construction time before hashing.
+        execution_run = coordinates.run
+        process_for_tid, bound_processes, bound_threads = {}, {}, {}
+        for (_, tid), artifact in zip(files, artifacts, strict=True):
+            process = coordinates.process_for(artifact, tid)
+            if process is None:
+                continue
+            process_for_tid[tid] = process.id
+            bound_processes[process.id] = process
+            thread = coordinates.thread_for(artifact, tid, "linux_native_tid")
+            if type(thread) is HostThreadInstance:
+                bound_threads[thread.id] = thread
+        processes, threads = tuple(bound_processes.values()), tuple(bound_threads.values())
     replay = _Replay(bound_scope, execution_run, artifacts, files, protocol, process_for_tid)
     for child in private_children & replay.states.keys():
         replay.states[child]["safe"] = True
