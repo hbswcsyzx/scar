@@ -1,5 +1,10 @@
 # OS capture coverage correction
 
+后继 **Implemented + Verified**：SCAR-owned launch/profile v2已在唯一成功的自有CPU
+full-profile门中通过。新`--os-capture-root`真实Popen/运行镜像/native intent/归档/一次
+最终coordinate发布已接通；旧Run不补造launch、旧35容器资格不恢复。见
+[OS_CAPTURE_LAUNCH.md](OS_CAPTURE_LAUNCH.md)。原v1纠错协议与历史说明如下。
+
 2026-10-23。Observed：原capture实际脚本只选择四类
 `%file,%process,%memory,%desc`。strace6.8原生amd64 syscall表中unshare/close_range为
 flags0；类过滤按mask机械筛选，不能由接口的人类含义推断成员。当前安装包
@@ -38,7 +43,9 @@ names及`-f/-ff`。类token从不贡献资格，后续trace选项按替换语义
 
 `OSFDTableContexts` schema2的builder与reader都要求此对象，并重新核完整artifact
 receipts。对象不能由公开构造函数或trust bool创建。没有为旧capture伪造launch/profile，
-也没有本轮collector producer集成；未来联合采集需在真实exec路径生成这些收据。
+最初纠错门尚无collector producer集成；后继v2已在真实exec路径生成并通过CPU资格门。
+v2额外核owned running image、intent/native准确membership与独立nonce，仍不把selection
+资格当完整event/effect证明。旧capture缺这组回执，不能因后继代码存在就获得资格。
 
 coverage是已有scope内continuity检查的**必要条件**，不是全部Linux接口模型：不证明
 FD内容/offset、全量OFD alias、ImportedAt前后ready、外部writes或GPU状态。原provider

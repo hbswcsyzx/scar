@@ -24,6 +24,13 @@ from scar.trace.reader import load
 
 def _trace(args) -> int:
     out = Path(args.out).resolve()
+    os_capture_root = getattr(args, 'os_capture_root', None)
+    if os_capture_root is not None:
+        os_capture_root = Path(os_capture_root).absolute()
+        if os_capture_root.exists() or out != os_capture_root / 'trace':
+            raise SystemExit('--os-capture-root requires a fresh root and explicit --out ROOT/trace')
+        if not (getattr(args, 'call_operands', False) and getattr(args, 'execution_evidence', False)):
+            raise SystemExit('--os-capture-root requires --call-operands --execution-evidence')
     out.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
     project_root = str(Path(__file__).resolve().parents[1])
@@ -35,6 +42,8 @@ def _trace(args) -> int:
     env.pop('SCAR_OPERAND_CAPTURE',None)
     env.pop('SCAR_EXECUTION_EVIDENCE',None)
     env.pop('SCAR_TENSOR_PHYSICAL',None)
+    for key in ('SCAR_OS_CAPTURE_NONCE','SCAR_OS_CAPTURE_INTENT','SCAR_OS_CAPTURE_INTENT_SHA256'):
+        env.pop(key,None)
     operands = getattr(args, "call_operands", False)
     execution_evidence = getattr(args, "execution_evidence", False)
     physical = getattr(args, "tensor_physical", False)
@@ -83,9 +92,28 @@ def _trace(args) -> int:
     if not cmd:
         raise SystemExit("trace requires '-- command'")
     start = time.perf_counter()
-    result = subprocess.run(cmd, env=env)
+    if os_capture_root is None:
+        result = subprocess.run(cmd, env=env)
+    else:
+        from scar.trace.os_capture_launch import OSCaptureBudgets, launch_os_capture
+        os_budgets = OSCaptureBudgets(max_os_bytes=args.max_os_bytes,
+            max_raw_bytes=args.max_capture_bytes, max_stored_bytes=args.max_archive_bytes,
+            max_os_lines=args.max_os_lines, max_seconds=args.os_timeout)
+        result, _ = launch_os_capture(cmd, env=env, capture_root=os_capture_root,
+            strace_executable=args.strace_executable, budgets=os_budgets)
     (out / "run.json").write_text(json.dumps({"command": cmd, "returncode": result.returncode,
                                                 "wall_s": time.perf_counter() - start}, indent=2))
+    if os_capture_root is not None and result.returncode == 0:
+        from scar.trace.os_capture_launch import archive_owned_capture, publish_bytes
+        from scar.trace.capture_coordinates import bind_capture_coordinates
+        archive_owned_capture(os_capture_root, budgets=os_budgets)
+        coordinate_path = os_capture_root / 'capture-coordinates.json'
+        coordinates = bind_capture_coordinates(os_capture_root, max_bytes=os_budgets.max_raw_bytes,
+            max_lines=os_budgets.max_os_lines, profile_uri=str(coordinate_path), publish_os_profile=True)
+        publish_bytes(coordinate_path, coordinates.payload)
+        print(json.dumps({'os_capture': str(os_capture_root), 'coordinates': str(coordinate_path),
+            'os_capture_provider': coordinates.report.get('os_capture_provider'),
+            'whole_model_established': False}), flush=True)
     return result.returncode
 
 
@@ -314,6 +342,13 @@ def main(argv=None) -> int:
     trace.add_argument('--max-call-bytes',type=int,default=64000000)
     trace.add_argument('--max-operand-events',type=int,default=100000)
     trace.add_argument('--max-operand-bytes',type=int,default=32000000)
+    trace.add_argument('--os-capture-root',help='opt in to owned trace=all strace, lossless retention and final coordinates; requires fresh ROOT and --out ROOT/trace')
+    trace.add_argument('--strace-executable',default='strace',help='strace executable for the owned opt-in OS capture')
+    trace.add_argument('--max-os-bytes',type=int,default=128000000)
+    trace.add_argument('--max-os-lines',type=int,default=2000000)
+    trace.add_argument('--max-capture-bytes',type=int,default=256000000)
+    trace.add_argument('--max-archive-bytes',type=int,default=128000000)
+    trace.add_argument('--os-timeout',type=int,default=300,help='owned OS provider wall-time budget in seconds')
     trace.add_argument("command", nargs=argparse.REMAINDER)
     trace.set_defaults(func=_trace)
     optimize_cmd = sub.add_parser("optimize", help="run a command with generic opt-in backends")

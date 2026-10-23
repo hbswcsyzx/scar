@@ -121,7 +121,7 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
     try:
         stage('coordinates', 'RUNNING')
         coordinates = bind_capture_coordinates(capture, max_bytes=max_bytes, max_lines=max_lines,
-            profile_uri=str(out / 'capture-coordinates.json'))
+            profile_uri=str(out / 'capture-coordinates.json'), publish_os_profile=True)
         (out / 'capture-coordinates.json').write_bytes(coordinates.payload)
         outputs.append(_stored(out / 'capture-coordinates.json'))
         stage('coordinates', 'IMPORTED', **coordinates.report['counts'])
@@ -248,6 +248,8 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
             'coordinate_identity_consistent': True, 'coverage_obligations': required,
             'whole_model_established': False, 'source_runtime_verified': False,
             'transformation_authorized': False, 'elapsed_s': time.perf_counter() - started}
+        if 'os_capture_provider' in coordinates.report:
+            report['os_capture_provider'] = coordinates.report['os_capture_provider']
         if bundle_partitions:
             report['native_bundle_storage'] = {'kind': 'partitioned',
                 'manifest': str(native_out / 'bundle-partitions' / 'manifest.json'),

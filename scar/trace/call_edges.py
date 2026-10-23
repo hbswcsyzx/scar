@@ -173,9 +173,27 @@ class CallEdgeRecorder:
                     "tensor_references": references}
 
     def profile(self, frame, event, arg):
-        if self.closed or self.io_failed or os.getpid() != self.pid or event not in ('call','return'):
+        if self.closed or self.io_failed or event not in ('call','return'):
             return
         if frame.f_code.co_filename in self.observer_files:
+            return
+        if event == 'call':
+            if not self._inside(frame) and not self._inside(frame.f_back):
+                return
+        else:
+            # No observation is produced for an unretained return. Read only
+            # under the original lock; do not block on an inherited raw-fork
+            # lock before checking that we are still the installing process.
+            locked = self.lock.acquire(blocking=False)
+            if locked:
+                try:
+                    if (threading.get_ident(), id(frame)) not in self.active:
+                        return
+                finally:
+                    self.lock.release()
+            elif os.getpid() != self.pid:
+                return
+        if os.getpid() != self.pid:
             return
         with self.lock:
             try:

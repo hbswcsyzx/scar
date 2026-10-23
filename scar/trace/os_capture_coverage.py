@@ -65,6 +65,50 @@ def _explicit_all(options):
     _need(covered,'explicit all/control-name coverage not recorded; class-filter zero is not absence')
 
 
+def _owned_v2(profile,launch,coords):
+    """Validate the new owned producer chain, without arbitrary URI opens."""
+    root=Path(coords['local_root']).absolute();nonce=profile['nonce']
+    _need(str(root)==coords['original_root']==launch.get('capture_root'),
+          'owned v2 relocation needs a separate explicit receipt adapter')
+    intent,intent_receipt=_document(root/f'os-capture-intent.{nonce}.json')
+    _need(intent.get('schema')=='scar.os-capture-intent' and intent.get('schema_version')==1
+          and intent.get('nonce')==nonce and profile.get('intent')==launch.get('intent')==intent_receipt,
+          'owned launch/intent exact receipts differ')
+    _need(intent.get('capture_root')==str(root) and intent.get('trace_directory')==str(root/'trace')
+          and intent.get('actual_exec_argv_planned')==launch['actual_exec_argv']
+          and intent.get('target_argv_index')==launch['target_argv_index']
+          and intent.get('target_argv')==launch['actual_exec_argv'][launch['target_argv_index']:],
+          'owned actual target/intent namespace differs')
+    image=launch.get('running_image',{});precheck=launch.get('executable_precheck',{})
+    _need(launch.get('status')=='CLOSED' and launch.get('returncode')==0 and launch.get('failure') is None
+          and launch.get('budget_stop') is None and type(launch.get('provider_pid')) is int
+          and launch['provider_pid']>0 and image.get('status')=='OBSERVED'
+          and image.get('pid')==launch['provider_pid'] and image.get('source')==f"/proc/{launch['provider_pid']}/exe"
+          and image.get('sha256')==precheck.get('sha256')==launch['executable_sha256']
+          and image.get('size_bytes')==precheck.get('size_bytes')
+          and launch.get('producer',{}).get('entrypoint')=='scar.trace.os_capture_launch.launch_os_capture',
+          'owned running provider image/close receipt not qualified')
+    expected=profile.get('native_manifest')
+    found=[row for row in coords.get('membership',[]) if row.get('artifact')==expected]
+    _need(len(found)==1,'native manifest has no unique exact capture membership')
+    local=Path(found[0].get('local_path',found[0]['artifact']['uri']))
+    _need(local.parent==root/'trace' and not local.is_symlink(),'native manifest escapes exact local namespace')
+    native,receipt=_document(local)
+    _need(receipt==expected and local.name==f"execution-evidence.{native.get('pid')}.json"
+          and native.get('status')=='CLOSED' and native.get('failures')==[],
+          'owned native manifest exact bytes/close differ')
+    declaration=native.get('configuration',{}).get('os_capture_intent',{})
+    native_nonce=Path(native['artifacts']['kineto']['path']).name.split('.')[2]
+    _need(declaration.get('intent')==intent_receipt and declaration.get('capture_nonce')==nonce
+          and declaration.get('native_nonce')==native_nonce,
+          'owned native intent/capture/native nonce association differs')
+    _need(profile.get('observation_completeness')=='UNKNOWN',
+          'selection coverage cannot declare a complete event stream')
+    _need(profile.get('provider_version')==launch.get('provider_version')
+          and profile.get('architecture')==launch.get('architecture'),
+          'owned provider version/architecture differ from actual launch')
+
+
 @dataclass(frozen=True,init=False)
 class OSCaptureCoverage:
     run: dict
@@ -90,8 +134,9 @@ class OSCaptureCoverage:
         _need(type(binding) is dict and binding.get('profile')==profile_receipt
               and binding.get('launch')==launch_receipt,
               'coordinates do not bind this actual-launch/provider profile; old metadata is not a coverage proof')
-        _need(profile_doc.get('schema')=='scar.os-capture-coverage' and profile_doc.get('schema_version')==1
-              and launch_doc.get('schema')=='scar.os-capture-launch' and launch_doc.get('schema_version')==1,
+        protocol=profile_doc.get('schema_version')
+        _need(profile_doc.get('schema')=='scar.os-capture-coverage' and type(protocol) is int and protocol in (1,2)
+              and launch_doc.get('schema')=='scar.os-capture-launch' and launch_doc.get('schema_version')==protocol,
               'unsupported actual-launch/profile protocol')
         _need(profile_doc.get('run')==coords['run']['id'] and profile_doc.get('launch')==launch_receipt
               and profile_doc.get('archive')==archive_receipt
@@ -113,9 +158,11 @@ class OSCaptureCoverage:
               'provider binary/version/architecture is not recorded')
         _need(profile_doc.get('stream_scope')=='CAPTURE_BOUND_REQUIRED_ACTORS'
               and profile_doc.get('known_selection_gaps')==[], 'capture selection scope has open gaps')
+        if protocol==2:_owned_v2(profile_doc,launch_doc,coords)
         self=object.__new__(cls)
         values=(coords['run']['id'],coords_receipt,archive_receipt,profile_receipt,launch_receipt,
-            tuple(argv),profile_doc['provider_version'],profile_doc['architecture'],'STRACE_EXPLICIT_SELECTION_CAPTURE_BOUND_V1')
+            tuple(argv),profile_doc['provider_version'],profile_doc['architecture'],
+            'STRACE_EXPLICIT_SELECTION_CAPTURE_BOUND_V'+str(protocol))
         for name,value in zip(cls.__dataclass_fields__,values,strict=True):object.__setattr__(self,name,value)
         return self
 

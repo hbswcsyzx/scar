@@ -1,0 +1,12 @@
+{
+  "fork_pid_guard_preserved": true,
+  "ordinary_outside_calls": 1000,
+  "ordinary_outside_pid_syscalls": 0,
+  "outside_root_visible_hook_mutation_detected": true,
+  "retained_frames_after_return": 0,
+  "schema": "scar.profile-owner-guard-behavior",
+  "schema_version": 1,
+  "scope": "one real profile/monitoring/fork behavior check; no graph or whole-program proof",
+  "status": "PASS",
+  "unknown_exception_returns": 1
+}

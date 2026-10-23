@@ -216,7 +216,8 @@ class _Files:
         return document, artifact
 
 
-def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000, profile_uri=None):
+def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000, profile_uri=None,
+                             publish_os_profile=False):
     """Validate this retained capture profile and reuse existing coordinate types.
 
     Only files under capture_dir are opened. Plain files are selected by exact
@@ -224,6 +225,8 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     its explicit lossless entries are checked against raw and compressed hashes.
     No manifest URI is opened and gzip names are never guessed.
     This does not join Python operations, Tensor values or source state effects.
+    An owned OS launch declaration can qualify a new profile after Run binding.
+    Publishing that derived profile is explicit; no legacy launch is fabricated.
     """
     from scar.trace.os_resources import _arguments, _clone_flags
 
@@ -581,6 +584,16 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         "callable_environment_binding_established": False,
         "resource_readiness_established": False,
         "whole_model_established": False, "transformation_authorized": False}
+    if native.get('configuration', {}).get('os_capture_intent') is not None:
+        from scar.trace.os_capture_launch import bind_os_capture_provider
+        archive_receipt = None if archive_payload is None else {
+            'uri': str(archive_path), 'sha256': sha256(archive_payload).hexdigest(),
+            'size_bytes': len(archive_payload), 'schema': archive['schema']}
+        binding, os_gaps = bind_os_capture_provider(root, run=encode(run.id), native=native,
+            native_artifact=encode(native_artifact), command=command, archive=archive_receipt,
+            publish=publish_os_profile)
+        report['os_capture_provider'] = binding
+        report['open'].extend(os_gaps)
     payload = _canonical(report)
     artifact = ProviderArtifact(profile_uri or "memory:scar.capture-coordinates:" + sha256(payload).hexdigest(),
                                 sha256(payload).hexdigest(), len(payload), report["schema"])

@@ -295,11 +295,36 @@ class CallOperandObserver:
 
     def profile(self, frame, event, arg):
         """Called by the existing profile wrapper after its frame event."""
-        if os.getpid() != self.pid or self._closed:
+        if self._closed:
             return
         try:
+            setter_kind = self._profile_setter(arg) if event == "c_call" else None
+            if event == "c_call":
+                # Hook/monitoring mutation remains visible from any source,
+                # including outside the selected project. Other C events have
+                # no action here and do not need an owner-process syscall.
+                if setter_kind is None:
+                    return
+            elif event == "call":
+                if not self._code_inside(frame.f_code):
+                    return
+            elif event == "return":
+                locked = self._lock.acquire(blocking=False)
+                if locked:
+                    try:
+                        # The frame recorder already popped its active entry;
+                        # this observer's retained frame is the right source.
+                        if (threading.get_ident(), id(frame)) not in self._frames:
+                            return
+                    finally:
+                        self._lock.release()
+                elif os.getpid() != self.pid:
+                    return
+            else:
+                return
+            if os.getpid() != self.pid:
+                return
             with self._lock:
-                setter_kind = self._profile_setter(arg) if event == "c_call" else None
                 if setter_kind is not None:
                     if not self._stopped:
                         self._mark_interference(frame, "VISIBLE_HOOK_OR_MONITORING_MUTATION",
@@ -312,6 +337,8 @@ class CallOperandObserver:
                 elif event == "return":
                     self._on_frame_exit(frame)
         except BaseException as error:
+            if os.getpid() != self.pid:
+                return
             self._remember_error(error)
             try:
                 with self.recorder.lock:

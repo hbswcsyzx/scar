@@ -6,6 +6,30 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：通用OS实际launch/归档/selection资格端到端通过
+
+`scar trace --os-capture-root ...` 已实现工具自己拥有strace Popen启动边界、native intent/
+双nonce关联、closed launch receipt、原lossless归档及一次最终coordinate/profile发布。
+旧capture无新声明时不添加字段或授资格，原Run seed不引入新profile hash循环。
+
+首个自有CPU门在Torch import时因原profile钩子的逐事件getpid日志触发64MB预算：CLI241、
+owned provider-15，原失败和64MB本机raw保持，未发profile或冒称目标成功。只把无记录
+动作的事件/不在范围的帧过滤提前，真正动作仍核实时PID；全局hook/monitoring mutation
+检测、原return清理、fork防混和完整calls/operands范围保留，没有加入较小采集profile。
+一个必要guard行为门核项目外1000calls无PID查询、正常/异常return、项目外hook修改及
+真实fork防混；exit0。它不证明完整调用协议或目标加速。
+
+第二独立CPU门保持同64MB/120s，CLI与runner均exit0、wall27.86s。11档归档共8344309
+decoded/916903 stored bytes；4个OS档81185行，81180 parsed interfaces、其中70190条
+在旧FD profile外，parser frontier0；unshare/close_range各实际1次。公共coverage2回读
+及错误nonce必要拒绝通过。GNU进程树peakRSS805588KiB与runner自身130752KiB分别记录。
+此门没有新LeWM episode、GPU/physical exporter或完整ExecutionModel验收。
+
+证明范围是实际启动/版本/selection与原字节绑定，**observation completeness仍UNKNOWN**，
+不能由正常exit或roundtrip推出无丢失、FD-table连续性、完整effect或ready。相关后继
+资源门仍需独立审查，第一阶段S3/S4继续OPEN。入口与所有原失败、准确SHA、范围见
+[OS_CAPTURE_LAUNCH.md](OS_CAPTURE_LAUNCH.md)；大型失败raw不提交Git，小回执与样本保留。
+
 ### 2026-10-23：tuple异常引用修正及一个自动选中body恢复
 
 通用tuple key前端现可从原SG唯一Tuple/operator/output-slot恢复缺旧computational

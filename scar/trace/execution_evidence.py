@@ -98,6 +98,10 @@ class ExecutionEvidence:
             root = Path(out).absolute()
             root.mkdir(parents=True, exist_ok=True)
             nonce = secrets.token_hex(16)
+            if any(os.environ.get(key) for key in (
+                    'SCAR_OS_CAPTURE_NONCE','SCAR_OS_CAPTURE_INTENT','SCAR_OS_CAPTURE_INTENT_SHA256')):
+                from scar.trace.os_capture_launch import native_intent
+                self._config['os_capture_intent'] = native_intent(root, nonce)
             self._paths = {
                 "execution_trace": root / f"execution-trace.{self.pid}.{nonce}.json",
                 "kineto": root / f"kineto.{self.pid}.{nonce}.json",
