@@ -404,6 +404,20 @@ def main(argv=None) -> int:
     source_invocations.add_argument("--max-lines", type=int, default=2000000)
     source_invocations.add_argument("--out", required=True, help="fresh source/invocation binding directory")
     source_invocations.set_defaults(func=_bind_source_invocations)
+    dispatch_sources = sub.add_parser("bind-dispatch-sources", help="join original provider marker contexts to retained Python source invocations")
+    dispatch_sources.add_argument("--source-bindings", required=True)
+    dispatch_sources.add_argument("--dispatch-bridge", required=True)
+    dispatch_sources.add_argument("--capture", required=True)
+    dispatch_sources.add_argument("--out", required=True)
+    dispatch_sources.add_argument("--max-bytes", type=int, default=2000000000)
+    dispatch_sources.add_argument("--max-lines", type=int, default=2000000)
+    dispatch_sources.add_argument("--max-input-bytes", type=int, default=1000000000)
+    dispatch_sources.add_argument("--max-observations", type=int, default=400000)
+    dispatch_sources.set_defaults(func=_bind_dispatch_sources)
+    dispatch_query = sub.add_parser("query-dispatch-source", help="follow one provider marker's original invocation, definition and body references")
+    dispatch_query.add_argument("directory")
+    dispatch_query.add_argument("--marker", required=True)
+    dispatch_query.set_defaults(func=_query_dispatch_source)
     check_inventory = sub.add_parser("check-inventory", help="rebuild a source inventory from current files and discovery context")
     check_inventory.add_argument("report", help="inventory report JSON or JSON.gz")
     check_inventory.set_defaults(func=_check_inventory)
@@ -506,6 +520,7 @@ def main(argv=None) -> int:
     capture_model.add_argument("directory", help="successful SCAR collector capture directory containing trace/ and os/")
     capture_model.add_argument("--max-bytes", type=int, default=1000000000)
     capture_model.add_argument("--max-lines", type=int, default=2000000)
+    capture_model.add_argument("--schema-contracts", action="store_true", help="recover ordered provider ports using the exact matching installed Torch schema parser")
     capture_model.add_argument("--out", required=True, help="fresh assembled capture directory with per-stage progress")
     capture_model.set_defaults(func=_import_capture)
     os_resources = sub.add_parser("import-os-resources", help="import retained per-TID strace files into existing resource and handle identities")
@@ -763,6 +778,34 @@ def _check_program(args) -> int:
         destination.write_text(payload + "\n", encoding="utf-8")
     print(payload)
     return 0 if report["status"] == "WELL_FORMED" else 2
+
+
+def _bind_dispatch_sources(args) -> int:
+    from scar.analysis.dispatch_sources import bind_dispatch_sources
+    from scar.trace.capture_coordinates import bind_capture_coordinates
+    try:
+        output = Path(args.out).resolve()
+        coordinates = bind_capture_coordinates(args.capture, max_bytes=args.max_bytes, max_lines=args.max_lines,
+            profile_uri=str(output / 'capture-coordinates.json'))
+        report = bind_dispatch_sources(args.source_bindings, args.dispatch_bridge, coordinates, output,
+            max_input_bytes=args.max_input_bytes, max_observations=args.max_observations)
+    except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
+        return 2
+    print(json.dumps({"status": "BOUND_WITH_OPEN_OBLIGATIONS", "out": str(output),
+                      "summary": report['summary'], "first_stage_complete": False}))
+    return 0
+
+
+def _query_dispatch_source(args) -> int:
+    from scar.analysis.dispatch_sources import query_dispatch_source
+    try:
+        row = query_dispatch_source(args.directory, args.marker)
+    except (OSError, ValueError, TypeError, KeyError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)]}))
+        return 2
+    print(json.dumps(row))
+    return 0
 
 
 def _bind_source_invocations(args) -> int:
@@ -1341,6 +1384,7 @@ def _normalize_v2(args) -> int:
 def _import_capture(args) -> int:
     from scar.trace.capture_import import import_capture
     report = import_capture(args.directory, args.out, max_bytes=args.max_bytes, max_lines=args.max_lines,
+        schema_contracts=args.schema_contracts,
         progress=lambda record: print(json.dumps(record), flush=True))
     print(json.dumps({"out": str(Path(args.out).resolve()), "coordinate_identity_consistent": report["coordinate_identity_consistent"],
                       "whole_model_established": report["whole_model_established"]}))

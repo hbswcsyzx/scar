@@ -84,7 +84,8 @@ def _check_os_coordinates(fragment, coordinates):
     return {'points_checked': len(points), 'points_with_unresolved_process': missing}
 
 
-def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000, progress=None):
+def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000,
+                   schema_contracts=False, progress=None):
     """Import an unmodified successful collector capture, without target execution.
 
     The membership binder validates the original artifacts once.  The existing
@@ -154,6 +155,13 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
             _write(native_out / 'dispatch-bridge.json.gz', bridge)
             stage('dispatch_bridge', 'IMPORTED', dispatches=bridge['dispatches'],
                   slot_associations=bridge['slot_associations'], gaps=bridge['gaps'])
+        if schema_contracts:
+            from scar.trace.native_schema import recover_schema_contracts
+            stage('native_schema', 'RUNNING')
+            schema = recover_schema_contracts(native, provider_revision=manifest['provider']['torch_git_version'])
+            _write(native_out / 'schema-contracts.json.gz', schema)
+            stage('native_schema', 'IMPORTED', schemas=schema['unique_schemas_parsed'],
+                  formal_slots=schema['formal_slots'], actual_tensor_slot_counts=schema['actual_tensor_slot_counts'])
         memory = export_native_memory(native, native_out, coordinates=coordinates)
         checked_lifetimes = _check_native_coordinates(memory, coordinates) if memory is not None else 0
         if memory is not None:
@@ -164,10 +172,13 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
         _write(native_out / 'resource-observations.json.gz', native.resources)
         _write(native_out / 'import-report.json.gz', native.report)
         native_summary = {key: value for key, value in native.report.items()
-                          if key not in ('memory', 'artifacts', 'dispatch_bridge') and not isinstance(value, list)}
+                          if key not in ('memory', 'artifacts', 'dispatch_bridge', 'native_schema') and not isinstance(value, list)}
         if 'dispatch_bridge' in native.report:
             native_summary['dispatch_bridge'] = {key: value for key, value in native.report['dispatch_bridge'].items()
                                                 if key not in ('observations', 'paths', 'artifacts')}
+        if 'native_schema' in native.report:
+            native_summary['native_schema'] = {key: value for key, value in native.report['native_schema'].items()
+                                              if key not in ('bindings', 'unqualified_without_schema')}
         native_summary['memory'] = {key: value for key, value in native.report.get('memory', {}).items()
                                     if key not in ('records', 'source_artifact')}
         native_summary['shared_lifetime_points_checked'] = checked_lifetimes

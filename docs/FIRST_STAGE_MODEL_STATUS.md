@@ -4,6 +4,26 @@
 
 ### 2026-10-23：成功全流程采集与统一运行身份
 
+**最新核验**：生产桥与资源联合导入已完成，实际原档独立审核PASS；39,796 dispatch
+接109,288个Tensor引用槽，完整保留480个祖先缺失和383个未资格化叶。schema接口
+另经原导出全量核对：100 schemas、481 ports、467,756个实际Tensor槽接形式端口，
+175,022个因无schema保留UNQUALIFIED，所有effect为PARTIAL。
+source绑定与dispatch引用进一步汇合：79,592个marker全部保留，79,112个接到当前
+帧记录，28,448个有source definition，10,986个有原局部body/activation引用；这是
+marker观察计数，**不是独立函数数或直接Python→ATen调用证明**。
+
+目前最大源码缺口已按实际调用权重归因：71,368次被project_root挡在依赖边界，
+其中70,565次源码实际存在；其次是新code无旧witness、module/genexpr/lambda/延迟
+annotation未有定义对应。见[SOURCE_RECOVERY_FRONTIERS.md](SOURCE_RECOVERY_FRONTIERS.md)。
+下一项自动准入已安装依赖源码，使用独立SourceRoot和原CodeID证明，不把原root扩大
+为整个文件系统，也不递归扫描所有传递依赖。
+
+自动封存策略经真实FIFO调度否决：465个body返回发生444次seal，耗时已超过33分钟，
+无法摊销冷成本。只停止自有分析PID，日志原样保存；没有最终inventory，不冒充成果。
+默认恢复普通完整校验，显式seal保留可选。新的全量位于
+`first_stage_full_inventory_plain_20261023`，基于最新capture，并保存逐body原图检查点。
+尚未结束，不用其中间数更新全量覆盖率；公共校验/队列/预算未放宽。
+
 后续同日进展：生产 dispatch 参数槽桥已实现，先以一次真实 CPU 程序核验重复
 Tensor 参数、返回、异常、view 与 autograd；不是重新执行目标来猜数据边。随后
 原 LeWM 命令成功运行，returncode 0、100,438 次保留调用、39,796 次 dispatch、

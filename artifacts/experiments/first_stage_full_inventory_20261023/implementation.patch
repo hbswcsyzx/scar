@@ -1,0 +1,143 @@
+diff --git a/scar/trace/call_edges.py b/scar/trace/call_edges.py
+index 0362d19..7853e41 100644
+--- a/scar/trace/call_edges.py
++++ b/scar/trace/call_edges.py
+@@ -129,6 +129,49 @@ class CallEdgeRecorder:
+             result.append({'name':name,'ref':self._reference(mapping[name],seen)})
+         return result,complete
+ 
++    def observe_dispatch(self, frame, tensor_slots, *, max_frames=32, max_slots=1024):
++        """Observe current retained ancestry and exact Tensor reference slots.
++
++        This is not a direct-call correspondence, content version or effect
++        receipt. The caller must keep the same tensors alive through its marker
++        start callback. Only bounded transient references are held here.
++        """
++        if any(type(limit) is not int or limit < 1 for limit in (max_frames, max_slots)):
++            raise ValueError("dispatch observation limits must be positive integers")
++        with self.lock:
++            if self.closed or self.io_failed or os.getpid() != self.pid:
++                return None
++            ident = threading.get_ident()
++            context, traversed = None, 0
++            while frame is not None and traversed < max_frames:
++                retained = self.active.get((ident, id(frame)))
++                if retained is not None:
++                    position = site(frame.f_code, frame.f_lasti)
++                    if position["code"] != retained[1]:
++                        raise ValueError("retained dispatch frame/code mismatch")
++                    context = {"invocation": retained[0], "code": retained[1],
++                               "source_file": frame.f_code.co_filename,
++                               "bytecode_offset": frame.f_lasti,
++                               "site": position,
++                               "kind": "retained ancestor context, not a proven direct caller"}
++                    break
++                frame = frame.f_back
++                traversed += 1
++            seen, references = {}, []
++            try:
++                if len(tensor_slots) > min(max_slots, self.limits["max_references"]):
++                    raise ValueError("dispatch Tensor slot budget exceeded")
++                for path, tensor in tensor_slots:
++                    token = self._reference(tensor, seen)
++                    references.append({"path": list(path), "ref": token,
++                                       "identity_qualified": token.startswith("weak:")})
++            finally:
++                seen.clear()
++            return {"process_id": self.pid, "python_ident": ident,
++                    "native_tid": threading.get_native_id(), "call_event_index": self.index,
++                    "context": context, "ancestry_complete": frame is None or context is not None,
++                    "tensor_references": references}
++
+     def profile(self, frame, event, arg):
+         if self.closed or self.io_failed or os.getpid() != self.pid or event not in ('call','return'):
+             return
+diff --git a/scar/trace/execution_evidence.py b/scar/trace/execution_evidence.py
+index 6e32623..b735325 100644
+--- a/scar/trace/execution_evidence.py
++++ b/scar/trace/execution_evidence.py
+@@ -34,7 +34,7 @@ _EXTRA_ENV = (
+ class ExecutionEvidence:
+     """One delayed capture. close() is idempotent and never stops a foreign ETO."""
+ 
+-    def __init__(self, out):
++    def __init__(self, out, *, recorder=None):
+         self.pid = os.getpid()
+         self.thread = threading.get_ident()
+         self.status = "WAITING_FOR_TORCH"
+@@ -44,6 +44,8 @@ class ExecutionEvidence:
+         self._observer = None
+         self._observer_owned = False
+         self._profiler = None
++        self._call_recorder = recorder
++        self._dispatch_evidence = None
+         self._enter_attempted = False
+         self._recording = False
+         self._previous_import = None
+@@ -305,10 +307,32 @@ class ExecutionEvidence:
+         self._window["started_ns"] = time.perf_counter_ns()
+         self._recording = True
+         self.status = "RECORDING"
++        if self._call_recorder is not None:
++            try:
++                from scar.trace.dispatch_evidence import DispatchEvidence, PRODUCTION_PROFILE
++                nonce = self._paths["kineto"].name.split(".")[2]
++                self._dispatch_evidence = DispatchEvidence(
++                    self._paths["kineto"].parent, self._call_recorder, nonce=nonce,
++                    provider_revision=self._provider["torch_git_version"])
++                started = self._dispatch_evidence.start(torch)
++                self._config["dispatch_observations"] = {
++                    "profile": PRODUCTION_PROFILE, "started": started,
++                    "events": str(self._dispatch_evidence.event_path),
++                    "metadata": str(self._dispatch_evidence.meta_path),
++                    "owner_python_ident": self.thread,
++                    "scope": "installing thread only; retained ancestor is not a direct caller"}
++            except Exception as error:
++                self._gap("dispatch observation bridge did not start")
++                self._failure("dispatch_start", error)
+ 
+     def _finish_owned(self):
+         if os.getpid() != self.pid:
+             return
++        if self._dispatch_evidence is not None:
++            try:
++                self._dispatch_evidence.stop()
++            except Exception as error:
++                self._failure("dispatch_stop", error)
+         if self._enter_attempted:
+             self._enter_attempted = False
+             self._window["stop_requested_ns"] = time.perf_counter_ns()
+@@ -349,11 +373,18 @@ class ExecutionEvidence:
+                 self.status = "NOT_COLLECTED"
+                 self._gap("torch was not fully observed on the installing thread before close")
+             self._write_manifest()
++            if self._dispatch_evidence is not None:
++                try:
++                    self._dispatch_evidence.close(native_manifest=self._manifest_path)
++                except Exception as error:
++                    # Keep the already-published native artifact unchanged:
++                    # the dispatch sidecar may bind its exact final hash.
++                    self._failure("dispatch_close", error)
+ 
+ 
+-def install(out):
++def install(out, *, recorder=None):
+     """Install delayed raw collection; the caller must arrange manager.close()."""
+-    return ExecutionEvidence(out)
++    return ExecutionEvidence(out, recorder=recorder)
+ 
+ 
+ __all__ = ["ExecutionEvidence", "install"]
+diff --git a/sitecustomize.py b/sitecustomize.py
+index 3bbc2cc..dfd6ca6 100644
+--- a/sitecustomize.py
++++ b/sitecustomize.py
+@@ -12,7 +12,7 @@ if os.environ.get("SCAR_TRACE_DIR"):
+             if _scar_recorder is not None and os.environ.get('SCAR_EXECUTION_EVIDENCE') == '1':
+                 import atexit as _scar_atexit
+                 from scar.trace.execution_evidence import install as _scar_install_evidence
+-                _scar_evidence = _scar_install_evidence(os.environ['SCAR_TRACE_DIR'])
++                _scar_evidence = _scar_install_evidence(os.environ['SCAR_TRACE_DIR'], recorder=_scar_recorder)
+                 # Close provider artifacts before the earlier call-recorder
+                 # callback. It remains the sole Python profile-hook owner.
+                 _scar_atexit.register(_scar_evidence.close)

@@ -1,7 +1,19 @@
 # Native schema → 原有 ports 与实际 ETO 参数槽
 
-状态：已实现，未在本模块实现后执行新采集、forward 或测试套件。下次完整 pipeline
-应调用公共 API 并保留真实绑定报告；不能以实现状态代替完整建模验收。
+状态：已实现，并对已保存的最新成功 LeWM 联合原档完成一次公共 reader→schema桥→
+全量槽位/端点核验。没有执行新采集、forward 或测试套件；完整程序建模仍 OPEN。
+
+## 真实原档验收
+
+2026-10-23，[完整记录](../artifacts/experiments/first_stage_native_schema_20261023/README.md)：
+100 个唯一 schema 全部解析，100 个原定义新增 481 个 ports、100 个 PARTIAL effects、
+593 条原 SG 边。642,778 个实际 Tensor 槽全部核验：467,756 个连接到准确 formal slot，
+175,022 个保留 UNQUALIFIED，原因均为原 provider 观察没有 op_schema。无解析或
+类型/ordinal 失败；此数量不代表 optimization rejection。
+
+原 instance/ValueGraph 身份及全部实际槽 path/reference/locator digest 保持；公共
+IRBundle 校验和独立全端点核对通过。独立报告 gzip 34.2MiB，SG delta 108.3KiB，
+绑定原 bundle 的 stored SHA，没有另存整个 2.09GB 原图。
 
 ```python
 from scar.trace.native_schema import recover_schema_contracts

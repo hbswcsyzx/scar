@@ -4,9 +4,10 @@ import gzip
 from hashlib import sha256
 import json
 from pathlib import Path
+import sys
 
 
-HERE = Path(__file__).resolve().parent
+HERE = Path(sys.argv[1]).resolve() if len(sys.argv) == 2 else Path(__file__).resolve().parent
 RESULT = HERE / 'result'
 
 
