@@ -6,6 +6,29 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：全部既有OS handle获得真实FD来源
+
+通用`os_fd_source_projection.py`唯一实际gate exit0，wall73.74s/RSS296,208KiB。
+工具从原完整handles表自动生成需求，8个原档共82,093,008raw bytes/1,035,968行及
+8,624,059compressed bytes全部核SHA/长度/行数；每compressed文件一次物理读取、
+一次流式解压。仅12,653条准确source行解析，产生12,649个FDports和4birth facts，
+FD提取frontier0；不重建百万Work。提取合同实测12,648 OPEN_RETURN、1 DUP_RETURN，
+后者保原OFD target而非创建另一个资源。
+
+全部12,684 same-ID handles经公开core codec及原/新非endpoint逐字段核对；旧35个
+ProviderHandle完整保留，新12,649个endpoint的selector指向新provider真实JSONL
+`/record/fd`。原/新OFD targets同为12,683，25selected Work/38access未改；290个
+creator point.process=None保留。全部新selector以2chunk有序批量核，另核每chunk
+实际combined resolver代表。producer读取时核真实raw，reader不冒称重做raw提取。
+
+新provider manifest197,638bytes，SHA256
+`0ebb957e8b4fd86eafefbce6f854ff045627cface9523f06766aabab8b2e8723`。
+实际98个SCAR imports与12关键源SHA前后一致。详见[实现与实测](OS_FD_SOURCE_PROJECTION.md)。
+耗时是有并行负载的离线验收成本，没有LeWM A/B或加速声明。
+
+已建FD值来源不等于所有资源闭合：新12,649个container仍Unresolved，未建继承/stdio、
+OFD内容/offset、跨exec身份、mmap/设备对应及ready/lifetime继续OPEN。完整模型未通过。
+
 ### 2026-10-23：移除FD观察context路径的人工birth选择
 
 新增通用`os_source_lookup.py`，从原R2的35端口、exact archive和coordinates机械生成

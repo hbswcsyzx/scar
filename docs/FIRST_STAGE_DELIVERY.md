@@ -59,6 +59,7 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | IR分块存储与查询索引 | CPU原档逐条往返PASS；源码SQLite建库/局部查询PASS；完整LeWM联合导入及实档审核PASS，2,259,781记录/195chunks | 42,767条endpoint引用未语义索引；SQLite不是第二个可写IR来源，不代表完整模型通过 |
 | 原OS work到资源端点关联 | 35ports/22producer work/13pipe/3executor有限核验完成；root独立134selector及原preimage核对exit0 | 原gate汇总footer错误exit1保留，finalizer0单列；初始container未知由下行精化，source/state/ready仍OPEN |
 | FD-table观察context精化与来源自动查找 | 原builder/public reader35container→3context已PASS；新增自动helper从35端口推导2birth需求、2精确命中，生成证据后再次public验收exit0/wall17.54s，原25selected work/38access不变 | ImportedAt不是新allocation；ancestor无自身birth、零/多个pre-exec需求的旧consumer限制、全部legacy handles及FD内容/并发状态和完整资源模型仍OPEN |
+| 全部既有OS handle的实际FD来源 | 一次8档完整双SHA/lines：82,093,008raw bytes，只解析12,653行，生成12,649新FDports和4birth facts；全部12,684 handle公共codec/非endpoint字段核对通过，原35保留；exit0/wall73.74s | scope是R1已建bindings，未建继承/stdio不因此消失；新12,649个container仍Unresolved，290个creator process=None保留，OFD/offset/ready仍需独立证明 |
 | 原调用到图端点统一查询 | 旧/当前Run各27argument+27completion回原GraphIndex/typed body，错误scope/ID/Run均拒绝 | 保留全部条件，callee post-world不冒充caller后态；不证明world/内容/alias等价 |
 | 通用解包/Slice语言建模 | 两原静态body恢复118/65ops，prepare0/compile0，attempt03 exit0；两次原失败保留 | 新SourceProgram5尚需CP2/inventory正式发布与当前Run消费，不抬当前body覆盖率 |
 | 实际调用协议分类 | 两Run各100,550attempts完整分类；945项目内无握手目标全8个generator codes | 不把OTHER当native，不把生成器创建当同步body进入；尚无创建对象/drive/结果的完整关联 |

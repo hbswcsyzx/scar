@@ -1,0 +1,150 @@
+{
+  "compile_runs": 0,
+  "frozen_sources": [
+    {
+      "ast": "PASS",
+      "bytes": 31957,
+      "path": "scar/trace/os_fd_table_contexts.py",
+      "sha256": "506d626a9db35bdfe0a405e58d3826a9f355f421487e50e002f732d9795e8f84"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 27756,
+      "path": "scar/trace/os_resource_refinement.py",
+      "sha256": "8a579625b319ff0fa1e85cec4202837d83964d5786eff3f4ef0f1375f7a6faf0"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 58928,
+      "path": "scar/trace/os_resources.py",
+      "sha256": "c52f45a62693e3e78875b3a23b7c56e0a4cdb48862436981f8d98941a4900c1b"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 19262,
+      "path": "scar/ir/execution/resources.py",
+      "sha256": "4fc743695164cc6700b00190ea8f6b1398328c2abf41e68a6eb626dddea09139"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 3959,
+      "path": "scar/ir/execution/ids.py",
+      "sha256": "bf88d2d9cb0d82ad38021ff853eea93ddd057890e79b1ffe73026260f9a684ea"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 2313,
+      "path": "scar/ir/execution/common.py",
+      "sha256": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 7545,
+      "path": "scar/ir/program/resources.py",
+      "sha256": "4cfd796ec46731bcdb170da7b8ab2ea3a78d9938fe10ce5bda26663d262deb22"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 12334,
+      "path": "scar/ir/program/providers.py",
+      "sha256": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 7478,
+      "path": "scar/ir/record_codec.py",
+      "sha256": "0954c05e53a6dcb31f449461db71c63fdcdd9f95a9c053424d86bf5217a89ef3"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 24449,
+      "path": "scar/store/bundle_partitions.py",
+      "sha256": "eadc3e7ae116e4e47dad09aa842b5e33be48b39e49426c7e257efa3ad6b817b5"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 23017,
+      "path": "scar/trace/os_source_lookup.py",
+      "sha256": "e5fdc1d7e788665db3f3df0a80b2f2c1ce9b35ab8bfe1eb2771e569cc8648e8d"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 40023,
+      "path": "scar/trace/os_fd_source_projection.py",
+      "sha256": "d766a3c6985d2f52ca9c16bab1aaea9116c0a04f7e15b2513e8afe260f8721d9"
+    }
+  ],
+  "inputs": {
+    "archive": {
+      "bytes": 145854,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/archive-index.json",
+      "sha256": "f4b21fbaef73f27d0e708a9ff6e4d117e8d8f8e2b1a418baa9addaf141567815"
+    },
+    "base": {
+      "bytes": 316803,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/interfaces/manifest.json",
+      "sha256": "cbc6dcfd78ccca0961bdabecce94bc747b7b281fdbc3f49228c8b52b9b3aec14"
+    },
+    "context_events": {
+      "bytes": 154531,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_projection_20261023/context-events.json",
+      "sha256": "e4601e54e1a1b406aaa89b4de424c814fbc12b5ce30db4b2a926def86a81020d"
+    },
+    "context_evidence": {
+      "bytes": 6571,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_source_lookup_20261023/gate-attempt01/automatic-witness/context-evidence.json",
+      "sha256": "ef590b5b38f9ad91a409861a3acbfed1d9ef86de36e591e7d09bd4b73626efbf"
+    },
+    "coordinates": {
+      "bytes": 674239,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/capture-coordinates.json",
+      "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25"
+    },
+    "projection_files": {
+      "bytes": 583581,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_projection_20261023/file-receipts.json",
+      "sha256": "612fe0c359a8d253cd9edad5019f1d953bbf0975139759c993efb517cc986ef0"
+    },
+    "projection_summary": {
+      "bytes": 7282,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_projection_20261023/summary.json",
+      "sha256": "7e470d3ed1581e35ccecc8ba53c390d89a1dd04cb5cb2b164da613483a37ed19"
+    },
+    "r1_audit": {
+      "bytes": 20091,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/audit-attempt03-summary.json",
+      "sha256": "1081479b77742fbbe80fbabadc6f6118085f250728b6342e6492243e9b47d2cf"
+    },
+    "r1_summary": {
+      "bytes": 3368,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/summary.json",
+      "sha256": "6c160e586bb639a9144f01b20a8dc185efe776dd21a99bbfdf152502baf0d579"
+    },
+    "r2": {
+      "bytes": 443446,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_resource_refinement_20261023/gate-attempt01/result/manifest.json",
+      "sha256": "6b5e1ae12e2c05364c76364cf1b1cf7859d2f6ddb09380c8940a3980381bde5c"
+    },
+    "selected": {
+      "bytes": 281314,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_source_lookup_20261023/gate-attempt01/result/manifest.json",
+      "sha256": "d37eef5881d25a66c7500be2130b4f7af114586e0b8607f81a36ddd359886d84"
+    }
+  },
+  "new_work_records": 0,
+  "revision": "93ccd689971366dda736e73f7ca36af95e986f19",
+  "schema": "scar.os-fd-source-projection-gate-producer",
+  "schema_version": 1,
+  "scope": "ONE offline provider projection and existing-handle refinement; parallel load possible, not benchmark",
+  "script": {
+    "bytes": 13246,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/gate-attempt01/run.py",
+    "sha256": "a754745858f07af785ae4ff27d241d6a65a9732bc692847c37aacf716ac602e8"
+  },
+  "source_freeze": {
+    "bytes": 2905,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/static-freeze.json",
+    "sha256": "514006dfdcf12fc18364c7ec0e5e71521b4bfcb669c1617b8c4f349892abe470"
+  },
+  "target_runs": 0
+}

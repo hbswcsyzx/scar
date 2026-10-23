@@ -1,0 +1,19 @@
+{"phase": "EXISTING_SELECTED_PUBLIC_READ_BEGIN"}
+{"phase": "NEW_RAW_PROJECTION_BEGIN"}
+{"fd_ports": 287, "files": 1, "phase": "RAW_FILE_COMPLETE", "raw_bytes": 378274, "raw_lines": 3341, "selected_lines_parsed": 287}
+{"fd_ports": 12616, "files": 2, "phase": "RAW_FILE_COMPLETE", "raw_bytes": 81956445, "raw_lines": 1034449, "selected_lines_parsed": 12620}
+{"fd_ports": 12622, "files": 3, "phase": "RAW_FILE_COMPLETE", "raw_bytes": 81962842, "raw_lines": 1034532, "selected_lines_parsed": 12626}
+{"fd_ports": 12641, "files": 4, "phase": "RAW_FILE_COMPLETE", "raw_bytes": 81978790, "raw_lines": 1034700, "selected_lines_parsed": 12645}
+{"fd_ports": 12642, "files": 5, "phase": "RAW_FILE_COMPLETE", "raw_bytes": 81979229, "raw_lines": 1034705, "selected_lines_parsed": 12646}
+{"fd_ports": 12644, "files": 6, "phase": "RAW_FILE_COMPLETE", "raw_bytes": 81984874, "raw_lines": 1034792, "selected_lines_parsed": 12648}
+{"fd_ports": 12648, "files": 7, "phase": "RAW_FILE_COMPLETE", "raw_bytes": 82001570, "raw_lines": 1035014, "selected_lines_parsed": 12652}
+{"fd_ports": 12649, "files": 8, "phase": "RAW_FILE_COMPLETE", "raw_bytes": 82093008, "raw_lines": 1035968, "selected_lines_parsed": 12653}
+{"phase": "PROJECTION_PUBLISHED", "receipt": {"path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_fd_source_projection_20261023/gate-attempt01/result/manifest.json", "physical_bytes": 197638, "physical_sha256": "0ebb957e8b4fd86eafefbce6f854ff045627cface9523f06766aabab8b2e8723"}}
+{"birth_facts": 4, "chunks": 2, "fd_ports": 12649, "phase": "PUBLIC_PROVIDER_ALL_ROWS_PASS"}
+{"handles": 2000, "phase": "ALL_HANDLE_CORE_CODEC_AND_FIELDS"}
+{"handles": 4000, "phase": "ALL_HANDLE_CORE_CODEC_AND_FIELDS"}
+{"handles": 6000, "phase": "ALL_HANDLE_CORE_CODEC_AND_FIELDS"}
+{"handles": 8000, "phase": "ALL_HANDLE_CORE_CODEC_AND_FIELDS"}
+{"handles": 10000, "phase": "ALL_HANDLE_CORE_CODEC_AND_FIELDS"}
+{"handles": 12000, "phase": "ALL_HANDLE_CORE_CODEC_AND_FIELDS"}
+{"counts": {"base_handles": 12684, "frontier_records": 0, "missing_birth_requests": 4, "physical_compressed_bytes_read": 8624059, "projected_birth_facts": 4, "projected_fd_ports": 12649, "raw_bytes": 82093008, "raw_files": 8, "raw_lines": 1035968, "requested_legacy_handles": 12649, "retained_provider_handles": 35, "selected_lines_parsed": 12653, "unrefined_legacy_handles": 0}, "phase": "GATE_COMPLETE", "status": "PASS_EXISTING_HANDLE_FD_SOURCE_SCOPE"}

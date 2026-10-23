@@ -1,0 +1,27 @@
+{
+  "actual_exit": 0,
+  "actual_exit_sources": [
+    "unified_exec completion",
+    "retained GNU time footer"
+  ],
+  "counts": {
+    "base_handles": 12684,
+    "frontier_records": 0,
+    "missing_birth_requests": 4,
+    "physical_compressed_bytes_read": 8624059,
+    "projected_birth_facts": 4,
+    "projected_fd_ports": 12649,
+    "raw_bytes": 82093008,
+    "raw_files": 8,
+    "raw_lines": 1035968,
+    "requested_legacy_handles": 12649,
+    "retained_provider_handles": 35,
+    "selected_lines_parsed": 12653,
+    "unrefined_legacy_handles": 0
+  },
+  "first_stage_complete": false,
+  "full_execution_model_semantics": "OPEN",
+  "schema": "scar.os-fd-source-projection-gate-completion",
+  "schema_version": 1,
+  "status": "PASS_EXISTING_HANDLE_FD_SOURCE_SCOPE"
+}
