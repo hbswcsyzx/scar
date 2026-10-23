@@ -309,6 +309,40 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
               "function-environment manifest does not reproduce exact event bytes/count declaration")
         members[str(environment_name)] = environment_artifact
         members[str(environment_meta_name)] = environment_meta
+    dispatch_config = native.get("configuration", {}).get("dispatch_observations")
+    dispatch = None
+    dispatch_names = []
+    if dispatch_config is not None:
+        _need(type(dispatch_config) is dict and dispatch_config.get("profile") == "scar.dispatch-marker-collector-v1",
+              "unsupported dispatch observation declaration")
+        dispatch_name = trace_root / f"dispatch-observations.{pid}.{nonce}.jsonl"
+        dispatch_meta_name = trace_root / f"dispatch-meta.{pid}.{nonce}.json"
+        _need(dispatch_config.get("events") == str(dispatch_name)
+              and dispatch_config.get("metadata") == str(dispatch_meta_name),
+              "dispatch declaration does not select this exact collector namespace")
+        dispatch, dispatch_meta = files.document(dispatch_meta_name, "scar.dispatch-observation-trace")
+        _need(dispatch.get("schema") == "scar.dispatch-observation-trace"
+              and dispatch.get("schema_version") == 1
+              and dispatch.get("profile") == dispatch_config["profile"]
+              and dispatch.get("process_id") == pid and dispatch.get("nonce") == nonce
+              and dispatch.get("provider_revision") == native["provider"]["torch_git_version"],
+              "dispatch collector schema/process/provider/nonce differs")
+        declaration = dispatch.get("file", {})
+        native_declaration = dispatch.get("native_manifest", {})
+        _need(native_declaration.get("path") == str(native_name)
+              and (native_declaration.get("raw_sha256"), native_declaration.get("raw_bytes"))
+                  == (native_artifact.sha256, native_artifact.size_bytes),
+              "dispatch collector does not bind this exact final native manifest")
+        dispatch_artifact = files.verify(dispatch_name, "scar.dispatch-observation.events.v1")
+        _need(declaration.get("path") == str(dispatch_name)
+              and (declaration.get("raw_sha256"), declaration.get("raw_bytes"))
+                  == (dispatch_artifact.sha256, dispatch_artifact.size_bytes)
+              and dispatch.get("bytes") == dispatch_artifact.size_bytes
+              and _integer(dispatch.get("events")) and declaration.get("lines") == dispatch["events"],
+              "dispatch collector exact event bytes/count declaration differs")
+        members[str(dispatch_name)] = dispatch_artifact
+        members[str(dispatch_meta_name)] = dispatch_meta
+        dispatch_names = [str(dispatch_name), str(dispatch_meta_name)]
     for name, schema, field in ((eto_name, "pytorch.execution-trace.v1", "execution_trace"),
                                 (kineto_name, "pytorch.kineto.chrome-trace.v1", "kineto")):
         artifact = files.verify(name, schema)
@@ -399,6 +433,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
                         str(trace_root / ("call-operand-meta." + str(pid) + ".json"))]
     if environment_present:
         exclusive_names += [str(environment_name), str(environment_meta_name)]
+    exclusive_names += dispatch_names
     for name in exclusive_names:
         witnessed = [fact for fact, flags in creations.get(name, ()) if "O_CREAT" in flags and "O_EXCL" in flags]
         _need(len(witnessed) == 1, "artifact lacks one exact target-process O_EXCL creation: " + name)
@@ -467,9 +502,13 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
              {"code": "process_thread_observation_intervals_incomplete"}]
     if environment is not None:
         gaps.append({"code": "function_environment_event_to_canonical_entry_unverified"})
+    if dispatch is not None:
+        gaps.append({"code": "dispatch_observation_to_canonical_source_ports_unverified"})
     collector_declarations = [("calls", calls), ("operands", operands)]
     if environment is not None:
         collector_declarations.append(("function_environments", environment))
+    if dispatch is not None:
+        collector_declarations.append(("dispatch_observations", dispatch))
     for family, declaration in collector_declarations:
         if (declaration.get("dropped_events", 0) or declaration.get("errors") or declaration.get("io_failed")
                 or declaration.get("unknown_exits", 0) or declaration.get("gaps", 0)):
@@ -488,6 +527,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         "collector_completeness": native.get("completeness", {}), "collector_gaps": native.get("gaps", []),
         "call_collector_declaration": calls, "operand_collector_declaration": operands,
         "function_environment_collector_declaration": environment,
+        "dispatch_collector_declaration": dispatch,
         "retention": {"mode": "plain" if archive is None else "lossless_archive",
                       "archive_sha256": seed["archive_sha256"], "gzip_names_inferred": False},
         "python_torch_correspondence_established": False, "world_effects_established": False,

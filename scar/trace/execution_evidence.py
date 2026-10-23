@@ -34,7 +34,7 @@ _EXTRA_ENV = (
 class ExecutionEvidence:
     """One delayed capture. close() is idempotent and never stops a foreign ETO."""
 
-    def __init__(self, out):
+    def __init__(self, out, *, recorder=None):
         self.pid = os.getpid()
         self.thread = threading.get_ident()
         self.status = "WAITING_FOR_TORCH"
@@ -44,6 +44,8 @@ class ExecutionEvidence:
         self._observer = None
         self._observer_owned = False
         self._profiler = None
+        self._call_recorder = recorder
+        self._dispatch_evidence = None
         self._enter_attempted = False
         self._recording = False
         self._previous_import = None
@@ -305,10 +307,34 @@ class ExecutionEvidence:
         self._window["started_ns"] = time.perf_counter_ns()
         self._recording = True
         self.status = "RECORDING"
+        if self._call_recorder is not None:
+            try:
+                from scar.trace.dispatch_evidence import DispatchEvidence, PRODUCTION_PROFILE
+                nonce = self._paths["kineto"].name.split(".")[2]
+                self._dispatch_evidence = DispatchEvidence(
+                    self._paths["kineto"].parent, self._call_recorder, nonce=nonce,
+                    provider_revision=self._provider["torch_git_version"],
+                    max_events=int(os.environ.get("SCAR_DISPATCH_MAX_EVENTS", "400000")),
+                    max_bytes=int(os.environ.get("SCAR_DISPATCH_MAX_BYTES", "256000000")))
+                started = self._dispatch_evidence.start(torch)
+                self._config["dispatch_observations"] = {
+                    "profile": PRODUCTION_PROFILE, "started": started,
+                    "events": str(self._dispatch_evidence.event_path),
+                    "metadata": str(self._dispatch_evidence.meta_path),
+                    "owner_python_ident": self.thread,
+                    "scope": "installing thread only; retained ancestor is not a direct caller"}
+            except Exception as error:
+                self._gap("dispatch observation bridge did not start")
+                self._failure("dispatch_start", error)
 
     def _finish_owned(self):
         if os.getpid() != self.pid:
             return
+        if self._dispatch_evidence is not None:
+            try:
+                self._dispatch_evidence.stop()
+            except Exception as error:
+                self._failure("dispatch_stop", error)
         if self._enter_attempted:
             self._enter_attempted = False
             self._window["stop_requested_ns"] = time.perf_counter_ns()
@@ -349,11 +375,18 @@ class ExecutionEvidence:
                 self.status = "NOT_COLLECTED"
                 self._gap("torch was not fully observed on the installing thread before close")
             self._write_manifest()
+            if self._dispatch_evidence is not None:
+                try:
+                    self._dispatch_evidence.close(native_manifest=self._manifest_path)
+                except Exception as error:
+                    # Keep the already-published native artifact unchanged:
+                    # the dispatch sidecar may bind its exact final hash.
+                    self._failure("dispatch_close", error)
 
 
-def install(out):
+def install(out, *, recorder=None):
     """Install delayed raw collection; the caller must arrange manager.close()."""
-    return ExecutionEvidence(out)
+    return ExecutionEvidence(out, recorder=recorder)
 
 
 __all__ = ["ExecutionEvidence", "install"]

@@ -129,6 +129,49 @@ class CallEdgeRecorder:
             result.append({'name':name,'ref':self._reference(mapping[name],seen)})
         return result,complete
 
+    def observe_dispatch(self, frame, tensor_slots, *, max_frames=32, max_slots=1024):
+        """Observe current retained ancestry and exact Tensor reference slots.
+
+        This is not a direct-call correspondence, content version or effect
+        receipt. The caller must keep the same tensors alive through its marker
+        start callback. Only bounded transient references are held here.
+        """
+        if any(type(limit) is not int or limit < 1 for limit in (max_frames, max_slots)):
+            raise ValueError("dispatch observation limits must be positive integers")
+        with self.lock:
+            if self.closed or self.io_failed or os.getpid() != self.pid:
+                return None
+            ident = threading.get_ident()
+            context, traversed = None, 0
+            while frame is not None and traversed < max_frames:
+                retained = self.active.get((ident, id(frame)))
+                if retained is not None:
+                    position = site(frame.f_code, frame.f_lasti)
+                    if position["code"] != retained[1]:
+                        raise ValueError("retained dispatch frame/code mismatch")
+                    context = {"invocation": retained[0], "code": retained[1],
+                               "source_file": frame.f_code.co_filename,
+                               "bytecode_offset": frame.f_lasti,
+                               "site": position,
+                               "kind": "retained ancestor context, not a proven direct caller"}
+                    break
+                frame = frame.f_back
+                traversed += 1
+            seen, references = {}, []
+            try:
+                if len(tensor_slots) > min(max_slots, self.limits["max_references"]):
+                    raise ValueError("dispatch Tensor slot budget exceeded")
+                for path, tensor in tensor_slots:
+                    token = self._reference(tensor, seen)
+                    references.append({"path": list(path), "ref": token,
+                                       "identity_qualified": token.startswith("weak:")})
+            finally:
+                seen.clear()
+            return {"process_id": self.pid, "python_ident": ident,
+                    "native_tid": threading.get_native_id(), "call_event_index": self.index,
+                    "context": context, "ancestry_complete": frame is None or context is not None,
+                    "tensor_references": references}
+
     def profile(self, frame, event, arg):
         if self.closed or self.io_failed or os.getpid() != self.pid or event not in ('call','return'):
             return

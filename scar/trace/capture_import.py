@@ -125,17 +125,35 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
             raise ValueError('capture manifest became ambiguous after membership validation')
         manifest = json.loads(manifests[0].read_bytes())
         members = coordinates.report['membership']
-        def native_path(field):
-            logical = manifest['artifacts'][field]['path']
+        def member_path(logical):
             matches = [row['artifact']['uri'] for row in members if row['logical_path'] == logical]
             if len(matches) != 1:
-                raise ValueError('native member has no exact bound artifact: ' + field)
+                raise ValueError('member has no exact bound artifact: ' + logical)
             return matches[0]
+        def native_path(field):
+            return member_path(manifest['artifacts'][field]['path'])
         native_out = out / 'native'
         native_out.mkdir()
         stage('native', 'RUNNING')
         native = import_native_evidence(native_path('execution_trace'), native_path('kineto'),
             max_bytes=max_bytes, provider_revision=manifest['provider']['torch_git_version'])
+        dispatch_config = manifest.get('configuration', {}).get('dispatch_observations')
+        if dispatch_config is not None and dispatch_config.get('started') is True:
+            from scar.trace.dispatch_import import import_dispatch_bridge
+            original_trace = str(Path(manifest['artifacts']['kineto']['path']).parent)
+            pid = manifest['pid']
+            stage('dispatch_bridge', 'RUNNING')
+            import_dispatch_bridge(native,
+                member_path(dispatch_config['events']), member_path(dispatch_config['metadata']),
+                member_path(original_trace + f'/call-events.{pid}.jsonl'),
+                member_path(original_trace + f'/call-codes.{pid}.jsonl'),
+                member_path(original_trace + f'/call-meta.{pid}.json'),
+                native_manifest_path=member_path(original_trace + '/' + manifests[0].name),
+                coordinates=coordinates, max_bytes=max_bytes, max_events=max_lines)
+            bridge = native.report['dispatch_bridge']
+            _write(native_out / 'dispatch-bridge.json.gz', bridge)
+            stage('dispatch_bridge', 'IMPORTED', dispatches=bridge['dispatches'],
+                  slot_associations=bridge['slot_associations'], gaps=bridge['gaps'])
         memory = export_native_memory(native, native_out, coordinates=coordinates)
         checked_lifetimes = _check_native_coordinates(memory, coordinates) if memory is not None else 0
         if memory is not None:
@@ -146,7 +164,10 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
         _write(native_out / 'resource-observations.json.gz', native.resources)
         _write(native_out / 'import-report.json.gz', native.report)
         native_summary = {key: value for key, value in native.report.items()
-                          if key not in ('memory', 'artifacts') and not isinstance(value, list)}
+                          if key not in ('memory', 'artifacts', 'dispatch_bridge') and not isinstance(value, list)}
+        if 'dispatch_bridge' in native.report:
+            native_summary['dispatch_bridge'] = {key: value for key, value in native.report['dispatch_bridge'].items()
+                                                if key not in ('observations', 'paths', 'artifacts')}
         native_summary['memory'] = {key: value for key, value in native.report.get('memory', {}).items()
                                     if key not in ('records', 'source_artifact')}
         native_summary['shared_lifetime_points_checked'] = checked_lifetimes
