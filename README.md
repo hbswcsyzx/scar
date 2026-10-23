@@ -1,15 +1,22 @@
 # SCAR v0.1.0
 
-Start with the [current modeling and tool reuse decision](docs/MODELING_REUSE_DECISION.md)
-for entity types, dependency relations, provider responsibilities and actual gaps.
+**当前阶段：完整程序自动建模，尚未完成。** 验收包括未修改 LeWM 从加载到推理、
+环境交互及视频保存的源码、依赖、实际值/状态与软硬件资源连接；不进入化简、
+新 detector、backend 或加速比实验。完成后先停止并向用户讲解。
 
-**Current priority:** [complete the program model](docs/WHOLE_PROGRAM_MODEL.md)
-before whole-program graph recovery and simplification. The
-[ordered gates](docs/WHOLE_PROGRAM_MODEL_PLAN.md) distinguish specifications,
-implemented types, automatic connectivity and optimization authority. The
-[bounded synchronous implementation](docs/N2_STRUCTURED_BODY_ACCEPTANCE.md)
-passes its declared checks; complete LeWM modeling and a verified speedup
-remain unfinished.
+- [实体、关系及完整性合同](docs/FIRST_STAGE_MODEL_CONTRACT.md)：什么东西需要建模、什么叫连接完整。
+- [当前交付与执行顺序](docs/FIRST_STAGE_DELIVERY.md)：真实产物、具体断口及下一项。
+- [实际运行记录](docs/FIRST_STAGE_MODEL_STATUS.md)：Observed / Implemented / Verified 与失败记录。
+- [模型设计](docs/WHOLE_PROGRAM_MODEL.md)、[现成工具与集成](docs/MODELING_INTEGRATION.md)。
+
+工具入口是通用的，LeWM 只提供原始命令和外部验收范围。源码、调用、Tensor
+算子、GPU 与 OS 证据使用独立身份，并通过可核对的来源关系连接；不会把同名、
+同指针、同 shape 或相邻时间当作完整依赖。入口及原始命令见实际运行记录。
+
+## 历史组件记录
+
+以下为此前限定范围的组件结果，保留用于追溯。测试通过数或提供的声明图不代表
+整个程序已经自动建模，也不是当前开发队列；当前顺序由上面的第一阶段合同控制。
 
 The [C2/D3 audit](docs/M1_PROTOCOL_FAMILY_AUDIT.md) now identifies the missing
 protocol-to-CFG obligations and Drive-to-persistent-body occurrence connections.

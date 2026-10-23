@@ -402,8 +402,22 @@ def main(argv=None) -> int:
     source_invocations.add_argument("--witness-mode", choices=("same_capture", "reused_code"), default="same_capture")
     source_invocations.add_argument("--max-bytes", type=int, default=2000000000)
     source_invocations.add_argument("--max-lines", type=int, default=2000000)
+    source_invocations.add_argument("--max-input-bytes", type=int, default=512000000,
+                                    help="independent decompressed composition/inventory input ceiling")
     source_invocations.add_argument("--out", required=True, help="fresh source/invocation binding directory")
     source_invocations.set_defaults(func=_bind_source_invocations)
+    dependency_sources = sub.add_parser("admit-dependency-sources", help="recover observed dependency source graphs using independent Python environment roots")
+    dependency_sources.add_argument("trace")
+    dependency_sources.add_argument("--project-root", required=True)
+    dependency_sources.add_argument("--out", required=True, help="fresh source-admission directory")
+    from scar.analysis.dependency_sources import DependencySourceBudget
+    from scar.ir.program.expansion import ContextStoreBudget
+    for budget_type, prefix in ((DependencySourceBudget, "dependency"), (ContextStoreBudget, "context")):
+        defaults = budget_type()
+        for name in budget_type.__dataclass_fields__:
+            dependency_sources.add_argument("--" + prefix + "-" + name.replace("_", "-"),
+                dest=prefix + "_" + name, type=int, default=getattr(defaults, name))
+    dependency_sources.set_defaults(func=_admit_dependency_sources)
     dispatch_sources = sub.add_parser("bind-dispatch-sources", help="join original provider marker contexts to retained Python source invocations")
     dispatch_sources.add_argument("--source-bindings", required=True)
     dispatch_sources.add_argument("--dispatch-bridge", required=True)
@@ -484,7 +498,7 @@ def main(argv=None) -> int:
             command.add_argument('--operand-' + name.replace('_','-'), dest='route_' + name,
                                  type=int, default=getattr(OperandRouteBudget(), name),
                                  help='independent route construction ceiling: ' + name)
-    for command in (call_links,check_call_links,query_call_refs,seed_calls,check_call_seeds,inventory_program,check_inventory,*operand_commands,source_invocations):
+    for command in (call_links,check_call_links,query_call_refs,seed_calls,check_call_seeds,inventory_program,check_inventory,*operand_commands,source_invocations,dependency_sources):
         command.add_argument('--max-call-report-bytes',type=int,default=256000000,
                              help='independent decompressed input/output report ceiling')
         command.add_argument('--max-call-trace-bytes',type=int,default=128000000)
@@ -816,7 +830,7 @@ def _bind_source_invocations(args) -> int:
         output = Path(args.out).resolve()
         coordinates = bind_capture_coordinates(args.capture, max_bytes=args.max_bytes, max_lines=args.max_lines,
             profile_uri=str(output / 'capture-coordinates.json'))
-        composition = CompositionIndex(args.composition)
+        composition = CompositionIndex(args.composition, max_input_bytes=args.max_input_bytes)
         report = bind_source_invocations(composition, coordinates,
             args.trace or str(Path(args.capture) / 'trace'), output,
             call_budget=_call_budget(args), witness_mode=args.witness_mode)
@@ -826,6 +840,25 @@ def _bind_source_invocations(args) -> int:
         return 2
     print(json.dumps({"status": "BOUND_WITH_OPEN_OBLIGATIONS", "out": str(output),
                       "summary": report['summary'], "first_stage_complete": False}))
+    return 0
+
+
+def _admit_dependency_sources(args) -> int:
+    from scar.analysis.dependency_sources import DependencySourceBudget, admit_dependency_sources
+    from scar.ir.program.expansion import ContextStoreBudget
+    try:
+        report = admit_dependency_sources(args.trace, args.project_root, args.out,
+            call_budget=_call_budget(args),
+            budget=DependencySourceBudget(**{name: getattr(args, "dependency_" + name)
+                for name in DependencySourceBudget.__dataclass_fields__}),
+            context_budget=ContextStoreBudget(**{name: getattr(args, "context_" + name)
+                for name in ContextStoreBudget.__dataclass_fields__}))
+    except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)],
+                          "transformation_authorized": False}))
+        return 2
+    print(json.dumps({"status": "ADMITTED_WITH_OPEN_OBLIGATIONS", "out": args.out,
+                      "summary": report["summary"], "first_stage_complete": False}))
     return 0
 
 

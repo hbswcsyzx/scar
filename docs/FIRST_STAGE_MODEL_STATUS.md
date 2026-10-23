@@ -2,6 +2,24 @@
 
 日期：2026-10-20。**OPEN：完整 LeWM 自动建模未验收。**
 
+当前交付与下一项统一见 [FIRST_STAGE_DELIVERY.md](FIRST_STAGE_DELIVERY.md)，
+实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
+实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
+
+### 2026-10-23：大模型存储与当前任务纠正
+
+完整普通源码任务已退出2，用时33:49；最终单JSON写入超过256MB独立上限，未
+发布inventory。1627份原返回检查点保留，840个有原图，raw合计513,803,391字节。
+这不是新全量inventory通过，也不与旧54 body相加。原日志保存。
+按用户最新存储要求，暂停1GB大JSON路线；改从原检查点恢复分片inventory，
+manifest索引原图与全局组件，逐图/overlay校验不减少。SQLite图索引与原证据归档
+分工见 [GRAPH_STORAGE.md](GRAPH_STORAGE.md)，数据库尚未实现。
+
+已实现依赖源码独立准入入口并开始一次真实离线采集原档分析；尚无最终验收数。
+Tensor物理sidecar exporter正在实现，复用profiler event tree，不另写CUPTI；
+尚未接采集器或运行验收。两者均不授完整状态/逻辑版本/ready结论。
+当前继续第一阶段；不新增detector/backend、不报告LeWM加速比。
+
 ### 2026-10-23：成功全流程采集与统一运行身份
 
 **最新核验**：生产桥与资源联合导入已完成，实际原档独立审核PASS；39,796 dispatch

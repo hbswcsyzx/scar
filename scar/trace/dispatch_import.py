@@ -14,13 +14,36 @@ import re
 from scar.ir.v2 import EvidenceClaim, EvidenceKind, ObjectID, ObjectInstance
 from scar.ir.v2.evidence import EvidenceEdge, EvidenceEndpoint, EvidenceNodeKind as N, EvidenceRelation
 from scar.ir.program.providers import ProviderArtifact
-from scar.ir.record_codec import encode
+from scar.ir.record_codec import decode, encode
 from scar.trace.dispatch_evidence import PRODUCTION_PROFILE, PROVIDER_REVISION
-from scar.trace.files import open_binary
+from scar.trace.files import open_binary, resolve as resolve_retained_path
 from scar.trace.native_import import _canonical_hash, _constant, _float, _pairs
 
 _MARKER = re.compile(r"scar-dispatch:([0-9a-f]{32}):([1-9][0-9]*):([1-9][0-9]*):(span|output)")
 _WEAK = re.compile(r"weak:([1-9][0-9]*):([1-9][0-9]*)")
+
+
+def _retained_artifact(coordinates, actual_path, raw_sha256, raw_bytes, schema):
+    """Resolve an explicitly read local file to its original declared artifact.
+
+    A content hash alone cannot select between distinct retained files. New
+    coordinate reports publish local_path separately from the logical URI;
+    historical reports require an exact URI/path match instead. No URI opens
+    a file, no basename/selector inference participates in this lookup.
+    """
+    if coordinates is None:
+        return ProviderArtifact(str(Path(actual_path).absolute()), raw_sha256, raw_bytes, schema)
+    local_path = str(Path(actual_path).resolve())
+    matches = []
+    for member in coordinates.report["membership"]:
+        declared = decode(ProviderArtifact, member["artifact"])
+        selected_path = member.get("local_path", declared.uri)
+        if (selected_path == local_path and declared.sha256 == raw_sha256
+                and declared.size_bytes == raw_bytes):
+            matches.append(declared)
+    if len(matches) != 1:
+        raise ValueError("dispatch input has no unique exact retained path/raw-byte membership")
+    return matches[0]
 
 
 def import_dispatch_bridge(result, observations_path, metadata_path, call_events_path,
@@ -38,7 +61,7 @@ def import_dispatch_bridge(result, observations_path, metadata_path, call_events
         raise ValueError("unsupported dispatch provider revision")
     if "dispatch_bridge" in result.report:
         raise ValueError("this native bundle already has a dispatch bridge")
-    documents, artifacts, lines, remaining = {}, {}, {}, max_bytes
+    documents, artifacts, lines, input_paths, remaining = {}, {}, {}, {}, max_bytes
     for key, path, schema in (
         ("observations", observations_path, "scar.dispatch-observation.events.v1"),
         ("metadata", metadata_path, "scar.dispatch-observation-trace"),
@@ -46,12 +69,15 @@ def import_dispatch_bridge(result, observations_path, metadata_path, call_events
         ("codes", call_codes_path, "scar.call-edge-codes.v1"),
         ("call_meta", call_meta_path, "scar.call-edge-trace"),
         ("native_meta", native_manifest_path, "scar.execution-evidence-collection")):
-        with open_binary(path) as stream:
+        actual_path = resolve_retained_path(path).resolve()
+        input_paths[key] = str(actual_path)
+        with open_binary(actual_path) as stream:
             payload = stream.read(remaining + 1)
         if len(payload) > remaining:
             raise ValueError("dispatch import exceeds combined raw byte budget")
         remaining -= len(payload)
-        artifact = ProviderArtifact(str(Path(path).absolute()), sha256(payload).hexdigest(), len(payload), schema)
+        artifact = _retained_artifact(coordinates, actual_path if coordinates is not None else path,
+                                      sha256(payload).hexdigest(), len(payload), schema)
         artifacts[key] = artifact
         def decode(raw):
             return json.loads(raw, object_pairs_hook=_pairs, parse_float=_float, parse_constant=_constant)
@@ -121,8 +147,8 @@ def import_dispatch_bridge(result, observations_path, metadata_path, call_events
             if coordinates.process_for(artifact, pid) != coordinates.target_process:
                 raise ValueError("dispatch/call artifact lacks verified capture membership")
         native_artifact = result.report["artifacts"]["eto"]
-        provider = ProviderArtifact(native_artifact["path"], native_artifact["sha256"],
-                                    native_artifact["size_bytes"], "pytorch.execution-trace.v1")
+        provider = _retained_artifact(coordinates, resolve_retained_path(native_artifact["path"]).resolve(),
+            native_artifact["sha256"], native_artifact["size_bytes"], "pytorch.execution-trace.v1")
         if coordinates.process_for(provider, pid) != coordinates.target_process:
             raise ValueError("native graph belongs to a different capture")
     evidence, values = result.bundle.evidence, result.bundle.values
@@ -266,6 +292,7 @@ def import_dispatch_bridge(result, observations_path, metadata_path, call_events
         "profile": PRODUCTION_PROFILE, "scope": scope, "production_collector": True,
         "capture_membership_verified": membership_verified,
         "artifacts": {key: encode(artifact) for key, artifact in artifacts.items()},
+        "retained_input_paths": input_paths,
         "dispatches": len(grouped), "marker_nodes": len(marker_nodes), "slot_associations": len(paths),
         "outcomes": dict(Counter(group.get("DISPATCH_END", {}).get("outcome", "OPEN") for group in grouped.values())),
         "observations": observations, "paths": paths, "gaps": dict(gaps),
