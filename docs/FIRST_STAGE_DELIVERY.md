@@ -4,6 +4,16 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
+**2026-10-23纠正：旧FD-table连续性资格撤回。** 原capture的strace6.8只选择
+`%file,%process,%memory,%desc`；该版本的`unshare`与`close_range`不属于这四类。
+因此旧记录中计数0不能证明未发生；历史35个container→3context和12110个区间候选
+均不能据此记为已闭合。原artifact与当次程序exit结果保留，不能用其PASS表述替代
+缺失的采集覆盖前提。FD实际数值提取仍有原source回执；container关联、原OFD target
+的实际coidentity及kernel availability另列未证。正在修复public reader的coverage门和
+以原R2（container未知）为基础的显式FD-values-only模式；未运行修正后的新episode。
+依据：[strace6.8 x86_64表](https://raw.githubusercontent.com/strace/strace/v6.8/src/linux/x86_64/syscallent.h)、
+[通用表](https://raw.githubusercontent.com/strace/strace/v6.8/src/linux/generic/syscallent-common.h)。
+
 ## 1. 程序拆成什么
 
 | 层次 | 实体及对应内容 | 必须连接的关系 |

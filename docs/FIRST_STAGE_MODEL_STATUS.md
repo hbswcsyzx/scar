@@ -6,6 +6,23 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：撤回旧FD表连续性资格，保留真实FD回执
+
+发现并核实原capture profile缺口：run.sh只启用strace6.8的四类filter，`unshare`和
+`close_range`在该版syscall表的分类flags均为0，不被四类选择。因此先前以原记录
+零计数作为“没有table切换”的前提不成立。旧35 container→3context、拟议12110
+关联的连续性结论降为条件声明，当前不能计作已闭合；不能仅因typed/FK通过维持
+其资源身份/availability资格。原运行与artifact按原字节保留，纠正报告单列。
+
+12,684个handle的真实FD scalar/selector提取仍有准确source回执，原字段不变、原
+targets数守恒的核对也仍是事实；它们不证明原OFD targets的实际coidentity或生命周期。
+尤其四类filter还可能漏过network类FD producer，不能把既有handle集合当所有FD全集。
+后继reader将对不具备独立coverage证据的连续性fail-closed，并以public R2的未知
+container形成显式FD_VALUES_ONLY_R2模式，剥离原35条未证container结论。
+
+完整程序建模继续OPEN；source与FD数值结果不因这个缺口一概丢弃，依赖该缺失前提的
+关系必须分别撤回。没有实际优化/目标改写，因此不存在已应用变换需要回滚的问题。
+
 ### 2026-10-23：全部既有OS handle获得真实FD来源
 
 通用`os_fd_source_projection.py`唯一实际gate exit0，wall73.74s/RSS296,208KiB。
