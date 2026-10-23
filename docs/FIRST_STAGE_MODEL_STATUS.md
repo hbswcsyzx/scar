@@ -6,6 +6,26 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：tuple异常引用修正及一个自动选中body恢复
+
+通用tuple key前端现可从原SG唯一Tuple/operator/output-slot恢复缺旧computational
+overlay的原children，准确CodeWitness区分LOAD_CONST和BUILD_TUPLE。异常路径改为
+success-only transfer，独立focused guard沿CFG/FRAME_HOLD/FRAME_EXIT验证有序引用；
+未知中间primitive与control join仍保留frontier，不授全lifetime或纯性。
+
+两body实档window exit0、wall26.71s：原65ops图在新producer下修正并公共回读，另一
+原自动队列body在新地址guard失败，原FAILED_RETAINED与UNKNOWN construction cost保留。
+只补通用heap-source恢复INDEX的PARTIAL读地址和原receiver0/key1端口顺序后，新独立
+attempt仅重跑失败body，exit0、wall17.49s，恢复218ops图。两个SG-only tuple key源码/
+编译见证/ordered Uses/raise element retention通过，25个其余lifetime frontiers仍在。
+两门compile0/prepare0/target0，旧graph和20-key archive全字节不变。
+
+新图准确SHA与原失败见 [SOURCE_FRONTEND_NEXT_PROTOCOL.md](SOURCE_FRONTEND_NEXT_PROTOCOL.md)。
+这两份新artifact尚未正式替换842 snapshot中的旧引用；当前旧snapshot在新strict guard
+下仍有已知失效body，不能因历史冻结producer的PASS称其现已完整合法。后继需显式原
+namespace/parent snapshot绑定的body revision，并在批次完成后统一重新连接当前调用。
+第一阶段S3/S4仍OPEN，没有新增优化backend、变换或目标加速结论。
+
 ### 2026-10-23：真实view几何接线修正与native/core内容断口
 
 发现physical adapter原样保存`torch.strided`，而规范StorageRegion的bounds/overlap只认

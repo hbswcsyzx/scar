@@ -1,0 +1,15 @@
+{
+  "scope": "terminal source modeling artifacts only; no publication or runtime content claim",
+  "files": [
+    {
+      "path": "application.json",
+      "bytes": 1007,
+      "sha256": "34294d5dbdc20b0758abc6e4375ddbc8d9bffa71c6cd24e78f92ebe5976a2000"
+    },
+    {
+      "path": "root-graph-review.json",
+      "bytes": 539,
+      "sha256": "7960e160ec0e7924ec05afcb1bd27c5430034fab976517b4b2827a94080f8712"
+    }
+  ]
+}

@@ -251,6 +251,11 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
                 and tuple(row.positions) == (node.lineno, node.end_lineno, node.col_offset, node.end_col_offset)]
             _need(len(candidates) == 1 and type(candidates[0].argval) in (slice, tuple),
                   "source constant does not name its exact witnessed LOAD_CONST slot")
+    tuple_ownership = None
+    if Capability.SLICE_KEYS in language.capabilities:
+        from scar.analysis.source_tuple_validation import validate_tuple_key_ownership
+        tuple_ownership = validate_tuple_key_ownership(model, graph, interface, metadata, semantic,
+            source_tree=source_tree, options=options, structural_only=structural_only)
     _need(len({row.name for row in language.compiler_locals}) == len(language.compiler_locals),
           "compiler-local names are not uniquely classified")
     for mapping in language.compiler_locals:
@@ -279,7 +284,8 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     return {"valid": True, "verification": "STRUCTURE" if structural_only else "SOURCE_AND_CODE_WITNESS",
             "source_shape_verified": not structural_only,
             "code_constant_provenance_verified": bool(constants) and not structural_only,
-            "runtime_code_instance_established": False, "effects_established": False}
+            "runtime_code_instance_established": False, "effects_established": False,
+            "tuple_key_pending_references": tuple_ownership}
 
 
 __all__ = ["validate_language_body"]

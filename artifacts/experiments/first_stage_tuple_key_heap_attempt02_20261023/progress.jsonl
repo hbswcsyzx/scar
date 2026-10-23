@@ -1,0 +1,2 @@
+{"stage": "LOWER_BEGIN", "elapsed_s": 7.597313423000742, "max_rss_kib": 440560}
+{"stage": "FINISHED", "elapsed_s": 15.696467326997663, "max_rss_kib": 440560, "status": "RECOVERED_WITH_OPEN"}

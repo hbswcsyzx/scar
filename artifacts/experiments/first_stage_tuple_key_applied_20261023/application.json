@@ -1,0 +1,31 @@
+{
+  "scope": "reviewed tuple proposal applied after both gates terminated",
+  "modules": [
+    {
+      "path": "scar/analysis/source_slice_lowering.py",
+      "sha256": "bcf303afaad4eb17464018767da9824f1c4c380b763b6f2b5f8920a0dccb3156",
+      "bytes": 11567,
+      "ast": "PASS"
+    },
+    {
+      "path": "scar/analysis/source_language_validation.py",
+      "sha256": "c2e697681e3c8d2f3fbc12325d59ab42f31680b3ea81fdce206af398056ba353",
+      "bytes": 20560,
+      "ast": "PASS"
+    },
+    {
+      "path": "scar/analysis/source_tuple_validation.py",
+      "sha256": "31813718ae82e5747b691f204b94e10c010e490c5bd93f0c14b4342f214345ee",
+      "bytes": 17856,
+      "ast": "PASS"
+    }
+  ],
+  "proposal_patch": {
+    "path": "artifacts/experiments/first_stage_tuple_key_proposal_20261023/proposal.patch",
+    "sha256": "927b6b993737e3f5642b6761f253e9864e833d55d035d0ed005784d7b637ac69",
+    "bytes": 25280
+  },
+  "source_worker_run": false,
+  "old_graph_modified": false,
+  "full_lifetime_established": false
+}

@@ -1,0 +1,26 @@
+--- a/scar/analysis/source_heap_lowering.py
++++ b/scar/analysis/source_heap_lowering.py
+@@ -138,7 +138,8 @@
+         children = ((node.value, "receiver", 0),)
+         opcode = Opcode.ATTRIBUTE
+     elif isinstance(node, ast.Subscript) and not isinstance(node.slice, ast.Slice):
+-        children = ((node.value, "receiver", 0), (node.slice, "index", 0))
++        key_index = 1 if getattr(builder, "has_language", lambda _: False)("SLICE_KEYS") else 0
++        children = ((node.value, "receiver", 0), (node.slice, "index", key_index))
+         opcode = Opcode.INDEX
+     elif (isinstance(node, ast.Call) and not any(isinstance(arg, ast.Starred) for arg in node.args)
+             and all(keyword.arg is not None for keyword in node.keywords)):
+@@ -159,6 +160,13 @@
+             inputs.append((value, child, role, index, None))
+         cursor, result, operation_id = builder.invoke(cursor, node, tuple(inputs))
+         _associate(builder, operation_id, node, definition, opcode)
++        if opcode is Opcode.INDEX and getattr(builder, "has_language", lambda _: False)("SLICE_KEYS"):
++            # This is a source-level, partial receiver/key address. The helper
++            # binds the same invoke's existing last coarse-world Use; neither
++            # physical storage access nor complete __getitem__ effects follow.
++            uses = builder.operation_records[operation_id].uses
++            builder._addresses(operation_id, (AddressEffect(ReferenceOwner(uses[0].id),
++                (Element(uses[1].id),), AccessMode.READ),))
+         builder.link_value(builder.values_by_id[result], node, SourceRole.EXPRESSION)
+         builder.gap(GapKind.DYNAMIC_DISPATCH, node,
+             "source-backed target expression operands are connected; actual dispatch, aliasing and effects remain unproved")

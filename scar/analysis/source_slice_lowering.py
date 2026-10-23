@@ -6,13 +6,15 @@ import dis
 from dataclasses import replace
 
 from scar.analysis.program_lowering import _REF, _Unsupported
-from scar.analysis.source_heap_lowering import _hold
+from scar.analysis.source_heap_lowering import _hold, _source_definition, _associate, expression_for_heap_target
 from scar.analysis.source_mapping_lowering import _transfer
 from scar.ir.program.model import AccessMode, Behavior, ExitKind, Operation, OperationResult, ReferenceValue, StateAccess
 from scar.ir.program.ids import OperationID, ValueID
 from scar.ir.program.source import GapKind, SourceRole
 from scar.ir.program.source_language import CodeConstantSource, SliceShape
 from scar.ir.program.structured import PythonProtocolKind
+from scar.ir.semantics_v2 import Opcode
+from scar.ir.v2.semantic import OperationKind
 from scar.ir.program.state_addresses import AddressEffect, Element, ReferenceOwner
 
 
@@ -61,11 +63,17 @@ def _constant(builder, node, cursor):
     return cursor, result.id
 
 
-def _invoke(builder, cursor, node, inputs, consumed, *, old=None, kind=None, memory=False):
+def _invoke(builder, cursor, node, inputs, normal_consumed, *, raise_consumed=None,
+            old=None, kind=None, memory=False):
+    # Most existing slice/index primitives consume the same input holds in both
+    # completions. BUILD_TUPLE steals only on success (CPython 3.14.7). Keeping
+    # the exceptional contract explicit avoids a second release before unwind.
+    if raise_consumed is None:
+        raise_consumed = normal_consumed
     def failed(failure, exception):
         pending = tuple(builder.active_temporaries)
         try:
-            _transfer(builder, consumed, node)
+            _transfer(builder, raise_consumed, node)
             builder.finish_exit(failure, node, exception, ExitKind.RAISE)
         finally:
             builder.active_temporaries[:] = pending
@@ -78,7 +86,7 @@ def _invoke(builder, cursor, node, inputs, consumed, *, old=None, kind=None, mem
         marked = replace(original, behaviors=original.behaviors + (Behavior.MEMORY,))
         builder.operations[builder.operations.index(original)] = marked
         builder.operation_records[operation] = marked
-    _transfer(builder, consumed, node)
+    _transfer(builder, normal_consumed, node)
     return cursor, value, operation
 
 
@@ -127,20 +135,39 @@ def lower_key(builder, node, cursor):
     instructions = _instructions(builder, node)
     if any(row.opname == 'LOAD_CONST' and type(row.argval) is tuple for row in instructions):
         return _constant(builder, node, cursor)
-    if not any(row.opname == 'BUILD_TUPLE' and row.arg == len(node.elts) for row in instructions):
+    if sum(row.opname == 'BUILD_TUPLE' and row.arg == len(node.elts) for row in instructions) != 1:
         raise _Unsupported(GapKind.CODE_VERSION, node, "INDEX_TUPLE_CODE_LOWERING_UNRECOVERED")
-    old = builder.old_operation(node)
-    if len(old.operands) != len(node.elts):
-        raise _Unsupported(GapKind.SOURCE_MAPPING, node, "index tuple operands differ from original source semantics")
+    records = builder.old_by_atom.get(builder.source(node).atom_id, ())
+    if len(records) > 1:
+        raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                           "index tuple has ambiguous computational source records")
+    old, definition = (records[0], None) if records else (None, _source_definition(builder, node))
+    if old is not None:
+        if old.opcode is not Opcode.BUILD_TUPLE or len(old.operands) != len(node.elts):
+            raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                               "index tuple operands differ from original source semantics")
+        operands = tuple((row.role, row.index, row.value) for row in old.operands)
+    else:
+        if (definition.kind is not OperationKind.OPERATOR or definition.metadata.get("ast_type") != "Tuple"
+                or len(definition.output_slots) != 1):
+            raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                               "index tuple requires its unique original SG Tuple/output slot")
+        operands = tuple(("element", index, None) for index in range(len(node.elts)))
     baseline, held, inputs = len(builder.active_temporaries), [], []
     try:
-        for child, operand in zip(node.elts, old.operands):
-            cursor, value = lower_key(builder, child, cursor)
+        for child, (role, index, static) in zip(node.elts, operands):
+            cursor, value = expression_for_heap_target(builder, child, cursor)
             if cursor is None:
                 return None, None
             _hold(builder, cursor, child, value); held.append((child, value))
-            inputs.append((value, child, operand.role, operand.index, operand.value))
-        cursor, value, _ = _invoke(builder, cursor, node, inputs, tuple(held), old=old, memory=True)
+            inputs.append((value, child, role, index, static))
+        cursor, value, operation = _invoke(builder, cursor, node, inputs, tuple(held),
+            raise_consumed=(), old=old, memory=True)
+        if definition is not None:
+            _associate(builder, operation, node, definition, Opcode.BUILD_TUPLE)
+        builder.gap(GapKind.EFFECT_SUMMARY, node,
+            "tuple key inputs transfer only on normal completion; modeled pending references are checked separately; "
+            "runtime code instance, finalizers, allocation and complete lifetime effects remain unproved")
         return cursor, value
     finally:
         del builder.active_temporaries[baseline:]
