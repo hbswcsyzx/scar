@@ -225,6 +225,7 @@ def import_dispatch_bridge(result, observations_path, metadata_path, call_events
             parent = current.metadata["ctrl_deps"]
             current = native_nodes.get(parent) if parent != current.metadata["node_id"] else None
         observations.append({"sequence": sequence, "phase": phase, "marker_instance": marker.id.wire,
+            "source_line": number,
             "retained_ancestor": context, "python_ident": observation["python_ident"],
             "native_tid": observation["native_tid"], "native_tid_verified": native_tid_verified,
             "actual_provider_ancestry": ancestry})

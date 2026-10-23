@@ -346,6 +346,39 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         members[str(dispatch_name)] = dispatch_artifact
         members[str(dispatch_meta_name)] = dispatch_meta
         dispatch_names = [str(dispatch_name), str(dispatch_meta_name)]
+    physical_config = native.get("configuration", {}).get("tensor_physical_observations")
+    physical, physical_names = None, []
+    if physical_config is not None:
+        _need(type(physical_config) is dict and physical_config.get("requested") is True
+              and physical_config.get("profile") == "scar.tensor-physical-event-tree-v1"
+              and dispatch is not None, "unsupported physical observation declaration")
+        physical_name = trace_root / f"tensor-physical.{pid}.{nonce}.jsonl"
+        physical_meta_name = trace_root / f"tensor-physical-meta.{pid}.{nonce}.json"
+        _need(physical_config.get("events") == str(physical_name)
+              and physical_config.get("metadata") == str(physical_meta_name),
+              "physical declaration does not select this exact collector namespace")
+        physical, physical_meta = files.document(physical_meta_name, "scar.tensor-physical-trace")
+        _need(physical.get("schema") == "scar.tensor-physical-trace"
+              and physical.get("schema_version") == 1
+              and physical.get("profile") == physical_config["profile"]
+              and physical.get("process_id") == pid and physical.get("nonce") == nonce
+              and physical.get("provider_revision") == native["provider"]["torch_git_version"],
+              "physical schema/process/provider/nonce differs")
+        for label, artifact in (("native_manifest", native_artifact),
+                                ("dispatch_metadata", dispatch_meta),
+                                ("dispatch_observations", dispatch_artifact)):
+            source = physical.get("inputs", {}).get(label, {})
+            _need((source.get("path"), source.get("raw_sha256"), source.get("raw_bytes"))
+                  == (artifact.uri, artifact.sha256, artifact.size_bytes),
+                  "physical collector does not bind exact " + label)
+        physical_artifact = files.verify(physical_name, "scar.tensor-physical-observation.v1")
+        declaration = physical.get("file", {})
+        _need((declaration.get("path"), declaration.get("raw_sha256"), declaration.get("raw_bytes"))
+              == (str(physical_name), physical_artifact.sha256, physical_artifact.size_bytes)
+              and _integer(declaration.get("lines")), "physical exact byte/count declaration differs")
+        members[str(physical_name)] = physical_artifact
+        members[str(physical_meta_name)] = physical_meta
+        physical_names = [str(physical_name), str(physical_meta_name)]
     for name, schema, field in ((eto_name, "pytorch.execution-trace.v1", "execution_trace"),
                                 (kineto_name, "pytorch.kineto.chrome-trace.v1", "kineto")):
         artifact = files.verify(name, schema)
@@ -437,6 +470,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     if environment_present:
         exclusive_names += [str(environment_name), str(environment_meta_name)]
     exclusive_names += dispatch_names
+    exclusive_names += physical_names
     for name in exclusive_names:
         witnessed = [fact for fact, flags in creations.get(name, ()) if "O_CREAT" in flags and "O_EXCL" in flags]
         _need(len(witnessed) == 1, "artifact lacks one exact target-process O_EXCL creation: " + name)
@@ -514,6 +548,12 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         collector_declarations.append(("function_environments", environment))
     if dispatch is not None:
         collector_declarations.append(("dispatch_observations", dispatch))
+    if physical is not None:
+        collector_declarations.append(("tensor_physical_observations", physical))
+        if (physical.get("traversal_completed") is not True
+                or physical.get("marker_ordered_slot_correspondence_established") is not True
+                or physical.get("allocation_receipt_traversal_complete") is not True):
+            gaps.append({"code": "tensor_physical_observations_incomplete"})
     for family, declaration in collector_declarations:
         if (declaration.get("dropped_events", 0) or declaration.get("errors") or declaration.get("io_failed")
                 or declaration.get("unknown_exits", 0) or declaration.get("gaps", 0)):
@@ -533,6 +573,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         "call_collector_declaration": calls, "operand_collector_declaration": operands,
         "function_environment_collector_declaration": environment,
         "dispatch_collector_declaration": dispatch,
+        "tensor_physical_collector_declaration": physical,
         "retention": {"mode": "plain" if archive is None else "lossless_archive",
                       "archive_sha256": seed["archive_sha256"], "gzip_names_inferred": False},
         "python_torch_correspondence_established": False, "world_effects_established": False,

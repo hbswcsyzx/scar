@@ -155,6 +155,18 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
             _write(native_out / 'dispatch-bridge.json.gz', bridge)
             stage('dispatch_bridge', 'IMPORTED', dispatches=bridge['dispatches'],
                   slot_associations=bridge['slot_associations'], gaps=bridge['gaps'])
+        physical_config = manifest.get('configuration', {}).get('tensor_physical_observations')
+        if physical_config is not None and physical_config.get('requested') is True:
+            from scar.trace.tensor_physical_import import import_tensor_physical
+            stage('tensor_physical', 'RUNNING')
+            physical = import_tensor_physical(native, member_path(physical_config['events']),
+                member_path(physical_config['metadata']), coordinates=coordinates, max_bytes=max_bytes,
+                max_rows=max_lines)
+            _write(native_out / 'tensor-physical.json.gz', physical)
+            stage('tensor_physical', 'IMPORTED_WITH_OPEN_OBLIGATIONS',
+                marker_nodes=physical.get('marker_nodes', 0),
+                physical_slots=physical.get('physical_slot_associations', 0),
+                allocation_epochs=physical.get('allocation_epochs', 0), gaps=physical['gaps'])
         if schema_contracts:
             from scar.trace.native_schema import recover_schema_contracts
             stage('native_schema', 'RUNNING')
@@ -172,13 +184,16 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
         _write(native_out / 'resource-observations.json.gz', native.resources)
         _write(native_out / 'import-report.json.gz', native.report)
         native_summary = {key: value for key, value in native.report.items()
-                          if key not in ('memory', 'artifacts', 'dispatch_bridge', 'native_schema') and not isinstance(value, list)}
+                          if key not in ('memory', 'artifacts', 'dispatch_bridge', 'native_schema', 'tensor_physical') and not isinstance(value, list)}
         if 'dispatch_bridge' in native.report:
             native_summary['dispatch_bridge'] = {key: value for key, value in native.report['dispatch_bridge'].items()
                                                 if key not in ('observations', 'paths', 'artifacts')}
         if 'native_schema' in native.report:
             native_summary['native_schema'] = {key: value for key, value in native.report['native_schema'].items()
                                               if key not in ('bindings', 'unqualified_without_schema')}
+        if 'tensor_physical' in native.report:
+            native_summary['tensor_physical'] = {key: value for key, value in native.report['tensor_physical'].items()
+                                                 if key not in ('associations', 'epochs')}
         native_summary['memory'] = {key: value for key, value in native.report.get('memory', {}).items()
                                     if key not in ('records', 'source_artifact')}
         native_summary['shared_lifetime_points_checked'] = checked_lifetimes

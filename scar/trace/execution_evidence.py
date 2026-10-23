@@ -46,6 +46,7 @@ class ExecutionEvidence:
         self._profiler = None
         self._call_recorder = recorder
         self._dispatch_evidence = None
+        self._physical_requested = os.environ.get("SCAR_TENSOR_PHYSICAL") == "1"
         self._enter_attempted = False
         self._recording = False
         self._previous_import = None
@@ -86,7 +87,7 @@ class ExecutionEvidence:
             "alignment": "one profiler lifecycle; provider start/stop calls are sequenced",
         }
         self._config = {
-            "record_shapes": False, "profile_memory": True,
+            "record_shapes": self._physical_requested, "profile_memory": True,
             "with_stack": False, "with_modules": False,
             "execution_trace_observer": True, "extra_resources": False,
             "extra_tensor_data": False, "activities": None,
@@ -101,6 +102,14 @@ class ExecutionEvidence:
                 "execution_trace": root / f"execution-trace.{self.pid}.{nonce}.json",
                 "kineto": root / f"kineto.{self.pid}.{nonce}.json",
             }
+            if self._physical_requested:
+                self._config["tensor_physical_observations"] = {
+                    "profile": "scar.tensor-physical-event-tree-v1", "requested": True,
+                    "events": str(root / f"tensor-physical.{self.pid}.{nonce}.jsonl"),
+                    "metadata": str(root / f"tensor-physical-meta.{self.pid}.{nonce}.json"),
+                    "failure": str(root / f"tensor-physical-failure.{self.pid}.{nonce}.json"),
+                    "export_timing": "after final native manifest and dispatch metadata close",
+                }
             self._manifest_path = root / f"execution-evidence.{self.pid}.json"
             self._manifest_temp = root / f".execution-evidence.{self.pid}.{nonce}.tmp"
             # A second manager must not overwrite a previous collection manifest.
@@ -289,7 +298,8 @@ class ExecutionEvidence:
         experimental_type = getattr(getattr(torch._C, "_profiler", None), "_ExperimentalConfig", None)
         if callable(experimental_type):
             try:
-                experimental = experimental_type(adjust_timestamps=False)
+                experimental = experimental_type(adjust_timestamps=False,
+                    **({"trace_only": False} if self._physical_requested else {}))
             except TypeError:
                 # Older providers retain their working profile path; absence
                 # of this receipt never qualifies allocator event ordering.
@@ -297,7 +307,9 @@ class ExecutionEvidence:
             else:
                 options["experimental_config"] = experimental
                 self._config["experimental_config"] = {"adjust_timestamps": False}
-        self._profiler = profile(record_shapes=False, profile_memory=True,
+                if self._physical_requested:
+                    self._config["experimental_config"]["trace_only"] = False
+        self._profiler = profile(record_shapes=self._physical_requested, profile_memory=True,
                                  with_stack=False, with_modules=False,
                                  execution_trace_observer=self._observer, **options)
         self._config["activities"] = sorted(str(item) for item in self._profiler.activities)
@@ -382,6 +394,40 @@ class ExecutionEvidence:
                     # Keep the already-published native artifact unchanged:
                     # the dispatch sidecar may bind its exact final hash.
                     self._failure("dispatch_close", error)
+            if self._physical_requested:
+                self._export_physical()
+
+    def _export_physical(self):
+        """Publish a separate receipt without changing the closed hash chain."""
+        if os.getpid() != self.pid:
+            return
+        config = self._config.get("tensor_physical_observations")
+        if config is None:
+            return
+        try:
+            from scar.trace.tensor_physical import export_tensor_physical
+            if self._dispatch_evidence is None or self._profiler is None:
+                raise ValueError("physical export requires owned dispatch and profiler results")
+            nonce = self._paths["kineto"].name.split(".")[2]
+            export_tensor_physical(self._profiler.profiler.kineto_results,
+                self._paths["kineto"].parent, nonce=nonce,
+                provider_revision=self._provider["torch_git_version"],
+                dispatch_metadata_path=self._dispatch_evidence.meta_path,
+                dispatch_observations_path=self._dispatch_evidence.event_path,
+                native_manifest_path=self._manifest_path)
+        except Exception as error:
+            # The prior native manifest is already bound by dispatch metadata.
+            # Export failure must not mutate either receipt or fail the target.
+            failure = {"schema": "scar.tensor-physical-export-failure", "schema_version": 1,
+                "pid": self.pid, "stage": "post_close_export", "status": "FAILED",
+                "error": {"type": type(error).__name__, "message": str(error)[:1024]},
+                "logical_versions_established": False, "whole_model_established": False}
+            try:
+                with Path(config["failure"]).open("x", encoding="utf-8") as stream:
+                    json.dump(failure, stream, sort_keys=True, allow_nan=False)
+                    stream.write("\n")
+            except (OSError, ValueError):
+                pass
 
 
 def install(out, *, recorder=None):
