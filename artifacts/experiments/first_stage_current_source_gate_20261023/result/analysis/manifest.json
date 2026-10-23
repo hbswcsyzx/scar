@@ -1,0 +1,1211 @@
+{
+  "canonical_document_bytes": 99478478,
+  "canonical_document_sha256": "633266c86dbabe4a98377b809bb6cfc259b7a164d00c3b19293b4fb259f5f51e",
+  "canonical_graphs_copied": false,
+  "header": {
+    "bytes": 135461,
+    "decoded_bytes": 895220,
+    "decoded_sha256": "650f8c80ff66a69c43342687c6e03a40e83ef796952776b664e93d7514be5799",
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/header.json.gz",
+    "sha256": "80c3b1e7409396dcf6ac17ee8dbb5f7f329d639abc095cd4aebd2d326b34ae6e"
+  },
+  "max_rows_per_shard": 1000,
+  "max_shard_decoded_bytes": 16000000,
+  "original_schema": "scar.call-operand-links",
+  "original_schema_version": 2,
+  "schema": "scar.partitioned-call-operand-links",
+  "schema_version": 1,
+  "table_pointer_rule": "dot-separated table names replace that original JSON array; header holds all other fields",
+  "tables": {
+    "code_links": {
+      "chunks": [
+        {
+          "bytes": 92024,
+          "decoded_bytes": 647947,
+          "decoded_sha256": "7128bb72dc19919917616e88f16d105add793ef748ef596abdf2c52c343ac1e0",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/code_links.0000.jsonl.gz",
+          "rows": 855,
+          "sha256": "99149e2efd0f17f718b57a8992ea8edf0eb7bc816f44109286b9bfb7aa78e5e3"
+        }
+      ],
+      "rows": 855
+    },
+    "entry_parameters": {
+      "chunks": [
+        {
+          "bytes": 57929,
+          "decoded_bytes": 1024493,
+          "decoded_sha256": "10266d9be10cfb2f8e865c98667ae00de355d27f6deb456648a9706c52b43f0c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d977b2c9260d1c884ba3ae2e5a9c16d139f42b14e34fce43eb304a74485da63d"
+        },
+        {
+          "bytes": 47465,
+          "decoded_bytes": 1027521,
+          "decoded_sha256": "ff71bfc31926dadb82a6e340a502fee511f9b3abebb4792e8c61041cd55f7385",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "dc5ed3c90f39569d3e579a286c701a7e9c10a8a0da7c0bfd0827140219c56c3f"
+        },
+        {
+          "bytes": 45240,
+          "decoded_bytes": 1027868,
+          "decoded_sha256": "cd15b7a89214f0a0bb77732be2fb10aa6cf67c34c0280a1c2b1839e557ac8e1d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "bb6ffeb6918becc30996dfd3d31e32243bce348d040e39e9eae255047a612519"
+        },
+        {
+          "bytes": 45729,
+          "decoded_bytes": 1029206,
+          "decoded_sha256": "f60ddd3c18a2e6ee98c7a70b20d479967a11aeef1eac67418981eb25539d5afd",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0003.jsonl.gz",
+          "rows": 1000,
+          "sha256": "5ea3fba410b027b0378d41b6420d6d24712c6fc0189ba735aadae7f633480967"
+        },
+        {
+          "bytes": 45438,
+          "decoded_bytes": 1029214,
+          "decoded_sha256": "7690d832b167da090c62ad2a7add8356324067de39dfeff4192d9b81e367a92f",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0004.jsonl.gz",
+          "rows": 1000,
+          "sha256": "54f57425ffe3fc151494613bb11cebe260ba4a4aa901b97970d178d7c5cb36ff"
+        },
+        {
+          "bytes": 45570,
+          "decoded_bytes": 1029206,
+          "decoded_sha256": "67d13e4261955d1925877dcb03d456f26c6d0ac4a9334e5fbca1e7483c03a6c7",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0005.jsonl.gz",
+          "rows": 1000,
+          "sha256": "52cdf81142153e0c8bf30e44c3b1ff7845145e5feca6ce9cf288e7354771a35a"
+        },
+        {
+          "bytes": 45631,
+          "decoded_bytes": 1029214,
+          "decoded_sha256": "5882bbc1e403df66ba4721c2f3c0ae5403153ea64b3b8cd224f476da612a635a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0006.jsonl.gz",
+          "rows": 1000,
+          "sha256": "6db5a602901f4771eb5e3a7ac06b0a53dbb1e8b6fc83c9dca3079e68ef5a2908"
+        },
+        {
+          "bytes": 45617,
+          "decoded_bytes": 1029206,
+          "decoded_sha256": "01c21e76bb1488995495ebbc1455cde80ffc65c0e33989eb962c690600f3ab73",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0007.jsonl.gz",
+          "rows": 1000,
+          "sha256": "0ebd33cbc6e141621b73539f8d69bdde502ed7f68bf6e92188d74082d36a5c9a"
+        },
+        {
+          "bytes": 45641,
+          "decoded_bytes": 1029214,
+          "decoded_sha256": "0bf60230b5980fbfb0987ad7cb4eb307761e8e5195b103ec15025ee81a980d50",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0008.jsonl.gz",
+          "rows": 1000,
+          "sha256": "658e1ecb3ece21a36020781d1e9f3fa00a7f81c38e5b8c67d922456d91e15069"
+        },
+        {
+          "bytes": 45892,
+          "decoded_bytes": 1030760,
+          "decoded_sha256": "0a1bb2e0df97d6fcd7c0bae54ea16f4160b26118a2610e336c23bca85029de2d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0009.jsonl.gz",
+          "rows": 1000,
+          "sha256": "ba19d72bb7bd198d82665620c593ec5bba0cf8a1d3cb6c1bb90a0f5477ac70e6"
+        },
+        {
+          "bytes": 46877,
+          "decoded_bytes": 1033765,
+          "decoded_sha256": "bbd0a4847058642c809dfbbdae8c2e3a0f4f527dc36567cc964f80c5f93dbefd",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0010.jsonl.gz",
+          "rows": 1000,
+          "sha256": "cceebfe981c059403877e91f2e64ccb3371448a13754cf175af1ae9925d8fb89"
+        },
+        {
+          "bytes": 46758,
+          "decoded_bytes": 1033825,
+          "decoded_sha256": "9179cfc7ac64e269800886792a450b5144335f01a87fe2610d697fa42bd4ac9e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0011.jsonl.gz",
+          "rows": 1000,
+          "sha256": "8371eccc0935f787398fb746ba70820e29706881fab318ad80ff3ceeddbdd5c3"
+        },
+        {
+          "bytes": 46726,
+          "decoded_bytes": 1033796,
+          "decoded_sha256": "52ca36bc3c31490e6611710752768c8080b5bb7b9f2bf12c45e079ef27efc138",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0012.jsonl.gz",
+          "rows": 1000,
+          "sha256": "c035916c3ea34f5cd5888cd92d8ed020c32dc2a9e14c9636423442ead0b55f54"
+        },
+        {
+          "bytes": 41505,
+          "decoded_bytes": 901685,
+          "decoded_sha256": "46b7a823a6323560e7ef53c1215ddfcc71bbaf7b5e682505507798206460942e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/entry_parameters.0013.jsonl.gz",
+          "rows": 872,
+          "sha256": "d202665205c69e45e71481dd9d15977fb69bb84b6c596f9be09b710aebb55faf"
+        }
+      ],
+      "rows": 13872
+    },
+    "environments.bindings": {
+      "chunks": [
+        {
+          "bytes": 321991,
+          "decoded_bytes": 4687111,
+          "decoded_sha256": "84197ca13efeeccfcc89b662e54b2444234eb41315e04d7f64ca616cf96f7b4e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.bindings.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "9733af9feb8f32c2a1698806a6b63d4a4039427c5fb65fc698207fa9dd96abec"
+        },
+        {
+          "bytes": 309814,
+          "decoded_bytes": 4671154,
+          "decoded_sha256": "dc3218387b5b2a31ca603095ff663111c751edc7ad57f8c2376103f55b5f0c41",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.bindings.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d7778ce1e78329b86f7c2b96e5e75c53fccc212add55582b18b72a235afca580"
+        },
+        {
+          "bytes": 327840,
+          "decoded_bytes": 4678622,
+          "decoded_sha256": "80978b26bbf8d8a365dc2a0af4437b4912ba87eda3f0689522f9880367a8fcea",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.bindings.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "3281dfc1e6bbe7213418a3e567dee79a5510d3389954e29d197b32bacb2d7397"
+        },
+        {
+          "bytes": 115563,
+          "decoded_bytes": 1623810,
+          "decoded_sha256": "3684bbf71ecd492acbd7bb542c08d4d2992e6252268994cc6c9856dac5c741c2",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.bindings.0003.jsonl.gz",
+          "rows": 347,
+          "sha256": "2664e58baba64d60dea47ce06e0c32df7b97878eb6df7565d6fe0aa922a8a385"
+        }
+      ],
+      "rows": 3347
+    },
+    "environments.files": {
+      "chunks": [
+        {
+          "bytes": 326,
+          "decoded_bytes": 643,
+          "decoded_sha256": "514f705161a36e7f8f99191b8847b0ec0d39a76475cb946cc6bc8d04237ad4fa",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.files.0000.jsonl.gz",
+          "rows": 2,
+          "sha256": "47353ee286dcf4623dda9cc82a8db56839e81967b2dbb726c5946f0373c0a38f"
+        }
+      ],
+      "rows": 2
+    },
+    "environments.metadata": {
+      "chunks": [
+        {
+          "bytes": 791,
+          "decoded_bytes": 1449,
+          "decoded_sha256": "1ff7043445e1f0c233717ef217112cf20f1e67db52661a0bcec4357a8250440e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.metadata.0000.jsonl.gz",
+          "rows": 1,
+          "sha256": "1efa932cfccb9384de5bdbe1301cf3fbbb8fc584ffafdb0bc20d1a0c9b993fff"
+        }
+      ],
+      "rows": 1
+    },
+    "environments.unresolved": {
+      "chunks": [
+        {
+          "bytes": 80797,
+          "decoded_bytes": 1357004,
+          "decoded_sha256": "5e6971a00491235be8e5a19fa5c69cbcb945137cd51ebccb82746a029d4c2720",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.unresolved.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "58987862be918fffd88e6f74d14d116c6cae7155a4587df12ebadf13364bdd70"
+        },
+        {
+          "bytes": 69857,
+          "decoded_bytes": 1293784,
+          "decoded_sha256": "26e1d4882121d7066ec7f035cde1121ca91dbb78f1b139afeb662910aab91547",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.unresolved.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "06a61efb8e8a7a9805faf8ad220e9d173680130570410aaf659bebfaf8f81981"
+        },
+        {
+          "bytes": 69921,
+          "decoded_bytes": 1293594,
+          "decoded_sha256": "f5015b2c47c85eacfcf710b79d26fcb2561f40f4546421da622c76b3f1c3aa2e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.unresolved.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "65a723c4d3f5268ba76e4cce35f7cc467ab5fcaf6cd224acd97f9cffda159365"
+        },
+        {
+          "bytes": 69890,
+          "decoded_bytes": 1293594,
+          "decoded_sha256": "826d0ad35711e4ab57b31afb7fa4c39a99b012490bca978751eea2808f2ce407",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.unresolved.0003.jsonl.gz",
+          "rows": 1000,
+          "sha256": "3cf95322c85e121390815e86586a8f88b2d8a0805314d0c082b2d5cef8544c86"
+        },
+        {
+          "bytes": 69959,
+          "decoded_bytes": 1293784,
+          "decoded_sha256": "2a1e0ccc470db964b4ebac49867e887e6a8eb59d5522d6bf758fb3b5a4307716",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.unresolved.0004.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2385268e91b5d96262c1024642265f02f522fafc2f27c7bb237bc00710f48478"
+        },
+        {
+          "bytes": 72032,
+          "decoded_bytes": 1304135,
+          "decoded_sha256": "d1e967cd2029fd8c28833fdb25c8a6f916a29c06317e2d9d05c101b848f277fb",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.unresolved.0005.jsonl.gz",
+          "rows": 1000,
+          "sha256": "4763b12122ad3639dfff555ef76f3010a47651f2d92c90efd6043c65e024e43d"
+        },
+        {
+          "bytes": 83320,
+          "decoded_bytes": 1364258,
+          "decoded_sha256": "ebb5310ff3b3978fd5f8da42e0666ff744540a237bf8b64a59fdfb09dbb54d15",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.unresolved.0006.jsonl.gz",
+          "rows": 1000,
+          "sha256": "11de16c47ad3671e37d2de0e42a42153d2fc4dadb4a7dbb152ee90881fa2799f"
+        },
+        {
+          "bytes": 81933,
+          "decoded_bytes": 1355316,
+          "decoded_sha256": "6aacc22d1f8302f20b846bf283628eb6f1d5d2d2d66525fb24806d753948ec5c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.unresolved.0007.jsonl.gz",
+          "rows": 1000,
+          "sha256": "0ea5f54ddd33adbfaa669629985857958e0486e96ecc25e7a66b529d026ec35f"
+        },
+        {
+          "bytes": 77395,
+          "decoded_bytes": 1317970,
+          "decoded_sha256": "8133e8959bd8ced6eb92c2a86cf37d38da3202d6a3fb33fbce0226cfd02395e1",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/environments.unresolved.0008.jsonl.gz",
+          "rows": 987,
+          "sha256": "b3e46dc1da4bedb79fb03b2eb74c20569bf42f3a4d371abfcd7d0eedce4a49ab"
+        }
+      ],
+      "rows": 8987
+    },
+    "routing.argument_routes": {
+      "chunks": [
+        {
+          "bytes": 4782,
+          "decoded_bytes": 86618,
+          "decoded_sha256": "8d3a24c722db8d09e1dd7b45d251fee2ef0f6e2c3b729338edc80e9bb234f41c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.argument_routes.0000.jsonl.gz",
+          "rows": 27,
+          "sha256": "944d9c208090f6935639325d347f5dfddc392f66aa2974e7a6afd972ae8fcd0a"
+        }
+      ],
+      "rows": 27
+    },
+    "routing.completion_routes": {
+      "chunks": [
+        {
+          "bytes": 4623,
+          "decoded_bytes": 74869,
+          "decoded_sha256": "74a28b56c52359e0dcfe2f17632a86c235c1cf124823b471dd2de90627042b63",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.completion_routes.0000.jsonl.gz",
+          "rows": 27,
+          "sha256": "d6c939ca073e3f25f226bc89af91020f32791766f20de070cea97ee1fdcbd31b"
+        }
+      ],
+      "rows": 27
+    },
+    "routing.issues": {
+      "chunks": [
+        {
+          "bytes": 50305,
+          "decoded_bytes": 446228,
+          "decoded_sha256": "5b221c917bd618123059b79d752ff4d7cade637ffeec89ff4b33a305469f34dc",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "512fbf2d27baa92e877b87d342e4bde117990cc01be5d82da2dcdb0782b6b946"
+        },
+        {
+          "bytes": 48754,
+          "decoded_bytes": 445048,
+          "decoded_sha256": "c2ad959ef631b2d83cd9bca474989db03e1850a129b4422953477ad8bc1009c5",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "677deda357d15e6215d51c7ab3d21ed62002b647846ffec0bd8b036bf6672498"
+        },
+        {
+          "bytes": 48609,
+          "decoded_bytes": 445000,
+          "decoded_sha256": "5db5b3ea52d074fcf0503eababbd062177564547ecedba4536360bca9f4a4162",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "14cb0d43f77813e0ab0af0a172b0085d76e584b8d9746e45fe527c2885b86d6e"
+        },
+        {
+          "bytes": 48838,
+          "decoded_bytes": 446408,
+          "decoded_sha256": "9818328fcf3900ac2070e444aebba27d52d831a321ffcdc124e7d9e035d90183",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0003.jsonl.gz",
+          "rows": 1000,
+          "sha256": "a50c6412f8c707fc37d6fa497909515cb6750001b6c46766a515ddf9603a80fc"
+        },
+        {
+          "bytes": 48917,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "e0fd86873134e518e1fc96d2997db5f2e0dfaee48a03e6493d38a93603e52fc3",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0004.jsonl.gz",
+          "rows": 1000,
+          "sha256": "eac09491ce48e50cdd6dffcb59c0c65c69bf13fe7c2610705ce6a7a3e997e7f4"
+        },
+        {
+          "bytes": 48913,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "e05e5de4efd98390be930c79c5572d4d919ae89c6a504f5a8a5c3f16ee94f00e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0005.jsonl.gz",
+          "rows": 1000,
+          "sha256": "ad6051db658c37301bb89928d8c230713a9100a856770dfb0f347d69603f408e"
+        },
+        {
+          "bytes": 48914,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "6f857ae65b07a7290eb6f96532cd86b92a721621c7535b342f710a28fc67914d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0006.jsonl.gz",
+          "rows": 1000,
+          "sha256": "6ee6b19960ee92493e82f33425fffcbb0596315f56e0cdc053721172325dee99"
+        },
+        {
+          "bytes": 48916,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "f413ac801f1542438f93d8f448cb500142f28ef034a99b16bd5b22a2aea26918",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0007.jsonl.gz",
+          "rows": 1000,
+          "sha256": "01373599d4b572e70379755b663ffeb8daeacf32f6788d7524a49187905d5e8a"
+        },
+        {
+          "bytes": 48907,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "d1664cc6becf10000cba809408eb496025a7837ea97c812efe813268bc3a96f0",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0008.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f549abe7dc9c7e4f682e0efc519c1fa54db83ca098f3eba580c435c234e376f6"
+        },
+        {
+          "bytes": 48954,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "9be5fcc727a5842383268c781bf745e7666d0aef042b9e78650c9aa6100c2b25",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0009.jsonl.gz",
+          "rows": 1000,
+          "sha256": "ee38c5aec4bc18fd6f04a13790f51862e4c2b47b5100bbabfb7b944f7456d0ec"
+        },
+        {
+          "bytes": 48906,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "3c2be0fff828ea7d1b28bd7afb0afd4358af075f731916d6e5cecc395746c168",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0010.jsonl.gz",
+          "rows": 1000,
+          "sha256": "056c2b6c54cc8f3435099faf59ddc03cf33bf759e37d9e21ce8b0d5059548486"
+        },
+        {
+          "bytes": 48969,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "71534b08092545f2abfd06c6cc33432bc00384bab12531dbc71267216dfd67c2",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0011.jsonl.gz",
+          "rows": 1000,
+          "sha256": "81b3228fbe73df59e573b79a7b5a115e2848fc941b37e58aca22c2cc7ccf8577"
+        },
+        {
+          "bytes": 48905,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "89e380492137c084f709e1c781603d15406eb07d8b90f9f79e835d95c71fa31b",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0012.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2141037137d4d44ab932ceacc8305fcd3f48ca7a2b9065d2321a875b62a99203"
+        },
+        {
+          "bytes": 48927,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "e2bee8a1a197854269888af70ca46b0e2f55be0cc2989bf01f9609cca98afb62",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0013.jsonl.gz",
+          "rows": 1000,
+          "sha256": "dee8819c36232d06af87e2bb7e6303240ff9379126e90f709e760b9487741847"
+        },
+        {
+          "bytes": 48956,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "699e1ddf1583c9689dd9ce85fcd3fb85dbb6f4d3545900f4eb2e1e679de4f490",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0014.jsonl.gz",
+          "rows": 1000,
+          "sha256": "181f13d5eb1f2ccc7d60f0a627d4eb7c7937238bb3bda18ef22ee9f808cee069"
+        },
+        {
+          "bytes": 48930,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "aef4ff0fede2fd68686d96d15efbf0b2e0961022faf99eeafee06e655781a6ad",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0015.jsonl.gz",
+          "rows": 1000,
+          "sha256": "fbfa948be1fc92234e99ef3f7d9ca982458e1a71e6b227b02e1bf9e6a060dc2d"
+        },
+        {
+          "bytes": 48928,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "752b9f19129ae7c895dac37121acea6490e276e2f79f953166f45604df9bdd6c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0016.jsonl.gz",
+          "rows": 1000,
+          "sha256": "fbafd3f492ef28bfa0f881f994a898a7b4c40db73695228f4814ea107406c744"
+        },
+        {
+          "bytes": 48942,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "44dd47cfc97004db9ca49cc4f6d8d9147494f5cf2860aa9c6b6a48faa430b777",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0017.jsonl.gz",
+          "rows": 1000,
+          "sha256": "ed00f1af0f500e2749a26733408f8096cb7d797c1fab4459d16970c672ee0850"
+        },
+        {
+          "bytes": 48932,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "3839693a2afc13d77a8ae25c711beccb09383359f85bd9b561a41fba7335cfe4",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0018.jsonl.gz",
+          "rows": 1000,
+          "sha256": "62a87d951b6006c772edf284aafa167a15c68cc75d07a37e05277ffa29a4c309"
+        },
+        {
+          "bytes": 49429,
+          "decoded_bytes": 447549,
+          "decoded_sha256": "39f9493f7acfc99960dbffbc8273602bd042344e1a8b33d12427761e9b309910",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0019.jsonl.gz",
+          "rows": 1000,
+          "sha256": "390a290a372b319c3d74aac5b60f08940f390078dcb062ffbe69ccdae94575d2"
+        },
+        {
+          "bytes": 49010,
+          "decoded_bytes": 447025,
+          "decoded_sha256": "f13768d624bce507dae12e0aa7de9d36623e260e4093fe5ff23c15d58c85361d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0020.jsonl.gz",
+          "rows": 1000,
+          "sha256": "dbb66173f6a9994b1c4e5c20102a82e9446777d64d06ae3fcdc042a8691ec7af"
+        },
+        {
+          "bytes": 48883,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "ce49f3eab557e0cc14743ab6d03c4f30f8dce811a55383926bc49dd7d0c37343",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0021.jsonl.gz",
+          "rows": 1000,
+          "sha256": "6d8879345ce07a65763897c6bddc3c0caa3badd1e95e549b90e6d44df2557409"
+        },
+        {
+          "bytes": 48975,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "df71db0995a156b1bd03efd1deffcddeb708a352fbf31360fd43a780db37c1ea",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0022.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2c993297a3eb5bf784ee8567937523f31cb67cf38e64afe928cd9541e27abadf"
+        },
+        {
+          "bytes": 48943,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "b0fc155c016c7b862b60d2ab3025971015f0c28d4aa12a0775108b550150d00a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0023.jsonl.gz",
+          "rows": 1000,
+          "sha256": "881d509f7c281b0cff202d0017aa7810aa59660b36e5a02c7d4013cf0e71e943"
+        },
+        {
+          "bytes": 48913,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "e0c661cdcdc5393b5bae26cde13af95e28af44ec1654654aff5e69f06b8ef02c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0024.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b3a63ff2c5bb75f92d6fd46466b8a5702f8ce4a271766e6efa071a731886926d"
+        },
+        {
+          "bytes": 48911,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "a6eabd3d63012e2dc6b93ea565db31c8cad6440d510d0370422ea54b8cf9485a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0025.jsonl.gz",
+          "rows": 1000,
+          "sha256": "61792e709bcad7305c8d8f42398305123e436238192d6cadc14494ef60083695"
+        },
+        {
+          "bytes": 48930,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "88ea17de101e3d953f5c96867d233658161ad12bafe99fb63998d02e9ad289f7",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0026.jsonl.gz",
+          "rows": 1000,
+          "sha256": "3cdd5e5110b7d622858ea3756ea49d8a1bb0e4972338da57bb3c99ba751e043a"
+        },
+        {
+          "bytes": 48912,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "2c762c9eafaa303e80ab440546308d35adb645940f8058fe88124057880548cf",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0027.jsonl.gz",
+          "rows": 1000,
+          "sha256": "6a300d89684a119a14dfa7efa6b278920caf971ac7c6fb9135b9491039864cee"
+        },
+        {
+          "bytes": 48922,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "d496aab3221d9f5476ea29ba3f9ae968ac9e645ce00f5d4aeb1733a81630c36c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0028.jsonl.gz",
+          "rows": 1000,
+          "sha256": "14ded11f816f17231080520acf3f24daf5e4f7dc1749e489ad5a509e221b4ffc"
+        },
+        {
+          "bytes": 48946,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "ad35217eedc4cc259d0b2188bc3282b4a7fc28bec518047a61c1dea7976fbb01",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0029.jsonl.gz",
+          "rows": 1000,
+          "sha256": "999884fde766ae178f2057d0d57cd4a1654c37e39064f500b241a528eeed7140"
+        },
+        {
+          "bytes": 48895,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "67218a4424a31983b63a37939fbeba6024fe34b4ae047ca85275dfbee9ae26b5",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0030.jsonl.gz",
+          "rows": 1000,
+          "sha256": "1c09d1cf9be17c53e8680bcd80ca2ec32da6d497f64bb4dd169465145e22e820"
+        },
+        {
+          "bytes": 48912,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "896d8a2db2a053d90527fe5aa7e022a1ab18941903aad19f1084d10ef4b46392",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0031.jsonl.gz",
+          "rows": 1000,
+          "sha256": "251ea932f53d4700318030678d0702088ee32e30678aa1718438afea523e8db1"
+        },
+        {
+          "bytes": 48899,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "811c15ba9f1d9fa34670feb6224461fec826a613ff9340bf8ef814f3600854f0",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0032.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b1a8a1b9588dcb654491077f10ab7d0c2990d0eaad6ebc7242e73cb97b70bfb7"
+        },
+        {
+          "bytes": 48898,
+          "decoded_bytes": 448418,
+          "decoded_sha256": "08cf0f675e1f70ef0b8f4d36484815304b49b21a4cc461062d6df7f32a620657",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0033.jsonl.gz",
+          "rows": 1000,
+          "sha256": "47afa53fb05f318b788b43ad9f86a08f7a965ef0923bb72c6c130aaf74afc351"
+        },
+        {
+          "bytes": 48957,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "c703b89f09afa50d0d5d377a9b499cc3a16ffca05619b0b082f0f599f7121bf8",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0034.jsonl.gz",
+          "rows": 1000,
+          "sha256": "8a1b92c6e2a12419d386a9665c3946bb8744b18c477653a3f3032918db086718"
+        },
+        {
+          "bytes": 48960,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "2e4c6f0a5fd991a4077bd7db214390987002ff3ea16f0698f664ed984eff4ae8",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0035.jsonl.gz",
+          "rows": 1000,
+          "sha256": "70511fb1b174270230da523645bfaa727ed75cfef7ad0e5ed4df6e0155367c1a"
+        },
+        {
+          "bytes": 48923,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "cb8d4ec59bde9320526ef300ebb223a57f1abc96472b2823c687171f74cf57f1",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0036.jsonl.gz",
+          "rows": 1000,
+          "sha256": "44953b6dbf4ce923a3d6fed4523f56038ef8d6275957fc2370d3df05fb9d6be6"
+        },
+        {
+          "bytes": 48913,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "93138cfdc42dae6d503fc958c5eade10d482168fe889ec668c971d671d837836",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0037.jsonl.gz",
+          "rows": 1000,
+          "sha256": "1d469e3ca432015c24f56c53f84e07911d7cf7947a1a5b92b3e46cbce174b6c9"
+        },
+        {
+          "bytes": 48906,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "270a241aa1ac38dade22e2eedf7c90533e032c98ee21e6502be0627906a5fe2e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0038.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d5c658643ffc8893412a44f70712bcc9a6962893843dc3d9bdb174c262bbf04f"
+        },
+        {
+          "bytes": 48964,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "2f8b38e716a7145ceb43b3d5ab9a6424c77c540aa49e55761f01bf79df987498",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0039.jsonl.gz",
+          "rows": 1000,
+          "sha256": "23147eeee9a6ba3e8dd4c9717e7e6a8b2cacf7cd35aa2c27a3c0959d1a8608c9"
+        },
+        {
+          "bytes": 48936,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "53904ba6a2e08b65c4b2af49a1548bc94dc7149855cc7e838635444fe95e412b",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0040.jsonl.gz",
+          "rows": 1000,
+          "sha256": "780e263d1ce1c0ed73951c933d598f0d99288f7677f4fd6e35947200f153d2cc"
+        },
+        {
+          "bytes": 48971,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "229c9c88608058c0258877d0a4f8f23223d5e7ab7ac691a45b2a7e61f2edf184",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0041.jsonl.gz",
+          "rows": 1000,
+          "sha256": "764200c73506258c479a5ca639dd8fe48ec33cb67d14a0306e5242bc77788a03"
+        },
+        {
+          "bytes": 48939,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "835c902730be677d704bb98c55dd88ef4e7eaadd70c042460f00efbb4a5a17fc",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0042.jsonl.gz",
+          "rows": 1000,
+          "sha256": "abbba3b5788f49f94f2eb78813f32b5b647dc2e96ea49ca9dac9b523df563436"
+        },
+        {
+          "bytes": 48921,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "04dead0e15f49286fb06839fa740695e5f84dd9cd4a76da4c61e040eff2f8808",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0043.jsonl.gz",
+          "rows": 1000,
+          "sha256": "a99bc46e90c35819f9f01b5deb1bf021719842337ef8a3231780b4ed09eb07e9"
+        },
+        {
+          "bytes": 48896,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "28efcc2c1fb749a021b4a97dbc8d894702745c0812dff77e1d938c7a0c543d68",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0044.jsonl.gz",
+          "rows": 1000,
+          "sha256": "030c2eec6cf359cc2cf2990222a7a46377c955e97e5d28950393e87800c700b4"
+        },
+        {
+          "bytes": 48932,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "26392aa31be299ec69d31424f20e4dc9962901ddff79a3c6169d2c1befcab911",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0045.jsonl.gz",
+          "rows": 1000,
+          "sha256": "369710e47cbac8c242012aad23d68d112ef14bbd6e1d0176c393fb4609b55ec5"
+        },
+        {
+          "bytes": 48915,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "ed8a56ea41588f6aef9d30119c1f4720145bdea684374c53b1b6dfec9bedc8ef",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0046.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f897657ea7c13a619aea2295fe12b4e97be20e81fb7bef10e53c41e42c921d3b"
+        },
+        {
+          "bytes": 48900,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "a04253d059d957d6ece464df4efbe384b5507f38012684627f3fdbcc97304518",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0047.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2b479f6a103fb0b56a899dba36705141ae52df686d20c8aad509b71be1da5e1b"
+        },
+        {
+          "bytes": 48928,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "b4e04e8409871e9dc9836d3560c92da38ae8d7740f6772f96ddbb8fbaadbe0fc",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0048.jsonl.gz",
+          "rows": 1000,
+          "sha256": "c7a78ad977365d65fa784d5d8373f80dae2597a7703b1f5a16011d897680698d"
+        },
+        {
+          "bytes": 48936,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "f77c215887cd20eace050e3ddf1b61a808b3bd873449fa1993fec8df0bdb5375",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0049.jsonl.gz",
+          "rows": 1000,
+          "sha256": "a21b3a3e889864e5e3131c8cd1d1def8d574138926f0ab46198cde534c96e37a"
+        },
+        {
+          "bytes": 48921,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "d31700daf99da3e813e080c5ee85a353771ffbb947e7af8662f0e7f452692d2c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0050.jsonl.gz",
+          "rows": 1000,
+          "sha256": "26f6fa5958c380b49d9221d6b54325f18a300e0f585f61ef8df063b365c8adb3"
+        },
+        {
+          "bytes": 48968,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "53fc3a8623b26a2e344cd709e83cd7bcfa261dfc84572f2778543f920a7c5f5b",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0051.jsonl.gz",
+          "rows": 1000,
+          "sha256": "195bbf4c5c637d5cd4b784468ac5c30a997dc3489a79287cbe01265139aad45c"
+        },
+        {
+          "bytes": 48971,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "9c2830ab3720f3010dc8a2ded57015c9e998d8446e042cda51e08f5763659680",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0052.jsonl.gz",
+          "rows": 1000,
+          "sha256": "a35f9a47eba8cda65b62f3dbcc105d0c83d7f1454e75605715364870ee7c8536"
+        },
+        {
+          "bytes": 48950,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "4becadd11b46e8f963c5eb6805c6a9d5e7a5e5623db955901e98107fffc3ef74",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0053.jsonl.gz",
+          "rows": 1000,
+          "sha256": "556af89aa246d83518a5a3cefd0d9c1d8e3c3bf3f0673d481710c4212d3bfb6d"
+        },
+        {
+          "bytes": 48948,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "0ee367cca1507fb12b9c3412a5c88514de39c06d18c7a01c848024a0bc4afee5",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0054.jsonl.gz",
+          "rows": 1000,
+          "sha256": "ede7fb931cd95708f43cdd5c8361690e97537a935a4bfd10d9c445cde38c7083"
+        },
+        {
+          "bytes": 48893,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "52833362331cad60ef11389a94e883ef4e6b96bf80d36013d03d565ccefed3d2",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0055.jsonl.gz",
+          "rows": 1000,
+          "sha256": "90c2628045b8097a4d73ba896ad6921854f81eba58dfa2c6300cc596a2e97420"
+        },
+        {
+          "bytes": 48918,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "283293f9a11beecffd137611ef83d82f1da351c58ad88219f3bbcdd1d6b6e170",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0056.jsonl.gz",
+          "rows": 1000,
+          "sha256": "dd490d8f0c0eff27f4e683ddfbf18dd8b83df6d1973dc3abef314001ea05c6ae"
+        },
+        {
+          "bytes": 50635,
+          "decoded_bytes": 454204,
+          "decoded_sha256": "04cd5916d6da358b813d40fe54e1a761ed7b851e808e2f49a6dc1267db14a761",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0057.jsonl.gz",
+          "rows": 1000,
+          "sha256": "5c842947134d9928caff8953ef02d7e2708c0f2819fbc0dea28cb0eb25ea2f83"
+        },
+        {
+          "bytes": 50467,
+          "decoded_bytes": 453331,
+          "decoded_sha256": "958029efdbf32b410cc7dec06b427e4637e54b096f7351a41bf63d477211dd4d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0058.jsonl.gz",
+          "rows": 1000,
+          "sha256": "8993ab0dc57eaa419ffc8422da64412a12f8188c5620c02c6b0ab8704fc3b83d"
+        },
+        {
+          "bytes": 50029,
+          "decoded_bytes": 451348,
+          "decoded_sha256": "3311d5b2f8eda75c528db03929906cec3ef475399738b927a4ff97ca8066a3b1",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0059.jsonl.gz",
+          "rows": 1000,
+          "sha256": "9e51a2eebee95862a53813c550cf00b57fa4b89612eb995cc566dc8cda62c614"
+        },
+        {
+          "bytes": 50345,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "d372a32dc0acdc1102a9c40b6a68903181a4ce475d8db7e1cd897b9f2e4a2aeb",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0060.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2ad4e52cab2630a20e67b12b5d25fce45058064fb4f289aacb3de00f6ddd2800"
+        },
+        {
+          "bytes": 50300,
+          "decoded_bytes": 452225,
+          "decoded_sha256": "5f8522e7d7278539ab34cd732ad4d48a637a564b9e169acec539fc0a3df94e63",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0061.jsonl.gz",
+          "rows": 1000,
+          "sha256": "7bbcc19e73394986a06fbc91a16290f6ddda3dc0a1729a40756e804e5378d489"
+        },
+        {
+          "bytes": 50297,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "00c5d402c85d2c49c9c9b5682f29846a854119d53721263135c762ae6618a0d9",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0062.jsonl.gz",
+          "rows": 1000,
+          "sha256": "92e3f379c1092319f0bc303de6b7286d253888e2e1dc0daf2e4f731d01788adc"
+        },
+        {
+          "bytes": 50384,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "3022c0269b7f080c8a452086dadbafca49a1255db79f654246d16cf5ae42e3b9",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0063.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b1a3f4210fb2cb891e8cc817be4410bd85115ec2c3e4c2f0e92b222c44a4af41"
+        },
+        {
+          "bytes": 50354,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "0ba9d26de73113c83473ae4382647f9c824d9f18732316622b4cde9edb0e3b97",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0064.jsonl.gz",
+          "rows": 1000,
+          "sha256": "4ae70738b340f484a3b669b9dc999a8ff7b06d205354cba3fa3f7248789d70bd"
+        },
+        {
+          "bytes": 50334,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "bfccf25b8d6fcd84b97a9d3036f1f95180eeb6aac00d4b5de3910b253568e6b4",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0065.jsonl.gz",
+          "rows": 1000,
+          "sha256": "a1c5384ce38085cb3b7b88a4826188a13c3cb760767adac1dfd17aa6310fb6c3"
+        },
+        {
+          "bytes": 50337,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "3e860cf7a85b9c171eed75c9b0398d1637f4fddc7637ea3e06676f927a9ca4d7",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0066.jsonl.gz",
+          "rows": 1000,
+          "sha256": "81734493ffe9399ea6879b25bf9d311f13669738d3e183b3825608ad13c3884b"
+        },
+        {
+          "bytes": 50331,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "1ac43577582daf1aa7603f523b1998501989bdc7adaf45a2ee0c9c55e575d9d0",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0067.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d2dffb696efd671265d5dd5a24837627290780ecfbaf2c4d3ce144f5726fbda5"
+        },
+        {
+          "bytes": 50374,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "16798fb34ee7fbd24db63f9c53b5019ddf188536eac51e9b76a163ab2da43d34",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0068.jsonl.gz",
+          "rows": 1000,
+          "sha256": "233661e8ae191cd2c2a50096701d0e9176b7b7113e79d36182b65142023b32a7"
+        },
+        {
+          "bytes": 50352,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "7a3cbc5431ac1c9af284b2931e29a0d8603985907bce1fbb77e0b05fea8e1d5a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0069.jsonl.gz",
+          "rows": 1000,
+          "sha256": "16dc414d6e046dd988849792514a8c053d7cf182b9bee355ef8fb188a0ef43a3"
+        },
+        {
+          "bytes": 50310,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "bd7a14619ed3a2b108a6743420049a3c90eb61c242f15a1658b913206c375075",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0070.jsonl.gz",
+          "rows": 1000,
+          "sha256": "99c5361f27ac81f3a8adc091bcdbb43d596da507d462eed59c1993bfffebf4b9"
+        },
+        {
+          "bytes": 50327,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "030973df61d2011182d36a44ce4e2d0fb742f22a79c6cf65585570b378f28dcd",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0071.jsonl.gz",
+          "rows": 1000,
+          "sha256": "9e3124833b17dff3dfdd580ba97e475d8bc61dfe42fbb12788ab2e67f4eead1f"
+        },
+        {
+          "bytes": 50354,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "136de65d67e087278ed2ee091b91a5df805501481466464c19a31d64fc4bf4df",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0072.jsonl.gz",
+          "rows": 1000,
+          "sha256": "5c6439bd1fde4a279d4532043e2bd84af6cb4adb60ba8be8a5d98abbd2bcdcab"
+        },
+        {
+          "bytes": 50335,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "4c2498275032d1f9a0145ba5baa4609b6e31954f58fa82d3ca8719695d73baae",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0073.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d17151a64029ed554edded861019ec91d005a9470ca40f02389b5f20ca30fd86"
+        },
+        {
+          "bytes": 50356,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "88b347565f4b6b5fb096dfb124c8dbeb8d0160d1659ca390719ff2ee8e9b6602",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0074.jsonl.gz",
+          "rows": 1000,
+          "sha256": "ef20c7cf8313ea27f37be72e1c01ecc352d3e5e748ad78ff31b462ebc625f390"
+        },
+        {
+          "bytes": 50336,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "c38bf4feac18562ea4a4edc14d9ad7e4250007119d32d7a4d7ae3d01dbce5392",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0075.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b0a1659d6a8e7f05b1444272887c2ca30b2949a85a14f9c72734e545e0dbda67"
+        },
+        {
+          "bytes": 50294,
+          "decoded_bytes": 452225,
+          "decoded_sha256": "07cc5a2744c866a66ada5049529edb4a171a20035bb3db4245184054c4b60057",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0076.jsonl.gz",
+          "rows": 1000,
+          "sha256": "7ae1d9cb20878e9ae1f35dad58f8796298c04c0b7e7125e13027df0b3119e832"
+        },
+        {
+          "bytes": 50332,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "bcb0e2f08579062a3929311aa8242bc067b985b0f59f2d65f2f0caf2a79cb096",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0077.jsonl.gz",
+          "rows": 1000,
+          "sha256": "e75914463fba1f195c9ebd5726b0042e1231148c00c6e17e29a936ea3ba87eaa"
+        },
+        {
+          "bytes": 50327,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "ac3b5d16339025b9408ba2b5facc1144a69b3ae16fd2e0cbc57a0441a19e2cd8",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0078.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f8e598b4474eed489a8c99012278cbe711fe788b364ab3535c57b91cbd31267d"
+        },
+        {
+          "bytes": 50351,
+          "decoded_bytes": 452225,
+          "decoded_sha256": "965c5c9e8a770350ce6f4f744e70a52a2145509bf3e3ed967717eb8057c8ca91",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0079.jsonl.gz",
+          "rows": 1000,
+          "sha256": "3525acc87da2e8f0f8eac75163dce33ed8e6e164f9a8ea75721d2a99b980d517"
+        },
+        {
+          "bytes": 50368,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "b453ec54d29b6fbe5dd901360c91e088ab77f58db9ebdf13b07e47f52d0979e0",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0080.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b04ffe0175baef10209a675694a729e4a27d8cdfa8c1dbaee053b37b3f4806fa"
+        },
+        {
+          "bytes": 50248,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "4734a1cf0165f5dfb92ca24a0953431fbe964be689d3508ea04cee08a8a28609",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0081.jsonl.gz",
+          "rows": 1000,
+          "sha256": "fffc64abafd6bebd514583f732c6d8ebd31bc73262b4be85aa4c20d0d13f59b1"
+        },
+        {
+          "bytes": 50302,
+          "decoded_bytes": 452202,
+          "decoded_sha256": "61432b51faee901003b538dd6d7711195d17066269e89902f714008048ee7af9",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0082.jsonl.gz",
+          "rows": 1000,
+          "sha256": "47eef56158ae4e9b8e38b7b650798d17be6dee23c1c67b785a706b1dc92f0e7a"
+        },
+        {
+          "bytes": 50227,
+          "decoded_bytes": 452564,
+          "decoded_sha256": "339fd76bbcd959a432309c8ad003634884018ed8d6aaef7d14779ae1c528e13a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0083.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2c047b2dfba362e31d88384acc3f14999da9d39a9cc354fa738cf2d21873db22"
+        },
+        {
+          "bytes": 50303,
+          "decoded_bytes": 452240,
+          "decoded_sha256": "c14a709a4b3f93f0bcd79d4f363dde192851489f8855e6bfab037478fe37d151",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0084.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2e445c620eadbfdf0ec468e80091b25f64a7e5ab6f0ec3f5e4c0cc539f1bf6fd"
+        },
+        {
+          "bytes": 50145,
+          "decoded_bytes": 452153,
+          "decoded_sha256": "6f6e2a09c35cb73e09e1cecbab7f548af2a8e300922d7e2583f593765f7ce09e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0085.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f1b46876f0b8487cfd56681a5dad4e1337c2e557d376b6ed6c3ee09106a9cb75"
+        },
+        {
+          "bytes": 50250,
+          "decoded_bytes": 452395,
+          "decoded_sha256": "88babef665ca054af229725c4f8e0d80e54a63a9b92a45f3aa319c2e01f9fb17",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0086.jsonl.gz",
+          "rows": 1000,
+          "sha256": "069ce7dd997feb4fe4d5ddeb849649dc64acbdd2780d6ee81dc4495c08a64447"
+        },
+        {
+          "bytes": 50214,
+          "decoded_bytes": 451952,
+          "decoded_sha256": "1dba1b4b0298e8722a537306389fea9f602fc1bb234db6cf1118160b9166d139",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0087.jsonl.gz",
+          "rows": 1000,
+          "sha256": "4ada5b279a03d2816445eddeba4b8023f96afd2e3d5bebd6c6f1a3587ba9ef85"
+        },
+        {
+          "bytes": 50198,
+          "decoded_bytes": 452512,
+          "decoded_sha256": "c80cced84b7d3973f4ab8a8940ac0cf352343e4f86681ea7fa1a8ef5547cc83a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0088.jsonl.gz",
+          "rows": 1000,
+          "sha256": "c7b094b9aad40b517aa9ec26ac1468bd113cb17df4ff91ac25335871a8d2f726"
+        },
+        {
+          "bytes": 50245,
+          "decoded_bytes": 452188,
+          "decoded_sha256": "381aaa51aa043289cac9c25b55c147453a54ae75ef1172897f39ddf441db48a9",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0089.jsonl.gz",
+          "rows": 1000,
+          "sha256": "20edfd08737dd28024ec3cc8aeefe151bd6a5612f1779ec0c2a5925b82301f49"
+        },
+        {
+          "bytes": 50140,
+          "decoded_bytes": 452179,
+          "decoded_sha256": "1c215e3ced6b85b46d170319afca4f2f51398c1f50589653f5dbab654253de4f",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0090.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b3070077c990c70705e69f9b75e72c9485b04b02c7f66744bd1d9ddd3ef52117"
+        },
+        {
+          "bytes": 50160,
+          "decoded_bytes": 452369,
+          "decoded_sha256": "4cbf7b255da2563ce12a279fca14291307b3acceffe3d33dbbfc2588dc5ca437",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0091.jsonl.gz",
+          "rows": 1000,
+          "sha256": "df03e7ae8e604a81affeba4fa5309b50d17c5d56c9fb7d3946aa9453b07d4a02"
+        },
+        {
+          "bytes": 50161,
+          "decoded_bytes": 451952,
+          "decoded_sha256": "525a8314247467361b84768991047cee24d9bea1d1880d6b8d36c5c640084455",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0092.jsonl.gz",
+          "rows": 1000,
+          "sha256": "77e7bd9630ee4fe328565633871bd3f81eda1fbf7d20ae2e0540580efa11dc46"
+        },
+        {
+          "bytes": 50179,
+          "decoded_bytes": 452589,
+          "decoded_sha256": "c016ae4459c3cde2a7459c60269c6fd3be69ba68c8af9f50ce38f93c4b28088c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0093.jsonl.gz",
+          "rows": 1000,
+          "sha256": "38f8e7b3c448e571db8dae1b2e30f2559e480b0a50b944cafd110de6b9e93a99"
+        },
+        {
+          "bytes": 50252,
+          "decoded_bytes": 452111,
+          "decoded_sha256": "5e9a33c44a4514eb46346ac992946a586b2a046adb057767d62a57911edf07ef",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0094.jsonl.gz",
+          "rows": 1000,
+          "sha256": "24aac90d2d9e7372b93f87907084bdef5d316798942bc1116bdd2fb6c0d71ffb"
+        },
+        {
+          "bytes": 50170,
+          "decoded_bytes": 452256,
+          "decoded_sha256": "6b4a57e5e7e2087ac5a0c230d4dfe1a53a089ab2ea57026ac86c82ccc1acef55",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0095.jsonl.gz",
+          "rows": 1000,
+          "sha256": "5af735bd0da429829893858a4b19660c188b4a0f7fd3a4777dc53da957d6a4bf"
+        },
+        {
+          "bytes": 50175,
+          "decoded_bytes": 452344,
+          "decoded_sha256": "eb57fb4ed56be1669feb4421920c0380898afeb72b3f456b5def44e8bba48f98",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0096.jsonl.gz",
+          "rows": 1000,
+          "sha256": "9e85373e68e3b400dce454c581fc1a63534bf0021a1f3c258be57d4c35ddf54a"
+        },
+        {
+          "bytes": 50250,
+          "decoded_bytes": 452004,
+          "decoded_sha256": "3dc94689c064fed41aada7471195e63c53064ad504df035c4b5dc9ae6647721f",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0097.jsonl.gz",
+          "rows": 1000,
+          "sha256": "aa562bfdab457d326703ff976740c9144ed9afa4e47fcb59cc460ae1e71c40d3"
+        },
+        {
+          "bytes": 50307,
+          "decoded_bytes": 452487,
+          "decoded_sha256": "2e822824da56b97b341ba6bc2a56f058aa1b424ddba77ee1d56d194f58ca91af",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0098.jsonl.gz",
+          "rows": 1000,
+          "sha256": "4dfd8515273c00570e2ca54219b3b1ca540c86573c9f271d17277889e917a391"
+        },
+        {
+          "bytes": 50291,
+          "decoded_bytes": 452580,
+          "decoded_sha256": "7d029f396b386cce61a8cfba10912ae606dd67f51f30508d6cd45f2bd6eb41b3",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0099.jsonl.gz",
+          "rows": 1000,
+          "sha256": "14b170d003459b1c33c39aec722e262049cb053c0d296bd8f6294255d9f2de9f"
+        },
+        {
+          "bytes": 26031,
+          "decoded_bytes": 235920,
+          "decoded_sha256": "bfe6889bb2cfb4e93a47306a2e44b3746f7748b885158dba3fc172bcd9c24e43",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.issues.0100.jsonl.gz",
+          "rows": 523,
+          "sha256": "907f9e10910e07c07cfa543bb5a4c22c954bfda0676bdf2529adfe710ffeaa9e"
+        }
+      ],
+      "rows": 100523
+    },
+    "routing.obligations": {
+      "chunks": [
+        {
+          "bytes": 122713,
+          "decoded_bytes": 661080,
+          "decoded_sha256": "5277cf9271c7719389d0bf0604bb276ee7d9ab422289f2585dac8b8b754a3bcb",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.obligations.0000.jsonl.gz",
+          "rows": 74,
+          "sha256": "356d97ce88a7ab5a86865575c85065e187d9bec63d38fcf410291cfb8c40a03d"
+        }
+      ],
+      "rows": 74
+    },
+    "routing.returns": {
+      "chunks": [
+        {
+          "bytes": 80128,
+          "decoded_bytes": 1526065,
+          "decoded_sha256": "d4256b548e399aa43505f49268b64e1f8f6e85b4f00c102506187850f963b161",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.returns.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f7285f391cb444da4d66ceb41b0685860fc4bbc63409d8e7111f8188cb2d19d7"
+        },
+        {
+          "bytes": 78252,
+          "decoded_bytes": 1531672,
+          "decoded_sha256": "6889f8e5bbafbb8a5a192f723144aba73866984f1e246a168ddf0574cd21e7ff",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.returns.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "91255194c6c1b733e21d3166c48159e4fd0bc440dcdd6add4ed11f045f50e0e8"
+        },
+        {
+          "bytes": 77518,
+          "decoded_bytes": 1532002,
+          "decoded_sha256": "fdda51c49ba4248b3b3c6fd7a44a9b90a1d05c4a972bb00a287d202119b0c8c9",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.returns.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "3e104f85c45b4ab0943f6126630ba943319fa5bfeeca6ca4c74c38e941bc4be2"
+        },
+        {
+          "bytes": 81161,
+          "decoded_bytes": 1531666,
+          "decoded_sha256": "f2ccf570e36810722ccb69801e37ed60a67b214c8d6d795b59b3db9b1ea67d6c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.returns.0003.jsonl.gz",
+          "rows": 1000,
+          "sha256": "71e10121c1483df14c16561ece0b8d117fb6d18b7c6d9b128f05bd76bdcf8fcb"
+        },
+        {
+          "bytes": 100069,
+          "decoded_bytes": 1529958,
+          "decoded_sha256": "d5e4e81cad3a14f3f31be0239fca122cae617423fc553013271f56c66db2efef",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.returns.0004.jsonl.gz",
+          "rows": 1000,
+          "sha256": "29be09eb18753d44729469121e937f0e8449eb5a3797eff4b94bb798dcf97668"
+        },
+        {
+          "bytes": 17891,
+          "decoded_bytes": 264715,
+          "decoded_sha256": "48ac8a040ba924597a95e4a585d0eff47d286d505afd2e0f069861acd49b68ae",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.returns.0005.jsonl.gz",
+          "rows": 173,
+          "sha256": "d2c7387709997719c1ead873158ded1e1d09bc2459fd9246dddd7fe1516d87b0"
+        }
+      ],
+      "rows": 5173
+    },
+    "routing.templates": {
+      "chunks": [
+        {
+          "bytes": 187363,
+          "decoded_bytes": 2164177,
+          "decoded_sha256": "096d3aeab3f62d4e60faf34874deaab8de428ebad3cffe63a863188e0b0df2cd",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/analysis/routing.templates.0000.jsonl.gz",
+          "rows": 74,
+          "sha256": "cc6c0b5547a2e6b7b65c335b42e7abf13e024e843d09d470ef62539979c7ca9e"
+        }
+      ],
+      "rows": 74
+    }
+  },
+  "transformation_authorized": false,
+  "whole_program_established": false
+}

@@ -120,6 +120,10 @@ def _inputs(source_directory, bridge_path, coordinates, max_bytes):
               and bindings.get("source_definition_reference_format") == report["source_definition_reference_format"]
               and bindings.get("source_inputs") == report.get("source_inputs"),
               "formal source definition format/input receipts differ")
+        if report["witness_mode"] == "reused_code":
+            _need(report.get("attachment_source_match_rule") == "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
+                  and bindings.get("attachment_source_match_rule") == report["attachment_source_match_rule"],
+                  "unsupported or inconsistent static code/source reuse rule")
     bridge, bridge_artifact = _read_document(bridge_path, "scar.dispatch-observation-import", max_bytes)
     _need(bridge.get("profile") == PRODUCTION_PROFILE and bridge.get("production_collector") is True
           and bridge.get("capture_membership_verified") is True
@@ -342,16 +346,25 @@ class _FormalSourceScope:
     def __init__(self, composition, report):
         self.project = _PartitionedSourceScope(composition, report)
         self.composition, self.counts = composition, Counter()
+        self.report = report
+        self.reused = report["witness_mode"] == "reused_code"
+        self.builds = {meta["process_id"]: meta["python"] for meta in report["collection_metadata"]}
         _need(composition.has_source_attachments
               and report["source_inputs"] == composition.source_inputs(),
               "formal source inputs differ from the explicitly bound attachments")
-        _need(report["witness_mode"] == "same_capture"
-              and report.get("attachment_capture_checks"),
-              "formal attachments have no declared complete same-capture check")
+        _need(report["witness_mode"] in ("same_capture", "reused_code")
+              and report.get("attachment_capture_checks"), "formal attachments have no current capture receipt")
         declaration = {key: report[key] for key in
                        ("trace_files", "collection_metadata", "raw_scan_issues")}
-        _need(all(value == declaration for value in composition.attachment_capture_declarations()),
-              "attachment source witnesses belong to a different raw capture")
+        if self.reused:
+            _need(report.get("attachment_source_match_rule") == "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
+                  and report.get("source_compilation_profile") == "RECORDED_FUTURE_FLAGS_V1"
+                  and all(receipt.get("scope") == "CURRENT_INDEPENDENT_SCAN_FOR_STATIC_REUSE"
+                          for receipt in report["attachment_capture_checks"]),
+                  "static witness reuse has no explicit independent-current-scan rule")
+        else:
+            _need(all(value == declaration for value in composition.attachment_capture_declarations()),
+                  "attachment source witnesses belong to a different raw capture")
         expected_scan = {"trace_files_sha256": hashlib.sha256(_canonical(report["trace_files"])).hexdigest(),
                          "captured_codes": report["summary"]["code_captures"],
                          "entered_code_groups": report["summary"]["entered_code_groups"],
@@ -382,6 +395,38 @@ class _FormalSourceScope:
                 _need(reference == expected, "project formal definition differs from its original graph")
                 self.composition.resolve_definition(reference)
                 self.counts["project_formal_definitions_verified"] += 1
+            if self.reused:
+                from scar.ir.program.call_edges import CodeCapture
+                capture = decode(CodeCapture, binding["code_capture"])
+                witness = self.composition.static_code_witness(capture.code,
+                    compilation_profile=self.report["source_compilation_profile"],
+                    captured_python_build=self.builds[binding["process_id"]])
+                _need(reference is None or witness is not None,
+                      "project current definition has no historical compiler/build context witness")
+                if witness is not None:
+                    _need(binding.get("source_context_guard") == witness["context_guard"],
+                          "project static compiler/build guard differs from original evidence")
+                    if reference is not None:
+                        check = self.composition.current_source_guard(reference.snapshot,
+                            binding["current_source_check"], self.report["current_source_checks"])
+                        _need(witness["context_guard"]["status"] == "MATCH"
+                              and check["status"] == "FINGERPRINT_MATCH",
+                              "project current definition passed a failed build/source guard")
+            return
+
+        if self.reused:
+            outcome = self.composition.validate_static_source_binding(binding,
+                compilation_profile=self.report["source_compilation_profile"],
+                captured_python_build=self.builds[binding["process_id"]],
+                current_source_checks=self.report["current_source_checks"])
+            self.counts["historical_compiler_witnesses_reused"] += 1
+            if not outcome["source_usable"]:
+                self.counts["external_static_guard_rejected"] += 1
+            elif reference is not None:
+                self.composition.resolve_definition(reference)
+                self.counts["external_source_only_definitions_verified"] += 1
+            else:
+                self.counts["external_verified_codes_without_definition"] += 1
             return
 
         from scar.ir.program.call_edges import CodeCapture, CodeSourceLink, CallLinkStatus
@@ -702,6 +747,8 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
         if version == 3:
             report["source_definition_reference_format"] = source_report["source_definition_reference_format"]
             report["source_inputs"] = source_report["source_inputs"]
+            if source_report["witness_mode"] == "reused_code":
+                report["attachment_source_match_rule"] = source_report["attachment_source_match_rule"]
         (stage / "report.json").write_bytes(_canonical(report))
         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
         output.mkdir(exist_ok=False)

@@ -1,0 +1,43 @@
+{
+  "budgets": {
+    "decoded_bytes": 12000000,
+    "line_bytes": 16384,
+    "lines": 200000
+  },
+  "files": [
+    {
+      "bytes": 16767,
+      "path": "artifacts/experiments/first_stage_fd_table_projection_20261023/project.py",
+      "sha256": "96b38e540a50fa6ae8ba3a319a0ef6f8e14eaff29dd2bf37b026c0be1a00f44a"
+    },
+    {
+      "bytes": 501,
+      "path": "artifacts/experiments/first_stage_fd_table_projection_20261023/run.sh",
+      "sha256": "41b0f71ebd2430303049d24e0e6fd5d8205efae69eca525cdd0b1f39b5c34e45"
+    },
+    {
+      "bytes": 58928,
+      "path": "scar/trace/os_resources.py",
+      "sha256": "c52f45a62693e3e78875b3a23b7c56e0a4cdb48862436981f8d98941a4900c1b"
+    },
+    {
+      "bytes": 36731,
+      "path": "scar/trace/capture_coordinates.py",
+      "sha256": "5a34c9624ecb0e23a28f0150bfce68eadbce2adf30cbb4ec21f706874943008c"
+    },
+    {
+      "bytes": 27756,
+      "path": "scar/trace/os_resource_refinement.py",
+      "sha256": "8a579625b319ff0fa1e85cec4202837d83964d5786eff3f4ef0f1375f7a6faf0"
+    },
+    {
+      "bytes": 20091,
+      "path": "artifacts/experiments/first_stage_os_interface_work_20261023/audit-attempt03-summary.json",
+      "sha256": "1081479b77742fbbe80fbabadc6f6118085f250728b6342e6492243e9b47d2cf"
+    }
+  ],
+  "revision": "b2c6ed5b167b89afb04e0c7a339174a44cfd9164",
+  "schema": "scar.read-only-projection-producer",
+  "schema_version": 1,
+  "scope": "ONE exact 252 non-main retained OS artifact complement; no producer/IR changes"
+}

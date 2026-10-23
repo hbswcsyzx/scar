@@ -1,0 +1,80 @@
+{
+  "freeze": {
+    "bytes": 2752,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_contexts_20261023/static-freeze.json",
+    "sha256": "2cc48ed097cb77eb6b947f8241b95b420084f2bc1a281634f9383c567c820004"
+  },
+  "frozen_python_modules": [
+    {
+      "ast": "PASS",
+      "bytes": 31957,
+      "path": "scar/trace/os_fd_table_contexts.py",
+      "sha256": "506d626a9db35bdfe0a405e58d3826a9f355f421487e50e002f732d9795e8f84"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 27756,
+      "path": "scar/trace/os_resource_refinement.py",
+      "sha256": "8a579625b319ff0fa1e85cec4202837d83964d5786eff3f4ef0f1375f7a6faf0"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 58928,
+      "path": "scar/trace/os_resources.py",
+      "sha256": "c52f45a62693e3e78875b3a23b7c56e0a4cdb48862436981f8d98941a4900c1b"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 19262,
+      "path": "scar/ir/execution/resources.py",
+      "sha256": "4fc743695164cc6700b00190ea8f6b1398328c2abf41e68a6eb626dddea09139"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 3959,
+      "path": "scar/ir/execution/ids.py",
+      "sha256": "bf88d2d9cb0d82ad38021ff853eea93ddd057890e79b1ffe73026260f9a684ea"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 2313,
+      "path": "scar/ir/execution/common.py",
+      "sha256": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 7545,
+      "path": "scar/ir/program/resources.py",
+      "sha256": "4cfd796ec46731bcdb170da7b8ab2ea3a78d9938fe10ce5bda26663d262deb22"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 12334,
+      "path": "scar/ir/program/providers.py",
+      "sha256": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 7478,
+      "path": "scar/ir/record_codec.py",
+      "sha256": "0954c05e53a6dcb31f449461db71c63fdcdd9f95a9c053424d86bf5217a89ef3"
+    },
+    {
+      "ast": "PASS",
+      "bytes": 24449,
+      "path": "scar/store/bundle_partitions.py",
+      "sha256": "eadc3e7ae116e4e47dad09aa842b5e33be48b39e49426c7e257efa3ad6b817b5"
+    }
+  ],
+  "full_execution_model_semantics": "OPEN",
+  "revision": "b2c6ed5b167b89afb04e0c7a339174a44cfd9164",
+  "schema": "scar.fd-table-context-gate-producer",
+  "schema_version": 1,
+  "scope": "ONE builder/public-reader/35 retained endpoints",
+  "script": {
+    "bytes": 10666,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_contexts_20261023/gate-attempt01/run.py",
+    "sha256": "b5e149419c9fd8e50569393df43cf749d8216143ffdb6678654335cd8dba52c6"
+  },
+  "target_runs": 0
+}

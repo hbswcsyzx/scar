@@ -39,6 +39,7 @@ from scar.ir.program.source import (
     LoweringMetadata, OperationSource, SourceRole,
     UseSource, ValueSource,
 )
+from scar.ir.program.source_language import SourceLanguageOverlay, reject_extended_protocols
 from scar.ir.program.validation import require_valid
 from scar.ir.record_codec import encode
 from scar.ir.semantics_v2 import Opcode, SourceExecutionPrecondition
@@ -74,6 +75,7 @@ class SourceProgram:
     interface: BodyEntryInterface | None = None
     frame: FrameModel | None = None
     structured: StructuredBodyModel | None = None
+    language: SourceLanguageOverlay | None = None
 
     def summary(self):
         """Separate declaration/link counts from program and effect coverage."""
@@ -114,8 +116,13 @@ class SourceProgram:
         }
 
     def to_dict(self):
+        if self.language is None:
+            reject_extended_protocols(self.structured)
+        elif self.profile is not BodyLoweringProfile.STRUCTURED_ENV:
+            raise ValueError("extended language wrapper requires the unchanged environment entry ABI")
         document = {
-            "schema": "scar.source-program", "schema_version": (1 if self.profile is BodyLoweringProfile.LEGACY else
+            "schema": "scar.source-program", "schema_version": (5 if self.language is not None else
+                1 if self.profile is BodyLoweringProfile.LEGACY else
                 4 if self.profile is BodyLoweringProfile.STRUCTURED_ENV else
                 3 if self.profile is BodyLoweringProfile.STRUCTURED_BODY else 2),
             "status": ("UNSUPPORTED" if self.graph is None else
@@ -133,10 +140,12 @@ class SourceProgram:
                             frame=encode(self.frame))
         if self.profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
             document["structured"] = encode(self.structured)
+        if self.language is not None:
+            document["language"] = encode(self.language)
         return document
 
     @classmethod
-    def from_dict(cls, document, *, max_operations=10000):
+    def from_dict(cls, document, *, max_operations=10000, language_options=None, verification="SOURCE_REPLAY"):
         from scar.ir.program.codec import loads as load_graph
         from scar.ir.record_codec import decode
         from scar.ir.semantics_v2 import SourceSemanticsGraph
@@ -148,40 +157,57 @@ class SourceProgram:
                            "transformation_authorized"}
         if type(document) is not dict:
             raise ValueError("source program fields mismatch")
+        if verification not in ("SOURCE_REPLAY", "STRUCTURE"):
+            raise ValueError("source program verification mode must be explicit")
         version = document.get("schema_version")
-        if type(version) is not int or version not in (1, 2, 3, 4):
+        if type(version) is not int or version not in (1, 2, 3, 4, 5):
             raise ValueError("source program schema/version mismatch")
-        if version in (2, 3, 4):
+        if version < 5 and verification != "SOURCE_REPLAY":
+            raise ValueError("historical source program replay policy is unchanged")
+        if version in (2, 3, 4, 5):
             expected_fields |= {"profile", "interface", "frame"}
-        if version in (3, 4):
+        if version in (3, 4, 5):
             expected_fields.add("structured")
+        if version == 5:
+            expected_fields.add("language")
         if set(document) != expected_fields or document["schema"] != "scar.source-program":
             raise ValueError("source program fields mismatch")
         profile = BodyLoweringProfile.LEGACY
         interface = frame = structured = None
-        if version in (2, 3, 4):
+        if version in (2, 3, 4, 5):
             profile = BodyLoweringProfile(document["profile"])
-            expected_profile = (BodyLoweringProfile.STRUCTURED_ENV if version == 4 else
+            expected_profile = (BodyLoweringProfile.STRUCTURED_ENV if version in (4, 5) else
                                 BodyLoweringProfile.BOUND_FRAME if version == 2 else
                                 BodyLoweringProfile.STRUCTURED_BODY)
             if profile is not expected_profile:
                 raise ValueError("source-program version requires its exact lowering profile")
             interface = decode(BodyEntryInterface, document["interface"]) if document["interface"] is not None else None
             frame = FrameModel.from_dict(document["frame"]) if document["frame"] is not None else None
-        if version in (3, 4):
+        if version in (3, 4, 5):
             structured = decode(StructuredBodyModel, document["structured"]) if document["structured"] is not None else None
+        language = decode(SourceLanguageOverlay, document["language"]) if version == 5 else None
+        if version < 5:
+            reject_extended_protocols(structured)
+            if language_options is not None:
+                raise ValueError("historical source wrapper cannot accept extended language inputs")
         metadata = decode(LoweringMetadata, document["metadata"])
         semantic = semantic_from_dict(document["semantic"])
         semantics = SourceSemanticsGraph.from_dict(document["semantics"], semantic)
         control = SourceControlFlowGraph.from_dict(document["control"])
         graph = load_graph(_canonical(document["graph"])) if document["graph"] is not None else None
-        result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame, structured)
+        result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame, structured, language)
         if _canonical(result.to_dict()) != _canonical(document):
             raise ValueError("source program scope/status/authority or canonical fields differ")
-        checked = validate_source_program(result, max_operations=max_operations)
+        checked = validate_source_program(result, max_operations=max_operations, language_options=language_options,
+                                          verification=verification)
         if not checked["valid"]:
             raise ValueError("; ".join(checked["errors"]))
         return result
+
+    @classmethod
+    def read_structure(cls, document, *, max_operations=10000):
+        """Read v5 without a live CodeType; no constant/source proof is granted."""
+        return cls.from_dict(document, max_operations=max_operations, verification="STRUCTURE")
 
 
 @dataclass(frozen=True)
@@ -193,6 +219,7 @@ class LoweredSourceBody:
     interface: BodyEntryInterface | None = None
     frame: FrameModel | None = None
     structured: StructuredBodyModel | None = None
+    language: SourceLanguageOverlay | None = None
 
 
 @dataclass(frozen=True)
@@ -222,20 +249,22 @@ class PreparedSource:
         return _SealedLoweringSession(self)
 
     def lower(self, entry, *, source: SourceReference | None = None, max_operations=10000,
-              expand_candidates=True, profile=BodyLoweringProfile.LEGACY):
+              expand_candidates=True, profile=BodyLoweringProfile.LEGACY, language_options=None):
         return _lower_prepared(self, entry, source=source, max_operations=max_operations,
-                               expand_candidates=expand_candidates, profile=profile)
+                               expand_candidates=expand_candidates, profile=profile, language_options=language_options)
 
 
 def _lower_prepared(context, entry, *, source, max_operations, expand_candidates, profile,
-                    sealed_source=None):
+                    sealed_source=None, language_options=None):
     _check_arguments(entry, max_operations)
+    if language_options is not None and profile is not BodyLoweringProfile.STRUCTURED_ENV:
+        raise ValueError("extended source language requires environment entry ABI")
     if profile is BodyLoweringProfile.STRUCTURED_ENV:
         if expand_candidates:
             raise ValueError("environment source bodies require root-only expansion")
         from scar.analysis.environment_lowering import StructuredEnvironmentBuilder
         return StructuredEnvironmentBuilder(context, entry, source=source, max_operations=max_operations,
-                                             sealed_source=sealed_source).run()
+                                             sealed_source=sealed_source, language_options=language_options).run()
     if profile is BodyLoweringProfile.STRUCTURED_BODY:
         if expand_candidates:
             raise ValueError("structured source bodies require root-only expansion")
@@ -282,11 +311,12 @@ class _SealedLoweringSession:
         self.__validated = True
 
     def lower(self, entry, *, source=None, max_operations=10000, expand_candidates=True,
-              profile=BodyLoweringProfile.LEGACY):
+              profile=BodyLoweringProfile.LEGACY, language_options=None):
         if profile not in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
             raise ValueError("sealed construction is limited to structured source profiles")
         return _lower_prepared(self.__prepared, entry, source=source, max_operations=max_operations,
-            expand_candidates=expand_candidates, profile=profile, sealed_source=self)
+            expand_candidates=expand_candidates, profile=profile, sealed_source=self,
+            language_options=language_options)
 
     def _require_inputs(self, semantic, control):
         if (not self.__validated or semantic is not self.__prepared.semantic
@@ -1020,23 +1050,37 @@ def _symbol_tables(text, path):
 
 
 def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000,
-                 profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY) -> SourceProgram:
+                 profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY, language_options=None,
+                 project_root=None) -> SourceProgram:
     _check_arguments(entry, max_operations)
     if type(profile) is not BodyLoweringProfile or profile not in (BodyLoweringProfile.LEGACY,
             BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
         raise ValueError("unsupported standalone source profile")
-    context = prepare_source(path)
+    context = prepare_source(path, project_root=project_root)
     body = context.lower(entry, max_operations=max_operations,
-                         expand_candidates=profile is BodyLoweringProfile.LEGACY, profile=profile)
+                         expand_candidates=profile is BodyLoweringProfile.LEGACY, profile=profile,
+                         language_options=language_options)
     return SourceProgram(body.graph, body.metadata, context.semantic, context.semantics, context.control,
-                         profile, body.interface, body.frame, body.structured)
+                         profile, body.interface, body.frame, body.structured, body.language)
 
 
-def validate_source_program(result: SourceProgram, *, max_operations: int = 10000):
+def validate_source_program(result: SourceProgram, *, max_operations: int = 10000, language_options=None,
+                            verification="SOURCE_REPLAY"):
     """Rebuild from current source; reported provenance cannot raise this budget."""
     try:
         if type(result) is not SourceProgram:
             raise ValueError("expected SourceProgram")
+        if verification not in ("SOURCE_REPLAY", "STRUCTURE"):
+            raise ValueError("source verification mode differs")
+        structural_only = verification == "STRUCTURE"
+        if structural_only and result.language is None:
+            raise ValueError("historical source replay policy is unchanged")
+        if result.language is not None:
+            if (type(result.language) is not SourceLanguageOverlay
+                    or result.profile is not BodyLoweringProfile.STRUCTURED_ENV):
+                raise ValueError("extended source-language overlay requires the environment entry ABI")
+            if result.language.source != result.metadata.source:
+                raise ValueError("source-language overlay snapshot differs from metadata")
         if type(result.profile) is not BodyLoweringProfile or result.profile not in (BodyLoweringProfile.LEGACY,
                 BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
             raise ValueError("unsupported standalone source lowering profile")
@@ -1050,8 +1094,18 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             from scar.analysis.structured_lowering import require_valid_structured_body
             if result.frame is not None or result.interface is None:
                 raise ValueError("structured bodies require a structured interface, not a legacy frame overlay")
+            source_tree = None
+            if result.language is not None and not structural_only:
+                if language_options is None:
+                    raise ValueError("v5 source replay requires explicit independently supplied language inputs")
+                with tokenize.open(result.metadata.source.path) as stream:
+                    source_text = stream.read()
+                if "sha256:" + hashlib.sha256(source_text.encode()).hexdigest() != result.metadata.source.fingerprint:
+                    raise ValueError("v5 source text changed")
+                source_tree = ast.parse(source_text, filename=result.metadata.source.path)
             require_valid_structured_body(result.structured, result.graph, result.interface, result.metadata,
-                                           semantic=result.semantic, control=result.control)
+                semantic=result.semantic, control=result.control, language=result.language,
+                source_tree=source_tree, language_options=language_options, structural_only=structural_only)
         else:
             if result.structured is not None:
                 raise ValueError("historical frame bodies cannot contain structured protocols")
@@ -1081,13 +1135,21 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             if {(link.operation, link.use) for link in result.metadata.use_links} != {
                     (op.id, use.id) for op in ops.values() for use in op.uses}:
                 raise ValueError("source use correspondence is incomplete")
-        rebuilt = lower_source(result.metadata.source.path, result.metadata.entry,
-                               max_operations=max_operations, profile=result.profile)
-        if _canonical(result.to_dict()) != _canonical(rebuilt.to_dict()):
-            raise ValueError("program graph or typed source correspondence differs from source replay")
+        if not structural_only:
+            rebuilt = lower_source(result.metadata.source.path, result.metadata.entry,
+                max_operations=max_operations, profile=result.profile, language_options=language_options,
+                project_root=result.language.namespace_root if result.language is not None else None)
+            if _canonical(result.to_dict()) != _canonical(rebuilt.to_dict()):
+                raise ValueError("program graph or typed source correspondence differs from source replay")
     except (ValueError, TypeError, KeyError, AttributeError, OSError, SyntaxError, RecursionError) as error:
         return {"valid": False, "errors": [str(error)]}
-    return {"valid": True, "errors": []}
+    if result.language is None:
+        return {"valid": True, "errors": []}
+    return {"valid": True, "errors": [], "verification": verification,
+            "source_shape_verified": verification == "SOURCE_REPLAY",
+            "code_constant_provenance_verified": bool(result.language and result.language.constants)
+                and verification == "SOURCE_REPLAY",
+            "runtime_code_instance_established": False}
 
 
 __all__ = ["SourceProgram", "PreparedSource", "LoweredSourceBody", "prepare_source",

@@ -1,0 +1,589 @@
+{
+  "body_index": 26,
+  "original_definition": "opdef:op:2bbbf0465da144672babb952",
+  "entry": "Predictor.forward",
+  "original_inventory_locator": {
+    "inventory_locator": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00140.json.gz",
+        "physical_sha256": "f363734ef286d5532a3d58319b04c53052bf173d7911266bd0516028b60b715b",
+        "physical_bytes": 54613,
+        "decoded_sha256": "23cc31c2cdcd38ab1d1172cc024a008f309734ae9d7116029d6fde177321a1bc",
+        "decoded_bytes": 852436,
+        "representation": "scar.partitioned-file-inventory/1"
+      },
+      "pointer": "#/file/bodies/26"
+    },
+    "graph_locator": null,
+    "metadata_locator": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00085.json.gz",
+        "physical_sha256": "574c98289f6c033a87059af2b240af0a0b6e52bda3869a5aaa7af0339856da99",
+        "physical_bytes": 1000,
+        "decoded_sha256": "c1d9ee3bdf07466641215c370fa7a1cb7c6335b37d7a27a6ba289b42dec8d6b3",
+        "decoded_bytes": 4447,
+        "representation": "scar.body-construction-checkpoint/1"
+      },
+      "pointer": "#/metadata"
+    },
+    "namespace": null
+  },
+  "body_recovered": true,
+  "operations_emitted": 65,
+  "operation_count": 65,
+  "language": {
+    "source": {
+      "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+      "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+      "encoding": "utf-8",
+      "python_version": "3.14"
+    },
+    "capabilities": [
+      "PYTHON_FIXED_LOCAL_UNPACK_V1",
+      "PYTHON_SLICE_KEYS_314_V1",
+      "PYTHON_LEXICAL_LOCALS_314_V1"
+    ],
+    "unpackings": [],
+    "slices": [
+      {
+        "operation": {
+          "kind": "program_operation",
+          "value": "c5e38954dbac3eb9f051d7ee226b4880",
+          "wire": "program_operation:c5e38954dbac3eb9f051d7ee226b4880"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:c97cb91588b34cba0bddf223",
+            "wire": "source:atom:c97cb91588b34cba0bddf223"
+          },
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+          "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+          "start_line": 291,
+          "end_line": 291,
+          "start_column": 38,
+          "end_column": 40
+        },
+        "lower": null,
+        "upper": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:6bbd62eb86aba3ec1bebb1c2",
+            "wire": "source:atom:6bbd62eb86aba3ec1bebb1c2"
+          },
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+          "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+          "start_line": 291,
+          "end_line": 291,
+          "start_column": 39,
+          "end_column": 40
+        },
+        "step": null
+      }
+    ],
+    "constants": [
+      {
+        "operation": {
+          "kind": "program_operation",
+          "value": "9706a245d7bc776af6d826cccd4466fd",
+          "wire": "program_operation:9706a245d7bc776af6d826cccd4466fd"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:6e5b96dc5fff70ae58694130",
+            "wire": "source:atom:6e5b96dc5fff70ae58694130"
+          },
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+          "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+          "start_line": 291,
+          "end_line": 291,
+          "start_column": 35,
+          "end_column": 36
+        },
+        "code_key": "pycode-v2:84d02981041d27e3557319215e6d1a3264d274d0275e50fdc441fddbc68801ad",
+        "constant_path": [
+          1
+        ]
+      }
+    ],
+    "compiler_locals": [
+      {
+        "name": "self",
+        "category": "LEXICAL_FUNCTION",
+        "lexical_slots": [
+          {
+            "kind": "slot",
+            "value": "slot:a2ed65a4dd38e7c3dd6d5e38",
+            "wire": "slot:slot:a2ed65a4dd38e7c3dd6d5e38"
+          }
+        ],
+        "comp_iteration": false,
+        "comp_cell": false
+      },
+      {
+        "name": "x",
+        "category": "LEXICAL_FUNCTION",
+        "lexical_slots": [
+          {
+            "kind": "slot",
+            "value": "slot:82e6309945917160e1bb0558",
+            "wire": "slot:slot:82e6309945917160e1bb0558"
+          }
+        ],
+        "comp_iteration": false,
+        "comp_cell": false
+      },
+      {
+        "name": "c",
+        "category": "LEXICAL_FUNCTION",
+        "lexical_slots": [
+          {
+            "kind": "slot",
+            "value": "slot:70fcfc1369f504dfdb725fc3",
+            "wire": "slot:slot:70fcfc1369f504dfdb725fc3"
+          }
+        ],
+        "comp_iteration": false,
+        "comp_cell": false
+      },
+      {
+        "name": "T",
+        "category": "LEXICAL_FUNCTION",
+        "lexical_slots": [
+          {
+            "kind": "slot",
+            "value": "slot:eb55f2bf8ce6436f9a347b10",
+            "wire": "slot:slot:eb55f2bf8ce6436f9a347b10"
+          }
+        ],
+        "comp_iteration": false,
+        "comp_cell": false
+      }
+    ],
+    "code_evidence": {
+      "captured": {
+        "key": "pycode-v2:84d02981041d27e3557319215e6d1a3264d274d0275e50fdc441fddbc68801ad",
+        "filename": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "qualname": "Predictor.forward",
+        "first_line": 285,
+        "flags": 201326595,
+        "parameters": [
+          "self",
+          "x",
+          "c"
+        ]
+      },
+      "source_link": {
+        "code": "pycode-v2:84d02981041d27e3557319215e6d1a3264d274d0275e50fdc441fddbc68801ad",
+        "status": "VERIFIED",
+        "snapshot": {
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+          "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+          "encoding": "utf-8",
+          "python_version": "3.14"
+        },
+        "definition": {
+          "kind": "opdef",
+          "value": "op:2bbbf0465da144672babb952",
+          "wire": "opdef:op:2bbbf0465da144672babb952"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:6c731b209fd1462bbb37fc2a",
+            "wire": "source:atom:6c731b209fd1462bbb37fc2a"
+          },
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+          "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+          "start_line": 285,
+          "end_line": 294,
+          "start_column": 4,
+          "end_column": 16
+        },
+        "optimize_levels": [
+          0,
+          1
+        ],
+        "issues": []
+      },
+      "witness": {
+        "captured_code_locator": {
+          "artifact": {
+            "decoded_bytes": 1685522,
+            "decoded_sha256": "80d07551902c234544bfbdeeefa547881eddc1c4bce5b32fcc4defd640c67213",
+            "physical_bytes": 268682,
+            "physical_sha256": "1e54903e94bf3e0c73d2da75e4c1c8392d24254d126a3429839f1a251866d185",
+            "representation": "scar.inventory-component/1",
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/components/call_sources.json.gz"
+          },
+          "pointer": "#/value/model/codes/801/code"
+        },
+        "constant_path": [
+          20,
+          9
+        ],
+        "descriptor": {
+          "filename": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+          "first_line": 285,
+          "flags": 201326595,
+          "key": "pycode-v2:84d02981041d27e3557319215e6d1a3264d274d0275e50fdc441fddbc68801ad",
+          "parameters": [
+            "self",
+            "x",
+            "c"
+          ],
+          "qualname": "Predictor.forward"
+        },
+        "inventory": {
+          "decoded_bytes": 63577,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/manifest.json",
+          "raw_bytes": 63577,
+          "raw_sha256": "1443fedcbd8882e86dee392339a5ea51fd29ea102068a65d9e51e06b347de09e"
+        },
+        "module_artifact": {
+          "bytes": 14046,
+          "path": "8e40fca22a28c5a2a268b3c17656b174cbb035aef331880a54a4351a4ef506c9.marshal",
+          "sha256": "84e67e182de6c1e179dd35bdb2a9ebb89919edadac331ef9b8d0d353a0366171"
+        },
+        "module_key": "8e40fca22a28c5a2a268b3c17656b174cbb035aef331880a54a4351a4ef506c9",
+        "source_link_locator": {
+          "artifact": {
+            "decoded_bytes": 1685522,
+            "decoded_sha256": "80d07551902c234544bfbdeeefa547881eddc1c4bce5b32fcc4defd640c67213",
+            "physical_bytes": 268682,
+            "physical_sha256": "1e54903e94bf3e0c73d2da75e4c1c8392d24254d126a3429839f1a251866d185",
+            "representation": "scar.inventory-component/1",
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/components/call_sources.json.gz"
+          },
+          "pointer": "#/value/model/code_links/439"
+        },
+        "store": {
+          "bytes": 42283,
+          "code_executed": false,
+          "module_count": 20,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/manifest.json",
+          "runtime": {
+            "cache_tag": "cpython-314",
+            "implementation": "cpython",
+            "magic": "2b0e0d0a",
+            "marshal_version": 5,
+            "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+            "version": [
+              3,
+              14,
+              7,
+              "final",
+              0
+            ]
+          },
+          "sha256": "56355f7ef10d16d8ab4fb02a84988cf2f0070b75e4cd5fccbf1c86c1ea34170d",
+          "source_count": 20,
+          "source_prepared": false
+        }
+      },
+      "runtime_code_instance_established": false
+    },
+    "version": "PYTHON_SOURCE_LANGUAGE_V1",
+    "namespace_root": "/home/zyf/AAA/le-wm"
+  },
+  "frontiers": [
+    {
+      "kind": "FRAME_EFFECT",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:6c731b209fd1462bbb37fc2a",
+          "wire": "source:atom:6c731b209fd1462bbb37fc2a"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 285,
+        "end_line": 294,
+        "start_column": 4,
+        "end_column": 16
+      },
+      "detail": "frame interposition, lifetime, finalizers and noncompletion remain explicit unproved conditions"
+    },
+    {
+      "kind": "CODE_VERSION",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:6c731b209fd1462bbb37fc2a",
+          "wire": "source:atom:6c731b209fd1462bbb37fc2a"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 285,
+        "end_line": 294,
+        "start_column": 4,
+        "end_column": 16
+      },
+      "detail": "source environment ports are declared; live function object, namespaces, cells and definition-time effects remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_DISPATCH",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:69f88cdf41c5a0c7c9827644",
+          "wire": "source:atom:69f88cdf41c5a0c7c9827644"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 290,
+        "end_line": 290,
+        "start_column": 12,
+        "end_column": 18
+      },
+      "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_DISPATCH",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:5c9feee9af5a43020c82a99a",
+          "wire": "source:atom:5c9feee9af5a43020c82a99a"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 290,
+        "end_line": 290,
+        "start_column": 12,
+        "end_column": 21
+      },
+      "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_TARGET",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:5c9feee9af5a43020c82a99a",
+          "wire": "source:atom:5c9feee9af5a43020c82a99a"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 290,
+        "end_line": 290,
+        "start_column": 12,
+        "end_column": 21
+      },
+      "detail": "candidate source is not verified runtime dispatch"
+    },
+    {
+      "kind": "DYNAMIC_DISPATCH",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:5fc0e83d6c17877a65e0f705",
+          "wire": "source:atom:5fc0e83d6c17877a65e0f705"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 291,
+        "end_line": 291,
+        "start_column": 16,
+        "end_column": 34
+      },
+      "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+    },
+    {
+      "kind": "CODE_VERSION",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:6e5b96dc5fff70ae58694130",
+          "wire": "source:atom:6e5b96dc5fff70ae58694130"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 291,
+        "end_line": 291,
+        "start_column": 35,
+        "end_column": 36
+      },
+      "detail": "code constant slot is witnessed; active CodeType/constant object instance identity remains unproved"
+    },
+    {
+      "kind": "EFFECT_SUMMARY",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:c97cb91588b34cba0bddf223",
+          "wire": "source:atom:c97cb91588b34cba0bddf223"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 291,
+        "end_line": 291,
+        "start_column": 38,
+        "end_column": 40
+      },
+      "detail": "slice syntax bounds/order are connected; allocation, identity, lifetime and consumer dispatch remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_DISPATCH",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:8dd9d935177da9b9e094d65a",
+          "wire": "source:atom:8dd9d935177da9b9e094d65a"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 291,
+        "end_line": 291,
+        "start_column": 16,
+        "end_column": 41
+      },
+      "detail": "subscription key/order are connected; consumer dispatch, mutation, aliasing and resources remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_DISPATCH",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:fde3b912478cb906f826ae39",
+          "wire": "source:atom:fde3b912478cb906f826ae39"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 291,
+        "end_line": 291,
+        "start_column": 12,
+        "end_column": 41
+      },
+      "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_DISPATCH",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:d36ab7af431354907a55f6ed",
+          "wire": "source:atom:d36ab7af431354907a55f6ed"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 292,
+        "end_line": 292,
+        "start_column": 12,
+        "end_column": 24
+      },
+      "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_DISPATCH",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:3ebae846b51da07395d300c6",
+          "wire": "source:atom:3ebae846b51da07395d300c6"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 292,
+        "end_line": 292,
+        "start_column": 12,
+        "end_column": 27
+      },
+      "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_TARGET",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:3ebae846b51da07395d300c6",
+          "wire": "source:atom:3ebae846b51da07395d300c6"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 292,
+        "end_line": 292,
+        "start_column": 12,
+        "end_column": 27
+      },
+      "detail": "candidate source is not verified runtime dispatch"
+    },
+    {
+      "kind": "DYNAMIC_DISPATCH",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:33effa3fd1d719b03980f002",
+          "wire": "source:atom:33effa3fd1d719b03980f002"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 293,
+        "end_line": 293,
+        "start_column": 12,
+        "end_column": 28
+      },
+      "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_DISPATCH",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:3e7b6d0df6d683eeeffa683a",
+          "wire": "source:atom:3e7b6d0df6d683eeeffa683a"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 293,
+        "end_line": 293,
+        "start_column": 12,
+        "end_column": 34
+      },
+      "detail": "source operation is connected; runtime dispatch, state accesses and effects remain unproved"
+    },
+    {
+      "kind": "DYNAMIC_TARGET",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:3e7b6d0df6d683eeeffa683a",
+          "wire": "source:atom:3e7b6d0df6d683eeeffa683a"
+        },
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "start_line": 293,
+        "end_line": 293,
+        "start_column": 12,
+        "end_column": 34
+      },
+      "detail": "candidate source is not verified runtime dispatch"
+    }
+  ],
+  "checks": {
+    "source_replay": "NOT_REQUESTED_NO_SOURCE_REPREPARE",
+    "source_program5": true,
+    "stored_structure": {
+      "valid": true,
+      "errors": [],
+      "verification": "STRUCTURE",
+      "source_shape_verified": false,
+      "code_constant_provenance_verified": false,
+      "runtime_code_instance_established": false
+    },
+    "canonical_roundtrip": true,
+    "exact_source_and_independent_code_witness": true,
+    "producer_v4_rejects_new_protocols": "historical source wrapper cannot contain extended source-language capability",
+    "parser_v4_rejects_new_protocols": "historical source wrapper cannot contain extended source-language capability",
+    "v5_full_verification_requires_independent_inputs": "v5 source replay requires explicit independently supplied language inputs"
+  },
+  "artifact": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/result/body-26.source-program5.json.gz",
+    "sha256": "180521b7803f93873ecbeb20ce41271cdc3d09259a264b113da27bce72f67e4c",
+    "bytes": 862959,
+    "decoded_sha256": "8306870473819c9282b5786f373baf5e59d1b1a9905bf268d9c8ea01e0597490",
+    "decoded_bytes": 8299897
+  },
+  "current_run_integration_performed": false
+}

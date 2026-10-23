@@ -6,6 +6,46 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：同一次运行的正式接线、端点查询与语言/资源局部闭合
+
+当前369749原档的source→production marker→SBA完整gate已actual exit0：817groups、
+100,438entries=exits、855codes独立扫描；667groups/95,474calls接原定义，150groups/
+4,964calls未解析。220个当前source fingerprint guard全匹配，1个新code实际14次
+调用未找到历史static witness，未借旧14次权重。105个依赖图各读一次，242组/
+86,688次外部调用为source-only；marker/SBA复用该resolver未重复读依赖图，最后
+selected完整source-view查询另读1个小图单列。无prepare/compile。
+
+同Run全部79,592marker/109,288slot保留：BODY10,992、SOURCE68,114、INV_ONLY6、
+UNRESOLVED480；source definition79,106、external source-only50,658。它们仍为retained
+ancestry/direct=false。SBA独立逐code权重与source全相等，312,812operand、16,403env；
+13,872入口参数、27+27条件路由、5,173returns，3,347entries接10,087env ports。
+只读20-keyCodeWitness load20、完整descriptor match224、compile0/current source read0。
+脚本2068.11s、wall2071.73s、RSS2,134,064KiB；141输出chunk另核stored/decoded SHA/
+rows。旧source/资源Run混用的断口在此范围关闭，state/world/内容/ready仍OPEN。
+
+新增`CallEndpointQueries`复用原GraphIndex键、InventoryPartitions及原条件路由，
+分别对旧272038与新369749各27argument+27completion回原graph端点通过，4种错误
+scope/ID/Run均拒绝；脚本分别2.87s/2.90s。不创建producer，不把callee post-world
+说成caller后态，不把端点可导航说成等价。见CALL_ENDPOINT_QUERIES.md。
+
+通用source-language能力在同一份原source的两真实body实测：body11恢复118ops/
+UNPACK6；body26在补精确INDEX READ-PARTIAL地址验证后恢复65ops、1BUILD_SLICE和
+1CodeConstantReference。两次原失败完整保留（地址集合接口缺失、局部导入遮蔽）；
+attempt03实际exit0/wall38.21s、compile0/prepare0，仅补body26并回读旧body11结构。
+SourceProgram5无liveCodeType可做STRUCTURE读取但不授源码/常量证明；完整source/code
+验证要求独立原CodeWitness。**两图尚未通过CP2/inventory正式接当前Run，不能抬高
+当前body覆盖数。**旧wrapper拒新capability；后继正式集成是下一必需项。
+
+资源的35个container已通过隔离FD-table adapter实际精化为3个观察context：builder→
+public read→全部35typed handle、3ResourceInstance/FK通过；13pipe两端不同原OFD、
+同container，25selected Work/38access及其它字段不变，wall13.67s。完整补集252档/
+9.26MB只读投影给连续性证据；ImportedAt不声明新物理allocation。原total12,683与
+selected35范围明确保留。childbirth selector仍由checked proof输入提供，上游自动
+发现与全ExecutionModel语义均OPEN，不能据此宣称端到端全自动完成。
+
+第一阶段仍OPEN：后续按已验证原图接线，补新body正式发布/消费、自动证明需求、
+调用阶段/状态/world与逻辑来源及其它资源生命周期。没有新增detector/backend或变换。
+
 ### 2026-10-23：已观察资源端点接线与调用协议边界核对
 
 R2.1已实现ProviderRecordSelector/ProviderHandle/ProviderResourceAccess及原work的

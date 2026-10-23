@@ -1,0 +1,1453 @@
+{
+  "routing.argument_routes": {
+    "all_relationships_indexed": false,
+    "conditions": [
+      "CAPTURE_PRODUCER_TRUSTED",
+      "NO_FRAME_INTERPOSITION",
+      "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+      "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+      "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+      "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+      "FUNCTION_ENVIRONMENT_UNVERIFIED",
+      "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+    ],
+    "contents_or_alias_equivalence_established": false,
+    "cross_body_state_domain_identity_established": false,
+    "endpoints": {
+      "callee_formal_value": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:19e725794d688820845ff863",
+              "wire": "opdef:op:19e725794d688820845ff863"
+            },
+            "entry": "light_color",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+              },
+              "end_column": 16,
+              "end_line": 197,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 0,
+              "start_line": 191
+            }
+          },
+          "decoded_bytes": 570149,
+          "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 55637,
+          "physical_sha256": "b87de30e69660619e538107ac43d9e34d4734bd4bdd81d25c06351f637f5c7cd",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 81,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+        },
+        "pointer": "#/graph/values/5",
+        "qualified_reference": {
+          "kind": "Value",
+          "local_id": {
+            "kind": "program_value",
+            "value": "379700a18398ae849786c1312004f543",
+            "wire": "program_value:379700a18398ae849786c1312004f543"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:19e725794d688820845ff863",
+                "wire": "opdef:op:19e725794d688820845ff863"
+              },
+              "entry": "light_color",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                  "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+                },
+                "end_column": 16,
+                "end_line": 197,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 0,
+                "start_line": 191
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "ReferenceValue",
+        "wire_order": 371968,
+        "wire_order_is_runtime_order": false
+      },
+      "callee_region": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:19e725794d688820845ff863",
+              "wire": "opdef:op:19e725794d688820845ff863"
+            },
+            "entry": "light_color",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+              },
+              "end_column": 16,
+              "end_line": 197,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 0,
+              "start_line": 191
+            }
+          },
+          "decoded_bytes": 570149,
+          "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 55637,
+          "physical_sha256": "b87de30e69660619e538107ac43d9e34d4734bd4bdd81d25c06351f637f5c7cd",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 81,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+        },
+        "pointer": "#/graph/regions/0",
+        "qualified_reference": {
+          "kind": "Region",
+          "local_id": {
+            "kind": "program_region",
+            "value": "002089579e2a0b462d0abb7be3c77ea2",
+            "wire": "program_region:002089579e2a0b462d0abb7be3c77ea2"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:19e725794d688820845ff863",
+                "wire": "opdef:op:19e725794d688820845ff863"
+              },
+              "entry": "light_color",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                  "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+                },
+                "end_column": 16,
+                "end_line": 197,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 0,
+                "start_line": 191
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "Region",
+        "wire_order": 371626,
+        "wire_order_is_runtime_order": false
+      },
+      "caller_actual_use": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:5e025c6b8f810d2c8dbf069e",
+              "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+            },
+            "entry": "DrawOptions.draw_circle",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:b0b36165d6eb7dca6bc70f91",
+                "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+              },
+              "end_column": 9,
+              "end_line": 83,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 4,
+              "start_line": 64
+            }
+          },
+          "decoded_bytes": 801974,
+          "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 73381,
+          "physical_sha256": "4cb191d86566b1445221d224d6692b3416976790cf1c70772477575459e632f6",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 88,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+        },
+        "pointer": "#/graph/operations/70/uses/1",
+        "qualified_reference": {
+          "kind": "Use",
+          "local_id": {
+            "kind": "program_use",
+            "value": "bb98b44146f9f90c7318b9bc410e09d5",
+            "wire": "program_use:bb98b44146f9f90c7318b9bc410e09d5"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:5e025c6b8f810d2c8dbf069e",
+                "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+              },
+              "entry": "DrawOptions.draw_circle",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:b0b36165d6eb7dca6bc70f91",
+                  "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+                },
+                "end_column": 9,
+                "end_line": 83,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 4,
+                "start_line": 64
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "Use",
+        "wire_order": 365695,
+        "wire_order_is_runtime_order": false
+      },
+      "caller_actual_value": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:5e025c6b8f810d2c8dbf069e",
+              "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+            },
+            "entry": "DrawOptions.draw_circle",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:b0b36165d6eb7dca6bc70f91",
+                "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+              },
+              "end_column": 9,
+              "end_line": 83,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 4,
+              "start_line": 64
+            }
+          },
+          "decoded_bytes": 801974,
+          "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 73381,
+          "physical_sha256": "4cb191d86566b1445221d224d6692b3416976790cf1c70772477575459e632f6",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 88,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+        },
+        "pointer": "#/graph/values/121",
+        "qualified_reference": {
+          "kind": "Value",
+          "local_id": {
+            "kind": "program_value",
+            "value": "f2e30235c834f771d39ee729b2743a2f",
+            "wire": "program_value:f2e30235c834f771d39ee729b2743a2f"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:5e025c6b8f810d2c8dbf069e",
+                "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+              },
+              "entry": "DrawOptions.draw_circle",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:b0b36165d6eb7dca6bc70f91",
+                  "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+                },
+                "end_column": 9,
+                "end_line": 83,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 4,
+                "start_line": 64
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "ReferenceValue",
+        "wire_order": 365956,
+        "wire_order_is_runtime_order": false
+      },
+      "caller_operation": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:5e025c6b8f810d2c8dbf069e",
+              "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+            },
+            "entry": "DrawOptions.draw_circle",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:b0b36165d6eb7dca6bc70f91",
+                "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+              },
+              "end_column": 9,
+              "end_line": 83,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 4,
+              "start_line": 64
+            }
+          },
+          "decoded_bytes": 801974,
+          "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 73381,
+          "physical_sha256": "4cb191d86566b1445221d224d6692b3416976790cf1c70772477575459e632f6",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 88,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+        },
+        "pointer": "#/graph/operations/70",
+        "qualified_reference": {
+          "kind": "Operation",
+          "local_id": {
+            "kind": "program_operation",
+            "value": "89fe305c817be3b207d115343ba5345d",
+            "wire": "program_operation:89fe305c817be3b207d115343ba5345d"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:5e025c6b8f810d2c8dbf069e",
+                "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+              },
+              "entry": "DrawOptions.draw_circle",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:b0b36165d6eb7dca6bc70f91",
+                  "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+                },
+                "end_column": 9,
+                "end_line": 83,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 4,
+                "start_line": 64
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "Operation",
+        "wire_order": 365693,
+        "wire_order_is_runtime_order": false
+      },
+      "caller_region": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:5e025c6b8f810d2c8dbf069e",
+              "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+            },
+            "entry": "DrawOptions.draw_circle",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:b0b36165d6eb7dca6bc70f91",
+                "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+              },
+              "end_column": 9,
+              "end_line": 83,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 4,
+              "start_line": 64
+            }
+          },
+          "decoded_bytes": 801974,
+          "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 73381,
+          "physical_sha256": "4cb191d86566b1445221d224d6692b3416976790cf1c70772477575459e632f6",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 88,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+        },
+        "pointer": "#/graph/regions/0",
+        "qualified_reference": {
+          "kind": "Region",
+          "local_id": {
+            "kind": "program_region",
+            "value": "51399b81960e46b6302fc5fb2d21b589",
+            "wire": "program_region:51399b81960e46b6302fc5fb2d21b589"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:5e025c6b8f810d2c8dbf069e",
+                "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+              },
+              "entry": "DrawOptions.draw_circle",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:b0b36165d6eb7dca6bc70f91",
+                  "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+                },
+                "end_column": 9,
+                "end_line": 83,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 4,
+                "start_line": 64
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "Region",
+        "wire_order": 365302,
+        "wire_order_is_runtime_order": false
+      }
+    },
+    "original_capture_and_source_proofs_replayed": false,
+    "original_endpoint_membership_verified": true,
+    "report_record": {
+      "chunk": {
+        "bytes": 4773,
+        "decoded_bytes": 86618,
+        "decoded_sha256": "47bfb469a642301cb076a47571f4dde9ea6be302ba598d40d3172974c2793197",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.argument_routes.0000.jsonl.gz",
+        "rows": 27,
+        "sha256": "7ad508920994c23d16d423abd2485de756cb714f3894892277cab0245c1a445f"
+      },
+      "line": 1,
+      "manifest": {
+        "bytes": 71118,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/manifest.json",
+        "sha256": "ce6416d7fcc11c2f0e190937fdba22a8d0fcfb2678b9f249e4c5699c35a88ba6"
+      },
+      "ordinal": 0,
+      "pointer_within_line": "",
+      "row_sha256": "4c9d8921ca7128c231221baaf6cf5be8d8ccf62968f5104587f659bf3a3fcb1a",
+      "table": "routing.argument_routes"
+    },
+    "route": {
+      "actual_index": 0,
+      "actual_source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:1a9913108a18cc33b1e43b69",
+          "wire": "source:atom:1a9913108a18cc33b1e43b69"
+        },
+        "end_column": 34,
+        "end_line": 79,
+        "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+        "start_column": 24,
+        "start_line": 79
+      },
+      "actual_use": {
+        "kind": "program_use",
+        "value": "bb98b44146f9f90c7318b9bc410e09d5",
+        "wire": "program_use:bb98b44146f9f90c7318b9bc410e09d5"
+      },
+      "actual_value": {
+        "kind": "program_value",
+        "value": "f2e30235c834f771d39ee729b2743a2f",
+        "wire": "program_value:f2e30235c834f771d39ee729b2743a2f"
+      },
+      "attempt": {
+        "index": 175673,
+        "line_number": 175673,
+        "line_sha256": "a72da95c4afad722b0e1c9be137d06beef4dc20183f3a6f5f0541a4230c9370a",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-operands.272038.jsonl"
+      },
+      "call": {
+        "kind": "opdef",
+        "value": "op:ff4bc0e4b6ff82733781f569",
+        "wire": "opdef:op:ff4bc0e4b6ff82733781f569"
+      },
+      "call_source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:b76e47fdc486dab1c067eb0b",
+          "wire": "source:atom:b76e47fdc486dab1c067eb0b"
+        },
+        "end_column": 35,
+        "end_line": 79,
+        "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+        "start_column": 12,
+        "start_line": 79
+      },
+      "callee": {
+        "invocation_id": 40464,
+        "process_id": 272038,
+        "thread_id": 124602718246720
+      },
+      "callee_definition": {
+        "kind": "opdef",
+        "value": "op:19e725794d688820845ff863",
+        "wire": "opdef:op:19e725794d688820845ff863"
+      },
+      "callee_region": {
+        "kind": "program_region",
+        "value": "002089579e2a0b462d0abb7be3c77ea2",
+        "wire": "program_region:002089579e2a0b462d0abb7be3c77ea2"
+      },
+      "caller": {
+        "invocation_id": 40461,
+        "process_id": 272038,
+        "thread_id": 124602718246720
+      },
+      "caller_definition": {
+        "kind": "opdef",
+        "value": "op:5e025c6b8f810d2c8dbf069e",
+        "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+      },
+      "caller_region": {
+        "kind": "program_region",
+        "value": "51399b81960e46b6302fc5fb2d21b589",
+        "wire": "program_region:51399b81960e46b6302fc5fb2d21b589"
+      },
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "NO_FRAME_INTERPOSITION",
+        "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+        "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+        "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+        "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+      ],
+      "formal_name": "color",
+      "formal_slot": {
+        "kind": "slot",
+        "value": "slot:00099d117b932d37d5e4c57f",
+        "wire": "slot:slot:00099d117b932d37d5e4c57f"
+      },
+      "formal_value": {
+        "kind": "program_value",
+        "value": "379700a18398ae849786c1312004f543",
+        "wire": "program_value:379700a18398ae849786c1312004f543"
+      },
+      "load_anchor": {
+        "index": 175671,
+        "line_number": 175671,
+        "line_sha256": "d911b6d2e99879af7ee1df751685e7a2bfc6d13a91a7d8386b122b986b70e689",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-operands.272038.jsonl"
+      },
+      "load_suboperand": 0,
+      "operation": {
+        "kind": "program_operation",
+        "value": "89fe305c817be3b207d115343ba5345d",
+        "wire": "program_operation:89fe305c817be3b207d115343ba5345d"
+      },
+      "reference_consistency": "UNKNOWN",
+      "rule": "RAW_FUNCTION_ALL_POSITIONAL_V1"
+    },
+    "run": {
+      "id": {
+        "kind": "exec_run",
+        "value": "capture:91a2ed5e3f92817799bd02fb2453dadd65ad28fbf4361165c31b881c371c0c66",
+        "wire": "exec_run:capture:91a2ed5e3f92817799bd02fb2453dadd65ad28fbf4361165c31b881c371c0c66"
+      },
+      "source": {
+        "artifact": {
+          "schema": "strace.syscalls.text.v1",
+          "sha256": "76542959431284a2b5ddc972fe5761f7d370723b97926a77fd9f857a99f8e95c",
+          "size_bytes": 71215077,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/os/syscalls.272038"
+        },
+        "locator": "#/lines/7"
+      }
+    },
+    "runtime_control_established": false,
+    "source_conditions": [
+      "source association reuses the bound inventory producer's exact code/source witness",
+      "this adapter does not independently repeat its compiler/source matching",
+      "collector and retained artifact producer follow their declared capture protocols",
+      "source and canonical body references are fragments, not a merged ProgramSnapshot",
+      "a recorded frame parent interval is not an actual/formal/return, environment, effect or ATen callsite proof"
+    ],
+    "transformation_authorized": false,
+    "whole_program_established": false,
+    "world_equivalence_established": false
+  },
+  "routing.completion_routes": {
+    "all_relationships_indexed": false,
+    "conditions": [
+      "CAPTURE_PRODUCER_TRUSTED",
+      "NO_FRAME_INTERPOSITION",
+      "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+      "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+      "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+      "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+      "FUNCTION_ENVIRONMENT_UNVERIFIED",
+      "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+    ],
+    "contents_or_alias_equivalence_established": false,
+    "cross_body_state_domain_identity_established": false,
+    "endpoints": {
+      "callee_payload_use": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:19e725794d688820845ff863",
+              "wire": "opdef:op:19e725794d688820845ff863"
+            },
+            "entry": "light_color",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+              },
+              "end_column": 16,
+              "end_line": 197,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 0,
+              "start_line": 191
+            }
+          },
+          "decoded_bytes": 570149,
+          "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 55637,
+          "physical_sha256": "b87de30e69660619e538107ac43d9e34d4734bd4bdd81d25c06351f637f5c7cd",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 81,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+        },
+        "pointer": "#/graph/operations/82/uses/0",
+        "qualified_reference": {
+          "kind": "Use",
+          "local_id": {
+            "kind": "program_use",
+            "value": "1c2104aa7cb006e5406b62008b13e42c",
+            "wire": "program_use:1c2104aa7cb006e5406b62008b13e42c"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:19e725794d688820845ff863",
+                "wire": "opdef:op:19e725794d688820845ff863"
+              },
+              "entry": "light_color",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                  "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+                },
+                "end_column": 16,
+                "end_line": 197,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 0,
+                "start_line": 191
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "Use",
+        "wire_order": 371961,
+        "wire_order_is_runtime_order": false
+      },
+      "callee_payload_value": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:19e725794d688820845ff863",
+              "wire": "opdef:op:19e725794d688820845ff863"
+            },
+            "entry": "light_color",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+              },
+              "end_column": 16,
+              "end_line": 197,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 0,
+              "start_line": 191
+            }
+          },
+          "decoded_bytes": 570149,
+          "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 55637,
+          "physical_sha256": "b87de30e69660619e538107ac43d9e34d4734bd4bdd81d25c06351f637f5c7cd",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 81,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+        },
+        "pointer": "#/graph/values/141",
+        "qualified_reference": {
+          "kind": "Value",
+          "local_id": {
+            "kind": "program_value",
+            "value": "870a67799eccb31762cff1b717864d17",
+            "wire": "program_value:870a67799eccb31762cff1b717864d17"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:19e725794d688820845ff863",
+                "wire": "opdef:op:19e725794d688820845ff863"
+              },
+              "entry": "light_color",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                  "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+                },
+                "end_column": 16,
+                "end_line": 197,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 0,
+                "start_line": 191
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "ReferenceValue",
+        "wire_order": 372104,
+        "wire_order_is_runtime_order": false
+      },
+      "callee_post_world": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:19e725794d688820845ff863",
+              "wire": "opdef:op:19e725794d688820845ff863"
+            },
+            "entry": "light_color",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+              },
+              "end_column": 16,
+              "end_line": 197,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 0,
+              "start_line": 191
+            }
+          },
+          "decoded_bytes": 570149,
+          "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 55637,
+          "physical_sha256": "b87de30e69660619e538107ac43d9e34d4734bd4bdd81d25c06351f637f5c7cd",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 81,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+        },
+        "pointer": "#/graph/values/142",
+        "qualified_reference": {
+          "kind": "Value",
+          "local_id": {
+            "kind": "program_value",
+            "value": "15bf66b6859b18e792bde35f53c21464",
+            "wire": "program_value:15bf66b6859b18e792bde35f53c21464"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:19e725794d688820845ff863",
+                "wire": "opdef:op:19e725794d688820845ff863"
+              },
+              "entry": "light_color",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                  "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+                },
+                "end_column": 16,
+                "end_line": 197,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 0,
+                "start_line": 191
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "StateVersionValue",
+        "wire_order": 372105,
+        "wire_order_is_runtime_order": false
+      },
+      "callee_region": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:19e725794d688820845ff863",
+              "wire": "opdef:op:19e725794d688820845ff863"
+            },
+            "entry": "light_color",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+              },
+              "end_column": 16,
+              "end_line": 197,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 0,
+              "start_line": 191
+            }
+          },
+          "decoded_bytes": 570149,
+          "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 55637,
+          "physical_sha256": "b87de30e69660619e538107ac43d9e34d4734bd4bdd81d25c06351f637f5c7cd",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 81,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+        },
+        "pointer": "#/graph/regions/0",
+        "qualified_reference": {
+          "kind": "Region",
+          "local_id": {
+            "kind": "program_region",
+            "value": "002089579e2a0b462d0abb7be3c77ea2",
+            "wire": "program_region:002089579e2a0b462d0abb7be3c77ea2"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:19e725794d688820845ff863",
+                "wire": "opdef:op:19e725794d688820845ff863"
+              },
+              "entry": "light_color",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                  "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+                },
+                "end_column": 16,
+                "end_line": 197,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 0,
+                "start_line": 191
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "Region",
+        "wire_order": 371626,
+        "wire_order_is_runtime_order": false
+      },
+      "callee_world_location": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:19e725794d688820845ff863",
+              "wire": "opdef:op:19e725794d688820845ff863"
+            },
+            "entry": "light_color",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+              },
+              "end_column": 16,
+              "end_line": 197,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 0,
+              "start_line": 191
+            }
+          },
+          "decoded_bytes": 570149,
+          "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 55637,
+          "physical_sha256": "b87de30e69660619e538107ac43d9e34d4734bd4bdd81d25c06351f637f5c7cd",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 81,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+        },
+        "pointer": "#/graph/locations/0",
+        "qualified_reference": {
+          "kind": "StateLocation",
+          "local_id": {
+            "kind": "program_location",
+            "value": "d97ae12c60ef30d86deef36d929e8697",
+            "wire": "program_location:d97ae12c60ef30d86deef36d929e8697"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "ec79246ecf01017eef7bc927d2480c9b2bade700b92923c6af2ce332ad7b8fc1",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00081.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:19e725794d688820845ff863",
+                "wire": "opdef:op:19e725794d688820845ff863"
+              },
+              "entry": "light_color",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:ccd5bce9e3d8f608f4deb5f0",
+                  "wire": "source:atom:ccd5bce9e3d8f608f4deb5f0"
+                },
+                "end_column": 16,
+                "end_line": 197,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 0,
+                "start_line": 191
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "StateLocation",
+        "wire_order": 372106,
+        "wire_order_is_runtime_order": false
+      },
+      "caller_normal_result": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:5e025c6b8f810d2c8dbf069e",
+              "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+            },
+            "entry": "DrawOptions.draw_circle",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:b0b36165d6eb7dca6bc70f91",
+                "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+              },
+              "end_column": 9,
+              "end_line": 83,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 4,
+              "start_line": 64
+            }
+          },
+          "decoded_bytes": 801974,
+          "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 73381,
+          "physical_sha256": "4cb191d86566b1445221d224d6692b3416976790cf1c70772477575459e632f6",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 88,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+        },
+        "pointer": "#/graph/values/122",
+        "qualified_reference": {
+          "kind": "Value",
+          "local_id": {
+            "kind": "program_value",
+            "value": "dacc8528f8301ab875a3ec4c58f6de36",
+            "wire": "program_value:dacc8528f8301ab875a3ec4c58f6de36"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:5e025c6b8f810d2c8dbf069e",
+                "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+              },
+              "entry": "DrawOptions.draw_circle",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:b0b36165d6eb7dca6bc70f91",
+                  "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+                },
+                "end_column": 9,
+                "end_line": 83,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 4,
+                "start_line": 64
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "ReferenceValue",
+        "wire_order": 365957,
+        "wire_order_is_runtime_order": false
+      },
+      "caller_operation": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:5e025c6b8f810d2c8dbf069e",
+              "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+            },
+            "entry": "DrawOptions.draw_circle",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:b0b36165d6eb7dca6bc70f91",
+                "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+              },
+              "end_column": 9,
+              "end_line": 83,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 4,
+              "start_line": 64
+            }
+          },
+          "decoded_bytes": 801974,
+          "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 73381,
+          "physical_sha256": "4cb191d86566b1445221d224d6692b3416976790cf1c70772477575459e632f6",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 88,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+        },
+        "pointer": "#/graph/operations/70",
+        "qualified_reference": {
+          "kind": "Operation",
+          "local_id": {
+            "kind": "program_operation",
+            "value": "89fe305c817be3b207d115343ba5345d",
+            "wire": "program_operation:89fe305c817be3b207d115343ba5345d"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:5e025c6b8f810d2c8dbf069e",
+                "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+              },
+              "entry": "DrawOptions.draw_circle",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:b0b36165d6eb7dca6bc70f91",
+                  "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+                },
+                "end_column": 9,
+                "end_line": 83,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 4,
+                "start_line": 64
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "Operation",
+        "wire_order": 365693,
+        "wire_order_is_runtime_order": false
+      },
+      "caller_region": {
+        "artifact_receipt": {
+          "body_identity": {
+            "definition": {
+              "kind": "opdef",
+              "value": "op:5e025c6b8f810d2c8dbf069e",
+              "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+            },
+            "entry": "DrawOptions.draw_circle",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:b0b36165d6eb7dca6bc70f91",
+                "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+              },
+              "end_column": 9,
+              "end_line": 83,
+              "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+              "start_column": 4,
+              "start_line": 64
+            }
+          },
+          "decoded_bytes": 801974,
+          "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+          "external": true,
+          "frame_pointer": "#/frame",
+          "graph_pointer": "#/graph",
+          "interface_pointer": "#/interface",
+          "metadata_pointer": "#/metadata",
+          "physical_bytes": 73381,
+          "physical_sha256": "4cb191d86566b1445221d224d6692b3416976790cf1c70772477575459e632f6",
+          "representation": "scar.body-construction-checkpoint/1",
+          "sequence": 88,
+          "structured_pointer": "#/structured",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+        },
+        "pointer": "#/graph/regions/0",
+        "qualified_reference": {
+          "kind": "Region",
+          "local_id": {
+            "kind": "program_region",
+            "value": "51399b81960e46b6302fc5fb2d21b589",
+            "wire": "program_region:51399b81960e46b6302fc5fb2d21b589"
+          },
+          "namespace": {
+            "artifact": {
+              "decoded_sha256": "6f198aa586d6eb8164bc16d9f224a72c30d725da5ebe67d21e4ef2175b92dd23",
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_plain_20261023/checkpoints/00088.json.gz"
+            },
+            "body": {
+              "definition": {
+                "kind": "opdef",
+                "value": "op:5e025c6b8f810d2c8dbf069e",
+                "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+              },
+              "entry": "DrawOptions.draw_circle",
+              "source": {
+                "atom_id": {
+                  "kind": "source",
+                  "value": "atom:b0b36165d6eb7dca6bc70f91",
+                  "wire": "source:atom:b0b36165d6eb7dca6bc70f91"
+                },
+                "end_column": 9,
+                "end_line": 83,
+                "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+                "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+                "start_column": 4,
+                "start_line": 64
+              }
+            },
+            "record_pointer": "#/graph",
+            "representation": "scar.program-graph/15"
+          }
+        },
+        "record_type": "Region",
+        "wire_order": 365302,
+        "wire_order_is_runtime_order": false
+      }
+    },
+    "original_capture_and_source_proofs_replayed": false,
+    "original_endpoint_membership_verified": true,
+    "report_record": {
+      "chunk": {
+        "bytes": 4625,
+        "decoded_bytes": 74869,
+        "decoded_sha256": "16e4fd250dd1e3c4a521e33abaab9a52bbe413c4ae7d68a3e900fd6b95072356",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.completion_routes.0000.jsonl.gz",
+        "rows": 27,
+        "sha256": "3d3fca4409ec7b7a7c8720bffef98ea2c39f43f7022f993c6ccd1b99225757d8"
+      },
+      "line": 1,
+      "manifest": {
+        "bytes": 71118,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/manifest.json",
+        "sha256": "ce6416d7fcc11c2f0e190937fdba22a8d0fcfb2678b9f249e4c5699c35a88ba6"
+      },
+      "ordinal": 0,
+      "pointer_within_line": "",
+      "row_sha256": "96f9f021c5d5d836df8627ef306fef0c6aeae99775533458d06a05c0efcc9936",
+      "table": "routing.completion_routes"
+    },
+    "route": {
+      "attempt": {
+        "index": 175673,
+        "line_number": 175673,
+        "line_sha256": "a72da95c4afad722b0e1c9be137d06beef4dc20183f3a6f5f0541a4230c9370a",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-operands.272038.jsonl"
+      },
+      "call": {
+        "kind": "opdef",
+        "value": "op:ff4bc0e4b6ff82733781f569",
+        "wire": "opdef:op:ff4bc0e4b6ff82733781f569"
+      },
+      "call_source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:b76e47fdc486dab1c067eb0b",
+          "wire": "source:atom:b76e47fdc486dab1c067eb0b"
+        },
+        "end_column": 35,
+        "end_line": 79,
+        "fingerprint": "sha256:2e5d98a5c13227cba6f5574bf72b6eab149ee5b3783df0481b8d240f34047f56",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/envs/utils.py",
+        "start_column": 12,
+        "start_line": 79
+      },
+      "callee": {
+        "invocation_id": 40464,
+        "process_id": 272038,
+        "thread_id": 124602718246720
+      },
+      "callee_definition": {
+        "kind": "opdef",
+        "value": "op:19e725794d688820845ff863",
+        "wire": "opdef:op:19e725794d688820845ff863"
+      },
+      "callee_region": {
+        "kind": "program_region",
+        "value": "002089579e2a0b462d0abb7be3c77ea2",
+        "wire": "program_region:002089579e2a0b462d0abb7be3c77ea2"
+      },
+      "caller": {
+        "invocation_id": 40461,
+        "process_id": 272038,
+        "thread_id": 124602718246720
+      },
+      "caller_definition": {
+        "kind": "opdef",
+        "value": "op:5e025c6b8f810d2c8dbf069e",
+        "wire": "opdef:op:5e025c6b8f810d2c8dbf069e"
+      },
+      "caller_region": {
+        "kind": "program_region",
+        "value": "51399b81960e46b6302fc5fb2d21b589",
+        "wire": "program_region:51399b81960e46b6302fc5fb2d21b589"
+      },
+      "conditions": [
+        "CAPTURE_PRODUCER_TRUSTED",
+        "NO_FRAME_INTERPOSITION",
+        "NO_NAMESPACE_MUTATION_BETWEEN_OBSERVATION_AND_LOAD",
+        "OBSERVER_AND_AUDIT_NONINTERFERENCE",
+        "MONITORING_DELIVERY_CONTINUITY_UNVERIFIED",
+        "SOURCE_CORE_EXECUTION_PRECONDITIONS",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "CONTENTS_EFFECTS_AND_WORLD_EQUIVALENCE_UNVERIFIED"
+      ],
+      "exit_anchor": {
+        "index": 80910,
+        "line_number": 80910,
+        "line_sha256": "90a6c05e25f1cb3e9af560ea5fae526d0c90e1b33766c31b426440a71af27ae7",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace/call-events.272038.jsonl"
+      },
+      "normal_result": {
+        "kind": "program_value",
+        "value": "dacc8528f8301ab875a3ec4c58f6de36",
+        "wire": "program_value:dacc8528f8301ab875a3ec4c58f6de36"
+      },
+      "operation": {
+        "kind": "program_operation",
+        "value": "89fe305c817be3b207d115343ba5345d",
+        "wire": "program_operation:89fe305c817be3b207d115343ba5345d"
+      },
+      "payload_use": {
+        "kind": "program_use",
+        "value": "1c2104aa7cb006e5406b62008b13e42c",
+        "wire": "program_use:1c2104aa7cb006e5406b62008b13e42c"
+      },
+      "payload_value": {
+        "kind": "program_value",
+        "value": "870a67799eccb31762cff1b717864d17",
+        "wire": "program_value:870a67799eccb31762cff1b717864d17"
+      },
+      "post_world": {
+        "kind": "program_value",
+        "value": "15bf66b6859b18e792bde35f53c21464",
+        "wire": "program_value:15bf66b6859b18e792bde35f53c21464"
+      },
+      "rule": "DIRECT_NORMAL_COMPLETION_V1"
+    },
+    "run": {
+      "id": {
+        "kind": "exec_run",
+        "value": "capture:91a2ed5e3f92817799bd02fb2453dadd65ad28fbf4361165c31b881c371c0c66",
+        "wire": "exec_run:capture:91a2ed5e3f92817799bd02fb2453dadd65ad28fbf4361165c31b881c371c0c66"
+      },
+      "source": {
+        "artifact": {
+          "schema": "strace.syscalls.text.v1",
+          "sha256": "76542959431284a2b5ddc972fe5761f7d370723b97926a77fd9f857a99f8e95c",
+          "size_bytes": 71215077,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/os/syscalls.272038"
+        },
+        "locator": "#/lines/7"
+      }
+    },
+    "runtime_control_established": false,
+    "source_conditions": [
+      "source association reuses the bound inventory producer's exact code/source witness",
+      "this adapter does not independently repeat its compiler/source matching",
+      "collector and retained artifact producer follow their declared capture protocols",
+      "source and canonical body references are fragments, not a merged ProgramSnapshot",
+      "a recorded frame parent interval is not an actual/formal/return, environment, effect or ATen callsite proof"
+    ],
+    "transformation_authorized": false,
+    "whole_program_established": false,
+    "world_equivalence_established": false
+  }
+}

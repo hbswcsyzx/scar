@@ -1,0 +1,95 @@
+{
+  "file_count": 17,
+  "files": [
+    {
+      "bytes": 3149,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/README.md",
+      "sha256": "3a9fab839389a878435ccce1ac99e3d98c6b9e1c86cd8f9e569bda4835bb80ff"
+    },
+    {
+      "bytes": 3700,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/archive_receipts.py",
+      "sha256": "5b4f7b2d59c983ea11f815e5f8746774565d1db8f383a727a2104263adab4438"
+    },
+    {
+      "bytes": 10206,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/artifact-receipts.json",
+      "sha256": "55a3064b8e6e08798ef3c6c349d48378ede52aea89bcc809e36cde0b5f5eae2f"
+    },
+    {
+      "bytes": 22268,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/body-26-checks.json",
+      "sha256": "3a7882e302b31a0c7af4710261af4f265cc19690d65e2dddf8a2f5636c79e1b8"
+    },
+    {
+      "bytes": 648,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/body11-previous-structure.json",
+      "sha256": "aa6ada8e884571045f7e7e4698696d9dfc25d5c937724f0c34b7dcefef6b3d88"
+    },
+    {
+      "bytes": 4496,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/freeze.json",
+      "sha256": "1abfd7969f3ad2eddc5c3d79bb077cf1319139567cec395ed558fada39b3a2dc"
+    },
+    {
+      "bytes": 19307,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/original-port-references.json",
+      "sha256": "47da431ee5871aaa66737194818ab2f6d56bc22adf6fef0f3ff917e49473d2af"
+    },
+    {
+      "bytes": 1477,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/producer.json",
+      "sha256": "7ac5191a5ef7e4faa56b17b47cbf686ac659a3db8ce58239e550b063c4987871"
+    },
+    {
+      "bytes": 781,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/progress.jsonl",
+      "sha256": "951ef720b3928bd44716db9f482e81380ae2d7667d5e59b2d31a370d1bcdd3d6"
+    },
+    {
+      "bytes": 862959,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/result/body-26.source-program5.json.gz",
+      "sha256": "180521b7803f93873ecbeb20ce41271cdc3d09259a264b113da27bce72f67e4c"
+    },
+    {
+      "bytes": 11905,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/run.py",
+      "sha256": "af487a5ef056b9ea7fe4a60828e5d65d99bc573d0f1788e7fe912b2857ef5edf"
+    },
+    {
+      "bytes": 557,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/run.sh",
+      "sha256": "749966a70a25653c015eb9d19445a602df94d80bb403cbe68908ecea60d46e5b"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/run.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 209,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/run.stdout.json",
+      "sha256": "78875015fdca8d69ab5e429c7267aa5cdba2edc179358bb547c55f4edfedca48"
+    },
+    {
+      "bytes": 815,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/run.time.txt",
+      "sha256": "9e5837b95598985338c3861f5cd5668dfde0f9f8e20f8a5caee0576ad4a110aa"
+    },
+    {
+      "bytes": 1432,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/source-input.json",
+      "sha256": "c7a45db5479405ec703e4df181570eddc4b5b5b7fd51fd56b8f7cf08b13c75e6"
+    },
+    {
+      "bytes": 54101,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt03_20261023/summary.json",
+      "sha256": "798509ee32cc85046819ce291b1406262efc077689ecddecaf6e36920acf7b82"
+    }
+  ],
+  "schema": "scar.root-artifact-receipts",
+  "schema_version": 1,
+  "stored_bytes": 998010,
+  "transformation_authorized": false,
+  "whole_model_established": false
+}

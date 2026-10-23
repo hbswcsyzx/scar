@@ -1,0 +1,27 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/run.py", line 85, in <module>
+    previous = SourceProgram.read_structure(previous_document, max_operations=4000)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py", line 210, in read_structure
+    return cls.from_dict(document, max_operations=max_operations, verification="STRUCTURE")
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py", line 201, in from_dict
+    checked = validate_source_program(result, max_operations=max_operations, language_options=language_options,
+                                      verification=verification)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py", line 1106, in validate_source_program
+    require_valid_structured_body(result.structured, result.graph, result.interface, result.metadata,
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        semantic=result.semantic, control=result.control, language=result.language,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        source_tree=source_tree, language_options=language_options, structural_only=structural_only)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/structured_lowering.py", line 597, in require_valid_structured_body
+    return _require_valid_structured_body(model, graph, interface, metadata,
+        semantic=semantic, control=control, language=language, source_tree=source_tree,
+        language_options=language_options, structural_only=structural_only)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/structured_lowering.py", line 733, in _require_valid_structured_body
+    validate_environment_body(model, graph, interface, metadata, semantic, language=language)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_environment_validation.py", line 154, in validate_environment_body
+    need(owner is not None and owner.kind is OperationKind.MODULE,
+                                             ^^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'OperationKind' where it is not associated with a value

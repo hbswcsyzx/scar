@@ -1,0 +1,18 @@
+[
+  {
+    "case": "bare_local_id",
+    "error": "call endpoint query: exact qualified canonical endpoint required"
+  },
+  {
+    "case": "foreign_namespace",
+    "error": "call endpoint query: namespace is outside this report's selected original body scope"
+  },
+  {
+    "case": "wrong_endpoint_kind",
+    "error": "typed ID namespace/wire mismatch"
+  },
+  {
+    "case": "different_Run",
+    "error": "call endpoint query: source-body scope or expected Run differs"
+  }
+]

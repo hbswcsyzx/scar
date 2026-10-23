@@ -1,0 +1,7 @@
+{"stage": "imports", "elapsed_s": 0.0770328270009486, "max_rss_kib": 37088, "status": "BEGIN"}
+{"stage": "imports", "elapsed_s": 0.6146676789940102, "max_rss_kib": 40684, "status": "END"}
+{"stage": "one_source", "elapsed_s": 16.416156039995258, "max_rss_kib": 478140, "status": "BEGIN", "file_index": 140}
+{"stage": "one_source", "elapsed_s": 19.498125825994066, "max_rss_kib": 478140, "status": "END"}
+{"stage": "body", "elapsed_s": 19.49817842998891, "max_rss_kib": 478140, "status": "BEGIN", "file_index": 140, "body_index": 26}
+{"stage": "body", "elapsed_s": 37.12778178299777, "max_rss_kib": 478140, "status": "END", "body_index": 26, "recovered": true, "operations": 65}
+{"stage": "FINISHED", "elapsed_s": 37.1536335569981, "max_rss_kib": 478140, "status": "PASS_WITH_OPEN"}

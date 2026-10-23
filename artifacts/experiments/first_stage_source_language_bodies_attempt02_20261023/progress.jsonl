@@ -1,0 +1,3 @@
+{"stage": "imports", "elapsed_s": 0.07907849599723704, "max_rss_kib": 36028, "status": "BEGIN"}
+{"stage": "imports", "elapsed_s": 0.6341846029972658, "max_rss_kib": 39544, "status": "END"}
+{"stage": "FAILED", "elapsed_s": 3.59597259099246, "max_rss_kib": 116600, "error_type": "UnboundLocalError", "detail": "cannot access local variable 'OperationKind' where it is not associated with a value"}

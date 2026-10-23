@@ -47,9 +47,10 @@ def captured_cell_slot(definition, name):
 class StructuredEnvironmentBuilder(StructuredBuilder):
     """The structured body rules with canonical environment and address ports."""
 
-    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None):
+    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None,
+                 language_options=None):
         super().__init__(context, entry, source=source, max_operations=max_operations,
-                         sealed_source=sealed_source)
+                         sealed_source=sealed_source, language_options=language_options)
         self.profile = BodyLoweringProfile.STRUCTURED_ENV
         self.prepared_source = context
         self.environment = None
@@ -105,6 +106,13 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         return cursor, value
 
     def expr(self, node, cursor):
+        if self.has_language("LEXICAL_LOCALS") and isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+            label = ("GENERATOR_EXPRESSION_CREATION_DRIVE_INTERFACE_UNIMPLEMENTED" if isinstance(node, ast.GeneratorExp)
+                     else "COMPREHENSION_SCOPE_INTERFACE_UNIMPLEMENTED")
+            raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, label)
+        if self.has_language("SLICE_KEYS") and isinstance(node, (ast.Slice, ast.Subscript)):
+            from scar.analysis.source_slice_lowering import lower_slice, lower_subscript
+            return lower_slice(self, node, cursor) if isinstance(node, ast.Slice) else lower_subscript(self, node, cursor)
         if isinstance(node, ast.Dict):
             from scar.analysis.source_mapping_lowering import lower_dictionary
             return lower_dictionary(self, node, cursor)
@@ -142,6 +150,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         return self._global_read(node, cursor, old)
 
     def store(self, target, value, cursor):
+        if self.has_language("FIXED_UNPACK") and isinstance(target, (ast.Tuple, ast.List)):
+            from scar.analysis.source_unpack_lowering import lower_unpack_target
+            return lower_unpack_target(self, target, value, cursor)
         if isinstance(target, (ast.Attribute, ast.Subscript)):
             from scar.analysis.source_heap_lowering import store_heap_target
             return store_heap_target(self, target, value, cursor)
@@ -227,7 +238,15 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         self.function_context = RegionID(_key("function-body", self.function_definition.id.wire, self.profile.value))
         self.function_blocks = []; self.reference_candidates = {}
         try:
-            layout = compiler_environment_layout(self.prepared_source, node, self.function_definition)
+            evidence = self.language_options.code_evidence if self.language_options is not None else None
+            if evidence is not None:
+                from scar.analysis.source_environment_layout import CompilerEnvironmentLayout
+                evidence.require_definition(self.snapshot, self.function_definition.id, self.source(node))
+                code = evidence.code
+                layout = CompilerEnvironmentLayout(tuple(code.co_freevars), tuple(code.co_cellvars),
+                                                   code.co_qualname, code.co_firstlineno)
+            else:
+                layout = compiler_environment_layout(self.prepared_source, node, self.function_definition)
         except (ValueError, SyntaxError, TypeError, KeyError, RecursionError) as error:
             raise _Unsupported(GapKind.SOURCE_MAPPING, node,
                 "compiler environment layout unavailable: " + str(error)) from error
@@ -238,7 +257,47 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         if free_names != self.free_cells:
             raise _Unsupported(GapKind.SOURCE_MAPPING, node,
                 "source symbol table and compiled free-variable interface differ")
-        self.locals = {symbol.get_name() for symbol in symbols if symbol.is_local()} - self.local_cells
+        physical_locals = {symbol.get_name() for symbol in symbols if symbol.is_local()}
+        if self.has_language("LEXICAL_LOCALS"):
+            from scar.ir.program.source_language import CompilerLocalMapping
+            lexical = {name for owner, name in self.slots if owner == self.function_definition.id}
+            transient = set()
+            def comprehension_in_this_function(owner):
+                seen = set()
+                while owner in self.semantic.definitions and owner not in seen:
+                    if owner == self.function_definition.id:
+                        return True
+                    seen.add(owner)
+                    definition = self.semantic.definitions[owner]
+                    if getattr(definition.kind, "value", definition.kind) in ("function", "method", "class"):
+                        return False
+                    owner = definition.parent_id
+                return False
+            for symbol in symbols:
+                name = symbol.get_name()
+                if not symbol.is_local():
+                    continue
+                comp_iter = bool(getattr(symbol, "is_comp_iter", lambda: False)())
+                comp_cell = bool(getattr(symbol, "is_comp_cell", lambda: False)())
+                if name in lexical:
+                    slots = (self.slots[self.function_definition.id, name],)
+                    category = "LEXICAL_FUNCTION"
+                elif comp_iter or comp_cell:
+                    slots = tuple(slot.slot_id for slot in self.semantic.slots.values()
+                                  if slot.name == name and slot.metadata.get("scope_kind") == "comprehension"
+                                  and comprehension_in_this_function(slot.owner))
+                    if not slots:
+                        raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                            "COMPILER_COMPREHENSION_SLOT_UNRECOVERED: " + name)
+                    category = "COMPREHENSION_TRANSIENT"
+                    transient.add(name)
+                else:
+                    raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                        "compiler local has no exact lexical or comprehension source slot: " + name)
+                self.language_compiler_locals.append(CompilerLocalMapping(name, category, slots, comp_iter, comp_cell))
+            self.local_cells = frozenset(set(self.local_cells) - transient)
+            physical_locals -= transient
+        self.locals = physical_locals - self.local_cells
         self.global_names = {symbol.get_name() for symbol in symbols if symbol.is_global()}
         parameters = [argument for argument, _ in formal_nodes(node)]
         cursor = self.new_block(node)
@@ -282,6 +341,8 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         self.frame_transition(cursor, node, refs, PythonProtocolKind.FRAME_ENTER)
         parameter_values = {parameter.arg: port.value for parameter, port in zip(parameters, ports)}
         for name in layout.cellvars:
+            if name not in self.local_cells:
+                continue
             parameter_node = next((parameter for parameter in parameters if parameter.arg == name), node)
             cursor = self._make_cell(cursor, parameter_node, name, parameter_values.get(name))
         for name in sorted(self.locals):

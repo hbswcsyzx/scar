@@ -1,0 +1,217 @@
+{
+  "argument_rendering_frontiers": [],
+  "blocking_frontiers": [],
+  "branch_notes": [
+    "existing coordinate births, not numeric TID equality alone, qualify known process groups",
+    "argument argv truncation remains explicit; successful exec table-unsharing effect needs actual result, not full argv",
+    "CLONE_FILES retains the shared container; no FD contents, offsets or cross-thread total order inferred",
+    "ImportedAt is observation, not physical allocation; no physical table created/freed/ready asserted"
+  ],
+  "budgets": {
+    "decoded_bytes": 12000000,
+    "lines": 200000,
+    "single_line_bytes": 16384
+  },
+  "container_refinements_applied": 0,
+  "currently_published_unresolved_containers": 35,
+  "elapsed_seconds": 0.4284436190064298,
+  "full_execution_model_semantics": "OPEN",
+  "full_scope_count_authority": "original R1 manifest + prior audit03, exact input SHA qualified",
+  "full_scope_table_switch_syscall_counts": {
+    "close_range": 0,
+    "execveat": 0,
+    "unshare": 0
+  },
+  "inputs": {
+    "archive": {
+      "bytes": 145854,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/archive-index.json",
+      "sha256": "f4b21fbaef73f27d0e708a9ff6e4d117e8d8f8e2b1a418baa9addaf141567815"
+    },
+    "audit": {
+      "bytes": 20091,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/audit-attempt03-summary.json",
+      "sha256": "1081479b77742fbbe80fbabadc6f6118085f250728b6342e6492243e9b47d2cf"
+    },
+    "audit_producer": {
+      "bytes": 3433,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/audit-attempt03-producer.json",
+      "sha256": "a666a0661053cc9078c1a5baf4d51dc36d248358c76d6f58f64b847ff0397255"
+    },
+    "coordinates": {
+      "bytes": 674239,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/capture-coordinates.json",
+      "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25"
+    },
+    "manifest": {
+      "bytes": 316803,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/interfaces/manifest.json",
+      "sha256": "cbc6dcfd78ccca0961bdabecce94bc747b7b281fdbc3f49228c8b52b9b3aec14"
+    },
+    "r2": {
+      "bytes": 443446,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_resource_refinement_20261023/gate-attempt01/result/manifest.json",
+      "sha256": "6b5e1ae12e2c05364c76364cf1b1cf7859d2f6ddb09380c8940a3980381bde5c"
+    },
+    "summary": {
+      "bytes": 3368,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/summary.json",
+      "sha256": "6c160e586bb639a9144f01b20a8dc185efe776dd21a99bbfdf152502baf0d579"
+    }
+  },
+  "main_context_continuity": "SUPPORTED_UNDER_CAPTURE_CONTRACT",
+  "main_counts_by_exact_complement": {
+    "access": 14,
+    "brk": 11592,
+    "clone": 1,
+    "clone3": 201,
+    "close": 12331,
+    "dup": 7,
+    "dup2": 0,
+    "epoll_create1": 2,
+    "epoll_ctl": 1,
+    "epoll_wait": 0,
+    "eventfd2": 5,
+    "execve": 1,
+    "exit": 0,
+    "exit_group": 1,
+    "fcntl": 38,
+    "flock": 2,
+    "fstat": 12253,
+    "get_mempolicy": 2,
+    "getcwd": 17,
+    "getdents64": 3430,
+    "ioctl": 645,
+    "link": 1,
+    "linkat": 1,
+    "lseek": 10899,
+    "lstat": 31538,
+    "madvise": 35,
+    "mbind": 112,
+    "mkdir": 29,
+    "mmap": 3423,
+    "mprotect": 781,
+    "mremap": 11,
+    "munmap": 670,
+    "newfstatat": 95,
+    "open": 6,
+    "openat": 13954,
+    "pipe2": 12,
+    "poll": 0,
+    "pread64": 18957,
+    "read": 22486,
+    "readlink": 19,
+    "readlinkat": 1,
+    "rename": 3,
+    "rmdir": 3,
+    "stat": 42077,
+    "statfs": 1,
+    "statx": 8,
+    "symlink": 19,
+    "unlink": 24,
+    "unlinkat": 2,
+    "utimensat": 1,
+    "vfork": 3,
+    "wait4": 12,
+    "write": 782854,
+    "writev": 62524
+  },
+  "main_failed_execs_by_complement": 0,
+  "main_successful_execs_by_complement": 1,
+  "mechanically_bindable_selected_ports": 35,
+  "non_main_failed_execs": 25,
+  "non_main_interface_counts": {
+    "access": 3,
+    "brk": 126,
+    "clone": 45,
+    "clone3": 1,
+    "close": 481,
+    "dup": 1,
+    "dup2": 9,
+    "epoll_create1": 2,
+    "epoll_ctl": 1,
+    "epoll_wait": 2,
+    "execve": 31,
+    "exit": 211,
+    "exit_group": 5,
+    "fcntl": 8,
+    "fstat": 323,
+    "getcwd": 2,
+    "getdents64": 83,
+    "ioctl": 205,
+    "lseek": 243,
+    "lstat": 32,
+    "madvise": 213,
+    "mbind": 55,
+    "mkdir": 1,
+    "mmap": 404,
+    "mprotect": 903,
+    "mremap": 6,
+    "munmap": 182,
+    "newfstatat": 5,
+    "open": 1,
+    "openat": 461,
+    "pipe2": 1,
+    "poll": 30654,
+    "pread64": 6,
+    "read": 768,
+    "readlink": 5,
+    "readlinkat": 2,
+    "stat": 1153,
+    "vfork": 1,
+    "wait4": 1,
+    "write": 28
+  },
+  "non_main_successful_execs": 6,
+  "parser": {
+    "bytes": 58928,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_resources.py",
+    "sha256": "c52f45a62693e3e78875b3a23b7c56e0a4cdb48862436981f8d98941a4900c1b"
+  },
+  "peak_rss_kib": 43076,
+  "run": {
+    "id": {
+      "kind": "exec_run",
+      "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+      "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+    },
+    "source": {
+      "artifact": {
+        "schema": "strace.syscalls.text.v1",
+        "sha256": "70ab02c2c19c407b1bbfc85f0a4f54e1ab3582e71fc783d9426973b0527a7ecd",
+        "size_bytes": 81578171,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369749"
+      },
+      "locator": "#/lines/7"
+    }
+  },
+  "schema": "scar.fd-table-complement-projection",
+  "schema_version": 1,
+  "scope": {
+    "calls": 36664,
+    "classifications": {
+      "COMPLETED": 36664,
+      "SIGNAL": 1
+    },
+    "decoded_bytes": 9264445,
+    "exact_archive_os_files": 253,
+    "excluded": {
+      "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369749.gz",
+      "compressed_bytes": 8568224,
+      "gzip_sha256": "7165527fab416d081218c5fef0e3630681660a0f1d292e12e6e737bccdc55115",
+      "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369749",
+      "raw_bytes": 81578171,
+      "raw_sha256": "70ab02c2c19c407b1bbfc85f0a4f54e1ab3582e71fc783d9426973b0527a7ecd"
+    },
+    "lines": 36665,
+    "verified_non_main_files": 252
+  },
+  "script": {
+    "bytes": 16767,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_table_projection_20261023/project.py",
+    "sha256": "96b38e540a50fa6ae8ba3a319a0ef6f8e14eaff29dd2bf37b026c0be1a00f44a"
+  },
+  "status": "VERIFIED_RETAINED_SCOPE_PROJECTION",
+  "transformation_authorized": false,
+  "whole_model_established": false
+}

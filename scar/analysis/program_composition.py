@@ -588,6 +588,93 @@ class CompositionIndex:
     def verify_source_attachments(self, scanned, groups):
         return [attachment.verify_capture(scanned, groups) for attachment in self._attachments]
 
+    def source_attachment_reuse_checks(self, scanned, groups):
+        return [attachment.current_scope_receipt(scanned, groups) for attachment in self._attachments]
+
+    def static_code_witness(self, captured, *, compilation_profile, captured_python_build):
+        found = [attachment.static_code_witness(captured, compilation_profile=compilation_profile,
+                    captured_python_build=captured_python_build) for attachment in self._attachments]
+        found = [witness for witness in found if witness is not None]
+        verified = [witness for witness in found if witness["status"] == "SOURCE_VERIFIED"]
+        selected = verified or found
+        if not selected:
+            return None
+        first = selected[0]
+        if any(witness["captured_code"] != first["captured_code"]
+               or witness["code_source_link"] != first["code_source_link"] for witness in selected[1:]):
+            raise ValueError("attachments contain ambiguous complete static code/source witnesses")
+        return first
+
+    def static_definition_reference(self, witness):
+        for attachment in self._attachments:
+            if witness["record_locator"]["artifact"] == attachment.receipts()["report"]["artifact"]:
+                return attachment.static_definition_reference(witness)
+        raise ValueError("static source witness has no explicitly bound original attachment")
+
+    @staticmethod
+    def current_source_guard(snapshot, index, checks):
+        """Validate a producer's explicit current guard, without refreshing it."""
+        if type(index) is not int or not 0 <= index < len(checks):
+            raise ValueError("current source guard has no exact report index")
+        check = checks[index]
+        if (check["path"] != snapshot.path or check["expected_fingerprint"] != snapshot.fingerprint
+                or check["method"] != "tokenize.open decoded text, universal newlines, UTF-8 SHA256"):
+            raise ValueError("current source guard belongs to a different source snapshot/method")
+        if check["status"] == "FINGERPRINT_MATCH" and (
+                check["actual_fingerprint"] != snapshot.fingerprint or check["frontier"] is not None):
+            raise ValueError("current source guard success contradicts its fingerprint")
+        if check["status"] not in ("FINGERPRINT_MATCH", "UNRESOLVED") or (
+                check["status"] == "UNRESOLVED" and type(check["frontier"]) is not str):
+            raise ValueError("current source guard has an unsupported outcome or no frontier")
+        return deepcopy(check)
+
+    def validate_static_source_binding(self, binding, *, compilation_profile,
+                                       captured_python_build, current_source_checks):
+        """Shared source-only proof query for dispatch and SourceBodyAccess.
+
+        Dynamic rows are supplied by their current raw readers. This validates
+        original static evidence and the declared guard, adding no producer.
+        """
+        from scar.ir.program.call_edges import CodeCapture, CodeSourceLink, CallLinkStatus
+        capture = decode(CodeCapture, binding["code_capture"])
+        if capture.process_id != binding["process_id"] or capture.code.key != binding["code"]:
+            raise ValueError("static binding differs from its current captured descriptor")
+        witness = self.static_code_witness(capture.code, compilation_profile=compilation_profile,
+            captured_python_build=captured_python_build)
+        if witness is None or witness["status"] != "SOURCE_VERIFIED":
+            raise ValueError("source-only binding has no complete original static code witness")
+        link = decode(CodeSourceLink, witness["code_source_link"])
+        if link.status is not CallLinkStatus.VERIFIED:
+            raise ValueError("static source link is not verified")
+        reference = self.static_definition_reference(witness)
+        index = binding["current_source_check"]
+        check = self.current_source_guard(link.snapshot, index, current_source_checks)
+        usable = witness["context_guard"]["status"] == "MATCH" and check["status"] == "FINGERPRINT_MATCH"
+        expected_witness = {"static_witness": witness,
+            "historical_definition": encode(reference) if reference is not None else None,
+            "current_guard_scope": "CURRENT_REUSED_CODE_SOURCE_FINGERPRINT", "current_guard_index": index}
+        expected_ref = encode(reference) if usable and reference is not None else None
+        if (binding.get("attachment_witness") != expected_witness
+                or binding["definition"] != expected_ref
+                or binding["definition_locator"] != (encode(reference.graph) if expected_ref is not None else None)
+                or binding["snapshot"] != (encode(link.snapshot) if usable else None)
+                or binding["source"] != (encode(link.source) if usable else None)
+                or binding["body"] is not None or binding.get("composition_element") is not None
+                or binding["complete_descriptor_match"] is not True
+                or binding["witness_status"] != "VERIFIED" or binding["witness_issues"] != encode(link.issues)
+                or binding["source_verification"] != "REUSED_HISTORICAL_CODE_SOURCE_WITNESS"
+                or binding["status"] != ("SOURCE_LINKED_REUSED_WITNESS"
+                    if usable and reference is not None else "UNRESOLVED")):
+            raise ValueError("current source-only binding changed its original static proof/guard")
+        for name in ("descriptor_witness_pointer", "code_source_witness_pointer", "admission_pointer",
+                     "descriptor_witness_locator", "code_source_witness_locator", "admission_locator"):
+            if binding.get(name) is not None:
+                raise ValueError("source-only static binding acquired a project/dynamic admission")
+        if binding.get("static_body_witness_pointers") != [] or binding.get("static_body_witness_locators") != []:
+            raise ValueError("external static source binding acquired typed body witnesses")
+        return {"source_usable": usable, "reference": reference,
+                "code_source_link": link, "static_witness": witness, "current_source_guard": check}
+
     def attachment_capture_declarations(self):
         return [attachment.capture_declaration() for attachment in self._attachments]
 

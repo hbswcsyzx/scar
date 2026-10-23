@@ -1,0 +1,42 @@
+[
+  {
+    "path": "artifacts/experiments/first_stage_current_source_scope_20261023/README.md",
+    "stored_bytes": 1735,
+    "stored_sha256": "c023ffafb66f7b20e8fd8494363188599f7418b8a8625cce4cb2540904a868cc"
+  },
+  {
+    "path": "artifacts/experiments/first_stage_current_source_scope_20261023/analyze.py",
+    "stored_bytes": 9484,
+    "stored_sha256": "2980681c4267dafc03abd64852a7eb706bd264ba8e0cec05f1571b55e20b2ba3"
+  },
+  {
+    "path": "artifacts/experiments/first_stage_current_source_scope_20261023/producer.json",
+    "stored_bytes": 3796,
+    "stored_sha256": "aef91cc9f1a1ff3229595d9fa61323d4f7c2379ed9a5c0c3020e5cbf87797022"
+  },
+  {
+    "path": "artifacts/experiments/first_stage_current_source_scope_20261023/result.json",
+    "stored_bytes": 5960,
+    "stored_sha256": "f485e26952a969f0c2c793c5217a24f54519d01184fbb0c25322f3c69596ef63"
+  },
+  {
+    "path": "artifacts/experiments/first_stage_current_source_scope_20261023/run.sh",
+    "stored_bytes": 389,
+    "stored_sha256": "296da80d52c9562bd8f735661d658d55e7bbc8d835e1e7076ddb1b8d228828c5"
+  },
+  {
+    "path": "artifacts/experiments/first_stage_current_source_scope_20261023/run.stderr.txt",
+    "stored_bytes": 0,
+    "stored_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "artifacts/experiments/first_stage_current_source_scope_20261023/run.stdout.json",
+    "stored_bytes": 559,
+    "stored_sha256": "6378005c96809e8e8447a1bb34c11b64fff57582e7df69361b1da14fa2bc14b2"
+  },
+  {
+    "path": "artifacts/experiments/first_stage_current_source_scope_20261023/run.time.txt",
+    "stored_bytes": 810,
+    "stored_sha256": "9e74eeccf62e654aff15a0ce34285806aa71eb8762c1491f45ea7f09c9cc53d5"
+  }
+]

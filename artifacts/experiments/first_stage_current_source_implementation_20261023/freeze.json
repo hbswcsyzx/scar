@@ -1,0 +1,45 @@
+{
+  "ast_only": true,
+  "base_revision": "6e6b67b8009b8765e8adfab5d1b8f216809d2eee",
+  "current_raw_scan_performed": false,
+  "current_source_connection_verified": false,
+  "diff_whitespace_check": true,
+  "first_stage_complete": false,
+  "frozen_utc": "2026-10-23T07:57:28.527953+00:00",
+  "modules": [
+    {
+      "bytes": 39545,
+      "path": "scar/analysis/source_attachments.py",
+      "sha256": "2720936fbfb6734085862e9118e1b613f2df79b04421443e3d594cd0ed91aa66"
+    },
+    {
+      "bytes": 60543,
+      "path": "scar/analysis/program_composition.py",
+      "sha256": "d2a805707cd2a596b32d184a92fac752bd111fcc7843ddae4b62e63fff1ab8d5"
+    },
+    {
+      "bytes": 57570,
+      "path": "scar/analysis/source_invocations.py",
+      "sha256": "c3653d125fc19222ab60a3f6a56f9e3eb556c257f556389571341843419ba8bf"
+    },
+    {
+      "bytes": 53561,
+      "path": "scar/analysis/dispatch_sources.py",
+      "sha256": "e95718a04a27acd7d8602c069bd6ed955a11b145c9a25fb2ecfbbe71e3e5f347"
+    },
+    {
+      "bytes": 29802,
+      "path": "scar/analysis/source_body_access.py",
+      "sha256": "1ea425eae82b3390dd0c53d028fdd086611a02bb022f6f0684f7e997fc190d93"
+    }
+  ],
+  "patch_sha256": "bce49088c3d2aaa242bbd4b68e8535bef4696adbf3c25854781651ae774ed42e",
+  "scar_modules_imported": false,
+  "schema": "scar.current-source-implementation-freeze",
+  "schema_version": 1,
+  "shared_ir_modified": false,
+  "source_compiled": false,
+  "source_reprepared": false,
+  "target_executed": false,
+  "transformation_authorized": false
+}

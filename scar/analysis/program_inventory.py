@@ -88,6 +88,9 @@ class ProgramInventory:
     structured: tuple[StructuredBodyModel, ...] = ()
 
     def _check_profile(self):
+        from scar.ir.program.source_language import reject_extended_protocols
+        for model in self.structured:
+            reject_extended_protocols(model)
         if self.call_sources is not None:
             from scar.analysis.call_seeds import CallSourceSeedReport
             from scar.analysis.call_demand import _call_source_scope
@@ -282,6 +285,9 @@ class ProgramInventory:
             if interfaces.profile is not required_profile:
                 raise ValueError("structured inventory interface profile mismatch")
             models = decode(tuple[StructuredBodyModel, ...], document["structured"])
+            from scar.ir.program.source_language import reject_extended_protocols
+            for model in models:
+                reject_extended_protocols(model)
             if len({model.definition for model in models}) != len(models):
                 raise ValueError("duplicate structured inventory model")
             if document["call_sources"] is None:

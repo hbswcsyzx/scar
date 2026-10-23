@@ -95,6 +95,10 @@ def expression_for_heap_target(builder, node, cursor):
     value, or evidence of a reaching binding.  SG ownership and real core Uses
     are retained while semantic_value remains absent.
     """
+    if (getattr(builder, "has_language", lambda _: False)("SLICE_KEYS")
+            and isinstance(node, (ast.Slice, ast.Tuple))):
+        from scar.analysis.source_slice_lowering import lower_key
+        return lower_key(builder, node, cursor)
     records = builder.old_by_atom.get(builder.source(node).atom_id, ())
     if len(records) == 1:
         return builder.expr(node, cursor)
@@ -192,8 +196,14 @@ def store_heap_target(builder, target, rhs, cursor):
         _unsupported(target, "heap target rule accepts only Attribute and Subscript")
     if not isinstance(target.ctx, ast.Store):
         raise _Unsupported(GapKind.SOURCE_MAPPING, target, "heap assignment target lacks Store context")
-    if isinstance(target, ast.Subscript) and isinstance(target.slice, ast.Slice):
-        _unsupported(target, "slice assignment needs its own evaluation and mutation rule")
+    if isinstance(target, ast.Subscript):
+        if getattr(builder, "has_language", lambda _: False)("SLICE_KEYS"):
+            if any(isinstance(child, ast.Slice) for child in ast.walk(target.slice)):
+                # The capability proves load-key construction only. Reusing
+                # the historical store contract would silently broaden it.
+                _unsupported(target, "SLICE_STORE_LIFETIME_UNRECOVERED")
+        elif isinstance(target.slice, ast.Slice):
+            _unsupported(target, "slice assignment needs its own evaluation and mutation rule")
     if isinstance(target, ast.Attribute) and target.attr.startswith("__") and not target.attr.endswith("__"):
         _unsupported(target, "private attribute assignment requires exact compiler-class name mangling")
     definition = _source_definition(builder, target, binding=True)

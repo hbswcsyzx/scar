@@ -1,0 +1,25 @@
+{
+  "file_count": 3,
+  "files": [
+    {
+      "bytes": 1435,
+      "path": "artifacts/experiments/first_stage_source_language_implementation_20261023/README.md",
+      "sha256": "f66b93ca4844c6ea6d3857d5d4ddd9fbba2b88e3948398f8bff347cd4a7a8004"
+    },
+    {
+      "bytes": 3512,
+      "path": "artifacts/experiments/first_stage_source_language_implementation_20261023/freeze.json",
+      "sha256": "5003d84713c9dd9d77433b9c589f9eaea5563f0b1a79db8d91eefe8a33113376"
+    },
+    {
+      "bytes": 104352,
+      "path": "artifacts/experiments/first_stage_source_language_implementation_20261023/implementation.patch",
+      "sha256": "787e0b801e7dbb8f627928443a321970b9f254189473e223c0e0fa93fbf3cfb7"
+    }
+  ],
+  "schema": "scar.root-artifact-receipts",
+  "schema_version": 1,
+  "stored_bytes": 109299,
+  "transformation_authorized": false,
+  "whole_model_established": false
+}

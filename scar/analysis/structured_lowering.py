@@ -46,7 +46,8 @@ class _Loop:
 
 
 class StructuredBuilder(_Builder):
-    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None):
+    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None,
+                 language_options=None):
         if sealed_source is not None:
             sealed_source._require_inputs(context.semantic, context.control)
         self.sealed_source = sealed_source
@@ -63,6 +64,32 @@ class StructuredBuilder(_Builder):
         self.loop_stack = []
         self.active_temporaries = []
         self.operation_records = {}
+        if language_options is not None:
+            from scar.analysis.source_language import SourceLanguageOptions
+            if type(language_options) is not SourceLanguageOptions:
+                raise TypeError("extended source language requires explicit SourceLanguageOptions")
+        self.language_options = language_options
+        self.language_namespace_root = str(context.root)
+        self.language_unpackings = []
+        self.language_slices = []
+        self.language_constants = []
+        self.language_compiler_locals = []
+
+    def has_language(self, name):
+        return self.language_options is not None and any(
+            item.name == name for item in self.language_options.capabilities)
+
+    def language_overlay(self, graph):
+        if self.language_options is None:
+            return None
+        from scar.ir.program.source_language import SourceLanguageOverlay
+        return SourceLanguageOverlay(self.snapshot, self.language_options.capabilities,
+            tuple(self.language_unpackings) if graph is not None else (),
+            tuple(self.language_slices) if graph is not None else (),
+            tuple(self.language_constants) if graph is not None else (),
+            tuple(self.language_compiler_locals),
+            self.language_options.code_evidence.to_dict() if self.language_options.code_evidence else None,
+            namespace_root=self.language_namespace_root)
 
     def emit(self, cursor, operation, node, role, old=None):
         super().emit(cursor, operation, node, role, old=old)
@@ -161,14 +188,22 @@ class StructuredBuilder(_Builder):
 
     def invoke(self, cursor, node, inputs, *, role=SourceRole.EXPRESSION, old=None,
                result_type=_REF, failure_handler=None):
+        normal, results, operation = self.invoke_results(cursor, node, inputs, role=role, old=old,
+            result_types=(result_type,) if result_type else (), failure_handler=failure_handler)
+        return normal, results[0] if results else None, operation
+
+    def invoke_results(self, cursor, node, inputs, *, role=SourceRole.EXPRESSION, old=None,
+                       result_types=(), failure_handler=None):
+        if type(result_types) is not tuple:
+            raise TypeError("normal payload types must be an explicit tuple")
         operation_id = self.fresh(OperationID, "structured-invoke")
         uses = [self.use(operation_id, value, child, input_role, index, semantic_value=static)
                 for value, child, input_role, index, static in inputs]
         uses.append(self.use(operation_id, cursor.state, node, "state", 0))
-        normal = self.new_block(node, role=role, extra_types=(result_type,) if result_type else ())
+        normal = self.new_block(node, role=role, extra_types=result_types)
         failure = self.new_block(node, role=SourceRole.EXCEPTION, extra_types=(_REF,))
         normal.env = dict(cursor.env); failure.env = dict(cursor.env)
-        signatures = (CompletionSignature(ExitKind.NORMAL, ((result_type,) if result_type else ()) + (self.state_type,)),
+        signatures = (CompletionSignature(ExitKind.NORMAL, result_types + (self.state_type,)),
                       CompletionSignature(ExitKind.RAISE, (_REF, self.state_type)))
         edges = tuple(CompletionSuccessor(signature.kind, target.block,
                       tuple(CompletionResult(index) for index in range(len(signature.types))))
@@ -183,7 +218,7 @@ class StructuredBuilder(_Builder):
             self.finish_exit(failure, node, exception, ExitKind.RAISE)
         else:
             failure_handler(failure, exception)
-        return normal, self.block_arguments[normal.block][0] if result_type else None, operation_id
+        return normal, tuple(self.block_arguments[normal.block][:-1]), operation_id
 
     def invoke_protocol(self, cursor, node, values, kind, *, result_type=_REF, failure_handler=None):
         inputs = tuple((value, node, "protocol-input", index, None) for index, value in enumerate(values))
@@ -543,8 +578,11 @@ class StructuredBuilder(_Builder):
             # This complete check also validates the canonical core; callers of
             # PreparedSource.lower receive a fully checked constructed body.
             _require_valid_structured_body(structured, graph, self.interface, metadata,
-                semantic=self.semantic, control=self.control, sealed_source=self.sealed_source)
-        return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface, None, structured)
+                semantic=self.semantic, control=self.control, sealed_source=self.sealed_source,
+                language=self.language_overlay(graph), source_tree=self.tree,
+                language_options=self.language_options)
+        return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface, None, structured,
+                                 self.language_overlay(graph))
 
     @staticmethod
     def assumptions():
@@ -552,15 +590,21 @@ class StructuredBuilder(_Builder):
         return _ASSUMPTIONS
 
 
-def require_valid_structured_body(model, graph, interface, metadata, *, semantic, control):
+def require_valid_structured_body(model, graph, interface, metadata, *, semantic, control,
+                                  language=None, source_tree=None, language_options=None, structural_only=False):
     """Validate typed overlay endpoints; exact source replay is a separate gate."""
     # Public validation always checks caller-owned mutable source layers.
     return _require_valid_structured_body(model, graph, interface, metadata,
-                                          semantic=semantic, control=control)
+        semantic=semantic, control=control, language=language, source_tree=source_tree,
+        language_options=language_options, structural_only=structural_only)
 
 
 def _require_valid_structured_body(model, graph, interface, metadata, *, semantic, control,
-                                   sealed_source=None):
+                                   sealed_source=None, language=None, source_tree=None, language_options=None,
+                                   structural_only=False):
+    if language is None:
+        from scar.ir.program.source_language import reject_extended_protocols
+        reject_extended_protocols(model)
     from scar.ir.v2._validation import record_errors
     errors = record_errors(model, StructuredBodyModel, "structured")
     if errors:
@@ -678,17 +722,25 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
             # Ownership, typed uses, state address and completion validation are
             # profile-specific; no legacy protocol is broadened by this branch.
             pass
+        elif language is not None and protocol.kind in (
+                PythonProtocolKind.UNPACK_FIXED, PythonProtocolKind.BUILD_SLICE,
+                PythonProtocolKind.READ_CODE_CONSTANT):
+            pass  # Exact shapes, source, payloads and lifetime are checked below.
         else:
             raise ValueError("opaque protocol has no implemented structured control interface")
     if environment_profile:
         from scar.analysis.source_environment_validation import validate_environment_body
-        validate_environment_body(model, graph, interface, metadata, semantic)
+        validate_environment_body(model, graph, interface, metadata, semantic, language=language)
         from scar.analysis.source_statement_lowering import validate_statement_protocols
         validate_statement_protocols(model, graph, interface, metadata, semantic)
         from scar.analysis.source_string_lowering import validate_string_protocols
         validate_string_protocols(model, graph, interface, metadata, semantic)
         from scar.analysis.source_mapping_lowering import validate_mapping_protocols
         validate_mapping_protocols(model, graph, interface, metadata, semantic)
+    if language is not None:
+        from scar.analysis.source_language_validation import validate_language_body
+        validate_language_body(model, graph, interface, metadata, semantic, language,
+                               source_tree=source_tree, options=language_options, structural_only=structural_only)
     expected_loops = {link.source.atom_id for link in metadata.operation_links
         if semantic.source_atoms[link.source.atom_id].kind in ("While", "For")
         and operations[link.operation].terminator is not None

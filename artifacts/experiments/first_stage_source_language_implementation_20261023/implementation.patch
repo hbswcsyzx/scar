@@ -1,0 +1,1671 @@
+diff --git a/scar/ir/program/source_language.py b/scar/ir/program/source_language.py
+new file mode 100644
+index 0000000..a9732eb
+--- /dev/null
++++ b/scar/ir/program/source_language.py
+@@ -0,0 +1,133 @@
++"""Explicit source-language capabilities and original-port provenance.
++
++These overlays index existing operations and source slots. They neither define
++another producer/state graph nor certify runtime identity, effects or purity.
++Historical source wrappers must reject the extended protocol names.
++"""
++from __future__ import annotations
++
++from dataclasses import dataclass
++from enum import Enum
++from typing import Any
++
++from scar.ir.program.ids import OperationID
++from scar.ir.semantics_v2 import SourceSnapshot
++from scar.ir.v2.common import SourceReference
++from scar.ir.v2.ids import ValueSlotID
++
++
++class SourceLanguageCapability(str, Enum):
++    FIXED_UNPACK = "PYTHON_FIXED_LOCAL_UNPACK_V1"
++    SLICE_KEYS = "PYTHON_SLICE_KEYS_314_V1"
++    LEXICAL_LOCALS = "PYTHON_LEXICAL_LOCALS_314_V1"
++
++
++EXTENDED_PROTOCOLS = frozenset(("UNPACK_FIXED", "BUILD_SLICE", "READ_CODE_CONSTANT"))
++
++
++def _need(condition, detail):
++    if not condition:
++        raise ValueError("source language: " + detail)
++
++
++def reject_extended_protocols(model):
++    """A v1-v4/v8 wrapper cannot acquire new language semantics via enum growth."""
++    if model is not None and any(row.kind.value in EXTENDED_PROTOCOLS for row in model.protocols):
++        raise ValueError("historical source wrapper cannot contain extended source-language capability")
++
++
++@dataclass(frozen=True, slots=True)
++class UnpackShape:
++    operation: OperationID
++    source: SourceReference
++    child_targets: tuple[SourceReference, ...]
++
++    def __post_init__(self):
++        _need(type(self.operation) is OperationID and type(self.source) is SourceReference,
++              "unpack shape needs original operation/source")
++        _need(type(self.child_targets) is tuple and all(type(row) is SourceReference for row in self.child_targets),
++              "unpack children need ordered original source references")
++
++
++@dataclass(frozen=True, slots=True)
++class SliceShape:
++    operation: OperationID
++    source: SourceReference
++    lower: SourceReference | None
++    upper: SourceReference | None
++    step: SourceReference | None
++
++    def __post_init__(self):
++        _need(type(self.operation) is OperationID and type(self.source) is SourceReference,
++              "slice shape needs original operation/source")
++        _need(all(row is None or type(row) is SourceReference for row in (self.lower, self.upper, self.step)),
++              "slice components must retain source or explicit omission")
++
++
++@dataclass(frozen=True, slots=True)
++class CodeConstantSource:
++    operation: OperationID
++    source: SourceReference
++    code_key: str
++    constant_path: tuple[int, ...]
++
++    def __post_init__(self):
++        import re
++        _need(type(self.operation) is OperationID and type(self.source) is SourceReference,
++              "code constant needs original operation/source")
++        _need(type(self.code_key) is str and re.fullmatch(r"pycode-v2:[0-9a-f]{64}", self.code_key) is not None,
++              "code constant needs a complete structural code key")
++        _need(type(self.constant_path) is tuple and bool(self.constant_path)
++              and all(type(index) is int and index >= 0 for index in self.constant_path),
++              "code constant path must be a nonempty tuple of exact indices")
++
++
++@dataclass(frozen=True, slots=True)
++class CompilerLocalMapping:
++    name: str
++    category: str
++    lexical_slots: tuple[ValueSlotID, ...]
++    comp_iteration: bool
++    comp_cell: bool
++
++    def __post_init__(self):
++        _need(type(self.name) is str and bool(self.name), "compiler local needs a name")
++        _need(self.category in ("LEXICAL_FUNCTION", "COMPREHENSION_TRANSIENT"),
++              "unsupported compiler-local classification")
++        _need(type(self.lexical_slots) is tuple and all(type(row) is ValueSlotID for row in self.lexical_slots),
++              "compiler-local mapping only references original slots")
++        _need(type(self.comp_iteration) is bool and type(self.comp_cell) is bool,
++              "compiler-local flags must be exact bool")
++
++
++@dataclass(frozen=True, slots=True)
++class SourceLanguageOverlay:
++    source: SourceSnapshot
++    capabilities: tuple[SourceLanguageCapability, ...]
++    unpackings: tuple[UnpackShape, ...] = ()
++    slices: tuple[SliceShape, ...] = ()
++    constants: tuple[CodeConstantSource, ...] = ()
++    compiler_locals: tuple[CompilerLocalMapping, ...] = ()
++    code_evidence: dict[str, Any] | None = None
++    version: str = "PYTHON_SOURCE_LANGUAGE_V1"
++    namespace_root: str | None = None
++
++    def __post_init__(self):
++        _need(type(self.source) is SourceSnapshot and self.version == "PYTHON_SOURCE_LANGUAGE_V1",
++              "overlay needs its pinned source/version")
++        from pathlib import PurePosixPath
++        _need(type(self.namespace_root) is str and PurePosixPath(self.namespace_root).is_absolute()
++              and PurePosixPath(self.source.path).is_relative_to(PurePosixPath(self.namespace_root)),
++              "overlay must retain its exact source namespace root")
++        _need(type(self.capabilities) is tuple and bool(self.capabilities)
++              and all(type(row) is SourceLanguageCapability for row in self.capabilities)
++              and len(set(self.capabilities)) == len(self.capabilities), "capabilities must be unique typed entries")
++        for rows, kind in ((self.unpackings, UnpackShape), (self.slices, SliceShape),
++                           (self.constants, CodeConstantSource), (self.compiler_locals, CompilerLocalMapping)):
++            _need(type(rows) is tuple and all(type(row) is kind for row in rows), "overlay record type differs")
++        _need(self.code_evidence is None or type(self.code_evidence) is dict,
++              "code evidence must be a receipt projection, never a CodeType")
++
++
++__all__ = ["SourceLanguageCapability", "SourceLanguageOverlay", "UnpackShape", "SliceShape",
++           "CodeConstantSource", "CompilerLocalMapping", "EXTENDED_PROTOCOLS", "reject_extended_protocols"]
+diff --git a/scar/ir/program/structured.py b/scar/ir/program/structured.py
+index 8b5b173..0ed6bfd 100644
+--- a/scar/ir/program/structured.py
++++ b/scar/ir/program/structured.py
+@@ -40,6 +40,9 @@ class PythonProtocolKind(str, Enum):
+     BUILD_MAP = "BUILD_MAP"
+     MAP_ADD = "MAP_ADD"
+     DICT_UPDATE = "DICT_UPDATE"
++    UNPACK_FIXED = "UNPACK_FIXED"
++    BUILD_SLICE = "BUILD_SLICE"
++    READ_CODE_CONSTANT = "READ_CODE_CONSTANT"
+     FRAME_ENTER = "FRAME_ENTER"
+     FRAME_BIND = "FRAME_BIND"
+     FRAME_DISCARD = "FRAME_DISCARD"
+diff --git a/scar/analysis/source_language.py b/scar/analysis/source_language.py
+new file mode 100644
+index 0000000..8ef570e
+--- /dev/null
++++ b/scar/analysis/source_language.py
+@@ -0,0 +1,94 @@
++"""Opt-in inputs and validation for extended source protocols.
++
++CodeType inputs are supplied by an already verified CodeWitnessStore. This
++module does not compile, import the target, or open a report-selected archive.
++"""
++from __future__ import annotations
++
++import ast
++import json
++from dataclasses import dataclass, field
++from types import CodeType
++
++from scar.ir.program.call_edges import CapturedCode, CodeSourceLink, CodeCapture, CallLinkStatus
++from scar.ir.program.source_language import SourceLanguageCapability
++from scar.ir.record_codec import decode, encode
++from scar.trace.code_snapshot import describe_code
++
++
++@dataclass(frozen=True)
++class SourceCodeEvidence:
++    store: object
++    composition: object
++    captured: CapturedCode
++    code: CodeType = field(init=False)
++    source_link: CodeSourceLink = field(init=False)
++    _witness_json: str = field(init=False, repr=False)
++
++    def __post_init__(self):
++        from scar.analysis.code_witness import CodeWitnessStore
++        from scar.analysis.program_composition import CompositionIndex
++        if (type(self.store) is not CodeWitnessStore or self.store.writable or self.store.compile_missing
++                or type(self.composition) is not CompositionIndex or type(self.captured) is not CapturedCode):
++            raise ValueError("source language requires explicit original composition and read-only CodeWitnessStore")
++        source = self.composition.inventory_component("call_sources")["model"]
++        captures = [(i, decode(CodeCapture, row)) for i, row in enumerate(source["codes"])
++                    if row["code"]["key"] == self.captured.key]
++        links = [(i, decode(CodeSourceLink, row)) for i, row in enumerate(source["code_links"])
++                 if row["code"] == self.captured.key]
++        if (not captures or any(row.code != self.captured for _, row in captures) or len(links) != 1
++                or links[0][1].status is not CallLinkStatus.VERIFIED):
++            raise ValueError("original composition has no complete matching captured-code/source witness")
++        link_index, link = links[0]
++        code, reference = self.store.resolve(self.captured, link.snapshot, link.optimize_levels, allow_compile=False)
++        if type(code) is not CodeType or describe_code(code) != encode(self.captured):
++            raise ValueError("owned CodeWitness archive did not reproduce the complete code descriptor")
++        witness = {**reference, "store": self.store.receipt(),
++            "source_link_locator": self.composition.inventory_component_locator("call_sources", f"/model/code_links/{link_index}"),
++            "captured_code_locator": self.composition.inventory_component_locator("call_sources", f"/model/codes/{captures[0][0]}/code"),
++            "inventory": self.composition.document["inventory"]}
++        object.__setattr__(self, "code", code)
++        object.__setattr__(self, "source_link", link)
++        object.__setattr__(self, "_witness_json", json.dumps(witness, sort_keys=True, separators=(",", ":"), allow_nan=False))
++
++    @property
++    def witness(self):
++        # A caller may annotate its copy of a receipt, never the independently
++        # verified evidence retained by this input object.
++        return json.loads(self._witness_json)
++
++    def require_definition(self, snapshot, definition, source):
++        link = self.source_link
++        if (link.snapshot != snapshot or link.definition != definition or link.source != source
++                or self.captured.filename != snapshot.path):
++            raise ValueError("CodeWitness does not identify this exact source definition")
++
++    def to_dict(self):
++        return {"captured": encode(self.captured), "source_link": encode(self.source_link),
++                "witness": self.witness, "runtime_code_instance_established": False}
++
++
++@dataclass(frozen=True)
++class SourceLanguageOptions:
++    capabilities: tuple[SourceLanguageCapability, ...] = tuple(SourceLanguageCapability)
++    code_evidence: SourceCodeEvidence | None = None
++
++    def __post_init__(self):
++        if (type(self.capabilities) is not tuple or not self.capabilities
++                or any(type(row) is not SourceLanguageCapability for row in self.capabilities)
++                or len(set(self.capabilities)) != len(self.capabilities)
++                or self.code_evidence is not None and type(self.code_evidence) is not SourceCodeEvidence):
++            raise ValueError("invalid explicit source-language inputs")
++
++
++def require_source_tree(tree, snapshot, source_reference):
++    """Resolve a source node by complete span and kind, under its fixed snapshot."""
++    if source_reference.path != snapshot.path or source_reference.fingerprint != snapshot.fingerprint:
++        raise ValueError("language source reference differs from its fixed snapshot")
++    return [node for node in ast.walk(tree) if hasattr(node, "end_lineno")
++            and (node.lineno, node.end_lineno, node.col_offset, node.end_col_offset)
++            == (source_reference.start_line, source_reference.end_line,
++                source_reference.start_column, source_reference.end_column)]
++
++
++__all__ = ["SourceCodeEvidence", "SourceLanguageOptions", "require_source_tree"]
+diff --git a/scar/analysis/source_language_validation.py b/scar/analysis/source_language_validation.py
+new file mode 100644
+index 0000000..0362b8b
+--- /dev/null
++++ b/scar/analysis/source_language_validation.py
+@@ -0,0 +1,247 @@
++"""Validate new source protocols against original ports and exact source.
++
++Structural reading is distinct from source/CodeWitness verification. Neither
++mode establishes runtime code-instance identity or operation purity.
++"""
++from __future__ import annotations
++
++import ast
++import dis
++
++from scar.analysis.program_lowering import _REF
++from scar.analysis.source_language import SourceLanguageOptions, require_source_tree
++from scar.ir.program.model import (
++    AccessMode, BlockArgument, CompletionResult, ExitKind, ReferenceValue,
++    StateVersionValue, LocalBindingValue, TerminatorKind, value_type,
++)
++from scar.ir.program.source_language import (
++    SourceLanguageOverlay, SourceLanguageCapability as Capability, EXTENDED_PROTOCOLS,
++)
++from scar.ir.record_codec import encode
++
++
++def _need(condition, detail):
++    if not condition:
++        raise ValueError("source language validation: " + detail)
++
++
++def validate_language_body(model, graph, interface, metadata, semantic, language,
++                           *, source_tree=None, options=None, structural_only=False):
++    _need(type(language) is SourceLanguageOverlay and language.source == metadata.source,
++          "overlay source differs from original body metadata")
++    _need(type(structural_only) is bool, "verification mode must be explicit")
++    if not structural_only:
++        _need(isinstance(source_tree, ast.Module) and type(options) is SourceLanguageOptions,
++              "exact source/CodeWitness verification requires explicit source AST and independent options")
++        _need(options.capabilities == language.capabilities, "requested and reported language capabilities differ")
++        expected_evidence = options.code_evidence.to_dict() if options.code_evidence is not None else None
++        _need(language.code_evidence == expected_evidence, "code provenance differs from the independent archive inputs")
++        if options.code_evidence is not None:
++            options.code_evidence.require_definition(metadata.source, interface.definition, model.source)
++    operations = {row.id: row for row in graph.operations}
++    values = {row.id: row for row in graph.values}
++    blocks = {block.id: block for region in graph.regions for block in region.blocks}
++    protocols = {row.operation: row for row in model.protocols}
++    links = {row.operation: row for row in metadata.operation_links}
++    world_type = value_type(values[interface.world])
++    unpack = {row.operation: row for row in language.unpackings}
++    slices = {row.operation: row for row in language.slices}
++    constants = {row.operation: row for row in language.constants}
++    _need(len(unpack) == len(language.unpackings) and len(slices) == len(language.slices)
++          and len(constants) == len(language.constants), "duplicate language shape/provenance record")
++    indexed = set(unpack) | set(slices) | set(constants)
++    actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
++    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants),
++          "new language operations must have one exact shape/provenance record")
++
++    def source_node(reference, classes):
++        atom = semantic.source_atoms.get(reference.atom_id)
++        _need(atom is not None and atom.reference == reference, "protocol source is not the original source atom")
++        _need(atom.kind in tuple(kind.__name__ for kind in classes), "protocol source AST kind differs")
++        if structural_only:
++            return None
++        candidates = [node for node in require_source_tree(source_tree, language.source, reference)
++                      if isinstance(node, classes)]
++        _need(len(candidates) == 1, "protocol needs one exact source AST node")
++        return candidates[0]
++
++    def invoke(identity, count, result_count):
++        operation = operations[identity]
++        _need(operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
++              and not operation.effects_complete and len(operation.invoke_arguments) == count + 1,
++              "protocol must retain incomplete invoke operands/completions")
++        uses = {row.id: row for row in operation.uses}
++        operands = tuple(uses[key] for key in operation.invoke_arguments)
++        _need(all(type(values[row.value]) is ReferenceValue for row in operands[:-1])
++              and type(values[operands[-1].value]) is StateVersionValue,
++              "protocol references/world are not their original typed Uses")
++        _need(tuple(row.kind for row in operation.completions) == (ExitKind.NORMAL, ExitKind.RAISE),
++              "protocol must keep ordered normal and exceptional completions")
++        normal, failure = operation.completions
++        _need(normal.types == (_REF,) * result_count + (world_type,)
++              and failure.types == (_REF, world_type), "protocol payload/world types differ")
++        _need(tuple(row.kind for row in operation.terminator.successors) == (ExitKind.NORMAL, ExitKind.RAISE)
++              and all(edge.arguments == tuple(CompletionResult(i) for i in range(len(signature.types)))
++                      for edge, signature in zip(operation.terminator.successors, operation.completions)),
++              "normal/raise ports are not this invoke's ordered CompletionResults")
++        edge = operation.terminator.successors[0]
++        return operation, operands, blocks[edge.block]
++
++    for identity in indexed:
++        _need(identity in operations and identity in links and links[identity].source == protocols[identity].source,
++              "language operation lost its exact source/core correspondence")
++    for identity, shape in unpack.items():
++        _need(Capability.FIXED_UNPACK in language.capabilities and protocols[identity].kind.value == "UNPACK_FIXED"
++              and shape.source == protocols[identity].source, "unpack shape/kind/capability differs")
++        node = source_node(shape.source, (ast.Tuple, ast.List))
++        if node is not None:
++            _need(isinstance(node.ctx, ast.Store) and not any(isinstance(row, ast.Starred) for row in ast.walk(node)),
++                  "fixed unpack cannot accept starred/load syntax")
++            _need(tuple((row.lineno, row.end_lineno, row.col_offset, row.end_col_offset) for row in node.elts)
++                  == tuple((row.start_line, row.end_line, row.start_column, row.end_column) for row in shape.child_targets),
++                  "unpack target sequence differs from exact source")
++        operation, operands, normal = invoke(identity, 1, len(shape.child_targets))
++        _need(operands[0].value != operands[-1].value, "unpack input/world alias typed ports")
++        source_uses = {(row.operation, row.use): row for row in metadata.use_links}
++        source_use = source_uses.get((identity, operands[0].id))
++        _need(source_use is not None and source_use.role == "unpack-source" and source_use.index == 0
++              and source_use.source == shape.source, "unpack original RHS Use/source role differs")
++        # Every normal result is published exactly once before the first leaf
++        # store/inner unpack. The primitive owns its arity/error internals.
++        published = []
++        for key in normal.operations[:len(shape.child_targets)]:
++            protocol = protocols.get(key)
++            if protocol is None or protocol.kind.value != "FRAME_HOLD_TEMPORARY":
++                break
++            reference = next(row.value for row in operations[key].uses if type(values[row.value]) is ReferenceValue)
++            published.append(reference)
++        _need(tuple(published) == tuple(reversed(normal.arguments[:-1])),
++              "unpack must publish all same-level results before ordered target stores")
++        for reference in shape.child_targets:
++            atom = semantic.source_atoms.get(reference.atom_id)
++            _need(atom is not None and atom.reference == reference and atom.kind in ("Name", "Tuple", "List"),
++                  "local unpack child has no permitted original target atom")
++    # Verify normal-path target order and direct original assigned ports. A
++    # nested unpack starts only when its outer siblings before it were stored.
++    visiting = set()
++    def stores(identity):
++        _need(identity not in visiting, "unpack target shape is cyclic")
++        visiting.add(identity)
++        shape = unpack[identity]
++        _, _, normal = invoke(identity, 1, len(shape.child_targets))
++        block, position = normal, len(shape.child_targets)
++        for index, reference in enumerate(shape.child_targets):
++            _need(position < len(block.operations), "unpack target store is missing")
++            key = block.operations[position]
++            protocol = protocols.get(key)
++            atom = semantic.source_atoms[reference.atom_id]
++            if atom.kind in ("Tuple", "List"):
++                _need(key in unpack and unpack[key].source == reference,
++                      "nested unpack does not follow its original target position")
++                nested_uses = {row.id: row for row in operations[key].uses}
++                _need(nested_uses[operations[key].invoke_arguments[0]].value == normal.arguments[index],
++                      "inner unpack did not consume the corresponding outer normal result")
++                block, position = stores(key)
++            else:
++                _need(protocol is not None and protocol.kind.value == "FRAME_BIND"
++                      and protocol.source == reference, "local target store order/source differs")
++                assigned = [row.value for row in operations[key].uses if type(values[row.value]) is ReferenceValue]
++                _need(assigned == [normal.arguments[index]], "local target did not receive its exact unpack result")
++                _need(position + 1 < len(block.operations), "local target has no binding definition")
++                definition = operations[block.operations[position + 1]]
++                _need(len(definition.results) == 1 and type(values[definition.results[0]]) is LocalBindingValue
++                      and len(definition.uses) == 1 and definition.uses[0].value == normal.arguments[index],
++                      "local binding token did not retain its assigned original reference")
++                slot = values[definition.results[0]].slot
++                _need(semantic.slots[slot].owner == interface.definition,
++                      "unpack introduced a binding in another lexical scope")
++                position += 2
++        visiting.remove(identity)
++        return block, position
++    for identity in unpack:
++        stores(identity)
++    for identity, shape in slices.items():
++        _need(Capability.SLICE_KEYS in language.capabilities and protocols[identity].kind.value == "BUILD_SLICE"
++              and shape.source == protocols[identity].source, "slice shape/kind/capability differs")
++        node = source_node(shape.source, (ast.Slice,))
++        if node is not None:
++            for part, expected in ((node.lower, shape.lower), (node.upper, shape.upper), (node.step, shape.step)):
++                _need((part is None) == (expected is None), "slice omission differs from source")
++                if part is not None:
++                    _need((part.lineno, part.end_lineno, part.col_offset, part.end_col_offset)
++                          == (expected.start_line, expected.end_line, expected.start_column, expected.end_column),
++                          "slice bound source differs")
++        _, operands, _ = invoke(identity, 3 if shape.step is not None else 2, 1)
++        source_uses = {(row.operation, row.use): row for row in metadata.use_links}
++        components = (shape.lower, shape.upper, shape.step)[:len(operands) - 1]
++        for index, (use, reference) in enumerate(zip(operands[:-1], components)):
++            link = source_uses.get((identity, use.id))
++            _need(link is not None and link.role == ('slice-lower', 'slice-upper', 'slice-step')[index]
++                  and link.index == index and link.source == (reference or shape.source),
++                  "slice bound ordered Use source/role differs")
++            if reference is None:
++                from scar.ir.program.model import LiteralOrigin
++                _need(type(values[use.value].origin) is LiteralOrigin and values[use.value].origin.value is None,
++                      "omitted slice bound is not exact None")
++        if not structural_only:
++            evidence = options.code_evidence
++            _need(evidence is not None, "dynamic slice requires its independent compiler witness")
++            candidates = [row for row in dis.get_instructions(evidence.code)
++                if row.opname == "BUILD_SLICE" and row.arg == len(operands) - 1
++                and tuple(row.positions) == (node.lineno, node.end_lineno, node.col_offset, node.end_col_offset)]
++            _need(len(candidates) == 1, "dynamic slice does not match its exact BUILD_SLICE code position")
++    for identity, constant in constants.items():
++        _need(Capability.SLICE_KEYS in language.capabilities and protocols[identity].kind.value == "READ_CODE_CONSTANT"
++              and constant.source == protocols[identity].source, "code constant kind/capability differs")
++        node = source_node(constant.source, (ast.Slice, ast.Tuple))
++        operation = operations[identity]
++        _need(operation.terminator is None and not operation.effects_complete and len(operation.results) == 1
++              and type(values[operation.results[0]]) is ReferenceValue
++              and values[operation.results[0]].referent_identity is None
++              and len(operation.accesses) == 1 and operation.accesses[0].mode is AccessMode.READ
++              and len(operation.uses) == 1 and type(values[operation.uses[0].value]) is StateVersionValue,
++              "code constant reference must be a nonallocating, identity-unproved table read")
++        from scar.ir.program.model import Behavior
++        _need(operation.behaviors == (Behavior.READ,), "constant table read cannot claim fresh allocation or mutation")
++        if not structural_only:
++            evidence = options.code_evidence
++            _need(evidence is not None and evidence.captured.key == constant.code_key,
++                  "constant provenance is not backed by the independently loaded CodeWitness")
++            _need(len(constant.constant_path) == 1, "this capability only indexes direct code constants")
++            candidates = [row for row in dis.get_instructions(evidence.code)
++                if row.opname == "LOAD_CONST" and row.arg == constant.constant_path[0]
++                and tuple(row.positions) == (node.lineno, node.end_lineno, node.col_offset, node.end_col_offset)]
++            _need(len(candidates) == 1 and type(candidates[0].argval) in (slice, tuple),
++                  "source constant does not name its exact witnessed LOAD_CONST slot")
++    _need(len({row.name for row in language.compiler_locals}) == len(language.compiler_locals),
++          "compiler-local names are not uniquely classified")
++    for mapping in language.compiler_locals:
++        _need(Capability.LEXICAL_LOCALS in language.capabilities, "compiler local mapping lacks explicit capability")
++        _need(bool(mapping.lexical_slots) and len(set(mapping.lexical_slots)) == len(mapping.lexical_slots),
++              "compiler local has no unique original lexical slots")
++        for slot in mapping.lexical_slots:
++            _need(slot in semantic.slots and semantic.slots[slot].name == mapping.name,
++                  "compiler-local mapping introduced a non-source slot")
++        if mapping.category == "LEXICAL_FUNCTION":
++            _need(all(semantic.slots[slot].owner == interface.definition for slot in mapping.lexical_slots),
++                  "function local points to another lexical scope")
++        else:
++            _need(mapping.comp_iteration or mapping.comp_cell, "transient local has no compiler comprehension classification")
++            _need(all(semantic.slots[slot].metadata.get("scope_kind") == "comprehension" for slot in mapping.lexical_slots),
++                  "transient comprehension local was projected as an outer slot")
++            for slot in mapping.lexical_slots:
++                owner, seen = semantic.slots[slot].owner, set()
++                while owner in semantic.definitions and owner not in seen and owner != interface.definition:
++                    seen.add(owner)
++                    definition = semantic.definitions[owner]
++                    _need(getattr(definition.kind, 'value', definition.kind) not in ('function', 'method', 'class'),
++                          "comprehension local crossed a different function/class scope")
++                    owner = definition.parent_id
++                _need(owner == interface.definition, "comprehension local belongs to another function")
++    return {"valid": True, "verification": "STRUCTURE" if structural_only else "SOURCE_AND_CODE_WITNESS",
++            "source_shape_verified": not structural_only,
++            "code_constant_provenance_verified": bool(constants) and not structural_only,
++            "runtime_code_instance_established": False, "effects_established": False}
++
++
++__all__ = ["validate_language_body"]
+diff --git a/scar/analysis/source_unpack_lowering.py b/scar/analysis/source_unpack_lowering.py
+new file mode 100644
+index 0000000..4ad1055
+--- /dev/null
++++ b/scar/analysis/source_unpack_lowering.py
+@@ -0,0 +1,68 @@
++"""Fixed arity over original local ports, with no synthetic tuple/getitem loop."""
++from __future__ import annotations
++
++import ast
++
++from scar.analysis.program_lowering import _REF, _Unsupported
++from scar.analysis.source_heap_lowering import _hold
++from scar.analysis.source_mapping_lowering import _transfer
++from scar.ir.program.model import ExitKind
++from scar.ir.program.source import GapKind, SourceRole
++from scar.ir.program.source_language import UnpackShape
++from scar.ir.program.structured import PythonProtocolKind
++
++
++def _check(builder, target):
++    if isinstance(target, (ast.Tuple, ast.List)) and isinstance(target.ctx, ast.Store):
++        for child in target.elts:
++            _check(builder, child)
++    elif not (isinstance(target, ast.Name) and isinstance(target.ctx, ast.Store) and target.id in builder.locals):
++        raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, target,
++            "UNPACK_FIXED requires fixed tuple/list ordinary-local leaves; starred/effectful targets remain unimplemented")
++
++
++def lower_unpack_target(builder, target, rhs, cursor, *, rhs_held=False):
++    _check(builder, target)
++    if not isinstance(target, (ast.Tuple, ast.List)):
++        raise _Unsupported(GapKind.SOURCE_MAPPING, target, "unpack root is not a tuple/list target")
++    if rhs_held and (not builder.active_temporaries or builder.active_temporaries[-1] != rhs):
++        raise _Unsupported(GapKind.SOURCE_MAPPING, target, "nested unpack does not own its exact pending RHS")
++    baseline = len(builder.active_temporaries) - int(rhs_held)
++    if not rhs_held:
++        _hold(builder, cursor, target, rhs)
++    consumed = ((target, rhs),)
++
++    def failed(failure, exception):
++        pending = tuple(builder.active_temporaries)
++        try:
++            _transfer(builder, consumed, target)
++            builder.finish_exit(failure, target, exception, ExitKind.RAISE)
++        finally:
++            builder.active_temporaries[:] = pending
++
++    try:
++        cursor, values, operation = builder.invoke_results(cursor, target,
++            ((rhs, target, "unpack-source", 0, None),), role=SourceRole.LOCAL_BINDING,
++            result_types=(_REF,) * len(target.elts), failure_handler=failed)
++        builder.protocol(operation, PythonProtocolKind.UNPACK_FIXED, target)
++        builder.language_unpackings.append(UnpackShape(operation, builder.source(target),
++            tuple(builder.source(child) for child in target.elts)))
++        _transfer(builder, consumed, target)
++        # Normal results are published stack references; reverse holds put
++        # the first target on top. No extra INCREF or allocation is asserted.
++        for child, value in reversed(tuple(zip(target.elts, values))):
++            _hold(builder, cursor, child, value)
++        for child, value in zip(target.elts, values):
++            if isinstance(child, (ast.Tuple, ast.List)):
++                cursor = lower_unpack_target(builder, child, value, cursor, rhs_held=True)
++            else:
++                cursor = builder.store(child, value, cursor)
++                _transfer(builder, ((child, value),), child)
++        builder.gap(GapKind.EFFECT_SUMMARY, target,
++            "fixed unpack order/arity/ports are connected; iterator dispatch, aliasing, finalizers and runtime implementation remain unproved")
++        return cursor
++    finally:
++        del builder.active_temporaries[baseline:]
++
++
++__all__ = ["lower_unpack_target"]
+diff --git a/scar/analysis/source_slice_lowering.py b/scar/analysis/source_slice_lowering.py
+new file mode 100644
+index 0000000..13edcbe
+--- /dev/null
++++ b/scar/analysis/source_slice_lowering.py
+@@ -0,0 +1,181 @@
++"""Slice/key construction without a global 'slice' lookup or allocation guess."""
++from __future__ import annotations
++
++import ast
++import dis
++from dataclasses import replace
++
++from scar.analysis.program_lowering import _REF, _Unsupported
++from scar.analysis.source_heap_lowering import _hold
++from scar.analysis.source_mapping_lowering import _transfer
++from scar.ir.program.model import AccessMode, Behavior, ExitKind, Operation, OperationResult, ReferenceValue, StateAccess
++from scar.ir.program.ids import OperationID, ValueID
++from scar.ir.program.source import GapKind, SourceRole
++from scar.ir.program.source_language import CodeConstantSource, SliceShape
++from scar.ir.program.structured import PythonProtocolKind
++from scar.ir.program.state_addresses import AddressEffect, Element, ReferenceOwner
++
++
++def _constant_slice(node):
++    return isinstance(node, ast.Slice) and all(child is None or isinstance(child, ast.Constant)
++                                               for child in (node.lower, node.upper, node.step))
++
++
++def _span(node):
++    return node.lineno, node.end_lineno, node.col_offset, node.end_col_offset
++
++
++def _instructions(builder, node):
++    evidence = builder.language_options.code_evidence
++    if evidence is None:
++        raise _Unsupported(GapKind.CODE_VERSION, node, "SLICE_CODE_WITNESS_REQUIRED")
++    if not hasattr(builder, "language_instructions"):
++        builder.language_instructions = tuple(dis.get_instructions(evidence.code))
++    return tuple(instruction for instruction in builder.language_instructions
++                 if tuple(instruction.positions) == _span(node))
++
++
++def _constant(builder, node, cursor):
++    matches = [row for row in _instructions(builder, node) if row.opname == "LOAD_CONST"
++               and type(row.arg) is int and type(row.argval) in (slice, tuple)]
++    if len(matches) != 1:
++        raise _Unsupported(GapKind.CODE_VERSION, node,
++                           "source key has no unique exact LOAD_CONST position in its CodeWitness")
++    instruction, = matches
++    evidence = builder.language_options.code_evidence
++    if evidence.code.co_consts[instruction.arg] is not instruction.argval:
++        raise _Unsupported(GapKind.CODE_VERSION, node, "code constant slot differs from disassembly")
++    operation_id = builder.fresh(OperationID, "code-constant-reference")
++    before = builder.use(operation_id, cursor.state, node, "code-constant-world", 0)
++    result = ReferenceValue(builder.fresh(ValueID, "code-constant-reference"), builder.function_context,
++                            OperationResult(operation_id, 0))
++    builder.add_value(result); builder.link_value(result, node, SourceRole.EXPRESSION)
++    operation = Operation(operation_id, "code constant reference", (Behavior.READ,), (before,),
++        (result.id,), (StateAccess(builder.world, before.id, AccessMode.READ),), effects_complete=False)
++    builder.emit(cursor, operation, node, SourceRole.EXPRESSION)
++    builder.protocol(operation_id, PythonProtocolKind.READ_CODE_CONSTANT, node)
++    builder.language_constants.append(CodeConstantSource(operation_id, builder.source(node),
++        evidence.captured.key, (instruction.arg,)))
++    builder.gap(GapKind.CODE_VERSION, node,
++        "code constant slot is witnessed; active CodeType/constant object instance identity remains unproved")
++    return cursor, result.id
++
++
++def _invoke(builder, cursor, node, inputs, consumed, *, old=None, kind=None, memory=False):
++    def failed(failure, exception):
++        pending = tuple(builder.active_temporaries)
++        try:
++            _transfer(builder, consumed, node)
++            builder.finish_exit(failure, node, exception, ExitKind.RAISE)
++        finally:
++            builder.active_temporaries[:] = pending
++    cursor, value, operation = builder.invoke(cursor, node, tuple(inputs), old=old,
++                                             failure_handler=failed)
++    if kind is not None:
++        builder.protocol(operation, kind, node)
++    if memory:
++        original = builder.operation_records[operation]
++        marked = replace(original, behaviors=original.behaviors + (Behavior.MEMORY,))
++        builder.operations[builder.operations.index(original)] = marked
++        builder.operation_records[operation] = marked
++    _transfer(builder, consumed, node)
++    return cursor, value, operation
++
++
++def lower_slice(builder, node, cursor):
++    if not isinstance(node, ast.Slice):
++        raise _Unsupported(GapKind.SOURCE_MAPPING, node, "expected exact Slice source")
++    if _constant_slice(node):
++        return _constant(builder, node, cursor)
++    instructions = _instructions(builder, node)
++    count = 3 if node.step is not None else 2
++    if not any(row.opname == "BUILD_SLICE" and row.arg == count for row in instructions):
++        raise _Unsupported(GapKind.CODE_VERSION, node, "COMBINED_SLICE_LIFETIME_UNRECOVERED")
++    baseline = len(builder.active_temporaries)
++    held, inputs = [], []
++    try:
++        for index, (role, child) in enumerate((('slice-lower', node.lower), ('slice-upper', node.upper),
++                                              ('slice-step', node.step))[:count]):
++            cursor, value = (builder.expr(child, cursor) if child is not None
++                             else (cursor, builder.literal(node, None)))
++            if cursor is None:
++                return None, None
++            origin = child or node
++            _hold(builder, cursor, origin, value)
++            held.append((origin, value))
++            inputs.append((value, origin, role, index, None))
++        cursor, value, operation = _invoke(builder, cursor, node, inputs, tuple(held),
++            kind=PythonProtocolKind.BUILD_SLICE, memory=True)
++        builder.language_slices.append(SliceShape(operation, builder.source(node),
++            builder.source(node.lower) if node.lower is not None else None,
++            builder.source(node.upper) if node.upper is not None else None,
++            builder.source(node.step) if node.step is not None else None))
++        builder.gap(GapKind.EFFECT_SUMMARY, node,
++            "slice syntax bounds/order are connected; allocation, identity, lifetime and consumer dispatch remain unproved")
++        return cursor, value
++    finally:
++        del builder.active_temporaries[baseline:]
++
++
++def lower_key(builder, node, cursor):
++    if isinstance(node, ast.Slice):
++        return lower_slice(builder, node, cursor)
++    if not isinstance(node, ast.Tuple):
++        return builder.expr(node, cursor)
++    if any(isinstance(child, ast.Starred) for child in node.elts):
++        raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "starred index key requires a separate construction rule")
++    instructions = _instructions(builder, node)
++    if any(row.opname == 'LOAD_CONST' and type(row.argval) is tuple for row in instructions):
++        return _constant(builder, node, cursor)
++    if not any(row.opname == 'BUILD_TUPLE' and row.arg == len(node.elts) for row in instructions):
++        raise _Unsupported(GapKind.CODE_VERSION, node, "INDEX_TUPLE_CODE_LOWERING_UNRECOVERED")
++    old = builder.old_operation(node)
++    if len(old.operands) != len(node.elts):
++        raise _Unsupported(GapKind.SOURCE_MAPPING, node, "index tuple operands differ from original source semantics")
++    baseline, held, inputs = len(builder.active_temporaries), [], []
++    try:
++        for child, operand in zip(node.elts, old.operands):
++            cursor, value = lower_key(builder, child, cursor)
++            if cursor is None:
++                return None, None
++            _hold(builder, cursor, child, value); held.append((child, value))
++            inputs.append((value, child, operand.role, operand.index, operand.value))
++        cursor, value, _ = _invoke(builder, cursor, node, inputs, tuple(held), old=old, memory=True)
++        return cursor, value
++    finally:
++        del builder.active_temporaries[baseline:]
++
++
++def lower_subscript(builder, node, cursor):
++    if not isinstance(node, ast.Subscript) or not isinstance(node.ctx, ast.Load):
++        raise _Unsupported(GapKind.SOURCE_MAPPING, node, "subscript read requires Load context")
++    if (isinstance(node.slice, ast.Slice) and not _constant_slice(node.slice)
++            and node.slice.step is None):
++        raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "COMBINED_SLICE_LIFETIME_UNRECOVERED")
++    old = builder.old_operation(node)
++    if len(old.operands) != 2:
++        raise _Unsupported(GapKind.SOURCE_MAPPING, node, "subscript source operands differ")
++    baseline, held, inputs = len(builder.active_temporaries), [], []
++    try:
++        cursor, receiver = builder.expr(node.value, cursor)
++        if cursor is None:
++            return None, None
++        _hold(builder, cursor, node.value, receiver); held.append((node.value, receiver))
++        cursor, key = lower_key(builder, node.slice, cursor)
++        if cursor is None:
++            return None, None
++        _hold(builder, cursor, node.slice, key); held.append((node.slice, key))
++        for value, child, operand in zip((receiver, key), (node.value, node.slice), old.operands):
++            inputs.append((value, child, operand.role, operand.index, operand.value))
++        cursor, result, operation = _invoke(builder, cursor, node, inputs, tuple(held), old=old)
++        uses = builder.operation_records[operation].uses
++        builder._addresses(operation, (AddressEffect(ReferenceOwner(uses[0].id),
++            (Element(uses[1].id),), AccessMode.READ),))
++        builder.gap(GapKind.DYNAMIC_DISPATCH, node,
++            "subscription key/order are connected; consumer dispatch, mutation, aliasing and resources remain unproved")
++        return cursor, result
++    finally:
++        del builder.active_temporaries[baseline:]
++
++
++__all__ = ["lower_slice", "lower_key", "lower_subscript"]
+diff --git a/scar/analysis/program_lowering.py b/scar/analysis/program_lowering.py
+index d842caf..0d9c004 100644
+--- a/scar/analysis/program_lowering.py
++++ b/scar/analysis/program_lowering.py
+@@ -39,6 +39,7 @@ from scar.ir.program.source import (
+     LoweringMetadata, OperationSource, SourceRole,
+     UseSource, ValueSource,
+ )
++from scar.ir.program.source_language import SourceLanguageOverlay, reject_extended_protocols
+ from scar.ir.program.validation import require_valid
+ from scar.ir.record_codec import encode
+ from scar.ir.semantics_v2 import Opcode, SourceExecutionPrecondition
+@@ -74,6 +75,7 @@ class SourceProgram:
+     interface: BodyEntryInterface | None = None
+     frame: FrameModel | None = None
+     structured: StructuredBodyModel | None = None
++    language: SourceLanguageOverlay | None = None
+ 
+     def summary(self):
+         """Separate declaration/link counts from program and effect coverage."""
+@@ -114,8 +116,13 @@ class SourceProgram:
+         }
+ 
+     def to_dict(self):
++        if self.language is None:
++            reject_extended_protocols(self.structured)
++        elif self.profile is not BodyLoweringProfile.STRUCTURED_ENV:
++            raise ValueError("extended language wrapper requires the unchanged environment entry ABI")
+         document = {
+-            "schema": "scar.source-program", "schema_version": (1 if self.profile is BodyLoweringProfile.LEGACY else
++            "schema": "scar.source-program", "schema_version": (5 if self.language is not None else
++                1 if self.profile is BodyLoweringProfile.LEGACY else
+                 4 if self.profile is BodyLoweringProfile.STRUCTURED_ENV else
+                 3 if self.profile is BodyLoweringProfile.STRUCTURED_BODY else 2),
+             "status": ("UNSUPPORTED" if self.graph is None else
+@@ -133,10 +140,12 @@ class SourceProgram:
+                             frame=encode(self.frame))
+         if self.profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+             document["structured"] = encode(self.structured)
++        if self.language is not None:
++            document["language"] = encode(self.language)
+         return document
+ 
+     @classmethod
+-    def from_dict(cls, document, *, max_operations=10000):
++    def from_dict(cls, document, *, max_operations=10000, language_options=None, verification="SOURCE_REPLAY"):
+         from scar.ir.program.codec import loads as load_graph
+         from scar.ir.record_codec import decode
+         from scar.ir.semantics_v2 import SourceSemanticsGraph
+@@ -148,41 +157,58 @@ class SourceProgram:
+                            "transformation_authorized"}
+         if type(document) is not dict:
+             raise ValueError("source program fields mismatch")
++        if verification not in ("SOURCE_REPLAY", "STRUCTURE"):
++            raise ValueError("source program verification mode must be explicit")
+         version = document.get("schema_version")
+-        if type(version) is not int or version not in (1, 2, 3, 4):
++        if type(version) is not int or version not in (1, 2, 3, 4, 5):
+             raise ValueError("source program schema/version mismatch")
+-        if version in (2, 3, 4):
++        if version < 5 and verification != "SOURCE_REPLAY":
++            raise ValueError("historical source program replay policy is unchanged")
++        if version in (2, 3, 4, 5):
+             expected_fields |= {"profile", "interface", "frame"}
+-        if version in (3, 4):
++        if version in (3, 4, 5):
+             expected_fields.add("structured")
++        if version == 5:
++            expected_fields.add("language")
+         if set(document) != expected_fields or document["schema"] != "scar.source-program":
+             raise ValueError("source program fields mismatch")
+         profile = BodyLoweringProfile.LEGACY
+         interface = frame = structured = None
+-        if version in (2, 3, 4):
++        if version in (2, 3, 4, 5):
+             profile = BodyLoweringProfile(document["profile"])
+-            expected_profile = (BodyLoweringProfile.STRUCTURED_ENV if version == 4 else
++            expected_profile = (BodyLoweringProfile.STRUCTURED_ENV if version in (4, 5) else
+                                 BodyLoweringProfile.BOUND_FRAME if version == 2 else
+                                 BodyLoweringProfile.STRUCTURED_BODY)
+             if profile is not expected_profile:
+                 raise ValueError("source-program version requires its exact lowering profile")
+             interface = decode(BodyEntryInterface, document["interface"]) if document["interface"] is not None else None
+             frame = FrameModel.from_dict(document["frame"]) if document["frame"] is not None else None
+-        if version in (3, 4):
++        if version in (3, 4, 5):
+             structured = decode(StructuredBodyModel, document["structured"]) if document["structured"] is not None else None
++        language = decode(SourceLanguageOverlay, document["language"]) if version == 5 else None
++        if version < 5:
++            reject_extended_protocols(structured)
++            if language_options is not None:
++                raise ValueError("historical source wrapper cannot accept extended language inputs")
+         metadata = decode(LoweringMetadata, document["metadata"])
+         semantic = semantic_from_dict(document["semantic"])
+         semantics = SourceSemanticsGraph.from_dict(document["semantics"], semantic)
+         control = SourceControlFlowGraph.from_dict(document["control"])
+         graph = load_graph(_canonical(document["graph"])) if document["graph"] is not None else None
+-        result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame, structured)
++        result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame, structured, language)
+         if _canonical(result.to_dict()) != _canonical(document):
+             raise ValueError("source program scope/status/authority or canonical fields differ")
+-        checked = validate_source_program(result, max_operations=max_operations)
++        checked = validate_source_program(result, max_operations=max_operations, language_options=language_options,
++                                          verification=verification)
+         if not checked["valid"]:
+             raise ValueError("; ".join(checked["errors"]))
+         return result
+ 
++    @classmethod
++    def read_structure(cls, document, *, max_operations=10000):
++        """Read v5 without a live CodeType; no constant/source proof is granted."""
++        return cls.from_dict(document, max_operations=max_operations, verification="STRUCTURE")
++
+ 
+ @dataclass(frozen=True)
+ class LoweredSourceBody:
+@@ -193,6 +219,7 @@ class LoweredSourceBody:
+     interface: BodyEntryInterface | None = None
+     frame: FrameModel | None = None
+     structured: StructuredBodyModel | None = None
++    language: SourceLanguageOverlay | None = None
+ 
+ 
+ @dataclass(frozen=True)
+@@ -222,20 +249,22 @@ class PreparedSource:
+         return _SealedLoweringSession(self)
+ 
+     def lower(self, entry, *, source: SourceReference | None = None, max_operations=10000,
+-              expand_candidates=True, profile=BodyLoweringProfile.LEGACY):
++              expand_candidates=True, profile=BodyLoweringProfile.LEGACY, language_options=None):
+         return _lower_prepared(self, entry, source=source, max_operations=max_operations,
+-                               expand_candidates=expand_candidates, profile=profile)
++                               expand_candidates=expand_candidates, profile=profile, language_options=language_options)
+ 
+ 
+ def _lower_prepared(context, entry, *, source, max_operations, expand_candidates, profile,
+-                    sealed_source=None):
++                    sealed_source=None, language_options=None):
+     _check_arguments(entry, max_operations)
++    if language_options is not None and profile is not BodyLoweringProfile.STRUCTURED_ENV:
++        raise ValueError("extended source language requires environment entry ABI")
+     if profile is BodyLoweringProfile.STRUCTURED_ENV:
+         if expand_candidates:
+             raise ValueError("environment source bodies require root-only expansion")
+         from scar.analysis.environment_lowering import StructuredEnvironmentBuilder
+         return StructuredEnvironmentBuilder(context, entry, source=source, max_operations=max_operations,
+-                                             sealed_source=sealed_source).run()
++                                             sealed_source=sealed_source, language_options=language_options).run()
+     if profile is BodyLoweringProfile.STRUCTURED_BODY:
+         if expand_candidates:
+             raise ValueError("structured source bodies require root-only expansion")
+@@ -282,11 +311,12 @@ class _SealedLoweringSession:
+         self.__validated = True
+ 
+     def lower(self, entry, *, source=None, max_operations=10000, expand_candidates=True,
+-              profile=BodyLoweringProfile.LEGACY):
++              profile=BodyLoweringProfile.LEGACY, language_options=None):
+         if profile not in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+             raise ValueError("sealed construction is limited to structured source profiles")
+         return _lower_prepared(self.__prepared, entry, source=source, max_operations=max_operations,
+-            expand_candidates=expand_candidates, profile=profile, sealed_source=self)
++            expand_candidates=expand_candidates, profile=profile, sealed_source=self,
++            language_options=language_options)
+ 
+     def _require_inputs(self, semantic, control):
+         if (not self.__validated or semantic is not self.__prepared.semantic
+@@ -1020,23 +1050,37 @@ def _symbol_tables(text, path):
+ 
+ 
+ def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000,
+-                 profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY) -> SourceProgram:
++                 profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY, language_options=None,
++                 project_root=None) -> SourceProgram:
+     _check_arguments(entry, max_operations)
+     if type(profile) is not BodyLoweringProfile or profile not in (BodyLoweringProfile.LEGACY,
+             BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+         raise ValueError("unsupported standalone source profile")
+-    context = prepare_source(path)
++    context = prepare_source(path, project_root=project_root)
+     body = context.lower(entry, max_operations=max_operations,
+-                         expand_candidates=profile is BodyLoweringProfile.LEGACY, profile=profile)
++                         expand_candidates=profile is BodyLoweringProfile.LEGACY, profile=profile,
++                         language_options=language_options)
+     return SourceProgram(body.graph, body.metadata, context.semantic, context.semantics, context.control,
+-                         profile, body.interface, body.frame, body.structured)
++                         profile, body.interface, body.frame, body.structured, body.language)
+ 
+ 
+-def validate_source_program(result: SourceProgram, *, max_operations: int = 10000):
++def validate_source_program(result: SourceProgram, *, max_operations: int = 10000, language_options=None,
++                            verification="SOURCE_REPLAY"):
+     """Rebuild from current source; reported provenance cannot raise this budget."""
+     try:
+         if type(result) is not SourceProgram:
+             raise ValueError("expected SourceProgram")
++        if verification not in ("SOURCE_REPLAY", "STRUCTURE"):
++            raise ValueError("source verification mode differs")
++        structural_only = verification == "STRUCTURE"
++        if structural_only and result.language is None:
++            raise ValueError("historical source replay policy is unchanged")
++        if result.language is not None:
++            if (type(result.language) is not SourceLanguageOverlay
++                    or result.profile is not BodyLoweringProfile.STRUCTURED_ENV):
++                raise ValueError("extended source-language overlay requires the environment entry ABI")
++            if result.language.source != result.metadata.source:
++                raise ValueError("source-language overlay snapshot differs from metadata")
+         if type(result.profile) is not BodyLoweringProfile or result.profile not in (BodyLoweringProfile.LEGACY,
+                 BodyLoweringProfile.BOUND_FRAME, BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
+             raise ValueError("unsupported standalone source lowering profile")
+@@ -1050,8 +1094,18 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
+             from scar.analysis.structured_lowering import require_valid_structured_body
+             if result.frame is not None or result.interface is None:
+                 raise ValueError("structured bodies require a structured interface, not a legacy frame overlay")
++            source_tree = None
++            if result.language is not None and not structural_only:
++                if language_options is None:
++                    raise ValueError("v5 source replay requires explicit independently supplied language inputs")
++                with tokenize.open(result.metadata.source.path) as stream:
++                    source_text = stream.read()
++                if "sha256:" + hashlib.sha256(source_text.encode()).hexdigest() != result.metadata.source.fingerprint:
++                    raise ValueError("v5 source text changed")
++                source_tree = ast.parse(source_text, filename=result.metadata.source.path)
+             require_valid_structured_body(result.structured, result.graph, result.interface, result.metadata,
+-                                           semantic=result.semantic, control=result.control)
++                semantic=result.semantic, control=result.control, language=result.language,
++                source_tree=source_tree, language_options=language_options, structural_only=structural_only)
+         else:
+             if result.structured is not None:
+                 raise ValueError("historical frame bodies cannot contain structured protocols")
+@@ -1081,13 +1135,21 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
+             if {(link.operation, link.use) for link in result.metadata.use_links} != {
+                     (op.id, use.id) for op in ops.values() for use in op.uses}:
+                 raise ValueError("source use correspondence is incomplete")
+-        rebuilt = lower_source(result.metadata.source.path, result.metadata.entry,
+-                               max_operations=max_operations, profile=result.profile)
+-        if _canonical(result.to_dict()) != _canonical(rebuilt.to_dict()):
+-            raise ValueError("program graph or typed source correspondence differs from source replay")
++        if not structural_only:
++            rebuilt = lower_source(result.metadata.source.path, result.metadata.entry,
++                max_operations=max_operations, profile=result.profile, language_options=language_options,
++                project_root=result.language.namespace_root if result.language is not None else None)
++            if _canonical(result.to_dict()) != _canonical(rebuilt.to_dict()):
++                raise ValueError("program graph or typed source correspondence differs from source replay")
+     except (ValueError, TypeError, KeyError, AttributeError, OSError, SyntaxError, RecursionError) as error:
+         return {"valid": False, "errors": [str(error)]}
+-    return {"valid": True, "errors": []}
++    if result.language is None:
++        return {"valid": True, "errors": []}
++    return {"valid": True, "errors": [], "verification": verification,
++            "source_shape_verified": verification == "SOURCE_REPLAY",
++            "code_constant_provenance_verified": bool(result.language and result.language.constants)
++                and verification == "SOURCE_REPLAY",
++            "runtime_code_instance_established": False}
+ 
+ 
+ __all__ = ["SourceProgram", "PreparedSource", "LoweredSourceBody", "prepare_source",
+diff --git a/scar/analysis/structured_lowering.py b/scar/analysis/structured_lowering.py
+index e7dd10b..db5dbe1 100644
+--- a/scar/analysis/structured_lowering.py
++++ b/scar/analysis/structured_lowering.py
+@@ -46,7 +46,8 @@ class _Loop:
+ 
+ 
+ class StructuredBuilder(_Builder):
+-    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None):
++    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None,
++                 language_options=None):
+         if sealed_source is not None:
+             sealed_source._require_inputs(context.semantic, context.control)
+         self.sealed_source = sealed_source
+@@ -63,6 +64,32 @@ class StructuredBuilder(_Builder):
+         self.loop_stack = []
+         self.active_temporaries = []
+         self.operation_records = {}
++        if language_options is not None:
++            from scar.analysis.source_language import SourceLanguageOptions
++            if type(language_options) is not SourceLanguageOptions:
++                raise TypeError("extended source language requires explicit SourceLanguageOptions")
++        self.language_options = language_options
++        self.language_namespace_root = str(context.root)
++        self.language_unpackings = []
++        self.language_slices = []
++        self.language_constants = []
++        self.language_compiler_locals = []
++
++    def has_language(self, name):
++        return self.language_options is not None and any(
++            item.name == name for item in self.language_options.capabilities)
++
++    def language_overlay(self, graph):
++        if self.language_options is None:
++            return None
++        from scar.ir.program.source_language import SourceLanguageOverlay
++        return SourceLanguageOverlay(self.snapshot, self.language_options.capabilities,
++            tuple(self.language_unpackings) if graph is not None else (),
++            tuple(self.language_slices) if graph is not None else (),
++            tuple(self.language_constants) if graph is not None else (),
++            tuple(self.language_compiler_locals),
++            self.language_options.code_evidence.to_dict() if self.language_options.code_evidence else None,
++            namespace_root=self.language_namespace_root)
+ 
+     def emit(self, cursor, operation, node, role, old=None):
+         super().emit(cursor, operation, node, role, old=old)
+@@ -161,14 +188,22 @@ class StructuredBuilder(_Builder):
+ 
+     def invoke(self, cursor, node, inputs, *, role=SourceRole.EXPRESSION, old=None,
+                result_type=_REF, failure_handler=None):
++        normal, results, operation = self.invoke_results(cursor, node, inputs, role=role, old=old,
++            result_types=(result_type,) if result_type else (), failure_handler=failure_handler)
++        return normal, results[0] if results else None, operation
++
++    def invoke_results(self, cursor, node, inputs, *, role=SourceRole.EXPRESSION, old=None,
++                       result_types=(), failure_handler=None):
++        if type(result_types) is not tuple:
++            raise TypeError("normal payload types must be an explicit tuple")
+         operation_id = self.fresh(OperationID, "structured-invoke")
+         uses = [self.use(operation_id, value, child, input_role, index, semantic_value=static)
+                 for value, child, input_role, index, static in inputs]
+         uses.append(self.use(operation_id, cursor.state, node, "state", 0))
+-        normal = self.new_block(node, role=role, extra_types=(result_type,) if result_type else ())
++        normal = self.new_block(node, role=role, extra_types=result_types)
+         failure = self.new_block(node, role=SourceRole.EXCEPTION, extra_types=(_REF,))
+         normal.env = dict(cursor.env); failure.env = dict(cursor.env)
+-        signatures = (CompletionSignature(ExitKind.NORMAL, ((result_type,) if result_type else ()) + (self.state_type,)),
++        signatures = (CompletionSignature(ExitKind.NORMAL, result_types + (self.state_type,)),
+                       CompletionSignature(ExitKind.RAISE, (_REF, self.state_type)))
+         edges = tuple(CompletionSuccessor(signature.kind, target.block,
+                       tuple(CompletionResult(index) for index in range(len(signature.types))))
+@@ -183,7 +218,7 @@ class StructuredBuilder(_Builder):
+             self.finish_exit(failure, node, exception, ExitKind.RAISE)
+         else:
+             failure_handler(failure, exception)
+-        return normal, self.block_arguments[normal.block][0] if result_type else None, operation_id
++        return normal, tuple(self.block_arguments[normal.block][:-1]), operation_id
+ 
+     def invoke_protocol(self, cursor, node, values, kind, *, result_type=_REF, failure_handler=None):
+         inputs = tuple((value, node, "protocol-input", index, None) for index, value in enumerate(values))
+@@ -543,8 +578,11 @@ class StructuredBuilder(_Builder):
+             # This complete check also validates the canonical core; callers of
+             # PreparedSource.lower receive a fully checked constructed body.
+             _require_valid_structured_body(structured, graph, self.interface, metadata,
+-                semantic=self.semantic, control=self.control, sealed_source=self.sealed_source)
+-        return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface, None, structured)
++                semantic=self.semantic, control=self.control, sealed_source=self.sealed_source,
++                language=self.language_overlay(graph), source_tree=self.tree,
++                language_options=self.language_options)
++        return LoweredSourceBody(graph, metadata, self.operations_emitted, self.interface, None, structured,
++                                 self.language_overlay(graph))
+ 
+     @staticmethod
+     def assumptions():
+@@ -552,15 +590,21 @@ class StructuredBuilder(_Builder):
+         return _ASSUMPTIONS
+ 
+ 
+-def require_valid_structured_body(model, graph, interface, metadata, *, semantic, control):
++def require_valid_structured_body(model, graph, interface, metadata, *, semantic, control,
++                                  language=None, source_tree=None, language_options=None, structural_only=False):
+     """Validate typed overlay endpoints; exact source replay is a separate gate."""
+     # Public validation always checks caller-owned mutable source layers.
+     return _require_valid_structured_body(model, graph, interface, metadata,
+-                                          semantic=semantic, control=control)
++        semantic=semantic, control=control, language=language, source_tree=source_tree,
++        language_options=language_options, structural_only=structural_only)
+ 
+ 
+ def _require_valid_structured_body(model, graph, interface, metadata, *, semantic, control,
+-                                   sealed_source=None):
++                                   sealed_source=None, language=None, source_tree=None, language_options=None,
++                                   structural_only=False):
++    if language is None:
++        from scar.ir.program.source_language import reject_extended_protocols
++        reject_extended_protocols(model)
+     from scar.ir.v2._validation import record_errors
+     errors = record_errors(model, StructuredBodyModel, "structured")
+     if errors:
+@@ -678,6 +722,10 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
+             # Ownership, typed uses, state address and completion validation are
+             # profile-specific; no legacy protocol is broadened by this branch.
+             pass
++        elif language is not None and protocol.kind in (
++                PythonProtocolKind.UNPACK_FIXED, PythonProtocolKind.BUILD_SLICE,
++                PythonProtocolKind.READ_CODE_CONSTANT):
++            pass  # Exact shapes, source, payloads and lifetime are checked below.
+         else:
+             raise ValueError("opaque protocol has no implemented structured control interface")
+     if environment_profile:
+@@ -689,6 +737,10 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
+         validate_string_protocols(model, graph, interface, metadata, semantic)
+         from scar.analysis.source_mapping_lowering import validate_mapping_protocols
+         validate_mapping_protocols(model, graph, interface, metadata, semantic)
++    if language is not None:
++        from scar.analysis.source_language_validation import validate_language_body
++        validate_language_body(model, graph, interface, metadata, semantic, language,
++                               source_tree=source_tree, options=language_options, structural_only=structural_only)
+     expected_loops = {link.source.atom_id for link in metadata.operation_links
+         if semantic.source_atoms[link.source.atom_id].kind in ("While", "For")
+         and operations[link.operation].terminator is not None
+diff --git a/scar/analysis/environment_lowering.py b/scar/analysis/environment_lowering.py
+index 9281191..c74a571 100644
+--- a/scar/analysis/environment_lowering.py
++++ b/scar/analysis/environment_lowering.py
+@@ -47,9 +47,10 @@ def captured_cell_slot(definition, name):
+ class StructuredEnvironmentBuilder(StructuredBuilder):
+     """The structured body rules with canonical environment and address ports."""
+ 
+-    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None):
++    def __init__(self, context, entry, *, source=None, max_operations=10000, sealed_source=None,
++                 language_options=None):
+         super().__init__(context, entry, source=source, max_operations=max_operations,
+-                         sealed_source=sealed_source)
++                         sealed_source=sealed_source, language_options=language_options)
+         self.profile = BodyLoweringProfile.STRUCTURED_ENV
+         self.prepared_source = context
+         self.environment = None
+@@ -105,6 +106,13 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
+         return cursor, value
+ 
+     def expr(self, node, cursor):
++        if self.has_language("LEXICAL_LOCALS") and isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
++            label = ("GENERATOR_EXPRESSION_CREATION_DRIVE_INTERFACE_UNIMPLEMENTED" if isinstance(node, ast.GeneratorExp)
++                     else "COMPREHENSION_SCOPE_INTERFACE_UNIMPLEMENTED")
++            raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, label)
++        if self.has_language("SLICE_KEYS") and isinstance(node, (ast.Slice, ast.Subscript)):
++            from scar.analysis.source_slice_lowering import lower_slice, lower_subscript
++            return lower_slice(self, node, cursor) if isinstance(node, ast.Slice) else lower_subscript(self, node, cursor)
+         if isinstance(node, ast.Dict):
+             from scar.analysis.source_mapping_lowering import lower_dictionary
+             return lower_dictionary(self, node, cursor)
+@@ -142,6 +150,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
+         return self._global_read(node, cursor, old)
+ 
+     def store(self, target, value, cursor):
++        if self.has_language("FIXED_UNPACK") and isinstance(target, (ast.Tuple, ast.List)):
++            from scar.analysis.source_unpack_lowering import lower_unpack_target
++            return lower_unpack_target(self, target, value, cursor)
+         if isinstance(target, (ast.Attribute, ast.Subscript)):
+             from scar.analysis.source_heap_lowering import store_heap_target
+             return store_heap_target(self, target, value, cursor)
+@@ -227,7 +238,15 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
+         self.function_context = RegionID(_key("function-body", self.function_definition.id.wire, self.profile.value))
+         self.function_blocks = []; self.reference_candidates = {}
+         try:
+-            layout = compiler_environment_layout(self.prepared_source, node, self.function_definition)
++            evidence = self.language_options.code_evidence if self.language_options is not None else None
++            if evidence is not None:
++                from scar.analysis.source_environment_layout import CompilerEnvironmentLayout
++                evidence.require_definition(self.snapshot, self.function_definition.id, self.source(node))
++                code = evidence.code
++                layout = CompilerEnvironmentLayout(tuple(code.co_freevars), tuple(code.co_cellvars),
++                                                   code.co_qualname, code.co_firstlineno)
++            else:
++                layout = compiler_environment_layout(self.prepared_source, node, self.function_definition)
+         except (ValueError, SyntaxError, TypeError, KeyError, RecursionError) as error:
+             raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                 "compiler environment layout unavailable: " + str(error)) from error
+@@ -238,7 +257,47 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
+         if free_names != self.free_cells:
+             raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                 "source symbol table and compiled free-variable interface differ")
+-        self.locals = {symbol.get_name() for symbol in symbols if symbol.is_local()} - self.local_cells
++        physical_locals = {symbol.get_name() for symbol in symbols if symbol.is_local()}
++        if self.has_language("LEXICAL_LOCALS"):
++            from scar.ir.program.source_language import CompilerLocalMapping
++            lexical = {name for owner, name in self.slots if owner == self.function_definition.id}
++            transient = set()
++            def comprehension_in_this_function(owner):
++                seen = set()
++                while owner in self.semantic.definitions and owner not in seen:
++                    if owner == self.function_definition.id:
++                        return True
++                    seen.add(owner)
++                    definition = self.semantic.definitions[owner]
++                    if getattr(definition.kind, "value", definition.kind) in ("function", "method", "class"):
++                        return False
++                    owner = definition.parent_id
++                return False
++            for symbol in symbols:
++                name = symbol.get_name()
++                if not symbol.is_local():
++                    continue
++                comp_iter = bool(getattr(symbol, "is_comp_iter", lambda: False)())
++                comp_cell = bool(getattr(symbol, "is_comp_cell", lambda: False)())
++                if name in lexical:
++                    slots = (self.slots[self.function_definition.id, name],)
++                    category = "LEXICAL_FUNCTION"
++                elif comp_iter or comp_cell:
++                    slots = tuple(slot.slot_id for slot in self.semantic.slots.values()
++                                  if slot.name == name and slot.metadata.get("scope_kind") == "comprehension"
++                                  and comprehension_in_this_function(slot.owner))
++                    if not slots:
++                        raise _Unsupported(GapKind.SOURCE_MAPPING, node,
++                            "COMPILER_COMPREHENSION_SLOT_UNRECOVERED: " + name)
++                    category = "COMPREHENSION_TRANSIENT"
++                    transient.add(name)
++                else:
++                    raise _Unsupported(GapKind.SOURCE_MAPPING, node,
++                        "compiler local has no exact lexical or comprehension source slot: " + name)
++                self.language_compiler_locals.append(CompilerLocalMapping(name, category, slots, comp_iter, comp_cell))
++            self.local_cells = frozenset(set(self.local_cells) - transient)
++            physical_locals -= transient
++        self.locals = physical_locals - self.local_cells
+         self.global_names = {symbol.get_name() for symbol in symbols if symbol.is_global()}
+         parameters = [argument for argument, _ in formal_nodes(node)]
+         cursor = self.new_block(node)
+@@ -282,6 +341,8 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
+         self.frame_transition(cursor, node, refs, PythonProtocolKind.FRAME_ENTER)
+         parameter_values = {parameter.arg: port.value for parameter, port in zip(parameters, ports)}
+         for name in layout.cellvars:
++            if name not in self.local_cells:
++                continue
+             parameter_node = next((parameter for parameter in parameters if parameter.arg == name), node)
+             cursor = self._make_cell(cursor, parameter_node, name, parameter_values.get(name))
+         for name in sorted(self.locals):
+diff --git a/scar/analysis/source_heap_lowering.py b/scar/analysis/source_heap_lowering.py
+index 8a1c3c7..26be636 100644
+--- a/scar/analysis/source_heap_lowering.py
++++ b/scar/analysis/source_heap_lowering.py
+@@ -95,6 +95,10 @@ def expression_for_heap_target(builder, node, cursor):
+     value, or evidence of a reaching binding.  SG ownership and real core Uses
+     are retained while semantic_value remains absent.
+     """
++    if (getattr(builder, "has_language", lambda _: False)("SLICE_KEYS")
++            and isinstance(node, (ast.Slice, ast.Tuple))):
++        from scar.analysis.source_slice_lowering import lower_key
++        return lower_key(builder, node, cursor)
+     records = builder.old_by_atom.get(builder.source(node).atom_id, ())
+     if len(records) == 1:
+         return builder.expr(node, cursor)
+@@ -192,8 +196,14 @@ def store_heap_target(builder, target, rhs, cursor):
+         _unsupported(target, "heap target rule accepts only Attribute and Subscript")
+     if not isinstance(target.ctx, ast.Store):
+         raise _Unsupported(GapKind.SOURCE_MAPPING, target, "heap assignment target lacks Store context")
+-    if isinstance(target, ast.Subscript) and isinstance(target.slice, ast.Slice):
+-        _unsupported(target, "slice assignment needs its own evaluation and mutation rule")
++    if isinstance(target, ast.Subscript):
++        if getattr(builder, "has_language", lambda _: False)("SLICE_KEYS"):
++            if any(isinstance(child, ast.Slice) for child in ast.walk(target.slice)):
++                # The capability proves load-key construction only. Reusing
++                # the historical store contract would silently broaden it.
++                _unsupported(target, "SLICE_STORE_LIFETIME_UNRECOVERED")
++        elif isinstance(target.slice, ast.Slice):
++            _unsupported(target, "slice assignment needs its own evaluation and mutation rule")
+     if isinstance(target, ast.Attribute) and target.attr.startswith("__") and not target.attr.endswith("__"):
+         _unsupported(target, "private attribute assignment requires exact compiler-class name mangling")
+     definition = _source_definition(builder, target, binding=True)
+diff --git a/scar/analysis/program_inventory.py b/scar/analysis/program_inventory.py
+index 2fc5305..245d88c 100644
+--- a/scar/analysis/program_inventory.py
++++ b/scar/analysis/program_inventory.py
+@@ -88,6 +88,9 @@ class ProgramInventory:
+     structured: tuple[StructuredBodyModel, ...] = ()
+ 
+     def _check_profile(self):
++        from scar.ir.program.source_language import reject_extended_protocols
++        for model in self.structured:
++            reject_extended_protocols(model)
+         if self.call_sources is not None:
+             from scar.analysis.call_seeds import CallSourceSeedReport
+             from scar.analysis.call_demand import _call_source_scope
+@@ -282,6 +285,9 @@ class ProgramInventory:
+             if interfaces.profile is not required_profile:
+                 raise ValueError("structured inventory interface profile mismatch")
+             models = decode(tuple[StructuredBodyModel, ...], document["structured"])
++            from scar.ir.program.source_language import reject_extended_protocols
++            for model in models:
++                reject_extended_protocols(model)
+             if len({model.definition for model in models}) != len(models):
+                 raise ValueError("duplicate structured inventory model")
+             if document["call_sources"] is None:
+diff --git a/docs/PYTHON_UNPACK_SLICE_MODEL.md b/docs/PYTHON_UNPACK_SLICE_MODEL.md
+new file mode 100644
+index 0000000..102743b
+--- /dev/null
++++ b/docs/PYTHON_UNPACK_SLICE_MODEL.md
+@@ -0,0 +1,328 @@
++# Python 固定解包、Slice 与 comprehension 作用域补全设计
++
++日期：2026-10-23。状态：**设计已批准；显式 opt-in 实现已编写，正在冻结审查；尚未 import、构造或实档验收。**
++本项不增加 detector/backend，不执行 LeWM/forward，不生成新 runtime events，不修改
++正在由 R2 调整的 ProgramGraph/resource/codec。完整程序建模仍 OPEN。
++
++## 1. 已读代码与真实分母
++
++已读 `first_stage_body_frontiers_20261023` 的 README/result/groups；
++`structured_lowering.py`、`environment_lowering.py`、`source_heap_lowering.py`、
++`program_lowering.py`、`source_compilation.py`；`ir/program/structured.py`、
++`model.py`、`frames.py`、`functions.py`、`stored_values.py` 和 `ir/literals.py`。
++仓库没有 `source_env_lowering.py`，实际环境 builder 在 `environment_lowering.py`。
++
++**Observed：**旧 272038 来源表的 91 个实际 code groups / 2,902 次调用，属于
++source 已关联但 body UNSUPPORTED。最主要同理由组为固定赋值/解包诊断
++12 groups / 1,092 calls；Slice 原理由分组为 150、30、2 calls，合计 182；
++`ordinary local has no parsed slot: v` 为 3 groups / 111 calls。900 次 GeneratorExp
++属于另一项，不能加到固定解包收益里。所有数字是首个停止理由加权，不能预言
++补一个语法后整个 body 必然成功。
++
++只读 AST 检查显示，具有该解包诊断的原 source bodies 确有 Tuple(Store) targets，
++本批看到的这些 targets 没有 Starred。审查不根据函数名生成产品规则。
++
++## 2. CPython 3.14.7 决定的边界
++
++参考固定 tag `v3.14.7`，与原采集 Python build 的 minor/patch 一致；滚动 3.14 文档
++仅作语言参考，不冒充另一 patch 的实现已被当前运行验证。
++
++### 2.1 解包不是一组 getitem
++
++赋值先求 RHS，再按目标的递归、从左到右顺序赋值。同层固定 arity 的解包先完成，
++然后才处理该层各 target；`a, (b, c) = rhs` 的内层失败不撤回已经赋给 a 的绑定。
++[语言定义](https://docs.python.org/3.14/reference/simple_stmts.html#assignment-statements)、
++[3.14.7 compiler assignment_helper](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c#L3177)
++明确区分这两个阶段。
++
++generic UNPACK 取得 iterator，收集所需项，再多取一项检查是否过多；不足、过多、
++不可迭代及用户迭代错误分别产生相应失败。失败会清理已取得的临时项/iterator。
++因此不能用 `len` 加 N 次索引、普通 for-loop 或“先 store 一个再取下一个”替代。
++[3.14.7 ceval helper](https://github.com/python/cpython/blob/v3.14.7/Python/ceval.c#L2254)
++是这里的协议依据。
++
++实际解释器也有 exact tuple/list 的 specialized 路径；它们不等于调用用户的
++`__iter__`。没有实现路径证据时不能断言发生 iterator allocation、N 次 Python
++callback 或零成本引用抽取。协议给出允许的实现边界，真实实现选择仍由 measurement
++与 runtime evidence 决定。[3.14.7 UNPACK opcodes](https://github.com/python/cpython/blob/v3.14.7/Python/bytecodes.c#L1437)
++
++### 2.2 Slice 键不是全局函数调用
++
++`base[lo:hi:step]` 先求 base，再按顺序求存在的 bounds；缺省项保留为 None。
++语法创建的键交给 subscription dispatch；全局变量 `slice` 被重绑定不改变这个语法。
++不能提前将 step=None 改成 1、将负数 bounds 归一化，或将 step=0 一律在建键时拒绝。
++这些会改变自定义 consumer 能观察到的键。
++[语言定义](https://docs.python.org/3.14/reference/expressions.html#slicings)、
++[3.14.7 sliceobject.c](https://github.com/python/cpython/blob/v3.14.7/Objects/sliceobject.c#L134)
++将建对象与 consumer 的 index conversion 分开。
++
++**关键实现事实：**3.14.7 compiler 对 constant Slice 使用 code constants 的 LOAD_CONST；
++动态无 step 的直接 subscription 可用 BINARY_SLICE/STORE_SLICE；其余情况可用
++BUILD_SLICE，再执行 subscription。因此“每个 ast.Slice 每轮分配新对象”也是错误模型。
++[3.14.7 codegen selection](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c#L5000)、
++[constant/build selection](https://github.com/python/cpython/blob/v3.14.7/Python/codegen.c#L5272)
++
++动态路径的 Slice、bounds、container 都有生命周期；失败也有 cleanup 顺序和 post-world。
++归一化 IR 可以展开它们，但不得把展开误称多条真实 runtime event，或延后最后引用的
++释放而称行为无变化。[3.14.7 slice opcodes](https://github.com/python/cpython/blob/v3.14.7/Python/bytecodes.c#L778)
++
++## 3. 当前 IR 足够什么，还差什么
++
++| 当前实体/接口 | 已有能力 | 必需补口 |
++| --- | --- | --- |
++| Operation / CompletionSignature / CompletionSuccessor | 正常边携带任意数量 typed payload；每条边有自己的 world | 不需要新 tuple-result Value，也不需要 ProgramGraph 多结果类型 |
++| StructuredBuilder.invoke | 仅单个 `result_type` 或无结果 | 增加多 payload helper，旧单结果 wrapper 不改语义 |
++| PythonProtocolKind | iterator、store、frame/temp 协议已有 | 固定解包、slice build、code constant reference 的明确协议/来源 |
++| LocalBindingValue / FRAME_BIND | 绑定可 UNBOUND，stateful 释放旧绑定 | 递归 target adapter，保持部分赋值和异常后的已更新 env |
++| active_temporaries / HOLD / RELEASE / EXIT | pending refs 可带到失败出口，原 FrameRules 保留 UNKNOWN | 对分支、消费所有权和剩余待赋值 refs 明确协议；不能随手延寿 |
++| SourceReference + SG slot | 词法 owner 和 code 来源已存在 | compiler physical local 与 comprehension 词法 slot 的对应 |
++| ReferenceValue / coarse world | 可以保留 alias/effects 未证实 | 不能将元素视为 clone、新 logical version 或无副作用 |
++
++当前 `StructuredBuilder.store` 只接受 Name；environment builder 另接 heap/global/cell，
++Tuple/List 仍落入拒绝。`expr` 不能处理 Slice。通用子表达式求值也没有像 heap-target
++helper 那样一致地暂存此前 operand；新 slice/tuple-key adapter 必须处理 pending refs，
++不能仅加一个 AST 分支然后让异常漏掉 receiver/前一个 bound。
++
++`FrameRules` 的 no-interposition 条件、UNKNOWN effects、MAY_NOT_COMPLETE、
++NOT_GUARANTEED release 均保留。协议结构补全不等于 finalizer 行为或实际生命周期已证实。
++
++## 4. Proposed：最小通用协议与 API
++
++### 4.1 多结果 INVOKE helper
++
++```text
++invoke_results(cursor, source_node, ordered_inputs,
++               result_types: tuple[ValueType, ...],
++               failure_handler=None)
++  -> normal_cursor, tuple[existing ValueID, ...], operation_id
++```
++
++正常 completion 是 `(*result_types, world)`；失败为 `(exception_reference, world)`。
++landing block arguments 仍是原 CompletionResult(i) 的唯一定义，不将 N 个结果打包
++成 Python tuple 再产生 N 次 getitem。现有 `invoke` 委托该 helper，维持旧返回形状。
++
++### 4.2 UNPACK_FIXED
++
++新增一个源协议 kind `UNPACK_FIXED`。输入为 RHS reference + world；正常结果为 N 个
++有序 references + world；raise 为 exception + world。N 从目标同层的 exact AST/SG
++来源与正常 signature 一起核定，允许 N=0。即使 N=0，也不能删除迭代/arity 检查。
++
++`lower_unpack_target(builder, target, rhs, cursor)`：
++
++1. 只接 `Tuple/List(ctx=Store)`；本 capability 不接 Starred。
++2. 先一次完成本层 UNPACK_FIXED；不在协议内部提前提交语言 targets。
++3. 完整设计应依次交付结果，由已有 Name/cell/global/heap store 接叶；嵌套 Tuple/List 递归。
++   **本轮实现 capability 为 `PYTHON_FIXED_LOCAL_UNPACK_V1`，只接普通 local Name leaves。**
++   cell/global/heap、Starred 明确拒绝；不能将这一实现称为全部 fixed unpack。
++4. `for` 仍由原 ADVANCE_ITERATOR 判断自然结束，body 的 unpack 失败是 body 失败，
++   不能送进原 for-exhaustion handler。
++5. inner unpack/store 失败使用当时 cursor.env 和 post-world，不回滚已完成的 leaf。
++
++协议负责自身 iterator/provisional items 的内部消费与失败清理。normal 公开的 N 个
++refs 只由各自 completion 定义；后续尚未赋值的 refs 必须在 active temporary 集中。
++RHS 临时持有应在 UNPACK opcode 对应消费点结束；如果 RHS 还由 local/链式赋值持有，
++那些是另外的既有引用，不能通过提前释放它们模拟 stack 消费。
++
++固定 3.14.7 generic 路径的生命周期合同还包括：成功校验后关闭 iterator，再由 opcode
++消费 RHS stack reference；失败关闭按逆取得顺序保存的 provisional items，再关闭
++iterator，opcode 随后消费 RHS。过多检查取得的额外项也要在失败中处理。exact built-in
++路径按它自己的引用取得/消费规则建模，不能假造一个实际 iterator。所有 cleanup 的
++可能 finalizer 作用归入相应 post-world；协议不是纯数据 projection。
++
++现有 HOLD/RELEASE/EXIT 可以承载这些关系，但构造 helper 需明确每条 completion 的
++pending set。失败构造不能借 normal 分支 pop/释放；不能以统一 finally 清空 list
++代替图上的 cleanup。内部 finalizer/noncompletion 仍由原协议条件与 world 表示，
++不把它误写成 NONE。如果未能给出正确 consumption/lifetime 规则，就保留该项 frontier。
++
++generic iter、exact built-in fast path 是协议的 implementation alternatives。后续有
++版本化 type/dispatch 证据才能细化；本次不新增 runtime callback/events 去伪造选择。
++
++### 4.3 Slice：值键、编译表示、subscription 分开
++
++新增源协议 `BUILD_SLICE`：存在的 bounds 顺序求值并暂存，缺省项用明确来源于语法的
++None；builder intrinsic 生成键，不能生成 Name('slice') 的 global lookup。动态建键
++用原 INVOKE 的 ref/world 与异常后态，不判纯，也不提前执行 consumer 的 `__index__`。
++
++constant Slice 需要另一个通用来源 `READ_CODE_CONSTANT`，配薄 `CodeConstantSource`
++见证（operation、原 source、CodeWitness artifact/hash、code fingerprint、constant path）。
++它索引原 code constant reference，不扩展 PythonLiteral 去伪装一个新分配 slice，
++不复制 co_consts 对象或增加另一套 producer。普通 read operation 的结果仍为原
++OperationResult；code-table 来源/可能读取的 world 单独保存。
++
++CodeWitness 的结构 fingerprint + constant path **不能证明运行中 CodeType object
++instance 唯一**；同结构代码可有不同 constants 实例。因此该来源不设虚假的
++referent_identity，实际 code-instance/constant-object identity 缺口明确保留。
++不能因为值相同就合并两次 constant materialization 或两个运行。
++
++`lower_slice_key` 应返回 key reference 与表示来源：code constant、dynamic BUILD_SLICE、
++或 compiler two-bound combined path。已经有 CodeWitness 时可读原 dis/constant path
++确认；没有则只建源层关系并保留 representation/identity frontier，不猜物理 allocation。
++constant LOAD_CONST 路径不能额外生成几条“实际 bounds 求值”事件。
++
++`lower_subscript_key` 再按左到右组装 tuple key：`[:, :T]` 是两个 key parts，
++省略项/None/Ellipsis 与普通整数索引各自保留。receiver、先完成的 key parts、动态
++bounds 必须跨后续可能失败的求值持有。最终沿既有 INDEX/STORE_SUBSCRIPT 协议派发，
++状态地址仍是 `Element(key_use)` 的部分覆盖；不从冒号推断 tensor view、copy 或零成本。
++
++two-bound BINARY_SLICE/STORE_SLICE 可以有一个 source composite 展开，但其输入消费、
++slice 销毁和 receiver/RHS 释放必须符合固定 compiler/runtime profile。若第一轮仅
++完成普通 key 物化，不应假称 combined 路径也已恢复；用明确 capability frontier
++`COMBINED_SLICE_LIFETIME_UNRECOVERED` 保留它，随后复用同协议补齐。
++
++普通 slice store 仍是 RHS→receiver→bounds→store；AugAssign 是另一种先读后改写
++协议，del 也有自己的完成规则，本轮不因共用 Subscript AST 而顺带接受它们。
++
++## 5. v 槽：已定位的作用域错接
++
++**Observed：**只读解析三份原 source 的 stdlib symtable，没有生成 CodeType 或执行
++目标；三处 v 都是 `is_local=True, is_comp_iter=True, is_comp_cell=False`。原 SG 的 v
++则有明确 comprehension owner。例如 `wm/lewm/lewm.py` 133–135 的 v 是
++`slot:slot:023431263823955d72728ac1`，owner 为 DictComp
++`opdef:op:edd0b457afdb1c33bce0f944`，不是 enclosing get_cost 的 slot。
++
++**Inferred from code and confirmed layout：**environment builder 将 compiler
++`is_local()` 名单当作全部 enclosing lexical locals；入口对每个名字调用
++`define_binding`，只查 `(function_definition, name)`。PEP709 物理内联变量因此被
++错误要求存在一个外层 SG slot。不是原 parser 没有给 comprehension 的 v 建槽。
++[3.14 symtable API](https://docs.python.org/3.14/library/symtable.html)、
++[3.14.7 symbol inlining](https://github.com/python/cpython/blob/v3.14.7/Python/symtable.c#L758)
++
++最小修正方向：按原 SG lexical owner 初始化 function 的真实 slots；另建只读
++compiler-local classification 对照，区分普通 local、inlined comp iteration/cell、
++hidden compiler locals、global/free 等。不能一律删除所有 `is_comp_iter` 名字：
++同名 v 还可能是合法的外层参数/local，必须按原每次 binding/read 的 lexical owner
++区分。也不能将没有外层槽的 v 降格为 global read。
++
++尚无 comp adapter 时，应停在明确 `COMPREHENSION_SCOPE_INTERFACE_UNIMPLEMENTED`，
++而不是补一个外层 v 或宣称 111 次调用都已恢复。完整 comp 需要隔离 binding tokens、
++保存/恢复可能 UNBOUND 的外层 binding/cell、异常 epilogue，以及 comp 内部各轮控制。
++PEP709 的 inlined list/dict/set comp 不要求新增 Python function invocation；源 Region
++不等于真实 frame。[PEP709](https://peps.python.org/pep-0709/)
++
++GeneratorExp 另保留 generator code/body、环境、creation/drive/yield/resume/close
++接口；左侧首个 iterable 的创建阶段与之后惰性求值不能合并。已有 resumable/frame
++实体可承载，但这不是本次固定 UNPACK 的实现目标，不生成假正常函数 root。
++实际压力已由[调用协议审计](CALL_PROTOCOL_FRONTIERS.md)完整核实：945 次项目内 exact
++function、无同步入口的 targets，全部属于 8 个 CO_GENERATOR code；这不证明945次成功创建。
++因此本轮显式保留 `GENERATOR_EXPRESSION_CREATION_DRIVE_INTERFACE_UNIMPLEMENTED`，
++不能用普通同步 entry 或将 GAP 改名消除这个缺口。
++
++## 6. 需要变更的最小文件与验证职责
++
++| 位置 | 最小改口 |
++| --- | --- |
++| `structured_lowering.py` | 多结果 wrapper；typed kind 准入；pending refs/每条 completion 校验 |
++| `environment_lowering.py` | tuple/list store 与 slice/key adapter 分派；lexical/compiler locals 分离 |
++| 新 `source_unpack_lowering.py` | 固定/嵌套 target 计划、顺序 store、arity/partial-store validator |
++| 新 `source_slice_lowering.py` | intrinsic key、constant witness、tuple-key 与生命周期 validator |
++| `source_heap_lowering.py` | 复用子表达式来源与临时持有；slice key 转交，不重做 namespace/heap 图 |
++| `ir/program/structured.py` | 新 typed protocol kinds；最小 `UnpackShape`/`CodeConstantSource` 来源参数，索引原端口 |
++| source program/inventory/checkpoint 封装 | 显式 language capability/version，不静默重解释旧 CP |
++
++`UnpackShape` 只记 arity/原 child target SourceReferences；结果以 operation signature 和
++既有 landing ports 为准，不能再存一份可独立修改的 producer/output 表。独立 source
++验证要从 exact source text/AST witness 核这个 shape，不能只自查一个声明的 N。
++可为 validator 增可选 exact-source witness（每 file parse 一次、fingerprint/atom 全核）；
++缺少它时只称 graph well-formed，source shape correspondence 保持未验证。
++
++最小来源记录可以是 `UnpackShape(operation, source, child_targets)` 与
++`CodeConstantSource(operation, source, code_key, constant_path, witness_artifact)`：
++arity 从 child_targets 数量与 normal signature 同时核定；这些是来源索引，不增加
++ValueID/StateVersion/producer。capability 明确限制 fixed arity，Starred 不混入此记录。
++
++validator 必须逐项核：
++
++- 输入 roles、N+world/exception+world、原 CompletionResult/landing、来源/owner；
++- 全层 unpack 完成后才出现叶 store，嵌套 failure 保留已写 env/world；
++- branch pending refs、正常消费/异常 cleanup 与原 frame 条件，没有临时引用漏项；
++- slice bounds/tuple parts 的有序 Uses；constant source 对应原 CodeWitness path，
++  dynamic/combined 路径不冒认 constant 或省略失败边；
++- alias/effects/termination/actual code-instance 缺口不被协议类型自动清除。
++
++核心已支持多 completion payload，暂不要求改 ProgramGraph/resource/codec；不抢 R2
++的 graph schema 号。source-language wrapper 需要显式升级（现 ENV SourceProgram4 /
++inventory8，拟在实施时分配后继版本及新 checkpoint capability）；旧 wire/profile
++保留原义。若增加字段影响公共 record codec，必须采用显式新版本而非旧字段静默默认。
++
++## 7. 两个原 source body 的有界验收计划（待根审查）
++
++自动从原 frontier 按 AST pattern/原 source reference 选择，不在产品写函数名规则。
++两例恰在同一 `wm/lewm/module.py`，原 fingerprint
++`sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7`：
++
++| 原 body / 位置 | 机械验收目标 |
++| --- | --- |
++| file140/body11，91–101；原 900 calls | 第92行六个 Name 的 Tuple(Store)，一次 chunk RHS→UNPACK_FIXED(6)→六个原 slot；正常6 refs+world，失败无本层 store；后续 calls/binary ops保持未知effects |
++| file140/body26，285–294；原150 calls | 第291行 `self.pos_embedding[:, :T]`：receiver先求值；tuple key首项constant Slice、次项动态 upper=T；原const path与BUILD_SLICE表示分别核，最终INDEX失败/alias保持 |
++
++只对这一份 source 准备/复用 context 一次，并只 lower 两个 exact definitions；
++优先用已归档 source 三图与现有 CodeWitness 的 module/CodeType，必要时只做本 file
++编译见证，记录实际次数。不能重 prepare 151 files，不执行 forward/模型或新 episode。
++初始独立构造预算可固定为1 source file、每body4,000 operations、合计8,000，
++达上限保留budget frontier；不借验收产物自行抬高预算。
++
++验收保存新原图/metadata/interface、capability、输入 SHA、独立 graph+source shape+
++protocol validators、预算/time/RSS，以及仍剩余的源码/状态/lifetime/runtime 缺口。
++两个 body 的静态恢复通过不等于旧900/150次调用已自动升级成闭合 activation；后续
++必须正式接新 body receipt 与原 code witness，未经核验不得改旧 source binding 原档。
++不加大批测试 suite，不先验收一个手写 mock graph 就宣称 LeWM 已恢复。
++
++本轮 nested/zero-arity 的构造规则与 source validator 已实现，但不以两个平面实例
++冒充所有边界行为已经实测。当前没有执行此 gate；根审查统一 freeze 后才运行。
++
++## 8. Implemented：显式封装、验证权限与当前限制
++
++新增 `ir/program/source_language.py` 保存薄来源记录，`analysis/source_language.py`
++提供 `SourceLanguageOptions` / `SourceCodeEvidence`；三个 lowering/validation helper
++复用原 Operation、CompletionResult、frame/world、slots，未改 ProgramGraph/resource/codec。
++构造入口是 `PreparedSource.lower(..., profile=STRUCTURED_ENV, expand_candidates=False,
++language_options=options)`。旧默认 None 的 source-program 1–4、inventory ≤8 含义不变；
++它们显式拒绝 UNPACK_FIXED/BUILD_SLICE/READ_CODE_CONSTANT，不能借 enum 扩展混入新能力。
++
++新 standalone wrapper 是 `scar.source-program/5`，新增必需的 language overlay，
++overlay 版本为 `PYTHON_SOURCE_LANGUAGE_V1`，保留 exact source namespace_root。
++三个 capability 是 `PYTHON_FIXED_LOCAL_UNPACK_V1`、`PYTHON_SLICE_KEYS_314_V1`、
++`PYTHON_LEXICAL_LOCALS_314_V1`；没有偷偷升级当前 inventory8/partition1/checkpoint1。
++Slice 当前支持 load-key 的 constant LOAD_CONST、dynamic BUILD_SLICE 与 tuple-key，
++combined two-bound 路径、slice store、AugAssign、del 保留显式 frontier。
++没有 comp adapter：仅修正 compiler/lexical 分类并保留原 comprehension slots，
++随后仍在 comp 本体处报告作用域接口未实现，不生成外层 v。
++
++`SourceCodeEvidence(store, composition, captured)` 只接受正规 CompositionIndex 和只读、
++owned CodeWitnessStore。它查原 call_sources 的完整 CapturedCode 与 VERIFIED
++CodeSourceLink、原 snapshot/definition/source，随后从既有 SHA/build/magic 已核 archive
++load 原 CodeType、再次完整 describe_code 匹配。来源记录包含原 component locator、
++store manifest/artifact/hash、原 inventory 收据；不接受一个任意 witness dict 或
++自称 VERIFIED 的记录作为独立 code proof。不 compile、不 exec，也不证明运行中的
++CodeType/constant object instance。
++
++保存后的 v5 有两条正规读取路径：
++
++- `SourceProgram.read_structure(document)`：公共 core codec、原 source layers、来源索引、
++  payload/store order 等结构检查；不需要 live CodeType，不 replay source。
++  `validate_source_program(..., verification="STRUCTURE")` 明确报告 source shape /
++  code-constant provenance 未重新验证。
++- `SourceProgram.from_dict(document, language_options=independent_options)`：默认
++  SOURCE_REPLAY，重新核当前 exact source 与独立 owned CodeWitness、同 namespace_root，
++  按固定预算构造并比对来源/原图。没有独立 options 必须拒绝，不能由保存的 provenance
++  dict 自认证。两条路径均不授 runtime code-instance identity、purity 或 effects closure。
++
++## 9. Proposed：两 body 通过后接回 inventory/composition 的最短后继
++
++两个 v5 body 即使通过也只是新静态来源产物；**不自动覆盖旧840 bodies，不表示当前 Run
++已接入新图**。下一独立 gate 应升级 partition manifest/file/body checkpoint reader，
++为新 body 分配 `scar.body-construction-checkpoint/2`（必需 language 字段与 capability），
++以及显式后继 inventory source wrapper；旧 checkpoint1/inventory≤8 继续严格拒绝新协议。
++reader 需解码并校验 v2 语言 overlay，复用原 SG/SourceSemantics/CFG archive、exact
++snapshot/context/DefinitionID，不能 prepare151 files 或拼大 JSON。版本号须与发布者
++协调后分配，当前没有发布任何这种升级。
++
++发布新不可变 manifest，只为两个新 body 写新 SHA/来源/预算收据；其余原 checkpoint
++逐项引用不复制。CompositionIndex 的 typed_body/source_body_access 正规分支按新
++schema 读取，namespace 必须含新 artifact/representation/root；local IDs 不跨片合并。
++原 coarse world 即使 localID 同文也不因此共享 StateLocation。
++
++随后以现 Run 完整 raw SHA、CapturedCode/source witness 重新绑定 definition→新 CP
++locator/namespace，再验 call operand/return/environment/dispatch 原端口；保存原分母与
++无法闭合的控制/occurrence frontiers。旧 Run/PID/activation 不借用，旧 artifact 不重写。
++这是下一接线任务，当前实现未让任意外部 v5 dict 成为本 Run 的 body activation。

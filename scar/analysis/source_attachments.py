@@ -20,8 +20,10 @@ import json
 import os
 from pathlib import Path
 import re
+import sys
 import tokenize
 
+from scar.analysis.call_compilation import future_flags_for
 from scar.analysis.call_trace_reader import CallTraceScan
 from scar.analysis.source_layers import load_source_graph_artifact
 from scar.ir.program.call_edges import CodeSourceLink, CapturedCode
@@ -165,6 +167,9 @@ class SourceAttachments:
         _need(len(self._guards) == len(report["source_guards"]) and set(self._guards) == set(self._files),
               "guard/source-file denominator mismatch")
         self._rows = {(row["process_id"], row["code"]): row for row in report["admissions"]}
+        self._static_rows = defaultdict(list)
+        for key, row in self._rows.items():
+            self._static_rows[key[1]].append((key, row))
         self._row_indexes = {(row["process_id"], row["code"]): index
                              for index, row in enumerate(report["admissions"])}
         old_rows = {(row["process_id"], row["code"]): row for row in parent["admissions"]}
@@ -439,6 +444,72 @@ class SourceAttachments:
                 "guard": deepcopy(self._guards.get(filename)),
                 "guard_locator": self._manifest_locator(f"#/source_guards/{self._guard_indexes[filename]}")
                                  if filename in self._guard_indexes else None}
+
+    def current_scope_receipt(self, scanned, groups):
+        """Receipt of a new strict scan, never equality with historical groups."""
+        _need(type(scanned) is CallTraceScan, "strict current scan required")
+        values = tuple(groups)
+        _need(all(type(group) is EnteredCodeGroup for group in values)
+              and len({(group.process_id, group.code) for group in values}) == len(values),
+              "current entered-code groups are invalid or duplicate")
+        return {"scope": "CURRENT_INDEPENDENT_SCAN_FOR_STATIC_REUSE",
+            "trace_directory": scanned.directory,
+            "trace_files_sha256": _sha(_canonical(encode(scanned.files))),
+            "captured_codes": len(scanned.captures), "entered_code_groups": len(values),
+            "entered_invocations": sum(group.count for group in values)}
+
+    def static_code_witness(self, captured, *, compilation_profile, captured_python_build):
+        """Select only complete code/source evidence, without old dynamic facts.
+
+        The historical record locator is provenance. Its PID/counts/anchors
+        are deliberately absent from the returned static view. No source read,
+        compile or new capture binding occurs in this selector.
+        """
+        _need(type(captured) is CapturedCode, "complete typed captured code required")
+        matched = [(key, row) for key, row in self._static_rows.get(captured.key, ())
+                   if row["captured_code"] == encode(captured)]
+        if not matched:
+            return None
+        key, row = matched[0]
+        _need(all(item["code_source_link"] == row["code_source_link"] and item["status"] == row["status"]
+                  for _, item in matched[1:]), "ambiguous historical static code/source proof")
+        historical_builds = sorted({meta["python"] for meta in self._report["collection_metadata"]})
+        frontiers = []
+        if compilation_profile != self._report["compilation_profile"]:
+            frontiers.append("STATIC_WITNESS_COMPILATION_PROFILE_MISMATCH")
+        if (type(captured_python_build) is not str or historical_builds != [captured_python_build]
+                or captured_python_build != sys.version):
+            frontiers.append("STATIC_WITNESS_PYTHON_BUILD_MISMATCH")
+        future_flags = None
+        try:
+            future_flags = future_flags_for(captured.flags, CallCompilationProfile.RECORDED_FUTURE_FLAGS)
+        except (ValueError, TypeError):
+            frontiers.append("STATIC_WITNESS_UNSUPPORTED_COMPILATION_FLAGS")
+        index = self._row_indexes[key]
+        result = {"captured_code": deepcopy(row["captured_code"]), "status": row["status"],
+            "code_source_link": deepcopy(row["code_source_link"]),
+            "record_locator": encode(self._manifest_locator(f"#/admissions/{index}")),
+            "descriptor_locator": encode(self._manifest_locator(f"#/admissions/{index}/captured_code")),
+            "code_source_locator": encode(self._manifest_locator(f"#/admissions/{index}/code_source_link")),
+            "witness_scope": "HISTORICAL_CODE_SOURCE_ONLY",
+            "context_guard": {"compilation_profile": compilation_profile,
+                "historical_compilation_profile": self._report["compilation_profile"],
+                "captured_python_build": captured_python_build, "historical_python_builds": historical_builds,
+                "reader_python_build": sys.version, "future_flags": future_flags,
+                "status": "MATCH" if not frontiers else "UNRESOLVED", "frontiers": frontiers},
+            "historical_frontiers": deepcopy(row["frontiers"])}
+        return result
+
+    def static_definition_reference(self, witness):
+        """Resolve the selected original record; no new PID masquerades as old."""
+        _need(type(witness) is dict, "static source witness required")
+        captured = decode(CapturedCode, witness["captured_code"])
+        for key, row in self._static_rows.get(captured.key, ()):
+            if row["captured_code"] == witness["captured_code"]:
+                locator = encode(self._manifest_locator(f"#/admissions/{self._row_indexes[key]}"))
+                if locator == witness["record_locator"] and row["code_source_link"] == witness["code_source_link"]:
+                    return self.definition_reference(*key)
+        raise ValueError("static witness is not one bound original full descriptor/source record")
 
     def _view(self, filename):
         if filename not in self._views:

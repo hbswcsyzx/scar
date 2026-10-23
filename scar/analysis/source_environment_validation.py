@@ -13,7 +13,7 @@ from scar.ir.program.model import (
     LocalBindingValue, ReferenceValue, StateVersionValue, TerminatorKind, ValueKind, ValueType,
 )
 from scar.ir.program.state_addresses import (
-    AddressCoverage, AddressEffect, CellContent, InvokeStateOperand, NamespaceKey, ReferenceOwner,
+    AddressCoverage, AddressEffect, CellContent, Element, InvokeStateOperand, NamespaceKey, ReferenceOwner,
 )
 from scar.ir.program.state_modes import AccessMode
 from scar.ir.program.structured import PythonProtocolKind as Kind
@@ -27,7 +27,7 @@ _KINDS = frozenset((Kind.LOOKUP_GLOBAL, Kind.READ_FREE_CELL, Kind.READ_LOCAL_CEL
 _STORES = frozenset((Kind.STORE_CELL, Kind.STORE_GLOBAL, Kind.STORE_ATTRIBUTE, Kind.STORE_SUBSCRIPT))
 
 
-def validate_environment_body(model, graph, interface, metadata, semantic):
+def validate_environment_body(model, graph, interface, metadata, semantic, *, language=None):
     from scar.analysis.environment_lowering import captured_cell_slot
 
     def need(condition, detail):
@@ -161,6 +161,35 @@ def validate_environment_body(model, graph, interface, metadata, semantic):
              and row.coverage is AddressCoverage.PARTIAL and row.protocol is None and row.effects == effects,
              "state address must name this operation's exact owner/key/world Uses")
         expected_rows.add(operation.id)
+    if language is not None:
+        from scar.ir.program.source_language import SourceLanguageCapability
+        if SourceLanguageCapability.SLICE_KEYS in language.capabilities:
+            for link in metadata.operation_links:
+                if link.opcode is not Opcode.INDEX:
+                    continue
+                operation = operations[link.operation]
+                source = semantic.definitions.get(link.semantic_operation)
+                atom = semantic.source_atoms.get(link.source.atom_id)
+                need(source is not None and source.kind is OperationKind.INDEX
+                     and source.code_id == link.source.atom_id.wire
+                     and link.source.atom_id in source.source_atoms
+                     and atom is not None and atom.kind == "Subscript" and atom.reference == link.source,
+                     "language index address has no exact original source INDEX")
+                need(operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
+                     and not operation.effects_complete and operation.callee is None
+                     and len(operation.uses) == 3
+                     and tuple(use.id for use in operation.uses) == operation.invoke_arguments
+                     and all(type(values[use.value]) is ReferenceValue for use in operation.uses[:2])
+                     and type(values[operation.uses[-1].value]) is StateVersionValue
+                     and values[operation.uses[-1].value].location == world.location,
+                     "language index address needs original receiver/key/world invoke Uses")
+                effect = AddressEffect(ReferenceOwner(operation.uses[0].id),
+                                       (Element(operation.uses[1].id),), AccessMode.READ)
+                row = rows.get(operation.id)
+                need(row is not None and row.site == InvokeStateOperand(operation.id, operation.uses[-1].id)
+                     and row.coverage is AddressCoverage.PARTIAL and row.protocol is None
+                     and row.effects == (effect,), "language index address differs from its exact receiver/key/world Uses")
+                expected_rows.add(operation.id)
     need(set(rows) == expected_rows, "unexpected or missing source environment address refinement")
     for value in values.values():
         if type(value) is LocalBindingValue:

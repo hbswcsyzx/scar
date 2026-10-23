@@ -25,6 +25,7 @@ from scar.ir.program.call_edges import (
 )
 from scar.ir.program.functions import BodyLoweringProfile, FunctionSignature
 from scar.ir.program.inventory import CallInventory, CoverageEntry, DefinitionInventory
+from scar.ir.program.source_references import SourceDefinitionReference
 from scar.ir.record_codec import decode, encode, loads as strict_loads
 from scar.ir.semantics_v2 import SourceSnapshot
 from scar.ir.v2.ids import OperationDefinitionID
@@ -108,8 +109,9 @@ class SourceBodyAccess:
         self.report_root = Path(source_bindings).resolve()
         report, self.report_receipt = _document(self.report_root / "report.json", max_document_bytes)
         self.report = report
-        _need(report.get("schema") == "scar.source-invocations" and report.get("schema_version") == 2,
-              "source input must be a completed schema2 source binding report")
+        _need(report.get("schema") == "scar.source-invocations" and report.get("schema_version") in (2, 3),
+              "source input must be a completed supported source binding report")
+        self.formal = report["schema_version"] == 3
         _need(report.get("current_capture_raw_scan_verified") is True
               and report.get("old_capture_dynamic_facts_used_for_current_run") is False
               and report.get("transformation_authorized") is False
@@ -119,6 +121,14 @@ class SourceBodyAccess:
               "source report composition/inventory receipt differs")
         _need(decode(ExecutionRun, report["run"]) == coordinates.run, "source/current Run differs")
         _need(report["witness_mode"] in ("same_capture", "reused_code"), "unknown source witness mode")
+        if self.formal:
+            _need(report.get("source_definition_reference_format") == "scar.source-definition-reference.v1"
+                  and report.get("source_inputs") == composition.source_inputs(),
+                  "formal source inputs/qualified definition format differ")
+            if report["witness_mode"] == "reused_code":
+                _need(report.get("attachment_source_match_rule") == "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
+                      and not code_witnesses.writable and not code_witnesses.compile_missing,
+                      "current static reuse requires its explicit rule and a read-only CodeWitnessStore")
         _need(report.get("source_compilation_profile") == "RECORDED_FUTURE_FLAGS_V1",
               "source witness must retain the recorded compiler-context profile")
         declaration = report["bindings"]
@@ -127,8 +137,13 @@ class SourceBodyAccess:
         _need(self.bindings_receipt["sha256"] == declaration["raw_sha256"]
               and self.bindings_receipt["bytes"] == declaration["raw_bytes"], "binding SHA/size differs")
         _need(document.get("schema") == "scar.source-invocation-bindings"
-              and document.get("schema_version") == 2 and document.get("witness_mode") == report["witness_mode"]
+              and document.get("schema_version") == report["schema_version"] and document.get("witness_mode") == report["witness_mode"]
               and document.get("transformation_authorized") is False, "binding document header differs")
+        if self.formal:
+            _need(document.get("source_inputs") == report["source_inputs"]
+                  and document.get("source_definition_reference_format") == report["source_definition_reference_format"]
+                  and document.get("attachment_source_match_rule") == report.get("attachment_source_match_rule"),
+                  "formal binding receipts/reuse rule differ from source report")
         self.rows = document["bindings"]
         _need(type(self.rows) is list, "binding rows must be a list")
         _need(len(self.rows) == report["summary"]["entered_code_groups"]
@@ -166,7 +181,13 @@ class SourceBodyAccess:
         for row in self.rows:
             if row["body"] is None:
                 continue
-            definition = decode(OperationDefinitionID, row["definition"]["identity"])
+            element = row["composition_element"] if self.formal else row["definition"]
+            _need(element is not None, "canonical body has no original project composition view")
+            definition = decode(OperationDefinitionID, element["identity"])
+            if self.formal:
+                reference = decode(SourceDefinitionReference, row["definition"])
+                _need(reference.definition == definition and encode(reference.snapshot) == row["snapshot"],
+                      "qualified definition differs from original project body/source")
             if definition in self.collisions:
                 continue
             ref = row["body"]["reference"]
@@ -249,6 +270,48 @@ class SourceBodyAccess:
             previous = self.descriptors.get(capture.code.key)
             _need(previous is None or previous == capture.code, "one code fingerprint has different descriptors")
             self.descriptors[capture.code.key] = capture.code
+            if self.formal and row.get("source_origin") == "SOURCE_ATTACHMENT":
+                if self.report["witness_mode"] == "reused_code":
+                    outcome = self.composition.validate_static_source_binding(row,
+                        compilation_profile=self.report["source_compilation_profile"],
+                        captured_python_build=next(meta["python"] for meta in scan.metadata
+                                                  if meta["process_id"] == capture.process_id),
+                        current_source_checks=self.report["current_source_checks"])
+                    if outcome["source_usable"]:
+                        self.links[capture.code.key] = outcome["code_source_link"]
+                    else:
+                        self.frontiers[capture.code.key] = "CURRENT_STATIC_SOURCE_GUARD_UNAVAILABLE"
+                else:
+                    witness = self.composition.attached_code_witness(*key)
+                    _need(witness is not None and witness["record"]["captured_code"] == encode(capture.code)
+                          and witness["record"]["descriptor_anchor"] == encode(capture.anchor)
+                          and witness["record"]["entered_invocations"] == groups[key],
+                          "same-capture external source witness differs from current group")
+                    link = decode(CodeSourceLink, witness["record"]["code_source_link"])
+                    reference = self.composition.attached_definition_reference(*key)
+                    _need(link.status is CallLinkStatus.VERIFIED
+                          and row["definition"] == (encode(reference) if reference is not None else None)
+                          and row["snapshot"] == encode(link.snapshot) and row["source"] == encode(link.source)
+                          and row["body"] is None and row["composition_element"] is None,
+                          "same-capture external qualified source identity differs")
+                    self.links[capture.code.key] = link
+                continue
+            if self.formal and self.report["witness_mode"] == "reused_code":
+                witness = self.composition.static_code_witness(capture.code,
+                    compilation_profile=self.report["source_compilation_profile"],
+                    captured_python_build=next(meta["python"] for meta in scan.metadata
+                                              if meta["process_id"] == capture.process_id))
+                _need(row["definition"] is None or witness is not None,
+                      "project current definition has no complete static compiler/build context witness")
+                if witness is not None:
+                    _need(row.get("source_context_guard") == witness["context_guard"],
+                          "project source/compiler build guard differs")
+                    if row["definition"] is not None:
+                        reference = decode(SourceDefinitionReference, row["definition"])
+                        guard = self.composition.current_source_guard(reference.snapshot,
+                            row["current_source_check"], self.report["current_source_checks"])
+                        _need(witness["context_guard"]["status"] == "MATCH" and guard["status"] == "FINGERPRINT_MATCH",
+                              "project qualified source passed a failed current guard")
             locator = row["code_source_witness_locator"]
             descriptor_locator = row["descriptor_witness_locator"]
             if locator is None or descriptor_locator is None:
@@ -274,8 +337,13 @@ class SourceBodyAccess:
                     continue
                 _need(encode(link.snapshot) == row["snapshot"], "verified source snapshot differs")
                 if row["definition"] is not None:
-                    _need(encode(link.definition) == row["definition"]["identity"]
+                    element = row["composition_element"] if self.formal else row["definition"]
+                    _need(encode(link.definition) == element["identity"]
                           and encode(link.source) == row["source"], "original definition/source witness differs")
+                    if self.formal:
+                        reference = decode(SourceDefinitionReference, row["definition"])
+                        expected = self.composition.definition_reference(element["file_index"], link.definition)
+                        _need(reference == expected, "formal project definition differs from original source graph")
             previous = self.links.get(link.code)
             _need(previous is None or previous == link, "ambiguous source link for a complete code descriptor")
             self.links[link.code] = link

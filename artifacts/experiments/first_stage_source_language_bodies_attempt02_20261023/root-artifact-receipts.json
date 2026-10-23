@@ -1,0 +1,65 @@
+{
+  "file_count": 11,
+  "files": [
+    {
+      "bytes": 1139,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/README.md",
+      "sha256": "06274f3d1195c9bde12bc975c7528a50aec65ebcc8e374fcbeb80e95c92072f1"
+    },
+    {
+      "bytes": 2972,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/failure.json",
+      "sha256": "b084d06ec3bbe44a37f7d3f89b83acdf8ce1c5f915fc64b54b133031d98a69ca"
+    },
+    {
+      "bytes": 8776,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/freeze.json",
+      "sha256": "33d4ea5a19d0b434a58e4a7bd81ada4daf7e84e87550efa90022cbadb14b0b2c"
+    },
+    {
+      "bytes": 1477,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/producer.json",
+      "sha256": "6fb150afa20b76a4ba9ffce907f5a9201697ce87ea85e4f8fcd2efcaa980dfd1"
+    },
+    {
+      "bytes": 396,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/progress.jsonl",
+      "sha256": "c2c43bfef28fffd53b5af38e078dc8b6f13d886d7d35812d52dd91d04382cdc0"
+    },
+    {
+      "bytes": 508,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/remove-shadowed-import-proposed.patch",
+      "sha256": "be7c49b5f6897f4e579afc9981e1d55f48b82c8371c7ed6e2fa4c233135e84cb"
+    },
+    {
+      "bytes": 11883,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/run.py",
+      "sha256": "0550c928979a533bf6e401479ea984fdf6f898b54e438e312c461c0d86ae7156"
+    },
+    {
+      "bytes": 557,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/run.sh",
+      "sha256": "93ed7aef05dcf4a4df01146d79ffa662555b9a4724e420cc118d41e6ab32c623"
+    },
+    {
+      "bytes": 2703,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/run.stderr.txt",
+      "sha256": "3ff1e3c9a6ae1440b2ba517ddee8c8a7eec25c6c82c0b690936bb2c31fd92eea"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/run.stdout.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 848,
+      "path": "artifacts/experiments/first_stage_source_language_bodies_attempt02_20261023/run.time.txt",
+      "sha256": "70b5d9566c00446e7c45d8f11705efa8dfce4be8decb9119a451a52b57b2c18d"
+    }
+  ],
+  "schema": "scar.root-artifact-receipts",
+  "schema_version": 1,
+  "stored_bytes": 31259,
+  "transformation_authorized": false,
+  "whole_model_established": false
+}
