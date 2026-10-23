@@ -1,0 +1,55 @@
+{
+  "scope": "terminal artifact bytes only; not semantic completeness",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 2725,
+      "sha256": "bd80d56fa0b5f24a41b998fafe5c4f8b7a46019fc6c2f11cdd154729e1aa9610"
+    },
+    {
+      "path": "correct_compile_keys.py",
+      "bytes": 8434,
+      "sha256": "fcc2054fe1895846db1a8212e880668986eaac5335f758bb9c373ea64b7b7eaa"
+    },
+    {
+      "path": "correction.stdout.json",
+      "bytes": 1101,
+      "sha256": "85c12dca749b010082120f48f4414b66b76fcc1c83f39793dcd3a421dbb2ed8c"
+    },
+    {
+      "path": "final-artifacts.json",
+      "bytes": 1513,
+      "sha256": "0ed883ce5b1354cbb877227c41ce6c2fe197875c9561c29d2238b86553f8ea28"
+    },
+    {
+      "path": "freeze.json",
+      "bytes": 26333,
+      "sha256": "378ec16692ee8187e477dbad47c7157d3cfeb1838d92e9cd35f1f30fb0310daf"
+    },
+    {
+      "path": "implementation.patch",
+      "bytes": 33554,
+      "sha256": "67983905cd6e60d3df84e1916da9b4e59e4b19ce898d1303bf97849cf0a7ed4e"
+    },
+    {
+      "path": "metadata-correction.final.json",
+      "bytes": 76739,
+      "sha256": "6d6b5b93a45dbfe1f5c515f0bfdb6aadac95d1b85ec2b9d81ecec51d80bdb6f5"
+    },
+    {
+      "path": "metadata-correction.json",
+      "bytes": 75273,
+      "sha256": "c28827e05bcea3200d13635f0d68b1d71135a9e2fe8ee16913ac07778afebafa"
+    },
+    {
+      "path": "minimal-api.json",
+      "bytes": 27083,
+      "sha256": "7ccb263bdeb21e4562f2896a5210a8a42bd0222bf121c67535323776ef20bebe"
+    },
+    {
+      "path": "minimal_api.py",
+      "bytes": 1598,
+      "sha256": "e5a935a4cab01271b786b0bd255c64c94c24b6f15042fbc6af43819650d46b6d"
+    }
+  ]
+}

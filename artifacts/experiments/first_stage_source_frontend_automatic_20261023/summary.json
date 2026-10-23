@@ -1,0 +1,118 @@
+{
+  "status": "AUTOMATIC_WINDOW_FINISHED_WITH_OPEN",
+  "plan_seconds": 8.780774884013226,
+  "worker_seconds": 25.62710758499452,
+  "elapsed_s": 40.12368125200737,
+  "max_rss_kib": 610876,
+  "plan_summary": {
+    "source_files": 151,
+    "bodies": 2217,
+    "body_statuses": {
+      "UNSUPPORTED": 785,
+      "LOWERED_WITH_GAPS": 842,
+      "NOT_ATTEMPTED": 590
+    },
+    "metadata_statuses": {
+      "PENDING_CODE_RESOLVE": 77,
+      "ALREADY_MODELED": 842,
+      "ENTRY_ADAPTER_MISSING:COMPREHENSION": 253,
+      "ENTRY_ADAPTER_MISSING:CLASS": 301,
+      "CAPTURED_CODE_SOURCE_WITNESS_MISSING": 705,
+      "CODE_WITNESS_MODULE_VARIANT_MISSING": 10,
+      "ENTRY_ADAPTER_MISSING:LAMBDA": 27,
+      "ENTRY_ADAPTER_MISSING:RESUMABLE_FUNCTION": 2
+    },
+    "current_groups": 817,
+    "current_calls": 100438,
+    "group_statuses": {
+      "ENTRY_ADAPTER_MISSING:CLASS": 260,
+      "EXTERNAL_ENTRY_CATALOG_AND_ADMISSION_SCOPE_REQUIRED": 242,
+      "PENDING_CODE_RESOLVE": 77,
+      "SOURCE_DEFINITION_UNRESOLVED": 150,
+      "CODE_WITNESS_MODULE_VARIANT_MISSING": 10,
+      "BODY_LINKED": 76,
+      "ENTRY_ADAPTER_MISSING:RESUMABLE_FUNCTION": 2
+    },
+    "call_statuses": {
+      "ENTRY_ADAPTER_MISSING:CLASS": 260,
+      "EXTERNAL_ENTRY_CATALOG_AND_ADMISSION_SCOPE_REQUIRED": 86688,
+      "PENDING_CODE_RESOLVE": 1752,
+      "SOURCE_DEFINITION_UNRESOLVED": 4964,
+      "CODE_WITNESS_MODULE_VARIANT_MISSING": 53,
+      "BODY_LINKED": 6674,
+      "ENTRY_ADAPTER_MISSING:RESUMABLE_FUNCTION": 47
+    },
+    "metadata_candidates": 77,
+    "dispatched_bodies": 12,
+    "dispatched_files": 4
+  },
+  "worker": {
+    "schema": "scar.source-frontend-result",
+    "schema_version": 1,
+    "status": "FINISHED_WITH_OPEN",
+    "plan_sha256": "33020db4dd73d598d78c70ab4e0f956f59bf6d8f7fe0718235f6c8a4434687c3",
+    "counts": {
+      "UNSUPPORTED": 12
+    },
+    "program_paths": [],
+    "original_static_bodies": 2217,
+    "original_current_groups": 817,
+    "original_current_calls": 100438,
+    "source_files": {
+      "146": {
+        "context_loads": 1,
+        "ast_parses": 1,
+        "symtable_parses": 1,
+        "source_prepare_attempts": 0,
+        "decoded_source_bytes": 7172
+      },
+      "0": {
+        "context_loads": 1,
+        "ast_parses": 1,
+        "symtable_parses": 1,
+        "source_prepare_attempts": 0,
+        "decoded_source_bytes": 5822
+      },
+      "3": {
+        "context_loads": 1,
+        "ast_parses": 1,
+        "symtable_parses": 1,
+        "source_prepare_attempts": 0,
+        "decoded_source_bytes": 18004
+      },
+      "147": {
+        "context_loads": 1,
+        "ast_parses": 1,
+        "symtable_parses": 1,
+        "source_prepare_attempts": 0,
+        "decoded_source_bytes": 22880
+      }
+    },
+    "budget_operation_charge": 1163,
+    "decoded_source_bytes": 53878,
+    "code_witness_counts": {
+      "compile_attempts": 0,
+      "module_loads": 4,
+      "complete_descriptor_matches": 12,
+      "source_bytes_read": 0
+    },
+    "elapsed_s": 24.46434464699996,
+    "source_prepare_attempts": 0,
+    "target_executed": false,
+    "current_run_integrated": false,
+    "first_stage_complete": false
+  },
+  "code_witness_counts": {
+    "compile_attempts": 0,
+    "module_loads": 4,
+    "complete_descriptor_matches": 12,
+    "source_bytes_read": 0
+  },
+  "code_witness_all_payloads_unchanged": true,
+  "source_prepared": false,
+  "code_compiled": false,
+  "target_executed": false,
+  "new_publication_performed": false,
+  "current_run_integrated": false,
+  "first_stage_complete": false
+}

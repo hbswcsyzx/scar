@@ -1,0 +1,11 @@
+--- a/scar/analysis/source_frontend_worklist.py
++++ b/scar/analysis/source_frontend_worklist.py
+@@ -271,7 +271,7 @@
+         group_counts[category] += 1
+         call_counts[category] += count
+     _need(len(groups) == report["summary"]["entered_code_groups"], "current group denominator differs")
+-    _need(sum(call_counts.values()) == report["summary"]["entered_invocations"], "current call denominator differs")
++    _need(sum(call_counts.values()) == report["summary"]["invocations"], "current call denominator differs")
+     # Lexical metadata determines structural depth; no qualname/name rule.
+     declarations = {(row["file_index"], row["definition"]["id"]["wire"]): row for row in bodies}
+     def depth(item):

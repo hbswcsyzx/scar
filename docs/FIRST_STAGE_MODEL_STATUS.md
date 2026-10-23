@@ -6,6 +6,20 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：自动源码恢复队列的真实派工与缺口定位
+
+通用 `source_frontend_worklist.py` 已通过一次真实自动规划/worker门：原2217 bodies、
+817 groups/100438 calls全部保留；正式两body发布后的842原图不因本门改变。
+按实际source/context/compile key生成77 metadata candidates/1752当前calls，
+自动派工12 bodies/4 files，无业务名字规则。12次独立完整CodeType/source见证均匹配，
+但12次实际lowerer都返回UNSUPPORTED；program_paths为空，不伪造成功graph。
+
+首阻塞包括固定tuple index-key的来源适配、kwargs expansion、comprehension、combined
+slice、Try、嵌套FunctionDef及ImportFrom。它们是程序表示缺口，不是优化拒绝。
+真实发射1163 operations；源码context/AST/symtable各file一次，compile0、target0，
+wall41.39s/RSS610876KiB。完整终态、原返回与未派工项保留，见
+[自动队列与历史计数纠正](SOURCE_FRONTEND_WORKLIST.md)。没有开始化简或性能A/B。
+
 ### 2026-10-23：撤回旧FD表连续性资格，保留真实FD回执
 
 发现并核实原capture profile缺口：run.sh只启用strace6.8的四类filter，`unshare`和

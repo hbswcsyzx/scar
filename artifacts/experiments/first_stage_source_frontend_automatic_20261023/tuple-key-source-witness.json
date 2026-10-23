@@ -1,0 +1,91 @@
+{
+  "scope": "read-only exact original SG/SourceSemantics/source witness",
+  "source": {
+    "atom_id": {
+      "kind": "source",
+      "value": "atom:a10db102febf6fb7eb7fb603",
+      "wire": "source:atom:a10db102febf6fb7eb7fb603"
+    },
+    "end_column": 22,
+    "end_line": 194,
+    "fingerprint": "sha256:b6e73253199e1a39f0fcadfad7dbea09270cbd559e366d1bc9bf09c9e7da0606",
+    "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/env_pool.py",
+    "start_column": 16,
+    "start_line": 194
+  },
+  "ast_parent_chain": [
+    {
+      "kind": "Subscript",
+      "ctx": "Store"
+    },
+    {
+      "kind": "Assign",
+      "ctx": null
+    }
+  ],
+  "source_archive": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/b40a581218a1b4621100a3d861696aa47584bbf8bb5ccc614ed0eb82cccba6ae.json.gz",
+    "sha256": "58696cbb0332b33cf4ce546bdbf96fc8e93c58a3583fdffb8f9fefe8c7e7025d",
+    "bytes": 617607,
+    "canonical_sha256_declared": "b40a581218a1b4621100a3d861696aa47584bbf8bb5ccc614ed0eb82cccba6ae"
+  },
+  "original_sg_definitions": [
+    {
+      "code_id": "source:atom:a10db102febf6fb7eb7fb603",
+      "contract": null,
+      "control_region": {
+        "kind": "ctrl",
+        "value": "control:c36f602ce57c9b5d7db43317",
+        "wire": "ctrl:control:c36f602ce57c9b5d7db43317"
+      },
+      "effect_summary": {
+        "kind": "effect",
+        "value": "op:4fc6512c63816ace2d54d9e4",
+        "wire": "effect:op:4fc6512c63816ace2d54d9e4"
+      },
+      "id": {
+        "kind": "opdef",
+        "value": "op:4fc6512c63816ace2d54d9e4",
+        "wire": "opdef:op:4fc6512c63816ace2d54d9e4"
+      },
+      "input_slots": [],
+      "kind": "operator",
+      "label": "Tuple",
+      "metadata": {
+        "ast_type": "Tuple",
+        "evidence": "Inferred",
+        "frontend": "python_ast_v2",
+        "module": "stable-worldmodel.stable_worldmodel.world.env_pool"
+      },
+      "output_slots": [
+        {
+          "kind": "slot",
+          "value": "slot:9c4feb33c7d1071bb9a9bf92",
+          "wire": "slot:slot:9c4feb33c7d1071bb9a9bf92"
+        }
+      ],
+      "parent_id": {
+        "kind": "opdef",
+        "value": "op:1d383d6df8789be22b301613",
+        "wire": "opdef:op:1d383d6df8789be22b301613"
+      },
+      "resource_requirements": [],
+      "source_atoms": [
+        {
+          "kind": "source",
+          "value": "atom:a10db102febf6fb7eb7fb603",
+          "wire": "source:atom:a10db102febf6fb7eb7fb603"
+        }
+      ],
+      "source_end": 194,
+      "source_file": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/env_pool.py",
+      "source_start": 194,
+      "state_slots": []
+    }
+  ],
+  "old_source_semantics_operations": [],
+  "reason_missing_is_not_missing_source": true,
+  "production_files_modified": false,
+  "source_prepared": false,
+  "code_compiled_or_loaded": false
+}

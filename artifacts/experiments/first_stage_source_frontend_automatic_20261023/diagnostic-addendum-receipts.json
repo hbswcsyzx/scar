@@ -1,0 +1,75 @@
+{
+  "schema": "scar.source-frontend-diagnostic-addendum",
+  "schema_version": 1,
+  "original_gate_archive": {
+    "path": "artifact-receipts.json",
+    "sha256": "2f4ed77456a1366b6952c21c050b1680e408ef912f87dbbbf4f79864214a2fa2",
+    "bytes": 38460,
+    "unchanged": true
+  },
+  "scope": "READ_ONLY_AST_AND_ORIGINAL_SOURCE_GRAPH_DIAGNOSIS",
+  "actual_gate_unchanged": true,
+  "production_files_modified": false,
+  "code_compiled_or_target_executed": false,
+  "original_attempts": 12,
+  "original_unsupported": 12,
+  "new_programs": 0,
+  "diagnostic_path_fix": {
+    "preserved": "exact-ast-frontiers.pre-path-fix.json",
+    "current": "exact-ast-frontiers.json",
+    "meaning": "artifact-only path normalization; original source bytes and frontend results unchanged"
+  },
+  "artifacts": [
+    {
+      "path": "diagnose_frontiers.py",
+      "sha256": "ccf59ff9898fe0a85c803c1319ba80361539ea2ae04214c480b5a3db79808952",
+      "bytes": 3639
+    },
+    {
+      "path": "diagnosis.stdout.json",
+      "sha256": "1532f4f75abce68d01c57aa3ba65fd5305fd2b61577ea567a4e7ed0098cee6a2",
+      "bytes": 402
+    },
+    {
+      "path": "exact-ast-frontiers.pre-path-fix.json",
+      "sha256": "12806203684004397d9b785693335d04bf54bf35855d1ed177ae2f6e9d28d884",
+      "bytes": 30009
+    },
+    {
+      "path": "exact-ast-frontiers.json",
+      "sha256": "4f080537b15c36eb5878fabee03469e135958a2b91aadd88d68cc88d7f357866",
+      "bytes": 31761
+    },
+    {
+      "path": "tuple-key-source-witness.json",
+      "sha256": "20835cbe0745f30e0fa8c11d0d154ee2de6703bb8cbe47c9cf38c5983ee62ae1",
+      "bytes": 2931
+    },
+    {
+      "path": "primary-source/receipts.json",
+      "sha256": "89e22e33144cd63d5e1f35b4b937781b4e89eb93c244ef87b7baf57d63c3097d",
+      "bytes": 1694
+    },
+    {
+      "path": "primary-source/Python_bytecodes.c",
+      "sha256": "7bf5ada874d6c8244f16c38be5c36e7a4eff1a7349e4c9a6c901d8475727e095",
+      "bytes": 225661
+    },
+    {
+      "path": "primary-source/Objects_tupleobject.c",
+      "sha256": "5de9d431f49f78a1c46ec61cbc606cbb0e3091e65c56dfcefc8ccc7fcf3bcd60",
+      "bytes": 35270
+    },
+    {
+      "path": "primary-source/Include_internal_pycore_tuple.h",
+      "sha256": "126e3a59bd58763897d3bb106f3688808faf3ee01264c572609fb8dbbf1f734b",
+      "bytes": 2555
+    },
+    {
+      "path": "docs/SOURCE_FRONTEND_NEXT_PROTOCOL.md",
+      "base": "repository",
+      "sha256": "f57324369aecbd6bc4cb3fd8e2dc9d325a964dbfb5a58d30b7343eb02f360e11",
+      "bytes": 9357
+    }
+  ]
+}
