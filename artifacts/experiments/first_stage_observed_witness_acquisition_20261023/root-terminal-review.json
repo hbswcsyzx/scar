@@ -1,0 +1,10 @@
+{
+  "status": "PASS_RECORDED_COMPLETE_ACQUISITION_AND_ARCHIVE_BYTES",
+  "requests": 10,
+  "unique_compile_keys": 8,
+  "payloads_verified": 16,
+  "source_recompiled_here": false,
+  "target_executed": false,
+  "new_bodies": 0,
+  "first_stage_complete": false
+}

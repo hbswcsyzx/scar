@@ -1,0 +1,60 @@
+{
+  "head_at_start": "56ecc1c5262dd22826e90efed93f3bff740e22cc",
+  "pid": 670902,
+  "runner": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_observed_witness_acquisition_20261023/run.py",
+    "sha256": "59e7b279594874567010a6b21a28de968bff8c624c1687aecd5e07c48f5e86ec",
+    "bytes": 12619
+  },
+  "preflight": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_observed_witness_acquisition_20261023/preflight.py",
+    "sha256": "74e268f1362ef0a1ecd9defce76194ad679e63a30ccf38408d53a4d7b56e2e81",
+    "bytes": 4532
+  },
+  "approved_acquirer": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/compiler_witness_archives.py",
+    "sha256": "8b7f9b3875098bd545775f9937d9a89c07ff4136fcdcbf6869fc228583f2c0a0",
+    "bytes": 21836
+  },
+  "composition": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/result/composition/index.json.gz",
+    "sha256": "8a4f872a02761d48cc0b156117bc69c2cd72303a7bb91656b3c93f39a8a31514",
+    "bytes": 17035096
+  },
+  "plan_manifest": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_frontend_automatic_20261023/plan/manifest.json",
+    "sha256": "832fdedf586b1746e12da89fc034a4120b33424a4951aec54b6f2a61562c4b27",
+    "bytes": 60623
+  },
+  "plan_sha256": "33020db4dd73d598d78c70ab4e0f956f59bf6d8f7fe0718235f6c8a4434687c3",
+  "selected_qualified_definitions": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_observed_witness_acquisition_20261023/selected-qualified-definitions.json",
+    "sha256": "ffe7928ea09262ba9f0599b4beb568ae7976eef61e567b225fdba7bfd5eee82d",
+    "bytes": 80762
+  },
+  "old_archive": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/manifest.json",
+    "sha256": "56355f7ef10d16d8ab4fb02a84988cf2f0070b75e4cd5fccbf1c86c1ea34170d",
+    "bytes": 42283,
+    "runtime": {
+      "implementation": "cpython",
+      "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+      "version": [
+        3,
+        14,
+        7,
+        "final",
+        0
+      ],
+      "cache_tag": "cpython-314",
+      "magic": "2b0e0d0a",
+      "marshal_version": 5
+    },
+    "module_count": 20,
+    "source_count": 20,
+    "code_executed": false,
+    "source_prepared": false
+  },
+  "source_prepare": 0,
+  "target_executed": false
+}

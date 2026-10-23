@@ -1,0 +1,31 @@
+{
+  "old_reader": {
+    "max_compile_keys": 20,
+    "max_source_files": 32,
+    "max_source_bytes": 16000000,
+    "max_module_bytes": 16000000,
+    "max_archive_bytes": 256000000,
+    "max_manifest_bytes": 8000000,
+    "max_nested_codes": 8192,
+    "max_depth": 128
+  },
+  "new_writer": {
+    "max_compile_keys": 8,
+    "max_source_files": 8,
+    "max_source_bytes": 2000000,
+    "max_module_bytes": 2000000,
+    "max_archive_bytes": 32000000,
+    "max_manifest_bytes": 8000000,
+    "max_nested_codes": 8192,
+    "max_depth": 128
+  },
+  "acquisition": {
+    "max_definitions": 10,
+    "max_requests": 10,
+    "max_attempts": 10,
+    "max_elapsed_seconds": 180,
+    "max_record_bytes": 2000000,
+    "max_report_bytes": 16000000
+  },
+  "independent_total_gate_wall_seconds": 180
+}

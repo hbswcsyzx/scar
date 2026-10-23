@@ -1,0 +1,89 @@
+{
+  "schema": "scar.observed-witness-acquisition-preflight",
+  "schema_version": 1,
+  "imports_verified": true,
+  "compile_performed": false,
+  "source_graphs_read": false,
+  "target_executed": false,
+  "source_prepared": false,
+  "plan_full_digest_verified": true,
+  "plan_sha256": "33020db4dd73d598d78c70ab4e0f956f59bf6d8f7fe0718235f6c8a4434687c3",
+  "tables": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_frontend_automatic_20261023/plan/bodies.json.gz",
+      "sha256": "18c316dc3bbdb0670effa5b5097e65ac9b52db033dfa39be36762f906fd708c8",
+      "bytes": 765445,
+      "decoded_sha256": "87114a29b695fbbcfd3dcc54fa04cbe81ad6e9e8aa0becd87a33fe195a217bcc",
+      "decoded_bytes": 10454875
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_frontend_automatic_20261023/plan/groups.json.gz",
+      "sha256": "04d91ee7d17edd769858f1cb92e4021a4b09433d8e1d14dfe288832ca56ebd26",
+      "bytes": 85867,
+      "decoded_sha256": "02882dd1cf9e0cf728ea7fd811f3e27c3b58fddddc7ab7144541a166154719c1",
+      "decoded_bytes": 724683
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_frontend_automatic_20261023/plan/dispatch.json.gz",
+      "sha256": "4e954f183d6e043f2c33b20bf68a89a0a0fb802ba668376c578fcdc2b6ec6e39",
+      "bytes": 1120,
+      "decoded_sha256": "dc61f328bc4b2b7e4c0cd6db88a4b1f224bd37ad5053c1b9793107c79349750c",
+      "decoded_bytes": 2461
+    }
+  ],
+  "bodies": 2217,
+  "groups": 817,
+  "calls": 100438,
+  "selected_bodies": 10,
+  "selected_files": 8,
+  "selected_calls": 53,
+  "selection": "metadata_status == CODE_WITNESS_MODULE_VARIANT_MISSING",
+  "row_keys": [
+    "body_index",
+    "body_key",
+    "body_locator",
+    "code_variants",
+    "context",
+    "current_calls",
+    "current_groups",
+    "definition",
+    "file_index",
+    "metadata_status",
+    "prior_status",
+    "snapshot"
+  ],
+  "group_keys": [
+    "binding_index",
+    "binding_locator",
+    "body_key",
+    "captured",
+    "current_calls",
+    "process_id",
+    "status"
+  ],
+  "definition_keys": [
+    "body_supported",
+    "definition_inputs",
+    "id",
+    "kind",
+    "lexical_owner",
+    "name",
+    "parameters",
+    "qualname",
+    "source"
+  ],
+  "api": {
+    "CompilerWitnessArchives": "(archives, *, store_budget=CodeWitnessBudget(max_compile_keys=20, max_source_files=32, max_source_bytes=16000000, max_module_bytes=16000000, max_archive_bytes=256000000, max_manifest_bytes=8000000, max_nested_codes=8192, max_depth=128), budget=CompilerArchiveBudget(max_archives=16, max_total_modules=1024, max_total_sources=1024, max_declared_payload_bytes=2000000000))",
+    "CompilerArchiveBudget": "(max_archives: 'int' = 16, max_total_modules: 'int' = 1024, max_total_sources: 'int' = 1024, max_declared_payload_bytes: 'int' = 2000000000) -> None",
+    "ObservedAcquisitionBudget": "(max_definitions: 'int' = 1024, max_requests: 'int' = 4096, max_attempts: 'int' = 128, max_elapsed_seconds: 'int' = 900, max_record_bytes: 'int' = 16000000, max_report_bytes: 'int' = 64000000) -> None",
+    "acquire_observed_witnesses": "(composition, definitions, archives, out_dir, *, producer, budget=ObservedAcquisitionBudget(max_definitions=1024, max_requests=4096, max_attempts=128, max_elapsed_seconds=900, max_record_bytes=16000000, max_report_bytes=64000000), store_budget=CodeWitnessBudget(max_compile_keys=20, max_source_files=32, max_source_bytes=16000000, max_module_bytes=16000000, max_archive_bytes=256000000, max_manifest_bytes=8000000, max_nested_codes=8192, max_depth=128), progress=None)",
+    "plan_observed_witness_acquisition": "(composition, definitions, archives, *, budget=ObservedAcquisitionBudget(max_definitions=1024, max_requests=4096, max_attempts=128, max_elapsed_seconds=900, max_record_bytes=16000000, max_report_bytes=64000000))",
+    "CodeWitnessBudget": "(max_compile_keys: 'int' = 20, max_source_files: 'int' = 32, max_source_bytes: 'int' = 16000000, max_module_bytes: 'int' = 16000000, max_archive_bytes: 'int' = 256000000, max_manifest_bytes: 'int' = 8000000, max_nested_codes: 'int' = 8192, max_depth: 'int' = 128) -> None",
+    "CompositionIndex": "(index_path: 'str | Path', *, max_input_bytes: 'int' = 512000000, max_record_bytes: 'int' = 128000000, cached_files: 'int' = 2, source_attachments=(), attachment_budget=SourceAttachmentBudget(max_report_bytes=64000000, max_files=256, max_codes=8192, max_roots=8, max_artifact_bytes=2200000000, max_record_bytes=128000000, cached_files=2))"
+  },
+  "module": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/compiler_witness_archives.py",
+    "sha256": "8b7f9b3875098bd545775f9937d9a89c07ff4136fcdcbf6869fc228583f2c0a0"
+  },
+  "elapsed_s": 0.8072768090059981
+}

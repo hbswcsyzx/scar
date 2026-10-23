@@ -1,0 +1,15 @@
+{
+  "scope": "terminal artifacts only; no runtime identity or whole-model claim",
+  "files": [
+    {
+      "path": "compiler_witness_archives.py-source",
+      "bytes": 21836,
+      "sha256": "8b7f9b3875098bd545775f9937d9a89c07ff4136fcdcbf6869fc228583f2c0a0"
+    },
+    {
+      "path": "freeze.json",
+      "bytes": 678,
+      "sha256": "296a50b74705323fdd28a271f92d8fffc57d4371e093947f9f10b3e26bef9d16"
+    }
+  ]
+}

@@ -1,9 +1,42 @@
 # Immutable compiler evidence for observed and unobserved functions
 
+## Current finite implementation and actual acquisition (2026-10-23)
+
+**Verified for observed compiler witnesses only.** The original audit below is
+historical; the isolated archive module now has one real-artifact acquisition
+gate with actual exit0. From the completed full frontend plan, the ordinary
+metadata status mechanically selected10 definitions/8 files/53 current calls.
+Eight distinct recorded-compatible preferred module keys compiled once each;
+all10 original complete captured descriptors matched, then reproduced through
+the API's read-only reopen and an independent read-only reopen. No target module
+was imported or executed. No runtime CodeType instance or invocation was created.
+
+The new8-key archive manifest SHA is
+`2da1103c7e8fe0e941a13948391a6080e3de141c0f35733e24be7c7b6e305c72`.
+The old20-key archive's manifest and40 payloads are byte-for-byte unchanged.
+Actual source bytes107344, marshal bytes142822; wall40.86s/RSS717372KiB including
+source-reference admission and independent replay. This is offline modeling
+cost, not LeWM speedup. All original source/compiler origin restrictions remain.
+
+Exact producer, fixed budgets, preflight failure/correction, public acquisition
+report and preserved bytes are in
+`first_stage_observed_witness_acquisition_20261023`. Newbody count is0 and
+currentRun coverage is unchanged. The unobserved705-definition static origin
+path remains Proposed. Multi-archive consumer wiring remains separate work;
+no saved body's receipt is silently rewritten to the new archive.
+
+## Original audit
+
 2026-10-23. **Observed source/metadata audit; Proposed next implementation.**
 No production file, archive or current publication gate was changed. This audit
 did not load marshal/source payloads, decode105 dependency graphs, prepare source,
 compile code or execute a target.
+
+**Correction:** the original metadata projection used below contained a future-
+flag masking error. Its12/10file/104call missing cohort is historical output,
+not the correct dispatch denominator. The corrected existing-API projection is
+10 missing bodies/8files/53calls; see the explicit correction at the end before
+using any of the historical planning numbers.
 
 ## Actual denominators and the two distinct gaps
 
@@ -171,3 +204,96 @@ window. Missing adapters, generated/non-file origin, source drift, unmodeled
 compile context, unknown constants and unsupported interpreter flags remain
 explicit demands. No all-file compile, actual acquisition, production edit or
 new gate was performed in this design review.
+
+## Correction: use the real compilation-key policy
+
+The original metadata script ORed all `__future__` compiler flags directly.
+`__future__.nested_scopes.compiler_flag == 0x10` overlaps structural CO_NESTED;
+the production `supported_future_flag_mask()` correctly excludes such overlap.
+Therefore the old projection falsely marked two existing variants missing
+(25+26 current calls). This was an audit-script error; the existing compiler
+key and matcher did not have that bug. The original artifacts remain intact.
+
+The independent corrected metadata artifact is
+`artifacts/experiments/first_stage_source_frontend_implementation_20261023/metadata-correction.json`,
+75273bytes, SHA256
+`c28827e05bcea3200d13635f0d68b1d71135a9e2fe8ee16913ac07778afebafa`.
+It uses the existing `compile_cache_key` with RECORDED_FUTURE_FLAGS_V1 and full
+key equality, preserving each captured descriptor, source/definition/body
+locator and original module reference. It did not load CodeType or compile.
+
+| Correct pre-publication metadata cohort | Bodies | Files | Current calls |
+| --- | ---: | ---: | ---: |
+| Matching module variant present | 79 | 15 | 2802 |
+| Missing module variant | 10 | 8 | 53 |
+| FUNCTION without complete captured/source witness | 705 | 113 | 0 |
+
+The10 missing requests have19 recorded-compatible alternative optimization
+keys in total. Choosing the lowest recorded matching optimize level per
+complete captured request and deduplicating the exact key yields8 preferred
+keys/8files, not19 mandatory compiles. These are metadata acquisition requests,
+not yet independent full nested-CodeType proof or successful lowered bodies.
+All later acquisition/worklist logic must call the production key API rather
+than reimplement its flag mask. Re-derive the cohort from the actual publication
+when dispatching; do not hard-code10,8,12 or these pre-publication call weights.
+
+The immutable-archive and observed-vs-static proof design above is unchanged.
+Historical counts and their117-file union are retained to explain the original
+review, not reused as current budget or coverage claims.
+
+The additive `metadata-correction.final.json` in that same implementation
+directory preserves these counts and additionally carries exact current binding
+locators for the two25/26call corrections. Its SHA256 is
+`6d6b5b93a45dbfe1f5c515f0bfdb6aadac95d1b85ec2b9d81ecec51d80bdb6f5`.
+The original c288... artifact remains unchanged.
+
+## Implemented first step: isolated module, no acquisition run yet
+
+`scar.analysis.compiler_witness_archives` now provides:
+
+```text
+CompilerWitnessArchives(((directory, exact_manifest_sha256), ...),
+                        store_budget=CodeWitnessBudget(),
+                        budget=CompilerArchiveBudget())
+  .store_for(complete_saved_native_store_receipt)
+  .metadata_variants(original_captured, snapshot, recorded_optimize_levels)
+
+plan_observed_witness_acquisition(composition, tuple_of_qualified_definitions,
+                                 archives, budget=ObservedAcquisitionBudget())
+
+acquire_observed_witnesses(composition, tuple_of_qualified_definitions, archives,
+                          fresh_out, producer=..., budget=...,
+                          store_budget=..., progress=None)
+```
+
+The acquisition API rederives the request internally from the real composition's
+original complete captures, verified source links, original source graph
+membership/context and compiler-basis locators. A caller's saved plan or boolean
+cannot substitute for those checks. There is no source-only/static705 path.
+The explicit qualified selection may produce a NO_ORIGINAL_OBSERVED_CODE_SOURCE_WITNESS
+frontier, never a fictional CodeCapture. Production compile_cache_key determines
+recorded-compatible variants; the lowest recorded matching optimize is the
+preferred acquisition key. Existing archive metadata remains distinct from a
+complete nested descriptor check.
+
+The fresh output contains `plan.json`, per-attempt durable `checkpoint.json`,
+the separate owned `archive/`, final `report.json`, or retained `failure.json`.
+Each attempted request records compiler key, status, elapsed time and writer
+counter deltas. Successful new writes remain pending until the writer's saved
+manifest is reopened read-only and the complete descriptor/module/constant-path
+witness is reproduced. Reports separately count compile attempts, unique
+attempted/published keys, raw source bytes read, published source/module bytes,
+budgets, existing readonly matches and undispatched budget frontiers. No old
+archive is appended, merged or given a new synthetic receipt.
+
+The legacy CallSourceSeedModel does not carry an exact captured Python build;
+the helper explicitly does not assert that missing field. It retains the
+original full descriptor/source/compiler producer basis and the actual new
+archive's exact runtime/build/magic/marshal receipt. Complete descriptor replay
+does not establish active runtime CodeType identity or create an invocation.
+
+The initial implementation freeze recorded AST/source review only. The later
+one real acquisition gate described at the top now verifies its observed-only
+path. SourceLanguage/SBA/publisher/worker consumers still use their prior
+single-archive interfaces; explicit multi-archive basis wiring and all
+static-compiler-origin changes remain Proposed.
