@@ -1,0 +1,24 @@
+{
+  "schema": "scar.source-body-revision-design-audit",
+  "schema_version": 1,
+  "artifacts": [
+    {
+      "path": "artifacts/analysis/source_body_revision_20261023/inspect_counts.py",
+      "sha256": "1dcca5b337827d35a302820bf46749e0355aaf1c6bd982d54e8660e6c16d9c38",
+      "bytes": 5277
+    },
+    {
+      "path": "artifacts/analysis/source_body_revision_20261023/raw-counts.json",
+      "sha256": "e8c2d353927c6a9a4fac0e9f7d618bac9f429731695ae051cf0d69e5112b17cf",
+      "bytes": 15914
+    },
+    {
+      "path": "docs/SOURCE_BODY_REVISION.md",
+      "sha256": "86d63ef88bf5e5f67ceaa13b646a4dcb6e116cc747e8267ab249b530edb2f87e",
+      "bytes": 10533
+    }
+  ],
+  "production_files_modified": false,
+  "old_graph_source_validated": false,
+  "new_publication_performed": false
+}

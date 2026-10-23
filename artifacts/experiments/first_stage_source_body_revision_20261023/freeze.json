@@ -1,0 +1,37 @@
+{
+  "schema": "scar.source-body-revision-implementation-freeze",
+  "schema_version": 1,
+  "head_at_freeze": "364591e7e30f373a0c07153c956e1b58b22dc07e",
+  "modules": [
+    {
+      "path": "scar/analysis/source_program_publication.py",
+      "sha256": "438c40e4c91a0807ff03e860d72849ef2d1d401577d13f261758e8fd2e377b12",
+      "bytes": 40436
+    },
+    {
+      "path": "scar/analysis/inventory_partitions.py",
+      "sha256": "5b997b94d87353ed88cc6202416635a42ab7be28d471ff699495249e06c3c753",
+      "bytes": 37658
+    },
+    {
+      "path": "scar/analysis/program_composition.py",
+      "sha256": "6e5a1ac020e3d2a97938afb139d079d0801ae1d3b791caf044a8b755a4435d85",
+      "bytes": 75094
+    },
+    {
+      "path": "scar/analysis/source_body_access.py",
+      "sha256": "6ee72734469e5c23130b0d4f4ba1b28e94493e54a1bd9f2f1c9ec46efebe56f0",
+      "bytes": 37298
+    }
+  ],
+  "ast_validated": true,
+  "actual_publication_started": false,
+  "api": {
+    "plan_source_body_publication": "(base_composition, source_program_paths, *, max_programs=128, max_record_bytes=128000000)",
+    "publish_source_body_revisions": "(base_composition, plan, out_dir, *, code_witnesses, max_programs=128, max_changed_sources=64, max_operations_per_body=10000, max_record_bytes=128000000, progress=None)",
+    "validate_body_revision_publication": "(base_composition, inventory, *, max_programs=128)",
+    "historical_body_accounting": "(self, file_index, body_index, *, expected_parent, expected_checkpoint, expected_namespace, expected_graph_sha256)"
+  },
+  "legacy_add_api_root_none_guard_retained": true,
+  "runtime_ancestor_proof_changed": false
+}

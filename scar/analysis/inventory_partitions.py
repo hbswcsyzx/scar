@@ -257,7 +257,9 @@ class InventoryPartitions:
                  "partition manifest schema mismatch")
         self.version = self.manifest["schema_version"]
         if self.version == 2:
-            _require(self.manifest.get("capabilities") == ["SOURCE_PROGRAM5_ADMISSION_V1"],
+            _require(self.manifest.get("capabilities") in (
+                         ["SOURCE_PROGRAM5_ADMISSION_V1"],
+                         ["SOURCE_PROGRAM5_ADMISSION_V1", "SOURCE_BODY_REVISION_V1"]),
                      "unsupported partition publication capabilities")
         _require(self.manifest.get("whole_program_graph_established") is False
                  and self.manifest.get("transformation_authorized") is False,
@@ -265,6 +267,12 @@ class InventoryPartitions:
         _require(type(cache_entries) is int and cache_entries > 0, "invalid partition cache budget")
         self.max_shard_bytes, self.cache_entries = max_shard_bytes, cache_entries
         self._cache = OrderedDict()
+        if self.version == 2:
+            publication = self.component("publication")
+            expected = 2 if "SOURCE_BODY_REVISION_V1" in self.manifest["capabilities"] else 1
+            _require(publication.get("schema") == "scar.source-program-publication"
+                     and publication.get("schema_version") == expected,
+                     "publication version differs from its explicit snapshot capability")
 
     def _read(self, ref):
         key = (ref["uri"], ref["physical_sha256"], ref["decoded_sha256"])
@@ -457,6 +465,59 @@ class InventoryPartitions:
                  "an unsupported materialized return has no canonical-body namespace")
         return {"namespace": self.body_field_locators(file_index, body_index)["graph_locator"]["namespace"],
             "kind": kind, "local_id": encode(local_id)}
+
+    def historical_body_accounting(self, file_index, body_index, *, expected_parent,
+                                   expected_checkpoint, expected_namespace, expected_graph_sha256):
+        """Read one receipt-bound historical body for accounting, never admission.
+
+        In particular this does not run SourceProgram's current language
+        validator on an obsolete model, or return a typed body as valid source.
+        The ordinary core codec remains mandatory for a present old graph.
+        """
+        from scar.ir.program.codec import loads as load_graph
+        _require(expected_parent == self.manifest_receipt, "historical accounting parent receipt differs")
+        file, row, checkpoint, fields = self._body_fields(file_index, body_index)
+        actual_checkpoint = self.external_reference(row["checkpoint"]) if row["checkpoint"] is not None else None
+        _require(actual_checkpoint == expected_checkpoint, "historical checkpoint compare-and-swap differs")
+        locators = self.body_field_locators(file_index, body_index) if checkpoint is not None else {}
+        namespace = (locators.get("graph_locator") or {}).get("namespace")
+        graph_document = fields["graph"] if fields is not None else None
+        graph_sha = (sha256(json.dumps(graph_document, sort_keys=True, ensure_ascii=False,
+            separators=(",", ":"), allow_nan=False).encode()).hexdigest() if graph_document is not None else None)
+        _require(namespace == expected_namespace and graph_sha == expected_graph_sha256,
+                 "historical graph namespace/digest compare-and-swap differs")
+        if checkpoint is not None:
+            _require(row["checkpoint"]["body_identity"]["definition"] == row["definition"]
+                     and fields["metadata"]["source"] == file["snapshot"],
+                     "historical checkpoint lost its exact source/body identity")
+            if checkpoint["schema_version"] == 1:
+                _require(checkpoint["operations_emitted"] == row["construction_operations"],
+                         "historical recorded construction cost differs")
+        graph = load_graph(json.dumps(graph_document, allow_nan=False)) if graph_document is not None else None
+        interface = fields.get("interface") if fields is not None else None
+        structured = fields.get("structured") if fields is not None else None
+        frame = fields.get("frame") if fields is not None else None
+        counts = {"graph_bodies": int(graph is not None),
+            "core_operations": len(graph.operations) if graph is not None else 0,
+            "core_values": len(graph.values) if graph is not None else 0,
+            "regions": len(graph.regions) if graph is not None else 0,
+            "locations": len(graph.locations) if graph is not None else 0,
+            "ordered_uses": sum(len(row.uses) for row in graph.operations) if graph is not None else 0,
+            "bound_bodies": int(interface is not None), "structured_bodies": int(structured is not None),
+            "protocols": len(structured["protocols"]) if structured is not None else 0,
+            "loops": len(structured["loops"]) if structured is not None else 0}
+        _require((graph is not None) == (row["status"] == "LOWERED_WITH_GAPS"),
+                 "historical graph/status accounting contradicts its original source shard")
+        return {"schema": "scar.historical-body-accounting", "schema_version": 1,
+            "authority": "ACCOUNTING_ONLY", "parent_manifest": deepcopy(self.manifest_receipt),
+            "checkpoint": actual_checkpoint, "namespace": namespace, "graph_canonical_sha256": graph_sha,
+            "field_locators": locators,
+            "definition": deepcopy(row["definition"]), "snapshot": deepcopy(file["snapshot"]),
+            "context": deepcopy(file["context"]), "status": row["status"],
+            "construction_operations": row["construction_operations"], "counts": counts,
+            "entry_profile": interface["profile"] if interface is not None else None,
+            "frame_present": frame is not None, "core_graph_codec_validated": graph is not None,
+            "source_language_validated": False, "typed_source_admission_authorized": False}
 
     def typed_body(self, file_index, body_index, *, source_layers=None, language_options=None, source_tree=None):
         """Use existing public validators, optionally including original source layers.

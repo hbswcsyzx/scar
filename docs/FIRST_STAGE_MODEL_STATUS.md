@@ -6,6 +6,27 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：新模型快照正式新增218ops并修订65ops
+
+通用显式body revision已实际通过一门：exact parent/checkpoint/namespace/digest CAS、
+旧body ACCOUNTING_ONLY统计、新body正常source/code准入、active接口/structured引用
+保序替换及全部计数减旧加新。旧ADD API仍拒绝覆盖已有graph，未知capability不静默接受。
+
+`first_stage_source_body_revision_20261023` actual exit0，wall153.76s/RSS994884KiB。
+正式source snapshot现在843 active graph bodies、151 files/2217 static bodies；
+core ops66513、values106442，known construction99929、unknown3/totalNone；
+checkpoint positions1627不变。修订不是又执行一次lowerer，图大小不当构造成本。
+compile0/load2/matches4、prepare0/lower0/raw0/target0，stale expectation实际拒绝。
+原坏65ops图只用于核过receipt的raw/core计数，不再授它新的source/lifetime合法性；
+新65/218图通过正常公共reader，原artifact/store全字节不变。参见
+[SOURCE_BODY_REVISION.md](SOURCE_BODY_REVISION.md)。
+
+新source快照尚未重派同Run的body attachments/activations/ports。先前842快照的
+6674 body-linked calls仍是先前冻结门结果，不能混入843当作新测量。后继采用正规
+ancestor receipt链仅复用原静态source membership，保持compiler origin严格等式；
+当前raw必须独立读取，新body引用从新快照派生，禁止resume旧source checkpoint。
+整体state/content/ready与lifetime义务保持，S3/S4仍OPEN。
+
 ### 2026-10-23：通用OS实际launch/归档/selection资格端到端通过
 
 `scar trace --os-capture-root ...` 已实现工具自己拥有strace Popen启动边界、native intent/

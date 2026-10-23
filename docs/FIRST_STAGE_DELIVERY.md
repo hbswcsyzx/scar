@@ -4,6 +4,13 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
+**最新snapshot边界：** 正式source revision门已通过，active源码图为843/2217，含
+218ops新增图和65ops修订图；旧artifact保留，source/code验证不授完整lifetime。
+当前完整runtime连接报告仍来自先前842 snapshot，尚未把新body attachments/ports
+重派到同Run，不能把两份snapshot的覆盖数字相加。具体见
+[SOURCE_BODY_REVISION.md](SOURCE_BODY_REVISION.md) 与
+[runtime ancestor设计](SOURCE_REVISION_RUNTIME_ANCESTRY.md)。第一阶段S3/S4仍OPEN。
+
 **2026-10-23纠正：旧FD-table连续性资格撤回。** 原capture的strace6.8只选择
 `%file,%process,%memory,%desc`；该版本的`unshare`与`close_range`不属于这四类。
 因此旧记录中计数0不能证明未发生；历史35个container→3context和12110个区间候选
@@ -63,7 +70,7 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | 分片源码图组合与当前调用绑定 | 当前369749正式两body接线gate exit0；100,438调用中6,674 body-linked、88,800 source-only、4,964 unresolved | 76 body groups、591 source-only、150 unresolved；242外部groups/86,688calls只接原定义；不复用旧Invocation，不是完整ProgramSnapshot |
 | 分片源码与marker连接 | 79,592 markers/109,288原slot全部保留；79,106条有准确source definition，20,592条body/activation/namespace关联 | 58,514条retained source-linked，6条仅invocation、480条无ancestor；retained ancestor不是direct call；状态/效果仍未闭合 |
 | 原参数、返回及环境路由接回 | 817groups/100,438调用、312,812operand与16,403env events守恒；17,022入口参数occurrences、27actual/formal与27completion条件路由、6,223返回root；3,347entry的10,087env ports | 全部只是带原条件的引用/端口连接；100,523条route问题、6,694未定defaults保留；不证明内容、状态、world等价 |
-| 更大范围源码归档 | 151文件/2217定义，正式新增两body后842原图、785 UNSUPPORTED、590 NOT_ATTEMPTED，原840图namespace全部保留 | 原256MB单JSON失败保留；发布不消除未支持语言与接口缺口；含tuple的原v5图有新发现的异常持有缺口，不能授完整lifetime资格 |
+| 更大范围源码归档 | 正式revision后151文件/2217定义，843 active图、784 UNSUPPORTED、590 NOT_ATTEMPTED；65ops旧图被准确修订、218ops新图准入 | 原256MB单JSON失败/旧artifact保留；新图已核source/code/局部tuple失败持有，未授全部normal/outer lifetime；843尚待统一runtime连接 |
 | 历史依赖源码准入与当前静态复用 | 原106文件/243groups准入保留；当前要求的105图各读一次，242groups/86,688calls接同版本static witness | 不把旧tool code或14旧calls移植当前；源码、body、effect为不同证明 |
 | 原source/body缺口按实际调用投影 | 原817groups/100,438calls逐项守恒；74body-linked、91source-only UNSUPPORTED、260source-only NOT_ATTEMPTED | 只是已保存metadata投影；不是canonical graph重验或新语言协议支持 |
 | 同次Tensor物理证据采集与导入 | 新完整LeWM episode成功；79,592 markers、109,288槽，108,682槽接物理epoch | 606槽为带provider ID但无storage pointer的空CPU Tensor；逻辑内容/ready与空表示接口仍OPEN |

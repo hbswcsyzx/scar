@@ -1,0 +1,12 @@
+{
+  "status": "PASS_ACTIVE_REFERENCE_UNIQUENESS_AND_RECORDED_DELTAS",
+  "source_files": 151,
+  "static_bodies": 2217,
+  "active_graphs": 843,
+  "core_operations": 66513,
+  "core_values": 106442,
+  "current_run_integrated": false,
+  "old_bad_source_legality_asserted": false,
+  "full_lifetime_verified": false,
+  "first_stage_complete": false
+}

@@ -172,7 +172,8 @@ class SourceBodyAccess:
                     and self.schema_version == 8 and not self.publication["capabilities"])
                    or (self.publication["header_schema"] == "scar.partitioned-inventory-header"
                        and self.schema_version == 2
-                       and self.publication["capabilities"] == ["SOURCE_PROGRAM5_ADMISSION_V1"])),
+                       and self.publication["capabilities"] in (["SOURCE_PROGRAM5_ADMISSION_V1"],
+                           ["SOURCE_PROGRAM5_ADMISSION_V1", "SOURCE_BODY_REVISION_V1"]))),
               "partition path requires an explicit supported structured environment header/capability")
         source_model = composition.inventory_component("call_sources")["model"]
         self.original_links = tuple(decode(CodeSourceLink, row) for row in source_model["code_links"])

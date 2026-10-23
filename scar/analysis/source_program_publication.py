@@ -8,6 +8,7 @@ from __future__ import annotations
 import ast
 from collections import Counter
 from copy import deepcopy
+from dataclasses import dataclass
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -50,9 +51,264 @@ def _module_receipts():
             for name in names]
 
 
+_ADMISSION_CAPS = ["SOURCE_PROGRAM5_ADMISSION_V1"]
+_REVISION_CAPS = ["SOURCE_PROGRAM5_ADMISSION_V1", "SOURCE_BODY_REVISION_V1"]
+
+
+def _program_counts(program):
+    return {"graph_bodies": 1, "core_operations": len(program.graph.operations),
+        "core_values": len(program.graph.values), "regions": len(program.graph.regions),
+        "locations": len(program.graph.locations),
+        "ordered_uses": sum(len(row.uses) for row in program.graph.operations),
+        "bound_bodies": 1, "structured_bodies": 1,
+        "protocols": len(program.structured.protocols), "loops": len(program.structured.loops)}
+
+
+def _replace_active_refs(base, references, changed, count_name):
+    result = [base.external_reference(ref) for ref in references]
+    for item in changed.values():
+        target = item["accounting"]["checkpoint"]
+        identity = item["checkpoint"]["body_identity"]
+        positions = [i for i, ref in enumerate(result) if ref == target]
+        same_body = [i for i, ref in enumerate(result) if ref["body_identity"] == identity]
+        required = item["accounting"]["counts"][count_name]
+        _need(required in (0, 1) and len(positions) == len(same_body) == required,
+              "active component has missing, duplicate or different previous checkpoint for one qualified body")
+        if positions:
+            result[positions[0]] = item["checkpoint"]
+        else:
+            result.append(item["checkpoint"])
+    return result
+
+
+def _summary_after(parent, transitions, admissions):
+    summary = deepcopy(parent)
+    known = summary.get("known_construction_operations", summary["construction_operations"])
+    unknown = summary.get("unknown_construction_cost_bodies", 0)
+    for old, before, after in transitions:
+        summary["body_statuses"][old["status"]] -= 1
+        summary["body_statuses"]["LOWERED_WITH_GAPS"] += 1
+        for name in ("core_operations", "core_values"):
+            summary[name] += after[name] - before[name]
+        if old["construction_operations"] is not None:
+            known -= old["construction_operations"]; unknown += 1
+        summary["interfaces"]["bound_bodies"] += after["bound_bodies"] - before["bound_bodies"]
+        for source, target in (("structured_bodies", "bodies"), ("protocols", "protocols"), ("loops", "loops")):
+            summary["structured"][target] += after[source] - before[source]
+    _need(known >= 0 and unknown >= 0 and all(value >= 0 for value in summary["body_statuses"].values())
+          and all(summary[key] >= 0 for key in ("core_operations", "core_values"))
+          and summary["interfaces"]["bound_bodies"] >= 0
+          and all(summary["structured"][key] >= 0 for key in ("bodies", "protocols", "loops")),
+          "body revision accounting underflow")
+    summary.update(construction_operations=None, known_construction_operations=known,
+                   unknown_construction_cost_bodies=unknown)
+    summary["call_source_scope"] = dict(sorted(Counter(row.status.value for row in admissions).items()))
+    return summary
+
+
+@dataclass(frozen=True)
+class SourceBodyPublicationPlan:
+    document: dict
+    sha256: str
+
+    def require_unchanged(self):
+        _need(type(self.document) is dict and sha256(_canonical(self.document)).hexdigest() == self.sha256,
+              "body publication expectations changed")
+
+
+def plan_source_body_publication(base_composition, source_program_paths, *, max_programs=128,
+                                 max_record_bytes=128_000_000):
+    """Derive exact parent/CAS navigation records; this does not admit a graph."""
+    _need(type(max_programs) is int and max_programs > 0 and type(max_record_bytes) is int and max_record_bytes > 0,
+          "positive independent revision plan ceilings required")
+    _need(type(base_composition) is CompositionIndex and base_composition.partitioned
+          and type(source_program_paths) is tuple and 0 < len(source_program_paths) <= max_programs,
+          "bounded original composition and immutable program paths required")
+    base = base_composition.inventory
+    expectations, seen = [], set()
+    for path in source_program_paths:
+        document, receipt = _read_receipt(path, limit=max_record_bytes)
+        _need(document.get("schema") == "scar.source-program" and document.get("schema_version") == 5
+              and document.get("graph") is not None and document.get("interface") is not None
+              and document.get("language") is not None, "revision navigation requires a real SourceProgram5")
+        files = [row for row in base_composition.document["files"]
+                 if row["snapshot"] == document["metadata"]["source"]
+                 and (row.get("context") or {}).get("namespace_root") == document["language"]["namespace_root"]]
+        _need(len(files) == 1, "replacement source has no unique original snapshot/context")
+        file = files[0]; fi = file["file_index"]
+        bodies = [(i, row) for i, row in enumerate(file["bodies"])
+                  if row["definition"] == document["interface"]["definition"]["wire"]]
+        _need(len(bodies) == 1, "replacement definition has no unique original body")
+        bi, body = bodies[0]; key = fi, bi
+        _need(key not in seen, "duplicate qualified body revision")
+        seen.add(key)
+        raw_file = base_composition.inventory_file(fi)
+        raw_body = raw_file["bodies"][bi]
+        definitions = [row for row in raw_file["definitions"]
+                       if row["id"] == document["interface"]["definition"]
+                       and row["source"] == document["structured"]["source"]]
+        _need(len(definitions) == 1, "replacement definition/source differs from its original index")
+        expectations.append({"operation": "REVISE_GRAPH" if body["root"] is not None else "ADD_GRAPH",
+            "file_index": fi, "body_index": bi, "snapshot": deepcopy(raw_file["snapshot"]),
+            "context": deepcopy(raw_file["context"]), "definition": deepcopy(raw_body["definition"]),
+            "source": deepcopy(document["structured"]["source"]),
+            "expected_checkpoint": base.external_reference(raw_body["checkpoint"]) if raw_body["checkpoint"] else None,
+            "expected_namespace": deepcopy(body.get("namespace")),
+            "expected_graph_canonical_sha256": body["program_canonical_sha256"],
+            "expected_root": body["root"],
+            "replacement": _input_ref(path, receipt, "scar.source-program/5")})
+    document = {"schema": "scar.source-body-publication-plan", "schema_version": 1,
+        "base_inventory": deepcopy(base_composition.document["inventory"]),
+        "base_manifest_receipt": deepcopy(base.manifest_receipt),
+        "base_composition": deepcopy(base_composition.index_receipt),
+        "base_composition_canonical_sha256": base_composition.source_inputs()["composition_canonical_sha256"],
+        "code_source_origin": base_composition.original_code_source_origin(),
+        "expectations": expectations, "source_admission_authorized": False}
+    return SourceBodyPublicationPlan(document, sha256(_canonical(document)).hexdigest())
+
+
+def publish_source_body_revisions(base_composition, plan, out_dir, *, code_witnesses,
+                                  max_programs=128, max_changed_sources=64,
+                                  max_operations_per_body=10000, max_record_bytes=128_000_000, progress=None):
+    """Explicit snapshot revision, with independent current-parent/CAS checks."""
+    _need(type(plan) is SourceBodyPublicationPlan, "a regular explicit revision expectation plan is required")
+    plan.require_unchanged()
+    paths = tuple(row["replacement"]["uri"] for row in plan.document["expectations"])
+    fresh = plan_source_body_publication(base_composition, paths, max_programs=max_programs,
+                                         max_record_bytes=max_record_bytes)
+    _need(fresh.document == plan.document and fresh.sha256 == plan.sha256,
+          "stale parent/checkpoint/namespace/digest body publication expectation")
+    return _publish_source_programs(base_composition, paths, out_dir, code_witnesses=code_witnesses,
+        max_programs=max_programs, max_changed_sources=max_changed_sources,
+        max_operations_per_body=max_operations_per_body, max_record_bytes=max_record_bytes,
+        progress=progress, revision_plan=plan)
+
+
+def validate_body_revision_publication(base_composition, inventory, *, max_programs=128):
+    """Validate lineage/counts/active references, not historical source legality.
+
+    New bodies still require the ordinary public typed/source/code validators.
+    This bounded check reads only the changed old/new bodies for accounting.
+    """
+    _need(type(base_composition) is CompositionIndex and type(inventory) is InventoryPartitions
+          and inventory.manifest.get("capabilities") == _REVISION_CAPS,
+          "explicit revision snapshot and actual parent composition required")
+    publication = inventory.component("publication")
+    _need(publication.get("schema_version") == 2, "revision requires publication2")
+    _need(publication["base_inventory"] == base_composition.document["inventory"]
+          and publication["base_composition"] == base_composition.index_receipt
+          and publication["base_composition_canonical_sha256"] == base_composition.source_inputs()["composition_canonical_sha256"]
+          and publication["code_source_origin"] == inventory.code_source_origin()
+              == base_composition.original_code_source_origin(), "revision actual parent or original compiler basis differs")
+    document = publication["expectations"]
+    _need(type(max_programs) is int and 0 < len(document["expectations"]) <= max_programs,
+          "revision expectation count exceeds independent validation ceiling")
+    plan = SourceBodyPublicationPlan(document, publication["expectations_sha256"])
+    plan.require_unchanged()
+    fresh = plan_source_body_publication(base_composition,
+        tuple(row["replacement"]["uri"] for row in document["expectations"]),
+        max_programs=max_programs, max_record_bytes=inventory.max_shard_bytes)
+    _need(fresh.document == document and fresh.sha256 == plan.sha256,
+          "revision snapshot has stale parent/checkpoint/namespace/digest expectations")
+    expected = {(row["file_index"], row["body_index"]): row for row in document["expectations"]}
+    _need(len(publication["changed_bodies"]) == len(expected), "revision changed-body denominator differs")
+    base, changed, transitions = base_composition.inventory, {}, []
+    changed_files = {fi for fi, _ in expected}
+    _need(publication["changed_files"] == sorted(changed_files)
+          and len(inventory.manifest["files"]) == len(base.manifest["files"]),
+          "revision changed-file or source-file denominator differs")
+    for fi, ref in enumerate(base.manifest["files"]):
+        if fi not in changed_files:
+            _need(base.external_reference(ref) == inventory.external_reference(inventory.manifest["files"][fi]),
+                  "revision changed an undeclared original source shard")
+            continue
+        old_file, new_file = base.file(fi), inventory.file(fi)
+        _need({key: value for key, value in old_file.items() if key != "bodies"}
+              == {key: value for key, value in new_file.items() if key != "bodies"}
+              and len(old_file["bodies"]) == len(new_file["bodies"]),
+              "revision changed source/snapshot/context/static-definition denominators")
+        for bi, body in enumerate(old_file["bodies"]):
+            if (fi, bi) not in expected:
+                _need(body == new_file["bodies"][bi], "revision changed an undeclared original body")
+    for change in publication["changed_bodies"]:
+        key = change["file_index"], change["body_index"]
+        _need(key in expected and key not in changed and change["expectation"] == expected[key]
+              and change["operation"] == expected[key]["operation"], "revision target/CAS record differs")
+        fi, bi = key; target = expected[key]
+        old = base.historical_body_accounting(fi, bi, expected_parent=document["base_manifest_receipt"],
+            expected_checkpoint=target["expected_checkpoint"], expected_namespace=target["expected_namespace"],
+            expected_graph_sha256=target["expected_graph_canonical_sha256"])
+        _need(change["old_accounting"] == old, "revision historical raw/core accounting differs")
+        current_ref = inventory.external_reference(inventory.file(fi)["bodies"][bi]["checkpoint"])
+        _need(current_ref == change["checkpoint"], "revision active checkpoint differs from its transition")
+        cp = inventory.checkpoint(current_ref)
+        previous = {"inventory_locator": base_composition.inventory_file_locator(fi, f"/bodies/{bi}"),
+                    **old["field_locators"], "namespace": old["namespace"]}
+        _need(cp["schema_version"] == 2 and cp["previous_body"] == change["previous_body"] == previous
+              and cp["source_program"] == target["replacement"] == change["source_program"],
+              "new CP admission lost its actual source-program or exact previous-body reference")
+        raw = inventory.body_record(fi, bi)
+        graph_sha = sha256(_canonical(raw["graph"])).hexdigest()
+        locators = inventory.body_field_locators(fi, bi)
+        after = inventory.historical_body_accounting(fi, bi, expected_parent=inventory.manifest_receipt,
+            expected_checkpoint=current_ref, expected_namespace=locators["graph_locator"]["namespace"],
+            expected_graph_sha256=graph_sha)
+        counts = after["counts"]
+        _need(counts["graph_bodies"] == counts["bound_bodies"] == counts["structured_bodies"] == 1
+              and counts == change["new_counts"]
+              and {key: counts[key] - old["counts"][key] for key in counts} == change["counts_delta"],
+              "revision new counts/delta differ from actual receipt-bound core fields")
+        changed[key] = {"accounting": old, "checkpoint": current_ref}
+        transitions.append(({"status": old["status"], "construction_operations": old["construction_operations"]},
+                            old["counts"], counts))
+    interfaces = deepcopy(base_composition.inventory_component("interfaces"))
+    interfaces["bodies"] = _replace_active_refs(base, interfaces["bodies"], changed, "bound_bodies")
+    _need(inventory.component("interfaces") == interfaces, "revision active interface replacement differs")
+    _need(inventory.component("structured") == _replace_active_refs(base,
+          base_composition.inventory_component("structured"), changed, "structured_bodies"),
+          "revision active structured replacement differs")
+    scope = decode(CallSourceScope, inventory.component("call_source_scope"))
+    old_scope = decode(CallSourceScope, base_composition.inventory_component("call_source_scope"))
+    expected_admissions = list(old_scope.admissions)
+    seen = set()
+    for row in publication["admission_changes"]:
+        index = row["index"]
+        _need(type(index) is int and 0 <= index < len(expected_admissions) and index not in seen
+              and encode(expected_admissions[index]) == row["before"], "revision admission previous record differs")
+        seen.add(index)
+        updated = decode(type(expected_admissions[index]), row["after"])
+        _need(updated.origin == expected_admissions[index].origin, "revision changed an original admission origin")
+        expected_admissions[index] = updated
+    _need(scope.admissions == tuple(expected_admissions), "revision changed undeclared admission records")
+    parent_summary = base_composition.inventory_component("header")["summary"]
+    header = inventory.component("header")
+    _need(header.get("schema") == "scar.partitioned-inventory-header" and header.get("schema_version") == 2
+          and header.get("profile") == "STRUCTURED_ENV_V1" and header.get("capabilities") == _REVISION_CAPS,
+          "revision header/version/entry ABI/capability differs")
+    _need(header["summary"] == _summary_after(parent_summary, transitions, scope.admissions),
+          "revision header summary violates before-minus-old-plus-new accounting")
+    counts = deepcopy(base.manifest["counts"])
+    counts["graph_bodies"] += sum(after["graph_bodies"] - before["graph_bodies"] for _, before, after in transitions)
+    counts["checkpoint_returns"] += sum(row["expected_checkpoint"] is None for row in expected.values())
+    counts["not_attempted_bodies"] -= sum(old["status"] == "NOT_ATTEMPTED" for old, _, _ in transitions)
+    _need(inventory.manifest["counts"] == counts, "revision manifest count denominator differs")
+    return {"valid": True, "scope": "LINEAGE_ACTIVE_REFERENCES_AND_ACCOUNTING_ONLY",
+            "changed_bodies": len(changed), "old_source_legality_established": False,
+            "new_source_code_proof_repeated": False, "target_executed": False}
+
+
 def publish_source_programs(base_composition, source_program_paths, out_dir, *, code_witnesses,
                             max_programs=128, max_changed_sources=64, max_operations_per_body=10000,
                             max_record_bytes=128_000_000, progress=None):
+    """Historical add-only entry; an existing canonical graph still rejects."""
+    return _publish_source_programs(base_composition, source_program_paths, out_dir,
+        code_witnesses=code_witnesses, max_programs=max_programs, max_changed_sources=max_changed_sources,
+        max_operations_per_body=max_operations_per_body, max_record_bytes=max_record_bytes, progress=progress)
+
+
+def _publish_source_programs(base_composition, source_program_paths, out_dir, *, code_witnesses,
+                            max_programs=128, max_changed_sources=64, max_operations_per_body=10000,
+                            max_record_bytes=128_000_000, progress=None, revision_plan=None):
     """Publish checked existing bodies; never prepare, compile or execute source.
 
     Defaults are general tool ceilings. A gate can independently narrow them.
@@ -78,6 +334,9 @@ def publish_source_programs(base_composition, source_program_paths, out_dir, *, 
     base = base_composition.inventory
     _need(type(base) is InventoryPartitions, "publication requires the canonical partition reader")
     origin = base_composition.original_code_source_origin()
+    revision_mode = revision_plan is not None
+    expected = ({(row["file_index"], row["body_index"]): row for row in revision_plan.document["expectations"]}
+                if revision_mode else {})
     interfaces = base_composition.inventory_component("interfaces")
     source_model = base_composition.inventory_component("call_sources")["model"]
     scope_raw = base_composition.inventory_component("call_source_scope")
@@ -102,9 +361,11 @@ def publish_source_programs(base_composition, source_program_paths, out_dir, *, 
         file_index = files[0]["file_index"]
         bodies = [(i, row) for i, row in enumerate(files[0]["bodies"])
                   if row["definition"] == program.interface.definition.wire]
-        _need(len(bodies) == 1 and bodies[0][1]["root"] is None, "body is ambiguous or already has a canonical graph")
+        _need(len(bodies) == 1, "body is ambiguous or already has a canonical graph")
         body_index = bodies[0][0]
         key = file_index, body_index
+        _need(bodies[0][1]["root"] is None or revision_mode and key in expected
+              and expected[key]["operation"] == "REVISE_GRAPH", "body is ambiguous or already has a canonical graph")
         _need(key not in changed, "duplicate source-qualified body admission")
         _need(len({item[0] for item in changed} | {file_index}) <= max_changed_sources, "changed source-file ceiling exceeded")
         raw_file = base_composition.inventory_file(file_index)
@@ -146,6 +407,25 @@ def publish_source_programs(base_composition, source_program_paths, out_dir, *, 
             "original": deepcopy(raw_file["bodies"][body_index]), "file": raw_file,
             "definitions": declarations, "captured": captured,
             "previous_body": base_composition.inventory_body_locators(file_index, body_index)}
+        if revision_mode:
+            expectation = expected[key]
+            accounting = base.historical_body_accounting(file_index, body_index,
+                expected_parent=revision_plan.document["base_manifest_receipt"],
+                expected_checkpoint=expectation["expected_checkpoint"],
+                expected_namespace=expectation["expected_namespace"],
+                expected_graph_sha256=expectation["expected_graph_canonical_sha256"])
+            _need(not accounting["frame_present"] and (accounting["entry_profile"] is None
+                  or accounting["entry_profile"] == program.profile.value),
+                  "body revision requires the same supported entry ABI and no unadapted frame")
+            old_counts = accounting["counts"]
+            attachment_counts = bodies[0][1]["counts"]
+            _need(all(attachment_counts.get(target, 0) == old_counts[source] for source, target in (
+                ("core_operations", "operations"), ("core_values", "values"), ("regions", "regions"),
+                ("locations", "locations"), ("ordered_uses", "ordered_uses"))),
+                "parent projection differs from historical raw/core accounting")
+            changed[key].update(expectation=expectation, accounting=accounting)
+            changed[key]["previous_body"] = {"inventory_locator": changed[key]["previous_body"]["inventory_locator"],
+                **deepcopy(accounting["field_locators"]), "namespace": accounting["namespace"]}
         inputs.append(ref)
         if progress is not None:
             progress({"stage": "admit_source_program", "file_index": file_index,
@@ -199,6 +479,11 @@ def publish_source_programs(base_composition, source_program_paths, out_dir, *, 
             replacements.append({"file_index": fi, "body_index": bi, "snapshot": encode(program.metadata.source),
                 "definition": encode(program.interface.definition), "source": encode(program.structured.source),
                 "previous_body": item["previous_body"], "checkpoint": ref, "source_program": item["input"]})
+            if revision_mode:
+                before, after = item["accounting"]["counts"], _program_counts(program)
+                replacements[-1].update(operation=item["expectation"]["operation"],
+                    expectation=deepcopy(item["expectation"]), old_accounting=item["accounting"],
+                    new_counts=after, counts_delta={key: after[key] - before[key] for key in after})
         for fi in sorted({key[0] for key in changed}):
             file = deepcopy(next(item["file"] for key, item in changed.items() if key[0] == fi))
             for (owner, bi), item in changed.items():
@@ -216,41 +501,32 @@ def publish_source_programs(base_composition, source_program_paths, out_dir, *, 
                 limit=max_record_bytes)
 
         updated_interfaces = deepcopy(interfaces)
-        updated_interfaces["bodies"] = [base.external_reference(ref) for ref in interfaces["bodies"]]
-        updated_interfaces["bodies"].extend(new_refs)
+        if revision_mode:
+            updated_interfaces["bodies"] = _replace_active_refs(base, interfaces["bodies"], changed, "bound_bodies")
+        else:
+            updated_interfaces["bodies"] = [base.external_reference(ref) for ref in interfaces["bodies"]]
+            updated_interfaces["bodies"].extend(new_refs)
         component("interfaces", updated_interfaces)
-        component("structured", [base.external_reference(ref) for ref in
-                                  base_composition.inventory_component("structured")] + new_refs)
+        old_structured = base_composition.inventory_component("structured")
+        component("structured", _replace_active_refs(base, old_structured, changed, "structured_bodies") if revision_mode
+                  else [base.external_reference(ref) for ref in old_structured] + new_refs)
+        if revision_mode:
+            frame_refs = [base.external_reference(ref) for ref in base_composition.inventory_component("frames")]
+            _need(all(item["accounting"]["checkpoint"] not in frame_refs for item in changed.values()),
+                  "body revision cannot retain an unadapted old active frame")
         component("call_source_scope", encode(CallSourceScope(tuple(admissions))))
         old_header = base_composition.inventory_component("header")
-        summary = deepcopy(old_header["summary"])
-        known = summary.get("known_construction_operations", summary["construction_operations"])
-        unknown = summary.get("unknown_construction_cost_bodies", 0)
-        for item in changed.values():
-            old, program = item["original"], item["program"]
-            summary["body_statuses"][old["status"]] -= 1
-            summary["body_statuses"]["LOWERED_WITH_GAPS"] += 1
-            summary["core_operations"] += len(program.graph.operations)
-            summary["core_values"] += len(program.graph.values)
-            if old["construction_operations"] is not None:
-                known -= old["construction_operations"]
-                unknown += 1
-            summary["interfaces"]["bound_bodies"] += 1
-            summary["structured"]["bodies"] += 1
-            summary["structured"]["protocols"] += len(program.structured.protocols)
-            summary["structured"]["loops"] += len(program.structured.loops)
-        summary["construction_operations"] = None
-        summary["known_construction_operations"] = known
-        summary["unknown_construction_cost_bodies"] = unknown
-        summary["call_source_scope"] = dict(sorted(Counter(row.status.value for row in admissions).items()))
+        summary = _summary_after(old_header["summary"],
+            [(item["original"], item["accounting"]["counts"] if revision_mode else Counter(),
+              _program_counts(item["program"])) for item in changed.values()], admissions)
         component("header", {"schema": "scar.partitioned-inventory-header", "schema_version": 2,
-            "profile": "STRUCTURED_ENV_V1", "capabilities": ["SOURCE_PROGRAM5_ADMISSION_V1"],
+            "profile": "STRUCTURED_ENV_V1", "capabilities": _REVISION_CAPS if revision_mode else _ADMISSION_CAPS,
             "base_header": base.external_reference(base.manifest["components"]["header"]),
             "base_analysis_budget": old_header.get("budget", old_header.get("base_analysis_budget")),
             "publication_budget": {"max_programs": max_programs, "max_changed_sources": max_changed_sources,
                                    "max_operations_per_body": max_operations_per_body, "max_record_bytes": max_record_bytes},
             "summary": summary, "target_executed": False, "transformation_authorized": False})
-        publication = {"schema": "scar.source-program-publication", "schema_version": 1,
+        publication = {"schema": "scar.source-program-publication", "schema_version": 2 if revision_mode else 1,
             "base_inventory": deepcopy(base_composition.document["inventory"]),
             "base_composition": deepcopy(base_composition.index_receipt),
             "base_composition_canonical_sha256": base_composition._original_document_sha256,
@@ -263,17 +539,20 @@ def publish_source_programs(base_composition, source_program_paths, out_dir, *, 
                 "original_construction_cost_known": False},
             "producer": {"modules": original_modules, "code_witness_store": code_witnesses.receipt()},
             "whole_program_established": False, "current_run_integrated": False, "transformation_authorized": False}
+        if revision_mode:
+            publication["expectations"] = deepcopy(revision_plan.document)
+            publication["expectations_sha256"] = revision_plan.sha256
         component("publication", publication)
         component("producer", {"kind": "SOURCE_PROGRAM5_ADMISSION", "modules": original_modules,
             "base_producer": base.external_reference(base.manifest["components"]["producer"])})
         component("inputs", {"base_inventory": deepcopy(base_composition.document["inventory"]),
             "base_inputs": base.external_reference(base.manifest["components"]["inputs"]), "source_programs": inputs})
         counts = deepcopy(base.manifest["counts"])
-        counts["graph_bodies"] += len(changed)
+        counts["graph_bodies"] += sum(1 - item["accounting"]["counts"]["graph_bodies"] for item in changed.values()) if revision_mode else len(changed)
         counts["checkpoint_returns"] += sum(item["original"]["checkpoint"] is None for item in changed.values())
         counts["not_attempted_bodies"] -= sum(item["original"]["status"] == "NOT_ATTEMPTED" for item in changed.values())
         manifest = {"schema": "scar.partitioned-program-inventory", "schema_version": 2,
-            "capabilities": ["SOURCE_PROGRAM5_ADMISSION_V1"],
+            "capabilities": _REVISION_CAPS if revision_mode else _ADMISSION_CAPS,
             "storage": "immutable original artifacts and source-program admission references",
             "identity": "actual artifact/representation/record pointer/body/kind/local_id",
             "parent_inventory": _input_ref(base.path, base.manifest_receipt,
@@ -298,4 +577,5 @@ def publish_source_programs(base_composition, source_program_paths, out_dir, *, 
         raise
 
 
-__all__ = ["publish_source_programs"]
+__all__ = ["publish_source_programs", "SourceBodyPublicationPlan", "plan_source_body_publication",
+           "publish_source_body_revisions", "validate_body_revision_publication"]

@@ -532,6 +532,9 @@ def compose_source_publication(base_composition, inventory_manifest, out_dir, *,
         canonical_sha256=publication["base_composition_canonical_sha256"])
     if inventory.partitions.code_source_origin() != base_composition.original_code_source_origin():
         raise ValueError("publication changed the original compiler/source evidence origin")
+    if publication.get("schema_version") == 2:
+        from scar.analysis.source_program_publication import validate_body_revision_publication
+        validate_body_revision_publication(base_composition, inventory.partitions)
     changed = publication["changed_files"]
     if (type(changed) is not list or changed != sorted(set(changed))
             or inventory.file_count != base_composition.inventory_file_count
@@ -668,6 +671,11 @@ class CompositionIndex:
             self._verify_parent_composition(self.document["parent_composition"],
                 canonical_sha256=publication["base_composition_canonical_sha256"])
             self._inventory.partitions.code_source_origin()
+            if publication.get("schema_version") == 2:
+                from scar.analysis.source_program_publication import validate_body_revision_publication
+                parent = CompositionIndex(self.document["parent_composition"]["path"],
+                    max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes, cached_files=cached_files)
+                validate_body_revision_publication(parent, self._inventory.partitions)
         elif expected_partitioned and self._inventory.partitions.version != 1:
             raise ValueError("legacy composition2 cannot contain source publication partition2")
         if self._inventory.file_count != len(self.document["files"]):
@@ -733,7 +741,9 @@ class CompositionIndex:
         if extended:
             publication = self.inventory_component("publication")
             if (header.get("schema") != "scar.partitioned-inventory-header" or header.get("schema_version") != 2
-                    or header.get("capabilities") != ["SOURCE_PROGRAM5_ADMISSION_V1"]
+                    or header.get("capabilities") not in (["SOURCE_PROGRAM5_ADMISSION_V1"],
+                        ["SOURCE_PROGRAM5_ADMISSION_V1", "SOURCE_BODY_REVISION_V1"])
+                    or header.get("capabilities") != self._inventory.partitions.manifest["capabilities"]
                     or publication["base_composition"] != self.document["parent_composition"]):
                 raise ValueError("source publication header/capability/parent differs")
             canonical = publication["base_composition_canonical_sha256"]
