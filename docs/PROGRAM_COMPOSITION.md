@@ -2,6 +2,25 @@
 
 日期：2026-10-23。状态：已实现组合适配器；**第一阶段仍为 OPEN**。
 
+### 分片输入与schema2
+
+`compose-program --inventory`也接受已发布的partitioned inventory `manifest.json`。
+旧monolithic输入仍生成原schema1；分片输入生成schema2，并使用原`CompositionIndex`
+正规类型读取。规范图仍在原source archives和body检查点中，不重新prepare源码、
+不拼装巨型inventory JSON。
+
+新索引的body header locator指向source shard `#/file/bodies/j`；graph、metadata
+及gap分别指向原CP `#/graph`、`#/metadata`、`#/metadata/gaps/n`。每条locator携带
+原artifact URI、physical/decoded SHA和size；canonical namespace另含精确ProgramGraph
+表示版本、原body身份和`#/graph`。不伪造旧`#/files/i/bodies/j`指针；新格式该legacy
+pointer字段为null。source定义通过snapshot(path/fingerprint)+原DefinitionID限定，
+裸local ID不充当全局身份。ElementReference仍由绑定的composition、file及body限定。
+
+`CompositionIndex`新增`inventory_file_count`、`inventory_file(i)`、`inventory_body(i,j)`、
+`inventory_component(name)`及对应`*_locator`访问器。分片body按需加载，最多保留有限
+source/body缓存。源三图每file沿用原公共reader验证，canonical graph每body沿用原codec；
+归档成功、代码来源匹配及图结构有效都不等于actual/formal、state或resource已闭合。
+
 ## 1. 本次补什么
 
 已有 Source SemanticGraph、SourceSemanticsGraph、SourceControlFlowGraph 与部分
@@ -111,7 +130,7 @@ for body_ref in region["typed_regions"]:
 关系。只有依赖、状态、完成和资源接口均闭合后，才可能组合成完整 ProgramSnapshot
 及其 ExecutionModel；本索引不代替这项工作。
 
-## 6. 本次真实自动组装
+## 6. 首次真实自动组装（历史 54-body 输入）
 
 使用未修改 LeWM 的既有 environment inventory 和 source-context 三图归档，
 自动组装 151/151 个文件：122,323 个 source atoms、114,560 个原 semantic
@@ -129,3 +148,22 @@ initializer canonical body 缺口，以及原语义/控制/效果与跨函数绑
 示例，不是产品对 LeWM 的特殊规则。组装进程启动后完善的查询投影和 coverage
 frontier 只在当前查询中使用；当前模块的更严格 metadata 检查不冒充已重跑全部
 151 份旧图。后续全量重建应使用当前模块与最新 inventory。
+
+## 7. 分片 full inventory 的实际组合与调用连接
+
+`artifacts/experiments/first_stage_partitioned_composition_bindings_20261023`
+已完成一次新的 151-file compose 与同 capture 绑定，exit 0。输入为
+`first_stage_full_inventory_restored_20261023/result/manifest.json`，不使用上节
+54-body inventory，不构造巨型 JSON，也未重新 prepare/lower 原源码。
+
+151 个原 source archive 均逐份核对 snapshot/context，840 个 canonical body 沿用
+原 public codec 校验；组合保存 2,217 个 definition/body header、122,323 个 source
+atoms、114,560 个 semantic operations 和 263 个条件调用目标。source CFG 的
+6,916 suites、65,880 nodes、78,691 edges 均引用原图。787 个 UNSUPPORTED、
+590 个 NOT_ATTEMPTED 和 151 个未恢复 module initializer body 明确保留。
+
+compose 阶段 wall 662.44 秒；连同独立坐标核对及 100,438 次实际调用绑定，全过程
+wall 14:26.32、peak RSS 814,720 KiB。5,624 次 invocation 关联原 body，3,162 次
+仅关联 source，91,652 次未解析。具体原档 SHA、schema2 locator、producer 与计数见
+实验 README、`summary.json` 和 `bindings/report.json`。这验证分片来源与实际 entry
+的正规接入，不证明 actual/formal、状态、effects、资源或完整执行模型已闭合。

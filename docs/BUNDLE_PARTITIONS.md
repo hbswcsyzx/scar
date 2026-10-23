@@ -1,6 +1,6 @@
 # IRBundle 原记录分块归档
 
-2026-10-23。状态：**Implemented；真实CPU原档全部记录核验PASS，完整LeWM导入进行中**。
+2026-10-23。状态：**Implemented；真实CPU原档全部记录核验PASS，完整LeWM导入及实档审核PASS**。
 新增独立 `scar/store/bundle_partitions.py`；`import-capture --bundle-partitions`
 显式选择该路径，旧JSON路径仍兼容，旧provider原档不变。存储验证不重跑目标/forward，
 不运行额外测试套件，不代表第一阶段完整程序模型通过。
@@ -168,7 +168,11 @@ stored bytes；manifest9,031字节。保存了producer SHA、脚本、原分母�
 这是存储往返证据，不是新的目标运行或完整模型证据。
 
 完整LeWM新采集的同路径联合导入位于 `first_stage_joined_physical_20261023`，
-当前正在运行；结束后以真实manifest和联合报告更新，不能沿用CPU结论冒充GPU验收。
+实际exit0：2,259,781原记录、195chunks，2,982,489,343decoded bytes与145,084,073
+stored bytes。独立审核核209输出stored SHA与物理allocation/region全部原关联及
+对应chunk decoded receipts，PASS；其它表未独立重复全codec，producer公开
+bundle验证仍是其语义依据。离线导入wall18:59.69/peakRSS7,308,272KiB，审核7.87s。
+这不是完整软件/硬件依赖闭合、原程序性能测量或优化许可。
 
 静态冻结收据：lewm 环境标准库 `ast.parse` exit 0；未 import 此模块、未 export
 bundle、未执行目标或测试。模块 SHA256：

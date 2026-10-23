@@ -12,7 +12,11 @@
 字节；1627/1627原返回精确恢复，840个原ProgramGraph经公共codec/overlay/formal
 检查，787 UNSUPPORTED、590 NOT_ATTEMPTED均保留。无fresh body lowering。
 新inventory与旧151source archives的snapshot和完整context逐项相等，正在接正规
-CompositionIndex及同capture source binder，不再prepare151个文件。
+CompositionIndex及同capture source binder的接线已实档PASS，不再prepare151个文件：
+100,438调用中5,624 body-linked、3,162 source-only、91,652 unresolved；source组合/
+绑定wall14:26.32。其后same_capture marker连接PASS：79,592 marker/109,288原slot
+全部保留，10,992 body/activation/namespace关联、17,456 source-only；wall442.34s。
+缺少外部图正式接入、actual/formal/return/environment/state等，不把引用连接算完成。
 
 依赖源码准入及独立增量均已结束并审核PASS：106文件全部有snapshot/三图，243groups/
 86,702次调用有完整descriptor/source witness。只补原预算阻止的27文件；原199个
@@ -27,7 +31,10 @@ storage pointer为None的空CPU Tensor，不伪造分配。原档1.17GB经hash�
 泄漏。643.29s为重度插桩墙钟，没有LeWM加速比。
 
 IRBundle分块存储已做一次真实CPU原档全记录往返：25表786条原记录/顺序/收据PASS；
-完整LeWM物理联合导入正使用 `--bundle-partitions`，不再生成一份巨大bundle JSON。
+完整LeWM物理联合导入使用 `--bundle-partitions` 已exit0并独立审核PASS：2,259,781原
+记录分195chunks，2.98GB decoded/145MB stored，不生成一份巨大bundle JSON。
+108,682物理槽/37,506epochs全部与原report一致，209输出stored SHA核验；完整导入
+wall18:59.69/peakRSS约6.97GiB。861 OS点process未知、逻辑内容/版本/state/ready仍OPEN。
 SQLite原图实体/关系索引首次真实构建及必要查询PASS：437,228实体、1,172,205关系；
 151/2217/1627/840原分母守恒，integrity=ok、FK0。建库418.65s、DB约459.2MiB、
 peakRSS约188.5MiB。42,767条endpoint引用仍未语义索引；数据库发布不是完整模型通过。

@@ -1,7 +1,22 @@
 # 实际 Python 调用连接原 source/body
 
-日期：2026-10-23。状态：适配器已实现；等待完整 inventory / composition 后实际
-运行。**尚未声称通过真实绑定验收，第一阶段仍 OPEN。**
+日期：2026-10-23。状态：分片适配器已在 151-file / 840-body composition 与
+272038 capture 上完成一次完整 same_capture 绑定。**来源连接验收通过，第一阶段仍 OPEN。**
+
+### 分片输入的正规接入
+
+分片inventory由原`CompositionIndex`的schema2输入访问器读取，不将其伪装为巨型
+dict，也不改变`type(composition) is CompositionIndex`约束。旧schema1路径保持兼容。
+新source-bindings/report schema2保存真实component、source shard和CP locator；旧
+`*_pointer`字段在没有对应monolithic文档时为null，绝不制造不存在的JSON pointer。
+每个RegionActivation对应行另带原canonical body namespace，限定artifact/representation/
+body，不能将两个body文档的同名RegionID直接合并。
+
+source定义、body映射按精确snapshot(path/fingerprint)+DefinitionID限定；graph root及
+canonical SHA仍逐body核验；locator也必须与原manifest/source shard/CP一致。code descriptor、
+code_source_witness、admission各自引用其真实component `#/value/...`记录。既有完整
+raw scan、same_capture核对、未知/外部source、每条invocation、retained ancestor与direct
+caller的区别及全部未闭合接口条件均保留。本接入不编译、不prepare、不执行目标。
 
 ## 1. 职责
 
@@ -157,10 +172,27 @@ witness 对比与产物构造均成功后才创建独占的新输出目录；先
 `BODY_LINKED_REUSED_WITNESS` 只表示这次 entry 可以指向哪一个原 body。它不等于
 纯函数、不等于输入不变、不等于可以缓存，也不等于第一阶段完整模型已经成立。
 
-## 7. 待实际验收
+## 7. 已完成的实际验收
 
-根任务将提供 `first_stage_lewm_environment_mounted_20261022/trace` 对应的新 full
-inventory 与 composition。同 capture 使用默认模式；附加 dispatch 采集的下一次
-运行若复用这份静态证明，必须显式使用 reused_code。届时运行实际绑定，核验：原 entry 分母全部保留、
-相同 capture membership、body 原图限定引用、direct/retained 分离，以及所有未恢复
-source/body 和接口缺口。当前文档不提前填写或推测成功数量。
+实验 `artifacts/experiments/first_stage_partitioned_composition_bindings_20261023`
+直接读取已发布分片 manifest，复用原 151 个 source archive 与 840 个 canonical
+body，未重新 prepare/lower。一次 compose 与 same_capture bind 全过程 exit 0，
+wall 14:26.32，peak RSS 814,720 KiB；原始采集为 272038，未混入另一次 369749 capture。
+`producer.json`、`implementation.patch`、`progress.jsonl`、`run.time.txt` 保存生产者、
+原档收据与实际运行记录。
+
+独立完整重扫保留 100,438 个 entry 和 100,438 个 exit，orphan exit 为 0；
+817 个 entered code group 的完整 captured descriptor 一致。5,624 次 invocation
+关联原 canonical body，3,162 次只有原 source definition，91,652 次未解析。
+三者之和等于原 entry 分母；不能将 151 个文件都有结构索引解释成所有 entry 都已闭合。
+
+96,799 条关系为采集器记录的直接 parent，3,638 条仅为 retained ancestor，1 条
+没有记录 parent；96,416 次通过原 frame interval 资格核对，4,022 次保持未解析。
+每次调用的 actual/formal、返回、环境、状态/effects 与 canonical completion 义务
+仍未闭合，`first_stage_complete` 与 `transformation_authorized` 均为 false。
+
+schema2 的实际 `bindings/report`、`invocations.jsonl.gz` 和
+`locator-examples.json` 均已归档；原 source-shard / component / CP locator 保留
+原 SHA、pointer 与 canonical namespace。后续 369749 运行必须显式选 `reused_code`，
+独立重扫它自己的完整 raw capture，不能复用 272038 的动态调用事实；该追加运行未在
+本次验收中执行。

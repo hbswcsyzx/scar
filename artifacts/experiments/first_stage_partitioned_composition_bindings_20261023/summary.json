@@ -1,0 +1,96 @@
+{
+  "status": "COMPOSED_AND_BOUND_WITH_OPEN_OBLIGATIONS",
+  "elapsed_s": 865.3324186570026,
+  "max_rss_kib": 814720,
+  "composition": {
+    "schema": "scar.program-composition",
+    "schema_version": 2,
+    "files_total": 151,
+    "files_indexed": 151,
+    "summary": {
+      "inventory_denominators": {
+        "files": 151,
+        "definitions": 2217,
+        "coverage_entries": 122323,
+        "calls": 10235,
+        "bodies": 2217
+      },
+      "counts": {
+        "bodies": 2217,
+        "calls": 10235,
+        "canonical_bodies": 840,
+        "cfg_edges": 78691,
+        "cfg_nodes": 65880,
+        "cfg_suites": 6916,
+        "conditional_call_targets": 263,
+        "control_regions": 5587,
+        "coverage_entries": 122323,
+        "definitions": 2217,
+        "semantic_operations": 114560,
+        "source_atoms": 122323
+      },
+      "frontiers": {
+        "BODY_CODE_VERSION": 882,
+        "BODY_DYNAMIC_DISPATCH": 9041,
+        "BODY_DYNAMIC_TARGET": 2858,
+        "BODY_EFFECT_SUMMARY": 1950,
+        "BODY_FRAME_EFFECT": 840,
+        "BODY_NOT_ATTEMPTED": 590,
+        "BODY_UNSUPPORTED": 787,
+        "CROSS_FUNCTION_BINDING_NOT_ESTABLISHED": 130,
+        "INCOMPLETE_OPERATION_EFFECTS": 840,
+        "MODULE_INITIALIZER_BODY_NOT_RECOVERED": 151,
+        "SOURCE_CONTROL_GAP": 4834,
+        "SOURCE_SEMANTICS_GAP": 117830
+      },
+      "first_stage_complete": false
+    }
+  },
+  "bindings": {
+    "processes": 1,
+    "code_captures": 855,
+    "coordinate_bound_processes": 1,
+    "entered_code_groups": 817,
+    "invocations": 100438,
+    "exits": 100438,
+    "orphan_exits": 0,
+    "source_binding_statuses": {
+      "BODY_LINKED_REUSED_WITNESS": 74,
+      "SOURCE_LINKED_REUSED_WITNESS": 351,
+      "UNRESOLVED": 392
+    },
+    "invocation_statuses": {
+      "BODY_LINKED_REUSED_WITNESS": 5624,
+      "SOURCE_LINKED_REUSED_WITNESS": 3162,
+      "UNRESOLVED": 91652
+    },
+    "parent_relations": {
+      "DIRECT_RECORDED_PARENT": 96799,
+      "NO_RECORDED_PARENT": 1,
+      "RETAINED_ANCESTOR": 3638
+    },
+    "parent_qualifications": {
+      "RECORDED_FRAME_INTERVAL_MATCH": 96416,
+      "UNRESOLVED": 4022
+    },
+    "complete_descriptor_matches": 817,
+    "current_source_check_statuses": {},
+    "unconnected_interfaces": {
+      "ACTUAL_FORMAL_ROUTING_UNVERIFIED": 100438,
+      "RETURN_VALUE_ROUTING_UNVERIFIED": 100438,
+      "FUNCTION_ENVIRONMENT_UNVERIFIED": 100438,
+      "STATE_EFFECTS_UNVERIFIED": 100438,
+      "CANONICAL_CONTROL_COMPLETION_UNVERIFIED": 100438
+    },
+    "frontiers": {
+      "CANONICAL_BODY_UNAVAILABLE": 3162,
+      "CODE_SOURCE_INCOMPLETE": 87505,
+      "FRAME_RESUMPTION_CONTINUITY_UNRECOVERED": 4021,
+      "PARENT_NO_PARENT_ENTRY_WITNESS": 1,
+      "PARENT_SUSPENDABLE_FRAME_OBSERVATION": 4021,
+      "VERIFIED_CODE_WITHOUT_DEFINITION_WITNESS": 4147
+    }
+  },
+  "fresh_lower_or_prepare_performed": false,
+  "whole_program_established": false
+}

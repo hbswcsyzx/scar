@@ -370,22 +370,28 @@ def _static_admission_key(admission):
         "core_region": encode(admission.core_region)})
 
 
+def _source_key(snapshot, definition):
+    return snapshot.path, snapshot.fingerprint, definition.wire
+
+
 def _source_tables(composition):
     definitions, body_refs, snapshots = {}, {}, {}
     rows = composition.document["files"]
-    _need(len(rows) == len(composition.inventory["files"]), "composition/inventory file denominator differs")
-    for file_index, raw in enumerate(composition.inventory["files"]):
+    _need(len(rows) == composition.inventory_file_count, "composition/inventory file denominator differs")
+    for file_index in range(composition.inventory_file_count):
+        raw = composition.inventory_file(file_index)
         snapshot = decode(SourceSnapshot, raw["snapshot"])
         _need(snapshot.path not in snapshots, "duplicate inventory source snapshot")
         snapshots[snapshot.path] = file_index, snapshot
         row = rows[file_index]
         _need(row["file_index"] == file_index and row["snapshot"] == raw["snapshot"],
               "composition file reference differs from original inventory")
-        for definition in decode(tuple[DefinitionInventory, ...], raw["definitions"]):
-            _need(definition.id not in definitions, "duplicate definition identity in composition")
-            definitions[definition.id] = file_index, definition
+        for definition_index, definition in enumerate(decode(tuple[DefinitionInventory, ...], raw["definitions"])):
+            key = _source_key(snapshot, definition.id)
+            _need(key not in definitions, "duplicate source-qualified definition identity in composition")
+            definitions[key] = file_index, definition, definition_index
         for body_index, body in enumerate(row["bodies"]):
-            original = raw["bodies"][body_index]
+            original = composition.inventory_body(file_index, body_index)
             _need(body["definition"] == original["definition"]["wire"],
                   "composition body definition differs from its inventory pointer")
             if body["root"] is not None:
@@ -393,13 +399,21 @@ def _source_tables(composition):
                       and original["graph"]["root"]["wire"] == body["root"]
                       and _sha(original["graph"]) == body["program_canonical_sha256"],
                       "composition body root/hash differs from original canonical graph")
-                body_refs[body["definition"]] = {
+                reference = {
                     "reference": encode(ElementReference(file_index,
                         RegionID(body["root"].split(":", 1)[1]), body_index)),
-                    "inventory_pointer": body["inventory_pointer"] + "/graph",
+                    "inventory_pointer": body["inventory_pointer"] + "/graph" if not composition.partitioned else None,
                     "program_canonical_sha256": body["program_canonical_sha256"],
                     "program_schema_version": body["program_schema_version"],
                 }
+                if composition.partitioned:
+                    locators = composition.inventory_body_locators(file_index, body_index, original["graph"])
+                    _need(all(body.get(name) == value for name, value in locators.items()),
+                          "composition body locator/namespace differs from original source shard/checkpoint")
+                    reference.update({"canonical_locator": locators["graph_locator"],
+                        "inventory_locator": locators["inventory_locator"],
+                        "metadata_locator": locators["metadata_locator"], "namespace": locators["namespace"]})
+                body_refs[(snapshot.path, snapshot.fingerprint, body["definition"])] = reference
     return definitions, body_refs, snapshots
 
 
@@ -408,14 +422,18 @@ def _binding_rows(composition, model, scope, sink, captures, members, witness_mo
     links = {link.code: (index, link) for index, link in enumerate(model.code_links)} if model is not None else {}
     admissions = {(item.origin.process_id, item.origin.code): (index, item)
                   for index, item in enumerate(scope.admissions)} if scope is not None else {}
-    descriptors, descriptor_pointers, static_admissions = {}, {}, defaultdict(list)
+    descriptors, descriptor_pointers, descriptor_locators, static_admissions = {}, {}, {}, defaultdict(list)
     if model is not None:
         for index, old_capture in enumerate(model.codes):
             previous = descriptors.get(old_capture.code.key)
             _need(previous is None or previous == old_capture.code,
                   "stored descriptor witnesses disagree for one complete code key")
             descriptors[old_capture.code.key] = old_capture.code
-            descriptor_pointers.setdefault(old_capture.code.key, f"#/call_sources/model/codes/{index}/code")
+            if composition.partitioned:
+                descriptor_locators.setdefault(old_capture.code.key,
+                    composition.inventory_component_locator("call_sources", f"/model/codes/{index}/code"))
+            else:
+                descriptor_pointers.setdefault(old_capture.code.key, f"#/call_sources/model/codes/{index}/code")
     for index, admission in enumerate(scope.admissions if scope is not None else ()):
         static_admissions[admission.origin.code].append((index, admission))
     rows, indexes = [], {}
@@ -442,12 +460,21 @@ def _binding_rows(composition, model, scope, sink, captures, members, witness_mo
                "witness_mode": witness_mode, "complete_descriptor_match": descriptor_match,
                "code_capture": encode(capture) if capture is not None else None,
                "descriptor_witness_pointer": descriptor_pointers.get(code) if descriptor_match else None,
-               "code_source_witness_pointer": f"#/call_sources/model/code_links/{linked[0]}" if linked else None,
-               "admission_pointer": f"#/call_source_scope/admissions/{admitted[0]}" if admitted and witness_mode == "same_capture" else None,
-               "static_body_witness_pointers": [f"#/call_source_scope/admissions/{index}" for index, _ in static_candidates],
+               "code_source_witness_pointer": f"#/call_sources/model/code_links/{linked[0]}" if linked and not composition.partitioned else None,
+               "admission_pointer": f"#/call_source_scope/admissions/{admitted[0]}" if admitted and witness_mode == "same_capture" and not composition.partitioned else None,
+               "static_body_witness_pointers": [f"#/call_source_scope/admissions/{index}" for index, _ in static_candidates] if not composition.partitioned else [],
                "current_source_check": None,
                "snapshot": None, "source": None, "definition": None, "body": None,
                "interface_frontiers": list(_INTERFACE_FRONTIERS), "frontiers": []}
+        if composition.partitioned:
+            row.update({"descriptor_witness_locator": descriptor_locators.get(code) if descriptor_match else None,
+                "code_source_witness_locator": composition.inventory_component_locator(
+                    "call_sources", f"/model/code_links/{linked[0]}") if linked else None,
+                "admission_locator": composition.inventory_component_locator(
+                    "call_source_scope", f"/admissions/{admitted[0]}") if admitted and witness_mode == "same_capture" else None,
+                "static_body_witness_locators": [composition.inventory_component_locator(
+                    "call_source_scope", f"/admissions/{index}") for index, _ in static_candidates],
+                "definition_locator": None})
         if capture is None:
             row["frontiers"].append("MISSING_PROCESS_CODE_CAPTURE")
         if linked is None:
@@ -477,7 +504,7 @@ def _binding_rows(composition, model, scope, sink, captures, members, witness_mo
                     row["frontiers"].append("VERIFIED_CODE_WITHOUT_DEFINITION_WITNESS")
                 else:
                     located = snapshots.get(link.snapshot.path)
-                    found = definitions.get(link.definition)
+                    found = definitions.get(_source_key(link.snapshot, link.definition))
                     if located is None:
                         row["frontiers"].append("SOURCE_NOT_IN_COMPOSITION")
                     elif located[1] != link.snapshot:
@@ -487,9 +514,12 @@ def _binding_rows(composition, model, scope, sink, captures, members, witness_mo
                     elif composition.document["files"][located[0]]["status"] == "GAP":
                         row["frontiers"].append("SOURCE_COMPOSITION_UNAVAILABLE")
                     else:
-                        file_index, definition = found
+                        file_index, definition, definition_index = found
                         row["source"] = encode(link.source)
                         row["definition"] = encode(ElementReference(file_index, definition.id))
+                        if composition.partitioned:
+                            row["definition_locator"] = composition.inventory_file_locator(
+                                file_index, f"/definitions/{definition_index}")
                         row["status"] = "SOURCE_LINKED_REUSED_WITNESS"
                         if admitted is None:
                             row["frontiers"].append("STATIC_BODY_WITNESS_CONFLICT" if admission_conflict
@@ -503,7 +533,7 @@ def _binding_rows(composition, model, scope, sink, captures, members, witness_mo
                                 _need(admission.snapshot == link.snapshot and admission.definition == link.definition
                                       and admission.source == link.source,
                                       "final source admission contradicts the exact code/source witness")
-                                body = bodies.get(definition.id.wire)
+                                body = bodies.get(_source_key(link.snapshot, definition.id))
                                 if admission.status is CallSourceAdmissionStatus.CORE_LINKED:
                                     _need(body is not None and body["reference"]["identity"]["wire"] == admission.core_region.wire,
                                           "final source admission points at a different/missing canonical body")
@@ -616,17 +646,16 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
     _need(not output.exists() and not output.is_symlink(), "output directory already exists")
     directory = Path(trace_directory).resolve()
     _need(directory.is_dir(), "trace directory is missing")
-    inventory = composition.inventory
-    discovery = inventory.get("discovery")
+    discovery = composition.inventory_component("discovery")
     _need(type(discovery) is dict and type(discovery.get("project_root")) is str,
           "inventory lacks its original project root")
     root = discovery["project_root"]
-    seed_document = inventory.get("call_sources")
+    seed_document = composition.inventory_component("call_sources")
     seed_model = (CallSourceSeedReport._decode_replay_input(seed_document, verification_budget=call_budget)
                   if seed_document is not None else None)
     if seed_model is not None:
         _need(seed_model.project_root == root, "source witness project root differs from inventory discovery")
-    scope_document = inventory.get("call_source_scope")
+    scope_document = composition.inventory_component("call_source_scope")
     scope = decode(CallSourceScope, scope_document) if scope_document is not None else None
     _need(seed_model is not None or scope is None, "source admissions have no bound seed model")
     if seed_model is not None and scope is not None:
@@ -679,7 +708,7 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
             qualifications[parent["qualification"]] += 1
             frontiers.update(missing)
             frontiers.update("PARENT_" + reason for reason in parent["frontiers"])
-            yield {"kind": "INVOCATION", "invocation": encode(invocation),
+            row = {"kind": "INVOCATION", "invocation": encode(invocation),
                    "code": entry.code, "source_binding_index": binding_index,
                    "anchor": encode(entry.anchor), "point": encode(point) if point is not None else None,
                    "raw_source": encode(members.fact(entry.anchor, invocation.process_id)),
@@ -694,6 +723,9 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
                    "caller_locals_complete": entry.caller_locals_complete,
                    "status": binding["status"], "frontiers": missing,
                    "actual_formal_return_connected": False, "environment_state_connected": False}
+            if composition.partitioned:
+                row["region_namespace"] = binding["body"]["namespace"] if binding["body"] is not None else None
+            yield row
 
     def orphan_rows():
         for invocation, exit_record in sorted(sink.exits.items(), key=lambda item: (item[0].process_id, item[1].anchor.index)):
@@ -706,7 +738,7 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
         stage = Path(temporary)
         invocation_file = _write_rows(stage / "invocations.jsonl.gz", invocation_rows())
         orphan_file = _write_rows(stage / "orphan-exits.jsonl.gz", orphan_rows())
-        binding_payload = _canonical({"schema": "scar.source-invocation-bindings", "schema_version": 1,
+        binding_payload = _canonical({"schema": "scar.source-invocation-bindings", "schema_version": 2 if composition.partitioned else 1,
                                       "witness_mode": witness_mode, "bindings": bindings, **_AUTHORITY})
         (stage / "bindings.json").write_bytes(binding_payload)
         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
@@ -714,7 +746,7 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
               == sum(meta["invocations"] for meta in scanned.metadata),
               "published invocation denominator differs from complete raw replay")
         report = {
-            "schema": "scar.source-invocations", "schema_version": 1,
+            "schema": "scar.source-invocations", "schema_version": 2 if composition.partitioned else 1,
             "scope": "observed frame entries to original source/body; reused code/source witness",
             "inventory": composition.document["inventory"],
             "composition_canonical_sha256": _sha(composition.document),

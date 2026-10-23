@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from scar.analysis.source_layers import SourceLayerView, load_source_layers
+from scar.analysis.inventory_partitions import InventoryPartitions
 from scar.ir.program.codec import loads as load_graph
 from scar.ir.program.ids import OperationID, RegionID
 from scar.ir.program.inventory import (
@@ -87,6 +88,89 @@ def _sort_mapping(mapping: dict) -> dict:
     return {key: sorted(rows) for key, rows in sorted(mapping.items())}
 
 
+def _at(locator: dict, suffix: str) -> dict:
+    return {**locator, "pointer": locator["pointer"] + suffix}
+
+
+class _InventorySource:
+    """Storage adapter only; canonical source/body records remain untouched."""
+
+    def __init__(self, path, *, max_input_bytes, max_record_bytes):
+        path = Path(path)
+        if path.is_dir():
+            path = path / "manifest.json"
+        document, self.receipt = _read(path, max_input_bytes)
+        self.partitions = None
+        self.document = None
+        self._files = OrderedDict()
+        if document.get("schema") == "scar.partitioned-program-inventory":
+            self.partitions = InventoryPartitions(path, max_shard_bytes=max_record_bytes)
+            self.format = "PARTITIONED"
+            self.file_count = len(self.partitions.manifest["files"])
+        elif document.get("schema") == "scar.program-inventory" and type(document.get("files")) is list:
+            self.document, self.format = document, "MONOLITHIC"
+            self.file_count = len(document["files"])
+        else:
+            raise ValueError("unsupported program inventory storage schema")
+
+    def file(self, index):
+        if self.partitions is None:
+            return self.document["files"][index]
+        if index not in self._files:
+            self._files[index] = self.partitions.file(index)
+            while len(self._files) > 2:
+                self._files.popitem(last=False)
+        self._files.move_to_end(index)
+        return self._files[index]
+
+    def body(self, file_index, body_index):
+        return (self.partitions.body_record(file_index, body_index) if self.partitions is not None
+                else self.document["files"][file_index]["bodies"][body_index])
+
+    def component(self, name):
+        return self.partitions.component(name) if self.partitions is not None else self.document.get(name)
+
+    def _artifact(self, ref):
+        uri = ref["uri"] if ref["external"] else str(self.partitions.root / ref["uri"])
+        return {"uri": uri, **{name: ref[name] for name in
+            ("physical_sha256", "physical_bytes", "decoded_sha256", "decoded_bytes", "representation")}}
+
+    def file_locator(self, index, pointer=""):
+        if self.partitions is None:
+            return {"artifact": self.receipt, "pointer": f"#/files/{index}" + pointer}
+        return {"artifact": self._artifact(self.partitions.manifest["files"][index]),
+                "pointer": "#/file" + pointer}
+
+    def component_locator(self, name, pointer=""):
+        if self.partitions is None:
+            return {"artifact": self.receipt, "pointer": "#/" + name + pointer}
+        return {"artifact": self._artifact(self.partitions.manifest["components"][name]),
+                "pointer": "#/value" + pointer}
+
+    def body_locators(self, file_index, body_index, graph_document=None):
+        header = self.file_locator(file_index, f"/bodies/{body_index}")
+        if self.partitions is None:
+            return {"inventory_locator": header, "graph_locator": _at(header, "/graph"),
+                    "metadata_locator": _at(header, "/metadata"), "namespace": None}
+        row = self.file(file_index)["bodies"][body_index]
+        ref = row["checkpoint"]
+        graph_locator = metadata_locator = namespace = None
+        if ref is not None:
+            artifact = self._artifact(ref)
+            metadata_locator = {"artifact": artifact, "pointer": "#/metadata"}
+            if graph_document is not None:
+                namespace = {"artifact": {"uri": ref["uri"], "decoded_sha256": ref["decoded_sha256"]},
+                    "representation": "scar.program-graph/" + str(graph_document["schema_version"]),
+                    "record_pointer": "#/graph", "body": ref["body_identity"]}
+                graph_locator = {"artifact": artifact, "pointer": "#/graph", "namespace": namespace}
+        return {"inventory_locator": header, "graph_locator": graph_locator,
+                "metadata_locator": metadata_locator, "namespace": namespace}
+
+
+def _definition_key(snapshot, identity):
+    return snapshot["path"], snapshot["fingerprint"], identity.wire
+
+
 def _bound_file(raw: dict, view: SourceLayerView) -> tuple:
     snapshot = decode(SourceSnapshot, raw["snapshot"])
     context = decode(SourceContextDigest, raw["context"])
@@ -105,11 +189,11 @@ def _bound_file(raw: dict, view: SourceLayerView) -> tuple:
 
 
 def _body_attachment(raw: dict, file_index: int, body_index: int,
-                     view: SourceLayerView) -> dict:
+                     view: SourceLayerView, *, locators=None) -> dict:
     definition = decode(OperationDefinitionID, raw["definition"])
     if definition not in view.semantic.definitions:
         raise ValueError("body definition is absent from the semantic graph")
-    pointer = f"#/files/{file_index}/bodies/{body_index}"
+    pointer = f"#/files/{file_index}/bodies/{body_index}" if locators is None else None
     status = raw.get("status")
     if status not in {"LOWERED_WITH_GAPS", "UNSUPPORTED", "NOT_ATTEMPTED"}:
         raise ValueError("unknown inventory body status")
@@ -120,6 +204,8 @@ def _body_attachment(raw: dict, file_index: int, body_index: int,
         "source_atom_links": {}, "regions": [], "counts": {},
         "frontiers": [],
     }
+    if locators is not None:
+        result.update(locators)
     metadata = (decode(LoweringMetadata, raw["metadata"])
                 if raw.get("metadata") is not None else None)
     if metadata is not None and metadata.source != view.snapshot:
@@ -127,10 +213,13 @@ def _body_attachment(raw: dict, file_index: int, body_index: int,
     if raw.get("graph") is None:
         if status == "LOWERED_WITH_GAPS":
             raise ValueError("lowered body has no canonical graph")
-        result["frontiers"].append({
+        frontier = {
             "kind": "BODY_" + status, "inventory_pointer": pointer,
             "detail": raw.get("reason", "body was not recovered"),
-        })
+        }
+        if locators is not None:
+            frontier["inventory_locator"] = locators["inventory_locator"]
+        result["frontiers"].append(frontier)
         return result
     if status != "LOWERED_WITH_GAPS" or metadata is None:
         raise ValueError("canonical body graph lacks its lowered status/metadata")
@@ -177,21 +266,27 @@ def _body_attachment(raw: dict, file_index: int, body_index: int,
         "source_atom_links": _sort_mapping(result["source_atom_links"]),
     })
     for index, gap in enumerate(metadata.gaps):
-        result["frontiers"].append({
+        frontier = {
             "kind": "BODY_" + gap.kind.value,
-            "inventory_pointer": pointer + f"/metadata/gaps/{index}",
+            "inventory_pointer": pointer + f"/metadata/gaps/{index}" if pointer is not None else None,
             "detail": gap.detail,
-        })
+        }
+        if locators is not None:
+            frontier["inventory_locator"] = _at(locators["metadata_locator"], f"/gaps/{index}")
+        result["frontiers"].append(frontier)
     if any(not operation.effects_complete for operation in graph.operations):
-        result["frontiers"].append({
-            "kind": "INCOMPLETE_OPERATION_EFFECTS", "inventory_pointer": pointer + "/graph",
+        frontier = {
+            "kind": "INCOMPLETE_OPERATION_EFFECTS", "inventory_pointer": pointer + "/graph" if pointer is not None else None,
             "detail": "operation effects_complete flags remain authoritative in the original graph",
-        })
+        }
+        if locators is not None:
+            frontier["inventory_locator"] = locators["graph_locator"]
+        result["frontiers"].append(frontier)
     return result
 
 
 def _compose_file(raw: dict, index: int, view: SourceLayerView,
-                  definition_files: dict[str, int]) -> dict:
+                  definition_files: dict, *, inventory_source=None) -> dict:
     definitions, coverage, calls = _bound_file(raw, view)
     semantic, semantics, control = view.semantic, view.semantics, view.control
     children, controlled, control_children, atom_ops = {}, {}, {}, {}
@@ -229,8 +324,12 @@ def _compose_file(raw: dict, index: int, view: SourceLayerView,
     for atom in semantic.source_atoms:
         if atom.wire not in atom_owners and atom.wire not in atom_ops:
             frontier.append({"kind": "SOURCE_ATOM_WITHOUT_OWNER", "subject": atom.wire})
-    bodies = [_body_attachment(body, index, body_index, view)
-              for body_index, body in enumerate(raw["bodies"])]
+    bodies = []
+    for body_index, header in enumerate(raw["bodies"]):
+        body = inventory_source.body(index, body_index) if inventory_source is not None else header
+        locators = (inventory_source.body_locators(index, body_index, body.get("graph"))
+                    if inventory_source is not None and inventory_source.partitions is not None else None)
+        bodies.append(_body_attachment(body, index, body_index, view, locators=locators))
     body_by_definition = {body["definition"]: body_index for body_index, body in enumerate(bodies)}
     if len(body_by_definition) != len(bodies):
         raise ValueError("duplicate inventory body definition")
@@ -252,17 +351,27 @@ def _compose_file(raw: dict, index: int, view: SourceLayerView,
             raise ValueError("call source/owner is absent from the semantic graph")
         targets = []
         for candidate in call.candidates:
-            destination = definition_files.get(candidate.wire)
+            if inventory_source is not None and inventory_source.partitions is not None:
+                destinations = {definition_files.get((w.target_source.path, w.target_source.fingerprint, candidate.wire))
+                    for w in call.candidate_witnesses if w.definition == candidate}
+                if None in destinations or len(destinations) != 1:
+                    raise ValueError("conditional target lacks one exact source-qualified definition")
+                destination = next(iter(destinations))
+            else:
+                destination = definition_files.get(candidate.wire)
             if destination is None:
                 raise ValueError("conditional call target has no inventory definition")
             targets.append({"file_index": destination, "definition": candidate.wire})
-        call_links.append({
+        record = {
             "operation": call.operation.wire, "owner": call.execution_owner.wire,
-            "inventory_pointer": f"#/files/{index}/calls/{call_index}",
+            "inventory_pointer": f"#/files/{index}/calls/{call_index}" if inventory_source is None or inventory_source.partitions is None else None,
             "target_definitions": targets,
             "status": "CONDITIONAL" if targets else "UNRESOLVED",
             "actual_formal_return_connected": False,
-        })
+        }
+        if inventory_source is not None and inventory_source.partitions is not None:
+            record["inventory_locator"] = inventory_source.file_locator(index, f"/calls/{call_index}")
+        call_links.append(record)
     if calls:
         frontier.append({"kind": "CROSS_FUNCTION_BINDING_NOT_ESTABLISHED",
                          "subjects": len(calls),
@@ -301,7 +410,7 @@ def _compose_file(raw: dict, index: int, view: SourceLayerView,
 def compose_program(inventory_path: str | Path, source_layers_dir: str | Path,
                     out_dir: str | Path, *, max_input_bytes: int = 512_000_000,
                     max_files: int = 256, max_record_bytes: int = 128_000_000,
-                    max_output_bytes: int = 256_000_000) -> dict:
+                    max_output_bytes: int = 256_000_000, progress=None) -> dict:
     """Automatically index every supplied inventory file; never execute it.
 
     Existing source-layer validation and canonical ProgramGraph validation run
@@ -310,10 +419,10 @@ def compose_program(inventory_path: str | Path, source_layers_dir: str | Path,
     """
     if type(max_files) is not int or max_files < 1:
         raise ValueError("max_files must be a positive exact integer")
-    inventory, artifact = _read(Path(inventory_path), max_input_bytes)
-    if inventory.get("schema") != "scar.program-inventory" or type(inventory.get("files")) is not list:
-        raise ValueError("unsupported program inventory")
-    if len(inventory["files"]) > max_files:
+    inventory = _InventorySource(inventory_path, max_input_bytes=max_input_bytes,
+                                 max_record_bytes=max_record_bytes)
+    artifact = inventory.receipt
+    if inventory.file_count > max_files:
         raise ValueError("inventory file budget exceeded")
     layers = Path(source_layers_dir).resolve()
     manifest, source_artifact = _read(layers / "index.json", 32_000_000)
@@ -322,28 +431,42 @@ def compose_program(inventory_path: str | Path, source_layers_dir: str | Path,
     source_rows = {row["source_path"]: row for row in manifest["files"]}
     if len(source_rows) != len(manifest["files"]):
         raise ValueError("duplicate source-layer file")
-    definition_files: dict[str, int] = {}
+    definition_files = {}
     seen_files = set()
-    for index, raw in enumerate(inventory["files"]):
+    denominators = Counter(files=inventory.file_count)
+    for index in range(inventory.file_count):
+        raw = inventory.file(index)
         path = decode(SourceSnapshot, raw["snapshot"]).path
         if path in seen_files:
             raise ValueError("duplicate inventory source path")
         seen_files.add(path)
+        denominators.update({"definitions": len(raw["definitions"]), "coverage_entries": len(raw["coverage"]),
+                             "calls": len(raw["calls"]), "bodies": len(raw["bodies"])})
         for definition in decode(tuple[DefinitionInventory, ...], raw["definitions"]):
-            if definition.id.wire in definition_files:
+            key = (_definition_key(raw["snapshot"], definition.id)
+                   if inventory.partitions is not None else definition.id.wire)
+            if key in definition_files:
                 raise ValueError("duplicate source definition identity")
-            definition_files[definition.id.wire] = index
+            definition_files[key] = index
     rows = []
-    for index, raw in enumerate(inventory["files"]):
+    for index in range(inventory.file_count):
+        raw = inventory.file(index)
         path = raw["snapshot"]["path"]
+        if progress is not None:
+            progress({"stage": "source_file", "status": "BEGIN", "file_index": index, "path": path})
         source_row = source_rows.get(path)
         if source_row is None or source_row.get("status") != "STORED":
             rows.append({"file_index": index, "snapshot": raw["snapshot"], "status": "GAP",
                          "frontiers": [{"kind": "SOURCE_ARCHIVE_UNAVAILABLE", "detail": source_row.get("gap") if source_row else None}],
                          "counts": {}, "bodies": [], "calls": []})
+            if progress is not None:
+                progress({"stage": "source_file", "status": "GAP", "file_index": index, "path": path})
             continue
         view = load_source_layers(layers, path, max_record_bytes=max_record_bytes)
-        rows.append(_compose_file(raw, index, view, definition_files))
+        rows.append(_compose_file(raw, index, view, definition_files, inventory_source=inventory))
+        if progress is not None:
+            progress({"stage": "source_file", "status": "END", "file_index": index,
+                      "path": path, "counts": rows[-1]["counts"]})
     counts, frontier_counts = Counter(), Counter()
     for row in rows:
         counts.update(row["counts"])
@@ -351,19 +474,16 @@ def compose_program(inventory_path: str | Path, source_layers_dir: str | Path,
         for body in row["bodies"]:
             frontier_counts.update(item["kind"] for item in body["frontiers"])
     document = {
-        "schema": "scar.program-composition", "schema_version": 1,
+        "schema": "scar.program-composition", "schema_version": 2 if inventory.partitions is not None else 1,
         "inventory": artifact, "source_layers": {**source_artifact, "directory": str(layers)},
         "files_total": len(rows), "files_indexed": sum(row["status"] != "GAP" for row in rows),
-        "summary": {"inventory_denominators": {
-                        "files": len(inventory["files"]),
-                        "definitions": sum(len(file["definitions"]) for file in inventory["files"]),
-                        "coverage_entries": sum(len(file["coverage"]) for file in inventory["files"]),
-                        "calls": sum(len(file["calls"]) for file in inventory["files"]),
-                        "bodies": sum(len(file["bodies"]) for file in inventory["files"])},
+        "summary": {"inventory_denominators": dict(denominators),
                     "counts": dict(sorted(counts.items())),
                     "frontiers": dict(sorted(frontier_counts.items())), "first_stage_complete": False},
         "files": rows, **_AUTHORITY,
     }
+    if inventory.partitions is not None:
+        document["inventory_format"] = "PARTITIONED"
     payload = _canonical(document)
     if type(max_output_bytes) is not int or max_output_bytes < 1 or len(payload) > max_output_bytes:
         raise ValueError("composition output budget exceeded")
@@ -402,14 +522,26 @@ class CompositionIndex:
         if type(cached_files) is not int or cached_files < 1:
             raise ValueError("cached_files must be positive")
         self.document, _ = _read(Path(index_path), max_input_bytes)
-        if self.document.get("schema") != "scar.program-composition" or self.document.get("schema_version") != 1:
+        if self.document.get("schema") != "scar.program-composition" or self.document.get("schema_version") not in (1, 2):
             raise ValueError("unsupported composition index")
         for key, value in _AUTHORITY.items():
             if self.document.get(key) is not value:
                 raise ValueError("composition index overstates its authority")
-        self.inventory, receipt = _read(Path(self.document["inventory"]["path"]), max_input_bytes)
-        if receipt != self.document["inventory"]:
+        self._inventory = _InventorySource(self.document["inventory"]["path"],
+            max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
+        if self._inventory.receipt != self.document["inventory"]:
             raise ValueError("inventory differs from bound composition input")
+        expected_partitioned = self.document["schema_version"] == 2
+        if expected_partitioned != (self._inventory.partitions is not None):
+            raise ValueError("composition version differs from its explicit inventory storage schema")
+        if expected_partitioned and self.document.get("inventory_format") != "PARTITIONED":
+            raise ValueError("partitioned composition requires its explicit storage format")
+        if self._inventory.file_count != len(self.document["files"]):
+            raise ValueError("composition/inventory source file denominator differs")
+        # Kept for legacy clients only. New clients use the explicit accessors;
+        # a partition reader never masquerades as a giant dict/list document.
+        self.inventory = self._inventory.partitions or self._inventory.document
+        self.partitioned = expected_partitioned
         self.layers = Path(self.document["source_layers"]["directory"])
         _, layer_receipt = _read(self.layers / "index.json", 32_000_000)
         if {**layer_receipt, "directory": str(self.layers)} != self.document["source_layers"]:
@@ -417,6 +549,28 @@ class CompositionIndex:
         self.max_record_bytes, self.cached_files = max_record_bytes, cached_files
         self._views: OrderedDict[int, SourceLayerView] = OrderedDict()
         self._bodies: OrderedDict[tuple[int, int], tuple[ProgramGraph, LoweringMetadata]] = OrderedDict()
+
+    @property
+    def inventory_file_count(self):
+        return self._inventory.file_count
+
+    def inventory_file(self, index):
+        return self._inventory.file(index)
+
+    def inventory_body(self, file_index, body_index):
+        return self._inventory.body(file_index, body_index)
+
+    def inventory_component(self, name):
+        return self._inventory.component(name)
+
+    def inventory_file_locator(self, index, pointer=""):
+        return self._inventory.file_locator(index, pointer)
+
+    def inventory_component_locator(self, name, pointer=""):
+        return self._inventory.component_locator(name, pointer)
+
+    def inventory_body_locators(self, file_index, body_index, graph_document=None):
+        return self._inventory.body_locators(file_index, body_index, graph_document)
 
     def _row(self, index: int) -> dict:
         if type(index) is not int or not 0 <= index < len(self.document["files"]):
@@ -448,10 +602,16 @@ class CompositionIndex:
             raise ValueError("body has an explicit recovery frontier")
         key = file_index, body_index
         if key not in self._bodies:
-            raw = self.inventory["files"][file_index]["bodies"][body_index]
+            raw = self.inventory_body(file_index, body_index)
+            if raw["definition"]["wire"] != attachment["definition"]:
+                raise ValueError("body definition differs from composition reference")
             payload = _canonical(raw["graph"])
             if hashlib.sha256(payload).hexdigest() != attachment["program_canonical_sha256"]:
                 raise ValueError("body graph differs from composition reference")
+            if self.partitioned:
+                locators = self.inventory_body_locators(file_index, body_index, raw["graph"])
+                if any(attachment.get(name) != locator for name, locator in locators.items()):
+                    raise ValueError("body locator/namespace differs from its original source shard and checkpoint")
             self._bodies[key] = (load_graph(payload.decode("utf-8")), decode(LoweringMetadata, raw["metadata"]))
             if len(self._bodies) > self.cached_files * 2:
                 self._bodies.popitem(last=False)
@@ -532,13 +692,17 @@ class CompositionIndex:
             result["record"] = view.semantic.source_atoms[identity]
             groups = [(row["atom_operations"].get(wire, ()), OperationDefinitionID, "corresponding_operations")]
             result["execution_owners"] = row["atom_owners"].get(wire, ())
-            coverage = self.inventory["files"][reference.file_index]["coverage"]
+            coverage = self.inventory_file(reference.file_index)["coverage"]
             result["coverage_records"] = tuple(decode(CoverageEntry, coverage[owner[3]])
                                                 for owner in result["execution_owners"])
-            result["frontiers"].extend({"kind": "COVERAGE_" + item.status.value,
-                "inventory_pointer": f"#/files/{reference.file_index}/coverage/{owner[3]}",
-                "detail": item.reason} for owner, item in zip(result["execution_owners"], result["coverage_records"])
-                if item.status.value != "CONNECTED")
+            for owner, item in zip(result["execution_owners"], result["coverage_records"]):
+                if item.status.value != "CONNECTED":
+                    frontier = {"kind": "COVERAGE_" + item.status.value,
+                        "inventory_pointer": f"#/files/{reference.file_index}/coverage/{owner[3]}" if not self.partitioned else None,
+                        "detail": item.reason}
+                    if self.partitioned:
+                        frontier["inventory_locator"] = self.inventory_file_locator(reference.file_index, f"/coverage/{owner[3]}")
+                    result["frontiers"].append(frontier)
         else:
             raise TypeError("identity has no structural expansion")
         for members, kind, projection in groups:
@@ -575,7 +739,7 @@ class CompositionIndex:
             raise TypeError("source dependency query requires OperationDefinitionID")
         view = self.source(reference.file_index)
         operation = view.semantics.operations.get(identity)
-        calls = decode(tuple[CallInventory, ...], self.inventory["files"][reference.file_index]["calls"])
+        calls = decode(tuple[CallInventory, ...], self.inventory_file(reference.file_index)["calls"])
         nodes = tuple(node for node in view.control.nodes.values() if identity in node.operations)
         node_ids = {node.id for node in nodes}
         canonical = []

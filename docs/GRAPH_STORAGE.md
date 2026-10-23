@@ -113,7 +113,8 @@ artifact/片段，再发布根manifest或提交根快照事务。中断、预算
   本地保留DB，Git保存脚本/固定manifest/DB SHA/查询收据，不提交大型派生库。
 - 动态IR归档：`scar/store/bundle_partitions.py` 直接遍历现有记录，不调用完整
   bundle.to_dict；已有真实CPU原档导入的全部25表786条记录、顺序和chunk收据逐条一致。
-  同一方式对新的完整LeWM物理采集联合导入已启动，尚待最终验收。
+  同一方式对新的完整LeWM物理采集联合导入及独立实档审核已PASS：2,259,781原记录/
+  195chunks；完整模型仍OPEN。成本、校验范围和剩余断口见该实验README。
 - 旧protocol snapshots与旧JSON入口保持兼容；不能宣称所有输出已迁移。
 
 实现接口与边界分别见 [GRAPH_INDEX.md](GRAPH_INDEX.md)、

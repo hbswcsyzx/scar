@@ -52,7 +52,7 @@ def _canonical(value):
                       separators=(",", ":"), allow_nan=False).encode("utf-8")
 
 
-def _read_document(path, schema, maximum):
+def _read_document(path, schema, maximum, *, versions=(1,)):
     path = Path(path)
     _need(not path.is_symlink() and path.is_file() and path.stat().st_size <= maximum,
           "document is missing, unsafe or exceeds its byte bound")
@@ -65,17 +65,18 @@ def _read_document(path, schema, maximum):
     _need(len(payload) <= maximum, "document decoded-byte bound exceeded")
     document = strict_loads(payload.decode("utf-8"))
     _need(type(document) is dict and document.get("schema") == schema
-          and document.get("schema_version") == 1, "unsupported document schema/version")
+          and type(document.get("schema_version")) is int
+          and document["schema_version"] in versions, "unsupported document schema/version")
     return document, ProviderArtifact(str(path.resolve()), hashlib.sha256(payload).hexdigest(),
                                      len(payload), schema)
 
 
-def _plain_receipt(root, declaration, schema, maximum):
+def _plain_receipt(root, declaration, schema, maximum, *, versions=(1,)):
     _need(type(declaration) is dict and type(declaration.get("path")) is str,
           "source artifact declaration is missing")
     _need(Path(declaration["path"]).name == declaration["path"], "source receipt escapes its directory")
     path = root / declaration["path"]
-    document, artifact = _read_document(path, schema, maximum)
+    document, artifact = _read_document(path, schema, maximum, versions=versions)
     _need((artifact.sha256, artifact.size_bytes) == (declaration["raw_sha256"], declaration["raw_bytes"]),
           "source document differs from its exact byte receipt")
     return document, artifact
@@ -101,14 +102,16 @@ def _inputs(source_directory, bridge_path, coordinates, max_bytes):
           and len(coordinates.payload) == coordinates.artifact.size_bytes
           and _canonical(coordinates.report) == coordinates.payload, "coordinate payload is inconsistent")
     root = Path(source_directory).resolve()
-    report, report_artifact = _read_document(root / "report.json", "scar.source-invocations", 16_000_000)
+    report, report_artifact = _read_document(root / "report.json", "scar.source-invocations", 16_000_000,
+                                           versions=(1, 2))
     _need(report.get("current_capture_raw_scan_verified") is True
           and report.get("old_capture_dynamic_facts_used_for_current_run") is False,
           "source report does not bind a completed current-capture raw scan")
     _need(decode(ExecutionRun, report["run"]) == coordinates.run, "source and marker Run declarations differ")
     _need(report.get("transformation_authorized") is False and report.get("first_stage_complete") is False,
           "source input overstates its authority")
-    bindings, binding_artifact = _plain_receipt(root, report["bindings"], "scar.source-invocation-bindings", 32_000_000)
+    bindings, binding_artifact = _plain_receipt(root, report["bindings"], "scar.source-invocation-bindings", 32_000_000,
+        versions=(report["schema_version"],))
     _need(bindings.get("witness_mode") == report["witness_mode"]
           and bindings.get("transformation_authorized") is False, "source binding header differs from its report")
     bridge, bridge_artifact = _read_document(bridge_path, "scar.dispatch-observation-import", max_bytes)
@@ -147,6 +150,181 @@ def _inputs(source_directory, bridge_path, coordinates, max_bytes):
     return root, report, report_artifact, bindings, binding_artifact, bridge, bridge_artifact, artifacts, native, pid, process
 
 
+class _PartitionedSourceScope:
+    """Verify v2 fragments through an explicit original CompositionIndex.
+
+    Cache compact verification results per file/body, not full graphs and not
+    per-marker computations. Locator URIs never become arbitrary open paths.
+    """
+    def __init__(self, composition, report):
+        from scar.analysis.program_composition import CompositionIndex
+        _need(type(composition) is CompositionIndex and composition.partitioned
+              and composition.document["schema_version"] == 2,
+              "source schema2 needs an explicit partitioned CompositionIndex")
+        _need(report["inventory"] == composition.document["inventory"]
+              and report["composition_canonical_sha256"] == hashlib.sha256(_canonical(composition.document)).hexdigest(),
+              "source report differs from the exact composition/inventory receipts")
+        self.composition = composition
+        self.components, self.checked_files, self.checked_bodies = {}, set(), {}
+        self.counts = Counter()
+
+    def _witness(self, locator, component, pattern):
+        if locator is None:
+            return None
+        _need(type(locator) is dict and type(locator.get("pointer")) is str
+              and re.fullmatch(pattern, locator["pointer"]) is not None,
+              "partitioned witness has no supported exact component pointer")
+        suffix = locator["pointer"][len("#/value"):]
+        expected = self.composition.inventory_component_locator(component, suffix)
+        _need(locator == expected, "witness artifact/representation differs from the bound component")
+        if component not in self.components:
+            self.components[component] = self.composition.inventory_component(component)
+        value = self.components[component]
+        for part in suffix.lstrip("/").split("/"):
+            value = value[int(part)] if type(value) is list else value[part]
+        self.counts["witness_locators_verified"] += 1
+        return value
+
+    def _file(self, file_index):
+        _need(type(file_index) is int and 0 <= file_index < self.composition.inventory_file_count,
+              "source element file index is not in the bound inventory")
+        raw = self.composition.inventory_file(file_index)
+        if file_index not in self.checked_files:
+            view = self.composition.source(file_index)
+            _need(raw["snapshot"] == encode(view.snapshot) and raw["context"] == encode(view.context),
+                  "source shard snapshot/context differs from its original source archive")
+            self.checked_files.add(file_index)
+        return raw
+
+    def binding(self, binding):
+        from scar.ir.program.call_edges import CodeCapture, CodeSourceLink, CallLinkStatus
+        from scar.ir.program.call_demand import CallSourceAdmission, CallSourceAdmissionStatus
+        from scar.ir.program.ids import RegionID
+        from scar.ir.v2.ids import OperationDefinitionID
+        _need(type(binding["process_id"]) is int and binding["process_id"] > 0,
+              "source schema2 binding process must be an exact positive PID")
+        _need(all(binding.get(name) is None for name in ("descriptor_witness_pointer",
+                  "code_source_witness_pointer", "admission_pointer"))
+              and binding.get("static_body_witness_pointers") == [],
+              "schema2 cannot substitute monolithic pointers for partitioned locators")
+        for name in ("descriptor_witness_locator", "code_source_witness_locator", "admission_locator",
+                     "static_body_witness_locators", "definition_locator"):
+            _need(name in binding, "source schema2 binding omitted an explicit locator field")
+        capture = decode(CodeCapture, binding["code_capture"]) if binding["code_capture"] is not None else None
+        if capture is not None:
+            _need(capture.process_id == binding["process_id"] and capture.code.key == binding["code"],
+                  "binding capture differs from its actual process/complete code identity")
+        descriptor = self._witness(binding["descriptor_witness_locator"], "call_sources",
+                                  r"#/value/model/codes/(0|[1-9][0-9]*)/code")
+        if binding["complete_descriptor_match"] is True:
+            _need(capture is not None and descriptor == encode(capture.code),
+                  "complete descriptor match has no identical original descriptor witness")
+        else:
+            _need(binding["complete_descriptor_match"] is False and descriptor is None,
+                  "unmatched descriptor cannot retain a verified descriptor locator")
+        link_document = self._witness(binding["code_source_witness_locator"], "call_sources",
+                                     r"#/value/model/code_links/(0|[1-9][0-9]*)")
+        link = decode(CodeSourceLink, link_document) if link_document is not None else None
+        if link is not None:
+            _need(link.code == binding["code"], "source witness belongs to a different complete code key")
+        if binding["snapshot"] is not None:
+            _need(link is not None and link.status is CallLinkStatus.VERIFIED
+                  and binding["snapshot"] == encode(link.snapshot),
+                  "binding snapshot has no matching original verified code/source witness")
+        admission_document = self._witness(binding["admission_locator"], "call_source_scope",
+                                         r"#/value/admissions/(0|[1-9][0-9]*)")
+        admissions = []
+        if admission_document is not None:
+            _need(binding["witness_mode"] == "same_capture", "dynamic admission used outside its declared same-capture mode")
+            admission = decode(CallSourceAdmission, admission_document)
+            _need(admission.origin.process_id == binding["process_id"]
+                  and admission.origin.code == binding["code"], "admission belongs to another process/code")
+            admissions.append(admission)
+        _need(type(binding["static_body_witness_locators"]) is list,
+              "static body witness locators must remain an ordered list")
+        for locator in binding["static_body_witness_locators"]:
+            _need(binding["witness_mode"] == "reused_code", "old static witness used as a current dynamic fact")
+            item = decode(CallSourceAdmission, self._witness(locator, "call_source_scope",
+                          r"#/value/admissions/(0|[1-9][0-9]*)"))
+            _need(item.origin.code == binding["code"], "static body witness has a different complete code identity")
+            admissions.append(item)
+        definition, body = binding["definition"], binding["body"]
+        if definition is None:
+            _need(binding["definition_locator"] is None and body is None and binding["source"] is None,
+                  "unresolved source definition cannot retain a body/definition locator")
+            self.counts["bindings_without_definition"] += 1
+            return
+        _need(link is not None and link.status is CallLinkStatus.VERIFIED
+              and binding["complete_descriptor_match"] is True and capture is not None
+              and binding["snapshot"] == encode(link.snapshot) and binding["source"] == encode(link.source),
+              "source definition lacks the exact descriptor/source/snapshot witness")
+        _need(type(definition) is dict and set(definition) == {"file_index", "identity", "body_index"}
+              and definition["body_index"] is None,
+              "definition reference is not a source-qualified original element")
+        definition_id = decode(OperationDefinitionID, definition["identity"])
+        _need(definition_id == link.definition, "definition identity differs from the exact source witness")
+        raw_file = self._file(definition["file_index"])
+        _need(raw_file["snapshot"] == binding["snapshot"] and capture.code.filename == raw_file["snapshot"]["path"],
+              "definition source snapshot differs from its captured code/source archive")
+        found = [i for i, item in enumerate(raw_file["definitions"]) if item["id"] == definition["identity"]]
+        _need(len(found) == 1 and raw_file["definitions"][found[0]]["source"] == binding["source"],
+              "definition ID/source does not identify one original source-shard record")
+        _need(binding["definition_locator"] == self.composition.inventory_file_locator(
+              definition["file_index"], f"/definitions/{found[0]}"),
+              "definition locator is not its exact original shard/record")
+        for admission in admissions:
+            if admission.status not in (CallSourceAdmissionStatus.UNAVAILABLE, CallSourceAdmissionStatus.MISMATCH):
+                _need(encode(admission.snapshot) == binding["snapshot"]
+                      and admission.definition == definition_id and encode(admission.source) == binding["source"],
+                      "source admission contradicts the source-qualified definition")
+        self.counts["definitions_verified"] += 1
+        if body is None:
+            return
+        ref = body["reference"]
+        _need(type(ref) is dict and set(ref) == {"file_index", "identity", "body_index"}
+              and type(ref["file_index"]) is int
+              and ref["file_index"] == definition["file_index"]
+              and type(ref["body_index"]) is int and ref["body_index"] >= 0
+              and body.get("inventory_pointer") is None,
+              "body reference lacks exact source/body qualification")
+        region = decode(RegionID, ref["identity"])
+        key = ref["file_index"], ref["body_index"]
+        if key not in self.checked_bodies:
+            raw_body = self.composition.inventory_body(*key)
+            graph, metadata = self.composition.typed_body(*key)
+            locators = self.composition.inventory_body_locators(*key, raw_body["graph"])
+            checkpoint_ref = raw_file["bodies"][ref["body_index"]]["checkpoint"]
+            checkpoint = self.composition.inventory.checkpoint(checkpoint_ref)
+            namespace = locators["namespace"]
+            _need(raw_body["definition"] == definition["identity"] and graph.root == region
+                  and encode(metadata.source) == binding["snapshot"]
+                  and namespace["body"]["definition"] == definition["identity"]
+                  and namespace["body"]["entry"] == metadata.entry
+                  and namespace["body"]["source"] == (checkpoint["structured"]["source"]
+                      if checkpoint["structured"] is not None else None),
+                  "body root/definition/metadata/namespace differs from its original checkpoint")
+            expected_fields = {"canonical_locator": locators["graph_locator"],
+                "inventory_locator": locators["inventory_locator"], "metadata_locator": locators["metadata_locator"],
+                "namespace": namespace, "program_schema_version": raw_body["graph"]["schema_version"],
+                "program_canonical_sha256": self.composition.document["files"][key[0]]["bodies"][key[1]]["program_canonical_sha256"],
+                "reference": ref}
+            self.checked_bodies[key] = {"fields": expected_fields, "definition": definition["identity"]}
+        expected = self.checked_bodies[key]
+        _need(expected["definition"] == definition["identity"]
+              and all(body.get(name) == value for name, value in expected["fields"].items()),
+              "body locator/hash/schema/namespace differs from its verified original body")
+        _need(any(admission.status is CallSourceAdmissionStatus.CORE_LINKED
+                  and admission.core_region == region for admission in admissions),
+              "canonical body has no matching exact source admission")
+        self.counts["body_bindings_verified"] += 1
+
+    def audit(self):
+        return {"partitioned_locators_verified": True, "unique_source_files_verified": len(self.checked_files),
+            "unique_bodies_verified": len(self.checked_bodies), **dict(self.counts),
+            "source_recompiled": False, "canonical_graphs_copied": False,
+            "definition_scope": "exact original snapshot/context + DefinitionID; not path/line matching"}
+
+
 def _load_invocations(root, report, bindings, artifacts, coordinates, pid, process, wanted, maximum, max_rows):
     declaration = report["invocations"]
     _need(declaration["path"] == "invocations.jsonl.gz", "unsupported invocation artifact path")
@@ -158,8 +336,9 @@ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, proce
         _need(binding["binding_index"] == index, "source binding table index differs")
     digest, size, count, selected, identities = hashlib.sha256(), 0, 0, {}, set()
     statuses, activation_count = Counter(), 0
+    version = report["schema_version"]
     source_artifact = ProviderArtifact(str(path), declaration["raw_sha256"], declaration["raw_bytes"],
-                                       "scar.source-invocations.events.v1")
+                                       "scar.source-invocations.events.v" + str(version))
     with gzip.open(path, "rb") as stream:
         for line, raw in enumerate(stream, 1):
             _need(len(raw) <= 2_000_000, "invocation row exceeds its fixed line bound")
@@ -184,10 +363,26 @@ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, proce
                   and point.source == raw_source and point.source.locator == "#/lines/" + str(anchor.line_number),
                   "invocation raw source or common execution coordinate differs")
             activation = decode(RegionActivation, row["region_activation"]) if row["region_activation"] is not None else None
+            if version == 2:
+                namespace = binding["body"]["namespace"] if binding["body"] is not None else None
+                _need("region_namespace" in row and row["region_namespace"] == namespace,
+                      "invocation region namespace differs from its verified source body")
+                host_thread = coordinates.thread_for(artifacts["calls"], invocation.thread_id, "python_ident")
+                _need(row["host_thread"] == (encode(host_thread) if host_thread is not None else None),
+                      "source invocation Python thread differs from exact call-artifact coordinates")
+                _need(type(row["suspended"]) is bool and (activation is not None)
+                      == (binding["body"] is not None and not row["suspended"]),
+                      "suspended frame or absent body cannot acquire a new region activation")
             if activation is not None:
                 _need(binding["body"] is not None and activation.region.as_dict() == binding["body"]["reference"]["identity"]
                       and activation.process == process.id and activation.entry == point,
                       "source region activation differs from its original body/entry")
+                if version == 2:
+                    expected_id = coordinates.run.id.value + ":source-frame:" + hashlib.sha256(_canonical({
+                        "process": encode(point.process), "invocation": encode(invocation),
+                        "entry": encode(point.source)})).hexdigest()
+                    _need(activation.id.value == expected_id,
+                          "region activation identity does not bind this exact original invocation/entry")
                 activation_count += 1
             statuses[row["status"]] += 1
             if invocation in wanted:
@@ -195,6 +390,8 @@ def _load_invocations(root, report, bindings, artifacts, coordinates, pid, proce
                     "code": row["code"], "binding_index": index, "activation": activation,
                     "anchor": anchor, "status": row["status"], "frontiers": row["frontiers"],
                     "suspended": row["suspended"]}
+                if version == 2:
+                    selected[invocation]["region_namespace"] = row["region_namespace"]
     _need((digest.hexdigest(), size, count) == (declaration["raw_sha256"], declaration["raw_bytes"], declaration["rows"]),
           "complete invocation raw SHA/bytes/row receipt differs")
     _need(count == report["summary"]["invocations"] and dict(statuses) == report["summary"]["invocation_statuses"],
@@ -211,7 +408,8 @@ def _write_gzip(path, payload):
 
 
 def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_dir,
-                          *, max_input_bytes=1_000_000_000, max_observations=400_000):
+                          *, max_input_bytes=1_000_000_000, max_observations=400_000,
+                          composition_index=None):
     """Verify compact inputs and reference every original production observation."""
     _need(type(max_input_bytes) is int and max_input_bytes > 0
           and type(max_observations) is int and max_observations > 0, "invalid input budgets")
@@ -219,6 +417,14 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
     _need(not output.exists(), "output directory already exists")
     (root, source_report, report_artifact, bindings, binding_artifact, bridge, bridge_artifact,
      artifacts, native, pid, process) = _inputs(source_directory, dispatch_bridge, coordinates, max_input_bytes)
+    version = source_report["schema_version"]
+    source_scope = None
+    if version == 2:
+        source_scope = _PartitionedSourceScope(composition_index, source_report)
+        for index, binding in enumerate(bindings["bindings"]):
+            _need(type(binding["binding_index"]) is int and binding["binding_index"] == index,
+                  "source schema2 binding table ordinal differs")
+            source_scope.binding(binding)
     observations = bridge["observations"]
     _need(type(observations) is list and len(observations) <= max_observations
           and len(observations) == bridge["marker_nodes"], "marker observation denominator/budget differs")
@@ -270,6 +476,8 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
                            "native_thread": None, "native_thread_reference": None,
                            "qualified_slot_path_indices": slot_indices[observation["marker_instance"]],
                            "frontiers": missing, "status": "UNRESOLVED"}
+                    if version == 2:
+                        row["region_namespace"] = None
                     if observation["native_tid_verified"] is True:
                         thread = coordinates.thread_for(native["kineto"], observation["native_tid"], "linux_native_tid")
                         if type(thread) is HostThreadInstance:
@@ -302,6 +510,8 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
                                 "#/bindings/" + str(source["binding_index"])))
                             row["source_invocation_line_sha256"] = source["line_sha256"]
                             row["definition"], row["body"] = binding["definition"], binding["body"]
+                            if version == 2:
+                                row["region_namespace"] = source["region_namespace"]
                             row["status"] = "RETAINED_INVOCATION_LINKED"
                             if binding["definition"] is None:
                                 missing.append("SOURCE_DEFINITION_UNAVAILABLE")
@@ -336,7 +546,7 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
         index_payload = _canonical({"schema": "scar.dispatch-source-index", "schema_version": 1,
                                     "markers": marker_index})
         _write_gzip(stage / "marker-index.json.gz", index_payload)
-        report = {"schema": "scar.dispatch-source-associations", "schema_version": 1,
+        report = {"schema": "scar.dispatch-source-associations", "schema_version": version,
             "scope": "original production marker to retained source invocation references",
             "run": encode(coordinates.run), "process": encode(process),
             "coordinate_binding": encode(coordinates.artifact),
@@ -360,6 +570,8 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
                 "retained ancestry does not establish a direct Python/ATen call or a global Python-ident/native-TID equality",
                 "unqualified payload leaves remain upstream gaps; compact bridge does not carry their individual raw descriptions"],
             **_AUTHORITY}
+        if source_scope is not None:
+            report["partitioned_source_scope_audit"] = source_scope.audit()
         (stage / "report.json").write_bytes(_canonical(report))
         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
         output.mkdir(exist_ok=False)
@@ -371,7 +583,8 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
 def query_dispatch_source(output_directory, marker_instance):
     """Resolve one marker's original references; verify the selected output row."""
     root = Path(output_directory)
-    report, _ = _read_document(root / "report.json", "scar.dispatch-source-associations", 16_000_000)
+    report, _ = _read_document(root / "report.json", "scar.dispatch-source-associations", 16_000_000,
+                              versions=(1, 2))
     declaration = report["index"]
     index, artifact = _read_document(root / declaration["path"], "scar.dispatch-source-index", 64_000_000)
     _need((artifact.sha256, artifact.size_bytes) == (declaration["raw_sha256"], declaration["raw_bytes"]),

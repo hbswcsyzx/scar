@@ -49,11 +49,12 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | 联合运行坐标及资源导入 | 5 进程、252 线程；24,082 条 runtime→GPU 对应；74,574 条内存记录 | 未恢复的 OS 共享/继承、ready 与使用者仍 OPEN |
 | 原档逐槽审核 | 79,592 个 marker、109,288 个 Tensor 引用槽均保留 | 保留 480 个祖先缺失、383 个未资格化叶，不能计作直接 Python→ATen 调用 |
 | 版本匹配 ATen schema 适配 | 100 schemas、481 形式端口，467,756 个 Tensor 槽接形式端口 | 175,022 个无 schema；effects 均 PARTIAL；不证明纯性或逻辑内容相等 |
-| 源码图组合与实际调用绑定 | 已有151文件原source图可查询；正在正规CompositionIndex接新分片inventory | 旧54 body绑定不是新840图的验收，不能混加；不是完整 ProgramSnapshot |
+| 分片源码图组合与实际调用绑定 | 151文件/840原body正规组合及same_capture绑定PASS；100,438调用中5,624 body-linked、3,162 source-only | 91,652调用在本次项目composition仍unresolved；外部源码需正式接入；不是完整 ProgramSnapshot |
+| 分片源码与marker连接 | 79,592 markers/109,288原slot引用全部保留；10,992条body/activation/namespace关联、17,456 source-only | retained ancestor不是direct call；50,664条仅invocation、480条无ancestor；actual/formal/state未闭合 |
 | 更大范围源码归档 | 分片恢复exit0；151文件/2217定义，840原图、787 UNSUPPORTED、590 NOT_ATTEMPTED | 原256MB单JSON失败保留；新归档发布不消除未支持语言与接口缺口 |
 | 外部依赖源码准入及精确增量 | 106需求文件全部有snapshot/三图；243 groups/86,702次调用有完整代码来源匹配；增量及独立审核PASS | 仅补27文件、继承原199 witnesses；803次非文件名与14次current source drift保留；不是body/effect完整性 |
 | 同次Tensor物理证据采集与导入 | 新完整LeWM episode成功；79,592 markers、109,288槽，108,682槽接物理epoch | 606槽为带provider ID但无storage pointer的空CPU Tensor；逻辑内容/ready与空表示接口仍OPEN |
-| IR分块存储与查询索引 | 真实CPU原档786条原记录分块往返PASS；源码SQLite首次实际建库/局部查询PASS；新LeWM联合导入进行中 | 42,767条endpoint引用未语义索引；SQLite不是第二个可写IR来源，不代表完整模型通过 |
+| IR分块存储与查询索引 | CPU原档逐条往返PASS；源码SQLite建库/局部查询PASS；完整LeWM联合导入及实档审核PASS，2,259,781记录/195chunks | 42,767条endpoint引用未语义索引；SQLite不是第二个可写IR来源，不代表完整模型通过 |
 
 详细依据分别在 `artifacts/experiments/first_stage_lewm_dispatch_20261023`、
 `first_stage_joined_dispatch_20261023`、`first_stage_native_schema_20261023`、
@@ -66,10 +67,10 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 
 | 顺序 | 本次具体任务 | 自验收条件 |
 | --- | --- | --- |
-| A | 分片恢复已PASS；复用原151文件source archives组合并绑定同次capture | 151/151 snapshot与完整context已匹配；正规CompositionIndex按需读取新840原图，输出真实CP/source locator；不重prepare，不与旧54相加 |
+| A | 分片恢复、151文件/840原body组合、同272038 source绑定及marker连接均已PASS | 真实source/CP定位与namespace已核，保留所有未连接分母；没有prepare/重lower/目标重跑，不与旧54相加 |
 | B，与A并行 | 自动准入实际观察到的依赖源码，保留namespace/provider/snapshot/原三图/code witness | 全部entered group仍在分母；相同编译语境的完整descriptor匹配；不以路径归属冒充代码或effect证明 |
-| C，与A/B并行 | 物理采集已完成；联合导入同marker有序Tensor槽、allocation代次及schema，动态IR分块归档 | CPU案例PASS；完整LeWM仍需逐槽及同一capture OS成员核验；TensorMetadata.id、Result*、RF id、TID不可混用，不存在的映射保持OPEN |
-| D | 接已有actual/formal/return/environment路由与原source/body引用，再核状态和资源依赖 | 沿原图而非复制producer；重用声明/引用不能替代实际关系；明确每个断口的来源 |
+| C，与A/B并行 | 完整LeWM物理采集/同capture native+OS导入、schema与分块归档已PASS | 108,682物理槽/37,506epochs实档核验；606空CPU槽、861 OS点process未知，逻辑版本/ready仍OPEN |
+| D | 接外部source attachments与共享限定定义引用；以按需CodeWitness和SourceBodyAccess接已有actual/formal/return/environment；再核状态与资源 | 不伪造inventory file_index；只补实际缺失精确字节码，原路由条件不减；CP/端口/状态原ID与来源不复制 |
 | E | 原命令端到端覆盖报告 | 加载→计算/环境→视频/结束全部必需项无未解释断点；范围与分母固定；S4通过后停止汇报 |
 
 一次完整采集只在需要的新字段已共同确定后进行；不为每个小字段重复跑 LeWM。
@@ -84,8 +85,9 @@ SQLite查询索引已实现并通过真实分片归档构建与局部查询：43
 ## 5. 当前最关键的断口
 
 - 依赖源码：71,368 次旧未绑定调用来自项目边界，70,565 次对应源码实际存在；
-  不是整体不可理解。另有新 code、模块初始化、genexpr/lambda、延迟 annotation
-  需要各自正确的定义与区域接口。
+  不是整体不可理解。现在106外部source已归档并有86,702次代码来源匹配，但尚需
+  经正式共享定义resolver接入现有图。模块初始化、genexpr/lambda、延迟annotation
+  仍需各自正确的定义与区域接口。
 - 跨调用数据：源码 body、调用帧和 native Tensor 引用已有局部连接，但 actual/
   formal、return、function environment 及可变状态必须逐槽接入。
 - 物理表示：allocation 记录不等于 Tensor→allocation 的证明；物理副本不是

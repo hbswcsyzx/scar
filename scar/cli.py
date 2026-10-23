@@ -429,6 +429,7 @@ def main(argv=None) -> int:
     dispatch_sources = sub.add_parser("bind-dispatch-sources", help="join original provider marker contexts to retained Python source invocations")
     dispatch_sources.add_argument("--source-bindings", required=True)
     dispatch_sources.add_argument("--dispatch-bridge", required=True)
+    dispatch_sources.add_argument("--composition", help="original composition index; required for partitioned source bindings")
     dispatch_sources.add_argument("--capture", required=True)
     dispatch_sources.add_argument("--out", required=True)
     dispatch_sources.add_argument("--max-bytes", type=int, default=2000000000)
@@ -805,13 +806,15 @@ def _check_program(args) -> int:
 
 def _bind_dispatch_sources(args) -> int:
     from scar.analysis.dispatch_sources import bind_dispatch_sources
+    from scar.analysis.program_composition import CompositionIndex
     from scar.trace.capture_coordinates import bind_capture_coordinates
     try:
         output = Path(args.out).resolve()
         coordinates = bind_capture_coordinates(args.capture, max_bytes=args.max_bytes, max_lines=args.max_lines,
             profile_uri=str(output / 'capture-coordinates.json'))
         report = bind_dispatch_sources(args.source_bindings, args.dispatch_bridge, coordinates, output,
-            max_input_bytes=args.max_input_bytes, max_observations=args.max_observations)
+            max_input_bytes=args.max_input_bytes, max_observations=args.max_observations,
+            composition_index=CompositionIndex(args.composition) if args.composition else None)
     except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)], "transformation_authorized": False}))
         return 2

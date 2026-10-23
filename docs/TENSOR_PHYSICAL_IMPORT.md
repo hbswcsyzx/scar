@@ -1,6 +1,6 @@
 # 从marker槽到原ValueGraph物理表示
 
-2026-10-23。**Implemented；一次CPU真实原档核验通过，LeWM/OS生产验收待执行。**
+2026-10-23。**Implemented；CPU真实原档及完整LeWM/OS同capture联合导入审核均通过。**
 配合 [TENSOR_PHYSICAL_BRIDGE.md](TENSOR_PHYSICAL_BRIDGE.md)。
 
 公共采集：`scar trace --call-operands --execution-evidence --tensor-physical -- ...`。
@@ -37,3 +37,10 @@ Materialization，不把物理alias当逻辑值相同。原Kineto allocation记�
 nonce/raw SHA、三项源hash链及target-process唯一O_EXCL creation。没有新flag的
 旧捕获仍走原路径。CPU实采无OS收据，因此只验证显式提供原档的一致性；生产
 membership、完整LeWM和全软硬件闭包不从该小案例外推。
+
+实际生产验收位于 `first_stage_joined_physical_20261023`：新369749完整成功capture
+的79,592 markers/109,288 ordered slots中，108,682槽接37,506 provider epochs；
+共同OS成员核验包含全部266artifact。producer公共验证及独立物理表/原report/
+所有输出stored SHA检查PASS。606槽是带provider ID但storage pointer为None的
+空CPU Tensor，未伪造非零allocation。逻辑来源/版本、状态、ready及完整资源闭合
+仍OPEN；不能从这些物理身份直接得出reuse或缓存合法性。
