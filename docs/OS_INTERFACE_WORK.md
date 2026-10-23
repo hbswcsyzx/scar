@@ -1,9 +1,10 @@
 # OS 接口与实际 work：R1 / R2 接线边界
 
-2026-10-23。R1 已实现、仅静态冻结，尚未执行新模式的真实 raw 验收。
+2026-10-23。R1 已实现；唯一369749公共CLI与完整scope审计03实际exit0。
+验收范围是全量字节/record/wire连接及实际结构分支代表codec，未执行全量work codec。
 R2 仅设计，未增加关联类型/codec。完整程序建模仍 OPEN。
 
-静态冻结收据：标准库AST解析PASS，未import/执行新导入模式。模块
+运行前静态冻结收据：标准库AST解析PASS，当时未import/执行新导入模式。模块
 `scar/trace/os_resources.py` 58,928bytes，SHA256
 `c52f45a62693e3e78875b3a23b7c56e0a4cdb48862436981f8d98941a4900c1b`。
 共享store模块仍为原冻结SHA
@@ -189,7 +190,9 @@ poll返回仅是指定条件的就绪观察；metadata结果也依赖外部状�
 接线需原provider证据，不将时间相近、地址相同或retained Python scope变成directcall。
 [poll(2)](https://man7.org/linux/man-pages/man2/poll.2.html)
 
-## 6. 唯一369749旧raw验收计划（尚未执行）
+## 6. 运行前冻结的唯一369749旧raw验收计划（历史）
+
+以下是运行前冻结计划；实际执行与范围纠偏记录见第7节。
 
 静态冻结后经授权执行一次现存raw离线导入/分表导出，不重跑target/GPU/采集：
 
@@ -202,3 +205,82 @@ poll返回仅是指定条件的就绪观察；metadata结果也依赖外部状�
    VM关系、未定process仍OPEN。预算、time/RSS/disk与producer/module SHA一并保存。
 
 PUBLISHED仅表示本次原record transport写完，不能据此宣布第一阶段完整或授权优化。
+
+## 7. R1 真实验收记录
+
+实验：`artifacts/experiments/first_stage_os_interface_work_20261023/`。
+公共CLI只运行一次，启动时revision为`c2578996ccd5d796e8f913d17ddaa3ed83a8f304`，
+配合producer.json保存的工作区patch与冻结module SHA；运行期间HEAD提交不改变原producer。
+没有目标执行、GPU、native重导、OS重导重跑或源码prepare。
+
+| 真实表/范围 | 数量 |
+| --- | ---: |
+| 原OS物理行 / artifacts | 1,067,773 / 253 |
+| 实际接口observations / submissions | 各1,067,768 |
+| 旧FD子集 / 旧outside子集 | 915,204 / 152,564（40类全部保留） |
+| 实际接口名称 / 类别 | 54 / 8 |
+| 普通return outcomes | 1,067,539 |
+| 非普通return | exec成功7、exit请求217、未恢复return5 |
+| OFD / HandleBinding / lifetime | 12,683 / 12,684 / 12,683 |
+| 新producer ports | 35（13pipe2×2 + 5eventfd2 + 4epoll_create1） |
+| process / thread records | 5 / 252 |
+
+5条未恢复return来自poll3、epoll_wait2，保持原未知token与无普通outcome，不能补成0。
+新producer端口比旧profile增加35个独立OFD/binding；原已观察handle end由570变573、
+接到私有表的IO由1064变1065，不表示共享表或全部IO已闭合。
+
+11表共**4,309,455 records / 681 chunks**，decoded **10,778,976,676bytes**，
+stored **260,737,882bytes**。manifest为316,803bytes，SHA256
+`cbc6dcfd78ccca0961bdabecce94bc747b7b281fdbc3f49228c8b52b9b3aec14`。
+原chunk保持本机，不复制/重压缩成另一个完整bundle。
+
+audit03完整消费全部11表，经公共reader核每个完整chunk的两层SHA/size/line/ordinal/count；
+所有work逐条核原ID、receipt、Run、process/native thread、UNKNOWN字段及普通outcome
+一对一关系。现有Work类型/codec未修改，公共codec缩为实际101结构分支的代表：
+101个submission、94个outcome roundtrip，含每种syscall/family、已知/未定process/thread、
+outcome kind和非普通return。没有将代表解码写成全2.13M work codec PASS。
+`full_execution_model_semantics`明确为OPEN。
+
+### 7.1 未定actor与审计历史
+
+唯一没有process membership的artifact是原collector/context actor369747。该文件不是
+缺失输入：精确archive logical/local URI、decoded SHA/bytes与coords.seed.target_birth
+指向同一原档；coordinates.open明确列actor未接target ancestry。原process/thread
+记录没有该actor，保None。所有OS/membership的`(hash,bytes)`重复组实查为0。
+
+因此完整接口观察的process未定分母为3340，旧FD子集为1194；两者不是旧其他OS点
+统计中的861。审计没有将这些值改写成目标process，也没有以PID/文件名猜归属。
+
+- audit01：36.74秒后在“每个artifact必有membership”的过强断言失败。原失败代码、
+  producer、time和日志保留，独立diagnosis说明原档已验证但actor未归属。
+- audit02：按精确archive+显式actor前沿修正独立续验，已全codec核140,000个submission /
+  139,997个outcome前缀；因验证未改codec的百万次重复成本过高，经明确指示SIGINT停止，
+  exit130。保cmdline核验、stop receipt和全部日志；它不是完整PASS。
+- audit03：只读同一681chunks，完整scope wire/byte核验与代表codec，exit0。没有重跑
+  22分钟公共CLI，没有修改R1 producer或IR。
+
+### 7.2 gap计数与运行成本
+
+原已发布metadata仅有界读取前90,892decoded bytes中的gaps字段，并独立核其整个
+13MB stored文件SHA；没有再导入原OS。比较收据见`gap-comparison.json`。
+
+| gap | 原groups / occurrences | 新groups / occurrences |
+| --- | ---: | ---: |
+| fd_argument_open | 1 / 25 | 0 / 0 |
+| fd_binding_open | 31 / 898,818 | 29 / 898,814 |
+| exec_inheritance_open | 6 / 7 | 6 / 7 |
+| dup_source_open | 7 / 20 | 7 / 20 |
+| fd_table_identity_open | 4 / 247 | 4 / 247 |
+| canonical_os_bridge_open | 1 / 1 | 1 / 1 |
+| 合计 | 50 / 899,118 | 47 / 899,089 |
+
+25条failedexec已逐条验证不再进入FD参数路径；另外4条绑定来自实际FD producer接线。
+仍有898,814次FD绑定前沿，不能将profile覆盖当资源依赖全部恢复。
+
+公共CLI wall **22:01.83**，user1307.48秒，peakRSS **4,285,356KiB**；audit03 wall
+**4:30.61**，user268.43秒，peakRSS **800,140KiB**。R1扫描仍持有calls/observations，
+有界的是逐条work导出与chunk读取，不能把整个importer称为恒定内存。上述为离线
+建模/核验成本，不是LeWM运行时间或加速比。
+
+R2限定关联/ancestor补全的后续设计见[OS_RESOURCE_ASSOCIATIONS_R2.md](OS_RESOURCE_ASSOCIATIONS_R2.md)，
+尚未实现。source/native/effect/state、共享FD/VM和完整程序模型仍OPEN。

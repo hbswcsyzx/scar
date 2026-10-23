@@ -49,8 +49,9 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | 联合运行坐标及资源导入 | 5 进程、252 线程；24,082 条 runtime→GPU 对应；74,574 条内存记录 | 未恢复的 OS 共享/继承、ready 与使用者仍 OPEN |
 | 原档逐槽审核 | 79,592 个 marker、109,288 个 Tensor 引用槽均保留 | 保留 480 个祖先缺失、383 个未资格化叶，不能计作直接 Python→ATen 调用 |
 | 版本匹配 ATen schema 适配 | 100 schemas、481 形式端口，467,756 个 Tensor 槽接形式端口 | 175,022 个无 schema；effects 均 PARTIAL；不证明纯性或逻辑内容相等 |
-| 分片源码图组合与实际调用绑定 | 151文件/840原body正规组合及same_capture绑定PASS；100,438调用中5,624 body-linked、3,162 source-only | 91,652调用在本次项目composition仍unresolved；外部源码需正式接入；不是完整 ProgramSnapshot |
-| 分片源码与marker连接 | 79,592 markers/109,288原slot引用全部保留；10,992条body/activation/namespace关联、17,456 source-only | retained ancestor不是direct call；50,664条仅invocation、480条无ancestor；actual/formal/state未闭合 |
+| 分片源码图组合与实际调用绑定 | 151文件/840原body组合及外部source attachments正规连接PASS；100,438调用中5,624 body-linked、89,864 source-only、4,950 unresolved | 外部86,702次只接原定义，不伪造body/activation；803非file、14旧源码guard false保留；不是完整 ProgramSnapshot |
+| 分片源码与marker连接 | 79,592 markers/109,288原slot全部保留；79,106条有准确source definition，10,992条body/activation/namespace关联 | 50,658条外部source-only，另有6条仅invocation、480条无ancestor；retained ancestor不是direct call；状态/效果仍未闭合 |
+| 原参数、返回及环境路由接回 | 817groups/100,438调用、312,812operand与16,403env events守恒；13,872入口参数occurrences、27actual/formal与27completion条件路由、5,173返回root；3,347entry的10,087env ports | 全部只是带原条件的引用/端口连接；100,523条route问题、6,694未定defaults保留；不证明内容、状态、world等价 |
 | 更大范围源码归档 | 分片恢复exit0；151文件/2217定义，840原图、787 UNSUPPORTED、590 NOT_ATTEMPTED | 原256MB单JSON失败保留；新归档发布不消除未支持语言与接口缺口 |
 | 外部依赖源码准入及精确增量 | 106需求文件全部有snapshot/三图；243 groups/86,702次调用有完整代码来源匹配；增量及独立审核PASS | 仅补27文件、继承原199 witnesses；803次非文件名与14次current source drift保留；不是body/effect完整性 |
 | 原source/body缺口按实际调用投影 | 原817groups/100,438calls逐项守恒；74body-linked、91source-only UNSUPPORTED、260source-only NOT_ATTEMPTED | 只是已保存metadata投影；不是canonical graph重验或新语言协议支持 |
@@ -71,7 +72,7 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | A | 分片恢复、151文件/840原body组合、同272038 source绑定及marker连接均已PASS | 真实source/CP定位与namespace已核，保留所有未连接分母；没有prepare/重lower/目标重跑，不与旧54相加 |
 | B，与A并行 | 自动准入实际观察到的依赖源码，保留namespace/provider/snapshot/原三图/code witness | 全部entered group仍在分母；相同编译语境的完整descriptor匹配；不以路径归属冒充代码或effect证明 |
 | C，与A/B并行 | 完整LeWM物理采集/同capture native+OS导入、schema与分块归档已PASS | 108,682物理槽/37,506epochs实档核验；606空CPU槽、861 OS点process未知，逻辑版本/ready仍OPEN |
-| D | 接外部source attachments与共享限定定义引用；以按需CodeWitness和SourceBodyAccess接已有actual/formal/return/environment；再核状态与资源 | 不伪造inventory file_index；只补实际缺失精确字节码，原路由条件不减；CP/端口/状态原ID与来源不复制 |
+| D | 外部source attachments/common resolver与旧272038的原参数/返回/environment接入已PASS；继续同369749源码、状态及资源连接 | 106外部图恰一次/源绑定1355.11s，source→marker433.90s；20键字节码复用attempt编译0，路由2.04s；原条件与缺口仍保留 |
 | E | 原命令端到端覆盖报告 | 加载→计算/环境→视频/结束全部必需项无未解释断点；范围与分母固定；S4通过后停止汇报 |
 
 一次完整采集只在需要的新字段已共同确定后进行；不为每个小字段重复跑 LeWM。
@@ -106,17 +107,29 @@ SQLite查询索引已实现并通过真实分片归档构建与局部查询：43
 
 因此第一阶段仍 OPEN。其后的化简、修改指导和成本选择均不在本轮执行范围。
 
-## 6. 当前已经启动但尚未验收的连接
+## 6. 本轮连接的实际验收状态
 
-以下只能记Implemented/Running，不能并入第3节Verified结果：
+各门独立验收，不能把其中一门PASS解释成第一阶段完成：
 
-1. `first_stage_source_attachments_20261023`：原272038的106份依赖源码经共同限定
-   定义resolver接source bindings与marker；保留historical compiler proof与guard差异。
-2. `first_stage_partitioned_operand_routes_20261023`：相同272038的原frame/operand/
-   environment读入，按需求最多20个编译键，接回既有严格actual/formal/return算法。
+1. `first_stage_source_attachments_20261023/attempt02`：原272038的106份依赖源码经
+   共同限定定义resolver接source bindings与marker，PASS；保留historical compiler
+   proof与guard差异。原attempt01在runner输入路径处退出，未运行源码连接，失败保留。
+2. `first_stage_partitioned_operand_routes_20261023`首轮完成20键编译及原74body读取，
+   在原issue线性去重处耗764.42s仍未完，被明确中止；SIGINT原栈确认在成员比较。
+   4行保序set索引修正后，`first_stage_partitioned_operand_routes_attempt02_20261023`
+   只读复用原字节码，原分母守恒、完整连接/归档PASS；routes2.04s、整体time5:26.17、
+   peakRSS1,833,420KiB。不是LeWM性能A/B，不能将中止耗时算成精确目标加速比。
 3. `first_stage_os_interface_work_20261023`：369749的全部原OS记录通过公共CLI导入，
    原152,564条旧FD子集外接口有work记录，新增typed work以bounded chunks保存；
-   共享FD-table、VM、source/native effects和ready仍须独立连接。
+   CLI exit0/PUBLISHED：4,309,455 records/681chunks，10,778,976,676decoded bytes、
+   260,737,882stored bytes。audit03已exit0：全部chunk/row/count及全部work原点/身份/
+   Run/process/thread/UNKNOWN wire关联核过；实际101结构分支的101submission/
+   94outcome代表codec通过。全ExecutionModel语义仍OPEN；共享FD-table、VM、
+   source/native effects和ready仍须独立连接。
+
+路由的独立端口归档审核另以2.64s核全部141个report chunks和74原CP收据，并核
+13,872入口参数、27+27路由和10,087env端口的原ID/namespace/端口归属；不重prepare、
+compile、扫描raw或执行全report codec。失败和修正日志保留，未修改原连接产物。
 
 实现与每次运行保存独立producer、原输入SHA、脚本、time/RSS、失败和验收报告。
 新模式没有执行新LeWM episode、优化、detector/backend或全仓测试套件。

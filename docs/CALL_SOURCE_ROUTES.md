@@ -1,6 +1,6 @@
 # 原 source/body 分片接入参数、返回与环境路由
 
-2026-10-23。状态：**Implemented；仅完成 AST 与源审查，实档验收尚未执行。**
+2026-10-23。状态：**Verified：原272038的实档接线与分表归档完成；完整模型仍OPEN。**
 本项接回已有能力，不增加 detector/backend，不执行目标，不宣称第一阶段完整。
 
 ## 1. 补什么
@@ -140,7 +140,7 @@ rebuilt = CallOperandReport.from_dict(
 不消费 report 声称的 route 代替原档核验；重建结果须精确一致。重复 operation、
 多轮 loop、不同 predecessor、挂起 frame 等原 occurrence/control 边界仍拒绝猜接。
 
-## 5. 下一次有界实档验收（未运行）
+## 5. 首次有界实档验收范围与实际结果
 
 固定 272038，输入为已验收的 partitioned composition/source bindings；不混 369749。
 只读已有产物的统计为：74 body-linked code groups 分布在 20 source files，首选
@@ -151,7 +151,24 @@ rebuilt = CallOperandReport.from_dict(
 含 207,248 instructions、100,550 attempts、4,069 handshakes、945 gaps；environment
 16,403 events，含 12,334 dispatches、4,069 entries。所有分母守恒，不预填 route 数。
 
-root 授权后才执行 ONE 实档验收：保存 revision/module SHA、脚本、progress/time/RSS，
-运行已有 reader/model/routes/environment；核每条正连接回到原 CP/端口，以及所有
-拒绝原因和未连接分母。当前只有 AST/源审查，未执行 compile/marshal load、全图读取、
-目标或测试套件。`first_stage_complete` / `transformation_authorized` 仍为 false。
+已保存 revision/module SHA、脚本、progress/time/RSS并执行上述范围：首次完成20键
+compile和74原CP读入后，在既有issue列表线性去重处耗764.42s仍未完成。root明确
+中止自己的分析任务，shell exit130；SIGINT原栈位于该成员比较，原归档未删除。
+
+修正只增加保序set成员索引，全部路由条件保持。独立attempt02只读复用20个源文本/
+marshal模块，compile0/current-source-read0，完整descriptor匹配224次；74CP保持原
+namespace。100,438调用、312,812operand与16,403env events全部守恒。
+
+实际输出：13,872入口参数occurrences，27条argument与27条completion条件路由，
+5,173 invocation return roots；3,347entries接10,087env ports。100,523 route issues
+（96,481 handshake、3,294 source/core、748 dispatch）与6,694未定defaults保留。
+这不证明完整的function environment、内容、状态、effects或world等价。
+
+routes阶段2.04s，整体time5:26.17、peakRSS1,833,420KiB；序列化5.73s后按原表分块，
+没有再保存一份99,289,131bytes完整report JSON。原文档canonical SHA为
+`0197eff9d76e8673efd1ef639eab5d1b61e70fcb2aab4eae02d0d02fbaea3abd`。
+这属于SCAR自身吞吐修正，不能报LeWM加速比。
+
+记录在`first_stage_partitioned_operand_routes_20261023`（原中止及CodeWitness）和
+`first_stage_partitioned_operand_routes_attempt02_20261023`。本次未新执行目标或测试
+套件。`first_stage_complete` / `transformation_authorized` 仍为 false。

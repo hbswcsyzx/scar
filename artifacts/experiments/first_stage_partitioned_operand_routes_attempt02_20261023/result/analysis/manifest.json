@@ -1,0 +1,1211 @@
+{
+  "canonical_document_bytes": 99289131,
+  "canonical_document_sha256": "0197eff9d76e8673efd1ef639eab5d1b61e70fcb2aab4eae02d0d02fbaea3abd",
+  "canonical_graphs_copied": false,
+  "header": {
+    "bytes": 116195,
+    "decoded_bytes": 844914,
+    "decoded_sha256": "0bc14ba5196900494a0adc1fa334dd0b1c4f78146cec699673f5975fca4f2d96",
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/header.json.gz",
+    "sha256": "5547e3738d6e4ff6b1cc0bf298bb58b5fefb652dabf592a8fea7f6314c64f460"
+  },
+  "max_rows_per_shard": 1000,
+  "max_shard_decoded_bytes": 16000000,
+  "original_schema": "scar.call-operand-links",
+  "original_schema_version": 2,
+  "schema": "scar.partitioned-call-operand-links",
+  "schema_version": 1,
+  "table_pointer_rule": "dot-separated table names replace that original JSON array; header holds all other fields",
+  "tables": {
+    "code_links": {
+      "chunks": [
+        {
+          "bytes": 69455,
+          "decoded_bytes": 508906,
+          "decoded_sha256": "3e9674f29a8f9a9017e40ca7ff1e725fbfcf7b74be859002b5fd412188f1b567",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/code_links.0000.jsonl.gz",
+          "rows": 855,
+          "sha256": "3983a2233e49e616fc832df34450700c0a17013261a438aa6629bb0f632eb387"
+        }
+      ],
+      "rows": 855
+    },
+    "entry_parameters": {
+      "chunks": [
+        {
+          "bytes": 57895,
+          "decoded_bytes": 1024493,
+          "decoded_sha256": "7377ebed436efd3391dcc1e74f44c3a3e884309b8a0a3cc0584549739525f495",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "74e2ba7cd61ba241ca23ecf80d27292172e6c69916cf39719d71f306af594f2a"
+        },
+        {
+          "bytes": 47475,
+          "decoded_bytes": 1027521,
+          "decoded_sha256": "9cd2d17359ee61c91c4daebf419ffbd8d15bd465d1c4b6c757e56fe4f38e2b3f",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "0b41e04276a06ad2abb6bc922247a23e8aba06c5d90f008ed8d2d4b9d91f60c3"
+        },
+        {
+          "bytes": 45307,
+          "decoded_bytes": 1027868,
+          "decoded_sha256": "a9230c3e33dfebea06deef9298e2a2caae02374426f551bb3f4364a55f59bae0",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "9ed65892f60c1b66d657e71e99de35d584e45c7fb830cf04ea5bde805e8dcabd"
+        },
+        {
+          "bytes": 45787,
+          "decoded_bytes": 1029206,
+          "decoded_sha256": "81e96e92a6528733f21102fa4b62c9a393b7e85e95e35f36cd5f5c69283af758",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0003.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2114f6d8bdc70b1edc1d3e25c6157e4dbabb66ba5aa373c469e182e7c03b27d6"
+        },
+        {
+          "bytes": 45443,
+          "decoded_bytes": 1029214,
+          "decoded_sha256": "24da4ae6a96c3b2d60c66e0873dc6373bad67d7576dcc644aa68191183f818c9",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0004.jsonl.gz",
+          "rows": 1000,
+          "sha256": "864e29e1516f6dcd1ba4f07c3a8a3f084b9d170839fbc8c2a7f45a2a22f68891"
+        },
+        {
+          "bytes": 45567,
+          "decoded_bytes": 1029206,
+          "decoded_sha256": "4657e84382d0d6ea9da38a5af492a66e35431517fb6ead228b0cd1df39f54215",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0005.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f3c6227a18cfeaa1a4a248c66f00359c09d19ecbf7b496aa6072dc88785b9620"
+        },
+        {
+          "bytes": 45680,
+          "decoded_bytes": 1029214,
+          "decoded_sha256": "9a8882ec7f366a691489078f5a35b41f7662dd80c575d5085e79449838278542",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0006.jsonl.gz",
+          "rows": 1000,
+          "sha256": "fa17d8d7eb8d4ab58bbb21eaadaf13221991413422c95c0d9d8734d9004d3b40"
+        },
+        {
+          "bytes": 45642,
+          "decoded_bytes": 1029206,
+          "decoded_sha256": "115ef489e55dbaefb0028adba384ddc98f5c15d50c0f0afbe67486998a403cfc",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0007.jsonl.gz",
+          "rows": 1000,
+          "sha256": "96c1b610b55a8f9212264030ac41897bfdc661e1e13ad8da5107a5e5edec42f5"
+        },
+        {
+          "bytes": 45673,
+          "decoded_bytes": 1029214,
+          "decoded_sha256": "fbfd84967f2b3d653b3f5e86efcb881e4b89720aa9994ac723613cce6f7e4486",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0008.jsonl.gz",
+          "rows": 1000,
+          "sha256": "250e933876ff0aaa961f6702ffb98a8278c22cdd7c20533aa5bfc051bcd1c6e2"
+        },
+        {
+          "bytes": 45922,
+          "decoded_bytes": 1030760,
+          "decoded_sha256": "447a93e47e5c3817938a61e9a2f11eb1af39c5d36c3e52f691e4b9245b679ccc",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0009.jsonl.gz",
+          "rows": 1000,
+          "sha256": "63ef06ee3b3864d9ae439270cbe448b245538b963bb9bb46cd06834691a1893d"
+        },
+        {
+          "bytes": 46833,
+          "decoded_bytes": 1033765,
+          "decoded_sha256": "bde92d7679cd5a66b56f5b22d7ab1f861798c539cf7e28f70f2b9552ab955bcc",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0010.jsonl.gz",
+          "rows": 1000,
+          "sha256": "ecf125430075503d494ac3ace4878a57533f94e8ecc96d170ad69c608ad12512"
+        },
+        {
+          "bytes": 46713,
+          "decoded_bytes": 1033825,
+          "decoded_sha256": "938c1cac98806d4763ab5cabefd97914e0400d5ce2b49ed20217d2e740a3e0a5",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0011.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d061764f0dc9962f272f5c720f18e9a684427d059f5a88e805eb1933a0d97f0c"
+        },
+        {
+          "bytes": 46693,
+          "decoded_bytes": 1033796,
+          "decoded_sha256": "595f7ee38a2d3e9fc96360d2083ca9d24ff3131abd8ae10e2c7daf2140719c8d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0012.jsonl.gz",
+          "rows": 1000,
+          "sha256": "bf455286b461297133e849aba6b5aff3b4a27fd52f4a5d68a0f34c0d92000e88"
+        },
+        {
+          "bytes": 41419,
+          "decoded_bytes": 901685,
+          "decoded_sha256": "abb311be0fb7d376f501303d49a33b0c608763ab5d7ff76aed1b648dd8ef222b",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/entry_parameters.0013.jsonl.gz",
+          "rows": 872,
+          "sha256": "ec944781b80bf032decc6c497844e48ba0ecf91f02c337d502f23ae2811ece25"
+        }
+      ],
+      "rows": 13872
+    },
+    "environments.bindings": {
+      "chunks": [
+        {
+          "bytes": 321922,
+          "decoded_bytes": 4687111,
+          "decoded_sha256": "466eaa66b79cfdebf598c373e093b353980b4110518ca72125b133627bfcfdce",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.bindings.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "dc6e920425c0349b4f7e39b129f5b4c857d16628251d1a169e15a3574c83065a"
+        },
+        {
+          "bytes": 310093,
+          "decoded_bytes": 4671154,
+          "decoded_sha256": "8e3c81af7175ff04b6389f40798fc98d6746d775de0e3c545adb54f2f6a2d6dd",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.bindings.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "08ddeaa5766a927423caab40c9434990f28ed7d9ee8905fac3fba19a69e4949a"
+        },
+        {
+          "bytes": 327876,
+          "decoded_bytes": 4678622,
+          "decoded_sha256": "0319e06a5faea913e0812e44a83795a459a59c3669846121e3adc63182a90b95",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.bindings.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f3b164986ca3fc9c1d56af3b937a3226a6f72f37eeb5361c4e3e36c799098186"
+        },
+        {
+          "bytes": 115527,
+          "decoded_bytes": 1623810,
+          "decoded_sha256": "dbda44c61082858ff28a9ab07447b1a83da743f87094db0fe83021aae8927196",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.bindings.0003.jsonl.gz",
+          "rows": 347,
+          "sha256": "11a7ec0d5573e24c57e4a65342d8f92fdf48e53f587bdf85d6265afe96e56404"
+        }
+      ],
+      "rows": 3347
+    },
+    "environments.files": {
+      "chunks": [
+        {
+          "bytes": 325,
+          "decoded_bytes": 643,
+          "decoded_sha256": "ae93522cf040c113833fde558dd9d9aa1fc390e9713d3100046e1efb084eb0d8",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.files.0000.jsonl.gz",
+          "rows": 2,
+          "sha256": "b17f0a8e4c6250c15d2eb4cdb89e6748059f98be42efe231e58ee61307d05bd6"
+        }
+      ],
+      "rows": 2
+    },
+    "environments.metadata": {
+      "chunks": [
+        {
+          "bytes": 789,
+          "decoded_bytes": 1449,
+          "decoded_sha256": "8295ebe4872bca4bd98d64c70383dee308fbb5081a4cb033aee43e1283be3cef",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.metadata.0000.jsonl.gz",
+          "rows": 1,
+          "sha256": "ce736df8a0f03a7d31e5186251f3451608a016314f356c8107581a917e09f9a0"
+        }
+      ],
+      "rows": 1
+    },
+    "environments.unresolved": {
+      "chunks": [
+        {
+          "bytes": 80684,
+          "decoded_bytes": 1357004,
+          "decoded_sha256": "412a5815230c196e8488b7ee271b0ee1a7f8ee522f184685eee23eae55eb77cb",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.unresolved.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d32cca31a8eef5b394c84823fd177786f6029f8f8508922b17145ecb4eaffb72"
+        },
+        {
+          "bytes": 69879,
+          "decoded_bytes": 1293784,
+          "decoded_sha256": "5f9d9b087712ce5568f11fc7f95e40ef4b2daeb2dc4603168d616c0169825f53",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.unresolved.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "6ae89cd27f502ea91c75043114ddd104bc92f24fb3f0e9037a8615cfd2fd0843"
+        },
+        {
+          "bytes": 69917,
+          "decoded_bytes": 1293594,
+          "decoded_sha256": "7a36b509b70d2dd6ef11ae55250f4f45f027d5ca1884ba88bb7d1d650ed84ac0",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.unresolved.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2c73d7f035ec3f33ed5d58d580797237adab2d67d8ee18764b76d435a74aa845"
+        },
+        {
+          "bytes": 69930,
+          "decoded_bytes": 1293594,
+          "decoded_sha256": "23805e2216ae2905a89c7a8d2a34f6cd9ae3c6f31ef3adafe5cc440124439dae",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.unresolved.0003.jsonl.gz",
+          "rows": 1000,
+          "sha256": "10038d8ba12c5c1938c3d05b3bd3a44bef659123cf76deb973ec824c3a13b88e"
+        },
+        {
+          "bytes": 70003,
+          "decoded_bytes": 1293784,
+          "decoded_sha256": "addeae8d3678967b3002edeef0f3c6b6ec0e0ec381e23ec1ee61f5814b01878e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.unresolved.0004.jsonl.gz",
+          "rows": 1000,
+          "sha256": "26aea2cd2dd1680f82ddd2e3487a50808f716b22bdb86a30dee874870b0bb0af"
+        },
+        {
+          "bytes": 72116,
+          "decoded_bytes": 1304135,
+          "decoded_sha256": "feaf51ecf5e2771a80d42509cf986bd6b90ca8c6f7f9c989ef787f9cb1985fbe",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.unresolved.0005.jsonl.gz",
+          "rows": 1000,
+          "sha256": "5dfd3be5bea06d8130fd4eb481e0ad702be9fe96ecb173552e4a5ef005f769d8"
+        },
+        {
+          "bytes": 83338,
+          "decoded_bytes": 1364258,
+          "decoded_sha256": "7a51fc17ca7b05c8cc9baa8afcc37b1deaf541e6cc40f6acef80d2f065f420fa",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.unresolved.0006.jsonl.gz",
+          "rows": 1000,
+          "sha256": "396c8830b7f33c104e0d579d5e8548b1737d3540b81322cc915468e71e591850"
+        },
+        {
+          "bytes": 81941,
+          "decoded_bytes": 1355316,
+          "decoded_sha256": "63b1f5d848dc3ec2b223a71ef078ed632fabe44418c6cf619deef2986047026d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.unresolved.0007.jsonl.gz",
+          "rows": 1000,
+          "sha256": "257e863d7e3fb00feddefe3eee4938b4987cebdcaa480e2e9cf94da7a794f9b8"
+        },
+        {
+          "bytes": 77351,
+          "decoded_bytes": 1317970,
+          "decoded_sha256": "312bfeef4c22ea4ea6050f2acf2dfd14918a5cdab98a9a39a32dcb8e928a6926",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/environments.unresolved.0008.jsonl.gz",
+          "rows": 987,
+          "sha256": "c0eb22cb455421f7798b4ed99ad917e073a05c19624d645b0f877066bb2bbd65"
+        }
+      ],
+      "rows": 8987
+    },
+    "routing.argument_routes": {
+      "chunks": [
+        {
+          "bytes": 4773,
+          "decoded_bytes": 86618,
+          "decoded_sha256": "47bfb469a642301cb076a47571f4dde9ea6be302ba598d40d3172974c2793197",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.argument_routes.0000.jsonl.gz",
+          "rows": 27,
+          "sha256": "7ad508920994c23d16d423abd2485de756cb714f3894892277cab0245c1a445f"
+        }
+      ],
+      "rows": 27
+    },
+    "routing.completion_routes": {
+      "chunks": [
+        {
+          "bytes": 4625,
+          "decoded_bytes": 74869,
+          "decoded_sha256": "16e4fd250dd1e3c4a521e33abaab9a52bbe413c4ae7d68a3e900fd6b95072356",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.completion_routes.0000.jsonl.gz",
+          "rows": 27,
+          "sha256": "3d3fca4409ec7b7a7c8720bffef98ea2c39f43f7022f993c6ccd1b99225757d8"
+        }
+      ],
+      "rows": 27
+    },
+    "routing.issues": {
+      "chunks": [
+        {
+          "bytes": 50262,
+          "decoded_bytes": 446228,
+          "decoded_sha256": "f720e433b4940b0b5fed6fadfb321ba66707bfe5b2eba96761405bfa34675d8b",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "5580c1e0d9d107cb8ae6b92adb8154a82fb7f128fc71746ce688f7c9a1f99f5d"
+        },
+        {
+          "bytes": 48756,
+          "decoded_bytes": 445048,
+          "decoded_sha256": "30d4d72bace012c74a569f90c9bee08d450b8ca2a9200ae52bb459ee4920455a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "0b79b84c5df5ea228dd039598494894f921c16ad86ba8ba3b886a992e279b489"
+        },
+        {
+          "bytes": 48611,
+          "decoded_bytes": 445000,
+          "decoded_sha256": "8a2544fccfe5c47b99e3cc34687676d6cb5850678c0cb26aeafd642c3187cacd",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d922a711a42417cd67cd648e8a4ce5ce850b85c5e012279dd6e876cedbf78b2b"
+        },
+        {
+          "bytes": 48849,
+          "decoded_bytes": 446408,
+          "decoded_sha256": "01ce87234f9c147c686f187f3bc5703a1bf346047f3aac4a968aef918c3b8b36",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0003.jsonl.gz",
+          "rows": 1000,
+          "sha256": "9d5ca91676727b9e4f7d4cb9c374e460cc1df071d98c649b595cda974f9a47d2"
+        },
+        {
+          "bytes": 48912,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "d39f18a8fec64f4bb09dcafeb1a5de272cdd792de5a20e1e72d03d4e7e6ca288",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0004.jsonl.gz",
+          "rows": 1000,
+          "sha256": "45353105614c25936bdd6614726fde56fada6ba68c03f04e6844091dfd561af3"
+        },
+        {
+          "bytes": 48893,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "181f8eecbc83d52089109d0a797747d87af2d0c53eeb55c89be601eeddf79432",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0005.jsonl.gz",
+          "rows": 1000,
+          "sha256": "cf053c6572cb2946d11b4263e0cba97c48f3d7646b1f7359cff49279b790ecb5"
+        },
+        {
+          "bytes": 48916,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "99b81e7f4e8b49e295571d387892611602df158b5821c3d88c0a00a778cb2465",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0006.jsonl.gz",
+          "rows": 1000,
+          "sha256": "7cf92fcbe08884618ed26c0c5fef7aa85876b5f7bc7b0783860115d3e9ada69a"
+        },
+        {
+          "bytes": 48900,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "5b58c8f635b28e62126cac982144c7b103312640905f7341d4021aee943d9a02",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0007.jsonl.gz",
+          "rows": 1000,
+          "sha256": "0d1562da8c32823ffff3a90fe44b1df544ce424b5eb038c6d4eeb90bd2a7b28c"
+        },
+        {
+          "bytes": 48939,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "5dc1fe25e015a0eea68e1f0221f2ed386ed650994411b46bcdd533c7be052692",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0008.jsonl.gz",
+          "rows": 1000,
+          "sha256": "c9ff1baa7ed57316745853dd47bf74b24b0a559fd6d926591e745084db17129b"
+        },
+        {
+          "bytes": 48906,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "64399fef001ed313fe4d9a332c0b399094db40473a126a3d5d6462dbe321c713",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0009.jsonl.gz",
+          "rows": 1000,
+          "sha256": "e53d0924db583c37eca0490b4bd4bd9f3f248ef95a664042df85ffea895e1b9a"
+        },
+        {
+          "bytes": 48885,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "1699d1c506c2e43141a41ee6f3320fac3010d6da0130569e4f5d0cfe6b18cd6e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0010.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d4693f834a3ca67de7faf1fe1cd5d39f4c020d64d91febe0e4b916b02cfd938b"
+        },
+        {
+          "bytes": 48875,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "24ffcfde00643cdeeea39705c7f5c675853c17573250e7f4581061e6ed9f1cd6",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0011.jsonl.gz",
+          "rows": 1000,
+          "sha256": "bfa30a5d315f0a4072235968cb7378e878ea7a92c2c196cb876d6d61c95bbfbf"
+        },
+        {
+          "bytes": 48956,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "406b635b08f8d62a02f316ee9e23be223a6f0d8ae0924e64421d08568bb77f66",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0012.jsonl.gz",
+          "rows": 1000,
+          "sha256": "c3e898a920435ea779a87a2483d040e87c01b72bfb339c566d6de498f546233f"
+        },
+        {
+          "bytes": 48880,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "1a67881c5f227cfe47d5e750ef78269884a1779f16ecb4b494426498b7dffb7c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0013.jsonl.gz",
+          "rows": 1000,
+          "sha256": "8d98db8dc85a4ceba28633e1e20ebd7f7f35230c64cd4e8634bf4a740f61472a"
+        },
+        {
+          "bytes": 48937,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "c1d5551155a4acac955ed5f4fc7c3993db074613542b48ad4692b6c6514fc99d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0014.jsonl.gz",
+          "rows": 1000,
+          "sha256": "50baef9b4bcfc6436924c747f3ed91e0b0f6fd52890e1517ec84297b3dad6820"
+        },
+        {
+          "bytes": 48941,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "e1a35e7e215cb40bf3397632b307cff902ec547463b9bf3e5b19ea632ba770e4",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0015.jsonl.gz",
+          "rows": 1000,
+          "sha256": "54608bee8f6b6ee3bc7954707495aaf0610d23322a0bebba620a35d1de2f1b74"
+        },
+        {
+          "bytes": 48908,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "7bd852cb9ddeeabe0f5708116c2a8de5361129ce7a81b2c09726cf509fb13df5",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0016.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2750f465ee4c256c8883cc761fda87370932cb815eff3ff5c90ecca8c42210a0"
+        },
+        {
+          "bytes": 48896,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "d5efa5bdae780a559d62b21babbed8421747d10f3340068cf6053760b2929527",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0017.jsonl.gz",
+          "rows": 1000,
+          "sha256": "bb5200c331550139c3919af00bf14750425c50d4d0ba571738e183d65a54e51c"
+        },
+        {
+          "bytes": 48929,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "57717c7b27f9d519e5aa9480ae8489b2b771bdc5e1b304360d4368f7b7498af2",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0018.jsonl.gz",
+          "rows": 1000,
+          "sha256": "6fcbbc641d4d2965cfde12a33f4c916715eac88ce0a1c5b95520ead5521906fd"
+        },
+        {
+          "bytes": 49397,
+          "decoded_bytes": 447549,
+          "decoded_sha256": "24fb472f196652cfa10c8bb23b8af6aeb6dd79a535af9bb6d8b444b111de2415",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0019.jsonl.gz",
+          "rows": 1000,
+          "sha256": "07473fe4a049b1d1394f2bf801631b80446f802f44b89905f4c60f6a512797da"
+        },
+        {
+          "bytes": 48989,
+          "decoded_bytes": 447025,
+          "decoded_sha256": "a5a30fddf943e4ebb00bcb60060102e07293da4ed2de545fb4444904fec260c3",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0020.jsonl.gz",
+          "rows": 1000,
+          "sha256": "894cce31daa4b2d41fb2033cfa689d00a782e4c343c11839bb69e9e64f57fa70"
+        },
+        {
+          "bytes": 48931,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "be2ed05916f38d27a1dd59460c9438da0ea70033161488f65532714453839adf",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0021.jsonl.gz",
+          "rows": 1000,
+          "sha256": "85e0960f8d18245d26861b1758ab910e8f571db110af50c10c55a508f9d07b0f"
+        },
+        {
+          "bytes": 48918,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "c4e262d20ec96a4a02c3e0a513535191448ca21d670a5d622eb53565ffa4d9c6",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0022.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b91878f282184efe379c9bbac893de8c6ee4faad4eb1a65de5ac39cd2c57b365"
+        },
+        {
+          "bytes": 48904,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "9ce7b877387e434ab656a552871bca57e11c047564057de017dff8dc7ff9d234",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0023.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f60e0f8f6694b2abeb1cf3423480fc07126162805a054cb6ec4f0c532f7d431e"
+        },
+        {
+          "bytes": 48948,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "b41441da13b706f81bfaa64a93ca9803c254f5a7bd229d08f6802b19e01ad17e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0024.jsonl.gz",
+          "rows": 1000,
+          "sha256": "dc865369d81318189940819232f80ed70244fe79e6acb2dcf80d453d52fe133f"
+        },
+        {
+          "bytes": 48922,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "7043b5d06d2d4ed74528fab3673d93c70713dcdd7c9a675c73b4e96c54ed0f78",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0025.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f8d79a0fe901dd9e625e97ae165ac9e7af358e533dc92c85098c32c6d1794cdf"
+        },
+        {
+          "bytes": 48890,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "d13b0422c9289ae50db79d42aa4939c3365a41904a0d5579f8350512ff1477be",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0026.jsonl.gz",
+          "rows": 1000,
+          "sha256": "91be962ff95972a5a27f5806bbddee01dfc47f0aa9a9942e8bb620b927aafab1"
+        },
+        {
+          "bytes": 48898,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "53d31cccdd91a3b76a1aae4116da0dd0556f990971dae1d8772c529a44c715aa",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0027.jsonl.gz",
+          "rows": 1000,
+          "sha256": "ba3ee57bfa5adf3be2903fa34e416431f724776e3ea32b124095a79c85d15ce1"
+        },
+        {
+          "bytes": 48898,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "3950ec471fa39b2ecc29081523ad3f27485d1dc89d5c6a2e406ecdd3e2db717a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0028.jsonl.gz",
+          "rows": 1000,
+          "sha256": "856d5f6afb109f0dd52ce2d583937000c2fbe9ce26c35e5702381add927eb22e"
+        },
+        {
+          "bytes": 48890,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "b914c838f38ade6bbf68a2adaba87ef0c2e734b6fd2f434c4d25ee3f09f46c70",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0029.jsonl.gz",
+          "rows": 1000,
+          "sha256": "540ba2487f3636c161233f343dec24036ff9fb3f708bdf014920f077165b3c53"
+        },
+        {
+          "bytes": 48872,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "4630030f030edeb31fa90d9739bea49ec234d751fdee1affb6de6280e9d1b48a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0030.jsonl.gz",
+          "rows": 1000,
+          "sha256": "7204e38c714ebf049a5dc6dcecbece2e5faa3076357fba71d11d2ce8c41c3347"
+        },
+        {
+          "bytes": 48923,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "e61039fc4fa2405a3a57d33aa09957b0d0c00e285b6ec446fc5d54aa76d92e59",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0031.jsonl.gz",
+          "rows": 1000,
+          "sha256": "887673e09069c081fe8001f8e1e6d345e313031f28ad45bcc3367a1510c2125c"
+        },
+        {
+          "bytes": 48918,
+          "decoded_bytes": 447000,
+          "decoded_sha256": "cb551cb06f7375e8cc21497b502a68bc98c290a511429f719bda4cea3b48dd66",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0032.jsonl.gz",
+          "rows": 1000,
+          "sha256": "9a5e5634bda1111060ea04e3e102dbd7c2ed597658c8f0941e16b8abf7b6103a"
+        },
+        {
+          "bytes": 48897,
+          "decoded_bytes": 448418,
+          "decoded_sha256": "3193f7bcac39a37666aa50342b05af19d80e164c2d7ff37e44ca4ca60ca63be6",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0033.jsonl.gz",
+          "rows": 1000,
+          "sha256": "03d45e20e37b2a368113aa32d7c5929891be4b9c7652e01dcea7d9029635480b"
+        },
+        {
+          "bytes": 48920,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "ea822d9b85c4d2ec51a28004629820d05a865d0b9e58344392a8d4d40d58f7dc",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0034.jsonl.gz",
+          "rows": 1000,
+          "sha256": "0116eec48e109e9ff62efc6e0b8cac0a516e6181ad4443e7c4f87693d4e24790"
+        },
+        {
+          "bytes": 48960,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "fb41a83361f753c8a0e267ea74c42b63ac7428238d1117013f106475a282b64e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0035.jsonl.gz",
+          "rows": 1000,
+          "sha256": "fa9d2d81801dedea793dfb0bfa2ae8eba9ba3d51153b10c2a32c15691656f011"
+        },
+        {
+          "bytes": 48967,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "6bbe6022cd10b162f54e7877ecd3e84b9acab7daa1b086a6e908c4cf75eb9574",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0036.jsonl.gz",
+          "rows": 1000,
+          "sha256": "03fb18d91323578ba8cce77fb8ff5203e1d7630953ab0b46987089f81a84d537"
+        },
+        {
+          "bytes": 48936,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "f7f7f6c8e100eda816a951723bce4dca1d22cb630f54ae1c866962f87d2985dd",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0037.jsonl.gz",
+          "rows": 1000,
+          "sha256": "4921853fe4cb1e38bce30ab5fae5a27009da0910a0dd1633666c01f4ba3f128b"
+        },
+        {
+          "bytes": 48924,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "e7a7ebb232d00b957f8a543cd95589c17cc246e4bfa6d9b2b10b553265922341",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0038.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b793af9ecb039192161c0237c7a4f3c6ceaa475d97412b4dafb5aabbcafe3175"
+        },
+        {
+          "bytes": 48909,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "0982c8e5595914e9e0afbb8dce2594a22d8246818709f2de5c50c6177d8fe54a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0039.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f6f0d2dccf58fb8ea92620e4b1c38831f037ea2ef2defe230a9c60c1d89cf2c2"
+        },
+        {
+          "bytes": 48860,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "6c0d6ef99b7ebe349d61c53d7fde3b566d2de257ca2cfcc410ced9d88cd03832",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0040.jsonl.gz",
+          "rows": 1000,
+          "sha256": "1ad7f3a91679f13ea2a0d79fb57793bd2bb164a550baa2bc69e7c8ab9149e4e2"
+        },
+        {
+          "bytes": 48907,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "f5cd8b06ca22ade51cd8b37125e63254c2aaee5588fdf6e9a6c45cc64a0e3d12",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0041.jsonl.gz",
+          "rows": 1000,
+          "sha256": "799d2e6d38ca300b39810cd330123cbcdb5197f492611692b1c62755171eb1b7"
+        },
+        {
+          "bytes": 48937,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "d4eb31fb104453704f97c012195dc1e919f8ea8a6fcd4d784ef2aeb9a4808daf",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0042.jsonl.gz",
+          "rows": 1000,
+          "sha256": "32cab25f9e1a8c6aa682f560023a21ca5c9fa215da0d73b96301fe5acd69e6e5"
+        },
+        {
+          "bytes": 48922,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "ef4f9342948bc2297d14d8f8396059865a1fe7784a2b2bc19738391a0048856c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0043.jsonl.gz",
+          "rows": 1000,
+          "sha256": "163e97d39c8e9ab8ad476d05f28a561396cc653f1f38f0b84c8a8025c2690f86"
+        },
+        {
+          "bytes": 48941,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "9754a13d489c4dea4435eb73c47f5b7051386d88ac95c674896875c45c18698a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0044.jsonl.gz",
+          "rows": 1000,
+          "sha256": "db2ccb557b188884c765e624b0e7cf56160c97c0fbad46626780deba9f3043f8"
+        },
+        {
+          "bytes": 48907,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "7b7f614c36ee9742879fb29a09dc144c8f1686ccee791b050b78ae0b4d87158d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0045.jsonl.gz",
+          "rows": 1000,
+          "sha256": "40f7c389925a4aaa502ad78b21fc29a505c8c0329bf4399c1361814b42df77f6"
+        },
+        {
+          "bytes": 48910,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "c4555c2052fc438ffe8f6e8e67d527107c957c1d9bca5e3bcf2c0693b085f910",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0046.jsonl.gz",
+          "rows": 1000,
+          "sha256": "0e92e79b04121dc74916cd7e59e589c82b9e609a82f7742626961a74f222f91b"
+        },
+        {
+          "bytes": 48923,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "1ce1d07de72bd89be589773512012323ca24bc9d0b6c55400e3adbe3c3662829",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0047.jsonl.gz",
+          "rows": 1000,
+          "sha256": "c109a41c507c4c32c653e0d28dea097c5fdc7a2fc51c1c59760ad74505623b80"
+        },
+        {
+          "bytes": 48934,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "a6bbf84469943115ae58f50073c96644f55418eab21e1ad2dd318ba8844590ce",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0048.jsonl.gz",
+          "rows": 1000,
+          "sha256": "18d2facb467ca183fb6dcb43690fdcb350dfca540c13b3eb536992ec0044da4d"
+        },
+        {
+          "bytes": 48945,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "3bc2cb7d7b4c002542898bf092e5f7982d3f2379d4e44c8bba45eea702a5223a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0049.jsonl.gz",
+          "rows": 1000,
+          "sha256": "dc4aec8f3bcbc0b6cc51c5d1b6c188e9eba412d5a6adb615dfbd958d935fd405"
+        },
+        {
+          "bytes": 48962,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "25ba216d6cc02c0a5956d72874ad31262539fd277d56f88106b75e2cffb7d36a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0050.jsonl.gz",
+          "rows": 1000,
+          "sha256": "5251b55f897aabb195060293ed9d9475b36e9771982260289886ed1a5862048f"
+        },
+        {
+          "bytes": 48984,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "7629eca1d8f34234ec1f92b2b22b09dfec5edef10d1a99c7b3042a4601a7348e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0051.jsonl.gz",
+          "rows": 1000,
+          "sha256": "068489a8c73bde1d338aa5f76d502a54aca58838f83ceabb21a718d2d4ebc73e"
+        },
+        {
+          "bytes": 48896,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "10e372b980d930d11f25fb062188e78372e5507806f06d5fb554a9b412e34425",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0052.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2fc064c18dd5bf763aab89617c1662af3d2884822d6a3976e845d90e3597d2ff"
+        },
+        {
+          "bytes": 48897,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "3e761f8e93c737f29b53f724af4c76c466a0f0ac221d04a42628fd2b16b57993",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0053.jsonl.gz",
+          "rows": 1000,
+          "sha256": "eac98c336392d7ce8e5e63c4ba802d2f6e2ef675b8ea054bd87e2e196cc16ab2"
+        },
+        {
+          "bytes": 48940,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "a5f15428bcd2a3c8540eb285d1522f423d6bfa2d264d353283d161f8e08c4c5a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0054.jsonl.gz",
+          "rows": 1000,
+          "sha256": "a45cedd4b6c080c31e3937768581b99cb5931eb64d255170d206cc29571bcdbc"
+        },
+        {
+          "bytes": 48907,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "afea162ce36d0d4be59a467fff69f5b0cb3361adf656fdde53099487b6201602",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0055.jsonl.gz",
+          "rows": 1000,
+          "sha256": "9ede5e958fedb32b3eb6f6b1f6990b8048a03c40d1774969e4c7230847cad463"
+        },
+        {
+          "bytes": 48922,
+          "decoded_bytes": 449000,
+          "decoded_sha256": "c12ca258fd6c9a8c928d4e7a1f224d2d0d2bcf99d35602bbdcce747e7815a808",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0056.jsonl.gz",
+          "rows": 1000,
+          "sha256": "c189b0c7c6757e64bff49d6d595b1766516eb365b085d1f9a73038a4ba14561e"
+        },
+        {
+          "bytes": 50641,
+          "decoded_bytes": 454204,
+          "decoded_sha256": "299e1b069c306ffab0dfc91ffcaf16d12cb08f918f857b5afa3b2c9b510d37f7",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0057.jsonl.gz",
+          "rows": 1000,
+          "sha256": "5d055f44908ef8a7a80869cc82de24e966c176f839d45aa6431bcf8a79388ddf"
+        },
+        {
+          "bytes": 50457,
+          "decoded_bytes": 453331,
+          "decoded_sha256": "a7807bc321c6e8dd256d192216d50e92686ed40772a1798233226c3994b65241",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0058.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b33c93fec1ebca557a75f9aef2944b79688c3e81bfe2c9dffa4e459e92112c29"
+        },
+        {
+          "bytes": 50030,
+          "decoded_bytes": 451348,
+          "decoded_sha256": "0b1de1e06dac5b192dde8a7e80a341596b15f0fdc5685daf6fa7d420e7b4f8d3",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0059.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d7d10b81e3c5404e448e24ad9bd63c2374bf44e989d5dfa5b92543f82b0489ec"
+        },
+        {
+          "bytes": 50340,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "1f89852c87bcf312e385bf0b02e45ff89f51fb5a3d21c6fb707c26e4c33256cf",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0060.jsonl.gz",
+          "rows": 1000,
+          "sha256": "530979915dd514a1898d3267f40fb44c1bbdc6fb02e10dba30ea4cc65a5d0e55"
+        },
+        {
+          "bytes": 50370,
+          "decoded_bytes": 452225,
+          "decoded_sha256": "da0e656399f008524ebc8882e297decb258132b03b7ba7e46b36998605d66b40",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0061.jsonl.gz",
+          "rows": 1000,
+          "sha256": "e868056a61eb8484780cd94743603df41eaf491f5c4e470b4a1924776a9f034b"
+        },
+        {
+          "bytes": 50297,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "79d76a1ba396e8ef4cc759d6f8288793e18ad0d6885da4076445b3dc9e755418",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0062.jsonl.gz",
+          "rows": 1000,
+          "sha256": "022df5051fa11519b6ef4d842a5e2fe55d8e985d8926afa5a612dc903668221d"
+        },
+        {
+          "bytes": 50355,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "4a404b9ecbaeff340d212e96b4495ce80cdc3836ac75adc9c06e342cf254a6b0",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0063.jsonl.gz",
+          "rows": 1000,
+          "sha256": "84db51f85950ce33dd4cb53a594b31bb754c03945af5de295d2c10258b0d8279"
+        },
+        {
+          "bytes": 50286,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "585210d5422a67998878cdc52a463d7e887e5d2d61c0f29385e962903c0f9d6d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0064.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2d6326bc94860bbbbbc8f136e732601ecc62b8c9fad7bee8908c24856fd6816d"
+        },
+        {
+          "bytes": 50349,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "11788d367852a516e8901233e693f6fe65db792d569b5cea7e243914ee3892d9",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0065.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f6ec3268c0fa10c75cbb75137cad9a34d1dcf20383aade695d1bcfeae7e64c4e"
+        },
+        {
+          "bytes": 50283,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "f054bfe405bdbed9f64b1d2f36220ab3c0f6353a6b8fb10371a634d14252409c",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0066.jsonl.gz",
+          "rows": 1000,
+          "sha256": "c5631d0fa731550b573ca19cc8dff49dd47998d86f1e6d2f56d4b8467df9bbc9"
+        },
+        {
+          "bytes": 50332,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "9b2d877da4524b79dfad809a36c3be8c17b722c8dd025fea0a8bfb6ddc64ca5a",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0067.jsonl.gz",
+          "rows": 1000,
+          "sha256": "79cb9ee18a6f7b9c13b66ce4b80e3bd358f4b04cec50c6589f1b40573d81be56"
+        },
+        {
+          "bytes": 50297,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "69bd18f91a42b1d8d5b9583d78bc99c653b051460115849825b268f6eb0143b1",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0068.jsonl.gz",
+          "rows": 1000,
+          "sha256": "bc3f5b5681643409913022e2498891e0bee02b05439b206675b5f5e279047c51"
+        },
+        {
+          "bytes": 50290,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "0c591a2d37a4f4cb8ea866cc53076ba1b32380e2d80f0c5fa0139ce0d3bfd7c0",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0069.jsonl.gz",
+          "rows": 1000,
+          "sha256": "defe23b045c2d256b6cab108ffbef37470fa988786ccbac4409ceea815de325a"
+        },
+        {
+          "bytes": 50273,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "844402c09c19ca744cf28aa72b3b95bf28539f5654a14f5c53880576a60c6557",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0070.jsonl.gz",
+          "rows": 1000,
+          "sha256": "dccaa97d004cae815391be4c7b7fb5ed9a166005385e5c0ceda67254dd05d185"
+        },
+        {
+          "bytes": 50325,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "96815442fc1cd7c00572118ae51953b68fa307a6d92e8973ae7519af96655326",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0071.jsonl.gz",
+          "rows": 1000,
+          "sha256": "5dcb0e79d86c6b9e812a00ec32b51688c9dffedbdd47e04f13538b7d3ed99132"
+        },
+        {
+          "bytes": 50380,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "1f3a247c9f92fcdaa5feaf67d0d355eb316572258059b3d6d5ddaafa504c6fab",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0072.jsonl.gz",
+          "rows": 1000,
+          "sha256": "7ad50af661fedbf2f01d14ba31353a02e9e067ab8cef4ecf12b8481e4434aa7e"
+        },
+        {
+          "bytes": 50310,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "3858a758cb92c41e80c4431241876e2ae67c19575306a6ba846ff00155157188",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0073.jsonl.gz",
+          "rows": 1000,
+          "sha256": "64e13af8d5f566108d9692eaced79e231010a46b5f43443ff2881c62c2cb6993"
+        },
+        {
+          "bytes": 50318,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "3644c169a7139d6826cf4754cf6045aca7799710770aae4cc6a99f2461f1890f",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0074.jsonl.gz",
+          "rows": 1000,
+          "sha256": "589aaf8f609ee90a127192a948e99fcf135fdb12083a8976e5026bebf0132f0e"
+        },
+        {
+          "bytes": 50363,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "d2c3675bdcbe171abaf70ac39ac7ad85dcd7ea3bb09f4b95977a3f6dd429202b",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0075.jsonl.gz",
+          "rows": 1000,
+          "sha256": "60ddf274196f277f192edeecd7f11649c0fdf50088b8c5395fd6809c37c7cd8e"
+        },
+        {
+          "bytes": 50323,
+          "decoded_bytes": 452225,
+          "decoded_sha256": "e6667ea4f6eb6e8c517c20e65be587a8a43be6999e310c71a09d85efb59775e4",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0076.jsonl.gz",
+          "rows": 1000,
+          "sha256": "7b6bcd5d17e0bac139dc71d2770cd06a050284e4588b8ec6f790b4b67291d439"
+        },
+        {
+          "bytes": 50289,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "2b6b57270c96008413cc71d26013ff34692d95b81b44519b2a010d7d19e3aa53",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0077.jsonl.gz",
+          "rows": 1000,
+          "sha256": "11fcaa1a9def85388d1db0311818b191d87e5145f994ea3e1407befbc55c0cf6"
+        },
+        {
+          "bytes": 50333,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "bc131ed6a6f12a75435ca3487f3470d292122c09f658237d17052acee3402b95",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0078.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d0d8cd9e02169fce1b00df2715c8bf54fa6a64d87100eb9bbfaa38e9088ab7af"
+        },
+        {
+          "bytes": 50353,
+          "decoded_bytes": 452225,
+          "decoded_sha256": "9c2a9732b8a3fbb6bc69fbc0f0ff8e6f93b8650eb90342485b21e4a8655d55c7",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0079.jsonl.gz",
+          "rows": 1000,
+          "sha256": "c2803029f13e051bb31c9b9f26cac2af7c2cf7da097d46ddbd14a021fcc6cca6"
+        },
+        {
+          "bytes": 50345,
+          "decoded_bytes": 452275,
+          "decoded_sha256": "a82ef2113eba362928801b7bb1043dc48d6f8e8619bf6a1cbd7488c23f5a21d8",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0080.jsonl.gz",
+          "rows": 1000,
+          "sha256": "a367483a995074a20c7b33621c6ee093981ea4434ec60e202381ca3e191d91c0"
+        },
+        {
+          "bytes": 50323,
+          "decoded_bytes": 452250,
+          "decoded_sha256": "34a8fa4b73b6373ae4af79dbc5a5b7392f07836cc9d1faada389ca7de88bbffb",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0081.jsonl.gz",
+          "rows": 1000,
+          "sha256": "51a4aafeb75e1a1ccbf6f28a984c832a91948cd68a593a2817da77bad35a8cc1"
+        },
+        {
+          "bytes": 50243,
+          "decoded_bytes": 452202,
+          "decoded_sha256": "ac88a1e380b0d474ecaca8ae1b85bcd0757cf6662dc40c03fa3df2929e62da45",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0082.jsonl.gz",
+          "rows": 1000,
+          "sha256": "24c56e3bc11769e835acc632b96a16e0b29c84a681bbea2b23d5aeb03a2fbf28"
+        },
+        {
+          "bytes": 50212,
+          "decoded_bytes": 452564,
+          "decoded_sha256": "efe6eaabe9913c027855264d6164ad5d0eff0dc1d102d0edd143f1cd4e359a2d",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0083.jsonl.gz",
+          "rows": 1000,
+          "sha256": "b0ae6bc088929ede23b71516baeeabd40a82e43e8e984d2aa30ac4ea017fdf18"
+        },
+        {
+          "bytes": 50327,
+          "decoded_bytes": 452240,
+          "decoded_sha256": "064b9c13b12447dbb1f43da6dd4cb0d8a3f92dff274b621c242d6bb2dc75a5b6",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0084.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2d7e57eff25a0ee26ff5a8f0f1f782c52108fc03a451a454f81e9a9a1498d086"
+        },
+        {
+          "bytes": 50073,
+          "decoded_bytes": 452153,
+          "decoded_sha256": "76d52f117e0864ad7bc336a3f7a11827acf2a07f0c943125c3ebfbd1d66db204",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0085.jsonl.gz",
+          "rows": 1000,
+          "sha256": "2979f6f3ea889dc3fa2bfe37dbfede5cc0429e5dbcb105abcc3da120a2643469"
+        },
+        {
+          "bytes": 50224,
+          "decoded_bytes": 452395,
+          "decoded_sha256": "6291711c220c14329be56fa223bb89ff85bc6c5b4330065444bb8b3f706d35e1",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0086.jsonl.gz",
+          "rows": 1000,
+          "sha256": "84698ce0a113cceb9eac7eff2684373749bda829833fd35b12af0a280c6ac906"
+        },
+        {
+          "bytes": 50180,
+          "decoded_bytes": 451952,
+          "decoded_sha256": "b688147d70ffc4ca21235b343773b974584076d87fa83073258df331e50110fe",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0087.jsonl.gz",
+          "rows": 1000,
+          "sha256": "79eb2161c02693f09e07aefcdf78cc82800cb5ef6b9a892df1178f28f456dec8"
+        },
+        {
+          "bytes": 50235,
+          "decoded_bytes": 452512,
+          "decoded_sha256": "4540c41198cbbf61c352525c6acad12f81baa497c8abcd930b3ca0a38fba87a2",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0088.jsonl.gz",
+          "rows": 1000,
+          "sha256": "e418d058bd291cd09eccd09cd974da28c1bec3eaee27b182c1e5ddeac399f062"
+        },
+        {
+          "bytes": 50240,
+          "decoded_bytes": 452188,
+          "decoded_sha256": "d9594538b8d754a08eaca68cb9388a5740bf5a9ec9a78079882c7f24b2698060",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0089.jsonl.gz",
+          "rows": 1000,
+          "sha256": "ef92618d3f437d08711b1215f060b7c3acf8a0e5bd7046953d095307f251a075"
+        },
+        {
+          "bytes": 50162,
+          "decoded_bytes": 452179,
+          "decoded_sha256": "ee1cb56f59c610c95e3a260171ac4c2fb96c28e50ad1ba465081a304fc95e8da",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0090.jsonl.gz",
+          "rows": 1000,
+          "sha256": "deef39af72d9587da7dde107fa47f209ea0044811c41621311a4f196b9030b62"
+        },
+        {
+          "bytes": 50145,
+          "decoded_bytes": 452369,
+          "decoded_sha256": "df8e9d20e52e82fee43127fbb6a6d94d859049b7c1ad39f7997ace7deb26f541",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0091.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d441386b02ee17184e49b2766de59a0d19ac982c4f7bc38c9abeeafb8f949d4b"
+        },
+        {
+          "bytes": 50167,
+          "decoded_bytes": 451952,
+          "decoded_sha256": "9fb6eb8a0184b966a1a1cf7f864e08e398ba1d82976e0630a1e04a69625e9451",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0092.jsonl.gz",
+          "rows": 1000,
+          "sha256": "6a85b50b9a86994ec38e413875167618e1624643a473fd2a1a0314bd8e0f659a"
+        },
+        {
+          "bytes": 50209,
+          "decoded_bytes": 452589,
+          "decoded_sha256": "93027591d642c9d74ddc7cdcd9203a86974e89d3975be03f74272797c94bf3ea",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0093.jsonl.gz",
+          "rows": 1000,
+          "sha256": "dc33fd706cf8142fa106f489add930ab2e649f481d18d1aec97b4d0d7d9eea58"
+        },
+        {
+          "bytes": 50270,
+          "decoded_bytes": 452111,
+          "decoded_sha256": "e223483f52a510693037840f53e6c9fa16e64b4c989c528c9a5c916e4f695645",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0094.jsonl.gz",
+          "rows": 1000,
+          "sha256": "6163939ba8c5890422efaca33426effa36f5431585011264598d6a736be4fc34"
+        },
+        {
+          "bytes": 50125,
+          "decoded_bytes": 452256,
+          "decoded_sha256": "9371769ec7e4a4cab2f5affd50cefa0ac53fbd1cbb662d1f1fdd89317709b550",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0095.jsonl.gz",
+          "rows": 1000,
+          "sha256": "d586150526ac0e0680cbb9f7f4587319e2a803aff70149f5d138a6c764b99202"
+        },
+        {
+          "bytes": 50193,
+          "decoded_bytes": 452344,
+          "decoded_sha256": "e5b6b4bd2440896677f0911ef46cdd5a27c4b3b2e714a2d1532a32be6ab8e3cd",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0096.jsonl.gz",
+          "rows": 1000,
+          "sha256": "972d9904a79c78e2ebc8dc5dec5f66e8b6e819ea07707163cd2f4a4c82d627bb"
+        },
+        {
+          "bytes": 50246,
+          "decoded_bytes": 452004,
+          "decoded_sha256": "024aa7baaf76efde975ce15a4f88f3dcf3a3bcb4a5efaa48807b39d03f22a4f4",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0097.jsonl.gz",
+          "rows": 1000,
+          "sha256": "24d6c9afb0555e0e5f40d5290f06acae2d692316c7b1f90d4acf4a91ab78931f"
+        },
+        {
+          "bytes": 50251,
+          "decoded_bytes": 452487,
+          "decoded_sha256": "e6abff6e90da06d6fc9265692d5ac4c0d4c9cacd3e9126e745f11296ca4b0b62",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0098.jsonl.gz",
+          "rows": 1000,
+          "sha256": "fbf70406440d33bc9d17e60c2b12730a0ff00faee9283ca3b1cc60e9ce45b46a"
+        },
+        {
+          "bytes": 50262,
+          "decoded_bytes": 452580,
+          "decoded_sha256": "b59bfd6fc12e38414e7616ead095eae0c8762ee0a1b6b1975151fd61223afbec",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0099.jsonl.gz",
+          "rows": 1000,
+          "sha256": "e6a64c7722b62e587144c48d9d0412fc3942cd383fcfd70674f4e65f3f8c8df8"
+        },
+        {
+          "bytes": 26043,
+          "decoded_bytes": 235920,
+          "decoded_sha256": "907b3d75e288eda4631497c732455ed229bf2d8146625cbb58b745c0424a32d5",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.issues.0100.jsonl.gz",
+          "rows": 523,
+          "sha256": "31ca8dee097705af7b4d64165f02cf6765334f8486b7bc97ae046db05833367d"
+        }
+      ],
+      "rows": 100523
+    },
+    "routing.obligations": {
+      "chunks": [
+        {
+          "bytes": 122713,
+          "decoded_bytes": 661080,
+          "decoded_sha256": "5277cf9271c7719389d0bf0604bb276ee7d9ab422289f2585dac8b8b754a3bcb",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.obligations.0000.jsonl.gz",
+          "rows": 74,
+          "sha256": "356d97ce88a7ab5a86865575c85065e187d9bec63d38fcf410291cfb8c40a03d"
+        }
+      ],
+      "rows": 74
+    },
+    "routing.returns": {
+      "chunks": [
+        {
+          "bytes": 80158,
+          "decoded_bytes": 1526065,
+          "decoded_sha256": "d97e1a6a9eea18d92f5b1db0d55d8a6f7ea7152bb6a2267d346d2c91c34d5d52",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.returns.0000.jsonl.gz",
+          "rows": 1000,
+          "sha256": "f40244b6ae6ef08cb30017bcac8b433280784f91337840b198e7405472a49722"
+        },
+        {
+          "bytes": 78194,
+          "decoded_bytes": 1531672,
+          "decoded_sha256": "bcc9f26b83eef8030b935b1dfb55f0a398f5da73d0b9c6d171d643356c7e6d23",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.returns.0001.jsonl.gz",
+          "rows": 1000,
+          "sha256": "0fb901746b00378b490bb220e5436f4f10875aa8abcc5ce7d674597635f374ed"
+        },
+        {
+          "bytes": 77470,
+          "decoded_bytes": 1532002,
+          "decoded_sha256": "2178a7a1df7a69b074e900603f40296eaad868327d703aa0b036c456e5ac2243",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.returns.0002.jsonl.gz",
+          "rows": 1000,
+          "sha256": "16b60cacd8be8da2550d48af082536468b840b3f48cbd710245c588fd14c0e96"
+        },
+        {
+          "bytes": 81169,
+          "decoded_bytes": 1531666,
+          "decoded_sha256": "d1100402726e1c749ae2d599593d30a62d4917f9a9d43179bfe8cc1e48167389",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.returns.0003.jsonl.gz",
+          "rows": 1000,
+          "sha256": "a66703334aa40ed4cc564a2b24a52387e057aeaff2322ee9d0f66468bf6039d1"
+        },
+        {
+          "bytes": 99995,
+          "decoded_bytes": 1529958,
+          "decoded_sha256": "5a7e5cde707a88032a1c59f564d920c0aa9c7aa170c152fa447c0dcac376b39e",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.returns.0004.jsonl.gz",
+          "rows": 1000,
+          "sha256": "63644156aefccb7c8ad3670cba861ab79a460b9dfe8cfd88346eb4820e515214"
+        },
+        {
+          "bytes": 17883,
+          "decoded_bytes": 264715,
+          "decoded_sha256": "94c14c1476e2f0cb558734c07b4ee80a4fa5a77c73e249de4ae961463d535793",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.returns.0005.jsonl.gz",
+          "rows": 173,
+          "sha256": "7a80763da024619b0d9585778e1f8511181e0d468ca2100a87bd07e35cea8373"
+        }
+      ],
+      "rows": 5173
+    },
+    "routing.templates": {
+      "chunks": [
+        {
+          "bytes": 187363,
+          "decoded_bytes": 2164177,
+          "decoded_sha256": "096d3aeab3f62d4e60faf34874deaab8de428ebad3cffe63a863188e0b0df2cd",
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_attempt02_20261023/result/analysis/routing.templates.0000.jsonl.gz",
+          "rows": 74,
+          "sha256": "cc6c0b5547a2e6b7b65c335b42e7abf13e024e843d09d470ef62539979c7ca9e"
+        }
+      ],
+      "rows": 74
+    }
+  },
+  "transformation_authorized": false,
+  "whole_program_established": false
+}

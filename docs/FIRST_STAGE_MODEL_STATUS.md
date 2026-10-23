@@ -6,12 +6,50 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：外部源码正式接线与参数/返回/环境路由实档验收
+
+原272038 capture的source attachments公共resolver连接已PASS。原composition文档及
+canonical SHA不变；106个依赖三图在绑定阶段各读一次，243组/86,702次调用接原限定
+源码定义。全部817groups/100,438entries=exits/855codes保留：5,624 body-linked、
+89,864 source-only、4,950 unresolved。803非file调用与14旧tool源码current guard
+false调用均保留；后者只授historical source association，不授当前文件优化权。
+
+同一resolver随后核source→marker连接PASS：79,592markers/109,288slots保留，79,106
+有定义、10,992有body/activation/namespace，50,658外部source-only，6仅invocation、
+480无ancestor。均不是direct Python→ATen证明。绑定1355.11s、marker433.90s；这是
+离线建模成本，没有新target/prepare/compile。完整记录见
+`first_stage_source_attachments_20261023/attempt02`。
+
+正规SourceBodyAccess及CodeWitnessStore接回既有参数/返回/environment算法，实档
+attempt02 exit0。原20键marshal/source归档只读加载，compile0/current source read0，
+完整descriptor匹配224次；原74CP以public codec/overlay/interface读取，namespace不变。
+312,812 operand、16,403 env events与100,438调用守恒；13,872入口参数引用、27条
+actual/formal及27条completion条件路由、5,173返回root；3,347entries接10,087env ports。
+100,523 route issues、6,694 defaults未定仍在；不授内容、状态、effect或world等价。
+
+旧issue列表线性去重在原run耗764.42s仍未结束，明确SIGINT自有分析任务，原异常栈
+确认在成员比较。4行保序set索引修正后，同阶段完整耗2.04s；新attempt整体5:26.17、
+peakRSS1,833,420KiB。原失败/停止、字节码证据、脚本、producer和分表输出全部保存。
+这是SCAR自身吞吐修正，不能报成LeWM加速；不是同样条件的完整性能A/B。
+
+完整OS接口新模式公共CLI也已exit0/PUBLISHED：1,067,773原lines、1,067,768接口/
+submissions、1,067,539普通return outcomes，35个新FD producer ports；4,309,455原记录
+分681chunks，10.779GB decoded/260.738MB stored，wall22:01.83。独立audit03 exit0，
+全量chunk/row/count与work wire关联核过，实际101结构分支代表codec通过；不是
+全量work codec或全ExecutionModel语义。成功exec/exit/5未知return、3,340未定process
+接口均未虚构完成或归属。
+唯一未接祖先actor有真实原档，其为collector上下文，后续须以通用exec/clone证据接线。
+
+完整模型仍OPEN。旧source/路由在272038，新物理/OS在369749；不能混合动态事实。
+下一项是版本化静态证据接当前Run、通用语言内部结构、逻辑来源/状态及资源关联；
+参见当前交付第5节。没有开始化简或增加backend/detector。
+
 ### 2026-10-23：分块归档已发布、物理采集成功，继续连接原图
 
 原单JSON失败已由分片恢复解决：151 source shards与13components，manifest63,577
 字节；1627/1627原返回精确恢复，840个原ProgramGraph经公共codec/overlay/formal
 检查，787 UNSUPPORTED、590 NOT_ATTEMPTED均保留。无fresh body lowering。
-新inventory与旧151source archives的snapshot和完整context逐项相等，正在接正规
+新inventory与旧151source archives的snapshot和完整context逐项相等，正规
 CompositionIndex及同capture source binder的接线已实档PASS，不再prepare151个文件：
 100,438调用中5,624 body-linked、3,162 source-only、91,652 unresolved；source组合/
 绑定wall14:26.32。其后same_capture marker连接PASS：79,592 marker/109,288原slot

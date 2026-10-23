@@ -1,0 +1,84 @@
+"""Inference-only launcher for the LeWM benchmark evaluation.
+
+The benchmark's original ``eval.py`` predates the current environment and
+uses Hydra's decorator directly.  This small launcher keeps the original
+evaluation code unchanged while making the two storage locations explicit:
+the large, read-only dataset root and the local inference output directory.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parent
+DATA_ROOT = Path(
+    os.environ.get(
+        "LEWM_DATA_ROOT", "/gpu4-share/nfs/gpu4-share/lewm_data"
+    )
+).resolve()
+CHECKPOINT_ROOT = Path(
+    os.environ.get(
+        "LEWM_CHECKPOINT_ROOT", "/gpu4-share/data/byx/lewm_data"
+    )
+).resolve()
+OUTPUT_ROOT = Path(
+    os.environ.get("LEWM_OUTPUT_ROOT", str(ROOT / "inference_results"))
+).resolve()
+RUN_NAME = os.environ.get("LEWM_RUN_NAME", "eval")
+
+# Hydra 1.3's completion-help wrapper is not a string on Python 3.14, while
+# argparse's validation still requires string help text.  This only affects
+# CLI help formatting and leaves evaluation behavior unchanged.
+_argparse_check_help = argparse.ArgumentParser._check_help
+
+
+def _patched_check_help(self, action):
+    if not isinstance(action.help, str):
+        action.help = repr(action.help)
+    return _argparse_check_help(self, action)
+
+
+argparse.ArgumentParser._check_help = _patched_check_help
+
+# Keep Hydra's cache/output root local.  The dataset and checkpoint paths are
+# injected separately below, so no shared directory is written by eval.py.
+os.environ["STABLEWM_HOME"] = str(OUTPUT_ROOT)
+os.environ.setdefault("MUJOCO_GL", "egl")
+OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
+
+import stable_worldmodel as swm  # noqa: E402
+
+
+_load_pretrained = swm.wm.utils.load_pretrained
+
+
+def _load_local_checkpoint(name, cache_dir=None, extra_args=None):
+    return _load_pretrained(
+        name,
+        cache_dir=str(CHECKPOINT_ROOT),
+        extra_args=extra_args,
+    )
+
+
+swm.wm.utils.load_pretrained = _load_local_checkpoint
+
+
+def main() -> None:
+    eval_path = ROOT / "eval.py"
+    # The original decorator resolves config_path relative to eval.py.  Keep
+    # its filename and __main__ identity while executing it here.
+    namespace = {"__name__": "__main__", "__file__": str(eval_path)}
+    exec(compile(eval_path.read_text(), str(eval_path), "exec"), namespace)
+
+
+if __name__ == "__main__":
+    # The overrides are intentionally left untouched for Hydra.  Add an
+    # isolated run directory unless the caller supplied one explicitly.
+    if not any(arg.startswith("hydra.run.dir=") for arg in sys.argv[1:]):
+        run_dir = OUTPUT_ROOT / "hydra" / RUN_NAME
+        sys.argv.append(f"hydra.run.dir={run_dir}")
+    main()

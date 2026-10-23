@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/audit.py", line 269, in <module>
+    main()
+    ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/audit.py", line 136, in main
+    assert len(members) == 1
+           ^^^^^^^^^^^^^^^^^
+AssertionError

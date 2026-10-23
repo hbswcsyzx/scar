@@ -2,10 +2,10 @@
 
 ## Status and scope
 
-Implemented, awaiting the one authorized real-artifact gate. AST parsing and
-source review are the checks performed so far; the new loader/binder has not
-been executed. This is a first-stage modeling connection, not an optimization
-or proof that the whole program has been modeled.
+Verified against the retained 272038 capture: explicit source binding, the common
+resolver, dispatch association and selected original-source queries passed.
+This is a first-stage modeling connection, not an optimization or proof that
+the whole program has been modeled. Actual receipts and limits are below.
 
 The existing project composition remains the authoritative project inventory.
 Its document, canonical SHA, file indices, typed bodies and schema 1/2 meaning
@@ -135,7 +135,7 @@ not provider version at capture or observer origin of a particular invocation.
 All existing whole-model/effect/version/transformation authority flags remain
 false.
 
-## One real-artifact acceptance gate (pending)
+## Real-artifact acceptance gate and actual results
 
 Use only the original PID **272038** capture and its existing 151-file project
 composition. Bind the existing continuation with raw SHA
@@ -163,6 +163,29 @@ the largest saved graph is 111,660,136 canonical bytes, within the explicit
 128 MB record default. Unique source-artifact budget is separate from physical
 re-read cost. Do not mix this capture with PID 369749.
 
-Even if this gate passes, it establishes this source/runtime connection only.
+Attempt01 exited at a runner receipt-path assumption before constructing these
+readers; its failure is preserved. The original capture has plain raw files and
+needs no archive index. Attempt02 used the correctly located original files and
+completed the public connection without preparing or compiling source.
+
+All 817 groups / 100,438 entries = exits / 855 descriptors were preserved. The 243
+dependency groups / 86,702 calls are source-only; project body activations remain
+5,624. Weighted output is 5,624 BODY_LINKED / 89,864 SOURCE_LINKED / 4,950 UNRESOLVED. The original
+composition document and canonical SHA stayed identical.
+
+All 79,592 markers / 109,288 slots remain: 79,106 definition-linked, 10,992 body-linked,
+50,658 external-source-only, 6 invocation-only and 480 without a retained ancestor.
+Public queries checked all status categories and selected original definitions,
+source atoms, snapshots, contexts and real graph pointers. No typed dependency
+bodies or activations were manufactured.
+
+Binding took 1355.11s and dispatch association 433.90s. The 106 dependency graph
+artifacts were each read once for binding; dispatch validation reused243compact
+verified definitions. Input budget charged 2,087,497,217 canonical bytes including
+144 auxiliary artifacts; physical reads 241,685,433 bytes. Two selected public full
+source views caused two additional measured graph reads. Peak RSS 1,749,776 KiB.
+Full records are in `first_stage_source_attachments_20261023/attempt02`.
+
+This gate establishes this source/runtime connection only.
 Actual/formal/return routing, function environments, fine effects/state versions,
 resource readiness and full software/hardware closure remain separate gates.
