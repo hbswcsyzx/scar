@@ -186,7 +186,7 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
                 enqueue(definition, BodyDemandKind.REMAINDER)
 
         remaining_bodies, remaining_operations = budget.max_lowered_bodies, budget.max_operations
-        loaded_path, loaded_context, lowering_session = None, None, None
+        loaded_path, loaded_context = None, None
         while True:
             v6_task = None
             if is_v6:
@@ -219,15 +219,8 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             try:
                 if path != loaded_path:
                     # Release the previous heavy context before unpickling one.
-                    lowering_session = None
                     loaded_context, loaded_path = None, None
                     loaded_context = store.get(path)
-                    if selected_profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
-                        # One isolated source snapshot for this loaded file,
-                        # released before restoring another. Only repeated
-                        # source-layer validation is reused; each new body is
-                        # still fully checked by the structured constructor.
-                        lowering_session = loaded_context.seal_for_lowering()
                     loaded_path = path
             except (OSError, ValueError, TypeError, KeyError, EOFError, RecursionError, pickle.PickleError) as error:
                 unavailable[path] = _error_reason(error)
@@ -247,8 +240,7 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             try:
                 selected = functions[definition]
                 options = {"profile": selected_profile} if interface_model else {}
-                lower = lowering_session.lower if lowering_session is not None else loaded_context.lower
-                result = lower(selected.qualname, source=selected.source,
+                result = loaded_context.lower(selected.qualname, source=selected.source,
                     max_operations=remaining_operations, expand_candidates=False, **options)
                 charged = result.operations_emitted
                 if type(charged) is not int or not 0 <= charged <= remaining_operations:
@@ -342,7 +334,6 @@ def expand_inventory(discovery, runtime_builder, budget, context_budget, ordered
             if not is_v6:
                 expand_owners((definition,))
 
-        lowering_session = None
         loaded_context = None
         final = []
         files = linker.finish()

@@ -395,6 +395,15 @@ def main(argv=None) -> int:
     composition.add_argument("--max-record-bytes", type=int, default=128000000)
     composition.add_argument("--max-output-bytes", type=int, default=256000000)
     composition.set_defaults(func=_compose_program)
+    source_invocations = sub.add_parser("bind-source-invocations", help="bind every original Python frame entry to exact source and body references")
+    source_invocations.add_argument("--composition", required=True, help="bound composition index JSON.gz")
+    source_invocations.add_argument("--capture", required=True, help="original successful collector capture")
+    source_invocations.add_argument("--trace", help="call trace directory; defaults to capture/trace")
+    source_invocations.add_argument("--witness-mode", choices=("same_capture", "reused_code"), default="same_capture")
+    source_invocations.add_argument("--max-bytes", type=int, default=2000000000)
+    source_invocations.add_argument("--max-lines", type=int, default=2000000)
+    source_invocations.add_argument("--out", required=True, help="fresh source/invocation binding directory")
+    source_invocations.set_defaults(func=_bind_source_invocations)
     check_inventory = sub.add_parser("check-inventory", help="rebuild a source inventory from current files and discovery context")
     check_inventory.add_argument("report", help="inventory report JSON or JSON.gz")
     check_inventory.set_defaults(func=_check_inventory)
@@ -461,7 +470,7 @@ def main(argv=None) -> int:
             command.add_argument('--operand-' + name.replace('_','-'), dest='route_' + name,
                                  type=int, default=getattr(OperandRouteBudget(), name),
                                  help='independent route construction ceiling: ' + name)
-    for command in (call_links,check_call_links,query_call_refs,seed_calls,check_call_seeds,inventory_program,check_inventory,*operand_commands):
+    for command in (call_links,check_call_links,query_call_refs,seed_calls,check_call_seeds,inventory_program,check_inventory,*operand_commands,source_invocations):
         command.add_argument('--max-call-report-bytes',type=int,default=256000000,
                              help='independent decompressed input/output report ceiling')
         command.add_argument('--max-call-trace-bytes',type=int,default=128000000)
@@ -754,6 +763,27 @@ def _check_program(args) -> int:
         destination.write_text(payload + "\n", encoding="utf-8")
     print(payload)
     return 0 if report["status"] == "WELL_FORMED" else 2
+
+
+def _bind_source_invocations(args) -> int:
+    from scar.analysis.program_composition import CompositionIndex
+    from scar.analysis.source_invocations import bind_source_invocations
+    from scar.trace.capture_coordinates import bind_capture_coordinates
+    try:
+        output = Path(args.out).resolve()
+        coordinates = bind_capture_coordinates(args.capture, max_bytes=args.max_bytes, max_lines=args.max_lines,
+            profile_uri=str(output / 'capture-coordinates.json'))
+        composition = CompositionIndex(args.composition)
+        report = bind_source_invocations(composition, coordinates,
+            args.trace or str(Path(args.capture) / 'trace'), output,
+            call_budget=_call_budget(args), witness_mode=args.witness_mode)
+    except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
+        print(json.dumps({"status": "INVALID", "errors": [str(error)],
+                          "transformation_authorized": False}))
+        return 2
+    print(json.dumps({"status": "BOUND_WITH_OPEN_OBLIGATIONS", "out": str(output),
+                      "summary": report['summary'], "first_stage_complete": False}))
+    return 0
 
 
 def _compose_program(args) -> int:

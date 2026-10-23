@@ -53,10 +53,11 @@ authority. Public validators and ordinary source lowering still validate current
 caller-owned inputs. Every newly constructed body/core/interface/typed protocol
 and source correspondence is checked, including inside sealed sessions.
 
-The structured/environment inventory path now uses one session per loaded file
-context. Switching files releases the session before restoring another context;
-this does not keep all 151 files' heavy graphs in memory. Re-entering a file
-creates and validates a fresh session. Legacy profiles retain their prior path.
+The initial structured/environment inventory trial used one session per loaded
+file context, releasing it when switching files. The later real inventory
+rejected that automatic policy for its measured cost; see below. The explicit
+sealed API remains available, while default inventory uses ordinary lowering
+with full validation. Legacy profiles retain their prior path.
 
 The exact same six-body cohort produced identical canonical hashes again.
 Observed instrumented times:
@@ -83,6 +84,24 @@ definition label and expected an exception, but the existing compiler-layout
 check instead returned an explicit unsupported body. That diagnostic mistake is
 retained in `snapshot-boundary-attempt1.stderr.txt`; production behavior was not
 relaxed to accommodate it. No broad test suite or target/GPU execution was run.
+
+## Rejected automatic sealing policy
+
+`first_stage_full_inventory_20261023/progress.jsonl` exposed a counterexample to
+assuming file-local reuse. At the observed checkpoint, 327 completed bodies had
+required 310 sealed sessions across only 38 distinct files. FIFO remainder
+admission is ordered by definition identity and repeatedly switches files, so
+the cost of creating and validating each private snapshot was seldom amortized.
+This is evidence about SCAR analysis cost, not target workload speed.
+
+The automatic sealing integration in `program_expansion.py` was therefore
+removed. The default expansion calls `PreparedSource.lower()` and retains its
+complete source/core/protocol validation. The explicit sealed session API and
+exact set/value-position indexes remain implemented. Queue order, analysis
+budgets, IR and public validation were not changed. The interrupted trial's logs
+remain evidence for the rejected policy; they are not a completed inventory or
+successful whole-program acceptance result. No tests or new jobs were run for
+this minimal rollback.
 
 ## Evidence and reproduction
 

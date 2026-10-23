@@ -4,6 +4,21 @@
 
 ### 2026-10-23：成功全流程采集与统一运行身份
 
+后续同日进展：生产 dispatch 参数槽桥已实现，先以一次真实 CPU 程序核验重复
+Tensor 参数、返回、异常、view 与 autograd；不是重新执行目标来猜数据边。随后
+原 LeWM 命令成功运行，returncode 0、100,438 次保留调用、39,796 次 dispatch、
+119,388 条 sidecar，零 drop/error/gap，owned mode 已退出；episode 成功并保存视频。
+404.86s 插桩墙钟和 150.19s 目标 evaluation time 都不是干净性能数据。
+新联合导入进行中，264 个成员/906,808 行 OS 已核；逐槽与 provider 的全量核对
+尚未结束，不能提前写 VERIFIED。产物位于 `first_stage_lewm_dispatch_20261023` 与
+`first_stage_joined_dispatch_20261023`。
+
+唯一的全量源码重建已从真实成功原档重新开始，environment profile、
+4096 body/100000 aggregate operations；`first_stage_full_inventory_20261023` 有
+逐文件 prepare/seal 和逐 body 的进度。尚无最终覆盖数；不会把运行中计数与旧的
+54 个局部 body 相加。新的源码 invocation 接线复用本次产生的 exact code/source
+witness，不重新按函数名或行号猜测，不在每次查询再 prepare 全部源码。
+
 本节接管下面历史运行中的状态：此前两个未结束的全量源码分析进程已不存在，
 没有可验收的最终产物，不能继续称其“正在运行”。数据挂载恢复后已重新成功运行
 原 pusht 单 episode 命令，未修改 LeWM。新采集产品版本 `7de08ee`，returncode 0，
