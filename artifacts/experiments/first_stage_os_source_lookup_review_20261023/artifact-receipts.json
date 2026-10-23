@@ -1,0 +1,79 @@
+{
+  "actual_exit": 0,
+  "files": [
+    {
+      "bytes": 947,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/README.md",
+      "sha256": "5b6bd3b717629f814fe046210068db3a51f188e2320d1a80fa6108bc6754460f"
+    },
+    {
+      "bytes": 263,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/completion-receipt.json",
+      "sha256": "baa6c67eef0b1bc76740ce9aa22c4ae8a33e955e51858247c53ed0e34a6feca0"
+    },
+    {
+      "bytes": 259,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/frontiers.json",
+      "sha256": "35af20d5f32141f1e8bf7fa538123a37dbd912ba74c59d3e297665cfaf811ea2"
+    },
+    {
+      "bytes": 11464,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/matches.json",
+      "sha256": "dd0ff5f7b21c5184be22238458e166f6152905c03ad3388be63cddd7b1be3828"
+    },
+    {
+      "bytes": 3942,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/needs.json",
+      "sha256": "7538035cdabce10c4620c3dd37d413230e8032d71bfe03ec8561ca83e9fa2df3"
+    },
+    {
+      "bytes": 9527,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/probe.py",
+      "sha256": "8dadba451af2d3c109cfc47155688b07263560a3cea9d8833360df9f217e6114"
+    },
+    {
+      "bytes": 2096,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/producer.json",
+      "sha256": "fc9ea94fc2ea4369bf39b281d0f6d08ab9590182a1cd9f1baa8a92b445faecfe"
+    },
+    {
+      "bytes": 4312,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/queries.json",
+      "sha256": "a93aba4a26a368c03b8a47590c683b495635e581efcc45571f0bea70264711af"
+    },
+    {
+      "bytes": 483,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/run.sh",
+      "sha256": "0b4390de15bdf1fdb56d4372a39cd3a29325ed6248b75cdb71fca5755b1d5fe5"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/run.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 876,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/run.stdout.jsonl",
+      "sha256": "7d405fef485f8a786f954667c8ae1dc740a7e2a73db12ec062e7db4f502771a5"
+    },
+    {
+      "bytes": 839,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/run.time.txt",
+      "sha256": "8ac7b16a7e58f58fff3c039cec266a6ace7bdac04491fd2c1885f452ebb679e0"
+    },
+    {
+      "bytes": 950,
+      "path": "artifacts/experiments/first_stage_os_source_lookup_review_20261023/summary.json",
+      "sha256": "06ca1cac19a6c1dff290a7b530ad0846312afdff82b96993c1499f5b1057cb0f"
+    },
+    {
+      "bytes": 6719,
+      "path": "docs/OS_SOURCE_LOOKUP_REVIEW.md",
+      "sha256": "4bb57c80305694fc897ecf4446c678aca837626dfda3f27188c78fa2e9afaf60"
+    }
+  ],
+  "full_execution_model_semantics": "OPEN",
+  "input_sha_unchanged_after_probe": true,
+  "schema": "scar.os-source-lookup-review-artifact-receipts",
+  "schema_version": 1
+}

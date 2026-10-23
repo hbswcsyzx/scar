@@ -6,6 +6,22 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-23：移除FD观察context路径的人工birth选择
+
+新增通用`os_source_lookup.py`，从原R2的35端口、exact archive和coordinates机械生成
+3groups/2birth需求，无actor/TID/ordinal入参。2次public原R1查询准确命中，收费
+31,998,744 decoded bytes；唯一required pre-exec witness以明确AUTOMATIC_SOURCE_LOOKUP
+producer发布，原consumer随后独立复核。唯一实际gate exit0，wall17.54s、RSS122,308KiB：
+35containers/3contexts、13pipe对、25selected work/38access保持，选中typed records与旧门
+完全一致。root另用stdlib核2原chunk双SHA/原row、source归档映射及child结果，exit0，
+0.263s；没有重跑importer或完整模型codec。
+
+此门仅关闭这35个端口context连接的人工选择断口。原ancestor无自身birth坐标仍列
+frontier；未声称source全局排序/唯一性/未命中即不存在，旧consumer零/多pre-exec
+witness限制保留。全部legacy handles、状态/offset/ready与全ExecutionModel仍OPEN。
+见[实现与实测](OS_SOURCE_LOOKUP.md)，实际producer/输入/输出/exit保存在
+`first_stage_os_source_lookup_20261023`。没有新target、compile、detector/backend或优化。
+
 ### 2026-10-23：同一次运行的正式接线、端点查询与语言/资源局部闭合
 
 当前369749原档的source→production marker→SBA完整gate已actual exit0：817groups、

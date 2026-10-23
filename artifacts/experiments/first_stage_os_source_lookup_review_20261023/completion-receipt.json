@@ -1,0 +1,10 @@
+{
+  "actual_exit": 0,
+  "first_stage_complete": false,
+  "full_execution_model_semantics": "OPEN",
+  "lookup_queries": 2,
+  "positive_exact_matches": 2,
+  "production_changed": false,
+  "schema": "scar.os-source-lookup-review-completion",
+  "schema_version": 1
+}

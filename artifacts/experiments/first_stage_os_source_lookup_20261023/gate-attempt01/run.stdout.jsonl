@@ -1,0 +1,24 @@
+{"phase": "AUTOMATIC_WITNESS_PREPARE_BEGIN"}
+{"charged_decoded_bytes": 15999783, "phase": "OS_SOURCE_QUERY", "queries": 1}
+{"charged_decoded_bytes": 31998744, "phase": "OS_SOURCE_QUERY", "queries": 2}
+{"phase": "AUTOMATIC_WITNESS_PUBLISHED", "receipt": {"bytes": 6571, "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_source_lookup_20261023/gate-attempt01/automatic-witness/context-evidence.json", "sha256": "ef590b5b38f9ad91a409861a3acbfed1d9ef86de36e591e7d09bd4b73626efbf"}}
+{"phase": "BUILD_BEGIN"}
+{"decoded_bytes": 382149, "files": 32, "lines": 3403, "phase": "PROOF_RAW", "stage": "build"}
+{"decoded_bytes": 421659, "files": 64, "lines": 3890, "phase": "PROOF_RAW", "stage": "build"}
+{"decoded_bytes": 432635, "files": 96, "lines": 4018, "phase": "PROOF_RAW", "stage": "build"}
+{"decoded_bytes": 441649, "files": 128, "lines": 4128, "phase": "PROOF_RAW", "stage": "build"}
+{"decoded_bytes": 445649, "files": 160, "lines": 4192, "phase": "PROOF_RAW", "stage": "build"}
+{"decoded_bytes": 452271, "files": 192, "lines": 4274, "phase": "PROOF_RAW", "stage": "build"}
+{"decoded_bytes": 9260396, "files": 224, "lines": 36603, "phase": "PROOF_RAW", "stage": "build"}
+{"decoded_bytes": 9264445, "files": 252, "lines": 36665, "phase": "PROOF_RAW", "stage": "build"}
+{"phase": "BUILD_PUBLISHED", "receipt": {"path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_source_lookup_20261023/gate-attempt01/result/manifest.json", "physical_bytes": 281314, "physical_sha256": "d37eef5881d25a66c7500be2130b4f7af114586e0b8607f81a36ddd359886d84"}}
+{"decoded_bytes": 382149, "files": 32, "lines": 3403, "phase": "PROOF_RAW", "stage": "public_read"}
+{"decoded_bytes": 421659, "files": 64, "lines": 3890, "phase": "PROOF_RAW", "stage": "public_read"}
+{"decoded_bytes": 432635, "files": 96, "lines": 4018, "phase": "PROOF_RAW", "stage": "public_read"}
+{"decoded_bytes": 441649, "files": 128, "lines": 4128, "phase": "PROOF_RAW", "stage": "public_read"}
+{"decoded_bytes": 445649, "files": 160, "lines": 4192, "phase": "PROOF_RAW", "stage": "public_read"}
+{"decoded_bytes": 452271, "files": 192, "lines": 4274, "phase": "PROOF_RAW", "stage": "public_read"}
+{"decoded_bytes": 9260396, "files": 224, "lines": 36603, "phase": "PROOF_RAW", "stage": "public_read"}
+{"decoded_bytes": 9264445, "files": 252, "lines": 36665, "phase": "PROOF_RAW", "stage": "public_read"}
+{"phase": "PUBLIC_READ_VALIDATED"}
+{"contexts": 3, "handles": 35, "phase": "GATE_COMPLETE", "status": "PASS_SELECTED_CONTAINER_SCOPE"}

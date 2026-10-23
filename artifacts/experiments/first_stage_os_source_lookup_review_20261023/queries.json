@@ -1,0 +1,114 @@
+[
+  {
+    "actual_source": {
+      "artifact": 0,
+      "line": 3310
+    },
+    "candidate_selector": {
+      "chunk": {
+        "artifact": {
+          "schema": "scar.partitioned-os-resource-fragment",
+          "sha256": "cbc6dcfd78ccca0961bdabecce94bc747b7b281fdbc3f49228c8b52b9b3aec14",
+          "size_bytes": 316803,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/interfaces/manifest.json"
+        },
+        "locator": "#/tables/observations/chunks/0"
+      },
+      "line": 3310,
+      "ordinal": 3309,
+      "pointer_within_line": "/record",
+      "table": "observations"
+    },
+    "exact_source_match": true,
+    "hint_anchor": {
+      "observation_ordinal": 3308,
+      "source_line": 3309
+    },
+    "locator": {
+      "artifact": {
+        "compression": "gzip",
+        "decoded_bytes": 15998961,
+        "decoded_sha256": "b6d96a45620160eb2cef981706d927b5679eb3b7da6f643896a300831f189706",
+        "first_ordinal": 0,
+        "last_ordinal": 10383,
+        "lines": 10384,
+        "physical_bytes": 959930,
+        "physical_sha256": "644fa29d7ce0741ad9315c859e82ee5d4aa1a808589a6b3b90c6222430caa741",
+        "uri": "os/observations/000000.jsonl.gz"
+      },
+      "line": 3310,
+      "manifest_receipt": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/interfaces/manifest.json",
+        "physical_bytes": 316803,
+        "physical_sha256": "cbc6dcfd78ccca0961bdabecce94bc747b7b281fdbc3f49228c8b52b9b3aec14"
+      },
+      "pointer_within_line": "/record"
+    },
+    "need": {
+      "artifact": {
+        "schema": "strace.syscalls.text.v1",
+        "sha256": "417421a14fe7f7e10ff8c38c692fb23b09d7e1ad926994fcf299ceb455358129",
+        "size_bytes": 378274,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369747"
+      },
+      "locator": "#/lines/3310"
+    },
+    "row_sha256": "abc2c7ab980437799001f7c5c77c8b1c646a930ee480e77bf4fcaa29b02d16eb"
+  },
+  {
+    "actual_source": {
+      "artifact": 1,
+      "line": 863883
+    },
+    "candidate_selector": {
+      "chunk": {
+        "artifact": {
+          "schema": "scar.partitioned-os-resource-fragment",
+          "sha256": "cbc6dcfd78ccca0961bdabecce94bc747b7b281fdbc3f49228c8b52b9b3aec14",
+          "size_bytes": 316803,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/interfaces/manifest.json"
+        },
+        "locator": "#/tables/observations/chunks/85"
+      },
+      "line": 7386,
+      "ordinal": 867219,
+      "pointer_within_line": "/record",
+      "table": "observations"
+    },
+    "exact_source_match": true,
+    "hint_anchor": {
+      "observation_ordinal": 867049,
+      "source_line": 863713
+    },
+    "locator": {
+      "artifact": {
+        "compression": "gzip",
+        "decoded_bytes": 15999783,
+        "decoded_sha256": "97c4e16db1d9a694aed58d724526d352391f844c6a7ca0fc6952f79b3a53c452",
+        "first_ordinal": 859834,
+        "last_ordinal": 870106,
+        "lines": 10273,
+        "physical_bytes": 813142,
+        "physical_sha256": "7a04c3e85cf5dca78f89d72c7f1f56194602af67276618762bcc7df585218196",
+        "uri": "os/observations/000085.jsonl.gz"
+      },
+      "line": 7386,
+      "manifest_receipt": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_os_interface_work_20261023/result/interfaces/manifest.json",
+        "physical_bytes": 316803,
+        "physical_sha256": "cbc6dcfd78ccca0961bdabecce94bc747b7b281fdbc3f49228c8b52b9b3aec14"
+      },
+      "pointer_within_line": "/record"
+    },
+    "need": {
+      "artifact": {
+        "schema": "strace.syscalls.text.v1",
+        "sha256": "70ab02c2c19c407b1bbfc85f0a4f54e1ab3582e71fc783d9426973b0527a7ecd",
+        "size_bytes": 81578171,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369749"
+      },
+      "locator": "#/lines/863883"
+    },
+    "row_sha256": "f47305b8401585789295787d0a03c0db939363f8cc2425ac8cec488b2d5498b6"
+  }
+]
