@@ -1,8 +1,8 @@
 # SourceProgram5 publication → current-Run body admission
 
-2026-10-23. **Observed code/artifact review; Proposed implementation only.**
-No production code or graph schema was changed, and no raw stream, full source
-archive or compiler was run. This complements `SOURCE_LANGUAGE_PUBLICATION.md`;
+2026-10-23. **Observed code/artifact review; Implemented runtime bridge,
+AST checked; new publication/current-Run gate pending.** The implementation below
+has not opened a new raw stream, prepared source, compiled code or executed a target. This complements `SOURCE_LANGUAGE_PUBLICATION.md`;
 it does not introduce another IR, GraphIndex change or optimization backend.
 
 ## 1. Actual old admission is the immediate blocker
@@ -207,4 +207,65 @@ original compiler-basis interfaces. Runtime minimum touches:
 
 `CodeWitnessStore`, raw trace producers,106source graph artifacts and legacy
 monolithic validators need no new semantics here. GraphIndex/CEM/detectors/
-backends are outside this task. This plan awaits root approval before code.
+backends are outside this task. The reviewed plan is implemented as detailed below;
+its joint real-artifact gate remains pending.
+
+
+## 7. Implemented boundary and normal entry (not yet runtime-Verified)
+
+`scar.analysis.current_source_evidence.connect_current_capture(composition,
+coordinates, trace_directory, out_dir, *, previous_source_directory,
+previous_report_sha256, previous_bindings_sha256, previous_producer,
+previous_participating_producer, code_witnesses, dispatch_bridge=None,
+frame_budget=None, operand_budget=None, route_budget=None,
+include_environments=True, progress=None)` owns one independent
+`read_call_operands` call. It passes its private in-process reader object to the
+source binder and operand/SBA linker. The public independent bind/replay functions
+keep their signatures and perform their original fresh reads. There is no public
+`validated=True` or caller-supplied transcript authority.
+
+The returned dictionary contains `source_report`, optional `dispatch_report`, the
+original `operand_report`, actual `reader_counts` and `proof_reuse`. The parent
+runner saves/shards the existing operand report; this bridge adds no persistent
+raw transcript or new program/state IR.
+
+`SameRunSourceProof` checks the pinned previous source report/bindings, original
+producer freeze and post-import receipts. It rehashes the actual archived bytes
+of the participating producer modules, and the original fixed-input manifest.
+It **does not rehash every historical carrier payload** or reparse105 library
+graphs here: the receipt explicitly records
+`prior_fixed_artifact_payloads_rehashed_here=false`. The current raw frame and
+operand families are freshly read and matched by logical URI/SHA/bytes/process
+to the exact old coordinate artifact; frame budgets, complete descriptors,
+anchors, groups, counts, metadata, issues, interpreter build, original static
+compiler basis and explicit attachment receipts are conserved. Changed source
+or a different current Run cannot inherit this proof.
+
+Only unchanged full qualified source-reference membership and the completed
+binding-scope source guards are reused. JSON declarations are checked against
+the actual installed private proof object before dispatch or SBA may consume
+this mode. Full `resolve_definition`/`source_view` still resolve real original
+graphs. No OperationDefinition, typed body or activation is fabricated by the
+membership cache. Source reports and consumers explicitly carry
+`REUSED_COMPLETED_CURRENT_CAPTURE_AT_RECORDED_BINDING_NOT_FRESH_LIVE` and state
+that current source guards were not refreshed. This is retained-capture analysis,
+not a fresh claim about the currently executing/live program.
+
+`SourceBodyAccess` recognizes legacy header8 and explicit header2/capability via
+`publication_header()`. CP2 language bodies use their actual SourceProgram5
+namespace and independently run the existing structured/language validators
+with the saved exact source AST and the original read-only CodeWitness evidence.
+Full code-evidence equality still includes original compiler/inventory locators.
+Only a complete currently bound matching descriptor makes that language body
+applicable. Loaded-body receipts distinguish structural, source-shape and
+source-code-witness validation, and retain `source_replay_performed=false`.
+
+The common admission helper accepts an actual public-codec BodyInventory plus
+original origin/link/snapshot/definition records; it never grants CORE_LINKED
+from a supplied success boolean or separate root string. The publisher uses it
+for affected origins while preserving all other original admissions.
+
+AST parsing and whitespace checks are implementation checks only. The parent
+owns the single combined publication → current source → marker → SBA gate and
+will derive all new associations, routes, ports and resource costs from real
+outputs before marking this bridge Verified.

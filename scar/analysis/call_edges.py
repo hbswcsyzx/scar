@@ -775,8 +775,9 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
     partitioned_access = inventory if type(inventory) is SourceBodyAccess else None
     if inventory is not None:
         versions = (5, 6, 7, 8) if allow_v6 else (4, 5)
-        version = partitioned_access.schema_version if partitioned_access is not None else inventory.to_dict()["schema_version"]
-        _require(version in versions and inventory.interfaces is not None,
+        supported = (allow_v6 and partitioned_access.supported_call_abi == "STRUCTURED_ENV_V1"
+                     if partitioned_access is not None else inventory.to_dict()["schema_version"] in versions)
+        _require(supported and inventory.interfaces is not None,
                  "operand/core linking requires an explicit frame/structured v5-v8 inventory" if allow_v6 else
                  "call/core linking requires a bound-formal v4 or bound-frame v5 inventory")
         inventory_root = str(partitioned_access.root) if partitioned_access is not None else inventory.discovery.project_root

@@ -169,8 +169,8 @@ class _PartitionedSourceScope:
     def __init__(self, composition, report):
         from scar.analysis.program_composition import CompositionIndex
         _need(type(composition) is CompositionIndex and composition.partitioned
-              and composition.document["schema_version"] == 2,
-              "source schema2 needs an explicit partitioned CompositionIndex")
+              and composition.document["schema_version"] in (2, 3),
+              "partitioned source binding needs an explicit supported CompositionIndex")
         _need(report["inventory"] == composition.document["inventory"]
               and report["composition_canonical_sha256"] == hashlib.sha256(_canonical(composition.document)).hexdigest(),
               "source report differs from the exact composition/inventory receipts")
@@ -347,6 +347,8 @@ class _FormalSourceScope:
         self.project = _PartitionedSourceScope(composition, report)
         self.composition, self.counts = composition, Counter()
         self.report = report
+        # The declaration in JSON is not an authority to reuse graph proof.
+        # The public binder below checks it against the actual installed proof.
         self.reused = report["witness_mode"] == "reused_code"
         self.builds = {meta["process_id"]: meta["python"] for meta in report["collection_metadata"]}
         _need(composition.has_source_attachments
@@ -423,7 +425,10 @@ class _FormalSourceScope:
             if not outcome["source_usable"]:
                 self.counts["external_static_guard_rejected"] += 1
             elif reference is not None:
-                self.composition.resolve_definition(reference)
+                if outcome.get("reference_membership_proof") is None:
+                    self.composition.resolve_definition(reference)
+                else:
+                    self.counts["exact_same_run_source_membership_proofs_reused"] += 1
                 self.counts["external_source_only_definitions_verified"] += 1
             else:
                 self.counts["external_verified_codes_without_definition"] += 1
@@ -583,6 +588,8 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
     (root, source_report, report_artifact, bindings, binding_artifact, bridge, bridge_artifact,
      artifacts, native, pid, process) = _inputs(source_directory, dispatch_bridge, coordinates, max_input_bytes)
     version = source_report["schema_version"]
+    from scar.analysis.current_source_evidence import _require_owned_source_report
+    retained_proof = _require_owned_source_report(composition_index, source_report, bindings)
     source_scope = None
     if version in (2, 3):
         source_scope = (_FormalSourceScope(composition_index, source_report) if version == 3
@@ -749,6 +756,11 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
             report["source_inputs"] = source_report["source_inputs"]
             if source_report["witness_mode"] == "reused_code":
                 report["attachment_source_match_rule"] = source_report["attachment_source_match_rule"]
+        if retained_proof is not None:
+            report.update(raw_reader_rule=source_report["raw_reader_rule"],
+                same_run_source_proof=retained_proof,
+                source_guard_scope=source_report["source_guard_scope"],
+                current_source_guards_refreshed=False)
         (stage / "report.json").write_bytes(_canonical(report))
         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
         output.mkdir(exist_ok=False)

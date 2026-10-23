@@ -759,6 +759,20 @@ def _write_rows(path, rows):
 def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureCoordinates,
                             trace_directory, out_dir, *, call_budget=CallEdgeBudget(),
                             witness_mode="same_capture"):
+    """Independently read raw frames through the unchanged public contract."""
+    return _bind_source_invocations(composition, coordinates, trace_directory, out_dir,
+        call_budget=call_budget, witness_mode=witness_mode)
+
+
+def _bind_source_invocations_owned(owner, composition, coordinates, trace_directory, out_dir, **kwargs):
+    from scar.analysis.current_source_evidence import _OwnedCurrent
+    _need(type(owner) is _OwnedCurrent, "owned source reader must be created by current orchestration")
+    return _bind_source_invocations(composition, coordinates, trace_directory, out_dir, _owner=owner, **kwargs)
+
+
+def _bind_source_invocations(composition: CompositionIndex, coordinates: CaptureCoordinates,
+                             trace_directory, out_dir, *, call_budget=CallEdgeBudget(),
+                             witness_mode="same_capture", _owner=None):
     """Reuse exact source witnesses and bind every recorded invocation.
 
     There is no target execution or compiler/source replay.  With an inventory
@@ -794,15 +808,21 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
         admitted = {(item.origin.process_id, item.origin.code) for item in scope.admissions}
         _need(admitted == eligible, "final admission denominator differs from eligible code/source groups")
     members = _Members(coordinates, directory)
-    sink = _Sink()
-    scanned = scan_call_trace(directory, root, call_budget, sink=sink)
+    if _owner is None:
+        sink = _Sink()
+        scanned = scan_call_trace(directory, root, call_budget, sink=sink)
+    else:
+        _need(witness_mode == "reused_code" and _owner.proof is not None,
+              "owned current source path requires exact retained static proof")
+        scanned, sink = _owner.source_inputs(directory, root, call_budget, coordinates)
     members.bind(scanned.files)
     if seed_model is not None and witness_mode == "same_capture":
         _verify_seed_model(seed_model, scanned, sink, members)
     attachment_capture_checks = (composition.verify_source_attachments(scanned, tuple(sink.groups.values()))
         if witness_mode == "same_capture" else composition.source_attachment_reuse_checks(scanned, tuple(sink.groups.values())))
     captures = {(capture.process_id, capture.code.key): capture for capture in scanned.captures}
-    source_guard = _SourceGuard(call_budget) if witness_mode == "reused_code" else None
+    source_guard = ((_owner.proof.guards() if _owner is not None else _SourceGuard(call_budget))
+                    if witness_mode == "reused_code" else None)
     bindings, binding_indexes = _binding_rows(composition, seed_model, scope, sink, captures,
                                              members, witness_mode, source_guard)
     if composition.has_source_attachments:
@@ -887,6 +907,9 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
                                     source_inputs=composition.source_inputs())
             if witness_mode == "reused_code":
                 binding_document["attachment_source_match_rule"] = "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
+        if _owner is not None:
+            binding_document.update(raw_reader_rule="OWNED_CURRENT_OPERAND_FRAME_SCAN_V1",
+                same_run_source_proof=_owner.proof.receipt())
         binding_payload = _canonical(binding_document)
         (stage / "bindings.json").write_bytes(binding_payload)
         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
@@ -941,6 +964,12 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
                 attachment_scope="original source fragments; no added inventory files or typed bodies")
             if witness_mode == "reused_code":
                 report["attachment_source_match_rule"] = "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
+        if _owner is not None:
+            report.update(raw_reader_rule="OWNED_CURRENT_OPERAND_FRAME_SCAN_V1",
+                raw_frames_read_by="shared owned operand/frame reader",
+                same_run_source_proof=_owner.proof.receipt(),
+                source_guard_scope="REUSED_COMPLETED_CURRENT_CAPTURE_AT_RECORDED_BINDING_NOT_FRESH_LIVE",
+                current_source_guards_refreshed=False)
         (stage / "report.json").write_bytes(_canonical(report))
         # All scanning, cross-input checking and row creation have succeeded.
         # Reserve the caller's destination exclusively, publish data first, and

@@ -1,0 +1,13 @@
+{
+  "actual_catalog_exit": 0,
+  "boundary_read_exit": 0,
+  "full_execution_model_semantics": "OPEN",
+  "handles": 12684,
+  "main_raw_read": false,
+  "million_work_scanned": false,
+  "production_changed": false,
+  "representative_read_exit": 0,
+  "resources": 12683,
+  "schema": "scar.all-os-handle-review-completion",
+  "schema_version": 1
+}

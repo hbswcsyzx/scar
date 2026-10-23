@@ -10,7 +10,7 @@ from __future__ import annotations
 import ast
 from collections import Counter, defaultdict
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import json
 from pathlib import Path
@@ -144,6 +144,8 @@ class SourceBodyAccess:
                   and document.get("source_definition_reference_format") == report["source_definition_reference_format"]
                   and document.get("attachment_source_match_rule") == report.get("attachment_source_match_rule"),
                   "formal binding receipts/reuse rule differ from source report")
+        from scar.analysis.current_source_evidence import _require_owned_source_report
+        self.retained_source_proof = _require_owned_source_report(composition, report, document)
         self.rows = document["bindings"]
         _need(type(self.rows) is list, "binding rows must be a list")
         _need(len(self.rows) == report["summary"]["entered_code_groups"]
@@ -157,12 +159,20 @@ class SourceBodyAccess:
             self.by_group[key] = row
         header = composition.inventory_component("header")
         self.schema_version = header["schema_version"]
-        self.profile = decode(BodyLoweringProfile, header["profile"])
+        self.publication = composition.publication_header()
+        self.profile = decode(BodyLoweringProfile, self.publication["profile"])
+        self.supported_call_abi = self.publication["supported_call_abi"]
         self.interfaces = SimpleNamespace(profile=self.profile)
         self.root = Path(composition.inventory_component("discovery")["project_root"])
         self.inventory_sha256 = report["inventory"]["raw_sha256"]
-        _need(self.profile is BodyLoweringProfile.STRUCTURED_ENV and self.schema_version == 8,
-              "partition path requires the original structured environment inventory")
+        _need(self.profile is BodyLoweringProfile.STRUCTURED_ENV
+              and self.supported_call_abi == "STRUCTURED_ENV_V1"
+              and ((self.publication["header_schema"] == "scar.program-inventory"
+                    and self.schema_version == 8 and not self.publication["capabilities"])
+                   or (self.publication["header_schema"] == "scar.partitioned-inventory-header"
+                       and self.schema_version == 2
+                       and self.publication["capabilities"] == ["SOURCE_PROGRAM5_ADMISSION_V1"])),
+              "partition path requires an explicit supported structured environment header/capability")
         source_model = composition.inventory_component("call_sources")["model"]
         self.original_links = tuple(decode(CodeSourceLink, row) for row in source_model["code_links"])
         self.original_captures = tuple(decode(CodeCapture, row) for row in source_model["codes"])
@@ -423,9 +433,26 @@ class SourceBodyAccess:
                   and bundle.body.metadata.source == projection.snapshot,
                   "typed body definition/root/snapshot differs")
             view = self.views[projection.snapshot.path]
+            language_arguments = {}
+            if bundle.language is not None:
+                from scar.analysis.source_language import SourceCodeEvidence, SourceLanguageOptions
+                _need(bundle.public_language_structure_validated
+                      and type(bundle.language.code_evidence) is dict,
+                      "extended body requires its public original language structure and code witness")
+                captured = decode(CapturedCode, bundle.language.code_evidence["captured"])
+                _need(self.descriptors.get(captured.key) == captured
+                      and self.links.get(captured.key) is not None
+                      and self.links[captured.key].definition == definition,
+                      "language applicability requires the complete currently bound code descriptor")
+                evidence = SourceCodeEvidence(self.code_witnesses, self.composition, captured)
+                _, _, source_tree = self.source_context(projection.snapshot.path)
+                language_arguments = {"language": bundle.language, "source_tree": source_tree,
+                    "language_options": SourceLanguageOptions(bundle.language.capabilities, evidence)}
             require_valid_structured_body(bundle.structured, bundle.body.graph, bundle.interface,
-                bundle.body.metadata, semantic=view.semantic, control=view.control)
+                bundle.body.metadata, semantic=view.semantic, control=view.control, **language_arguments)
             validate_body_interface(bundle.body, bundle.interface, self.signatures[definition])
+            if bundle.language is not None:
+                bundle = replace(bundle, source_shape_verified=True, source_code_witness_verified=True)
             self.bundles[definition] = bundle
             graph = bundle.body.graph
             self.cores[definition] = (bundle.body,
@@ -448,6 +475,10 @@ class SourceBodyAccess:
             "composition_canonical_sha256": _hash(self.composition.document),
             "source_report": self.report_receipt, "source_bindings": self.bindings_receipt,
             "source_witness_mode": self.report["witness_mode"], "run": encode(self.coordinates.run),
+            "publication_header": self.publication,
+            "same_run_source_proof": self.retained_source_proof,
+            "source_guard_scope": self.report.get("source_guard_scope", "ORIGINAL_SOURCE_REPORT_BINDING_SCOPE"),
+            "current_source_guards_refreshed_here": False,
             "current_raw_scan_verified": self.bound, "raw_counts": getattr(self, "scan_counts", {}),
             "unbound_processes": sorted(getattr(self, "unbound_processes", ())),
             "source_invocation_rows_consumed": False,
@@ -456,6 +487,14 @@ class SourceBodyAccess:
             "code_witness_references": dict(self.witness_references),
             "code_witness_frontiers": dict(self.frontiers),
             "loaded_bodies": len(self.bundles), "parsed_source_files": len(self.asts),
+            "loaded_body_validation": {definition.wire: {
+                "public_graph_validated": bundle.public_graph_validated,
+                "public_source_overlay_validated": bundle.public_source_overlay_validated,
+                "public_language_structure_validated": bundle.public_language_structure_validated,
+                "source_shape_verified": bundle.source_shape_verified,
+                "source_code_witness_verified": bundle.source_code_witness_verified,
+                "source_replay_performed": bundle.source_replay_performed}
+                for definition, bundle in self.bundles.items()},
             "source_producer_conditions": self.report["conditions"],
             "source_prepared": False, "canonical_producers_copied": False,
             "whole_program_established": False, "transformation_authorized": False}

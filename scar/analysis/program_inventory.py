@@ -88,6 +88,8 @@ class ProgramInventory:
     structured: tuple[StructuredBodyModel, ...] = ()
 
     def _check_profile(self):
+        if any(body.construction_operations is None for file in self.files for body in file.bodies):
+            raise ValueError("historical inventory wrappers require recorded construction costs; source publication needs its explicit wrapper")
         from scar.ir.program.source_language import reject_extended_protocols
         for model in self.structured:
             reject_extended_protocols(model)

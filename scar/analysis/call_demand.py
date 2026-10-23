@@ -187,43 +187,70 @@ def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trac
         return result
 
 
+def derive_call_source_admission(origin, code_source_link, *, source_snapshot,
+                                 indexed_definitions, body=None, source_unavailable=False):
+    """Derive one static source/body association using the full original join.
+
+    ``body`` is the existing BodyInventory produced/read through the public
+    body pipeline, not a caller success flag or standalone region claim.
+    This correspondence does not prove effects or any current invocation.
+    """
+    from scar.ir.program.call_demand import (
+        CallSourceAdmission, CallSourceAdmissionStatus as Status, EnteredCallCode,
+    )
+    from scar.ir.program.call_edges import CodeSourceLink, CallLinkStatus
+    from scar.ir.program.inventory import BodyInventory, BodyStatus, DefinitionInventory
+    from scar.ir.semantics_v2 import SourceSnapshot
+    if (type(origin) is not EnteredCallCode or type(code_source_link) is not CodeSourceLink
+            or code_source_link.status is not CallLinkStatus.VERIFIED
+            or origin.code != code_source_link.code or type(indexed_definitions) is not tuple
+            or any(type(item) is not DefinitionInventory for item in indexed_definitions)
+            or type(source_unavailable) is not bool):
+        raise TypeError("static admission needs exact original origin/link/definition records")
+    if source_snapshot is None:
+        return CallSourceAdmission(origin, Status.UNAVAILABLE,
+            reason="source not admitted by discovery budgets or source boundary")
+    if type(source_snapshot) is not SourceSnapshot:
+        raise TypeError("static admission source snapshot must be exact")
+    link = code_source_link
+    if source_snapshot.path != link.snapshot.path or source_snapshot.fingerprint != link.snapshot.fingerprint:
+        return CallSourceAdmission(origin, Status.MISMATCH,
+            reason="discovered source content differs from the verified code/source snapshot")
+    matches = [definition for definition in indexed_definitions
+               if definition.id == link.definition and definition.source == link.source]
+    if len(matches) != 1:
+        status = Status.UNAVAILABLE if not indexed_definitions and source_unavailable else Status.MISMATCH
+        return CallSourceAdmission(origin, status,
+            reason="verified unique definition was not indexed in the admitted source")
+    definition = matches[0]
+    if body is not None and (type(body) is not BodyInventory or body.definition != definition.id):
+        raise ValueError("static admission body differs from its unique original definition")
+    if body is not None and body.graph is not None:
+        if (body.status is not BodyStatus.LOWERED_WITH_GAPS or body.metadata is None
+                or body.metadata.source != source_snapshot):
+            raise ValueError("canonical body status/source contradicts its static admission")
+        return CallSourceAdmission(origin, Status.CORE_LINKED,
+            source_snapshot, definition.id, definition.source, body.graph.root)
+    reason = body.reason if body is not None and body.reason else "indexed source has no supported body interface"
+    return CallSourceAdmission(origin, Status.INDEXED_WITHOUT_BODY,
+        source_snapshot, definition.id, definition.source, reason=reason)
+
+
 def _call_source_scope(report, files):
     """Link only final bodies, after every preparation/interface failure."""
-    from scar.ir.program.call_demand import (
-        CallSourceAdmission, CallSourceAdmissionStatus as Status, CallSourceScope, EnteredCallCode,
-    )
-    from scar.analysis.call_demand_schedule import _matched_call_sources
+    from scar.ir.program.call_demand import CallSourceScope, EnteredCallCode
     by_path = {file.snapshot.path: file for file in files}
     links = {link.code: link for link in report.eligible_code_links()}
-    matched = _matched_call_sources(report, files)
     admissions = []
     for group in report.eligible_groups():
-        origin = EnteredCallCode(group.process_id, group.code)
         link = links[group.code]
         file = by_path.get(link.snapshot.path)
-        if file is None:
-            admissions.append(CallSourceAdmission(origin, Status.UNAVAILABLE,
-                reason="source not admitted by discovery budgets or source boundary"))
-            continue
-        if file.snapshot.fingerprint != link.snapshot.fingerprint:
-            admissions.append(CallSourceAdmission(origin, Status.MISMATCH,
-                reason="discovered source content differs from the verified code/source snapshot"))
-            continue
-        selected = matched[group.process_id, group.code]
-        if selected is None:
-            status = Status.UNAVAILABLE if not file.definitions and file.gaps else Status.MISMATCH
-            admissions.append(CallSourceAdmission(origin, status,
-                reason="verified unique definition was not indexed in the admitted source"))
-            continue
-        _, definition = selected
-        body = next((body for body in file.bodies if body.definition == definition.id), None)
-        if body is not None and body.graph is not None:
-            admissions.append(CallSourceAdmission(origin, Status.CORE_LINKED,
-                file.snapshot, definition.id, definition.source, body.graph.root))
-        else:
-            reason = body.reason if body is not None and body.reason else "indexed source has no supported body interface"
-            admissions.append(CallSourceAdmission(origin, Status.INDEXED_WITHOUT_BODY,
-                file.snapshot, definition.id, definition.source, reason=reason))
+        definitions = () if file is None else file.definitions
+        body = (next((body for body in file.bodies if body.definition == link.definition), None)
+                if file is not None else None)
+        admissions.append(derive_call_source_admission(EnteredCallCode(group.process_id, group.code), link,
+            source_snapshot=None if file is None else file.snapshot, indexed_definitions=definitions,
+            body=body, source_unavailable=file is not None and bool(file.gaps)))
     return CallSourceScope(tuple(admissions))
 
 

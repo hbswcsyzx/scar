@@ -46,7 +46,7 @@ class SourceCodeEvidence:
         witness = {**reference, "store": self.store.receipt(),
             "source_link_locator": self.composition.inventory_component_locator("call_sources", f"/model/code_links/{link_index}"),
             "captured_code_locator": self.composition.inventory_component_locator("call_sources", f"/model/codes/{captures[0][0]}/code"),
-            "inventory": self.composition.document["inventory"]}
+            "inventory": self.composition.original_code_source_origin()["inventory"]}
         object.__setattr__(self, "code", code)
         object.__setattr__(self, "source_link", link)
         object.__setattr__(self, "_witness_json", json.dumps(witness, sort_keys=True, separators=(",", ":"), allow_nan=False))

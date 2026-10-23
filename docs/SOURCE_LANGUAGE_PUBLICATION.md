@@ -1,7 +1,7 @@
 # SourceProgram5 正式接回分片 inventory/composition：最小接口设计
 
-2026-10-23。**Proposed / 只读审查；尚未修改生产代码或运行发布。**
-两个新 source bodies 已有真实有界验证；独立 SourceProgram5 尚不是当前 Run 的已准入body。
+2026-10-23。**Implemented / 两个真实body已正式发布并经公共reader回读；当前Run联合门未结束。**
+两个新 source bodies 已有真实有界验证；当前调用覆盖数须等完整runtime门后重新推导。
 本设计不新增图、detector/backend，不准备151份source，不执行目标，不扩GraphIndex基建。
 
 ## 1. 已核代码与确切接口断口
@@ -171,3 +171,11 @@ source shard2、2个CP2与必要components/root；核其它150source/840PG refs�
 旧版本拒新能力，新CP2可typed读取/按原record查询、independent proof与结构权限分开。
 不重lower、prepare或compile，不执行目标。随后独立以现369749原raw/Run与current-source
 证据接新composition，核原groups/calls及两个source-only→newbody的端口，model仍OPEN。
+
+## 6. 实现检查点
+
+上述最小接口已实现，6个拥有生产文件AST、diffcheck与public API import检查PASS。
+实际源码SHA/patch/导入链记录在
+`artifacts/experiments/first_stage_source_publication_implementation_20261023/freeze.json`。
+尚未运行实际publication、全源读取/prepare/compile或目标。根将统一记录真实两body发布、
+composition delta与当前Run接线的验收，不能从本实现冻结推导已完成集成。

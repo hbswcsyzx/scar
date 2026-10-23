@@ -164,6 +164,23 @@ def link_call_operands(trace, project_root, inventory=None, *, frame_budget=Call
                        operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
                        include_environments=False, composition=None, source_bindings=None,
                        coordinates=None, code_witnesses=None, progress=None):
+    """Independent public replay always owns its raw reader."""
+    return _link_call_operands(trace, project_root, inventory, frame_budget=frame_budget,
+        operand_budget=operand_budget, route_budget=route_budget, include_environments=include_environments,
+        composition=composition, source_bindings=source_bindings, coordinates=coordinates,
+        code_witnesses=code_witnesses, progress=progress)
+
+
+def _link_call_operands_owned(owner, trace, project_root, **kwargs):
+    from scar.analysis.current_source_evidence import _OwnedCurrent
+    _require(type(owner) is _OwnedCurrent, "private operand owner was not created by current orchestration")
+    return _link_call_operands(trace, project_root, _owner=owner, **kwargs)
+
+
+def _link_call_operands(trace, project_root, inventory=None, *, frame_budget=CallEdgeBudget(),
+                        operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
+                        include_environments=False, composition=None, source_bindings=None,
+                        coordinates=None, code_witnesses=None, progress=None, _owner=None):
     """Automatically reconstruct original call operands and typed core routes."""
     from scar.analysis.call_operand_reader import read_call_operands
     from scar.analysis.call_operand_routes import build_operand_routes
@@ -187,7 +204,8 @@ def link_call_operands(trace, project_root, inventory=None, *, frame_budget=Call
     route_budget.__post_init__()
     root = Path(project_root).resolve()
     notify("OPERAND_READ_BEGIN")
-    operands = read_call_operands(trace, root, budget=operand_budget, frame_budget=frame_budget)
+    operands = (read_call_operands(trace, root, budget=operand_budget, frame_budget=frame_budget)
+                if _owner is None else _owner.require(trace, root, frame_budget, operand_budget, coordinates))
     notify("OPERAND_READ_END", invocations=len(operands.entries), events=len(operands.events))
     access = None
     if partitioned:

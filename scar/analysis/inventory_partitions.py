@@ -97,7 +97,7 @@ def _write_shard(root, relative, document, *, limit):
             pending.extend(b"\n")
             stream.write(pending)
     physical_hash, physical_size = _file_hash(path)
-    return {"uri": relative, "external": False, "representation": document["schema"] + "/1",
+    return {"uri": relative, "external": False, "representation": document["schema"] + "/" + str(document["schema_version"]),
         "physical_sha256": physical_hash, "physical_bytes": physical_size,
         "decoded_sha256": digest.hexdigest(), "decoded_bytes": size}
 
@@ -237,6 +237,11 @@ class TypedBodyPartition:
     public_graph_validated: bool
     public_source_overlay_validated: bool
     source_replay_performed: bool = False
+    language: Any = None
+    public_language_structure_validated: bool = False
+    source_shape_verified: bool = False
+    source_code_witness_verified: bool = False
+    locators: dict | None = None
 
 
 class InventoryPartitions:
@@ -246,9 +251,14 @@ class InventoryPartitions:
         if path.is_dir():
             path = path / "manifest.json"
         self.root = path.parent
+        self.path = path
         self.manifest, self.manifest_receipt = _read_receipt(path, limit=4_000_000)
-        _require(self.manifest.get("schema") == SCHEMA and self.manifest.get("schema_version") == VERSION,
+        _require(self.manifest.get("schema") == SCHEMA and self.manifest.get("schema_version") in (1, 2),
                  "partition manifest schema mismatch")
+        self.version = self.manifest["schema_version"]
+        if self.version == 2:
+            _require(self.manifest.get("capabilities") == ["SOURCE_PROGRAM5_ADMISSION_V1"],
+                     "unsupported partition publication capabilities")
         _require(self.manifest.get("whole_program_graph_established") is False
                  and self.manifest.get("transformation_authorized") is False,
                  "partition archive cannot raise program authority")
@@ -286,9 +296,55 @@ class InventoryPartitions:
         _require(document.get("name") == name, "partition component name mismatch")
         return deepcopy(document["value"])
 
+    def external_reference(self, ref):
+        """Retain an original artifact's bytes/identity when changing roots."""
+        path = Path(ref["uri"]) if ref["external"] else self.root / ref["uri"]
+        return {**deepcopy(ref), "uri": str(path.resolve()), "external": True}
+
+    def code_source_origin(self, *, max_depth=16):
+        """Verify small immutable parent manifests, without loading old graphs."""
+        current, seen = self, set()
+        children = []
+        for _ in range(max_depth):
+            identity = (str(current.root), current.manifest_receipt["physical_sha256"])
+            _require(identity not in seen, "publication parent cycle")
+            seen.add(identity)
+            if current.version == 1:
+                current._read(current.manifest["components"]["call_sources"])
+                ref = current.external_reference(current.manifest["components"]["call_sources"])
+                origin = {"inventory": {"path": str(current.path),
+                    "raw_sha256": current.manifest_receipt["physical_sha256"],
+                    "raw_bytes": current.manifest_receipt["physical_bytes"],
+                    "decoded_bytes": current.manifest_receipt["decoded_bytes"]},
+                    "call_sources": {"artifact": {key: value for key, value in ref.items() if key != "external"},
+                                     "pointer": "#/value"}}
+                break
+            publication = current.component("publication")
+            parent_ref = current.manifest["parent_inventory"]
+            current._read(parent_ref)  # Actual SHA/bytes/schema receipt verification.
+            parent_path = (Path(parent_ref["uri"]) if parent_ref["external"] else current.root / parent_ref["uri"])
+            children.append((current, publication))
+            current = InventoryPartitions(parent_path, max_shard_bytes=self.max_shard_bytes,
+                                          cache_entries=self.cache_entries)
+        else:
+            raise ValueError("publication parent depth budget exceeded")
+        for child, publication in reversed(children):
+            _require(publication["code_source_origin"] == origin,
+                     "publication changed the original static code/source origin")
+            ref = child.external_reference(child.manifest["components"]["call_sources"])
+            actual = {"artifact": {key: value for key, value in ref.items() if key != "external"}, "pointer": "#/value"}
+            _require(actual == origin["call_sources"], "publication changed original call_sources component")
+        return deepcopy(origin)
+
     def file(self, index):
         _require(type(index) is int and 0 <= index < len(self.manifest["files"]), "source index out of range")
         document = self._read(self.manifest["files"][index])
+        _require(document.get("schema") == "scar.partitioned-file-inventory"
+                 and document.get("schema_version") in ((1,) if self.version == 1 else (1, 2)),
+                 "source shard version is outside the explicit partition capabilities")
+        if document["schema_version"] == 1:
+            _require(all(row["checkpoint"] is None or row["checkpoint"]["representation"] == CHECKPOINT_SCHEMA + "/1"
+                         for row in document["file"]["bodies"]), "legacy source shard cannot contain CP2")
         _require(document.get("file_index") == index, "source shard ordinal mismatch")
         return deepcopy(document["file"])
 
@@ -301,43 +357,114 @@ class InventoryPartitions:
         _require(document.get("schema") == CHECKPOINT_SCHEMA
                  and document.get("whole_program_established") is False,
                  "body reference does not identify an original construction checkpoint")
+        version = document.get("schema_version")
+        _require(version in ((1,) if self.version == 1 else (1, 2)), "unsupported checkpoint version")
+        if version == 1:
+            from scar.ir.program.source_language import EXTENDED_PROTOCOLS
+            _require(type(document["operations_emitted"]) is int and document["operations_emitted"] >= 0,
+                     "CP1 requires its recorded integer construction cost")
+            structured = document.get("structured")
+            _require(structured is None or not any(row["kind"] in EXTENDED_PROTOCOLS for row in structured["protocols"]),
+                     "legacy CP1 cannot contain extended source-language protocols")
+        else:
+            fields = {"graph": "#/graph", "metadata": "#/metadata", "interface": "#/interface",
+                      "frame": "#/frame", "structured": "#/structured", "language": "#/language"}
+            _require(document.get("origin") == "SOURCE_PROGRAM5_ADMISSION"
+                     and document.get("fields") == fields and document.get("language") == "#/language"
+                     and document.get("construction_operations") is None
+                     and document.get("construction_cost_known") is False,
+                     "CP2 requires fixed source-program fields and explicit unknown construction cost")
+            _require(document["source_program"]["representation"] == "scar.source-program/5",
+                     "CP2 must identify a real SourceProgram5 artifact")
         return deepcopy(document)
+
+    def _body_fields(self, file_index, body_index):
+        file = self.file(file_index)
+        row = file["bodies"][body_index]
+        if row["checkpoint"] is None:
+            return file, row, None, None
+        checkpoint = self.checkpoint(row["checkpoint"])
+        if checkpoint["schema_version"] == 1:
+            return file, row, checkpoint, checkpoint
+        program = deepcopy(self._read(checkpoint["source_program"]))
+        _require(program.get("schema") == "scar.source-program" and program.get("schema_version") == 5
+                 and program.get("profile") == "STRUCTURED_ENV_V1" and program.get("language") is not None,
+                 "CP2 target is not a source-language environment program")
+        _require(checkpoint["context"] == file["context"] and program["metadata"]["source"] == file["snapshot"]
+                 and program["language"]["source"] == file["snapshot"]
+                 and program["language"]["namespace_root"] == file["context"]["namespace_root"],
+                 "CP2 source snapshot or namespace differs from its original source shard")
+        actual = [sha256(json.dumps(program[key], sort_keys=True, ensure_ascii=False,
+                      separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+                  for key in ("semantic", "semantics", "control")]
+        _require(actual == [file["context"][key] for key in
+                            ("semantic_sha256", "semantics_sha256", "control_sha256")],
+                 "SourceProgram5 source graphs differ from the original context")
+        identity = row["checkpoint"]["body_identity"]
+        _require(identity == checkpoint["body_identity"]
+                 and identity["definition"] == row["definition"] == program["interface"]["definition"]
+                 and program["structured"]["definition"] == row["definition"]
+                 and identity["source"] == program["structured"]["source"]
+                 and identity["entry"] == program["metadata"]["entry"]
+                 and row["construction_operations"] is None,
+                 "CP2 body/source/interface identity differs")
+        return file, row, checkpoint, program
+
+    def body_field_locators(self, file_index, body_index):
+        """Return actual field artifacts; CP2 is admission, never a graph copy."""
+        _, row, checkpoint, fields = self._body_fields(file_index, body_index)
+        if checkpoint is None:
+            return {}
+        admission = row["checkpoint"]
+        original = admission if checkpoint["schema_version"] == 1 else checkpoint["source_program"]
+        artifact = {key: original[key] for key in ("physical_sha256", "physical_bytes", "decoded_sha256", "decoded_bytes", "representation")}
+        artifact["uri"] = original["uri"] if original["external"] else str(self.root / original["uri"])
+        result = {name + "_locator": {"artifact": artifact, "pointer": "#/" + name}
+                  for name in ("graph", "metadata", "interface", "frame", "structured")}
+        if fields["graph"] is not None:
+            namespace = {"artifact": {"uri": artifact["uri"], "decoded_sha256": artifact["decoded_sha256"]},
+                "representation": "scar.program-graph/" + str(fields["graph"]["schema_version"]),
+                "record_pointer": "#/graph", "body": admission["body_identity"]}
+            result["graph_locator"]["namespace"] = namespace
+        if checkpoint["schema_version"] == 2:
+            result["language_locator"] = {"artifact": artifact, "pointer": "#/language"}
+            result["source_program_locator"] = {"artifact": artifact, "pointer": "#"}
+        return result
 
     def body_record(self, file_index, body_index):
         """Return one original BodyInventory wire record, reading just its shard."""
-        row = self.file(file_index)["bodies"][body_index]
-        checkpoint = self.checkpoint(row["checkpoint"]) if row["checkpoint"] is not None else None
+        _, row, checkpoint, fields = self._body_fields(file_index, body_index)
         if checkpoint is not None:
             identity = row["checkpoint"]["body_identity"]
             _require(identity["definition"] == row["definition"]
-                     and identity["entry"] == checkpoint["entry"]
-                     and checkpoint["operations_emitted"] == row["construction_operations"],
+                     and identity["entry"] == fields["metadata"]["entry"]
+                     and (checkpoint["schema_version"] == 2 or checkpoint["operations_emitted"] == row["construction_operations"]),
                      "source body/header differs from its original materialized-return reference")
-            actual_source = checkpoint["structured"]["source"] if checkpoint["structured"] is not None else None
+            actual_source = fields["structured"]["source"] if fields["structured"] is not None else None
             _require(identity["source"] == actual_source, "qualified body source differs from checkpoint")
         return {"definition": row["definition"], "status": row["status"], "reason": row["reason"],
             "construction_operations": row["construction_operations"],
-            "graph": checkpoint["graph"] if checkpoint is not None else None,
-            "metadata": checkpoint["metadata"] if checkpoint is not None else row["metadata_without_checkpoint"]}
+            "graph": fields["graph"] if fields is not None else None,
+            "metadata": fields["metadata"] if fields is not None else row["metadata_without_checkpoint"]}
 
     def qualified_reference(self, file_index, body_index, *, kind, local_id):
         ref = self.file(file_index)["bodies"][body_index]["checkpoint"]
         _require(ref is not None, "an unattempted body has no canonical-body namespace")
         _require(type(kind) is str and kind, "qualified reference requires an explicit kind")
-        graph = self.checkpoint(ref)["graph"]
+        _, _, _, fields = self._body_fields(file_index, body_index)
+        graph = fields["graph"]
         _require(graph is not None and graph.get("schema") == "scar.program-graph",
                  "an unsupported materialized return has no canonical-body namespace")
-        return {"namespace": {"artifact": {"uri": ref["uri"], "decoded_sha256": ref["decoded_sha256"]},
-            "representation": "scar.program-graph/" + str(graph["schema_version"]),
-            "record_pointer": "#/graph", "body": ref["body_identity"]},
+        return {"namespace": self.body_field_locators(file_index, body_index)["graph_locator"]["namespace"],
             "kind": kind, "local_id": encode(local_id)}
 
-    def typed_body(self, file_index, body_index, *, source_layers=None):
+    def typed_body(self, file_index, body_index, *, source_layers=None, language_options=None, source_tree=None):
         """Use existing public validators, optionally including original source layers.
 
-        Without source_layers only canonical graph validation is claimed. With
-        it, original source snapshot/context and structured overlay/formals are
-        checked; this still does not replay source construction or raw calls.
+        CP1 without source_layers retains its historical core-only policy.
+        CP2 checks the original SourceProgram5 structure and source context;
+        independent AST/code proof requires explicit options. Neither path
+        replays source construction or raw calls.
         """
         from scar.ir.program.codec import loads as load_graph
         from scar.ir.program.frames import FrameModel
@@ -348,17 +475,23 @@ class InventoryPartitions:
         from scar.ir.program.structured import StructuredBodyModel
         from scar.ir.semantics_v2 import SourceSnapshot
         from scar.ir.v2.ids import OperationDefinitionID
-        file = self.file(file_index)
-        row = file["bodies"][body_index]
-        checkpoint = self.checkpoint(row["checkpoint"]) if row["checkpoint"] is not None else None
+        file, row, checkpoint, fields = self._body_fields(file_index, body_index)
         raw = self.body_record(file_index, body_index)
-        graph = load_graph(json.dumps(raw["graph"], allow_nan=False)) if raw["graph"] is not None else None
-        metadata = decode(LoweringMetadata, raw["metadata"]) if raw["metadata"] is not None else None
+        language = program = None
+        extended = checkpoint is not None and checkpoint["schema_version"] == 2
+        if extended:
+            from scar.analysis.program_lowering import SourceProgram
+            program = SourceProgram.read_structure(fields)
+            graph, metadata = program.graph, program.metadata
+            language = program.language
+        else:
+            graph = load_graph(json.dumps(raw["graph"], allow_nan=False)) if raw["graph"] is not None else None
+            metadata = decode(LoweringMetadata, raw["metadata"]) if raw["metadata"] is not None else None
         body = BodyInventory(decode(OperationDefinitionID, raw["definition"]),
             decode(BodyStatus, raw["status"]), graph, metadata, raw["reason"], raw["construction_operations"])
-        interface = decode(BodyEntryInterface, checkpoint["interface"]) if checkpoint is not None and checkpoint["interface"] is not None else None
-        frame = FrameModel.from_dict(checkpoint["frame"]) if checkpoint is not None and checkpoint["frame"] is not None else None
-        structured = decode(StructuredBodyModel, checkpoint["structured"]) if checkpoint is not None and checkpoint["structured"] is not None else None
+        interface = decode(BodyEntryInterface, fields["interface"]) if fields is not None and fields["interface"] is not None else None
+        frame = FrameModel.from_dict(fields["frame"]) if fields is not None and fields["frame"] is not None else None
+        structured = decode(StructuredBodyModel, fields["structured"]) if fields is not None and fields["structured"] is not None else None
         if metadata is not None:
             _require(metadata.source == decode(SourceSnapshot, file["snapshot"]), "checkpoint/source snapshot mismatch")
         if graph is None:
@@ -369,7 +502,7 @@ class InventoryPartitions:
             _require(body.status is BodyStatus.LOWERED_WITH_GAPS and interface is not None
                      and interface.definition == body.definition and interface.region == graph.root,
                      "canonical body definition/status/interface mismatch")
-        overlay_checked = False
+        overlay_checked = extended
         if source_layers is not None and graph is not None:
             from scar.analysis.function_interfaces import validate_body_interface
             from scar.analysis.source_layers import load_source_layers
@@ -380,7 +513,11 @@ class InventoryPartitions:
                      and view.context == decode(SourceContextDigest, file["context"]),
                      "partitioned source inventory differs from the original source archive")
             require_valid_structured_body(structured, graph, interface, metadata,
-                                          semantic=view.semantic, control=view.control)
+                semantic=view.semantic, control=view.control, language=language,
+                structural_only=extended, language_options=language_options, source_tree=source_tree)
+            overlay_checked = True
+        if graph is not None and (source_layers is not None or extended):
+            from scar.analysis.function_interfaces import validate_body_interface
             signatures = self.component("interfaces")["signatures"]
             matching = [decode(FunctionSignature, signature) for signature in signatures
                         if signature["definition"] == raw["definition"]
@@ -388,10 +525,18 @@ class InventoryPartitions:
                         and signature["source"]["fingerprint"] == file["snapshot"]["fingerprint"]]
             _require(len(matching) == 1, "body must identify one original signature")
             validate_body_interface(body, interface, matching[0])
-            overlay_checked = True
+        source_checked = False
+        if extended and language_options is not None:
+            from scar.analysis.structured_lowering import require_valid_structured_body
+            require_valid_structured_body(structured, graph, interface, metadata,
+                semantic=program.semantic, control=program.control, language=language,
+                language_options=language_options, source_tree=source_tree)
+            source_checked = True
         namespace = self.qualified_reference(file_index, body_index, kind="Region", local_id=graph.root)["namespace"] if graph is not None else None
         return TypedBodyPartition(body, interface, frame, structured, namespace,
-                                  graph is not None, overlay_checked)
+            graph is not None, overlay_checked, False, language, extended,
+            source_checked, source_checked and language_options.code_evidence is not None,
+            self.body_field_locators(file_index, body_index) if checkpoint is not None else {})
 
 
 __all__ = ["InventoryPartitions", "MaterializedBodySource", "TypedBodyPartition",

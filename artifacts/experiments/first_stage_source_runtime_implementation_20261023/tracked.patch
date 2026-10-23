@@ -1,0 +1,388 @@
+diff --git a/scar/analysis/call_demand.py b/scar/analysis/call_demand.py
+index 8a12b67..fbeb9f3 100644
+--- a/scar/analysis/call_demand.py
++++ b/scar/analysis/call_demand.py
+@@ -187,43 +187,70 @@ def inventory_from_calls(entry, *, project_root, source_roots, budget, call_trac
+         return result
+ 
+ 
+-def _call_source_scope(report, files):
+-    """Link only final bodies, after every preparation/interface failure."""
++def derive_call_source_admission(origin, code_source_link, *, source_snapshot,
++                                 indexed_definitions, body=None, source_unavailable=False):
++    """Derive one static source/body association using the full original join.
++
++    ``body`` is the existing BodyInventory produced/read through the public
++    body pipeline, not a caller success flag or standalone region claim.
++    This correspondence does not prove effects or any current invocation.
++    """
+     from scar.ir.program.call_demand import (
+-        CallSourceAdmission, CallSourceAdmissionStatus as Status, CallSourceScope, EnteredCallCode,
++        CallSourceAdmission, CallSourceAdmissionStatus as Status, EnteredCallCode,
+     )
+-    from scar.analysis.call_demand_schedule import _matched_call_sources
++    from scar.ir.program.call_edges import CodeSourceLink, CallLinkStatus
++    from scar.ir.program.inventory import BodyInventory, BodyStatus, DefinitionInventory
++    from scar.ir.semantics_v2 import SourceSnapshot
++    if (type(origin) is not EnteredCallCode or type(code_source_link) is not CodeSourceLink
++            or code_source_link.status is not CallLinkStatus.VERIFIED
++            or origin.code != code_source_link.code or type(indexed_definitions) is not tuple
++            or any(type(item) is not DefinitionInventory for item in indexed_definitions)
++            or type(source_unavailable) is not bool):
++        raise TypeError("static admission needs exact original origin/link/definition records")
++    if source_snapshot is None:
++        return CallSourceAdmission(origin, Status.UNAVAILABLE,
++            reason="source not admitted by discovery budgets or source boundary")
++    if type(source_snapshot) is not SourceSnapshot:
++        raise TypeError("static admission source snapshot must be exact")
++    link = code_source_link
++    if source_snapshot.path != link.snapshot.path or source_snapshot.fingerprint != link.snapshot.fingerprint:
++        return CallSourceAdmission(origin, Status.MISMATCH,
++            reason="discovered source content differs from the verified code/source snapshot")
++    matches = [definition for definition in indexed_definitions
++               if definition.id == link.definition and definition.source == link.source]
++    if len(matches) != 1:
++        status = Status.UNAVAILABLE if not indexed_definitions and source_unavailable else Status.MISMATCH
++        return CallSourceAdmission(origin, status,
++            reason="verified unique definition was not indexed in the admitted source")
++    definition = matches[0]
++    if body is not None and (type(body) is not BodyInventory or body.definition != definition.id):
++        raise ValueError("static admission body differs from its unique original definition")
++    if body is not None and body.graph is not None:
++        if (body.status is not BodyStatus.LOWERED_WITH_GAPS or body.metadata is None
++                or body.metadata.source != source_snapshot):
++            raise ValueError("canonical body status/source contradicts its static admission")
++        return CallSourceAdmission(origin, Status.CORE_LINKED,
++            source_snapshot, definition.id, definition.source, body.graph.root)
++    reason = body.reason if body is not None and body.reason else "indexed source has no supported body interface"
++    return CallSourceAdmission(origin, Status.INDEXED_WITHOUT_BODY,
++        source_snapshot, definition.id, definition.source, reason=reason)
++
++
++def _call_source_scope(report, files):
++    """Link only final bodies, after every preparation/interface failure."""
++    from scar.ir.program.call_demand import CallSourceScope, EnteredCallCode
+     by_path = {file.snapshot.path: file for file in files}
+     links = {link.code: link for link in report.eligible_code_links()}
+-    matched = _matched_call_sources(report, files)
+     admissions = []
+     for group in report.eligible_groups():
+-        origin = EnteredCallCode(group.process_id, group.code)
+         link = links[group.code]
+         file = by_path.get(link.snapshot.path)
+-        if file is None:
+-            admissions.append(CallSourceAdmission(origin, Status.UNAVAILABLE,
+-                reason="source not admitted by discovery budgets or source boundary"))
+-            continue
+-        if file.snapshot.fingerprint != link.snapshot.fingerprint:
+-            admissions.append(CallSourceAdmission(origin, Status.MISMATCH,
+-                reason="discovered source content differs from the verified code/source snapshot"))
+-            continue
+-        selected = matched[group.process_id, group.code]
+-        if selected is None:
+-            status = Status.UNAVAILABLE if not file.definitions and file.gaps else Status.MISMATCH
+-            admissions.append(CallSourceAdmission(origin, status,
+-                reason="verified unique definition was not indexed in the admitted source"))
+-            continue
+-        _, definition = selected
+-        body = next((body for body in file.bodies if body.definition == definition.id), None)
+-        if body is not None and body.graph is not None:
+-            admissions.append(CallSourceAdmission(origin, Status.CORE_LINKED,
+-                file.snapshot, definition.id, definition.source, body.graph.root))
+-        else:
+-            reason = body.reason if body is not None and body.reason else "indexed source has no supported body interface"
+-            admissions.append(CallSourceAdmission(origin, Status.INDEXED_WITHOUT_BODY,
+-                file.snapshot, definition.id, definition.source, reason=reason))
++        definitions = () if file is None else file.definitions
++        body = (next((body for body in file.bodies if body.definition == link.definition), None)
++                if file is not None else None)
++        admissions.append(derive_call_source_admission(EnteredCallCode(group.process_id, group.code), link,
++            source_snapshot=None if file is None else file.snapshot, indexed_definitions=definitions,
++            body=body, source_unavailable=file is not None and bool(file.gaps)))
+     return CallSourceScope(tuple(admissions))
+ 
+ 
+diff --git a/scar/analysis/call_edges.py b/scar/analysis/call_edges.py
+index 6a7d0d3..aec8b0c 100644
+--- a/scar/analysis/call_edges.py
++++ b/scar/analysis/call_edges.py
+@@ -775,8 +775,9 @@ def _link_call_model(trace, project_root, inventory=None, budget=CallEdgeBudget(
+     partitioned_access = inventory if type(inventory) is SourceBodyAccess else None
+     if inventory is not None:
+         versions = (5, 6, 7, 8) if allow_v6 else (4, 5)
+-        version = partitioned_access.schema_version if partitioned_access is not None else inventory.to_dict()["schema_version"]
+-        _require(version in versions and inventory.interfaces is not None,
++        supported = (allow_v6 and partitioned_access.supported_call_abi == "STRUCTURED_ENV_V1"
++                     if partitioned_access is not None else inventory.to_dict()["schema_version"] in versions)
++        _require(supported and inventory.interfaces is not None,
+                  "operand/core linking requires an explicit frame/structured v5-v8 inventory" if allow_v6 else
+                  "call/core linking requires a bound-formal v4 or bound-frame v5 inventory")
+         inventory_root = str(partitioned_access.root) if partitioned_access is not None else inventory.discovery.project_root
+diff --git a/scar/analysis/call_operands.py b/scar/analysis/call_operands.py
+index 70f2475..72af1fa 100644
+--- a/scar/analysis/call_operands.py
++++ b/scar/analysis/call_operands.py
+@@ -164,6 +164,23 @@ def link_call_operands(trace, project_root, inventory=None, *, frame_budget=Call
+                        operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
+                        include_environments=False, composition=None, source_bindings=None,
+                        coordinates=None, code_witnesses=None, progress=None):
++    """Independent public replay always owns its raw reader."""
++    return _link_call_operands(trace, project_root, inventory, frame_budget=frame_budget,
++        operand_budget=operand_budget, route_budget=route_budget, include_environments=include_environments,
++        composition=composition, source_bindings=source_bindings, coordinates=coordinates,
++        code_witnesses=code_witnesses, progress=progress)
++
++
++def _link_call_operands_owned(owner, trace, project_root, **kwargs):
++    from scar.analysis.current_source_evidence import _OwnedCurrent
++    _require(type(owner) is _OwnedCurrent, "private operand owner was not created by current orchestration")
++    return _link_call_operands(trace, project_root, _owner=owner, **kwargs)
++
++
++def _link_call_operands(trace, project_root, inventory=None, *, frame_budget=CallEdgeBudget(),
++                        operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
++                        include_environments=False, composition=None, source_bindings=None,
++                        coordinates=None, code_witnesses=None, progress=None, _owner=None):
+     """Automatically reconstruct original call operands and typed core routes."""
+     from scar.analysis.call_operand_reader import read_call_operands
+     from scar.analysis.call_operand_routes import build_operand_routes
+@@ -187,7 +204,8 @@ def link_call_operands(trace, project_root, inventory=None, *, frame_budget=Call
+     route_budget.__post_init__()
+     root = Path(project_root).resolve()
+     notify("OPERAND_READ_BEGIN")
+-    operands = read_call_operands(trace, root, budget=operand_budget, frame_budget=frame_budget)
++    operands = (read_call_operands(trace, root, budget=operand_budget, frame_budget=frame_budget)
++                if _owner is None else _owner.require(trace, root, frame_budget, operand_budget, coordinates))
+     notify("OPERAND_READ_END", invocations=len(operands.entries), events=len(operands.events))
+     access = None
+     if partitioned:
+diff --git a/scar/analysis/dispatch_sources.py b/scar/analysis/dispatch_sources.py
+index acf4f4c..fc655db 100644
+--- a/scar/analysis/dispatch_sources.py
++++ b/scar/analysis/dispatch_sources.py
+@@ -169,8 +169,8 @@ class _PartitionedSourceScope:
+     def __init__(self, composition, report):
+         from scar.analysis.program_composition import CompositionIndex
+         _need(type(composition) is CompositionIndex and composition.partitioned
+-              and composition.document["schema_version"] == 2,
+-              "source schema2 needs an explicit partitioned CompositionIndex")
++              and composition.document["schema_version"] in (2, 3),
++              "partitioned source binding needs an explicit supported CompositionIndex")
+         _need(report["inventory"] == composition.document["inventory"]
+               and report["composition_canonical_sha256"] == hashlib.sha256(_canonical(composition.document)).hexdigest(),
+               "source report differs from the exact composition/inventory receipts")
+@@ -347,6 +347,8 @@ class _FormalSourceScope:
+         self.project = _PartitionedSourceScope(composition, report)
+         self.composition, self.counts = composition, Counter()
+         self.report = report
++        # The declaration in JSON is not an authority to reuse graph proof.
++        # The public binder below checks it against the actual installed proof.
+         self.reused = report["witness_mode"] == "reused_code"
+         self.builds = {meta["process_id"]: meta["python"] for meta in report["collection_metadata"]}
+         _need(composition.has_source_attachments
+@@ -423,7 +425,10 @@ class _FormalSourceScope:
+             if not outcome["source_usable"]:
+                 self.counts["external_static_guard_rejected"] += 1
+             elif reference is not None:
+-                self.composition.resolve_definition(reference)
++                if outcome.get("reference_membership_proof") is None:
++                    self.composition.resolve_definition(reference)
++                else:
++                    self.counts["exact_same_run_source_membership_proofs_reused"] += 1
+                 self.counts["external_source_only_definitions_verified"] += 1
+             else:
+                 self.counts["external_verified_codes_without_definition"] += 1
+@@ -583,6 +588,8 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
+     (root, source_report, report_artifact, bindings, binding_artifact, bridge, bridge_artifact,
+      artifacts, native, pid, process) = _inputs(source_directory, dispatch_bridge, coordinates, max_input_bytes)
+     version = source_report["schema_version"]
++    from scar.analysis.current_source_evidence import _require_owned_source_report
++    retained_proof = _require_owned_source_report(composition_index, source_report, bindings)
+     source_scope = None
+     if version in (2, 3):
+         source_scope = (_FormalSourceScope(composition_index, source_report) if version == 3
+@@ -749,6 +756,11 @@ def bind_dispatch_sources(source_directory, dispatch_bridge, coordinates, out_di
+             report["source_inputs"] = source_report["source_inputs"]
+             if source_report["witness_mode"] == "reused_code":
+                 report["attachment_source_match_rule"] = source_report["attachment_source_match_rule"]
++        if retained_proof is not None:
++            report.update(raw_reader_rule=source_report["raw_reader_rule"],
++                same_run_source_proof=retained_proof,
++                source_guard_scope=source_report["source_guard_scope"],
++                current_source_guards_refreshed=False)
+         (stage / "report.json").write_bytes(_canonical(report))
+         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
+         output.mkdir(exist_ok=False)
+diff --git a/scar/analysis/source_body_access.py b/scar/analysis/source_body_access.py
+index bf46c71..db4c802 100644
+--- a/scar/analysis/source_body_access.py
++++ b/scar/analysis/source_body_access.py
+@@ -10,7 +10,7 @@ from __future__ import annotations
+ import ast
+ from collections import Counter, defaultdict
+ from collections.abc import Mapping
+-from dataclasses import dataclass
++from dataclasses import dataclass, replace
+ import hashlib
+ import json
+ from pathlib import Path
+@@ -144,6 +144,8 @@ class SourceBodyAccess:
+                   and document.get("source_definition_reference_format") == report["source_definition_reference_format"]
+                   and document.get("attachment_source_match_rule") == report.get("attachment_source_match_rule"),
+                   "formal binding receipts/reuse rule differ from source report")
++        from scar.analysis.current_source_evidence import _require_owned_source_report
++        self.retained_source_proof = _require_owned_source_report(composition, report, document)
+         self.rows = document["bindings"]
+         _need(type(self.rows) is list, "binding rows must be a list")
+         _need(len(self.rows) == report["summary"]["entered_code_groups"]
+@@ -157,12 +159,20 @@ class SourceBodyAccess:
+             self.by_group[key] = row
+         header = composition.inventory_component("header")
+         self.schema_version = header["schema_version"]
+-        self.profile = decode(BodyLoweringProfile, header["profile"])
++        self.publication = composition.publication_header()
++        self.profile = decode(BodyLoweringProfile, self.publication["profile"])
++        self.supported_call_abi = self.publication["supported_call_abi"]
+         self.interfaces = SimpleNamespace(profile=self.profile)
+         self.root = Path(composition.inventory_component("discovery")["project_root"])
+         self.inventory_sha256 = report["inventory"]["raw_sha256"]
+-        _need(self.profile is BodyLoweringProfile.STRUCTURED_ENV and self.schema_version == 8,
+-              "partition path requires the original structured environment inventory")
++        _need(self.profile is BodyLoweringProfile.STRUCTURED_ENV
++              and self.supported_call_abi == "STRUCTURED_ENV_V1"
++              and ((self.publication["header_schema"] == "scar.program-inventory"
++                    and self.schema_version == 8 and not self.publication["capabilities"])
++                   or (self.publication["header_schema"] == "scar.partitioned-inventory-header"
++                       and self.schema_version == 2
++                       and self.publication["capabilities"] == ["SOURCE_PROGRAM5_ADMISSION_V1"])),
++              "partition path requires an explicit supported structured environment header/capability")
+         source_model = composition.inventory_component("call_sources")["model"]
+         self.original_links = tuple(decode(CodeSourceLink, row) for row in source_model["code_links"])
+         self.original_captures = tuple(decode(CodeCapture, row) for row in source_model["codes"])
+@@ -423,9 +433,26 @@ class SourceBodyAccess:
+                   and bundle.body.metadata.source == projection.snapshot,
+                   "typed body definition/root/snapshot differs")
+             view = self.views[projection.snapshot.path]
++            language_arguments = {}
++            if bundle.language is not None:
++                from scar.analysis.source_language import SourceCodeEvidence, SourceLanguageOptions
++                _need(bundle.public_language_structure_validated
++                      and type(bundle.language.code_evidence) is dict,
++                      "extended body requires its public original language structure and code witness")
++                captured = decode(CapturedCode, bundle.language.code_evidence["captured"])
++                _need(self.descriptors.get(captured.key) == captured
++                      and self.links.get(captured.key) is not None
++                      and self.links[captured.key].definition == definition,
++                      "language applicability requires the complete currently bound code descriptor")
++                evidence = SourceCodeEvidence(self.code_witnesses, self.composition, captured)
++                _, _, source_tree = self.source_context(projection.snapshot.path)
++                language_arguments = {"language": bundle.language, "source_tree": source_tree,
++                    "language_options": SourceLanguageOptions(bundle.language.capabilities, evidence)}
+             require_valid_structured_body(bundle.structured, bundle.body.graph, bundle.interface,
+-                bundle.body.metadata, semantic=view.semantic, control=view.control)
++                bundle.body.metadata, semantic=view.semantic, control=view.control, **language_arguments)
+             validate_body_interface(bundle.body, bundle.interface, self.signatures[definition])
++            if bundle.language is not None:
++                bundle = replace(bundle, source_shape_verified=True, source_code_witness_verified=True)
+             self.bundles[definition] = bundle
+             graph = bundle.body.graph
+             self.cores[definition] = (bundle.body,
+@@ -448,6 +475,10 @@ class SourceBodyAccess:
+             "composition_canonical_sha256": _hash(self.composition.document),
+             "source_report": self.report_receipt, "source_bindings": self.bindings_receipt,
+             "source_witness_mode": self.report["witness_mode"], "run": encode(self.coordinates.run),
++            "publication_header": self.publication,
++            "same_run_source_proof": self.retained_source_proof,
++            "source_guard_scope": self.report.get("source_guard_scope", "ORIGINAL_SOURCE_REPORT_BINDING_SCOPE"),
++            "current_source_guards_refreshed_here": False,
+             "current_raw_scan_verified": self.bound, "raw_counts": getattr(self, "scan_counts", {}),
+             "unbound_processes": sorted(getattr(self, "unbound_processes", ())),
+             "source_invocation_rows_consumed": False,
+@@ -456,6 +487,14 @@ class SourceBodyAccess:
+             "code_witness_references": dict(self.witness_references),
+             "code_witness_frontiers": dict(self.frontiers),
+             "loaded_bodies": len(self.bundles), "parsed_source_files": len(self.asts),
++            "loaded_body_validation": {definition.wire: {
++                "public_graph_validated": bundle.public_graph_validated,
++                "public_source_overlay_validated": bundle.public_source_overlay_validated,
++                "public_language_structure_validated": bundle.public_language_structure_validated,
++                "source_shape_verified": bundle.source_shape_verified,
++                "source_code_witness_verified": bundle.source_code_witness_verified,
++                "source_replay_performed": bundle.source_replay_performed}
++                for definition, bundle in self.bundles.items()},
+             "source_producer_conditions": self.report["conditions"],
+             "source_prepared": False, "canonical_producers_copied": False,
+             "whole_program_established": False, "transformation_authorized": False}
+diff --git a/scar/analysis/source_invocations.py b/scar/analysis/source_invocations.py
+index dfddd1c..707dbce 100644
+--- a/scar/analysis/source_invocations.py
++++ b/scar/analysis/source_invocations.py
+@@ -759,6 +759,20 @@ def _write_rows(path, rows):
+ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureCoordinates,
+                             trace_directory, out_dir, *, call_budget=CallEdgeBudget(),
+                             witness_mode="same_capture"):
++    """Independently read raw frames through the unchanged public contract."""
++    return _bind_source_invocations(composition, coordinates, trace_directory, out_dir,
++        call_budget=call_budget, witness_mode=witness_mode)
++
++
++def _bind_source_invocations_owned(owner, composition, coordinates, trace_directory, out_dir, **kwargs):
++    from scar.analysis.current_source_evidence import _OwnedCurrent
++    _need(type(owner) is _OwnedCurrent, "owned source reader must be created by current orchestration")
++    return _bind_source_invocations(composition, coordinates, trace_directory, out_dir, _owner=owner, **kwargs)
++
++
++def _bind_source_invocations(composition: CompositionIndex, coordinates: CaptureCoordinates,
++                             trace_directory, out_dir, *, call_budget=CallEdgeBudget(),
++                             witness_mode="same_capture", _owner=None):
+     """Reuse exact source witnesses and bind every recorded invocation.
+ 
+     There is no target execution or compiler/source replay.  With an inventory
+@@ -794,15 +808,21 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
+         admitted = {(item.origin.process_id, item.origin.code) for item in scope.admissions}
+         _need(admitted == eligible, "final admission denominator differs from eligible code/source groups")
+     members = _Members(coordinates, directory)
+-    sink = _Sink()
+-    scanned = scan_call_trace(directory, root, call_budget, sink=sink)
++    if _owner is None:
++        sink = _Sink()
++        scanned = scan_call_trace(directory, root, call_budget, sink=sink)
++    else:
++        _need(witness_mode == "reused_code" and _owner.proof is not None,
++              "owned current source path requires exact retained static proof")
++        scanned, sink = _owner.source_inputs(directory, root, call_budget, coordinates)
+     members.bind(scanned.files)
+     if seed_model is not None and witness_mode == "same_capture":
+         _verify_seed_model(seed_model, scanned, sink, members)
+     attachment_capture_checks = (composition.verify_source_attachments(scanned, tuple(sink.groups.values()))
+         if witness_mode == "same_capture" else composition.source_attachment_reuse_checks(scanned, tuple(sink.groups.values())))
+     captures = {(capture.process_id, capture.code.key): capture for capture in scanned.captures}
+-    source_guard = _SourceGuard(call_budget) if witness_mode == "reused_code" else None
++    source_guard = ((_owner.proof.guards() if _owner is not None else _SourceGuard(call_budget))
++                    if witness_mode == "reused_code" else None)
+     bindings, binding_indexes = _binding_rows(composition, seed_model, scope, sink, captures,
+                                              members, witness_mode, source_guard)
+     if composition.has_source_attachments:
+@@ -887,6 +907,9 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
+                                     source_inputs=composition.source_inputs())
+             if witness_mode == "reused_code":
+                 binding_document["attachment_source_match_rule"] = "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
++        if _owner is not None:
++            binding_document.update(raw_reader_rule="OWNED_CURRENT_OPERAND_FRAME_SCAN_V1",
++                same_run_source_proof=_owner.proof.receipt())
+         binding_payload = _canonical(binding_document)
+         (stage / "bindings.json").write_bytes(binding_payload)
+         (stage / "capture-coordinates.json").write_bytes(coordinates.payload)
+@@ -941,6 +964,12 @@ def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureC
+                 attachment_scope="original source fragments; no added inventory files or typed bodies")
+             if witness_mode == "reused_code":
+                 report["attachment_source_match_rule"] = "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
++        if _owner is not None:
++            report.update(raw_reader_rule="OWNED_CURRENT_OPERAND_FRAME_SCAN_V1",
++                raw_frames_read_by="shared owned operand/frame reader",
++                same_run_source_proof=_owner.proof.receipt(),
++                source_guard_scope="REUSED_COMPLETED_CURRENT_CAPTURE_AT_RECORDED_BINDING_NOT_FRESH_LIVE",
++                current_source_guards_refreshed=False)
+         (stage / "report.json").write_bytes(_canonical(report))
+         # All scanning, cross-input checking and row creation have succeeded.
+         # Reserve the caller's destination exclusively, publish data first, and

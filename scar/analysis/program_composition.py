@@ -157,6 +157,13 @@ class _InventorySource:
                     "metadata_locator": _at(header, "/metadata"), "namespace": None}
         row = self.file(file_index)["bodies"][body_index]
         ref = row["checkpoint"]
+        if ref is not None and ref["representation"] == "scar.body-construction-checkpoint/2":
+            actual = self.partitions.body_field_locators(file_index, body_index)
+            return {"inventory_locator": header, "graph_locator": actual["graph_locator"],
+                "metadata_locator": actual["metadata_locator"],
+                "namespace": actual["graph_locator"]["namespace"],
+                "language_locator": actual["language_locator"],
+                "source_program_locator": actual["source_program_locator"]}
         graph_locator = metadata_locator = namespace = None
         if ref is not None:
             artifact = self._artifact(ref)
@@ -500,6 +507,117 @@ def compose_program(inventory_path: str | Path, source_layers_dir: str | Path,
     return summary
 
 
+def compose_source_publication(base_composition, inventory_manifest, out_dir, *,
+                               max_record_bytes=128_000_000, max_output_bytes=256_000_000,
+                               progress=None):
+    """Re-index changed source files; retain every other original projection.
+
+    This is an explicit partition2/composition3 path. It neither changes legacy
+    compose_program nor rebuilds source layers or canonical graph producers.
+    """
+    import tempfile
+    if type(base_composition) is not CompositionIndex or not base_composition.partitioned:
+        raise TypeError("delta composition requires an original partitioned CompositionIndex")
+    inventory = _InventorySource(inventory_manifest, max_input_bytes=4_000_000,
+                                 max_record_bytes=max_record_bytes)
+    if inventory.partitions is None or inventory.partitions.version != 2:
+        raise ValueError("delta composition requires an explicit source publication partition2")
+    publication = inventory.component("publication")
+    if (publication["base_inventory"] != base_composition.document["inventory"]
+            or publication["base_composition"] != base_composition.index_receipt
+            or publication["base_composition_canonical_sha256"] != base_composition._original_document_sha256):
+        raise ValueError("publication differs from its actual parent composition/inventory")
+    base_composition.source_inputs()  # Includes original document immutability check.
+    CompositionIndex._verify_parent_composition(publication["base_composition"],
+        canonical_sha256=publication["base_composition_canonical_sha256"])
+    if inventory.partitions.code_source_origin() != base_composition.original_code_source_origin():
+        raise ValueError("publication changed the original compiler/source evidence origin")
+    changed = publication["changed_files"]
+    if (type(changed) is not list or changed != sorted(set(changed))
+            or inventory.file_count != base_composition.inventory_file_count
+            or any(type(index) is not int or not 0 <= index < inventory.file_count for index in changed)):
+        raise ValueError("publication source-file denominator or changed-file set differs")
+    original = base_composition.inventory
+    changed_components = {"header", "interfaces", "structured", "call_source_scope", "publication", "producer", "inputs"}
+    for name, ref in original.manifest["components"].items():
+        if name not in changed_components and inventory.partitions.external_reference(inventory.partitions.manifest["components"][name]) != original.external_reference(ref):
+            raise ValueError("publication changed an undeclared original component")
+    definitions, denominators = {}, Counter(files=inventory.file_count)
+    for index in range(inventory.file_count):
+        if index not in changed and inventory.partitions.external_reference(inventory.partitions.manifest["files"][index]) != original.external_reference(original.manifest["files"][index]):
+            raise ValueError("publication changed an undeclared source shard")
+        raw = inventory.file(index)  # Source headers only, no canonical graphs.
+        original_header = original.file(index)
+        if raw["snapshot"] != original_header["snapshot"] or raw["context"] != original_header["context"]:
+            raise ValueError("source publication changed an original source snapshot/context")
+        denominators.update(definitions=len(raw["definitions"]), coverage_entries=len(raw["coverage"]),
+                            calls=len(raw["calls"]), bodies=len(raw["bodies"]))
+        for definition in decode(tuple[DefinitionInventory, ...], raw["definitions"]):
+            key = _definition_key(raw["snapshot"], definition.id)
+            if key in definitions:
+                raise ValueError("duplicate qualified source definition")
+            definitions[key] = index
+    actual_changes = set()
+    for change in publication["changed_bodies"]:
+        fi, bi = change["file_index"], change["body_index"]
+        if (fi, bi) in actual_changes or fi not in changed:
+            raise ValueError("duplicate or out-of-file source body publication")
+        actual_changes.add((fi, bi))
+        typed = inventory.partitions.typed_body(fi, bi)
+        if (typed.language is None or not typed.public_language_structure_validated
+                or typed.body.definition != decode(OperationDefinitionID, change["definition"])
+                or typed.body.metadata.source != decode(SourceSnapshot, change["snapshot"])
+                or typed.structured.source != decode(type(typed.structured.source), change["source"])):
+            raise ValueError("new canonical body differs from its published source-language admission")
+    if {key[0] for key in actual_changes} != set(changed):
+        raise ValueError("changed file has no exact changed-body admission")
+    rows = deepcopy(base_composition.document["files"])
+    for index in changed:
+        if progress is not None:
+            progress({"stage": "compose_changed_file", "status": "BEGIN", "file_index": index})
+        raw = inventory.file(index)
+        rows[index] = _compose_file(raw, index, base_composition.source(index), definitions,
+                                    inventory_source=inventory)
+        if progress is not None:
+            progress({"stage": "compose_changed_file", "status": "END", "file_index": index})
+    counts, frontiers = Counter(), Counter()
+    for row in rows:
+        counts.update(row["counts"])
+        frontiers.update(item["kind"] for item in row["frontiers"])
+        for body in row["bodies"]:
+            frontiers.update(item["kind"] for item in body["frontiers"])
+    document = {"schema": "scar.program-composition", "schema_version": 3,
+        "inventory_format": "PARTITIONED", "inventory": inventory.receipt,
+        "parent_composition": deepcopy(base_composition.index_receipt),
+        "source_layers": deepcopy(base_composition.document["source_layers"]),
+        "files_total": len(rows), "files_indexed": sum(row["status"] != "GAP" for row in rows),
+        "summary": {"inventory_denominators": dict(denominators), "counts": dict(sorted(counts.items())),
+                    "frontiers": dict(sorted(frontiers.items())), "first_stage_complete": False},
+        "files": rows, **_AUTHORITY}
+    payload = _canonical(document)
+    if type(max_output_bytes) is not int or max_output_bytes < 1 or len(payload) > max_output_bytes:
+        raise ValueError("composition publication output budget exceeded")
+    output = Path(out_dir).resolve()
+    if output.exists():
+        raise ValueError("composition output already exists")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = Path(tempfile.mkdtemp(prefix=".scar-composition-", dir=output.parent))
+    try:
+        with (temporary / "index.json.gz").open("xb") as stream:
+            with gzip.GzipFile(filename="", fileobj=stream, mode="wb", mtime=0) as zipped:
+                zipped.write(payload)
+        summary = {key: document[key] for key in ("schema", "schema_version", "files_total", "files_indexed", "summary")}
+        (temporary / "summary.json").write_bytes(_canonical(summary))
+        temporary.rename(output)
+        return summary
+    except BaseException as error:
+        (temporary / "failure.json").write_text(json.dumps({"status": "BUILDING_FAILED_RETAINED",
+            "error_type": type(error).__name__, "detail": str(error),
+            "building_directory": str(temporary), "intended_output": str(output)}, indent=2) + "\n")
+        error.add_note("composition BUILDING artifacts retained at " + str(temporary))
+        raise
+
+
 @dataclass(frozen=True, slots=True)
 class ElementReference:
     """An existing identity qualified by file and original body document."""
@@ -525,9 +643,9 @@ class CompositionIndex:
                  source_attachments=(), attachment_budget=SourceAttachmentBudget()):
         if type(cached_files) is not int or cached_files < 1:
             raise ValueError("cached_files must be positive")
-        self.document, _ = _read(Path(index_path), max_input_bytes)
+        self.document, self.index_receipt = _read(Path(index_path), max_input_bytes)
         self._original_document_sha256 = hashlib.sha256(_canonical(self.document)).hexdigest()
-        if self.document.get("schema") != "scar.program-composition" or self.document.get("schema_version") not in (1, 2):
+        if self.document.get("schema") != "scar.program-composition" or self.document.get("schema_version") not in (1, 2, 3):
             raise ValueError("unsupported composition index")
         for key, value in _AUTHORITY.items():
             if self.document.get(key) is not value:
@@ -536,11 +654,22 @@ class CompositionIndex:
             max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
         if self._inventory.receipt != self.document["inventory"]:
             raise ValueError("inventory differs from bound composition input")
-        expected_partitioned = self.document["schema_version"] == 2
+        expected_partitioned = self.document["schema_version"] in (2, 3)
         if expected_partitioned != (self._inventory.partitions is not None):
             raise ValueError("composition version differs from its explicit inventory storage schema")
         if expected_partitioned and self.document.get("inventory_format") != "PARTITIONED":
             raise ValueError("partitioned composition requires its explicit storage format")
+        if self.document["schema_version"] == 3:
+            if self._inventory.partitions.version != 2:
+                raise ValueError("composition3 requires the explicit source publication partition2")
+            publication = self._inventory.component("publication")
+            if publication["base_composition"] != self.document["parent_composition"]:
+                raise ValueError("composition3 and publication parent receipts differ")
+            self._verify_parent_composition(self.document["parent_composition"],
+                canonical_sha256=publication["base_composition_canonical_sha256"])
+            self._inventory.partitions.code_source_origin()
+        elif expected_partitioned and self._inventory.partitions.version != 1:
+            raise ValueError("legacy composition2 cannot contain source publication partition2")
         if self._inventory.file_count != len(self.document["files"]):
             raise ValueError("composition/inventory source file denominator differs")
         # Kept for legacy clients only. New clients use the explicit accessors;
@@ -572,6 +701,75 @@ class CompositionIndex:
         self._project_definitions = {}
         self._project_snapshot_indexes = {_canonical(row["snapshot"]): index
                                           for index, row in enumerate(self.document["files"])}
+        self._static_source_proof = None
+
+    @staticmethod
+    def _verify_parent_composition(receipt, *, canonical_sha256=None):
+        path = Path(receipt["path"])
+        if path.is_symlink() or not path.is_file():
+            raise ValueError("publication parent composition is not its immutable artifact")
+        digest, count = hashlib.sha256(), 0
+        with path.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(block); count += len(block)
+                if count > receipt["raw_bytes"]:
+                    raise ValueError("parent composition size differs")
+        if count != receipt["raw_bytes"] or digest.hexdigest() != receipt["raw_sha256"]:
+            raise ValueError("parent composition stored SHA/size differs")
+        if canonical_sha256 is not None:
+            decoded, size = hashlib.sha256(), 0
+            opener = gzip.open if path.suffix == ".gz" else open
+            with opener(path, "rb") as stream:
+                for block in iter(lambda: stream.read(1024 * 1024), b""):
+                    decoded.update(block); size += len(block)
+                    if size > receipt["decoded_bytes"]:
+                        raise ValueError("parent composition decoded byte budget differs")
+            if size != receipt["decoded_bytes"] or decoded.hexdigest() != canonical_sha256:
+                raise ValueError("publication parent must be the exact original canonical composition artifact")
+
+    def publication_header(self):
+        header = self.inventory_component("header")
+        extended = self.document["schema_version"] == 3
+        if extended:
+            publication = self.inventory_component("publication")
+            if (header.get("schema") != "scar.partitioned-inventory-header" or header.get("schema_version") != 2
+                    or header.get("capabilities") != ["SOURCE_PROGRAM5_ADMISSION_V1"]
+                    or publication["base_composition"] != self.document["parent_composition"]):
+                raise ValueError("source publication header/capability/parent differs")
+            canonical = publication["base_composition_canonical_sha256"]
+            parent_inventory = publication["base_inventory"]
+            keys = deepcopy(publication["changed_bodies"])
+        else:
+            if header.get("schema") != "scar.program-inventory":
+                raise ValueError("legacy inventory header schema differs")
+            canonical, parent_inventory, keys = self._original_document_sha256, self.document["inventory"], []
+        return {"header_schema": header["schema"], "header_version": header["schema_version"],
+            "profile": header["profile"], "supported_call_abi": "STRUCTURED_ENV_V1" if header["profile"] == "STRUCTURED_ENV_V1" else None,
+            "capabilities": deepcopy(header.get("capabilities", [])),
+            "base_inventory_receipt": deepcopy(parent_inventory),
+            "base_composition_receipt": deepcopy(self.document["parent_composition"] if extended else self.index_receipt),
+            "base_composition_canonical_sha256": canonical, "changed_body_keys": keys}
+
+    def original_code_source_origin(self):
+        if self.partitioned:
+            return self._inventory.partitions.code_source_origin()
+        return {"inventory": deepcopy(self.document["inventory"]),
+                "call_sources": self.inventory_component_locator("call_sources")}
+
+    def code_source_origin(self):
+        return self.original_code_source_origin()
+
+    def install_static_source_proof(self, proof):
+        from scar.analysis.current_source_evidence import SameRunSourceProof
+        if type(proof) is not SameRunSourceProof:
+            raise TypeError("static source proof requires the checked same-Run proof reader")
+        proof.require_composition(self)
+        if self._static_source_proof is not None:
+            raise ValueError("same-Run static source proof is already installed")
+        self._static_source_proof = proof
+
+    def static_source_proof_receipt(self):
+        return deepcopy(self._static_source_proof.receipt()) if self._static_source_proof is not None else None
 
     @property
     def has_source_attachments(self):
@@ -606,6 +804,10 @@ class CompositionIndex:
         return first
 
     def static_definition_reference(self, witness):
+        if self._static_source_proof is not None:
+            reference = self._static_source_proof.definition_reference(witness)
+            if reference is not None:
+                return reference
         for attachment in self._attachments:
             if witness["record_locator"]["artifact"] == attachment.receipts()["report"]["artifact"]:
                 return attachment.static_definition_reference(witness)
@@ -672,8 +874,11 @@ class CompositionIndex:
                 raise ValueError("source-only static binding acquired a project/dynamic admission")
         if binding.get("static_body_witness_pointers") != [] or binding.get("static_body_witness_locators") != []:
             raise ValueError("external static source binding acquired typed body witnesses")
-        return {"source_usable": usable, "reference": reference,
-                "code_source_link": link, "static_witness": witness, "current_source_guard": check}
+        result = {"source_usable": usable, "reference": reference,
+                  "code_source_link": link, "static_witness": witness, "current_source_guard": check}
+        if self._static_source_proof is not None:
+            result["reference_membership_proof"] = self._static_source_proof.reference_membership_proof(reference)
+        return result
 
     def attachment_capture_declarations(self):
         return [attachment.capture_declaration() for attachment in self._attachments]
@@ -1025,4 +1230,4 @@ if __name__ == "__main__":
     main()
 
 
-__all__ = ["CompositionIndex", "ElementReference", "compose_program"]
+__all__ = ["CompositionIndex", "ElementReference", "compose_program", "compose_source_publication"]

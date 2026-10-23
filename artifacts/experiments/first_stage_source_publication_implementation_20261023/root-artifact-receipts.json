@@ -1,0 +1,33 @@
+{
+  "files": [
+    {
+      "bytes": 1564,
+      "path": "README.md",
+      "sha256": "e51d30822a9b609012ba9f54a2dfc3a387ac20d812c4468c44cdce525e317581"
+    },
+    {
+      "bytes": 28310,
+      "path": "freeze.json",
+      "sha256": "2e66efa75b962f651827e126cdef73f8d8979d039a2a25cf9879cc19c1c9cb42"
+    },
+    {
+      "bytes": 62440,
+      "path": "implementation.patch",
+      "sha256": "11e61aa4e588c43ebf9e75a472b2c80368a6858fb7d9687013049f5b8607ccf0"
+    },
+    {
+      "bytes": 27327,
+      "path": "minimal-check.json",
+      "sha256": "6dff701b3d656ce7d44c22042ed095990aa3f163b2851b0dbc997e3782b7b4ca"
+    },
+    {
+      "bytes": 2197,
+      "path": "minimal_check.py",
+      "sha256": "16132319efcc354c472e43515d9daa4703955dcc66bd4409b9ce9686d64ace66"
+    }
+  ],
+  "first_stage_complete": false,
+  "schema": "scar.root-artifact-receipts",
+  "schema_version": 1,
+  "snapshot_only": true
+}

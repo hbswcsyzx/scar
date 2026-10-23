@@ -144,7 +144,7 @@ class BodyInventory:
     graph: ProgramGraph | None
     metadata: LoweringMetadata | None
     reason: str
-    construction_operations: int = 0
+    construction_operations: int | None = 0
 
 
 @dataclass(frozen=True, slots=True)
