@@ -111,6 +111,9 @@ SQLite查询索引已实现并通过真实分片归档构建与局部查询：43
   不能用“有文件/线程节点”代替使用者及数据依赖。
 
 因此第一阶段仍 OPEN。其后的化简、修改指导和成本选择均不在本轮执行范围。
+整体集成的身份、world/state边界及原档反例见
+[COMPOSITE_MODEL_CONNECTION.md](COMPOSITE_MODEL_CONNECTION.md)；不能将多个局部图
+按ID文本直接合并，也不能用空ProgramSnapshot冒充整个程序。
 
 ## 6. 本轮连接的实际验收状态
 
