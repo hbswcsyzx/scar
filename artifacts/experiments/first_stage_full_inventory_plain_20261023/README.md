@@ -7,8 +7,10 @@
 decoded检查点合计513,803,391字节。日志与原图未改写。
 
 后续恢复实验位于 `../first_stage_full_inventory_restored_20261023/`：按原队列及
-原输入逐项核验并复用原materialized返回，不再重lower；只提高最终报告独立写
-上限。其状态与本次失败分别记录，不能把恢复写成此原命令已经成功。
+原输入逐项核验并复用原materialized返回，不再重lower；在ProgramInventory返回后、
+`to_dict()`之前改用manifest/per-source/per-component分片，body直接引用本实验原
+检查点。最初1GB单JSON方案已被替代且未执行。两次状态分别记录，不能把恢复写成
+此原命令已经成功。
 
 `run.sh` 固定最新成功的272038 LeWM trace、environment profile、256文件、
 4096 body、100000 aggregate operations。自动发现范围，不提供业务函数名单或 IR。

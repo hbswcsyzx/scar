@@ -1,9 +1,9 @@
 # 自动准入已观察到的依赖源码
 
-状态：**Implemented，尚未运行验收**。日期：2026-10-23。
+状态：**Implemented；真实离线准入部分完成，独立 artifact／raw 审计通过**。日期：2026-10-23。
 只新增 `scar/analysis/dependency_sources.py` 与本文档。没有修改旧 CLI、resolver、
-workspace、wire 或正在执行的建模任务，也没有运行测试、GPU、prepare 或完整 trace。
-第一阶段仍 **OPEN**。
+workspace、wire 或原有的建模任务。实现后已获准针对现有 capture 执行一次离线
+源码准入及三图导出；没有运行测试、GPU、目标程序或新的采集。第一阶段仍 **OPEN**。
 
 ## 1. 本次必要连接
 
@@ -145,11 +145,76 @@ fresh_output_directory/
 
 ## 6. 当前验收边界与下一步
 
-本模块尚未被运行，当前只有实现和静态代码审查，不能声称真实 dependency source
-匹配已成功。没有新增 CLI，也没有修改旧 seed v1/v2、inventory v8、discovery、
+真实离线验收位于 `artifacts/experiments/first_stage_dependency_sources_20261023`。
+单次运行 exit 0，保存 86 个 source snapshots、79 个原三图 artifacts。
+817 个 entered process/code groups／100,438 次调用中：199 groups／65,554 次原
+CodeSourceLink VERIFIED，553 groups／12,933 次保留给原 program pipeline，65 groups／
+21,951 次 unresolved。其中 44 groups／21,148 次是 archive 总预算阻止后续 20 个
+文件的 snapshot／prepare／匹配；**是预算未完成，不是代码不支持**。另 21 groups／
+803 次是非实际文件名。7 个已有 matcher 结果的文件缺图，对应 181 次调用。
+
+独立 stdlib-only 审计逐个验证全部 493 artifacts／1,499,996,718 canonical bytes，
+重新核对完整 raw SHA／计数及所有 admission descriptor、artifact／definition／source 引用。
+未重编译／prepare。详细真实结果、代价、预算失败与边界见
+[实验报告](../artifacts/experiments/first_stage_dependency_sources_20261023/README.md)。
+这只是代码来源恢复的必要连接，不是第一阶段完整建模完成。
+没有新增 CLI，也没有修改旧 seed v1/v2、inventory v8、discovery、
 composition 或 invocation wire。所有 body、effect、状态、observer origin、
 实际参数绑定、统一 execution model 和 transformation 权威字段保持 false。
 
-下一步只需由协调者选择一份现有 capture，使用明确的独立预算执行本入口，逐条
-核验 external code 的原始依据、保留 snapshot、三图和完整匹配结果；不得重跑
-GPU 或重建全部传递依赖。先确认普通实际文件的必要连接，再推进其它 code 类型。
+## 7. 最小增量继续方案（Proposed，未运行）
+
+只补缺失证据，不重新准入全部 106 文件，也不重新 prepare 已保存的 79 图文件。
+新入口／manifest 是独立 sidecar 的增量扩展；旧 v1 报告不可覆盖或原地补值。
+
+### 7.1 先验证可复用的共同前提
+
+1. 以原 `admissions.json` 原文件 SHA 与 schema 锁定 parent；重核原 capture 全部
+   codes／events／meta 的 SHA、size、lines、descriptors、817 groups 与 100,438 次
+   调用计数。不能只复用报告的 summary，或只按相同文件路径认定相同 capture。
+2. 验证 parent 限定的原 86 snapshot／79 三图／metadata artifacts canonical SHA、
+   context digests 与引用，保留原 source root，不重定位 DefinitionID／SourceReference。
+   引用必须至少含 parent-report 身份、source-root 身份、artifact 路径与 SHA，不能把
+   两个 namespace 中的短 ID 字符串直接合并。
+3. 原 recorded/current Python 条件、未来 flags、compile filename、optimize levels、
+   完整 captured-code digest 与 matcher profile 必须保留。旧 VERIFIED witness 标为
+   **REUSED_SOURCE_COMPILER_WITNESS，非本次重新编译**；不调用新 matcher 猜测。
+4. 每个需求源码做一次有界当前 raw SHA／size／decoded fingerprint guard。
+   本次只读检查 105／106 一致；`scar/trace/execution_evidence.py` 存在并行修改，
+   对应历史 importing callback／14 次调用。历史 artifact 可继续作为原 snapshot
+   的证据；当前源证明须保留 drift frontier，不能静默改 SHA 或重用为当前版本。
+   原 capture 的历史 witness 与当前源码一致性是不同命题。
+
+### 7.2 三种 file cohort，分别做最少必要操作
+
+| cohort | 操作 | 明确不重做 |
+|---|---|---|
+| 79 有图文件 | 引用已审计原三图、snapshot、原 code/source witness；保留 current guard／drift | 不 prepare、compile 或重新导出三图 |
+| 7 有 snapshot／matcher、缺图 | 只为缺失图构造 source layers；从原 snapshot 与不变 fingerprint 得到三图并与原 context digests 比较 | 不重复匹配已验证 codes，不声称从 digest 还原原图对象 |
+| 20 缺 snapshot 文件 | 先保存精确 snapshot；每文件一次现有 workspace prepare／导出；仅对其 44 个原未匹配 groups 运行原 `_Sources` matcher | 不重扫传递 imports，不按包名作推断 |
+
+7 个缺图文件的旧私有 scratch 已释放；原档只有 snapshot 与三图 digests，不能宣称
+仍握有原 graph objects。构造仅限这 7 个文件，而且必须匹配原 digest；若 producer
+实现已变化导致不能一致，记录 producer／context mismatch，不能覆盖旧 digest。
+新 manifest 同时列出 inherited artifacts、reused witnesses、new artifacts、仍未解决
+frontiers；全部指向限定 artifact，不伪造统一 inventory 根或 whole-program 覆盖证明。
+
+### 7.3 预算按真实 cohort 计算，逐文件持久化
+
+实际剩余 source：20 缺 snapshot 共 **881,024 bytes**，7 缺图共 **412,731 bytes**。
+20 snapshot 按现 schema 精确需 **2,098,293 canonical bytes**，应先持久化并预留
+manifest／checkpoint 配额，避免再次被大图饿死。旧 provider metadata 只需引用及
+hash 核验；不能再枚举／保存全部 metadata 后占用本次增量图预算。
+
+79 个已有图的实际 canonical/raw 加权比为 497.73；27 文件推算新增图约 **644MB**，
+按各文件比率 P90 推算约 **1,036MB**。这是实测样本的估计，**不是硬上限**。
+最大剩余文件 `torch/nn/functional.py` 为 277,195 source bytes，现 256MB record
+上限不能保证足够。完整逐文件 bytes 与比率在实验 `cohort_stats.json`。
+
+实施时在每文件首次导出记录实际 canonical bytes、累计预算与 artifact SHA；预算
+拒绝也必须保存实际所需 bytes 和完成 checkpoint。下一次仅重试缺失 artifact，
+不丢失已完成结果。不得直接猜更大上限后全量盲跑；预算批准前先用上述实测增长量
+说明所选 cap 的含义，并保持预算拒绝为预算 frontier，不改称 unsupported。
+
+这个继续方案不需要等待 SQLite，也不修改原 public validate／replay 的完整校验。
+当前只完成设计，**没有实现或启动任何增量任务**。

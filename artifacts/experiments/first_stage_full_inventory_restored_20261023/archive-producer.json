@@ -1,0 +1,8 @@
+{
+  "module_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/inventory_partitions.py",
+  "sha256": "f34b231914614dbde43dfe2496222976effff476a89975be96cafdcc927ec40d",
+  "bytes": 21818,
+  "snapshot": "inventory_partitions.py.snapshot",
+  "stage": "module unchanged since process346699 import; writer pending",
+  "public_source_replay_performed": false
+}

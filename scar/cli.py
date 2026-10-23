@@ -543,6 +543,7 @@ def main(argv=None) -> int:
     capture_model.add_argument("--max-bytes", type=int, default=1000000000)
     capture_model.add_argument("--max-lines", type=int, default=2000000)
     capture_model.add_argument("--schema-contracts", action="store_true", help="recover ordered provider ports using the exact matching installed Torch schema parser")
+    capture_model.add_argument("--bundle-partitions", action="store_true", help="store native graph records as bounded chunks instead of one nested bundle JSON")
     capture_model.add_argument("--out", required=True, help="fresh assembled capture directory with per-stage progress")
     capture_model.set_defaults(func=_import_capture)
     os_resources = sub.add_parser("import-os-resources", help="import retained per-TID strace files into existing resource and handle identities")
@@ -1425,7 +1426,7 @@ def _normalize_v2(args) -> int:
 def _import_capture(args) -> int:
     from scar.trace.capture_import import import_capture
     report = import_capture(args.directory, args.out, max_bytes=args.max_bytes, max_lines=args.max_lines,
-        schema_contracts=args.schema_contracts,
+        schema_contracts=args.schema_contracts, bundle_partitions=args.bundle_partitions,
         progress=lambda record: print(json.dumps(record), flush=True))
     print(json.dumps({"out": str(Path(args.out).resolve()), "coordinate_identity_consistent": report["coordinate_identity_consistent"],
                       "whole_model_established": report["whole_model_established"]}))

@@ -1,10 +1,38 @@
 # 第一阶段建模：实际状态与下一项
 
-日期：2026-10-20。**OPEN：完整 LeWM 自动建模未验收。**
+日期：2026-10-23。**OPEN：完整 LeWM 自动建模未验收。**
 
 当前交付与下一项统一见 [FIRST_STAGE_DELIVERY.md](FIRST_STAGE_DELIVERY.md)，
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
+
+### 2026-10-23：分块归档已发布、物理采集成功，继续连接原图
+
+原单JSON失败已由分片恢复解决：151 source shards与13components，manifest63,577
+字节；1627/1627原返回精确恢复，840个原ProgramGraph经公共codec/overlay/formal
+检查，787 UNSUPPORTED、590 NOT_ATTEMPTED均保留。无fresh body lowering。
+新inventory与旧151source archives的snapshot和完整context逐项相等，正在接正规
+CompositionIndex及同capture source binder，不再prepare151个文件。
+
+依赖源码准入及独立增量均已结束并审核PASS：106文件全部有snapshot/三图，243groups/
+86,702次调用有完整descriptor/source witness。只补原预算阻止的27文件；原199个
+witness不重match，新增44组全部VERIFIED、27次prepare、7原context一致，437.87s。
+剩803次非文件名与14次工具源码current drift显式保留，不提升为body/effect证明。
+
+新增通用物理collector已跑完原LeWM完整episode（return0/success/video），
+79,592 markers、109,288 Tensor槽，108,682槽已导入物理epoch；606槽是带provider ID、
+storage pointer为None的空CPU Tensor，不伪造分配。原档1.17GB经hash往返压缩至54.9MB；
+5进程/252线程/266成员共同坐标
+核验PASS。record_shapes可能保留引用、改变所观察生命周期，不能据此推断原程序
+泄漏。643.29s为重度插桩墙钟，没有LeWM加速比。
+
+IRBundle分块存储已做一次真实CPU原档全记录往返：25表786条原记录/顺序/收据PASS；
+完整LeWM物理联合导入正使用 `--bundle-partitions`，不再生成一份巨大bundle JSON。
+SQLite原图实体/关系索引首次真实构建及必要查询PASS：437,228实体、1,172,205关系；
+151/2217/1627/840原分母守恒，integrity=ok、FK0。建库418.65s、DB约459.2MiB、
+peakRSS约188.5MiB。42,767条endpoint引用仍未语义索引；数据库发布不是完整模型通过。
+记录与文档见 [GRAPH_STORAGE.md](GRAPH_STORAGE.md)、[当前交付](FIRST_STAGE_DELIVERY.md)。
+上述存储发布与局部连接均不是第一阶段完整软硬件依赖闭合，不进入优化阶段。
 
 ### 2026-10-23：大模型存储与当前任务纠正
 

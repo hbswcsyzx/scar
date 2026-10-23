@@ -1,0 +1,34 @@
+{
+  "allocation_mapping_invented": false,
+  "groups": [
+    {
+      "count": 606,
+      "example": {
+        "artifact": {
+          "lines": 132445,
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical.369749.72816598bfa183a810428fe30a7873ff.jsonl",
+          "raw_bytes": 146461974,
+          "raw_sha256": "d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778"
+        },
+        "line": 681,
+        "pointer_within_line": "/arguments/0"
+      },
+      "features": {
+        "device": "cpu",
+        "empty_shape": true,
+        "gaps": [],
+        "provider_allocation_id": 92,
+        "status": "OBSERVED",
+        "storage_data_ptr": null
+      }
+    }
+  ],
+  "original_total_slots": 109288,
+  "schema": "scar.physical-slot-frontier-description",
+  "schema_version": 1,
+  "source": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+  "target_executed": false,
+  "tensor_contents_read": false,
+  "unqualified_slots": 606,
+  "whole_model_established": false
+}

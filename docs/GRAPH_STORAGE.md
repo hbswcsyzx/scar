@@ -1,7 +1,8 @@
 # 图的持久化与查询：存储层设计
 
 日期：2026-10-23。状态：**设计决定与实施约束**，不是数据库迁移已完成的声明。
-当前原图/逐body检查点已经存在；分片inventory正在实施；SQLite图索引尚未实现。
+原图/逐body检查点已恢复为分片inventory并完成实际验收；SQLite图索引已实现，
+同一真实归档的首次构建与局部查询验收PASS，不代表全模型覆盖通过。
 本变更解决第一阶段模型产物无法发布的问题，不开始优化阶段。
 
 ## 1. 问题与选择
@@ -98,3 +99,23 @@ artifact/片段，再发布根manifest或提交根快照事务。中断、预算
 
 选择存储不应变成新的长期基础设施项目。不会因引入数据库就宣称图连接已完整，
 也不会因图可查询就宣称后续的reuse/hoist/delete合法。
+
+## 7. 当前实现与真实验收
+
+- 源码归档：151 source shards、13 global components，通过真实1627检查点恢复；
+  840原图、787 UNSUPPORTED、590 NOT_ATTEMPTED全部保留。新manifest为63,577字节，
+  新增分片约7.8MiB，原图检查点通过locator引用而不复制。
+- 查询层：`scar/store/graph_index.py` 使用明确实体/关系表及原artifact locator。
+  实际首次构建PASS：437,228实体、1,172,205关系、289,298facts；151/2217/1627/840
+  分母守恒，SQLite integrity=ok、FK0，包含/producer+重复Use/StateAccess原locator
+  查询PASS。构建418.65s、含验收426.82s、peakRSS192,992KiB，DB481,460,224bytes。
+  仍有42,767条显式保留但未语义索引的endpoint引用，不能声称全部关系已经索引。
+  本地保留DB，Git保存脚本/固定manifest/DB SHA/查询收据，不提交大型派生库。
+- 动态IR归档：`scar/store/bundle_partitions.py` 直接遍历现有记录，不调用完整
+  bundle.to_dict；已有真实CPU原档导入的全部25表786条记录、顺序和chunk收据逐条一致。
+  同一方式对新的完整LeWM物理采集联合导入已启动，尚待最终验收。
+- 旧protocol snapshots与旧JSON入口保持兼容；不能宣称所有输出已迁移。
+
+实现接口与边界分别见 [GRAPH_INDEX.md](GRAPH_INDEX.md)、
+[BUNDLE_PARTITIONS.md](BUNDLE_PARTITIONS.md)。SQLite只是可重建索引；版本化规范
+记录及原始证据仍是事实来源，没有数据库与文件各自独立可写的双重权威。

@@ -85,7 +85,7 @@ def _check_os_coordinates(fragment, coordinates):
 
 
 def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000,
-                   schema_contracts=False, progress=None):
+                   schema_contracts=False, bundle_partitions=False, progress=None):
     """Import an unmodified successful collector capture, without target execution.
 
     The membership binder validates the original artifacts once.  The existing
@@ -179,7 +179,14 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
         if memory is not None:
             _write(native_out / 'native-memory-values.json.gz', native.bundle.values.to_dict())
             _write(native_out / 'native-memory-lifetimes.json.gz', memory)
-        _write(native_out / 'evidence-bundle.json.gz', native.bundle.to_dict())
+        if bundle_partitions:
+            from scar.store.bundle_partitions import publish_bundle
+            stage('bundle_partitions', 'RUNNING')
+            partition_manifest = publish_bundle(native.bundle, native_out / 'bundle-partitions',
+                progress=lambda record: stage('bundle_partitions', 'WRITING', detail=record))
+            stage('bundle_partitions', 'PUBLISHED_WITH_OPEN_OBLIGATIONS')
+        else:
+            _write(native_out / 'evidence-bundle.json.gz', native.bundle.to_dict())
         _write(native_out / 'provider-references.json.gz', native.references)
         _write(native_out / 'resource-observations.json.gz', native.resources)
         _write(native_out / 'import-report.json.gz', native.report)
@@ -197,7 +204,7 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
         native_summary['memory'] = {key: value for key, value in native.report.get('memory', {}).items()
                                     if key not in ('records', 'source_artifact')}
         native_summary['shared_lifetime_points_checked'] = checked_lifetimes
-        outputs.extend(_stored(path) for path in sorted(native_out.iterdir()))
+        outputs.extend(_stored(path) for path in sorted(native_out.rglob('*')) if path.is_file())
         stage('native', 'IMPORTED', cpu_rf_matches=native.report['cpu_rf_matches'],
               runtime_gpu_matches=native.report['runtime_gpu_matches'], lifetime_points=checked_lifetimes)
         del native, memory
@@ -230,6 +237,10 @@ def import_capture(capture_dir, output_dir, *, max_bytes=1_000_000_000, max_line
             'coordinate_identity_consistent': True, 'coverage_obligations': required,
             'whole_model_established': False, 'source_runtime_verified': False,
             'transformation_authorized': False, 'elapsed_s': time.perf_counter() - started}
+        if bundle_partitions:
+            report['native_bundle_storage'] = {'kind': 'partitioned',
+                'manifest': str(native_out / 'bundle-partitions' / 'manifest.json'),
+                'publication_is_model_completeness': False}
         _write(out / 'capture-model.json', report)
         stage('capture', 'IMPORTED_WITH_OPEN_OBLIGATIONS', coordinate_identity_consistent=True)
         return report
