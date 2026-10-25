@@ -6,6 +6,13 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：字符串通用恢复越过原前沿，完整body仍未返回
+
+真实单body门exit0/9.882s，partial construction634 ops，下一实际缺口为comprehension
+作用域接口；没有返回canonical graph。33ops fixture的局部字符串验证通过不替代真实
+body完整图的AST/compiler/pending验证。准确四文件已从817481c7接入主树；没有新body、
+全运行接线、优化或加速结论。见[SOURCE_CALL_MODEL.md](SOURCE_CALL_MODEL.md)。
+
 ### 2026-10-25：kwargs三原图已发布；原总门FAILED_ENV_FREEZE
 
 普通ADD_GRAPH发布已在原843父快照上保存92/85/217 ops三个原图，新正式静态快照为

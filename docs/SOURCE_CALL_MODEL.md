@@ -56,3 +56,10 @@ FAILED_ENV_FREEZE。这只是首先报告的缺项，完整历史runtime字节�
 见[定向检查](../artifacts/experiments/archived_source_consumer_20261025/receipt.json)。
 后继汇总增量接线，避免每个body重扫原100438调用。
 JoinedStr、完整kwargs cleanup/outer lifetime、内容/state/ready及第一阶段继续OPEN。
+
+通用缺-overlay字符串恢复四文件现已从`codex/source-call-model`的817481c7原样接入。
+真实seq5门exit0/9.882s，construction从原350推进到634，下一前沿是comprehension作用域；
+仍未返回graph，不能计为新增body或该body完整数据/状态连通。33ops小fixture验证与真实
+partial construction分开，完整图上的独立字符串验证未在该真实body运行。实际报告在
+该分支的`artifacts/experiments/source_joinedstr_target_20261025/REPORT.md`；
+主树[应用收据](../artifacts/experiments/source_joinedstr_applied_20261025/receipt.json)记录准确四源码。
