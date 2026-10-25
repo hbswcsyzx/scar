@@ -1,0 +1,44 @@
+{
+  "actual_exit": 130,
+  "freeze": {
+    "bytes": 51616,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/freeze.json",
+    "sha256": "d6cf9a3d0240685f3a3349c783ac8d8b12036a304e76e7168cccac562fbe24b3"
+  },
+  "full_domain_modeled": false,
+  "gate_retry": false,
+  "hashed_stage_count": 455,
+  "large_published_outputs_read_for_sha_only": true,
+  "original_raw_or_index_reads_during_terminal_freeze": 0,
+  "outputs": {
+    "bytes": 49717,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/terminal-output-inventory.json",
+    "sha256": "976bfd18a402fe4957b8402132e24467e55a91b7bc56435771c8402c47fe9dd5"
+  },
+  "production_changes": false,
+  "production_dependencies_match": 269,
+  "result": {
+    "bytes": 2602,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/RESULT.md",
+    "sha256": "b3b83fef4714ce2b9840a61cf56a81e7c1df19f6bf3186f21fa701d5854754de"
+  },
+  "root_session": 4258,
+  "runners_match": 2,
+  "stage_count": 457,
+  "stage_list": {
+    "bytes": 109503,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/staging-list-v2.json",
+    "sha256": "3e7017537608474c0707ed2816fc24d749f2cacc89c349175ba59f3f737c653b"
+  },
+  "stage_paths": {
+    "bytes": 47469,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/staging-paths-v2.txt",
+    "sha256": "82b5b5d87bc352c5697ca7150ae4c69f5d0f15209c6583901c957d9a56046f24"
+  },
+  "status": "ACTUAL_TERMINAL_V2_RECEIPT",
+  "terminal": {
+    "bytes": 4025,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/terminal-result.json",
+    "sha256": "b8129512b344f8188bd9b95756549f30e4d0c23295b84dd2227fbc935dfae1c1"
+  }
+}

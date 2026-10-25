@@ -1,0 +1,17 @@
+{
+  "actual_outcome": "PENDING_ROOT_TERMINAL_EXIT",
+  "dependencies": 269,
+  "freeze_sha256": "d6cf9a3d0240685f3a3349c783ac8d8b12036a304e76e7168cccac562fbe24b3",
+  "preparation_stage_files": "staging-paths.txt (371 paths); runtime outputs and this launch receipt require new terminal staging receipt",
+  "producer_review_candidate": "candidate02",
+  "producer_runner_freeze_remain_frozen": true,
+  "read_only_metadata_files": 6,
+  "recorded_utc": "2026-10-25T12:03:53.918153+00:00",
+  "retry_started_by_this_agent": false,
+  "root_report": "277 pins and three reviewed source SHA values fully matched; freeze d6cf9a...; 143208488960 bytes free; conda lewm activated; root owns exactly one full actual attempt02",
+  "root_session": 4258,
+  "runner_files": 2,
+  "schema": "scar.root-native-gate-launch-review",
+  "status": "ROOT_REPORTED_SINGLE_ACTUAL_ATTEMPT02_RUNNING",
+  "unsupported_schema_boundary": "Parser RuntimeError/unsupported boxed arity/tree or unavailable unique direct child is explicit frontier; known identity/ordinal/source contradiction hard rejects. A held Tensor path unsupported by formal Tensor/List/Tuple/Optional proof currently hard rejects conservatively; if actually encountered, retain first failure and diagnose unsupported representation before any review-approved fix."
+}

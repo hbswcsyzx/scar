@@ -1,0 +1,2537 @@
+{
+  "observed_dispatch": {
+    "begin_count": 1,
+    "end_count": 1,
+    "operator": "aten.mul_.Tensor",
+    "outcome": "RETURNED",
+    "sequence": 3182,
+    "source_rows": {
+      "DISPATCH_BEGIN": [
+        {
+          "artifact": {
+            "schema": "scar.dispatch-observation.events.v1",
+            "sha256": "b54e19dcdb7e19817fa1519f42109cf67afee891141bf685bd28a9b201d5ef5f",
+            "size_bytes": 78870130,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-observations.369749.72816598bfa183a810428fe30a7873ff.jsonl"
+          },
+          "index": 9544,
+          "locator": "#line/9544"
+        }
+      ],
+      "DISPATCH_END": [
+        {
+          "artifact": {
+            "schema": "scar.dispatch-observation.events.v1",
+            "sha256": "b54e19dcdb7e19817fa1519f42109cf67afee891141bf685bd28a9b201d5ef5f",
+            "size_bytes": 78870130,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-observations.369749.72816598bfa183a810428fe30a7873ff.jsonl"
+          },
+          "index": 9546,
+          "locator": "#line/9546"
+        }
+      ],
+      "DISPATCH_OUTPUT": [
+        {
+          "artifact": {
+            "schema": "scar.dispatch-observation.events.v1",
+            "sha256": "b54e19dcdb7e19817fa1519f42109cf67afee891141bf685bd28a9b201d5ef5f",
+            "size_bytes": 78870130,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-observations.369749.72816598bfa183a810428fe30a7873ff.jsonl"
+          },
+          "index": 9545,
+          "locator": "#line/9545"
+        }
+      ]
+    }
+  },
+  "observed_line_bytes": 1338,
+  "observed_line_sha256": "6a15f20faeab8080b26b4e2dc79321b99f9c5b384b70395cb995dd0dda0a625b",
+  "original_archive_chunks_opened": 0,
+  "original_raw_files_opened": 0,
+  "raw_source_artifacts_from_terminal_receipt": [
+    {
+      "artifact": {
+        "schema": "pytorch.execution-trace.v1",
+        "sha256": "625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6",
+        "size_bytes": 321287818,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-trace.369749.72816598bfa183a810428fe30a7873ff.json"
+      },
+      "complete_raw_sha_verified": true,
+      "complete_semantic_parse_performed": true,
+      "newlines": 1862477,
+      "raw_bytes_read": 321287818,
+      "stored_bytes_read": 10557182
+    },
+    {
+      "artifact": {
+        "schema": "scar.dispatch-observation.events.v1",
+        "sha256": "b54e19dcdb7e19817fa1519f42109cf67afee891141bf685bd28a9b201d5ef5f",
+        "size_bytes": 78870130,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-observations.369749.72816598bfa183a810428fe30a7873ff.jsonl"
+      },
+      "complete_raw_sha_verified": true,
+      "complete_semantic_parse_performed": true,
+      "newlines": 119388,
+      "raw_bytes_read": 78870130,
+      "stored_bytes_read": 2630654
+    },
+    {
+      "artifact": {
+        "schema": "scar.tensor-physical-observation.v1",
+        "sha256": "d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778",
+        "size_bytes": 146461974,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical.369749.72816598bfa183a810428fe30a7873ff.jsonl"
+      },
+      "complete_raw_sha_verified": true,
+      "complete_semantic_parse_performed": true,
+      "newlines": 132445,
+      "raw_bytes_read": 146461974,
+      "stored_bytes_read": 7124180
+    }
+  ],
+  "runtime_authority_recreated": false,
+  "selected_sqlite_rows": [
+    {
+      "key": "9544",
+      "kind": "dispatch",
+      "ordinal": 9544,
+      "payload_bytes": 885,
+      "payload_sha256": "7d549b0785dd1452b05275e14894bc480010ba8d3ff98d7d0a0001c1c0a4b7a8",
+      "record": {
+        "index": 9544,
+        "kind": "DISPATCH_BEGIN",
+        "marker": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:3182:span",
+        "observation": {
+          "ancestry_complete": true,
+          "call_event_index": 81609,
+          "context": {
+            "bytecode_offset": 98,
+            "code": "pycode-v2:5da16730180c12a587793de952992e6b185811639c0f7469becc4033aa4b7bf2",
+            "invocation": 40811,
+            "kind": "retained ancestor context, not a proven direct caller",
+            "site": {
+              "code": "pycode-v2:5da16730180c12a587793de952992e6b185811639c0f7469becc4033aa4b7bf2",
+              "offset": 98,
+              "opname": "CALL_FUNCTION_EX",
+              "position": [
+                1778,
+                1778,
+                19,
+                51
+              ]
+            },
+            "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py"
+          },
+          "native_tid": 369749,
+          "process_id": 369749,
+          "python_ident": 134637364963136,
+          "tensor_references": [
+            {
+              "identity_qualified": true,
+              "path": [
+                0,
+                0
+              ],
+              "ref": "weak:369749:354301"
+            }
+          ]
+        },
+        "operator": "aten.mul_.Tensor",
+        "process_id": 369749,
+        "sequence": 3182,
+        "slot_gaps": []
+      }
+    },
+    {
+      "key": "9546",
+      "kind": "dispatch",
+      "ordinal": 9546,
+      "payload_bytes": 204,
+      "payload_sha256": "3631d9ee638dd87a6ddc02771130b9436745f4fd1d402bbfa1d837057248bd78",
+      "record": {
+        "index": 9546,
+        "kind": "DISPATCH_END",
+        "outcome": "RETURNED",
+        "output_marker": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:3182:output",
+        "process_id": 369749,
+        "sequence": 3182,
+        "span_enter_returned": true
+      }
+    },
+    {
+      "key": "9545",
+      "kind": "dispatch",
+      "ordinal": 9545,
+      "payload_bytes": 855,
+      "payload_sha256": "8b278cbb107c716103b20fc2be35e966e39e59aba42cf98621e51ac72b6bffba",
+      "record": {
+        "index": 9545,
+        "kind": "DISPATCH_OUTPUT",
+        "marker": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:3182:output",
+        "observation": {
+          "ancestry_complete": true,
+          "call_event_index": 81609,
+          "context": {
+            "bytecode_offset": 98,
+            "code": "pycode-v2:5da16730180c12a587793de952992e6b185811639c0f7469becc4033aa4b7bf2",
+            "invocation": 40811,
+            "kind": "retained ancestor context, not a proven direct caller",
+            "site": {
+              "code": "pycode-v2:5da16730180c12a587793de952992e6b185811639c0f7469becc4033aa4b7bf2",
+              "offset": 98,
+              "opname": "CALL_FUNCTION_EX",
+              "position": [
+                1778,
+                1778,
+                19,
+                51
+              ]
+            },
+            "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/nn/modules/module.py"
+          },
+          "native_tid": 369749,
+          "process_id": 369749,
+          "python_ident": 134637364963136,
+          "tensor_references": [
+            {
+              "identity_qualified": true,
+              "path": [],
+              "ref": "weak:369749:354301"
+            }
+          ]
+        },
+        "process_id": 369749,
+        "sequence": 3182,
+        "slot_gaps": []
+      }
+    },
+    {
+      "key": "24611",
+      "kind": "node",
+      "ordinal": 20481,
+      "payload_bytes": 883,
+      "payload_sha256": "07983a7d43dd5cd75aa8dade9a3e62de345c9bdb6db2fb55e022d437c5ef40e1",
+      "record": {
+        "attrs": [
+          {
+            "name": "rf_id",
+            "type": "uint64",
+            "value": 20473
+          },
+          {
+            "name": "fw_parent",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "seq_id",
+            "type": "int64",
+            "value": 0
+          },
+          {
+            "name": "scope",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "tid",
+            "type": "uint64",
+            "value": 1
+          },
+          {
+            "name": "fw_tid",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "op_schema",
+            "type": "string",
+            "value": "aten::mul_.Tensor(Tensor(a!) self, Tensor other) -> Tensor(a!)"
+          },
+          {
+            "name": "kernel_backend",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_file",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "tensor_range",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "ctrl_deps": 2,
+        "id": 24611,
+        "inputs": {
+          "shapes": [
+            [
+              3,
+              224,
+              224
+            ],
+            []
+          ],
+          "strides": [
+            [
+              1,
+              672,
+              3
+            ],
+            []
+          ],
+          "types": [
+            "Tensor(float)",
+            "Tensor(double)"
+          ],
+          "values": [
+            [
+              24607,
+              24608,
+              0,
+              150528,
+              4,
+              "cpu"
+            ],
+            [
+              24612,
+              24613,
+              0,
+              1,
+              8,
+              "cpu"
+            ]
+          ]
+        },
+        "name": "aten::mul_",
+        "outputs": {
+          "shapes": [
+            [
+              3,
+              224,
+              224
+            ]
+          ],
+          "strides": [
+            [
+              1,
+              672,
+              3
+            ]
+          ],
+          "types": [
+            "Tensor(float)"
+          ],
+          "values": [
+            [
+              24607,
+              24608,
+              0,
+              150528,
+              4,
+              "cpu"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "key": "24614",
+      "kind": "node",
+      "ordinal": 20480,
+      "payload_bytes": 769,
+      "payload_sha256": "ee9757132134c27e44ae9590cbd8714b1bd628c167c48b9d2fc490496786fa79",
+      "record": {
+        "attrs": [
+          {
+            "name": "rf_id",
+            "type": "uint64",
+            "value": 20474
+          },
+          {
+            "name": "fw_parent",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "seq_id",
+            "type": "int64",
+            "value": -1
+          },
+          {
+            "name": "scope",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "tid",
+            "type": "uint64",
+            "value": 1
+          },
+          {
+            "name": "fw_tid",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "op_schema",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_backend",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_file",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "tensor_range",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "ctrl_deps": 24611,
+        "id": 24614,
+        "inputs": {
+          "shapes": [
+            [
+              3,
+              224,
+              224
+            ],
+            []
+          ],
+          "strides": [
+            [
+              1,
+              672,
+              3
+            ],
+            []
+          ],
+          "types": [
+            "Tensor(float)",
+            "Tensor(double)"
+          ],
+          "values": [
+            [
+              24607,
+              24608,
+              0,
+              150528,
+              4,
+              "cpu"
+            ],
+            [
+              24612,
+              24613,
+              0,
+              1,
+              8,
+              "cpu"
+            ]
+          ]
+        },
+        "name": "PythonDispatchMode",
+        "outputs": {
+          "shapes": [],
+          "strides": [],
+          "types": [],
+          "values": []
+        }
+      }
+    },
+    {
+      "key": "24615",
+      "kind": "node",
+      "ordinal": 20479,
+      "payload_bytes": 765,
+      "payload_sha256": "3fe54481c6ca0eb911bae07b4931b07a26b24671a9c74c3bbc07ca33318e6443",
+      "record": {
+        "attrs": [
+          {
+            "name": "rf_id",
+            "type": "uint64",
+            "value": 20475
+          },
+          {
+            "name": "fw_parent",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "seq_id",
+            "type": "int64",
+            "value": -1
+          },
+          {
+            "name": "scope",
+            "type": "uint64",
+            "value": 7
+          },
+          {
+            "name": "tid",
+            "type": "uint64",
+            "value": 1
+          },
+          {
+            "name": "fw_tid",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "op_schema",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_backend",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_file",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "tensor_range",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "ctrl_deps": 24614,
+        "id": 24615,
+        "inputs": {
+          "shapes": [
+            [
+              3,
+              224,
+              224
+            ]
+          ],
+          "strides": [
+            [
+              1,
+              672,
+              3
+            ]
+          ],
+          "types": [
+            "Tensor(float)"
+          ],
+          "values": [
+            [
+              24607,
+              24608,
+              0,
+              150528,
+              4,
+              "cpu"
+            ]
+          ]
+        },
+        "name": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:3182:span",
+        "outputs": {
+          "shapes": [],
+          "strides": [],
+          "types": [],
+          "values": []
+        }
+      }
+    },
+    {
+      "key": "24616",
+      "kind": "node",
+      "ordinal": 20477,
+      "payload_bytes": 888,
+      "payload_sha256": "8df5f0435cd43c3fefaa95357333ea8368dbdc356a7bfa5c479cc7d2d249f0df",
+      "record": {
+        "attrs": [
+          {
+            "name": "rf_id",
+            "type": "uint64",
+            "value": 20476
+          },
+          {
+            "name": "fw_parent",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "seq_id",
+            "type": "int64",
+            "value": -1
+          },
+          {
+            "name": "scope",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "tid",
+            "type": "uint64",
+            "value": 1
+          },
+          {
+            "name": "fw_tid",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "op_schema",
+            "type": "string",
+            "value": "aten::mul_.Tensor(Tensor(a!) self, Tensor other) -> Tensor(a!)"
+          },
+          {
+            "name": "kernel_backend",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_file",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "tensor_range",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "ctrl_deps": 24615,
+        "id": 24616,
+        "inputs": {
+          "shapes": [
+            [
+              3,
+              224,
+              224
+            ],
+            []
+          ],
+          "strides": [
+            [
+              1,
+              672,
+              3
+            ],
+            []
+          ],
+          "types": [
+            "Tensor(float)",
+            "Tensor(double)"
+          ],
+          "values": [
+            [
+              24607,
+              24608,
+              0,
+              150528,
+              4,
+              "cpu"
+            ],
+            [
+              24617,
+              24618,
+              0,
+              1,
+              8,
+              "cpu"
+            ]
+          ]
+        },
+        "name": "aten::mul_",
+        "outputs": {
+          "shapes": [
+            [
+              3,
+              224,
+              224
+            ]
+          ],
+          "strides": [
+            [
+              1,
+              672,
+              3
+            ]
+          ],
+          "types": [
+            "Tensor(float)"
+          ],
+          "values": [
+            [
+              24607,
+              24608,
+              0,
+              150528,
+              4,
+              "cpu"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "key": "24619",
+      "kind": "node",
+      "ordinal": 20476,
+      "payload_bytes": 945,
+      "payload_sha256": "f0ad60099b7e27713c1fdb8131621eee98b2ace18464419ffa7d201cae2cdb1a",
+      "record": {
+        "attrs": [
+          {
+            "name": "rf_id",
+            "type": "uint64",
+            "value": 20477
+          },
+          {
+            "name": "fw_parent",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "seq_id",
+            "type": "int64",
+            "value": -1
+          },
+          {
+            "name": "scope",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "tid",
+            "type": "uint64",
+            "value": 1
+          },
+          {
+            "name": "fw_tid",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "op_schema",
+            "type": "string",
+            "value": "aten::to.dtype(Tensor(a) self, ScalarType dtype, bool non_blocking=False, bool copy=False, MemoryFormat? memory_format=None) -> Tensor(a)"
+          },
+          {
+            "name": "kernel_backend",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_file",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "tensor_range",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "ctrl_deps": 24616,
+        "id": 24619,
+        "inputs": {
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "strides": [
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "types": [
+            "Tensor(double)",
+            "Int",
+            "Bool",
+            "Bool",
+            "None"
+          ],
+          "values": [
+            [
+              24617,
+              24618,
+              0,
+              1,
+              8,
+              "cpu"
+            ],
+            6,
+            false,
+            false,
+            "<None>"
+          ]
+        },
+        "name": "aten::to",
+        "outputs": {
+          "shapes": [
+            []
+          ],
+          "strides": [
+            []
+          ],
+          "types": [
+            "Tensor(float)"
+          ],
+          "values": [
+            [
+              24622,
+              24623,
+              0,
+              1,
+              4,
+              "cpu"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "key": "24620",
+      "kind": "node",
+      "ordinal": 20475,
+      "payload_bytes": 1049,
+      "payload_sha256": "c054cb9571c9ee716aa88293058f550533711a3db79c5d758d4062147c07a2d3",
+      "record": {
+        "attrs": [
+          {
+            "name": "rf_id",
+            "type": "uint64",
+            "value": 20478
+          },
+          {
+            "name": "fw_parent",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "seq_id",
+            "type": "int64",
+            "value": -1
+          },
+          {
+            "name": "scope",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "tid",
+            "type": "uint64",
+            "value": 1
+          },
+          {
+            "name": "fw_tid",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "op_schema",
+            "type": "string",
+            "value": "aten::_to_copy(Tensor self, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None, bool non_blocking=False, MemoryFormat? memory_format=None) -> Tensor"
+          },
+          {
+            "name": "kernel_backend",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_file",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "tensor_range",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "ctrl_deps": 24619,
+        "id": 24620,
+        "inputs": {
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "strides": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "types": [
+            "Tensor(double)",
+            "Int",
+            "None",
+            "None",
+            "None",
+            "Bool",
+            "None"
+          ],
+          "values": [
+            [
+              24617,
+              24618,
+              0,
+              1,
+              8,
+              "cpu"
+            ],
+            6,
+            "<None>",
+            "<None>",
+            "<None>",
+            false,
+            "<None>"
+          ]
+        },
+        "name": "aten::_to_copy",
+        "outputs": {
+          "shapes": [
+            []
+          ],
+          "strides": [
+            []
+          ],
+          "types": [
+            "Tensor(float)"
+          ],
+          "values": [
+            [
+              24622,
+              24623,
+              0,
+              1,
+              4,
+              "cpu"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "key": "24621",
+      "kind": "node",
+      "ordinal": 20473,
+      "payload_bytes": 967,
+      "payload_sha256": "211a947cafcac6b19751e2a4c14de58d02932fc6b3c97ac8848baf5f51288f1f",
+      "record": {
+        "attrs": [
+          {
+            "name": "rf_id",
+            "type": "uint64",
+            "value": 20479
+          },
+          {
+            "name": "fw_parent",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "seq_id",
+            "type": "int64",
+            "value": -1
+          },
+          {
+            "name": "scope",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "tid",
+            "type": "uint64",
+            "value": 1
+          },
+          {
+            "name": "fw_tid",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "op_schema",
+            "type": "string",
+            "value": "aten::empty_strided(SymInt[] size, SymInt[] stride, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor"
+          },
+          {
+            "name": "kernel_backend",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_file",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "tensor_range",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "ctrl_deps": 24620,
+        "id": 24621,
+        "inputs": {
+          "shapes": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "strides": [
+            [],
+            [],
+            [],
+            [],
+            [],
+            []
+          ],
+          "types": [
+            "GenericList[]",
+            "GenericList[]",
+            "Int",
+            "Int",
+            "Device",
+            "Bool"
+          ],
+          "values": [
+            [],
+            [],
+            6,
+            0,
+            "cpu",
+            false
+          ]
+        },
+        "name": "aten::empty_strided",
+        "outputs": {
+          "shapes": [
+            []
+          ],
+          "strides": [
+            []
+          ],
+          "types": [
+            "Tensor(float)"
+          ],
+          "values": [
+            [
+              24622,
+              24623,
+              0,
+              1,
+              4,
+              "cpu"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "key": "24624",
+      "kind": "node",
+      "ordinal": 20474,
+      "payload_bytes": 883,
+      "payload_sha256": "410c4128a06f683e4623bdf84ef118f355fd83f628ae4e08704d6f3938820ced",
+      "record": {
+        "attrs": [
+          {
+            "name": "rf_id",
+            "type": "uint64",
+            "value": 20480
+          },
+          {
+            "name": "fw_parent",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "seq_id",
+            "type": "int64",
+            "value": -1
+          },
+          {
+            "name": "scope",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "tid",
+            "type": "uint64",
+            "value": 1
+          },
+          {
+            "name": "fw_tid",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "op_schema",
+            "type": "string",
+            "value": "aten::copy_(Tensor(a!) self, Tensor src, bool non_blocking=False) -> Tensor(a!)"
+          },
+          {
+            "name": "kernel_backend",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_file",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "tensor_range",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "ctrl_deps": 24620,
+        "id": 24624,
+        "inputs": {
+          "shapes": [
+            [],
+            [],
+            []
+          ],
+          "strides": [
+            [],
+            [],
+            []
+          ],
+          "types": [
+            "Tensor(float)",
+            "Tensor(double)",
+            "Bool"
+          ],
+          "values": [
+            [
+              24622,
+              24623,
+              0,
+              1,
+              4,
+              "cpu"
+            ],
+            [
+              24617,
+              24618,
+              0,
+              1,
+              8,
+              "cpu"
+            ],
+            false
+          ]
+        },
+        "name": "aten::copy_",
+        "outputs": {
+          "shapes": [
+            []
+          ],
+          "strides": [
+            []
+          ],
+          "types": [
+            "Tensor(float)"
+          ],
+          "values": [
+            [
+              24622,
+              24623,
+              0,
+              1,
+              4,
+              "cpu"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "key": "24625",
+      "kind": "node",
+      "ordinal": 20478,
+      "payload_bytes": 767,
+      "payload_sha256": "0ec2ec57a003fe522987688efcda480f7a0a6b94df51c8aec58d7fdfcaeeafff",
+      "record": {
+        "attrs": [
+          {
+            "name": "rf_id",
+            "type": "uint64",
+            "value": 20481
+          },
+          {
+            "name": "fw_parent",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "seq_id",
+            "type": "int64",
+            "value": -1
+          },
+          {
+            "name": "scope",
+            "type": "uint64",
+            "value": 7
+          },
+          {
+            "name": "tid",
+            "type": "uint64",
+            "value": 1
+          },
+          {
+            "name": "fw_tid",
+            "type": "uint64",
+            "value": 0
+          },
+          {
+            "name": "op_schema",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_backend",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "kernel_file",
+            "type": "string",
+            "value": ""
+          },
+          {
+            "name": "tensor_range",
+            "type": "string",
+            "value": ""
+          }
+        ],
+        "ctrl_deps": 24615,
+        "id": 24625,
+        "inputs": {
+          "shapes": [
+            [
+              3,
+              224,
+              224
+            ]
+          ],
+          "strides": [
+            [
+              1,
+              672,
+              3
+            ]
+          ],
+          "types": [
+            "Tensor(float)"
+          ],
+          "values": [
+            [
+              24607,
+              24608,
+              0,
+              150528,
+              4,
+              "cpu"
+            ]
+          ]
+        },
+        "name": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:3182:output",
+        "outputs": {
+          "shapes": [],
+          "strides": [],
+          "types": [],
+          "values": []
+        }
+      }
+    },
+    {
+      "key": "9687",
+      "kind": "physical",
+      "ordinal": 9687,
+      "payload_bytes": 692,
+      "payload_sha256": "b4ddc1ab81bea74c5602d6cc5b4837da9cb365737cf3eceec58ae09b18f69599",
+      "record": {
+        "alloc_size": 8,
+        "device": {
+          "index": null,
+          "text": "cpu",
+          "type": "cpu"
+        },
+        "event": {
+          "correlation_id": 0,
+          "end_time_ns": 1792729230115071428,
+          "parent_result_id": null,
+          "record_function_thread_token": 1,
+          "result_id": 99366986241696,
+          "start_time_ns": 1792729230115071428,
+          "traversal_ordinal": 25399
+        },
+        "gaps": [],
+        "index": 9687,
+        "kind": "ALLOCATION",
+        "legacy_kineto_allocation_correspondence_established": false,
+        "nonce": "72816598bfa183a810428fe30a7873ff",
+        "physical_epoch_reference_observed": true,
+        "process_id": 369749,
+        "provider_allocation_id": 1840,
+        "provider_tensor_id": 1233,
+        "ptr": 99366340643136,
+        "receipt_kind": "ALLOCATE",
+        "schema": "scar.tensor-physical-observation",
+        "schema_version": 1,
+        "total_allocated": 624200,
+        "total_reserved": 0
+      }
+    },
+    {
+      "key": "9688",
+      "kind": "physical",
+      "ordinal": 9688,
+      "payload_bytes": 1176,
+      "payload_sha256": "c7827e82c603427a4ff6e096cf5fee2747609f6738c3677ffbce7d8bd7c5e28f",
+      "record": {
+        "arguments": [
+          {
+            "argument_ordinal": 0,
+            "dispatch_reference_ordinal": 0,
+            "metadata": {
+              "device": {
+                "index": null,
+                "text": "cpu",
+                "type": "cpu"
+              },
+              "dtype": "torch.float32",
+              "gaps": [],
+              "impl_ptr": 99366344084560,
+              "layout": "torch.strided",
+              "physical_epoch_reference_observed": true,
+              "provider_allocation_id": 1839,
+              "provider_tensor_id": 1232,
+              "sizes": [
+                3,
+                224,
+                224
+              ],
+              "status": "OBSERVED",
+              "storage_data_ptr": 99366423657472,
+              "storage_offset": null,
+              "storage_offset_gap": "not_exposed_by_installed_tensor_metadata_binding",
+              "strides": [
+                1,
+                672,
+                3
+              ]
+            }
+          }
+        ],
+        "binding_status": "PROVISIONAL_REQUIRES_FINAL_METADATA",
+        "dispatch_native_tid": 369749,
+        "dispatch_python_ident": 134637364963136,
+        "dispatch_source_line": 9544,
+        "event": {
+          "correlation_id": 20475,
+          "end_time_ns": 1792729230119099592,
+          "parent_result_id": 99367085568016,
+          "record_function_thread_token": 1,
+          "result_id": 99367085568848,
+          "start_time_ns": 1792729230117125105,
+          "traversal_ordinal": 25402
+        },
+        "expected_argument_count": 1,
+        "gaps": [],
+        "index": 9688,
+        "kind": "MARKER",
+        "marker": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:3182:span",
+        "nonce": "72816598bfa183a810428fe30a7873ff",
+        "phase": "span",
+        "process_id": 369749,
+        "schema": "scar.tensor-physical-observation",
+        "schema_version": 1,
+        "sequence": 3182
+      }
+    },
+    {
+      "key": "9689",
+      "kind": "physical",
+      "ordinal": 9689,
+      "payload_bytes": 702,
+      "payload_sha256": "e85b6c34f05c48519cf8c5a5575232b3361f7f5652cf399a4e806446bc11bb85",
+      "record": {
+        "alloc_size": 8,
+        "device": {
+          "index": null,
+          "text": "cpu",
+          "type": "cpu"
+        },
+        "event": {
+          "correlation_id": 0,
+          "end_time_ns": 1792729230117195810,
+          "parent_result_id": 99367085568848,
+          "record_function_thread_token": 1,
+          "result_id": 99366986242336,
+          "start_time_ns": 1792729230117195810,
+          "traversal_ordinal": 25403
+        },
+        "gaps": [],
+        "index": 9689,
+        "kind": "ALLOCATION",
+        "legacy_kineto_allocation_correspondence_established": false,
+        "nonce": "72816598bfa183a810428fe30a7873ff",
+        "physical_epoch_reference_observed": true,
+        "process_id": 369749,
+        "provider_allocation_id": 1841,
+        "provider_tensor_id": 1234,
+        "ptr": 99366349926656,
+        "receipt_kind": "ALLOCATE",
+        "schema": "scar.tensor-physical-observation",
+        "schema_version": 1,
+        "total_allocated": 624208,
+        "total_reserved": 0
+      }
+    },
+    {
+      "key": "9690",
+      "kind": "physical",
+      "ordinal": 9690,
+      "payload_bytes": 702,
+      "payload_sha256": "62b9dbac217bef8d95500f81edda1fe3dcd643c737c1d21f1a54edc2d0fc201a",
+      "record": {
+        "alloc_size": 4,
+        "device": {
+          "index": null,
+          "text": "cpu",
+          "type": "cpu"
+        },
+        "event": {
+          "correlation_id": 0,
+          "end_time_ns": 1792729230117288605,
+          "parent_result_id": 99367085578656,
+          "record_function_thread_token": 1,
+          "result_id": 99366986242976,
+          "start_time_ns": 1792729230117288605,
+          "traversal_ordinal": 25408
+        },
+        "gaps": [],
+        "index": 9690,
+        "kind": "ALLOCATION",
+        "legacy_kineto_allocation_correspondence_established": false,
+        "nonce": "72816598bfa183a810428fe30a7873ff",
+        "physical_epoch_reference_observed": true,
+        "process_id": 369749,
+        "provider_allocation_id": 1842,
+        "provider_tensor_id": 1235,
+        "ptr": 99366341037952,
+        "receipt_kind": "ALLOCATE",
+        "schema": "scar.tensor-physical-observation",
+        "schema_version": 1,
+        "total_allocated": 624212,
+        "total_reserved": 0
+      }
+    },
+    {
+      "key": "9691",
+      "kind": "physical",
+      "ordinal": 9691,
+      "payload_bytes": 699,
+      "payload_sha256": "1334cb0fdbbc0e337c39e139bd2fda5b88349fc917c121179225e4a1bf09fa6c",
+      "record": {
+        "alloc_size": -4,
+        "device": {
+          "index": null,
+          "text": "cpu",
+          "type": "cpu"
+        },
+        "event": {
+          "correlation_id": 0,
+          "end_time_ns": 1792729230117630856,
+          "parent_result_id": 99367085570192,
+          "record_function_thread_token": 1,
+          "result_id": 99366986243616,
+          "start_time_ns": 1792729230117630856,
+          "traversal_ordinal": 25410
+        },
+        "gaps": [],
+        "index": 9691,
+        "kind": "ALLOCATION",
+        "legacy_kineto_allocation_correspondence_established": false,
+        "nonce": "72816598bfa183a810428fe30a7873ff",
+        "physical_epoch_reference_observed": true,
+        "process_id": 369749,
+        "provider_allocation_id": 1842,
+        "provider_tensor_id": 1235,
+        "ptr": 99366341037952,
+        "receipt_kind": "FREE",
+        "schema": "scar.tensor-physical-observation",
+        "schema_version": 1,
+        "total_allocated": 624208,
+        "total_reserved": 0
+      }
+    },
+    {
+      "key": "9692",
+      "kind": "physical",
+      "ordinal": 9692,
+      "payload_bytes": 699,
+      "payload_sha256": "f7f83f3f77a7ccfe611938ed6ceec4f88e9e4c9192dd9a6ebe619e0dff8f29e2",
+      "record": {
+        "alloc_size": -8,
+        "device": {
+          "index": null,
+          "text": "cpu",
+          "type": "cpu"
+        },
+        "event": {
+          "correlation_id": 0,
+          "end_time_ns": 1792729230117632403,
+          "parent_result_id": 99367085570192,
+          "record_function_thread_token": 1,
+          "result_id": 99366986244256,
+          "start_time_ns": 1792729230117632403,
+          "traversal_ordinal": 25411
+        },
+        "gaps": [],
+        "index": 9692,
+        "kind": "ALLOCATION",
+        "legacy_kineto_allocation_correspondence_established": false,
+        "nonce": "72816598bfa183a810428fe30a7873ff",
+        "physical_epoch_reference_observed": true,
+        "process_id": 369749,
+        "provider_allocation_id": 1841,
+        "provider_tensor_id": 1234,
+        "ptr": 99366349926656,
+        "receipt_kind": "FREE",
+        "schema": "scar.tensor-physical-observation",
+        "schema_version": 1,
+        "total_allocated": 624200,
+        "total_reserved": 0
+      }
+    },
+    {
+      "key": "9693",
+      "kind": "physical",
+      "ordinal": 9693,
+      "payload_bytes": 1180,
+      "payload_sha256": "fe9190b2b4e7df861d0692a74cb7dde2ff24a4fd7d61f05df5db143325614932",
+      "record": {
+        "arguments": [
+          {
+            "argument_ordinal": 0,
+            "dispatch_reference_ordinal": 0,
+            "metadata": {
+              "device": {
+                "index": null,
+                "text": "cpu",
+                "type": "cpu"
+              },
+              "dtype": "torch.float32",
+              "gaps": [],
+              "impl_ptr": 99366344084560,
+              "layout": "torch.strided",
+              "physical_epoch_reference_observed": true,
+              "provider_allocation_id": 1839,
+              "provider_tensor_id": 1232,
+              "sizes": [
+                3,
+                224,
+                224
+              ],
+              "status": "OBSERVED",
+              "storage_data_ptr": 99366423657472,
+              "storage_offset": null,
+              "storage_offset_gap": "not_exposed_by_installed_tensor_metadata_binding",
+              "strides": [
+                1,
+                672,
+                3
+              ]
+            }
+          }
+        ],
+        "binding_status": "PROVISIONAL_REQUIRES_FINAL_METADATA",
+        "dispatch_native_tid": 369749,
+        "dispatch_python_ident": 134637364963136,
+        "dispatch_source_line": 9545,
+        "event": {
+          "correlation_id": 20481,
+          "end_time_ns": 1792729230118774945,
+          "parent_result_id": 99367085568848,
+          "record_function_thread_token": 1,
+          "result_id": 99367085580688,
+          "start_time_ns": 1792729230118733728,
+          "traversal_ordinal": 25412
+        },
+        "expected_argument_count": 1,
+        "gaps": [],
+        "index": 9693,
+        "kind": "MARKER",
+        "marker": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:3182:output",
+        "nonce": "72816598bfa183a810428fe30a7873ff",
+        "phase": "output",
+        "process_id": 369749,
+        "schema": "scar.tensor-physical-observation",
+        "schema_version": 1,
+        "sequence": 3182
+      }
+    },
+    {
+      "key": "9694",
+      "kind": "physical",
+      "ordinal": 9694,
+      "payload_bytes": 689,
+      "payload_sha256": "af555a1a4493e3475bc5b02741200961097d0d741f6efbdb69541734ad188e6d",
+      "record": {
+        "alloc_size": -8,
+        "device": {
+          "index": null,
+          "text": "cpu",
+          "type": "cpu"
+        },
+        "event": {
+          "correlation_id": 0,
+          "end_time_ns": 1792729230119179497,
+          "parent_result_id": null,
+          "record_function_thread_token": 1,
+          "result_id": 99366986244896,
+          "start_time_ns": 1792729230119179497,
+          "traversal_ordinal": 25413
+        },
+        "gaps": [],
+        "index": 9694,
+        "kind": "ALLOCATION",
+        "legacy_kineto_allocation_correspondence_established": false,
+        "nonce": "72816598bfa183a810428fe30a7873ff",
+        "physical_epoch_reference_observed": true,
+        "process_id": 369749,
+        "provider_allocation_id": 1840,
+        "provider_tensor_id": 1233,
+        "ptr": 99366340643136,
+        "receipt_kind": "FREE",
+        "schema": "scar.tensor-physical-observation",
+        "schema_version": 1,
+        "total_allocated": 624192,
+        "total_reserved": 0
+      }
+    },
+    {
+      "key": "24611",
+      "kind": "archive:instances",
+      "ordinal": 20481,
+      "payload_bytes": 5209,
+      "payload_sha256": "ddfee0755bd722767d26c324709d00c7d739496a1015772a0c804e64bce47354",
+      "record": {
+        "locator": {
+          "artifact": {
+            "compression": "gzip",
+            "decoded_bytes": 15995969,
+            "decoded_sha256": "24971a57fba14109386d6434415b4d3ebf13ee923a6382918ed765e7da650960",
+            "first_ordinal": 17773,
+            "last_ordinal": 22934,
+            "lines": 5162,
+            "physical_bytes": 911857,
+            "physical_sha256": "da35f4e501c04f09b436f6078916ce1a2a62bc892a0c9de48ad92529b91d66a1",
+            "uri": "evidence/instances/000003.jsonl.gz"
+          },
+          "line": 2709,
+          "manifest_receipt": {
+            "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+            "physical_bytes": 72965,
+            "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+          },
+          "pointer_within_line": "/record"
+        },
+        "ordinal": 20481,
+        "record": {
+          "control_scope": null,
+          "definition": {
+            "kind": "opdef",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670",
+            "wire": "opdef:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670"
+          },
+          "end_ns": 1872204119173967,
+          "id": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24611",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24611"
+          },
+          "iteration": {},
+          "metadata": {
+            "category": "cpu_op",
+            "clock_domain": "kineto",
+            "correlation": null,
+            "cpu_join_assumptions": [
+              "artifacts belong to the same supplied capture"
+            ],
+            "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+            "cpu_join_status": "Inferred",
+            "ctrl_deps": 2,
+            "eto_tid": 1,
+            "external_id": 20473,
+            "kineto_reference": "sha256:256f688f0c767a6302fccaec088fab9b1232ca429c24de4254a984329c3be875#/traceEvents/20531",
+            "node_id": 24611,
+            "parent_basis": "ETO ctrl_deps collector stack only",
+            "provider": "ETO",
+            "raw_pid": 369749,
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20481",
+            "raw_resource": {},
+            "raw_tid": 369749,
+            "rf_id": 20473,
+            "tensor_slots": [
+              {
+                "descriptor_id": "d6b619f00ce223c343fcae96dc27ba0bdd4d4f3a65d3c90cb1700fdbde4bf149",
+                "native_schema_binding": {
+                  "formal_slot": {
+                    "kind": "slot",
+                    "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:input_slots:0",
+                    "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:input_slots:0"
+                  },
+                  "gap": null,
+                  "schema_sha256": "12443b2a746b97941ca3dfd9540702c98f28147e2048275d7a94b057488fc269",
+                  "status": "QUALIFIED"
+                },
+                "ordered_path": [
+                  0
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24607",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20481/inputs/values/0",
+                "role": "inputs"
+              },
+              {
+                "descriptor_id": "955554c81b0ff781f5ecf87cf156b43c3d4ace0207072736c5d4440ea8459228",
+                "native_schema_binding": {
+                  "formal_slot": {
+                    "kind": "slot",
+                    "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:input_slots:1",
+                    "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:input_slots:1"
+                  },
+                  "gap": null,
+                  "schema_sha256": "12443b2a746b97941ca3dfd9540702c98f28147e2048275d7a94b057488fc269",
+                  "status": "QUALIFIED"
+                },
+                "ordered_path": [
+                  1
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24612",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20481/inputs/values/1",
+                "role": "inputs"
+              },
+              {
+                "descriptor_id": "d6b619f00ce223c343fcae96dc27ba0bdd4d4f3a65d3c90cb1700fdbde4bf149",
+                "native_schema_binding": {
+                  "formal_slot": {
+                    "kind": "slot",
+                    "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:output_slots:0",
+                    "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:output_slots:0"
+                  },
+                  "gap": null,
+                  "schema_sha256": "12443b2a746b97941ca3dfd9540702c98f28147e2048275d7a94b057488fc269",
+                  "status": "QUALIFIED"
+                },
+                "ordered_path": [
+                  0
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24607",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20481/outputs/values/0",
+                "role": "outputs"
+              }
+            ],
+            "thread_namespace": "Kineto host thread"
+          },
+          "parent": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:2",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:2"
+          },
+          "process_id": 369749,
+          "start_ns": 1872204115147987,
+          "status": "Observed",
+          "thread_id": 369749
+        },
+        "verification": {
+          "current_row_ordinal_verified": true,
+          "record_semantics_revalidated": false,
+          "whole_bundle_revalidated": false,
+          "whole_chunk_decoded_sha_verified": true,
+          "whole_chunk_stored_sha_verified": true
+        }
+      }
+    },
+    {
+      "key": "24614",
+      "kind": "archive:instances",
+      "ordinal": 20480,
+      "payload_bytes": 3573,
+      "payload_sha256": "a668e8c11de276c78a973e96d5724a4ce3c8f1db4f36b3606d34255532027709",
+      "record": {
+        "locator": {
+          "artifact": {
+            "compression": "gzip",
+            "decoded_bytes": 15995969,
+            "decoded_sha256": "24971a57fba14109386d6434415b4d3ebf13ee923a6382918ed765e7da650960",
+            "first_ordinal": 17773,
+            "last_ordinal": 22934,
+            "lines": 5162,
+            "physical_bytes": 911857,
+            "physical_sha256": "da35f4e501c04f09b436f6078916ce1a2a62bc892a0c9de48ad92529b91d66a1",
+            "uri": "evidence/instances/000003.jsonl.gz"
+          },
+          "line": 2708,
+          "manifest_receipt": {
+            "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+            "physical_bytes": 72965,
+            "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+          },
+          "pointer_within_line": "/record"
+        },
+        "ordinal": 20480,
+        "record": {
+          "control_scope": null,
+          "definition": {
+            "kind": "opdef",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:7203cb917ec9cf6a74169eb9d36801bf176ecaa96b28ef6fbde08a07496c0f52",
+            "wire": "opdef:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:7203cb917ec9cf6a74169eb9d36801bf176ecaa96b28ef6fbde08a07496c0f52"
+          },
+          "end_ns": 1872204119149785,
+          "id": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24614",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24614"
+          },
+          "iteration": {},
+          "metadata": {
+            "category": "cpu_op",
+            "clock_domain": "kineto",
+            "correlation": null,
+            "cpu_join_assumptions": [
+              "artifacts belong to the same supplied capture"
+            ],
+            "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+            "cpu_join_status": "Inferred",
+            "ctrl_deps": 24611,
+            "eto_tid": 1,
+            "external_id": 20474,
+            "kineto_reference": "sha256:256f688f0c767a6302fccaec088fab9b1232ca429c24de4254a984329c3be875#/traceEvents/20532",
+            "node_id": 24614,
+            "parent_basis": "ETO ctrl_deps collector stack only",
+            "provider": "ETO",
+            "raw_pid": 369749,
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20480",
+            "raw_resource": {},
+            "raw_tid": 369749,
+            "rf_id": 20474,
+            "tensor_slots": [
+              {
+                "descriptor_id": "d6b619f00ce223c343fcae96dc27ba0bdd4d4f3a65d3c90cb1700fdbde4bf149",
+                "native_schema_binding": {
+                  "formal_slot": null,
+                  "gap": "actual_tensor_slots_have_no_qualified_schema",
+                  "schema_sha256": null,
+                  "status": "UNQUALIFIED"
+                },
+                "ordered_path": [
+                  0
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24607",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20480/inputs/values/0",
+                "role": "inputs"
+              },
+              {
+                "descriptor_id": "955554c81b0ff781f5ecf87cf156b43c3d4ace0207072736c5d4440ea8459228",
+                "native_schema_binding": {
+                  "formal_slot": null,
+                  "gap": "actual_tensor_slots_have_no_qualified_schema",
+                  "schema_sha256": null,
+                  "status": "UNQUALIFIED"
+                },
+                "ordered_path": [
+                  1
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24612",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20480/inputs/values/1",
+                "role": "inputs"
+              }
+            ],
+            "thread_namespace": "Kineto host thread"
+          },
+          "parent": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24611",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24611"
+          },
+          "process_id": 369749,
+          "start_ns": 1872204115163981,
+          "status": "Observed",
+          "thread_id": 369749
+        },
+        "verification": {
+          "current_row_ordinal_verified": true,
+          "record_semantics_revalidated": false,
+          "whole_bundle_revalidated": false,
+          "whole_chunk_decoded_sha_verified": true,
+          "whole_chunk_stored_sha_verified": true
+        }
+      }
+    },
+    {
+      "key": "24615",
+      "kind": "archive:instances",
+      "ordinal": 20479,
+      "payload_bytes": 3087,
+      "payload_sha256": "47cf75b1dfe8946e0e56c215db802f2f5a0c9c14366d45406fc2383fe761a7cc",
+      "record": {
+        "locator": {
+          "artifact": {
+            "compression": "gzip",
+            "decoded_bytes": 15995969,
+            "decoded_sha256": "24971a57fba14109386d6434415b4d3ebf13ee923a6382918ed765e7da650960",
+            "first_ordinal": 17773,
+            "last_ordinal": 22934,
+            "lines": 5162,
+            "physical_bytes": 911857,
+            "physical_sha256": "da35f4e501c04f09b436f6078916ce1a2a62bc892a0c9de48ad92529b91d66a1",
+            "uri": "evidence/instances/000003.jsonl.gz"
+          },
+          "line": 2707,
+          "manifest_receipt": {
+            "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+            "physical_bytes": 72965,
+            "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+          },
+          "pointer_within_line": "/record"
+        },
+        "ordinal": 20479,
+        "record": {
+          "control_scope": null,
+          "definition": {
+            "kind": "opdef",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:274a16e59e69f6f47353b7a254377e6e7fc9b034c4ce43ecf25bbddaf59cb86e",
+            "wire": "opdef:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:274a16e59e69f6f47353b7a254377e6e7fc9b034c4ce43ecf25bbddaf59cb86e"
+          },
+          "end_ns": 1872204119099592,
+          "id": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24615",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24615"
+          },
+          "iteration": {},
+          "metadata": {
+            "category": "user_annotation",
+            "clock_domain": "kineto",
+            "correlation": null,
+            "cpu_join_assumptions": [
+              "artifacts belong to the same supplied capture"
+            ],
+            "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+            "cpu_join_status": "Inferred",
+            "ctrl_deps": 24614,
+            "eto_tid": 1,
+            "external_id": 20475,
+            "kineto_reference": "sha256:256f688f0c767a6302fccaec088fab9b1232ca429c24de4254a984329c3be875#/traceEvents/20533",
+            "node_id": 24615,
+            "parent_basis": "ETO ctrl_deps collector stack only",
+            "provider": "ETO",
+            "raw_pid": 369749,
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20479",
+            "raw_resource": {},
+            "raw_tid": 369749,
+            "rf_id": 20475,
+            "tensor_slots": [
+              {
+                "descriptor_id": "d6b619f00ce223c343fcae96dc27ba0bdd4d4f3a65d3c90cb1700fdbde4bf149",
+                "native_schema_binding": {
+                  "formal_slot": null,
+                  "gap": "actual_tensor_slots_have_no_qualified_schema",
+                  "schema_sha256": null,
+                  "status": "UNQUALIFIED"
+                },
+                "ordered_path": [
+                  0
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24607",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20479/inputs/values/0",
+                "role": "inputs"
+              }
+            ],
+            "thread_namespace": "Kineto host thread"
+          },
+          "parent": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24614",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24614"
+          },
+          "process_id": 369749,
+          "start_ns": 1872204117125105,
+          "status": "Observed",
+          "thread_id": 369749
+        },
+        "verification": {
+          "current_row_ordinal_verified": true,
+          "record_semantics_revalidated": false,
+          "whole_bundle_revalidated": false,
+          "whole_chunk_decoded_sha_verified": true,
+          "whole_chunk_stored_sha_verified": true
+        }
+      }
+    },
+    {
+      "key": "24616",
+      "kind": "archive:instances",
+      "ordinal": 20477,
+      "payload_bytes": 5221,
+      "payload_sha256": "082abb7488840f61dacdfec08442daef8f5f6b0eca4c88887039936456a64388",
+      "record": {
+        "locator": {
+          "artifact": {
+            "compression": "gzip",
+            "decoded_bytes": 15995969,
+            "decoded_sha256": "24971a57fba14109386d6434415b4d3ebf13ee923a6382918ed765e7da650960",
+            "first_ordinal": 17773,
+            "last_ordinal": 22934,
+            "lines": 5162,
+            "physical_bytes": 911857,
+            "physical_sha256": "da35f4e501c04f09b436f6078916ce1a2a62bc892a0c9de48ad92529b91d66a1",
+            "uri": "evidence/instances/000003.jsonl.gz"
+          },
+          "line": 2705,
+          "manifest_receipt": {
+            "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+            "physical_bytes": 72965,
+            "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+          },
+          "pointer_within_line": "/record"
+        },
+        "ordinal": 20477,
+        "record": {
+          "control_scope": null,
+          "definition": {
+            "kind": "opdef",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670",
+            "wire": "opdef:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670"
+          },
+          "end_ns": 1872204117650642,
+          "id": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24616",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24616"
+          },
+          "iteration": {},
+          "metadata": {
+            "category": "cpu_op",
+            "clock_domain": "kineto",
+            "correlation": null,
+            "cpu_join_assumptions": [
+              "artifacts belong to the same supplied capture"
+            ],
+            "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+            "cpu_join_status": "Inferred",
+            "ctrl_deps": 24615,
+            "eto_tid": 1,
+            "external_id": 20476,
+            "kineto_reference": "sha256:256f688f0c767a6302fccaec088fab9b1232ca429c24de4254a984329c3be875#/traceEvents/20534",
+            "node_id": 24616,
+            "parent_basis": "ETO ctrl_deps collector stack only",
+            "provider": "ETO",
+            "raw_pid": 369749,
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20477",
+            "raw_resource": {},
+            "raw_tid": 369749,
+            "rf_id": 20476,
+            "tensor_slots": [
+              {
+                "descriptor_id": "d6b619f00ce223c343fcae96dc27ba0bdd4d4f3a65d3c90cb1700fdbde4bf149",
+                "native_schema_binding": {
+                  "formal_slot": {
+                    "kind": "slot",
+                    "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:input_slots:0",
+                    "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:input_slots:0"
+                  },
+                  "gap": null,
+                  "schema_sha256": "12443b2a746b97941ca3dfd9540702c98f28147e2048275d7a94b057488fc269",
+                  "status": "QUALIFIED"
+                },
+                "ordered_path": [
+                  0
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24607",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20477/inputs/values/0",
+                "role": "inputs"
+              },
+              {
+                "descriptor_id": "ca2daa4603c04ef0d7d97cca8abaeeef39f01a86ca4ffe590f04739814241bf4",
+                "native_schema_binding": {
+                  "formal_slot": {
+                    "kind": "slot",
+                    "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:input_slots:1",
+                    "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:input_slots:1"
+                  },
+                  "gap": null,
+                  "schema_sha256": "12443b2a746b97941ca3dfd9540702c98f28147e2048275d7a94b057488fc269",
+                  "status": "QUALIFIED"
+                },
+                "ordered_path": [
+                  1
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24617",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20477/inputs/values/1",
+                "role": "inputs"
+              },
+              {
+                "descriptor_id": "d6b619f00ce223c343fcae96dc27ba0bdd4d4f3a65d3c90cb1700fdbde4bf149",
+                "native_schema_binding": {
+                  "formal_slot": {
+                    "kind": "slot",
+                    "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:output_slots:0",
+                    "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:cdc43c20ff8a8fec170c2c9479d71c895689d274b21875beddd7bacbed677670:schema:output_slots:0"
+                  },
+                  "gap": null,
+                  "schema_sha256": "12443b2a746b97941ca3dfd9540702c98f28147e2048275d7a94b057488fc269",
+                  "status": "QUALIFIED"
+                },
+                "ordered_path": [
+                  0
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24607",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20477/outputs/values/0",
+                "role": "outputs"
+              }
+            ],
+            "thread_namespace": "Kineto host thread"
+          },
+          "parent": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24615",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24615"
+          },
+          "process_id": 369749,
+          "start_ns": 1872204117224410,
+          "status": "Observed",
+          "thread_id": 369749
+        },
+        "verification": {
+          "current_row_ordinal_verified": true,
+          "record_semantics_revalidated": false,
+          "whole_bundle_revalidated": false,
+          "whole_chunk_decoded_sha_verified": true,
+          "whole_chunk_stored_sha_verified": true
+        }
+      }
+    },
+    {
+      "key": "24625",
+      "kind": "archive:instances",
+      "ordinal": 20478,
+      "payload_bytes": 3087,
+      "payload_sha256": "df99b261f25014523c33dc7ea3c2c907c9da3141e1d52a33e8a2134879acef79",
+      "record": {
+        "locator": {
+          "artifact": {
+            "compression": "gzip",
+            "decoded_bytes": 15995969,
+            "decoded_sha256": "24971a57fba14109386d6434415b4d3ebf13ee923a6382918ed765e7da650960",
+            "first_ordinal": 17773,
+            "last_ordinal": 22934,
+            "lines": 5162,
+            "physical_bytes": 911857,
+            "physical_sha256": "da35f4e501c04f09b436f6078916ce1a2a62bc892a0c9de48ad92529b91d66a1",
+            "uri": "evidence/instances/000003.jsonl.gz"
+          },
+          "line": 2706,
+          "manifest_receipt": {
+            "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+            "physical_bytes": 72965,
+            "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+          },
+          "pointer_within_line": "/record"
+        },
+        "ordinal": 20478,
+        "record": {
+          "control_scope": null,
+          "definition": {
+            "kind": "opdef",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ddc312d98ed1948a8288152780dd84050b4014988166cc39557f04401e6fd361",
+            "wire": "opdef:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ddc312d98ed1948a8288152780dd84050b4014988166cc39557f04401e6fd361"
+          },
+          "end_ns": 1872204118774945,
+          "id": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24625",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24625"
+          },
+          "iteration": {},
+          "metadata": {
+            "category": "user_annotation",
+            "clock_domain": "kineto",
+            "correlation": null,
+            "cpu_join_assumptions": [
+              "artifacts belong to the same supplied capture"
+            ],
+            "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+            "cpu_join_status": "Inferred",
+            "ctrl_deps": 24615,
+            "eto_tid": 1,
+            "external_id": 20481,
+            "kineto_reference": "sha256:256f688f0c767a6302fccaec088fab9b1232ca429c24de4254a984329c3be875#/traceEvents/20539",
+            "node_id": 24625,
+            "parent_basis": "ETO ctrl_deps collector stack only",
+            "provider": "ETO",
+            "raw_pid": 369749,
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20478",
+            "raw_resource": {},
+            "raw_tid": 369749,
+            "rf_id": 20481,
+            "tensor_slots": [
+              {
+                "descriptor_id": "d6b619f00ce223c343fcae96dc27ba0bdd4d4f3a65d3c90cb1700fdbde4bf149",
+                "native_schema_binding": {
+                  "formal_slot": null,
+                  "gap": "actual_tensor_slots_have_no_qualified_schema",
+                  "schema_sha256": null,
+                  "status": "UNQUALIFIED"
+                },
+                "ordered_path": [
+                  0
+                ],
+                "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:24607",
+                "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20478/inputs/values/0",
+                "role": "inputs"
+              }
+            ],
+            "thread_namespace": "Kineto host thread"
+          },
+          "parent": {
+            "kind": "opinst",
+            "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24615",
+            "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24615"
+          },
+          "process_id": 369749,
+          "start_ns": 1872204118733728,
+          "status": "Observed",
+          "thread_id": 369749
+        },
+        "verification": {
+          "current_row_ordinal_verified": true,
+          "record_semantics_revalidated": false,
+          "whole_bundle_revalidated": false,
+          "whole_chunk_decoded_sha_verified": true,
+          "whole_chunk_stored_sha_verified": true
+        }
+      }
+    },
+    {
+      "key": "weak:369749:354301",
+      "kind": "archive:objects",
+      "ordinal": 2074,
+      "payload_bytes": 2182,
+      "payload_sha256": "71b3ec9fe4cf94b622093081b403d5ced6d08c27236d56689bf420944e234af1",
+      "record": {
+        "locator": {
+          "artifact": {
+            "compression": "gzip",
+            "decoded_bytes": 15999941,
+            "decoded_sha256": "1821edae55e7f50afa62550028414e0943f1739188ba8bfd1d90a726d403f232",
+            "first_ordinal": 0,
+            "last_ordinal": 12457,
+            "lines": 12458,
+            "physical_bytes": 386157,
+            "physical_sha256": "a2ee68a1975ba553c31eb33610a069666d2fcf7883d033a0bab1a43c787b9439",
+            "uri": "values/objects/000000.jsonl.gz"
+          },
+          "line": 2075,
+          "manifest_receipt": {
+            "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+            "physical_bytes": 72965,
+            "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+          },
+          "pointer_within_line": "/record"
+        },
+        "ordinal": 2074,
+        "record": {
+          "evidence": [
+            {
+              "assumptions": [
+                "association is local to this observation; no persistent content/storage identity",
+                "capture membership verified",
+                "fixed production collector passed the same held Tensor to this exact marker argument",
+                "retained ancestor is not a direct caller"
+              ],
+              "confidence": null,
+              "kind": "Inferred",
+              "references": [
+                "sha256:27b2dfcf1e36a6d1d98fae67e4422a775ba13532765eb882a47b941b111dc94d#",
+                "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20468/inputs/values/0",
+                "sha256:b54e19dcdb7e19817fa1519f42109cf67afee891141bf685bd28a9b201d5ef5f#line/9542",
+                "sha256:bc43f911f955f0a2650c7ba02f199bb3f35a644b5b6c4b3e4d8ddf09377149e7#"
+              ],
+              "scope": "dispatch-reference:6a936f8d139145faeb6f1222f9600b157bdb5b1cf222d7bfd3715d95174c191c"
+            }
+          ],
+          "id": {
+            "kind": "object",
+            "value": "dispatch-reference:6a936f8d139145faeb6f1222f9600b157bdb5b1cf222d7bfd3715d95174c191c:weak:369749:354301",
+            "wire": "object:dispatch-reference:6a936f8d139145faeb6f1222f9600b157bdb5b1cf222d7bfd3715d95174c191c:weak:369749:354301"
+          },
+          "metadata": {
+            "identity_basis": "existing call recorder weak-reference epoch",
+            "lifetime": "UNKNOWN",
+            "process_id": 369749,
+            "weak_token": "weak:369749:354301"
+          },
+          "scope": "dispatch-reference:6a936f8d139145faeb6f1222f9600b157bdb5b1cf222d7bfd3715d95174c191c"
+        },
+        "verification": {
+          "current_row_ordinal_verified": true,
+          "record_semantics_revalidated": false,
+          "whole_bundle_revalidated": false,
+          "whole_chunk_decoded_sha_verified": true,
+          "whole_chunk_stored_sha_verified": true
+        }
+      }
+    },
+    {
+      "key": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/9688/arguments/0:0",
+      "kind": "archive:regions",
+      "ordinal": 5353,
+      "payload_bytes": 2202,
+      "payload_sha256": "61984dd213fa7ce1115a1c8d50c640626cf8611e8dfc080d941dbfc90e125902",
+      "record": {
+        "locator": {
+          "artifact": {
+            "compression": "gzip",
+            "decoded_bytes": 15999437,
+            "decoded_sha256": "34e1e673baf6bc65f93a7cccc7449b7efa11c9bfcdfead24cdb167a7b6728a5a",
+            "first_ordinal": 0,
+            "last_ordinal": 12276,
+            "lines": 12277,
+            "physical_bytes": 863969,
+            "physical_sha256": "fcbb5b1452e53435b56fb4dbb3e79d5e7854412af88051befd91836bee8ad022",
+            "uri": "values/regions/000000.jsonl.gz"
+          },
+          "line": 5354,
+          "manifest_receipt": {
+            "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+            "physical_bytes": 72965,
+            "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+          },
+          "pointer_within_line": "/record"
+        },
+        "ordinal": 5353,
+        "record": {
+          "allocation": {
+            "kind": "alloc",
+            "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:f113e2061b9e405eaa405c071e8c478cd22e1152d1bc269e39f0349d7d8683ce",
+            "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:f113e2061b9e405eaa405c071e8c478cd22e1152d1bc269e39f0349d7d8683ce"
+          },
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "id": {
+            "kind": "region",
+            "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:9688:0",
+            "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:9688:0"
+          },
+          "layout": "torch.strided",
+          "metadata": {
+            "argument_ordinal": 0,
+            "association_persistent": false,
+            "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20479/inputs/values/0",
+            "impl_ptr": 99366344084560,
+            "logical_version": null,
+            "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24615",
+            "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+            "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/9688/arguments/0",
+            "provider_tensor_id": 1232
+          },
+          "offset": 0,
+          "shape": [
+            3,
+            224,
+            224
+          ],
+          "strides": [
+            1,
+            672,
+            3
+          ]
+        },
+        "verification": {
+          "current_row_ordinal_verified": true,
+          "record_semantics_revalidated": false,
+          "whole_bundle_revalidated": false,
+          "whole_chunk_decoded_sha_verified": true,
+          "whole_chunk_stored_sha_verified": true
+        }
+      }
+    },
+    {
+      "key": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/9693/arguments/0:0",
+      "kind": "archive:regions",
+      "ordinal": 5354,
+      "payload_bytes": 2202,
+      "payload_sha256": "671503bdd0b2cf42b20677e3c85d4643e718277aefb0b209bf01e8488b8dca26",
+      "record": {
+        "locator": {
+          "artifact": {
+            "compression": "gzip",
+            "decoded_bytes": 15999437,
+            "decoded_sha256": "34e1e673baf6bc65f93a7cccc7449b7efa11c9bfcdfead24cdb167a7b6728a5a",
+            "first_ordinal": 0,
+            "last_ordinal": 12276,
+            "lines": 12277,
+            "physical_bytes": 863969,
+            "physical_sha256": "fcbb5b1452e53435b56fb4dbb3e79d5e7854412af88051befd91836bee8ad022",
+            "uri": "values/regions/000000.jsonl.gz"
+          },
+          "line": 5355,
+          "manifest_receipt": {
+            "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+            "physical_bytes": 72965,
+            "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+          },
+          "pointer_within_line": "/record"
+        },
+        "ordinal": 5354,
+        "record": {
+          "allocation": {
+            "kind": "alloc",
+            "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:f113e2061b9e405eaa405c071e8c478cd22e1152d1bc269e39f0349d7d8683ce",
+            "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:f113e2061b9e405eaa405c071e8c478cd22e1152d1bc269e39f0349d7d8683ce"
+          },
+          "device": "cpu",
+          "dtype": "torch.float32",
+          "id": {
+            "kind": "region",
+            "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:9693:0",
+            "wire": "region:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:region:9693:0"
+          },
+          "layout": "torch.strided",
+          "metadata": {
+            "argument_ordinal": 0,
+            "association_persistent": false,
+            "eto_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/20478/inputs/values/0",
+            "impl_ptr": 99366344084560,
+            "logical_version": null,
+            "marker_instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:24625",
+            "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+            "physical_observation": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/9693/arguments/0",
+            "provider_tensor_id": 1232
+          },
+          "offset": 0,
+          "shape": [
+            3,
+            224,
+            224
+          ],
+          "strides": [
+            1,
+            672,
+            3
+          ]
+        },
+        "verification": {
+          "current_row_ordinal_verified": true,
+          "record_semantics_revalidated": false,
+          "whole_bundle_revalidated": false,
+          "whole_chunk_decoded_sha_verified": true,
+          "whole_chunk_stored_sha_verified": true
+        }
+      }
+    },
+    {
+      "key": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:f113e2061b9e405eaa405c071e8c478cd22e1152d1bc269e39f0349d7d8683ce",
+      "kind": "archive:allocations",
+      "ordinal": 39272,
+      "payload_bytes": 2192,
+      "payload_sha256": "df37f7a97d126ccac8ce1450de854cacc68b7b81bf534880d5bd82ac81b4ba6e",
+      "record": {
+        "locator": {
+          "artifact": {
+            "compression": "gzip",
+            "decoded_bytes": 15999160,
+            "decoded_sha256": "2d1afb0367a4f576c36360a545499ec9112f7f5b91e6cd917d26156936845dc8",
+            "first_ordinal": 37415,
+            "last_ordinal": 50725,
+            "lines": 13311,
+            "physical_bytes": 1203854,
+            "physical_sha256": "13d2607bbd71ce374395e05bc46de5cb259acaedde41a2c0c331bfeeb92d7c75",
+            "uri": "values/allocations/000003.jsonl.gz"
+          },
+          "line": 1858,
+          "manifest_receipt": {
+            "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+            "physical_bytes": 72965,
+            "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6"
+          },
+          "pointer_within_line": "/record"
+        },
+        "ordinal": 39272,
+        "record": {
+          "allocator_token": "provider-allocation-id:1839",
+          "device": "cpu",
+          "id": {
+            "kind": "alloc",
+            "value": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:f113e2061b9e405eaa405c071e8c478cd22e1152d1bc269e39f0349d7d8683ce",
+            "wire": "alloc:tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0:epoch:f113e2061b9e405eaa405c071e8c478cd22e1152d1bc269e39f0349d7d8683ce"
+          },
+          "lifetime_scope": "tensor-physical:2ac220bb749919c40dff08964248a759849b4297386d564d5d6a2b366a69bbe0",
+          "metadata": {
+            "address": 99366423657472,
+            "allocation_receipts": [
+              "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/9685",
+              "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/9712"
+            ],
+            "birth_reference": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/9685",
+            "free_reference": "sha256:d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778#line/9712",
+            "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+            "legacy_kineto_allocation_correspondence_established": false,
+            "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+            "physical_cuda_allocation_established": false,
+            "provider_allocation_id": 1839,
+            "resource_ready_established": false
+          },
+          "nbytes": 602112
+        },
+        "verification": {
+          "current_row_ordinal_verified": true,
+          "record_semantics_revalidated": false,
+          "whole_bundle_revalidated": false,
+          "whole_chunk_decoded_sha_verified": true,
+          "whole_chunk_stored_sha_verified": true
+        }
+      }
+    }
+  ],
+  "sqlite_mac_reverified": false,
+  "sqlite_open_mode": "mode=ro&immutable=1",
+  "sqlite_stat_before_and_after": {
+    "inode": 16792825,
+    "mtime_ns": 1792923594353653353,
+    "size_bytes": 3973341184
+  },
+  "sqlite_wholefile_sha_recomputed": false,
+  "status": "READ_ONLY_SAVED_METADATA_EXTRACTION"
+}

@@ -1,0 +1,32 @@
+{
+  "archive_chunk_reads": 0,
+  "note": {
+    "bytes": 4026,
+    "path": "analysis/native_physical_delta_20261025/DELTA.md",
+    "sha256": "e65f329a9bba58d231de0fb1203309757011aa00aca31df053ad17f6f2b0541f"
+  },
+  "outputs_api": "Not established by current exporter code; explicit output frontier unless actually exposed",
+  "production_changes": 0,
+  "provider_queries": 0,
+  "raw_reads": 0,
+  "sources": [
+    {
+      "bytes": 31708,
+      "path": "scar/trace/tensor_physical.py",
+      "sha256": "6a4026e6cbb038a243851e14156216b693c90dd2d587d56d0e02ebdabfaf94b3"
+    },
+    {
+      "bytes": 19916,
+      "path": "scar/trace/tensor_physical_import.py",
+      "sha256": "c834d0a1072b610d9cc23d163709171ae329b6b175f1a9388c95e9842a5f0372"
+    },
+    {
+      "bytes": 63641,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "f2c1eb8ec8d011f52fbf31f4973be2376ceff7afdc657a6689807dc99bd897e7"
+    }
+  ],
+  "sqlite_reads": 0,
+  "status": "CODE_ONLY_JOINT_RECAPTURE_DELTA",
+  "target_executions": 0
+}

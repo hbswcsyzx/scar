@@ -1,0 +1,41 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/gate.py", line 190, in <module>
+    result = bind_native_capture_batches(coordinates, CAPTURE, MANIFEST, OUT / 'result',
+        expected_manifest_sha256=freeze['native_manifest_sha256'], capture_model_path=MODEL,
+        expected_capture_model_sha256=freeze['capture_model_sha256'], budget=NativeCaptureBatchBudget(), progress=emit)
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_capture_batch.py", line 969, in bind_native_capture_batches
+    emit_shard(pending)
+    ~~~~~~~~~~^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_capture_batch.py", line 879, in emit_shard
+    values, evidence, va, ea, geometry, payloads = _prepare_projection(source, interfaces, selected, shard_dir, budget)
+                                                   ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_protocol.py", line 261, in _prepare_projection
+    return _prepare_projection_v2(source, interfaces, selected, out, budget)
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_protocol.py", line 427, in _prepare_projection_v2
+    values, evidence = values_from_dict(values_doc), evidence_from_dict(evidence_doc)
+                                                     ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/v2/codec.py", line 282, in decode
+    return function(*args, **kwargs)
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/v2/codec.py", line 668, in evidence_from_dict
+    graph.assert_valid()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/v2/evidence.py", line 481, in assert_valid
+    report = self.validate()
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/v2/evidence.py", line 405, in validate
+    errors.extend(mapping_errors(mapping, key_type, record_type, name, key_field))
+                  ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/v2/_validation.py", line 147, in mapping_errors
+    errors.extend(record_errors(value, record_type, f"{path}[{key!s}]"))
+                  ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/v2/_validation.py", line 74, in record_errors
+    return _record_errors(value, _type_plan(expected), path)
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/v2/_validation.py", line 132, in _record_errors
+    errors.extend(_record_errors(getattr(value, name), field_plan, f"{path}.{name}"))
+                  ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/v2/_validation.py", line 93, in _record_errors
+    errors.extend(_record_errors(item, child_plans[1], f"{path}[{key!s}]"))
+                  ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/v2/_validation.py", line 77, in _record_errors
+    def _record_errors(value: Any, plan: tuple, path: str) -> list[str]:
+    
+KeyboardInterrupt

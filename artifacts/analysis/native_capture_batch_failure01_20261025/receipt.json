@@ -1,0 +1,58 @@
+{
+  "V2_contract_status": "proposal submitted to root; no producer implementation performed",
+  "files": [
+    {
+      "bytes": 6982,
+      "path": "artifacts/analysis/native_capture_batch_failure01_20261025/README.md",
+      "sha256": "c983e5012cf96592deaec98e9e39f2679119b3ba2c99bbf1e07409c0510f77d5"
+    },
+    {
+      "bytes": 6318,
+      "path": "artifacts/analysis/native_capture_batch_failure01_20261025/V2_CONTRACT.md",
+      "sha256": "51848d807af217e3f90b927315d3dab8d6d65ba190f84412109413b3d4ff4e81"
+    },
+    {
+      "bytes": 5696,
+      "path": "artifacts/analysis/native_capture_batch_failure01_20261025/diagnosis.json",
+      "sha256": "535803e04e2f94f491c5d84a008e10affa646cc9a49f5acc693db77526d9df7e"
+    },
+    {
+      "bytes": 85039,
+      "path": "artifacts/analysis/native_capture_batch_failure01_20261025/evidence.json",
+      "sha256": "eaa6e9914459b2ba39c34808acdf7c9776c11578f99ef5e3c152363ef171135e"
+    },
+    {
+      "bytes": 9444,
+      "path": "artifacts/analysis/native_capture_batch_failure01_20261025/extract.py",
+      "sha256": "7aad8e32107ce0e719f6bdf838286a10a08f9bfd10ffb852f0278f1365a70f9b"
+    }
+  ],
+  "first_gate_runner_unchanged": true,
+  "first_gate_terminal_metadata_unchanged": true,
+  "frozen_producer_dependencies_unchanged": 269,
+  "git_commands": 0,
+  "new_gate_runs": 0,
+  "new_runtime_owner_or_evidence_restored": false,
+  "original_archive_chunks_reopened": 0,
+  "original_first_gate_freeze": {
+    "bytes": 49319,
+    "path": "artifacts/experiments/native_capture_batch_20261025/freeze.json",
+    "sha256": "36917f11e0fc5d521d301b23d8e0bfa241e3fe17b7309e93adb0aecced857f00"
+  },
+  "original_raw_files_reopened": 0,
+  "production_writes": 0,
+  "self_hash_excluded": true,
+  "source_contract_inputs": [
+    {
+      "bytes": 5645,
+      "path": "analysis/native_boxing_contract_20261025/CONTRACT.md",
+      "sha256": "cd39c11572e93cc2b3d5a9dbe6dee1147283dc928f7bcd35a46529659607d166"
+    },
+    {
+      "bytes": 10287,
+      "path": "analysis/native_boxing_contract_20261025/source-receipts.json",
+      "sha256": "b62141be1af32a779956e05fb9077a5a6f49e3c93e3b1bee59a7c9a363c43cf3"
+    }
+  ],
+  "status": "FAILURE01_READ_ONLY_DIAGNOSIS_AND_V2_CONTRACT_FROZEN"
+}

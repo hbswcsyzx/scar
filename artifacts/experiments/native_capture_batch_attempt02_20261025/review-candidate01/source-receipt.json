@@ -1,0 +1,22 @@
+{
+  "status": "V2_PRODUCER_REVIEW_CANDIDATE01_FROZEN",
+  "files": [
+    {
+      "path": "scar/trace/native_capture_batch.py",
+      "bytes": 63641,
+      "sha256": "f2c1eb8ec8d011f52fbf31f4973be2376ceff7afdc657a6689807dc99bd897e7"
+    },
+    {
+      "path": "scar/trace/native_protocol.py",
+      "bytes": 55647,
+      "sha256": "fb1506b2d58df9fdc8b4c9be0068575ee83c188fd92f4f0ee06804c3ab9b258e"
+    },
+    {
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "bytes": 53258,
+      "sha256": "14bb9e2868135250481505296e28f2790f2dc91713817bd0e46a1e3c76e3c424"
+    }
+  ],
+  "preflight": "api-check-05.json",
+  "full_gate_run": false
+}

@@ -22,7 +22,7 @@ import time
 from scar.ir.record_codec import decode, encode
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.execution.native_port_protocol import (
-    PROFILE, _make_evidence, _own_capture, attributes, canonical, need, replay_interfaces,
+    PROFILE_V2, _make_evidence, _own_capture, attributes, canonical, need, replay_batch_interfaces,
 )
 from scar.trace.native_protocol import (
     NativeProtocolWindowResult, _artifact, _build_execution, _build_program,
@@ -40,7 +40,9 @@ class NativeCaptureBatchBudget:
     max_index_bytes: int = 4_000_000_000
     max_program_bytes: int = 64_000_000
     max_interface_bytes: int = 16_000_000
-    max_inventory_bytes: int = 256_000_000
+    max_inventory_chunk_bytes: int = 8_000_000
+    max_inventory_chunk_rows: int = 1000
+    max_inventory_manifest_bytes: int = 4_000_000
     max_report_bytes: int = 16_000_000
     max_shard_attempts: int = 256
     max_shard_execution_bytes: int = 64_000_000
@@ -58,7 +60,9 @@ class NativeCaptureBatchBudget:
     def __post_init__(self):
         need(all(type(v) is int and v > 0 for v in vars(self).values()), "batch budgets must be positive exact integers")
         need(self.max_shard_attempts <= 256 and self.max_source_raw_bytes <= 600_000_000
-             and self.max_program_bytes <= 64_000_000, "batch source/program/attempt hard bounds exceeded")
+             and self.max_program_bytes <= 64_000_000 and self.max_inventory_chunk_bytes <= 8_000_000
+             and self.max_inventory_chunk_rows <= 1000 and self.max_inventory_manifest_bytes <= 4_000_000,
+             "batch source/program/attempt/inventory hard bounds exceeded")
 
 
 @dataclass(frozen=True)
@@ -67,6 +71,7 @@ class NativeCaptureBatchResult:
     program: object
     report: dict
     first_shard: object | None
+    first_partial_shard: object | None = None
 
 
 class _MissingDependency(ValueError):
@@ -400,6 +405,25 @@ class _SourceIndex:
             "nodes": [self.get("node", n) for n in sorted(selected_nodes, key=self.node_ordinals.__getitem__)],
             "root_node": self.get("node", 1), "dispatch": dispatch, "physical": physical,
             "node_ordinals": {str(n): self.node_ordinals[n] for n in selected_nodes}}
+        objects, geometry_records = {}, {}
+        for row in dispatch:
+            for ref in row.get("observation", {}).get("tensor_references", []):
+                if type(ref.get("ref")) is str:
+                    original = self.get("archive:objects", ref["ref"], optional=True)
+                    if original is not None:
+                        objects[ref["ref"]] = original["record"]
+        for row in physical:
+            if row.get("kind") != "MARKER":
+                continue
+            for arg in row.get("arguments", []):
+                ordinal = arg.get("argument_ordinal")
+                if type(ordinal) is not int:
+                    continue
+                locator = "sha256:" + self.base["artifacts"]["physical"]["sha256"] + "#line/" + str(row["index"]) + "/arguments/" + str(ordinal)
+                region = self.get("archive:regions", locator + ":" + str(ordinal), optional=True)
+                allocation = None if region is None else self.get("archive:allocations", region["record"]["allocation"]["value"], optional=True)
+                geometry_records[str(row["index"]) + ":" + str(ordinal)] = {"region": region, "allocation": allocation}
+        source.update(object_records=objects, geometry_records=geometry_records)
         if definitions:
             source["definition_signatures"] = self.signatures
         need(len(canonical(source)) <= self.budget.max_shard_source_bytes, "shard detached raw closure byte budget exceeded")
@@ -457,6 +481,34 @@ class _SourceIndex:
             "operator": begins[0].get("operator") if len(begins) == 1 else None,
             "outcome": ends[0].get("outcome") if len(ends) == 1 else None,
             "begin_count": len(begins), "end_count": len(ends)}
+
+    def selected_v2(self, source, interfaces):
+        result = {("evidence", "instances"): [], ("values", "objects"): [],
+                  ("values", "regions"): [], ("values", "allocations"): []}
+        for node in source["nodes"]:
+            row = self.get("archive:instances", node["id"], optional=True)
+            if row is None:
+                raise _MissingDependency("original native evidence instance unavailable")
+            need(row["ordinal"] == self.node_ordinals[node["id"]], "original native instance ordinal contradicts source")
+            result["evidence", "instances"].append(row)
+        objects, regions, allocations = {}, {}, {}
+        for interface in interfaces:
+            for ports in interface["ports"].values():
+                for port in ports:
+                    original = port.get("object_record")
+                    if original is not None:
+                        row = self.get("archive:objects", port["held"]["weak_token"])
+                        need(row["record"] == original, "original object record changed")
+                        objects[row["record"]["id"]["value"]] = row
+                    g = port.get("geometry", {})
+                    if g.get("status") == "QUALIFIED":
+                        witness = source["geometry_records"][str(g["physical_line"]) + ":" + str(g["argument_ordinal"])]
+                        r, a = witness["region"], witness["allocation"]
+                        regions[r["record"]["id"]["value"]] = r
+                        allocations[a["record"]["id"]["value"]] = a
+        for table, rows in (("objects", objects), ("regions", regions), ("allocations", allocations)):
+            result["values", table] = sorted(rows.values(), key=lambda row: row["ordinal"])
+        return result
 
 
 def _acquire(coordinates, capture_directory, manifest, capture_model_path, out, budget,
@@ -521,6 +573,7 @@ def _acquire(coordinates, capture_directory, manifest, capture_model_path, out, 
     owner.declared_attempts = dispatch["dispatch_attempts"]
     need(type(owner.declared_attempts) is int and owner.declared_attempts >= 0, "declared dispatch count is not an exact nonnegative integer")
     owner.base = {"pid": pid, "nonce": nonce, "provider_revision": PROVIDER_REVISION,
+        "reference_profile": PROFILE_V2,
         "run": coordinates.run.id.value, "coordinate_artifact": encode(coordinates.artifact),
         "owner_native_tid": dispatch["owner_native_tid"], "owner_python_ident": dispatch["owner_python_ident"],
         "native_scope": scope, "physical_scope": physical_scope, "physical_profile": physical["profile"],
@@ -533,6 +586,7 @@ def _acquire(coordinates, capture_directory, manifest, capture_model_path, out, 
     owner.scan_archive(partitions)
     owner._closed_source = True
     owner.manifest_receipt = partitions.manifest_receipt
+    owner.base["source_manifest"] = partitions.manifest_receipt
     return owner
 
 
@@ -615,10 +669,18 @@ def _check_group_identity(source):
                  "known output marker has another native parent/thread")
         if span is not None:
             candidates = []
+            unsupported = None
             for child in source["nodes"]:
                 raw = attributes(child).get("op_schema")
                 if child["ctrl_deps"] == span["id"] and type(raw) is str and raw:
-                    schema, _, _ = parse_schema_ports(raw)
+                    try:
+                        schema, _, _ = parse_schema_ports(raw)
+                    except RuntimeError as error:
+                        if source.get("reference_profile") != PROFILE_V2:
+                            raise
+                        unsupported = {"reason": "SCHEMA_TYPE_RESOLUTION_UNAVAILABLE", "sequence": seq,
+                                       "node": child["id"], "detail": str(error)[:512]}
+                        continue
                     key = schema.name.replace("::", ".") + "." + (schema.overload_name or "default")
                     if begin is not None and key == begin.get("operator"):
                         candidates.append(child)
@@ -626,13 +688,16 @@ def _check_group_identity(source):
                              "known matching native child label/thread contradicts span/schema")
             need(len(candidates) <= 1, "ambiguous matching direct native schema children")
         else:
-            candidates = []
+            candidates, unsupported = [], None
         normal = (begin is not None and output is not None and end is not None
                   and end["outcome"] == "RETURNED" and end["span_enter_returned"]
                   and not begin.get("slot_gaps") and not output.get("slot_gaps")
-                  and str(begin.get("operator", "")).startswith("aten."))
+                  and (bool(begin.get("operator")) if source.get("reference_profile") == PROFILE_V2
+                       else str(begin.get("operator", "")).startswith("aten.")))
         if normal:
-            if span is None or result is None:
+            if unsupported is not None:
+                absence = unsupported
+            elif span is None or (result is None and source.get("reference_profile") != PROFILE_V2):
                 absence = {"reason": "ORIGINAL_ETO_MARKER_UNAVAILABLE", "sequence": seq,
                            "missing_markers": [r["marker"] for r in (begin, output) if not names.get(r["marker"])]}
             elif not candidates:
@@ -664,6 +729,48 @@ def _unavailable_physical(source):
     return None
 
 
+def _write_inventory(directory, rows, budget, publish, *, role, metadata=None):
+    """Bounded transport chunks; original sequence and source locators survive."""
+    chunks, buffer, count, total, first, last = [], bytearray(), 0, 0, None, None
+    begins, begin_groups = 0, 0
+
+    def flush():
+        nonlocal buffer, count
+        if not count:
+            return
+        path = directory / f"{len(chunks):06d}.jsonl"
+        raw = bytes(buffer)
+        publish(path, raw, budget.max_inventory_chunk_bytes)
+        chunks.append({"artifact": encode(_artifact(path, raw, "scar.native-capture-row-chunk")),
+            "rows": count, "first_sequence": first, "last_sequence": last,
+            "first_row_ordinal": total - count, "last_row_ordinal": total - 1})
+        buffer, count = bytearray(), 0
+
+    for row in rows:
+        raw = canonical(row) + b"\n"
+        need(len(raw) <= min(budget.max_record_bytes, budget.max_inventory_chunk_bytes), "inventory row exceeds bounded transport cap")
+        if count and (count >= budget.max_inventory_chunk_rows or len(buffer) + len(raw) > budget.max_inventory_chunk_bytes):
+            flush()
+        if not count:
+            first = row["sequence"]
+        buffer.extend(raw)
+        count += 1
+        total += 1
+        last = row["sequence"]
+        begins += row.get("begin_count", 0)
+        begin_groups += int(row.get("begin_count", 0) > 0)
+    flush()
+    document = {**(metadata or {}), "schema": "scar.native-capture-table-chunks", "schema_version": 1,
+        "profile": PROFILE_V2, "role": role, "row_schema_version": 2,
+        "rows": total, "begin_rows": begins, "begin_groups": begin_groups,
+        "max_chunk_bytes": budget.max_inventory_chunk_bytes, "max_chunk_rows": budget.max_inventory_chunk_rows,
+        "chunks": chunks, "storage_ordinals_are_not_source_coordinates": True}
+    raw = canonical(document)
+    path = directory / "manifest.json"
+    publish(path, raw, budget.max_inventory_manifest_bytes)
+    return _artifact(path, raw, document["schema"]), document
+
+
 def bind_native_capture_batches(coordinates, capture_directory, partitioned_native_manifest, out_dir, *,
                                 expected_manifest_sha256, capture_model_path, expected_capture_model_sha256,
                                 budget=NativeCaptureBatchBudget(), progress=None):
@@ -681,20 +788,26 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
     need(not out.exists(), "native batch output must be fresh")
     out.mkdir(parents=True)
     started, owner = time.monotonic(), None
+    published_total = 0
+
+    def publish(path, raw, maximum):
+        nonlocal published_total
+        need(len(raw) <= maximum, "artifact exceeds per-file cap before publication: " + path.name)
+        need(published_total + len(raw) <= budget.max_output_bytes, "artifact exceeds remaining output cap before publication")
+        _write(path, raw)
+        published_total += len(raw)
+
     try:
         owner = _SourceIndex(out, budget, progress)
         owner = _acquire(coordinates, capture_directory, partitioned_native_manifest, capture_model_path, out, budget,
                          expected_manifest_sha256, expected_capture_model_sha256, progress, owner)
         sequences = tuple(sorted(owner.groups))
-        observed = [owner.inventory(seq) for seq in sequences]
-        observed_bytes = b"".join(canonical(row) + b"\n" for row in observed)
-        need(len(observed_bytes) <= budget.max_inventory_bytes and len(observed_bytes) <= budget.max_output_bytes,
-             "observed inventory byte budget exceeded before publication")
-        _write(out / "observed-dispatches.jsonl", observed_bytes)
-        enumerated_begins = sum(row["begin_count"] for row in observed)
+        observed_artifact, observed = _write_inventory(out / "observed-dispatches", (owner.inventory(seq) for seq in sequences),
+            budget, publish, role="observed-dispatches", metadata={"declared_attempts": owner.declared_attempts})
+        enumerated_begins = observed["begin_rows"]
         source_complete = (len(sequences) == enumerated_begins == owner.declared_attempts
                            and all(seq == i for i, seq in enumerate(sequences, 1))
-                           and all(row["begin_count"] == 1 for row in observed))
+                           and observed["begin_groups"] == len(sequences))
         owner.emit({"stage": "dispatch_domain_enumerated", "declared_attempts": owner.declared_attempts,
                     "actual_groups": len(sequences), "actual_begin_rows": enumerated_begins,
                     "source_domain_complete": source_complete})
@@ -708,17 +821,13 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             if absent_native is not None:
                 owner.classifications[seq] = {"state": "FRONTIER", **absent_native}
                 continue
-            unavailable = _unavailable_physical(source)
-            if unavailable is not None:
-                owner.classifications[seq] = {"state": "FRONTIER", **unavailable}
-                continue
-            interfaces, frontiers = replay_interfaces(source)
+            interfaces, frontiers = replay_batch_interfaces(source)
             if interfaces:
                 interface = interfaces[0]
                 # Missing original projected dependencies remain explicit; a
                 # contradictory full record will reject in _project, not pass.
                 try:
-                    owner.selected(source, interfaces)
+                    owner.selected_v2(source, interfaces)
                 except _MissingDependency as error:
                     owner.classifications[seq] = {"state": "FRONTIER", "reason": "ORIGINAL_REFERENCE_DEPENDENCY_UNAVAILABLE", "detail": str(error)}
                     continue
@@ -737,38 +846,35 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
                 need(len(frontiers) == 1, "actual group did not yield exactly one classification")
                 owner.classifications[seq] = {"state": "FRONTIER", **frontiers[0]}
         definitions = {sig: owner.signatures[sig] for sig in sorted(owner.signatures)}
-        interface_doc = {"schema": "scar.pinned-aten-protocol-interface", "schema_version": 1,
-            "profile": PROFILE, "interfaces": definitions,
+        interface_doc = {"schema": "scar.pinned-torch-protocol-interface", "schema_version": 1,
+            "profile": PROFILE_V2, "interfaces": definitions,
             "effect_contract": "UNKNOWN outside partial provider schema annotations", "content_version_claimed": False}
         interface_bytes = canonical(interface_doc)
         need(len(interface_bytes) <= budget.max_interface_bytes, "shared interface byte budget exceeded before publication")
-        need(len(observed_bytes) + len(interface_bytes) <= budget.max_output_bytes, "shared interface exceeds remaining output budget")
         interface_artifact = _artifact(out / "native-interface.json", interface_bytes, interface_doc["schema"])
-        _write(out / "native-interface.json", interface_bytes)
+        publish(out / "native-interface.json", interface_bytes, budget.max_interface_bytes)
         program_source = {**owner.base, "max_sequences": owner.declared_attempts}
         representatives = [owner.representatives[sig] for sig in sorted(owner.representatives)]
         program, layouts = _build_program(representatives, program_source, interface_artifact)
         program_bytes = program_dumps(program).encode()
         need(len(program_bytes) <= budget.max_program_bytes, "shared static program byte budget exceeded")
-        need(len(observed_bytes) + len(interface_bytes) + len(program_bytes) <= budget.max_output_bytes,
-             "shared program exceeds remaining output budget")
         program_artifact = _artifact(out / "program.json", program_bytes, "scar.program-graph")
-        _write(out / "program.json", program_bytes)
-        shard_reports, first_shard, output_total = [], None, len(program_bytes) + len(interface_bytes) + len(observed_bytes)
+        publish(out / "program.json", program_bytes, budget.max_program_bytes)
+        shard_reports, first_shard, first_partial_shard = [], None, None
         pending = []
 
         def emit_shard(selected_sequences):
-            nonlocal first_shard, output_total
+            nonlocal first_shard, first_partial_shard
             owner.check()
             shard_started = time.monotonic()
             source = owner.source_for(tuple(selected_sequences), definitions=True)
-            interfaces, frontiers = replay_interfaces(source)
+            interfaces, frontiers = replay_batch_interfaces(source)
             expected = {seq for seq in selected_sequences if owner.classifications[seq]["state"] == "READY"}
             interfaces = [i for i in interfaces if i["sequence"] in expected]
             need({i["sequence"] for i in interfaces} == expected, "source replay changed during shard construction")
             if not interfaces:
                 return
-            selected = owner.selected(source, interfaces)
+            selected = owner.selected_v2(source, interfaces)
             shard_dir = out / "shards" / f"{len(shard_reports):06d}"
             values, evidence, va, ea, geometry, payloads = _prepare_projection(source, interfaces, selected, shard_dir, budget)
             execution = _build_execution(program, layouts, interfaces, source, coordinates, program_artifact, va, ea)
@@ -788,12 +894,35 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
                               "gaps": [encode(g) for g in validation.gaps]}
             need(validation.valid, "actual shard validation failed: " + json.dumps(validation_doc["issues"][:10], sort_keys=True))
             artifact = _artifact(shard_dir / "execution.json", execution_bytes, "scar.execution-model")
-            report = {"schema": "scar.native-capture-execution-shard", "schema_version": 1,
-                "status": "REFERENCE_PORTS_VERIFIED", "sequences": sorted(expected),
+            tensor_ports = [p for i in interfaces for ports in i["ports"].values() for p in ports if p["tensor"]]
+            b_count = sum(p.get("object_record") is not None for p in tensor_ports)
+            c_count = sum(p["geometry"]["status"] == "QUALIFIED" for p in tensor_ports)
+            denotations = {d.id.value: d for d in execution.denotations}
+            port_rows = []
+            for interface in interfaces:
+                for direction, ports in interface["ports"].items():
+                    for position, port in enumerate(ports):
+                        if not port["tensor"]:
+                            continue
+                        denotation = denotations["native-port:" + source["run"] + ":" + str(interface["sequence"]) + ":" + direction + ":denotation:" + str(position)]
+                        port_rows.append({"sequence": interface["sequence"], "direction": direction, "position": position,
+                            "native_path": port["path"], "native_type": port["type"], "source": encode(denotation.source),
+                            "native_tensor_tuple": port["value"], "native_shape": port["shape"], "native_strides": port["strides"],
+                            "denotation": encode(denotation), "A": "QUALIFIED_NATIVE_PORT",
+                            "B": "QUALIFIED_HELD_OBJECT" if port.get("object_record") is not None else "UNRESOLVED",
+                            "C": port["geometry"], "D": "CONTENT_STATE_READY_UNPROVED"})
+            qualification_artifact, _ = _write_inventory(shard_dir / "port-qualifications", iter(port_rows), budget, publish,
+                role="native-port-qualifications", metadata={"program_snapshot": encode(execution.snapshot)})
+            report = {"schema": "scar.native-capture-execution-shard", "schema_version": 2, "profile": PROFILE_V2,
+                "status": "NATIVE_PORTS_MODELED_WITH_EXPLICIT_QUALIFICATION", "sequences": sorted(expected),
                 "program_snapshot": encode(execution.snapshot), "execution": encode(artifact),
                 "values_projection": encode(va), "evidence_projection": encode(ea),
                 "signature_ids": sorted({i["signature_id"] for i in interfaces}),
                 "actual_activations": len(execution.activations), "tensor_denotations": len(execution.denotations),
+                "native_tensor_ports": len(tensor_ports), "held_object_ports": b_count,
+                "unresolved_object_ports": len(tensor_ports) - b_count, "geometry_qualified_ports": c_count,
+                "geometry_gap_ports": len(tensor_ports) - c_count,
+                "port_qualifications": encode(qualification_artifact),
                 "physical_associations": len(geometry), "gap_counts": dict(Counter(g.code for g in validation.gaps)),
                 "wall_seconds": time.monotonic() - shard_started}
             payloads.update({"execution.json": execution_bytes, "validation.json": canonical(validation_doc),
@@ -805,20 +934,27 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             for name, raw in payloads.items():
                 need(len(raw) <= caps[name], "shard file byte budget exceeded before publication: " + name)
             shard_size = sum(map(len, payloads.values()))
-            need(output_total + shard_size <= budget.max_output_bytes, "shard exceeds remaining published output budget")
+            need(published_total + shard_size <= budget.max_output_bytes, "shard exceeds remaining published output budget")
             owner.check()
             need(report["wall_seconds"] <= budget.max_shard_seconds, "materialized shard wall budget exceeded")
             for name, raw in payloads.items():
-                _write(shard_dir / name, raw)
-            output_total += shard_size
+                publish(shard_dir / name, raw, caps[name])
             for interface in interfaces:
                 seq = interface["sequence"]
-                owner.classifications[seq] = {"state": "QUALIFIED_REFERENCE_NORMAL", "signature_id": interface["signature_id"],
+                ports = [p for ps in interface["ports"].values() for p in ps if p["tensor"]]
+                held = sum(p.get("object_record") is not None for p in ports)
+                geometry_count = sum(p["geometry"]["status"] == "QUALIFIED" for p in ports)
+                owner.classifications[seq] = {"state": "MODELED_COMPLETE_REFERENCE" if held == len(ports) else "MODELED_PARTIAL_REFERENCE",
+                    "native_tensor_ports": len(ports), "held_object_ports": held, "unresolved_object_ports": len(ports) - held,
+                    "geometry_qualified_ports": geometry_count, "geometry_gap_ports": len(ports) - geometry_count,
+                    "port_qualifications": encode(qualification_artifact), "signature_id": interface["signature_id"],
                     "shard": str(shard_dir.relative_to(out)), "execution": encode(artifact),
                     "activation_id": "native-port:" + owner.base["run"] + ":" + str(seq)}
             shard_reports.append(report)
             if first_shard is None:
                 first_shard = NativeProtocolWindowResult(shard_dir, program, execution, values, evidence, native, validation, report)
+            if first_partial_shard is None and b_count < len(tensor_ports):
+                first_partial_shard = NativeProtocolWindowResult(shard_dir, program, execution, values, evidence, native, validation, report)
             owner.emit({"stage": "actual_shard_verified", "number": len(shard_reports) - 1,
                         "activations": len(execution.activations), "tensor_denotations": len(execution.denotations)})
 
@@ -837,36 +973,48 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             flat_leaves += item["flat_leaves"]
         if pending:
             emit_shard(pending)
-        inventory = [{**row, **owner.classifications[row["sequence"]]} for row in observed]
-        need(all(row["state"] != "READY" for row in inventory), "unmaterialized actual dispatch remains")
-        inventory_bytes = b"".join(canonical(row) + b"\n" for row in inventory)
-        need(len(inventory_bytes) <= budget.max_inventory_bytes and output_total + len(inventory_bytes) <= budget.max_output_bytes,
-             "final dispatch inventory budget exceeded before publication")
-        inventory_artifact = _artifact(out / "dispatch-inventory.jsonl", inventory_bytes, "scar.native-dispatch-inventory")
-        _write(out / "dispatch-inventory.jsonl", inventory_bytes)
-        qualified = sum(row["state"] == "QUALIFIED_REFERENCE_NORMAL" for row in inventory)
-        frontier = sum(row["state"] == "FRONTIER" for row in inventory)
-        need(qualified + frontier == len(sequences), "actual dispatch accounting mismatch")
-        report = {"schema": "scar.native-capture-batch", "schema_version": 1,
-            "status": "SOURCE_DOMAIN_ACCOUNTED" if source_complete else "OPEN_SOURCE_DOMAIN_MISMATCH",
+        need(all(owner.classifications[s]["state"] != "READY" for s in sequences), "unmaterialized actual dispatch remains")
+        inventory_artifact, _ = _write_inventory(out / "dispatch-inventory",
+            ({**owner.inventory(seq), **owner.classifications[seq]} for seq in sequences), budget, publish,
+            role="dispatch-accounting", metadata={"declared_attempts": owner.declared_attempts, "program_snapshot": encode(program_artifact)})
+        complete = sum(owner.classifications[s]["state"] == "MODELED_COMPLETE_REFERENCE" for s in sequences)
+        partial = sum(owner.classifications[s]["state"] == "MODELED_PARTIAL_REFERENCE" for s in sequences)
+        frontier = sum(owner.classifications[s]["state"] == "FRONTIER" for s in sequences)
+        need(complete + partial + frontier == len(sequences), "actual dispatch accounting mismatch")
+        report = {"schema": "scar.native-capture-batch", "schema_version": 2, "profile": PROFILE_V2,
+            "capabilities": {"native_tensor_ports": True, "held_reference_subset": True, "geometry_independent": True,
+                             "unresolved_native_identity": True, "logical_contents": False, "resource_ready": False},
+            "status": "SOURCE_DOMAIN_ACCOUNTED_WITH_PORT_GAPS" if source_complete else "OPEN_SOURCE_DOMAIN_MISMATCH",
             "run": owner.base["run"], "coordinates": encode(coordinates.artifact),
             "source_manifest": owner.manifest_receipt, "raw_reads": owner.raw_receipts,
             "source_raw_acquisitions": 1, "coordinate_binds_inside_batch": 0,
             "declared_dispatch_attempts": owner.declared_attempts,
             "enumerated_dispatch_groups": len(sequences), "enumerated_begin_rows": enumerated_begins,
-            "enumerated_begin_groups": sum(row["begin_count"] > 0 for row in observed),
+            "enumerated_begin_groups": observed["begin_groups"],
             "actual_sequence_ids": list(sequences), "source_domain_complete": source_complete,
-            "qualified_dispatches": qualified, "frontier_dispatches": frontier,
-            "frontier_counts": dict(Counter(row["reason"] for row in inventory if row["state"] == "FRONTIER")),
+            "structurally_modeled_dispatches": complete + partial,
+            "modeled_complete_reference_dispatches": complete, "modeled_partial_reference_dispatches": partial,
+            "unmodeled_frontier_dispatches": frontier,
+            "frontier_counts": dict(Counter(owner.classifications[s]["reason"] for s in sequences if owner.classifications[s]["state"] == "FRONTIER")),
+            "native_tensor_ports": sum(r["native_tensor_ports"] for r in shard_reports),
+            "held_object_ports": sum(r["held_object_ports"] for r in shard_reports),
+            "unresolved_object_ports": sum(r["unresolved_object_ports"] for r in shard_reports),
+            "geometry_qualified_ports": sum(r["geometry_qualified_ports"] for r in shard_reports),
+            "geometry_gap_ports": sum(r["geometry_gap_ports"] for r in shard_reports),
             "unvisited_actual_groups": 0, "declared_minus_enumerated_begins": owner.declared_attempts - enumerated_begins,
             "unvisited_declared_sequences": 0 if source_complete else None,
-            "dispatch_inventory": encode(inventory_artifact), "static_interfaces": len(definitions),
+            "dispatch_inventory": encode(inventory_artifact), "observed_dispatch_inventory": encode(observed_artifact), "static_interfaces": len(definitions),
             "shared_program": encode(program_artifact), "shared_interface": encode(interface_artifact),
             "shards": shard_reports, "archive_reads": owner.archive_receipts,
             "native_raw_bytes_returned": owner.raw_returned, "private_spool_bytes_returned": owner.spool_returned,
             "private_index_bytes": owner.path.stat().st_size,
             "wall_seconds": time.monotonic() - started, "max_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
             "logical_contents_established": False, "complete_state_effects_established": False,
+            "implementation_code_identity_established": False,
+            "observed_execution_instrumented": True,
+            "target_observer_work_attribution_established": False,
+            "clean_benchmark_established": False,
+            "observation_scope": "Observed instrumented execution including provider/mode/observer activity; target versus observer work remains unattributed",
             "alias_completeness_established": False, "resource_readiness_established": False,
             "whole_model_established": False, "transformation_authorized": False,
             "target_executions": 0, "compile_calls": 0, "prepare_calls": 0}
@@ -874,9 +1022,9 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
         report["published_bytes_before_report"] = published
         need(len(canonical(report)) <= budget.max_report_bytes and published + len(canonical(report)) <= budget.max_output_bytes,
              "final report/publication byte budget exceeded before publication")
-        _write_json(out / "report.json", report)
+        publish(out / "report.json", canonical(report), budget.max_report_bytes)
         owner.check()
-        return NativeCaptureBatchResult(out, program, report, first_shard)
+        return NativeCaptureBatchResult(out, program, report, first_shard, first_partial_shard)
     except BaseException as error:
         import traceback
         failure = {"status": "INCOMPLETE_NATIVE_CAPTURE_BATCH", "error_type": type(error).__name__,

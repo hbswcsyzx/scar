@@ -1,0 +1,9 @@
+{
+  "status": "SMALL_FIXTURE_FAILED",
+  "error": "V2 native parent closure differs",
+  "cause": "fixture included four nested nodes but only archived closure rows for the actual direct-child lease",
+  "fix": "fixture now uses exact direct-child/span/output and ancestor closure; production unchanged by this correction",
+  "original_raw_reads": 0,
+  "archive_chunk_reads": 0,
+  "full_gate_run": false
+}

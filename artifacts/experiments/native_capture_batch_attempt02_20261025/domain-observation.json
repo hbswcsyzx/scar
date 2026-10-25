@@ -1,0 +1,710 @@
+{
+  "status": "READ_ONLY_DIAGNOSTIC_DECLARATIONS_NOT_OWNED_EVIDENCE",
+  "cases": [
+    {
+      "sequence": 1,
+      "dispatch_lines": [
+        1,
+        2,
+        3
+      ],
+      "native_records": [
+        {
+          "ordinal": 3,
+          "node": {
+            "attrs": [
+              {
+                "name": "rf_id",
+                "type": "uint64",
+                "value": 3
+              },
+              {
+                "name": "fw_parent",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "seq_id",
+                "type": "int64",
+                "value": -1
+              },
+              {
+                "name": "scope",
+                "type": "uint64",
+                "value": 7
+              },
+              {
+                "name": "tid",
+                "type": "uint64",
+                "value": 1
+              },
+              {
+                "name": "fw_tid",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "op_schema",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_backend",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_file",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "tensor_range",
+                "type": "string",
+                "value": ""
+              }
+            ],
+            "ctrl_deps": 4,
+            "id": 5,
+            "inputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            },
+            "name": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:1:span",
+            "outputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            }
+          }
+        },
+        {
+          "ordinal": 1,
+          "node": {
+            "attrs": [
+              {
+                "name": "rf_id",
+                "type": "uint64",
+                "value": 4
+              },
+              {
+                "name": "fw_parent",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "seq_id",
+                "type": "int64",
+                "value": -1
+              },
+              {
+                "name": "scope",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "tid",
+                "type": "uint64",
+                "value": 1
+              },
+              {
+                "name": "fw_tid",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "op_schema",
+                "type": "string",
+                "value": "torchvision::_cuda_version() -> int _0"
+              },
+              {
+                "name": "kernel_backend",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_file",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "tensor_range",
+                "type": "string",
+                "value": ""
+              }
+            ],
+            "ctrl_deps": 5,
+            "id": 6,
+            "inputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            },
+            "name": "torchvision::_cuda_version",
+            "outputs": {
+              "shapes": [
+                []
+              ],
+              "strides": [
+                []
+              ],
+              "types": [
+                "Int"
+              ],
+              "values": [
+                13020
+              ]
+            }
+          }
+        },
+        {
+          "ordinal": 2,
+          "node": {
+            "attrs": [
+              {
+                "name": "rf_id",
+                "type": "uint64",
+                "value": 5
+              },
+              {
+                "name": "fw_parent",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "seq_id",
+                "type": "int64",
+                "value": -1
+              },
+              {
+                "name": "scope",
+                "type": "uint64",
+                "value": 7
+              },
+              {
+                "name": "tid",
+                "type": "uint64",
+                "value": 1
+              },
+              {
+                "name": "fw_tid",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "op_schema",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_backend",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_file",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "tensor_range",
+                "type": "string",
+                "value": ""
+              }
+            ],
+            "ctrl_deps": 5,
+            "id": 7,
+            "inputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            },
+            "name": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:1:output",
+            "outputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "sequence": 2,
+      "dispatch_lines": [
+        4,
+        5,
+        6
+      ],
+      "native_records": [
+        {
+          "ordinal": 8,
+          "node": {
+            "attrs": [
+              {
+                "name": "rf_id",
+                "type": "uint64",
+                "value": 8
+              },
+              {
+                "name": "fw_parent",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "seq_id",
+                "type": "int64",
+                "value": -1
+              },
+              {
+                "name": "scope",
+                "type": "uint64",
+                "value": 7
+              },
+              {
+                "name": "tid",
+                "type": "uint64",
+                "value": 1
+              },
+              {
+                "name": "fw_tid",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "op_schema",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_backend",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_file",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "tensor_range",
+                "type": "string",
+                "value": ""
+              }
+            ],
+            "ctrl_deps": 9,
+            "id": 10,
+            "inputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            },
+            "name": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:2:span",
+            "outputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            }
+          }
+        },
+        {
+          "ordinal": 6,
+          "node": {
+            "attrs": [
+              {
+                "name": "rf_id",
+                "type": "uint64",
+                "value": 9
+              },
+              {
+                "name": "fw_parent",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "seq_id",
+                "type": "int64",
+                "value": -1
+              },
+              {
+                "name": "scope",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "tid",
+                "type": "uint64",
+                "value": 1
+              },
+              {
+                "name": "fw_tid",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "op_schema",
+                "type": "string",
+                "value": "torchvision::_cuda_version() -> int _0"
+              },
+              {
+                "name": "kernel_backend",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_file",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "tensor_range",
+                "type": "string",
+                "value": ""
+              }
+            ],
+            "ctrl_deps": 10,
+            "id": 11,
+            "inputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            },
+            "name": "torchvision::_cuda_version",
+            "outputs": {
+              "shapes": [
+                []
+              ],
+              "strides": [
+                []
+              ],
+              "types": [
+                "Int"
+              ],
+              "values": [
+                13020
+              ]
+            }
+          }
+        },
+        {
+          "ordinal": 7,
+          "node": {
+            "attrs": [
+              {
+                "name": "rf_id",
+                "type": "uint64",
+                "value": 10
+              },
+              {
+                "name": "fw_parent",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "seq_id",
+                "type": "int64",
+                "value": -1
+              },
+              {
+                "name": "scope",
+                "type": "uint64",
+                "value": 7
+              },
+              {
+                "name": "tid",
+                "type": "uint64",
+                "value": 1
+              },
+              {
+                "name": "fw_tid",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "op_schema",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_backend",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_file",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "tensor_range",
+                "type": "string",
+                "value": ""
+              }
+            ],
+            "ctrl_deps": 10,
+            "id": 12,
+            "inputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            },
+            "name": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:2:output",
+            "outputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            }
+          }
+        }
+      ]
+    },
+    {
+      "sequence": 3,
+      "dispatch_lines": [
+        7,
+        8,
+        9
+      ],
+      "native_records": [
+        {
+          "ordinal": 13,
+          "node": {
+            "attrs": [
+              {
+                "name": "rf_id",
+                "type": "uint64",
+                "value": 13
+              },
+              {
+                "name": "fw_parent",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "seq_id",
+                "type": "int64",
+                "value": -1
+              },
+              {
+                "name": "scope",
+                "type": "uint64",
+                "value": 7
+              },
+              {
+                "name": "tid",
+                "type": "uint64",
+                "value": 1
+              },
+              {
+                "name": "fw_tid",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "op_schema",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_backend",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_file",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "tensor_range",
+                "type": "string",
+                "value": ""
+              }
+            ],
+            "ctrl_deps": 14,
+            "id": 15,
+            "inputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            },
+            "name": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:3:span",
+            "outputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            }
+          }
+        },
+        {
+          "ordinal": 11,
+          "node": {
+            "attrs": [
+              {
+                "name": "rf_id",
+                "type": "uint64",
+                "value": 14
+              },
+              {
+                "name": "fw_parent",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "seq_id",
+                "type": "int64",
+                "value": -1
+              },
+              {
+                "name": "scope",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "tid",
+                "type": "uint64",
+                "value": 1
+              },
+              {
+                "name": "fw_tid",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "op_schema",
+                "type": "string",
+                "value": "torchvision::_cuda_version() -> int _0"
+              },
+              {
+                "name": "kernel_backend",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_file",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "tensor_range",
+                "type": "string",
+                "value": ""
+              }
+            ],
+            "ctrl_deps": 15,
+            "id": 16,
+            "inputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            },
+            "name": "torchvision::_cuda_version",
+            "outputs": {
+              "shapes": [
+                []
+              ],
+              "strides": [
+                []
+              ],
+              "types": [
+                "Int"
+              ],
+              "values": [
+                13020
+              ]
+            }
+          }
+        },
+        {
+          "ordinal": 12,
+          "node": {
+            "attrs": [
+              {
+                "name": "rf_id",
+                "type": "uint64",
+                "value": 15
+              },
+              {
+                "name": "fw_parent",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "seq_id",
+                "type": "int64",
+                "value": -1
+              },
+              {
+                "name": "scope",
+                "type": "uint64",
+                "value": 7
+              },
+              {
+                "name": "tid",
+                "type": "uint64",
+                "value": 1
+              },
+              {
+                "name": "fw_tid",
+                "type": "uint64",
+                "value": 0
+              },
+              {
+                "name": "op_schema",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_backend",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "kernel_file",
+                "type": "string",
+                "value": ""
+              },
+              {
+                "name": "tensor_range",
+                "type": "string",
+                "value": ""
+              }
+            ],
+            "ctrl_deps": 15,
+            "id": 17,
+            "inputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            },
+            "name": "scar-dispatch:72816598bfa183a810428fe30a7873ff:369749:3:output",
+            "outputs": {
+              "shapes": [],
+              "strides": [],
+              "types": [],
+              "values": []
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "raw_files_opened": 0,
+  "archive_chunks_opened": 0,
+  "runtime_owner_restored": false
+}

@@ -1,4 +1,6 @@
-"""Bounded source-owning ATen reference/core interface bridge.
+"""Bounded source-owning native reference/core interface bridge.
+
+V1 retains its strict ATen prefix; batch V2 observes Torch FunctionSchema ports.
 
 The importer never executes a workload, compiles source or reconstructs the
 complete native bundle. Native callbacks/physical observations remain evidence;
@@ -254,6 +256,9 @@ def _selected_chunks(partitions, requests, budget):
 
 
 def _prepare_projection(source, interfaces, selected, out, budget):
+    from scar.ir.execution.native_port_protocol import PROFILE_V2
+    if source.get("reference_profile") == PROFILE_V2:
+        return _prepare_projection_v2(source, interfaces, selected, out, budget)
     from scar.ir.v2.codec import values_from_dict, evidence_from_dict
     from scar.ir.v2.values import ValueGraph
     from scar.ir.v2.evidence import EvidenceGraph
@@ -353,7 +358,83 @@ def _project(source, interfaces, selected, out, budget):
     return tuple(result)
 
 
+def _prepare_projection_v2(source, interfaces, selected, out, budget):
+    """Closed ordinary graphs: B objects and C geometry are separate subsets."""
+    from scar.ir.execution.native_port_protocol import replay_batch_interfaces, PROFILE_V2
+    from scar.ir.v2.codec import values_from_dict, evidence_from_dict
+    from scar.ir.v2.values import ValueGraph
+    from scar.ir.v2.evidence import EvidenceGraph
+    replayed, _ = replay_batch_interfaces(source)
+    need(canonical(replayed) == canonical(interfaces), "V2 projected interface witnesses changed")
+    values_doc, evidence_doc = ValueGraph().to_dict(), EvidenceGraph().to_dict()
+    values_doc.update(schema_version=ValueGraph.SCHEMA_VERSION, objects=[])
+    values_doc.pop("validation", None); evidence_doc.pop("validation", None)
+    raw_nodes = {n["id"]: n for n in source["nodes"]}
+    receipts, geometry = [], []
+    expected_regions, expected_allocations = {}, {}
+    expected_objects = {}
+    for interface in interfaces:
+        for direction, ports in interface["ports"].items():
+            for position, port in enumerate(ports):
+                if not port["tensor"]:
+                    continue
+                if port.get("object_record") is not None:
+                    expected_objects[port["object_record"]["id"]["value"]] = port["object_record"]
+                g = port["geometry"]
+                if g["status"] != "QUALIFIED":
+                    continue
+                witness = source["geometry_records"][str(g["physical_line"]) + ":" + str(g["argument_ordinal"])]
+                region, allocation = witness["region"]["record"], witness["allocation"]["record"]
+                expected_regions[region["id"]["value"]] = region
+                expected_allocations[allocation["id"]["value"]] = allocation
+                geometry.append({"sequence": interface["sequence"], "direction": direction, "position": position,
+                    "object": None if port.get("object_record") is None else port["object_record"]["id"],
+                    "region": region["id"], "allocation": allocation["id"], "point": g["point"],
+                    "association_persistent": False, "logical_content_known": False, "ready": False})
+    expected = {"objects": expected_objects, "regions": expected_regions, "allocations": expected_allocations}
+    for (graph, table), rows in selected.items():
+        doc = values_doc if graph == "values" else evidence_doc
+        for row in rows:
+            original = row["record"]
+            if graph == "evidence":
+                node_id = original["metadata"]["node_id"]
+                raw = raw_nodes[node_id]
+                need(row["ordinal"] == source["node_ordinals"][str(node_id)]
+                     and original["id"]["value"] == source["native_scope"] + ":eto:" + str(node_id)
+                     and original["process_id"] == source["pid"] and original["metadata"]["provider"] == "ETO"
+                     and original["metadata"]["rf_id"] == attributes(raw)["rf_id"]
+                     and original["metadata"]["ctrl_deps"] == raw["ctrl_deps"]
+                     and original["metadata"]["raw_reference"] == "sha256:" + source["artifacts"]["eto"]["sha256"] + "#/nodes/" + str(row["ordinal"]),
+                     "V2 original native instance/ordinal differs")
+                need((original["parent"] is None if raw["ctrl_deps"] == node_id else
+                      original["parent"]["value"] == source["native_scope"] + ":eto:" + str(raw["ctrl_deps"])),
+                     "V2 original parent differs")
+            else:
+                need(expected[table].get(original["id"]["value"]) == original, "V2 selected original value record differs")
+            record = json.loads(canonical(original))
+            derived = None
+            if table == "regions":
+                layout = record["layout"]
+                record["layout"] = canonical_tensor_layout(layout, profile=source["physical_profile"], provider_revision=source["provider_revision"])
+                record["metadata"].update(provider_layout=layout, layout_normalization_rule="PINNED_TORCH_LAYOUT_V1")
+                derived = {"rule": "PINNED_TORCH_LAYOUT_V1", "original_layout": layout, "projected_layout": record["layout"]}
+            doc[table].append(record)
+            receipts.append({"graph": graph, "table": table, "original_record": original,
+                "source_locator": row["locator"], "source_verification": row["verification"], "derived": derived})
+    for table in expected:
+        need({r["id"]["value"] for r in values_doc[table]} == set(expected[table]), "V2 projection dependency inventory differs")
+    need({r["metadata"]["node_id"] for r in evidence_doc["instances"]} == set(raw_nodes), "V2 native parent closure differs")
+    values, evidence = values_from_dict(values_doc), evidence_from_dict(evidence_doc)
+    vp, ep = canonical(values.to_dict()), canonical(evidence.to_dict())
+    va, ea = _artifact(out / "source-values.json", vp, values.SCHEMA), _artifact(out / "source-evidence.json", ep, evidence.SCHEMA)
+    rp = canonical({"schema": "scar.native-source-window-receipts", "schema_version": 2, "profile": PROFILE_V2,
+        "values_projection": encode(va), "evidence_projection": encode(ea), "records": receipts,
+        "physical_associations": geometry, "whole_source_graph_identity_claimed": False})
+    return values, evidence, va, ea, geometry, {"source-values.json": vp, "source-evidence.json": ep, "source-projection-receipts.json": rp}
+
+
 def _build_program(interfaces, source, interface_artifact):
+    from scar.ir.execution.native_port_protocol import PROFILE_V2
     from scar.ir.program.model import (Behavior, Block, BlockArgument, CompletionResult,
         CompletionSignature, CompletionSuccessor, DataValue, ExitKind, ExitPort, Operation,
         ProgramGraph, ReferenceValue, Region, StateLocation, StateVersionValue,
@@ -368,14 +449,16 @@ def _build_program(interfaces, source, interface_artifact):
     from scar.ir.program.native import (NativeBoundary, NativeInputSlot, NativeOutputSlot,
         EntryPortRef, ExitPortRef, CoreInputPort, CoreOutputPort)
     from scar.ir.v2.common import Completeness
-    catalog = RegionID("aten-interface:catalog")
+    v2 = source.get("reference_profile") == PROFILE_V2
+    region_prefix, provider_prefix = ("torch-interface:", "torch-schema:") if v2 else ("aten-interface:", "aten-schema:")
+    catalog = RegionID(region_prefix + "catalog")
     catalog_block, catalog_return = BlockID(catalog.value + ":entry"), OperationID(catalog.value + ":return")
     operations = [Operation(catalog_return, "interface catalog; not a runtime invocation", (Behavior.CONTROL,),
                             terminator=Terminator(TerminatorKind.RETURN, exit="normal"))]
-    regions = [Region(catalog, "observed ATen interface definitions", catalog_block,
+    regions = [Region(catalog, "observed Torch FunctionSchema interfaces" if v2 else "observed ATen interface definitions", catalog_block,
                       (Block(catalog_block, (), (catalog_return,)),), (ExitPort("normal", ExitKind.NORMAL, ()),))]
     values, locations, bindings, provider_regions, boundaries, layouts = [], [], [], [], [], {}
-    definition_provider, execution_provider = ProviderID("aten-schema:" + PROVIDER_REVISION), ProviderID("eto:" + source["native_scope"])
+    definition_provider, execution_provider = ProviderID(provider_prefix + PROVIDER_REVISION), ProviderID("eto:" + source["native_scope"])
     fact = ProviderFactReference(interface_artifact, "#")
 
     def envelope(id_, name, artifact, kind, mode, scope):
@@ -389,14 +472,14 @@ def _build_program(interfaces, source, interface_artifact):
             tuple(ProviderCollectionObservation(d, None, "instrumentation impact/cost not established") for d in ProviderCollectionDomain))
 
     eto_artifact = decode(ProviderArtifact, source["artifacts"]["eto"])
-    envelopes = (envelope(definition_provider, "pinned ATen schema interface", interface_artifact,
+    envelopes = (envelope(definition_provider, "observed Torch FunctionSchema ports; implementation identity unknown" if v2 else "pinned ATen schema interface", interface_artifact,
             ProviderArtifactKind.DEFINITION_GRAPH, ProviderCaptureMode.STATIC_ANALYSIS, None),
         envelope(execution_provider, "PyTorch ETO", eto_artifact, ProviderArtifactKind.EXECUTION_EVIDENCE,
             ProviderCaptureMode.REAL_EXECUTION, ProviderRunScope(source["run"], source["pid"],
                 "dispatch prefix sequences 1.." + str(source["max_sequences"]), "ETO collector ordering; no per-node clock")))
     unique = {i["signature_id"]: i for i in interfaces}
     for sig_id, interface in unique.items():
-        prefix = "aten-interface:" + sig_id
+        prefix = region_prefix + sig_id
         region = RegionID(prefix)
         entry, normal, failed = (BlockID(prefix + ":" + s) for s in ("entry", "normal", "raised"))
         invoke, returned, raised = (OperationID(prefix + ":" + s) for s in ("invoke", "return", "raise"))
@@ -479,7 +562,8 @@ def _build_execution(program, layouts, interfaces, source, coordinates, program_
     from scar.ir.program.codec import dumps as program_dumps
     from scar.ir.execution.coordinates import (BlockVisit, ControlTransfer, ExecutionSegment, InitialEntry,
         OperationOccurrence, ProgramSnapshot, RegionActivation, UseOccurrence, ValueOccurrence)
-    from scar.ir.execution.common import EvidencePoint
+    from scar.ir.execution.common import EvidencePoint, Unresolved
+    from scar.ir.execution.native_port_protocol import PROFILE_V2, _native_slot_fact
     from scar.ir.execution.ids import (BlockVisitID, DenotationID, ExecutionSegmentID,
         OperationOccurrenceID, RegionActivationID, ValueOccurrenceID)
     from scar.ir.execution.content import NativeInputRef, NativeOutputRef, ObjectIdentity, ObjectRef, ValueDenotation
@@ -515,16 +599,27 @@ def _build_execution(program, layouts, interfaces, source, coordinates, program_
                 ports = interface["ports"][direction]
                 if j >= len(ports) or not ports[j]["tensor"]:
                     continue
-                held = ports[j]["held"]
-                original = source["object_records"][held["weak_token"]]
-                identity = ObjectIdentity(ObjectRef(values_artifact, ObjectID(original["id"]["value"])))
+                if source.get("reference_profile") == PROFILE_V2:
+                    native_fact = decode(ProviderFactReference, _native_slot_fact(source, interface, direction, ports[j]))
+                    original = ports[j].get("object_record")
+                    identity = (Unresolved(ports[j]["identity_reason"], EvidencePoint(coordinates.run.id, coordinates.target_process.id, native_fact))
+                                if original is None else ObjectIdentity(ObjectRef(values_artifact, ObjectID(original["id"]["value"]))))
+                    denotation_source = native_fact
+                else:
+                    held = ports[j]["held"]
+                    original = source["object_records"][held["weak_token"]]
+                    identity = ObjectIdentity(ObjectRef(values_artifact, ObjectID(original["id"]["value"])))
+                    denotation_source = entry_fact if direction == "inputs" else output_fact
                 basis = (NativeInputRef(static["boundary"].id, entry, j) if direction == "inputs"
                          else NativeOutputRef(static["boundary"].id, returned, j))
                 denotations.append(ValueDenotation(DenotationID(prefix + ":" + direction + ":denotation:" + str(j)),
-                    actual, identity, basis, entry_fact if direction == "inputs" else output_fact))
+                    actual, identity, basis, denotation_source))
         native_id = OperationInstanceID(source["native_scope"] + ":eto:" + str(interface["node"]["id"]))
         native_fact = ProviderFactReference(eto_artifact, "#/nodes/" + str(source["node_ordinals"][str(interface["node"]["id"])]))
         evidence_bindings.append(OccurrenceEvidenceBinding(invoke, LegacyOperationRef(evidence_artifact, native_id), native_fact))
+        if source.get("reference_profile") == PROFILE_V2:
+            evidence_bindings.append(OccurrenceEvidenceBinding(returned, LegacyOperationRef(evidence_artifact, native_id),
+                ProviderFactReference(eto_artifact, native_fact.locator + "/outputs")))
     return ExecutionModel(ProgramSnapshot(program_artifact, json.loads(program_dumps(program))["schema_version"]),
         runs=(coordinates.run,), processes=coordinates.processes, threads=coordinates.threads,
         activations=tuple(activations), segments=tuple(segments), visits=tuple(visits), operations=tuple(operations),

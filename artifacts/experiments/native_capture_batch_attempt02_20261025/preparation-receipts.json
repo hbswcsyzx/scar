@@ -1,0 +1,147 @@
+{
+  "first_gate_complete_code_copy": {
+    "bytes": 45762,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/baseline-receipt.json",
+    "sha256": "c64aa1179e715ec700a7fd08bce2e25853d00b6ce1188dd9c404cdacaa19afe4"
+  },
+  "first_gate_original_data_untouched": true,
+  "first_gate_result": "terminal exit1 at seq3182; original acquisition SHA and table scans retained; no full-domain modeled success claimed",
+  "first_gate_terminal_files": [
+    {
+      "bytes": 49319,
+      "path": "artifacts/experiments/native_capture_batch_20261025/freeze.json",
+      "sha256": "36917f11e0fc5d521d301b23d8e0bfa241e3fe17b7309e93adb0aecced857f00"
+    },
+    {
+      "bytes": 12962,
+      "path": "artifacts/experiments/native_capture_batch_20261025/gate.py",
+      "sha256": "da276c6b8e13f97183def4cf99c1648ff85a8685bed961ea6478e8ef4930b2fb"
+    },
+    {
+      "bytes": 500,
+      "path": "artifacts/experiments/native_capture_batch_20261025/run.sh",
+      "sha256": "4e13ea396b5e081fe8b87e56c0cc91ebeeb9af657bfb9e607e91f86a1777259a"
+    },
+    {
+      "bytes": 139,
+      "path": "artifacts/experiments/native_capture_batch_20261025/gate-started.json",
+      "sha256": "a91a7699191f98dbd8d0660e67308ea2839623e359619bc6675cd23a4ae4e6d7"
+    },
+    {
+      "bytes": 1600,
+      "path": "artifacts/experiments/native_capture_batch_20261025/gate-failure.json",
+      "sha256": "a2672cd99b95006a99897ecf2a2b79dec4b399d1d43424cf0462893fcca3e553"
+    },
+    {
+      "bytes": 155902,
+      "path": "artifacts/experiments/native_capture_batch_20261025/actual-io.json",
+      "sha256": "28c651345737681797be98abbe86721c2941ed26bd9ad3a570843215da423ce1"
+    },
+    {
+      "bytes": 4123,
+      "path": "artifacts/experiments/native_capture_batch_20261025/progress.jsonl",
+      "sha256": "19ef1356f3f0a917bad3a46c94733e9e041fb9aa99686cdd3b208cd98068348d"
+    },
+    {
+      "bytes": 4123,
+      "path": "artifacts/experiments/native_capture_batch_20261025/stdout.txt",
+      "sha256": "19ef1356f3f0a917bad3a46c94733e9e041fb9aa99686cdd3b208cd98068348d"
+    },
+    {
+      "bytes": 1327,
+      "path": "artifacts/experiments/native_capture_batch_20261025/stderr.txt",
+      "sha256": "95815ca1bf2cd733d551e727cba59058eed8e47551b1e2e1bd02dd0d2b02d0f0"
+    },
+    {
+      "bytes": 873,
+      "path": "artifacts/experiments/native_capture_batch_20261025/time.txt",
+      "sha256": "d314da51c591ca3e26593ee179e6493fa982350859512653da93f70e13bd60a0"
+    },
+    {
+      "bytes": 2767,
+      "path": "artifacts/experiments/native_capture_batch_20261025/result/failure.json",
+      "sha256": "a8e67a00e1e9551c3ce14494768e4c92c9039c9d7966f09bccacce9b7a38b720"
+    }
+  ],
+  "freeze": {
+    "bytes": 51616,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/freeze.json",
+    "sha256": "d6cf9a3d0240685f3a3349c783ac8d8b12036a304e76e7168cccac562fbe24b3"
+  },
+  "full_gate_run_by_this_agent": false,
+  "independent_review": "source_revision_current reviewed exact candidate02 SHA triple; common invoke+normal-return evidence bindings and full binding inventory now cover all Unknown and zero-Tensor activations. Review is code-only, not actual full verification.",
+  "limitations": [
+    "D content/state/ready remain unproved",
+    "C and B dynamic and independent",
+    "Observed instrumented execution; target/observer attribution and clean benchmark unproved",
+    "Full V2 costs Inferred until root-owned actual run"
+  ],
+  "original_archive_chunk_reads_during_v2_preparation": 0,
+  "original_raw_reads_during_v2_preparation": 0,
+  "root_run_command": "bash artifacts/experiments/native_capture_batch_attempt02_20261025/run.sh",
+  "runner_files": [
+    {
+      "bytes": 18831,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/gate.py",
+      "sha256": "3909ff738db62d104ec70c591bc7cc7888c5831211379f96a1715600d672791a"
+    },
+    {
+      "bytes": 510,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/run.sh",
+      "sha256": "94b683d096e8fd8b51229cd59a663673cd97a52b5f8224766b2b0f1b11b135eb"
+    }
+  ],
+  "runtime_owned_authority_restored_from_diagnostics": false,
+  "small_preflight": [
+    {
+      "bytes": 1906,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/api-check-07.json",
+      "sha256": "175a03468d270e16b4726190345d348d432525fb535c1bb47134f7efbc72ef84"
+    },
+    {
+      "bytes": 1580,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/v1-compat-check.json",
+      "sha256": "ba15f31df755e5f25ce485511815d57f4752329870cd185d54d209d0b83859bb"
+    },
+    {
+      "bytes": 338,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/runner-static-check.json",
+      "sha256": "1dbb8434f840a19992e72e36bb97a5083eeded450ecb7c076db88aeb346f4b6b"
+    }
+  ],
+  "source_candidate": {
+    "files": [
+      {
+        "bytes": 63641,
+        "path": "scar/trace/native_capture_batch.py",
+        "sha256": "f2c1eb8ec8d011f52fbf31f4973be2376ceff7afdc657a6689807dc99bd897e7"
+      },
+      {
+        "bytes": 55916,
+        "path": "scar/trace/native_protocol.py",
+        "sha256": "5293de71ff19d487efb0407bcc568f4732707af2e6b15925032eae9e2442d0a2"
+      },
+      {
+        "bytes": 54920,
+        "path": "scar/ir/execution/native_port_protocol.py",
+        "sha256": "9d58de81e85946cfaea1bc69d280b3893266e3e4b0b877bf0cd4e16d7b8ff943"
+      }
+    ],
+    "fix": "common exact original invoke and normal-completion producer bindings independent of Tensor/B set",
+    "full_gate_run": false,
+    "preflight": "api-check-07.json",
+    "status": "V2_PRODUCER_REVIEW_CANDIDATE02_FROZEN"
+  },
+  "staging_list": {
+    "bytes": 89766,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/staging-list.json",
+    "sha256": "72caf61d4f6457b8b262440d9ca11a5d8a549cc5a8b8eec3014fced1d39b0739"
+  },
+  "staging_paths": {
+    "bytes": 39244,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/staging-paths.txt",
+    "sha256": "7be3cd5dd18573dea123380c78232cd39750329460c890f8de92345633cb3971"
+  },
+  "staging_paths_count": 371,
+  "status": "ATTEMPT02_PREPARED_FOR_ROOT_RUN"
+}

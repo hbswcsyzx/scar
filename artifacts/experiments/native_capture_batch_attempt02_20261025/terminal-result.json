@@ -1,0 +1,118 @@
+{
+  "actual_enumerated_groups": 39796,
+  "actual_exit_source": "root-owned session4258 terminal confirmation; GNU time reports signal2 and an embedded Exit status0, not successful gate",
+  "actual_session_exit": 130,
+  "all_domain_A_modeling_established": false,
+  "all_domain_B_identity_established": false,
+  "all_domain_C_geometry_established": false,
+  "all_raw_sha_and_parse_complete": true,
+  "archive_tables": [
+    {
+      "chunks": 76,
+      "decoded_bytes": 1200966077,
+      "elapsed_s": 133.02163815998938,
+      "graph": "evidence",
+      "stage": "archive_table_indexed",
+      "stored_bytes": 76212360,
+      "table": "instances",
+      "whole_chunks_verified_by_BundlePartitions": true,
+      "whole_elapsed_s": 144.62481023103464
+    },
+    {
+      "chunks": 4,
+      "decoded_bytes": 54018019,
+      "elapsed_s": 138.25672559195664,
+      "graph": "values",
+      "stage": "archive_table_indexed",
+      "stored_bytes": 1304314,
+      "table": "objects",
+      "whole_chunks_verified_by_BundlePartitions": true,
+      "whole_elapsed_s": 149.8598978240043
+    },
+    {
+      "chunks": 9,
+      "decoded_bytes": 142927166,
+      "elapsed_s": 152.86816963297315,
+      "graph": "values",
+      "stage": "archive_table_indexed",
+      "stored_bytes": 7693289,
+      "table": "regions",
+      "whole_chunks_verified_by_BundlePartitions": true,
+      "whole_elapsed_s": 164.47134145000018
+    },
+    {
+      "chunks": 6,
+      "decoded_bytes": 92998937,
+      "elapsed_s": 164.27021992596565,
+      "graph": "values",
+      "stage": "archive_table_indexed",
+      "stored_bytes": 5834508,
+      "table": "allocations",
+      "whole_chunks_verified_by_BundlePartitions": true,
+      "whole_elapsed_s": 175.87339175801026
+    }
+  ],
+  "batch_internal_seconds": 614.227050593996,
+  "codec_only_profile": "analysis/native_batch_cost_review_20261025/single-shard-profile/result.json",
+  "critical_final_fresh_owned_negatives_executed": false,
+  "declared_dispatch_attempts": 39796,
+  "discovery_classified_groups": 39796,
+  "last_verified_progress": {
+    "activations": 256,
+    "elapsed_s": 610.6917465789593,
+    "number": 19,
+    "stage": "actual_shard_verified",
+    "tensor_denotations": 725,
+    "whole_elapsed_s": 622.2949190110085
+  },
+  "logical_contents_established": false,
+  "max_rss_kib": 1068856,
+  "not_1800s_timeout": true,
+  "not_corruption_failure": true,
+  "private_index_not_read_during_terminal_review": true,
+  "public_outputs": {
+    "bytes": 49717,
+    "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/terminal-output-inventory.json",
+    "sha256": "976bfd18a402fe4957b8402132e24467e55a91b7bc56435771c8402c47fe9dd5"
+  },
+  "published_shard_range": [
+    "000000",
+    "000019"
+  ],
+  "raw_bytes_once": 546619922,
+  "ready_established": false,
+  "root_session": 4258,
+  "runtime_owned_session_ended": true,
+  "sampling": {
+    "result": "PermissionError EPERM",
+    "samples_obtained": 0,
+    "tool": "CPython _remote_debugging.RemoteUnwinder"
+  },
+  "signal": "SIGINT",
+  "source_based_hotspots_are_inferred": true,
+  "source_discovery_complete": true,
+  "source_files_match_frozen_candidate02": true,
+  "state_effects_established": false,
+  "static_interfaces": 127,
+  "status": "STOPPED_FOR_IMPLEMENTATION_COST_PARTIAL_20_SHARDS",
+  "stop_reason": "Repeated full static ProgramGraph validation/serialization and catalog traversal per shard; stop owned task to fix before another full acquisition.",
+  "transformation_authorized": false,
+  "unmaterialized_dispatches": 34676,
+  "unmaterialized_dispatches_are_not_frontiers": true,
+  "verified_prefix_counts": {
+    "actual_activations": 5120,
+    "geometry_gap_ports": 766,
+    "geometry_qualified_ports": 10664,
+    "held_object_ports": 11365,
+    "native_tensor_ports": 11430,
+    "unresolved_object_ports": 65
+  },
+  "verified_sequences": [
+    1,
+    5120
+  ],
+  "verified_shards": 20,
+  "whole_gate_internal_seconds": 625.8337227890152,
+  "whole_model_established": false,
+  "whole_wall_seconds_gnu_time": 626.91
+}

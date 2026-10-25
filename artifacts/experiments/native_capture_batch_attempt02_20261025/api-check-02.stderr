@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/api_check.py", line 99, in <module>
+    model = _build_execution(program, layouts, interfaces, source, coordinates, snapshot.artifact, va, ea)
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_protocol.py", line 584, in _build_execution
+    thread = coordinates.thread_for(dispatch_artifact, source["owner_native_tid"], "linux_native_tid")
+  File "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/api_check.py", line 48, in <lambda>
+    target_process=target, thread_for=lambda *args: model0.segments[0].thread)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ExecutionSegment' object has no attribute 'thread'

@@ -1,0 +1,43 @@
+{
+  "API_checks": 0,
+  "archive_chunk_reads": 0,
+  "budget_changes": 0,
+  "note": {
+    "bytes": 4343,
+    "path": "analysis/native_batch_cost_review_20261025/COST.md",
+    "sha256": "87820578e3334340b55264bc26ddba76fb00ee01c6dad3740906edd30db859e6"
+  },
+  "production_changes": 0,
+  "raw_reads": 0,
+  "root_session": 4258,
+  "sampling_executed": false,
+  "source_files": [
+    {
+      "bytes": 63641,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "f2c1eb8ec8d011f52fbf31f4973be2376ceff7afdc657a6689807dc99bd897e7"
+    },
+    {
+      "bytes": 55916,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "5293de71ff19d487efb0407bcc568f4732707af2e6b15925032eae9e2442d0a2"
+    },
+    {
+      "bytes": 54920,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "9d58de81e85946cfaea1bc69d280b3893266e3e4b0b877bf0cd4e16d7b8ff943"
+    },
+    {
+      "bytes": 28250,
+      "path": "scar/ir/execution/validation.py",
+      "sha256": "a998f6d9cc312e4ddddb7dc4d79dd5c2daf54907359683a009be28000626c2a2"
+    },
+    {
+      "bytes": 40826,
+      "path": "scar/ir/program/codec.py",
+      "sha256": "63689ab9741b613f8ab0549c4618a4bc8a03e073da52c91dcf9a9342ecb4f443"
+    }
+  ],
+  "sqlite_reads": 0,
+  "status": "INFERRED_COST_REVIEW_NOT_EXECUTED_PROFILER"
+}

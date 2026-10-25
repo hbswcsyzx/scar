@@ -1,0 +1,23 @@
+{
+  "status": "V2_PRODUCER_REVIEW_CANDIDATE02_FROZEN",
+  "files": [
+    {
+      "path": "scar/trace/native_capture_batch.py",
+      "bytes": 63641,
+      "sha256": "f2c1eb8ec8d011f52fbf31f4973be2376ceff7afdc657a6689807dc99bd897e7"
+    },
+    {
+      "path": "scar/trace/native_protocol.py",
+      "bytes": 55916,
+      "sha256": "5293de71ff19d487efb0407bcc568f4732707af2e6b15925032eae9e2442d0a2"
+    },
+    {
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "bytes": 54920,
+      "sha256": "9d58de81e85946cfaea1bc69d280b3893266e3e4b0b877bf0cd4e16d7b8ff943"
+    }
+  ],
+  "preflight": "api-check-07.json",
+  "fix": "common exact original invoke and normal-completion producer bindings independent of Tensor/B set",
+  "full_gate_run": false
+}

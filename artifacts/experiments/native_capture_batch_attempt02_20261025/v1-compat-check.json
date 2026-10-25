@@ -1,0 +1,38 @@
+{
+  "checks": [
+    "new producer and order module AST",
+    "old prefix start and size rejection preserved",
+    "one actual activation validates against shared four-signature catalog",
+    "new own snapshot generic-valid permutation has two static and two actual order errors",
+    "full synthetic ETO parser handles later parents and final root",
+    "inventory retains actual sparse sequences and missing actual roles without fabricated rows",
+    "live private navigation seal rejects changed payload"
+  ],
+  "counterexample_order_errors": [
+    [
+      "native_core_order",
+      "interface:57416b64a353458ef7a2220fad1f7c58f199a6c80a945d93d37dcbf47488f965:inputs:0",
+      "native slot selects another canonical formal/exit ordinal"
+    ],
+    [
+      "native_core_order",
+      "interface:57416b64a353458ef7a2220fad1f7c58f199a6c80a945d93d37dcbf47488f965:inputs:1",
+      "native slot selects another canonical formal/exit ordinal"
+    ],
+    [
+      "actual_native_order",
+      "native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:9:inputs:0",
+      "native slot/denotation does not preserve the actual original Use value ordinal"
+    ],
+    [
+      "actual_native_order",
+      "native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:9:inputs:1",
+      "native slot/denotation does not preserve the actual original Use value ordinal"
+    ]
+  ],
+  "full_gate_run": false,
+  "new_runtime_owned_evidence_created": false,
+  "original_raw_reads": 0,
+  "status": "SMALL_API_CHECK_PASS",
+  "target_executions": 0
+}

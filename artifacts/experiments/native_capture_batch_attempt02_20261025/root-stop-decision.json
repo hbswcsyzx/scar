@@ -1,0 +1,24 @@
+{
+  "completed_shards_before_signal": 20,
+  "cost_attribution": "Source-based diagnosis; no sampled CPU attribution; projected whole wall time is inference.",
+  "fixed_input_frozen": true,
+  "last_progress": {
+    "activations": 256,
+    "elapsed_s": 610.6917465789593,
+    "number": 19,
+    "stage": "actual_shard_verified",
+    "tensor_denotations": 725,
+    "whole_elapsed_s": 622.2949190110085
+  },
+  "pid": 1281409,
+  "ppid": 1281408,
+  "reason": "Repeated full static ProgramGraph validation/serialization and catalog traversal per shard; stop owned task to fix before another full acquisition.",
+  "signal": "SIGINT",
+  "stack_sampling_attempt": {
+    "result": "PermissionError EPERM",
+    "samples_obtained": 0,
+    "tool": "CPython _remote_debugging.RemoteUnwinder"
+  },
+  "status": "ROOT_REQUESTED_STOP_FOR_IMPLEMENTATION_COST",
+  "whole_gate_complete": false
+}

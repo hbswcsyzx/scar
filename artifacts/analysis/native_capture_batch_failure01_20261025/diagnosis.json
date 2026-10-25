@@ -1,0 +1,184 @@
+{
+  "classified_actual_groups_before_failure": 3181,
+  "completed_acquisition_scope": {
+    "additional_verified_BytesIO_chunk_decoded_bytes": 1490910199,
+    "archive_tables": [
+      {
+        "chunks": 76,
+        "decoded_bytes": 1200966077,
+        "elapsed_s": 129.00928504799958,
+        "graph": "evidence",
+        "stage": "archive_table_indexed",
+        "stored_bytes": 76212360,
+        "table": "instances",
+        "whole_chunks_verified_by_BundlePartitions": true,
+        "whole_elapsed_s": 140.38612425001338
+      },
+      {
+        "chunks": 4,
+        "decoded_bytes": 54018019,
+        "elapsed_s": 134.3499611489824,
+        "graph": "values",
+        "stage": "archive_table_indexed",
+        "stored_bytes": 1304314,
+        "table": "objects",
+        "whole_chunks_verified_by_BundlePartitions": true,
+        "whole_elapsed_s": 145.72679983699345
+      },
+      {
+        "chunks": 9,
+        "decoded_bytes": 142927166,
+        "elapsed_s": 148.807884283975,
+        "graph": "values",
+        "stage": "archive_table_indexed",
+        "stored_bytes": 7693289,
+        "table": "regions",
+        "whole_chunks_verified_by_BundlePartitions": true,
+        "whole_elapsed_s": 160.18473434401676
+      },
+      {
+        "chunks": 6,
+        "decoded_bytes": 92998937,
+        "elapsed_s": 159.6124972749967,
+        "graph": "values",
+        "stage": "archive_table_indexed",
+        "stored_bytes": 5834508,
+        "table": "allocations",
+        "whole_chunks_verified_by_BundlePartitions": true,
+        "whole_elapsed_s": 170.98933564900653
+      }
+    ],
+    "path_API_IO_by_phase": {
+      "coordinate_scope": {
+        "decoded": 1261870214,
+        "stored": 118910986
+      },
+      "native_capture_batches": {
+        "decoded": 547054104,
+        "stored": 111790669
+      }
+    },
+    "raw_bytes": 546619922,
+    "raw_sources": 3
+  },
+  "dispatch_complete_args_kwargs_tree_retained": false,
+  "dispatch_lines": {
+    "DISPATCH_BEGIN": 9544,
+    "DISPATCH_END": 9546,
+    "DISPATCH_OUTPUT": 9545
+  },
+  "dispatch_nonTensor_kind_or_value_retained": false,
+  "domain_cardinality_record": {
+    "actual_begin_rows": 39796,
+    "actual_groups": 39796,
+    "declared_attempts": 39796,
+    "elapsed_s": 169.90164150798228,
+    "source_domain_complete": true,
+    "stage": "dispatch_domain_enumerated",
+    "whole_elapsed_s": 181.27848454899504
+  },
+  "execution_shards_published": false,
+  "failure_sequence": 3182,
+  "inferred_explanation": "Versioned wrapped-number Tensor -> Python primitive -> newly boxed native Tensor is strongly consistent with outer/PythonDispatchMode/inner records. Actual primitive kind/value and wrapped bit were not saved, so the particular conversion is inference.",
+  "known_held_self_consistent_in_selected_records": true,
+  "known_marker_parent_RF_thread_inconsistency_detected": false,
+  "missing_held_native_paths": [
+    [
+      1
+    ]
+  ],
+  "native_input_tensor_paths": [
+    [
+      0
+    ],
+    [
+      1
+    ]
+  ],
+  "native_node": {
+    "id": 24616,
+    "ordinal": 20477,
+    "schema": "aten::mul_.Tensor(Tensor(a!) self, Tensor other) -> Tensor(a!)"
+  },
+  "native_only_input": {
+    "element_bytes": 8,
+    "numel": 1,
+    "path": [
+      1
+    ],
+    "shape": [],
+    "strides": [],
+    "tuple": [
+      24617,
+      24618,
+      0,
+      1,
+      8,
+      "cpu"
+    ],
+    "type": "Tensor(double)"
+  },
+  "observed_interpretation": "V1 held-reference inventory is a strict subset of the actual native Tensor inputs. The unmatched Tensor input has no observed Python WeakRef/ObjectIdentity.",
+  "operator": "aten.mul_.Tensor",
+  "producer_modified_by_diagnosis": false,
+  "program_published": false,
+  "python_held_input_formal_paths": [
+    [
+      0
+    ]
+  ],
+  "python_held_input_paths": [
+    [
+      0,
+      0
+    ]
+  ],
+  "second_gate_or_retry_started": false,
+  "status": "FAILURE01_DIAGNOSIS_ONLY_NOT_SOURCE_MODEL_PASS",
+  "terminal_cost": {
+    "GNU_whole_wall_seconds": 196.92,
+    "actual_exit_status": 1,
+    "gate_in_process_wall_seconds": 195.47038940299535,
+    "max_RSS_KiB": 910204,
+    "native_batch_wall_seconds": 184.0897629619867
+  },
+  "terminal_input_fingerprints": [
+    {
+      "bytes": 49319,
+      "path": "artifacts/experiments/native_capture_batch_20261025/freeze.json",
+      "sha256": "36917f11e0fc5d521d301b23d8e0bfa241e3fe17b7309e93adb0aecced857f00"
+    },
+    {
+      "bytes": 1600,
+      "path": "artifacts/experiments/native_capture_batch_20261025/gate-failure.json",
+      "sha256": "a2672cd99b95006a99897ecf2a2b79dec4b399d1d43424cf0462893fcca3e553"
+    },
+    {
+      "bytes": 2767,
+      "path": "artifacts/experiments/native_capture_batch_20261025/result/failure.json",
+      "sha256": "a8e67a00e1e9551c3ce14494768e4c92c9039c9d7966f09bccacce9b7a38b720"
+    },
+    {
+      "bytes": 4123,
+      "path": "artifacts/experiments/native_capture_batch_20261025/progress.jsonl",
+      "sha256": "19ef1356f3f0a917bad3a46c94733e9e041fb9aa99686cdd3b208cd98068348d"
+    },
+    {
+      "bytes": 873,
+      "path": "artifacts/experiments/native_capture_batch_20261025/time.txt",
+      "sha256": "d314da51c591ca3e26593ee179e6493fa982350859512653da93f70e13bd60a0"
+    },
+    {
+      "bytes": 155902,
+      "path": "artifacts/experiments/native_capture_batch_20261025/actual-io.json",
+      "sha256": "28c651345737681797be98abbe86721c2941ed26bd9ad3a570843215da423ce1"
+    }
+  ],
+  "unsafe_conclusions_excluded": [
+    "no invented WeakRef/ObjectID for native-only input",
+    "no scalar literal or content equality inferred",
+    "no identity granted by zero-dimensional shape, dtype or nearby allocation",
+    "no whole-domain/model PASS"
+  ],
+  "whole_program_model_established": false
+}

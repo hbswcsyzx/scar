@@ -13,6 +13,7 @@ from scar.ir.program.providers import ProviderArtifact
 from .content import NativeInputRef, NativeOutputRef, ObjectIdentity
 
 PROFILE = "PINNED_ATEN_HELD_REFERENCE_PORT_V1"
+PROFILE_V2 = "PINNED_TORCH_NATIVE_PORT_HELD_SUBSET_V2"
 _OWNER = object()
 
 
@@ -193,11 +194,210 @@ def replay_interfaces(source):
     return interfaces, frontiers
 
 
+def _native_slot_fact(source, interface, direction, port):
+    suffix = "/".join(str(i) for i in port["path"])
+    return {"artifact": source["artifacts"]["eto"], "locator": "#/nodes/" +
+        str(source["node_ordinals"][str(interface["node"]["id"])] ) + "/" + direction + "/values/" + suffix}
+
+
+def _geometry_v2(source, port, marker, physical, ordinal):
+    """Point geometry is independent of Python object identity qualification."""
+    gap = lambda reason: {"status": "UNPROVED", "reason": reason}
+    if physical is None:
+        return gap("PHYSICAL_MARKER_UNAVAILABLE")
+    if physical.get("gaps"):
+        return gap("PHYSICAL_MARKER_GAPS")
+    arguments = physical.get("arguments", [])
+    if ordinal >= len(arguments):
+        return gap("PHYSICAL_SLOT_UNAVAILABLE")
+    arg = arguments[ordinal]
+    need(arg.get("argument_ordinal") == arg.get("dispatch_reference_ordinal") == ordinal,
+         "physical argument ordinal contradicts known held slot")
+    meta = arg.get("metadata") or {}
+    if meta.get("status") != "OBSERVED" or meta.get("gaps"):
+        return gap("PHYSICAL_METADATA_UNAVAILABLE")
+    if type(meta.get("provider_allocation_id")) is not int:
+        return gap("PHYSICAL_EPOCH_UNAVAILABLE")
+    need(meta.get("sizes") == port["shape"] and meta.get("strides") == port["strides"]
+         and meta.get("device", {}).get("text") == port["value"][5],
+         "qualified physical metadata contradicts native held marker")
+    epoch = (meta["device"]["text"], meta["provider_allocation_id"])
+    births = [r for r in source["physical"] if r.get("kind") == "ALLOCATION"
+              and (r["device"]["text"], r["provider_allocation_id"]) == epoch and r["alloc_size"] > 0]
+    need(len(births) <= 1, "contradictory duplicate original allocation births")
+    if not births:
+        return gap("ORIGINAL_ALLOCATION_BIRTH_UNAVAILABLE")
+    key = str(physical["index"]) + ":" + str(ordinal)
+    witness = source.get("geometry_records", {}).get(key)
+    if witness is None or witness.get("region") is None or witness.get("allocation") is None:
+        return gap("ORIGINAL_GEOMETRY_RECORD_UNAVAILABLE")
+    region, allocation = witness["region"]["record"], witness["allocation"]["record"]
+    physical_ref = "sha256:" + source["artifacts"]["physical"]["sha256"] + "#line/" + str(physical["index"]) + "/arguments/" + str(ordinal)
+    native_ref = "sha256:" + source["artifacts"]["eto"]["sha256"] + "#/nodes/" + str(source["node_ordinals"][str(marker["id"])]) + "/inputs/values/" + str(ordinal)
+    need(region["metadata"]["physical_observation"] == physical_ref
+         and region["metadata"]["eto_reference"] == native_ref
+         and region["metadata"]["marker_instance"] == "opinst:" + source["native_scope"] + ":eto:" + str(marker["id"])
+         and region["metadata"]["impl_ptr"] == meta["impl_ptr"]
+         and region["metadata"]["provider_tensor_id"] == meta["provider_tensor_id"]
+         and region["offset"] == port["value"][2] and region["shape"] == port["shape"]
+         and region["strides"] == port["strides"] and region["dtype"] == meta["dtype"]
+         and region["device"] == meta["device"]["text"] and region["layout"] == meta["layout"],
+         "original region contradicts qualified point geometry")
+    need(region["allocation"] == allocation["id"] and allocation["device"] == region["device"]
+         and allocation["metadata"]["provider_allocation_id"] == epoch[1]
+         and allocation["metadata"]["address"] == meta["storage_data_ptr"]
+         and allocation["lifetime_scope"] == source["physical_scope"] and allocation["nbytes"] == births[0]["alloc_size"],
+         "original allocation contradicts qualified epoch/birth")
+    return {"status": "QUALIFIED", "physical_line": physical["index"], "argument_ordinal": ordinal,
+            "region": region["id"], "allocation": allocation["id"], "point": physical_ref}
+
+
+def replay_batch_interfaces(source):
+    """V2: native structure, held object identity and geometry are distinct.
+
+    Native-only Tensor ports retain their actual native type/path. No wrapped
+    origin, Python object, scalar contents or physical epoch is manufactured.
+    """
+    from scar.trace.native_schema import parse_schema_ports, _tensor_path, PROVIDER_REVISION
+    need(source.get("reference_profile") == PROFILE_V2 and source["provider_revision"] == PROVIDER_REVISION,
+         "V2 source owner/profile/provider differs")
+    nodes = {n["id"]: n for n in source["nodes"]}
+    need(len(nodes) == len(source["nodes"]), "duplicate original native node")
+    names, groups = {}, {}
+    for n in nodes.values():
+        names.setdefault(n["name"], []).append(n)
+    for row in source["dispatch"]:
+        need(type(row.get("process_id")) is int and row["process_id"] == source["pid"], "dispatch process differs")
+        groups.setdefault(row["sequence"], []).append(row)
+    physical = {r["marker"]: r for r in source["physical"] if r.get("kind") == "MARKER"}
+    need(len(physical) == sum(r.get("kind") == "MARKER" for r in source["physical"]), "duplicate physical marker")
+    interfaces, frontiers = [], []
+    for seq in range(source["first_sequence"], source["first_sequence"] + source["max_sequences"]):
+        rows = groups.get(seq, [])
+        if [r.get("kind") for r in rows] != ["DISPATCH_BEGIN", "DISPATCH_OUTPUT", "DISPATCH_END"]:
+            frontiers.append({"sequence": seq, "reason": "NORMAL_DISPATCH_GROUP_NOT_AVAILABLE"}); continue
+        begin, output, end = rows
+        expected = {"DISPATCH_BEGIN": f"scar-dispatch:{source['nonce']}:{source['pid']}:{seq}:span",
+                    "DISPATCH_OUTPUT": f"scar-dispatch:{source['nonce']}:{source['pid']}:{seq}:output"}
+        for row in (begin, output):
+            need(row.get("marker") == expected[row["kind"]], "dispatch marker nonce/process/sequence/phase differs")
+            obs = row.get("observation", {})
+            need(obs.get("process_id") == source["pid"] and obs.get("native_tid") == source["owner_native_tid"]
+                 and obs.get("python_ident") == source["owner_python_ident"], "held observation belongs to another owner")
+        if end.get("output_marker") is not None:
+            need(end["output_marker"] == output["marker"] and end.get("outcome") == "RETURNED" and end.get("span_enter_returned") is True,
+                 "END names another or unsuccessful output")
+        if end.get("outcome") != "RETURNED" or end.get("span_enter_returned") is not True:
+            frontiers.append({"sequence": seq, "reason": "NORMAL_COMPLETION_NOT_AVAILABLE"}); continue
+        operator = begin.get("operator")
+        if type(operator) is not str or not operator:
+            frontiers.append({"sequence": seq, "reason": "REGISTERED_OPERATOR_IDENTITY_UNAVAILABLE", "operator": operator}); continue
+        spans, results = names.get(begin["marker"], []), names.get(output["marker"], [])
+        need(len(spans) <= 1 and len(results) <= 1, "duplicate original native dispatch marker")
+        if not spans:
+            frontiers.append({"sequence": seq, "reason": "ORIGINAL_ETO_SPAN_UNAVAILABLE"}); continue
+        span, result = spans[0], results[0] if results else None
+        if result is not None:
+            need(result["ctrl_deps"] == span["id"] and attributes(result)["tid"] == attributes(span)["tid"], "output parent/thread differs")
+        candidates = []
+        unsupported_schema = None
+        for node in nodes.values():
+            raw = attributes(node).get("op_schema")
+            if node["ctrl_deps"] == span["id"] and type(raw) is str and raw:
+                try:
+                    schema, args, rets = parse_schema_ports(raw)
+                except RuntimeError as error:
+                    unsupported_schema = {"node": node["id"], "detail": str(error)[:512]}
+                    continue
+                key = schema.name.replace("::", ".") + "." + (schema.overload_name or "default")
+                if key == operator:
+                    candidates.append((node, schema, args, rets, raw))
+        need(len(candidates) <= 1, "ambiguous direct native schema child")
+        if unsupported_schema is not None:
+            frontiers.append({"sequence": seq, "reason": "SCHEMA_TYPE_RESOLUTION_UNAVAILABLE", **unsupported_schema}); continue
+        if not candidates:
+            frontiers.append({"sequence": seq, "reason": "DIRECT_SCHEMA_NATIVE_CHILD_UNAVAILABLE"}); continue
+        node, schema, args, rets, raw_schema = candidates[0]
+        need(node["name"] == schema.name and attributes(node)["tid"] == attributes(span)["tid"], "native child schema/thread differs")
+        if len(node["inputs"]["values"]) != len(args) or len(node["outputs"]["values"]) != len(rets):
+            frontiers.append({"sequence": seq, "reason": "NATIVE_SCHEMA_BOXED_ARITY_UNSUPPORTED", "node": node["id"]}); continue
+        try:
+            ports = {d: flat_native(node[d]) for d in ("inputs", "outputs")}
+        except ValueError as error:
+            frontiers.append({"sequence": seq, "reason": "NATIVE_BOXED_TREE_UNSUPPORTED", "node": node["id"], "detail": str(error)[:512]}); continue
+        interface = {"sequence": seq, "operator": operator, "node": node, "span": span, "output_marker": result,
+                     "ports": ports, "source_lines": [r["index"] for r in rows]}
+        for direction, row, marker, formals in (("inputs", begin, span, schema.arguments), ("outputs", output, result, schema.returns)):
+            tensor_ports = {tuple(p["path"]): p for p in ports[direction] if p["tensor"]}
+            for p in tensor_ports.values():
+                p["identity_reason"] = "NATIVE_TENSOR_WITHOUT_QUALIFIED_PYTHON_HELD_OBJECT"
+                p["geometry"] = {"status": "UNPROVED", "reason": "NATIVE_ONLY_NO_HELD_PHYSICAL_SLOT"}
+            refs = row["observation"].get("tensor_references")
+            need(type(refs) is list, "held reference inventory missing")
+            if marker is None:
+                continue
+            marker_ports = flat_native(marker["inputs"])
+            need(len(marker_ports) == len(refs) and all(p["tensor"] for p in marker_ports), "held marker Tensor inventory differs")
+            phys = physical.get(row["marker"])
+            if phys is not None:
+                if phys.get("expected_argument_count") is not None:
+                    need(type(phys["expected_argument_count"]) is int and phys["expected_argument_count"] == len(refs),
+                         "known physical marker expected slot inventory differs")
+                need(len(phys.get("arguments", [])) <= len(refs), "physical marker has extra undeclared held arguments")
+                for field, value in (("dispatch_source_line", row["index"]), ("sequence", seq),
+                                     ("dispatch_native_tid", source["owner_native_tid"]), ("dispatch_python_ident", source["owner_python_ident"])):
+                    if phys.get(field) is not None:
+                        need(phys[field] == value, "known physical marker source identity differs")
+                event = phys.get("event") or {}
+                for field, value in (("correlation_id", attributes(marker)["rf_id"]), ("record_function_thread_token", attributes(marker)["tid"])):
+                    if event.get(field) is not None:
+                        need(event[field] == value, "known physical marker RF/thread differs")
+            matched = set()
+            for ordinal, (ref, marker_port) in enumerate(zip(refs, marker_ports, strict=True)):
+                path = ref.get("path")
+                need(type(path) is list and ref.get("identity_qualified") is True
+                     and type(ref.get("ref")) is str and ref["ref"].startswith(f"weak:{source['pid']}:"), "held slot identity unqualified")
+                if direction == "inputs":
+                    need(len(path) >= 2 and path[0] in (0, 1), "held input args/kwargs path missing")
+                    if path[0] == 0:
+                        target = path[1:]
+                    else:
+                        matches = [i for i, a in enumerate(schema.arguments) if a.name == path[1]]
+                        need(len(matches) == 1, "held keyword selects no unique formal")
+                        target = [matches[0], *path[2:]]
+                else:
+                    target = [0, *path] if len(rets) == 1 else path
+                key = tuple(target)
+                need(key in tensor_ports and key not in matched and type(target[0]) is int
+                     and _tensor_path(formals[target[0]].type, target[1:])[0], "held Tensor path contradicts native/formal path")
+                matched.add(key)
+                port = tensor_ports[key]
+                need(marker_port["path"] == [ordinal] and all(marker_port[k] == port[k] for k in ("value", "shape", "strides", "type")),
+                     "known held marker and actual native Tensor differ")
+                port["held"] = {"weak_token": ref["ref"], "dispatch_line": row["index"], "marker_node": marker["id"],
+                                "marker_ordinal": ordinal, "physical_line": None if phys is None else phys["index"]}
+                original = source.get("object_records", {}).get(ref["ref"])
+                if original is not None:
+                    need(original["metadata"]["weak_token"] == ref["ref"] and original["metadata"]["process_id"] == source["pid"],
+                         "original held object record contradicts source")
+                    port["object_record"] = original
+                    port.pop("identity_reason")
+                else:
+                    port["identity_reason"] = "ORIGINAL_HELD_OBJECT_RECORD_UNAVAILABLE"
+                port["geometry"] = _geometry_v2(source, port, marker, phys, ordinal)
+        signature = {"provider_revision": PROVIDER_REVISION, "schema": raw_schema,
+            **{d: [{"path": p["path"], "type": p["type"], "tensor": p["tensor"]} for p in ports[d]] for d in ports}}
+        interface.update(signature=signature, signature_id=sha256(canonical(signature)).hexdigest())
+        interfaces.append(interface)
+    return interfaces, frontiers
+
+
 class NativePortOrderError(ValueError):
     """This pinned adapter's ordered ABI disagrees with the original core."""
 
 
-def _native_port_order_errors(program, model, interfaces, run, *, definition_signatures=None):
+def _native_port_order_errors(program, model, interfaces, run, *, definition_signatures=None,
+                              profile=PROFILE, source=None, value_artifact=None, evidence_artifact=None):
     """Pure ABI interpretation, not ownership or runtime authority.
 
     Generic NativeBoundary permits arbitrary representation order. Only this
@@ -212,6 +412,10 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
         ProviderPathIndex, ProviderPathKey, ProviderRegionRelation)
     from .coordinates import InitialEntry
     from .content import NativeInputRef, NativeOutputRef
+    need(profile in (PROFILE, PROFILE_V2), "unsupported native source profile")
+    region_prefix = "torch-interface:" if profile == PROFILE_V2 else "aten-interface:"
+    provider_prefix = "torch-schema:" if profile == PROFILE_V2 else "aten-schema:"
+    interface_schema = "scar.pinned-torch-protocol-interface" if profile == PROFILE_V2 else "scar.pinned-aten-protocol-interface"
     errors = []
 
     def check(ok, code, path, message):
@@ -245,11 +449,11 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
                   "signature_catalog", sig, "actual signature is absent from shared source catalog")
     # Independently reconstruct this provider profile's declared interface
     # document, rather than trusting a builder-produced mapping/boolean.
-    definition_doc = {"schema": "scar.pinned-aten-protocol-interface", "schema_version": 1,
-        "profile": PROFILE, "interfaces": {sig: item["signature"] for sig, item in definitions.items()},
+    definition_doc = {"schema": interface_schema, "schema_version": 1,
+        "profile": profile, "interfaces": {sig: item["signature"] for sig, item in definitions.items()},
         "effect_contract": "UNKNOWN outside partial provider schema annotations", "content_version_claimed": False}
     definition_bytes = canonical(definition_doc)
-    expected_provider = ProviderID("aten-schema:" + next(iter(definitions.values()))["signature"]["provider_revision"]) if definitions else None
+    expected_provider = ProviderID(provider_prefix + next(iter(definitions.values()))["signature"]["provider_revision"]) if definitions else None
     envelope = next((e for e in program.provider_envelopes if e.id == expected_provider), None)
     check(envelope is not None and envelope.kind is ProviderArtifactKind.DEFINITION_GRAPH
           and envelope.artifact.schema == definition_doc["schema"]
@@ -258,11 +462,11 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
           "definition_artifact", "provider", "definition owner differs from independently reconstructed schema interface")
     layouts = {}
     if definition_signatures is not None:
-        check(set(boundaries) == {NativeBoundaryID("aten-interface:" + sig + ":boundary") for sig in definitions},
+        check(set(boundaries) == {NativeBoundaryID(region_prefix + sig + ":boundary") for sig in definitions},
               "definition_inventory", "program", "shared program boundary inventory differs from owned source catalog")
     for sig, item in definitions.items():
         path = "interface:" + sig
-        region_id = RegionID("aten-interface:" + sig)
+        region_id = RegionID(region_prefix + sig)
         region = regions.get(region_id)
         boundary = boundaries.get(NativeBoundaryID(region_id.value + ":boundary"))
         if not check(region is not None and boundary is not None and boundary.region == region_id,
@@ -359,6 +563,14 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
     for use in model.uses:
         actual_uses.setdefault((use.operation, use.use), []).append(use)
     expected_activations = set()
+    expected_denotations = set()
+    expected_bindings = set()
+    if profile == PROFILE_V2:
+        need(type(source) is dict and source.get("reference_profile") == PROFILE_V2
+             and source["run"] == run and type(value_artifact) is type(evidence_artifact) is ProviderArtifact,
+             "V2 checker needs exact owned source and projection scope")
+        target_processes = [p for p in model.processes if p.pid == source["pid"] and p.run.value == run]
+        check(len(target_processes) == 1, "native_process", "model", "V2 source process is absent or ambiguous")
     for item in interfaces:
         sig = item["signature_id"]
         if sig not in layouts:
@@ -388,6 +600,21 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
                      "native invocation/normal Return occurrence missing or ambiguous"):
             continue
         invoked, completed = invoked[0], completed[0]
+        if profile == PROFILE_V2:
+            from .model import LegacyOperationRef
+            from scar.ir.record_codec import decode
+            from scar.ir.program.providers import ProviderFactReference
+            for occurrence, suffix in ((invoked, ""), (completed, "/outputs")):
+                bindings = [b for b in model.evidence_bindings if b.operation == occurrence.id]
+                expected_bindings.add(occurrence.id)
+                fact = decode(ProviderFactReference, {"artifact": source["artifacts"]["eto"],
+                    "locator": "#/nodes/" + str(source["node_ordinals"][str(item["node"]["id"])]) + suffix})
+                check(len(bindings) == 1 and type(bindings[0].legacy) is LegacyOperationRef
+                      and bindings[0].legacy.artifact == evidence_artifact
+                      and bindings[0].legacy.instance.value == source["native_scope"] + ":eto:" + str(item["node"]["id"])
+                      and bindings[0].source == fact,
+                      "native_producer_binding", occurrence.id.value,
+                      "actual native invocation/completion lost its exact original producer/artifact/ordinal")
         transfers = [t for t in model.transfers if t.operation == invoked.id]
         check(len(transfers) == 1 and transfers[0].successor_index == normal_index
               and transfers[0].target == normal_visit.id,
@@ -404,6 +631,39 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
                     continue
                 if i >= len(item["signature"][direction]) or not item["signature"][direction][i]["tensor"]:
                     continue
+                if profile == PROFILE_V2:
+                    from scar.ir.execution.common import Unresolved
+                    from scar.ir.record_codec import decode
+                    from scar.ir.program.providers import ProviderFactReference
+                    candidates = [d for d in model.denotations if d.value == values[0].id]
+                    if not check(len(candidates) == 1, "actual_native_denotation", path,
+                                 "each native Tensor occurrence requires exactly one denotation"):
+                        continue
+                    d = candidates[0]
+                    expected_denotations.add(d.id)
+                    expected_basis = (NativeInputRef(boundary.id, entry_visit.id, i) if direction == "inputs"
+                                      else NativeOutputRef(boundary.id, completed.id, i))
+                    check(type(d.basis) is type(expected_basis) and d.basis == expected_basis
+                          and d.id.value == expected_id + ":" + direction + ":denotation:" + str(i),
+                          "actual_native_order", path, "V2 basis/denotation ordinal differs from exact original port")
+                    native = item["ports"][direction][i]
+                    fact = decode(ProviderFactReference, _native_slot_fact(source, item, direction, native))
+                    check(d.source == fact, "native_source", path, "denotation source differs from exact original native slot")
+                    original = native.get("object_record")
+                    if original is not None:
+                        check(type(d.identity) is ObjectIdentity and d.identity.object.artifact == value_artifact
+                              and d.identity.object.object.value == original["id"]["value"],
+                              "native_object_identity", path, "known held object was replaced, erased or borrowed")
+                    else:
+                        ok = type(d.identity) is Unresolved
+                        check(ok, "native_identity_unresolved", path, "native-only port cannot borrow an object/content identity")
+                        if ok:
+                            point = d.identity.point
+                            check(d.identity.reason == native["identity_reason"] and point.run.value == run
+                                  and len(target_processes) == 1 and point.process == target_processes[0].id
+                                  and point.source == fact,
+                                  "native_unresolved_source", path, "unresolved identity loses exact source/Run/process/port")
+                    continue
                 denotations = [d for d in model.denotations if type(d.basis) is
                     (NativeInputRef if direction == "inputs" else NativeOutputRef)
                     and d.basis.boundary == boundary.id and d.basis.position == i
@@ -412,12 +672,20 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
                       "actual_native_order", path, "native slot/denotation does not preserve the actual original Use value ordinal")
     check(set(activations) == expected_activations, "activation_inventory", "model",
           "native window has missing or extra canonical activations")
+    if profile == PROFILE_V2:
+        check(len(model.denotations) == len(expected_denotations) and {d.id for d in model.denotations} == expected_denotations,
+              "native_denotation_inventory", "model", "missing, duplicate or extra V2 native Tensor denotation")
+        check(len(model.evidence_bindings) == len(expected_bindings)
+              and {b.operation for b in model.evidence_bindings} == expected_bindings,
+              "native_producer_inventory", "model", "missing, duplicate or extra actual native producer binding")
     return tuple(errors)
 
 
-def _require_native_port_order(program, model, interfaces, run, *, definition_signatures=None):
+def _require_native_port_order(program, model, interfaces, run, *, definition_signatures=None,
+                               profile=PROFILE, source=None, value_artifact=None, evidence_artifact=None):
     errors = _native_port_order_errors(program, model, interfaces, run,
-                                       definition_signatures=definition_signatures)
+                                       definition_signatures=definition_signatures, profile=profile,
+                                       source=source, value_artifact=value_artifact, evidence_artifact=evidence_artifact)
     if errors:
         raise NativePortOrderError("native_port_order: " + "; ".join(
             code + " at " + path + ": " + message for code, path, message in errors))
@@ -451,7 +719,7 @@ class NativePortEvidence:
     logical contents, hidden effects, alias completeness, CUDA order or ready.
     """
     __slots__ = ("_owned", "_program_sha", "_model_sha", "_value_artifact", "_evidence_artifact",
-                 "_interfaces", "_source", "_lookup", "_definitions")
+                 "_interfaces", "_source", "_lookup", "_definitions", "_profile")
 
     def __init__(self, key, owned, program, model, value_artifact, evidence_artifact):
         need(key is _OWNER and type(owned) is _OwnedNativeCapture, "owned source session is required")
@@ -463,12 +731,15 @@ class NativePortEvidence:
         need(type(value_artifact) is type(evidence_artifact) is ProviderArtifact, "projection artifacts are required")
         self._value_artifact, self._evidence_artifact = value_artifact, evidence_artifact
         self._source = owned.source()
-        interfaces = replay_interfaces(self._source)[0]
+        self._profile = self._source.get("reference_profile", PROFILE)
+        need(self._profile in (PROFILE, PROFILE_V2), "unsupported owned native profile")
+        interfaces = (replay_batch_interfaces(self._source) if self._profile == PROFILE_V2 else replay_interfaces(self._source))[0]
         self._interfaces = canonical(interfaces)
         self._lookup = {"native-port:" + self._source["run"] + ":" + str(i["sequence"]): i for i in interfaces}
         self._definitions = owned.definitions()
         _require_native_port_order(program, model, interfaces, self._source["run"],
-                                   definition_signatures=self._definitions)
+                                   definition_signatures=self._definitions, profile=self._profile,
+                                   source=self._source, value_artifact=self._value_artifact, evidence_artifact=self._evidence_artifact)
 
     def require_scope(self, model, program):
         from scar.ir.program.codec import dumps as program_dumps
@@ -477,11 +748,12 @@ class NativePortEvidence:
              and self._model_sha == sha256(dumps(model).encode()).hexdigest(),
              "owned native port evidence does not apply to this exact program/execution/Run")
         _require_native_port_order(program, model, json.loads(self._interfaces), self._source["run"],
-                                   definition_signatures=self._definitions)
+                                   definition_signatures=self._definitions, profile=self._profile,
+                                   source=self._source, value_artifact=self._value_artifact, evidence_artifact=self._evidence_artifact)
 
     def resolve(self, ctx, basis, resolved, identity, path):
         """Replay original ordered ports independently of builder declarations."""
-        if resolved is None or resolved["value"] is None or type(identity) is not ObjectIdentity:
+        if resolved is None or resolved["value"] is None:
             return False
         # Scope checked once by normal _analyze. NativeInput/Output select the
         # canonical current visit/completion independently in content_validation.
@@ -493,10 +765,14 @@ class NativePortEvidence:
             ctx.issue("native_reference_activation", path, "activation has no exact owned native sequence"); return False
         direction = "inputs" if type(basis) is NativeInputRef else "outputs"
         boundary = resolved["boundary"]
-        expected_boundary = "aten-interface:" + interface["signature_id"] + ":boundary"
+        expected_boundary = ("torch-interface:" if self._profile == PROFILE_V2 else "aten-interface:") + interface["signature_id"] + ":boundary"
         if boundary.id.value != expected_boundary or basis.position >= len(interface["ports"][direction]):
             ctx.issue("native_reference_slot", path, "canonical boundary/ordered slot differs from actual native schema"); return False
         native = interface["ports"][direction][basis.position]
+        if self._profile == PROFILE_V2 and native.get("geometry", {}).get("status") != "QUALIFIED":
+            ctx.gap("native_port_geometry_unproved", path, native.get("geometry", {}).get("reason", "geometry unavailable"))
+        if type(identity) is not ObjectIdentity:
+            return False
         if not native["tensor"] or "held" not in native:
             return False
         held = native["held"]
@@ -530,4 +806,4 @@ def _make_evidence(owned, program, model, value_artifact, evidence_artifact):
     return NativePortEvidence(_OWNER, owned, program, model, value_artifact, evidence_artifact)
 
 
-__all__ = ["NativePortEvidence", "PROFILE"]
+__all__ = ["NativePortEvidence", "PROFILE", "PROFILE_V2"]

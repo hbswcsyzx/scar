@@ -1,0 +1,11 @@
+{
+  "status": "STATIC_RUNNER_AND_3_PRODUCER_AST_AND_SHELL_SYNTAX_PASS",
+  "gate_executed": false,
+  "production_matches_review_candidate02": true,
+  "dependency_count": 269,
+  "changed_from_first_gate": [
+    "scar/ir/execution/native_port_protocol.py",
+    "scar/trace/native_capture_batch.py",
+    "scar/trace/native_protocol.py"
+  ]
+}
