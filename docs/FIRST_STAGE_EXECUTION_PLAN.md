@@ -9,8 +9,8 @@
 | 工作 | 当前边界与下一验收 |
 | --- | --- |
 | 通用 frame/control 根 | core29 的 typed FRAME/ModuleUnitSource/单一 ABI 权威及旧 source 守卫七处已通过 A 类型门；主树旧 SP5/6/7 正常读回。尚未生成 SP8/模块正文或绑定实际 frame。下一步接通用 namespace/source producer，再接 Try/异常清理，整体12文件方案见[设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
-| callee-entry 参数边 | 保存样例实际有260次入口/520个参数引用观测；先实现 snapshot→原 formal port 的局部 projection。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[证据与设计](../artifacts/analysis/callee_entry_routing_plan_20261025/PLAN.md)。 |
-| project/dependency 统一出版 | 当前自动 CLI 对 project SP5 的 adapter 明确 BLOCKED；先审原 origin、父 body/CAS 和 namespace，保所有成功产物，不能只留下方便处理的 external case。该项仍处设计审查，未授权新代码。 |
+| callee-entry 参数边 | snapshot→原 formal port 的局部 projection 已通过真实隔离门及主树旧 SP5/typed consumer：271次入口/566个参数观测，260次入口/520 ports 对应，11次保留 frontier。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[实际接入报告](../artifacts/experiments/callee_entry_routing_applied_20261025/REPORT.md)。 |
+| project/dependency 统一出版 | 当前 CLI 对 project SP5 的 adapter 仍 BLOCKED；原 origin、父 body/CAS 和 namespace 设计已审，四源码正在实现 schema2 ADD/REVISE。保所有成功产物，不能只留下方便处理的 external case。随后用同一新 CPU capture 实际验证两类入口，不拼接旧样例。 |
 
 这些是模型连接与类型修正，不是优化候选或 backend。下一版本仍必须保完整源码、
 调用和资源分母，并分别报告 source topology、运行对应、效果与完成状态。

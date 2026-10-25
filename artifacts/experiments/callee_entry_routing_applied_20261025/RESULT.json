@@ -1,0 +1,24 @@
+{
+  "caller_actual_expression_route": false,
+  "code_witness_activity": {
+    "compile_attempts": 0,
+    "complete_descriptor_matches": 0,
+    "module_loads": 0,
+    "source_bytes_read": 0
+  },
+  "default_publication_schema": "UNCHANGED_BY_THIS_PATCH",
+  "direct_input_bytes": 6218921,
+  "frontier_invocations": 11,
+  "isolated_gate_core": "28",
+  "main_core": "29",
+  "new_capture": false,
+  "new_live_qualification": false,
+  "original_sp5_roundtrip": true,
+  "preserved_existing_formal_port_projections": 520,
+  "schema": "scar.entry-routing-main-compatibility/1",
+  "status": "PASSED_WITH_OPEN",
+  "target_execution": false,
+  "typed_parameter_occurrences": 566,
+  "wall_seconds": 3.534129834966734,
+  "whole_model": "OPEN"
+}

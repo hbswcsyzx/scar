@@ -1,0 +1,64 @@
+{
+  "budget": {
+    "compiler_archives": 32000000,
+    "coordinate_accounted_stored_plus_decoded": 64000000,
+    "coordinate_control_metadata": 1000000,
+    "frame_plus_operand_decoded_raw": 2000000,
+    "outer_seconds": 180,
+    "output_poststage": 128000000,
+    "record_decoded": 64000000,
+    "source_provider_selected_decode": 128000000
+  },
+  "changed_sources": [
+    {
+      "sha256": "4d85853099e8aa8e9c9af2779131b32339369dc7deb11d4dd9194ce75d66ae40",
+      "size_bytes": 68523,
+      "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/analysis/source_invocations.py"
+    },
+    {
+      "sha256": "46738db188c3d5be0ab042f10db260e56e09e06deca3a323b44f7dde04cf1b43",
+      "size_bytes": 7680,
+      "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/analysis/source_entry_routing.py"
+    },
+    {
+      "sha256": "8ce80f3a4f5f63b51f225ab7986295c10b52081bb75c4b545fe623bb30984f44",
+      "size_bytes": 8487,
+      "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/analysis/source_entry_routing_validation.py"
+    }
+  ],
+  "freeze": {
+    "sha256": "929a61fb7db6cf4c56718bc30273c94a9775c51319aa11869e04589281f05032",
+    "size_bytes": 104222,
+    "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/callee_entry_routing_20261025/attempt01/freeze.json"
+  },
+  "input_declarations": 50,
+  "locator_contract": {
+    "sha256": "ed391b9ca6a81b7f1ca26e718033c0b2b5e1bbfe35d09c4347c2434b1180e4ca",
+    "size_bytes": 3740,
+    "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/callee_entry_routing_20261025/LOCATOR_CONTRACT.json"
+  },
+  "preflight": {
+    "sha256": "410ddd7327df6a289ff3fedda71ea9dc7c54b06f8a441967639245d6e6519d78",
+    "size_bytes": 812,
+    "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/callee_entry_routing_20261025/api-check-03.json"
+  },
+  "raw_payload_body_target_producer_runs": 0,
+  "runner": [
+    {
+      "sha256": "0796bf39c0bb0f64df38292be5fd5b939d2965039e8b04222925136fae83b3c1",
+      "size_bytes": 14155,
+      "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/callee_entry_routing_20261025/attempt01/gate.py"
+    },
+    {
+      "sha256": "8f06080b60261cfffa1589ad524a2852b5949d1735560cab5645a7fb87700d1f",
+      "size_bytes": 591,
+      "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/callee_entry_routing_20261025/attempt01/run.sh"
+    }
+  ],
+  "runtime_program_core": 28,
+  "schema": "scar.callee-entry-routing-preparation",
+  "schema_version": 1,
+  "source_bytes_per_hash_pass": 7213860,
+  "sources": 368,
+  "status": "PREPARED_NOT_RUN"
+}
