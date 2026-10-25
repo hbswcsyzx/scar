@@ -142,16 +142,24 @@ def plan_source_frontend(composition, current_bindings, code_witnesses, *,
                              SourceLanguageCapability.SLICE_KEYS,
                              SourceLanguageCapability.LEXICAL_LOCALS,
                              SourceLanguageCapability.CALL_KWARGS_314_V1),
-                         out_dir=None, progress=None):
+                         eligible_body_keys=None, out_dir=None, progress=None):
     """Inventory every body/group, then bound metadata-only dispatch candidates.
 
     No reason text or name pattern participates in selection. A matching module
     entry is merely PENDING_CODE_RESOLVE, never a verified nested CodeType.
+    Optional unique body keys narrow only the dispatch window; the full source
+    and current-call catalogs remain intact. Explicit windows prioritize call
+    counts; the worker retains its existing per-file context grouping.
     """
     _need(type(composition) is CompositionIndex and composition.partitioned, "a regular partitioned composition is required")
     _need(type(budget) is SourceFrontendBudget, "budget must be independently supplied")
     budget.__post_init__()
     SourceLanguageOptions(capabilities)  # Exact enum types and uniqueness, no I/O.
+    if eligible_body_keys is not None:
+        _need(type(eligible_body_keys) is tuple and bool(eligible_body_keys)
+              and all(type(key) is str and bool(key) for key in eligible_body_keys)
+              and len(set(eligible_body_keys)) == len(eligible_body_keys),
+              "eligible_body_keys must be an explicit nonempty tuple of unique nonempty strings")
     store_receipt = _check_store(code_witnesses)
     root = Path(current_bindings).resolve()
     report_path = root / "report.json" if root.is_dir() else root
@@ -290,8 +298,14 @@ def plan_source_frontend(composition, current_bindings, code_witnesses, *,
         return count
     candidates = [row for row in bodies if row["metadata_status"] == "PENDING_CODE_RESOLVE"]
     candidates.sort(key=lambda row: (not bool(row["current_groups"]), depth(row), -row["current_calls"], row["body_key"]))
+    dispatch_candidates = candidates
+    if eligible_body_keys is not None:
+        eligible = frozenset(eligible_body_keys)
+        _need(eligible.issubset(by_key), "eligible_body_keys contains an unknown qualified body key")
+        dispatch_candidates = [row for row in candidates if row["body_key"] in eligible]
+        dispatch_candidates.sort(key=lambda row: (-row["current_calls"], depth(row), row["body_key"]))
     dispatch, files = [], set()
-    for item in candidates:
+    for item in dispatch_candidates:
         if len(dispatch) == budget.max_dispatch_bodies:
             break
         if item["file_index"] not in files and len(files) == budget.max_source_files:
@@ -311,6 +325,13 @@ def plan_source_frontend(composition, current_bindings, code_witnesses, *,
             "group_statuses": dict(group_counts), "call_statuses": dict(call_counts),
             "metadata_candidates": len(candidates), "dispatched_bodies": len(dispatch), "dispatched_files": len(files)},
         "code_type_verified_during_planning": False, "target_executed": False, "first_stage_complete": False}
+    if eligible_body_keys is not None:
+        document["selection"] = {"kind": "EXPLICIT_QUALIFIED_BODY_KEYS",
+            "eligible_body_keys": sorted(eligible_body_keys),
+            "eligible_pending_candidates": len(dispatch_candidates),
+            "dispatch_priority": "CURRENT_CALLS_DESC_THEN_LEXICAL_DEPTH_THEN_BODY_KEY",
+            "worker_order": "EXISTING_PER_FILE_CONTEXT_GROUPING",
+            "full_catalog_and_call_denominators_preserved": True}
     digest = _hash({"document": document, "bodies": bodies, "groups": groups, "dispatch": dispatch})
     plan = SourceFrontendPlan(composition, document, tuple(bodies), tuple(groups), tuple(dispatch), digest)
     if out_dir is not None:

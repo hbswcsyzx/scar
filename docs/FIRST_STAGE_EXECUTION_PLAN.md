@@ -69,6 +69,18 @@ held109288/未定1901，几何107483/缺口3706。GNU28:41.75，peak1091472KiB�
 实际注册/关闭/普通坐标绑定。它只补未来采集的可验证来源，不升级原LeWM scope。
 新episode仍待其它必要采集字段共同确定，不为此单独重跑目标。
 
+下一批源码窗口是65个此前未进入新前端的普通函数，关联原运行1713次调用、13文件。
+它们来自原自动候选/实际尝试/新发布delta的准确qualified key扣重，不是业务函数名单。
+590项NOT_ATTEMPTED中的260次已见调用属于class-entry接口，不能当普通函数批量补lower。
+规划继续使用准确匹配的843 composition及其runtime报告；846仅作发布排除和后续ADD目标，
+不能伪造846运行报告。新`eligible_body_keys`只缩调度窗口，保完整2217定义和100438调用分母，
+选择及当前producer进入新plan digest/work key，不resume旧window。
+
+本批已批准65/13的调度上限，计算预算4000ops/body、24000总ops、worker180s，
+record/output128MB、outer300s、累计stored+decoded输入1GiB。读取量约570MB decoded、
+100MB stored为代码/manifest估计，尚非实测；不称沿用原单body256MB输入门。
+实际budget stop、code缺证和新frontier逐项保留；本段是计划，未声称已lower65项。
+
 ## 3. 关键缺口与处理原则
 
 - Python 源构造、函数环境、actual/formal、return、generator creation/drive：
