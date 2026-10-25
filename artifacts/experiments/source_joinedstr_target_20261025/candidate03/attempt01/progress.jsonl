@@ -1,0 +1,8 @@
+{"actual_retained_input_bytes":0,"body":null,"elapsed_s":1.0516152670024894,"event":"BEGIN","output_accounted_bytes":0,"phase":"FREEZE","self_peak_rss_kib":76636}
+{"actual_retained_input_bytes":611255,"body":null,"elapsed_s":1.0834816099959426,"event":"STAGE_BEGIN","output_accounted_bytes":326,"phase":"CURRENT_INPUT_MEMBERSHIP","self_peak_rss_kib":76636}
+{"actual_retained_input_bytes":1625216,"body":null,"elapsed_s":1.0960246829781681,"event":"STAGE_BEGIN","output_accounted_bytes":714,"phase":"ORIGINAL_COMPOSITION","self_peak_rss_kib":76636}
+{"actual_retained_input_bytes":215109720,"body":1,"elapsed_s":5.009095145971514,"event":"STAGE_BEGIN","original_sequence":5,"output_accounted_bytes":1096,"phase":"EXACT_SOURCE_AND_CODE","self_peak_rss_kib":445016}
+{"actual_retained_input_bytes":227191140,"body":1,"elapsed_s":9.19027461798396,"event":"STAGE_BEGIN","output_accounted_bytes":11773,"phase":"LOWER_BODY","self_peak_rss_kib":445016}
+{"actual_retained_input_bytes":227191140,"body":1,"elapsed_s":9.341936958022416,"event":"BODY_END","operations_emitted":634,"output_accounted_bytes":150376,"phase":"LOWER_BODY","self_peak_rss_kib":445016,"status":"UNSUPPORTED"}
+{"actual_retained_input_bytes":227191140,"body":1,"elapsed_s":9.341996985021979,"event":"STAGE_BEGIN","output_accounted_bytes":150832,"phase":"FINAL_SOURCE_AND_INPUT_CHECK","self_peak_rss_kib":445016}
+{"actual_retained_input_bytes":227191140,"body":1,"elapsed_s":9.625022337015253,"event":"FINISHED","output_accounted_bytes":388770,"phase":"FINISHED_OPEN","returned_bodies":1,"self_peak_rss_kib":445016,"whole_program":"OPEN"}

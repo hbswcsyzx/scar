@@ -110,6 +110,14 @@ def expression_for_heap_target(builder, node, cursor):
         raise _Unsupported(GapKind.SOURCE_MAPPING, node,
             "heap target child has ambiguous legacy computational records")
     definition = _source_definition(builder, node)
+    if isinstance(node, ast.JoinedStr):
+        if (definition.kind is not OperationKind.OPERATOR
+                or definition.metadata.get("ast_type") != "JoinedStr"
+                or len(definition.output_slots) != 1):
+            raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                "heap target string requires its unique original SG JoinedStr/output slot")
+        from scar.analysis.source_string_lowering import lower_joined_string
+        return lower_joined_string(builder, node, cursor, recover_missing_children=True)
     if isinstance(node, ast.Name):
         reads = [edge for edge in builder.semantic.edges.values()
                  if edge.relation is SemanticRelation.READS_SLOT and edge.source.id == definition.id]

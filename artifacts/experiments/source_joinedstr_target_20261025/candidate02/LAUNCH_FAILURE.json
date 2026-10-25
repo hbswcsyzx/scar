@@ -1,0 +1,22 @@
+{
+  "attempt_created": false,
+  "body_lowerings": 0,
+  "evidence_source": "root confirmed actual session49634 terminal in thread",
+  "exception": "ValueError",
+  "exit_code": 1,
+  "freeze_attempt": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_joinedstr_target_20261025/candidate02/attempt01",
+  "freeze_sha256": "0c212db4ee5e86483cfdaac54e1a0f08abd570848002cdc1a81f28979a5eefb2",
+  "full_external_traceback_retained_by_root": true,
+  "message": "attempt is not fixed fresh directory",
+  "old_runner_and_freeze_unchanged": true,
+  "phase": "LAUNCHER_BEFORE_ATTEMPT_OR_WORKER",
+  "root_session": 49634,
+  "runner_expected_attempt": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_joinedstr_target_20261025/candidate02/attempt04",
+  "schema": "scar.retained-gate-launch-failure",
+  "schema_version": 1,
+  "source_location": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_joinedstr_target_20261025/candidate02/run_gate.py:288",
+  "target_executions": 0,
+  "wall_seconds": null,
+  "wall_seconds_measured_here": false,
+  "worker_started": false
+}

@@ -1,0 +1,87 @@
+{
+  "changes": [
+    {
+      "isolated_bytes": 15507,
+      "main_expected_absent": false,
+      "main_expected_sha256": "323f2f478a57c0a133648749323e9bfbfb942dbe9410ad35111a608515af2ff9",
+      "new_sha256": "a4e6d4b7ccd1c4981e67cd38117f6887ade8f63b7d9e3a07193cc7db64f28f0e",
+      "operation": "REPLACE_EXACT_BASELINE",
+      "relative_path": "scar/analysis/source_heap_lowering.py"
+    },
+    {
+      "isolated_bytes": 13200,
+      "main_expected_absent": false,
+      "main_expected_sha256": "33061d4dd8680eb33e696a6d9312323d4aadd225ebf036fc453c45b9dd6b5407",
+      "new_sha256": "5c7b5483effa97cfebb5905c4fc64050a200399c944a5f9eb48bde3b10759d7f",
+      "operation": "REPLACE_EXACT_BASELINE",
+      "relative_path": "scar/analysis/source_string_lowering.py"
+    },
+    {
+      "isolated_bytes": 22157,
+      "main_expected_absent": true,
+      "main_expected_sha256": null,
+      "new_sha256": "917e69c4e2907b4118eae66ed66da291b7b65396384377c64298a5f6be790a65",
+      "operation": "ADD",
+      "relative_path": "scar/analysis/source_string_validation.py"
+    },
+    {
+      "isolated_bytes": 21725,
+      "main_expected_absent": false,
+      "main_expected_sha256": "e5d26274c8b96efb760f37101069c8785c58d6b8afad59b712b6b3cd9715efdc",
+      "new_sha256": "9aab0db3459c3cc31124c5630bca365a35cd4b70d82183fc3e98dd46d8d37d7e",
+      "operation": "REPLACE_EXACT_BASELINE",
+      "relative_path": "scar/analysis/source_language_validation.py"
+    }
+  ],
+  "dependency_review": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_joinedstr_target_20261025/DEPENDENCY_REVIEW.json",
+  "do_not_copy_other_dependencies": true,
+  "files_to_copy_count": 4,
+  "freeze_sha256": "8af3a241fc7daea58329db9ceeae77cee7d316f901617aa83c5f8a97cf81a17f",
+  "git_operations": 0,
+  "main_root": "/home/zyf/AAA/scar-worktrees/structured-program-model",
+  "production_files_not_changed_after_freeze": true,
+  "production_writes_to_main": 0,
+  "real_gate": {
+    "active_body_count": 1,
+    "exit_code": 0,
+    "graph_returned": false,
+    "independent_string_validator_run_on_real_body_graph": false,
+    "last_frontier": {
+      "detail": "COMPREHENSION_SCOPE_INTERFACE_UNIMPLEMENTED",
+      "kind": "UNSUPPORTED_SYNTAX",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:cb60167cd8e9165bc6dfd2ee",
+          "wire": "source:atom:cb60167cd8e9165bc6dfd2ee"
+        },
+        "end_column": 88,
+        "end_line": 111,
+        "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+        "path": "/home/zyf/AAA/le-wm/eval.py",
+        "start_column": 25,
+        "start_line": 111
+      }
+    },
+    "launcher_wall_seconds": 9.881613667996135,
+    "operations_emitted": 634,
+    "original_subject_count": 4,
+    "result": {
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_joinedstr_target_20261025/candidate03/attempt01/result.json",
+      "sha256": "a12aba29a3f22346930803012b9f3a0778dd85a5a8fc4e27e26eb299f3e72fb5"
+    },
+    "root_session": 23268,
+    "status": "SINGLE_JOINEDSTR_WINDOW_FINISHED_OPEN"
+  },
+  "schema": "scar.joinedstr-four-source-apply-receipt",
+  "schema_version": 1,
+  "small_fixture": {
+    "exact_code_witness_compiler_check_performed": false,
+    "operations": 33,
+    "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_joinedstr_target_20261025/check03/receipt.json",
+    "sha256": "624c2fbbf41c095af7519507fdf3dc43537d7604d31b4b0124af95bed879cd91",
+    "status": "PASSED"
+  },
+  "source_root": "/home/zyf/AAA/scar-worktrees/source-call-model",
+  "status": "READY_FOR_ROOT_EXACT_BASELINE_APPLICATION_NOT_APPLIED"
+}

@@ -1,0 +1,142 @@
+--- isolated/scar/analysis/inventory_partitions.py
++++ main/scar/analysis/inventory_partitions.py
+@@ -519,13 +519,16 @@
+             "frame_present": frame is not None, "core_graph_codec_validated": graph is not None,
+             "source_language_validated": False, "typed_source_admission_authorized": False}
+ 
+-    def typed_body(self, file_index, body_index, *, source_layers=None, language_options=None, source_tree=None):
++    def typed_body(self, file_index, body_index, *, source_layers=None, language_options=None, source_tree=None,
++                   source_texts=None):
+         """Use existing public validators, optionally including original source layers.
+ 
+         CP1 without source_layers retains its historical core-only policy.
+         CP2 checks the original SourceProgram5 structure and source context;
+         independent AST/code proof requires explicit options. Neither path
+         replays source construction or raw calls.
++        Explicit source_texts selects fingerprint-checked archived text for
++        CP2 structure verification; it is not source replay or code evidence.
+         """
+         from scar.ir.program.codec import loads as load_graph
+         from scar.ir.program.frames import FrameModel
+@@ -542,7 +545,7 @@
+         extended = checkpoint is not None and checkpoint["schema_version"] == 2
+         if extended:
+             from scar.analysis.program_lowering import SourceProgram
+-            program = SourceProgram.read_structure(fields)
++            program = SourceProgram.read_structure(fields, source_texts=source_texts)
+             graph, metadata = program.graph, program.metadata
+             language = program.language
+         else:
+--- isolated/scar/analysis/program_composition.py
++++ main/scar/analysis/program_composition.py
+@@ -509,11 +509,13 @@
+ 
+ def compose_source_publication(base_composition, inventory_manifest, out_dir, *,
+                                max_record_bytes=128_000_000, max_output_bytes=256_000_000,
+-                               progress=None):
++                               progress=None, source_texts=None):
+     """Re-index changed source files; retain every other original projection.
+ 
+     This is an explicit partition2/composition3 path. It neither changes legacy
+     compose_program nor rebuilds source layers or canonical graph producers.
++    Explicit source_texts forwards archived, fingerprint-checked source text
++    to CP2 structure readers; it grants no compiler or runtime evidence.
+     """
+     import tempfile
+     if type(base_composition) is not CompositionIndex or not base_composition.partitioned:
+@@ -566,7 +568,7 @@
+         if (fi, bi) in actual_changes or fi not in changed:
+             raise ValueError("duplicate or out-of-file source body publication")
+         actual_changes.add((fi, bi))
+-        typed = inventory.partitions.typed_body(fi, bi)
++        typed = inventory.partitions.typed_body(fi, bi, source_texts=source_texts)
+         if (typed.language is None or not typed.public_language_structure_validated
+                 or typed.body.definition != decode(OperationDefinitionID, change["definition"])
+                 or typed.body.metadata.source != decode(SourceSnapshot, change["snapshot"])
+--- isolated/scar/analysis/source_body_access.py
++++ main/scar/analysis/source_body_access.py
+@@ -476,7 +476,14 @@
+                                         definition=definition.wire)
+             attachment = self.composition.document["files"][fi]["bodies"][bi]
+             projection = self.projection(self.composition.document["files"][fi]["snapshot"]["path"])
+-            bundle = self.composition.inventory.typed_body(fi, bi)
++            inventory = self.composition.inventory
++            checkpoint_ref = inventory.file(fi)["bodies"][bi]["checkpoint"]
++            checkpoint = inventory.checkpoint(checkpoint_ref) if checkpoint_ref is not None else None
++            source_texts = None
++            if checkpoint is not None and checkpoint["schema_version"] == 2:
++                _, text, _ = self.source_context(projection.snapshot.path)
++                source_texts = {projection.snapshot.path: text}
++            bundle = inventory.typed_body(fi, bi, source_texts=source_texts)
+             raw = self.composition.inventory_body(fi, bi)
+             locators = self.composition.inventory_body_locators(fi, bi, raw["graph"])
+             _need(all(attachment.get(name) == value for name, value in locators.items())
+--- isolated/scar/analysis/source_frontend_worklist.py
++++ main/scar/analysis/source_frontend_worklist.py
+@@ -137,7 +137,11 @@
+ 
+ 
+ def plan_source_frontend(composition, current_bindings, code_witnesses, *,
+-                         budget=SourceFrontendBudget(), capabilities=tuple(SourceLanguageCapability),
++                         budget=SourceFrontendBudget(), capabilities=(
++                             SourceLanguageCapability.FIXED_UNPACK,
++                             SourceLanguageCapability.SLICE_KEYS,
++                             SourceLanguageCapability.LEXICAL_LOCALS,
++                             SourceLanguageCapability.CALL_KWARGS_314_V1),
+                          out_dir=None, progress=None):
+     """Inventory every body/group, then bound metadata-only dispatch candidates.
+ 
+--- isolated/scar/analysis/source_program_publication.py
++++ main/scar/analysis/source_program_publication.py
+@@ -14,7 +14,6 @@
+ from pathlib import Path
+ import tempfile
+ import time
+-import tokenize
+ 
+ from scar.analysis.inventory_partitions import InventoryPartitions, _read_receipt, _write_shard
+ from scar.analysis.program_composition import CompositionIndex
+@@ -26,6 +25,7 @@
+ from scar.ir.program.inventory import BodyInventory, BodyStatus, DefinitionInventory
+ from scar.ir.program.functions import FunctionSignature
+ from scar.ir.record_codec import decode, encode
++from scar.ir.semantics_v2 import SourceSnapshot
+ 
+ 
+ def _need(condition, message):
+@@ -350,7 +350,17 @@
+     changed, inputs, texts = {}, [], {}
+     for path in source_program_paths:
+         document, receipt = _read_receipt(path, limit=max_record_bytes)
+-        program = SourceProgram.read_structure(document, max_operations=max_operations_per_body)
++        # The original witness archive is the source authority.  Structure
++        # verification must use those exact bytes even when the live checkout
++        # has moved since this SourceProgram was produced.
++        snapshot = decode(SourceSnapshot, document["metadata"]["source"])
++        source_key = snapshot.path, snapshot.fingerprint
++        if source_key not in texts:
++            text = code_witnesses.text(snapshot)
++            texts[source_key] = (text, ast.parse(text, filename=snapshot.path),
++                                 _symbol_tables(text, snapshot.path))
++        program = SourceProgram.read_structure(document, max_operations=max_operations_per_body,
++            source_texts={snapshot.path: texts[source_key][0]})
+         _need(program.language is not None and program.graph is not None and program.interface is not None,
+               "only a recovered SourceProgram5 language body can be admitted")
+         _need(len(program.graph.operations) <= max_operations_per_body, "body graph exceeds independent operation ceiling")
+@@ -386,15 +396,9 @@
+         _need(captures.get(captured.key) == captured, "body code descriptor differs from the original source producer")
+         evidence = SourceCodeEvidence(code_witnesses, base_composition, captured)
+         options = SourceLanguageOptions(program.language.capabilities, evidence)
+-        source_key = program.metadata.source.path, program.metadata.source.fingerprint
+-        if source_key not in texts:
+-            with tokenize.open(source_key[0]) as stream:
+-                text = stream.read()
+-            _need("sha256:" + sha256(text.encode()).hexdigest() == source_key[1], "current exact source drifted")
+-            texts[source_key] = (ast.parse(text, filename=source_key[0]), _symbol_tables(text, source_key[0]))
+         require_valid_structured_body(program.structured, program.graph, program.interface, program.metadata,
+             semantic=program.semantic, control=program.control, language=program.language,
+-            source_tree=texts[source_key][0], language_options=options)
++            source_tree=texts[source_key][1], language_options=options)
+         reason = "; ".join(dict.fromkeys(row.detail for row in program.metadata.gaps))
+         body = BodyInventory(program.interface.definition, BodyStatus.LOWERED_WITH_GAPS,
+                              program.graph, program.metadata, reason, None)

@@ -21,12 +21,11 @@ RAISE(ref,world)):
 
 Consumed input holds are released in both completions before propagation.
 No target code, conversion, format method or tensor value is executed here.
-Rules were checked with this interpreter's compile/dis and these primary
-sources: CPython v3.14.0 Python/codegen.c (codegen_formatted_value,
-codegen_joined_str) and Python/generated_cases.c.h (CONVERT_VALUE,
-FORMAT_SIMPLE, FORMAT_WITH_SPEC, BUILD_STRING).
-https://github.com/python/cpython/blob/v3.14.0/Python/codegen.c
-https://github.com/python/cpython/blob/v3.14.0/Python/generated_cases.c.h
+The recovered target-child path uses its original SG, not an invented legacy
+computational value. Consumption was checked against the retained CPython
+v3.14.7 Python/bytecodes.c (BUILD_STRING, CONVERT_VALUE, FORMAT_SIMPLE and
+FORMAT_WITH_SPEC); independent AST/CodeWitness/pending checks are separate.
+https://github.com/python/cpython/blob/v3.14.7/Python/bytecodes.c
 """
 from __future__ import annotations
 
@@ -99,12 +98,29 @@ def _link_result(builder, node, reference):
                        semantic_value=records[0].result if records else None)
 
 
-def _formatted_value(builder, node, cursor):
+def _original_string_node(builder, node):
+    from scar.analysis.source_heap_lowering import _source_definition
+    from scar.ir.v2.semantic import OperationKind
+    definition = _source_definition(builder, node)
+    if (definition.kind is not OperationKind.OPERATOR
+            or definition.metadata.get("ast_type") != type(node).__name__
+            or len(definition.output_slots) != 1):
+        raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                           "recovered string requires its unique original SG operator/output slot")
+
+
+def _formatted_value(builder, node, cursor, *, recover_missing_children=False):
+    if recover_missing_children:
+        _original_string_node(builder, node)
     if node.conversion != -1 and node.conversion not in _CONVERSIONS:
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "unsupported f-string conversion code")
     initial_holds = len(builder.active_temporaries)
     try:
-        cursor, value = builder.expr(node.value, cursor)
+        if recover_missing_children:
+            from scar.analysis.source_heap_lowering import expression_for_heap_target
+            cursor, value = expression_for_heap_target(builder, node.value, cursor)
+        else:
+            cursor, value = builder.expr(node.value, cursor)
         if cursor is None:
             return None, None
         _hold(builder, cursor, node.value, value)
@@ -120,7 +136,8 @@ def _formatted_value(builder, node, cursor):
             if not isinstance(node.format_spec, ast.JoinedStr):
                 raise _Unsupported(GapKind.SOURCE_MAPPING, node.format_spec,
                                    "f-string format specification must retain its JoinedStr source")
-            cursor, spec = lower_joined_string(builder, node.format_spec, cursor)
+            cursor, spec = lower_joined_string(builder, node.format_spec, cursor,
+                                               recover_missing_children=recover_missing_children)
             if cursor is None:
                 return None, None
             _hold(builder, cursor, node.format_spec, spec)
@@ -132,10 +149,14 @@ def _formatted_value(builder, node, cursor):
         del builder.active_temporaries[initial_holds:]
 
 
-def lower_joined_string(builder, node, cursor):
+def lower_joined_string(builder, node, cursor, *, recover_missing_children=False):
     """Construct ordinary f-strings; preserve every child and evaluation edge."""
     if not isinstance(node, ast.JoinedStr):
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "expected JoinedStr source")
+    if type(recover_missing_children) is not bool:
+        raise TypeError("missing string-child recovery must be an explicit boolean")
+    if recover_missing_children:
+        _original_string_node(builder, node)
     if len(node.values) > _MAX_STACK_PIECES:
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
                            "large f-string requires the compiler's incremental list/append/join protocol")
@@ -148,9 +169,19 @@ def lower_joined_string(builder, node, cursor):
     try:
         for child in node.values:
             if isinstance(child, ast.Constant) and type(child.value) is str:
-                value = builder.literal(child, child.value)
+                if recover_missing_children:
+                    from scar.analysis.source_heap_lowering import _source_definition, expression_for_heap_target
+                    from scar.ir.v2.semantic import OperationKind
+                    definition = _source_definition(builder, child)
+                    if definition.kind is not OperationKind.CONSTANT or len(definition.output_slots) != 1:
+                        raise _Unsupported(GapKind.SOURCE_MAPPING, child,
+                                           "recovered string literal requires its original SG constant/output")
+                    cursor, value = expression_for_heap_target(builder, child, cursor)
+                else:
+                    value = builder.literal(child, child.value)
             elif isinstance(child, ast.FormattedValue):
-                cursor, value = _formatted_value(builder, child, cursor)
+                cursor, value = _formatted_value(builder, child, cursor,
+                                                 recover_missing_children=recover_missing_children)
                 if cursor is None:
                     return None, None
             else:

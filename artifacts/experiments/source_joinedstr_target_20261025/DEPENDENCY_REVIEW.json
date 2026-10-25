@@ -1,0 +1,117 @@
+{
+  "differences": [
+    {
+      "authorized_to_apply": false,
+      "imported_in_gate": true,
+      "iso_sha256": "5b997b94d87353ed88cc6202416635a42ab7be28d471ff699495249e06c3c753",
+      "main_sha256": "4eb3814294b10d4f15c0464d13b78094eca0351295b7cd93092bf00bf470eb5d",
+      "relative_path": "scar/analysis/inventory_partitions.py"
+    },
+    {
+      "authorized_to_apply": false,
+      "imported_in_gate": true,
+      "iso_sha256": "a0577c7762a53a1c167451bf6b4bd0bd029cd82bbd115721b36315f283dda070",
+      "main_sha256": "431e1b9d73d08ed362f18d945c551bdc565c1325c3b7495877364299b552afd1",
+      "relative_path": "scar/analysis/program_composition.py"
+    },
+    {
+      "authorized_to_apply": false,
+      "imported_in_gate": false,
+      "iso_sha256": "6ee72734469e5c23130b0d4f4ba1b28e94493e54a1bd9f2f1c9ec46efebe56f0",
+      "main_sha256": "545b6cc3bd73b05027507e9ff242d4f01b332a5394c7a4a8ea4697159f194995",
+      "relative_path": "scar/analysis/source_body_access.py"
+    },
+    {
+      "authorized_to_apply": false,
+      "imported_in_gate": false,
+      "iso_sha256": "cbc34304cb9aaa1d64b3df6f0031aec581e41716a1549a761c3ca96d5c4b79d3",
+      "main_sha256": "f6e8312d23601a5c633a09f38a906de2e2d06b7896b4af23d9b826a50023748c",
+      "relative_path": "scar/analysis/source_frontend_worklist.py"
+    },
+    {
+      "authorized_to_apply": true,
+      "imported_in_gate": true,
+      "iso_sha256": "a4e6d4b7ccd1c4981e67cd38117f6887ade8f63b7d9e3a07193cc7db64f28f0e",
+      "main_sha256": "323f2f478a57c0a133648749323e9bfbfb942dbe9410ad35111a608515af2ff9",
+      "relative_path": "scar/analysis/source_heap_lowering.py"
+    },
+    {
+      "authorized_to_apply": true,
+      "imported_in_gate": true,
+      "iso_sha256": "9aab0db3459c3cc31124c5630bca365a35cd4b70d82183fc3e98dd46d8d37d7e",
+      "main_sha256": "e5d26274c8b96efb760f37101069c8785c58d6b8afad59b712b6b3cd9715efdc",
+      "relative_path": "scar/analysis/source_language_validation.py"
+    },
+    {
+      "authorized_to_apply": false,
+      "imported_in_gate": false,
+      "iso_sha256": "438c40e4c91a0807ff03e860d72849ef2d1d401577d13f261758e8fd2e377b12",
+      "main_sha256": "b25caef649883d71f4d32e1b31896147c0d5e22572af0f493c7379b9581127cc",
+      "relative_path": "scar/analysis/source_program_publication.py"
+    },
+    {
+      "authorized_to_apply": true,
+      "imported_in_gate": true,
+      "iso_sha256": "5c7b5483effa97cfebb5905c4fc64050a200399c944a5f9eb48bde3b10759d7f",
+      "main_sha256": "33061d4dd8680eb33e696a6d9312323d4aadd225ebf036fc453c45b9dd6b5407",
+      "relative_path": "scar/analysis/source_string_lowering.py"
+    },
+    {
+      "authorized_to_apply": true,
+      "imported_in_gate": true,
+      "iso_sha256": "917e69c4e2907b4118eae66ed66da291b7b65396384377c64298a5f6be790a65",
+      "main_sha256": null,
+      "relative_path": "scar/analysis/source_string_validation.py"
+    },
+    {
+      "authorized_to_apply": false,
+      "imported_in_gate": false,
+      "iso_sha256": "efc880368660782a856785968bfb53a35523cae48c1f75b6b73ed8dab4d586d0",
+      "main_sha256": "acb12cc68657d456b7174dda5d7dd0da82173176fa2f6a6eeacc977283e58a8e",
+      "relative_path": "scar/ir/execution/native_port_protocol.py"
+    },
+    {
+      "authorized_to_apply": false,
+      "imported_in_gate": false,
+      "iso_sha256": "a998f6d9cc312e4ddddb7dc4d79dd5c2daf54907359683a009be28000626c2a2",
+      "main_sha256": "ade5f14338eeca223eb57b77f228fe4d40b2d37db50d904a3935b2813a3fda30",
+      "relative_path": "scar/ir/execution/validation.py"
+    },
+    {
+      "authorized_to_apply": false,
+      "imported_in_gate": false,
+      "iso_sha256": "650ae1f3691f195a0dda9dbb18306409f5123ca3965c8a78e48dc61bd7863484",
+      "main_sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d",
+      "relative_path": "scar/trace/native_protocol.py"
+    }
+  ],
+  "git_operations": 0,
+  "imported_gate_modules": 115,
+  "isolated_frozen_files": 353,
+  "main_only_not_in_isolated_gate": [
+    "scar/analysis/source_native_composition.py",
+    "scar/trace/native_capture_batch.py"
+  ],
+  "main_reexecution_claimed": false,
+  "main_writes": 0,
+  "matching_files": 341,
+  "other_changes_not_applied": {
+    "native_and_main_only": "preserve main versions; no copying from isolation",
+    "source_body_access_and_source_program_publication": "main archived-source public readers/admission plumbing preserved; not imported in gate",
+    "source_frontend_worklist": "main explicit four-cap default policy preserved; not imported in gate"
+  },
+  "reviewed_other_imported_differences": [
+    {
+      "change": "typed_body optional source_texts forwarded to CP2 SourceProgram.read_structure; existing membership/file/source methods unchanged",
+      "gate_calls_modified_function": false,
+      "path": "scar/analysis/inventory_partitions.py"
+    },
+    {
+      "change": "compose_source_publication optional source_texts forwarded to typed_body; CompositionIndex construction/source/inventory methods unchanged",
+      "gate_calls_modified_function": false,
+      "path": "scar/analysis/program_composition.py"
+    }
+  ],
+  "schema": "scar.joinedstr-main-dependency-review",
+  "schema_version": 1
+}

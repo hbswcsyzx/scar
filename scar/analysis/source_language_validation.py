@@ -260,6 +260,9 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
                   "source constant does not name its exact witnessed LOAD_CONST slot")
     call_protocols = validate_call_protocols(model, graph, interface, metadata, semantic, language,
         source_tree=source_tree, options=options, structural_only=structural_only)
+    from scar.analysis.source_string_validation import validate_string_source
+    string_protocols = validate_string_source(model, graph, interface, metadata, semantic,
+        source_tree=source_tree, options=options, structural_only=structural_only)
     tuple_ownership = None
     if Capability.SLICE_KEYS in language.capabilities:
         from scar.analysis.source_tuple_validation import validate_tuple_key_ownership
@@ -294,7 +297,8 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
             "source_shape_verified": not structural_only,
             "code_constant_provenance_verified": bool(constants) and not structural_only,
             "runtime_code_instance_established": False, "effects_established": False,
-            "tuple_key_pending_references": tuple_ownership, "kwargs_call_protocols": call_protocols}
+            "tuple_key_pending_references": tuple_ownership, "kwargs_call_protocols": call_protocols,
+            "string_protocols": string_protocols}
 
 
 __all__ = ["validate_language_body"]

@@ -1,0 +1,57 @@
+{
+  "active_subjects": 1,
+  "body_lowerings": 0,
+  "changed_sources": [
+    {
+      "bytes": 15507,
+      "main_baseline": {
+        "bytes": 14965,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_heap_lowering.py",
+        "sha256": "323f2f478a57c0a133648749323e9bfbfb942dbe9410ad35111a608515af2ff9"
+      },
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_heap_lowering.py",
+      "relative_path": "scar/analysis/source_heap_lowering.py",
+      "sha256": "a4e6d4b7ccd1c4981e67cd38117f6887ade8f63b7d9e3a07193cc7db64f28f0e"
+    },
+    {
+      "bytes": 13200,
+      "main_baseline": {
+        "bytes": 11191,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_string_lowering.py",
+        "sha256": "33061d4dd8680eb33e696a6d9312323d4aadd225ebf036fc453c45b9dd6b5407"
+      },
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_string_lowering.py",
+      "relative_path": "scar/analysis/source_string_lowering.py",
+      "sha256": "5c7b5483effa97cfebb5905c4fc64050a200399c944a5f9eb48bde3b10759d7f"
+    },
+    {
+      "bytes": 22157,
+      "main_baseline": null,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_string_validation.py",
+      "relative_path": "scar/analysis/source_string_validation.py",
+      "sha256": "917e69c4e2907b4118eae66ed66da291b7b65396384377c64298a5f6be790a65"
+    },
+    {
+      "bytes": 21725,
+      "main_baseline": {
+        "bytes": 21423,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language_validation.py",
+        "sha256": "e5d26274c8b96efb760f37101069c8785c58d6b8afad59b712b6b3cd9715efdc"
+      },
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_language_validation.py",
+      "relative_path": "scar/analysis/source_language_validation.py",
+      "sha256": "9aab0db3459c3cc31124c5630bca365a35cd4b70d82183fc3e98dd46d8d37d7e"
+    }
+  ],
+  "compiler_payloads_loaded": 0,
+  "freeze_sha256": "8af3a241fc7daea58329db9ceeae77cee7d316f901617aa83c5f8a97cf81a17f",
+  "full_subjects": 4,
+  "input_stat_pins": 35,
+  "runtime_preloaded_files": 145,
+  "selected_sequence": 5,
+  "source_files": 1,
+  "source_sha_files": 353,
+  "status": "FROZEN_NOT_RUN",
+  "target_context_or_graph_stream_reads": 0,
+  "tool_guard_bytes": 51289210
+}
