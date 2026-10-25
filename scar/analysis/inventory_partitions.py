@@ -519,13 +519,16 @@ class InventoryPartitions:
             "frame_present": frame is not None, "core_graph_codec_validated": graph is not None,
             "source_language_validated": False, "typed_source_admission_authorized": False}
 
-    def typed_body(self, file_index, body_index, *, source_layers=None, language_options=None, source_tree=None):
+    def typed_body(self, file_index, body_index, *, source_layers=None, language_options=None, source_tree=None,
+                   source_texts=None):
         """Use existing public validators, optionally including original source layers.
 
         CP1 without source_layers retains its historical core-only policy.
         CP2 checks the original SourceProgram5 structure and source context;
         independent AST/code proof requires explicit options. Neither path
         replays source construction or raw calls.
+        Explicit source_texts selects fingerprint-checked archived text for
+        CP2 structure verification; it is not source replay or code evidence.
         """
         from scar.ir.program.codec import loads as load_graph
         from scar.ir.program.frames import FrameModel
@@ -542,7 +545,7 @@ class InventoryPartitions:
         extended = checkpoint is not None and checkpoint["schema_version"] == 2
         if extended:
             from scar.analysis.program_lowering import SourceProgram
-            program = SourceProgram.read_structure(fields)
+            program = SourceProgram.read_structure(fields, source_texts=source_texts)
             graph, metadata = program.graph, program.metadata
             language = program.language
         else:

@@ -476,7 +476,14 @@ class SourceBodyAccess:
                                         definition=definition.wire)
             attachment = self.composition.document["files"][fi]["bodies"][bi]
             projection = self.projection(self.composition.document["files"][fi]["snapshot"]["path"])
-            bundle = self.composition.inventory.typed_body(fi, bi)
+            inventory = self.composition.inventory
+            checkpoint_ref = inventory.file(fi)["bodies"][bi]["checkpoint"]
+            checkpoint = inventory.checkpoint(checkpoint_ref) if checkpoint_ref is not None else None
+            source_texts = None
+            if checkpoint is not None and checkpoint["schema_version"] == 2:
+                _, text, _ = self.source_context(projection.snapshot.path)
+                source_texts = {projection.snapshot.path: text}
+            bundle = inventory.typed_body(fi, bi, source_texts=source_texts)
             raw = self.composition.inventory_body(fi, bi)
             locators = self.composition.inventory_body_locators(fi, bi, raw["graph"])
             _need(all(attachment.get(name) == value for name, value in locators.items())

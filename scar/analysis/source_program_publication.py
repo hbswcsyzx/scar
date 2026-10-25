@@ -14,7 +14,6 @@ import json
 from pathlib import Path
 import tempfile
 import time
-import tokenize
 
 from scar.analysis.inventory_partitions import InventoryPartitions, _read_receipt, _write_shard
 from scar.analysis.program_composition import CompositionIndex
@@ -26,6 +25,7 @@ from scar.ir.program.call_demand import CallSourceScope
 from scar.ir.program.inventory import BodyInventory, BodyStatus, DefinitionInventory
 from scar.ir.program.functions import FunctionSignature
 from scar.ir.record_codec import decode, encode
+from scar.ir.semantics_v2 import SourceSnapshot
 
 
 def _need(condition, message):
@@ -350,7 +350,17 @@ def _publish_source_programs(base_composition, source_program_paths, out_dir, *,
     changed, inputs, texts = {}, [], {}
     for path in source_program_paths:
         document, receipt = _read_receipt(path, limit=max_record_bytes)
-        program = SourceProgram.read_structure(document, max_operations=max_operations_per_body)
+        # The original witness archive is the source authority.  Structure
+        # verification must use those exact bytes even when the live checkout
+        # has moved since this SourceProgram was produced.
+        snapshot = decode(SourceSnapshot, document["metadata"]["source"])
+        source_key = snapshot.path, snapshot.fingerprint
+        if source_key not in texts:
+            text = code_witnesses.text(snapshot)
+            texts[source_key] = (text, ast.parse(text, filename=snapshot.path),
+                                 _symbol_tables(text, snapshot.path))
+        program = SourceProgram.read_structure(document, max_operations=max_operations_per_body,
+            source_texts={snapshot.path: texts[source_key][0]})
         _need(program.language is not None and program.graph is not None and program.interface is not None,
               "only a recovered SourceProgram5 language body can be admitted")
         _need(len(program.graph.operations) <= max_operations_per_body, "body graph exceeds independent operation ceiling")
@@ -386,15 +396,9 @@ def _publish_source_programs(base_composition, source_program_paths, out_dir, *,
         _need(captures.get(captured.key) == captured, "body code descriptor differs from the original source producer")
         evidence = SourceCodeEvidence(code_witnesses, base_composition, captured)
         options = SourceLanguageOptions(program.language.capabilities, evidence)
-        source_key = program.metadata.source.path, program.metadata.source.fingerprint
-        if source_key not in texts:
-            with tokenize.open(source_key[0]) as stream:
-                text = stream.read()
-            _need("sha256:" + sha256(text.encode()).hexdigest() == source_key[1], "current exact source drifted")
-            texts[source_key] = (ast.parse(text, filename=source_key[0]), _symbol_tables(text, source_key[0]))
         require_valid_structured_body(program.structured, program.graph, program.interface, program.metadata,
             semantic=program.semantic, control=program.control, language=program.language,
-            source_tree=texts[source_key][0], language_options=options)
+            source_tree=texts[source_key][1], language_options=options)
         reason = "; ".join(dict.fromkeys(row.detail for row in program.metadata.gaps))
         body = BodyInventory(program.interface.definition, BodyStatus.LOWERED_WITH_GAPS,
                              program.graph, program.metadata, reason, None)

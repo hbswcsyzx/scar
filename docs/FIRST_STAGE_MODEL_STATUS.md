@@ -6,6 +6,27 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：kwargs三原图已发布；原总门FAILED_ENV_FREEZE
+
+普通ADD_GRAPH发布已在原843父快照上保存92/85/217 ops三个原图，新正式静态快照为
+846 active bodies/2217定义/151文件，781 UNSUPPORTED、590 NOT_ATTEMPTED。原artifact
+URI与namespace保留、parent准确指843，严格compiler-origin保留，新CP2 construction cost仍Unknown。
+publisher/composer完成，三个公共结构/AST/CodeWitness reader实际逐项PASS；没有重lower、
+compile或执行目标。
+
+原门actual exit1/281.584s/peak1246608KiB，最后participant审计先报告标准库
+`_compat_pickle.py`未预冻结，状态为FAILED_ENV_FREEZE。原freeze、失败和exit不改；
+完整历史runtime清单及字节证明仍OPEN，不能以事后新hash追认为执行期证据。
+最小metadata postflight actual exit0/0.149469s，stored29214490B、decoded metadata326576B、
+核383文件，只查小headers/引用/原三PASS日志/源码freeze及stored SHA，没有重新解
+composition或三图，也未重跑publisher/composer。它通过不把原总门改称PASS。
+
+完整runtime仍绑定843快照；旧6699次body-linked调用及source/native导航根未自动升级。
+后续汇总增量接线，保JoinedStr、完整cleanup/outer lifetime、内容/state/ready、旧scope
+义务和collector provenance assumption，第一阶段仍OPEN。详见
+[kwargs模型](SOURCE_CALL_MODEL.md)、[实际边界](../artifacts/experiments/source_call_kwargs_publication_20261025/postflight01/RESULT.md)
+及[准确receipt](../artifacts/experiments/source_call_kwargs_publication_20261025/postflight01/receipt.json)。
+
 ### 2026-10-25：source/native有限组合查询实档通过
 
 新导航门实际exit0/outer104.434s，79592条source associations与40个native inventory

@@ -4,7 +4,8 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
-**当前可复核结果（2026-10-25）：** 新843源码快照已接回原完整运行；新增覆盖账本
+**当前可复核结果（2026-10-25）：** 完整runtime接线仍为843快照；正式静态源码已发布
+到846，新增三body尚未接回原运行，原发布总门FAILED_ENV_FREEZE保留。新增覆盖账本
 也已实际终态exit0，完整枚举2217个源码定义及100438次调用。账本发布的是原记录归属
 和具体待办，不是依赖已闭合的统一图：其聚合状态仍为OPEN。637个压缩块共
 126695719字节，manifest声明decoded4268542417字节；重复定位/规则字段使编码开销较大，
@@ -32,16 +33,20 @@ invocation-only/零Tensor、native-only及unresolved；最后一种保持null re
 一个派生关系样本通过。见[实际结果](../artifacts/experiments/source_native_context_gate_20261025/RESULT.md)
 与[复核](../artifacts/experiments/source_native_context_review_20261025/REPORT.md)。旧scope义务未关闭。
 
-通用kwargs前端已获得92/85/217 ops三个有限图的结构、AST/CodeWitness及局部pending验证；
-另一项越过kwargs后停于JoinedStr。原失败和末窗口exit1/postflight0分别保留，未重lower
-已返回图。新图尚未正式加入843快照或接回运行，详见[SOURCE_CALL_MODEL.md](SOURCE_CALL_MODEL.md)。
+通用kwargs的92/85/217 ops三个原图已按普通ADD_GRAPH正式发布到846静态快照，三项
+公共reader实际PASS；另一项仍停于JoinedStr。publisher/composer完成后，原总门因
+`_compat_pickle.py`未预冻结而exit1/281.584s，状态FAILED_ENV_FREEZE。metadata
+postflight exit0/0.149469s只核已保存产物，不补历史runtime字节资格或改写原exit。
+原生成窗口exit1/postflight0及其失败也保留，未重lower、compile或执行目标；846尚未接回
+当前runtime。详见[SOURCE_CALL_MODEL.md](SOURCE_CALL_MODEL.md)。
 
 **2026-10-25 当前实施：** 用户确认先审定模型和声明格式再完成自动接线。
 [当前执行计划](FIRST_STAGE_EXECUTION_PLAN.md)对应原S1—S5；
 [声明式图规范](DECLARATIVE_GRAPH_STORAGE.md)明确保留原typed IR/codec权威，
-SQLite仅为可重建索引。已有native bridge不再是“完全没有producer”：最终真实
-attempt03已连接13个调用/4接口/27参考，但只覆盖16-prefix，41gaps与内容四表0
-保留，不能当完整native接入。FD namespace临时隔离阻止无证连续性结论，闭包
+SQLite仅为可重建索引。已有native bridge不再是“完全没有producer”：历史16-prefix门
+连接13个调用/4接口/27参考、41gaps与内容四表0的记录保留；最新全39796次dispatch边界
+门已通过，资格和范围以上述[NATIVE_CAPTURE_BATCH.md](NATIVE_CAPTURE_BATCH.md)为准。
+FD namespace临时隔离阻止无证连续性结论，闭包
 producer仍待落实。843的fresh联合门已实际exit0，已取代旧842报告成为最新runtime
 连接结果。提交与准确实际范围见[当前状态](FIRST_STAGE_MODEL_STATUS.md)。
 
@@ -53,10 +58,12 @@ wall24:18.35/RSS2226076KiB。817 groups/100438 calls新读且各扫描一次，7
 [实际结果](../artifacts/experiments/first_stage_source_revision_current_review_20261025/RESULT.md)。
 state/content/ready、全部native及资源依赖仍未闭合，第一阶段继续OPEN。
 
-**最新snapshot边界：** 正式source revision门已通过，active源码图为843/2217，含
-218ops新增图和65ops修订图；旧artifact保留，source/code验证不授完整lifetime。
-当前完整runtime连接报告已由fresh门重派到843 snapshot，新body attachments/ports
-来自新namespace，不能把与旧842快照的覆盖数字相加。具体见
+**最新snapshot边界：** 三项kwargs普通ADD已在原843父快照上发布，active静态源码图为
+846/2217；原218ops新增图和65ops修订图继续保留。原URI/namespace保留，准确parent为843，
+严格compiler origin不变，新CP2 construction cost仍Unknown。此次原总门FAILED_ENV_FREEZE，
+三reader PASS及metadata postflight通过分别记录，source/code验证不授完整lifetime。
+当前完整runtime连接报告仍为已通过的843 fresh门；不能把旧842或新846静态发布数量
+混入其attachments/ports。具体见[SOURCE_CALL_MODEL.md](SOURCE_CALL_MODEL.md)、
 [SOURCE_BODY_REVISION.md](SOURCE_BODY_REVISION.md) 与
 [runtime ancestor设计](SOURCE_REVISION_RUNTIME_ANCESTRY.md)。第一阶段S3/S4仍OPEN。
 
@@ -119,7 +126,7 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | 分片源码图组合与当前调用绑定 | 当前843快照fresh gate exit0；100,438调用中6,699 body-linked、88,775 source-only、4,964 unresolved | 77 body groups、590 source-only、150 unresolved；不复用旧Invocation，不是完整ProgramSnapshot |
 | 分片源码与marker连接 | 79,592 markers/109,288原slot全部保留；79,106条有准确source definition，20,592条body/activation/namespace关联 | 58,514条retained source-linked，6条仅invocation、480条无ancestor；retained ancestor不是direct call；状态/效果仍未闭合 |
 | 原参数、返回及环境路由接回 | 当前843门保留817groups/100,438调用、312,812operand与16,403env events；17,097入口参数occurrences、27actual/formal与27completion条件路由、6,223返回root；3,372entry的10,162env ports | 全部只是带原条件的引用/端口连接；100,523条route问题、6,744未定defaults保留；不证明内容、状态、world等价 |
-| 更大范围源码归档 | 正式revision后151文件/2217定义，843 active图、784 UNSUPPORTED、590 NOT_ATTEMPTED；65ops旧图被准确修订、218ops新图准入 | 原256MB单JSON失败/旧artifact保留；843已统一runtime接线，但source-only、源码语法、normal/outer lifetime等缺口仍在 |
+| 更大范围源码归档 | 最新正式静态发布151文件/2217定义，846 active图、781 UNSUPPORTED、590 NOT_ATTEMPTED；含原65ops修订、218ops新增及三kwargs ADD | 原总门FAILED_ENV_FREEZE保留，三reader PASS/metadata postflight0分列；完整runtime仍843，source-only、源码语法及normal/outer lifetime继续OPEN |
 | 历史依赖源码准入与当前静态复用 | 原106文件/243groups准入保留；当前要求的105图各读一次，242groups/86,688calls接同版本static witness | 不把旧tool code或14旧calls移植当前；源码、body、effect为不同证明 |
 | 原source/body缺口按实际调用投影 | 原817groups/100,438calls逐项守恒；74body-linked、91source-only UNSUPPORTED、260source-only NOT_ATTEMPTED | 只是已保存metadata投影；不是canonical graph重验或新语言协议支持 |
 | 同次Tensor物理证据采集与导入 | 新完整LeWM episode成功；79,592 markers、109,288槽，108,682槽接物理epoch | 606槽为带provider ID但无storage pointer的空CPU Tensor；逻辑内容/ready与空表示接口仍OPEN |
@@ -129,7 +136,7 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | 全部既有OS handle的实际FD来源 | 一次8档完整双SHA/lines：82,093,008raw bytes，只解析12,653行，生成12,649新FDports和4birth facts；全部12,684 handle公共codec/非endpoint字段核对通过，原35保留；exit0/wall73.74s | scope是R1已建bindings，未建继承/stdio不因此消失；新12,649个container仍Unresolved，290个creator process=None保留，OFD/offset/ready仍需独立证明 |
 | 原调用到图端点统一查询 | 旧/当前Run各27argument+27completion回原GraphIndex/typed body，错误scope/ID/Run均拒绝 | 保留全部条件，callee post-world不冒充caller后态；不证明world/内容/alias等价 |
 | 通用解包/Slice语言建模 | 两原静态body118/65ops经CP2/inventory正式发布与当前Run消费，分别900/150calls，prepare0/compile0 | 仅有限source/结构和引用端口验证；tuple异常pending遗漏已由隔离新guard揭示，原图保留，修正图需新producer/artifact；不是完整lifetime或effect证明 |
-| 自动source front-end派工 | 全2217 bodies/817groups/100438calls入账；77 metadata candidates自动选12 bodies/4 files，12个编译见证匹配、12个真实UNSUPPORTED | 本window新增graph0；kwargs/comprehension/Try/definition/import等表示缺口继续OPEN，不是优化拒绝 |
+| 自动source front-end派工 | 全2217 bodies/817groups/100438calls入账；77 metadata candidates自动选12 bodies/4 files，12个编译见证匹配、12个真实UNSUPPORTED | 原window新增graph0；后续kwargs原图另批发布，JoinedStr/comprehension/Try/definition/import等缺口继续OPEN，不是优化拒绝 |
 | 实际调用协议分类 | 两Run各100,550attempts完整分类；945项目内无握手目标全8个generator codes | 不把OTHER当native，不把生成器创建当同步body进入；尚无创建对象/drive/结果的完整关联 |
 
 详细依据分别在 `artifacts/experiments/first_stage_lewm_dispatch_20261023`、
