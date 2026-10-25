@@ -217,7 +217,7 @@ class _Files:
 
 
 def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000, profile_uri=None,
-                             publish_os_profile=False):
+                             publish_os_profile=False, allow_plain_owned_capture=False):
     """Validate this retained capture profile and reuse existing coordinate types.
 
     Only files under capture_dir are opened. Plain files are selected by exact
@@ -227,10 +227,13 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     This does not join Python operations, Tensor values or source state effects.
     An owned OS launch declaration can qualify a new profile after Run binding.
     Publishing that derived profile is explicit; no legacy launch is fabricated.
+    Explicit plain-owned preflight can retain actual launch facts while archive
+    publication is pending; it never publishes the qualified coverage profile.
     """
     from scar.trace.os_resources import _arguments, _clone_flags
 
     root = Path(capture_dir).resolve()
+    _need(type(allow_plain_owned_capture) is bool, "plain preflight mode must be explicit")
     _need(root.is_dir() and _integer(max_bytes, 1) and _integer(max_lines, 1), "invalid directory or budgets")
     manifests = [path for path in (root / "trace").glob("execution-evidence.*.json")
                  if _MANIFEST_NAME.fullmatch(path.name)]
@@ -382,6 +385,41 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         members[str(physical_name)] = physical_artifact
         members[str(physical_meta_name)] = physical_meta
         physical_names = [str(physical_name), str(physical_meta_name)]
+    native_input_names, native_input_membership = [], None
+    native_input_config = native.get("configuration", {}).get("native_tensor_input_observations")
+    if native_input_config is not None:
+        from scar.trace.tensor_physical import NATIVE_INPUT_PROFILE
+        from scar.trace.native_tensor_inputs import read_native_tensor_inputs
+        companion_name = trace_root / f"native-tensor-inputs.{pid}.{nonce}" / "manifest.json"
+        _need(type(native_input_config) is dict and native_input_config.get("requested") is True
+              and native_input_config.get("profile") == NATIVE_INPUT_PROFILE
+              and native_input_config.get("manifest") == str(companion_name) and physical is not None,
+              "native input declaration has no exact physical companion namespace")
+        companion, companion_artifact = files.document(companion_name, "scar.native-tensor-input-trace")
+        checked = read_native_tensor_inputs(companion_name, expected_sha256=companion_artifact.sha256,
+            max_bytes=max_bytes, _retained_files=files)
+        original_physical = companion.get("legacy_physical_metadata", {})
+        _need((original_physical.get("path"), original_physical.get("raw_sha256"), original_physical.get("raw_bytes"))
+              == (physical_meta.uri, physical_meta.sha256, physical_meta.size_bytes),
+              "native input companion has another closed physical metadata root")
+        members[str(companion_name)] = companion_artifact
+        native_input_names.append(str(companion_name))
+        chunk_artifacts = []
+        for chunk in companion["chunks"]:
+            logical = companion_name.parent / chunk["path"]
+            artifact = files.verify(logical, "scar.native-tensor-input-observation.v1")
+            _need((artifact.sha256, artifact.size_bytes) == (chunk["raw_sha256"], chunk["raw_bytes"]),
+                  "native input chunk differs from exact companion receipt")
+            members[str(logical)] = artifact
+            native_input_names.append(str(logical))
+            chunk_artifacts.append(encode(artifact))
+        native_input_membership = {"capability": "SCAR_NATIVE_TENSOR_INPUT_MEMBERSHIP_V1",
+            "profile": NATIVE_INPUT_PROFILE, "manifest": encode(companion_artifact),
+            "chunks": chunk_artifacts, "retained_rows": checked["retained_rows"],
+            "scope": "exact retained artifacts and target-process creation only",
+            "native_port_join_established": False, "Python_identity_established": False,
+            "geometry_established": False, "logical_content_established": False,
+            "resource_ready_established": False, "native_outputs": "UNAVAILABLE_IN_PINNED_API"}
     for name, schema, field in ((eto_name, "pytorch.execution-trace.v1", "execution_trace"),
                                 (kineto_name, "pytorch.kineto.chrome-trace.v1", "kineto")):
         artifact = files.verify(name, schema)
@@ -474,6 +512,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         exclusive_names += [str(environment_name), str(environment_meta_name)]
     exclusive_names += dispatch_names
     exclusive_names += physical_names
+    exclusive_names += native_input_names
     for name in exclusive_names:
         witnessed = [fact for fact, flags in creations.get(name, ()) if "O_CREAT" in flags and "O_EXCL" in flags]
         _need(len(witnessed) == 1, "artifact lacks one exact target-process O_EXCL creation: " + name)
@@ -591,9 +630,13 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
             'size_bytes': len(archive_payload), 'schema': archive['schema']}
         binding, os_gaps = bind_os_capture_provider(root, run=encode(run.id), native=native,
             native_artifact=encode(native_artifact), command=command, archive=archive_receipt,
-            publish=publish_os_profile)
+            publish=publish_os_profile, allow_plain_preflight=allow_plain_owned_capture)
         report['os_capture_provider'] = binding
         report['open'].extend(os_gaps)
+    if native_input_membership is not None:
+        report['native_tensor_input_membership'] = native_input_membership
+        report['open'].append({'code': 'native_tensor_input_port_join_unverified',
+                               'source': native_input_membership['manifest']})
     payload = _canonical(report)
     artifact = ProviderArtifact(profile_uri or "memory:scar.capture-coordinates:" + sha256(payload).hexdigest(),
                                 sha256(payload).hexdigest(), len(payload), report["schema"])

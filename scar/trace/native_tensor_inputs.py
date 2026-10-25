@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections import Counter
 from hashlib import sha256
+import gzip
 import json
 from pathlib import Path
 import re
@@ -135,7 +136,8 @@ def _row(row, index, pid, nonce, previous, seen, counts):
     return header['traversal_ordinal']
 
 
-def read_native_tensor_inputs(path, *, expected_sha256, max_bytes=512000000, max_rows=1000000, on_row=None):
+def read_native_tensor_inputs(path, *, expected_sha256, max_bytes=512000000, max_rows=1000000, on_row=None,
+                              _retained_files=None):
     """Fully verify retained bytes/structure, never recreate a live owner.
 
     on_row receives provisional observations. Only successful return confirms
@@ -143,8 +145,31 @@ def read_native_tensor_inputs(path, *, expected_sha256, max_bytes=512000000, max
     """
     _need(_integer(max_bytes, 1) and _integer(max_rows, 1) and (on_row is None or callable(on_row)), "invalid reader bounds")
     path = Path(path).absolute()
-    _need(not path.is_symlink() and path.is_file() and path.stat().st_size <= 2000000, "invalid manifest path/bound")
-    raw = path.read_bytes()
+    if _retained_files is not None:
+        from scar.trace.capture_coordinates import _Files
+        _need(type(_retained_files) is _Files, "exact retained file resolver required")
+
+    def locate(logical, schema):
+        if _retained_files is None:
+            _need(not logical.is_symlink() and logical.is_file(), "absent/symlinked source")
+            return logical, None, None
+        artifact = _retained_files.verify(str(logical), schema)
+        local, entry = _retained_files.local(str(logical))
+        return local, entry, artifact
+
+    def document(logical, schema):
+        local, entry, artifact = locate(logical, schema)
+        _need((artifact.size_bytes if artifact is not None else local.stat().st_size) <= 2000000,
+              "metadata bound exceeded")
+        with (gzip.open if entry is not None else open)(local, 'rb') as source:
+            content = source.read(2000001)
+        _need(len(content) <= 2000000, "metadata read bound exceeded")
+        if artifact is not None:
+            _need(len(content) == artifact.size_bytes and sha256(content).hexdigest() == artifact.sha256,
+                  "resolved metadata changed")
+        return content
+
+    raw = document(path, 'scar.native-tensor-input-trace')
     _need(sha256(raw).hexdigest() == expected_sha256, "manifest SHA differs")
     doc = _json(raw)
     _keys(doc, 'schema schema_version profile provider_revision process_id nonce status traversal_completed frontier transport_failure errors visited_torch_ops retained_rows omitted_visited_torch_ops raw_bytes chunks limits inputs legacy_physical_metadata capabilities assumptions membership')
@@ -176,10 +201,10 @@ def read_native_tensor_inputs(path, *, expected_sha256, max_bytes=512000000, max
     def metadata_receipt(receipt, filename):
         _keys(receipt, 'path raw_bytes raw_sha256')
         source = path.parent.parent / filename
-        _need(receipt['path'] == str(source) and not source.is_symlink() and source.is_file()
-              and _integer(receipt['raw_bytes'], 1) and source.stat().st_size == receipt['raw_bytes'] <= 2000000, "metadata namespace/size differs")
-        content = source.read_bytes()
-        _need(sha256(content).hexdigest() == receipt['raw_sha256'], "metadata bytes changed")
+        _need(receipt['path'] == str(source) and _integer(receipt['raw_bytes'], 1)
+              and receipt['raw_bytes'] <= 2000000, "metadata namespace/size differs")
+        content = document(source, 'application/json')
+        _need(len(content) == receipt['raw_bytes'] and sha256(content).hexdigest() == receipt['raw_sha256'], "metadata bytes changed")
         return _json(content)
     native = metadata_receipt(doc['inputs']['native_manifest'], f'execution-evidence.{pid}.json')
     dispatch = metadata_receipt(doc['inputs']['dispatch_metadata'], f'dispatch-meta.{pid}.{nonce}.json')
@@ -209,10 +234,12 @@ def read_native_tensor_inputs(path, *, expected_sha256, max_bytes=512000000, max
               and chunk['first_index'] == rows + 1 and _integer(chunk['rows'], 1)
               and chunk['rows'] <= limits['chunk_rows'] and _integer(chunk['raw_bytes'], 1)
               and chunk['raw_bytes'] <= limits['chunk_bytes'], "chunk namespace/range differs")
-        source = path.parent / chunk['path']
-        _need(not source.is_symlink() and source.is_file() and source.stat().st_size == chunk['raw_bytes'], "chunk file/size differs")
+        source, entry, artifact = locate(path.parent / chunk['path'], 'scar.native-tensor-input-observation.v1')
+        _need((artifact.size_bytes if artifact is not None else source.stat().st_size) == chunk['raw_bytes'], "chunk file/size differs")
+        if artifact is not None:
+            _need(artifact.sha256 == chunk['raw_sha256'], "resolved chunk SHA differs")
         digest, size, count = sha256(), 0, 0
-        with source.open('rb') as stream:
+        with (gzip.open if entry is not None else open)(source, 'rb') as stream:
             while line := stream.readline(limits['line_bytes'] + 1):
                 _need(len(line) <= limits['line_bytes'] and line.endswith(b'\n')
                       and total + len(line) <= max_bytes and rows < max_rows, "chunk line/reader budget")
