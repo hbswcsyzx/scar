@@ -1,0 +1,328 @@
+--- attempt02/scar/trace/native_capture_batch.py
++++ attempt03/scar/trace/native_capture_batch.py
+@@ -30,6 +30,8 @@
+ )
+ from scar.trace.native_schema import PROVIDER_REVISION
+ from scar.store.bundle_partitions import BundlePartitions
++
++PARENT_CLOSURE_CAPABILITY = 'SELECTED_NATIVE_PARENT_CLOSURE_V1'
+ 
+ 
+ @dataclass(frozen=True)
+@@ -202,6 +204,7 @@
+         need(actual_limit == max_pages, "SQLite could not enforce the private index page cap")
+         self.db.execute("CREATE TABLE records(kind TEXT,key TEXT,ordinal INTEGER,payload BLOB,mac BLOB,PRIMARY KEY(kind,key)) WITHOUT ROWID")
+         self.parents, self.node_ordinals = {}, {}
++        self.parent_frontiers, self.missing_parent_edges = {}, {}
+         self.names, self.children, self.groups = defaultdict(list), defaultdict(list), defaultdict(list)
+         self.physical_markers, self.births = {}, defaultdict(list)
+         self.signatures, self.representatives = {}, {}
+@@ -295,11 +298,20 @@
+         need(root["ctrl_deps"] == 1 and root["name"] == "[pytorch|profiler|execution_trace|process]"
+              and attributes(root).get("rf_id") == 0 and attributes(root).get("tid") == 0
+              and attributes(root).get("scope") == 7, "original ETO root sentinel differs")
++        # Preserve all fully hashed records for diagnosis even if a later known
++        # cycle rejects acquisition. This private DB still cannot restore owners.
++        self.db.commit()
++        self.missing_parent_edges = {node: parent for node, parent in self.parents.items()
++                                     if parent not in self.parents}
+         done = set()
+         for node_id in self.parents:
+             chain, seen, current = [], set(), node_id
++            cause = None
+             while current not in done:
+-                need(current in self.parents and current not in seen, "original ETO parent missing or cyclic")
++                if current not in self.parents:
++                    cause = (chain[-1], current)
++                    break
++                need(current not in seen, "original ETO parent cycle")
+                 seen.add(current)
+                 chain.append(current)
+                 parent = self.parents[current]
+@@ -307,7 +319,33 @@
+                     need(current == 1, "unexpected original self-parent ETO root")
+                     break
+                 current = parent
++            else:
++                cause = self.parent_frontiers.get(current)
++            if cause is not None:
++                for affected in chain:
++                    self.parent_frontiers[affected] = cause
+             done.update(chain)
++
++    def parent_fact(self, node_id):
++        node = self.get('node', node_id)
++        attrs = attributes(node)
++        cause = self.parent_frontiers.get(node_id)
++        source = {'artifact': self.base['artifacts']['eto'],
++                  'locator': '#/nodes/' + str(self.node_ordinals[node_id])}
++        return {'node_id': node_id, 'original_ordinal': self.node_ordinals[node_id],
++            'original_parent': self.parents[node_id], 'source': source,
++            'parent_edge_source': {'artifact': source['artifact'], 'locator': source['locator'] + '/ctrl_deps'},
++            'actor': {'process_id': self.base['pid'], 'record_function_thread_token': attrs.get('tid'),
++                      'thread_namespace': 'ETO_RECORD_FUNCTION_THREAD_TOKEN', 'rf_id': attrs.get('rf_id'),
++                      'scope': attrs.get('scope'), 'name': node['name']},
++            'status': 'ORIGINAL_PARENT_CHAIN_UNAVAILABLE' if cause else 'ORIGINAL_ROOTED_PARENT_CLOSURE_VERIFIED',
++            'direct_missing_parent_edge': node_id in self.missing_parent_edges,
++            'missing_chain_origin_node': None if cause is None else cause[0],
++            'missing_parent_id': None if cause is None else cause[1]}
++
++    def parent_inventory(self):
++        for node_id in self.parents:
++            yield self.parent_fact(node_id)
+ 
+     def read_lines(self, kind, artifact, path, pid, nonce=None):
+         reader = _RawReader(self, artifact, path)
+@@ -371,7 +409,7 @@
+         self.db.commit()
+         need(self.path.stat().st_size <= self.budget.max_index_bytes, "closed private index over budget")
+ 
+-    def source_for(self, sequences, definitions=False):
++    def source_for(self, sequences, definitions=False, *, require_complete_parents=True):
+         need(self._closed_source, "live native source acquisition has not closed")
+         need(sequences and tuple(sorted(set(sequences))) == tuple(sequences), "shard sequence selection differs")
+         dispatch = [self.get("dispatch", line) for seq in sequences for line in self.groups[seq]]
+@@ -386,12 +424,16 @@
+                 physical_lines.add(self.physical_markers[marker])
+         for node_id in tuple(selected_nodes):
+             current = node_id
+-            while True:
++            while current in self.parents:
+                 selected_nodes.add(current)
+                 parent = self.parents[current]
+                 if parent == current:
+                     break
+                 current = parent
++        parent_frontiers = [self.parent_fact(n) for n in sorted(selected_nodes, key=self.node_ordinals.__getitem__)
++                            if n in self.parent_frontiers]
++        need(not require_complete_parents or not parent_frontiers,
++             'selected native instance lacks its complete original parent closure')
+         physical = [self.get("physical", line) for line in sorted(physical_lines)]
+         births = set()
+         for row in physical:
+@@ -404,7 +446,9 @@
+             "max_sequences": sequences[-1] - sequences[0] + 1,
+             "nodes": [self.get("node", n) for n in sorted(selected_nodes, key=self.node_ordinals.__getitem__)],
+             "root_node": self.get("node", 1), "dispatch": dispatch, "physical": physical,
+-            "node_ordinals": {str(n): self.node_ordinals[n] for n in selected_nodes}}
++            "node_ordinals": {str(n): self.node_ordinals[n] for n in selected_nodes},
++            'parent_closure_capability': PARENT_CLOSURE_CAPABILITY,
++            'required_parent_frontiers': parent_frontiers}
+         objects, geometry_records = {}, {}
+         for row in dispatch:
+             for ref in row.get("observation", {}).get("tensor_references", []):
+@@ -730,7 +774,7 @@
+     return None
+ 
+ 
+-def _write_inventory(directory, rows, budget, publish, *, role, metadata=None):
++def _write_inventory(directory, rows, budget, publish, *, role, metadata=None, coordinate_key='sequence'):
+     """Bounded transport chunks; original sequence and source locators survive."""
+     chunks, buffer, count, total, first, last = [], bytearray(), 0, 0, None, None
+     begins, begin_groups = 0, 0
+@@ -743,7 +787,7 @@
+         raw = bytes(buffer)
+         publish(path, raw, budget.max_inventory_chunk_bytes)
+         chunks.append({"artifact": encode(_artifact(path, raw, "scar.native-capture-row-chunk")),
+-            "rows": count, "first_sequence": first, "last_sequence": last,
++            "rows": count, 'first_' + coordinate_key: first, 'last_' + coordinate_key: last,
+             "first_row_ordinal": total - count, "last_row_ordinal": total - 1})
+         buffer, count = bytearray(), 0
+ 
+@@ -753,11 +797,11 @@
+         if count and (count >= budget.max_inventory_chunk_rows or len(buffer) + len(raw) > budget.max_inventory_chunk_bytes):
+             flush()
+         if not count:
+-            first = row["sequence"]
++            first = row[coordinate_key]
+         buffer.extend(raw)
+         count += 1
+         total += 1
+-        last = row["sequence"]
++        last = row[coordinate_key]
+         begins += row.get("begin_count", 0)
+         begin_groups += int(row.get("begin_count", 0) > 0)
+     flush()
+@@ -766,6 +810,8 @@
+         "rows": total, "begin_rows": begins, "begin_groups": begin_groups,
+         "max_chunk_bytes": budget.max_inventory_chunk_bytes, "max_chunk_rows": budget.max_inventory_chunk_rows,
+         "chunks": chunks, "storage_ordinals_are_not_source_coordinates": True}
++    if coordinate_key != 'sequence':
++        document['source_coordinate_field'] = coordinate_key
+     raw = canonical(document)
+     path = directory / "manifest.json"
+     publish(path, raw, budget.max_inventory_manifest_bytes)
+@@ -802,6 +848,12 @@
+         owner = _SourceIndex(out, budget, progress)
+         owner = _acquire(coordinates, capture_directory, partitioned_native_manifest, capture_model_path, out, budget,
+                          expected_manifest_sha256, expected_capture_model_sha256, progress, owner)
++        parent_inventory_artifact, parent_inventory = _write_inventory(out / 'native-parent-inventory',
++            owner.parent_inventory(), budget, publish, role='native-parent-closure', coordinate_key='original_ordinal',
++            metadata={'capability': PARENT_CLOSURE_CAPABILITY,
++                'whole_tree_parent_closure_established': not bool(owner.parent_frontiers),
++                'missing_parent_edges': len(owner.missing_parent_edges), 'affected_nodes': len(owner.parent_frontiers),
++                'run': owner.base['run'], 'process_id': owner.base['pid'], 'source_artifact': owner.base['artifacts']['eto']})
+         sequences = tuple(sorted(owner.groups))
+         observed_artifact, observed = _write_inventory(out / "observed-dispatches", (owner.inventory(seq) for seq in sequences),
+             budget, publish, role="observed-dispatches", metadata={"declared_attempts": owner.declared_attempts})
+@@ -817,8 +869,15 @@
+                 owner.check()
+                 owner.emit({"stage": "dispatch_discovery", "visited_actual_groups": count - 1,
+                             "static_signatures": len(owner.signatures)})
+-            source = owner.source_for((seq,))
++            source = owner.source_for((seq,), require_complete_parents=False)
+             absent_native = _check_group_identity(source)
++            # Identity contradictions are checked before this availability
++            # frontier. Only closed original ancestry can reach a source lease.
++            if source['required_parent_frontiers']:
++                owner.classifications[seq] = {'state': 'FRONTIER',
++                    'reason': 'ORIGINAL_NATIVE_PARENT_CLOSURE_UNAVAILABLE',
++                    'parent_frontiers': source['required_parent_frontiers'], 'other_absence': absent_native}
++                continue
+             if absent_native is not None:
+                 owner.classifications[seq] = {"state": "FRONTIER", **absent_native}
+                 continue
+@@ -992,7 +1051,8 @@
+         need(complete + partial + frontier == len(sequences), "actual dispatch accounting mismatch")
+         report = {"schema": "scar.native-capture-batch", "schema_version": 2, "profile": PROFILE_V2,
+             "capabilities": {"native_tensor_ports": True, "held_reference_subset": True, "geometry_independent": True,
+-                             "unresolved_native_identity": True, "logical_contents": False, "resource_ready": False},
++                             "unresolved_native_identity": True, "logical_contents": False, "resource_ready": False,
++                             'selected_native_parent_closure': PARENT_CLOSURE_CAPABILITY},
+             "status": "SOURCE_DOMAIN_ACCOUNTED_WITH_PORT_GAPS" if source_complete else "OPEN_SOURCE_DOMAIN_MISMATCH",
+             "run": owner.base["run"], "coordinates": encode(coordinates.artifact),
+             "source_manifest": owner.manifest_receipt, "raw_reads": owner.raw_receipts,
+@@ -1001,6 +1061,12 @@
+             "enumerated_dispatch_groups": len(sequences), "enumerated_begin_rows": enumerated_begins,
+             "enumerated_begin_groups": observed["begin_groups"],
+             "actual_sequence_ids": list(sequences), "source_domain_complete": source_complete,
++            'source_domain_definition': 'complete observed dispatch inventory, not complete ETO tree/whole program',
++            'whole_tree_parent_closure_established': not bool(owner.parent_frontiers),
++            'qualified_leases_have_complete_required_parent_closure': True,
++            'native_parent_inventory': encode(parent_inventory_artifact), 'native_parent_nodes': parent_inventory['rows'],
++            'missing_parent_edge_count': len(owner.missing_parent_edges),
++            'parent_frontier_node_count': len(owner.parent_frontiers),
+             "structurally_modeled_dispatches": complete + partial,
+             "modeled_complete_reference_dispatches": complete, "modeled_partial_reference_dispatches": partial,
+             "unmodeled_frontier_dispatches": frontier,
+@@ -1041,6 +1107,7 @@
+             "whole_model_established": False, "target_executions": 0}
+         if owner is not None:
+             failure.update(raw_reads=owner.raw_receipts, declared_dispatch_attempts=owner.declared_attempts,
++                           archive_reads=owner.archive_receipts,
+                            classified_actual_groups=len(owner.classifications), enumerated_dispatch_groups=len(owner.groups))
+         _write_json(out / "failure.json", failure, budget.max_report_bytes)
+         raise
+@@ -1088,10 +1155,11 @@
+         path = Path(path)
+         need(path.is_absolute() and path.is_file() and not path.is_symlink(), 'control metadata is not an exact regular path')
+         size = path.stat().st_size
+-        inputs.charge('control: ' + path.name, size, size, control=True)
++        charged = inputs.charge('control: ' + path.name, size, size, control=True)
+         with path.open('rb') as stream:
+             raw = stream.read(size + 1)
+         need(len(raw) == size and (expected is None or sha256(raw).hexdigest() == expected), 'control metadata changed')
++        inputs.complete(charged)
+         return _json(raw), raw
+ 
+     try:
+@@ -1164,6 +1232,7 @@
+              and coordinates.payload == retained_raw
+              and coordinates.report['counts']['verified_raw_bytes'] == verified_raw,
+              'fresh ordinary coordinates differ from exact G1 Run/membership')
++        inputs.complete_prefix('ordinary binder ')
+         _write(out / 'capture-coordinates.json', coordinates.payload)
+         metadata = prepare_native_input_metadata(coordinates, budget=inputs)
+         # Source acquisition is still the original V2 owner. No G1 success bit
+@@ -1197,6 +1266,7 @@
+         need(sum(r['decoded_bytes'] for r in native.report['archive_reads']) == table_raw
+              and sum(r['stored_bytes'] for r in native.report['archive_reads']) == table_stored,
+              'actual original-table read accounting differs')
++        inputs.complete_prefix('native V2 ')
+         need(consumed_shards == len(native.report['shards']), 'not every verified shard consumed')
+         association = metadata.report()
+         association_payload = canonical(association)
+@@ -1209,6 +1279,10 @@
+             'modeled_dispatches': native.report['structurally_modeled_dispatches'],
+             'G1_dispatch_outcomes': model['native']['dispatch_bridge']['outcomes'],
+             'dispatch_frontiers': native.report['frontier_counts'], 'metadata_counts': association['counts'],
++            'native_parent_closure': {key: native.report[key] for key in (
++                'source_domain_definition', 'whole_tree_parent_closure_established',
++                'qualified_leases_have_complete_required_parent_closure', 'native_parent_inventory',
++                'native_parent_nodes', 'missing_parent_edge_count', 'parent_frontier_node_count')},
+             'input_budget': inputs.report(), 'own_source_hash_checks': native.report['raw_reads'],
+             'output_limit_bytes': limits.max_output_bytes, 'private_index_limit_bytes': limits.max_index_bytes,
+             'wall_limit_seconds': limits.max_wall_seconds, 'rss_limit_KiB': limits.max_rss_kib,
+@@ -1226,8 +1300,19 @@
+         return NativeCaptureModelBatchResult(native, metadata, report)
+     except BaseException as error:
+         import traceback
++        # Diagnostic receipts from this call's own fresh failure output cannot
++        # restore a lease. Distinguish verified reads from pending reservations.
++        native_failure = out / 'native' / 'failure.json'
++        verified_native_reads = []
++        if native_failure.is_file() and native_failure.stat().st_size <= 1_000_000:
++            observed_failure = _json(native_failure.read_bytes())
++            verified_native_reads = observed_failure.get('raw_reads', [])
++            if verified_native_reads:
++                inputs.complete_prefix('native V2 acquisition metadata')
+         _write_json(out / 'failure.json', {'status': 'INCOMPLETE_NATIVE_INPUT_MODEL_BINDING', 'error_type': type(error).__name__,
+             'message': str(error), 'traceback': traceback.format_exc(), 'input_budget': inputs.report(),
++            'native_verified_source_reads': verified_native_reads,
++            'partial_or_unverified_stream_bytes_not_measured': True,
+             'whole_elapsed_seconds': time.monotonic() - started, 'target_executions': 0}, limits.max_report_bytes)
+         raise
+ 
+--- attempt02/scar/trace/native_tensor_inputs.py
++++ attempt03/scar/trace/native_tensor_inputs.py
+@@ -294,10 +294,24 @@
+         self.total += amount
+         self.control += amount if control else 0
+         self.entries.append({'component': component, 'stored_bytes': stored, 'decoded_bytes': decoded,
+-                             'basis': basis, 'control_metadata': control})
++                             'basis': basis, 'control_metadata': control, 'completed_verified_phase': False})
++        return len(self.entries) - 1
++
++    def complete(self, entry):
++        self.entries[entry]['completed_verified_phase'] = True
++
++    def complete_prefix(self, prefix):
++        for entry in self.entries:
++            if entry['component'].startswith(prefix):
++                entry['completed_verified_phase'] = True
+ 
+     def report(self):
+         return {'limit': self.maximum, 'stored_plus_decoded_bytes': self.total,
++                'accounting_role': 'RESERVATIONS; not actual or kernel IO',
++                'completed_verified_phase_bytes': sum(e['stored_bytes'] + e['decoded_bytes'] for e in self.entries
++                                                      if e['completed_verified_phase']),
++                'pending_reserved_bytes': sum(e['stored_bytes'] + e['decoded_bytes'] for e in self.entries
++                                             if not e['completed_verified_phase']),
+                 'control_metadata_limit': self.control_maximum, 'control_metadata_bytes': self.control,
+                 'entries': list(self.entries), 'kernel_IO_measurement': False}
+ 
+@@ -346,7 +360,7 @@
+           and entry['raw_sha256'] == artifact.sha256 and size == entry['compressed_bytes']), 'associated archive declaration differs')
+     # Reserve both planes before reading; a changed file cannot consume an
+     # unbounded extra stream. SHA/EOF comparisons below reject any change.
+-    budget.charge(label, size, artifact.size_bytes, basis='bounded member returned bytes')
++    charged = budget.charge(label, size, artifact.size_bytes, basis='bounded member returned bytes')
+     with path.open('rb') as source:
+         stored = source.read(size + 1)
+     _need(len(stored) == size, 'associated stored source changed')
+@@ -358,6 +372,7 @@
+         raw = stored
+     _need(len(raw) == artifact.size_bytes and sha256(raw).hexdigest() == artifact.sha256,
+           'associated raw source changed')
++    budget.complete(charged)
+     return artifact, raw
+ 
+ 
+@@ -643,6 +658,7 @@
+                 frontiers['PARENT_OUTSIDE_EXPORTED_TORCHOP_BOUNDARY'] += 1
+     counts['rows'] = len(result)
+     _need(counts['rows'] == retention['retained_rows'], 'full input row denominator differs')
++    budget.complete_prefix('adapter ')
+     return NativeInputMetadataSession(_INPUT_OWNER, {'run': coordinates.run.id.value,
+         'process': coordinates.target_process.id.value, 'rows': result, 'counts': dict(counts), 'frontiers': dict(frontiers)})
+ 

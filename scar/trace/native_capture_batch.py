@@ -31,6 +31,8 @@ from scar.trace.native_protocol import (
 from scar.trace.native_schema import PROVIDER_REVISION
 from scar.store.bundle_partitions import BundlePartitions
 
+PARENT_CLOSURE_CAPABILITY = 'SELECTED_NATIVE_PARENT_CLOSURE_V1'
+
 
 @dataclass(frozen=True)
 class NativeCaptureBatchBudget:
@@ -202,6 +204,7 @@ class _SourceIndex:
         need(actual_limit == max_pages, "SQLite could not enforce the private index page cap")
         self.db.execute("CREATE TABLE records(kind TEXT,key TEXT,ordinal INTEGER,payload BLOB,mac BLOB,PRIMARY KEY(kind,key)) WITHOUT ROWID")
         self.parents, self.node_ordinals = {}, {}
+        self.parent_frontiers, self.missing_parent_edges = {}, {}
         self.names, self.children, self.groups = defaultdict(list), defaultdict(list), defaultdict(list)
         self.physical_markers, self.births = {}, defaultdict(list)
         self.signatures, self.representatives = {}, {}
@@ -295,11 +298,20 @@ class _SourceIndex:
         need(root["ctrl_deps"] == 1 and root["name"] == "[pytorch|profiler|execution_trace|process]"
              and attributes(root).get("rf_id") == 0 and attributes(root).get("tid") == 0
              and attributes(root).get("scope") == 7, "original ETO root sentinel differs")
+        # Preserve all fully hashed records for diagnosis even if a later known
+        # cycle rejects acquisition. This private DB still cannot restore owners.
+        self.db.commit()
+        self.missing_parent_edges = {node: parent for node, parent in self.parents.items()
+                                     if parent not in self.parents}
         done = set()
         for node_id in self.parents:
             chain, seen, current = [], set(), node_id
+            cause = None
             while current not in done:
-                need(current in self.parents and current not in seen, "original ETO parent missing or cyclic")
+                if current not in self.parents:
+                    cause = (chain[-1], current)
+                    break
+                need(current not in seen, "original ETO parent cycle")
                 seen.add(current)
                 chain.append(current)
                 parent = self.parents[current]
@@ -307,7 +319,33 @@ class _SourceIndex:
                     need(current == 1, "unexpected original self-parent ETO root")
                     break
                 current = parent
+            else:
+                cause = self.parent_frontiers.get(current)
+            if cause is not None:
+                for affected in chain:
+                    self.parent_frontiers[affected] = cause
             done.update(chain)
+
+    def parent_fact(self, node_id):
+        node = self.get('node', node_id)
+        attrs = attributes(node)
+        cause = self.parent_frontiers.get(node_id)
+        source = {'artifact': self.base['artifacts']['eto'],
+                  'locator': '#/nodes/' + str(self.node_ordinals[node_id])}
+        return {'node_id': node_id, 'original_ordinal': self.node_ordinals[node_id],
+            'original_parent': self.parents[node_id], 'source': source,
+            'parent_edge_source': {'artifact': source['artifact'], 'locator': source['locator'] + '/ctrl_deps'},
+            'actor': {'process_id': self.base['pid'], 'record_function_thread_token': attrs.get('tid'),
+                      'thread_namespace': 'ETO_RECORD_FUNCTION_THREAD_TOKEN', 'rf_id': attrs.get('rf_id'),
+                      'scope': attrs.get('scope'), 'name': node['name']},
+            'status': 'ORIGINAL_PARENT_CHAIN_UNAVAILABLE' if cause else 'ORIGINAL_ROOTED_PARENT_CLOSURE_VERIFIED',
+            'direct_missing_parent_edge': node_id in self.missing_parent_edges,
+            'missing_chain_origin_node': None if cause is None else cause[0],
+            'missing_parent_id': None if cause is None else cause[1]}
+
+    def parent_inventory(self):
+        for node_id in self.parents:
+            yield self.parent_fact(node_id)
 
     def read_lines(self, kind, artifact, path, pid, nonce=None):
         reader = _RawReader(self, artifact, path)
@@ -371,7 +409,7 @@ class _SourceIndex:
         self.db.commit()
         need(self.path.stat().st_size <= self.budget.max_index_bytes, "closed private index over budget")
 
-    def source_for(self, sequences, definitions=False):
+    def source_for(self, sequences, definitions=False, *, require_complete_parents=True):
         need(self._closed_source, "live native source acquisition has not closed")
         need(sequences and tuple(sorted(set(sequences))) == tuple(sequences), "shard sequence selection differs")
         dispatch = [self.get("dispatch", line) for seq in sequences for line in self.groups[seq]]
@@ -386,12 +424,16 @@ class _SourceIndex:
                 physical_lines.add(self.physical_markers[marker])
         for node_id in tuple(selected_nodes):
             current = node_id
-            while True:
+            while current in self.parents:
                 selected_nodes.add(current)
                 parent = self.parents[current]
                 if parent == current:
                     break
                 current = parent
+        parent_frontiers = [self.parent_fact(n) for n in sorted(selected_nodes, key=self.node_ordinals.__getitem__)
+                            if n in self.parent_frontiers]
+        need(not require_complete_parents or not parent_frontiers,
+             'selected native instance lacks its complete original parent closure')
         physical = [self.get("physical", line) for line in sorted(physical_lines)]
         births = set()
         for row in physical:
@@ -404,7 +446,9 @@ class _SourceIndex:
             "max_sequences": sequences[-1] - sequences[0] + 1,
             "nodes": [self.get("node", n) for n in sorted(selected_nodes, key=self.node_ordinals.__getitem__)],
             "root_node": self.get("node", 1), "dispatch": dispatch, "physical": physical,
-            "node_ordinals": {str(n): self.node_ordinals[n] for n in selected_nodes}}
+            "node_ordinals": {str(n): self.node_ordinals[n] for n in selected_nodes},
+            'parent_closure_capability': PARENT_CLOSURE_CAPABILITY,
+            'required_parent_frontiers': parent_frontiers}
         objects, geometry_records = {}, {}
         for row in dispatch:
             for ref in row.get("observation", {}).get("tensor_references", []):
@@ -730,7 +774,7 @@ def _unavailable_physical(source):
     return None
 
 
-def _write_inventory(directory, rows, budget, publish, *, role, metadata=None):
+def _write_inventory(directory, rows, budget, publish, *, role, metadata=None, coordinate_key='sequence'):
     """Bounded transport chunks; original sequence and source locators survive."""
     chunks, buffer, count, total, first, last = [], bytearray(), 0, 0, None, None
     begins, begin_groups = 0, 0
@@ -743,7 +787,7 @@ def _write_inventory(directory, rows, budget, publish, *, role, metadata=None):
         raw = bytes(buffer)
         publish(path, raw, budget.max_inventory_chunk_bytes)
         chunks.append({"artifact": encode(_artifact(path, raw, "scar.native-capture-row-chunk")),
-            "rows": count, "first_sequence": first, "last_sequence": last,
+            "rows": count, 'first_' + coordinate_key: first, 'last_' + coordinate_key: last,
             "first_row_ordinal": total - count, "last_row_ordinal": total - 1})
         buffer, count = bytearray(), 0
 
@@ -753,11 +797,11 @@ def _write_inventory(directory, rows, budget, publish, *, role, metadata=None):
         if count and (count >= budget.max_inventory_chunk_rows or len(buffer) + len(raw) > budget.max_inventory_chunk_bytes):
             flush()
         if not count:
-            first = row["sequence"]
+            first = row[coordinate_key]
         buffer.extend(raw)
         count += 1
         total += 1
-        last = row["sequence"]
+        last = row[coordinate_key]
         begins += row.get("begin_count", 0)
         begin_groups += int(row.get("begin_count", 0) > 0)
     flush()
@@ -766,6 +810,8 @@ def _write_inventory(directory, rows, budget, publish, *, role, metadata=None):
         "rows": total, "begin_rows": begins, "begin_groups": begin_groups,
         "max_chunk_bytes": budget.max_inventory_chunk_bytes, "max_chunk_rows": budget.max_inventory_chunk_rows,
         "chunks": chunks, "storage_ordinals_are_not_source_coordinates": True}
+    if coordinate_key != 'sequence':
+        document['source_coordinate_field'] = coordinate_key
     raw = canonical(document)
     path = directory / "manifest.json"
     publish(path, raw, budget.max_inventory_manifest_bytes)
@@ -774,7 +820,7 @@ def _write_inventory(directory, rows, budget, publish, *, role, metadata=None):
 
 def bind_native_capture_batches(coordinates, capture_directory, partitioned_native_manifest, out_dir, *,
                                 expected_manifest_sha256, capture_model_path, expected_capture_model_sha256,
-                                budget=NativeCaptureBatchBudget(), progress=None):
+                                budget=NativeCaptureBatchBudget(), progress=None, on_verified_shard=None):
     """Verify once and account for every actually enumerated dispatch group.
 
     Coordinates must already be freshly bound by the ordinary public binder.
@@ -783,6 +829,7 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
     from scar.ir.execution.codec import dumps as execution_dumps
     from scar.ir.execution.validation import prepare_program_snapshot, validate
     need(type(budget) is NativeCaptureBatchBudget, "exact native batch budget required")
+    need(on_verified_shard is None or callable(on_verified_shard), "verified shard consumer must be callable")
     budget.__post_init__()
     out = Path(out_dir).resolve()
     need(not out.exists(), "native batch output must be fresh")
@@ -801,6 +848,12 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
         owner = _SourceIndex(out, budget, progress)
         owner = _acquire(coordinates, capture_directory, partitioned_native_manifest, capture_model_path, out, budget,
                          expected_manifest_sha256, expected_capture_model_sha256, progress, owner)
+        parent_inventory_artifact, parent_inventory = _write_inventory(out / 'native-parent-inventory',
+            owner.parent_inventory(), budget, publish, role='native-parent-closure', coordinate_key='original_ordinal',
+            metadata={'capability': PARENT_CLOSURE_CAPABILITY,
+                'whole_tree_parent_closure_established': not bool(owner.parent_frontiers),
+                'missing_parent_edges': len(owner.missing_parent_edges), 'affected_nodes': len(owner.parent_frontiers),
+                'run': owner.base['run'], 'process_id': owner.base['pid'], 'source_artifact': owner.base['artifacts']['eto']})
         sequences = tuple(sorted(owner.groups))
         observed_artifact, observed = _write_inventory(out / "observed-dispatches", (owner.inventory(seq) for seq in sequences),
             budget, publish, role="observed-dispatches", metadata={"declared_attempts": owner.declared_attempts})
@@ -816,8 +869,15 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
                 owner.check()
                 owner.emit({"stage": "dispatch_discovery", "visited_actual_groups": count - 1,
                             "static_signatures": len(owner.signatures)})
-            source = owner.source_for((seq,))
+            source = owner.source_for((seq,), require_complete_parents=False)
             absent_native = _check_group_identity(source)
+            # Identity contradictions are checked before this availability
+            # frontier. Only closed original ancestry can reach a source lease.
+            if source['required_parent_frontiers']:
+                owner.classifications[seq] = {'state': 'FRONTIER',
+                    'reason': 'ORIGINAL_NATIVE_PARENT_CLOSURE_UNAVAILABLE',
+                    'parent_frontiers': source['required_parent_frontiers'], 'other_absence': absent_native}
+                continue
             if absent_native is not None:
                 owner.classifications[seq] = {"state": "FRONTIER", **absent_native}
                 continue
@@ -956,10 +1016,13 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
                     "shard": str(shard_dir.relative_to(out)), "execution": encode(artifact),
                     "activation_id": "native-port:" + owner.base["run"] + ":" + str(seq)}
             shard_reports.append(report)
+            verified = NativeProtocolWindowResult(shard_dir, program, execution, values, evidence, native, validation, report)
+            if on_verified_shard is not None:
+                on_verified_shard(verified)
             if first_shard is None:
-                first_shard = NativeProtocolWindowResult(shard_dir, program, execution, values, evidence, native, validation, report)
+                first_shard = verified
             if first_partial_shard is None and b_count < len(tensor_ports):
-                first_partial_shard = NativeProtocolWindowResult(shard_dir, program, execution, values, evidence, native, validation, report)
+                first_partial_shard = verified
             owner.emit({"stage": "actual_shard_verified", "number": len(shard_reports) - 1,
                         "activations": len(execution.activations), "tensor_denotations": len(execution.denotations)})
 
@@ -988,7 +1051,8 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
         need(complete + partial + frontier == len(sequences), "actual dispatch accounting mismatch")
         report = {"schema": "scar.native-capture-batch", "schema_version": 2, "profile": PROFILE_V2,
             "capabilities": {"native_tensor_ports": True, "held_reference_subset": True, "geometry_independent": True,
-                             "unresolved_native_identity": True, "logical_contents": False, "resource_ready": False},
+                             "unresolved_native_identity": True, "logical_contents": False, "resource_ready": False,
+                             'selected_native_parent_closure': PARENT_CLOSURE_CAPABILITY},
             "status": "SOURCE_DOMAIN_ACCOUNTED_WITH_PORT_GAPS" if source_complete else "OPEN_SOURCE_DOMAIN_MISMATCH",
             "run": owner.base["run"], "coordinates": encode(coordinates.artifact),
             "source_manifest": owner.manifest_receipt, "raw_reads": owner.raw_receipts,
@@ -997,6 +1061,12 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             "enumerated_dispatch_groups": len(sequences), "enumerated_begin_rows": enumerated_begins,
             "enumerated_begin_groups": observed["begin_groups"],
             "actual_sequence_ids": list(sequences), "source_domain_complete": source_complete,
+            'source_domain_definition': 'complete observed dispatch inventory, not complete ETO tree/whole program',
+            'whole_tree_parent_closure_established': not bool(owner.parent_frontiers),
+            'qualified_leases_have_complete_required_parent_closure': True,
+            'native_parent_inventory': encode(parent_inventory_artifact), 'native_parent_nodes': parent_inventory['rows'],
+            'missing_parent_edge_count': len(owner.missing_parent_edges),
+            'parent_frontier_node_count': len(owner.parent_frontiers),
             "structurally_modeled_dispatches": complete + partial,
             "modeled_complete_reference_dispatches": complete, "modeled_partial_reference_dispatches": partial,
             "unmodeled_frontier_dispatches": frontier,
@@ -1037,6 +1107,7 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             "whole_model_established": False, "target_executions": 0}
         if owner is not None:
             failure.update(raw_reads=owner.raw_receipts, declared_dispatch_attempts=owner.declared_attempts,
+                           archive_reads=owner.archive_receipts,
                            classified_actual_groups=len(owner.classifications), enumerated_dispatch_groups=len(owner.groups))
         _write_json(out / "failure.json", failure, budget.max_report_bytes)
         raise
@@ -1046,3 +1117,204 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
 
 
 __all__ = ["NativeCaptureBatchBudget", "NativeCaptureBatchResult", "bind_native_capture_batches"]
+
+
+@dataclass(frozen=True)
+class NativeCaptureModelBatchResult:
+    native: NativeCaptureBatchResult
+    metadata: object
+    report: dict
+
+
+def bind_native_capture_model_batches(capture_model_path, out_dir, *, expected_sha256,
+                                     input_budget=None, budget=None, progress=None, on_verified_shard=None):
+    """Reuse G1 graphs with a genuine fresh ordinary coordinate acquisition.
+
+    This entry never imports a capture/model, reconstructs an owner from JSON,
+    or executes a target. G1 locates exact retained products; the normal binder
+    and V2 producer perform their ordinary checks. Metadata has a separate cap.
+    """
+    from scar.trace.capture_coordinates import bind_capture_coordinates
+    from scar.trace.native_tensor_inputs import NativeInputPayloadBudget, prepare_native_input_metadata
+    from scar.ir.record_codec import decode
+    from scar.ir.execution.coordinates import ExecutionRun
+    need(input_budget is None or type(input_budget) is NativeInputPayloadBudget, 'exact input payload budget required')
+    inputs = input_budget or NativeInputPayloadBudget()
+    need(budget is None or type(budget) is NativeCaptureBatchBudget, 'exact native batch budget required')
+    limits = budget or NativeCaptureBatchBudget(max_source_raw_bytes=20_000_000, max_index_bytes=128_000_000,
+        max_output_bytes=64_000_000, max_wall_seconds=120)
+    need(limits.max_wall_seconds <= 120 and limits.max_index_bytes <= 128_000_000
+         and limits.max_output_bytes <= 64_000_000, 'small capture model entry budget exceeds hard cap')
+    need(on_verified_shard is None or callable(on_verified_shard), 'verified shard consumer must be callable')
+    out = Path(out_dir).resolve()
+    need(not out.exists(), 'capture model binding output must be fresh')
+    out.mkdir(parents=True)
+    started = time.monotonic()
+
+    def control(path, expected=None):
+        path = Path(path)
+        need(path.is_absolute() and path.is_file() and not path.is_symlink(), 'control metadata is not an exact regular path')
+        size = path.stat().st_size
+        charged = inputs.charge('control: ' + path.name, size, size, control=True)
+        with path.open('rb') as stream:
+            raw = stream.read(size + 1)
+        need(len(raw) == size and (expected is None or sha256(raw).hexdigest() == expected), 'control metadata changed')
+        inputs.complete(charged)
+        return _json(raw), raw
+
+    try:
+        model, model_raw = control(capture_model_path, expected_sha256)
+        need(model.get('schema') == 'scar.capture-model' and model.get('schema_version') == 1
+             and model.get('coordinate_identity_consistent') is True, 'unsupported G1 capture model')
+        root = Path(model['capture']).resolve()
+        need(root.is_dir(), 'G1 original capture unavailable')
+        expected_coordinate = model['coordinate_binding']
+        retained, retained_raw = control(expected_coordinate['uri'], expected_coordinate['sha256'])
+        need(len(retained_raw) == expected_coordinate['size_bytes'] and retained['local_root'] == str(root),
+             'G1 coordinate root/size differs')
+        archive, archive_raw = control(root / 'archive-index.json', retained['seed']['archive_sha256'])
+        need(archive.get('schema') == 'scar.lossless-capture-archive' and archive.get('schema_version') == 1
+             and archive.get('verified_roundtrip') is True, 'unsupported exact lossless capture')
+        storage = model['native_bundle_storage']
+        need(storage.get('kind') == 'partitioned', 'G1 partitioned native graphs required')
+        manifest_path = Path(storage['manifest'])
+        declarations = [r for r in model['outputs'] if r['path'] == str(manifest_path)]
+        need(len(declarations) == 1, 'G1 native manifest lacks one exact output receipt')
+        declaration = declarations[0]
+        partition, partition_raw = control(manifest_path, declaration['stored_sha256'])
+        need(len(partition_raw) == declaration['stored_bytes'], 'G1 native manifest size differs')
+        members = {r['artifact']['uri']: r for r in retained['membership']}
+        need(len(members) == len(retained['membership']), 'duplicate G1 membership URI')
+        archived = {r['logical_path']: r for r in archive['files']}
+        need(len(archived) == len(archive['files']), 'duplicate capture archive URI')
+        def one(schema):
+            rows = [r['artifact'] for r in retained['membership'] if r['artifact']['schema'] == schema]
+            need(len(rows) == 1, 'one G1 member required: ' + schema)
+            return rows[0]
+        native_member = one('scar.execution-evidence-collection')
+        native_meta, native_meta_raw = control(members[native_member['uri']]['local_path'], native_member['sha256'])
+        run_path = root / 'trace' / 'run.json'
+        run_size = run_path.stat().st_size
+        # Pre-charge complete public-binder passes before it opens the payloads.
+        # Success is reconciled with fresh membership/byte counts, not a flag.
+        plain_sizes = sum(r['artifact']['size_bytes'] for r in retained['membership'] if r['artifact']['uri'] not in archived) + run_size
+        archive_stored = sum(r['compressed_bytes'] for r in archive['files'])
+        verified_raw = sum(r['raw_bytes'] for r in archive['files']) + plain_sizes
+        need(verified_raw == retained['counts']['verified_raw_bytes'], 'declared binder inventory/raw count differs')
+        inputs.charge('ordinary binder verified complete members', 2*archive_stored + plain_sizes, verified_raw,
+                      basis='precharged complete SHA passes; fresh public binder reconciles exact receipts')
+        os_members = [r['artifact'] for r in retained['membership'] if r['artifact']['schema'] == 'strace.syscalls.text.v1']
+        inputs.charge('ordinary binder OS fact parse', sum(archived[r['uri']]['compressed_bytes'] for r in os_members),
+                      sum(r['size_bytes'] for r in os_members), basis='unchanged public binder complete OS parse passes')
+        cap = retained['native_tensor_input_membership']
+        chunk_raw = sum(r['size_bytes'] for r in cap['chunks'])
+        chunk_stored = sum(archived[r['uri']]['compressed_bytes'] for r in cap['chunks'])
+        inputs.charge('ordinary binder strict companion parse', chunk_stored, chunk_raw,
+                      basis='unchanged strict-reader complete parse passes after member SHA verification')
+        physical_member = one('scar.tensor-physical-trace')
+        dispatch_member = one('scar.dispatch-observation-trace')
+        companion_doc_sizes = sum(r['size_bytes'] for r in (native_member, physical_member, dispatch_member, cap['manifest']))
+        inputs.charge('ordinary binder strict companion metadata parse', companion_doc_sizes, companion_doc_sizes,
+                      basis='cached verified metadata document parse')
+        doc_names = ('call-meta.', 'call-operand-meta.', 'function-environment-meta.', 'dispatch-meta.', 'tensor-physical-meta.')
+        doc_sizes = sum(r['artifact']['size_bytes'] for r in retained['membership']
+                        if Path(r['logical_path']).name.startswith(doc_names)) + cap['manifest']['size_bytes'] + run_size
+        inputs.charge('ordinary binder other metadata parse', doc_sizes, doc_sizes, basis='complete document passes')
+        initial_sizes = native_member['size_bytes'] + len(archive_raw)
+        inputs.charge('ordinary binder initial native/archive', initial_sizes, initial_sizes, basis='complete initial document reads')
+        launch = retained['os_capture_provider']['launch']
+        coverage = retained['os_capture_provider']['profile']
+        os_control = sum(r['size_bytes'] for r in (launch, coverage, native_meta['configuration']['os_capture_intent']['intent']))
+        inputs.charge('ordinary binder OS intent/launch/coverage', 2*os_control, 2*os_control,
+                      basis='unchanged _document: receipt read plus document read')
+        coordinates = bind_capture_coordinates(root, max_bytes=verified_raw, profile_uri=str(out / 'capture-coordinates.json'))
+        need(coordinates.run == decode(ExecutionRun, model['run'])
+             and coordinates.payload == retained_raw
+             and coordinates.report['counts']['verified_raw_bytes'] == verified_raw,
+             'fresh ordinary coordinates differ from exact G1 Run/membership')
+        inputs.complete_prefix('ordinary binder ')
+        _write(out / 'capture-coordinates.json', coordinates.payload)
+        metadata = prepare_native_input_metadata(coordinates, budget=inputs)
+        # Source acquisition is still the original V2 owner. No G1 success bit
+        # substitutes for its full source SHA / original record / namespace checks.
+        source_artifacts = [one(s) for s in ('pytorch.execution-trace.v1', 'scar.dispatch-observation.events.v1', 'scar.tensor-physical-observation.v1')]
+        source_raw = sum(r['size_bytes'] for r in source_artifacts)
+        source_stored = sum(archived[r['uri']]['compressed_bytes'] for r in source_artifacts)
+        inputs.charge('native V2 complete sources', source_stored, source_raw, basis='precharged original V2 complete source reads')
+        tables = [('evidence', 'instances'), ('values', 'objects'), ('values', 'regions'), ('values', 'allocations')]
+        table_stored = table_raw = 0
+        for graph, table in tables:
+            for chunk in partition['graphs'][graph]['tables'][table]['chunks']:
+                table_stored += chunk['physical_bytes']; table_raw += chunk['decoded_bytes']
+        inputs.charge('native V2 original four tables', table_stored, table_raw, basis='precharged complete BundlePartitions chunk reads')
+        acquisition_meta = len(model_raw) + len(partition_raw) + sum(r['size_bytes'] for r in (native_member, dispatch_member, physical_member))
+        inputs.charge('native V2 acquisition metadata', acquisition_meta, acquisition_meta, basis='complete acquisition metadata reads')
+        consumed_shards = 0
+        def consume(shard):
+            nonlocal consumed_shards
+            metadata.bind_shard(shard)
+            consumed_shards += 1
+            if on_verified_shard is not None:
+                on_verified_shard(shard, metadata)
+            need(time.monotonic() - started <= limits.max_wall_seconds, 'capture-model whole wall budget')
+        native = bind_native_capture_batches(coordinates, root, manifest_path, out / 'native',
+            expected_manifest_sha256=declaration['stored_sha256'], capture_model_path=capture_model_path,
+            expected_capture_model_sha256=expected_sha256, budget=limits, progress=progress, on_verified_shard=consume)
+        need(sum(r['raw_bytes_read'] for r in native.report['raw_reads']) == source_raw
+             and sum(r['stored_bytes_read'] for r in native.report['raw_reads']) == source_stored,
+             'actual native complete-source read accounting differs')
+        need(sum(r['decoded_bytes'] for r in native.report['archive_reads']) == table_raw
+             and sum(r['stored_bytes'] for r in native.report['archive_reads']) == table_stored,
+             'actual original-table read accounting differs')
+        inputs.complete_prefix('native V2 ')
+        need(consumed_shards == len(native.report['shards']), 'not every verified shard consumed')
+        association = metadata.report()
+        association_payload = canonical(association)
+        need(len(association_payload) <= limits.max_report_bytes, 'association report byte cap')
+        report = {'schema': 'scar.native-capture-model-input-binding', 'schema_version': 1,
+            'profile': association['profile'], 'G1_capture_model': {'uri': str(capture_model_path), 'sha256': expected_sha256, 'size_bytes': len(model_raw)},
+            'run': coordinates.run.id.value, 'fresh_public_coordinate_binds': 1, 'verified_shards_consumed': consumed_shards,
+            'declared_dispatch_attempts': native.report['declared_dispatch_attempts'],
+            'enumerated_dispatch_groups': native.report['enumerated_dispatch_groups'],
+            'modeled_dispatches': native.report['structurally_modeled_dispatches'],
+            'G1_dispatch_outcomes': model['native']['dispatch_bridge']['outcomes'],
+            'dispatch_frontiers': native.report['frontier_counts'], 'metadata_counts': association['counts'],
+            'native_parent_closure': {key: native.report[key] for key in (
+                'source_domain_definition', 'whole_tree_parent_closure_established',
+                'qualified_leases_have_complete_required_parent_closure', 'native_parent_inventory',
+                'native_parent_nodes', 'missing_parent_edge_count', 'parent_frontier_node_count')},
+            'input_budget': inputs.report(), 'own_source_hash_checks': native.report['raw_reads'],
+            'output_limit_bytes': limits.max_output_bytes, 'private_index_limit_bytes': limits.max_index_bytes,
+            'wall_limit_seconds': limits.max_wall_seconds, 'rss_limit_KiB': limits.max_rss_kib,
+            'metadata_associations': str(out / 'input-associations.json'), 'target_executions': 0,
+            'capture_imports': 0, 'OS_interface_imports': 0, 'whole_model_established': False,
+            'source_call_binding_established': False, 'logical_content_established': False,
+            'state_effects_established': False, 'resource_ready_established': False,
+            'whole_elapsed_seconds': time.monotonic() - started}
+        report_payload = canonical(report)
+        published = sum(p.stat().st_size for p in out.rglob('*') if p.is_file() and 'private' not in p.relative_to(out).parts)
+        need(published + len(association_payload) + len(report_payload) <= limits.max_output_bytes, 'whole binding published output byte cap')
+        need(time.monotonic() - started <= limits.max_wall_seconds, 'capture-model whole wall budget')
+        _write(out / 'input-associations.json', association_payload)
+        _write(out / 'report.json', report_payload)
+        return NativeCaptureModelBatchResult(native, metadata, report)
+    except BaseException as error:
+        import traceback
+        # Diagnostic receipts from this call's own fresh failure output cannot
+        # restore a lease. Distinguish verified reads from pending reservations.
+        native_failure = out / 'native' / 'failure.json'
+        verified_native_reads = []
+        if native_failure.is_file() and native_failure.stat().st_size <= 1_000_000:
+            observed_failure = _json(native_failure.read_bytes())
+            verified_native_reads = observed_failure.get('raw_reads', [])
+            if verified_native_reads:
+                inputs.complete_prefix('native V2 acquisition metadata')
+        _write_json(out / 'failure.json', {'status': 'INCOMPLETE_NATIVE_INPUT_MODEL_BINDING', 'error_type': type(error).__name__,
+            'message': str(error), 'traceback': traceback.format_exc(), 'input_budget': inputs.report(),
+            'native_verified_source_reads': verified_native_reads,
+            'partial_or_unverified_stream_bytes_not_measured': True,
+            'whole_elapsed_seconds': time.monotonic() - started, 'target_executions': 0}, limits.max_report_bytes)
+        raise
+
+
+__all__ += ['NativeCaptureModelBatchResult', 'bind_native_capture_model_batches']

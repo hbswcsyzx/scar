@@ -1,0 +1,11 @@
+{
+  "G1_reimports": 0,
+  "elapsed_seconds": 1.7126242090016603,
+  "error_type": "ValueError",
+  "full_model": "OPEN",
+  "message": "native input retention: input member process differs",
+  "new_captures": 0,
+  "new_target_runs": 0,
+  "status": "OFFLINE_NATIVE_INPUT_BINDING_FAILED",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt01/gate.py\", line 113, in <module>\n    document = main()\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt01/gate.py\", line 71, in main\n    result = bind_native_capture_model_batches(freeze['G1_capture_model']['uri'], HERE / 'products',\n        expected_sha256=freeze['G1_capture_model']['sha256'], input_budget=NativeInputPayloadBudget(68000000, 1000000),\n        on_verified_shard=consume,\n        progress=lambda row: (HERE / 'progress.json').write_text(json.dumps(row, sort_keys=True) + '\\n'))\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_capture_batch.py\", line 1168, in bind_native_capture_model_batches\n    metadata = prepare_native_input_metadata(coordinates, budget=inputs)\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_tensor_inputs.py\", line 479, in prepare_native_input_metadata\n    members = _association_members(coordinates)\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_tensor_inputs.py\", line 317, in _association_members\n    _need(coordinates.process_for(artifact, coordinates.target_process.pid) == coordinates.target_process,\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n          'input member process differs')\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_tensor_inputs.py\", line 16, in _need\n    raise ValueError(\"native input retention: \" + message)\nValueError: native input retention: input member process differs\n"
+}

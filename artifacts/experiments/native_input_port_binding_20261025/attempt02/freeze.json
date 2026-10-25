@@ -1,0 +1,2718 @@
+{
+  "G1_capture_model": {
+    "sha256": "0b52a66d8259dc2234eacd98351adeb4c8d7763f1a667061f1839aa67fa57c94",
+    "size_bytes": 110385,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/capture-model.json"
+  },
+  "attempt": "attempt02",
+  "budgets": {
+    "RSS_KiB": 2097152,
+    "extra_control_metadata": 1000000,
+    "outer_seconds": 150,
+    "private_index": 128000000,
+    "public_outputs": 64000000,
+    "retained_stored_plus_decoded": 68000000,
+    "whole_seconds": 120
+  },
+  "changed_owner_sources": [
+    {
+      "candidate": {
+        "bytes": 78283,
+        "path": "scar/trace/native_capture_batch.py",
+        "sha256": "242e7cba98c37fcddcaec88d113e4bba11d4fab7d9c222d26a064b0cd05aeb11"
+      },
+      "main_baseline": {
+        "bytes": 64076,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_capture_batch.py",
+        "sha256": "d0eac8d1adf64bae16703ac3289e159d23b2d8582a1110506def9f7b2e8de1ae"
+      },
+      "path": "scar/trace/native_capture_batch.py"
+    },
+    {
+      "candidate": {
+        "bytes": 40367,
+        "path": "scar/trace/native_tensor_inputs.py",
+        "sha256": "4962c7e0e332dd30852d0e4be169499633140ea12f08d4875ba233dca81e0896"
+      },
+      "main_baseline": {
+        "bytes": 16604,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_tensor_inputs.py",
+        "sha256": "f8cf28fa8b375ccab3932db3f371a67d6a518e467eff133d4e4b0c02047d3ff8"
+      },
+      "path": "scar/trace/native_tensor_inputs.py"
+    }
+  ],
+  "excluded_source_paths": [
+    "scar/analysis/modeling_scope.py",
+    "scar/ir/modeling_scope.py",
+    "scar/ir/modeling_scope_codec.py",
+    "scar/store/scope_partitions.py"
+  ],
+  "inputs": [
+    {
+      "label": "G1_capture_model",
+      "sha256": "0b52a66d8259dc2234eacd98351adeb4c8d7763f1a667061f1839aa67fa57c94",
+      "size_bytes": 110385,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/capture-model.json"
+    },
+    {
+      "label": "G1_coordinates",
+      "schema": "scar.capture-coordinates",
+      "sha256": "637ce4a82da7aebabea13ed8f6885985115b7dbfc28f5e85dcaf4552ba0696da",
+      "size_bytes": 198782,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/capture-coordinates.json"
+    },
+    {
+      "bytes": 36412,
+      "label": "archive_index",
+      "path": "artifacts/experiments/native_input_membership_20261025/capture/archive-index.json",
+      "sha256": "aa037dfa45757ac8ceec63632af65f03c6e6d69b18219e0c271c13e7f6ab6e69"
+    },
+    {
+      "bytes": 1003708,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391040",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 8966352,
+      "raw_sha256": "a0dacc8348352bc53cf0cf1f1c2bbe97907787cd7b726cdb71fc2e193388a6f1",
+      "sha256": "d5bf99933a6807947a010c644b9cd502ee5bec4b653b4aee87523e0ebbec629f",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391040.gz"
+    },
+    {
+      "bytes": 432,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391046",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 862,
+      "raw_sha256": "1b6f7100d3bc208648704d9194ad6f9f649f84cdf83d7b7475b32e027a508384",
+      "sha256": "80831fdf8d175143932bb7dcf7f32302f584e8061520b1ef89f40e749f1fd7ec",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391046.gz"
+    },
+    {
+      "bytes": 371,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391047",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "3d915390ab543210db3da71b0d64354760b3fd9ca5b06ed12e9782de3217956c",
+      "sha256": "a6ed624993574be33e92ad8c2dfef23063d4430846ee8c07cb84e33a9a22c866",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391047.gz"
+    },
+    {
+      "bytes": 375,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391048",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "10cc1e3e532f58570e96189acfd6b9cc80fd7f1d46fbc14636aa2f7dc7c4d0a3",
+      "sha256": "fa5a12590f92734a5ffe33239f0870fea40fb793d53ac5175c7fe4a5d3ec0e97",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391048.gz"
+    },
+    {
+      "bytes": 376,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391049",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "aa12af86ff62db5fbc9b9ca6c66424068b38a882bda6dbdcbb088e8f9b17f428",
+      "sha256": "889ca0a0a092dea90119f936d4c4fb5da2923d9ea42ec1f5b99d08252c16f70b",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391049.gz"
+    },
+    {
+      "bytes": 376,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391050",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "1fa7bdb6be8339dae120cc37854e2fda5fc6a6ac21b989ec7cf8c770a9f490d0",
+      "sha256": "07400d8cb7b3e814c265ceed716d69afa374435d55595311322abc5c56ff34a8",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391050.gz"
+    },
+    {
+      "bytes": 377,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391051",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "7dfbb690108ff5d6f039e5b89d1eae34b3053d42b3c1460724f48dc2f408e367",
+      "sha256": "1e755bee4ca295728ef50b9973a8e9ff85e9d7ba26f56e4dba72df94c9fe1c2d",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391051.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391052",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "4e4be709f7d3a3aaf007b24353f242ac8d784794e9781a37554e2a39d84cb56e",
+      "sha256": "5f4eee1949c6a115ff79aa7a387424a4a3e2160676d8f4cd69986a7f9afb407c",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391052.gz"
+    },
+    {
+      "bytes": 370,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391053",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "30142fc24c210ffbf6982643abe7d4aad5a7fb04f39a9b1825a86a1aa133357c",
+      "sha256": "31d51fbfe507b60d144e14a3bc73aa24d9d77ff049c1425b98e2d600bb8a0290",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391053.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391054",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "9276b5287f140b545c1b694b6e66fe7087bcbfa2fa51b13008b3f0425bfc2bc6",
+      "sha256": "5608fff7f15870c2c8f315068ca217b10ea7987b1908e74a3c9197939f85c078",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391054.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391055",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "4b6454aef28d3b30da9c3885ff8b393597677b11324ab0cd14bd7164a762f53e",
+      "sha256": "102d819236df9f62bd2755fbc445f9374d4abcef9ee0e52d1165101f8bcf581d",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391055.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391056",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "b299781ae2a67e4396d75a2cdf7d8b7e92d776cfc15b5c077c919e4b313638c3",
+      "sha256": "bc6a587e6e686f4b146801d1e02c79c6c1343e266f5e024e7537b515dbbe1fec",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391056.gz"
+    },
+    {
+      "bytes": 375,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391057",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "f52bfa52beb5d7283885878a22bae16b0faaf7ad1c5eec057252ecf6ef4f699d",
+      "sha256": "0bac6dbd8d652cbe30d601d18ff21be6c54c5d71108efe5562c2a9fd2ac475be",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391057.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391058",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "20fe6f24346b1af179fc3481e150532b878a8b6f069a949e55bdf7d4b7241323",
+      "sha256": "b524df8ea01a8fd6e4f0338d70b499c52d29a74c59b03b1bbd8998d5b1303c16",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391058.gz"
+    },
+    {
+      "bytes": 375,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391059",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "e75b92720c176021b397e2736ab7fae98ab37dea4bd7f1bd63df8d2cdc6d07ae",
+      "sha256": "2c17807c685ec704a29385a2b9d98d219849052a761106043cf9dab64d57635d",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391059.gz"
+    },
+    {
+      "bytes": 369,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391060",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "d3b708a14359b5ef31f75dbdc208fe76af88cdb18b4b2774e4b6c3de3f082c38",
+      "sha256": "7a8f2bbd8a257c523ba48879350dc363c56fa7d7fef6c0141f625b7aa94226eb",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391060.gz"
+    },
+    {
+      "bytes": 374,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391061",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "c9b06757f8ec61ce52a74dcd8bfb79bfb427caf66fdf4c78738c2ca28e828c5d",
+      "sha256": "5824b4b7e644f26e8f591062de7de622c4ea8d2e8b2997aa1aafb64fa0a03e3c",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391061.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391062",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "a894eef90022d528e6b1d54d06cb972a19db3da6c073f7b92438627fd57bf1c3",
+      "sha256": "99d0072b166c81c45ddc4f7bbab928f28195a653127cd1a4c3bbdcc3ec0a4f8d",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391062.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391063",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "bff3c3c94a187eae47bf9ef3778802d93528081f25fa5d7d3046ac465aec4681",
+      "sha256": "601ac65e856e416d3383d681196e5ee93de3017f1b1526203d0586b8b0b0d0e6",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391063.gz"
+    },
+    {
+      "bytes": 371,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391064",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "b999c769fb757e07b9dcc42afcce3287046034880d99ccede12189e050d75da9",
+      "sha256": "119e25e7264dacd96b8933037d350b79f6103a2795f78a7a7ace23add0befe01",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391064.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391065",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "bf866ce7f73b6b37826bf750c127016f18c6a4ea192ca0be4515fa4200ab2d2b",
+      "sha256": "6b1924633875e568c6ee043a8510d1c40c36fb91883c79dab274fbfc110d9ad6",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391065.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391066",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "4e9c937430c73c688b912f221ee0476cb8d3e1141410bea0f8bc7e2a3175de7c",
+      "sha256": "dba39e973f0ca3b04962e563695b568451c8426869be10a99a08553b13c05cb5",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391066.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391067",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "8b38253d4937eff930e179bc9c1f0cb382fea4ebbe751774662e13e4e2c00efe",
+      "sha256": "320fae45b5e7bd3dc5d462dade62210ac33c99d7697d8dc9dcb3e1836c3284bd",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391067.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391068",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "60e8a96931ea616b737e79ba9de57b151c915b25edf91c61cd48b9d26b3b5d85",
+      "sha256": "abf45a62cf9c6991332ca63548ad9e79ecba21085cdcd0a0709dce7136a19355",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391068.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391069",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "b6f508a73e9eab91b07503f236d9e17de79ccf54ee48bbee8ac8b628cee948c3",
+      "sha256": "f7266f81b123e65ce40d9c4848c481bc67e77ef188f90e49d62a2b94078f518e",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391069.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391070",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "f00543a8f477517e259c7ce6e1d831ce4e6e94d4e3ea2be0203c41f378a78dda",
+      "sha256": "4ae9e5c04eda24e16595b1b194bd766ca827a0b31e9ea0cebcc44be9e1fab979",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391070.gz"
+    },
+    {
+      "bytes": 370,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391071",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "20d8d5ca43704402bba5c3c61684e2b9e3f3e6cbf90a58acae7d410da944232c",
+      "sha256": "69357ba1993777914d8f256e8c94fae4c0bb4f82376d925216666e7461b0c0da",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391071.gz"
+    },
+    {
+      "bytes": 374,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391072",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "25086c5b2beec2bcfe8d12213a2617712c8eebc59e925fb77b967c8f2e89b15d",
+      "sha256": "1c3b394fca245ac96a7210fdfb6e7fced6d228cb017584bc32e70ae35bf4b14d",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391072.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391073",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "b982047f93bd98bcaa4cac6e7c96afbbb21802a89be142a9225fd8b2a8427cd8",
+      "sha256": "97bb8b53d0db6198d252e80a5e92528041e1cba7a406b0d141ffbf4fce916336",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391073.gz"
+    },
+    {
+      "bytes": 375,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391074",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "e0ce1a8062fa9064fbdc69a6c2673ecd19646a4ff935d33b753c27a0f6d34897",
+      "sha256": "d9f30e36d6252216904232f26fcf30401e23db4b006bbb5a60887304d4c75596",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391074.gz"
+    },
+    {
+      "bytes": 370,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391075",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "2016777d1df3ea0bc772f9a0b23e104a65043586a26528377055b435f0d72475",
+      "sha256": "4faa98aeb701bc6b26764e9af6deae160eeeefe0389eafb0d45104cd83f89286",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391075.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391076",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "8b08422eb38225374fd3cc67b4b429d52ddb4efcc4dcb6262aebac9a67288daa",
+      "sha256": "a57ff62a6298e29beda5c8f24417fb74398d13f507018809634a1a3fe2457bf6",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391076.gz"
+    },
+    {
+      "bytes": 367,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391077",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "88bffa575b625dbd3dffd43e277b89712cc98d5427c3d6e2bee2bec2d72470ce",
+      "sha256": "a0cf0222b5ee628d3ec70620b780b11b8e37a266cb3689bb335a7ae995e6b462",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391077.gz"
+    },
+    {
+      "bytes": 376,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391078",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "0c917632e236a03067e639205b34b3b6e82e16c2e85b41a56a8576462478ac32",
+      "sha256": "1f3daf7e8cd196ccbb0fc822045ea2d232d8d8be887c447a31e656fe3ddba0f6",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391078.gz"
+    },
+    {
+      "bytes": 370,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391079",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "6ebdb8f969399d14e27cb2d3b980449d09a6216c5b7a1a1679ac8be402ca17fc",
+      "sha256": "32d6b480d799a0af8921d9642fa85c70146058e5fbb829f2f97af444a2accc53",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391079.gz"
+    },
+    {
+      "bytes": 371,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391080",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "b75b1649054d1dc28f337724773330cf12f52b90fc6404e58d491b6ace0d529f",
+      "sha256": "6747cc7f31134fe61d96dd3b7bdaef098adf07ac490de7d0508d16662a6074f4",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391080.gz"
+    },
+    {
+      "bytes": 376,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391081",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "56038c75d44b2ca3c5e3e072a24e9449f8ecb995cad5b340975661da10fc3f89",
+      "sha256": "f558b8cee609ca822243901b3a46d9552590eda557a680f89f629d7f5c0d6dbe",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391081.gz"
+    },
+    {
+      "bytes": 375,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391082",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "25f1aa44d02644af65264ae27c69c98d1cadd488f7179a2e06cc0baf345f7c86",
+      "sha256": "876f22f634b3f78b76fb6c146d58ec125351fcc76a505d3b4d79acae2438c0ad",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391082.gz"
+    },
+    {
+      "bytes": 374,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391083",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "26fde05a1b70f18f6230d823368d1ee70ec284877384b71b603a60b3c972857b",
+      "sha256": "0bcc95dbce5d10dfea05e743a1082c7e47b247a21a78f83fa55dd5251164d948",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391083.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391084",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "3cab7dbaa7e739f6ee9a2efcc837ad2b79d967926bacb0312403bfcfcfdfc3c4",
+      "sha256": "300ba0ff85d5326ae6cc98eca4b3b057bd3e94657af2807db05ddeebdca8ec52",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391084.gz"
+    },
+    {
+      "bytes": 371,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391085",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "3f3e982e503993b1c1d9ff703e5857071f615cc4d649c1c591ae52b28b7d5e70",
+      "sha256": "3a8160db1e79b157e29632d74a442473c4771b139617e9a52a0ba6678e759569",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391085.gz"
+    },
+    {
+      "bytes": 374,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391086",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "842ebaf52c074dbbd734c768c703dc14036680cc0f337bad92f8b074bd617a78",
+      "sha256": "7dbaa319bf6ab019d262109bbf39081569fef677e9fd5242b1f677a020164205",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391086.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391087",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "5a0ea3667f16c02ce2ec178aef1448f4356254334457fddde917bbb434b77bc6",
+      "sha256": "31aed97f312a446b6a8a9897498347a56959694aafe0a644a826988f9a4bbe77",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391087.gz"
+    },
+    {
+      "bytes": 376,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391088",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "a741d49705bcca91e154b3cc762505f9451e60c233e80126ac661f6931fb2e5b",
+      "sha256": "b36ea474953be7e1612f0e5c26ec2fd66b13f0b6af1080f18f62308247709e89",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391088.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391089",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "f18cebf961a0f3e8fac95c876570e677e77842f6632351e5323ef40e7da65ca0",
+      "sha256": "59a63ba00587533b7bd925254ea94c8287b2b48a675e3c68ed15e9d2cdb6bf34",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391089.gz"
+    },
+    {
+      "bytes": 374,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391090",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "8a4f91b22f06e62fbec00a46fead864388002ea1d76fc6c6b2f90f924c3e3bd8",
+      "sha256": "9ba2c0ea1823801bab31827b29971ec088d0c05ad3cbf24f56492cb6f1571e89",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391090.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391091",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "81bca26ee21224746fedb965a836c1fb25d646a947f8824a2c2428a683402418",
+      "sha256": "d538ba40e71a9156c960ab7650084c1c0a5c4646c83e175c7da7ede1f432ab2a",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391091.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391092",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "28ebb65c9737e0f30b1d2edadb1a7a3897e028d8bbea1d7f70a8716186f28c30",
+      "sha256": "2779af76792b2109d135d25236350f627749b401dc96509430c16e93837d67e5",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391092.gz"
+    },
+    {
+      "bytes": 369,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391093",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "89be319a828fef7543f8603da068550bffeb13b7e317b1cdbd2662968d6df6ba",
+      "sha256": "1113d0cbc2b465824b8c0c6fbf6dd3359080636f9741734da799e27eee61918d",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391093.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391094",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "0b48d2cc8714ae43bb330c0029ae01100ae6819862b7c53a16213cccb404d309",
+      "sha256": "233be63665917556befc1d79458ba6b9d0bbc91aca8ea355144060893eac50cc",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391094.gz"
+    },
+    {
+      "bytes": 372,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391095",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "edba551e5bfd8d3217f474538096df450433553cedd28e38e14dd13be83b4f35",
+      "sha256": "82ec0df390f31d9d7547864d168b75a1cc8ddfe7771feb40d8905f6419f811d6",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391095.gz"
+    },
+    {
+      "bytes": 376,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391096",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "14807ee60b3fa094a4637db0a30e2405b459bcbcb8cf5916c9b4379f698cf68b",
+      "sha256": "75de6bb5e8bbc998ea15c8c0bb1a9d2d8ec8b605ba477b48308a46c346b6bb94",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391096.gz"
+    },
+    {
+      "bytes": 373,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391097",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "bd5da23d5d476e627a02a3985655d29e890fd75e8588d5600d19c95dbf4ab933",
+      "sha256": "6246f247930dbaca3faca86865e4bdd10c9107ab68577bd1e1b3b83f06b2237a",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391097.gz"
+    },
+    {
+      "bytes": 376,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391098",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "bdc3a7efe0f9dbc5b57c524f5305c48d6c2f8410a7820fd3e5f83ffe303dccb2",
+      "sha256": "51de591ceb7612ff4ad2ee6d8d908e02dba39ed17b7c218ee88808216947a810",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391098.gz"
+    },
+    {
+      "bytes": 374,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391099",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "8c36d69bfa887d2468689705f130bb9105170428eef72bc2589eb0e9b6d40632",
+      "sha256": "8985bd03c789a3559b7f8546328efd6097c8bea395478882dc20058afb311317",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391099.gz"
+    },
+    {
+      "bytes": 378,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391100",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 675,
+      "raw_sha256": "e501e0e8fb9681adaa5e0ebe6ea1a849b3a1d2a079ee6890f2acbc42656e2087",
+      "sha256": "8de9e167c4efc36b8bfe7fd8b0bf23f995bdbd795c61c73204ef8f40d123211d",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391100.gz"
+    },
+    {
+      "bytes": 3134,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391101",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 16291,
+      "raw_sha256": "4a30651a25f33cd9a5addfb740c57404cb003ab89df08693e07de8910cb1dcb0",
+      "sha256": "9cd1d936d06c8ce6a73ae7c9b1d0394adc0d2930ebe60b53501b13ed75b20769",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391101.gz"
+    },
+    {
+      "bytes": 502,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391119",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 1000,
+      "raw_sha256": "c434f9303e12e4dc0b03ea3ab5c6b0e9ac8d03da6b34490d6ee80dd31d197514",
+      "sha256": "e9fb7095fff8b7d3f94a54bc1b1fe970613f77919485ade89f931af2e92454a6",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391119.gz"
+    },
+    {
+      "bytes": 636,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391136",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 1220,
+      "raw_sha256": "8f03494c33e5c7002ad1f6c9d90f071caae4e9c3938381551fc6609c87bbb380",
+      "sha256": "30251aa4511b6fab9a057529c156b7def667a801ad4cf825f104a4e46108721e",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391136.gz"
+    },
+    {
+      "bytes": 1095,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-codes.1391040.jsonl",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 2552,
+      "raw_sha256": "1f3460cf75d0908516fef16228480d3d90f969cc415f31895c18bff90ccc6a1c",
+      "sha256": "897af4961800f137063810edd1be28a283572e179b0c239dfb3c4af6889e8d8f",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-codes.1391040.jsonl.gz"
+    },
+    {
+      "bytes": 24062,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-events.1391040.jsonl",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 533107,
+      "raw_sha256": "971e40c6e0cbe21b4ecd80c81b224bc7cad830af10489a3747d7bff89a4ed56f",
+      "sha256": "deabf9baf833a35b5426cfd953fe55af851220e47f5ed98bc37af19e5a393714",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-events.1391040.jsonl.gz"
+    },
+    {
+      "bytes": 1357,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-operands.1391040.jsonl",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 11266,
+      "raw_sha256": "c66abfb32d1538406bf6a4f6e9f544ebde94103d22825080c1d5f1dbb40ea5be",
+      "sha256": "15e7fe1923b2d46de3a832167f16f6c1e649b6370915625a2e38be56e32fc763",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-operands.1391040.jsonl.gz"
+    },
+    {
+      "bytes": 17856,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/dispatch-observations.1391040.4c632006cdb40aef2065bd5d1309bcf5.jsonl",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 513244,
+      "raw_sha256": "8c31dd7d674c8e91ad6de84f0bf8b4be05003c034da88735baec402818124aa6",
+      "sha256": "0499e9e4d16155a805fbbe8756fcad702685747190184e2a7421a76cd69c24ca",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/dispatch-observations.1391040.4c632006cdb40aef2065bd5d1309bcf5.jsonl.gz"
+    },
+    {
+      "bytes": 573,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/function-environments.1391040.jsonl",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 2270,
+      "raw_sha256": "e24c1279a701fafe64c19d5c5a0944ca5d069d673cb916167033dddcae261629",
+      "sha256": "6c80284fcfe991645275e9b2c6daec4c915fc0539a55512ee06aca06c4aba5aa",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/function-environments.1391040.jsonl.gz"
+    },
+    {
+      "bytes": 152752,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/tensor-physical.1391040.4c632006cdb40aef2065bd5d1309bcf5.jsonl",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 2018741,
+      "raw_sha256": "bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12",
+      "sha256": "d65274bb033a19e6e94431cab956385c5b933545711def36ef3ab7101b0968f7",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/tensor-physical.1391040.4c632006cdb40aef2065bd5d1309bcf5.jsonl.gz"
+    },
+    {
+      "bytes": 93412,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/execution-trace.1391040.4c632006cdb40aef2065bd5d1309bcf5.json",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 2294964,
+      "raw_sha256": "09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47",
+      "sha256": "b209592fefb9a416307c7fc7081bfff621062afa3c08cdfe6f30fbd77e413651",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/execution-trace.1391040.4c632006cdb40aef2065bd5d1309bcf5.json.gz"
+    },
+    {
+      "bytes": 122210,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/kineto.1391040.4c632006cdb40aef2065bd5d1309bcf5.json",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 1707134,
+      "raw_sha256": "6ceded4dea3dcb048d945fd5fdd293beb81d74ca5bd95f7f77dcaef4dfda38b4",
+      "sha256": "fbc12f1d0b044cd3d17b018ba88d345728d0af707702654001326b9a577e9a71",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/kineto.1391040.4c632006cdb40aef2065bd5d1309bcf5.json.gz"
+    },
+    {
+      "bytes": 72297,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/native-tensor-inputs.1391040.4c632006cdb40aef2065bd5d1309bcf5/000000.jsonl",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 1291085,
+      "raw_sha256": "e210478750c05e9a1d61ac59ed6b4d39bf21e3a981270bd013e8b1be420339c6",
+      "sha256": "55b3856dd84b1a9ff8d2decd4b969397dd8b8c7e5066bd6e22d573469d56bae3",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/native-tensor-inputs.1391040.4c632006cdb40aef2065bd5d1309bcf5/000000.jsonl.gz"
+    },
+    {
+      "bytes": 70547,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/native-tensor-inputs.1391040.4c632006cdb40aef2065bd5d1309bcf5/000001.jsonl",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 1297529,
+      "raw_sha256": "9715872b646c3e0266a925b6b4d92f6e1e993a03f05c771b64096cfb46585c8e",
+      "sha256": "6465f23646f534c3667685b92daf2cb5a87350fa7b7e8de8ce17ba7e90db34b9",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/native-tensor-inputs.1391040.4c632006cdb40aef2065bd5d1309bcf5/000001.jsonl.gz"
+    },
+    {
+      "bytes": 24443,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/native-tensor-inputs.1391040.4c632006cdb40aef2065bd5d1309bcf5/000002.jsonl",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 425579,
+      "raw_sha256": "8e46027af43a7236054840a296b42feed473a52c3f07fee08985431d357f74f3",
+      "sha256": "ca48e0f1be905d00d058092282cba1110921b416f60d0cc5cbbad3d22ce209ac",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/native-tensor-inputs.1391040.4c632006cdb40aef2065bd5d1309bcf5/000002.jsonl.gz"
+    },
+    {
+      "label": "retained_plain_metadata",
+      "schema": "scar.execution-evidence-collection",
+      "sha256": "587ee159ed0add164d3bc13d812a18752c3d0f846ee7d74442a85737c74af9ae",
+      "size_bytes": 6259,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/execution-evidence.1391040.json"
+    },
+    {
+      "label": "retained_plain_metadata",
+      "schema": "scar.call-edge-meta.v1",
+      "sha256": "83d42f1c9be7de576134f3e1e8564e20ba0e2499adac77c98a3078769e6e10b3",
+      "size_bytes": 1025,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-meta.1391040.json"
+    },
+    {
+      "label": "retained_plain_metadata",
+      "schema": "scar.call-operands-trace",
+      "sha256": "40d5934938b05c6d934ff698e1bcb2a9e7fabd5b75cf3391d2c5d5cab034282a",
+      "size_bytes": 2019,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-operand-meta.1391040.json"
+    },
+    {
+      "label": "retained_plain_metadata",
+      "schema": "scar.function-environment-trace",
+      "sha256": "e2b1a439f96c4af47cce0c86eaf1964585490ee5824c22e836785a16206c4d36",
+      "size_bytes": 1413,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/function-environment-meta.1391040.json"
+    },
+    {
+      "label": "retained_plain_metadata",
+      "schema": "scar.dispatch-observation-trace",
+      "sha256": "12cd299c2efa05c62806579b948935dd382a81c3ebc5caf2a81d08ab7f13dfd3",
+      "size_bytes": 1514,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/dispatch-meta.1391040.4c632006cdb40aef2065bd5d1309bcf5.json"
+    },
+    {
+      "label": "retained_plain_metadata",
+      "schema": "scar.tensor-physical-trace",
+      "sha256": "bb4a69f365eb26ce44827c28382c8a0a928ce6bdf9633aa8f1e21374547153c3",
+      "size_bytes": 4215,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/tensor-physical-meta.1391040.4c632006cdb40aef2065bd5d1309bcf5.json"
+    },
+    {
+      "label": "retained_plain_metadata",
+      "schema": "scar.native-tensor-input-trace",
+      "sha256": "b5ca4a3d067bb746689709363d162b597ae4cb2c18a6679790d33b088be422ba",
+      "size_bytes": 2695,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/native-tensor-inputs.1391040.4c632006cdb40aef2065bd5d1309bcf5/manifest.json"
+    },
+    {
+      "bytes": 258,
+      "label": "command",
+      "sha256": "550842e8c75113664d35c3790daef5d526833fda5c571b326aa17ed1d8a848d7",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/run.json"
+    },
+    {
+      "bytes": 10099,
+      "label": "native_partition_manifest",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/native/bundle-partitions/manifest.json",
+      "sha256": "fb35e450c22344d6eadd0a0dc49cfb919fa472c9ecb6cd7546955dee329bb973"
+    },
+    {
+      "descriptor": {
+        "compression": "gzip",
+        "decoded_bytes": 10162560,
+        "decoded_sha256": "485a8a4b5fd59a1b43926c2624005af1b42f718ca3fb1e061c553aec4851b761",
+        "first_ordinal": 0,
+        "last_ordinal": 4385,
+        "lines": 4386,
+        "physical_bytes": 524667,
+        "physical_sha256": "7663bfb5f21d29f47c5876e007373b3dec3a6e76de8dabdc670f2ebfb5470113",
+        "uri": "evidence/instances/000000.jsonl.gz"
+      },
+      "label": "evidence.instances",
+      "manifest_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/native/bundle-partitions/manifest.json",
+      "provenance": "exact G1 manifest; verified by BundlePartitions"
+    },
+    {
+      "descriptor": {
+        "compression": "gzip",
+        "decoded_bytes": 331779,
+        "decoded_sha256": "98c22f116d17a9695cd8aaf2b6a295fea52076b45845afc08f526f86c5ddea36",
+        "first_ordinal": 0,
+        "last_ordinal": 259,
+        "lines": 260,
+        "physical_bytes": 8221,
+        "physical_sha256": "4f85b9981b28d24bdc1008bc68952a38dd64312e935d9c1d72fa66c92014bdfe",
+        "uri": "values/objects/000000.jsonl.gz"
+      },
+      "label": "values.objects",
+      "manifest_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/native/bundle-partitions/manifest.json",
+      "provenance": "exact G1 manifest; verified by BundlePartitions"
+    },
+    {
+      "descriptor": {
+        "compression": "gzip",
+        "decoded_bytes": 708613,
+        "decoded_sha256": "2a8f0cb5768d2a68ecd2a655d430c8ce30f79e7f92efbd62d49b014c93a30f40",
+        "first_ordinal": 0,
+        "last_ordinal": 519,
+        "lines": 520,
+        "physical_bytes": 36297,
+        "physical_sha256": "1d8f8e13f332dd07591c9f73ee583178549dca86ba8dbd54ccc969559d61994e",
+        "uri": "values/regions/000000.jsonl.gz"
+      },
+      "label": "values.regions",
+      "manifest_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/native/bundle-partitions/manifest.json",
+      "provenance": "exact G1 manifest; verified by BundlePartitions"
+    },
+    {
+      "descriptor": {
+        "compression": "gzip",
+        "decoded_bytes": 2604833,
+        "decoded_sha256": "237cfe52ff91e25095732c3ba1211e0a34265f487801649eefb5ccaea8296b45",
+        "first_ordinal": 0,
+        "last_ordinal": 2051,
+        "lines": 2052,
+        "physical_bytes": 156708,
+        "physical_sha256": "4649839c3f026a309477cbf8204e77c1d631e5ca183eac420fd9dfc80c2d28f4",
+        "uri": "values/allocations/000000.jsonl.gz"
+      },
+      "label": "values.allocations",
+      "manifest_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/native/bundle-partitions/manifest.json",
+      "provenance": "exact G1 manifest; verified by BundlePartitions"
+    },
+    {
+      "label": "owned_OS_metadata",
+      "schema": "scar.os-capture-launch",
+      "sha256": "e5991e36821662c80e74373663b95d8409df3c10378b6877b5ab43f17a6cee53",
+      "size_bytes": 3221,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os-capture-launch.72e4825aa567b8a82d51a87388a7e52c.json"
+    },
+    {
+      "label": "owned_OS_metadata",
+      "schema": "scar.os-capture-coverage",
+      "sha256": "4397af951a62866dae81ce874cfde19493a7e2836cc570aa6e640daac04ffd57",
+      "size_bytes": 2977,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os-capture-coverage.72e4825aa567b8a82d51a87388a7e52c.json"
+    },
+    {
+      "label": "owned_OS_intent",
+      "schema": "scar.os-capture-intent",
+      "sha256": "9fd6a70af9c41f6f6635af5856cece25c4bdc7e97a34acfd85a4b638b93b516d",
+      "size_bytes": 1877,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os-capture-intent.72e4825aa567b8a82d51a87388a7e52c.json"
+    }
+  ],
+  "new_captures": 0,
+  "new_target_runs": 0,
+  "original_G1_reimports": 0,
+  "previous_actual_attempt": {
+    "directory": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt01",
+    "elapsed_seconds": 1.712624209,
+    "failure": {
+      "bytes": 2125,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/failure.json",
+      "sha256": "38398435d7e9eda98dd6ed5ae747fd83c6b5e842be6afa8e43fccf2e92180d97"
+    },
+    "freeze": {
+      "bytes": 116177,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/freeze.json",
+      "sha256": "f582fec7b6d4cf4ce291b682e8ace9c39a7b2f7d234a0f41b53aa78013860b18"
+    },
+    "producer_source_snapshots": [
+      {
+        "bytes": 78283,
+        "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/attempt01-source/native_capture_batch.py",
+        "sha256": "242e7cba98c37fcddcaec88d113e4bba11d4fab7d9c222d26a064b0cd05aeb11"
+      },
+      {
+        "bytes": 39255,
+        "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/attempt01-source/native_tensor_inputs.py",
+        "sha256": "3cf3e77f2dda2ee656c153e75991743ce0725fc662c9623829155b5e3afa1a2a"
+      }
+    ],
+    "root_cause": "Process attribution is distinct from valid artifact selector. Same-process OS thread files have TID selectors, not targetPID selectors. Native helper must select its exact native input domain first.",
+    "session": 75283,
+    "terminal_exit": 1
+  },
+  "runner": [
+    {
+      "bytes": 6849,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/gate.py",
+      "sha256": "9d51250e600917d3c86e7ac92cd9e3200fa74b61df4299001ba15e92d852b995"
+    },
+    {
+      "bytes": 601,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/run.sh",
+      "sha256": "26debb8c6d3bf4e991dbaae72bc232ab324d29731f653674083b67f3bba71bd2"
+    }
+  ],
+  "schema": "scar.native-input-port-binding-gate-freeze",
+  "schema_version": 1,
+  "source_hash_validation_separate_from_retained_payload": true,
+  "sources": [
+    {
+      "bytes": 86,
+      "path": "scar/__init__.py",
+      "sha256": "06c291b537285645ebef96a29bd5de6440ed2649c5a5c2fcb1d91e8cc058ba4c"
+    },
+    {
+      "bytes": 1587,
+      "path": "scar/analysis/__init__.py",
+      "sha256": "d00d3f539d292f3bf90d84a49d20f81a1723fb7284e7303a3a200bbd8582652b"
+    },
+    {
+      "bytes": 5901,
+      "path": "scar/analysis/call_compilation.py",
+      "sha256": "9913057f2594541ba960bdb0221a1b613ff3a7f3526aa7db5643547aec9eef05"
+    },
+    {
+      "bytes": 16267,
+      "path": "scar/analysis/call_demand.py",
+      "sha256": "afe3445c9e05096852283184b7a8b395f66c51abcbf83fe7e5476f24433fc567"
+    },
+    {
+      "bytes": 9066,
+      "path": "scar/analysis/call_demand_schedule.py",
+      "sha256": "4796afe7453ae5c78df7d4a2ba8b88885baecf7009e8840d18a347ecf5393183"
+    },
+    {
+      "bytes": 55428,
+      "path": "scar/analysis/call_edges.py",
+      "sha256": "639eeb6ddafaeb7e74b406b0190d425ba5fe3acde66d15f88b01a7919324ca01"
+    },
+    {
+      "bytes": 20007,
+      "path": "scar/analysis/call_endpoint_queries.py",
+      "sha256": "f2f280d0c6768d1f6cbea2163a41e3c9f21de06c64a6d2b2c1ca0faecaa8b933"
+    },
+    {
+      "bytes": 18120,
+      "path": "scar/analysis/call_operand_reader.py",
+      "sha256": "5dc26ce1e4e3fb2eed5fcaf4cda9fd0650f3c794d49c61d171f0dd933f08bf3d"
+    },
+    {
+      "bytes": 38341,
+      "path": "scar/analysis/call_operand_routes.py",
+      "sha256": "1fcf016dc0941c64682c1c6a452ad12e1f0f7e61ef3ad0dd62f93c6aa286a7fb"
+    },
+    {
+      "bytes": 14906,
+      "path": "scar/analysis/call_operands.py",
+      "sha256": "12cb6a2301ebae6d2c41c93b3b29a827315f557ec998ad4352494dd93d264638"
+    },
+    {
+      "bytes": 9364,
+      "path": "scar/analysis/call_seeds.py",
+      "sha256": "e8c480b6146500cec09cd529170bcba80e33f70628c6b37737069062f3e77de7"
+    },
+    {
+      "bytes": 22103,
+      "path": "scar/analysis/call_trace_reader.py",
+      "sha256": "684c16a34b27e233407e64cfa5a313515d95fbcea13152ae253a21e1b9bb0416"
+    },
+    {
+      "bytes": 25860,
+      "path": "scar/analysis/callable_environment_import.py",
+      "sha256": "eb902edcd18f54a68b26fd141de936484703fdf772f6de856229bdd82b8cef86"
+    },
+    {
+      "bytes": 625,
+      "path": "scar/analysis/candidates.py",
+      "sha256": "6dd95a2fd55a1f28f489bcb2e90280c88c73f5464400e3512ba20c29a3a17f53"
+    },
+    {
+      "bytes": 16601,
+      "path": "scar/analysis/code_witness.py",
+      "sha256": "fb4b2be1274750ebbc0a3971d8c43bca261e5769d088765ee42f6f05d3c26a52"
+    },
+    {
+      "bytes": 21836,
+      "path": "scar/analysis/compiler_witness_archives.py",
+      "sha256": "8b7f9b3875098bd545775f9937d9a89c07ff4136fcdcbf6869fc228583f2c0a0"
+    },
+    {
+      "bytes": 20341,
+      "path": "scar/analysis/constants.py",
+      "sha256": "bdefa5e32789f2e735232a5a32a5c20ff20581d77c3b18ba0555c97fca248d4f"
+    },
+    {
+      "bytes": 29832,
+      "path": "scar/analysis/constants_v2.py",
+      "sha256": "00295d01d9eac66382a6120c488845e284289fa1ab97d8e3b27595957f32607c"
+    },
+    {
+      "bytes": 16081,
+      "path": "scar/analysis/contracts_v2.py",
+      "sha256": "bd73e71118edbeb527e922d4358f98fa126ba86c2bece6cf80fe4d0d478e8ee1"
+    },
+    {
+      "bytes": 59355,
+      "path": "scar/analysis/control_flow_v2.py",
+      "sha256": "595917215df8ff593142a1e6beb517acc891c78b6b7693d5260e7ca4de09f367"
+    },
+    {
+      "bytes": 20920,
+      "path": "scar/analysis/correspondence_v2.py",
+      "sha256": "74da61b7413e0fb46ae353bc967743d64484e80a51cbf9debbadebf59abf0d9a"
+    },
+    {
+      "bytes": 29100,
+      "path": "scar/analysis/current_source_evidence.py",
+      "sha256": "1886477d1845dd5ddf669aec8b2b5830c375cbb328647e345b6329615d09cdf2"
+    },
+    {
+      "bytes": 47799,
+      "path": "scar/analysis/dependency_continuation.py",
+      "sha256": "e87ddba3cca2d350890947ae80c92a43a043ca534c4a829824fdb4c5f1a2123a"
+    },
+    {
+      "bytes": 31092,
+      "path": "scar/analysis/dependency_sources.py",
+      "sha256": "249aaacbfdaf71ad9ecbef886438dcbbd886b387104d301f11b6bce75631e283"
+    },
+    {
+      "bytes": 54675,
+      "path": "scar/analysis/dispatch_sources.py",
+      "sha256": "039a57281a860d1d66aa5d4ebf36294fce7751c001065091789fea6d094c6cb7"
+    },
+    {
+      "bytes": 32349,
+      "path": "scar/analysis/effects_v2.py",
+      "sha256": "e47e56d9d6d23eff502f58072c811f2f640072e5a850ebdeac0f80b5f3db43c1"
+    },
+    {
+      "bytes": 21905,
+      "path": "scar/analysis/environment_lowering.py",
+      "sha256": "ae89cdbbe428e137ef1c372eb0625dd4989f691fdb7b06ee9ef469a88d7ec13b"
+    },
+    {
+      "bytes": 5737,
+      "path": "scar/analysis/frame_queries.py",
+      "sha256": "4db3d0ca485ef345ad2625673a97f5a5490d4c42a682f752864e99632ac6ca40"
+    },
+    {
+      "bytes": 8164,
+      "path": "scar/analysis/function_binding.py",
+      "sha256": "af6a9e38c6e0225d819afaa1fb32dcfd22e08e77cb450f09e074237488a2f77c"
+    },
+    {
+      "bytes": 10085,
+      "path": "scar/analysis/function_interfaces.py",
+      "sha256": "cf1245d1405628e1c719fd6099bc37c10055ee62007394946c1b3244e811b7ac"
+    },
+    {
+      "bytes": 9734,
+      "path": "scar/analysis/graph_candidates.py",
+      "sha256": "0cba159cd741159dc6349e9249030d477c91a7bbe0933e1dc923630a1bdbd564"
+    },
+    {
+      "bytes": 10618,
+      "path": "scar/analysis/graph_loops.py",
+      "sha256": "27930dea62b3aea8d7d0c79c42d04b9478bd4cf2d5b67a67db0fe4459c36c7c1"
+    },
+    {
+      "bytes": 2397,
+      "path": "scar/analysis/import_report_v2.py",
+      "sha256": "fcd9281baef7d9935f3000b04f5a6b900e3ce5467b7ec3dc46afe6b476e3f63a"
+    },
+    {
+      "bytes": 117119,
+      "path": "scar/analysis/import_values_v2.py",
+      "sha256": "b5bee769f71bca3fccb135ce69c35d4be19fe91749a0255e91bc5c4a611d860c"
+    },
+    {
+      "bytes": 6961,
+      "path": "scar/analysis/inspection_v2.py",
+      "sha256": "fbe676b7f7dfc1d82fcf8d189e387c450715301a17d9db3404a0e72467b61b46"
+    },
+    {
+      "bytes": 247,
+      "path": "scar/analysis/invariance.py",
+      "sha256": "3a89e48d684a0f687f83b5c8304c0b550ff450e31e681fab0a5efea87efb4b7c"
+    },
+    {
+      "bytes": 5620,
+      "path": "scar/analysis/inventory.py",
+      "sha256": "246c292b9c4d71e20e1eb01ec6d76cef3b68bfa22bae16be8f20b92bbf7a7093"
+    },
+    {
+      "bytes": 37658,
+      "path": "scar/analysis/inventory_partitions.py",
+      "sha256": "5b997b94d87353ed88cc6202416635a42ab7be28d471ff699495249e06c3c753"
+    },
+    {
+      "bytes": 3228,
+      "path": "scar/analysis/liveness.py",
+      "sha256": "125177d1f67870489bc278e0fae0ff2828181581f73020ab0a3c4cdcb24a317d"
+    },
+    {
+      "bytes": 74143,
+      "path": "scar/analysis/local_statement_semantics_v2.py",
+      "sha256": "acc97151e208982c35ef0c49dc8b45105508f202aab97ec008f189cc861e7dfc"
+    },
+    {
+      "bytes": 4416,
+      "path": "scar/analysis/loops.py",
+      "sha256": "3a0d17920ffdd9eecf0a45d676e1191d49dd880f6c9b0e154105ebd3e5a16cac"
+    },
+    {
+      "bytes": 7762,
+      "path": "scar/analysis/materialization.py",
+      "sha256": "457d798746b7ca63daf4db9cd9b9bc7409cd534a1026e56d5a8547e15edd6f12"
+    },
+    {
+      "bytes": 3211,
+      "path": "scar/analysis/memory.py",
+      "sha256": "dd95d0743048b80540053a3e7631cb8602ec399e4a381b3be92fd12c31d5a36b"
+    },
+    {
+      "bytes": 23824,
+      "path": "scar/analysis/primitive_semantics_v2.py",
+      "sha256": "dd6bbe3fe165767a3c4c1766068502ff867c031bc6769f5a78fe5040d77c9522"
+    },
+    {
+      "bytes": 87585,
+      "path": "scar/analysis/program_composition.py",
+      "sha256": "a0577c7762a53a1c167451bf6b4bd0bd029cd82bbd115721b36315f283dda070"
+    },
+    {
+      "bytes": 5594,
+      "path": "scar/analysis/program_context_store.py",
+      "sha256": "de964205aa0ae8c6beffd7be5f47be60efbe90becfcee20e86d0489fb61c5165"
+    },
+    {
+      "bytes": 21787,
+      "path": "scar/analysis/program_expansion.py",
+      "sha256": "c1f6857be8ff7b1e391736e9716691a3f150af76c5908837162ddb3960ed2a93"
+    },
+    {
+      "bytes": 60606,
+      "path": "scar/analysis/program_inventory.py",
+      "sha256": "0a2e80c69f1af56400caedd39d308d96ff64f9a60a1dfd3295c498e5524831dc"
+    },
+    {
+      "bytes": 66613,
+      "path": "scar/analysis/program_lowering.py",
+      "sha256": "8366051f1f9584d2b44363c3310580b6e51594de182849bb43245218a697bee4"
+    },
+    {
+      "bytes": 76762,
+      "path": "scar/analysis/proof_ledger_v2.py",
+      "sha256": "62bc8433ead43544eb22dc02713d410378188d5f3e71b0753b4ce8a086d845b1"
+    },
+    {
+      "bytes": 3088,
+      "path": "scar/analysis/proof_models_report_v2.py",
+      "sha256": "bf8507779c03da6a24f828f24c367bb3aebfc66d9bdc2e0c38c638f4682b7bcb"
+    },
+    {
+      "bytes": 10121,
+      "path": "scar/analysis/region_conflicts_v2.py",
+      "sha256": "39f6da71dbdc63f81e125074c8108f35c786144658631ea5e946a7a5c7d16026"
+    },
+    {
+      "bytes": 29849,
+      "path": "scar/analysis/region_queries_v2.py",
+      "sha256": "d110d948730fe0e5ab121a5545dd9299eb5263397c68ae2a5c8378996cb5e546"
+    },
+    {
+      "bytes": 6180,
+      "path": "scar/analysis/region_report_v2.py",
+      "sha256": "82b6e283673fee3e966c3247bd6ef4a5c8435a9ec61b3bcbad2fb38ac2ea1c68"
+    },
+    {
+      "bytes": 45442,
+      "path": "scar/analysis/regions_v2.py",
+      "sha256": "0579edffbb3ce3f29cf24ea815209fe851173c0a47c9d0548d2b68ea1c6d9f1b"
+    },
+    {
+      "bytes": 6354,
+      "path": "scar/analysis/rejection_audit.py",
+      "sha256": "720155d11974203527adf95d07ddcebebe8de0ae19b23ecbdcbe0fbdc5c107ba"
+    },
+    {
+      "bytes": 11012,
+      "path": "scar/analysis/repetition.py",
+      "sha256": "482256e38c5cef6f1dfced78606561e2a32bd59967eed9bd11be1c1ffbb727a5"
+    },
+    {
+      "bytes": 16735,
+      "path": "scar/analysis/runtime_effects_v2.py",
+      "sha256": "e31b0bd16aa2433ae9d8c096f9f3f192f38be6719d1d13cbe0b81a5bdf2d14d4"
+    },
+    {
+      "bytes": 12294,
+      "path": "scar/analysis/runtime_inventory.py",
+      "sha256": "8360727acde8135dc4b883777661ac42fa6cc561f7e099bfd9fe96cd6da064cc"
+    },
+    {
+      "bytes": 19041,
+      "path": "scar/analysis/runtime_sources.py",
+      "sha256": "d31380d3175dd18eb0a8d46b7398bd9b029c8d2207bd1dcaada7ed32220adf81"
+    },
+    {
+      "bytes": 2348,
+      "path": "scar/analysis/semantics_report_v2.py",
+      "sha256": "0728783025411b4e9e59f04799a41748875eff0016b1eb08f37115ddc72f2a1b"
+    },
+    {
+      "bytes": 39545,
+      "path": "scar/analysis/source_attachments.py",
+      "sha256": "2720936fbfb6734085862e9118e1b613f2df79b04421443e3d594cd0ed91aa66"
+    },
+    {
+      "bytes": 37298,
+      "path": "scar/analysis/source_body_access.py",
+      "sha256": "6ee72734469e5c23130b0d4f4ba1b28e94493e54a1bd9f2f1c9ec46efebe56f0"
+    },
+    {
+      "bytes": 14981,
+      "path": "scar/analysis/source_compilation.py",
+      "sha256": "e68cb99a98fd5b94ecbef83d0c06ca0b1ec65279c91fff927b7272bce3d69092"
+    },
+    {
+      "bytes": 9705,
+      "path": "scar/analysis/source_conditional_lowering.py",
+      "sha256": "ea8a7e1ff7dbfaab064edec7a6b1ba8a3481acc0551a3ed295293f14c915d96d"
+    },
+    {
+      "bytes": 35030,
+      "path": "scar/analysis/source_control_context.py",
+      "sha256": "28d97257faa37b3a53c86003ba173f5b62efb77239583ea7558e00629266c725"
+    },
+    {
+      "bytes": 46767,
+      "path": "scar/analysis/source_discovery.py",
+      "sha256": "7b4e1af9ed88fe8fe1ede7ccf087ae1b8924ba451054e4ed19f700ab353f36ad"
+    },
+    {
+      "bytes": 9737,
+      "path": "scar/analysis/source_environment_layout.py",
+      "sha256": "8ab33fd9a79af057d1952f23c1bdcf850b324237c41d39d8656746ffcd6c7baa"
+    },
+    {
+      "bytes": 13422,
+      "path": "scar/analysis/source_environment_validation.py",
+      "sha256": "d543bd8a8cbbf9ea51c675658eef1753576855e370ea61c2946c45a2eda4472a"
+    },
+    {
+      "bytes": 17448,
+      "path": "scar/analysis/source_fragments_v2.py",
+      "sha256": "6ec6d0324d0423c2b2926a0d8c7cfc0d7a8a5cde3f8842d6d2ffdd74d70a93e2"
+    },
+    {
+      "bytes": 32792,
+      "path": "scar/analysis/source_frontend_worklist.py",
+      "sha256": "cbc34304cb9aaa1d64b3df6f0031aec581e41716a1549a761c3ca96d5c4b79d3"
+    },
+    {
+      "bytes": 14653,
+      "path": "scar/analysis/source_heap_lowering.py",
+      "sha256": "e0948eb09225b4e31e1c3ba72bbcd47eadfa4460d605e3a400435f3936ff8d97"
+    },
+    {
+      "bytes": 2211,
+      "path": "scar/analysis/source_heap_validation.py",
+      "sha256": "2ce2113cbe6e8a201fc6fe4f9bdb18225e56bbfb53424aa5d63b640dbff9c2bd"
+    },
+    {
+      "bytes": 59390,
+      "path": "scar/analysis/source_invocations.py",
+      "sha256": "0c90a637860c8ad414568ecede776464e9ec813643bcf27798fb763f8a63b9fe"
+    },
+    {
+      "bytes": 5180,
+      "path": "scar/analysis/source_language.py",
+      "sha256": "9b2ef877bbfc9d752313cf54738ddcdf9b424f519b6c836f37d738ddf44497c1"
+    },
+    {
+      "bytes": 20560,
+      "path": "scar/analysis/source_language_validation.py",
+      "sha256": "c2e697681e3c8d2f3fbc12325d59ab42f31680b3ea81fdce206af398056ba353"
+    },
+    {
+      "bytes": 42939,
+      "path": "scar/analysis/source_layers.py",
+      "sha256": "483f0949a1bf714a67e4f0e328dcc622f85075ab9636044feefcfd21807b572f"
+    },
+    {
+      "bytes": 12366,
+      "path": "scar/analysis/source_mapping_lowering.py",
+      "sha256": "2f9f3973dc2fe64ac95cd22010af4fb1c871d6cf520690388adf93cb415cdbf4"
+    },
+    {
+      "bytes": 40436,
+      "path": "scar/analysis/source_program_publication.py",
+      "sha256": "438c40e4c91a0807ff03e860d72849ef2d1d401577d13f261758e8fd2e377b12"
+    },
+    {
+      "bytes": 33881,
+      "path": "scar/analysis/source_semantics_v2.py",
+      "sha256": "2c20b09a3affc372f1103904bdf100dd3e0963c6ed89463bd57dbcae1e512a96"
+    },
+    {
+      "bytes": 11567,
+      "path": "scar/analysis/source_slice_lowering.py",
+      "sha256": "bcf303afaad4eb17464018767da9824f1c4c380b763b6f2b5f8920a0dccb3156"
+    },
+    {
+      "bytes": 12089,
+      "path": "scar/analysis/source_statement_lowering.py",
+      "sha256": "9d6b86482d3d6202534803b095233cc8228aeb54a1e964e85e0e8764d12c8b26"
+    },
+    {
+      "bytes": 11191,
+      "path": "scar/analysis/source_string_lowering.py",
+      "sha256": "33061d4dd8680eb33e696a6d9312323d4aadd225ebf036fc453c45b9dd6b5407"
+    },
+    {
+      "bytes": 17856,
+      "path": "scar/analysis/source_tuple_validation.py",
+      "sha256": "31813718ae82e5747b691f204b94e10c010e490c5bd93f0c14b4342f214345ee"
+    },
+    {
+      "bytes": 3390,
+      "path": "scar/analysis/source_unpack_lowering.py",
+      "sha256": "96ccbde846eb5a4eb0f1cdf1428a2a1f2c429e06c340863b1c2b3747e3a43a44"
+    },
+    {
+      "bytes": 7417,
+      "path": "scar/analysis/static_candidates.py",
+      "sha256": "973b77a3965e5d003cb55951914458ce19425f271a20ae926aa50d58360ad0ec"
+    },
+    {
+      "bytes": 55023,
+      "path": "scar/analysis/structured_lowering.py",
+      "sha256": "ff0efe4a806c22607753458eac11795103dbdf110d9867b400cc20638b8e2931"
+    },
+    {
+      "bytes": 4912,
+      "path": "scar/analysis/synchronization.py",
+      "sha256": "6c09397ee2335e405b1fc7b33e99bfe24d42276e248a544d603668b4229809ab"
+    },
+    {
+      "bytes": 16134,
+      "path": "scar/analysis/topdown.py",
+      "sha256": "211266a77b3ebc88bda1e29887ab019ae17cadd3c590db775e8ee4eb9ed568aa"
+    },
+    {
+      "bytes": 609,
+      "path": "scar/backends/__init__.py",
+      "sha256": "223c1f9efc2c87a2292ac4edb98c99b3cd41678327f8ac41cde6f2238f0c1e21"
+    },
+    {
+      "bytes": 468,
+      "path": "scar/backends/base.py",
+      "sha256": "6bcd7559a1d5aebbc93718001994e87583e02e3c173715b2aff8b0f13db956e1"
+    },
+    {
+      "bytes": 2573,
+      "path": "scar/backends/dispatcher.py",
+      "sha256": "8e4491fbadfcdbd129d4f8b8ab4598b14d70c8b4b7e545ecfd71d5fce4a24167"
+    },
+    {
+      "bytes": 6441,
+      "path": "scar/backends/residency.py",
+      "sha256": "a9617bd586d6313ad9a344f30c619bc2fcea3139cf9ad88e138cf195540a1446"
+    },
+    {
+      "bytes": 20606,
+      "path": "scar/backends/reuse.py",
+      "sha256": "4b1d6586cfe39c4f06a02ff3c75cd93bf22840608ea80d1843d212e74b7b49e9"
+    },
+    {
+      "bytes": 2279,
+      "path": "scar/backends/source.py",
+      "sha256": "0a7d0f3320d4784499e807f9346c02d80b2dc292b94f46635fae32f2968061af"
+    },
+    {
+      "bytes": 99249,
+      "path": "scar/cli.py",
+      "sha256": "a314548ea32e24f905f63092c37d5b6c599eb8d517f0f415a117d84cee589715"
+    },
+    {
+      "bytes": 1445,
+      "path": "scar/ir/__init__.py",
+      "sha256": "104501dea2488611e70e31a3579604c3e5249c1315bfc60591e1c26cd91a27fe"
+    },
+    {
+      "bytes": 7725,
+      "path": "scar/ir/cfg.py",
+      "sha256": "8cf0ba8584735ff87ab0ef9ea049fea9169450e5c4f956faf3e4f55ccc0f74df"
+    },
+    {
+      "bytes": 31560,
+      "path": "scar/ir/control_flow_v2.py",
+      "sha256": "d31fed629ff80fb80294343bb1904c9375c5a976d3073e274c6e4b6c5a52e92e"
+    },
+    {
+      "bytes": 5784,
+      "path": "scar/ir/correspondence.py",
+      "sha256": "4d657909fed7734337510262f7788bab09cee3753a1f7b49b930a6f5a2ed47c5"
+    },
+    {
+      "bytes": 2834,
+      "path": "scar/ir/effects.py",
+      "sha256": "56f9500bc2e0ae08a59ab2b93e67adcbb33518e0e9376b5a772c5f555f06022f"
+    },
+    {
+      "bytes": 4408,
+      "path": "scar/ir/entities.py",
+      "sha256": "92ac005de66ea22b8217115285f34d9619f14705f644d8c22dece3791c48b341"
+    },
+    {
+      "bytes": 2281,
+      "path": "scar/ir/events.py",
+      "sha256": "e7a7a0458f71fa2822e4c23aadd2dc4e713a48da5262707a381e41d243580017"
+    },
+    {
+      "bytes": 1756,
+      "path": "scar/ir/execution/__init__.py",
+      "sha256": "6f5096f7edee3c263001a204f4c3c14f5f373344edc0389730474ed59e380b0e"
+    },
+    {
+      "bytes": 48482,
+      "path": "scar/ir/execution/await_links.py",
+      "sha256": "59bc695076f3d6c398e37697b2bdb5aee75f20167050fb1b888e019ae41fa075"
+    },
+    {
+      "bytes": 11530,
+      "path": "scar/ir/execution/await_outcome_evidence.py",
+      "sha256": "9f64b5cda5b7856ff2dfa42fd35737881a15dbb741beeceaccd1df182efab6f4"
+    },
+    {
+      "bytes": 35327,
+      "path": "scar/ir/execution/await_outcomes.py",
+      "sha256": "34e0fbe6e6991515c1b89a6aba6f41387c94dd7210eeb6c9ff5d8d996dfb518c"
+    },
+    {
+      "bytes": 6646,
+      "path": "scar/ir/execution/await_qualification.py",
+      "sha256": "fdd29572181c78cdef4dbff4ae6b5b39113d20885df8cc9ab3c80b681d922bd5"
+    },
+    {
+      "bytes": 34150,
+      "path": "scar/ir/execution/body_state_history.py",
+      "sha256": "7b8224ee9c940a4a427bb8e75bc85085b0f0030e60f8de649e9e56b697c6fd63"
+    },
+    {
+      "bytes": 2247,
+      "path": "scar/ir/execution/call_query.py",
+      "sha256": "9cecb45f6da0ee59a4e86faa1ae05fe5de3d019ed362d5e42aa91830cf1ebe42"
+    },
+    {
+      "bytes": 21676,
+      "path": "scar/ir/execution/call_validation.py",
+      "sha256": "9b9de07e1002e4f2c973dba2a48fac44e7ecfde546caf191a8b47c192adb09c2"
+    },
+    {
+      "bytes": 2085,
+      "path": "scar/ir/execution/calls.py",
+      "sha256": "a287446babd077c072f51182d12ecc5e670bd2e1700b6396e914e134d95a183f"
+    },
+    {
+      "bytes": 3543,
+      "path": "scar/ir/execution/cli.py",
+      "sha256": "28d6c8729b6caa52ddc8238453b4933fb88369ad03a669831e7211be03f14baa"
+    },
+    {
+      "bytes": 16011,
+      "path": "scar/ir/execution/codec.py",
+      "sha256": "f171cbabc251822b17014ad36fcce642b8d8e782fdb67ad23d92bc3dd4b70049"
+    },
+    {
+      "bytes": 2313,
+      "path": "scar/ir/execution/common.py",
+      "sha256": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8"
+    },
+    {
+      "bytes": 19328,
+      "path": "scar/ir/execution/completion_continuations.py",
+      "sha256": "b7ec6c61b2373f0b2f2437d8e2d5f1424eb7c5c818f881e04d0e9330fe01bb1c"
+    },
+    {
+      "bytes": 1377,
+      "path": "scar/ir/execution/composition.py",
+      "sha256": "6190ab8faa17c4b2823a061ce5179fb850fa9dd32c77806f04bc478052171852"
+    },
+    {
+      "bytes": 11629,
+      "path": "scar/ir/execution/composition_query.py",
+      "sha256": "ed631511a56893d419edf76c8ddbf15862761c7e851227db772348471587aa6c"
+    },
+    {
+      "bytes": 25471,
+      "path": "scar/ir/execution/composition_requirements.py",
+      "sha256": "7f3c536a36ddcc905a0200c440c2e2d62660aba49fd1be3104bd9de7893da601"
+    },
+    {
+      "bytes": 14898,
+      "path": "scar/ir/execution/composition_routes.py",
+      "sha256": "4040eacd33c8bf378803293826a4c386d3cced036fe4a19b83ff14ed2fe9df82"
+    },
+    {
+      "bytes": 10997,
+      "path": "scar/ir/execution/content.py",
+      "sha256": "1eee1822056e59a0be9f4f3a1524f97948df91497ad57072c7c0ca53c670cf9e"
+    },
+    {
+      "bytes": 38926,
+      "path": "scar/ir/execution/content_validation.py",
+      "sha256": "3a71d980f10e1d6c80057439baa35a68230e037d74f9aec793885cc9cf7fb4b8"
+    },
+    {
+      "bytes": 10753,
+      "path": "scar/ir/execution/coordinates.py",
+      "sha256": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09"
+    },
+    {
+      "bytes": 22116,
+      "path": "scar/ir/execution/coverage.py",
+      "sha256": "53da83b9cb3b67ae63a12163d74e58cf9d9d6d76511e2d4011a6918d43c59411"
+    },
+    {
+      "bytes": 8980,
+      "path": "scar/ir/execution/effects.py",
+      "sha256": "fd3d756ea382af33916ae6076b17e71a7bc3bc59a45db30c2b7974b573534e6d"
+    },
+    {
+      "bytes": 15981,
+      "path": "scar/ir/execution/endpoint_protocol.py",
+      "sha256": "4b9cf7163c498ce85e654c3c1ff2ac863dab8efb9fae471bf07398535ed037fb"
+    },
+    {
+      "bytes": 13143,
+      "path": "scar/ir/execution/flow.py",
+      "sha256": "f4682d97b2dce5fcd928461d2a7608ab56919a827bd1e213f579aa9b31ecb058"
+    },
+    {
+      "bytes": 11608,
+      "path": "scar/ir/execution/host_order.py",
+      "sha256": "c4578ff1cf51b7ac922453a8e89e951a5c2393ac63d4817ebaa8bd029e659a91"
+    },
+    {
+      "bytes": 3959,
+      "path": "scar/ir/execution/ids.py",
+      "sha256": "bf88d2d9cb0d82ad38021ff853eea93ddd057890e79b1ffe73026260f9a684ea"
+    },
+    {
+      "bytes": 24309,
+      "path": "scar/ir/execution/inventory.py",
+      "sha256": "99ed4011ebd379cff8f9b8731b5fd5c2cf9611ff7865d1241dc83dfe67a9afb5"
+    },
+    {
+      "bytes": 5900,
+      "path": "scar/ir/execution/literals.py",
+      "sha256": "ac1a100d74f333cc0f85efeb5e4624ec0ef838ceb3ab95a0986c037d29f09598"
+    },
+    {
+      "bytes": 7174,
+      "path": "scar/ir/execution/model.py",
+      "sha256": "2e0938dad916273c9320af407c86956a4a2091ccf7b148f021578fa862afa891"
+    },
+    {
+      "bytes": 9546,
+      "path": "scar/ir/execution/native_memory_binding.py",
+      "sha256": "eb8d59ac7cae672a126c2a18434a2f9a916fdee377b625f895dc289c879cc72a"
+    },
+    {
+      "bytes": 13348,
+      "path": "scar/ir/execution/native_memory_protocol.py",
+      "sha256": "277d572dac359da5db0a3bd2fb6728025316fe7e22be30fb704f3f5d18d54b40"
+    },
+    {
+      "bytes": 62029,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "608ba93502637c600fe46f8e9cfe1fca1005610d9b282da0633f69de93286338"
+    },
+    {
+      "bytes": 11640,
+      "path": "scar/ir/execution/observation_validation.py",
+      "sha256": "eaae52e54664107ac7baa7aa5707fbf2a19be6e9b59346f0ce37040f563ff983"
+    },
+    {
+      "bytes": 3932,
+      "path": "scar/ir/execution/observations.py",
+      "sha256": "8c8237c855680e78f6e1c256a30086105636c2af5ad6fb59958385840ed7d882"
+    },
+    {
+      "bytes": 4625,
+      "path": "scar/ir/execution/order.py",
+      "sha256": "e4ce65c33bb8169e643eb5bebd8bf5f3620d8d2cc5c8d333b62b52e2e4aea43a"
+    },
+    {
+      "bytes": 22729,
+      "path": "scar/ir/execution/order_validation.py",
+      "sha256": "cbea6d0b1072c0cf7a3579e07a13a3a9bad808b807c779e66ac76acf43f6ea09"
+    },
+    {
+      "bytes": 8842,
+      "path": "scar/ir/execution/pending_payloads.py",
+      "sha256": "e344ef6176fee208dc3da2c2f700bf4d02cb0032b85980b69c5c0d2744720b24"
+    },
+    {
+      "bytes": 10458,
+      "path": "scar/ir/execution/production.py",
+      "sha256": "abd9700207262eed121af4a7edb064c01afe903cbd3898f99d8d4653bee24097"
+    },
+    {
+      "bytes": 29485,
+      "path": "scar/ir/execution/production_query.py",
+      "sha256": "48cceaa0878db98508f4700ad24eb1b02b889219a8531aee0d7e69e3ca21c703"
+    },
+    {
+      "bytes": 13322,
+      "path": "scar/ir/execution/production_ranges.py",
+      "sha256": "42778b9c3ede578e1f664c5689aa4471f4df096855c273434bde589b429ca292"
+    },
+    {
+      "bytes": 16236,
+      "path": "scar/ir/execution/production_validation.py",
+      "sha256": "63f55ef4c4270f137d62799874ee51b783f562fc5086005e3f1769e8571158aa"
+    },
+    {
+      "bytes": 28764,
+      "path": "scar/ir/execution/query.py",
+      "sha256": "91bc5106cf392225dd6b58dfb6935bef9b60ccb759465de324fb02adcfd1efc6"
+    },
+    {
+      "bytes": 8969,
+      "path": "scar/ir/execution/reference_identity.py",
+      "sha256": "60ee15ce024c3a7e344b991694b76b9abda2a0f92fdc5229361329077b944cc6"
+    },
+    {
+      "bytes": 15935,
+      "path": "scar/ir/execution/region_implementation.py",
+      "sha256": "496c5500e5c8e1b4d8ca321e0b18788ea0775d8c65a1963427ccdd04130d24e4"
+    },
+    {
+      "bytes": 15945,
+      "path": "scar/ir/execution/request_state_history.py",
+      "sha256": "7ff1171ac41044d1e3d2622355ab048a0dd0ad0c112ca4a7b81e4df41cf3487e"
+    },
+    {
+      "bytes": 46872,
+      "path": "scar/ir/execution/resource_validation.py",
+      "sha256": "cd87ab75a38b29fe5e5177aac53e64f810955663f7b6539d9194d5b56c6f1588"
+    },
+    {
+      "bytes": 19262,
+      "path": "scar/ir/execution/resources.py",
+      "sha256": "4fc743695164cc6700b00190ea8f6b1398328c2abf41e68a6eb626dddea09139"
+    },
+    {
+      "bytes": 19165,
+      "path": "scar/ir/execution/resumable_flow.py",
+      "sha256": "a09dacd299e71d5119bd8feb00a077c6e8ea788ce0508a87e047dce9486feea6"
+    },
+    {
+      "bytes": 8338,
+      "path": "scar/ir/execution/resumable_identity.py",
+      "sha256": "523e25800bbbb86166b0fd780643fb1fcbc1301cc7a8abf6518f2970be630c60"
+    },
+    {
+      "bytes": 6820,
+      "path": "scar/ir/execution/resumable_query.py",
+      "sha256": "b1860cb99671b95af03f9842663c1588aff980d861e5176093a71ac0994e3310"
+    },
+    {
+      "bytes": 36619,
+      "path": "scar/ir/execution/resumable_sessions.py",
+      "sha256": "35aac3108fc6f7707bf6273f85e8f90b58932456d6b3170afb1a211761cd9695"
+    },
+    {
+      "bytes": 14997,
+      "path": "scar/ir/execution/resumable_validation.py",
+      "sha256": "f6cffc61110db87205619cc16e1948742263bbee9ec5983e73390dc4b1d6750a"
+    },
+    {
+      "bytes": 2236,
+      "path": "scar/ir/execution/resumables.py",
+      "sha256": "fdb741f337f7537533c77b2461dcbd424e9723f3ef3e4402907499519c52203f"
+    },
+    {
+      "bytes": 10711,
+      "path": "scar/ir/execution/session_occupancy_history.py",
+      "sha256": "0298dac5a58245ed45d331a7259fedd13436c4cadca08fa87f69849161f48c70"
+    },
+    {
+      "bytes": 8916,
+      "path": "scar/ir/execution/snapshot.py",
+      "sha256": "7757c299a965e37f5e73eeaa1f4ed304da6b7bfb970cded5d274fdc4e8483107"
+    },
+    {
+      "bytes": 12138,
+      "path": "scar/ir/execution/source_validation.py",
+      "sha256": "96b2ba96349574ee2ba12a24dd8d0784157fc9015e186acf87ac895cee749cbe"
+    },
+    {
+      "bytes": 9145,
+      "path": "scar/ir/execution/state_addresses.py",
+      "sha256": "2ce0377920a5b07e9268fbcb91404afc414a129385b155255998b75b718dc49b"
+    },
+    {
+      "bytes": 30090,
+      "path": "scar/ir/execution/state_preservation.py",
+      "sha256": "feb00e2bc5506c7e2da2abcddfe7423971ba9e9c078d81b00257ce2a64d39ec0"
+    },
+    {
+      "bytes": 14549,
+      "path": "scar/ir/execution/stored_value_projection.py",
+      "sha256": "797fb705def357e87517abb8deae3f4759215422e61a9cc73d08b44123109c79"
+    },
+    {
+      "bytes": 18814,
+      "path": "scar/ir/execution/stored_values.py",
+      "sha256": "96ebd29d3e6961b27977d34c85a9fb847bc8bbd62087c2bc7416b4d9acef9e65"
+    },
+    {
+      "bytes": 30851,
+      "path": "scar/ir/execution/validation.py",
+      "sha256": "ade5f14338eeca223eb57b77f228fe4d40b2d37db50d904a3935b2813a3fda30"
+    },
+    {
+      "bytes": 7730,
+      "path": "scar/ir/execution/validity.py",
+      "sha256": "55df8f7cc20c06b246e92822ea51ea4fcf9a64647ede17613e4325b8b8d0f120"
+    },
+    {
+      "bytes": 2142,
+      "path": "scar/ir/execution/validity_budget.py",
+      "sha256": "e1b297345fc1a63716da5d8d7f2434b4999e3200ad3b6ee4f3823c5d99244b10"
+    },
+    {
+      "bytes": 12435,
+      "path": "scar/ir/execution/validity_order.py",
+      "sha256": "c569e2b039e1f2c63760b02092e61a5d0e7799a50421f51598acd27f41c78368"
+    },
+    {
+      "bytes": 26902,
+      "path": "scar/ir/execution/validity_query.py",
+      "sha256": "cf1ff0f076939d04357cb64a2b03af5d77fb7aad7a1d9243465d2ad452ffea0c"
+    },
+    {
+      "bytes": 22813,
+      "path": "scar/ir/execution/validity_stability.py",
+      "sha256": "ef78805eba6be300dcc222836b8920910720b811ce19c15f1f327ac2000adea6"
+    },
+    {
+      "bytes": 43302,
+      "path": "scar/ir/execution/validity_validation.py",
+      "sha256": "0c640eadb9099fffd6a39525495e7fc3d3e01a74a715c4da9950cda92047bee2"
+    },
+    {
+      "bytes": 7924,
+      "path": "scar/ir/execution/value_sources.py",
+      "sha256": "f280de465fff16fd3fde46a8b921bbbed205380cfc3506bfb13ec603b6a65f99"
+    },
+    {
+      "bytes": 12864,
+      "path": "scar/ir/execution/work.py",
+      "sha256": "67faa8771822b3994fc7ad34a7527c2888c0fc5859bf99b4a887627094ec8f0f"
+    },
+    {
+      "bytes": 30465,
+      "path": "scar/ir/execution/work_validation.py",
+      "sha256": "7beb3ca5e1988c855ff5673a86af7401db7c1ea05905d7bc0c10bce533d4596b"
+    },
+    {
+      "bytes": 47032,
+      "path": "scar/ir/frontend_v2.py",
+      "sha256": "dd258588e3c68f121c7652b6d5c639d3f851f9b401e61920ad15a410867695f9"
+    },
+    {
+      "bytes": 36440,
+      "path": "scar/ir/graph.py",
+      "sha256": "ba39496a99441ee855d5cd761afb202afd9cb916480e28dadc2d9587b36ad301"
+    },
+    {
+      "bytes": 3055,
+      "path": "scar/ir/ids.py",
+      "sha256": "3507c19a291f10a3ddeffa22ba2be274b33c15f28904786ea5ca9c87c2e74f5e"
+    },
+    {
+      "bytes": 34543,
+      "path": "scar/ir/invocation_bindings_v2.py",
+      "sha256": "a66f4ae5993b56087c3682f9dee49bb4d133d11fbedc52ff2e108e6b79332dca"
+    },
+    {
+      "bytes": 21708,
+      "path": "scar/ir/literals.py",
+      "sha256": "a2ef2cb826378d034143134f3c85f0e3fb91c9adb67415ce88e74b64812f24f9"
+    },
+    {
+      "bytes": 10277,
+      "path": "scar/ir/program/__init__.py",
+      "sha256": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b"
+    },
+    {
+      "bytes": 14622,
+      "path": "scar/ir/program/admission.py",
+      "sha256": "382f1757b2e779318876cb0f12442bc8a4f8fa1542f59a760bab2b8c74fa85fb"
+    },
+    {
+      "bytes": 48875,
+      "path": "scar/ir/program/async_initial.py",
+      "sha256": "13b9c46ef90598f28b31111e0be372ef0cfaceea0d390537fdc8e07e12be360c"
+    },
+    {
+      "bytes": 22697,
+      "path": "scar/ir/program/async_request_paths.py",
+      "sha256": "6f57aebaafa8b1d9abedcda34cb3df9f0cea9e9f1f6ee1e020ad269187dbfd2c"
+    },
+    {
+      "bytes": 19676,
+      "path": "scar/ir/program/async_session_sources.py",
+      "sha256": "ee192bb2f6f11b4ce48d32c2328fbf250050a616d4df70a379d1982875306747"
+    },
+    {
+      "bytes": 14714,
+      "path": "scar/ir/program/await_failures.py",
+      "sha256": "16ed0d6021ac070da16d7a3a144bc07684d62dff36833382812e02df718b7f69"
+    },
+    {
+      "bytes": 3302,
+      "path": "scar/ir/program/await_inventory_originals.py",
+      "sha256": "1860f988838ebfaf9875a60df08fc949f0b5f7ceed5bbea91dffcc05d123cc81"
+    },
+    {
+      "bytes": 12821,
+      "path": "scar/ir/program/await_outcome_flow.py",
+      "sha256": "ce86b8d714a7ce72c87ce70940150a52ac7340dee385a1ce9c200f5be9982219"
+    },
+    {
+      "bytes": 25074,
+      "path": "scar/ir/program/await_outcomes.py",
+      "sha256": "84c3779e63150bd63d0a77c9000c9f7cc6ba8e2fd67c505af42a42f7180c5fc1"
+    },
+    {
+      "bytes": 11011,
+      "path": "scar/ir/program/await_qualification.py",
+      "sha256": "119225840de2abe49e98086f07c03d221bc7488c3d9e962d14764acf9bd7ec4e"
+    },
+    {
+      "bytes": 5373,
+      "path": "scar/ir/program/await_structured_completion.py",
+      "sha256": "7182c95c7b61e24716e08dc15f84759d988602ded0b085ad1f61306b4825b6d6"
+    },
+    {
+      "bytes": 32060,
+      "path": "scar/ir/program/binding_validation.py",
+      "sha256": "498e7515e4951013822befc419c85b842159be70c1ced08e5cd6ab74d8cd99cd"
+    },
+    {
+      "bytes": 3302,
+      "path": "scar/ir/program/bindings.py",
+      "sha256": "8bb4dfaddbeaf0fb70f675da4db60ba655f9b8f4ee56047f0b9a95f0009e3a46"
+    },
+    {
+      "bytes": 8757,
+      "path": "scar/ir/program/call_composition.py",
+      "sha256": "f03ef49aa1d0925b7dd22d43541ce04722c52e2acaf066e42c9e47db06a1b6bf"
+    },
+    {
+      "bytes": 10375,
+      "path": "scar/ir/program/call_demand.py",
+      "sha256": "7307de2bdfbebcdce3e66e6146012eb3e4321fefac01730c2ae034ead04b59c6"
+    },
+    {
+      "bytes": 13751,
+      "path": "scar/ir/program/call_edges.py",
+      "sha256": "b2a414942e7d236596e088bdf36396a86afaf247cc1cf3b069978d93f0499063"
+    },
+    {
+      "bytes": 3165,
+      "path": "scar/ir/program/call_effect_expansion.py",
+      "sha256": "c4f7778bb29570f151ebe8ebdd22c781492b382c6e90cf9341b00fd30413ba79"
+    },
+    {
+      "bytes": 13293,
+      "path": "scar/ir/program/call_operand_routes.py",
+      "sha256": "339dbd3433c1beadc5e4a038ff8f447f637c498036946696a650b9e0579e829e"
+    },
+    {
+      "bytes": 14524,
+      "path": "scar/ir/program/call_operands.py",
+      "sha256": "3f7a8ce71c2e2ba706b5fac952cfeb1b6ebc381fb0531058f6eab844fe8cbd14"
+    },
+    {
+      "bytes": 22746,
+      "path": "scar/ir/program/call_returns.py",
+      "sha256": "1b7aabe7512330504e2e3c0225883a7d962b6429b656c194896b2a2fc96b929d"
+    },
+    {
+      "bytes": 19352,
+      "path": "scar/ir/program/call_seeds.py",
+      "sha256": "c20e12f2d5d3ee95a8f58cffcae2fbd827f929589955b983e726ecd7a526a0fb"
+    },
+    {
+      "bytes": 6282,
+      "path": "scar/ir/program/cleanup.py",
+      "sha256": "79b5888885bf8c4ad50df77e8f6dc7ffff4e5aa8956aca9010a98a055cbd372c"
+    },
+    {
+      "bytes": 6328,
+      "path": "scar/ir/program/cleanup_forward.py",
+      "sha256": "ff99ec4320a1e65079c0988d483faec604838f0e84a260962d85a3a1955629a2"
+    },
+    {
+      "bytes": 26115,
+      "path": "scar/ir/program/cleanup_validation.py",
+      "sha256": "2bc12af79a58a08728196e0a9ec7907da9b16a810a444d46c009f91b63a948c3"
+    },
+    {
+      "bytes": 40826,
+      "path": "scar/ir/program/codec.py",
+      "sha256": "63689ab9741b613f8ab0549c4618a4bc8a03e073da52c91dcf9a9342ecb4f443"
+    },
+    {
+      "bytes": 242,
+      "path": "scar/ir/program/compilation.py",
+      "sha256": "2924eb78ece2c6fa3c993f84a0f84f29768ad9d19b835b3e34ab3aba9c57058c"
+    },
+    {
+      "bytes": 4787,
+      "path": "scar/ir/program/completion_adapter_routes.py",
+      "sha256": "7f20e972c1a13d5877dd123337a868d36b5c4cd3a610f7816201fb435cf08612"
+    },
+    {
+      "bytes": 894,
+      "path": "scar/ir/program/completion_continuations.py",
+      "sha256": "2d042822ac8c03d0ae7132f681b07d11ac1c5fd0f973b5b25d5bbbf0722a951c"
+    },
+    {
+      "bytes": 1941,
+      "path": "scar/ir/program/continuation_receipts.py",
+      "sha256": "28861135e25bdc0d54865d45ca3fb975bf298081c00aa5e3f2dc3538b39e33ca"
+    },
+    {
+      "bytes": 9227,
+      "path": "scar/ir/program/control.py",
+      "sha256": "88d2640c7cb23c454f95888ced4130784fd829e8d1d60292a17000278fbe4ef2"
+    },
+    {
+      "bytes": 19918,
+      "path": "scar/ir/program/control_validation.py",
+      "sha256": "3217ddedc8c00f5d19b299cd40f1ee7b5b53f3545f2ec7992d07312b6ee51fa5"
+    },
+    {
+      "bytes": 18724,
+      "path": "scar/ir/program/copy_consumers.py",
+      "sha256": "78e25935a1aa1a670641ebdea7a66de146e79113725f9198f5742fdea65e635c"
+    },
+    {
+      "bytes": 9291,
+      "path": "scar/ir/program/copy_flow.py",
+      "sha256": "25a8a07f5fdaa567eb024ed9489e5bca48107ed6065b958707d6ba72981e6432"
+    },
+    {
+      "bytes": 3799,
+      "path": "scar/ir/program/created_close.py",
+      "sha256": "5c1088ffd8260a83742a6ba193f29f4acee66066d45c76f44944e8b527d3fb8e"
+    },
+    {
+      "bytes": 16780,
+      "path": "scar/ir/program/discovery.py",
+      "sha256": "d9bfc4b5218413a3dc72ea7cc65be8f4746c87b07576bca495a8091d60556617"
+    },
+    {
+      "bytes": 4516,
+      "path": "scar/ir/program/driver_flow.py",
+      "sha256": "1815918ff1419257a33d19060ec3d7ca941fb84f80af8fc8733612d4c3f244aa"
+    },
+    {
+      "bytes": 23277,
+      "path": "scar/ir/program/driver_validation.py",
+      "sha256": "cdd8439fb1cd63c3ecd52c42f796a4c0cf15ec53591b0859f25137bee2f0e4d6"
+    },
+    {
+      "bytes": 12741,
+      "path": "scar/ir/program/drivers.py",
+      "sha256": "d1a4844d3b00fefed05e2fb743daaf32c9082ae8f0fec3a9db6bce255561aabd"
+    },
+    {
+      "bytes": 6999,
+      "path": "scar/ir/program/environment_validation.py",
+      "sha256": "edfefa6a74b80fbbe425de3dce2a0d4750ab971c42f372072f7252c6d19da834"
+    },
+    {
+      "bytes": 7546,
+      "path": "scar/ir/program/environments.py",
+      "sha256": "14e9c16d89db388793236a3636adaac0557c410a5c633c65f7558d413db029f8"
+    },
+    {
+      "bytes": 13369,
+      "path": "scar/ir/program/evaluated_sources.py",
+      "sha256": "9b77839ad692ec6ee88204298cf99e922fd657f6167c3df664d4fe1b8d51b0aa"
+    },
+    {
+      "bytes": 16342,
+      "path": "scar/ir/program/exception_match_query.py",
+      "sha256": "b9d9dc890f80e2e8760607e03f0dcd817584cad4c79449e0f9bc40525ba4666b"
+    },
+    {
+      "bytes": 4372,
+      "path": "scar/ir/program/exception_matches.py",
+      "sha256": "bbdbdbc098da785e6b86713a829f513ebe809ebd28f8cb60be98f62eb7b21bd0"
+    },
+    {
+      "bytes": 4323,
+      "path": "scar/ir/program/expansion.py",
+      "sha256": "7b9c9e1fcc091d994e820b2c6e9dd5d0b18ae323f0801098396556d7ccd78e04"
+    },
+    {
+      "bytes": 14890,
+      "path": "scar/ir/program/frame_validation.py",
+      "sha256": "f497bfd4849609384ff4e086bce259c3c80a748affd2876c3de553602da11356"
+    },
+    {
+      "bytes": 8049,
+      "path": "scar/ir/program/frames.py",
+      "sha256": "4c24a8719043778fdfaec6285c5b579a8855b6b0c8b31bde6c9ec2e81613cba2"
+    },
+    {
+      "bytes": 10570,
+      "path": "scar/ir/program/functions.py",
+      "sha256": "aa6440229e87cfbf67d57d9d268c1d6b4c89b824ff379c24509caa1af94b922f"
+    },
+    {
+      "bytes": 19458,
+      "path": "scar/ir/program/handled_completion_routes.py",
+      "sha256": "ca637488ae3f2756119761b75b3ef325d07c0439a6b0c2863c5e365651660fe1"
+    },
+    {
+      "bytes": 1613,
+      "path": "scar/ir/program/ids.py",
+      "sha256": "d13dcf373b8ca771bb107becad41fc6bd1dd6d8f1bf146ea4c48b0e962e342c8"
+    },
+    {
+      "bytes": 59967,
+      "path": "scar/ir/program/input_origins.py",
+      "sha256": "1c3ccb3010b42bebf8081f0ebb5bc760c1893bba1a4c8e424d6e9dc8575aae98"
+    },
+    {
+      "bytes": 5129,
+      "path": "scar/ir/program/inventory.py",
+      "sha256": "826868c6754cc0490c0477f6f0f0ec09e5f45b70b360a6624ba45b03f6bf26ba"
+    },
+    {
+      "bytes": 5507,
+      "path": "scar/ir/program/lifecycle.py",
+      "sha256": "326422e0b5c0a89fef3abda0f27037928d6c20bfc5adbd9afc875236678d17d7"
+    },
+    {
+      "bytes": 1619,
+      "path": "scar/ir/program/lifecycle_analysis.py",
+      "sha256": "153c309f0cd32a6b6b719f0266dbc68209a107c9746bb88c2463194d7d650dd7"
+    },
+    {
+      "bytes": 13823,
+      "path": "scar/ir/program/lifecycle_flow.py",
+      "sha256": "9fc23f943b8389764876856579db2e82797b2fb375a8c9ecc701b785b094d7f7"
+    },
+    {
+      "bytes": 7010,
+      "path": "scar/ir/program/lifecycle_validation.py",
+      "sha256": "49dee4e82ebe09964a1a72c0d5d19fc91b67645822e7b1abc4961d13ba381daa"
+    },
+    {
+      "bytes": 3842,
+      "path": "scar/ir/program/literal_sources.py",
+      "sha256": "9b3e99c0335d4177ee1814301a0be0da52039dfa10575bb78e46f411ba5c7a06"
+    },
+    {
+      "bytes": 3996,
+      "path": "scar/ir/program/literal_validation.py",
+      "sha256": "1c0cc6ce2464804dfb29fced4cdf9ba7f4f0ffa65407b62073e0f17fd91436ca"
+    },
+    {
+      "bytes": 56397,
+      "path": "scar/ir/program/model.py",
+      "sha256": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0"
+    },
+    {
+      "bytes": 8354,
+      "path": "scar/ir/program/native.py",
+      "sha256": "17543d01b8351d74eefc665d48c74383bca27d820507fff98646dc3cef2a22b0"
+    },
+    {
+      "bytes": 5120,
+      "path": "scar/ir/program/native_validation.py",
+      "sha256": "7fb36d01c70dc36889cf6dea65aa23763c0dd5139afc1bccdee65324e5e2743b"
+    },
+    {
+      "bytes": 9243,
+      "path": "scar/ir/program/no_body_validation.py",
+      "sha256": "22669aec4d7c608b1b60c7d161908452f1135e4a1b434b7b80fccccca12607ea"
+    },
+    {
+      "bytes": 2158,
+      "path": "scar/ir/program/operation_results.py",
+      "sha256": "1e7ce57c21eda7bf2c3d3f66dcf5db4863af8f04173a61068bba2ec870e0991d"
+    },
+    {
+      "bytes": 9065,
+      "path": "scar/ir/program/pending_payload_flow.py",
+      "sha256": "b1230cc9757844ab22a476b6025a8785f6a13aad42b79fe2350c6493ff6f3037"
+    },
+    {
+      "bytes": 71442,
+      "path": "scar/ir/program/protocol_async.py",
+      "sha256": "f674dc70ddc3b00d7d8619d5f9ab412a72e7402db2d6fc288529baa40f9a77ff"
+    },
+    {
+      "bytes": 60616,
+      "path": "scar/ir/program/protocol_await.py",
+      "sha256": "11d898c966ce152f1c92738d50460202f5a6e78166cf15da409e94287946f92e"
+    },
+    {
+      "bytes": 10593,
+      "path": "scar/ir/program/protocol_await_records.py",
+      "sha256": "af6513c1589025467d5e75f78f9a9b539159ca18efb4532f6199a3026db0a2c5"
+    },
+    {
+      "bytes": 34088,
+      "path": "scar/ir/program/protocol_connection_flow.py",
+      "sha256": "4f5ec8057c47b3508e7540e06f48f3e577733d68dab307bd6ea7f12dbe2d84d7"
+    },
+    {
+      "bytes": 20144,
+      "path": "scar/ir/program/protocol_connection_validation.py",
+      "sha256": "fa6ce1fc31f1d5b29806e4436d3a649b8b4337207b7596f6c83e43dae768dcf1"
+    },
+    {
+      "bytes": 27630,
+      "path": "scar/ir/program/protocol_connections.py",
+      "sha256": "a632e35f625abb2a6725361d29fa3180233a6eae3873e9a050ff92b634ca6cfb"
+    },
+    {
+      "bytes": 49645,
+      "path": "scar/ir/program/protocol_continuations.py",
+      "sha256": "4df206a2fb8aeb07a04c48b08a1c981241a66ebc18287adddd0fd99ef590b893"
+    },
+    {
+      "bytes": 29640,
+      "path": "scar/ir/program/protocol_flow.py",
+      "sha256": "9cb0bbe7c2d0ac3ebf6d9da413d88126b1d4dacb4e69d1db4ac27cf52b7498d4"
+    },
+    {
+      "bytes": 22674,
+      "path": "scar/ir/program/protocol_lookup_fallbacks.py",
+      "sha256": "c63a4da2d9f9eee82bc76b2c7c6e5a92c6ae175f08705e4f766eb5c1f3794380"
+    },
+    {
+      "bytes": 46484,
+      "path": "scar/ir/program/protocol_packet_routes.py",
+      "sha256": "27895e8c7bf6c0648449b1cdc93bacb194c3309022aec923c5f5fd508cce4072"
+    },
+    {
+      "bytes": 15001,
+      "path": "scar/ir/program/protocol_query.py",
+      "sha256": "4006dd4b38ba38572513acfbe05761ba536803dcdb5bd897f6f582e66fe45568"
+    },
+    {
+      "bytes": 16795,
+      "path": "scar/ir/program/protocol_rules.py",
+      "sha256": "828ad23a2a14f6aa56ca4bbaa2f1fc45cc68f927dd895e12a71ae3c57692b865"
+    },
+    {
+      "bytes": 52909,
+      "path": "scar/ir/program/protocol_validation.py",
+      "sha256": "814b68bfb9d3299aa6c89346314b55241992940ab26b6437242806950be07cbd"
+    },
+    {
+      "bytes": 30175,
+      "path": "scar/ir/program/protocols.py",
+      "sha256": "894f432e6b9ca4525fb6465b11199fef53fc70a5172fe7dde8d42027106e1885"
+    },
+    {
+      "bytes": 7468,
+      "path": "scar/ir/program/provider_validation.py",
+      "sha256": "1db55a3b5ab2c67f32496601a946b97263083b3d19af58bdedba3a83ef3e7877"
+    },
+    {
+      "bytes": 12334,
+      "path": "scar/ir/program/providers.py",
+      "sha256": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343"
+    },
+    {
+      "bytes": 58451,
+      "path": "scar/ir/program/queries.py",
+      "sha256": "3c47ec80d76292ab752fe3784f6b5a7d30db0d56c00ae1b818640c9e71c5d162"
+    },
+    {
+      "bytes": 14925,
+      "path": "scar/ir/program/region_implementation.py",
+      "sha256": "06ae780292613cd76784fdc6590b496e8d20738da182b15ff3f9d0ae4dcac39e"
+    },
+    {
+      "bytes": 14088,
+      "path": "scar/ir/program/request_inputs.py",
+      "sha256": "3854ab1af53a8b050cba03285f90ef2a1a99f5de299e1418646c310b3f1507a4"
+    },
+    {
+      "bytes": 5892,
+      "path": "scar/ir/program/resource_validation.py",
+      "sha256": "f2709a6d9e9898bc5ecb87ae2396510750550fde1bb071f8ab9808569f352c39"
+    },
+    {
+      "bytes": 7545,
+      "path": "scar/ir/program/resources.py",
+      "sha256": "4cfd796ec46731bcdb170da7b8ab2ea3a78d9938fe10ce5bda26663d262deb22"
+    },
+    {
+      "bytes": 9452,
+      "path": "scar/ir/program/resumption.py",
+      "sha256": "ef9d208d57ff6d3cd834529df7b68f377d1ac210f3f262b421c15aeadf5109ac"
+    },
+    {
+      "bytes": 2304,
+      "path": "scar/ir/program/resumption_flow.py",
+      "sha256": "c7c6b5c8e6d84d568fa87e52f71f9b66a6c1a50930633d0e97ea8613ce014cbc"
+    },
+    {
+      "bytes": 17070,
+      "path": "scar/ir/program/resumption_validation.py",
+      "sha256": "3e8f0a60bc9b636af1b4e25abc1caeaadfa208dc54b6abf9db89e8d468bf182a"
+    },
+    {
+      "bytes": 10865,
+      "path": "scar/ir/program/runtime_sources.py",
+      "sha256": "74843e78617e5a76f6f671df344b5843af3d332323893a97407d6ee06cb537a6"
+    },
+    {
+      "bytes": 11636,
+      "path": "scar/ir/program/session_flow.py",
+      "sha256": "13e90d83f74bd46281a678c778c559ad1d6d52d3d5722137be38848f853a7387"
+    },
+    {
+      "bytes": 19534,
+      "path": "scar/ir/program/session_occupancy.py",
+      "sha256": "ef73ff6654252eb2528751f4ffc798c2a619ff77d6a31d409225d9964903106d"
+    },
+    {
+      "bytes": 6687,
+      "path": "scar/ir/program/session_release_validation.py",
+      "sha256": "b96e989a611a518630e2c33bbf61b5f69d4cc015b54166d27f78a6486482e0fc"
+    },
+    {
+      "bytes": 4845,
+      "path": "scar/ir/program/source.py",
+      "sha256": "dbff369035e06452de1f6c0e741e68553f188addac8483859ae47a444f5a002b"
+    },
+    {
+      "bytes": 5920,
+      "path": "scar/ir/program/source_language.py",
+      "sha256": "a6588f7c12299d503582520603fc5b4756f7434910ce2ccd7be8128f22ef06e6"
+    },
+    {
+      "bytes": 5912,
+      "path": "scar/ir/program/source_references.py",
+      "sha256": "3b3f466571b83f298588e3bdb0329240c21371082e678b0df431af56b364d69e"
+    },
+    {
+      "bytes": 16239,
+      "path": "scar/ir/program/state_address_validation.py",
+      "sha256": "03c1d4f8b3e9fe991f902a4e775051b2fbc8f048b49e4758fb3431833937a096"
+    },
+    {
+      "bytes": 9581,
+      "path": "scar/ir/program/state_addresses.py",
+      "sha256": "6ff4052771e4c92cf248f298131037f9a25a5bda8059e1547da44410d3577b61"
+    },
+    {
+      "bytes": 227,
+      "path": "scar/ir/program/state_modes.py",
+      "sha256": "8d841907f306ee66996b9b45b3c7b5a6a4c799361e818851dff66534e0ee519e"
+    },
+    {
+      "bytes": 16100,
+      "path": "scar/ir/program/stored_values.py",
+      "sha256": "8fb11f28816e0e19997722f59b6156909f6b987a10aec58f929eb079b548cb6f"
+    },
+    {
+      "bytes": 6530,
+      "path": "scar/ir/program/structured.py",
+      "sha256": "c100dd3b51665e462336efe0d555d60806922b1ec7c34c8c2b9c904755eca87f"
+    },
+    {
+      "bytes": 45594,
+      "path": "scar/ir/program/validation.py",
+      "sha256": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90"
+    },
+    {
+      "bytes": 3665,
+      "path": "scar/ir/proofs.py",
+      "sha256": "57d0ba9768d0a5e9db79d4f468c41ae73058e46df18e6f28cdb4039581ecf527"
+    },
+    {
+      "bytes": 53719,
+      "path": "scar/ir/provenance.py",
+      "sha256": "f8f11d353a05c9b2ec893ae5ab3da7be747b4a2ea3b28a21eb1f7891237523c1"
+    },
+    {
+      "bytes": 7478,
+      "path": "scar/ir/record_codec.py",
+      "sha256": "0954c05e53a6dcb31f449461db71c63fdcdd9f95a9c053424d86bf5217a89ef3"
+    },
+    {
+      "bytes": 28661,
+      "path": "scar/ir/semantics_v2.py",
+      "sha256": "5d943b7d48b159cfb8512ffff228236aee29d3c4f795ff0319d44489a81a4094"
+    },
+    {
+      "bytes": 3189,
+      "path": "scar/ir/source_fragments_v2.py",
+      "sha256": "25629ca20d5d9186d1a6c65534d0e78371f1e6a7dc2b30d5c3d2789e46ba7e51"
+    },
+    {
+      "bytes": 21470,
+      "path": "scar/ir/static.py",
+      "sha256": "30be3dc04e6f03d8c91e8469dbd50771120b3c91ecedc3ea2cfdb4fd0cd495ca"
+    },
+    {
+      "bytes": 5226,
+      "path": "scar/ir/v2/__init__.py",
+      "sha256": "6d1da8e107dfb8fb6a424fd2e6004f8ef71e8d18add1324d939334d94eefbd91"
+    },
+    {
+      "bytes": 6576,
+      "path": "scar/ir/v2/_validation.py",
+      "sha256": "f1c640101d6d9ffc8baa7a647cad2862353fcdcd196c698f1f97b7764be04ede"
+    },
+    {
+      "bytes": 44003,
+      "path": "scar/ir/v2/codec.py",
+      "sha256": "8b1392d3840daee80f21a88b87e09443f06f186cc2ed4bec9d0cd001c45dee9b"
+    },
+    {
+      "bytes": 4677,
+      "path": "scar/ir/v2/common.py",
+      "sha256": "691a7ec169c81cb51e271731ea11ee4c2aed38b5553b1f48f072a8ff368979b9"
+    },
+    {
+      "bytes": 7129,
+      "path": "scar/ir/v2/contracts.py",
+      "sha256": "c7aaae3ea0e292e425cfbe820d4508363b9e26e0c94427cefc5a4bb0ae6e15b1"
+    },
+    {
+      "bytes": 5260,
+      "path": "scar/ir/v2/correspondence.py",
+      "sha256": "7882dfa21e7877f41dc441f40875433d6b340f4fdb657df547ca57fc34953de5"
+    },
+    {
+      "bytes": 24584,
+      "path": "scar/ir/v2/evidence.py",
+      "sha256": "c789c7aca05e217f95d4ca7bef6c761d9a5244a9779fed5174a0f4132c09630d"
+    },
+    {
+      "bytes": 3963,
+      "path": "scar/ir/v2/ids.py",
+      "sha256": "d11e038a6a4c7de6dee5c8050182a97ddb4a6a6a399c466836ca64d6d9cb0a23"
+    },
+    {
+      "bytes": 44870,
+      "path": "scar/ir/v2/optimization.py",
+      "sha256": "429313a4b30d82fb0dbbb908d48caec5d4849142ac72cc1ab10cdf2bd919620f"
+    },
+    {
+      "bytes": 12417,
+      "path": "scar/ir/v2/schemas.py",
+      "sha256": "de5c56960aa70ad5633758ccd61f9bc6ae3f66a97aea67b85d994b66e1ad0682"
+    },
+    {
+      "bytes": 24191,
+      "path": "scar/ir/v2/semantic.py",
+      "sha256": "9d0af8a2b4a868df00388ccb910cdabdc93066aad7ff0e593d1c8d0e969885ab"
+    },
+    {
+      "bytes": 22415,
+      "path": "scar/ir/v2/values.py",
+      "sha256": "e12586470c294701c315d6108a80746f08a14ba26a4ca6dcf6374f458d1078b5"
+    },
+    {
+      "bytes": 4606,
+      "path": "scar/ir/versions.py",
+      "sha256": "e6f31b33c3854244c52e26977942beb57909f4526752396f052c56555c57b98d"
+    },
+    {
+      "bytes": 385,
+      "path": "scar/planner/__init__.py",
+      "sha256": "ccce10252c988ae8de017b4747e321d124ef8da19687146138bb5e8b2f5bedd6"
+    },
+    {
+      "bytes": 1720,
+      "path": "scar/planner/cost.py",
+      "sha256": "0ffdcf2ef9737637af9fe9c794e5af75b34ad0ce759fc9ba9e9794b6fb2c6e01"
+    },
+    {
+      "bytes": 2913,
+      "path": "scar/planner/planner.py",
+      "sha256": "9c8be41e1cde3af4d5181564f4a5e1e4316ca007bf1f10917e57958d94fa5499"
+    },
+    {
+      "bytes": 12525,
+      "path": "scar/planner/selection.py",
+      "sha256": "04a895744a3213faf4428a21a16985d8b179c003cc2359457e9069651413b4d1"
+    },
+    {
+      "bytes": 239,
+      "path": "scar/store/__init__.py",
+      "sha256": "019e9754352facfb195c6f6bf1b768f7c9ad0dfa6b2712d4a3342021a79d08ed"
+    },
+    {
+      "bytes": 27087,
+      "path": "scar/store/bundle_partitions.py",
+      "sha256": "655c87445ab30e07ca1371362901e7bef53bf6aaca085d2c3ba8a0a330c389e3"
+    },
+    {
+      "bytes": 56137,
+      "path": "scar/store/graph_index.py",
+      "sha256": "e59746ae82fe4d3d397222521721d26646a634d48a17e88bc32a05752314c5b8"
+    },
+    {
+      "bytes": 95,
+      "path": "scar/trace/__init__.py",
+      "sha256": "5151c57e95553b9bcc4a21568a77c29fbc95075cc68671ae1597afeeb9245f73"
+    },
+    {
+      "bytes": 18213,
+      "path": "scar/trace/call_edges.py",
+      "sha256": "804a0c93d3aac6ddedf5154f2956cac49823cf35d9d6aac45f47e24c234d6fe8"
+    },
+    {
+      "bytes": 50423,
+      "path": "scar/trace/call_operands.py",
+      "sha256": "93de23067ca8f816ff5733248e57c2bfc1344845020b05f8f6c507b26e97167e"
+    },
+    {
+      "bytes": 22036,
+      "path": "scar/trace/callable_environment.py",
+      "sha256": "14e4a319ec9024752eff907422fbc886da1e735db88360b8871c345669c39428"
+    },
+    {
+      "bytes": 40987,
+      "path": "scar/trace/capture_coordinates.py",
+      "sha256": "e0d71eba04aab0a948ee6d07bbbcd30abc20ddb162dee62a7f0b7922ad8d8aba"
+    },
+    {
+      "bytes": 15797,
+      "path": "scar/trace/capture_import.py",
+      "sha256": "70236a492175c02de84a3a11ffb6de2bdf58e95ef35711b64b5f03ad0b7c9687"
+    },
+    {
+      "bytes": 11101,
+      "path": "scar/trace/checkpoint.py",
+      "sha256": "980e26531a240e84b0f8bafcd47d15f09cb9ad6f36a3b1fe70d712e6a440cc46"
+    },
+    {
+      "bytes": 9612,
+      "path": "scar/trace/code_snapshot.py",
+      "sha256": "3a00de3ef3dbac1e0ceca379f89dc501e95f9256dc59d77b318cc6f9f4c332cb"
+    },
+    {
+      "bytes": 20885,
+      "path": "scar/trace/collector_execution_witness.py",
+      "sha256": "a09f40f32a16fd5aef2c5a20f56a2bc00d5829d27d49722f94e850007c2bb293"
+    },
+    {
+      "bytes": 5258,
+      "path": "scar/trace/cuda.py",
+      "sha256": "6a52696d7c1c472832cc8c50b8e69f8eac3573b01a714702cfa4fe0ad433c1f4"
+    },
+    {
+      "bytes": 14658,
+      "path": "scar/trace/dispatch_evidence.py",
+      "sha256": "c5db7dba084b8ec903549ba48380eedd2fd24c5db80aa1aca18f4376327ebb77"
+    },
+    {
+      "bytes": 19932,
+      "path": "scar/trace/dispatch_import.py",
+      "sha256": "71cd511cbc82188e1ade4a8a5a84f931f549d431ceda8cab9753ba2fb4a7d18e"
+    },
+    {
+      "bytes": 23140,
+      "path": "scar/trace/execution_evidence.py",
+      "sha256": "ac1c9f1d88b91b37f8c46b4c8c9ba26ffca1510f9b9683d265fe1202cf903b53"
+    },
+    {
+      "bytes": 833,
+      "path": "scar/trace/files.py",
+      "sha256": "cc0dee95dde97b488272e4b23ccb23df9cd84fca98fe5c2bb05003e8dad6e8b0"
+    },
+    {
+      "bytes": 10626,
+      "path": "scar/trace/inject.py",
+      "sha256": "aceab4d21c2345f042c9de086e68b9d09ef493a4cdb8e268c0fb1c07f07f9cb7"
+    },
+    {
+      "bytes": 78283,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "242e7cba98c37fcddcaec88d113e4bba11d4fab7d9c222d26a064b0cd05aeb11"
+    },
+    {
+      "bytes": 32455,
+      "path": "scar/trace/native_import.py",
+      "sha256": "b65c817daf876855912a811196a97d89845d6fd7ae92d9df176c758b58f5613f"
+    },
+    {
+      "bytes": 14691,
+      "path": "scar/trace/native_memory.py",
+      "sha256": "30ef73726029d533d9023b4277ca6aab86e3f1ca1fe476d629232fc6dd647a4d"
+    },
+    {
+      "bytes": 9988,
+      "path": "scar/trace/native_memory_export.py",
+      "sha256": "089a8e41f02cb77d9730d24e59b242d0234602f149a8bb72c7187fcbd4d0cb52"
+    },
+    {
+      "bytes": 56622,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+    },
+    {
+      "bytes": 7171,
+      "path": "scar/trace/native_scalar_content.py",
+      "sha256": "e920bfa213c7a4684128a087ecbe8e1f90e75934f3d9b93404114db7bfad44a8"
+    },
+    {
+      "bytes": 17141,
+      "path": "scar/trace/native_schema.py",
+      "sha256": "b407a61322183e74e140682d32c2de779d595b8468655ec21e8ba3bea8294aee"
+    },
+    {
+      "bytes": 40367,
+      "path": "scar/trace/native_tensor_inputs.py",
+      "sha256": "4962c7e0e332dd30852d0e4be169499633140ea12f08d4875ba233dca81e0896"
+    },
+    {
+      "bytes": 33697,
+      "path": "scar/trace/normalize_v2.py",
+      "sha256": "e9a2987481911a1cf51dc3d793d3a49d1e07740a4304967c8618d9e302c8bffb"
+    },
+    {
+      "bytes": 8463,
+      "path": "scar/trace/operand_bytecode.py",
+      "sha256": "17b6ba703296c279e893ff6c44481108a2dc1899c2702195b6c2a82458997743"
+    },
+    {
+      "bytes": 15489,
+      "path": "scar/trace/optimizer.py",
+      "sha256": "2a1965cc65458cb6a26b16e51211dbefcad9e338c83b2a8e6f8556f0be2424a1"
+    },
+    {
+      "bytes": 11285,
+      "path": "scar/trace/os_capture_coverage.py",
+      "sha256": "1c08d50d0aebe5d02bf5a0f6dfa8589e98376d9c4b2a82e16970529564676a36"
+    },
+    {
+      "bytes": 20661,
+      "path": "scar/trace/os_capture_launch.py",
+      "sha256": "94daeb4158feaeae45d6467fdd3cd2799a15b30c66aef8b5ea2bfa3e3c40cb44"
+    },
+    {
+      "bytes": 60630,
+      "path": "scar/trace/os_fd_source_projection.py",
+      "sha256": "77cf6361420bbf88a0da0213e6e3472275b755ccfeca56f1b8de4074b9d341e2"
+    },
+    {
+      "bytes": 33953,
+      "path": "scar/trace/os_fd_table_contexts.py",
+      "sha256": "ad34367fa2ee403ad3354920a96481604616e58e0954c2044a00a1230aff42ad"
+    },
+    {
+      "bytes": 27756,
+      "path": "scar/trace/os_resource_refinement.py",
+      "sha256": "8a579625b319ff0fa1e85cec4202837d83964d5786eff3f4ef0f1375f7a6faf0"
+    },
+    {
+      "bytes": 58928,
+      "path": "scar/trace/os_resources.py",
+      "sha256": "c52f45a62693e3e78875b3a23b7c56e0a4cdb48862436981f8d98941a4900c1b"
+    },
+    {
+      "bytes": 23017,
+      "path": "scar/trace/os_source_lookup.py",
+      "sha256": "e5fdc1d7e788665db3f3df0a80b2f2c1ce9b35ab8bfe1eb2771e569cc8648e8d"
+    },
+    {
+      "bytes": 1016,
+      "path": "scar/trace/reader.py",
+      "sha256": "a36b508f5a4744570af2b9b095ffce9045b4a3c83e5e0dc90d4f6a3359c2d8b3"
+    },
+    {
+      "bytes": 13989,
+      "path": "scar/trace/reference_import.py",
+      "sha256": "6cb7c55707e4cdfecb56a88e216c6b1cd2b1f84ace4c2121ced371a0b6569b06"
+    },
+    {
+      "bytes": 6831,
+      "path": "scar/trace/resources.py",
+      "sha256": "045ec3f797e43de76142eb8d70ac10b7f49ad218b19eec4eecd754229568b5e3"
+    },
+    {
+      "bytes": 43790,
+      "path": "scar/trace/session.py",
+      "sha256": "c08a75b4bd2ee520b302373b406392c4f083a413a7b46692dcedff2dcdd3747a"
+    },
+    {
+      "bytes": 41956,
+      "path": "scar/trace/tensor_physical.py",
+      "sha256": "cbfcbc00d21c4a0c636af22bde8ebd8672481fcf759f326b3de99c804b56f164"
+    },
+    {
+      "bytes": 19916,
+      "path": "scar/trace/tensor_physical_import.py",
+      "sha256": "c834d0a1072b610d9cc23d163709171ae329b6b175f1a9388c95e9842a5f0372"
+    },
+    {
+      "bytes": 9098,
+      "path": "scar/trace/values_v2.py",
+      "sha256": "70e68ac316b691fe25005293acab798d7e6f0ca3c2d0351292b83198c3638f2c"
+    },
+    {
+      "bytes": 303,
+      "path": "scar/validate/__init__.py",
+      "sha256": "03f05a4135cc5804e1a22d7233d8c75c6f71f7e6f085a2b8c70e6c6259c3ef1e"
+    },
+    {
+      "bytes": 1121,
+      "path": "scar/validate/compare.py",
+      "sha256": "341e9734becf58ee214064868f7ee4f0a19515142bbf5020920ef70adee81548"
+    },
+    {
+      "bytes": 1610,
+      "path": "scar/validate/layers.py",
+      "sha256": "e1f3b92b094e115c315b2a08562ca86633076f5a682faff9fd6281da706b3750"
+    },
+    {
+      "bytes": 2066,
+      "path": "scar/validate/runner.py",
+      "sha256": "708407045a4e159b50dd94c41e4b2d0b1054868a5259ce10e9bee5b9800447fc"
+    },
+    {
+      "bytes": 74,
+      "path": "scar/workloads/__init__.py",
+      "sha256": "fc82ced4ccdf52b383313c61bb5bd2c6eb41d5355b1f3df4f9d188725ce75ffa"
+    },
+    {
+      "bytes": 5377,
+      "path": "scar/workloads/micro.py",
+      "sha256": "7c136fd8bd5f301ce4186880e0925d8dfd784441b682f25f63f813d745d57fca"
+    }
+  ],
+  "status": "PREPARED_NOT_RUN"
+}

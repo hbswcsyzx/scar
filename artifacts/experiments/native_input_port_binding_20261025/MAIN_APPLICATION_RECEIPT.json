@@ -1,0 +1,87 @@
+{
+  "Run_seed_IR_schema_unchanged": true,
+  "files": [
+    {
+      "historical_main_before_apply_from_freeze": {
+        "bytes": 64076,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_capture_batch.py",
+        "sha256": "d0eac8d1adf64bae16703ac3289e159d23b2d8582a1110506def9f7b2e8de1ae"
+      },
+      "iso_final_consumer": {
+        "bytes": 84113,
+        "sha256": "d765fb25def905892e5d7e7d23f9fa9c1a7f666b2094782c623a3ffb13b778f3",
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_capture_batch.py"
+      },
+      "main_current_matches_final_consumer": true,
+      "main_current_observed": {
+        "bytes": 84113,
+        "sha256": "d765fb25def905892e5d7e7d23f9fa9c1a7f666b2094782c623a3ffb13b778f3",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_capture_batch.py"
+      },
+      "path": "scar/trace/native_capture_batch.py"
+    },
+    {
+      "historical_main_before_apply_from_freeze": {
+        "bytes": 16604,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_tensor_inputs.py",
+        "sha256": "f8cf28fa8b375ccab3932db3f371a67d6a518e467eff133d4e4b0c02047d3ff8"
+      },
+      "iso_final_consumer": {
+        "bytes": 41269,
+        "sha256": "e54cf55ec69f6feab2570949075e245b27bb9a66499452ac05b7ae6b61c96828",
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_tensor_inputs.py"
+      },
+      "main_current_matches_final_consumer": true,
+      "main_current_observed": {
+        "bytes": 41269,
+        "sha256": "e54cf55ec69f6feab2570949075e245b27bb9a66499452ac05b7ae6b61c96828",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_tensor_inputs.py"
+      },
+      "path": "scar/trace/native_tensor_inputs.py"
+    },
+    {
+      "historical_main_before_apply_from_freeze": {
+        "bytes": 56622,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_protocol.py",
+        "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+      },
+      "iso_final_consumer": {
+        "bytes": 57495,
+        "sha256": "8a328d05036804f34c8d5b77ce99a240a27ea4de834c3a47e381dd44618d544e",
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_protocol.py"
+      },
+      "main_current_matches_final_consumer": true,
+      "main_current_observed": {
+        "bytes": 57495,
+        "sha256": "8a328d05036804f34c8d5b77ce99a240a27ea4de834c3a47e381dd44618d544e",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_protocol.py"
+      },
+      "path": "scar/trace/native_protocol.py"
+    },
+    {
+      "historical_main_before_apply_from_freeze": {
+        "bytes": 62029,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/native_port_protocol.py",
+        "sha256": "608ba93502637c600fe46f8e9cfe1fca1005610d9b282da0633f69de93286338"
+      },
+      "iso_final_consumer": {
+        "bytes": 64011,
+        "sha256": "1c1765e25f2aa8829f1b3cd6fa7826ff2c2c01bf0deacf7d2b24d96241e8c10d",
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/execution/native_port_protocol.py"
+      },
+      "main_current_matches_final_consumer": true,
+      "main_current_observed": {
+        "bytes": 64011,
+        "sha256": "1c1765e25f2aa8829f1b3cd6fa7826ff2c2c01bf0deacf7d2b24d96241e8c10d",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/native_port_protocol.py"
+      },
+      "path": "scar/ir/execution/native_port_protocol.py"
+    }
+  ],
+  "historical_collector_execution_bytes_attested_by_consumer_SHA": false,
+  "main_application_performed_by_this_agent": false,
+  "main_tree": "/home/zyf/AAA/scar-worktrees/structured-program-model",
+  "root_reported_main_revision_at_implementation_start": "f415d86d; current main HEAD not inferred",
+  "schema": "scar.native-input-association-main-application-receipt",
+  "schema_version": 1
+}

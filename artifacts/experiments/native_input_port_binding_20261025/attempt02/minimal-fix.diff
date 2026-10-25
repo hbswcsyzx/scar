@@ -1,0 +1,35 @@
+--- attempt01/scar/trace/native_tensor_inputs.py
++++ attempt02/scar/trace/native_tensor_inputs.py
+@@ -309,15 +309,29 @@
+     _need(type(coordinates) is CaptureCoordinates
+           and sha256(coordinates.payload).hexdigest() == coordinates.artifact.sha256
+           and _json(coordinates.payload) == coordinates.report, 'genuine ordinary coordinates required')
++    rows = coordinates.report['membership']
++    capability = coordinates.report['native_tensor_input_membership']
++    _need(capability['capability'] == 'SCAR_NATIVE_TENSOR_INPUT_MEMBERSHIP_V1', 'ordinary input membership required')
++    required = {capability['manifest']['uri'], *(a['uri'] for a in capability['chunks'])}
++    for schema in ('scar.execution-evidence-collection', 'scar.dispatch-observation-trace',
++                   'scar.tensor-physical-trace', 'pytorch.execution-trace.v1', 'pytorch.kineto.chrome-trace.v1'):
++        roots = [r['artifact']['uri'] for r in rows if r['artifact']['schema'] == schema]
++        _need(len(roots) == 1, 'one native input root required: ' + schema)
++        required.add(roots[0])
+     result = {}
+-    for row in coordinates.report['membership']:
++    # Process attribution does not make a PID a valid selector for every
++    # artifact: ordinary OS thread files use their own TID selectors. They are
++    # outside this native helper's exact input domain and stay in coordinates.
++    for row in rows:
++        if row['artifact']['uri'] not in required:
++            continue
+         artifact = decode(ProviderArtifact, row['artifact'])
+-        if row['process'] != coordinates.report['target_process']:
+-            continue
++        _need(row['process'] == coordinates.report['target_process'], 'native input member process attribution differs')
+         _need(coordinates.process_for(artifact, coordinates.target_process.pid) == coordinates.target_process,
+               'input member process differs')
+         _need(artifact.uri not in result, 'duplicate exact member URI')
+         result[artifact.uri] = (artifact, Path(row['local_path']))
++    _need(set(result) == required, 'exact native input member set incomplete')
+     return result
+ 
+ 

@@ -1,0 +1,44 @@
+{
+  "decoded_graph_bytes": 0,
+  "explicit_Root_authorized_limits": {
+    "per_file_bytes": 16000000,
+    "total_bytes": 24000000
+  },
+  "files": [
+    {
+      "JSON_decodes": 0,
+      "bytes": 8443189,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/input-associations.json",
+      "provenance": "POST_GATE_RETENTION_HASH",
+      "runtime_producer_or_source_proof": false,
+      "sha256": "40170bc4fb13fbaf9d9acc5019fddbe80fdea863a83602879243761765b0245e",
+      "stream_reads": 1,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/input-associations.json"
+    },
+    {
+      "JSON_decodes": 0,
+      "bytes": 8325974,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/source-projection-receipts.json",
+      "provenance": "POST_GATE_RETENTION_HASH",
+      "runtime_producer_or_source_proof": false,
+      "sha256": "e239ebe10c215141440bc4efc0c09421bb6d9fb0ceb91018648705242475079f",
+      "stream_reads": 1,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/source-projection-receipts.json"
+    },
+    {
+      "JSON_decodes": 0,
+      "bytes": 143913,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/source-projection-receipts.json",
+      "provenance": "POST_GATE_RETENTION_HASH",
+      "runtime_producer_or_source_proof": false,
+      "sha256": "f2f1691082ce1741941559ef7a0daf18ce84b99ba0caece0cc0b29e465117593",
+      "stream_reads": 1,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/source-projection-receipts.json"
+    }
+  ],
+  "independent_of_runtime_68000000B_input_accounting": true,
+  "opaque_file_bytes_read": 16913076,
+  "producer_revalidation_calls": 0,
+  "schema": "scar.post-gate-retention-hashes",
+  "schema_version": 1
+}

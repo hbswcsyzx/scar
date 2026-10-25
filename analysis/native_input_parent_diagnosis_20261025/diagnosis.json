@@ -1,0 +1,1881 @@
+{
+  "actual_gate": {
+    "elapsed_seconds": 2.61911758996,
+    "failure": {
+      "bytes": 2666,
+      "sha256": "f0992c3d104798787712bcc02c25cfedc1e0d75c04f006a280b9f887428a91a3",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt02/failure.json"
+    },
+    "freeze": {
+      "bytes": 117673,
+      "sha256": "91a1e92b2217ab99d8b7a23dc53af03f75176c13facd24cf0f75d736dd03b528",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt02/freeze.json"
+    },
+    "native_failure": {
+      "bytes": 2030,
+      "sha256": "09cad29aa49bc85f8cd8afe1387f1051083a539b239d03e639d829e2816d52d6",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt02/products/native/failure.json"
+    },
+    "session": 70844,
+    "terminal_exit": 1
+  },
+  "authorized_raw_fallback": {
+    "complete_gzip_EOF": true,
+    "decoded_bytes": 2294964,
+    "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/execution-trace.1391040.4c632006cdb40aef2065bd5d1309bcf5.json.gz",
+    "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/execution-trace.1391040.4c632006cdb40aef2065bd5d1309bcf5.json",
+    "node_count": 2332,
+    "raw_sha256": "09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47",
+    "reads": 1,
+    "source_pid": 1391040,
+    "source_schema": "1.1.1-chakra.0.0.4",
+    "stored_bytes": 93412,
+    "stored_plus_decoded_bytes": 2388376,
+    "stored_sha256": "b209592fefb9a416307c7fc7081bfff621062afa3c08cdfe6f30fbd77e413651",
+    "strict_duplicate_JSON_rejected": true
+  },
+  "budget_failure_scope": {
+    "completed_phase_logical_stored_plus_decoded_bytes_derived": 50044363,
+    "completed_phase_total_basis": "Successful complete binder/metadata-adapter phases plus acquisition metadata, and the actual native ETO verified-read receipt. Ordinary binder complete-pass accounting is derived from frozen read multiplicities, not instrumented kernel I/O.",
+    "kernel_IO_measured": false,
+    "native_source_verified_receipt": {
+      "raw_bytes": 2294964,
+      "sha256": "09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47",
+      "stored_bytes": 93412,
+      "sum": 2388376
+    },
+    "reservation_total_is_not_actual_IO": true,
+    "reserved_ledger_total": 67280634,
+    "unexecuted_reserved_dispatch_physical_source_bytes": 2702593,
+    "unexecuted_reserved_four_table_bytes": 14533678
+  },
+  "canonical_qualification_established": false,
+  "database": {
+    "bytes": 2789376,
+    "connection": "sqlite3 mode=ro; PRAGMA query_only=ON",
+    "database_file_hash_not_read": true,
+    "meaning": "Only the persisted SQL-visible table is empty. This is not evidence of zero original ETO nodes.",
+    "node_rows": 0,
+    "original_node_payloads_decoded": 0,
+    "owner_restored": false,
+    "page_forensics_performed": false,
+    "rows_by_kind": [],
+    "table_schema": "CREATE TABLE records(kind TEXT,key TEXT,ordinal INTEGER,payload BLOB,mac BLOB,PRIMARY KEY(kind,key)) WITHOUT ROWID",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt02/products/native/private/navigation.sqlite"
+  },
+  "derived_audit_inventory": {
+    "bytes": 1369147,
+    "candidate_nodes": 2330,
+    "missing_parent_in_derived_projection": [
+      {
+        "id": 3,
+        "ordinal": 7,
+        "parent": 2,
+        "row": 1
+      },
+      {
+        "id": 12,
+        "ordinal": 16,
+        "parent": 2,
+        "row": 8
+      },
+      {
+        "id": 29,
+        "ordinal": 25,
+        "parent": 2,
+        "row": 17
+      },
+      {
+        "id": 45,
+        "ordinal": 34,
+        "parent": 2,
+        "row": 26
+      },
+      {
+        "id": 61,
+        "ordinal": 43,
+        "parent": 2,
+        "row": 35
+      },
+      {
+        "id": 77,
+        "ordinal": 52,
+        "parent": 2,
+        "row": 44
+      },
+      {
+        "id": 93,
+        "ordinal": 61,
+        "parent": 2,
+        "row": 53
+      },
+      {
+        "id": 109,
+        "ordinal": 70,
+        "parent": 2,
+        "row": 62
+      },
+      {
+        "id": 124,
+        "ordinal": 79,
+        "parent": 2,
+        "row": 71
+      },
+      {
+        "id": 140,
+        "ordinal": 88,
+        "parent": 2,
+        "row": 80
+      },
+      {
+        "id": 156,
+        "ordinal": 97,
+        "parent": 2,
+        "row": 89
+      },
+      {
+        "id": 171,
+        "ordinal": 106,
+        "parent": 2,
+        "row": 98
+      },
+      {
+        "id": 187,
+        "ordinal": 115,
+        "parent": 2,
+        "row": 107
+      },
+      {
+        "id": 203,
+        "ordinal": 124,
+        "parent": 2,
+        "row": 116
+      },
+      {
+        "id": 219,
+        "ordinal": 133,
+        "parent": 2,
+        "row": 125
+      },
+      {
+        "id": 234,
+        "ordinal": 142,
+        "parent": 2,
+        "row": 134
+      },
+      {
+        "id": 248,
+        "ordinal": 151,
+        "parent": 2,
+        "row": 143
+      },
+      {
+        "id": 265,
+        "ordinal": 160,
+        "parent": 2,
+        "row": 152
+      },
+      {
+        "id": 280,
+        "ordinal": 169,
+        "parent": 2,
+        "row": 161
+      },
+      {
+        "id": 295,
+        "ordinal": 178,
+        "parent": 2,
+        "row": 170
+      },
+      {
+        "id": 310,
+        "ordinal": 187,
+        "parent": 2,
+        "row": 179
+      },
+      {
+        "id": 325,
+        "ordinal": 196,
+        "parent": 2,
+        "row": 188
+      },
+      {
+        "id": 340,
+        "ordinal": 205,
+        "parent": 2,
+        "row": 197
+      },
+      {
+        "id": 354,
+        "ordinal": 214,
+        "parent": 2,
+        "row": 206
+      },
+      {
+        "id": 370,
+        "ordinal": 223,
+        "parent": 2,
+        "row": 215
+      },
+      {
+        "id": 385,
+        "ordinal": 232,
+        "parent": 2,
+        "row": 224
+      },
+      {
+        "id": 400,
+        "ordinal": 241,
+        "parent": 2,
+        "row": 233
+      },
+      {
+        "id": 415,
+        "ordinal": 250,
+        "parent": 2,
+        "row": 242
+      },
+      {
+        "id": 430,
+        "ordinal": 259,
+        "parent": 2,
+        "row": 251
+      },
+      {
+        "id": 445,
+        "ordinal": 268,
+        "parent": 2,
+        "row": 260
+      },
+      {
+        "id": 461,
+        "ordinal": 277,
+        "parent": 2,
+        "row": 269
+      },
+      {
+        "id": 477,
+        "ordinal": 286,
+        "parent": 2,
+        "row": 278
+      },
+      {
+        "id": 493,
+        "ordinal": 295,
+        "parent": 2,
+        "row": 287
+      },
+      {
+        "id": 508,
+        "ordinal": 304,
+        "parent": 2,
+        "row": 296
+      },
+      {
+        "id": 523,
+        "ordinal": 313,
+        "parent": 2,
+        "row": 305
+      },
+      {
+        "id": 538,
+        "ordinal": 322,
+        "parent": 2,
+        "row": 314
+      },
+      {
+        "id": 553,
+        "ordinal": 331,
+        "parent": 2,
+        "row": 323
+      },
+      {
+        "id": 568,
+        "ordinal": 340,
+        "parent": 2,
+        "row": 332
+      },
+      {
+        "id": 583,
+        "ordinal": 349,
+        "parent": 2,
+        "row": 341
+      },
+      {
+        "id": 599,
+        "ordinal": 358,
+        "parent": 2,
+        "row": 350
+      },
+      {
+        "id": 614,
+        "ordinal": 367,
+        "parent": 2,
+        "row": 359
+      },
+      {
+        "id": 630,
+        "ordinal": 376,
+        "parent": 2,
+        "row": 368
+      },
+      {
+        "id": 645,
+        "ordinal": 385,
+        "parent": 2,
+        "row": 377
+      },
+      {
+        "id": 660,
+        "ordinal": 394,
+        "parent": 2,
+        "row": 386
+      },
+      {
+        "id": 675,
+        "ordinal": 403,
+        "parent": 2,
+        "row": 395
+      },
+      {
+        "id": 690,
+        "ordinal": 412,
+        "parent": 2,
+        "row": 404
+      },
+      {
+        "id": 705,
+        "ordinal": 421,
+        "parent": 2,
+        "row": 413
+      },
+      {
+        "id": 720,
+        "ordinal": 430,
+        "parent": 2,
+        "row": 422
+      },
+      {
+        "id": 734,
+        "ordinal": 439,
+        "parent": 2,
+        "row": 431
+      },
+      {
+        "id": 749,
+        "ordinal": 448,
+        "parent": 2,
+        "row": 440
+      },
+      {
+        "id": 763,
+        "ordinal": 457,
+        "parent": 2,
+        "row": 449
+      },
+      {
+        "id": 778,
+        "ordinal": 466,
+        "parent": 2,
+        "row": 458
+      },
+      {
+        "id": 794,
+        "ordinal": 475,
+        "parent": 2,
+        "row": 467
+      },
+      {
+        "id": 809,
+        "ordinal": 484,
+        "parent": 2,
+        "row": 476
+      },
+      {
+        "id": 824,
+        "ordinal": 493,
+        "parent": 2,
+        "row": 485
+      },
+      {
+        "id": 839,
+        "ordinal": 502,
+        "parent": 2,
+        "row": 494
+      },
+      {
+        "id": 855,
+        "ordinal": 511,
+        "parent": 2,
+        "row": 503
+      },
+      {
+        "id": 870,
+        "ordinal": 520,
+        "parent": 2,
+        "row": 512
+      },
+      {
+        "id": 885,
+        "ordinal": 529,
+        "parent": 2,
+        "row": 521
+      },
+      {
+        "id": 899,
+        "ordinal": 538,
+        "parent": 2,
+        "row": 530
+      },
+      {
+        "id": 913,
+        "ordinal": 547,
+        "parent": 2,
+        "row": 539
+      },
+      {
+        "id": 928,
+        "ordinal": 556,
+        "parent": 2,
+        "row": 548
+      },
+      {
+        "id": 945,
+        "ordinal": 565,
+        "parent": 2,
+        "row": 557
+      },
+      {
+        "id": 959,
+        "ordinal": 574,
+        "parent": 2,
+        "row": 566
+      },
+      {
+        "id": 974,
+        "ordinal": 583,
+        "parent": 2,
+        "row": 575
+      },
+      {
+        "id": 989,
+        "ordinal": 592,
+        "parent": 2,
+        "row": 584
+      },
+      {
+        "id": 1005,
+        "ordinal": 601,
+        "parent": 2,
+        "row": 593
+      },
+      {
+        "id": 1019,
+        "ordinal": 610,
+        "parent": 2,
+        "row": 602
+      },
+      {
+        "id": 1034,
+        "ordinal": 619,
+        "parent": 2,
+        "row": 611
+      },
+      {
+        "id": 1049,
+        "ordinal": 628,
+        "parent": 2,
+        "row": 620
+      },
+      {
+        "id": 1064,
+        "ordinal": 637,
+        "parent": 2,
+        "row": 629
+      },
+      {
+        "id": 1077,
+        "ordinal": 646,
+        "parent": 2,
+        "row": 638
+      },
+      {
+        "id": 1093,
+        "ordinal": 655,
+        "parent": 2,
+        "row": 647
+      },
+      {
+        "id": 1109,
+        "ordinal": 664,
+        "parent": 2,
+        "row": 656
+      },
+      {
+        "id": 1124,
+        "ordinal": 673,
+        "parent": 2,
+        "row": 665
+      },
+      {
+        "id": 1139,
+        "ordinal": 682,
+        "parent": 2,
+        "row": 674
+      },
+      {
+        "id": 1154,
+        "ordinal": 691,
+        "parent": 2,
+        "row": 683
+      },
+      {
+        "id": 1168,
+        "ordinal": 700,
+        "parent": 2,
+        "row": 692
+      },
+      {
+        "id": 1183,
+        "ordinal": 709,
+        "parent": 2,
+        "row": 701
+      },
+      {
+        "id": 1198,
+        "ordinal": 718,
+        "parent": 2,
+        "row": 710
+      },
+      {
+        "id": 1214,
+        "ordinal": 727,
+        "parent": 2,
+        "row": 719
+      },
+      {
+        "id": 1230,
+        "ordinal": 736,
+        "parent": 2,
+        "row": 728
+      },
+      {
+        "id": 1246,
+        "ordinal": 745,
+        "parent": 2,
+        "row": 737
+      },
+      {
+        "id": 1261,
+        "ordinal": 754,
+        "parent": 2,
+        "row": 746
+      },
+      {
+        "id": 1276,
+        "ordinal": 763,
+        "parent": 2,
+        "row": 755
+      },
+      {
+        "id": 1291,
+        "ordinal": 772,
+        "parent": 2,
+        "row": 764
+      },
+      {
+        "id": 1306,
+        "ordinal": 781,
+        "parent": 2,
+        "row": 773
+      },
+      {
+        "id": 1322,
+        "ordinal": 790,
+        "parent": 2,
+        "row": 782
+      },
+      {
+        "id": 1337,
+        "ordinal": 799,
+        "parent": 2,
+        "row": 791
+      },
+      {
+        "id": 1352,
+        "ordinal": 808,
+        "parent": 2,
+        "row": 800
+      },
+      {
+        "id": 1367,
+        "ordinal": 817,
+        "parent": 2,
+        "row": 809
+      },
+      {
+        "id": 1383,
+        "ordinal": 826,
+        "parent": 2,
+        "row": 818
+      },
+      {
+        "id": 1398,
+        "ordinal": 835,
+        "parent": 2,
+        "row": 827
+      },
+      {
+        "id": 1413,
+        "ordinal": 844,
+        "parent": 2,
+        "row": 836
+      },
+      {
+        "id": 1428,
+        "ordinal": 853,
+        "parent": 2,
+        "row": 845
+      },
+      {
+        "id": 1443,
+        "ordinal": 862,
+        "parent": 2,
+        "row": 854
+      },
+      {
+        "id": 1459,
+        "ordinal": 871,
+        "parent": 2,
+        "row": 863
+      },
+      {
+        "id": 1474,
+        "ordinal": 880,
+        "parent": 2,
+        "row": 872
+      },
+      {
+        "id": 1488,
+        "ordinal": 889,
+        "parent": 2,
+        "row": 881
+      },
+      {
+        "id": 1504,
+        "ordinal": 898,
+        "parent": 2,
+        "row": 890
+      },
+      {
+        "id": 1519,
+        "ordinal": 907,
+        "parent": 2,
+        "row": 899
+      },
+      {
+        "id": 1534,
+        "ordinal": 916,
+        "parent": 2,
+        "row": 908
+      },
+      {
+        "id": 1549,
+        "ordinal": 925,
+        "parent": 2,
+        "row": 917
+      },
+      {
+        "id": 1565,
+        "ordinal": 934,
+        "parent": 2,
+        "row": 926
+      },
+      {
+        "id": 1580,
+        "ordinal": 943,
+        "parent": 2,
+        "row": 935
+      },
+      {
+        "id": 1594,
+        "ordinal": 952,
+        "parent": 2,
+        "row": 944
+      },
+      {
+        "id": 1610,
+        "ordinal": 961,
+        "parent": 2,
+        "row": 953
+      },
+      {
+        "id": 1625,
+        "ordinal": 970,
+        "parent": 2,
+        "row": 962
+      },
+      {
+        "id": 1641,
+        "ordinal": 979,
+        "parent": 2,
+        "row": 971
+      },
+      {
+        "id": 1656,
+        "ordinal": 988,
+        "parent": 2,
+        "row": 980
+      },
+      {
+        "id": 1669,
+        "ordinal": 997,
+        "parent": 2,
+        "row": 989
+      },
+      {
+        "id": 1684,
+        "ordinal": 1006,
+        "parent": 2,
+        "row": 998
+      },
+      {
+        "id": 1699,
+        "ordinal": 1015,
+        "parent": 2,
+        "row": 1007
+      },
+      {
+        "id": 1714,
+        "ordinal": 1024,
+        "parent": 2,
+        "row": 1016
+      },
+      {
+        "id": 1729,
+        "ordinal": 1033,
+        "parent": 2,
+        "row": 1025
+      },
+      {
+        "id": 1744,
+        "ordinal": 1042,
+        "parent": 2,
+        "row": 1034
+      },
+      {
+        "id": 1760,
+        "ordinal": 1051,
+        "parent": 2,
+        "row": 1043
+      },
+      {
+        "id": 1775,
+        "ordinal": 1060,
+        "parent": 2,
+        "row": 1052
+      },
+      {
+        "id": 1789,
+        "ordinal": 1069,
+        "parent": 2,
+        "row": 1061
+      },
+      {
+        "id": 1805,
+        "ordinal": 1078,
+        "parent": 2,
+        "row": 1070
+      },
+      {
+        "id": 1820,
+        "ordinal": 1087,
+        "parent": 2,
+        "row": 1079
+      },
+      {
+        "id": 1834,
+        "ordinal": 1096,
+        "parent": 2,
+        "row": 1088
+      },
+      {
+        "id": 1850,
+        "ordinal": 1105,
+        "parent": 2,
+        "row": 1097
+      },
+      {
+        "id": 1865,
+        "ordinal": 1114,
+        "parent": 2,
+        "row": 1106
+      },
+      {
+        "id": 1880,
+        "ordinal": 1123,
+        "parent": 2,
+        "row": 1115
+      },
+      {
+        "id": 1895,
+        "ordinal": 1132,
+        "parent": 2,
+        "row": 1124
+      },
+      {
+        "id": 1910,
+        "ordinal": 1141,
+        "parent": 2,
+        "row": 1133
+      },
+      {
+        "id": 1925,
+        "ordinal": 1150,
+        "parent": 2,
+        "row": 1142
+      },
+      {
+        "id": 1941,
+        "ordinal": 1159,
+        "parent": 2,
+        "row": 1151
+      },
+      {
+        "id": 1956,
+        "ordinal": 1168,
+        "parent": 2,
+        "row": 1160
+      },
+      {
+        "id": 1971,
+        "ordinal": 1177,
+        "parent": 2,
+        "row": 1169
+      },
+      {
+        "id": 1987,
+        "ordinal": 1186,
+        "parent": 2,
+        "row": 1178
+      },
+      {
+        "id": 2002,
+        "ordinal": 1195,
+        "parent": 2,
+        "row": 1187
+      },
+      {
+        "id": 2017,
+        "ordinal": 1204,
+        "parent": 2,
+        "row": 1196
+      },
+      {
+        "id": 2032,
+        "ordinal": 1213,
+        "parent": 2,
+        "row": 1205
+      },
+      {
+        "id": 2047,
+        "ordinal": 1222,
+        "parent": 2,
+        "row": 1214
+      },
+      {
+        "id": 2062,
+        "ordinal": 1231,
+        "parent": 2,
+        "row": 1223
+      },
+      {
+        "id": 2077,
+        "ordinal": 1240,
+        "parent": 2,
+        "row": 1232
+      },
+      {
+        "id": 2091,
+        "ordinal": 1249,
+        "parent": 2,
+        "row": 1241
+      },
+      {
+        "id": 2106,
+        "ordinal": 1258,
+        "parent": 2,
+        "row": 1250
+      },
+      {
+        "id": 2121,
+        "ordinal": 1267,
+        "parent": 2,
+        "row": 1259
+      },
+      {
+        "id": 2136,
+        "ordinal": 1276,
+        "parent": 2,
+        "row": 1268
+      },
+      {
+        "id": 2150,
+        "ordinal": 1285,
+        "parent": 2,
+        "row": 1277
+      },
+      {
+        "id": 2166,
+        "ordinal": 1294,
+        "parent": 2,
+        "row": 1286
+      },
+      {
+        "id": 2181,
+        "ordinal": 1303,
+        "parent": 2,
+        "row": 1295
+      },
+      {
+        "id": 2197,
+        "ordinal": 1312,
+        "parent": 2,
+        "row": 1304
+      },
+      {
+        "id": 2211,
+        "ordinal": 1321,
+        "parent": 2,
+        "row": 1313
+      },
+      {
+        "id": 2226,
+        "ordinal": 1330,
+        "parent": 2,
+        "row": 1322
+      },
+      {
+        "id": 2242,
+        "ordinal": 1339,
+        "parent": 2,
+        "row": 1331
+      },
+      {
+        "id": 2257,
+        "ordinal": 1348,
+        "parent": 2,
+        "row": 1340
+      },
+      {
+        "id": 2272,
+        "ordinal": 1357,
+        "parent": 2,
+        "row": 1349
+      },
+      {
+        "id": 2287,
+        "ordinal": 1366,
+        "parent": 2,
+        "row": 1358
+      },
+      {
+        "id": 2301,
+        "ordinal": 1375,
+        "parent": 2,
+        "row": 1367
+      },
+      {
+        "id": 2316,
+        "ordinal": 1384,
+        "parent": 2,
+        "row": 1376
+      },
+      {
+        "id": 2331,
+        "ordinal": 1393,
+        "parent": 2,
+        "row": 1385
+      },
+      {
+        "id": 2346,
+        "ordinal": 1402,
+        "parent": 2,
+        "row": 1394
+      },
+      {
+        "id": 2361,
+        "ordinal": 1411,
+        "parent": 2,
+        "row": 1403
+      },
+      {
+        "id": 2376,
+        "ordinal": 1420,
+        "parent": 2,
+        "row": 1412
+      },
+      {
+        "id": 2390,
+        "ordinal": 1429,
+        "parent": 2,
+        "row": 1421
+      },
+      {
+        "id": 2405,
+        "ordinal": 1438,
+        "parent": 2,
+        "row": 1430
+      },
+      {
+        "id": 2420,
+        "ordinal": 1447,
+        "parent": 2,
+        "row": 1439
+      },
+      {
+        "id": 2434,
+        "ordinal": 1456,
+        "parent": 2,
+        "row": 1448
+      },
+      {
+        "id": 2448,
+        "ordinal": 1465,
+        "parent": 2,
+        "row": 1457
+      },
+      {
+        "id": 2464,
+        "ordinal": 1474,
+        "parent": 2,
+        "row": 1466
+      },
+      {
+        "id": 2480,
+        "ordinal": 1483,
+        "parent": 2,
+        "row": 1475
+      },
+      {
+        "id": 2495,
+        "ordinal": 1492,
+        "parent": 2,
+        "row": 1484
+      },
+      {
+        "id": 2510,
+        "ordinal": 1501,
+        "parent": 2,
+        "row": 1493
+      },
+      {
+        "id": 2525,
+        "ordinal": 1510,
+        "parent": 2,
+        "row": 1502
+      },
+      {
+        "id": 2540,
+        "ordinal": 1519,
+        "parent": 2,
+        "row": 1511
+      },
+      {
+        "id": 2555,
+        "ordinal": 1528,
+        "parent": 2,
+        "row": 1520
+      },
+      {
+        "id": 2570,
+        "ordinal": 1537,
+        "parent": 2,
+        "row": 1529
+      },
+      {
+        "id": 2585,
+        "ordinal": 1546,
+        "parent": 2,
+        "row": 1538
+      },
+      {
+        "id": 2600,
+        "ordinal": 1555,
+        "parent": 2,
+        "row": 1547
+      },
+      {
+        "id": 2616,
+        "ordinal": 1564,
+        "parent": 2,
+        "row": 1556
+      },
+      {
+        "id": 2631,
+        "ordinal": 1573,
+        "parent": 2,
+        "row": 1565
+      },
+      {
+        "id": 2646,
+        "ordinal": 1582,
+        "parent": 2,
+        "row": 1574
+      },
+      {
+        "id": 2661,
+        "ordinal": 1591,
+        "parent": 2,
+        "row": 1583
+      },
+      {
+        "id": 2677,
+        "ordinal": 1600,
+        "parent": 2,
+        "row": 1592
+      },
+      {
+        "id": 2692,
+        "ordinal": 1609,
+        "parent": 2,
+        "row": 1601
+      },
+      {
+        "id": 2707,
+        "ordinal": 1618,
+        "parent": 2,
+        "row": 1610
+      },
+      {
+        "id": 2723,
+        "ordinal": 1627,
+        "parent": 2,
+        "row": 1619
+      },
+      {
+        "id": 2738,
+        "ordinal": 1636,
+        "parent": 2,
+        "row": 1628
+      },
+      {
+        "id": 2753,
+        "ordinal": 1645,
+        "parent": 2,
+        "row": 1637
+      },
+      {
+        "id": 2769,
+        "ordinal": 1654,
+        "parent": 2,
+        "row": 1646
+      },
+      {
+        "id": 2784,
+        "ordinal": 1663,
+        "parent": 2,
+        "row": 1655
+      },
+      {
+        "id": 2799,
+        "ordinal": 1672,
+        "parent": 2,
+        "row": 1664
+      },
+      {
+        "id": 2814,
+        "ordinal": 1681,
+        "parent": 2,
+        "row": 1673
+      },
+      {
+        "id": 2829,
+        "ordinal": 1690,
+        "parent": 2,
+        "row": 1682
+      },
+      {
+        "id": 2845,
+        "ordinal": 1699,
+        "parent": 2,
+        "row": 1691
+      },
+      {
+        "id": 2860,
+        "ordinal": 1708,
+        "parent": 2,
+        "row": 1700
+      },
+      {
+        "id": 2875,
+        "ordinal": 1717,
+        "parent": 2,
+        "row": 1709
+      },
+      {
+        "id": 2890,
+        "ordinal": 1726,
+        "parent": 2,
+        "row": 1718
+      },
+      {
+        "id": 2905,
+        "ordinal": 1735,
+        "parent": 2,
+        "row": 1727
+      },
+      {
+        "id": 2920,
+        "ordinal": 1744,
+        "parent": 2,
+        "row": 1736
+      },
+      {
+        "id": 2936,
+        "ordinal": 1753,
+        "parent": 2,
+        "row": 1745
+      },
+      {
+        "id": 2951,
+        "ordinal": 1762,
+        "parent": 2,
+        "row": 1754
+      },
+      {
+        "id": 2966,
+        "ordinal": 1771,
+        "parent": 2,
+        "row": 1763
+      },
+      {
+        "id": 2981,
+        "ordinal": 1780,
+        "parent": 2,
+        "row": 1772
+      },
+      {
+        "id": 2997,
+        "ordinal": 1789,
+        "parent": 2,
+        "row": 1781
+      },
+      {
+        "id": 3012,
+        "ordinal": 1798,
+        "parent": 2,
+        "row": 1790
+      },
+      {
+        "id": 3027,
+        "ordinal": 1807,
+        "parent": 2,
+        "row": 1799
+      },
+      {
+        "id": 3042,
+        "ordinal": 1816,
+        "parent": 2,
+        "row": 1808
+      },
+      {
+        "id": 3057,
+        "ordinal": 1825,
+        "parent": 2,
+        "row": 1817
+      },
+      {
+        "id": 3072,
+        "ordinal": 1834,
+        "parent": 2,
+        "row": 1826
+      },
+      {
+        "id": 3087,
+        "ordinal": 1843,
+        "parent": 2,
+        "row": 1835
+      },
+      {
+        "id": 3102,
+        "ordinal": 1852,
+        "parent": 2,
+        "row": 1844
+      },
+      {
+        "id": 3118,
+        "ordinal": 1861,
+        "parent": 2,
+        "row": 1853
+      },
+      {
+        "id": 3133,
+        "ordinal": 1870,
+        "parent": 2,
+        "row": 1862
+      },
+      {
+        "id": 3148,
+        "ordinal": 1879,
+        "parent": 2,
+        "row": 1871
+      },
+      {
+        "id": 3162,
+        "ordinal": 1888,
+        "parent": 2,
+        "row": 1880
+      },
+      {
+        "id": 3176,
+        "ordinal": 1897,
+        "parent": 2,
+        "row": 1889
+      },
+      {
+        "id": 3191,
+        "ordinal": 1906,
+        "parent": 2,
+        "row": 1898
+      },
+      {
+        "id": 3206,
+        "ordinal": 1915,
+        "parent": 2,
+        "row": 1907
+      },
+      {
+        "id": 3222,
+        "ordinal": 1924,
+        "parent": 2,
+        "row": 1916
+      },
+      {
+        "id": 3237,
+        "ordinal": 1933,
+        "parent": 2,
+        "row": 1925
+      },
+      {
+        "id": 3252,
+        "ordinal": 1942,
+        "parent": 2,
+        "row": 1934
+      },
+      {
+        "id": 3266,
+        "ordinal": 1951,
+        "parent": 2,
+        "row": 1943
+      },
+      {
+        "id": 3281,
+        "ordinal": 1960,
+        "parent": 2,
+        "row": 1952
+      },
+      {
+        "id": 3296,
+        "ordinal": 1969,
+        "parent": 2,
+        "row": 1961
+      },
+      {
+        "id": 3311,
+        "ordinal": 1978,
+        "parent": 2,
+        "row": 1970
+      },
+      {
+        "id": 3327,
+        "ordinal": 1987,
+        "parent": 2,
+        "row": 1979
+      },
+      {
+        "id": 3342,
+        "ordinal": 1996,
+        "parent": 2,
+        "row": 1988
+      },
+      {
+        "id": 3357,
+        "ordinal": 2005,
+        "parent": 2,
+        "row": 1997
+      },
+      {
+        "id": 3373,
+        "ordinal": 2014,
+        "parent": 2,
+        "row": 2006
+      },
+      {
+        "id": 3389,
+        "ordinal": 2023,
+        "parent": 2,
+        "row": 2015
+      },
+      {
+        "id": 3404,
+        "ordinal": 2032,
+        "parent": 2,
+        "row": 2024
+      },
+      {
+        "id": 3419,
+        "ordinal": 2041,
+        "parent": 2,
+        "row": 2033
+      },
+      {
+        "id": 3434,
+        "ordinal": 2050,
+        "parent": 2,
+        "row": 2042
+      },
+      {
+        "id": 3448,
+        "ordinal": 2059,
+        "parent": 2,
+        "row": 2051
+      },
+      {
+        "id": 3463,
+        "ordinal": 2068,
+        "parent": 2,
+        "row": 2060
+      },
+      {
+        "id": 3477,
+        "ordinal": 2077,
+        "parent": 2,
+        "row": 2069
+      },
+      {
+        "id": 3493,
+        "ordinal": 2086,
+        "parent": 2,
+        "row": 2078
+      },
+      {
+        "id": 3507,
+        "ordinal": 2095,
+        "parent": 2,
+        "row": 2087
+      },
+      {
+        "id": 3522,
+        "ordinal": 2104,
+        "parent": 2,
+        "row": 2096
+      },
+      {
+        "id": 3537,
+        "ordinal": 2113,
+        "parent": 2,
+        "row": 2105
+      },
+      {
+        "id": 3551,
+        "ordinal": 2122,
+        "parent": 2,
+        "row": 2114
+      },
+      {
+        "id": 3565,
+        "ordinal": 2131,
+        "parent": 2,
+        "row": 2123
+      },
+      {
+        "id": 3580,
+        "ordinal": 2140,
+        "parent": 2,
+        "row": 2132
+      },
+      {
+        "id": 3595,
+        "ordinal": 2149,
+        "parent": 2,
+        "row": 2141
+      },
+      {
+        "id": 3609,
+        "ordinal": 2158,
+        "parent": 2,
+        "row": 2150
+      },
+      {
+        "id": 3624,
+        "ordinal": 2167,
+        "parent": 2,
+        "row": 2159
+      },
+      {
+        "id": 3639,
+        "ordinal": 2176,
+        "parent": 2,
+        "row": 2168
+      },
+      {
+        "id": 3654,
+        "ordinal": 2185,
+        "parent": 2,
+        "row": 2177
+      },
+      {
+        "id": 3669,
+        "ordinal": 2194,
+        "parent": 2,
+        "row": 2186
+      },
+      {
+        "id": 3684,
+        "ordinal": 2203,
+        "parent": 2,
+        "row": 2195
+      },
+      {
+        "id": 3698,
+        "ordinal": 2212,
+        "parent": 2,
+        "row": 2204
+      },
+      {
+        "id": 3714,
+        "ordinal": 2221,
+        "parent": 2,
+        "row": 2213
+      },
+      {
+        "id": 3729,
+        "ordinal": 2230,
+        "parent": 2,
+        "row": 2222
+      },
+      {
+        "id": 3745,
+        "ordinal": 2239,
+        "parent": 2,
+        "row": 2231
+      },
+      {
+        "id": 3760,
+        "ordinal": 2248,
+        "parent": 2,
+        "row": 2240
+      },
+      {
+        "id": 3775,
+        "ordinal": 2257,
+        "parent": 2,
+        "row": 2249
+      },
+      {
+        "id": 3790,
+        "ordinal": 2266,
+        "parent": 2,
+        "row": 2258
+      },
+      {
+        "id": 3805,
+        "ordinal": 2275,
+        "parent": 2,
+        "row": 2267
+      },
+      {
+        "id": 3820,
+        "ordinal": 2284,
+        "parent": 2,
+        "row": 2276
+      },
+      {
+        "id": 3835,
+        "ordinal": 2293,
+        "parent": 2,
+        "row": 2285
+      },
+      {
+        "id": 3850,
+        "ordinal": 2302,
+        "parent": 2,
+        "row": 2294
+      },
+      {
+        "id": 3865,
+        "ordinal": 2311,
+        "parent": 2,
+        "row": 2303
+      },
+      {
+        "id": 3880,
+        "ordinal": 2317,
+        "parent": 2,
+        "row": 2312
+      },
+      {
+        "id": 3887,
+        "ordinal": 2323,
+        "parent": 2,
+        "row": 2318
+      },
+      {
+        "id": 3894,
+        "ordinal": 2328,
+        "parent": 2,
+        "row": 2324
+      },
+      {
+        "id": 3901,
+        "ordinal": 2330,
+        "parent": 3900,
+        "row": 2330
+      }
+    ],
+    "nonjoined_rows": [
+      {
+        "disposition": "ETO_RF_MISSING",
+        "row": 2329
+      },
+      {
+        "disposition": "ETO_RF_MISSING",
+        "row": 2332
+      }
+    ],
+    "reads": 1,
+    "sha256": "66c9b23e45e853034ab905c59d644d87289db3b87123eeb63969a36dd5c2e93d",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_input_port_adapter_20261025/PLAN.json"
+  },
+  "diagnostic_IO": {
+    "OS_reads": 0,
+    "audit_PLAN_decoded": 1369147,
+    "audit_PLAN_plain_stored": 1369147,
+    "new_ETO_decoded": 2294964,
+    "new_ETO_stored": 93412,
+    "old_LeWM_reads": 0,
+    "producer_runs": 0,
+    "stored_plus_decoded_total": 5126670
+  },
+  "interpretation": {
+    "Inferred": [
+      "The local shape is consistent with the single raised dispatch reported by G1, but dispatch END was not reread.",
+      "Exceptional execution or provider callback serialization could explain an omitted enclosing node, but the capture alone does not prove that causal mechanism."
+    ],
+    "Observed": [
+      "One original missing parent target3900; the directly broken node is3901, not either synthetic root.",
+      "Only nodes3901 and3902 depend on that missing target. All other2330 nodes close to the legitimate process root; no nonpermitted cycle.",
+      "The only affected owned span marker is sequence261, which has no output marker; all260 other span/output marker ancestries avoid the missing edge."
+    ],
+    "Unverified": [
+      "Actual name/schema/type/value of absent node3900.",
+      "Full V2 qualification of any of the260 other normal candidates; the gate stopped before their source acquisition/discovery.",
+      "Canonical metadata associations and full program/source/content/state/ready closure."
+    ]
+  },
+  "persistence_explanation": {
+    "cannot_determine_from_DB": [
+      "offending node/ordinal",
+      "missing versus cyclic parent",
+      "synthetic-root convention",
+      "relation to raised dispatch"
+    ],
+    "classification": "CODE_SUPPORTED_EXPLANATION",
+    "facts": [
+      "put() starts insertion transactions; commits only at multiples of4096 operations.",
+      "ETO scan declared2332 nodes and complete source SHA succeeded before parent closure.",
+      "No complete source/scan_archive commit boundary was reached.",
+      "bind_native_capture_batches finally closes the connection after the exception; uncommitted insertions roll back."
+    ],
+    "source": {
+      "bytes": 78283,
+      "sha256": "242e7cba98c37fcddcaec88d113e4bba11d4fab7d9c222d26a064b0cd05aeb11",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_capture_batch.py"
+    }
+  },
+  "qualification_implications": {
+    "actual_canonical_boundary_qualifications_in_attempt02": 0,
+    "global_missing_parent_rejection": "Overly broad for a partial native-boundary producer: the sole missing edge is outside every other span/output ancestry. This does not establish qualification of those other boundaries.",
+    "local_boundary_requirements": [
+      "Keep all2332 original nodes and all261 declared/observed dispatches in accounting; retain the actual3901->3900 missing edge and dependent3902 as explicit frontier.",
+      "A modeled boundary still needs its genuine dispatch BEGIN/OUTPUT/END normal completion, unique matching schema child, exact owned marker/thread/producer/ordinal/ports and original selected graph dependencies.",
+      "Require the original parent closure for every modeled occurrence and its retained proof dependencies; a missing dependency propagates to that affected candidate, without fake parent/root or renumbering.",
+      "Known cycles, duplicate IDs, contradictory parents/threads/markers and qualified producer/port mismatches remain hard contradictions.",
+      "Do not qualify seq261 normal Return, grant metadata association, or drop its nodes just to allow other candidates. Native-only identity/content/state/ready remain independent and OPEN."
+    ],
+    "source_modified": false,
+    "third_gate_prepared": false
+  },
+  "raw_parent_diagnosis": {
+    "affected_direct_children_first8": [
+      {
+        "id": 3902,
+        "input_top_level_count": 0,
+        "name": "scar-dispatch:4c632006cdb40aef2065bd5d1309bcf5:1391040:261:span",
+        "op_schema": "",
+        "ordinal": 2329,
+        "output_top_level_count": 0,
+        "parent": 3901,
+        "rf_id": 2331,
+        "scope": 7,
+        "tid": 1
+      }
+    ],
+    "affected_dispatch_scope": {
+      "G1_declared_outcomes": {
+        "RAISED": 1,
+        "RETURNED": 260
+      },
+      "dispatch_END_records_read_for_diagnosis": 0,
+      "exception_caused_missing_parent": "INFERRED_NOT_PROVEN",
+      "missing_node3900_name_schema_and_value": "UNAVAILABLE_NOT_RECONSTRUCTED",
+      "missing_output_sequences": [
+        261
+      ],
+      "other_span_marker_ancestries_affected": 0,
+      "sequence261_RAISED_is_inferred_from_marker_inventory_and_G1_summary": true,
+      "span_marker": "scar-dispatch:4c632006cdb40aef2065bd5d1309bcf5:1391040:261:span",
+      "span_sequence": 261,
+      "total_output_markers": 260,
+      "total_spans": 261
+    },
+    "affected_marker_nodes": 1,
+    "affected_node_ids_and_ordinals": [
+      {
+        "id": 3902,
+        "ordinal": 2329
+      },
+      {
+        "id": 3901,
+        "ordinal": 2330
+      }
+    ],
+    "affected_nodes": 2,
+    "bad_head_ancestor_chains": [
+      [
+        {
+          "id": 3901,
+          "input_top_level_count": 2,
+          "name": "PythonDispatchMode",
+          "op_schema": "",
+          "ordinal": 2330,
+          "output_top_level_count": 0,
+          "parent": 3900,
+          "rf_id": 2330,
+          "scope": 0,
+          "tid": 1
+        },
+        {
+          "id": 3900,
+          "status": "MISSING"
+        }
+      ]
+    ],
+    "direct_missing_parents": [
+      {
+        "id": 3901,
+        "input_top_level_count": 2,
+        "name": "PythonDispatchMode",
+        "op_schema": "",
+        "ordinal": 2330,
+        "output_top_level_count": 0,
+        "parent": 3900,
+        "rf_id": 2330,
+        "scope": 0,
+        "tid": 1
+      }
+    ],
+    "first_failing_global_walk": {
+      "chain": [
+        {
+          "id": 3902,
+          "input_top_level_count": 0,
+          "name": "scar-dispatch:4c632006cdb40aef2065bd5d1309bcf5:1391040:261:span",
+          "op_schema": "",
+          "ordinal": 2329,
+          "output_top_level_count": 0,
+          "parent": 3901,
+          "rf_id": 2331,
+          "scope": 7,
+          "tid": 1
+        },
+        {
+          "id": 3901,
+          "input_top_level_count": 2,
+          "name": "PythonDispatchMode",
+          "op_schema": "",
+          "ordinal": 2330,
+          "output_top_level_count": 0,
+          "parent": 3900,
+          "rf_id": 2330,
+          "scope": 0,
+          "tid": 1
+        },
+        {
+          "id": 3900,
+          "status": "NOT_PRESENT_IN_ORIGINAL_ETO"
+        }
+      ],
+      "max_ancestor_records": 8,
+      "start_node": 3902,
+      "start_original_ordinal": 2329
+    },
+    "full_accounting": {
+      "direct_missing_edges": 1,
+      "nodes": 2332,
+      "nodes_affected_by_missing_parent": 2,
+      "nodes_with_complete_rooted_parent_closure": 2330,
+      "nonpermitted_cycles": 0,
+      "valid_root_convention": "node2 thread sentinel ordinal0 parent1; node1 process sentinel ordinal2331 self-parent1"
+    },
+    "marker_counts": {
+      "output": 260,
+      "span": 261
+    },
+    "nonpermitted_cycles": [],
+    "sentinels": [
+      {
+        "id": 2,
+        "input_top_level_count": 0,
+        "name": "[pytorch|profiler|execution_trace|thread]",
+        "op_schema": "",
+        "ordinal": 0,
+        "output_top_level_count": 0,
+        "parent": 1,
+        "rf_id": 0,
+        "scope": 7,
+        "tid": 1
+      },
+      {
+        "id": 1,
+        "input_top_level_count": 0,
+        "name": "[pytorch|profiler|execution_trace|process]",
+        "op_schema": "",
+        "ordinal": 2331,
+        "output_top_level_count": 0,
+        "parent": 1,
+        "rf_id": 0,
+        "scope": 7,
+        "tid": 0
+      }
+    ]
+  },
+  "read_scope": {
+    "SQL_queries": [
+      "SELECT name,sql FROM sqlite_master WHERE type=table",
+      "SELECT kind,count(*),sum(length(payload)) FROM records GROUP BY kind",
+      "SELECT key,ordinal,payload FROM records WHERE kind=node ORDER BY ordinal"
+    ],
+    "authorized_derived_inventory_reads": 1,
+    "authorized_original_ETO_reads": 1,
+    "connections": 1,
+    "new_gates": 0,
+    "old4GB_reads": 0,
+    "original_ETO_or_raw_reads": 1
+  },
+  "schema": "scar.native-input-parent-failure-diagnosis",
+  "schema_version": 1,
+  "status": "EXACT_LOCAL_MISSING_PARENT_DIAGNOSED_NO_PRODUCTION_CHANGE",
+  "whole_model": "OPEN"
+}

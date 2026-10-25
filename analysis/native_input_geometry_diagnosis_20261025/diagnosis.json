@@ -1,0 +1,533 @@
+{
+  "actual_gate": {
+    "elapsed_seconds": 5.752414,
+    "failure": {
+      "bytes": 3117,
+      "sha256": "f8c8775c037c2832a2c1f831fe7d2e318d3fc2ac9effe09c15afe714f6627576",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt03/failure.json"
+    },
+    "freeze": {
+      "bytes": 119685,
+      "sha256": "1044cb0107488b878a8f310994a8ba6c9cf2e6f3db2acfedfcaf932c11f33fbc",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt03/freeze.json"
+    },
+    "session": 88989,
+    "terminal_exit": 1
+  },
+  "allocation_predicates": {
+    "address_equal": true,
+    "device_equal": true,
+    "lifetime_scope_equal": true,
+    "positive_birth_nbytes_equal": true,
+    "provider_allocation_id_equal": true,
+    "region.allocation_equals_id": true
+  },
+  "canonical_association_established": false,
+  "database": {
+    "bytes": 36573184,
+    "connections": 1,
+    "mode": "ro",
+    "private_rows_are_diagnostic_not_owned_authority": true,
+    "queries": [
+      {
+        "parameters": [],
+        "sql": "SELECT key,ordinal,payload FROM records WHERE kind='dispatch' ORDER BY ordinal LIMIT 3"
+      },
+      {
+        "parameters": [
+          "scar-dispatch:4c632006cdb40aef2065bd5d1309bcf5:1391040:1:span"
+        ],
+        "sql": "SELECT key,ordinal,payload FROM records WHERE kind='node' AND json_extract(CAST(payload AS TEXT),'$.name')=?"
+      },
+      {
+        "parameters": [
+          "scar-dispatch:4c632006cdb40aef2065bd5d1309bcf5:1391040:1:output"
+        ],
+        "sql": "SELECT key,ordinal,payload FROM records WHERE kind='node' AND json_extract(CAST(payload AS TEXT),'$.name')=?"
+      },
+      {
+        "parameters": [
+          5
+        ],
+        "sql": "SELECT key,ordinal,payload FROM records WHERE kind='node' AND json_extract(CAST(payload AS TEXT),'$.ctrl_deps')=?"
+      },
+      {
+        "parameters": [
+          "scar-dispatch:4c632006cdb40aef2065bd5d1309bcf5:1391040:1:output"
+        ],
+        "sql": "SELECT key,ordinal,payload FROM records WHERE kind='physical' AND json_extract(CAST(payload AS TEXT),'$.marker')=?"
+      },
+      {
+        "parameters": [
+          "%#line/3/arguments/0"
+        ],
+        "sql": "SELECT key,ordinal,payload FROM records WHERE kind='archive:regions' AND json_extract(CAST(payload AS TEXT),'$.record.metadata.argument_ordinal')=0 AND json_extract(CAST(payload AS TEXT),'$.record.metadata.physical_observation') LIKE ?"
+      },
+      {
+        "parameters": [
+          "archive:allocations",
+          "tensor-physical:fc5a661cffb0baad94b7c80e57ab8434fd6e5df38b4b11ad4974503d93df9a80:epoch:152c5d48a8d9677acb009a8a25b1f9e6e43323e514771186f27414d26b8caa0e"
+        ],
+        "sql": "SELECT key,ordinal,payload FROM records WHERE kind=? AND key=?"
+      },
+      {
+        "parameters": [
+          1,
+          "cpu"
+        ],
+        "sql": "SELECT key,ordinal,payload FROM records WHERE kind='physical' AND json_extract(CAST(payload AS TEXT),'$.kind')='ALLOCATION' AND json_extract(CAST(payload AS TEXT),'$.provider_allocation_id')=? AND json_extract(CAST(payload AS TEXT),'$.device.text')=? AND json_extract(CAST(payload AS TEXT),'$.alloc_size')>0"
+      }
+    ],
+    "query_only": true,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/private/navigation.sqlite"
+  },
+  "differing_fields": [
+    "layout"
+  ],
+  "existing_two_owner_files_unchanged_for_diagnosis": true,
+  "finding": {
+    "Code_supported": "Pinned import_tensor_physical calls canonical_tensor_layout on provider spelling and stores provider_layout/rule. The normalizer requires exact physical profile/provider revision and rejects an already-canonical strided argument. _prepare_projection_v2 currently re-normalizes region.layout unconditionally.",
+    "Not_established": "No object/content/state/ready or new physical qualification; this reads a failed private navigation index diagnostically, without restoring an owned session. No claim that all520 regions were independently compared in this diagnosis.",
+    "Observed": "All current _geometry_v2 region predicates except layout agree. G1 region layout is canonical strided; raw point layout is torch.strided; exact provider_layout and PINNED_TORCH_LAYOUT_V1 are retained. Allocation predicates also agree."
+  },
+  "first_normal_group": {
+    "dispatch_source_lines": [
+      1,
+      2,
+      3
+    ],
+    "held_reference": {
+      "identity_qualified": true,
+      "path": [],
+      "ref": "weak:1391040:58"
+    },
+    "native_boxed_path": [
+      0
+    ],
+    "native_node": {
+      "id": 6,
+      "name": "aten::ones",
+      "original_ordinal": 3,
+      "schema": "aten::ones(SymInt[] size, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor"
+    },
+    "operator": "aten.ones.default",
+    "outcome": "RETURNED",
+    "output_marker_node": {
+      "id": 11,
+      "name": "scar-dispatch:4c632006cdb40aef2065bd5d1309bcf5:1391040:1:output",
+      "original_ordinal": 4
+    },
+    "port_direction": "outputs",
+    "port_position": 0,
+    "sequence": 1
+  },
+  "independent_expected_namespace_basis": {
+    "ETO_artifact": {
+      "schema": "pytorch.execution-trace.v1",
+      "sha256": "09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47",
+      "size_bytes": 2294964,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/execution-trace.1391040.4c632006cdb40aef2065bd5d1309bcf5.json"
+    },
+    "Kineto_raw_artifact": {
+      "bytes": 122210,
+      "label": "retained_capture",
+      "logical_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/kineto.1391040.4c632006cdb40aef2065bd5d1309bcf5.json",
+      "provenance": "exact frozen archive-index; verified by normal binder",
+      "raw_bytes": 1707134,
+      "raw_sha256": "6ceded4dea3dcb048d945fd5fdd293beb81d74ca5bd95f7f77dcaef4dfda38b4",
+      "sha256": "fbc12f1d0b044cd3d17b018ba88d345728d0af707702654001326b9a577e9a71",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/kineto.1391040.4c632006cdb40aef2065bd5d1309bcf5.json.gz"
+    },
+    "calculated_native_scope": "native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911",
+    "calculated_physical_scope": "tensor-physical:fc5a661cffb0baad94b7c80e57ab8434fd6e5df38b4b11ad4974503d93df9a80",
+    "physical_artifact": {
+      "schema": "scar.tensor-physical-observation.v1",
+      "sha256": "bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12",
+      "size_bytes": 2018741,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/tensor-physical.1391040.4c632006cdb40aef2065bd5d1309bcf5.jsonl"
+    },
+    "physical_metadata_artifact": {
+      "schema": "scar.tensor-physical-trace",
+      "sha256": "bb4a69f365eb26ce44827c28382c8a0a928ce6bdf9633aa8f1e21374547153c3",
+      "size_bytes": 4215,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/tensor-physical-meta.1391040.4c632006cdb40aef2065bd5d1309bcf5.json"
+    },
+    "source": "actual native failure raw_reads plus frozen exact Kineto raw artifact descriptor"
+  },
+  "minimum_additional_production_scope": [
+    {
+      "change": "One strict layout-view helper and _geometry_v2 provider-spelling comparison through it.",
+      "path": "scar/ir/execution/native_port_protocol.py"
+    },
+    {
+      "change": "V2 projection uses the same checked view; preserve already-normalized source without second normalization. V1 projection unchanged.",
+      "path": "scar/trace/native_protocol.py"
+    }
+  ],
+  "new_binder_or_producer_calls": 0,
+  "normalization_evidence": {
+    "provider_layout": "torch.strided",
+    "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+    "region_layout": "strided",
+    "rule": "PINNED_TORCH_LAYOUT_V1",
+    "source_profile": "scar.tensor-physical-event-tree-v1"
+  },
+  "original_allocation_record": {
+    "allocator_token": "provider-allocation-id:1",
+    "device": "cpu",
+    "id": {
+      "kind": "alloc",
+      "value": "tensor-physical:fc5a661cffb0baad94b7c80e57ab8434fd6e5df38b4b11ad4974503d93df9a80:epoch:152c5d48a8d9677acb009a8a25b1f9e6e43323e514771186f27414d26b8caa0e",
+      "wire": "alloc:tensor-physical:fc5a661cffb0baad94b7c80e57ab8434fd6e5df38b4b11ad4974503d93df9a80:epoch:152c5d48a8d9677acb009a8a25b1f9e6e43323e514771186f27414d26b8caa0e"
+    },
+    "lifetime_scope": "tensor-physical:fc5a661cffb0baad94b7c80e57ab8434fd6e5df38b4b11ad4974503d93df9a80",
+    "metadata": {
+      "address": 93888780833152,
+      "allocation_receipts": [
+        "sha256:bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12#line/2",
+        "sha256:bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12#line/13"
+      ],
+      "birth_reference": "sha256:bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12#line/2",
+      "free_reference": "sha256:bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12#line/13",
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "physical_cuda_allocation_established": false,
+      "provider_allocation_id": 1,
+      "resource_ready_established": false
+    },
+    "nbytes": 4
+  },
+  "original_raw_reads": 0,
+  "original_record_sources": {
+    "allocation": {
+      "locator": {
+        "artifact": {
+          "compression": "gzip",
+          "decoded_bytes": 2604833,
+          "decoded_sha256": "237cfe52ff91e25095732c3ba1211e0a34265f487801649eefb5ccaea8296b45",
+          "first_ordinal": 0,
+          "last_ordinal": 2051,
+          "lines": 2052,
+          "physical_bytes": 156708,
+          "physical_sha256": "4649839c3f026a309477cbf8204e77c1d631e5ca183eac420fd9dfc80c2d28f4",
+          "uri": "values/allocations/000000.jsonl.gz"
+        },
+        "line": 1027,
+        "manifest_receipt": {
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/native/bundle-partitions/manifest.json",
+          "physical_bytes": 10099,
+          "physical_sha256": "fb35e450c22344d6eadd0a0dc49cfb919fa472c9ecb6cd7546955dee329bb973"
+        },
+        "pointer_within_line": "/record"
+      },
+      "ordinal": 1026,
+      "verification": {
+        "current_row_ordinal_verified": true,
+        "record_semantics_revalidated": false,
+        "whole_bundle_revalidated": false,
+        "whole_chunk_decoded_sha_verified": true,
+        "whole_chunk_stored_sha_verified": true
+      }
+    },
+    "native": "sha256:09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47#/nodes/4/inputs/values/0",
+    "physical": "sha256:bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12#line/3/arguments/0",
+    "region": {
+      "locator": {
+        "artifact": {
+          "compression": "gzip",
+          "decoded_bytes": 708613,
+          "decoded_sha256": "2a8f0cb5768d2a68ecd2a655d430c8ce30f79e7f92efbd62d49b014c93a30f40",
+          "first_ordinal": 0,
+          "last_ordinal": 519,
+          "lines": 520,
+          "physical_bytes": 36297,
+          "physical_sha256": "1d8f8e13f332dd07591c9f73ee583178549dca86ba8dbd54ccc969559d61994e",
+          "uri": "values/regions/000000.jsonl.gz"
+        },
+        "line": 1,
+        "manifest_receipt": {
+          "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/native/bundle-partitions/manifest.json",
+          "physical_bytes": 10099,
+          "physical_sha256": "fb35e450c22344d6eadd0a0dc49cfb919fa472c9ecb6cd7546955dee329bb973"
+        },
+        "pointer_within_line": "/record"
+      },
+      "ordinal": 0,
+      "verification": {
+        "current_row_ordinal_verified": true,
+        "record_semantics_revalidated": false,
+        "whole_bundle_revalidated": false,
+        "whole_chunk_decoded_sha_verified": true,
+        "whole_chunk_stored_sha_verified": true
+      }
+    }
+  },
+  "original_region_record": {
+    "allocation": {
+      "kind": "alloc",
+      "value": "tensor-physical:fc5a661cffb0baad94b7c80e57ab8434fd6e5df38b4b11ad4974503d93df9a80:epoch:152c5d48a8d9677acb009a8a25b1f9e6e43323e514771186f27414d26b8caa0e",
+      "wire": "alloc:tensor-physical:fc5a661cffb0baad94b7c80e57ab8434fd6e5df38b4b11ad4974503d93df9a80:epoch:152c5d48a8d9677acb009a8a25b1f9e6e43323e514771186f27414d26b8caa0e"
+    },
+    "device": "cpu",
+    "dtype": "torch.float32",
+    "id": {
+      "kind": "region",
+      "value": "tensor-physical:fc5a661cffb0baad94b7c80e57ab8434fd6e5df38b4b11ad4974503d93df9a80:region:3:0",
+      "wire": "region:tensor-physical:fc5a661cffb0baad94b7c80e57ab8434fd6e5df38b4b11ad4974503d93df9a80:region:3:0"
+    },
+    "layout": "strided",
+    "metadata": {
+      "argument_ordinal": 0,
+      "association_persistent": false,
+      "eto_reference": "sha256:09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47#/nodes/4/inputs/values/0",
+      "impl_ptr": 93888780173008,
+      "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
+      "logical_version": null,
+      "marker_instance": "opinst:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:eto:11",
+      "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+      "physical_observation": "sha256:bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12#line/3/arguments/0",
+      "provider_layout": "torch.strided",
+      "provider_tensor_id": 0
+    },
+    "offset": 0,
+    "shape": [],
+    "strides": []
+  },
+  "owned_owner_restored": false,
+  "point_metadata": {
+    "device": {
+      "index": null,
+      "text": "cpu",
+      "type": "cpu"
+    },
+    "dtype": "torch.float32",
+    "gaps": [],
+    "impl_ptr": 93888780173008,
+    "layout": "torch.strided",
+    "physical_epoch_reference_observed": true,
+    "provider_allocation_id": 1,
+    "provider_tensor_id": 0,
+    "sizes": [],
+    "status": "OBSERVED",
+    "storage_data_ptr": 93888780833152,
+    "storage_offset": null,
+    "storage_offset_gap": "not_exposed_by_installed_tensor_metadata_binding",
+    "strides": []
+  },
+  "positive_birth_record": {
+    "key": "2",
+    "ordinal": 2,
+    "payload": {
+      "alloc_size": 4,
+      "device": {
+        "index": null,
+        "text": "cpu",
+        "type": "cpu"
+      },
+      "event": {
+        "correlation_id": 0,
+        "end_time_ns": 1792952659779269344,
+        "parent_result_id": 93888750595920,
+        "record_function_thread_token": 1,
+        "result_id": 93888780650624,
+        "start_time_ns": 1792952659779269344,
+        "traversal_ordinal": 6
+      },
+      "gaps": [],
+      "index": 2,
+      "kind": "ALLOCATION",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "nonce": "4c632006cdb40aef2065bd5d1309bcf5",
+      "physical_epoch_reference_observed": true,
+      "process_id": 1391040,
+      "provider_allocation_id": 1,
+      "provider_tensor_id": 0,
+      "ptr": 93888780833152,
+      "receipt_kind": "ALLOCATE",
+      "schema": "scar.tensor-physical-observation",
+      "schema_version": 1,
+      "total_allocated": 4,
+      "total_reserved": 0
+    }
+  },
+  "region_kind_and_offset": {
+    "kind": null,
+    "normalizer_changes_only_layout_representation": true,
+    "offset": 0,
+    "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+    "offset_unit_field": null,
+    "predicate_offset_equals_original_ETO_storage_offset": true
+  },
+  "region_predicates": [
+    {
+      "G1_region": "sha256:bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12#line/3/arguments/0",
+      "equal": true,
+      "field": "metadata.physical_observation",
+      "provider_point_expected": "sha256:bb5214dd48f2b973620de8273e89e508caf0c7f96422cceca6872f8beb976c12#line/3/arguments/0"
+    },
+    {
+      "G1_region": "sha256:09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47#/nodes/4/inputs/values/0",
+      "equal": true,
+      "field": "metadata.eto_reference",
+      "provider_point_expected": "sha256:09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47#/nodes/4/inputs/values/0"
+    },
+    {
+      "G1_region": "opinst:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:eto:11",
+      "equal": true,
+      "field": "metadata.marker_instance",
+      "provider_point_expected": "opinst:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:eto:11"
+    },
+    {
+      "G1_region": 93888780173008,
+      "equal": true,
+      "field": "metadata.impl_ptr",
+      "provider_point_expected": 93888780173008
+    },
+    {
+      "G1_region": 0,
+      "equal": true,
+      "field": "metadata.provider_tensor_id",
+      "provider_point_expected": 0
+    },
+    {
+      "G1_region": 0,
+      "equal": true,
+      "field": "offset",
+      "provider_point_expected": 0
+    },
+    {
+      "G1_region": [],
+      "equal": true,
+      "field": "shape",
+      "provider_point_expected": []
+    },
+    {
+      "G1_region": [],
+      "equal": true,
+      "field": "strides",
+      "provider_point_expected": []
+    },
+    {
+      "G1_region": "torch.float32",
+      "equal": true,
+      "field": "dtype",
+      "provider_point_expected": "torch.float32"
+    },
+    {
+      "G1_region": "cpu",
+      "equal": true,
+      "field": "device",
+      "provider_point_expected": "cpu"
+    },
+    {
+      "G1_region": "strided",
+      "equal": false,
+      "field": "layout",
+      "provider_point_expected": "torch.strided"
+    }
+  ],
+  "review_code_pins": {
+    "scar/ir/execution/native_port_protocol.py": {
+      "bytes": 62029,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "608ba93502637c600fe46f8e9cfe1fca1005610d9b282da0633f69de93286338"
+    },
+    "scar/trace/capture_import.py": {
+      "bytes": 15797,
+      "path": "scar/trace/capture_import.py",
+      "sha256": "70236a492175c02de84a3a11ffb6de2bdf58e95ef35711b64b5f03ad0b7c9687"
+    },
+    "scar/trace/native_protocol.py": {
+      "bytes": 56622,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+    },
+    "scar/trace/tensor_physical_import.py": {
+      "bytes": 19916,
+      "path": "scar/trace/tensor_physical_import.py",
+      "sha256": "c834d0a1072b610d9cc23d163709171ae329b6b175f1a9388c95e9842a5f0372"
+    }
+  },
+  "reviewed_code_excerpt_bytes": 6491,
+  "reviewed_code_sections": [
+    {
+      "frozen_full_source": {
+        "bytes": 19916,
+        "path": "scar/trace/tensor_physical_import.py",
+        "sha256": "c834d0a1072b610d9cc23d163709171ae329b6b175f1a9388c95e9842a5f0372"
+      },
+      "line_ranges_1_based": [
+        [
+          36,
+          46
+        ],
+        [
+          245,
+          255
+        ]
+      ],
+      "path": "scar/trace/tensor_physical_import.py",
+      "reviewed_excerpt_bytes": 1660,
+      "reviewed_excerpt_sha256": "4790774c2d709fd8eb7b42de7a2c624128316c1a3fd372d1b7a01b090b29eafc"
+    },
+    {
+      "frozen_full_source": {
+        "bytes": 62029,
+        "path": "scar/ir/execution/native_port_protocol.py",
+        "sha256": "608ba93502637c600fe46f8e9cfe1fca1005610d9b282da0633f69de93286338"
+      },
+      "line_ranges_1_based": [
+        [
+          206,
+          255
+        ]
+      ],
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "reviewed_excerpt_bytes": 3573,
+      "reviewed_excerpt_sha256": "a94a19888172816e21f545e7ed52b40133efdf44798e7b4b7103e272284edbcc"
+    },
+    {
+      "frozen_full_source": {
+        "bytes": 56622,
+        "path": "scar/trace/native_protocol.py",
+        "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+      },
+      "line_ranges_1_based": [
+        [
+          416,
+          424
+        ]
+      ],
+      "path": "scar/trace/native_protocol.py",
+      "reviewed_excerpt_bytes": 741,
+      "reviewed_excerpt_sha256": "eb273dbee623692e2435c7ad8044ab405427aa0ac5a51c746186a134728d0486"
+    },
+    {
+      "frozen_full_source": {
+        "bytes": 15797,
+        "path": "scar/trace/capture_import.py",
+        "sha256": "70236a492175c02de84a3a11ffb6de2bdf58e95ef35711b64b5f03ad0b7c9687"
+      },
+      "line_ranges_1_based": [
+        [
+          163,
+          169
+        ]
+      ],
+      "path": "scar/trace/capture_import.py",
+      "reviewed_excerpt_bytes": 517,
+      "reviewed_excerpt_sha256": "c74fff2dac71444c48f3406e837fd286a93c634ed83eeb42cc03035292af750e"
+    }
+  ],
+  "schema": "scar.native-geometry-view-diagnosis",
+  "schema_version": 1,
+  "source_modified": false,
+  "status": "PINNED_LAYOUT_NORMALIZATION_VIEW_MISMATCH_IDENTIFIED",
+  "strict_compatibility_contract": {
+    "canonical_view": "Require both exact rule PINNED_TORCH_LAYOUT_V1 and nonempty original provider_layout; require pinned profile/revision; recompute canonical_tensor_layout(provider_layout) and require exact equality to stored region.layout; independently require provider_layout equals the actual raw point metadata.layout. Partial, unknown-rule, wrong-provider or contradictory receipts reject.",
+    "projection": "Already-canonical verified records preserve their layout and metadata exactly and retain the original archive locator; emit a view receipt. Raw records alone perform the original canonical conversion. Do not overwrite provider_layout with strided.",
+    "raw_provider_view": "Keep the legacy strict raw layout check and original conversion when no normalization receipt exists; canonical strided without a receipt is not a provider spelling.",
+    "unchanged": "All original actor/marker/ordinal/source/object/geometry/offset/epoch/birth/namespace and independent port checks remain; V1 path/API stays unchanged. This compatibility is representation only, not value equality or content proof."
+  }
+}

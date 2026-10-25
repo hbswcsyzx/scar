@@ -360,7 +360,7 @@ def _project(source, interfaces, selected, out, budget):
 
 def _prepare_projection_v2(source, interfaces, selected, out, budget):
     """Closed ordinary graphs: B objects and C geometry are separate subsets."""
-    from scar.ir.execution.native_port_protocol import replay_batch_interfaces, PROFILE_V2
+    from scar.ir.execution.native_port_protocol import replay_batch_interfaces, PROFILE_V2, _native_region_layout_view
     from scar.ir.v2.codec import values_from_dict, evidence_from_dict
     from scar.ir.v2.values import ValueGraph
     from scar.ir.v2.evidence import EvidenceGraph
@@ -372,6 +372,8 @@ def _prepare_projection_v2(source, interfaces, selected, out, budget):
     raw_nodes = {n["id"]: n for n in source["nodes"]}
     receipts, geometry = [], []
     expected_regions, expected_allocations = {}, {}
+    point_layouts = {}
+    physical_points = {row['index']: row for row in source['physical'] if row.get('kind') == 'MARKER'}
     expected_objects = {}
     for interface in interfaces:
         for direction, ports in interface["ports"].items():
@@ -387,6 +389,11 @@ def _prepare_projection_v2(source, interfaces, selected, out, budget):
                 region, allocation = witness["region"]["record"], witness["allocation"]["record"]
                 expected_regions[region["id"]["value"]] = region
                 expected_allocations[allocation["id"]["value"]] = allocation
+                point_layout = physical_points[g['physical_line']]['arguments'][g['argument_ordinal']]['metadata']['layout']
+                region_id = region['id']['value']
+                need(region_id not in point_layouts or point_layouts[region_id] == point_layout,
+                     'V2 original region has contradictory physical point layouts')
+                point_layouts[region_id] = point_layout
                 geometry.append({"sequence": interface["sequence"], "direction": direction, "position": position,
                     "object": None if port.get("object_record") is None else port["object_record"]["id"],
                     "region": region["id"], "allocation": allocation["id"], "point": g["point"],
@@ -415,9 +422,14 @@ def _prepare_projection_v2(source, interfaces, selected, out, budget):
             derived = None
             if table == "regions":
                 layout = record["layout"]
-                record["layout"] = canonical_tensor_layout(layout, profile=source["physical_profile"], provider_revision=source["provider_revision"])
-                record["metadata"].update(provider_layout=layout, layout_normalization_rule="PINNED_TORCH_LAYOUT_V1")
-                derived = {"rule": "PINNED_TORCH_LAYOUT_V1", "original_layout": layout, "projected_layout": record["layout"]}
+                view = _native_region_layout_view(record, point_layout=point_layouts[record['id']['value']],
+                    profile=source['physical_profile'], provider_revision=source['provider_revision'])
+                if view['source_view'] == 'RAW_PROVIDER_LAYOUT':
+                    record['layout'] = view['canonical_layout']
+                    record['metadata'].update(provider_layout=view['provider_layout'], layout_normalization_rule=view['rule'])
+                else:
+                    need(record == original, 'already canonical V2 original region changed during projection')
+                derived = {**view, 'original_layout': layout, 'projected_layout': record['layout']}
             doc[table].append(record)
             receipts.append({"graph": graph, "table": table, "original_record": original,
                 "source_locator": row["locator"], "source_verification": row["verification"], "derived": derived})

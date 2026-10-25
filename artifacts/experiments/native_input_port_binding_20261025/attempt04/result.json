@@ -1,0 +1,572 @@
+{
+  "G1_reimports": 0,
+  "elapsed_seconds": 19.634581955964677,
+  "first_positive": {
+    "CPU_bridge": {
+      "artifact": {
+        "schema": "pytorch.kineto.chrome-trace.v1",
+        "sha256": "6ceded4dea3dcb048d945fd5fdd293beb81d74ca5bd95f7f77dcaef4dfda38b4",
+        "size_bytes": 1707134,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/kineto.1391040.4c632006cdb40aef2065bd5d1309bcf5.json"
+      },
+      "locator": "#/traceEvents/17"
+    },
+    "Python_identity_qualified": false,
+    "geometry_allocation_qualified": false,
+    "logical_content_qualified": false,
+    "metadata": {
+      "device": {
+        "index": null,
+        "text": "cpu",
+        "type": "cpu"
+      },
+      "dtype": "torch.float32",
+      "gaps": [],
+      "impl_ptr": 93888780173008,
+      "layout": "torch.strided",
+      "physical_epoch_reference_observed": true,
+      "provider_allocation_id": 1,
+      "provider_tensor_id": 0,
+      "sizes": [],
+      "status": "OBSERVED",
+      "storage_data_ptr": 93888780833152,
+      "storage_offset": null,
+      "storage_offset_gap": "not_exposed_by_installed_tensor_metadata_binding",
+      "strides": []
+    },
+    "metadata_source": {
+      "artifact": {
+        "schema": "scar.native-tensor-input-observation.v1",
+        "sha256": "e210478750c05e9a1d61ac59ed6b4d39bf21e3a981270bd013e8b1be420339c6",
+        "size_bytes": 1291085,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/native-tensor-inputs.1391040.4c632006cdb40aef2065bd5d1309bcf5/000000.jsonl"
+      },
+      "locator": "#/lines/11/inputs/slots/0/metadata"
+    },
+    "native_input": {
+      "boundary": {
+        "kind": "program_native_boundary",
+        "value": "torch-interface:bff7adba9a329dcbc975f453863a15dc7e5198d4413a5540858d4ef4f74c1349:boundary",
+        "wire": "program_native_boundary:torch-interface:bff7adba9a329dcbc975f453863a15dc7e5198d4413a5540858d4ef4f74c1349:boundary"
+      },
+      "entry": {
+        "kind": "exec_block_visit",
+        "value": "native-port:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:2:entry",
+        "wire": "exec_block_visit:native-port:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:2:entry"
+      },
+      "position": 0
+    },
+    "native_producer": {
+      "instance": {
+        "artifact": {
+          "schema": "scar.ir.v2.evidence",
+          "sha256": "75cd7d8813f03e7c057352e9f7760760798db0ef3e17f12bb6fbccb96548e1e1",
+          "size_bytes": 3951512,
+          "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/source-evidence.json"
+        },
+        "instance": {
+          "kind": "opinst",
+          "value": "native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:eto:17",
+          "wire": "opinst:native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:eto:17"
+        }
+      },
+      "source": {
+        "artifact": {
+          "schema": "pytorch.execution-trace.v1",
+          "sha256": "09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47",
+          "size_bytes": 2294964,
+          "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/execution-trace.1391040.4c632006cdb40aef2065bd5d1309bcf5.json"
+        },
+        "locator": "#/nodes/12"
+      }
+    },
+    "original_input": {
+      "artifact": {
+        "schema": "pytorch.execution-trace.v1",
+        "sha256": "09c7c992081de904b3d3e9037f566a8eb1e11075f56d65964e409630d7009b47",
+        "size_bytes": 2294964,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/execution-trace.1391040.4c632006cdb40aef2065bd5d1309bcf5.json"
+      },
+      "locator": "#/nodes/12/inputs/values/0"
+    },
+    "path": [
+      0
+    ],
+    "resource_ready_qualified": false,
+    "row": 11,
+    "value_occurrence": {
+      "kind": "exec_value_occurrence",
+      "value": "native-port:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:2:inputs:0",
+      "wire": "exec_value_occurrence:native-port:capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44:2:inputs:0"
+    }
+  },
+  "frozen_imported_SCAR_sources": [
+    "scar/__init__.py",
+    "scar/ir/ids.py",
+    "scar/ir/effects.py",
+    "scar/ir/entities.py",
+    "scar/ir/proofs.py",
+    "scar/ir/events.py",
+    "scar/ir/graph.py",
+    "scar/ir/correspondence.py",
+    "scar/ir/cfg.py",
+    "scar/ir/static.py",
+    "scar/ir/versions.py",
+    "scar/ir/__init__.py",
+    "scar/trace/files.py",
+    "scar/trace/reader.py",
+    "scar/trace/session.py",
+    "scar/trace/__init__.py",
+    "scar/ir/literals.py",
+    "scar/ir/v2/ids.py",
+    "scar/ir/v2/common.py",
+    "scar/ir/v2/contracts.py",
+    "scar/ir/v2/_validation.py",
+    "scar/ir/v2/values.py",
+    "scar/ir/v2/semantic.py",
+    "scar/ir/v2/evidence.py",
+    "scar/ir/v2/correspondence.py",
+    "scar/ir/v2/optimization.py",
+    "scar/ir/v2/schemas.py",
+    "scar/ir/v2/codec.py",
+    "scar/ir/v2/__init__.py",
+    "scar/ir/record_codec.py",
+    "scar/ir/program/ids.py",
+    "scar/ir/program/providers.py",
+    "scar/ir/program/native.py",
+    "scar/ir/program/call_effect_expansion.py",
+    "scar/ir/program/state_modes.py",
+    "scar/ir/program/state_addresses.py",
+    "scar/ir/program/frames.py",
+    "scar/ir/program/structured.py",
+    "scar/ir/program/stored_values.py",
+    "scar/ir/program/resources.py",
+    "scar/ir/program/drivers.py",
+    "scar/ir/program/lifecycle.py",
+    "scar/ir/program/protocols.py",
+    "scar/ir/program/protocol_connections.py",
+    "scar/ir/program/bindings.py",
+    "scar/ir/program/functions.py",
+    "scar/ir/program/environments.py",
+    "scar/ir/program/control.py",
+    "scar/ir/program/cleanup.py",
+    "scar/ir/program/literal_sources.py",
+    "scar/ir/program/resumption.py",
+    "scar/ir/program/protocol_await_records.py",
+    "scar/ir/program/exception_matches.py",
+    "scar/ir/program/model.py",
+    "scar/ir/program/codec.py",
+    "scar/ir/program/binding_validation.py",
+    "scar/ir/program/__init__.py",
+    "scar/ir/execution/ids.py",
+    "scar/ir/execution/common.py",
+    "scar/ir/execution/coordinates.py",
+    "scar/ir/execution/calls.py",
+    "scar/ir/execution/resumables.py",
+    "scar/ir/provenance.py",
+    "scar/ir/execution/resources.py",
+    "scar/ir/execution/snapshot.py",
+    "scar/ir/execution/coverage.py",
+    "scar/ir/execution/work.py",
+    "scar/ir/execution/content.py",
+    "scar/ir/execution/observations.py",
+    "scar/ir/execution/composition.py",
+    "scar/ir/execution/production.py",
+    "scar/ir/execution/order.py",
+    "scar/ir/execution/validity.py",
+    "scar/ir/execution/__init__.py",
+    "scar/ir/execution/native_port_protocol.py",
+    "scar/trace/capture_coordinates.py",
+    "scar/trace/native_schema.py",
+    "scar/trace/dispatch_evidence.py",
+    "scar/trace/native_import.py",
+    "scar/trace/dispatch_import.py",
+    "scar/trace/tensor_physical.py",
+    "scar/trace/tensor_physical_import.py",
+    "scar/analysis/memory.py",
+    "scar/analysis/materialization.py",
+    "scar/analysis/repetition.py",
+    "scar/analysis/synchronization.py",
+    "scar/analysis/loops.py",
+    "scar/analysis/candidates.py",
+    "scar/analysis/invariance.py",
+    "scar/analysis/liveness.py",
+    "scar/analysis/graph_candidates.py",
+    "scar/analysis/graph_loops.py",
+    "scar/analysis/inventory.py",
+    "scar/analysis/static_candidates.py",
+    "scar/analysis/rejection_audit.py",
+    "scar/analysis/topdown.py",
+    "scar/analysis/constants.py",
+    "scar/analysis/__init__.py",
+    "scar/analysis/inventory_partitions.py",
+    "scar/store/graph_index.py",
+    "scar/store/__init__.py",
+    "scar/store/bundle_partitions.py",
+    "scar/trace/native_protocol.py",
+    "scar/trace/native_capture_batch.py",
+    "scar/trace/native_tensor_inputs.py",
+    "scar/trace/os_resources.py",
+    "scar/trace/os_capture_launch.py",
+    "scar/trace/os_capture_coverage.py",
+    "scar/ir/execution/model.py",
+    "scar/ir/execution/codec.py",
+    "scar/ir/execution/validation.py",
+    "scar/ir/program/driver_flow.py",
+    "scar/ir/program/validation.py",
+    "scar/ir/program/resource_validation.py",
+    "scar/ir/program/environment_validation.py",
+    "scar/ir/program/state_address_validation.py",
+    "scar/ir/program/literal_validation.py",
+    "scar/ir/program/control_validation.py",
+    "scar/ir/program/cleanup_forward.py",
+    "scar/ir/program/cleanup_validation.py",
+    "scar/ir/program/resumption_validation.py",
+    "scar/ir/program/resumption_flow.py",
+    "scar/ir/program/driver_validation.py",
+    "scar/ir/program/lifecycle_validation.py",
+    "scar/ir/program/no_body_validation.py",
+    "scar/ir/program/session_release_validation.py",
+    "scar/ir/program/protocol_flow.py",
+    "scar/ir/program/protocol_rules.py",
+    "scar/ir/program/protocol_validation.py",
+    "scar/ir/program/lifecycle_flow.py",
+    "scar/ir/program/session_flow.py",
+    "scar/ir/program/lifecycle_analysis.py",
+    "scar/ir/program/provider_validation.py",
+    "scar/ir/program/native_validation.py",
+    "scar/ir/execution/flow.py",
+    "scar/ir/execution/call_validation.py",
+    "scar/ir/program/queries.py",
+    "scar/ir/execution/resumable_flow.py",
+    "scar/ir/execution/resumable_validation.py",
+    "scar/ir/execution/pending_payloads.py",
+    "scar/ir/execution/resumable_sessions.py",
+    "scar/ir/execution/await_links.py",
+    "scar/ir/execution/host_order.py",
+    "scar/ir/execution/endpoint_protocol.py",
+    "scar/ir/execution/effects.py",
+    "scar/ir/execution/content_validation.py",
+    "scar/ir/execution/inventory.py",
+    "scar/ir/execution/source_validation.py",
+    "scar/ir/execution/resource_validation.py",
+    "scar/ir/execution/work_validation.py",
+    "scar/ir/execution/order_validation.py",
+    "scar/ir/execution/observation_validation.py",
+    "scar/ir/execution/production_validation.py",
+    "scar/ir/execution/validity_order.py",
+    "scar/ir/execution/validity_validation.py",
+    "scar/ir/execution/resumable_identity.py",
+    "scar/ir/execution/production_ranges.py"
+  ],
+  "full_model": "OPEN",
+  "input_budget": {
+    "accounting_role": "RESERVATIONS; not actual or kernel IO",
+    "completed_verified_phase_bytes": 67280634,
+    "control_metadata_bytes": 860820,
+    "control_metadata_limit": 1000000,
+    "entries": [
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "control: capture-model.json",
+        "control_metadata": true,
+        "decoded_bytes": 110385,
+        "stored_bytes": 110385
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "control: capture-coordinates.json",
+        "control_metadata": true,
+        "decoded_bytes": 198782,
+        "stored_bytes": 198782
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "control: archive-index.json",
+        "control_metadata": true,
+        "decoded_bytes": 36412,
+        "stored_bytes": 36412
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "control: manifest.json",
+        "control_metadata": true,
+        "decoded_bytes": 10099,
+        "stored_bytes": 10099
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "control: execution-evidence.1391040.json",
+        "control_metadata": true,
+        "decoded_bytes": 6259,
+        "stored_bytes": 6259
+      },
+      {
+        "basis": "precharged complete SHA passes; fresh public binder reconciles exact receipts",
+        "completed_verified_phase": true,
+        "component": "ordinary binder verified complete members",
+        "control_metadata": false,
+        "decoded_bytes": 19139044,
+        "stored_bytes": 3237716
+      },
+      {
+        "basis": "unchanged public binder complete OS parse passes",
+        "completed_verified_phase": true,
+        "component": "ordinary binder OS fact parse",
+        "control_metadata": false,
+        "decoded_bytes": 9022175,
+        "stored_bytes": 1028555
+      },
+      {
+        "basis": "unchanged strict-reader complete parse passes after member SHA verification",
+        "completed_verified_phase": true,
+        "component": "ordinary binder strict companion parse",
+        "control_metadata": false,
+        "decoded_bytes": 3014193,
+        "stored_bytes": 167287
+      },
+      {
+        "basis": "cached verified metadata document parse",
+        "completed_verified_phase": true,
+        "component": "ordinary binder strict companion metadata parse",
+        "control_metadata": false,
+        "decoded_bytes": 14683,
+        "stored_bytes": 14683
+      },
+      {
+        "basis": "complete document passes",
+        "completed_verified_phase": true,
+        "component": "ordinary binder other metadata parse",
+        "control_metadata": false,
+        "decoded_bytes": 13139,
+        "stored_bytes": 13139
+      },
+      {
+        "basis": "complete initial document reads",
+        "completed_verified_phase": true,
+        "component": "ordinary binder initial native/archive",
+        "control_metadata": false,
+        "decoded_bytes": 42671,
+        "stored_bytes": 42671
+      },
+      {
+        "basis": "unchanged _document: receipt read plus document read",
+        "completed_verified_phase": true,
+        "component": "ordinary binder OS intent/launch/coverage",
+        "control_metadata": false,
+        "decoded_bytes": 16150,
+        "stored_bytes": 16150
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "adapter archive index",
+        "control_metadata": true,
+        "decoded_bytes": 36412,
+        "stored_bytes": 36412
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "adapter companion manifest reload",
+        "control_metadata": true,
+        "decoded_bytes": 2695,
+        "stored_bytes": 2695
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "adapter strict metadata verify+parse",
+        "control_metadata": true,
+        "decoded_bytes": 5390,
+        "stored_bytes": 5390
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "adapter strict metadata verify+parse",
+        "control_metadata": true,
+        "decoded_bytes": 12518,
+        "stored_bytes": 12518
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "adapter strict metadata verify+parse",
+        "control_metadata": true,
+        "decoded_bytes": 3028,
+        "stored_bytes": 3028
+      },
+      {
+        "basis": "returned bytes",
+        "completed_verified_phase": true,
+        "component": "adapter strict metadata verify+parse",
+        "control_metadata": true,
+        "decoded_bytes": 8430,
+        "stored_bytes": 8430
+      },
+      {
+        "basis": "reserved complete strict-reader passes; verified on return",
+        "completed_verified_phase": true,
+        "component": "adapter strict chunk verify+parse",
+        "control_metadata": false,
+        "decoded_bytes": 2582170,
+        "stored_bytes": 216891
+      },
+      {
+        "basis": "reserved complete strict-reader passes; verified on return",
+        "completed_verified_phase": true,
+        "component": "adapter strict chunk verify+parse",
+        "control_metadata": false,
+        "decoded_bytes": 2595058,
+        "stored_bytes": 211641
+      },
+      {
+        "basis": "reserved complete strict-reader passes; verified on return",
+        "completed_verified_phase": true,
+        "component": "adapter strict chunk verify+parse",
+        "control_metadata": false,
+        "decoded_bytes": 851158,
+        "stored_bytes": 73329
+      },
+      {
+        "basis": "bounded member returned bytes",
+        "completed_verified_phase": true,
+        "component": "adapter ETO",
+        "control_metadata": false,
+        "decoded_bytes": 2294964,
+        "stored_bytes": 93412
+      },
+      {
+        "basis": "bounded member returned bytes",
+        "completed_verified_phase": true,
+        "component": "adapter Kineto",
+        "control_metadata": false,
+        "decoded_bytes": 1707134,
+        "stored_bytes": 122210
+      },
+      {
+        "basis": "precharged original V2 complete source reads",
+        "completed_verified_phase": true,
+        "component": "native V2 complete sources",
+        "control_metadata": false,
+        "decoded_bytes": 4826949,
+        "stored_bytes": 264020
+      },
+      {
+        "basis": "precharged complete BundlePartitions chunk reads",
+        "completed_verified_phase": true,
+        "component": "native V2 original four tables",
+        "control_metadata": false,
+        "decoded_bytes": 13807785,
+        "stored_bytes": 725893
+      },
+      {
+        "basis": "complete acquisition metadata reads",
+        "completed_verified_phase": true,
+        "component": "native V2 acquisition metadata",
+        "control_metadata": false,
+        "decoded_bytes": 132472,
+        "stored_bytes": 132472
+      }
+    ],
+    "kernel_IO_measurement": false,
+    "limit": 68000000,
+    "pending_reserved_bytes": 0,
+    "stored_plus_decoded_bytes": 67280634
+  },
+  "native": {
+    "G1_capture_model": {
+      "sha256": "0b52a66d8259dc2234eacd98351adeb4c8d7763f1a667061f1839aa67fa57c94",
+      "size_bytes": 110385,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/capture-model.json"
+    },
+    "G1_dispatch_outcomes": {
+      "RAISED": 1,
+      "RETURNED": 260
+    },
+    "OS_interface_imports": 0,
+    "capture_imports": 0,
+    "declared_dispatch_attempts": 261,
+    "dispatch_frontiers": {
+      "ORIGINAL_NATIVE_PARENT_CLOSURE_UNAVAILABLE": 1
+    },
+    "enumerated_dispatch_groups": 261,
+    "fresh_public_coordinate_binds": 1,
+    "logical_content_established": false,
+    "metadata_associations": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/input-associations.json",
+    "metadata_counts": {
+      "associated_metadata_paths": 516,
+      "canonical_nodes": 260,
+      "empty_tensor_lists": 3,
+      "exact_raw_key_joins": 2330,
+      "mapped_parent_checks": 2069,
+      "metadata_at_exact_native_path": 3095,
+      "metadata_dispositions": {
+        "ASSOCIATED": 516,
+        "CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE": 2579
+      },
+      "metadata_paths": 3095,
+      "rows": 2332,
+      "slot_OPAQUE": 2072,
+      "slot_SCALAR_OPAQUE": 3084,
+      "slot_TENSOR": 3089,
+      "slot_TENSOR_LIST": 6
+    },
+    "modeled_dispatches": 260,
+    "native_parent_closure": {
+      "missing_parent_edge_count": 1,
+      "native_parent_inventory": {
+        "schema": "scar.native-capture-table-chunks",
+        "sha256": "acd0660a80e0661609dffaf0292e120c09e4932a0d30bf89339e445e4f053c23",
+        "size_bytes": 2293,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/native-parent-inventory/manifest.json"
+      },
+      "native_parent_nodes": 2332,
+      "parent_frontier_node_count": 2,
+      "qualified_leases_have_complete_required_parent_closure": true,
+      "source_domain_definition": "complete observed dispatch inventory, not complete ETO tree/whole program",
+      "whole_tree_parent_closure_established": false
+    },
+    "output_limit_bytes": 64000000,
+    "private_index_limit_bytes": 128000000,
+    "profile": "SCAR_NATIVE_INPUT_METADATA_ASSOCIATION_V1",
+    "resource_ready_established": false,
+    "rss_limit_KiB": 2097152,
+    "run": "capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44",
+    "schema": "scar.native-capture-model-input-binding",
+    "schema_version": 1,
+    "source_call_binding_established": false,
+    "state_effects_established": false,
+    "target_executions": 0,
+    "verified_shards_consumed": 2,
+    "wall_limit_seconds": 120,
+    "whole_elapsed_seconds": 18.596453776001,
+    "whole_model_established": false
+  },
+  "new_captures": 0,
+  "new_target_runs": 0,
+  "old1901_reads": 0,
+  "producer_source_hash_bytes_separate": 13228666,
+  "sole_negative": {
+    "candidate_sha256": "6665034a044a72ebebae97516504ab3cc02d308db9efba610ea09f0595f6624c",
+    "canonical_lease_changed": false,
+    "case": "same_Run_wrong_native_producer_and_ordinal",
+    "changed_producer": "native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:eto:6",
+    "failure_was_old_owner_hash_scope": false,
+    "original_producer": "native:33f1c66211e1f97d10729a20ccc5f124d367a2ada14036234a9923e35e03d911:eto:17",
+    "reason": "native input retention: native input association producer/path/source mismatch",
+    "rejected": true
+  },
+  "source_calls": {
+    "bound_bodies": 0,
+    "count": 271,
+    "status": "OPEN_UNRESOLVED"
+  },
+  "status": "NATIVE_INPUT_METADATA_CANONICAL_SUBSET_BOUND_WITH_OPEN_FRONTIERS"
+}

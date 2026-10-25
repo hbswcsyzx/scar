@@ -1,0 +1,687 @@
+{
+  "URI_relocation_or_owner_restore_authorized": false,
+  "data_graph_decodes_for_delivery": 0,
+  "excluded_dirty_paths": [
+    "artifacts/experiments/modeling_scope_membership_20261025/README.md",
+    "artifacts/experiments/modeling_scope_membership_20261025/check_small.py",
+    "docs/MODELING_SCOPE_MEMBERSHIP_IMPLEMENTATION.md",
+    "scar/analysis/modeling_scope.py",
+    "scar/ir/modeling_scope.py",
+    "scar/ir/modeling_scope_codec.py",
+    "scar/store/scope_partitions.py",
+    "analysis/source_call_readonly_review_20261025/"
+  ],
+  "local_only": [
+    {
+      "bytes": 2789376,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt02/products/native/private/navigation.sqlite",
+      "mtime_ns": 1792957954438421255,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/products/native/private/navigation.sqlite",
+      "reason": "PRIVATE_DIAGNOSTIC_NAVIGATION_NO_OWNER_AUTHORITY",
+      "sha256": null,
+      "sha_provenance": [
+        "NOT_AVAILABLE_NOT_COMPUTED"
+      ]
+    },
+    {
+      "bytes": 1142792,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/native-parent-inventory/000000.jsonl",
+      "mtime_ns": 1792959345818293354,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/native-parent-inventory/000000.jsonl",
+      "reason": "PUBLIC_INVENTORY_CHUNK_OVER_SMALL_LIMIT_LOCAL_ONLY",
+      "sha256": "81525f2646f9133370a1c67f9a7a48350f670b02a71eafdb391b317da0aa934d",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 1148655,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/native-parent-inventory/000001.jsonl",
+      "mtime_ns": 1792959345953083154,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/native-parent-inventory/000001.jsonl",
+      "reason": "PUBLIC_INVENTORY_CHUNK_OVER_SMALL_LIMIT_LOCAL_ONLY",
+      "sha256": "d429893a2ed3c9315e6aad8c92fe18649c325b1c4a19d330e34f4a7e97a059d1",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 36573184,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/private/navigation.sqlite",
+      "mtime_ns": 1792959345680927179,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/private/navigation.sqlite",
+      "reason": "PRIVATE_DIAGNOSTIC_NAVIGATION_NO_OWNER_AUTHORITY",
+      "sha256": null,
+      "sha_provenance": [
+        "NOT_AVAILABLE_NOT_COMPUTED"
+      ]
+    },
+    {
+      "bytes": 8443189,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/input-associations.json",
+      "mtime_ns": 1792960197118958635,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/input-associations.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "40170bc4fb13fbaf9d9acc5019fddbe80fdea863a83602879243761765b0245e",
+      "sha_provenance": [
+        "POST_GATE_RETENTION_HASH"
+      ]
+    },
+    {
+      "bytes": 1142792,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/native-parent-inventory/000000.jsonl",
+      "mtime_ns": 1792960181665176329,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/native-parent-inventory/000000.jsonl",
+      "reason": "PUBLIC_INVENTORY_CHUNK_OVER_SMALL_LIMIT_LOCAL_ONLY",
+      "sha256": "81525f2646f9133370a1c67f9a7a48350f670b02a71eafdb391b317da0aa934d",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 1148655,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/native-parent-inventory/000001.jsonl",
+      "mtime_ns": 1792960181792927256,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/native-parent-inventory/000001.jsonl",
+      "reason": "PUBLIC_INVENTORY_CHUNK_OVER_SMALL_LIMIT_LOCAL_ONLY",
+      "sha256": "d429893a2ed3c9315e6aad8c92fe18649c325b1c4a19d330e34f4a7e97a059d1",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 36573184,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/private/navigation.sqlite",
+      "mtime_ns": 1792960181541672231,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/private/navigation.sqlite",
+      "reason": "PRIVATE_DIAGNOSTIC_NAVIGATION_NO_OWNER_AUTHORITY",
+      "sha256": null,
+      "sha_provenance": [
+        "NOT_AVAILABLE_NOT_COMPUTED"
+      ]
+    },
+    {
+      "bytes": 156893,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/program.json",
+      "mtime_ns": 1792960184863099104,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/program.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "07501ef60d981e617b728c890e80d4e865d890acaaae779899c1dfde488fa541",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 8969237,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/execution.json",
+      "mtime_ns": 1792960192745733735,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/execution.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "1db9a26802934885000bdce45ef112340adca24972e41815af004417b2786051",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 2656858,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/port-qualifications/000000.jsonl",
+      "mtime_ns": 1792960192669603269,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/port-qualifications/000000.jsonl",
+      "reason": "BULK_PORT_QUALIFICATION_ROWS_LOCAL_ONLY",
+      "sha256": "e036f41fa799ad9fc6c678c6ecf0caea455c05adad7606295a8773b95e5923bd",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 3951512,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/source-evidence.json",
+      "mtime_ns": 1792960192694606537,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/source-evidence.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "75cd7d8813f03e7c057352e9f7760760798db0ef3e17f12bb6fbccb96548e1e1",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 8325974,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/source-projection-receipts.json",
+      "mtime_ns": 1792960192710408215,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/source-projection-receipts.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "e239ebe10c215141440bc4efc0c09421bb6d9fb0ceb91018648705242475079f",
+      "sha_provenance": [
+        "POST_GATE_RETENTION_HASH"
+      ]
+    },
+    {
+      "bytes": 1324186,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/source-values.json",
+      "mtime_ns": 1792960192689761611,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/source-values.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "d166a52c8e38d13907653b03a456ac634035ebdc0e0ba22e5df00df93f35fab9",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 214446,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/execution.json",
+      "mtime_ns": 1792960196509542875,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/execution.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "28dec48cc632cf2f39ba23f6997cb686319b41b364a202020e6784cf92fce808",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 35372,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/port-qualifications/000000.jsonl",
+      "mtime_ns": 1792960196507345243,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/port-qualifications/000000.jsonl",
+      "reason": "BULK_PORT_QUALIFICATION_ROWS_LOCAL_ONLY",
+      "sha256": "d86e16f5aed2b2cf36fa774de7f2c55e6c55e916b813de06df4388b25b4b328c",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 67299,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/source-evidence.json",
+      "mtime_ns": 1792960196508564899,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/source-evidence.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "61f70977a76b6b353329cca9d1dec13b5e4bfa21760f0fc93e74b2060730f96a",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    },
+    {
+      "bytes": 143913,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/source-projection-receipts.json",
+      "mtime_ns": 1792960196508927639,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/source-projection-receipts.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "f2f1691082ce1741941559ef7a0daf18ce84b99ba0caece0cc0b29e465117593",
+      "sha_provenance": [
+        "POST_GATE_RETENTION_HASH"
+      ]
+    },
+    {
+      "bytes": 22351,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/source-values.json",
+      "mtime_ns": 1792960196508321788,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/source-values.json",
+      "reason": "BULK_CANONICAL_OR_ASSOCIATION_DATA_LOCAL_ONLY",
+      "sha256": "54cb6e4351695b373f1b85721fb5ca9c94767c51c3fb5fe0fd32656742354c54",
+      "sha_provenance": [
+        "EXISTING_RUNTIME_ARTIFACT_OR_CHUNK_RECEIPT"
+      ]
+    }
+  ],
+  "local_only_bytes": 114829868,
+  "local_only_files": 19,
+  "post_gate_opaque_retention_read_bytes": 16913076,
+  "private_DB_whole_hash_reads": 0,
+  "qualified_subset": {
+    "Run": "capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44",
+    "associated_paths": 516,
+    "companion_rows": 2332,
+    "dispatches": 261,
+    "metadata_paths": 3095,
+    "modeled_normal_dispatches": 260,
+    "no_canonical_boundary_frontier_paths": 2579,
+    "source_bound_bodies": 0,
+    "source_unresolved_calls": 271,
+    "whole_model": false,
+    "whole_tree_parent_closure": false
+  },
+  "schema": "scar.native-input-association-delivery-inventory",
+  "schema_version": 1,
+  "self_receipt": "Git commit binds this inventory; no recursive self SHA",
+  "source_input_roots": [
+    {
+      "label": "G1 capture model",
+      "receipt": {
+        "sha256": "0b52a66d8259dc2234eacd98351adeb4c8d7763f1a667061f1839aa67fa57c94",
+        "size_bytes": 110385,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/capture-model.json"
+      }
+    },
+    {
+      "URI": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture",
+      "authority": "unchanged existing ordinary membership; exact members/sha receipts remain in each original freeze",
+      "label": "original capture namespace"
+    }
+  ],
+  "source_namespace_preserved": true,
+  "stage_list_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_port_binding_20261025/stage-paths.txt",
+  "staged_file_count": 85,
+  "staged_files_except_self": [
+    {
+      "bytes": 3608,
+      "path": "analysis/native_input_geometry_diagnosis_20261025/REPORT.md",
+      "sha256": "08652a6c64ca790f730d837fbfdeb4c3dc37b26e1b596501b2f66cea1f4a566d"
+    },
+    {
+      "bytes": 22355,
+      "path": "analysis/native_input_geometry_diagnosis_20261025/diagnosis.json",
+      "sha256": "e3bdec7a41efa67001253a29e8bc0ac624f2d91746768db7ea57dd86d67430a7"
+    },
+    {
+      "bytes": 3511,
+      "path": "analysis/native_input_parent_diagnosis_20261025/REPORT.md",
+      "sha256": "1037c7a6ff50d8f7e568619b4cdcdcc3774d99c150f32bf2748e1b2bd6c9e00b"
+    },
+    {
+      "bytes": 38859,
+      "path": "analysis/native_input_parent_diagnosis_20261025/diagnosis.json",
+      "sha256": "151f415f54014b5a60536cb4c6226efefe4473ef06f1f368af653530508cec82"
+    },
+    {
+      "bytes": 7924,
+      "path": "analysis/native_input_port_adapter_20261025/READ_BUDGET_REV2.json",
+      "sha256": "f07f822d46369d476258749b75d42c0ff671ba090744ff5eb2e1eb15292ea022"
+    },
+    {
+      "bytes": 5620,
+      "path": "analysis/native_input_port_adapter_20261025/REVISED_PLAN.md",
+      "sha256": "9fc5317b99f17efbd6ab6d0400f6c0f3309ee7683ea82d8d46eab2b7bbb89c72"
+    },
+    {
+      "bytes": 5530,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/ACTUAL_TERMINALS.json",
+      "sha256": "1e3e3a8d254b245369879ab1fc2f2786e78259369d674d3a187901033d496663"
+    },
+    {
+      "bytes": 4042,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/CONTRACT.md",
+      "sha256": "a1e2f2cba128ac4fd8fe66fc0a018aafdd0d37a1d1b8af21db9c0b1b1316e22b"
+    },
+    {
+      "bytes": 4065,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/MAIN_APPLICATION_RECEIPT.json",
+      "sha256": "5a9cc949352fde6112b131bb460d7bf46c9eafa8c014cd4b41c4453dd9761349"
+    },
+    {
+      "bytes": 2119,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/POST_GATE_RETENTION_HASHES.json",
+      "sha256": "aa3383120016547b95b0593d7ea6681803048bd5db56ae7900055c2dd02f5137"
+    },
+    {
+      "bytes": 4266,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/RESULT.md",
+      "sha256": "945856ef375bc4fb9634b4e8a0bbba1ecd83f7486b68a1454988b48814ea980b"
+    },
+    {
+      "bytes": 2673,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/RETENTION.md",
+      "sha256": "f249f1099f106d7d42dc56d8e57f9b681b1abd216186d26d6be8ae06b6ef9b1b"
+    },
+    {
+      "bytes": 2968,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/README.md",
+      "sha256": "d76cf7dd21c97066db100cd0944d4998be06cb99be2ec09f6282f19b165e9e8c"
+    },
+    {
+      "bytes": 2125,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/failure.json",
+      "sha256": "38398435d7e9eda98dd6ed5ae747fd83c6b5e842be6afa8e43fccf2e92180d97"
+    },
+    {
+      "bytes": 116177,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/freeze.json",
+      "sha256": "f582fec7b6d4cf4ce291b682e8ace9c39a7b2f7d234a0f41b53aa78013860b18"
+    },
+    {
+      "bytes": 6849,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/gate.py",
+      "sha256": "9d51250e600917d3c86e7ac92cd9e3200fa74b61df4299001ba15e92d852b995"
+    },
+    {
+      "bytes": 39881,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/implementation.diff",
+      "sha256": "18e0992dc65488f20dbff1b9a8bc83359b6493bdd56b923dde91ab8bbb1c2806"
+    },
+    {
+      "bytes": 198782,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/products/capture-coordinates.json",
+      "sha256": "637ce4a82da7aebabea13ed8f6885985115b7dbfc28f5e85dcaf4552ba0696da"
+    },
+    {
+      "bytes": 3515,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/products/failure.json",
+      "sha256": "966085c1f2fc7c56e6295b43bf3c89f2c65a61649d8eb1e78561d83beed88274"
+    },
+    {
+      "bytes": 601,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/run.sh",
+      "sha256": "4be6e1c7461abc5f4267bcb50542ce2ae5cfb3517af46aa09016d7b1428d4f89"
+    },
+    {
+      "bytes": 904,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt01/time.txt",
+      "sha256": "557b5e0ff037484a2bbb0478bfe2532bdf0be6e9274a4490a46fc6c53471870c"
+    },
+    {
+      "bytes": 2410,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/README.md",
+      "sha256": "750792df0c4445c17dec1b8d14e04189096665cd7d069d81a002d43086265f35"
+    },
+    {
+      "bytes": 78283,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/attempt01-source/native_capture_batch.py",
+      "sha256": "242e7cba98c37fcddcaec88d113e4bba11d4fab7d9c222d26a064b0cd05aeb11"
+    },
+    {
+      "bytes": 39255,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/attempt01-source/native_tensor_inputs.py",
+      "sha256": "3cf3e77f2dda2ee656c153e75991743ce0725fc662c9623829155b5e3afa1a2a"
+    },
+    {
+      "bytes": 2666,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/failure.json",
+      "sha256": "f0992c3d104798787712bcc02c25cfedc1e0d75c04f006a280b9f887428a91a3"
+    },
+    {
+      "bytes": 117673,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/freeze.json",
+      "sha256": "91a1e92b2217ab99d8b7a23dc53af03f75176c13facd24cf0f75d736dd03b528"
+    },
+    {
+      "bytes": 6849,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/gate.py",
+      "sha256": "9d51250e600917d3c86e7ac92cd9e3200fa74b61df4299001ba15e92d852b995"
+    },
+    {
+      "bytes": 2171,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/minimal-fix.diff",
+      "sha256": "0c6358c62dde4b62ef1dd115c26a0d4d2f7342dadec01a5f16f232f22f59cb76"
+    },
+    {
+      "bytes": 198782,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/products/capture-coordinates.json",
+      "sha256": "637ce4a82da7aebabea13ed8f6885985115b7dbfc28f5e85dcaf4552ba0696da"
+    },
+    {
+      "bytes": 6258,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/products/failure.json",
+      "sha256": "5deafba2e9de7683ec27161ca9ce83438e327ec8b6675e0dafaf301c5921cd71"
+    },
+    {
+      "bytes": 2030,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/products/native/failure.json",
+      "sha256": "09cad29aa49bc85f8cd8afe1387f1051083a539b239d03e639d829e2816d52d6"
+    },
+    {
+      "bytes": 148,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/progress.json",
+      "sha256": "271515bb9cf18d5ed8725a8fee9d657476cbaf7fb4659e45b3fdbee425ec7f41"
+    },
+    {
+      "bytes": 601,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/run.sh",
+      "sha256": "26debb8c6d3bf4e991dbaae72bc232ab324d29731f653674083b67f3bba71bd2"
+    },
+    {
+      "bytes": 907,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt02/time.txt",
+      "sha256": "202da57bbc8e90ca46f528361453d5f8b4a8a08089bdbecd16d5109263c4a0b7"
+    },
+    {
+      "bytes": 3554,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/README.md",
+      "sha256": "fe047ad49aacef4e79f5abe9c864f64b793b8e6cdfe8ce6175ad5351621ebce4"
+    },
+    {
+      "bytes": 78283,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/attempt02-source/native_capture_batch.py",
+      "sha256": "242e7cba98c37fcddcaec88d113e4bba11d4fab7d9c222d26a064b0cd05aeb11"
+    },
+    {
+      "bytes": 40367,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/attempt02-source/native_tensor_inputs.py",
+      "sha256": "4962c7e0e332dd30852d0e4be169499633140ea12f08d4875ba233dca81e0896"
+    },
+    {
+      "bytes": 3117,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/failure.json",
+      "sha256": "f8c8775c037c2832a2c1f831fe7d2e318d3fc2ac9effe09c15afe714f6627576"
+    },
+    {
+      "bytes": 119685,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/freeze.json",
+      "sha256": "1044cb0107488b878a8f310994a8ba6c9cf2e6f3db2acfedfcaf932c11f33fbc"
+    },
+    {
+      "bytes": 7387,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/gate.py",
+      "sha256": "c973e58ba47ab0a29bea7675b6de897ac9a39a346b958324ae9d11f08d73c528"
+    },
+    {
+      "bytes": 20015,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/minimal-fix.diff",
+      "sha256": "8cc6f9b3dc71b6d7aff013a1dce3116f015bfa92a06a55f3d7cea31586fec045"
+    },
+    {
+      "bytes": 198782,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/capture-coordinates.json",
+      "sha256": "637ce4a82da7aebabea13ed8f6885985115b7dbfc28f5e85dcaf4552ba0696da"
+    },
+    {
+      "bytes": 9227,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/failure.json",
+      "sha256": "c26689d038cf8677e1aa3b09730ef80aae5c224b624202dbf09ac56c780bc4ce"
+    },
+    {
+      "bytes": 4058,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/failure.json",
+      "sha256": "882a838b2749800ff152bc4ca16774402f1ff360a91f9cf97a898fc9bfac12ba"
+    },
+    {
+      "bytes": 381525,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/native-parent-inventory/000002.jsonl",
+      "sha256": "93603605ffdf6629f72ce5ac6818f3ba9cd677016a474f200595bd2a0bb1ad9c"
+    },
+    {
+      "bytes": 2293,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/native-parent-inventory/manifest.json",
+      "sha256": "bc59682c33a255e7febcd5752afa9f9b59e6483c8b4215e0cabb60c6efcbd77e"
+    },
+    {
+      "bytes": 346405,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/observed-dispatches/000000.jsonl",
+      "sha256": "517a3170e448b67a3a80c564dbafdd5ab966d3b521b4fc0e731db62599ce4389"
+    },
+    {
+      "bytes": 769,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/products/native/observed-dispatches/manifest.json",
+      "sha256": "4e3821aa0f5fe45c381261b594d95083d64be511681de6b78f9a37ddacfe787d"
+    },
+    {
+      "bytes": 178,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/progress.json",
+      "sha256": "22518230ad4c54acc93c5b41390dd34a2f084e067925c9d0f76b1026ee1993a0"
+    },
+    {
+      "bytes": 601,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/run.sh",
+      "sha256": "91c27afa16390bd99e8fc5456ad62d873155f61d29515f4e83f384d0d708f713"
+    },
+    {
+      "bytes": 913,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt03/time.txt",
+      "sha256": "523ac0d5691ef614684668aaba4a7b9a2baf76f43ae647a1d43060f48e6be6ae"
+    },
+    {
+      "bytes": 3198,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/README.md",
+      "sha256": "39589d2396b687e37eb73abbf82bfc683d44c9ae3e275e28233db2e136108cf2"
+    },
+    {
+      "bytes": 84113,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/attempt03-source/native_capture_batch.py",
+      "sha256": "d765fb25def905892e5d7e7d23f9fa9c1a7f666b2094782c623a3ffb13b778f3"
+    },
+    {
+      "bytes": 62029,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/attempt03-source/native_port_protocol.py",
+      "sha256": "608ba93502637c600fe46f8e9cfe1fca1005610d9b282da0633f69de93286338"
+    },
+    {
+      "bytes": 56622,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/attempt03-source/native_protocol.py",
+      "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+    },
+    {
+      "bytes": 41269,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/attempt03-source/native_tensor_inputs.py",
+      "sha256": "e54cf55ec69f6feab2570949075e245b27bb9a66499452ac05b7ae6b61c96828"
+    },
+    {
+      "bytes": 123241,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/freeze.json",
+      "sha256": "03c4e0290b92ad749da27f26bc378715f7b897ad1547dd167f224d23330066c4"
+    },
+    {
+      "bytes": 7387,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/gate.py",
+      "sha256": "c973e58ba47ab0a29bea7675b6de897ac9a39a346b958324ae9d11f08d73c528"
+    },
+    {
+      "bytes": 7353,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/minimal-fix.diff",
+      "sha256": "2379a96c6c5fa66be61c32e5108cecebc9ae01807ab25adf69bd345af0b38c64"
+    },
+    {
+      "bytes": 198782,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/capture-coordinates.json",
+      "sha256": "637ce4a82da7aebabea13ed8f6885985115b7dbfc28f5e85dcaf4552ba0696da"
+    },
+    {
+      "bytes": 618350,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/dispatch-inventory/000000.jsonl",
+      "sha256": "4618537db59d4adc3e79a30fe41a1d1438b39d3f35b8ea124d1d47894cda6d4c"
+    },
+    {
+      "bytes": 1068,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/dispatch-inventory/manifest.json",
+      "sha256": "cdf96e9ae1d0bc3e66f34b51dc7bb8e67ebeefba42d6944f1ba2eec4fcb84a02"
+    },
+    {
+      "bytes": 2011,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/native-interface.json",
+      "sha256": "4f59cdd35e48da185a2b3495de4fc65f9189eb0488b8a49b326b4a49e33f3e9e"
+    },
+    {
+      "bytes": 381525,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/native-parent-inventory/000002.jsonl",
+      "sha256": "93603605ffdf6629f72ce5ac6818f3ba9cd677016a474f200595bd2a0bb1ad9c"
+    },
+    {
+      "bytes": 2293,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/native-parent-inventory/manifest.json",
+      "sha256": "acd0660a80e0661609dffaf0292e120c09e4932a0d30bf89339e445e4f053c23"
+    },
+    {
+      "bytes": 346405,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/observed-dispatches/000000.jsonl",
+      "sha256": "517a3170e448b67a3a80c564dbafdd5ab966d3b521b4fc0e731db62599ce4389"
+    },
+    {
+      "bytes": 769,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/observed-dispatches/manifest.json",
+      "sha256": "1767cbe152e058022221870e7297b8cb73853ab7e4501c54ae8fab45e49d85bc"
+    },
+    {
+      "bytes": 13574,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/report.json",
+      "sha256": "6ef2a5f25ee35e75a81ad65b7efcc830af5cff57ddca4c24df9d8c4fa5c40145"
+    },
+    {
+      "bytes": 1095,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/port-qualifications/manifest.json",
+      "sha256": "058cc4e7199884b30094f4bee5e3191c7e578d9c8fc46a1a8c23603d9a2e0ed9"
+    },
+    {
+      "bytes": 3400,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/report.json",
+      "sha256": "b344dbc9976ad3628ab589908057e23eaf44f73ec0f6c30c8cbe8afab757a9b2"
+    },
+    {
+      "bytes": 463705,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000000/validation.json",
+      "sha256": "554df0904f08bf459463b33854928cbb9efd500a26618ab35296778964386b45"
+    },
+    {
+      "bytes": 1091,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/port-qualifications/manifest.json",
+      "sha256": "53fca9523f8b40f791aa74469b96563fb36cd23bd5bba3e32434744c80dfe092"
+    },
+    {
+      "bytes": 2537,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/report.json",
+      "sha256": "8a0a5e9456bb6e0a790092ce6cfbda44b43b3d3bb08f3b515111331f42b1ee44"
+    },
+    {
+      "bytes": 5031,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/native/shards/000001/validation.json",
+      "sha256": "5d028c75086574b6ce25cff0dedde19da4f7d79d04bcd1b756399e2b29745f94"
+    },
+    {
+      "bytes": 9263,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/products/report.json",
+      "sha256": "eaa9ca6163046f5882facef334d8e2312deefa70e9164a6b9c85ed0ddca3e194"
+    },
+    {
+      "bytes": 124,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/progress.json",
+      "sha256": "70fe1340dcafe4d2942e2b93b4d9c078b301632a3fc2f8bee3f907698bb4118b"
+    },
+    {
+      "bytes": 21535,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/result.json",
+      "sha256": "6685eb1742f5949e925bb037d2b84db15124eb5ce780c1438bda0340365fef75"
+    },
+    {
+      "bytes": 601,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/run.sh",
+      "sha256": "7db04a19d4aa78036eccee81b8d801eb710537c94ab266b1f0e1efb55593f6ce"
+    },
+    {
+      "bytes": 877,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/attempt04/time.txt",
+      "sha256": "1b3fcaeaedb2864e80d6ee486a752b1f1134d8a66682c26ad611b37c6b570076"
+    },
+    {
+      "bytes": 7449,
+      "path": "artifacts/experiments/native_input_port_binding_20261025/stage-paths.txt",
+      "sha256": "84b7ccae47b7da93c50d0ccdee2cc65a6a12269efa529e66f0dcc2bdd093ee70"
+    },
+    {
+      "bytes": 64011,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "1c1765e25f2aa8829f1b3cd6fa7826ff2c2c01bf0deacf7d2b24d96241e8c10d"
+    },
+    {
+      "bytes": 84113,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "d765fb25def905892e5d7e7d23f9fa9c1a7f666b2094782c623a3ffb13b778f3"
+    },
+    {
+      "bytes": 57495,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "8a328d05036804f34c8d5b77ce99a240a27ea4de834c3a47e381dd44618d544e"
+    },
+    {
+      "bytes": 41269,
+      "path": "scar/trace/native_tensor_inputs.py",
+      "sha256": "e54cf55ec69f6feab2570949075e245b27bb9a66499452ac05b7ae6b61c96828"
+    }
+  ],
+  "staged_total_bytes": 4897953,
+  "status": "ACTUAL_EXIT0_QUALIFIED_SUBSET_WITH_OPEN_FRONTIERS"
+}

@@ -260,3 +260,407 @@ def read_native_tensor_inputs(path, *, expected_sha256, max_bytes=512000000, max
 
 
 __all__ = ['read_native_tensor_inputs']
+
+
+# This capability associates retained native input metadata with an already
+# verified V2 occurrence. It grants no object, allocation, content or ready fact.
+INPUT_ASSOCIATION_PROFILE = 'SCAR_NATIVE_INPUT_METADATA_ASSOCIATION_V1'
+_INPUT_OWNER = object()
+
+
+def _canonical(value):
+    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()
+
+
+class NativeInputPayloadBudget:
+    """One bounded accounting ledger; complete legacy passes are explicit.
+
+    The unchanged public coordinate binder reports verified complete artifacts.
+    Its full-pass read multiplicities are charged separately and labeled derived;
+    newly opened adapter streams count returned bytes directly. Reservations are
+    charged before a phase, reconciled after success, and never reusable credit.
+    """
+    def __init__(self, maximum=68000000, control_maximum=1000000):
+        _need(_integer(maximum, 1) and maximum <= 68000000
+              and _integer(control_maximum, 1) and control_maximum <= 1000000, 'payload budget')
+        self.maximum, self.control_maximum = maximum, control_maximum
+        self.entries, self.total, self.control = [], 0, 0
+
+    def charge(self, component, stored, decoded, *, basis='returned bytes', control=False):
+        _need(_integer(stored) and _integer(decoded), 'invalid payload accounting')
+        amount = stored + decoded
+        _need(self.total + amount <= self.maximum, 'aggregate stored+decoded payload budget')
+        _need(not control or self.control + amount <= self.control_maximum, 'control metadata budget')
+        self.total += amount
+        self.control += amount if control else 0
+        self.entries.append({'component': component, 'stored_bytes': stored, 'decoded_bytes': decoded,
+                             'basis': basis, 'control_metadata': control, 'completed_verified_phase': False})
+        return len(self.entries) - 1
+
+    def complete(self, entry):
+        self.entries[entry]['completed_verified_phase'] = True
+
+    def complete_prefix(self, prefix):
+        for entry in self.entries:
+            if entry['component'].startswith(prefix):
+                entry['completed_verified_phase'] = True
+
+    def report(self):
+        return {'limit': self.maximum, 'stored_plus_decoded_bytes': self.total,
+                'accounting_role': 'RESERVATIONS; not actual or kernel IO',
+                'completed_verified_phase_bytes': sum(e['stored_bytes'] + e['decoded_bytes'] for e in self.entries
+                                                      if e['completed_verified_phase']),
+                'pending_reserved_bytes': sum(e['stored_bytes'] + e['decoded_bytes'] for e in self.entries
+                                             if not e['completed_verified_phase']),
+                'control_metadata_limit': self.control_maximum, 'control_metadata_bytes': self.control,
+                'entries': list(self.entries), 'kernel_IO_measurement': False}
+
+
+def _association_members(coordinates):
+    from scar.trace.capture_coordinates import CaptureCoordinates
+    from scar.ir.record_codec import decode
+    from scar.ir.program.providers import ProviderArtifact
+    _need(type(coordinates) is CaptureCoordinates
+          and sha256(coordinates.payload).hexdigest() == coordinates.artifact.sha256
+          and _json(coordinates.payload) == coordinates.report, 'genuine ordinary coordinates required')
+    rows = coordinates.report['membership']
+    capability = coordinates.report['native_tensor_input_membership']
+    _need(capability['capability'] == 'SCAR_NATIVE_TENSOR_INPUT_MEMBERSHIP_V1', 'ordinary input membership required')
+    required = {capability['manifest']['uri'], *(a['uri'] for a in capability['chunks'])}
+    for schema in ('scar.execution-evidence-collection', 'scar.dispatch-observation-trace',
+                   'scar.tensor-physical-trace', 'pytorch.execution-trace.v1', 'pytorch.kineto.chrome-trace.v1'):
+        roots = [r['artifact']['uri'] for r in rows if r['artifact']['schema'] == schema]
+        _need(len(roots) == 1, 'one native input root required: ' + schema)
+        required.add(roots[0])
+    result = {}
+    # Process attribution does not make a PID a valid selector for every
+    # artifact: ordinary OS thread files use their own TID selectors. They are
+    # outside this native helper's exact input domain and stay in coordinates.
+    for row in rows:
+        if row['artifact']['uri'] not in required:
+            continue
+        artifact = decode(ProviderArtifact, row['artifact'])
+        _need(row['process'] == coordinates.report['target_process'], 'native input member process attribution differs')
+        _need(coordinates.process_for(artifact, coordinates.target_process.pid) == coordinates.target_process,
+              'input member process differs')
+        _need(artifact.uri not in result, 'duplicate exact member URI')
+        result[artifact.uri] = (artifact, Path(row['local_path']))
+    _need(set(result) == required, 'exact native input member set incomplete')
+    return result
+
+
+def _read_input_member(members, logical, budget, label, archive):
+    """Read exact declared local bytes once, then decode the same buffer."""
+    from io import BytesIO
+    artifact, path = members[str(logical)]
+    _need(path.is_file() and not path.is_symlink(), 'absent/symlinked associated member')
+    size = path.stat().st_size
+    entry = archive.get(str(logical))
+    _need(entry is None or (entry['raw_bytes'] == artifact.size_bytes
+          and entry['raw_sha256'] == artifact.sha256 and size == entry['compressed_bytes']), 'associated archive declaration differs')
+    # Reserve both planes before reading; a changed file cannot consume an
+    # unbounded extra stream. SHA/EOF comparisons below reject any change.
+    charged = budget.charge(label, size, artifact.size_bytes, basis='bounded member returned bytes')
+    with path.open('rb') as source:
+        stored = source.read(size + 1)
+    _need(len(stored) == size, 'associated stored source changed')
+    if path.suffix == '.gz':
+        _need(entry is not None and sha256(stored).hexdigest() == entry['gzip_sha256'], 'associated stored SHA differs')
+        with gzip.GzipFile(fileobj=BytesIO(stored), mode='rb') as source:
+            raw = source.read(artifact.size_bytes + 1)
+    else:
+        raw = stored
+    _need(len(raw) == artifact.size_bytes and sha256(raw).hexdigest() == artifact.sha256,
+          'associated raw source changed')
+    budget.complete(charged)
+    return artifact, raw
+
+
+class NativeInputMetadataSession:
+    """Fresh immutable raw join preimages, never a canonical graph or old owner."""
+    __slots__ = ('_wire', '_seen', '_canonical_nodes', '_associations')
+
+    def __setattr__(self, name, value):
+        if name == '_wire' and hasattr(self, '_wire'):
+            raise AttributeError('native input preimages are immutable')
+        object.__setattr__(self, name, value)
+
+    def __init__(self, key, document):
+        _need(key is _INPUT_OWNER, 'input association factory required')
+        self._wire = _canonical(document)
+        self._seen, self._canonical_nodes, self._associations = set(), set(), []
+
+    def _expected(self, shard):
+        from scar.ir.execution.content import NativeInputRef
+        from scar.ir.program.model import TerminatorKind
+        from scar.ir.record_codec import encode
+        # Covers all identities, including all-Unknown and zero-Tensor calls.
+        shard.native_port_evidence.require_scope(shard.execution, shard.program)
+        source = _json(self._wire)
+        _need(len(shard.execution.runs) == 1 and shard.execution.runs[0].id.value == source['run']
+              and any(p.id.value == source['process'] for p in shard.execution.processes), 'association Run/process differs')
+        model, program = shard.execution, shard.program
+        raw_nodes = {r['node_id']: r for r in source['rows'] if r.get('node_id') is not None}
+        by_visit, by_binding = {}, {}
+        for occurrence in model.operations:
+            by_visit.setdefault(occurrence.visit, []).append(occurrence)
+        for binding in model.evidence_bindings:
+            by_binding.setdefault(binding.operation, []).append(binding)
+        static_ops = {o.id: o for o in program.operations}
+        instances = shard.evidence.instances
+        expected, canonical_nodes = [], set()
+        for occurrence in model.operations:
+            static = static_ops[occurrence.operation]
+            if static.terminator is None or static.terminator.kind != TerminatorKind.INVOKE:
+                continue
+            bindings = by_binding.get(occurrence.id, ())
+            _need(len(bindings) == 1, 'unique exact native invoke binding required')
+            native = instances.get(bindings[0].legacy.instance)
+            _need(native is not None and native.metadata.get('provider') == 'ETO', 'original ETO producer missing')
+            canonical_nodes.add(native.metadata['node_id'])
+        for denotation in model.denotations:
+            basis = denotation.basis
+            if type(basis) is not NativeInputRef:
+                continue
+            invokes = [o for o in by_visit.get(basis.entry, ()) if static_ops[o.operation].terminator is not None
+                       and static_ops[o.operation].terminator.kind == TerminatorKind.INVOKE]
+            _need(len(invokes) == 1, 'input has no unique actual invoke')
+            binding = by_binding[invokes[0].id][0]
+            instance = instances.get(binding.legacy.instance)
+            _need(instance is not None, 'input original producer unavailable')
+            row = raw_nodes.get(instance.metadata['node_id'])
+            if row is None:
+                continue
+            producer = {'instance': encode(binding.legacy), 'source': encode(binding.source)}
+            _need(producer['source'] == row['original_node'], 'input producer/ordinal differs from original raw join')
+            _need(denotation.source.artifact == binding.source.artifact, 'input and producer artifact differ')
+            prefix = row['original_node']['locator'] + '/inputs/values/'
+            _need(denotation.source.locator.startswith(prefix), 'input lacks exact original native slot')
+            tail = denotation.source.locator[len(prefix):]
+            _need(tail and all(p.isdecimal() for p in tail.split('/')), 'invalid original input path')
+            path = [int(p) for p in tail.split('/')]
+            leaves = [p for p in row['metadata'] if p['path'] == path]
+            _need(len(leaves) <= 1, 'ambiguous original input metadata path')
+            if not leaves:
+                continue
+            leaf = leaves[0]
+            expected.append({'native_input': encode(basis), 'value_occurrence': encode(denotation.value),
+                'native_producer': producer, 'original_input': encode(denotation.source),
+                'metadata_source': leaf['source'], 'CPU_bridge': row['CPU_bridge'],
+                'metadata': leaf['metadata'], 'row': row['index'], 'path': path,
+                'Python_identity_qualified': False, 'geometry_allocation_qualified': False,
+                'logical_content_qualified': False, 'resource_ready_qualified': False})
+        return expected, canonical_nodes
+
+    def check(self, shard, associations):
+        """Independent comparison to fresh raw preimages and real canonical ports."""
+        expected, _ = self._expected(shard)
+        _need(type(associations) is list and len(associations) == len(expected), 'input association inventory differs')
+        for actual, original in zip(associations, expected, strict=True):
+            _need(_canonical(actual) == _canonical(original), 'native input association producer/path/source mismatch')
+        return True
+
+    def bind_shard(self, shard):
+        expected, nodes = self._expected(shard)
+        self.check(shard, expected)
+        for item in expected:
+            key = (item['row'], tuple(item['path']))
+            _need(key not in self._seen, 'input metadata associated twice across shards')
+            self._seen.add(key)
+        self._canonical_nodes.update(nodes)
+        self._associations.extend(expected)
+        return expected
+
+    def report(self):
+        source = _json(self._wire)
+        rows, counts = [], Counter()
+        for original in source['rows']:
+            row = dict(original)
+            if row.get('node_id') in self._canonical_nodes:
+                row['canonical_status'] = 'CANONICAL_BOUNDARY_AVAILABLE'
+            else:
+                row['canonical_status'] = 'CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE'
+            for leaf in row['metadata']:
+                associated = (row['index'], tuple(leaf['path'])) in self._seen
+                _need(associated or row.get('node_id') not in self._canonical_nodes,
+                      'canonical native input metadata path lacks its exact actual port')
+                leaf['association'] = 'ASSOCIATED' if associated else row['canonical_status']
+                counts[leaf['association']] += 1
+            rows.append(row)
+        return {'schema': 'scar.native-input-metadata-associations', 'schema_version': 1,
+            'profile': INPUT_ASSOCIATION_PROFILE, 'run': source['run'], 'process': source['process'],
+            'counts': {**source['counts'], 'associated_metadata_paths': len(self._seen),
+                       'canonical_nodes': len(self._canonical_nodes), 'metadata_dispositions': dict(counts)},
+            'rows': rows, 'associations': list(self._associations),
+            'native_outputs': 'UNAVAILABLE_IN_PINNED_API', 'Python_identity_established': False,
+            'geometry_allocation_established': False, 'logical_content_established': False,
+            'state_effects_established': False, 'resource_ready_established': False,
+            'whole_model_established': False, 'frontiers': source['frontiers']}
+
+
+def prepare_native_input_metadata(coordinates, *, budget):
+    """Verify all retained rows and raw bridge preimages under ordinary membership."""
+    from collections import defaultdict
+    from scar.ir.record_codec import encode
+    from scar.ir.execution.native_port_protocol import attributes, flat_native
+    from scar.trace.capture_coordinates import _Files
+    _need(type(budget) is NativeInputPayloadBudget, 'exact shared payload budget required')
+    members = _association_members(coordinates)
+    root = Path(coordinates.report['local_root'])
+    original_root = Path(coordinates.report['original_root'])
+    archive_path = root / 'archive-index.json'
+    archive_size = archive_path.stat().st_size
+    budget.charge('adapter archive index', archive_size, archive_size, control=True)
+    archive_raw = archive_path.read_bytes()
+    _need(len(archive_raw) == archive_size, 'archive index size changed')
+    archive = _json(archive_raw)
+    _need(sha256(archive_raw).hexdigest() == coordinates.report['seed']['archive_sha256'], 'archive root changed')
+    files = _Files(root, original_root, archive, budget.maximum)
+    capability = coordinates.report['native_tensor_input_membership']
+    _need(capability['capability'] == 'SCAR_NATIVE_TENSOR_INPUT_MEMBERSHIP_V1', 'ordinary input membership required')
+    manifest = capability['manifest']
+    archived = {r['logical_path']: r for r in archive['files']}
+    manifest_path = members[manifest['uri']][1]
+    budget.charge('adapter companion manifest reload', manifest['size_bytes'], manifest['size_bytes'], control=True)
+    manifest_raw = manifest_path.read_bytes()
+    _need(len(manifest_raw) == manifest['size_bytes'] and sha256(manifest_raw).hexdigest() == manifest['sha256'], 'input manifest changed')
+    companion_doc = _json(manifest_raw)
+    strict_names = [manifest['uri']] + [companion_doc['inputs'][k]['path'] for k in ('native_manifest', 'dispatch_metadata')]
+    strict_names += [companion_doc['legacy_physical_metadata']['path']]
+    for logical in strict_names:
+        size = members[logical][0].size_bytes
+        budget.charge('adapter strict metadata verify+parse', 2*size, 2*size, control=True)
+    strict_raw = 0
+    for artifact in capability['chunks']:
+        entry = archived[artifact['uri']]
+        _need(entry['raw_sha256'] == artifact['sha256'] and entry['raw_bytes'] == artifact['size_bytes'], 'input chunk membership differs')
+        budget.charge('adapter strict chunk verify+parse', 3*entry['compressed_bytes'], 2*entry['raw_bytes'],
+                      basis='reserved complete strict-reader passes; verified on return')
+        strict_raw += entry['raw_bytes']
+    raw_rows = []
+    retention = read_native_tensor_inputs(manifest['uri'], expected_sha256=manifest['sha256'],
+        max_bytes=max(1, strict_raw), on_row=raw_rows.append, _retained_files=files)
+    _need(retention['raw_bytes'] == strict_raw, 'strict companion returned-byte accounting differs')
+    def member(schema):
+        matches = [x for x in members.values() if x[0].schema == schema]
+        _need(len(matches) == 1, 'no unique associated member: ' + schema)
+        return matches[0][0]
+    ea, ka = member('pytorch.execution-trace.v1'), member('pytorch.kineto.chrome-trace.v1')
+    _, eraw = _read_input_member(members, ea.uri, budget, 'adapter ETO', archived)
+    _, kraw = _read_input_member(members, ka.uri, budget, 'adapter Kineto', archived)
+    eto, kineto = _json(eraw), _json(kraw)
+    pid = coordinates.target_process.pid
+    _need(eto['pid'] == pid, 'input ETO process differs')
+    cpu, rf, correlations = defaultdict(list), defaultdict(list), defaultdict(list)
+    for ordinal, event in enumerate(kineto['traceEvents']):
+        key = event.get('args', {}).get('External id')
+        if event.get('ph') == 'X' and event.get('cat') in ('cpu_op', 'user_annotation') and event.get('pid') == pid and type(key) is int and key > 0:
+            cpu[key].append((ordinal, event))
+    for ordinal, node in enumerate(eto['nodes']):
+        handle = attributes(node).get('rf_id')
+        if type(handle) is int and handle > 0:
+            rf[handle].append((ordinal, node))
+    for row in raw_rows:
+        correlations[row['event']['correlation_id']].append(row['index'])
+    def fact(artifact, locator):
+        return {'artifact': encode(artifact), 'locator': locator}
+    chunk_for_row = {}
+    for chunk, artifact in zip(companion_doc['chunks'], capability['chunks'], strict=True):
+        for offset in range(chunk['rows']):
+            chunk_for_row[chunk['first_index'] + offset] = (artifact, offset + 1)
+    counts, frontiers, result, mapped = Counter(), Counter(), [], {}
+    for row in raw_rows:
+        index, event = row['index'], row['event']
+        chunk, line = chunk_for_row[index]
+        leaves = []
+        for slot in row['inputs']['slots']:
+            counts['slot_' + slot['kind']] += 1
+            if slot['kind'] == 'TENSOR_LIST':
+                counts['empty_tensor_lists'] += not slot['items']
+            items = [(slot['path'], slot['metadata'], f"/inputs/slots/{slot['ordinal']}/metadata")] if slot['kind'] == 'TENSOR' else [
+                (item['path'], item['metadata'], f"/inputs/slots/{slot['ordinal']}/items/{item['ordinal']}/metadata") for item in slot['items']] if slot['kind'] == 'TENSOR_LIST' else []
+            for path, metadata, pointer in items:
+                leaves.append({'path': path, 'metadata': metadata, 'source': {'artifact': chunk, 'locator': f'#/lines/{line}' + pointer}})
+        retained_inputs = []
+        for slot in row['inputs']['slots']:
+            skeleton = {'ordinal': slot['ordinal'], 'kind': slot['kind']}
+            if slot['kind'] == 'TENSOR':
+                skeleton['tensor_paths'] = [slot['path']]
+            elif slot['kind'] == 'TENSOR_LIST':
+                skeleton['tensor_paths'] = [p['path'] for p in slot['items']]
+            elif slot['kind'] == 'OPAQUE':
+                skeleton['reason'] = slot['reason']
+            elif slot['kind'] == 'SCALAR_OPAQUE':
+                skeleton['scalar_kind'] = slot['scalar_kind']
+            retained_inputs.append(skeleton)
+        item = {'index': index, 'metadata': leaves, 'node_id': None, 'source': {'artifact': chunk, 'locator': f'#/lines/{line}'},
+                'tree_parent': event['parent_result_id'], 'tree_result': event['result_id'],
+                'input_availability': row['inputs']['availability'], 'retained_inputs': retained_inputs}
+        counts['metadata_paths'] += len(leaves)
+        correlation = event['correlation_id']
+        if type(correlation) is int and correlation > 0:
+            _need(len(correlations[correlation]) == 1, 'ambiguous tree correlation')
+        candidates = cpu.get(correlation, ()) if type(correlation) is int and correlation > 0 else ()
+        _need(len(candidates) <= 1, 'ambiguous CPU External id')
+        if not candidates:
+            item['frontier'] = 'CPU_EXTERNAL_UNAVAILABLE'
+        else:
+            ko, observed = candidates[0]
+            handle = observed.get('args', {}).get('Record function id')
+            matches = rf.get(handle, ()) if type(handle) is int and handle > 0 else ()
+            _need(len(matches) <= 1, 'ambiguous ETO RecordFunction id')
+            if not matches:
+                item['frontier'] = 'ETO_RF_MISSING'
+            else:
+                ordinal, node = matches[0]
+                attrs = attributes(node)
+                _need(attrs.get('tid') == event['record_function_thread_token'], 'raw RF thread contradiction')
+                name = row['name'] + ('.' + row['overload_name'] if row['overload_name'] else '')
+                _need(node['name'] == row['name'] and observed['name'] == name, 'name contradiction after exact key join')
+                if row['inputs']['availability'] == 'OBSERVED':
+                    _need(len(row['inputs']['slots']) == len(node['inputs']['values']), 'native boxed input arity contradiction')
+                item.update(node_id=node['id'], original_node=fact(ea, f'#/nodes/{ordinal}'),
+                    CPU_bridge=fact(ka, f'#/traceEvents/{ko}'), ETO_parent=node['ctrl_deps'])
+                mapped[event['result_id']] = node['id']
+                counts['exact_raw_key_joins'] += 1
+                item['schema_text_present'] = bool(attrs.get('op_schema'))
+                if not item['schema_text_present']:
+                    item['schema_frontier'] = 'REGISTERED_SCHEMA_TEXT_UNAVAILABLE'
+                    frontiers['REGISTERED_SCHEMA_TEXT_UNAVAILABLE'] += 1
+                try:
+                    native_paths = {tuple(p['path']): p for p in flat_native(node['inputs']) if p['tensor']}
+                except ValueError:
+                    item['frontier'] = 'NATIVE_INPUT_STRUCTURE_UNSUPPORTED'
+                    native_paths = None
+                if native_paths is not None:
+                    seen = set()
+                    for leaf in leaves:
+                        path = tuple(leaf['path'])
+                        _need(path not in seen and path in native_paths, 'metadata original Tensor path contradiction')
+                        seen.add(path)
+                        original = native_paths[path]
+                        metadata = leaf['metadata']
+                        if metadata['sizes'] is not None and metadata['strides'] is not None and metadata['device'] is not None:
+                            _need(metadata['sizes'] == original['shape'] and metadata['strides'] == original['strides']
+                                  and metadata['device']['text'] == original['value'][5], 'metadata geometry contradiction after original path join')
+                        counts['metadata_at_exact_native_path'] += 1
+                    frontiers['NATIVE_TENSOR_WITHOUT_EXPOSED_METADATA'] += len(set(native_paths) - seen)
+        if 'frontier' in item:
+            frontiers[item['frontier']] += 1
+        result.append(item)
+    for row in result:
+        if row.get('node_id') is not None:
+            parent = row['tree_parent']
+            if parent in mapped:
+                _need(mapped[parent] == row['ETO_parent'], 'mapped original parent contradiction')
+                counts['mapped_parent_checks'] += 1
+            else:
+                frontiers['PARENT_OUTSIDE_EXPORTED_TORCHOP_BOUNDARY'] += 1
+    counts['rows'] = len(result)
+    _need(counts['rows'] == retention['retained_rows'], 'full input row denominator differs')
+    budget.complete_prefix('adapter ')
+    return NativeInputMetadataSession(_INPUT_OWNER, {'run': coordinates.run.id.value,
+        'process': coordinates.target_process.id.value, 'rows': result, 'counts': dict(counts), 'frontiers': dict(frontiers)})
+
+
+__all__ += ['INPUT_ASSOCIATION_PROFILE', 'NativeInputPayloadBudget', 'NativeInputMetadataSession', 'prepare_native_input_metadata']

@@ -1,0 +1,170 @@
+{
+  "accounting": "Every retained stream open is charged for stored bytes plus decoded bytes; a second raw/compressed/hash/parse pass is charged again. SQLite scratch reads and output serialization have separate index/output/RSS/wall budgets and are not hidden original-input reads. Plain payloads charge stored and decoded planes equally.",
+  "additional_control_metadata_ceiling_bytes": 1000000,
+  "capture_root": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture",
+  "components": [
+    {
+      "basis": "70 archived members: one decode + a separate compressed SHA pass; 8 plain members including run.json",
+      "component": "ordinary binder: verify all members",
+      "decoded_bytes": 19139044,
+      "stored_bytes": 3237716,
+      "sum": 22376760
+    },
+    {
+      "basis": "59 OS files reopened for necessary membership/birth/exec/O_EXCL facts; not OS interface import",
+      "component": "ordinary binder: OS parse",
+      "decoded_bytes": 9022175,
+      "stored_bytes": 1028555,
+      "sum": 10050730
+    },
+    {
+      "basis": "3 chunks reopened by the existing strict reader after _Files.verify",
+      "component": "ordinary binder: companion parse",
+      "decoded_bytes": 3014193,
+      "stored_bytes": 167287,
+      "sum": 3181480
+    },
+    {
+      "basis": "manifest/native/dispatch/physical document parse after cached verification",
+      "component": "ordinary binder: companion metadata documents",
+      "decoded_bytes": 14683,
+      "stored_bytes": 14683,
+      "sum": 29366
+    },
+    {
+      "basis": "call/operand/environment/dispatch/physical/companion/run documents",
+      "component": "ordinary binder: other metadata documents",
+      "decoded_bytes": 13139,
+      "stored_bytes": 13139,
+      "sum": 26278
+    },
+    {
+      "basis": "initial native manifest and archive-index reads",
+      "component": "ordinary binder: initial native/archive documents",
+      "decoded_bytes": 42671,
+      "stored_bytes": 42671,
+      "sum": 85342
+    },
+    {
+      "basis": "each _document performs receipt read plus document read",
+      "component": "ordinary binder: OS intent/launch/coverage",
+      "decoded_bytes": 16150,
+      "stored_bytes": 16150,
+      "sum": 32300
+    },
+    {
+      "basis": "ETO + dispatch rows + legacy physical rows, each once",
+      "component": "native V2: complete original three sources",
+      "decoded_bytes": 4826949,
+      "stored_bytes": 264020,
+      "sum": 5090969
+    },
+    {
+      "basis": "instances/objects/regions/allocations once each; no re-import",
+      "component": "native V2: original four archive tables",
+      "decoded_bytes": 13807785,
+      "stored_bytes": 725893,
+      "sum": 14533678
+    },
+    {
+      "basis": "capture-model + partition manifest + native/dispatch/physical metadata",
+      "component": "native V2: acquisition metadata",
+      "decoded_bytes": 132472,
+      "stored_bytes": 132472,
+      "sum": 264944
+    },
+    {
+      "basis": "one ETO and one Kineto pass; no numeric correlation/RF substitution",
+      "component": "metadata adapter: ETO/Kineto key-join input",
+      "decoded_bytes": 4002098,
+      "stored_bytes": 215622,
+      "sum": 4217720
+    },
+    {
+      "basis": "new retained resolver uses existing verify + strict parse: two decodes and three compressed passes per chunk",
+      "component": "metadata adapter: strict companion verify and parse",
+      "decoded_bytes": 6028386,
+      "stored_bytes": 501861,
+      "sum": 6530247
+    },
+    {
+      "basis": "one document parse each; additional verify passes charged to control metadata reserve",
+      "component": "metadata adapter: metadata document parse",
+      "decoded_bytes": 14683,
+      "stored_bytes": 14683,
+      "sum": 29366
+    }
+  ],
+  "control_metadata_scope": "Additional wrapper/header/archive/partition preflight reads and strict-reader metadata verification passes only. Their pinned sizes/read multiplicities must be listed before Root launch, total <=1,000,000B; no schema-contracts data decode is needed because original raw schema is independently parsed by existing V2. No public input output re-open may be silently added.",
+  "declared": {
+    "OS_files": 59,
+    "OS_raw_bytes": 9022175,
+    "OS_stored_bytes": 1028555,
+    "RAISED": 1,
+    "RETURNED": 260,
+    "archive_files": 70,
+    "archive_raw_bytes": 19119646,
+    "archive_stored_bytes": 1609159,
+    "companion_chunks": 3,
+    "companion_raw_bytes": 3014193,
+    "companion_rows": 2332,
+    "companion_stored_bytes": 167287,
+    "dispatches": 261,
+    "metadata_input_paths": 3095,
+    "ordinary_member_count": 77,
+    "ordinary_verified_raw_bytes": 19139044
+  },
+  "enforcement_plan": "Preflight pins exact retained member set, declared sizes and multiplicities; reject growth/new members or an aggregate plan above ceiling before owner acquisition. Use unchanged normal binder with max_bytes=20,000,000 unique raw bytes; check fresh report counts/membership and Run against G1. Component counters/receipts report actual reads for adapter/native V2; normal binder repeated-pass amount is derived from the frozen implementation and verified member receipts, and must be labeled derived rather than a kernel I/O measurement.",
+  "headroom_bytes": 550820,
+  "implementation_status": "PREPARED_NOT_RUN",
+  "implemented_planned_aggregate_bytes": 67280634,
+  "implemented_planned_control_metadata_bytes": 860820,
+  "known_subtotal_bytes": 66449180,
+  "no_original_payloads_read_by_this_budget_design": true,
+  "not_actual_measurement": true,
+  "owner_sources": {
+    "scar/trace/capture_coordinates.py": {
+      "sha256": "e0d71eba04aab0a948ee6d07bbbcd30abc20ddb162dee62a7f0b7922ad8d8aba",
+      "size_bytes": 40987,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/capture_coordinates.py"
+    },
+    "scar/trace/native_capture_batch.py": {
+      "sha256": "d0eac8d1adf64bae16703ac3289e159d23b2d8582a1110506def9f7b2e8de1ae",
+      "size_bytes": 64076,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_capture_batch.py"
+    },
+    "scar/trace/native_protocol.py": {
+      "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d",
+      "size_bytes": 56622,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_protocol.py"
+    },
+    "scar/trace/native_tensor_inputs.py": {
+      "sha256": "f8cf28fa8b375ccab3932db3f371a67d6a518e467eff133d4e4b0c02047d3ff8",
+      "size_bytes": 16604,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_tensor_inputs.py"
+    }
+  },
+  "planned_upper_bound_bytes": 67449180,
+  "prior_64000000_feasible_without_changed_read_plan": false,
+  "receipts": {
+    "G1_capture_model": {
+      "sha256": "0b52a66d8259dc2234eacd98351adeb4c8d7763f1a667061f1839aa67fa57c94",
+      "size_bytes": 110385,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/capture-model.json"
+    },
+    "G1_partition_manifest": {
+      "sha256": "fb35e450c22344d6eadd0a0dc49cfb919fa472c9ecb6cd7546955dee329bb973",
+      "size_bytes": 10099,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/01-capture-import/model/native/bundle-partitions/manifest.json"
+    },
+    "archive_index": {
+      "sha256": "aa037dfa45757ac8ceec63632af65f03c6e6d69b18219e0c271c13e7f6ab6e69",
+      "size_bytes": 36412,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/archive-index.json"
+    }
+  },
+  "requested_single_ceiling_bytes": 68000000,
+  "schema": "scar.native-input-binding-read-budget-plan",
+  "schema_version": 1,
+  "status": "PLANNED_NOT_EXECUTED"
+}
