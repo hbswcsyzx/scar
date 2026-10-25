@@ -1,0 +1,331 @@
+{
+  "files_read": 60,
+  "geometry_gap_reasons": {
+    "NATIVE_ONLY_NO_HELD_PHYSICAL_SLOT": 65,
+    "ORIGINAL_ALLOCATION_BIRTH_UNAVAILABLE": 701
+  },
+  "joint_counts": {
+    "QUALIFIED_HELD_OBJECT/QUALIFIED": 10664,
+    "QUALIFIED_HELD_OBJECT/UNPROVED": 701,
+    "UNRESOLVED/UNPROVED": 65
+  },
+  "limits": "Counts of retained qualification claims; not a replay of the full native proof or full-domain coverage.",
+  "native_owned_session_restored": false,
+  "private_database_reads": 0,
+  "qualification_counts": {
+    "QUALIFIED_HELD_OBJECT": 11365,
+    "UNRESOLVED": 65,
+    "geometry_QUALIFIED": 10664,
+    "geometry_UNPROVED": 766,
+    "native_ports": 11430
+  },
+  "raw_reads": 0,
+  "receipts": [
+    {
+      "sha256": "e163773548fb63ebf15894a36a5d8869b0fee7239dfb5a29853920df147597d6",
+      "size_bytes": 3661,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000000/report.json"
+    },
+    {
+      "sha256": "40e5faaf900dc068eac39bc32d2a8081fb3fcf927fff03de54949ab43f6cbb84",
+      "size_bytes": 3738,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000001/report.json"
+    },
+    {
+      "sha256": "cd8404ca00957cf14be8ca1187d2ab50dee52889d0d313243f4ecff0982b2d55",
+      "size_bytes": 3471,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000002/report.json"
+    },
+    {
+      "sha256": "f8f35b5c1bbc8f2cc3cb91b1911ed63a5fc64f664b550b6a56268d9b604b6be9",
+      "size_bytes": 4096,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000003/report.json"
+    },
+    {
+      "sha256": "9f5da738a443cb76d104797ec55e128dd8c96bda75f98f8faea5cf8a5cba652a",
+      "size_bytes": 4360,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000004/report.json"
+    },
+    {
+      "sha256": "236bfe10eba2c80c2b0a1c1f0665a78f963ae19d523081938f650fbbb4bdcfb3",
+      "size_bytes": 4159,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000005/report.json"
+    },
+    {
+      "sha256": "eabac02c81775d9fe9f332a10a65f4f7ec8fe4f110c355f39ab3db7f1a22e4af",
+      "size_bytes": 4158,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000006/report.json"
+    },
+    {
+      "sha256": "1f0d3919678b681ce6d1eb7b993b133b77a3a5182de7aa367dae54f94a9e7613",
+      "size_bytes": 4159,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000007/report.json"
+    },
+    {
+      "sha256": "b35cb960c3a23a119615df8bb79bcbd41116197b4465adf13442565965f61f78",
+      "size_bytes": 4159,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000008/report.json"
+    },
+    {
+      "sha256": "52a551b5b96683de6b09a5e37c20336a170ddc2f0c13c3245bd341e2e9a443f9",
+      "size_bytes": 4896,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000009/report.json"
+    },
+    {
+      "sha256": "9ee74bc4a8ab9050ec6b38ab918e45013b573fa0f240e308e9fe9cec08b49491",
+      "size_bytes": 3489,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000010/report.json"
+    },
+    {
+      "sha256": "d8c822fca5d75dd6a94b7bea79ec7d0772fc537456cba49d84ddfe3911985f5d",
+      "size_bytes": 3624,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000011/report.json"
+    },
+    {
+      "sha256": "bd5650508665db85bcc56b63202fb8088158cf26fcd9954eaf6c03e755012ef3",
+      "size_bytes": 6569,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000012/report.json"
+    },
+    {
+      "sha256": "f360bd51631eff1d16031d708e7db76b45d114e98775d1b9c42433ebdf1a883d",
+      "size_bytes": 4829,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000013/report.json"
+    },
+    {
+      "sha256": "ef467203089bd5ac67cfe287fb3f865090b9e6239b7a580bc5c892a2a4c1fc10",
+      "size_bytes": 4762,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000014/report.json"
+    },
+    {
+      "sha256": "7d5ca5b7c422365f094b32da6eca88c3d92cb43a5b6092733ec086dc31ee60b7",
+      "size_bytes": 5627,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000015/report.json"
+    },
+    {
+      "sha256": "35b97d2f6c6856da2e646c50389a9d2255935529ee3fd15bb1ea106f3c979260",
+      "size_bytes": 4963,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000016/report.json"
+    },
+    {
+      "sha256": "2b2665dc5324ecdc25d5281333b93b9b596d6fdff45e61d90b72374a37ca61c6",
+      "size_bytes": 5030,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000017/report.json"
+    },
+    {
+      "sha256": "d7eed0307d7c2d9694c0b2788f7fc44f04d2b7eff29e522d7ebf75606926759e",
+      "size_bytes": 5030,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000018/report.json"
+    },
+    {
+      "sha256": "18ddd7f1e844b1cfe369faa2fd8cb10a95d73ed340ff976cb5c1c9686cf129fa",
+      "size_bytes": 6638,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000019/report.json"
+    },
+    {
+      "sha256": "e719bcf6a1f928af0670e9468f106a3887720af083065514276203152a8972aa",
+      "size_bytes": 1068,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000000/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "1cdf382c2d86fe0bef71bc1f0563718ecd0e238a4804e7809f63d8e76103a98b",
+      "size_bytes": 1983666,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000000/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "77050fca03f0d15a69183346a1df5837c3e79db7c68450a38b69b106dfb40585",
+      "size_bytes": 1070,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000001/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "698c95c52947acc411c537f84db01b524defa4acb02ab16ea99bfee97fd2c7b5",
+      "size_bytes": 1193295,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000001/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "d1588856b62feb6f3152babaedb44bd91fc9b0e22169e2c7ae20919bf370bd13",
+      "size_bytes": 1070,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000002/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "d512ca4e9dbe94e5b4c666a2c6c0e045060072c9488e69bedd79f305e876b5d4",
+      "size_bytes": 1187991,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000002/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "319a5cf14d98bfebc6c646b8cf7ed7517e9ed91950e0e2a002069ccb7d08d82e",
+      "size_bytes": 1071,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000003/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "47472af333e7843770f8ee5beb7a13607d0912a2c2ec090eb79992018da80689",
+      "size_bytes": 1297369,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000003/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "685888109307dfde6ea4fb0df93f02e371fb08f18a93578c40f1f07f3fa5d083",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000004/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "12c4cc2c4863858c608b496912dbae15295039ab422c32d54de73d02be9aa8b1",
+      "size_bytes": 1397056,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000004/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "744d81666cff2d5431fc0b465e869a0015fc5b565415ce62ac573888d3f078bd",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000005/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "0f83e272c95f269fd0c7348a64342f18be09189f323158c1e25430627d6111db",
+      "size_bytes": 1689906,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000005/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "f0d8ae42d825d10b6d6a1dafb33e4adff2af13502fb3f14610c4155660121a9a",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000006/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "394293b8e348cd79aa583e64f31133779799c08691679f8b8a11b621759af594",
+      "size_bytes": 1701416,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000006/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "5c0d09f9fc27e17da651485e790b99b6c8227fe23d2900fb1366b36715cba42d",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000007/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "ea71a41006e9d2d9a8bb4b20de7bd8a91f1bbcefc85bea16372420412566c2ce",
+      "size_bytes": 1702028,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000007/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "6b00ff7c12c5b8a43fe537f71bf750863162f202408af55fb436ccd77c4cf4c9",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000008/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "d548af424dd008581614b234146770454ccdfeff63b36205ec289c3440e2c917",
+      "size_bytes": 1698409,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000008/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "c6910537401b455f1ecdff32044b02a4fa8842981fc85783d101a8fae3efb10e",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000009/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "107dee497713ac699d9c40f3376caf759c28e8a15dab92ff13e9980dc895921b",
+      "size_bytes": 1487742,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000009/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "eab8f419605f6616a76e6ec12b72a64e62ab81ea6b5c9d3e13077fb6f6725741",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000010/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "52c10ee491f9b0c533bc2b560732b9315adf34b77911339d1022ddc0da8d6826",
+      "size_bytes": 2738534,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000010/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "83918aae98f0edf5b13aa52bae790872e17784991a7b5f7f86d1ebc61fd82750",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000011/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "ff650741f6193c7d21583a72715201ed666c17a08347f926880c3bf9f997bba3",
+      "size_bytes": 1964483,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000011/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "2ed9ca7e54d0237ce2277d6f072af604c854241561241b83eeaac4cf005c6fc5",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000012/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "5e62f106cdb5fcbe888a6ac32bcf756a2928e29f8808bc8f6388086a2857f58c",
+      "size_bytes": 1853441,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000012/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "0e6f6be97617e39ce5cd5eb5afde0b511e6899eb462c7dcc06abd641cb532ee7",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000013/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "40cadd1c43bc6fee0d9f9882bdff112681ba5466e94da2412b9084c0f51d7b66",
+      "size_bytes": 2579605,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000013/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "4c0ffa785076da031205990987c12c7334be80dab880377f6de7285db67e9760",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000014/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "ca7106cdac1c121b7c2ff2b4d230795e7fd19b79fa5ab723d0a23c3730c8e627",
+      "size_bytes": 2597368,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000014/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "6ec55569717ef929de1f6b799c48a4d85825177070d1246d698d8d8b06f1216a",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000015/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "0dd2434427007710f582856648a3875bd2719b75ad77ca448a323ac9b417929e",
+      "size_bytes": 2647100,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000015/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "1b290dae9ccbdb843f5848e68217d83530c1475e724732bb661361a9595909af",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000016/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "4f579926761eff7b849d19780a9b972a4c0cea82abebcb64b4c3457062d1d91a",
+      "size_bytes": 2676342,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000016/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "f70c4da6a87b973433d23862940dd4f12e0b859b4edde940bbe8decdadf71af3",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000017/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "73627fc9456a53e0823a0418eb2d74fa28dc7f55d9b580b1e0515f79bda3b91e",
+      "size_bytes": 2683404,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000017/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "5bde19e8b684bf1a80c01cecf1fccbe7a9d4be5a2d2833b9d046e12644d6d7d1",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000018/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "4797eae56c81f41dee8ad79fec2edeed88425c511ff6d75f7284434a0fa83d21",
+      "size_bytes": 2697334,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000018/port-qualifications/000000.jsonl"
+    },
+    {
+      "sha256": "a42488ea3c3f670f51f3d60fd3c455f1de1bc14316e543fae6b79f5727b0e9a0",
+      "size_bytes": 1072,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000019/port-qualifications/manifest.json"
+    },
+    {
+      "sha256": "801f86e419be8e2160fc3372d887ee059429247ceba7f3e5567b5170aaefd2c8",
+      "size_bytes": 2601127,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000019/port-qualifications/000000.jsonl"
+    }
+  ],
+  "schema": "scar.retained-native-prefix-plane-query",
+  "schema_version": 1,
+  "scope": "20 completed execution shards only; sequence 1..5120 of 39796",
+  "stored_bytes_read": 40490465,
+  "wall_seconds": 0.40967204998014495,
+  "whole_program_model": "OPEN"
+}
