@@ -1,0 +1,75 @@
+{
+  "all_unrelated_346_frozen_source_bytes_match_previous_gate": true,
+  "budgets": {
+    "RSS_KiB": 2097152,
+    "catalog_extra_stored_plus_decoded": 4022,
+    "control_metadata": 1000000,
+    "outer_seconds": 150,
+    "prepared_complete_pass_bound": 67598442,
+    "prepared_control_bound": 864842,
+    "private_index": 128000000,
+    "program_IR_extra_stored_plus_decoded": 313786,
+    "public_outputs": 64000000,
+    "retained_stored_plus_decoded": 68000000,
+    "whole_seconds": 120
+  },
+  "capture_raw_reads_during_preparation": 0,
+  "freeze": {
+    "bytes": 128397,
+    "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/freeze.json",
+    "sha256": "748696f8e349b5431e1a1fa9bebc5447fad154dbe68a3dd1ae8feb015796fa13"
+  },
+  "implementation_diff": {
+    "bytes": 16841,
+    "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/implementation.diff",
+    "sha256": "1b909e1a8e37694df68e3a9746877f9f0271778364c0ea64222141742db3851c"
+  },
+  "input_receipts_retained": 91,
+  "new_target_runs": 0,
+  "preflight": {
+    "bytes": 1125,
+    "path": "artifacts/experiments/native_scalar_union_20261025/api-check.json",
+    "sha256": "0a3e06dffa10162b6992721ee0b312bb5e090b705efdd96c1ff34f0163cb6976"
+  },
+  "producer_runs_during_preparation": 0,
+  "qualification_row_reads_during_preparation": 0,
+  "runner": [
+    {
+      "bytes": 10128,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/gate.py",
+      "sha256": "184f7395ef5ccda07cf7e83cae7a1903766099bd0c3026c6e4fd1d73b2e30279"
+    },
+    {
+      "bytes": 589,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/run.sh",
+      "sha256": "aeee6fbedfa742bfc9adb426ae6416fdd74b75f5bc4bf524b612c6a1af8e6ea6"
+    }
+  ],
+  "schema": "scar.native-scalar-union-preparation",
+  "schema_version": 1,
+  "source_and_runner_bytes_per_hash_pass": 6639632,
+  "sources": [
+    {
+      "bytes": 8390,
+      "path": "scar/trace/native_scalar_content.py",
+      "sha256": "b1f2ac13d24d7bc8765e7fac593dce915f0c083a5b70e82bab912ebb89dcfdd0"
+    },
+    {
+      "bytes": 76747,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "6e30bb657916abd617c02ccfd6969148a9f87935336f5a7571c0f5358c93776c"
+    },
+    {
+      "bytes": 59623,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "14ac2da5789ca93635bfe85a1b08c3312a4fca9ea97ae7dbba8cc2f2bc3c2757"
+    },
+    {
+      "bytes": 89587,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "fb881e08460b7d12eab62a9f36971ec4880d8e592995a0bba591773e06115cbc"
+    }
+  ],
+  "sources_frozen": 350,
+  "status": "PREPARED_NOT_RUN"
+}

@@ -1,0 +1,255 @@
+diff --git a/scar/ir/execution/native_port_protocol.py b/scar/ir/execution/native_port_protocol.py
+index 916f3485..4be32ea6 100644
+--- a/scar/ir/execution/native_port_protocol.py
++++ b/scar/ir/execution/native_port_protocol.py
+@@ -19,6 +19,8 @@ from .content import NativeInputRef, NativeOutputRef, ObjectIdentity, VersionRef
+ PROFILE = "PINNED_ATEN_HELD_REFERENCE_PORT_V1"
+ PROFILE_V2 = "PINNED_TORCH_NATIVE_PORT_HELD_SUBSET_V2"
+ SCALAR_INPUT_CAPABILITY = 'SCAR_NATIVE_SCALAR_OBSERVED_ROOT_V1'
++SCALAR_INPUT_CAPABILITY_V2 = 'SCAR_NATIVE_SCALAR_OBSERVED_ROOT_V2'
++SCALAR_INPUT_CAPABILITIES = (SCALAR_INPUT_CAPABILITY, SCALAR_INPUT_CAPABILITY_V2)
+ _OWNER = object()
+ 
+ 
+@@ -206,7 +208,7 @@ def _native_slot_fact(source, interface, direction, port):
+         str(source["node_ordinals"][str(interface["node"]["id"])] ) + "/" + direction + "/values/" + suffix}
+ 
+ 
+-def _scalar_input(port, formal, revision):
++def _scalar_input(port, formal, revision, *, profile=SCALAR_INPUT_CAPABILITY):
+     """Decode actual formal leaves; strings/defaults never stand in for kinds."""
+     from scar.trace.native_scalar_content import decode_pinned_scalar
+     from scar.ir.record_codec import encode
+@@ -228,7 +230,7 @@ def _scalar_input(port, formal, revision):
+         while declared.kind() == 'OptionalType': declared = declared.getElementType()
+         while real.kind() == 'OptionalType': real = real.getElementType()
+     decoded = decode_pinned_scalar(revision, port['type'], declared.kind(), port['value'],
+-                                  formal_real_kind=real.kind())
++                                  formal_real_kind=real.kind(), profile=profile)
+     result = {'formal_kind': declared.kind(), 'formal_real_kind': real.kind(),
+               'frontier': None if decoded.frontier is None else decoded.frontier.value}
+     if decoded.literal is not None:
+@@ -467,12 +469,13 @@ def replay_batch_interfaces(source):
+                     port["identity_reason"] = "ORIGINAL_HELD_OBJECT_RECORD_UNAVAILABLE"
+                 port["geometry"] = _geometry_v2(source, port, marker, phys, ordinal)
+         if source.get('scalar_input_profile') is not None:
+-            need(source['scalar_input_profile'] == SCALAR_INPUT_CAPABILITY, 'unsupported owned scalar profile')
++            need(source['scalar_input_profile'] in SCALAR_INPUT_CAPABILITIES, 'unsupported owned scalar profile')
+             for port in ports['inputs']:
+                 if not port['tensor']:
+                     need(port['path'] and type(port['path'][0]) is int and 0 <= port['path'][0] < len(schema.arguments),
+                          'scalar input has no exact formal argument')
+-                    port['scalar_input'] = _scalar_input(port, schema.arguments[port['path'][0]], PROVIDER_REVISION)
++                    port['scalar_input'] = _scalar_input(port, schema.arguments[port['path'][0]], PROVIDER_REVISION,
++                        profile=source['scalar_input_profile'])
+         signature = {"provider_revision": PROVIDER_REVISION, "schema": raw_schema,
+             **{d: [{"path": p["path"], "type": p["type"], "tensor": p["tensor"]} for p in ports[d]] for d in ports}}
+         interface.update(signature=signature, signature_id=sha256(canonical(signature)).hexdigest())
+@@ -765,7 +768,7 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
+                 if i >= len(item['signature'][direction]):
+                     continue
+                 if not item['signature'][direction][i]['tensor']:
+-                    if profile == PROFILE_V2 and direction == 'inputs' and source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY:
++                    if profile == PROFILE_V2 and direction == 'inputs' and source.get('scalar_input_profile') in SCALAR_INPUT_CAPABILITIES:
+                         from .content import DataIdentity
+                         from .common import Unresolved
+                         from scar.ir.record_codec import decode
+@@ -919,7 +922,10 @@ def _prepare_native_catalog(owned, program, snapshot):
+ 
+ @dataclass(frozen=True, slots=True, init=False)
+ class NativeScalarObservation:
+-    """Owned typed query result; no static literal or Python object identity."""
++    """Owned typed result; builtin_type names its normalized literal representation.
++
++    No static literal, original Python class or pre-conversion origin is proved.
++    """
+     literal: PythonLiteral
+     builtin_type: str
+     source: ProviderFactReference
+@@ -960,7 +966,7 @@ class NativePortEvidence:
+         self._interfaces = canonical(interfaces)
+         self._scalar_denotations = MappingProxyType({d.value: d for d in model.denotations})
+         self._scalar_projection, self._scalar_versions = None, {}
+-        if self._source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY:
++        if self._source.get('scalar_input_profile') in SCALAR_INPUT_CAPABILITIES:
+             need(type(_scalar_projection) is bytes and sha256(_scalar_projection).hexdigest() == value_artifact.sha256
+                  and len(_scalar_projection) == value_artifact.size_bytes, 'scalar source needs exact immutable value projection bytes')
+             from scar.ir.v2.codec import values_from_dict
+@@ -1152,4 +1158,5 @@ def _make_evidence(owned, program, model, value_artifact, evidence_artifact, *,
+                               _prepared=_prepared, _scalar_projection=_scalar_projection)
+ 
+ 
+-__all__ = ["NativePortEvidence", "PROFILE", "PROFILE_V2", 'SCALAR_INPUT_CAPABILITY', 'NativeScalarObservation']
++__all__ = ["NativePortEvidence", "PROFILE", "PROFILE_V2", 'SCALAR_INPUT_CAPABILITY',
++           'SCALAR_INPUT_CAPABILITY_V2', 'NativeScalarObservation']
+diff --git a/scar/trace/native_capture_batch.py b/scar/trace/native_capture_batch.py
+index f05176db..e350f406 100644
+--- a/scar/trace/native_capture_batch.py
++++ b/scar/trace/native_capture_batch.py
+@@ -22,7 +22,7 @@ import time
+ from scar.ir.record_codec import decode, encode
+ from scar.ir.program.providers import ProviderArtifact
+ from scar.ir.execution.native_port_protocol import (
+-    PROFILE_V2, SCALAR_INPUT_CAPABILITY, _make_evidence, _own_capture, _prepare_native_catalog, attributes, canonical, need, replay_batch_interfaces,
++    PROFILE_V2, SCALAR_INPUT_CAPABILITY, SCALAR_INPUT_CAPABILITIES, _make_evidence, _own_capture, _prepare_native_catalog, attributes, canonical, need, replay_batch_interfaces,
+ )
+ from scar.trace.native_protocol import (
+     NativeProtocolWindowResult, _artifact, _build_execution, _build_program,
+@@ -846,7 +846,7 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
+     from scar.ir.execution.validation import prepare_program_snapshot, validate
+     need(type(budget) is NativeCaptureBatchBudget, "exact native batch budget required")
+     need(on_verified_shard is None or callable(on_verified_shard), "verified shard consumer must be callable")
+-    need(scalar_input_profile in (None, SCALAR_INPUT_CAPABILITY), 'unsupported requested scalar capability')
++    need(scalar_input_profile in (None, *SCALAR_INPUT_CAPABILITIES), 'unsupported requested scalar capability')
+     need(static_artifacts is None or type(static_artifacts) is NativeStaticArtifacts, 'exact static artifact input required')
+     budget.__post_init__()
+     out = Path(out_dir).resolve()
+@@ -1201,7 +1201,7 @@ def bind_native_capture_model_batches(capture_model_path, out_dir, *, expected_s
+     need(limits.max_wall_seconds <= 120 and limits.max_index_bytes <= 128_000_000
+          and limits.max_output_bytes <= 64_000_000, 'small capture model entry budget exceeds hard cap')
+     need(on_verified_shard is None or callable(on_verified_shard), 'verified shard consumer must be callable')
+-    need(scalar_input_profile in (None, SCALAR_INPUT_CAPABILITY), 'unsupported scalar capability')
++    need(scalar_input_profile in (None, *SCALAR_INPUT_CAPABILITIES), 'unsupported scalar capability')
+     need((static_program is None) == (static_interface is None), 'program/catalog must be supplied together')
+     out = Path(out_dir).resolve()
+     need(not out.exists(), 'capture model binding output must be fresh')
+diff --git a/scar/trace/native_protocol.py b/scar/trace/native_protocol.py
+index e0ae51d0..e24c9daa 100644
+--- a/scar/trace/native_protocol.py
++++ b/scar/trace/native_protocol.py
+@@ -361,7 +361,7 @@ def _project(source, interfaces, selected, out, budget):
+ def _prepare_projection_v2(source, interfaces, selected, out, budget):
+     """Closed ordinary graphs: B objects and C geometry are separate subsets."""
+     from scar.ir.execution.native_port_protocol import (replay_batch_interfaces, PROFILE_V2,
+-        _native_region_layout_view, SCALAR_INPUT_CAPABILITY, _scalar_root_records, _native_slot_fact)
++        _native_region_layout_view, SCALAR_INPUT_CAPABILITIES, _scalar_root_records, _native_slot_fact)
+     from scar.ir.v2.codec import values_from_dict, evidence_from_dict
+     from scar.ir.v2.values import ValueGraph
+     from scar.ir.v2.evidence import EvidenceGraph
+@@ -437,7 +437,7 @@ def _prepare_projection_v2(source, interfaces, selected, out, budget):
+     for table in expected:
+         need({r["id"]["value"] for r in values_doc[table]} == set(expected[table]), "V2 projection dependency inventory differs")
+     scalar_roots = []
+-    if source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY:
++    if source.get('scalar_input_profile') in SCALAR_INPUT_CAPABILITIES:
+         for interface in interfaces:
+             for position, port in enumerate(interface['ports']['inputs']):
+                 if port['tensor'] or port['scalar_input']['frontier'] is not None:
+@@ -455,8 +455,8 @@ def _prepare_projection_v2(source, interfaces, selected, out, budget):
+     rp = canonical({"schema": "scar.native-source-window-receipts", "schema_version": 2, "profile": PROFILE_V2,
+         "values_projection": encode(va), "evidence_projection": encode(ea), "records": receipts,
+         "physical_associations": geometry,
+-        **({'scalar_observed_roots': scalar_roots, 'scalar_input_profile': SCALAR_INPUT_CAPABILITY}
+-           if source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY else {}),
++        **({'scalar_observed_roots': scalar_roots, 'scalar_input_profile': source['scalar_input_profile']}
++           if source.get('scalar_input_profile') in SCALAR_INPUT_CAPABILITIES else {}),
+         "whole_source_graph_identity_claimed": False})
+     return values, evidence, va, ea, geometry, {"source-values.json": vp, "source-evidence.json": ep, "source-projection-receipts.json": rp}
+ 
+@@ -592,7 +592,7 @@ def _build_execution(program, layouts, interfaces, source, coordinates, program_
+         OperationOccurrence, ProgramSnapshot, RegionActivation, UseOccurrence, ValueOccurrence)
+     from scar.ir.execution.common import EvidencePoint, Unresolved
+     from scar.ir.execution.native_port_protocol import (PROFILE_V2, _native_slot_fact,
+-        SCALAR_INPUT_CAPABILITY, _scalar_root_records)
++        SCALAR_INPUT_CAPABILITIES, _scalar_root_records)
+     from scar.ir.execution.ids import (BlockVisitID, DenotationID, ExecutionSegmentID,
+         OperationOccurrenceID, RegionActivationID, ValueOccurrenceID)
+     from scar.ir.execution.content import (NativeInputRef, NativeOutputRef, ObjectIdentity, ObjectRef,
+@@ -630,7 +630,7 @@ def _build_execution(program, layouts, interfaces, source, coordinates, program_
+                 if j >= len(ports):
+                     continue
+                 if not ports[j]['tensor']:
+-                    if direction == 'inputs' and source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY:
++                    if direction == 'inputs' and source.get('scalar_input_profile') in SCALAR_INPUT_CAPABILITIES:
+                         native_fact = decode(ProviderFactReference, _native_slot_fact(source, interface, direction, ports[j]))
+                         scalar = ports[j]['scalar_input']
+                         identity = (DataIdentity(VersionRef(values_artifact, _scalar_root_records(source, interface, j)[1].id))
+diff --git a/scar/trace/native_scalar_content.py b/scar/trace/native_scalar_content.py
+index 8e8b515f..ad25dfa9 100644
+--- a/scar/trace/native_scalar_content.py
++++ b/scar/trace/native_scalar_content.py
+@@ -14,6 +14,8 @@ from scar.ir.literals import PythonLiteral, require_exact_literal
+ from scar.trace.native_schema import PROVIDER_REVISION
+ 
+ PINNED_SCALAR_PROVIDER_REVISION = 'cf30153c4c131c8164ee7798e5022d810682e2cb'
++SCALAR_CONTENT_PROFILE_V1 = 'SCAR_NATIVE_SCALAR_OBSERVED_ROOT_V1'
++SCALAR_CONTENT_PROFILE_V2 = 'SCAR_NATIVE_SCALAR_OBSERVED_ROOT_V2'
+ 
+ 
+ class ScalarFrontier(str, Enum):
+@@ -32,11 +34,16 @@ class ScalarFrontier(str, Enum):
+     DOUBLE_PRECISION = 'DOUBLE_SERIALIZATION_NOT_PROVEN_LOSSLESS'
+     STRING_ENCODING = 'NONASCII_PROVIDER_STRING_CONTENT_UNESTABLISHED'
+     PAYLOAD_BUDGET = 'SCALAR_EXACT_LITERAL_PAYLOAD_BUDGET'
++    NUMBER_TAG = 'NUMBER_FORMAL_PROVIDER_TAG_UNSUPPORTED'
+ 
+ 
+ @dataclass(frozen=True, slots=True)
+ class ScalarDecode:
+-    """Local decode result, not an IR record or an evidence capability."""
++    """Local decode result, not an IR record or an evidence capability.
++
++    builtin_type names the normalized PythonLiteral representation, never the
++    class of an original Python object before provider conversion.
++    """
+ 
+     literal: PythonLiteral | None
+     builtin_type: str | None
+@@ -70,7 +77,8 @@ def _gap(frontier):
+ 
+ def decode_pinned_scalar(provider_revision: str, provider_type: str,
+                          formal_kind: str, value: object, *,
+-                         formal_real_kind: str) -> ScalarDecode:
++                         formal_real_kind: str,
++                         profile: str = SCALAR_CONTENT_PROFILE_V1) -> ScalarDecode:
+     """Decode one already selected leaf without coercing type or ownership.
+ 
+     ``formal_kind`` and ``formal_real_kind`` are the exact leaf ``kind()`` values
+@@ -81,7 +89,11 @@ def decode_pinned_scalar(provider_revision: str, provider_type: str,
+ 
+     A supported result is abstract builtin content under this provider contract,
+     not evidence of a Python object's class, identity, origin or constancy.
++    The explicit V2 profile additionally interprets actual Int/Bool IValues at
++    a NumberType formal. Earlier enum/symbolic conversions remain unknown.
+     """
++    if type(profile) is not str or profile not in (SCALAR_CONTENT_PROFILE_V1, SCALAR_CONTENT_PROFILE_V2):
++        raise ValueError('unsupported scalar content profile')
+     for name, item, maximum in (('provider_revision', provider_revision, 128),
+             ('provider_type', provider_type, 4096), ('formal_kind', formal_kind, 128),
+             ('formal_real_kind', formal_real_kind, 128)):
+@@ -97,13 +109,21 @@ def decode_pinned_scalar(provider_revision: str, provider_type: str,
+     if provider_type in ('SymInt', 'SymFloat', 'SymBool') or (
+             formal_kind in _SYMBOLIC_KINDS or formal_real_kind in _SYMBOLIC_KINDS):
+         return _gap(ScalarFrontier.SYMBOLIC)
+-    if formal_kind not in _PRIMITIVE_KINDS or formal_real_kind not in _PRIMITIVE_KINDS:
+-        return _gap(ScalarFrontier.NON_BUILTIN_FORMAL)
+-    kinds = _SCALAR_KINDS.get(provider_type)
+-    if kinds is None:
+-        return _gap(ScalarFrontier.PROVIDER_TAG)
+-    if formal_kind != formal_real_kind or formal_kind not in kinds:
+-        return _gap(ScalarFrontier.FORMAL_KIND)
++    number = (profile == SCALAR_CONTENT_PROFILE_V2
++              and formal_kind == formal_real_kind == 'NumberType')
++    if number:
++        # The original formal remains NumberType. Never replace it with a
++        # guessed primitive formal or infer a pre-conversion Python type.
++        if provider_type not in ('Int', 'Bool'):
++            return _gap(ScalarFrontier.NUMBER_TAG)
++    else:
++        if formal_kind not in _PRIMITIVE_KINDS or formal_real_kind not in _PRIMITIVE_KINDS:
++            return _gap(ScalarFrontier.NON_BUILTIN_FORMAL)
++        kinds = _SCALAR_KINDS.get(provider_type)
++        if kinds is None:
++            return _gap(ScalarFrontier.PROVIDER_TAG)
++        if formal_kind != formal_real_kind or formal_kind not in kinds:
++            return _gap(ScalarFrontier.FORMAL_KIND)
+     if provider_type == 'None':
+         # The pinned getScalarValue fallback serializes this exact tag sentinel.
+         if type(value) is not str or value != '<None>':
+@@ -143,4 +163,5 @@ def decode_pinned_scalar(provider_revision: str, provider_type: str,
+     return ScalarDecode(literal, _BUILTIN_TYPES[type(decoded)], None)
+ 
+ 
+-__all__ = ['ScalarDecode', 'ScalarFrontier', 'decode_pinned_scalar', 'PINNED_SCALAR_PROVIDER_REVISION']
++__all__ = ['ScalarDecode', 'ScalarFrontier', 'decode_pinned_scalar', 'PINNED_SCALAR_PROVIDER_REVISION',
++           'SCALAR_CONTENT_PROFILE_V1', 'SCALAR_CONTENT_PROFILE_V2']

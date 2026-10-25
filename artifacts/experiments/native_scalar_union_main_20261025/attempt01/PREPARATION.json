@@ -1,0 +1,80 @@
+{
+  "budgets": {
+    "RSS_KiB": 2097152,
+    "catalog_extra_stored_plus_decoded": 4022,
+    "control_metadata": 1000000,
+    "outer_seconds": 150,
+    "prepared_complete_pass_bound": 67598442,
+    "prepared_control_bound": 864842,
+    "private_index": 128000000,
+    "program_IR_extra_stored_plus_decoded": 313786,
+    "public_outputs": 64000000,
+    "retained_stored_plus_decoded": 68000000,
+    "whole_seconds": 120
+  },
+  "changed_owner_sources": [
+    {
+      "bytes": 8390,
+      "path": "scar/trace/native_scalar_content.py",
+      "sha256": "b1f2ac13d24d7bc8765e7fac593dce915f0c083a5b70e82bab912ebb89dcfdd0"
+    },
+    {
+      "bytes": 76747,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "6e30bb657916abd617c02ccfd6969148a9f87935336f5a7571c0f5358c93776c"
+    },
+    {
+      "bytes": 59623,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "14ac2da5789ca93635bfe85a1b08c3312a4fca9ea97ae7dbba8cc2f2bc3c2757"
+    },
+    {
+      "bytes": 89587,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "fb881e08460b7d12eab62a9f36971ec4880d8e592995a0bba591773e06115cbc"
+    }
+  ],
+  "current_native_producer_runs": 0,
+  "forbidden_import_modules": [
+    "scar.analysis.modeling_scope",
+    "scar.ir.modeling_scope",
+    "scar.ir.modeling_scope_codec",
+    "scar.store.scope_partitions"
+  ],
+  "freeze": {
+    "bytes": 139463,
+    "path": "artifacts/experiments/native_scalar_union_main_20261025/attempt01/freeze.json",
+    "sha256": "4c6f81b7da2f41e5401f1141cbce1bddc60c08f7a34bee7f277fa4e0bd6452f8"
+  },
+  "input_receipts": 91,
+  "new_capture_runs": 0,
+  "new_raw_reads": 0,
+  "new_target_runs": 0,
+  "required_live_modules": [
+    "scar.trace.native_scalar_content",
+    "scar.trace.native_protocol",
+    "scar.trace.native_capture_batch",
+    "scar.ir.execution.native_port_protocol"
+  ],
+  "root_must_hold_actual_session": true,
+  "runner": [
+    {
+      "bytes": 11545,
+      "path": "artifacts/experiments/native_scalar_union_main_20261025/attempt01/gate.py",
+      "sha256": "3fbc1bc87612b66ae0be34f1bf2f61ae770df0ecfc0ee5f64a43b9a993913caf"
+    },
+    {
+      "bytes": 609,
+      "path": "artifacts/experiments/native_scalar_union_main_20261025/attempt01/run.sh",
+      "sha256": "7215c9062b1ad8c8abf8980359693f1b8c9cbed60c776f71c3d988877b9d8c1d"
+    }
+  ],
+  "schema": "scar.main-native-scalar-union-preparation",
+  "schema_version": 1,
+  "source_CLI_two_fixed": true,
+  "source_and_runner_bytes_per_SHA_pass": 7191116,
+  "source_bytes": 7178962,
+  "source_root": "/home/zyf/AAA/scar-worktrees/structured-program-model",
+  "sources": 366,
+  "status": "PREPARED_NOT_RUN"
+}

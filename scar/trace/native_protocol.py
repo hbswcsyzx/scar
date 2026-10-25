@@ -361,7 +361,7 @@ def _project(source, interfaces, selected, out, budget):
 def _prepare_projection_v2(source, interfaces, selected, out, budget):
     """Closed ordinary graphs: B objects and C geometry are separate subsets."""
     from scar.ir.execution.native_port_protocol import (replay_batch_interfaces, PROFILE_V2,
-        _native_region_layout_view, SCALAR_INPUT_CAPABILITY, _scalar_root_records, _native_slot_fact)
+        _native_region_layout_view, SCALAR_INPUT_CAPABILITIES, _scalar_root_records, _native_slot_fact)
     from scar.ir.v2.codec import values_from_dict, evidence_from_dict
     from scar.ir.v2.values import ValueGraph
     from scar.ir.v2.evidence import EvidenceGraph
@@ -437,7 +437,7 @@ def _prepare_projection_v2(source, interfaces, selected, out, budget):
     for table in expected:
         need({r["id"]["value"] for r in values_doc[table]} == set(expected[table]), "V2 projection dependency inventory differs")
     scalar_roots = []
-    if source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY:
+    if source.get('scalar_input_profile') in SCALAR_INPUT_CAPABILITIES:
         for interface in interfaces:
             for position, port in enumerate(interface['ports']['inputs']):
                 if port['tensor'] or port['scalar_input']['frontier'] is not None:
@@ -455,8 +455,8 @@ def _prepare_projection_v2(source, interfaces, selected, out, budget):
     rp = canonical({"schema": "scar.native-source-window-receipts", "schema_version": 2, "profile": PROFILE_V2,
         "values_projection": encode(va), "evidence_projection": encode(ea), "records": receipts,
         "physical_associations": geometry,
-        **({'scalar_observed_roots': scalar_roots, 'scalar_input_profile': SCALAR_INPUT_CAPABILITY}
-           if source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY else {}),
+        **({'scalar_observed_roots': scalar_roots, 'scalar_input_profile': source['scalar_input_profile']}
+           if source.get('scalar_input_profile') in SCALAR_INPUT_CAPABILITIES else {}),
         "whole_source_graph_identity_claimed": False})
     return values, evidence, va, ea, geometry, {"source-values.json": vp, "source-evidence.json": ep, "source-projection-receipts.json": rp}
 
@@ -592,7 +592,7 @@ def _build_execution(program, layouts, interfaces, source, coordinates, program_
         OperationOccurrence, ProgramSnapshot, RegionActivation, UseOccurrence, ValueOccurrence)
     from scar.ir.execution.common import EvidencePoint, Unresolved
     from scar.ir.execution.native_port_protocol import (PROFILE_V2, _native_slot_fact,
-        SCALAR_INPUT_CAPABILITY, _scalar_root_records)
+        SCALAR_INPUT_CAPABILITIES, _scalar_root_records)
     from scar.ir.execution.ids import (BlockVisitID, DenotationID, ExecutionSegmentID,
         OperationOccurrenceID, RegionActivationID, ValueOccurrenceID)
     from scar.ir.execution.content import (NativeInputRef, NativeOutputRef, ObjectIdentity, ObjectRef,
@@ -630,7 +630,7 @@ def _build_execution(program, layouts, interfaces, source, coordinates, program_
                 if j >= len(ports):
                     continue
                 if not ports[j]['tensor']:
-                    if direction == 'inputs' and source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY:
+                    if direction == 'inputs' and source.get('scalar_input_profile') in SCALAR_INPUT_CAPABILITIES:
                         native_fact = decode(ProviderFactReference, _native_slot_fact(source, interface, direction, ports[j]))
                         scalar = ports[j]['scalar_input']
                         identity = (DataIdentity(VersionRef(values_artifact, _scalar_root_records(source, interface, j)[1].id))
