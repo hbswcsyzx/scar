@@ -33,10 +33,30 @@ witness，从当前 raw 独立读一次并调用既有 source→dispatch→SBA �
 准确结果、成本和剩余义务见
 [联合门结果](../artifacts/experiments/first_stage_source_revision_current_review_20261025/RESULT.md)。
 
-同时复核已有 native bridge 的终态：它只验过16个 dispatch prefix 中的13个
-ATen调用、4种静态接口及27条 Tensor 参考；内容版本、完整状态与 ready 未闭合。
-后继应扩到实际全部 dispatch 的自动接入，并按真实缺字段补内容/资源对应，不能
-反复运行同一个小 prefix 来代替全流程。详见 [当前桥接](NATIVE_PROTOCOL_BRIDGE.md)。
+覆盖账本完整source/call门现已通过：2217定义、100438调用全部原成员入账，
+其语义轴与另六域仍OPEN。全部637个stored chunk独立核过，查询只有12个样本；
+不是完整依赖建模。[实测与成本](../artifacts/experiments/modeling_scope_retained_gate_20261025/RESULT.md)
+及[独立审查](../artifacts/experiments/modeling_scope_retained_review_20261025/REPORT.md)分别保留。
+
+native已推进到完整39796次dispatch，而非继续重复16-prefix：首次门暴露原生Tensor
+与Python held Tensor并非一一对应，V2改为端口/对象/几何/内容四项独立资格。
+第二门完成全域枚举和127接口，20个分片（5120次调用）验证后由root因实现成本主动
+中止，exit130；其余34676次尚未构建，不能称frontier或已通过。失败产物及代码已提交
+`codex/native-scalar-model` 的31198ff9。下一门先消除SCAR每片重复的静态图处理，
+预算不增加，再执行完整新门。
+
+当前并行实施边界：
+
+| 分工 | 具体模型断口 | 下一项实际验收 |
+| --- | --- | --- |
+| native隔离树 | 同一静态图反复校验/编码；实际端口与对象身份必须独立 | 精确不可变prepared snapshot与原source/catalog绑定，所有动态ABI/producer/Unknown检查保留；同预算完整实档门 |
+| source-call隔离树 | 通用Call中kwargs pack/merge/call协议未建模 | 复用原IR/world/有序Uses，显式能力与独立compiler/异常审核；仅机械选原四个必要失败body |
+| main组合查询 | 原source ancestry与native actual occurrence尚不能有界联合导航 | 只读qualified endpoints和typed retained-context；不将祖先当direct call，不重扫100k stream |
+
+计划及来源分别在`artifacts/analysis/kwargs_expansion_design_20261025`和
+`artifacts/analysis/source_native_composition_20261025`。历史collector只有HEAD label、缺
+执行时SCAR源码字节证明；同issuer实现机制是条件合同，不能据当前源码授原运行无条件
+对象身份。首个组合查询因此不发布跨source/native的对象同一性结论。
 
 ## 3. 关键缺口与处理原则
 
