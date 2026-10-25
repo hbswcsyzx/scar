@@ -28,6 +28,16 @@ from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import SourceSnapshot
 
 
+_ENTRY_AUTHORITY = {
+    "target_executed": False, "source_relowered": False,
+    "construction_cost_known": False, "runtime_code_instance_established": False,
+    "actual_formal_routing_established": False, "function_environment_established": False,
+    "state_versions_established": False, "effects_established": False,
+    "whole_program_established": False, "first_stage_complete": False,
+    "transformation_authorized": False,
+}
+
+
 def _need(condition, message):
     if not condition:
         raise ValueError("source publication: " + message)
@@ -299,6 +309,189 @@ def validate_body_revision_publication(base_composition, inventory, *, max_progr
     return {"valid": True, "scope": "LINEAGE_ACTIVE_REFERENCES_AND_ACCOUNTING_ONLY",
             "changed_bodies": len(changed), "old_source_legality_established": False,
             "new_source_code_proof_repeated": False, "target_executed": False}
+
+
+def _entry_canonical(document, receipt):
+    payload = _canonical(document)
+    return any(len(value) == receipt["decoded_bytes"] and sha256(value).hexdigest() == receipt["decoded_sha256"]
+               for value in (payload, payload + b"\n"))
+
+
+def _entry_program(catalog, request, max_operations, max_record_bytes):
+    """Ordinary independent reader over one original, externally qualified body."""
+    from scar.analysis.source_entry_catalog import SourceEntryCatalog
+    from scar.analysis.source_attachments import SourceAttachments
+    from scar.analysis.function_interfaces import extract_entry_signature, validate_body_interface
+    _need(type(catalog) is SourceEntryCatalog and type(request) is dict
+          and set(request) == {"entry_key", "source_program"}, "exact entry/program request required")
+    entry = catalog.resolve(request["entry_key"])
+    _need(type(catalog.require_entry(entry)) is SourceAttachments, "external publication requires an admitted original entry")
+    expected = request["source_program"]
+    _need(type(expected) is dict and set(expected) == {"uri", "external", "representation",
+          "physical_sha256", "physical_bytes", "decoded_sha256", "decoded_bytes"}
+          and expected["external"] is True and expected["representation"] == "scar.source-program/5",
+          "exact original SourceProgram5 receipt required")
+    path = Path(expected["uri"])
+    _need(path.is_absolute() and path.resolve(strict=True) == path, "original source program URI changed")
+    document, receipt = _read_receipt(path, limit=max_record_bytes)
+    _need(all(receipt[key] == expected[key] for key in receipt)
+          and _entry_canonical(document, receipt),
+          "original program stored/decoded/canonical receipt differs")
+    _need(document.get("schema_version") == 5, "external function publication requires SourceProgram5")
+    context = catalog.prepare(entry)  # archived source/AST only, no lower/seal/prepare_source
+    program = SourceProgram.read_structure(document, max_operations=max_operations,
+        source_texts={entry.reference.snapshot.path: context.text})
+    reference = entry.reference
+    _need(program.graph is not None and program.interface is not None and program.language is not None
+          and program.structured is not None and program.metadata.source == reference.snapshot
+          and program.interface.definition == reference.definition
+          and program.structured.definition == reference.definition and program.structured.source == reference.source
+          and program.language.namespace_root == reference.context.namespace_root,
+          "source program changes the original definition/snapshot/namespace")
+    _need([sha256(_canonical(document[key])).hexdigest() for key in ("semantic", "semantics", "control")]
+          == [getattr(reference.context, key) for key in ("semantic_sha256", "semantics_sha256", "control_sha256")],
+          "program source graphs differ from the original qualified context")
+    evidence = SourceCodeEvidence.from_entry(catalog, entry)
+    _need(program.language.code_evidence == evidence.to_dict(), "program compiler/source origin differs from the exact entry")
+    require_valid_structured_body(program.structured, program.graph, program.interface, program.metadata,
+        semantic=program.semantic, control=program.control, language=program.language,
+        source_tree=context.tree, language_options=SourceLanguageOptions(program.language.capabilities, evidence))
+    body = BodyInventory(reference.definition, BodyStatus.LOWERED_WITH_GAPS, program.graph, program.metadata,
+                         "; ".join(dict.fromkeys(gap.detail for gap in program.metadata.gaps)), None)
+    signature = extract_entry_signature(context, reference)
+    validate_body_interface(body, program.interface, signature)
+    return entry, program, body, signature
+
+
+def _entry_admissions(catalog, entry, body):
+    from scar.analysis.call_demand import derive_entry_source_admission
+    from scar.ir.program.call_demand import EnteredCallCode
+    return [encode(derive_entry_source_admission(EnteredCallCode(row["process_id"], row["code"]),
+        entry.source_link, catalog=catalog, entry=entry, body=body))
+        for row in catalog.metadata()["groups"] if row.get("entry_key") == entry.key]
+
+
+def _entry_parent(base, catalog):
+    from scar.analysis.source_entry_catalog import SourceEntryCatalog
+    _need(type(base) is CompositionIndex and type(catalog) is SourceEntryCatalog
+          and len(catalog.projects) == 1 and catalog.projects[0] is base
+          and not base.has_source_entry_publication and not base.has_source_attachments,
+          "entry publication requires its exact unchanged project parent and original catalog")
+    _need(all(owner.receipts()["format"] == "scar.source-admissions-input.v1" for owner in catalog.admissions),
+          "entry publication requires explicit direct-admissions inputs")
+    catalog.require_unchanged()
+    return {"parent_composition": deepcopy(base.index_receipt), "parent_inputs": base.source_inputs(),
+            "catalog_inputs": catalog.inputs(), "catalog_sha256": sha256(_canonical(catalog.metadata())).hexdigest(),
+            "entered_code_groups": catalog.metadata()["entered_code_groups"],
+            "entered_invocations": catalog.metadata()["entered_invocations"],
+            "candidate_entries": len(catalog.metadata()["candidates"])}
+
+
+def _entry_module_receipts():
+    names = ("source_program_publication.py", "program_composition.py", "function_interfaces.py", "call_demand.py",
+             "source_entry_catalog.py", "source_attachments.py", "source_language.py", "compiler_witness_archives.py",
+             "code_witness.py", "program_lowering.py", "structured_lowering.py", "inventory_partitions.py")
+    return [{"path": str(Path(__file__).with_name(name)),
+             "sha256": sha256(Path(__file__).with_name(name).read_bytes()).hexdigest()} for name in names]
+
+
+def publish_source_entries(base_composition, catalog, source_programs, out_dir, *, max_programs=1,
+                           max_operations_per_body=4000, max_record_bytes=64_000_000, progress=None):
+    """Independently admit saved external SP5s; publish only qualified navigation.
+
+    No lower owner, fi/bi, copied graph or known construction cost is created.
+    """
+    _need(all(type(value) is int and value > 0 for value in
+              (max_programs, max_operations_per_body, max_record_bytes))
+          and type(source_programs) is tuple and 0 < len(source_programs) <= max_programs,
+          "positive bounded original entry publication requests required")
+    _need(progress is None or callable(progress), "invalid entry publication progress callback")
+    parent = _entry_parent(base_composition, catalog)
+    out = Path(out_dir).resolve()
+    _need(not out.exists(), "entry publication output already exists")
+    out.mkdir(parents=True, exist_ok=False)
+    rows, seen = [], set()
+    for serial, request in enumerate(source_programs):
+        entry, program, body, signature = _entry_program(catalog, request, max_operations_per_body, max_record_bytes)
+        key = _canonical(encode(entry.reference))
+        _need(key not in seen, "duplicate original qualified body ADD")
+        seen.add(key)
+        identity = {"definition": encode(entry.reference.definition), "source": encode(entry.reference.source),
+                    "entry": program.metadata.entry}
+        checkpoint = {"schema": "scar.body-construction-checkpoint", "schema_version": 2,
+            "origin": "SOURCE_PROGRAM5_ADMISSION", "source_program": deepcopy(request["source_program"]),
+            "body_identity": identity, "context": encode(entry.reference.context),
+            "profile": program.profile.value, "language": "#/language",
+            "fields": {name: "#/" + name for name in ("graph", "metadata", "interface", "frame", "structured", "language")},
+            "construction_operations": None, "construction_cost_known": False, "previous_body": None,
+            "definition_reference": encode(entry.reference), "whole_program_established": False}
+        cp_ref = _write_shard(out, f"bodies/{serial:05d}.json.gz", checkpoint, limit=max_record_bytes)
+        cp_ref = {**cp_ref, "uri": str(out / cp_ref["uri"]), "external": True}
+        rows.append({"operation": "ADD_GRAPH", "entry_key": entry.key, "definition": encode(entry.reference),
+            "source_program": deepcopy(request["source_program"]), "checkpoint": cp_ref,
+            "signature": encode(signature), "admissions": _entry_admissions(catalog, entry, body),
+            "program_graph_sha256": sha256(_canonical(program.to_dict()["graph"])).hexdigest(),
+            "root": encode(program.graph.root), "construction_operations": None})
+        if progress is not None:
+            progress({"stage": "admit_qualified_entry", "entry_key": entry.key, "status": "VERIFIED"})
+    _need(_entry_parent(base_composition, catalog) == parent, "entry parent inputs changed during admission")
+    document = {"schema": "scar.source-entry-publication", "schema_version": 1, **parent,
+        "bodies": rows, "producer": _entry_module_receipts(), **_ENTRY_AUTHORITY}
+    payload = _canonical(document)
+    _need(len(payload) <= max_record_bytes, "entry manifest byte ceiling exceeded")
+    with (out / "manifest.json").open("xb") as stream:
+        stream.write(payload)
+    return {"manifest": str(out / "manifest.json"), "sha256": sha256(payload).hexdigest(),
+            "body_count": len(rows), "construction_operations": None, **_ENTRY_AUTHORITY}
+
+
+def read_source_entry_publication(path, *, expected_sha256, catalog, max_programs=1,
+                                  max_operations_per_body=4000, max_record_bytes=64_000_000):
+    """Ordinary source/code reader; returned records are a cache, not new graphs."""
+    from scar.ir.program.source_references import SourceDefinitionReference
+    _need(all(type(value) is int and value > 0 for value in
+              (max_programs, max_operations_per_body, max_record_bytes)), "invalid entry-reader ceilings")
+    _need(type(catalog.projects) is tuple and len(catalog.projects) == 1,
+          "publication reader needs one exact original project")
+    document, receipt = _read_receipt(path, limit=max_record_bytes)
+    _need(receipt["physical_sha256"] == expected_sha256
+          and _entry_canonical(document, receipt)
+          and document.get("schema") == "scar.source-entry-publication" and document.get("schema_version") == 1
+          and all(document.get(key) is value for key, value in _ENTRY_AUTHORITY.items()),
+          "entry publication schema/canonical receipt/authority differs")
+    parent = _entry_parent(catalog.projects[0], catalog)
+    _need(all(document.get(key) == value for key, value in parent.items()), "entry publication parent/catalog/CAS differs")
+    rows, seen = document.get("bodies"), set()
+    _need(type(rows) is list and 0 < len(rows) <= max_programs, "entry publication body ceiling exceeded")
+    checked = []
+    for row in rows:
+        _need(row["operation"] == "ADD_GRAPH" and row["construction_operations"] is None,
+              "external publication must be a cost-unknown independent ADD")
+        entry, program, body, signature = _entry_program(catalog,
+            {"entry_key": row["entry_key"], "source_program": row["source_program"]},
+            max_operations_per_body, max_record_bytes)
+        reference = decode(SourceDefinitionReference, row["definition"])
+        key = _canonical(encode(reference))
+        _need(reference == entry.reference and key not in seen, "duplicate or substituted qualified entry")
+        seen.add(key)
+        _need(row["signature"] == encode(signature) and row["root"] == encode(body.graph.root)
+              and row["admissions"] == _entry_admissions(catalog, entry, body)
+              and row["program_graph_sha256"] == sha256(_canonical(program.to_dict()["graph"])).hexdigest(),
+              "entry signature/admission/root/graph digest differs")
+        checkpoint, actual = _read_receipt(row["checkpoint"]["uri"], limit=max_record_bytes)
+        _need(all(actual[name] == row["checkpoint"][name] for name in actual)
+              and _entry_canonical(checkpoint, actual), "entry CP2 receipt differs")
+        expected = {"schema": "scar.body-construction-checkpoint", "schema_version": 2,
+            "origin": "SOURCE_PROGRAM5_ADMISSION", "source_program": row["source_program"],
+            "body_identity": {"definition": encode(reference.definition), "source": encode(reference.source),
+                              "entry": program.metadata.entry}, "context": encode(reference.context),
+            "profile": program.profile.value, "language": "#/language",
+            "fields": {name: "#/" + name for name in ("graph", "metadata", "interface", "frame", "structured", "language")},
+            "construction_operations": None, "construction_cost_known": False, "previous_body": None,
+            "definition_reference": encode(reference), "whole_program_established": False}
+        _need(checkpoint == expected, "entry CP2 fixed fields/origin/context/body identity differ")
+        checked.append({"record": deepcopy(row), "body": body, "program": program, "entry": entry})
+    return document, receipt, tuple(checked)
 
 
 def publish_source_programs(base_composition, source_program_paths, out_dir, *, code_witnesses,

@@ -1,5 +1,13 @@
 # 从已有采集自动组织建模
 
+保存的 source-entry SP5 现可通过 `publish_source_entries` 独立准入，并以
+`CompositionIndex.from_source_entry_publication` 查询原 qualified body；普通
+`bind_source_invocations` 已在同一 CPU 采集上实际关联 260 次调用。
+它保原 SourceDefinitionReference、namespace 和 SP5 URI，不伪造项目 fi/bi；
+原生图仍是原 SP5，publication 只导航。此后继目前是公共 Python API，尚未接为
+`model-run` 的单独自动阶段。参数/环境/state/return/control 仍未连接，详见
+[真实结果](../artifacts/experiments/qualified_source_entry_binding_resume02_20261025/RESULT.md)。
+
 2026-10-25。P0通用离线入口已实现，真实八阶段串联通过；完整程序建模仍OPEN。
 LeWM正式source858/runtime843的覆盖不受本次小CPU样例影响。
 

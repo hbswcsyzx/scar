@@ -1,0 +1,122 @@
+{
+  "LeWM_runtime_qualification": false,
+  "binder_signature": "(composition: 'CompositionIndex', coordinates: 'CaptureCoordinates', trace_directory, out_dir, *, call_budget=CallEdgeBudget(max_raw_bytes=128000000, max_lines=200000, max_line_bytes=2000000, max_processes=128, max_codes=8192, max_events=100000, max_source_files=256, max_source_bytes=16000000, max_references=1000000, max_path=128), witness_mode='same_capture', seed_verification_budget=None)",
+  "full_mixed_binder_verified": false,
+  "input": {
+    "decoded_bytes": 299763,
+    "decoded_sha256": "0fd5bcd3dc01e8efc0305d0dbbd60964300a8d9181e99f8c90c9d67b7ffd771a",
+    "sha256": "cdc1c0031fca1b66bd1ef3f5b652b9c554dd44eb54d619518ea8bbba75386046",
+    "stored_bytes": 28011,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/b1_call_operands/generic_gpu/reports/inventory.json.gz"
+  },
+  "legacy_locator_unchanged": true,
+  "locators": {
+    "graph_locator": {
+      "artifact": {
+        "decoded_bytes": 299763,
+        "decoded_sha256": "0fd5bcd3dc01e8efc0305d0dbbd60964300a8d9181e99f8c90c9d67b7ffd771a",
+        "physical_bytes": 28011,
+        "physical_sha256": "cdc1c0031fca1b66bd1ef3f5b652b9c554dd44eb54d619518ea8bbba75386046",
+        "representation": "scar.program-inventory/6",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/b1_call_operands/generic_gpu/reports/inventory.json.gz"
+      },
+      "namespace": {
+        "artifact": {
+          "decoded_sha256": "0fd5bcd3dc01e8efc0305d0dbbd60964300a8d9181e99f8c90c9d67b7ffd771a",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/b1_call_operands/generic_gpu/reports/inventory.json.gz"
+        },
+        "body": {
+          "definition": {
+            "kind": "opdef",
+            "value": "op:d6bd57ff4d446079e9d47573",
+            "wire": "opdef:op:d6bd57ff4d446079e9d47573"
+          },
+          "entry": "run",
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:b2aec05c27555ba1e6342c2b",
+              "wire": "source:atom:b2aec05c27555ba1e6342c2b"
+            },
+            "end_column": 16,
+            "end_line": 7,
+            "fingerprint": "sha256:4e99146b409bdfcca97563140339330d3065c6faba397b6f23526fbc7dde98ea",
+            "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/generic_gpu/project/entry.py",
+            "start_column": 0,
+            "start_line": 4
+          }
+        },
+        "record_pointer": "#/files/0/bodies/0/graph",
+        "representation": "scar.program-graph/2"
+      },
+      "pointer": "#/files/0/bodies/0/graph"
+    },
+    "inventory_locator": {
+      "artifact": {
+        "decoded_bytes": 299763,
+        "decoded_sha256": "0fd5bcd3dc01e8efc0305d0dbbd60964300a8d9181e99f8c90c9d67b7ffd771a",
+        "physical_bytes": 28011,
+        "physical_sha256": "cdc1c0031fca1b66bd1ef3f5b652b9c554dd44eb54d619518ea8bbba75386046",
+        "representation": "scar.program-inventory/6",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/b1_call_operands/generic_gpu/reports/inventory.json.gz"
+      },
+      "pointer": "#/files/0/bodies/0"
+    },
+    "metadata_locator": {
+      "artifact": {
+        "decoded_bytes": 299763,
+        "decoded_sha256": "0fd5bcd3dc01e8efc0305d0dbbd60964300a8d9181e99f8c90c9d67b7ffd771a",
+        "physical_bytes": 28011,
+        "physical_sha256": "cdc1c0031fca1b66bd1ef3f5b652b9c554dd44eb54d619518ea8bbba75386046",
+        "representation": "scar.program-inventory/6",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/b1_call_operands/generic_gpu/reports/inventory.json.gz"
+      },
+      "pointer": "#/files/0/bodies/0/metadata"
+    },
+    "namespace": {
+      "artifact": {
+        "decoded_sha256": "0fd5bcd3dc01e8efc0305d0dbbd60964300a8d9181e99f8c90c9d67b7ffd771a",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/b1_call_operands/generic_gpu/reports/inventory.json.gz"
+      },
+      "body": {
+        "definition": {
+          "kind": "opdef",
+          "value": "op:d6bd57ff4d446079e9d47573",
+          "wire": "opdef:op:d6bd57ff4d446079e9d47573"
+        },
+        "entry": "run",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:b2aec05c27555ba1e6342c2b",
+            "wire": "source:atom:b2aec05c27555ba1e6342c2b"
+          },
+          "end_column": 16,
+          "end_line": 7,
+          "fingerprint": "sha256:4e99146b409bdfcca97563140339330d3065c6faba397b6f23526fbc7dde98ea",
+          "path": "/home/zyf/AAA/scar/artifacts/experiments/b1_call_operands/generic_gpu/project/entry.py",
+          "start_column": 0,
+          "start_line": 4
+        }
+      },
+      "record_pointer": "#/files/0/bodies/0/graph",
+      "representation": "scar.program-graph/2"
+    }
+  },
+  "raw_lower_compile_target": 0,
+  "runner_syntax": "PASS",
+  "scope": "one actual existing small inventory; core/namespace structural consumption only",
+  "selected_original_body": {
+    "body_index": 0,
+    "file_index": 0,
+    "root": "program_region:9fcac07822183eaa7120e5e3b4e6be55"
+  },
+  "source_sha256": {
+    "call_demand.py": "7b534c7972f7bdb98ab040f64119ba1052d0ae3af385eeaaef729a50b1ccde5b",
+    "function_interfaces.py": "1d9d64b552f378d20239155994c6e889a2c40cbd9b3c796cd85df90afd62eef4",
+    "program_composition.py": "e0f0c4711f6974553f15e47f75d8d393c0d4701de7a6bc291a1971f12fa45479",
+    "source_invocations.py": "883d1d6e43d8d40ed53208943c3854b68b3e92885aeac45c2d49ad942fe56c2e",
+    "source_program_publication.py": "53637e9f9d1e8a62fb36c8c5b5d2a4f8ed5d5f1d90ea85a430d73934b29ac419"
+  },
+  "status": "PASS"
+}

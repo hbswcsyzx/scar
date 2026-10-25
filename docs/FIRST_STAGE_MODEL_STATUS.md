@@ -6,6 +6,16 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：外部 qualified body 出版与普通调用绑定通过
+
+Root session22541 actual exit0/36.7671s；消费同一原 SP5/publication，不重新 lower
+或出版。原调用文件 536684B/585 行完整扫描，260 body-linked、5 source-linked、
+6 unresolved，9 groups/271 次/271 exits，orphan0。静态 CP2 构造成本仍 UNKNOWN。
+原总门因 seed metadata/当前扫描预算混用而失败；首恢复因 direct-admissions 缺少
+continuation 专属字段而失败，两次均保留。独立预算和显式来源分支已修，旧 v1–3
+报告及 SBA 资格不变。五类动态接口仍各 271 未验证；旧 LeWM 的 858/843/6699 不变。
+见 [准确结果与剩余关系](../artifacts/experiments/qualified_source_entry_binding_resume02_20261025/RESULT.md)。
+
 ### 2026-10-25：统一 source-entries CLI 实际通过
 
 Root session48967 actual exit0/7.5152s；自动核对原项目、依赖与两份只读 archive，

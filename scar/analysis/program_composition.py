@@ -28,7 +28,8 @@ from scar.ir.program.inventory import (
 )
 from scar.ir.program.model import ProgramGraph
 from scar.ir.program.source import LoweringMetadata
-from scar.ir.program.source_references import SourceDefinitionReference
+from scar.ir.program.source_references import SourceArtifactLocator, SourceDefinitionReference
+from scar.ir.program.providers import ProviderArtifact
 from scar.ir.record_codec import decode, encode, loads as strict_loads
 from scar.ir.semantics_v2 import SourceSnapshot
 from scar.ir.v2.ids import (
@@ -53,7 +54,7 @@ def _canonical(value: Any) -> bytes:
                       separators=(",", ":"), allow_nan=False).encode("utf-8")
 
 
-def _read(path: Path, limit: int) -> tuple[dict, dict]:
+def _read(path: Path, limit: int, *, _decoded_identity=None) -> tuple[dict, dict]:
     if type(limit) is not int or limit < 1:
         raise ValueError("byte budget must be a positive exact integer")
     if path.is_symlink() or not path.is_file() or path.stat().st_size > limit:
@@ -71,6 +72,8 @@ def _read(path: Path, limit: int) -> tuple[dict, dict]:
     document = strict_loads(payload.decode("utf-8"))
     if type(document) is not dict:
         raise ValueError("input must be a JSON object")
+    if _decoded_identity is not None:
+        _decoded_identity.update(sha256=hashlib.sha256(payload).hexdigest())
     return document, {
         "path": str(path.resolve()), "raw_sha256": hashlib.sha256(raw).hexdigest(),
         "raw_bytes": len(raw), "decoded_bytes": len(payload),
@@ -102,7 +105,8 @@ class _InventorySource:
         path = Path(path)
         if path.is_dir():
             path = path / "manifest.json"
-        document, self.receipt = _read(path, max_input_bytes)
+        self._decoded_identity = {}
+        document, self.receipt = _read(path, max_input_bytes, _decoded_identity=self._decoded_identity)
         self.partitions = None
         self.document = None
         self._files = OrderedDict()
@@ -175,6 +179,33 @@ class _InventorySource:
                 graph_locator = {"artifact": artifact, "pointer": "#/graph", "namespace": namespace}
         return {"inventory_locator": header, "graph_locator": graph_locator,
                 "metadata_locator": metadata_locator, "namespace": namespace}
+
+    def qualified_body_locators(self, file_index, body_index, graph_document):
+        """Explicit v4 namespace; the legacy locator/receipt API is unchanged."""
+        if self.partitions is not None:
+            return self.body_locators(file_index, body_index, graph_document)
+        if any(type(value) is not int or value < 0 for value in (file_index, body_index)):
+            raise ValueError("qualified monolith body needs nonnegative original indices")
+        file, body = self.file(file_index), self.body(file_index, body_index)
+        if body["graph"] is None or body["graph"] != graph_document or body["metadata"] is None:
+            raise ValueError("qualified monolith graph differs from its original body")
+        definitions = [row for row in file["definitions"] if row["id"] == body["definition"]]
+        if len(definitions) != 1:
+            raise ValueError("qualified monolith body has no unique original definition")
+        original = self.body_locators(file_index, body_index, graph_document)
+        artifact = {"uri": self.receipt["path"], "physical_sha256": self.receipt["raw_sha256"],
+            "physical_bytes": self.receipt["raw_bytes"], "decoded_bytes": self.receipt["decoded_bytes"],
+            "decoded_sha256": self._decoded_identity["sha256"],
+            "representation": "scar.program-inventory/" + str(self.document["schema_version"])}
+        namespace = {"artifact": {"uri": artifact["uri"], "decoded_sha256": artifact["decoded_sha256"]},
+            "representation": "scar.program-graph/" + str(graph_document["schema_version"]),
+            "record_pointer": original["graph_locator"]["pointer"],
+            "body": {"definition": body["definition"], "source": definitions[0]["source"],
+                     "entry": body["metadata"]["entry"]}}
+        return {"inventory_locator": {"artifact": artifact, "pointer": original["inventory_locator"]["pointer"]},
+            "graph_locator": {"artifact": artifact, "pointer": original["graph_locator"]["pointer"], "namespace": namespace},
+            "metadata_locator": {"artifact": artifact, "pointer": original["metadata_locator"]["pointer"]},
+            "namespace": namespace}
 
 
 def _definition_key(snapshot, identity):
@@ -647,6 +678,30 @@ class ElementReference:
             raise ValueError("canonical body identities require body qualification")
 
 
+@dataclass(frozen=True, slots=True)
+class QualifiedSourceBodyReference:
+    """An admitted original SP5 body, qualified without project fi/bi."""
+
+    definition: SourceDefinitionReference
+    source_program: SourceArtifactLocator
+    checkpoint: SourceArtifactLocator
+    identity: RegionID
+    reference_format: str = "scar.qualified-source-body-reference.v1"
+
+    def __post_init__(self):
+        if (type(self.definition) is not SourceDefinitionReference
+                or type(self.source_program) is not SourceArtifactLocator
+                or type(self.checkpoint) is not SourceArtifactLocator or type(self.identity) is not RegionID
+                or self.reference_format != "scar.qualified-source-body-reference.v1"):
+            raise TypeError("qualified body requires original typed definition/SP5/CP2/region references")
+        for item in (self.definition, self.source_program, self.checkpoint, self.identity):
+            item.__post_init__()
+        if (self.source_program.pointer != "#" or self.checkpoint.pointer != "#"
+                or self.source_program.artifact.schema != "scar.source-program/5"
+                or self.checkpoint.artifact.schema != "scar.body-construction-checkpoint/2"):
+            raise ValueError("qualified body requires exact original SP5/CP2 root locators")
+
+
 class CompositionIndex:
     """Bounded lazy queries over the original graphs, with no copied producers."""
 
@@ -723,6 +778,149 @@ class CompositionIndex:
         self._source_membership_queries = {}
         self._source_membership_reads = {"parent_compositions": 0, "parent_inventories": 0,
                                          "decoded_bytes": 0}
+        self._entry_publication = None
+
+    @classmethod
+    def from_source_entry_publication(cls, path, *, expected_sha256, archives,
+                                      max_input_bytes=64_000_000, max_record_bytes=64_000_000,
+                                      max_programs=1, max_operations_per_body=4000,
+                                      max_catalog_groups=16, max_catalog_entries=16,
+                                      max_selected_decode_bytes=128_000_000,
+                                      attachment_budget=SourceAttachmentBudget()):
+        """Read a qualified overlay over an unchanged project composition.
+
+        Direct admissions are explicit in this new contract. The legacy
+        continuation constructor and partitioned namespace policy are unchanged.
+        """
+        from scar.analysis.compiler_witness_archives import CompilerWitnessArchives
+        from scar.analysis.source_entry_catalog import SourceEntryCatalog
+        from scar.analysis.source_program_publication import read_source_entry_publication
+        if cls is not CompositionIndex or type(archives) is not CompilerWitnessArchives:
+            raise TypeError("entry composition requires exact readonly archives")
+        document, receipt = _read(Path(path), max_input_bytes)
+        if (receipt["raw_sha256"] != expected_sha256
+                or document.get("schema") != "scar.source-entry-publication" or document.get("schema_version") != 1):
+            raise ValueError("entry publication root receipt/schema differs")
+        original = document["parent_composition"]
+        parent = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
+        if (parent.index_receipt != original or parent.source_inputs() != document["parent_inputs"]
+                or archives.receipts() != document["catalog_inputs"]["archives"]):
+            raise ValueError("entry publication parent/archive inputs differ")
+        admissions = []
+        for declaration in document["catalog_inputs"]["admissions"]:
+            if (declaration.get("format") != "scar.source-admissions-input.v1"
+                    or declaration.get("parent") is not None):
+                raise ValueError("entry publication requires an explicit direct-admissions locator")
+            report = declaration["report"]
+            owner = SourceAttachments.from_admissions(report["artifact"]["uri"],
+                expected_report_sha256=report["artifact"]["sha256"],
+                project_root=parent.inventory_component("discovery")["project_root"], budget=attachment_budget)
+            if owner.receipts() != declaration:
+                raise ValueError("entry publication admission receipt differs")
+            admissions.append(owner)
+        catalog = SourceEntryCatalog(archives=archives, admissions=tuple(admissions), projects=(parent,),
+            max_groups=max_catalog_groups, max_candidates=max_catalog_entries,
+            max_selected_decode_bytes=max_selected_decode_bytes)
+        verified, actual, checked = read_source_entry_publication(path, expected_sha256=expected_sha256,
+            catalog=catalog, max_programs=max_programs, max_operations_per_body=max_operations_per_body,
+            max_record_bytes=max_record_bytes)
+        # Keep catalog's original parent separate: its source_inputs must never
+        # be changed recursively by installation of this publication overlay.
+        result = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
+        result._attachments = list(admissions)
+        watched = []
+        for ref in ({"uri": str(Path(path).resolve()), "physical_sha256": actual["physical_sha256"],
+                     "physical_bytes": actual["physical_bytes"]},
+                    *(row["record"][name] for row in checked for name in ("source_program", "checkpoint"))):
+            p = Path(ref["uri"])
+            stat = p.stat()
+            watched.append((deepcopy(ref), (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns)))
+        result._entry_publication = {"document": verified, "receipt": actual, "path": str(Path(path).resolve()),
+                                     "catalog": catalog, "checked": checked, "watched": watched,
+                                     "document_sha256": hashlib.sha256(_canonical(verified)).hexdigest()}
+        return result
+
+    @property
+    def has_source_entry_publication(self):
+        return self._entry_publication is not None
+
+    def _require_entry_publication(self):
+        state = self._entry_publication
+        if state is None:
+            raise ValueError("composition has no qualified entry publication")
+        state["catalog"].require_unchanged()
+        if hashlib.sha256(_canonical(state["document"])).hexdigest() != state["document_sha256"]:
+            raise ValueError("bound entry publication document changed")
+        for ref, original in state["watched"]:
+            path = Path(ref["uri"])
+            stat = path.stat()
+            if (path.is_symlink() or (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns) != original
+                    or stat.st_size != ref["physical_bytes"]):
+                raise ValueError("bound entry publication/program/checkpoint changed")
+        return state
+
+    @staticmethod
+    def _entry_locator(ref):
+        return SourceArtifactLocator(ProviderArtifact(ref["uri"], ref["physical_sha256"],
+            ref["physical_bytes"], ref["representation"]), ref["decoded_sha256"], ref["decoded_bytes"],
+            "gzip-canonical-json" if Path(ref["uri"]).suffix == ".gz" else "canonical-json")
+
+    def body_reference(self, definition_ref):
+        """Return an exact qualified external body, or None for an open entry."""
+        self.resolve_definition(definition_ref)
+        if not self.has_source_entry_publication:
+            return None
+        for item in self._require_entry_publication()["checked"]:
+            if item["entry"].reference == definition_ref:
+                row = item["record"]
+                return QualifiedSourceBodyReference(definition_ref, self._entry_locator(row["source_program"]),
+                    self._entry_locator(row["checkpoint"]), item["body"].graph.root)
+        return None
+
+    def _qualified_entry_item(self, reference):
+        if type(reference) is not QualifiedSourceBodyReference:
+            raise TypeError("exact qualified source body reference required")
+        reference.__post_init__()
+        state = self._require_entry_publication()
+        for item in state["checked"]:
+            if item["entry"].reference == reference.definition:
+                if reference != self.body_reference(reference.definition):
+                    raise ValueError("qualified body locator/namespace/region changed")
+                if hashlib.sha256(_canonical(item["program"].to_dict()["graph"])).hexdigest() != item["record"]["program_graph_sha256"]:
+                    raise ValueError("cached original typed body changed")
+                return item
+        raise ValueError("qualified body is not in this publication")
+
+    def qualified_body_record(self, reference):
+        item = self._qualified_entry_item(reference)
+        row, program = item["record"], item["program"]
+        namespace = {"artifact": {"uri": reference.source_program.artifact.uri,
+                                   "decoded_sha256": reference.source_program.decoded_sha256},
+            "representation": "scar.program-graph/" + str(program.to_dict()["graph"]["schema_version"]),
+            "record_pointer": "#/graph", "body": {"definition": encode(reference.definition.definition),
+                "source": encode(reference.definition.source), "entry": program.metadata.entry}}
+        return {"kind": "QUALIFIED_SOURCE_BODY", "reference": encode(reference), "namespace": namespace,
+                "program_canonical_sha256": row["program_graph_sha256"],
+                "canonical_locator": encode(replace(reference.source_program, pointer="#/graph")),
+                "metadata_locator": encode(replace(reference.source_program, pointer="#/metadata")),
+                "checkpoint_locator": encode(reference.checkpoint), "construction_operations": None}
+
+    def typed_qualified_body(self, reference):
+        from scar.analysis.inventory_partitions import TypedBodyPartition
+        item = self._qualified_entry_item(reference)
+        program, record = item["program"], self.qualified_body_record(reference)
+        return deepcopy(TypedBodyPartition(item["body"], program.interface, program.frame, program.structured,
+            record["namespace"], True, True, False, program.language, True, True, True,
+            {name + "_locator": encode(replace(reference.source_program, pointer="#/" + name))
+             for name in ("graph", "metadata", "interface", "frame", "structured", "language")}))
+
+    def entry_body_admission(self, process_id, code, reference):
+        item = self._qualified_entry_item(reference)
+        admissions = [row for row in item["record"]["admissions"]
+                      if row["origin"]["process_id"] == process_id and row["origin"]["code"] == code]
+        if len(admissions) != 1:
+            raise ValueError("qualified body has no unique exact original process/code admission")
+        return deepcopy(admissions[0])
 
     @staticmethod
     def _verify_parent_composition(receipt, *, canonical_sha256=None):
@@ -976,9 +1174,13 @@ class CompositionIndex:
         """Explicit input receipts; the original composition document stays intact."""
         if hashlib.sha256(_canonical(self.document)).hexdigest() != self._original_document_sha256:
             raise ValueError("composition document changed after its bound original receipt")
-        return {"composition_canonical_sha256": self._original_document_sha256,
+        result = {"composition_canonical_sha256": self._original_document_sha256,
                 "inventory": deepcopy(self.document["inventory"]),
                 "attachments": [attachment.receipts() for attachment in self._attachments]}
+        if self.has_source_entry_publication:
+            state = self._require_entry_publication()
+            result["entry_publication"] = {"path": state["path"], **deepcopy(state["receipt"])}
+        return result
 
     def verify_source_attachments(self, scanned, groups):
         return [attachment.verify_capture(scanned, groups) for attachment in self._attachments]
@@ -1208,6 +1410,14 @@ class CompositionIndex:
 
     def inventory_body_locators(self, file_index, body_index, graph_document=None):
         return self._inventory.body_locators(file_index, body_index, graph_document)
+
+    def qualified_inventory_body_locators(self, file_index, body_index, graph_document):
+        """Exact monolith artifact/graph namespace for the explicit v4 path.
+
+        The original locator API and all legacy receipts remain unchanged.
+        Decoded SHA was measured while reading the original inventory payload.
+        """
+        return self._inventory.qualified_body_locators(file_index, body_index, graph_document)
 
     def _row(self, index: int) -> dict:
         if type(index) is not int or not 0 <= index < len(self.document["files"]):

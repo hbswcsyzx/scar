@@ -20,7 +20,7 @@ import tokenize
 
 from scar.analysis.call_seeds import CallSourceSeedReport
 from scar.analysis.call_trace_reader import scan_call_trace
-from scar.analysis.program_composition import CompositionIndex, ElementReference
+from scar.analysis.program_composition import CompositionIndex, ElementReference, QualifiedSourceBodyReference
 from scar.ir.execution.common import EvidencePoint
 from scar.ir.execution.coordinates import RegionActivation
 from scar.ir.execution.ids import RegionActivationID
@@ -32,7 +32,7 @@ from scar.ir.program.call_edges import (
 from scar.ir.program.call_seeds import EnteredCodeGroup, SeedCollectionMetadata
 from scar.ir.program.ids import RegionID
 from scar.ir.program.inventory import DefinitionInventory
-from scar.ir.program.source_references import SourceDefinitionReference
+from scar.ir.program.source_references import SourceArtifactLocator, SourceDefinitionReference
 from scar.ir.v2.ids import OperationDefinitionID
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
 from scar.ir.record_codec import decode, encode
@@ -415,6 +415,11 @@ def _source_tables(composition):
                     reference.update({"canonical_locator": locators["graph_locator"],
                         "inventory_locator": locators["inventory_locator"],
                         "metadata_locator": locators["metadata_locator"], "namespace": locators["namespace"]})
+                elif composition.has_source_entry_publication:
+                    locators = composition.qualified_inventory_body_locators(file_index, body_index, original["graph"])
+                    reference.update({"canonical_locator": locators["graph_locator"],
+                        "inventory_locator": locators["inventory_locator"],
+                        "metadata_locator": locators["metadata_locator"], "namespace": locators["namespace"]})
                 body_refs[(snapshot.path, snapshot.fingerprint, body["definition"])] = reference
     return definitions, body_refs, snapshots
 
@@ -552,6 +557,28 @@ def _binding_rows(composition, model, scope, sink, captures, members, witness_mo
     return rows, indexes
 
 
+def _attachment_witness(attached, *, binding_version):
+    """Preserve the actual producer contract; direct admissions have no continuation flags."""
+    locator = attached["record_locator"]
+    _need(type(binding_version) is int and binding_version in (3, 4), "explicit formal binding version required")
+    _need(type(locator) is SourceArtifactLocator, "attachment requires an exact original report locator")
+    record = attached["record"]
+    result = {"record_locator": encode(locator),
+        "descriptor_locator": encode(attached["descriptor_locator"]),
+        "code_source_locator": encode(attached["code_source_locator"]),
+        "code_source_link": record["code_source_link"], "witness_scope": attached["witness_scope"],
+        "guard_scope": attached["guard_scope"], "guard": attached["guard"],
+        "guard_locator": encode(attached["guard_locator"]) if attached["guard_locator"] is not None else None}
+    if locator.artifact.schema == "scar.dependency-source-continuation":
+        result.update(source_compiler_witness_reused=record["source_compiler_witness_reused"],
+                      source_compiler_matching_performed=record["source_compiler_matching_performed"])
+    elif locator.artifact.schema == "scar.dependency-source-admissions" and binding_version == 4:
+        result.update(attachment_origin="DIRECT_ADMISSION_CODE_SOURCE_LINK", compiler_matching_this_binder=False)
+    else:
+        raise ValueError("unsupported attachment producer schema for this binding version")
+    return result
+
+
 def _formal_binding_rows(composition, bindings, captures, members, *, witness_mode="same_capture"):
     """Use one shared original-definition resolver; no new inventory or body."""
     composition.prefetch_definition_references((
@@ -588,19 +615,25 @@ def _formal_binding_rows(composition, bindings, captures, members, *, witness_mo
                 static_body_witness_pointers=[], descriptor_witness_locator=None,
                 code_source_witness_locator=None, admission_locator=None, static_body_witness_locators=[],
                 current_source_check=None, frontiers=list(row["attachment_frontiers"]))
-            row["attachment_witness"] = {
-                "record_locator": encode(attached["record_locator"]),
-                "descriptor_locator": encode(attached["descriptor_locator"]),
-                "code_source_locator": encode(attached["code_source_locator"]),
-                "code_source_link": link, "witness_scope": attached["witness_scope"],
-                "source_compiler_witness_reused": record["source_compiler_witness_reused"],
-                "source_compiler_matching_performed": record["source_compiler_matching_performed"],
-                "guard_scope": attached["guard_scope"], "guard": attached["guard"],
-                "guard_locator": encode(attached["guard_locator"]) if attached["guard_locator"] is not None else None,
-            }
+            row["attachment_witness"] = _attachment_witness(attached,
+                binding_version=4 if composition.has_source_entry_publication else 3)
             if reference is not None:
                 row["status"] = "SOURCE_LINKED_REUSED_WITNESS"
-                row["frontiers"].append("CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT")
+                qualified = composition.body_reference(reference) if composition.has_source_entry_publication else None
+                if qualified is None:
+                    row["frontiers"].append("CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT")
+                else:
+                    admission = composition.entry_body_admission(*key, qualified)
+                    _need(admission["origin"]["process_id"] == key[0] and admission["origin"]["code"] == key[1]
+                          and admission["status"] == CallSourceAdmissionStatus.CORE_LINKED.value
+                          and admission["snapshot"] == row["snapshot"]
+                          and admission["definition"] == encode(reference.definition)
+                          and admission["source"] == row["source"]
+                          and admission["core_region"] == encode(qualified.identity),
+                          "qualified body admission contradicts the exact current code/source witness")
+                    row["body"] = composition.qualified_body_record(qualified)
+                    row["qualified_body_admission"] = admission
+                    row["status"] = "BODY_LINKED_REUSED_WITNESS"
             else:
                 row["status"] = "UNRESOLVED"
                 row["frontiers"].append("VERIFIED_CODE_WITHOUT_DEFINITION_WITNESS")
@@ -758,10 +791,10 @@ def _write_rows(path, rows):
 
 def bind_source_invocations(composition: CompositionIndex, coordinates: CaptureCoordinates,
                             trace_directory, out_dir, *, call_budget=CallEdgeBudget(),
-                            witness_mode="same_capture"):
+                            witness_mode="same_capture", seed_verification_budget=None):
     """Independently read raw frames through the unchanged public contract."""
     return _bind_source_invocations(composition, coordinates, trace_directory, out_dir,
-        call_budget=call_budget, witness_mode=witness_mode)
+        call_budget=call_budget, witness_mode=witness_mode, seed_verification_budget=seed_verification_budget)
 
 
 def _bind_source_invocations_owned(owner, composition, coordinates, trace_directory, out_dir, **kwargs):
@@ -772,7 +805,7 @@ def _bind_source_invocations_owned(owner, composition, coordinates, trace_direct
 
 def _bind_source_invocations(composition: CompositionIndex, coordinates: CaptureCoordinates,
                              trace_directory, out_dir, *, call_budget=CallEdgeBudget(),
-                             witness_mode="same_capture", _owner=None):
+                             witness_mode="same_capture", seed_verification_budget=None, _owner=None):
     """Reuse exact source witnesses and bind every recorded invocation.
 
     There is no target execution or compiler/source replay.  With an inventory
@@ -785,8 +818,16 @@ def _bind_source_invocations(composition: CompositionIndex, coordinates: Capture
     _need(type(call_budget) is CallEdgeBudget, "call_budget must be CallEdgeBudget")
     _need(type(witness_mode) is str and witness_mode in ("same_capture", "reused_code"),
           "witness_mode must be same_capture or reused_code")
-    source_version = 3 if composition.has_source_attachments else 2 if composition.partitioned else 1
+    source_version = (4 if composition.has_source_entry_publication else
+                      3 if composition.has_source_attachments else 2 if composition.partitioned else 1)
+    _need(source_version != 4 or witness_mode == "same_capture",
+          "qualified entry publication currently requires the ordinary exact same-capture binder")
+    _need(seed_verification_budget is None or source_version == 4
+          and type(seed_verification_budget) is CallEdgeBudget,
+          "independent seed metadata budget requires the explicit v4 contract")
     call_budget.__post_init__()
+    seed_budget = call_budget if seed_verification_budget is None else seed_verification_budget
+    seed_budget.__post_init__()
     output = Path(out_dir).resolve()
     _need(not output.exists() and not output.is_symlink(), "output directory already exists")
     directory = Path(trace_directory).resolve()
@@ -796,7 +837,7 @@ def _bind_source_invocations(composition: CompositionIndex, coordinates: Capture
           "inventory lacks its original project root")
     root = discovery["project_root"]
     seed_document = composition.inventory_component("call_sources")
-    seed_model = (CallSourceSeedReport._decode_replay_input(seed_document, verification_budget=call_budget)
+    seed_model = (CallSourceSeedReport._decode_replay_input(seed_document, verification_budget=seed_budget)
                   if seed_document is not None else None)
     if seed_model is not None:
         _need(seed_model.project_root == root, "source witness project root differs from inventory discovery")
@@ -860,7 +901,14 @@ def _bind_source_invocations(composition: CompositionIndex, coordinates: Capture
                 missing.append("COLLECTION_PARTIAL")
             activation = None
             if binding["body"] is not None and point is not None and not entry.suspended:
-                region = decode(RegionID, binding["body"]["reference"]["identity"])
+                if binding["body"].get("kind") == "QUALIFIED_SOURCE_BODY":
+                    _need(source_version == 4, "qualified body acquired a legacy binding schema")
+                    qualified = decode(QualifiedSourceBodyReference, binding["body"]["reference"])
+                    _need(encode(qualified.definition) == binding["definition"],
+                          "invocation body belongs to a different qualified definition")
+                    region = qualified.identity
+                else:
+                    region = decode(RegionID, binding["body"]["reference"]["identity"])
                 identity = RegionActivationID(coordinates.run.id.value + ":source-frame:" + _sha({
                     "process": encode(point.process), "invocation": encode(invocation),
                     "entry": encode(point.source)}))
@@ -885,7 +933,7 @@ def _bind_source_invocations(composition: CompositionIndex, coordinates: Capture
                    "caller_locals_complete": entry.caller_locals_complete,
                    "status": binding["status"], "frontiers": missing,
                    "actual_formal_return_connected": False, "environment_state_connected": False}
-            if composition.partitioned:
+            if composition.partitioned or source_version == 4:
                 row["region_namespace"] = binding["body"]["namespace"] if binding["body"] is not None else None
             yield row
 
@@ -902,11 +950,19 @@ def _bind_source_invocations(composition: CompositionIndex, coordinates: Capture
         orphan_file = _write_rows(stage / "orphan-exits.jsonl.gz", orphan_rows())
         binding_document = {"schema": "scar.source-invocation-bindings", "schema_version": source_version,
                             "witness_mode": witness_mode, "bindings": bindings, **_AUTHORITY}
-        if source_version == 3:
+        if source_version in (3, 4):
             binding_document.update(source_definition_reference_format="scar.source-definition-reference.v1",
                                     source_inputs=composition.source_inputs())
             if witness_mode == "reused_code":
                 binding_document["attachment_source_match_rule"] = "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
+            if source_version == 4:
+                binding_document["source_body_reference_format"] = "scar.qualified-source-body-reference.v1"
+                binding_document.update(source_seed_verification_budget=encode(seed_budget), call_budget=encode(call_budget),
+                    budget_roles={"source_seed_verification_budget": "original seed metadata decode ceiling only; no raw/source I/O grant",
+                                  "call_budget": "actual fresh raw scan and current source guards"},
+                    actual_call_scan={"raw_bytes": sum(file.raw_bytes for file in scanned.files),
+                                      "lines": sum(file.lines for file in scanned.files),
+                                      "captured_codes": len(scanned.captures), "entered_groups": len(sink.groups)})
         if _owner is not None:
             binding_document.update(raw_reader_rule="OWNED_CURRENT_OPERAND_FRAME_SCAN_V1",
                 same_run_source_proof=_owner.proof.receipt())
@@ -958,10 +1014,16 @@ def _bind_source_invocations(composition: CompositionIndex, coordinates: Capture
                 "a recorded frame parent interval is not an actual/formal/return, environment, effect or ATen callsite proof",
             ], **_AUTHORITY,
         }
-        if source_version == 3:
+        if source_version in (3, 4):
             report.update(source_definition_reference_format="scar.source-definition-reference.v1",
                 source_inputs=composition.source_inputs(), attachment_capture_checks=attachment_capture_checks,
                 attachment_scope="original source fragments; no added inventory files or typed bodies")
+            if source_version == 4:
+                report.update(source_body_reference_format="scar.qualified-source-body-reference.v1",
+                    attachment_scope="original qualified source/body fragments; unchanged project inventory",
+                    body_association_scope="complete current captured code to original source definition and admitted body; no callable/environment proof")
+                report.update({name: binding_document[name] for name in
+                    ("source_seed_verification_budget", "budget_roles", "actual_call_scan")})
             if witness_mode == "reused_code":
                 report["attachment_source_match_rule"] = "EXACT_CAPTURED_CODE_STATIC_REUSE_V1"
         if _owner is not None:

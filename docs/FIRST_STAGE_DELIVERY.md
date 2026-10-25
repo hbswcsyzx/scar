@@ -9,11 +9,15 @@
 实际正常lower1entry/28ops，相同SP5的普通source/code reader通过。260只是原调用权重，
 尚未publication或新binding；统一 `source-entries` CLI 后继已在同 CPU 采集通过，
 7.5152s，自动合并 project/dependency、两份只读 archive，原 9/271 与 6 候选守恒。
-当前优先为同一已存 SP5 的 qualified publication/运行接线。
+后继已对同一原 SP5 完成独立 qualified publication 和普通调用绑定：新 CPU 样例
+260 body-linked、5 source-linked、6 unresolved，共 271 次。参数、返回、环境、
+控制完成和状态五类动态接口仍各有 271 项未验证；这不是 LeWM 覆盖增量或完整执行图。
 见[入口及范围](MODEL_RUN.md)与
 [entry实际结果](../artifacts/experiments/source_entry_catalog_gate_20261025/RESULT.md)。
 CLI 的精确资格与范围见
 [实际报告](../artifacts/experiments/model_run_source_entries_gate_20261025/RESULT.md)。
+出版/绑定的两次失败及最终范围见
+[恢复结果](../artifacts/experiments/qualified_source_entry_binding_resume02_20261025/RESULT.md)。
 同CPU后继native门已将516个metadata路径关联实际规范NativeInputRef端口，260正常
 调用/2shards；3095路径中2579项仍保frontier。此资格及上述source结果均属于新CPU
 样例，与旧LeWM独立；不授Python对象、内容/state或ready，也不增加其覆盖。见

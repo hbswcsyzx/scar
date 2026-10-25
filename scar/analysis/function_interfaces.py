@@ -1,5 +1,6 @@
 """Source adapters for function interfaces; no target imports or evaluation."""
 import ast
+from dataclasses import dataclass
 
 from scar.ir.program.functions import (
     ArgumentKind, BodyEntryInterface, BodyLoweringProfile, CallArgument, FormalParameter,
@@ -57,6 +58,36 @@ def extract_signature(context, definition, *, node=None, sources=None, slots=Non
             else FunctionKind.ASYNC if asynchronous else FunctionKind.SYNC)
     return FunctionSignature(definition.id,definition.source,parameters,kind,
                              tuple(sources[_span(n)] for n in getattr(node,"decorator_list",())))
+
+
+def extract_entry_signature(context, reference):
+    """Use an original qualified definition, without inventing inventory indices."""
+    from scar.ir.program.source_references import SourceDefinitionReference
+    if type(reference) is not SourceDefinitionReference:
+        raise TypeError("entry signature requires an exact source definition reference")
+    reference.__post_init__()
+    if (str(context.path) != reference.snapshot.path or str(context.root) != reference.context.namespace_root
+            or context.semantics.sources.get(reference.snapshot.path) != reference.snapshot):
+        raise ValueError("entry signature context differs from the original source")
+    definition = context.semantic.definitions.get(reference.definition)
+    atom = context.semantic.source_atoms.get(reference.source.atom_id)
+    if (definition is None or atom is None or atom.reference != reference.source
+            or reference.source.atom_id not in definition.source_atoms):
+        raise ValueError("entry signature definition/source is absent from the original graph")
+    sources = _sources(context)
+    matches = [node for node in ast.walk(context.tree)
+               if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda))
+               and sources.get(_span(node)) == reference.source]
+    if len(matches) != 1:
+        raise ValueError("entry signature needs one original function AST")
+    # extract_signature only reads id/source.  The local adapter is not an
+    # inventory record, declaration, function object or persisted authority.
+    @dataclass(frozen=True)
+    class _SignatureSource:
+        id: object
+        source: object
+    return extract_signature(context, _SignatureSource(reference.definition, reference.source),
+                             node=matches[0], sources=sources)
 
 
 def validate_body_interface(body, interface, signature):

@@ -236,6 +236,40 @@ def derive_call_source_admission(origin, code_source_link, *, source_snapshot,
         source_snapshot, definition.id, definition.source, reason=reason)
 
 
+def derive_entry_source_admission(origin, code_source_link, *, catalog, entry, body):
+    """Associate one checked original entry/body, without project inventory slots.
+
+    This is static membership only. Current frame/process membership is checked
+    independently by the invocation binder; no callable/environment is inferred.
+    """
+    from scar.analysis.source_entry_catalog import SourceEntryCatalog, ResolvedSourceEntry
+    from scar.ir.program.call_demand import EnteredCallCode, CallSourceAdmission, CallSourceAdmissionStatus
+    from scar.ir.program.call_edges import CodeSourceLink, CallLinkStatus
+    from scar.ir.program.inventory import BodyInventory, BodyStatus
+    if (type(catalog) is not SourceEntryCatalog or type(entry) is not ResolvedSourceEntry
+            or type(origin) is not EnteredCallCode or type(code_source_link) is not CodeSourceLink
+            or type(body) is not BodyInventory):
+        raise TypeError("qualified admission requires exact catalog/entry/origin/link/body")
+    owner = catalog.require_entry(entry)
+    owner.resolve_definition(entry.reference)
+    link, reference = entry.source_link, entry.reference
+    if (code_source_link != link or link.status is not CallLinkStatus.VERIFIED
+            or origin.code != entry.captured.key or link.code != origin.code
+            or link.snapshot != reference.snapshot or link.definition != reference.definition
+            or link.source != reference.source or body.definition != reference.definition
+            or body.status is not BodyStatus.LOWERED_WITH_GAPS or body.graph is None
+            or body.metadata is None or body.metadata.source != reference.snapshot
+            or body.construction_operations is not None):
+        raise ValueError("qualified body admission contradicts its original code/source/body")
+    groups = [row for row in catalog.metadata()["groups"]
+              if row["process_id"] == origin.process_id and row["code"] == origin.code
+              and row.get("entry_key") == entry.key]
+    if len(groups) != 1:
+        raise ValueError("qualified admission origin is not one original catalog group")
+    return CallSourceAdmission(origin, CallSourceAdmissionStatus.CORE_LINKED,
+        reference.snapshot, reference.definition, reference.source, body.graph.root)
+
+
 def _call_source_scope(report, files):
     """Link only final bodies, after every preparation/interface failure."""
     from scar.ir.program.call_demand import CallSourceScope, EnteredCallCode
