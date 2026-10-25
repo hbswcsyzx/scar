@@ -284,22 +284,32 @@ class StructuredBuilder(_Builder):
         else:
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
                                "structured expression protocol still required for " + type(node).__name__)
-        if len(children) != len(old.operands):
-            raise _Unsupported(GapKind.SOURCE_MAPPING, node, "source operands differ from typed source semantics")
+        old, children_and_operands = self.ordered_expression_inputs(node, children, old)
         inputs = []
-        for child, operand in zip(children, old.operands):
+        for child, role, index, static in children_and_operands:
             cursor, value = self.expr(child, cursor)
             if cursor is None:
                 return None, None
-            inputs.append((value, child, operand.role, operand.index, operand.value))
+            inputs.append((value, child, role, index, static))
         self.gap(GapKind.DYNAMIC_DISPATCH, node,
                  "source operation is connected; runtime dispatch, state accesses and effects remain unproved")
         cursor, value, operation = self.invoke(cursor, node, inputs, old=old)
+        self.associate_expression(operation, node, old)
         if isinstance(node, ast.Call):
             callee = inputs[0][0]
             self.pending_targets.append((operation, callee, self.reference_candidates.get(callee), node))
             self.gap(GapKind.DYNAMIC_TARGET, node, "candidate source is not verified runtime dispatch")
         return cursor, value
+
+    def ordered_expression_inputs(self, node, children, old):
+        """Default function adapter requires the original computational overlay."""
+        if len(children) != len(old.operands):
+            raise _Unsupported(GapKind.SOURCE_MAPPING, node, "source operands differ from typed source semantics")
+        return old, tuple((child, operand.role, operand.index, operand.value)
+                          for child, operand in zip(children, old.operands))
+
+    def associate_expression(self, operation, node, old):
+        """Source adapters may link an exact SG definition without inventing IR."""
 
     def store(self, target, value, cursor):
         if not isinstance(target, ast.Name) or target.id not in self.locals:

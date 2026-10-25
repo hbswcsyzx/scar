@@ -1,0 +1,73 @@
+{
+  "schema": "scar.module-prefix-b-actual-terminal",
+  "schema_version": 1,
+  "status": "ROOT_CONFIRMED_ACTUAL_EXIT0_WITH_OPEN",
+  "isolated": {
+    "root_session": 63369,
+    "actual_terminal_exit_code": 0,
+    "window": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_structured_prefix_g1_20261025/candidate01/attempt01/result.json",
+    "worker": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_structured_prefix_g1_20261025/candidate01/attempt01/worker-result.json",
+    "outer_seconds": 7.126339702983387,
+    "worker_seconds": 6.942416362988297,
+    "self_peak_rss_kib": 77208,
+    "freeze_sha256": "50902fe76d6914787808b8be84abd7c4b63ffe17db9752ecd0c508ae48f2aa88",
+    "ordinary_SP8_readback": "PASSED",
+    "summary": {
+      "body_status": "SOURCE_PREFIX_WITH_REQUIRED_SLICE",
+      "completion_profile": "RAW_EXCEPTION_REF_314_V1",
+      "construction_operations": 118,
+      "entry": "opdef:init:2d91d50cf13f1e1f61014373",
+      "entry_kind": "MAPPING_FRAME",
+      "entry_regions": 2,
+      "expanded_statement_records": 9,
+      "fine_grained_state_effects_established": false,
+      "graph_present": true,
+      "import_module_object_established": false,
+      "namespace_alias_established": false,
+      "namespace_content_established": false,
+      "namespace_policy": "MODULE_MAPPING_314_V1",
+      "remaining_statement_count": 3,
+      "required_body_expansion": "REQUIRED",
+      "runtime_target_verified": false,
+      "source_census": {
+        "cfg_edges": 56,
+        "cfg_nodes": 45,
+        "semantic_operations": 92,
+        "source_atoms": 95
+      },
+      "top_level_statement_interfaces_expanded": 8,
+      "transformation_authorized": false,
+      "whole_program_coverage_established": false
+    },
+    "code_witness_counts": {
+      "compile_attempts": 0,
+      "complete_descriptor_matches": 1,
+      "module_loads": 1,
+      "source_bytes_read": 0
+    },
+    "activity_counts": {
+      "actual_input_bytes": 4464710,
+      "ast_only_compile_calls": 22,
+      "decoded_bytes": 4051054,
+      "internal_freeze_check_reads": 1,
+      "non_target_compile_audit_events": 1191,
+      "source_prepare_attempts": 0,
+      "stored_bytes": 413656,
+      "symtable_calls": 0,
+      "target_analysis_compile_audit_events": 22,
+      "target_exec_attempts": 0,
+      "target_executable_compile_attempts": 0
+    }
+  },
+  "main_consumer_root_reported": {
+    "root_session": 55827,
+    "actual_terminal_exit_code": 0,
+    "elapsed_seconds": 4.898593,
+    "scope": "EXACT_SIX_SOURCE_APPLICATION_AND_ORDINARY_SP8_PLUS_FUNCTION_SP5_READERS",
+    "new_source_lowering": false,
+    "receipt_owner": "ROOT_MAIN; not copied into or invented by this isolated branch"
+  },
+  "module_complete": false,
+  "whole_program_complete": false,
+  "actual_runtime_ABI_proved": false
+}

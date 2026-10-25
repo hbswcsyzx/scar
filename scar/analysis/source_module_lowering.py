@@ -188,7 +188,9 @@ class ModuleBuilder(StructuredBuilder):
 def lower_module_entry(context,selection,*,code_evidence,max_operations=10000,profile=ModuleEntryProfile.EXEC_MAPPING_314_V1):
     if type(max_operations) is not int or not 1<=max_operations<=100000:
         raise ValueError('module operation budget must be in [1,100000]')
-    from scar.ir.program.module_entries import ModuleBodyExpansionProfile
+    from scar.ir.program.module_entries import ModuleBodyExpansionProfile,FrameBodyProfile
+    if profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1:
+        return StructuredModuleBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1:
         return ModulePrefixBuilder(context,selection,code_evidence,max_operations).run_module()
     if profile is not ModuleEntryProfile.EXEC_MAPPING_314_V1:
@@ -354,4 +356,272 @@ class ModulePrefixBuilder(ModuleBuilder):
         from scar.analysis.source_module_validation import require_valid_module_prefix
         require_valid_module_prefix(result,source_texts={str(self.prepared_source.path):self.prepared_source.text},
                                     code_evidence=self.evidence,max_operations=self.max_operations)
+        return result
+
+
+def frame_statement_slice(context, owner, field, nodes):
+    """A source collection with an original boundary, or its explicit absence."""
+    from scar.ir.program.module_entries import FrameStatementSlice,SourceControlBoundary
+    from scar.ir.control_flow_v2 import InsertionKind
+    unit=module_unit(context)
+    refs=tuple(_module_statement_ref(context,node) for node in nodes)
+    if not refs:raise ValueError('frame statement slice must be nonempty')
+    matches=[point for point in context.control.insertions.values()
+        if point.kind is InsertionKind.BEFORE and point.source==refs[0]]
+    if len(matches)>1:raise ValueError('frame source boundary is ambiguous')
+    point=matches[0] if matches else None
+    return FrameStatementSlice(unit,module_source_context(context),owner,field,refs,
+        SourceControlBoundary.EXACT_OLD_ANCHOR if point else SourceControlBoundary.NO_EXACT_OLD_ANCHOR,
+        point.suite if point else None,point.id if point else None)
+
+
+def mapping_prefix_selection(context, evidence):
+    """Maximal contiguous supported statements; no workload/name allowlist."""
+    unit=module_unit(context);require_root_evidence(unit,evidence)
+    import dis
+    instructions=tuple(dis.get_instructions(evidence.code,adaptive=False,show_caches=False))
+    def positioned(node,opnames):
+        span=(node.lineno,node.end_lineno,node.col_offset,node.end_col_offset)
+        return [row for row in instructions if row.opname in opnames and tuple(row.positions)==span]
+    def expression(node):
+        try:
+            source=_module_statement_ref(context,node)
+        except ValueError:
+            return False
+        definitions=[row for row in context.semantic.definitions.values()
+            if row.code_id==source.atom_id.wire and source.atom_id in row.source_atoms
+            and row.output_slots and row.metadata.get('role')!='binding'
+            and row.kind not in (OperationKind.FUNCTION,OperationKind.METHOD)]
+        if len(definitions)!=1:return False
+        if isinstance(node,ast.Name):
+            return len([row for row in positioned(node,('LOAD_NAME',)) if row.argval==node.id])==1
+        if isinstance(node,ast.Constant):
+            import math
+            return (node.value is None or type(node.value) in (bool,int,str)
+                or type(node.value) is float and math.isfinite(node.value))
+        if isinstance(node,ast.Tuple):
+            if len(positioned(node,('LOAD_CONST',)))==1:
+                return type(positioned(node,('LOAD_CONST',))[0].argval) is tuple
+            return all(expression(child) for child in node.elts)
+        if isinstance(node,ast.List):return all(expression(child) for child in node.elts)
+        if isinstance(node,ast.Attribute):return not (node.attr.startswith('__') and not node.attr.endswith('__')) and expression(node.value)
+        if isinstance(node,ast.Subscript):return not isinstance(node.slice,ast.Slice) and expression(node.value) and expression(node.slice)
+        if isinstance(node,ast.BinOp):return expression(node.left) and expression(node.right)
+        if isinstance(node,ast.UnaryOp):return expression(node.operand)
+        if isinstance(node,ast.Compare):return len(node.ops)==1 and expression(node.left) and expression(node.comparators[0])
+        if isinstance(node,ast.Call):return (not any(isinstance(arg,ast.Starred) for arg in node.args)
+            and all(keyword.arg is not None for keyword in node.keywords)
+            and all(expression(child) for child in (node.func,*node.args,*(keyword.value for keyword in node.keywords))))
+        return False
+    def target(node):return isinstance(node,ast.Name) and len([row for row in positioned(node,('STORE_NAME',)) if row.argval==node.id])==1
+    def statement(node):
+        if isinstance(node,ast.Import):return bool(node.names) and all('.' not in alias.name for alias in node.names)
+        if isinstance(node,ast.ImportFrom):return bool(node.names) and all(alias.name!='*' for alias in node.names)
+        if isinstance(node,ast.Assign):return len(node.targets)==1 and target(node.targets[0]) and expression(node.value)
+        if isinstance(node,ast.Expr):return expression(node.value)
+        if isinstance(node,ast.For):return target(node.target) and expression(node.iter) and all(statement(child) for child in (*node.body,*node.orelse))
+        return isinstance(node,ast.Pass)
+    end=0
+    for node in context.tree.body:
+        if not statement(node):break
+        end+=1
+    return tuple(context.tree.body[:end]),tuple(context.tree.body[end:])
+
+
+class StructuredModuleBuilder(ModuleBuilder):
+    """One actual mapping frame; existing expression/loop rules, no fast locals."""
+    def __init__(self,context,selection,evidence,max_operations):
+        super().__init__(context,selection,evidence,max_operations)
+        from scar.analysis.source_language import SourceLanguageOptions
+        from scar.ir.program.source_language import SourceLanguageCapability
+        from scar.ir.program.ids import ControlScopeID
+        self.language_options=SourceLanguageOptions((SourceLanguageCapability.SLICE_KEYS,),evidence)
+        self.instructions=None;self.address_refinements=[];self.statement_expansions=[]
+        self.root_scope=ControlScopeID(_key('module-frame-scope',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
+        self.frame_region=RegionID(_key('module-structured-frame',self.unit.initializer.wire,self.unit.snapshot.fingerprint))
+        self.prefix_nodes,self.remaining_nodes=mapping_prefix_selection(context,evidence)
+
+    def old_operation(self,node):
+        rows=self.old_by_atom.get(self.source(node).atom_id,())
+        if len(rows)>1:raise _Unsupported(GapKind.SOURCE_MAPPING,node,'module expression has ambiguous computational records')
+        return rows[0] if rows else None
+
+    def literal(self,node,value):
+        from scar.ir.program.model import LiteralOrigin
+        from scar.ir.program.ids import ValueID
+        record=ReferenceValue(self.fresh(ValueID,'mapping-literal'),self.function_context,LiteralOrigin(value),targets=())
+        self.add_value(record);old=self.old_operation(node) if isinstance(node,ast.Constant) else None
+        self.link_value(record,node,SourceRole.EXPRESSION,semantic_value=old.result if old else None)
+        return record.id
+
+    def protocol(self,operation,kind,node):
+        from scar.ir.program.module_entries import FrameBodyProtocol
+        self.protocols.append(FrameBodyProtocol(operation,kind,self.source(node)))
+
+    def _addresses(self,operation_id,effects):
+        from scar.ir.program.state_addresses import StateAddressRefinement,InvokeStateOperand,AddressCoverage
+        operation=self.operation_records[operation_id]
+        self.address_refinements.append(StateAddressRefinement(InvokeStateOperand(operation_id,operation.uses[-1].id),tuple(effects),AddressCoverage.PARTIAL))
+
+    def read_source_name(self,node,cursor,old=None):
+        from scar.ir.program.module_entries import FrameBodyProtocolKind as K
+        from scar.ir.program.state_addresses import AddressEffect,ReferenceOwner,NamespaceKey
+        from scar.ir.program.model import AccessMode
+        key=self.literal(node,node.id)
+        cursor,value,identity=self.invoke(cursor,node,tuple((ref,node,role,index,None)
+            for index,(ref,role) in enumerate(zip((*self.entry_references,key),('locals-owner','globals-owner','saved-builtins-owner','namespace-key')))),old=old)
+        self.protocol(identity,K.LOAD_NAME_314,node)
+        operation=self.operation_records[identity]
+        self._addresses(identity,tuple(AddressEffect(ReferenceOwner(operation.uses[index].id),
+            (NamespaceKey(operation.uses[3].id),),AccessMode.READ) for index in range(3)))
+        if old is None:self.associate_expression(identity,node,None)
+        self.gap(GapKind.EFFECT_SUMMARY,node,'LOAD_NAME: missing-only locals/globals/saved-builtins fallback; mapping effects/content/activation remain open')
+        return cursor,value
+
+    def store_name(self,node,name,value,cursor):
+        from scar.ir.program.module_entries import FrameBodyProtocolKind as K
+        from scar.ir.program.state_addresses import AddressEffect,ReferenceOwner,NamespaceKey
+        from scar.ir.program.model import AccessMode
+        key=self.literal(node,name)
+        cursor,_,identity=self.invoke(cursor,node,((self.entry_references[0],node,'locals-owner',0,None),
+            (key,node,'namespace-key',0,None),(value,node,'assigned-reference',0,None)),result_type=None)
+        self.protocol(identity,K.STORE_NAME_314,node);operation=self.operation_records[identity]
+        self._addresses(identity,(AddressEffect(ReferenceOwner(operation.uses[0].id),
+            (NamespaceKey(operation.uses[1].id),),AccessMode.WRITE),))
+        self.gap(GapKind.EFFECT_SUMMARY,node,'STORE_NAME is a partial mapping attempt; normal completion grants no stored-content or disjointness proof')
+        return cursor
+
+    def store(self,target,value,cursor):
+        if not isinstance(target,ast.Name):raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX,target,'mapping profile supports only compiler STORE_NAME targets')
+        return self.store_name(target,target.id,value,cursor)
+
+    def ordered_expression_inputs(self,node,children,old):
+        if old is not None:return super().ordered_expression_inputs(node,children,old)
+        from scar.analysis.source_heap_lowering import _source_definition
+        _source_definition(self,node)
+        if isinstance(node,ast.Call):
+            roles=[('callee',0)]+[('argument',i) for i in range(len(node.args))]+[('keyword:'+kw.arg,i) for i,kw in enumerate(node.keywords)]
+        elif isinstance(node,ast.Attribute):roles=[('receiver',0)]
+        elif isinstance(node,ast.Subscript):roles=[('receiver',0),('index',0)]
+        else:roles=[('operand',i) for i in range(len(children))]
+        return None,tuple((child,role,index,None) for child,(role,index) in zip(children,roles))
+
+    def associate_expression(self,operation,node,old):
+        if old is not None:return
+        from scar.analysis.source_heap_lowering import _source_definition,_associate
+        from scar.ir.semantics_v2 import Opcode
+        definition=_source_definition(self,node)
+        opcode=(Opcode.READ if isinstance(node,ast.Name) else Opcode.CALL if isinstance(node,ast.Call)
+            else Opcode.ATTRIBUTE if isinstance(node,ast.Attribute) else Opcode.INDEX if isinstance(node,ast.Subscript)
+            else Opcode.BUILD_TUPLE if isinstance(node,ast.Tuple) else Opcode.BUILD_LIST if isinstance(node,ast.List)
+            else Opcode.OPAQUE)
+        if isinstance(node,(ast.BinOp,ast.UnaryOp)):
+            from scar.analysis.source_semantics_v2 import _BINARY,_UNARY
+            opcode=getattr(Opcode,(_BINARY if isinstance(node,ast.BinOp) else _UNARY).get(type(node.op),'OPAQUE'))
+        _associate(self,operation,node,definition,opcode)
+
+    def expr(self,node,cursor):
+        from scar.analysis.environment_lowering import dispatch_source_expression
+        if isinstance(node,ast.Tuple):
+            from scar.analysis.source_slice_lowering import _instructions,_constant
+            if any(row.opname=='LOAD_CONST' and type(row.argval) is tuple for row in _instructions(self,node)):
+                return _constant(self,node,cursor)
+        result=dispatch_source_expression(self,node,cursor)
+        return super().expr(node,cursor) if result is NotImplemented else result
+
+    def condition(self,node,cursor):
+        from scar.analysis.environment_lowering import dispatch_source_condition
+        result=dispatch_source_condition(self,node,cursor)
+        return super().condition(node,cursor) if result is NotImplemented else result
+
+    def import_statement(self,node,cursor):
+        from scar.ir.program.module_entries import FrameBodyProtocolKind as K
+        from scar.ir.program.state_addresses import AddressEffect,ReferenceOwner,NamespaceKey
+        from scar.ir.program.model import AccessMode
+        from scar.analysis.source_slice_lowering import _constant
+        imports=node.names if isinstance(node,ast.Import) else (None,)
+        for alias in imports:
+            name=alias.name if alias is not None else (node.module or '')
+            requested=self.literal(node,name);level=self.literal(node,0 if alias is not None else node.level)
+            if alias is None:cursor,fromlist=_constant(self,node,cursor)
+            else:fromlist=self.literal(node,None)
+            lookup=self.literal(node,'__import__')
+            inputs=(*reversed(self.entry_references),requested,level,fromlist,lookup)
+            cursor,imported,identity=self.invoke(cursor,node,tuple((value,node,'import-input',index,None) for index,value in enumerate(inputs)))
+            self.protocol(identity,K.IMPORT_NAME_314,node);operation=self.operation_records[identity]
+            self._addresses(identity,(AddressEffect(ReferenceOwner(operation.uses[0].id),
+                (NamespaceKey(operation.uses[6].id),),AccessMode.READ),))
+            if alias is not None:
+                cursor=self.store_name(node,alias.asname or alias.name,imported,cursor)
+            else:
+                self.frame_transition(cursor,node,((imported,node,'import-from-owner'),),PythonProtocolKind.FRAME_HOLD_TEMPORARY)
+                self.active_temporaries.append(imported)
+                for member in node.names:
+                    key=self.literal(node,member.name)
+                    cursor,value,identity=self.invoke(cursor,node,((imported,node,'from-owner',0,None),(key,node,'from-key',0,None)))
+                    self.protocol(identity,K.IMPORT_FROM_314,node)
+                    cursor=self.store_name(node,member.asname or member.name,value,cursor)
+                self.active_temporaries.pop()
+                self.frame_transition(cursor,node,((imported,node,'import-from-owner'),),PythonProtocolKind.FRAME_RELEASE_TEMPORARY)
+            self.gap(GapKind.EFFECT_SUMMARY,node,'import lookup/call/from access internals and runtime objects/effects require expansion')
+        return cursor
+
+    def statements(self,nodes,cursor):
+        from scar.ir.program.module_entries import FrameStatementExpansion,StatementSequenceField as F
+        for node in nodes:
+            if cursor is None:raise _Unsupported(GapKind.CONTROL_FLOW,node,'mapping prefix lost its normal continuation')
+            start=len(self.operations);entry=cursor.block
+            if isinstance(node,(ast.Import,ast.ImportFrom)):cursor=self.import_statement(node,cursor)
+            else:cursor=super().statements((node,),cursor)
+            children=tuple(frame_statement_slice(self.prepared_source,self.source(node),field,getattr(node,name))
+                for name,field in (('body',F.BODY),('orelse',F.ORELSE)) if isinstance(node,ast.For) and getattr(node,name))
+            self.statement_expansions.append(FrameStatementExpansion(self.source(node),self.frame_region,entry,cursor.block if cursor else None,
+                tuple(operation.id for operation in self.operations[start:]),children))
+        return cursor
+
+    def run_module(self):
+        from scar.ir.program.module_entries import (FrameBodyProfile,StructuredFrameBodyOverlay,
+            FrameBodyProtocolKind as K,StatementSequenceField as F,UnexpandedFrameSlice)
+        from scar.ir.program.source_subjects import FrameRoot,FrameKind,MappingFramePorts
+        from scar.ir.program.control import ControlScope,ControlScopeKind
+        remaining=None
+        if self.remaining_nodes:
+            self.function_context=RegionID(_key('module-exact-suffix',self.unit.initializer.wire,
+                _module_statement_ref(self.prepared_source,self.remaining_nodes[0]).atom_id.wire))
+            self.function_blocks=[];child=self.new_block(self.tree,extra_types=(_REF,_REF,_REF));child_world=child.state
+            refs=self.block_arguments[child.block][:-1]
+            normal,_,identity=self.invoke_results(child,self.tree,tuple((value,self.tree,'borrowed-slice-namespace',i,None) for i,value in enumerate(refs)),
+                result_types=(),failure_handler=lambda failed,error:self.body_exit(failed,error,ExitKind.RAISE))
+            self.protocol(identity,K.UNEXPANDED_SLICE,self.tree);self.body_exit(normal,self.literal(self.tree,None),ExitKind.NORMAL)
+            self.regions.append(replace(self.assemble_region(child_world),label='exact required module statement slice',parent=self.frame_region))
+            remaining=UnexpandedFrameSlice(frame_statement_slice(self.prepared_source,self.unit,F.BODY,self.remaining_nodes),self.function_context,identity)
+        self.function_context=self.frame_region;self.function_blocks=[]
+        cursor=self.new_block(self.tree,extra_types=(_REF,_REF,_REF));entry_world=cursor.state
+        self.entry_references=self.block_arguments[cursor.block][:-1]
+        abi=MappingFramePorts(*self.entry_references,(),entry_world)
+        self.frame_transition(cursor,self.tree,tuple((value,self.tree,'borrowed-namespace') for value in self.entry_references),PythonProtocolKind.FRAME_ENTER)
+        cursor=self.statements(self.prefix_nodes,cursor)
+        if remaining is not None:
+            cursor,payload,identity=self.invoke(cursor,self.tree,tuple((value,self.tree,'slice-namespace',i,None) for i,value in enumerate(self.entry_references)))
+            operation=replace(self.operation_records[identity],callee=remaining.region)
+            self.operations[self.operations.index(self.operation_records[identity])]=operation;self.operation_records[identity]=operation
+            self.protocol(identity,K.INVOKE_REMAINING,self.tree)
+        else:payload=self.literal(self.tree,None)
+        self.finish_exit(cursor,self.tree,payload,ExitKind.NORMAL)
+        self.regions.append(self.assemble_region(entry_world))
+        graph=replace(self.make_graph(),root=self.frame_region,state_address_refinements=tuple(self.address_refinements),
+            control_scopes=(ControlScope(self.root_scope,self.frame_region,None,ControlScopeKind.FRAME,self.unit,tuple(self.function_blocks)),),
+            frame_roots=(FrameRoot(self.root_scope,FrameKind.MODULE,self.evidence.captured,abi),))
+        self.module_frontiers.extend((ModuleFrontier(self.unit,'ENTRY_PROTOCOL_UNPROVEN','declared source ABI is not an actual namespace/activation/import binding'),
+            ModuleFrontier(self.unit,'NAMESPACE_CONTENT_UNPROVEN','mapping access attempts do not establish stored content or alias/effect completeness')))
+        if remaining is not None:self.module_frontiers.append(ModuleFrontier(self.source(self.remaining_nodes[0]),'REQUIRED_EXPANSION',
+            'exact remaining statement collection starts at unsupported '+type(self.remaining_nodes[0]).__name__))
+        overlay=StructuredFrameBodyOverlay(self.declaration,module_source_census(self.prepared_source),self.root_scope,
+            frame_statement_slice(self.prepared_source,self.unit,F.BODY,self.prefix_nodes) if self.prefix_nodes else None,
+            tuple(self.statement_expansions),remaining,tuple(self.module_frontiers),self.operations_emitted,
+            tuple(self.operation_links),tuple(self.value_links),tuple(self.use_links),tuple(self.protocols),tuple(self.loops),tuple(self.language_constants))
+        result=SourceProgram(graph,LoweringMetadata(self.entry,self.snapshot),self.semantic,self.semantics,self.control,
+            FrameBodyProfile.STRUCTURED_MAPPING_314_V1,module=overlay)
+        from scar.analysis.source_module_validation import require_valid_structured_module_program
+        require_valid_structured_module_program(result,source_texts={str(self.prepared_source.path):self.prepared_source.text},code_evidence=self.evidence,max_operations=self.max_operations)
         return result
