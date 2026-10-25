@@ -261,6 +261,10 @@ def validate_body_revision_publication(base_composition, inventory, *, max_progr
         changed[key] = {"accounting": old, "checkpoint": current_ref}
         transitions.append(({"status": old["status"], "construction_operations": old["construction_operations"]},
                             old["counts"], counts))
+    # Checkpoint shards/changed_bodies are stored by (file, body), while ADD
+    # references are appended in the exact original publication-plan order.
+    # Preserve that order when independently rebuilding active components.
+    changed = {key: changed[key] for key in expected}
     interfaces = deepcopy(base_composition.inventory_component("interfaces"))
     interfaces["bodies"] = _replace_active_refs(base, interfaces["bodies"], changed, "bound_bodies")
     _need(inventory.component("interfaces") == interfaces, "revision active interface replacement differs")

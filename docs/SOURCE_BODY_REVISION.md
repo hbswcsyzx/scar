@@ -1,5 +1,13 @@
 # Immutable source-body revision：最小准入协议
 
+2026-10-25补记：多body发布中，checkpoint/changed_bodies按文件与body存档，active接口
+与structured集合的新增项按原plan输入顺序追加；两种顺序不是同一个合同。12图组合暴露
+consumer错误地按存档顺序重建新增列表，现按已验证的expectations恢复原顺序，仍逐项
+核CAS、namespace、端点与全部原前缀，不普遍排序或忽略顺序。真实组件小检查验证旧846
+前缀和12引用均准确，原错误排列会被拒绝；原396.750s组合失败保留，未重publisher或
+解12图。完整composition恢复结果另记，不能由本检查宣布858统一快照通过。
+见[定向检查](../artifacts/experiments/source_publication_order_20261025/receipt.json)。
+
 2026-10-23。**Implemented / snapshot发布与公共reader门Verified；runtime ancestor接线仍Proposed。**
 依据当前publisher、partition reader、delta composition、SBA与same-Run source proof源码；
 另以两个实际新artifact及当前parent的原CP做有界raw accounting。完整程序建模仍OPEN。
