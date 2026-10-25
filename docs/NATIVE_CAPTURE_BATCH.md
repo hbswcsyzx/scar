@@ -3,6 +3,14 @@
 2026-10-25。**Verified：原 LeWM 保留运行的全部 dispatch 边界端口接入；完整程序模型仍 OPEN。**
 这不是全部原生库内部操作、内容版本、状态或资源 ready 已闭合的声明。
 
+后续代码审查修正三处多余的`correlation_id == rf_id`条件：固定provider分别分配
+profiler correlation和RecordFunction身份，不能按数值相等互认。原held Tensor/几何
+连接已有独立owned nonce-marker、准确phase/owner/thread及逐槽合同，原资格不因此撤回。
+新代码保留全部这些条件；泛native metadata仍需实际Kineto桥，不能沿用数值等式。
+唯一synthetic检查使两组ID不同仍通过，同时改nonce的三个入口均拒绝；不授新运行资格，
+不重跑完整native门。原样两文件来自71665a29，见
+[应用收据](../artifacts/experiments/native_identity_fields_applied_20261025/receipt.json)。
+
 ## 公共实现与模型
 
 `scar.trace.native_capture_batch.bind_native_capture_batches` 接受普通公共 binder 产生的

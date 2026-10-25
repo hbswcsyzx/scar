@@ -1,0 +1,32 @@
+{
+  "base_main_commit": "5f0d4469",
+  "files_applied": [
+    {
+      "isolated_new": {
+        "bytes": 64076,
+        "sha256": "d0eac8d1adf64bae16703ac3289e159d23b2d8582a1110506def9f7b2e8de1ae"
+      },
+      "main_old": {
+        "bytes": 64032,
+        "sha256": "a1497c216d12436b55ee73538a1db192af65ac308b72f6c4ba9e3848f4959d44"
+      },
+      "path": "scar/trace/native_capture_batch.py"
+    },
+    {
+      "isolated_new": {
+        "bytes": 62029,
+        "sha256": "608ba93502637c600fe46f8e9cfe1fca1005610d9b282da0633f69de93286338"
+      },
+      "main_old": {
+        "bytes": 61884,
+        "sha256": "acb12cc68657d456b7174dda5d7dd0da82173176fa2f6a6eeacc977283e58a8e"
+      },
+      "path": "scar/ir/execution/native_port_protocol.py"
+    }
+  ],
+  "full_native_rerun": false,
+  "original_held_marker_qualification_retained": true,
+  "source_commit": "71665a29",
+  "synthetic_check_does_not_grant_runtime_qualification": true,
+  "whole_first_stage_complete": false
+}
