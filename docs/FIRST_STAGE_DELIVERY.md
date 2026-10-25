@@ -4,6 +4,18 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
+**后继通用入口已实际串联，模型缺口仍保留：** `model-run --from-capture`在已有CPU
+capture完成八阶段、exit0/125.90s，未执行目标。该样例只有module顶层，typed body0、
+271调用全未解析：269外部Python源码未准入、1 frozen、1 module无入口接口。
+所以当前优先项是自动依赖准入及entry类型接线，不能把入口成功当第一阶段完成。
+见[入口及范围](MODEL_RUN.md)与
+[真实归因](../artifacts/experiments/model_run_offline_g1_20261025/RESULT.md)。
+同一CPU采集的原生输入metadata已完成普通归档/actor归属；离线2332行可核出2330组
+tree→Kineto→ETO对应和3095个原输入路径，无contradiction。它们尚未产生canonical
+NativeInputRef，不授Python对象、内容/state或ready资格，也不增加旧LeWM覆盖。
+见[归档](NATIVE_TENSOR_INPUTS.md)及
+[有界路径审计](../artifacts/experiments/native_input_port_audit_20261025/RESULT.md)。
+
 **当前可复核结果（2026-10-25）：** 完整runtime接线仍为843快照；正式静态源码已发布
 到858，后继新增body尚未接回原运行。12原图普通ADD的恢复消费实际exit0/651.143247s；
 原两次消费失败与更早FAILED_ENV_FREEZE均保留。新增覆盖账本
