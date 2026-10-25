@@ -1,0 +1,10 @@
+{
+  "no_gate_executed": true,
+  "scope": "after metadata-failure resume input-path pin; metadata planner unchanged since api-check-final",
+  "sources": {
+    "artifacts/experiments/model_run_source_entry_bindings_gate_20261025/run.py": "095c00b37e23069c95aeaf8357da9f3a5261ad36fc9995d61db347965adcef96",
+    "scar/analysis/source_entry_run.py": "381a864a43362feca2d01ad7f34288503866bea09c7477e32d570f3cd2c3c25e",
+    "scar/cli.py": "0ba5232509de17ce7bbe1a9b88db03e96adb866342f6edf1ccd4be7ee15c35bb"
+  },
+  "status": "SYNTAX_PASS"
+}

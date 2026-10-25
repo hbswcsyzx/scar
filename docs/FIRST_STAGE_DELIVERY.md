@@ -18,6 +18,10 @@ CLI 的精确资格与范围见
 [实际报告](../artifacts/experiments/model_run_source_entries_gate_20261025/RESULT.md)。
 出版/绑定的两次失败及最终范围见
 [恢复结果](../artifacts/experiments/qualified_source_entry_binding_resume02_20261025/RESULT.md)。
+该链已接入通用 `model-run --stage source-entry-bindings`，实际 CLI exit0/40.8172s，
+自动完成 publication、普通 query、genuine coordinates、普通 binder 四阶段；仍保
+同一 CPU 样例的 260/5/6 与上述未连接关系。见
+[CLI 门](../artifacts/experiments/model_run_source_entry_bindings_gate_20261025/RESULT.md)。
 同CPU后继native门已将516个metadata路径关联实际规范NativeInputRef端口，260正常
 调用/2shards；3095路径中2579项仍保frontier。此资格及上述source结果均属于新CPU
 样例，与旧LeWM独立；不授Python对象、内容/state或ready，也不增加其覆盖。见

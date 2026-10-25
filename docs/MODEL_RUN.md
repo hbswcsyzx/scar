@@ -4,8 +4,10 @@
 `CompositionIndex.from_source_entry_publication` 查询原 qualified body；普通
 `bind_source_invocations` 已在同一 CPU 采集上实际关联 260 次调用。
 它保原 SourceDefinitionReference、namespace 和 SP5 URI，不伪造项目 fi/bi；
-原生图仍是原 SP5，publication 只导航。此后继目前是公共 Python API，尚未接为
-`model-run` 的单独自动阶段。参数/环境/state/return/control 仍未连接，详见
+原生图仍是原 SP5，publication 只导航。此后继现已接为独立
+`source-entry-bindings` 通用CLI，真实四阶段门exit0/40.817240s，实际仍为原9groups/
+271calls中的260body、5source、6unresolved；它与此前公共API门分别保留资格。
+参数/环境/state/return/control 仍未连接，详见
 [真实结果](../artifacts/experiments/qualified_source_entry_binding_resume02_20261025/RESULT.md)。
 
 2026-10-25。P0通用离线入口已实现，真实八阶段串联通过；完整程序建模仍OPEN。
@@ -106,3 +108,39 @@ live owned return只在该进程中有效，JSON不能恢复owner。后继可对
 module无definition前沿均保留。project+admissions是同原9/271的来源联合，不是新增调用；
 它与此前独立entry门分别保留实际producer/profile收据，不倒改历史。见
 [CLI实际结果](../artifacts/experiments/model_run_source_entries_gate_20261025/RESULT.md)。
+
+## 已存entry body的自动出版与调用关联
+
+```bash
+python -B -m scar.cli model-run --from-model-run SOURCE_ENTRY_TERMINAL \
+  --stage source-entry-bindings --out BINDINGS --plan-only
+python -B -m scar.cli model-run --from-model-run SOURCE_ENTRY_TERMINAL \
+  --stage source-entry-bindings --out BINDINGS --resume
+```
+
+该独立阶段固定原SOURCE_ENTRIES immutable terminal、worker成功产物、dependency/
+bootstrap输入与两readonly archive，机械取所有成功SP5。默认一个program；数量超限
+明确BLOCKED，使用`--binding-max-programs`显式配置，不能截掉其它成功项。独立binding
+profile不混用bootstrap/dependency/entry flags。plan-only仅有界小metadata及artifact
+stat，不读graph/raw或编译。新source-entries输出精确worker terminal receipt；旧输入
+只在所有保存program与原SUCCEEDED总数一致的无歧义情形接受，否则保留成功归属前沿。
+
+实际模式复用既有publisher→ordinary qualified reader/query→fresh genuine coordinates
+→v4普通binder，输入从原products自动取得，没有实验目录import或业务函数名单。
+SP5 URI不变、CP2成本UNKNOWN，不lower/恢复owner/执行目标/重建native或OS模型。
+默认4000ops/128MB source-provider decode，actual raw2MB/2048lines/1024events，坐标
+64MB reservations；原seed metadata64MB等profile另列为解码上限，不授当前raw许可。
+record64MB/output128MB是既有参数及post-stage检查，外部180s，全输入累计I/O仍OPEN。
+
+resume新建attempt并保旧失败。输出只链接原SP5、规范publication/v4绑定和原project
+composition，没有新图权威。当前publisher仅支持qualified external-entry；project
+SP5保全部declaration并报PROJECT_BODY_PUBLICATION_ADAPTER_MISSING，不伪fi/bi。
+actual-formal/env/state/return/control及完整模型仍OPEN，旧SBA不因新v4自动取得资格。
+实现范围与门见[短计划](../artifacts/analysis/model_run_source_entry_bindings_20261025/PLAN.md)。
+
+真实CLI门session71666 exit0：1原成功SP5，独立出版→普通qualified查询→genuine坐标→
+v4普通binder四阶段完成，无实验模块import、lower/compile/target/native或OS重建。
+readonly依赖1load/2matches、project0；原9/271守恒，260body+5source+6unresolved，
+271exits/0orphan。五类未连接接口仍各271，旧SBA2/3不放宽，858/843/6699不变。
+本门旧成功归属仅1/1兼容，未把任意legacy partial mapping或project adapter当已通过。
+详见[CLI实测与留存](../artifacts/experiments/model_run_source_entry_bindings_gate_20261025/RESULT.md)。

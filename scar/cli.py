@@ -326,8 +326,8 @@ def main(argv=None) -> int:
     model_input = model_run.add_mutually_exclusive_group(required=True)
     model_input.add_argument("--from-capture", dest="capture")
     model_input.add_argument("--from-model-run", help="resolve a saved workflow to its pinned immutable terminal")
-    model_run.add_argument("--stage", choices=("bootstrap", "dependency-sources", "source-entries"),
-                           help="dependency-sources/source-entries require --from-model-run and skip bootstrap")
+    model_run.add_argument("--stage", choices=("bootstrap", "dependency-sources", "source-entries", "source-entry-bindings"),
+                           help="offline dependency/source-entry stages require --from-model-run and skip bootstrap")
     model_run.add_argument("--out", required=True)
     model_run.add_argument("--plan-only", action="store_true", help="read bounded metadata only; no raw streams or compilation")
     model_run.add_argument("--resume", action="store_true", help="preserve old attempts and create a fresh attempt")
@@ -342,11 +342,15 @@ def main(argv=None) -> int:
     for name, default in DependencyRunBudget.__dataclass_fields__.items():
         dependency_options.add_argument("--dependency-" + name.replace("_", "-"), type=int,
                                        help="dependency profile default: " + str(default.default))
-    from scar.analysis.source_entry_run import SourceEntryRunBudget
+    from scar.analysis.source_entry_run import SourceEntryRunBudget, SourceEntryBindingBudget
     entry_options = model_run.add_argument_group("independent source-entries budget (not bootstrap/dependency options)")
     for name, default in SourceEntryRunBudget.__dataclass_fields__.items():
         entry_options.add_argument("--entry-" + name.replace("_", "-"), type=int,
                                    help="source-entry profile default: " + str(default.default))
+    binding_options = model_run.add_argument_group("independent source-entry-bindings budget (not earlier stage profiles)")
+    for name, default in SourceEntryBindingBudget.__dataclass_fields__.items():
+        binding_options.add_argument("--binding-" + name.replace("_", "-"), type=int,
+                                     help="binding profile default: " + str(default.default))
     model_run.set_defaults(func=_model_run)
     trace = sub.add_parser("trace", help="trace an arbitrary child command")
     trace.add_argument("--out", default="artifacts/traces/run")
@@ -1496,9 +1500,21 @@ def _normalize_v2(args) -> int:
 def _model_run(args) -> int:
     from scar.analysis.model_run import DependencyRunBudget, ModelRunBudget, run_dependency_admission, run_model
     tokens = args._model_run_options
-    if args.from_model_run is not None and args.stage == "source-entries":
+    if args.from_model_run is not None and args.stage == "source-entry-bindings":
+        from scar.analysis.source_entry_run import SourceEntryBindingBudget, run_source_entry_binding_stage
+        if any(option.startswith(("--max-", "--dependency-", "--entry-")) for option in tokens):
+            raise SystemExit("source-entry-bindings uses --binding-max-* budgets; earlier profiles cannot be mixed")
+        defaults = SourceEntryBindingBudget()
+        options, sources = {}, {}
+        for name in SourceEntryBindingBudget.__dataclass_fields__:
+            value = getattr(args, "binding_" + name)
+            options[name] = getattr(defaults, name) if value is None else value
+            sources[name] = "SOURCE_ENTRY_BINDING_PROFILE_DEFAULT" if value is None else "CLI:--binding-" + name.replace("_", "-")
+        report = run_source_entry_binding_stage(args.from_model_run, args.out, plan_only=args.plan_only,
+            resume=args.resume, budget=SourceEntryBindingBudget(**options), budget_sources=sources)
+    elif args.from_model_run is not None and args.stage == "source-entries":
         from scar.analysis.source_entry_run import SourceEntryRunBudget, run_source_entry_stage
-        if any(option.startswith(("--max-", "--dependency-")) for option in tokens):
+        if any(option.startswith(("--max-", "--dependency-", "--binding-")) for option in tokens):
             raise SystemExit("source-entries uses --entry-max-* budgets; bootstrap/dependency budgets cannot be mixed")
         defaults = SourceEntryRunBudget()
         options, sources = {}, {}
@@ -1509,7 +1525,7 @@ def _model_run(args) -> int:
         report = run_source_entry_stage(args.from_model_run, args.out, plan_only=args.plan_only,
             resume=args.resume, budget=SourceEntryRunBudget(**options), budget_sources=sources)
     elif args.from_model_run is not None:
-        if args.stage != "dependency-sources" or any(option.startswith(("--max-", "--entry-")) for option in tokens):
+        if args.stage != "dependency-sources" or any(option.startswith(("--max-", "--entry-", "--binding-")) for option in tokens):
             raise SystemExit("--from-model-run requires --stage dependency-sources; use --dependency-max-* budgets")
         defaults = DependencyRunBudget()
         options, sources = {}, {}
@@ -1520,7 +1536,7 @@ def _model_run(args) -> int:
         report = run_dependency_admission(args.from_model_run, args.out, plan_only=args.plan_only,
             resume=args.resume, budget=DependencyRunBudget(**options), budget_sources=sources)
     else:
-        if args.stage not in (None, "bootstrap") or any(option.startswith(("--dependency-", "--entry-")) for option in tokens):
+        if args.stage not in (None, "bootstrap") or any(option.startswith(("--dependency-", "--entry-", "--binding-")) for option in tokens):
             raise SystemExit("--from-capture selects bootstrap budgets; dependency-sources requires --from-model-run")
         options = {name: getattr(args, name) for name in ModelRunBudget.__dataclass_fields__}
         report = run_model(args.capture, args.out, plan_only=args.plan_only,
@@ -1528,7 +1544,8 @@ def _model_run(args) -> int:
     print(json.dumps({"out": str(Path(args.out).absolute()), "status": report["status"],
                       "attempt": report["attempt"], "whole_model_established": False}), flush=True)
     return 0 if report["status"] in ("METADATA_PLANNED_WITH_OPEN", "COMPONENTS_LINKED_WITH_OPEN",
-                                     "DEPENDENCY_SOURCE_FRAGMENTS_WITH_OPEN", "SOURCE_ENTRY_ATTEMPT_WITH_OPEN") else 2
+                                     "DEPENDENCY_SOURCE_FRAGMENTS_WITH_OPEN", "SOURCE_ENTRY_ATTEMPT_WITH_OPEN",
+                                     "SOURCE_ENTRY_BINDINGS_WITH_OPEN") else 2
 
 
 def _import_capture(args) -> int:

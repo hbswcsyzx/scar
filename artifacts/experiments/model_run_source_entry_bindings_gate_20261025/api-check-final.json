@@ -1,0 +1,20 @@
+{
+  "genuine_stage_run": false,
+  "graph_raw_compile_target_reads": 0,
+  "input": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_source_entries_gate_20261025/model/attempts/1792962847383051508-1430458/terminal.json",
+  "legacy_success_membership": "one original program matches immutable worker SUCCEEDED1; worker record exact; independent publication still required",
+  "metadata_decoded_bytes": 785889,
+  "metadata_stored_bytes": 641856,
+  "original_denominators": {
+    "calls": 271,
+    "groups": 9
+  },
+  "selected_successful_programs": 1,
+  "signature": "(model_run_path, out, *, plan_only=False, resume=False, budget=SourceEntryBindingBudget(max_metadata_bytes=2000000, max_programs=1, max_operations_per_body=4000, max_selected_decode_bytes=128000000, max_record_bytes=64000000, max_output_bytes=128000000, max_report_bytes=8000000, max_catalog_groups=16, max_catalog_entries=16, max_catalog_source_files=6, max_source_roots=8, max_archive_keys=21, max_archive_sources=6, max_archives=2, max_archive_bytes=32000000, max_source_bytes=1000000, max_raw_bytes=2000000, max_lines=2048, max_line_bytes=1000000, max_processes=4, max_codes=16, max_events=1024, max_coordinate_bytes=64000000, max_coordinate_control_bytes=1000000, max_seed_raw_bytes=64000000, max_seed_lines=2304, max_seed_line_bytes=64000000, max_seed_processes=128, max_seed_codes=128, max_seed_events=1024, max_seed_source_files=4, max_seed_source_bytes=256000, max_seed_references=1000000, max_seed_path=128, max_seconds=180), budget_sources=None)",
+  "source_sha256": {
+    "scar/analysis/source_entry_run.py": "5f936503611e44317e5cdeb79dc71d9207918b2c9b4fe4b628d880956a378102",
+    "scar/cli.py": "0ba5232509de17ce7bbe1a9b88db03e96adb866342f6edf1ccd4be7ee15c35bb"
+  },
+  "status": "SYNTAX_HELP_SMALL_METADATA_SCOPE_PASS",
+  "torch_imported": false
+}

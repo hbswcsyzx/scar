@@ -6,6 +6,15 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：源码入口出版/绑定已接通用 CLI
+
+Root session71666 actual exit0/40.8172s，四阶段机械完成，260 body-linked、5 source-linked、
+6 unresolved，总271/9groups；原 SP5 不重新 lower，readonly1load/2matches/compile0。
+全部366冻结源码前后不变。项目自有 SP5 的 publication adapter 当前仍明确 BLOCKED，
+旧 success-membership 只在已验证1/1兼容情形接受，不静默筛选成功/丢失来源。
+本门不是完整数据流或 LeWM 覆盖提升；参数/return/env/control/state 五类仍各271未验证。
+见 [真实命令与边界](../artifacts/experiments/model_run_source_entry_bindings_gate_20261025/RESULT.md)。
+
 ### 2026-10-25：模块首个 Import 接口独立读回并接入
 
 同原 SP7 的 postflight session73659 actual exit0/2.3181s；首句接口1、4 Regions、

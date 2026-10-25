@@ -1,0 +1,79 @@
+{
+  "actual_call_scan": {
+    "captured_codes": 9,
+    "entered_groups": 9,
+    "lines": 585,
+    "raw_bytes": 536684
+  },
+  "actual_terminal_exit": 0,
+  "actual_tool_session": 71666,
+  "all_frozen_source_files_unchanged": 366,
+  "binding_summary": {
+    "code_captures": 9,
+    "complete_descriptor_matches": 9,
+    "coordinate_bound_processes": 1,
+    "current_source_check_statuses": {},
+    "entered_code_groups": 9,
+    "exits": 271,
+    "frontiers": {
+      "CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT": 5,
+      "CODE_SOURCE_INCOMPLETE": 5,
+      "NONFILE_CODE_FILENAME": 1,
+      "NO_ENVIRONMENT_SOURCE_ROOT": 4,
+      "PARENT_NO_PARENT_ENTRY_WITNESS": 1,
+      "VERIFIED_CODE_WITHOUT_DEFINITION_WITNESS": 1
+    },
+    "invocation_statuses": {
+      "BODY_LINKED_REUSED_WITNESS": 260,
+      "SOURCE_LINKED_REUSED_WITNESS": 5,
+      "UNRESOLVED": 6
+    },
+    "invocations": 271,
+    "orphan_exits": 0,
+    "parent_qualifications": {
+      "RECORDED_FRAME_INTERVAL_MATCH": 270,
+      "UNRESOLVED": 1
+    },
+    "parent_relations": {
+      "DIRECT_RECORDED_PARENT": 270,
+      "NO_RECORDED_PARENT": 1
+    },
+    "processes": 1,
+    "source_binding_statuses": {
+      "BODY_LINKED_REUSED_WITNESS": 1,
+      "SOURCE_LINKED_REUSED_WITNESS": 5,
+      "UNRESOLVED": 3
+    },
+    "unconnected_interfaces": {
+      "ACTUAL_FORMAL_ROUTING_UNVERIFIED": 271,
+      "CANONICAL_CONTROL_COMPLETION_UNVERIFIED": 271,
+      "FUNCTION_ENVIRONMENT_UNVERIFIED": 271,
+      "RETURN_VALUE_ROUTING_UNVERIFIED": 271,
+      "STATE_EFFECTS_UNVERIFIED": 271
+    }
+  },
+  "new_source_graph_decode_by_review": false,
+  "old_LeWM_source858_runtime843_unchanged": true,
+  "original_denominators": {
+    "calls": 271,
+    "groups": 9
+  },
+  "readonly_activity": [
+    {
+      "compile_attempts": 0,
+      "complete_descriptor_matches": 2,
+      "module_loads": 1,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "complete_descriptor_matches": 0,
+      "module_loads": 0,
+      "source_bytes_read": 0
+    }
+  ],
+  "schema": "scar.source-entry-bindings-cli-root-review/1",
+  "status": "PASSED_WITH_OPEN",
+  "wall_seconds": 40.817239652969874,
+  "whole_model": "OPEN"
+}
