@@ -52,6 +52,38 @@ class ModelRunBudget:
             raise ValueError("model-run budgets must be positive exact integers")
 
 
+@dataclass(frozen=True)
+class DependencyRunBudget:
+    """Independent source-only profile; never substitutes bootstrap defaults."""
+
+    max_metadata_bytes: int = 2_000_000
+    max_raw_bytes: int = 64_000_000
+    max_record_bytes: int = 64_000_000
+    max_output_bytes: int = 128_000_000
+    max_calls: int = 512
+    max_codes: int = 16
+    max_source_files: int = 6
+    max_source_bytes: int = 1_000_000
+    max_roots: int = 8
+    max_metadata_entries: int = 4096
+    max_provider_metadata_files: int = 512
+    max_provider_metadata_bytes: int = 16_000_000
+    max_provider_metadata_record_bytes: int = 4_000_000
+    max_archive_record_bytes: int = 64_000_000
+    max_archive_bytes: int = 256_000_000
+    max_report_bytes: int = 8_000_000
+    max_compile_variants: int = 21
+    max_context_compressed_bytes: int = 128_000_000
+    max_context_record_bytes: int = 64_000_000
+    max_compile_keys: int = 21
+    max_witness_bytes: int = 32_000_000
+    max_seconds: int = 180
+
+    def __post_init__(self):
+        if any(type(v) is not int or v <= 0 for v in asdict(self).values()):
+            raise ValueError("dependency-run budgets must be positive exact integers")
+
+
 def _canonical(value):
     return json.dumps(value, sort_keys=True, ensure_ascii=False,
                       separators=(",", ":"), allow_nan=False).encode("utf-8")
@@ -86,8 +118,10 @@ def _safe(path, root):
     return path
 
 
-def _publish(path, document):
+def _publish(path, document, *, maximum=None):
     raw = _canonical(document) + b"\n"
+    if maximum is not None and len(raw) > maximum:
+        raise ValueError("orchestration report byte budget exceeded")
     with Path(path).open("xb") as stream:
         stream.write(raw)
     return {"uri": str(path), "sha256": _sha(raw), "size_bytes": len(raw)}
@@ -659,3 +693,346 @@ def _write_document(path, document, maximum):
                 if count + 1 > maximum:
                     raise ValueError("existing document transport record budget exceeded")
                 buffered.write(b"\n")
+
+
+class _PinnedModelInputs:
+    """Small JSON inputs only; reading never restores an owned model object."""
+
+    def __init__(self, maximum):
+        self.maximum, self.stored_bytes, self.decoded_bytes = maximum, 0, 0
+        self.receipts = []
+
+    def read(self, path, expected=None):
+        path = Path(path).absolute()
+        if path != path.resolve() or not path.is_file():
+            raise ValueError("model input must be a canonical regular file")
+        size = path.stat().st_size
+        required = size if path.suffix == ".gz" else size * 2
+        if required > self.maximum - self.stored_bytes - self.decoded_bytes:
+            raise ValueError("small model input stored+decoded budget exceeded")
+        if expected is not None and (expected.get("uri") != str(path)
+                or type(expected.get("size_bytes")) is not int or expected["size_bytes"] != size
+                or re.fullmatch(r"[0-9a-f]{64}", str(expected.get("sha256", ""))) is None):
+            raise ValueError("model input receipt/path/size differs")
+        with path.open("rb") as stream:
+            raw = stream.read(size)
+        self.stored_bytes += len(raw)
+        if len(raw) != size or path.stat().st_size != size:
+            raise ValueError("model input changed during read")
+        receipt = {"uri": str(path), "size_bytes": size, "sha256": _sha(raw)}
+        if expected is not None and receipt["sha256"] != expected["sha256"]:
+            raise ValueError("model input stored SHA differs")
+        if path.suffix == ".gz":
+            remaining = self.maximum - self.stored_bytes - self.decoded_bytes
+            with gzip.GzipFile(fileobj=io.BytesIO(raw), mode="rb") as stream:
+                decoded = stream.read(remaining + 1)
+        else:
+            decoded = raw
+        self.decoded_bytes += len(decoded)
+        # A gzip overflow probe is explicitly charged, including its one byte.
+        if self.stored_bytes + self.decoded_bytes > self.maximum:
+            raise ValueError("small model input stored+decoded budget exceeded (overflow probe charged)")
+        receipt["decoded_bytes"] = len(decoded)
+        self.receipts.append(receipt)
+        return _decode(decoded), receipt
+
+
+def _source_catalog(model):
+    captures, groups = {}, {}
+    for row in model["codes"]:
+        key = row["process_id"], row["code"]["key"]
+        if key in captures:
+            raise ValueError("duplicate original captured-code identity")
+        captures[key] = row
+    for row in model["groups"]:
+        key = row["process_id"], row["code"]
+        if key in groups or type(row["count"]) is not int or row["count"] < 1:
+            raise ValueError("invalid original entered-code group")
+        groups[key] = row
+    return [{"process_id": key[0], "code": key[1], "captured_code": captures[key]["code"] if key in captures else None,
+             "descriptor_anchor": captures[key]["anchor"] if key in captures else None, "entered_invocations": group["count"],
+             "first_anchor": group["first_anchor"], "last_anchor": group["last_anchor"]}
+            for key, group in sorted(groups.items())]
+
+
+def _dependency_base(path, reader):
+    path = Path(path).absolute()
+    if path.is_dir():
+        path = path / "model-run.json"
+    document, declaration = reader.read(path)
+    if document.get("schema") != SCHEMA:
+        raise ValueError("unsupported model-run input schema")
+    if "terminal" in document:
+        expected = document["terminal"]
+        attempt = Path(document["attempt"])
+        if attempt.parent != path.parent / "attempts" or expected.get("uri") != str(attempt / "terminal.json"):
+            raise ValueError("navigation terminal is outside its exact attempt")
+        terminal, terminal_receipt = reader.read(expected["uri"], expected)
+        if _canonical(document) != _canonical({**terminal, "terminal": expected}):
+            raise ValueError("navigation differs from its immutable terminal")
+    else:
+        terminal, terminal_receipt = document, declaration
+        if path.name != "terminal.json" or str(path.parent) != terminal.get("attempt"):
+            raise ValueError("direct model input must be its immutable attempt terminal")
+    # These checks constrain scope/representation. No success boolean grants
+    # evidence; the new dependency producer independently checks the raw scan.
+    if terminal.get("schema") != SCHEMA or terminal.get("partial_route") != "MONOLITHIC_BOOTSTRAP":
+        raise ValueError("dependency source stage requires an original bootstrap context")
+    capture = Path(terminal["capture"])
+    if not capture.is_absolute() or capture != capture.resolve():
+        raise ValueError("original capture path is not canonical")
+    original_attempt = Path(terminal["attempt"])
+    seed_ref = terminal["products"]["source_seeds"]
+    seed_path = _safe(seed_ref["uri"], original_attempt)
+    seeds, seed_receipt = reader.read(seed_path, seed_ref)
+    if (seeds.get("schema") != "scar.call-source-seeds" or type(seeds.get("schema_version")) is not int
+            or seeds["schema_version"] != 2 or seeds.get("compilation_profile") != "RECORDED_FUTURE_FLAGS_V1"
+            or seeds.get("target_executed_by_resolver") is not False):
+        raise ValueError("original seeds lack their exact recorded-flags profile")
+    model = seeds["model"]
+    if model["trace_directory"] != str(capture / "trace"):
+        raise ValueError("original seed trace is outside the selected capture")
+    project = Path(model["project_root"])
+    if not project.is_absolute() or str(project) == project.anchor or project != project.resolve():
+        raise ValueError("original project boundary is invalid")
+    binding_ref = terminal["products"]["source_bindings"]
+    binding_path = _safe(binding_ref["uri"], original_attempt)
+    binding, binding_receipt = reader.read(binding_path, binding_ref)
+    if (binding.get("schema") != "scar.source-invocations" or type(binding.get("schema_version")) is not int
+            or binding["schema_version"] != 1 or _canonical(binding["trace_files"]) != _canonical(model["files"])):
+        raise ValueError("bootstrap binding and seed raw manifests differ")
+    return {"input": declaration, "terminal": terminal_receipt, "source_seeds": seed_receipt,
+            "source_bindings": binding_receipt, "raw_collection_metadata": binding["collection_metadata"],
+            "raw_scan_issues": binding["raw_scan_issues"],
+            "capture": str(capture), "project_root": str(project), "catalog": _source_catalog(model),
+            "seed_model": model, "original_binding_summary": binding["summary"],
+            "original_products": terminal["products"]}
+
+
+def _verify_dependency_scope(report, base):
+    model = base["seed_model"]
+    if (report.get("schema") != "scar.dependency-source-admissions" or type(report.get("schema_version")) is not int
+            or report["schema_version"] != 1
+            or report["program_root"] != base["project_root"] or report["trace_directory"] != model["trace_directory"]
+            or _canonical(report["trace_files"]) != _canonical(model["files"])
+            or _canonical(report["collection_metadata"]) != _canonical(base["raw_collection_metadata"])
+            or _canonical(report["raw_scan_issues"]) != _canonical(base["raw_scan_issues"])):
+        raise ValueError("dependency admission changed the original raw/source scope")
+    actual = {(row["process_id"], row["code"]): row for row in report["admissions"]}
+    if len(actual) != len(report["admissions"]) or len(actual) != len(base["catalog"]):
+        raise ValueError("dependency admission changed the entered-code denominator")
+    for original in base["catalog"]:
+        row = actual.get((original["process_id"], original["code"]))
+        if row is None or _canonical({field: row[field] for field in original}) != _canonical(original):
+            raise ValueError("dependency admission changed descriptor, anchor or call weight")
+    if report["summary"]["entered_invocations"] != sum(row["entered_invocations"] for row in base["catalog"]):
+        raise ValueError("dependency admission changed the original invocation denominator")
+
+
+def _dependency_budget_contract(budget):
+    return {"profile": "INDEPENDENT_DEPENDENCY_SOURCE_PROFILE",
+        "input_metadata": "pre-read stored and bounded decoded accounting; one-byte gzip overflow probe charged",
+        "raw": {"max_bytes_per_public_scan": budget.max_raw_bytes, "cumulative_input_stored_plus_decoded_io": "OPEN"},
+        "source_metadata_archive_compile": "independent CallEdgeBudget/DependencySourceBudget/ContextStoreBudget hard limits; frontiers retained",
+        "report": {"max_bytes": budget.max_report_bytes, "mode": "producer admissions bound; orchestration report post-check"},
+        "record": {"max_bytes": budget.max_record_bytes, "mode": "post-stage check plus producer archive-record limits"},
+        "output": {"max_stored_bytes": budget.max_output_bytes, "mode": "post-stage current-attempt total; not a continuous limit"},
+        "witness": {"max_compile_keys": budget.max_compile_keys, "max_archive_bytes": budget.max_witness_bytes,
+                    "mode": "CodeWitnessStore hard bounds; independent of source matcher compile variants"},
+        "wall": {"max_seconds": budget.max_seconds, "mode": "between stages plus required external timeout"}}
+
+
+def run_dependency_admission(model_run_path, out, *, plan_only=False, resume=False,
+                             budget=DependencyRunBudget(), budget_sources=None):
+    """Publish source fragments/witness only; never re-run bootstrap producers."""
+    if type(budget) is not DependencyRunBudget or type(plan_only) is not bool or type(resume) is not bool:
+        raise ValueError("dependency stage requires typed budget and exact Boolean options")
+    budget.__post_init__()
+    root, source = Path(out).absolute(), Path(model_run_path).absolute()
+    if root != root.resolve() or source != source.resolve():
+        raise ValueError("source/output paths must be canonical")
+    if source.is_dir():
+        source = source / "model-run.json"
+    if root == source.parent or root.is_relative_to(source.parent) or source.is_relative_to(root):
+        raise ValueError("source-only output cannot overlap the original model")
+    if root.exists() and not resume:
+        raise ValueError("source-only output exists; --resume requires a fresh attempt")
+    fields = asdict(budget)
+    sources = {name: "API_BUDGET_OBJECT" for name in fields} if budget_sources is None else dict(budget_sources)
+    if set(sources) != set(fields) or any(type(value) is not str or not value for value in sources.values()):
+        raise ValueError("budget configuration provenance must cover every independent field")
+    root.mkdir(parents=True, exist_ok=True)
+    attempts = _safe(root / "attempts", root)
+    attempts.mkdir(exist_ok=True)
+    attempt = attempts / (str(time.time_ns()) + "-" + str(os.getpid()))
+    attempt.mkdir()
+    started = time.monotonic()
+    result = {"schema": SCHEMA, "attempt": str(attempt), "partial_route": "DEPENDENCY_SOURCE_ONLY",
+              "status": "RUNNING", "stages": [], "products": {}, "plan_only": plan_only,
+              "whole_model_established": False, "target_executed": False,
+              "implementation": _implementation_receipts(), "budget": fields, "budget_sources": sources,
+              "budget_enforcement": _dependency_budget_contract(budget),
+              "resume_policy": "FRESH_SOURCE_ONLY_ATTEMPT; BOOTSTRAP_IS_NOT_REPLAYED",
+              "open": ["source admission is not body connectivity or a new inventory",
+                       "entry catalog, partitioned proof handoff and ordinary binding remain unconnected",
+                       "module entry, frozen provider and original tooling root require independent evidence",
+                       "ordered runtime data/state/content, object identity, ready and whole ProgramModel remain OPEN"]}
+    reader = _PinnedModelInputs(budget.max_metadata_bytes)
+    previous = None
+    if resume:
+        previous, _receipt = reader.read(_safe(root / "model-run.json", root))
+        if previous.get("schema") != SCHEMA or previous.get("partial_route") != "DEPENDENCY_SOURCE_ONLY":
+            raise ValueError("resume requires a source-only workflow root")
+        result["previous_attempt"] = {"path": previous["attempt"], "status": previous["status"]}
+    _publish(attempt / "started.json", {"from_model_run": str(source), "budget": fields,
+        "budget_sources": sources, "implementation": result["implementation"]})
+    _update_navigation(root, attempt, result)
+    old_signal = signal.signal(signal.SIGTERM, _interrupt) if threading.current_thread() is threading.main_thread() else None
+    try:
+        base = _dependency_base(source, reader)
+        capture = Path(base["capture"])
+        if root == capture or root.is_relative_to(capture) or capture.is_relative_to(root):
+            raise ValueError("source-only output overlaps the original capture")
+        if previous is not None and previous.get("input_terminal") != base["terminal"]:
+            raise ValueError("source-only resume changed the immutable original terminal")
+        result.update(capture=base["capture"], input_terminal=base["terminal"],
+                      source_seed_input=base["source_seeds"], source_binding_input=base["source_bindings"],
+                      original_binding_summary=base["original_binding_summary"])
+        catalog = base["catalog"]
+        counts = {"captured_codes": len(base["seed_model"]["codes"]), "entered_code_groups": len(catalog),
+                  "entered_invocations": sum(row["entered_invocations"] for row in catalog)}
+        result["original_denominators"] = counts
+        blockers = []
+        if counts["captured_codes"] > budget.max_codes or counts["entered_invocations"] > budget.max_calls:
+            blockers.append("original source cohort exceeds independent code/call budget")
+        result["plan"] = _publish(attempt / "plan.json", {"schema": "scar.model-run-dependency-plan/1",
+            "input_terminal": base["terminal"], "source_seeds": base["source_seeds"], "project_root": base["project_root"],
+            "catalog": catalog, "denominators": counts, "budget": fields, "budget_sources": sources,
+            "namespace_policy": "original project boundary; current public producer roots; unresolved tooling is not remapped",
+            "blockers": blockers, "raw_bytes_read": 0, "canonical_bodies_established": False}, maximum=budget.max_report_bytes)
+        result["status"] = "BLOCKED" if blockers else "METADATA_PLANNED_WITH_OPEN"
+        if not plan_only and not blockers:
+            _execute_dependency_stages(base, attempt, result, budget)
+    except BaseException as error:
+        result.update(status="FAILED", failure={"type": type(error).__name__, "detail": str(error)})
+    finally:
+        result["planning_io"] = {"stored_metadata_bytes_read": reader.stored_bytes,
+                                 "decoded_metadata_bytes": reader.decoded_bytes,
+                                 "scope": "small workflow inputs only; source producer I/O is separate"}
+        result["input_receipts"] = reader.receipts
+        if old_signal is not None:
+            signal.signal(signal.SIGTERM, old_signal)
+    result["wall_seconds"] = time.monotonic() - started
+    final = _canonical(result) + b"\n"
+    stored = sum(p.stat().st_size for p in _regular_files(attempt))
+    projected = {"uri": str(attempt / "terminal.json"), "size_bytes": len(final), "sha256": _sha(final)}
+    if (len(final) > budget.max_report_bytes or stored + len(final)
+            + len(_canonical({**result, "terminal": projected})) + 1 > budget.max_output_bytes):
+        result.update(status="FAILED", failure={"type": "PostStageBudgetExceeded",
+            "detail": "orchestration report/output post-check exceeded; partial products retained"})
+    terminal = _publish(attempt / "terminal.json", result)
+    navigation = {**result, "terminal": terminal}
+    _update_navigation(root, attempt, navigation)
+    return navigation
+
+
+def _update_navigation(root, attempt, document):
+    temporary = root / (".model-run-" + str(time.time_ns()) + "-" + attempt.name + ".json")
+    _publish(temporary, document)
+    os.replace(temporary, root / "model-run.json")
+
+
+def _execute_dependency_stages(base, attempt, result, budget):
+    from scar.analysis.dependency_sources import DependencySourceBudget, admit_dependency_sources
+    from scar.analysis.code_witness import CodeWitnessBudget, CodeWitnessStore, CodeWitnessUnavailable
+    from scar.ir.program.call_edges import CallEdgeBudget, CapturedCode, CodeSourceLink, CallLinkStatus
+    from scar.ir.program.expansion import ContextStoreBudget
+    from scar.ir.record_codec import decode
+
+    stages = _Stages(attempt, result, budget)
+    calls = CallEdgeBudget(max_raw_bytes=budget.max_raw_bytes, max_codes=budget.max_codes,
+        max_events=budget.max_calls * 2, max_lines=budget.max_calls * 4 + budget.max_codes + 128,
+        max_line_bytes=min(budget.max_record_bytes, budget.max_raw_bytes),
+        max_source_files=budget.max_source_files, max_source_bytes=budget.max_source_bytes)
+    admission_budget = DependencySourceBudget(max_roots=budget.max_roots,
+        max_metadata_entries=budget.max_metadata_entries, max_metadata_files=budget.max_provider_metadata_files,
+        max_metadata_bytes=budget.max_provider_metadata_bytes,
+        max_metadata_record_bytes=budget.max_provider_metadata_record_bytes,
+        max_archive_record_bytes=budget.max_archive_record_bytes, max_archive_bytes=budget.max_archive_bytes,
+        max_report_bytes=budget.max_report_bytes, max_compile_variants=budget.max_compile_variants)
+    contexts = ContextStoreBudget(max_compressed_bytes=budget.max_context_compressed_bytes,
+                                  max_record_bytes=budget.max_context_record_bytes)
+
+    def progress(row):
+        print(json.dumps({"schema": SCHEMA, "producer_progress": row}, allow_nan=False), flush=True)
+
+    def link(name, path):
+        for stage in reversed(result["stages"]):
+            for receipt in stage.get("post_stage", {}).get("stage_outputs", ()):
+                if receipt["uri"] == str(path):
+                    result["products"][name] = receipt
+                    return receipt
+        raise ValueError("dependency product has no checked stored receipt")
+
+    def admit(stage):
+        report = admit_dependency_sources(Path(base["capture"]) / "trace", base["project_root"], stage / "admissions",
+            call_budget=calls, budget=admission_budget, context_budget=contexts, progress=progress)
+        _verify_dependency_scope(report, base)
+        return report
+
+    report, admission_stage = stages.call("dependency-sources", admit_dependency_sources, admit)
+    admission_receipt = link("dependency_admissions", admission_stage / "admissions" / "admissions.json")
+    result["dependency_summary"] = report["summary"]
+    result["dependency_measurements"] = report["measurements"]
+    result["source_roots"] = report["source_roots"]
+    result["root_frontiers"], result["provider_frontiers"] = report["root_frontiers"], report["provider_frontiers"]
+
+    def witness(stage):
+        limits = CodeWitnessBudget(max_compile_keys=budget.max_compile_keys,
+            max_source_files=budget.max_source_files, max_source_bytes=budget.max_source_bytes,
+            max_module_bytes=min(budget.max_record_bytes, budget.max_witness_bytes),
+            max_archive_bytes=budget.max_witness_bytes, max_manifest_bytes=budget.max_metadata_bytes)
+        archive = stage / "archive"
+        writer = CodeWitnessStore(archive, budget=limits, create=True, compile_missing=True,
+            producer={"profile": "SCAR_OFFLINE_DEPENDENCY_WITNESS_V1", "admissions": admission_receipt,
+                      "adapter": result["implementation"]}, progress=progress)
+        acquired, frontiers = [], []
+        for index, row in enumerate(report["admissions"]):
+            if row["status"] != "SOURCE_VERIFIED":
+                continue
+            captured = decode(CapturedCode, row["captured_code"])
+            source = decode(CodeSourceLink, row["code_source_link"])
+            if source.status is not CallLinkStatus.VERIFIED or source.code != captured.key or source.snapshot is None:
+                raise ValueError("admission claims a contradictory verified source witness")
+            origin = {"artifact": admission_receipt, "pointer": "#/admissions/" + str(index),
+                      "source_root": row["source_root"], "process_id": row["process_id"], "code": row["code"]}
+            try:
+                _code, proof = writer.resolve(captured, source.snapshot, source.optimize_levels, allow_compile=True)
+            except CodeWitnessUnavailable as error:
+                frontiers.append({"origin": origin, "reason": str(error)})
+            else:
+                acquired.append((captured, source, proof, origin))
+        receipt = writer.receipt()
+        readonly = CodeWitnessStore(archive, budget=limits)
+        if readonly.receipt() != receipt:
+            raise ValueError("dependency archive changed before read-only consumption")
+        for captured, source, proof, _origin in acquired:
+            _code, actual = readonly.resolve(captured, source.snapshot, source.optimize_levels, allow_compile=False)
+            if actual != proof:
+                raise ValueError("dependency read-only complete descriptor proof differs")
+        document = {"schema": "scar.model-run-workload-witness/1", "scope": "dependency source fragments only",
+                    "archive": receipt, "acquired": [origin for _code, _source, _proof, origin in acquired],
+                    "frontiers": frontiers, "writer_activity": writer.counts, "readonly_activity": readonly.counts,
+                    "body_connectivity_established": False, "target_executed": False}
+        _publish(stage / "witness-resolution.json", document, maximum=budget.max_report_bytes)
+        return document
+
+    witnesses, witness_stage = stages.call("dependency-witness", CodeWitnessStore, witness)
+    link("dependency_workload_witness", witness_stage / "archive" / "manifest.json")
+    link("dependency_witness_resolution", witness_stage / "witness-resolution.json")
+    result["dependency_witness_summary"] = {key: witnesses[key] for key in
+        ("acquired", "frontiers", "writer_activity", "readonly_activity")}
+    result["next_interface"] = {"entry_catalog": "UNCONNECTED", "partitioned_proof_handoff": "UNCONNECTED",
+        "ordinary_new_source_binding": "NOT_RUN", "canonical_body_publication": "NOT_RUN",
+        "ordered_runtime_data_state": "OPEN", "original_binding_facts_changed": False}
+    result["status"] = "DEPENDENCY_SOURCE_FRAGMENTS_WITH_OPEN"

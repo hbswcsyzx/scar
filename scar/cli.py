@@ -319,10 +319,15 @@ def _query_body_execution(args) -> int:
 
 
 def main(argv=None) -> int:
+    cli_argv = sys.argv[1:] if argv is None else list(argv)
     parser = argparse.ArgumentParser(prog="scar")
     sub = parser.add_subparsers(dest="subcommand", required=True)
     model_run = sub.add_parser("model-run", help="build a partial model offline from an existing capture")
-    model_run.add_argument("--from-capture", required=True, dest="capture")
+    model_input = model_run.add_mutually_exclusive_group(required=True)
+    model_input.add_argument("--from-capture", dest="capture")
+    model_input.add_argument("--from-model-run", help="resolve a saved workflow to its pinned immutable terminal")
+    model_run.add_argument("--stage", choices=("bootstrap", "dependency-sources"),
+                           help="dependency-sources requires --from-model-run and skips native/OS/bootstrap")
     model_run.add_argument("--out", required=True)
     model_run.add_argument("--plan-only", action="store_true", help="read bounded metadata only; no raw streams or compilation")
     model_run.add_argument("--resume", action="store_true", help="preserve old attempts and create a fresh attempt")
@@ -332,6 +337,11 @@ def main(argv=None) -> int:
                           ("source-bytes", 256_000), ("bodies", 4), ("operations", 4000),
                           ("seconds", 180), ("compile-keys", 4), ("witness-bytes", 16_000_000)):
         model_run.add_argument("--max-" + name, type=int, default=default)
+    from scar.analysis.model_run import DependencyRunBudget
+    dependency_options = model_run.add_argument_group("independent dependency-sources budget (not bootstrap --max-* options)")
+    for name, default in DependencyRunBudget.__dataclass_fields__.items():
+        dependency_options.add_argument("--dependency-" + name.replace("_", "-"), type=int,
+                                       help="dependency profile default: " + str(default.default))
     model_run.set_defaults(func=_model_run)
     trace = sub.add_parser("trace", help="trace an arbitrary child command")
     trace.add_argument("--out", default="artifacts/traces/run")
@@ -674,7 +684,9 @@ def main(argv=None) -> int:
     micro.add_argument("--warmup", type=int, default=1)
     micro.add_argument("--work-factor", type=int, default=1)
     micro.set_defaults(func=_optimize_micro)
-    args = parser.parse_args(argv)
+    args = parser.parse_args(cli_argv)
+    if args.subcommand == "model-run":
+        args._model_run_options = tuple(token.split("=", 1)[0] for token in cli_argv if token.startswith("--"))
     return args.func(args)
 
 
@@ -1477,13 +1489,29 @@ def _normalize_v2(args) -> int:
 
 
 def _model_run(args) -> int:
-    from scar.analysis.model_run import ModelRunBudget, run_model
-    options = {name: getattr(args, name) for name in ModelRunBudget.__dataclass_fields__}
-    report = run_model(args.capture, args.out, plan_only=args.plan_only,
-                       resume=args.resume, budget=ModelRunBudget(**options))
+    from scar.analysis.model_run import DependencyRunBudget, ModelRunBudget, run_dependency_admission, run_model
+    tokens = args._model_run_options
+    if args.from_model_run is not None:
+        if args.stage != "dependency-sources" or any(option.startswith("--max-") for option in tokens):
+            raise SystemExit("--from-model-run requires --stage dependency-sources; use --dependency-max-* budgets")
+        defaults = DependencyRunBudget()
+        options, sources = {}, {}
+        for name in DependencyRunBudget.__dataclass_fields__:
+            value = getattr(args, "dependency_" + name)
+            options[name] = getattr(defaults, name) if value is None else value
+            sources[name] = "DEPENDENCY_PROFILE_DEFAULT" if value is None else "CLI:--dependency-" + name.replace("_", "-")
+        report = run_dependency_admission(args.from_model_run, args.out, plan_only=args.plan_only,
+            resume=args.resume, budget=DependencyRunBudget(**options), budget_sources=sources)
+    else:
+        if args.stage not in (None, "bootstrap") or any(option.startswith("--dependency-") for option in tokens):
+            raise SystemExit("--from-capture selects bootstrap budgets; dependency-sources requires --from-model-run")
+        options = {name: getattr(args, name) for name in ModelRunBudget.__dataclass_fields__}
+        report = run_model(args.capture, args.out, plan_only=args.plan_only,
+                           resume=args.resume, budget=ModelRunBudget(**options))
     print(json.dumps({"out": str(Path(args.out).absolute()), "status": report["status"],
                       "attempt": report["attempt"], "whole_model_established": False}), flush=True)
-    return 0 if report["status"] in ("METADATA_PLANNED_WITH_OPEN", "COMPONENTS_LINKED_WITH_OPEN") else 2
+    return 0 if report["status"] in ("METADATA_PLANNED_WITH_OPEN", "COMPONENTS_LINKED_WITH_OPEN",
+                                     "DEPENDENCY_SOURCE_FRAGMENTS_WITH_OPEN") else 2
 
 
 def _import_capture(args) -> int:

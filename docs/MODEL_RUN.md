@@ -53,3 +53,24 @@ post-stage解压校验约999MB是输出校验成本，不是全部输入I/O测�
 [根复核](../artifacts/experiments/model_run_offline_g1_20261025/ROOT_REVIEW.json)及
 [实际结果与归因](../artifacts/experiments/model_run_offline_g1_20261025/RESULT.md)、
 [接口和后续接线规划](../artifacts/analysis/model_run_orchestration_design_20261025/PLAN.md)。
+
+## 独立依赖源码阶段
+
+```bash
+python -B -m scar.cli model-run --from-model-run RUN/model-run.json \
+  --out SOURCE_RUN --stage dependency-sources
+```
+
+该入口核对导航和不可变terminal、原source-seeds/binding收据，再仅调用既有依赖准入
+及新CodeWitness archive，不重做capture/native/OS/bootstrap。独立预算用
+`--dependency-max-*`配置并逐字段记录来源，原bootstrap默认值保留。
+
+真实门实际exit0/36.862007s：原9组/271调用守恒，4份snapshot/source graphs为6组/
+265调用建立SOURCE_VERIFIED；新archive4compile keys/6descriptor matches，readonly
+4loads/6matches、compile0。工具跨worktree4次和frozen1次未解析；project module1次
+保留原scope。源码与编译匹配不是函数环境、actual/formal、状态或执行对应的证明。
+
+原G1绑定报告不修改，body-linked仍0；entry/catalog、partitioned return-proof handoff、
+正式body publication与新普通binding尚待接线。完整模型及LeWM正式覆盖数不变。
+源图bulk按精确local receipts保留，未把全部86MB解码数据复制进导航root。
+见[实际根复核](../artifacts/experiments/model_run_dependency_gate_20261025/ROOT_REVIEW.json)。
