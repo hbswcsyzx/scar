@@ -1,8 +1,10 @@
 # Revision后复用source membership：最窄runtime接线设计
 
-2026-10-23。**Proposed / 未改runtime proof源码，未扫描raw或运行新绑定。**
+2026-10-23。**Implemented / 真实ancestor query与wrong-ancestor拒绝Verified；private factory/current绑定未运行。**
 前置门`first_stage_source_body_revision_20261023`已PASS：ADD218+REVISE65发布为843 active
 bodies；下一步只把此已完成batch接回同一既有capture，不重新lower/compile/执行目标。
+实现门见 `artifacts/experiments/first_stage_source_membership_ancestor_20261023/README.md`：
+真实depth2/两个parent各parse一次，重复query与错误ancestor不新增parent解析；raw仍未读。
 
 ## 精确断口与保持不变的条件
 

@@ -1,0 +1,32 @@
+{
+  "head_at_start": "9da2ea3c14282ccec536fc1c844c4fc78d363057",
+  "pid": 697602,
+  "runner": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_membership_ancestor_20261023/run.py",
+    "sha256": "8dba0ce2bbf725543b15abef98bd4ed42538b132160428955d9b4ce27824cb14",
+    "bytes": 6325
+  },
+  "freeze": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_membership_ancestor_20261023/freeze.json",
+    "sha256": "f0edfd40cf9245ac6a6f873b72d6d94f4bc15bee53a01c93ab630d039ce3024f",
+    "bytes": 850
+  },
+  "current_composition": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_body_revision_20261023/result/composition/index.json.gz",
+    "sha256": "3424d0715a86a5a7db28c7a4617440c4307558c8d3cc7e2f8b9f5ddf2d3dd36c",
+    "bytes": 17043558
+  },
+  "original_source_report": {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/source/report.json",
+    "sha256": "988c82df02b2d698a5f8061d88e1d3a13ddc323801353102b959d12566c86c48",
+    "bytes": 105902
+  },
+  "max_depth": 16,
+  "max_total_decoded_bytes": 1000000000,
+  "source_report_is_navigation_input_not_new_dynamic_proof": true,
+  "raw_trace_read": false,
+  "private_source_proof_factory_called": false,
+  "target_executed": false,
+  "compile_performed": false,
+  "source_prepared": false
+}

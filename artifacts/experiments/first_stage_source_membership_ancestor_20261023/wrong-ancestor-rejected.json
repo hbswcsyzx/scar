@@ -1,0 +1,15 @@
+{
+  "type": "ValueError",
+  "detail": "source membership ancestor: requested ancestor is not in the bounded exact source chain",
+  "before": {
+    "parent_compositions": 2,
+    "parent_inventories": 2,
+    "decoded_bytes": 154443079
+  },
+  "after": {
+    "parent_compositions": 2,
+    "parent_inventories": 2,
+    "decoded_bytes": 154443079
+  },
+  "new_parent_indexes_parsed": 0
+}

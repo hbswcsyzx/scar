@@ -710,6 +710,10 @@ class CompositionIndex:
         self._project_snapshot_indexes = {_canonical(row["snapshot"]): index
                                           for index, row in enumerate(self.document["files"])}
         self._static_source_proof = None
+        self._source_membership_nodes = {}
+        self._source_membership_queries = {}
+        self._source_membership_reads = {"parent_compositions": 0, "parent_inventories": 0,
+                                         "decoded_bytes": 0}
 
     @staticmethod
     def _verify_parent_composition(receipt, *, canonical_sha256=None):
@@ -734,6 +738,180 @@ class CompositionIndex:
                         raise ValueError("parent composition decoded byte budget differs")
             if size != receipt["decoded_bytes"] or decoded.hexdigest() != canonical_sha256:
                 raise ValueError("publication parent must be the exact original canonical composition artifact")
+
+    def source_membership_query_counts(self):
+        """Owned ancestor-reader counts; ordinary compiler-origin checks are separate."""
+        return dict(self._source_membership_reads)
+
+    def require_source_membership_ancestor(self, expected_composition_canonical_sha256,
+                                            expected_inventory, *, max_depth=16,
+                                            max_total_decoded_bytes=1_000_000_000):
+        """Verify a fixed-source ancestor, without loading body graphs or raw calls.
+
+        Each parent index is parsed once per bound input state. Only compact
+        source metadata/receipts survive, never a second CompositionIndex and
+        its body-accounting/graph caches. Cache reuse additionally requires all
+        observed input file identities/timestamps and bound documents unchanged.
+        """
+        if (not self.partitioned or type(expected_inventory) is not dict
+                or type(expected_composition_canonical_sha256) is not str
+                or len(expected_composition_canonical_sha256) != 64
+                or any(char not in "0123456789abcdef" for char in expected_composition_canonical_sha256)
+                or type(max_depth) is not int or not 0 < max_depth <= 16
+                or type(max_total_decoded_bytes) is not int or not 0 < max_total_decoded_bytes <= 1_000_000_000):
+            raise ValueError("source membership ancestor requires exact receipts and bounded independent ceilings")
+
+        def need(condition, detail):
+            if not condition:
+                raise ValueError("source membership ancestor: " + detail)
+
+        def stamp(path):
+            path = Path(path)
+            need(path.is_absolute() and not path.is_symlink() and path.is_file(), "input is not an ordinary canonical file")
+            status = path.stat()
+            return str(path), (status.st_dev, status.st_ino, status.st_size, status.st_mtime_ns)
+
+        def unchanged(watched):
+            need(all(stamp(path)[1] == original for path, original in watched),
+                 "previously checked ancestry input changed")
+
+        def vector(document):
+            need(document.get("schema") == "scar.program-composition"
+                 and document.get("schema_version") in (2, 3)
+                 and document.get("inventory_format") == "PARTITIONED"
+                 and all(document.get(key) is value for key, value in _AUTHORITY.items()),
+                 "parent is not its original conservative partitioned composition")
+            rows = document["files"]
+            need(len(rows) == document["files_total"]
+                 and [row["file_index"] for row in rows] == list(range(len(rows))),
+                 "source-file order/denominator differs")
+            return hashlib.sha256(_canonical([(row["file_index"], row["snapshot"], row.get("context"))
+                                               for row in rows])).hexdigest()
+
+        def inventory_receipt(inventory):
+            item = inventory.manifest_receipt
+            return {"path": str(inventory.path), "raw_sha256": item["physical_sha256"],
+                    "raw_bytes": item["physical_bytes"], "decoded_bytes": item["decoded_bytes"]}
+
+        inputs = self.source_inputs()  # Existing current-document and attachment checks.
+        origin = self.original_code_source_origin()
+        guard = hashlib.sha256(_canonical({"inputs": inputs, "origin": origin,
+            "manifest": self.inventory.manifest})).hexdigest()
+        query_key = hashlib.sha256(_canonical((expected_composition_canonical_sha256,
+            expected_inventory, max_depth, max_total_decoded_bytes, guard))).hexdigest()
+        if query_key in self._source_membership_queries:
+            checked, watched = self._source_membership_queries[query_key]
+            unchanged(watched)
+            return deepcopy(checked)
+        source_vector = vector(self.document)
+        source_layers = self.document["source_layers"]
+        discovery_ref = self.inventory.external_reference(self.inventory.manifest["components"]["discovery"])
+        code_source_ref = self.inventory.external_reference(self.inventory.manifest["components"]["call_sources"])
+        need({"artifact": {key: value for key, value in code_source_ref.items() if key != "external"},
+              "pointer": "#/value"} == origin["call_sources"], "current compiler-origin reference differs")
+
+        def compact(document, reference, canonical_sha, inventory):
+            need(inventory_receipt(inventory) == document["inventory"], "paired parent inventory differs")
+            need(vector(document) == source_vector and document["source_layers"] == source_layers,
+                 "full source snapshot/context vector or source-layer reference changed")
+            need(inventory.external_reference(inventory.manifest["components"]["discovery"]) == discovery_ref,
+                 "project discovery source changed")
+            actual = inventory.external_reference(inventory.manifest["components"]["call_sources"])
+            need(actual == code_source_ref, "original compiler/source component changed")
+            publication = inventory.component("publication") if inventory.version == 2 else None
+            watched = [stamp(reference["path"]), stamp(inventory.path)]
+            if publication is not None:
+                need(document["schema_version"] == 3 and publication["code_source_origin"] == origin
+                     and publication["base_composition"] == document["parent_composition"],
+                     "publication changed compiler origin or paired parent composition")
+                parent = inventory.external_reference(inventory.manifest["parent_inventory"])
+                parent_receipt = {"path": parent["uri"], "raw_sha256": parent["physical_sha256"],
+                                  "raw_bytes": parent["physical_bytes"], "decoded_bytes": parent["decoded_bytes"]}
+                need(parent_receipt == publication["base_inventory"], "paired parent inventory declaration differs")
+                pubref = inventory.external_reference(inventory.manifest["components"]["publication"])
+                watched.append(stamp(pubref["uri"]))
+                next_parent = {"composition": publication["base_composition"],
+                    "canonical_sha256": publication["base_composition_canonical_sha256"],
+                    "inventory": publication["base_inventory"], "publication": pubref}
+            else:
+                need(document["schema_version"] == 2 and document["inventory"] == origin["inventory"],
+                     "root inventory is not the exact original compiler/source origin")
+                next_parent = None
+            return {"composition": deepcopy(reference), "canonical_sha256": canonical_sha,
+                "inventory": deepcopy(document["inventory"]), "parent": deepcopy(next_parent),
+                "source_vector_sha256": source_vector, "watched": tuple(watched)}
+
+        current = compact(self.document, self.index_receipt, self._original_document_sha256, self.inventory)
+        watched = list(current["watched"]) + [stamp(self.layers / "index.json"),
+            stamp(origin["call_sources"]["artifact"]["uri"]), stamp(discovery_ref["uri"])]
+        steps, seen, decoded_total = [], set(), 0
+        for depth in range(max_depth + 1):
+            identity = current["canonical_sha256"], _canonical(current["inventory"])
+            need(identity not in seen, "parent cycle")
+            seen.add(identity)
+            if (current["canonical_sha256"] == expected_composition_canonical_sha256
+                    and current["inventory"] == expected_inventory):
+                unchanged(watched)
+                result = {"rule": "SOURCE_MEMBERSHIP_ANCESTOR_CHAIN_V1",
+                    "current_composition": deepcopy(self.index_receipt),
+                    "current_composition_canonical_sha256": self._original_document_sha256,
+                    "ancestor_composition": current["composition"],
+                    "ancestor_composition_canonical_sha256": current["canonical_sha256"],
+                    "ancestor_inventory": current["inventory"], "steps": steps,
+                    "depth": depth, "decoded_bytes": decoded_total,
+                    "source_layers": deepcopy(source_layers), "source_snapshot_context_vector_sha256": source_vector,
+                    "code_source_origin": deepcopy(origin), "static_membership_only": True,
+                    "old_body_or_activation_reused": False, "raw_trace_read": False}
+                self._source_membership_queries[query_key] = deepcopy(result), tuple(watched)
+                return deepcopy(result)
+            need(depth < max_depth and current["parent"] is not None,
+                 "requested ancestor is not in the bounded exact source chain")
+            parent = current["parent"]
+            declared = parent["composition"]
+            requested_bytes = declared["decoded_bytes"] + parent["inventory"]["decoded_bytes"]
+            need(decoded_total + requested_bytes <= max_total_decoded_bytes,
+                 "cumulative decoded ancestry input budget exceeded")
+            node_key = hashlib.sha256(_canonical((guard, declared, parent["canonical_sha256"], parent["inventory"]))).hexdigest()
+            cached = self._source_membership_nodes.get(node_key)
+            if cached is not None:
+                unchanged(cached["watched"])
+                current = deepcopy(cached)
+            else:
+                path = Path(declared["path"]); before = stamp(path)
+                need(declared["raw_bytes"] <= max_total_decoded_bytes - decoded_total,
+                     "stored ancestry input exceeds independent budget")
+                with path.open("rb") as stream:
+                    raw = stream.read(declared["raw_bytes"] + 1)
+                need(len(raw) == declared["raw_bytes"] and hashlib.sha256(raw).hexdigest() == declared["raw_sha256"]
+                     and stamp(path) == before, "parent composition stored bytes/identity changed")
+                opener = gzip.GzipFile(fileobj=BytesIO(raw), mode="rb") if path.suffix == ".gz" else BytesIO(raw)
+                with opener as stream:
+                    payload = stream.read(declared["decoded_bytes"] + 1)
+                need(len(payload) == declared["decoded_bytes"]
+                     and hashlib.sha256(payload).hexdigest() == parent["canonical_sha256"],
+                     "parent decoded/canonical composition identity differs")
+                document = strict_loads(payload.decode("utf-8"))
+                remaining = max_total_decoded_bytes - decoded_total - requested_bytes
+                need(remaining > 0, "no bounded metadata budget remains for parent publication")
+                inventory_before = stamp(parent["inventory"]["path"])
+                inventory = InventoryPartitions(parent["inventory"]["path"],
+                    max_shard_bytes=min(self.max_record_bytes, remaining))
+                need(inventory_receipt(inventory) == parent["inventory"], "actual parent inventory receipt differs")
+                current = compact(document, declared, parent["canonical_sha256"], inventory)
+                need(stamp(path) == before and stamp(inventory.path) == inventory_before,
+                     "parent input changed while verifying source membership")
+                current["decoded_read_bytes"] = requested_bytes + (
+                    inventory.manifest["components"]["publication"]["decoded_bytes"] if inventory.version == 2 else 0)
+                self._source_membership_nodes[node_key] = deepcopy(current)
+                self._source_membership_reads["parent_compositions"] += 1
+                self._source_membership_reads["parent_inventories"] += 1
+                self._source_membership_reads["decoded_bytes"] += current["decoded_read_bytes"]
+                del document, payload, raw, inventory
+            decoded_total += current["decoded_read_bytes"]
+            need(decoded_total <= max_total_decoded_bytes, "parent publication exceeded cumulative ancestry budget")
+            watched.extend(current["watched"])
+            steps.append(deepcopy(parent))
+        raise ValueError("source membership ancestor: unreachable depth limit")
 
     def publication_header(self):
         header = self.inventory_component("header")

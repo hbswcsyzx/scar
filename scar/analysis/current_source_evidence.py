@@ -21,7 +21,7 @@ from scar.ir.semantics_v2 import SourceSnapshot
 
 _KEY = object()
 _RULE = "OWNED_CURRENT_OPERAND_FRAME_SCAN_V1"
-_PROOF_RULE = "SAME_RUN_STATIC_SOURCE_MEMBERSHIP_V1"
+_PROOF_RULE = "SAME_RUN_STATIC_SOURCE_MEMBERSHIP_ANCESTRY_V2"
 _GUARD_SCOPE = "REUSED_COMPLETED_CURRENT_CAPTURE_AT_RECORDED_BINDING_NOT_FRESH_LIVE"
 
 
@@ -135,7 +135,10 @@ class SameRunSourceProof:
             _need(guard["status"] == "FINGERPRINT_MATCH" and witness["context_guard"]["status"] == "MATCH",
                   "retained reference has no successful recorded binding-scope guard")
             encoded = _canonical(encode(reference))
-            provenance = {"rule": _PROOF_RULE, "reference_sha256": _digest(encoded),
+            provenance = {"rule": _PROOF_RULE, "rule_version": 2,
+                "source_membership_ancestry_sha256": _digest(_canonical(self._source_membership_ancestry)),
+                "static_membership_only": True, "old_body_or_activation_reused": False,
+                "reference_sha256": _digest(encoded),
                 "source_report": encode(self._report_artifact), "source_bindings": encode(self._binding_artifact),
                 "definition_pointer": f"#/bindings/{index}/definition", "run": report["run"],
                 "producer": encode(self._producer_artifact), "participating_producer": encode(self._participating_artifact),
@@ -217,15 +220,16 @@ class SameRunSourceProof:
 
     def require_composition(self, composition):
         origin = composition.original_code_source_origin()
-        header = composition.publication_header()
-        base_sha = (header.get("base_composition_canonical_sha256")
-                    if composition.document["schema_version"] == 3 else _digest(_canonical(composition.document)))
-        _need(base_sha == self._report["composition_canonical_sha256"]
-              and origin["inventory"] == self._report["inventory"]
+        ancestry = composition.require_source_membership_ancestor(
+            self._report["composition_canonical_sha256"], self._report["inventory"])
+        _need(origin["inventory"] == self._report["inventory"]
               and composition.source_inputs()["attachments"] == self._source_inputs["attachments"]
               and composition.inventory_component("discovery")["project_root"]
                   == self._report["collection_metadata"][0]["project_root"],
               "publication changed the prior static source/compiler proof basis")
+        previous = getattr(self, "_source_membership_ancestry", None)
+        _need(previous is None or previous == ancestry, "source proof is already bound to a different current snapshot")
+        self._source_membership_ancestry = ancestry
 
     def definition_reference(self, witness):
         return self._witnesses.get(_canonical(witness))
@@ -240,7 +244,10 @@ class SameRunSourceProof:
         return self._guards
 
     def receipt(self):
-        return {"rule": _PROOF_RULE, "source_report": encode(self._report_artifact),
+        return {"rule": _PROOF_RULE, "rule_version": 2,
+            "source_membership_ancestry": deepcopy(self._source_membership_ancestry),
+            "static_membership_only": True, "old_body_or_activation_reused": False,
+            "source_report": encode(self._report_artifact),
             "source_bindings": encode(self._binding_artifact), "producer": encode(self._producer_artifact),
             "participating_producer": encode(self._participating_artifact),
             "run": self._report["run"], "guard_scope": _GUARD_SCOPE,
