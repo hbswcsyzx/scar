@@ -1,5 +1,9 @@
 # 模块顶层的建模入口
 
+后继 SP7 已在同一原源码上展开首个 Import 接口和 namespace store 尝试，准确保留
+剩余 10 条 statement slice；独立读回通过。不是 importer 内部或整段 body 完成，见
+[import 前缀模型](SOURCE_MODULE_IMPORT_PREFIX.md)。以下描述已保留兼容的原 SP6。
+
 本能力已实现并在保存的真实 CPU 采集对应源码上验证；模块内部仍未完成。
 它属于通用 Python 前端，未使用 workload 名称或业务规则。
 

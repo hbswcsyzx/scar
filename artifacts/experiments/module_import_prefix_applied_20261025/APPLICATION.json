@@ -1,0 +1,42 @@
+{
+  "actual_independent_postflight_exit": 0,
+  "actual_independent_postflight_tool_session": 73659,
+  "actual_producer_window_status": "FAILED_PRESERVED",
+  "files": [
+    {
+      "after_bytes": 77617,
+      "after_sha256": "a3cb7da0887d04cb0e449eda406a663cc3438bbf78aa4c0bdc4f8e89dc4804f2",
+      "before_sha256": "6f61e9f5d046d9a733aaa6c1c198c20b49c1d3b34f9ef360b9d573e451488bc2",
+      "path": "scar/analysis/program_lowering.py"
+    },
+    {
+      "after_bytes": 15826,
+      "after_sha256": "c01e9d27c6a9153991d88ee537e9445a90e4f1cba56239791ae23b12ad075b35",
+      "before_sha256": "be6129a40006c2f4e2e2e288c2510ed6d37154f67e8f7f788b73627e96cfe26d",
+      "path": "scar/ir/program/module_entries.py"
+    },
+    {
+      "after_bytes": 25226,
+      "after_sha256": "0e83aed9da8e72c6d50bb2630bcffa905f10da7104db1d94c31312f8b5fe3d9a",
+      "before_sha256": "a8cfcbaadf8620f05d618ae3fb27d9ffb3be2cfcd85e2929839248b74723bd5a",
+      "path": "scar/analysis/source_module_lowering.py"
+    },
+    {
+      "after_bytes": 32259,
+      "after_sha256": "b8c97c4d887dd01a553e37e6b10b0464eef87bec4213bd9583656cdedc3cd8fc",
+      "before_sha256": "efac81700dc67a652d36cf54d9ee7a05ea0eba8f09c01ace2bfffa14f2f5e95c",
+      "path": "scar/analysis/source_module_validation.py"
+    }
+  ],
+  "main_actual_terminal_exit": 0,
+  "main_actual_tool_session": 63891,
+  "main_head_before": "28ac4a2d53222de4d2af776e4bcbdb57c782416e",
+  "main_readback_seconds": 5.225906092033256,
+  "new_lowerings": 0,
+  "producer_window_lost_measurements": "OPEN_NOT_RECONSTRUCTED",
+  "schema": "scar.module-import-prefix-main-application/1",
+  "source_baseline": "9308d91e3efc0a96c093c4da434fd597ac31acef",
+  "source_delivery_commit": "8f066a0fba3b10f9db8bed52e198f5c1dab9a86c",
+  "status": "EXACT_SOURCE_APPLIED_ORDINARY_READBACK_PASSED",
+  "whole_model": "OPEN"
+}

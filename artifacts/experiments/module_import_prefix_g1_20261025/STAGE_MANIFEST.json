@@ -1,0 +1,416 @@
+{
+  "schema": "scar.explicit-stage-paths",
+  "schema_version": 1,
+  "paths": [
+    "artifacts/analysis/module_first_import_plan_20261025/PLAN.md",
+    "artifacts/experiments/module_import_prefix_g1_20261025/APPLICATION_RECEIPT.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/CANDIDATE02_PATCH_RECEIPT.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/FINAL_PRODUCTION.patch",
+    "artifacts/experiments/module_import_prefix_g1_20261025/IMPLEMENTATION_RECEIPT.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/PRIMARY_CONTRACT.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/PRODUCTION.patch",
+    "artifacts/experiments/module_import_prefix_g1_20261025/REPORT.md",
+    "artifacts/experiments/module_import_prefix_g1_20261025/RUNNER_PLAN.md",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/RECEIPT.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/scar/analysis/program_lowering.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/scar/analysis/source_module_lowering.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/scar/analysis/source_module_validation.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/scar/ir/program/module_entries.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/PREPARATION_RECEIPT.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/failure.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/gnu-time.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/progress.jsonl",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/result.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/stderr.log",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/stdout.log",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/freeze.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/gate_guards.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/prepare_gate.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/run_gate.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/selection.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/stderr.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/stdout.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/time.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/PREPARATION_RECEIPT.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/gnu-time.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/progress.jsonl",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/result.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/sourceprogram7.json.gz",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/stderr.log",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/stdout.log",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/freeze.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/gate_guards.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/prepare_gate.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/run_gate.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/selection.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/stderr.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/stdout.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/time.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/check01/check_codec.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/check01/receipt.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/ARTIFACT_MEASUREMENT.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/PREPARATION_RECEIPT.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/gnu-time.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/progress.jsonl",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/result.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/stderr.log",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/stdout.log",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/worker-result.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/freeze.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/gate_guards.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/prepare_postflight.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/run_postflight.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/selection.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/stderr.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/stdout.txt",
+    "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/time.txt",
+    "docs/SOURCE_MODULE_IMPORT_PREFIX.md",
+    "scar/analysis/program_lowering.py",
+    "scar/analysis/source_module_lowering.py",
+    "scar/analysis/source_module_validation.py",
+    "scar/ir/program/module_entries.py",
+    "artifacts/experiments/module_import_prefix_g1_20261025/RETENTION.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/STAGE_MANIFEST.json",
+    "artifacts/experiments/module_import_prefix_g1_20261025/STAGE_PATHS.txt"
+  ],
+  "per_file_limit_bytes": 1000000,
+  "artifact_gzip_included_by_root_authorization": true,
+  "source_files_count": 4,
+  "receipts_before_manifest": [
+    {
+      "path": "artifacts/analysis/module_first_import_plan_20261025/PLAN.md",
+      "bytes": 8795,
+      "sha256": "013e342fff146a200eeff00b96ab123e9255b9c8e887ac8c17be4c8cbb8570c4"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/APPLICATION_RECEIPT.json",
+      "bytes": 3133,
+      "sha256": "bb210a85e194771af8741c21c2c74b3d3af2ec0b5a7b175c8457afdae21f8228"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/CANDIDATE02_PATCH_RECEIPT.json",
+      "bytes": 4948,
+      "sha256": "06d089a1c53f16113deb770d10c55960365423989ee54d8382f8ce694d6db843"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/FINAL_PRODUCTION.patch",
+      "bytes": 45472,
+      "sha256": "0f2534e3711fb04c92dd691e6612c0cb6b903f475779856b3cd2320ceb1ee714"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/IMPLEMENTATION_RECEIPT.json",
+      "bytes": 1806,
+      "sha256": "dfd35fb325580ff1f33b145a704f6a06a9db3a69f858a4b06ec911fc33751b65"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/PRIMARY_CONTRACT.json",
+      "bytes": 1226,
+      "sha256": "ccf433d8d1ed4b90def75939d5169b9ff368e986224e2f3efd237479b59ff409"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/PRODUCTION.patch",
+      "bytes": 45467,
+      "sha256": "0758e56a05059f9d563faa2cb2f851780ee9d6983cb05f90058d1c301ca396af"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/REPORT.md",
+      "bytes": 3465,
+      "sha256": "611248a1725f40c3cf5a577f7a277e7a796f456ca0f270f964a4e716b699ac96"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/RUNNER_PLAN.md",
+      "bytes": 2512,
+      "sha256": "7406bf76ac7eed52a81c7594d06c12df6b0b24f169feeaad975439e1c499b20a"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/RECEIPT.json",
+      "bytes": 1771,
+      "sha256": "4f675452e078cb146dae48925107417733df8a2e22deb268244b1fabb43a8ac3"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/scar/analysis/program_lowering.py",
+      "bytes": 77617,
+      "sha256": "a3cb7da0887d04cb0e449eda406a663cc3438bbf78aa4c0bdc4f8e89dc4804f2"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/scar/analysis/source_module_lowering.py",
+      "bytes": 25221,
+      "sha256": "37e7db052eb8eafc59e3f249b57094c79906b32308ff32013f06fca50b6a1696"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/scar/analysis/source_module_validation.py",
+      "bytes": 32259,
+      "sha256": "b8c97c4d887dd01a553e37e6b10b0464eef87bec4213bd9583656cdedc3cd8fc"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot/scar/ir/program/module_entries.py",
+      "bytes": 15826,
+      "sha256": "c01e9d27c6a9153991d88ee537e9445a90e4f1cba56239791ae23b12ad075b35"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/PREPARATION_RECEIPT.json",
+      "bytes": 504,
+      "sha256": "acd3b450f2a447447c7f124a60080d2409feee5d9fc999a5fe3e654c7b9cb82d"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/failure.json",
+      "bytes": 5034,
+      "sha256": "fa3c182e4c268dddb8f627de888b29e2e5c0639ccbd2a71f78e871bb9b09eb7c"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/gnu-time.txt",
+      "bytes": 1026,
+      "sha256": "5046aa606cba3bcbd10421c3a0775a369c1a2c65fa9a5648f078f26537f87844"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/progress.jsonl",
+      "bytes": 489,
+      "sha256": "9eef0c74f3a1eba4eccfa9e20bba7ab4608ed88a1269a194e5f11c924832df65"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/result.json",
+      "bytes": 409,
+      "sha256": "688aceeb14c1d6d4d365459248d5e1a8d9723cecf346dd5bcece8ef37937c996"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/attempt01/stdout.log",
+      "bytes": 489,
+      "sha256": "9eef0c74f3a1eba4eccfa9e20bba7ab4608ed88a1269a194e5f11c924832df65"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/freeze.json",
+      "bytes": 95803,
+      "sha256": "4f8de487d3f6598d5db13565d5fcdb9b804fd0afa1b908c55f54e8482c2b05d8"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/gate_guards.py",
+      "bytes": 12140,
+      "sha256": "c5a5608a63bdc20cc9ad8c0abc8000307425b745a5628411c18eef5963503750"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/prepare_gate.py",
+      "bytes": 7582,
+      "sha256": "ea3d7fb7eee122b831264f95c4db03380622783f47aaed034cfb15665df08fa0"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/run_gate.py",
+      "bytes": 16879,
+      "sha256": "1cf6113b5d6b8b8f6151b12ab11845c1f27fdd272cc168e49ecd32cd2e9b68d5"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/selection.json",
+      "bytes": 2843,
+      "sha256": "571e1b89119dd842eb78b6fe8e7c963207f34be289cb4280fb81318a201b9ecc"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate01/time.txt",
+      "bytes": 994,
+      "sha256": "856718a63cc2204f97d8b3927931fae2acd20303072395bb792340c878e4c42e"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/PREPARATION_RECEIPT.json",
+      "bytes": 504,
+      "sha256": "a7e0d32e3ba6b7a617ba9575af6d50e994b75e8c0eff7199db0981df98fbe4b0"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/gnu-time.txt",
+      "bytes": 1028,
+      "sha256": "91394f40712c197a85bb3599840f746a17d0a7c9a844a03d31c1bd213cfc88b8"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/progress.jsonl",
+      "bytes": 650,
+      "sha256": "7c92f15fdf8026e26ed2cb6cbd3cd78b99601cbca1fd878dc2312c6573a1203f"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/result.json",
+      "bytes": 408,
+      "sha256": "8e1fc885b6f660f7b5f19a6284637b28eb82207b41bbdf07749db22e0d6f1e9b"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/sourceprogram7.json.gz",
+      "bytes": 91514,
+      "sha256": "aafdd47ee1182017a9742717d68ed64b85ac9d7117eeb2e32533141b00f17f0e"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/stderr.log",
+      "bytes": 1429,
+      "sha256": "442bfac0a6e999f63b19683ca18602a24016dadd3c259802080affd5adfdc82c"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/attempt01/stdout.log",
+      "bytes": 650,
+      "sha256": "7c92f15fdf8026e26ed2cb6cbd3cd78b99601cbca1fd878dc2312c6573a1203f"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/freeze.json",
+      "bytes": 95803,
+      "sha256": "c488748534bd0a92763f7b80ac1d28e38ad345d2a6d35d4f0f8e728a76b3127c"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/gate_guards.py",
+      "bytes": 12140,
+      "sha256": "c5a5608a63bdc20cc9ad8c0abc8000307425b745a5628411c18eef5963503750"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/prepare_gate.py",
+      "bytes": 7582,
+      "sha256": "ea3d7fb7eee122b831264f95c4db03380622783f47aaed034cfb15665df08fa0"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/run_gate.py",
+      "bytes": 16879,
+      "sha256": "1cf6113b5d6b8b8f6151b12ab11845c1f27fdd272cc168e49ecd32cd2e9b68d5"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/selection.json",
+      "bytes": 2843,
+      "sha256": "571e1b89119dd842eb78b6fe8e7c963207f34be289cb4280fb81318a201b9ecc"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/candidate02/time.txt",
+      "bytes": 997,
+      "sha256": "23abbc6b0876d985c6b4a193ceb72e0cb4a974d55aa4e222d251ec6baf938989"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/check01/check_codec.py",
+      "bytes": 4155,
+      "sha256": "550807ed6aae14a5480dc369fce1b451f0f2141a2ab3cb0308de80dd6f6cc573"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/check01/receipt.json",
+      "bytes": 2200,
+      "sha256": "9ea728fa8cf769f03f93bfdcc98aada5284421325ad46e099f6c32c1160446fe"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/ARTIFACT_MEASUREMENT.json",
+      "bytes": 570,
+      "sha256": "302cd90abc29a0cea9d8dd8591f68be6e88bae2424006a86ee309847e8343a9c"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/PREPARATION_RECEIPT.json",
+      "bytes": 1013,
+      "sha256": "45e81b972c53015e20c3851202233fc1fb99c3e378d3177fdf87272415fcc5a8"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/gnu-time.txt",
+      "bytes": 995,
+      "sha256": "81d5f049477ced2f82ecf572b56f8acb7dd98b98a2c868b6b19bfd89010734d1"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/progress.jsonl",
+      "bytes": 735,
+      "sha256": "150f6d0dc770daa21e2b93fff6ef01dbbc3d8b0ad96687f57f48b5907e794a52"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/result.json",
+      "bytes": 275,
+      "sha256": "ba009aaf5266f2e8051fd71a3f043231dbbaa10acf981bbc314a466665381fec"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/stdout.log",
+      "bytes": 735,
+      "sha256": "150f6d0dc770daa21e2b93fff6ef01dbbc3d8b0ad96687f57f48b5907e794a52"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/attempt01/worker-result.json",
+      "bytes": 22292,
+      "sha256": "ba4e2599a42d44b644822ed05abdf4b397f47edc02f11e4888920248112359be"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/freeze.json",
+      "bytes": 99959,
+      "sha256": "859e3d7dff1f5e9a534f81121577faecbbe92a56a338ce74799f279ee68a18e2"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/gate_guards.py",
+      "bytes": 12140,
+      "sha256": "c5a5608a63bdc20cc9ad8c0abc8000307425b745a5628411c18eef5963503750"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/prepare_postflight.py",
+      "bytes": 6364,
+      "sha256": "0500c558aae44cde1c87a651a49be50cb62ff7f3a80aca92701f872c6e5750b3"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/run_postflight.py",
+      "bytes": 13326,
+      "sha256": "fd4b4d4c8074b93500c2cd5a669988a46e409d57b608c019e18157d6507e799c"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/selection.json",
+      "bytes": 4152,
+      "sha256": "bc74c8b6feff6693278179ad6151ca262a2b380fc64af9049e00f91796e34c59"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/module_import_prefix_g1_20261025/postflight01/time.txt",
+      "bytes": 963,
+      "sha256": "8c126484952bfac3ca0cd210a63815729af2d7953d4d796c567414a902740fb1"
+    },
+    {
+      "path": "docs/SOURCE_MODULE_IMPORT_PREFIX.md",
+      "bytes": 2133,
+      "sha256": "679e6dbbdce7d53a6d53e7c58a683b440738150504960d2f0c5b1b2c930b3eb1"
+    },
+    {
+      "path": "scar/analysis/program_lowering.py",
+      "bytes": 77617,
+      "sha256": "a3cb7da0887d04cb0e449eda406a663cc3438bbf78aa4c0bdc4f8e89dc4804f2"
+    },
+    {
+      "path": "scar/analysis/source_module_lowering.py",
+      "bytes": 25226,
+      "sha256": "0e83aed9da8e72c6d50bb2630bcffa905f10da7104db1d94c31312f8b5fe3d9a"
+    },
+    {
+      "path": "scar/analysis/source_module_validation.py",
+      "bytes": 32259,
+      "sha256": "b8c97c4d887dd01a553e37e6b10b0464eef87bec4213bd9583656cdedc3cd8fc"
+    },
+    {
+      "path": "scar/ir/program/module_entries.py",
+      "bytes": 15826,
+      "sha256": "c01e9d27c6a9153991d88ee537e9445a90e4f1cba56239791ae23b12ad075b35"
+    }
+  ]
+}

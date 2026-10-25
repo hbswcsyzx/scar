@@ -6,6 +6,15 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：模块首个 Import 接口独立读回并接入
+
+同原 SP7 的 postflight session73659 actual exit0/2.3181s；首句接口1、4 Regions、
+19 ops，namespace 访问尝试2、存储内容证明0，准确保剩余10句及 importer REQUIRED。
+原构造窗口因 runner 变量遮蔽 exit1，旧 counts/activity/runtime 清单保持 OPEN，
+不倒改为 PASS。主树 session63891 actual exit0/5.2259s，原 SP7、SP6、SP5 三格式
+均普通读回，无新 lower。下一完整语句模型还需解决非函数 frame/control 根主体的
+真实类型缺口，不能伪造 module SourceAtom。见 [模型与边界](SOURCE_MODULE_IMPORT_PREFIX.md)。
+
 ### 2026-10-25：外部 qualified body 出版与普通调用绑定通过
 
 Root session22541 actual exit0/36.7671s；消费同一原 SP5/publication，不重新 lower

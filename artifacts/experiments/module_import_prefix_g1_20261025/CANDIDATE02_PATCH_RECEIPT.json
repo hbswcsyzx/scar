@@ -1,0 +1,93 @@
+{
+  "status": "PREPARED_NOT_RUN",
+  "only_change": {
+    "before": "row.code_id==source.atom_id and row.parent_id==unit.initializer",
+    "after": "row.code_id==source.atom_id.wire and row.parent_id==unit.initializer"
+  },
+  "source_sha256": "0e83aed9da8e72c6d50bb2630bcffa905f10da7104db1d94c31312f8b5fe3d9a",
+  "old_source_snapshot": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_import_prefix_g1_20261025/candidate01-source-snapshot",
+  "original_candidate01_unchanged": true,
+  "type_domains": {
+    "OperationDefinition": {
+      "id": "<class 'scar.ir.v2.ids.OperationDefinitionID'>",
+      "kind": "<enum 'OperationKind'>",
+      "label": "<class 'str'>",
+      "code_id": "str | None",
+      "source_file": "str | None",
+      "source_start": "int | None",
+      "source_end": "int | None",
+      "parent_id": "scar.ir.v2.ids.OperationDefinitionID | None",
+      "control_region": "scar.ir.v2.ids.ControlRegionID | None",
+      "input_slots": "tuple[scar.ir.v2.ids.ValueSlotID, ...]",
+      "output_slots": "tuple[scar.ir.v2.ids.ValueSlotID, ...]",
+      "state_slots": "tuple[scar.ir.v2.ids.ValueSlotID, ...]",
+      "source_atoms": "tuple[scar.ir.v2.ids.SourceAtomID, ...]",
+      "contract": "scar.ir.v2.ids.ContractID | None",
+      "effect_summary": "scar.ir.v2.ids.EffectSummaryID | None",
+      "resource_requirements": "tuple[scar.ir.v2.ids.ResourceID, ...]",
+      "metadata": "dict[str, typing.Any]"
+    },
+    "ValueSlot": {
+      "slot_id": "<class 'scar.ir.v2.ids.ValueSlotID'>",
+      "name": "<class 'str'>",
+      "direction": "<class 'str'>",
+      "semantic_type": "str | None",
+      "owner": "scar.ir.v2.ids.OperationDefinitionID | None",
+      "mutable": "bool | None",
+      "metadata": "dict[str, typing.Any]"
+    },
+    "ControlFlowSuite": {
+      "id": "<class 'scar.ir.v2.ids.ControlFlowSuiteID'>",
+      "scope": "<class 'scar.ir.v2.ids.OperationDefinitionID'>",
+      "kind": "<enum 'SuiteKind'>",
+      "parent": "scar.ir.v2.ids.ControlFlowSuiteID | None",
+      "owner": "scar.ir.v2.ids.OperationDefinitionID | None",
+      "source": "scar.ir.v2.common.SourceReference | None",
+      "entry": "<class 'scar.ir.v2.ids.ControlFlowNodeID'>",
+      "normal_exit": "<class 'scar.ir.v2.ids.ControlFlowNodeID'>",
+      "exception_exit": "<class 'scar.ir.v2.ids.ControlFlowNodeID'>",
+      "version": "<class 'scar.ir.v2.common.SourceVersion'>",
+      "complete": "<class 'bool'>"
+    },
+    "ControlFlowNode": {
+      "id": "<class 'scar.ir.v2.ids.ControlFlowNodeID'>",
+      "kind": "<enum 'NodeKind'>",
+      "scope": "<class 'scar.ir.v2.ids.OperationDefinitionID'>",
+      "suite": "<class 'scar.ir.v2.ids.ControlFlowSuiteID'>",
+      "operations": "tuple[scar.ir.v2.ids.OperationDefinitionID, ...]",
+      "source": "scar.ir.v2.common.SourceReference | None",
+      "ordinal": "<class 'int'>",
+      "label": "<class 'str'>"
+    },
+    "InsertionPoint": {
+      "id": "<class 'scar.ir.v2.ids.InsertionPointID'>",
+      "suite": "<class 'scar.ir.v2.ids.ControlFlowSuiteID'>",
+      "kind": "<enum 'InsertionKind'>",
+      "node": "<class 'scar.ir.v2.ids.ControlFlowNodeID'>",
+      "anchor": "scar.ir.v2.ids.ControlFlowNodeID | None",
+      "source": "scar.ir.v2.common.SourceReference | None",
+      "version": "<class 'scar.ir.v2.common.SourceVersion'>"
+    },
+    "ModuleStatementSlice": {
+      "unit": "<class 'scar.ir.program.module_entries.ModuleUnitSource'>",
+      "context": "<class 'scar.ir.program.inventory.SourceContextDigest'>",
+      "statements": "tuple[scar.ir.v2.common.SourceReference, ...]",
+      "suite": "<class 'scar.ir.v2.ids.ControlFlowSuiteID'>",
+      "before": "<class 'scar.ir.v2.ids.InsertionPointID'>"
+    }
+  },
+  "producer_chain": {
+    "code_id": "frontend_v2.operation stores atom.wire string; compare SourceReference.atom_id.wire",
+    "source_atoms": "frontend_v2.own/finalize retain typed SourceAtomID tuple and HAS_SOURCE edge; not the code_id string field",
+    "owner": "parent_id is typed OperationDefinitionID, imported statement parent=module initializer",
+    "binding": "bind emits WRITES_SLOT to module-owned binding ValueSlotID; this static source binding is not runtime StoredValueWrite",
+    "output": "output emits one ValueSlotID owned by original Import and PRODUCES edge",
+    "cfg": "control producer uses typed atom\u2192SG definition lookup; statement.operations holds typed SG IDs, suite/scope/anchor have independent typed ID domains",
+    "insertion": "BEFORE InsertionPointID points to insertion node and statement anchor ControlFlowNodeID; source/version belong to original root",
+    "wire_range": "record_codec preserves Identifier kind/value/wire; ModuleStatementSlice stores typed suite/before plus exact ordered original SourceReferences/context, never wire strings in typed slots"
+  },
+  "source_context_payload_reads": 0,
+  "real_source_lowerings": 0,
+  "new_fixtures": 0,
+  "budgets_and_guard_unchanged": true
+}

@@ -1,0 +1,39 @@
+{
+  "status": "FROZEN_NOT_RUN",
+  "freeze_sha256": "4f8de487d3f6598d5db13565d5fcdb9b804fd0afa1b908c55f54e8482c2b05d8",
+  "production_sources": [
+    {
+      "bytes": 77617,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/program_lowering.py",
+      "sha256": "a3cb7da0887d04cb0e449eda406a663cc3438bbf78aa4c0bdc4f8e89dc4804f2"
+    },
+    {
+      "bytes": 15826,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/program/module_entries.py",
+      "sha256": "c01e9d27c6a9153991d88ee537e9445a90e4f1cba56239791ae23b12ad075b35"
+    },
+    {
+      "bytes": 25221,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_module_lowering.py",
+      "sha256": "37e7db052eb8eafc59e3f249b57094c79906b32308ff32013f06fca50b6a1696"
+    },
+    {
+      "bytes": 32259,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_module_validation.py",
+      "sha256": "b8c97c4d887dd01a553e37e6b10b0464eef87bec4213bd9583656cdedc3cd8fc"
+    }
+  ],
+  "four_source_only": true,
+  "core28_unchanged": true,
+  "v6_closed_record_and_validator_unchanged": true,
+  "source_worklist_or_main_changed": false,
+  "codec_check": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_import_prefix_g1_20261025/check01/receipt.json",
+  "codec_fixture_not_source_or_runtime_proof": true,
+  "real_source_entry_lowerings": 0,
+  "new_target_exec_compile_prepare": 0,
+  "old_SP6_payload_reads_before_root_gate": 0,
+  "source_layer_payload_reads_before_root_gate": 0,
+  "planned_scope": "one original module, first generic Import selected by original AST/SG/CFG/compiler, exact suffix; no function/module-name rule",
+  "remaining_body_and_import_internals": "REQUIRED",
+  "namespace_content_and_reclamation_proven": false
+}

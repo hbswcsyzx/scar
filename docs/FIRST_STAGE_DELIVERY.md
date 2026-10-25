@@ -27,6 +27,10 @@ CLI 的精确资格与范围见
 2 Regions/9 个入口操作及普通 v6/v5 读回通过。内部语句恢复仍为 0，REQUIRED 展开
 债务和实际 namespace 绑定缺口保留；不是完整 module body。见
 [模块入口及下一步](SOURCE_MODULE_ENTRY.md)。
+后继同原 SP7 独立 postflight exit0，首个 import/namespace-store 接口已展开为
+4 Regions/19 ops，剩余 10 句及 importer 内部仍 REQUIRED。原构造门的报告变量错误
+exit1 保留，丢失测量未重建；主树同一 SP7、旧 SP6/SP5 正常读回通过，未再 lower。
+见 [前缀模型](SOURCE_MODULE_IMPORT_PREFIX.md)。
 
 **当前可复核结果（2026-10-25）：** 完整runtime接线仍为843快照；正式静态源码已发布
 到858，后继新增body尚未接回原运行。12原图普通ADD的恢复消费实际exit0/651.143247s；
