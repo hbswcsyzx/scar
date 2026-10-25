@@ -22,7 +22,7 @@ import time
 from scar.ir.record_codec import decode, encode
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.execution.native_port_protocol import (
-    PROFILE_V2, _make_evidence, _own_capture, _prepare_native_catalog, attributes, canonical, need, replay_batch_interfaces,
+    PROFILE_V2, SCALAR_INPUT_CAPABILITY, _make_evidence, _own_capture, _prepare_native_catalog, attributes, canonical, need, replay_batch_interfaces,
 )
 from scar.trace.native_protocol import (
     NativeProtocolWindowResult, _artifact, _build_execution, _build_program,
@@ -74,6 +74,21 @@ class NativeCaptureBatchResult:
     report: dict
     first_shard: object | None
     first_partial_shard: object | None = None
+
+
+@dataclass(frozen=True)
+class NativeStaticArtifacts:
+    program: ProviderArtifact
+    program_bytes: bytes
+    interface: ProviderArtifact
+    interface_bytes: bytes
+
+    def __post_init__(self):
+        for artifact, raw, schema in ((self.program, self.program_bytes, 'scar.program-graph'),
+                                     (self.interface, self.interface_bytes, 'scar.pinned-torch-protocol-interface')):
+            need(type(artifact) is ProviderArtifact and type(raw) is bytes and artifact.schema == schema
+                 and len(raw) == artifact.size_bytes and sha256(raw).hexdigest() == artifact.sha256,
+                 'static program/catalog need exact original bytes and artifact identities')
 
 
 class _MissingDependency(ValueError):
@@ -820,7 +835,8 @@ def _write_inventory(directory, rows, budget, publish, *, role, metadata=None, c
 
 def bind_native_capture_batches(coordinates, capture_directory, partitioned_native_manifest, out_dir, *,
                                 expected_manifest_sha256, capture_model_path, expected_capture_model_sha256,
-                                budget=NativeCaptureBatchBudget(), progress=None, on_verified_shard=None):
+                                budget=NativeCaptureBatchBudget(), progress=None, on_verified_shard=None,
+                                scalar_input_profile=None, static_artifacts=None):
     """Verify once and account for every actually enumerated dispatch group.
 
     Coordinates must already be freshly bound by the ordinary public binder.
@@ -830,6 +846,8 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
     from scar.ir.execution.validation import prepare_program_snapshot, validate
     need(type(budget) is NativeCaptureBatchBudget, "exact native batch budget required")
     need(on_verified_shard is None or callable(on_verified_shard), "verified shard consumer must be callable")
+    need(scalar_input_profile in (None, SCALAR_INPUT_CAPABILITY), 'unsupported requested scalar capability')
+    need(static_artifacts is None or type(static_artifacts) is NativeStaticArtifacts, 'exact static artifact input required')
     budget.__post_init__()
     out = Path(out_dir).resolve()
     need(not out.exists(), "native batch output must be fresh")
@@ -848,6 +866,8 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
         owner = _SourceIndex(out, budget, progress)
         owner = _acquire(coordinates, capture_directory, partitioned_native_manifest, capture_model_path, out, budget,
                          expected_manifest_sha256, expected_capture_model_sha256, progress, owner)
+        if scalar_input_profile is not None:
+            owner.base['scalar_input_profile'] = scalar_input_profile
         parent_inventory_artifact, parent_inventory = _write_inventory(out / 'native-parent-inventory',
             owner.parent_inventory(), budget, publish, role='native-parent-closure', coordinate_key='original_ordinal',
             metadata={'capability': PARENT_CLOSURE_CAPABILITY,
@@ -912,6 +932,9 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
         interface_bytes = canonical(interface_doc)
         need(len(interface_bytes) <= budget.max_interface_bytes, "shared interface byte budget exceeded before publication")
         interface_artifact = _artifact(out / "native-interface.json", interface_bytes, interface_doc["schema"])
+        if static_artifacts is not None:
+            need(interface_bytes == static_artifacts.interface_bytes, 'independent original scalar/catalog ABI differs')
+            interface_artifact = static_artifacts.interface
         publish(out / "native-interface.json", interface_bytes, budget.max_interface_bytes)
         program_source = {**owner.base, "max_sequences": owner.declared_attempts}
         representatives = [owner.representatives[sig] for sig in sorted(owner.representatives)]
@@ -920,6 +943,9 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
         program_bytes = prepared_snapshot.canonical_bytes(program)
         need(len(program_bytes) <= budget.max_program_bytes, "shared static program byte budget exceeded")
         program_artifact = _artifact(out / "program.json", program_bytes, "scar.program-graph")
+        if static_artifacts is not None:
+            need(program_bytes == static_artifacts.program_bytes, 'independent rebuilt ProgramSnapshot differs')
+            program_artifact = static_artifacts.program
         publish(out / "program.json", program_bytes, budget.max_program_bytes)
         shard_reports, first_shard, first_partial_shard = [], None, None
         prepared_catalog = None
@@ -951,7 +977,8 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             owned = _own_capture(source)
             if prepared_catalog is None:
                 prepared_catalog = _prepare_native_catalog(owned, program, prepared_snapshot)
-            native = _make_evidence(owned, program, execution, va, ea, _prepared=prepared_catalog)
+            native = _make_evidence(owned, program, execution, va, ea, _prepared=prepared_catalog,
+                _scalar_projection=payloads['source-values.json'] if scalar_input_profile is not None else None)
             catalogs = {"value_graphs": {va.sha256: values}, "evidence_graphs": {ea.sha256: evidence},
                         "artifact_bytes": {interface_artifact.sha256: interface_bytes}, "native_port_evidence": native}
             validation = validate(execution, program, prepared_snapshot=prepared_snapshot, **catalogs)
@@ -978,18 +1005,38 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
                             "C": port["geometry"], "D": "CONTENT_STATE_READY_UNPROVED"})
             qualification_artifact, _ = _write_inventory(shard_dir / "port-qualifications", iter(port_rows), budget, publish,
                 role="native-port-qualifications", metadata={"program_snapshot": encode(execution.snapshot)})
+            scalar_rows = []
+            if scalar_input_profile is not None:
+                for interface in interfaces:
+                    for position, port in enumerate(interface['ports']['inputs']):
+                        if port['tensor']:
+                            continue
+                        scalar = port['scalar_input']
+                        denotation = denotations['native-port:' + source['run'] + ':' + str(interface['sequence']) + ':inputs:denotation:' + str(position)]
+                        scalar_rows.append({'sequence': interface['sequence'], 'position': position,
+                            'native_path': port['path'], 'provider_type': port['type'],
+                            'formal_kind': scalar.get('formal_kind'), 'formal_real_kind': scalar.get('formal_real_kind'),
+                            'frontier': scalar['frontier'], 'denotation': encode(denotation), 'input_root_not_consumer_output': True})
+                scalar_artifact, _ = _write_inventory(shard_dir / 'scalar-input-qualifications', iter(scalar_rows), budget, publish,
+                    role='native-scalar-input-qualifications', metadata={'scalar_input_profile': scalar_input_profile,
+                        'program_snapshot': encode(execution.snapshot)})
             report = {"schema": "scar.native-capture-execution-shard", "schema_version": 2, "profile": PROFILE_V2,
                 "status": "NATIVE_PORTS_MODELED_WITH_EXPLICIT_QUALIFICATION", "sequences": sorted(expected),
                 "program_snapshot": encode(execution.snapshot), "execution": encode(artifact),
                 "values_projection": encode(va), "evidence_projection": encode(ea),
                 "signature_ids": sorted({i["signature_id"] for i in interfaces}),
-                "actual_activations": len(execution.activations), "tensor_denotations": len(execution.denotations),
+                "actual_activations": len(execution.activations), "tensor_denotations": len(tensor_ports),
                 "native_tensor_ports": len(tensor_ports), "held_object_ports": b_count,
                 "unresolved_object_ports": len(tensor_ports) - b_count, "geometry_qualified_ports": c_count,
                 "geometry_gap_ports": len(tensor_ports) - c_count,
                 "port_qualifications": encode(qualification_artifact),
                 "physical_associations": len(geometry), "gap_counts": dict(Counter(g.code for g in validation.gaps)),
                 "wall_seconds": time.monotonic() - shard_started}
+            if scalar_input_profile is not None:
+                report.update(scalar_input_profile=scalar_input_profile, scalar_input_ports=len(scalar_rows),
+                    scalar_observed_roots=sum(r['frontier'] is None for r in scalar_rows),
+                    scalar_frontiers=dict(Counter(r['frontier'] for r in scalar_rows if r['frontier'] is not None)),
+                    scalar_input_qualifications=encode(scalar_artifact))
             payloads.update({"execution.json": execution_bytes, "validation.json": canonical(validation_doc),
                              "report.json": canonical(report)})
             caps = {"source-values.json": budget.max_shard_values_bytes, "source-evidence.json": budget.max_shard_evidence_bytes,
@@ -1024,7 +1071,7 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             if first_partial_shard is None and b_count < len(tensor_ports):
                 first_partial_shard = verified
             owner.emit({"stage": "actual_shard_verified", "number": len(shard_reports) - 1,
-                        "activations": len(execution.activations), "tensor_denotations": len(execution.denotations)})
+                        "activations": len(execution.activations), "tensor_denotations": len(tensor_ports)})
 
         leaves, flat_leaves = 0, 0
         for seq in sequences:
@@ -1094,6 +1141,13 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             "whole_model_established": False, "transformation_authorized": False,
             "target_executions": 0, "compile_calls": 0, "prepare_calls": 0}
         published = sum(p.stat().st_size for p in out.rglob("*") if p.is_file() and "private" not in p.relative_to(out).parts)
+        if scalar_input_profile is not None:
+            report.update(scalar_input_profile=scalar_input_profile,
+                scalar_input_ports=sum(r['scalar_input_ports'] for r in shard_reports),
+                scalar_observed_roots=sum(r['scalar_observed_roots'] for r in shard_reports),
+                scalar_frontiers=dict(sum((Counter(r['scalar_frontiers']) for r in shard_reports), Counter())),
+                scalar_input_contents_observed_locally=any(r['scalar_observed_roots'] for r in shard_reports), scalar_upstream_producers_established=False,
+                static_artifacts_reused=static_artifacts is not None)
         report["published_bytes_before_report"] = published
         need(len(canonical(report)) <= budget.max_report_bytes and published + len(canonical(report)) <= budget.max_output_bytes,
              "final report/publication byte budget exceeded before publication")
@@ -1127,7 +1181,8 @@ class NativeCaptureModelBatchResult:
 
 
 def bind_native_capture_model_batches(capture_model_path, out_dir, *, expected_sha256,
-                                     input_budget=None, budget=None, progress=None, on_verified_shard=None):
+                                     input_budget=None, budget=None, progress=None, on_verified_shard=None,
+                                     scalar_input_profile=None, static_program=None, static_interface=None):
     """Reuse G1 graphs with a genuine fresh ordinary coordinate acquisition.
 
     This entry never imports a capture/model, reconstructs an owner from JSON,
@@ -1146,16 +1201,19 @@ def bind_native_capture_model_batches(capture_model_path, out_dir, *, expected_s
     need(limits.max_wall_seconds <= 120 and limits.max_index_bytes <= 128_000_000
          and limits.max_output_bytes <= 64_000_000, 'small capture model entry budget exceeds hard cap')
     need(on_verified_shard is None or callable(on_verified_shard), 'verified shard consumer must be callable')
+    need(scalar_input_profile in (None, SCALAR_INPUT_CAPABILITY), 'unsupported scalar capability')
+    need((static_program is None) == (static_interface is None), 'program/catalog must be supplied together')
     out = Path(out_dir).resolve()
     need(not out.exists(), 'capture model binding output must be fresh')
     out.mkdir(parents=True)
     started = time.monotonic()
 
-    def control(path, expected=None):
+    def control(path, expected=None, *, program_IR=False):
         path = Path(path)
         need(path.is_absolute() and path.is_file() and not path.is_symlink(), 'control metadata is not an exact regular path')
         size = path.stat().st_size
-        charged = inputs.charge('control: ' + path.name, size, size, control=True)
+        charged = inputs.charge(('program IR: ' if program_IR else 'control: ') + path.name,
+                                size, size, control=not program_IR)
         with path.open('rb') as stream:
             raw = stream.read(size + 1)
         need(len(raw) == size and (expected is None or sha256(raw).hexdigest() == expected), 'control metadata changed')
@@ -1164,6 +1222,12 @@ def bind_native_capture_model_batches(capture_model_path, out_dir, *, expected_s
 
     try:
         model, model_raw = control(capture_model_path, expected_sha256)
+        static = None
+        if static_program is not None:
+            need(type(static_program) is type(static_interface) is ProviderArtifact, 'typed exact static artifacts required')
+            _, program_raw = control(static_program.uri, static_program.sha256, program_IR=True)
+            _, interface_raw = control(static_interface.uri, static_interface.sha256)
+            static = NativeStaticArtifacts(static_program, program_raw, static_interface, interface_raw)
         need(model.get('schema') == 'scar.capture-model' and model.get('schema_version') == 1
              and model.get('coordinate_identity_consistent') is True, 'unsupported G1 capture model')
         root = Path(model['capture']).resolve()
@@ -1259,7 +1323,8 @@ def bind_native_capture_model_batches(capture_model_path, out_dir, *, expected_s
             need(time.monotonic() - started <= limits.max_wall_seconds, 'capture-model whole wall budget')
         native = bind_native_capture_batches(coordinates, root, manifest_path, out / 'native',
             expected_manifest_sha256=declaration['stored_sha256'], capture_model_path=capture_model_path,
-            expected_capture_model_sha256=expected_sha256, budget=limits, progress=progress, on_verified_shard=consume)
+            expected_capture_model_sha256=expected_sha256, budget=limits, progress=progress, on_verified_shard=consume,
+            scalar_input_profile=scalar_input_profile, static_artifacts=static)
         need(sum(r['raw_bytes_read'] for r in native.report['raw_reads']) == source_raw
              and sum(r['stored_bytes_read'] for r in native.report['raw_reads']) == source_stored,
              'actual native complete-source read accounting differs')
@@ -1292,6 +1357,11 @@ def bind_native_capture_model_batches(capture_model_path, out_dir, *, expected_s
             'state_effects_established': False, 'resource_ready_established': False,
             'whole_elapsed_seconds': time.monotonic() - started}
         report_payload = canonical(report)
+        if scalar_input_profile is not None:
+            report.update(scalar_input_profile=scalar_input_profile,
+                scalar_input_ports=native.report['scalar_input_ports'], scalar_observed_roots=native.report['scalar_observed_roots'],
+                scalar_frontiers=native.report['scalar_frontiers'], scalar_upstream_producers_established=False)
+            report_payload = canonical(report)
         published = sum(p.stat().st_size for p in out.rglob('*') if p.is_file() and 'private' not in p.relative_to(out).parts)
         need(published + len(association_payload) + len(report_payload) <= limits.max_output_bytes, 'whole binding published output byte cap')
         need(time.monotonic() - started <= limits.max_wall_seconds, 'capture-model whole wall budget')
@@ -1317,4 +1387,4 @@ def bind_native_capture_model_batches(capture_model_path, out_dir, *, expected_s
         raise
 
 
-__all__ += ['NativeCaptureModelBatchResult', 'bind_native_capture_model_batches']
+__all__ += ['NativeCaptureModelBatchResult', 'bind_native_capture_model_batches', 'NativeStaticArtifacts']
