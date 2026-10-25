@@ -203,6 +203,34 @@ def _native_slot_fact(source, interface, direction, port):
         str(source["node_ordinals"][str(interface["node"]["id"])] ) + "/" + direction + "/values/" + suffix}
 
 
+def _native_region_layout_view(region, *, point_layout, profile, provider_revision):
+    """Check raw or explicitly normalized layout against its actual point.
+
+    The receipt selects a representation rule, never a weaker geometry or
+    identity check. Canonical spellings without their complete receipt reject.
+    """
+    from scar.trace.tensor_physical_import import canonical_tensor_layout
+    need(type(region) is dict and type(region.get('metadata')) is dict,
+         'native region layout view requires its original record metadata')
+    metadata, layout = region['metadata'], region['layout']
+    receipt = 'provider_layout' in metadata or 'layout_normalization_rule' in metadata
+    if receipt:
+        need(metadata.get('layout_normalization_rule') == 'PINNED_TORCH_LAYOUT_V1'
+             and type(metadata.get('provider_layout')) is str and bool(metadata['provider_layout']),
+             'native region layout normalization receipt is incomplete or unsupported')
+        provider_layout = metadata['provider_layout']
+        canonical_layout = canonical_tensor_layout(provider_layout, profile=profile, provider_revision=provider_revision)
+        need(layout == canonical_layout, 'native region canonical layout contradicts its original provider receipt')
+        view = 'ALREADY_CANONICAL_PINNED_TORCH_LAYOUT_V1'
+    else:
+        provider_layout = layout
+        canonical_layout = canonical_tensor_layout(provider_layout, profile=profile, provider_revision=provider_revision)
+        view = 'RAW_PROVIDER_LAYOUT'
+    need(provider_layout == point_layout, 'native region provider layout contradicts exact physical point')
+    return {'source_view': view, 'provider_layout': provider_layout, 'canonical_layout': canonical_layout,
+            'rule': 'PINNED_TORCH_LAYOUT_V1'}
+
+
 def _geometry_v2(source, port, marker, physical, ordinal):
     """Point geometry is independent of Python object identity qualification."""
     gap = lambda reason: {"status": "UNPROVED", "reason": reason}
@@ -235,6 +263,8 @@ def _geometry_v2(source, port, marker, physical, ordinal):
     if witness is None or witness.get("region") is None or witness.get("allocation") is None:
         return gap("ORIGINAL_GEOMETRY_RECORD_UNAVAILABLE")
     region, allocation = witness["region"]["record"], witness["allocation"]["record"]
+    layout_view = _native_region_layout_view(region, point_layout=meta['layout'],
+        profile=source['physical_profile'], provider_revision=source['provider_revision'])
     physical_ref = "sha256:" + source["artifacts"]["physical"]["sha256"] + "#line/" + str(physical["index"]) + "/arguments/" + str(ordinal)
     native_ref = "sha256:" + source["artifacts"]["eto"]["sha256"] + "#/nodes/" + str(source["node_ordinals"][str(marker["id"])]) + "/inputs/values/" + str(ordinal)
     need(region["metadata"]["physical_observation"] == physical_ref
@@ -244,7 +274,7 @@ def _geometry_v2(source, port, marker, physical, ordinal):
          and region["metadata"]["provider_tensor_id"] == meta["provider_tensor_id"]
          and region["offset"] == port["value"][2] and region["shape"] == port["shape"]
          and region["strides"] == port["strides"] and region["dtype"] == meta["dtype"]
-         and region["device"] == meta["device"]["text"] and region["layout"] == meta["layout"],
+         and region["device"] == meta["device"]["text"] and layout_view['provider_layout'] == meta["layout"],
          "original region contradicts qualified point geometry")
     need(region["allocation"] == allocation["id"] and allocation["device"] == region["device"]
          and allocation["metadata"]["provider_allocation_id"] == epoch[1]
