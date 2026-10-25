@@ -80,6 +80,8 @@
   "schema": "scar.native-input-binding-source-application",
   "schema_version": 1,
   "source_baseline": "7946a40fd3e5f9b01f68f4fdf3423f3ff2cb7cd3",
+  "source_delivery_commit": "cb77abc81d0d2249f583f103a9731934bb9a34d5",
+  "source_delivery_commit_role": "later source and evidence archive; not the runtime producer HEAD",
   "source_tree": "/home/zyf/AAA/scar-worktrees/native-scalar-model",
   "status": "FOUR_EXACT_FROZEN_FILES_APPLIED",
   "whole_model": "OPEN"

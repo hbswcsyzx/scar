@@ -19,6 +19,14 @@ S1 审计、已有数据的 S3 接线和独立产品复核可以并行；会改�
 
 ## 2. 当前实际下一门
 
+通用CPU入口已推进到265调用的源码对应，以及1entry/28ops的正常lower、同SP5普通
+source/code读回（6.771874s）；9/271及全部前沿保留，260权重不计runtime。
+下一小门先把现有catalog/plan/worker接回通用`model-run --stage source-entries`入口，
+严格固定dependency terminal/products，默认1entry，不重raw/dependency/native/OS。
+然后消费原SP5进行qualified publication与普通binding；不用重新lower来恢复已失效
+live owner，CP2仍为未知成本。详见[入口](MODEL_RUN.md)与
+[实际门](../artifacts/experiments/source_entry_catalog_gate_20261025/RESULT.md)。
+
 当前正式静态源码快照为858个active bodies/2217个定义/151个文件，769 UNSUPPORTED、
 590 NOT_ATTEMPTED。三kwargs图的846父快照上，后继12个既有图普通ADD及组合消费已完成；
 resume02 actual exit0/651.143247s、12 ordinary-reader通过。原publisher消费失败396.750s
@@ -102,9 +110,9 @@ stored仅声明/代码估计。12图后继用1800s ceiling的普通ADD/consumer�
   [创建与驱动](SOURCE_GENERATOR_EXPRESSIONS.md)，main792b1228、隔离存档aad9a534。
 
 下一批源码只准备把三张已验收图（两string148/131、generator312）一次ADD/consume；
-禁止再lower或按body重扫runtime。自动入口P0则先接`--from-capture`的metadata规划及
-合法fresh monolithic链，原返回检查点handoff和partitioned frontend/schema接线仍是
-明确阻断。引用型workflow root不取代规范图、不以存在根报告计完整。
+禁止再lower或按body重扫runtime。自动入口P0的metadata规划、fresh monolithic链和
+一项entry/真实return普通读回已实测；统一source-entries入口及qualified publication/
+binding仍待接线。引用型workflow root不取代规范图、不以存在根报告计完整。
 准确接口、预算与分步验收见
 [自动入口设计](../artifacts/analysis/model_run_orchestration_design_20261025/PLAN.md)。
 

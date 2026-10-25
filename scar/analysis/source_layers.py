@@ -828,9 +828,17 @@ def load_source_graph_artifact(path, *, schema, canonical_sha256, canonical_byte
             or document["namespace_root"] != context.namespace_root):
         raise ValueError("source graph root/snapshot/context differs from its declaration")
     if schema == "scar.dependency-source-graphs":
-        if (snapshot_locator.get("origin") != "PARENT"
-                or document["source_snapshot_artifact"] != snapshot_locator["artifact"]):
-            raise ValueError("original graph snapshot artifact differs from its parent declaration")
+        artifact_fields = {"schema", "schema_version", "path", "canonical_sha256", "canonical_bytes", "compressed_bytes"}
+        if declaration.artifact.schema == "scar.dependency-source-admissions" and set(snapshot_locator) == artifact_fields:
+            original_snapshot = snapshot_locator
+        elif (declaration.artifact.schema == "scar.dependency-source-continuation"
+              and set(snapshot_locator) == {"origin", "source_root", "artifact", "parent_directory", "parent_report_raw_sha256"}
+              and snapshot_locator.get("origin") == "PARENT" and type(snapshot_locator.get("artifact")) is dict):
+            original_snapshot = snapshot_locator["artifact"]
+        else:
+            raise ValueError("original graph has no exact admission or continuation snapshot declaration")
+        if set(original_snapshot) != artifact_fields or _canonical(document["source_snapshot_artifact"]) != _canonical(original_snapshot):
+            raise ValueError("original graph snapshot artifact differs from its original declaration")
     elif document["source_snapshot_locator"] != snapshot_locator:
         raise ValueError("continuation graph snapshot locator differs from its original declaration")
     metadata = {"archive_sha256": canonical_sha256, "archive_bytes": canonical_bytes,

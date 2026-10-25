@@ -70,7 +70,24 @@ python -B -m scar.cli model-run --from-model-run RUN/model-run.json \
 4loads/6matches、compile0。工具跨worktree4次和frozen1次未解析；project module1次
 保留原scope。源码与编译匹配不是函数环境、actual/formal、状态或执行对应的证明。
 
-原G1绑定报告不修改，body-linked仍0；entry/catalog、partitioned return-proof handoff、
+该门结束时原G1绑定报告不修改，body-linked仍0；后继entry消费见下节。
 正式body publication与新普通binding尚待接线。完整模型及LeWM正式覆盖数不变。
 源图bulk按精确local receipts保留，未把全部86MB解码数据复制进导航root。
 见[实际根复核](../artifacts/experiments/model_run_dependency_gate_20261025/ROOT_REVIEW.json)。
+
+## 原定义entry、真实return与普通读回
+
+同一CPU样例后继实际exit0/6.771874s：公共SourceEntryCatalog保留6候选及原9组/271调用，
+按原调用权重自动选1entry，消费原source/context与readonly CodeWitness，正常sealed
+lower返回28ops。相同返回已保存为SourceProgram5，普通STRUCTURE/source与独立code
+reader均通过；readonly1load/2matches、compile0，source_prepare0，无raw/native/OS重做。
+原260调用仅是所选定义的权重，不能增加runtime覆盖。正式静态858/runtime843不变。
+
+live owned return只在该进程中有效，JSON不能恢复owner。后继可对原SP5 artifact做普通
+独立准入，发布CP2未知成本，无需重复lower；publisher/binder及完整第一阶段仍OPEN。
+见[实际结果](../artifacts/experiments/source_entry_catalog_gate_20261025/RESULT.md)。
+
+下一入口拟为`model-run --from-model-run <dependency terminal> --stage source-entries`，
+**当前尚未实现该CLI阶段**。将固定原terminal/admission/archive/source scope，只复用
+现有catalog/plan/worker，独立默认窗口1entry/1file/4000ops；不重dependency/raw/native/OS，
+不混入publication/binding，也不创建第二份图权威。

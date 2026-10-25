@@ -6,6 +6,16 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：通用entry正常lower及普通读回1项通过，尚未出版
+
+同CPU依赖门6组/265源码对应之后，entry门session67217 actualexit0/6.771874s，
+保6候选/9groups/271calls；按权重选1entry，正常lower实际28ops，同原SP5的普通
+STRUCTURE/source与独立code reader通过。readonly1load/2matches、compile0；未重做
+raw、dependency/native/OS或prepare_source。260是权重，不是新增runtime。
+live owner随进程结束失效；原SP5可再独立准入CP2未知成本，无需重复lower。
+publication/binding未运行，正式858静态/843runtime和第一阶段OPEN不变。见
+[结果](../artifacts/experiments/source_entry_catalog_gate_20261025/RESULT.md)及[入口](MODEL_RUN.md)。
+
 ### 2026-10-25：12原图普通ADD的恢复消费完成，source858/runtime843
 
 root确认resume02 session20761 actual exit0/651.143247s，peak1494132KiB；12个ordinary

@@ -4,17 +4,16 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
-**后继通用入口已实际串联，模型缺口仍保留：** `model-run --from-capture`在已有CPU
-capture完成八阶段、exit0/125.90s，未执行目标。该样例只有module顶层，typed body0、
-271调用全未解析：269外部Python源码未准入、1 frozen、1 module无入口接口。
-所以当前优先项是自动依赖准入及entry类型接线，不能把入口成功当第一阶段完成。
+**通用入口的最新有限结果：** 原CPU G1八阶段125.90s通过时，基线为0body/271调用
+未解析。后继自动依赖门为6组/265调用建立SOURCE_VERIFIED；再后继entry门6.771874s
+实际正常lower1entry/28ops，相同SP5的普通source/code reader通过。260只是原调用权重，
+尚未publication或新binding；当前优先为统一source-entries入口及正规出版/运行接线。
 见[入口及范围](MODEL_RUN.md)与
-[真实归因](../artifacts/experiments/model_run_offline_g1_20261025/RESULT.md)。
-同一CPU采集的原生输入metadata已完成普通归档/actor归属；离线2332行可核出2330组
-tree→Kineto→ETO对应和3095个原输入路径，无contradiction。它们尚未产生canonical
-NativeInputRef，不授Python对象、内容/state或ready资格，也不增加旧LeWM覆盖。
-见[归档](NATIVE_TENSOR_INPUTS.md)及
-[有界路径审计](../artifacts/experiments/native_input_port_audit_20261025/RESULT.md)。
+[entry实际结果](../artifacts/experiments/source_entry_catalog_gate_20261025/RESULT.md)。
+同CPU后继native门已将516个metadata路径关联实际规范NativeInputRef端口，260正常
+调用/2shards；3095路径中2579项仍保frontier。此资格及上述source结果均属于新CPU
+样例，与旧LeWM独立；不授Python对象、内容/state或ready，也不增加其覆盖。见
+[归档与规范端口关联](NATIVE_TENSOR_INPUTS.md)。
 
 **当前可复核结果（2026-10-25）：** 完整runtime接线仍为843快照；正式静态源码已发布
 到858，后继新增body尚未接回原运行。12原图普通ADD的恢复消费实际exit0/651.143247s；

@@ -388,6 +388,10 @@ def run_source_frontend(plan, code_witnesses, out_dir, *, budget=SourceFrontendB
     Same-input failures are skipped through explicit immutable resume indexes.
     Changed capabilities/compiler/source/producer/budget produce a different key.
     """
+    if type(plan) is SourceEntryFrontendPlan:
+        _need(not resume_from, "entry v2 resume requires a fresh explicit plan/attempt")
+        _need(code_witnesses is plan.catalog.archives, "entry worker requires its explicitly admitted archives")
+        return run_source_entries(plan, out_dir, budget=budget, progress=progress)
     _need(type(plan) is SourceFrontendPlan and type(budget) is SourceFrontendBudget, "regular worklist and independent worker budget required")
     plan.require_unchanged()
     budget.__post_init__()
@@ -553,4 +557,261 @@ def run_source_frontend(plan, code_witnesses, out_dir, *, budget=SourceFrontendB
         index.close()
 
 
-__all__ = ['SourceFrontendBudget', 'SourceFrontendPlan', 'plan_source_frontend', 'run_source_frontend']
+def _entry_producer():
+    result = _producer()
+    directory = Path(__file__).resolve().parent
+    return result + [_receipt(directory / name) for name in
+                     ('source_entry_catalog.py', 'source_attachments.py', 'source_layers.py', 'compiler_witness_archives.py')]
+
+
+@dataclass(frozen=True)
+class SourceEntryFrontendPlan:
+    catalog: object
+    document: dict
+    entries: tuple[dict, ...]
+    groups: tuple[dict, ...]
+    dispatch: tuple[dict, ...]
+    digest: str
+
+    def require_unchanged(self):
+        from scar.analysis.source_entry_catalog import SourceEntryCatalog
+        _need(type(self.catalog) is SourceEntryCatalog and self.digest == _hash({
+            'document': self.document, 'entries': self.entries, 'groups': self.groups, 'dispatch': self.dispatch}),
+            'entry plan mutated')
+        _need(self.catalog.inputs() == self.document['catalog_inputs'], 'entry source/archive inputs changed')
+
+
+def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=(
+        SourceLanguageCapability.FIXED_UNPACK, SourceLanguageCapability.SLICE_KEYS,
+        SourceLanguageCapability.LEXICAL_LOCALS, SourceLanguageCapability.CALL_KWARGS_314_V1), out_dir=None):
+    """Version2: metadata-only window over original qualified entry candidates."""
+    from scar.analysis.source_entry_catalog import SourceEntryCatalog
+    _need(type(catalog) is SourceEntryCatalog and type(budget) is SourceFrontendBudget,
+          'original entry catalog and independent frontend budget required')
+    budget.__post_init__()
+    SourceLanguageOptions(capabilities)
+    metadata = catalog.metadata()
+    entries, groups = tuple(metadata['candidates']), tuple(metadata['groups'])
+    _need(len(entries) <= budget.max_catalog_bodies and len(groups) <= budget.max_catalog_groups,
+          'full entry catalog exceeds budget')
+    dispatch, files = [], set()
+    for entry in entries:
+        if entry['status'] != 'CANDIDATE_SOURCE_GRAPH_UNVERIFIED':
+            continue
+        if len(dispatch) >= budget.max_dispatch_bodies:
+            break
+        if entry['file_key'] not in files and len(files) >= budget.max_source_files:
+            continue
+        dispatch.append(entry)
+        files.add(entry['file_key'])
+    document = {'schema': 'scar.source-frontend-plan', 'schema_version': 2,
+        'catalog_inputs': catalog.inputs(), 'budget': asdict(budget), 'producer': _entry_producer(),
+        'profile': BodyLoweringProfile.STRUCTURED_ENV.value, 'capabilities': [x.value for x in capabilities],
+        'selection': 'qualified original entry candidates, actual call weight descending; bounded window',
+        'summary': {'candidate_entries': len(entries), 'current_groups': len(groups),
+                    'current_calls': metadata['entered_invocations'], 'dispatch_entries': len(dispatch)},
+        'source_body_publication': 'NOT_RUN', 'runtime_binding': 'NOT_RUN', 'first_stage_complete': False}
+    digest = _hash({'document': document, 'entries': entries, 'groups': groups, 'dispatch': tuple(dispatch)})
+    result = SourceEntryFrontendPlan(catalog, document, entries, groups, tuple(dispatch), digest)
+    if out_dir is not None:
+        root = Path(out_dir).resolve()
+        _need(not root.exists(), 'entry plan output must be fresh')
+        root.mkdir(parents=True)
+        for name, rows in (('entries', entries), ('groups', groups), ('dispatch', dispatch)):
+            _write_rows(root, name + '.json.gz', rows, budget.max_record_bytes)
+        (root / 'plan.json').write_bytes(_bytes({**document, 'plan_sha256': digest}) + b'\n')
+    return result
+
+
+_OWNED_ENTRY_RETURN = object()
+
+
+class _OwnedEntryReturn:
+    """Live worker provenance; JSON is never accepted as its constructor input."""
+    def __init__(self, seal, entry, context, result, evidence, work_key):
+        _need(seal is _OWNED_ENTRY_RETURN, 'owned return is minted only at the worker lower call')
+        self.entry, self.context, self.result, self.evidence, self.work_key = entry, context, result, evidence, work_key
+        self._objects = tuple(getattr(result, name) for name in ('graph', 'metadata', 'interface', 'frame', 'structured', 'language'))
+        self._cost = result.operations_emitted
+        self._seal = seal
+        self.program_reference = None
+        self._bound_reference_json = None
+        self._program_digest = None
+
+    def require_unchanged(self):
+        _need(self._seal is _OWNED_ENTRY_RETURN and all(getattr(self.result, name) is original for name, original in
+              zip(('graph', 'metadata', 'interface', 'frame', 'structured', 'language'), self._objects))
+              and type(self.result.operations_emitted) is int and self.result.operations_emitted == self._cost,
+              'actual lowerer-return object identity/cost changed')
+        self.entry._owner.require_entry(self.entry)
+        _need(self._bound_reference_json is None or self._bound_reference_json == _bytes(self.program_reference),
+              'owned original artifact reference changed')
+        if self._program_digest is not None:
+            _need(_hash(self.program().to_dict()) == self._program_digest, 'owned return fields changed after serialization')
+
+    def program(self):
+        r = self.result
+        return SourceProgram(r.graph, r.metadata, self.context.semantic, self.context.semantics,
+            self.context.control, BodyLoweringProfile.STRUCTURED_ENV, r.interface, r.frame, r.structured, r.language)
+
+    def record(self):
+        self.require_unchanged()
+        r = self.result
+        return {'schema': 'scar.source-frontend-lowered-return', 'schema_version': 2,
+            'entry_reference': encode(self.entry.reference), 'code_source_origin': self.entry.origin,
+            'work_key': self.work_key, 'metadata': encode(r.metadata), 'interface': encode(r.interface),
+            'frame': encode(r.frame), 'structured': encode(r.structured), 'language': encode(r.language),
+            'operations_emitted': r.operations_emitted, 'graph_present': r.graph is not None,
+            'graph_artifact': self.program_reference, 'live_owner_restored_by_record': False,
+            'normal_publication_checkpoint': 'CP2_UNKNOWN_COST_NOT_YET_PUBLISHED', 'whole_program_established': False}
+
+
+def _lower_and_capture_entry(session, entry, context, evidence, capabilities, allocation, work_key):
+    # The result is produced here. There is deliberately no input accepting a
+    # purported LoweredSourceBody, serialized success flag or materialized CP1.
+    evidence.require_definition(entry.reference.snapshot, entry.reference.definition, entry.reference.source)
+    options = SourceLanguageOptions(capabilities, evidence)
+    result = session.lower(entry.captured.qualname.replace('.<locals>.', '.'), source=entry.reference.source,
+        max_operations=allocation, expand_candidates=False, profile=BodyLoweringProfile.STRUCTURED_ENV,
+        language_options=options)
+    _need(type(result.operations_emitted) is int and 0 <= result.operations_emitted <= allocation
+          and result.metadata.source == entry.reference.snapshot, 'actual return source/cost differs')
+    if result.graph is not None:
+        _need(result.interface is not None and result.interface.definition == entry.reference.definition
+              and result.structured is not None and result.structured.source == entry.reference.source,
+              'actual return has a different original definition/source')
+    return _OwnedEntryReturn(_OWNED_ENTRY_RETURN, entry, context, result, evidence, work_key)
+
+
+@dataclass(frozen=True)
+class SourceEntryFrontendResult:
+    document: dict
+    owned_returns: tuple[object, ...]
+    digest: str
+
+    def require_unchanged(self):
+        _need(self.digest == _hash(self.document), 'entry result accounting mutated')
+        for item in self.owned_returns:
+            _need(type(item) is _OwnedEntryReturn, 'result contains a foreign owned return')
+            item.require_unchanged()
+
+
+def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress=None):
+    """Normal sealed lowering and ordinary SP5/code readback, no publication."""
+    from scar.analysis.code_witness import CodeWitnessUnavailable
+    from scar.analysis.structured_lowering import require_valid_structured_body
+    _need(type(plan) is SourceEntryFrontendPlan and type(budget) is SourceFrontendBudget,
+          'entry v2 plan and independent worker budget required')
+    plan.require_unchanged()
+    budget.__post_init__()
+    requested = SourceFrontendBudget(**plan.document['budget'])
+    _need(all(getattr(requested, key) <= getattr(budget, key) for key in asdict(budget)), 'entry plan exceeds worker ceilings')
+    _need(_entry_producer() == plan.document['producer'], 'entry worker producer changed')
+    root = Path(out_dir).resolve()
+    _need(not root.exists(), 'entry worker output must be fresh')
+    root.mkdir(parents=True)
+    started, charged, source_bytes, output_bytes = time.perf_counter(), 0, 0, 0
+    owned_returns, rows, file_stats = [], [], {}
+    capabilities = tuple(SourceLanguageCapability(x) for x in plan.document['capabilities'])
+    active_file = context = session = None
+    index = (root / 'attempts.jsonl').open('x', buffering=1)
+    try:
+        for ordinal, candidate in enumerate(plan.dispatch, 1):
+            if charged >= requested.max_total_operations or time.perf_counter() - started >= requested.max_elapsed_seconds:
+                break
+            allocation = min(requested.max_operations_per_body, requested.max_total_operations - charged)
+            folder = root / f'attempt-{ordinal:05d}'
+            folder.mkdir()
+            row = {'schema': 'scar.source-frontend-attempt', 'schema_version': 2,
+                'entry_key': candidate['entry_key'], 'source_calls': candidate['calls'], 'status': 'STARTED',
+                'program': None, 'operations_emitted': None, 'budget_charge': 0, 'construction_cost_known': False,
+                'public_structure_reader': False, 'independent_code_reader': False, 'publication': 'NOT_RUN',
+                'target_executed': False, 'first_stage_complete': False}
+            row['work_key'] = _hash({'plan': plan.digest, 'entry': candidate, 'allocation': allocation})
+            (folder / 'started.json').write_bytes(_bytes(row) + b'\n')
+            lower_started, owned = False, None
+            try:
+                entry = plan.catalog.resolve(candidate['entry_key'])
+                evidence = SourceCodeEvidence.from_entry(plan.catalog, entry)
+                row['code_witness'] = evidence.to_dict()
+                if active_file != entry.file_key:
+                    _need(len(file_stats) < requested.max_source_files, 'worker source-file ceiling exceeded')
+                    context = plan.catalog.prepare(entry)
+                    source_bytes += len(context.text.encode())
+                    _need(source_bytes <= requested.max_source_bytes, 'worker decoded source-byte ceiling exceeded')
+                    session = context.seal_for_lowering()
+                    active_file = entry.file_key
+                    file_stats[active_file] = {'context_builds': 1, 'sealed_sessions': 1,
+                        'source_prepare_attempts': 0, 'decoded_source_bytes': len(context.text.encode())}
+                lower_started = True
+                owned = _lower_and_capture_entry(session, entry, context, evidence, capabilities, allocation, row['work_key'])
+                owned_returns.append(owned)
+                row.update(operations_emitted=owned.result.operations_emitted, budget_charge=owned.result.operations_emitted,
+                           construction_cost_known=True, entry_reference=encode(entry.reference))
+                (folder / 'returned-metadata.json').write_bytes(_bytes(owned.record()) + b'\n')
+                if owned.result.graph is None:
+                    row['status'] = 'UNSUPPORTED'
+                else:
+                    document = owned.program().to_dict()
+                    owned._program_digest = _hash(document)
+                    ref = _write_shard(folder, 'source-program5.json.gz', document, limit=requested.max_record_bytes)
+                    ref = {**ref, 'uri': str(folder / ref['uri']), 'external': True}
+                    owned.program_reference = {'artifact': ref, 'pointer': '#/graph'}
+                    owned._bound_reference_json = _bytes(owned.program_reference)
+                    row['program'] = ref
+                    output_bytes += ref['physical_bytes']
+                    (folder / 'lowered-return.json').write_bytes(_bytes(owned.record()) + b'\n')
+                    # Ordinary reader, not another lowering. The code proof is
+                    # independently resolved again from the admitted archive.
+                    restored, _physical = _read_receipt(ref['uri'], limit=requested.max_record_bytes)
+                    _need(all(_physical[name] == ref[name] for name in
+                              ('physical_sha256', 'physical_bytes', 'decoded_sha256', 'decoded_bytes')),
+                          'ordinary reader consumed a different original body artifact')
+                    checked = SourceProgram.read_structure(restored, max_operations=allocation,
+                        source_texts={entry.reference.snapshot.path: context.text})
+                    independent = SourceCodeEvidence.from_entry(plan.catalog, entry)
+                    require_valid_structured_body(checked.structured, checked.graph, checked.interface, checked.metadata,
+                        semantic=checked.semantic, control=checked.control, language=checked.language,
+                        source_tree=context.tree, language_options=SourceLanguageOptions(capabilities, independent))
+                    owned.require_unchanged()
+                    row.update(status='SUCCEEDED', public_structure_reader=True, independent_code_reader=True)
+            except CodeWitnessUnavailable as error:
+                row.update(status='CODE_WITNESS_UNAVAILABLE', error={'type': type(error).__name__, 'detail': str(error)})
+            except Exception as error:
+                row.update(status='FAILED', error={'type': type(error).__name__, 'detail': str(error),
+                                                  'traceback': traceback.format_exc()})
+            if owned is None and lower_started:
+                row['budget_charge'] = allocation
+            charged += row['budget_charge']
+            row['elapsed_s'] = time.perf_counter() - started
+            (folder / 'result.json').write_bytes(_bytes(row) + b'\n')
+            index.write((_bytes(row) + b'\n').decode())
+            index.flush()
+            rows.append(row)
+            output_bytes += len(_bytes(row)) + 1
+            _need(output_bytes <= requested.max_output_bytes, 'worker output byte ceiling exceeded')
+            if progress is not None:
+                progress({'stage': 'source_entry_attempt', 'entry_key': row['entry_key'], 'status': row['status']})
+        plan.require_unchanged()
+        _need(_entry_producer() == plan.document['producer'], 'entry worker producer changed during construction')
+        counts = Counter(x['status'] for x in rows)
+        summary = {'schema': 'scar.source-frontend-result', 'schema_version': 2, 'status': 'FINISHED_WITH_OPEN',
+            'plan_sha256': plan.digest, 'counts': dict(counts), 'actual_lower_returns': len(owned_returns),
+            'original_candidate_entries': len(plan.entries), 'original_current_groups': len(plan.groups),
+            'original_current_calls': plan.document['summary']['current_calls'], 'window': len(plan.dispatch),
+            'unattempted_window_entries': len(plan.dispatch) - len(rows), 'budget_operation_charge': charged,
+            'decoded_source_bytes': source_bytes, 'source_files': file_stats, 'catalog_measurements': plan.catalog.measurements(),
+            'source_prepare_attempts': 0, 'target_executed': False, 'publication': 'NOT_RUN', 'runtime_binding': 'NOT_RUN',
+            'first_stage_complete': False, 'elapsed_s': time.perf_counter() - started}
+        (root / 'manifest.json').write_bytes(_bytes(summary) + b'\n')
+        return SourceEntryFrontendResult(summary, tuple(owned_returns), _hash(summary))
+    except BaseException as error:
+        (root / 'failure.json').write_bytes(_bytes({'status': 'BUILDING_FAILED_RETAINED', 'type': type(error).__name__,
+            'detail': str(error), 'plan_sha256': plan.digest}) + b'\n')
+        raise
+    finally:
+        index.close()
+
+
+__all__ = ['SourceFrontendBudget', 'SourceFrontendPlan', 'plan_source_frontend', 'run_source_frontend',
+           'SourceEntryFrontendPlan', 'SourceEntryFrontendResult', 'plan_source_entries', 'run_source_entries']

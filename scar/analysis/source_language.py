@@ -51,6 +51,37 @@ class SourceCodeEvidence:
         object.__setattr__(self, "source_link", link)
         object.__setattr__(self, "_witness_json", json.dumps(witness, sort_keys=True, separators=(",", ":"), allow_nan=False))
 
+    @classmethod
+    def from_entry(cls, catalog, entry):
+        """Resolve one original qualified entry; no inventory origin is invented."""
+        from scar.analysis.source_entry_catalog import SourceEntryCatalog, ResolvedSourceEntry
+        from scar.analysis.program_composition import CompositionIndex
+        if cls is not SourceCodeEvidence or type(catalog) is not SourceEntryCatalog or type(entry) is not ResolvedSourceEntry:
+            raise ValueError("source evidence requires an exact original entry catalog")
+        owner = catalog.require_entry(entry)
+        store = catalog.store_for(entry)
+        if type(owner) is CompositionIndex:
+            result = cls(store, owner, entry.captured)
+            result.require_definition(entry.reference.snapshot, entry.reference.definition, entry.reference.source)
+            return result
+        owner.resolve_definition(entry.reference)
+        link = entry.source_link
+        if (link.status is not CallLinkStatus.VERIFIED or link.snapshot != entry.reference.snapshot
+                or link.definition != entry.reference.definition or link.source != entry.reference.source
+                or entry.captured.filename != link.snapshot.path):
+            raise ValueError("original entry code/source/definition differs")
+        code, reference = store.resolve(entry.captured, link.snapshot, link.optimize_levels, allow_compile=False)
+        if type(code) is not CodeType or describe_code(code) != encode(entry.captured):
+            raise ValueError("entry archive differs from the complete captured descriptor")
+        witness = {**reference, "store": store.receipt(), "source_origin": entry.origin}
+        result = object.__new__(cls)
+        for name, value in (("store", store), ("composition", None), ("captured", entry.captured),
+                            ("code", code), ("source_link", link),
+                            ("_witness_json", json.dumps(witness, sort_keys=True, separators=(",", ":"), allow_nan=False))):
+            object.__setattr__(result, name, value)
+        result.require_definition(entry.reference.snapshot, entry.reference.definition, entry.reference.source)
+        return result
+
     @property
     def witness(self):
         # A caller may annotate its copy of a receipt, never the independently

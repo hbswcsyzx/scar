@@ -283,8 +283,132 @@ class SourceAttachments:
                 self._artifact_path(graph_ref, row["source_root"], "graphs")
         self._validate_providers()
 
+    @classmethod
+    def from_admissions(cls, report_path, *, expected_report_sha256, project_root,
+                        budget=SourceAttachmentBudget()):
+        """Read the original admission directly, without inventing continuation.
+
+        No raw scan/current guard is restored. Definition membership is checked
+        lazily against the original graph before a qualified reference is issued.
+        """
+        _need(cls is SourceAttachments and type(budget) is SourceAttachmentBudget,
+              "exact admission reader and independent budget required")
+        budget.__post_init__()
+        self = object.__new__(cls)
+        self.budget, self._admission_mode = budget, True
+        self._report, self._report_locator = _plain(report_path, expected_report_sha256,
+            "scar.dependency-source-admissions", budget.max_report_bytes)
+        report = self._report
+        _need(all(report.get(name) is False for name in _FALSE_AUTHORITY), "admission overstates authority")
+        _need(report["program_root"] == str(project_root)
+              and report["compilation_profile"] == CallCompilationProfile.RECORDED_FUTURE_FLAGS.value,
+              "original admission project/compiler scope differs")
+        self._directory = Path(self._report_locator.artifact.uri).parent
+        self._parent = self._parent_locator = None
+        self._guards, self._guard_indexes = {}, {}
+        self._roots, self._root_indexes = {}, {}
+        _need(len(report["source_roots"]) <= budget.max_roots, "admission root budget exceeded")
+        for index, root in enumerate(report["source_roots"]):
+            fields = {key: value for key, value in root.items() if key != "id"}
+            path = Path(root["namespace_root"])
+            _need(root["id"] == "dependency-source-root:" + _sha(_canonical(fields))
+                  and path.is_absolute() and str(path) == os.path.normpath(str(path))
+                  and path != Path(path.anchor) and root["id"] not in self._roots,
+                  "invalid original admission namespace")
+            self._roots[root["id"]], self._root_indexes[root["id"]] = root, index
+        self._files = {row["path"]: row for row in report["source_files"]}
+        self._file_indexes = {row["path"]: index for index, row in enumerate(report["source_files"])}
+        _need(len(self._files) == len(report["source_files"]) <= budget.max_files,
+              "duplicate admission source or file budget exceeded")
+        self._rows = {(row["process_id"], row["code"]): row for row in report["admissions"]}
+        _need(len(self._rows) == len(report["admissions"]) <= budget.max_codes,
+              "duplicate admission group or code budget exceeded")
+        self._row_indexes = {key: index for index, key in enumerate(self._rows)}
+        self._static_rows, self._requests = defaultdict(list), defaultdict(list)
+        self._snapshots, self._links = {}, {}
+        statuses, weights = Counter(), Counter()
+        for key, row in self._rows.items():
+            _need(type(key[0]) is int and key[0] > 0
+                  and type(row["entered_invocations"]) is int and row["entered_invocations"] > 0,
+                  "invalid original admission group")
+            captured = decode(CapturedCode, row["captured_code"]) if row["captured_code"] is not None else None
+            _need(captured is None or captured.key == key[1], "captured descriptor/key differs")
+            self._static_rows[key[1]].append((key, row))
+            link = decode(CodeSourceLink, row["code_source_link"]) if row["code_source_link"] is not None else None
+            if link is not None:
+                _need(link.code == key[1] and row["status"] == "SOURCE_" + link.status.value,
+                      "admission source status/key differs")
+                self._links[key] = link
+                if link.status.value == "VERIFIED":
+                    _need(captured is not None and link.snapshot is not None
+                          and captured.filename == link.snapshot.path == row["source_file"]
+                          and captured.filename in self._files, "verified admission has no exact source")
+                    file = self._files[captured.filename]
+                    _need(row["source_root"] == file["source_root"]
+                          and link.snapshot.fingerprint == file["fingerprint"], "admission source namespace/version differs")
+                    prior = self._snapshots.get(captured.filename)
+                    _need(prior is None or prior == link.snapshot, "conflicting original source snapshot")
+                    self._snapshots[captured.filename] = link.snapshot
+                    self._requests[captured.filename].append(key)
+            statuses[row["status"]] += 1
+            weights[row["status"]] += row["entered_invocations"]
+        summary = report["summary"]
+        _need(summary["entered_code_groups"] == len(self._rows)
+              and summary["entered_invocations"] == sum(weights.values())
+              and summary["statuses"] == dict(statuses) and summary["weighted_statuses"] == dict(weights),
+              "admission denominator/status accounting differs")
+        self._charged, self._unique_bytes, self._auxiliary = set(), 0, {}
+        self._views, self._resolved, self._definitions = OrderedDict(), {}, {}
+        self._file_graph_locators, self._verified_capture = {}, None
+        self._measurements = Counter()
+        for filename, row in self._files.items():
+            root = self._roots[row["source_root"]]
+            matching = [item for item in self._roots.values() if Path(filename).is_relative_to(item["namespace_root"])]
+            selected = max(matching, key=lambda item: len(Path(item["namespace_root"]).parts), default=None)
+            _need(Path(filename).is_absolute() and os.path.normpath(filename) == filename
+                  and not Path(filename).is_relative_to(project_root)
+                  and selected is not None and selected["id"] == root["id"], "admission file namespace differs")
+            if row["context"] is not None:
+                _need(decode(SourceContextDigest, row["context"]).namespace_root == root["namespace_root"],
+                      "admission context namespace differs")
+            if row["snapshot_artifact"] is not None:
+                doc, _locator = self._aux(row["snapshot_artifact"], row["source_root"], "sources")
+                raw = base64.b64decode(doc["raw_base64"], validate=True)
+                encoding, _ = tokenize.detect_encoding(BytesIO(raw).readline)
+                with TextIOWrapper(BytesIO(raw), encoding=encoding, newline=None) as stream:
+                    text = stream.read()
+                _need(doc["original_uri"] == filename and doc["source_root"] == row["source_root"]
+                      and doc["namespace_root"] == root["namespace_root"]
+                      and _sha(raw) == row["raw_sha256"] == doc["raw_sha256"]
+                      and len(raw) == row["raw_bytes"] == doc["raw_bytes"]
+                      and text == doc["decoded_text"]
+                      and "sha256:" + _sha(text.encode()) == row["fingerprint"] == doc["fingerprint"]
+                      and doc["code_source_match_established"] is False, "original source snapshot differs")
+                if filename in self._snapshots:
+                    _need(self._snapshots[filename].python_version == doc["python_version"],
+                          "admission snapshot Python version differs")
+            if row["source_graph_artifact"] is not None:
+                self._artifact_path(row["source_graph_artifact"], row["source_root"], "graphs")
+        self._validate_providers()
+        return self
+
+    def catalog_rows(self):
+        """Original complete groups; does not resolve graphs or claim a Run."""
+        return tuple(deepcopy(row) for row in self._rows.values())
+
+    def require_unchanged(self):
+        schema = "scar.dependency-source-admissions" if getattr(self, "_admission_mode", False) else "scar.dependency-source-continuation"
+        document, locator = _plain(self._report_locator.artifact.uri, self._report_locator.artifact.sha256,
+                                  schema, self.budget.max_report_bytes)
+        _need(locator == self._report_locator and _canonical(document) == _canonical(self._report),
+              "bound original source manifest changed")
+
     def receipts(self):
         """Explicit attachments input; never changes CompositionIndex.document."""
+        if getattr(self, "_admission_mode", False):
+            return {"report": encode(self._report_locator), "parent": None,
+                    "format": "scar.source-admissions-input.v1",
+                    "source_root_count": len(self._roots), "source_file_count": len(self._files)}
         return {"report": encode(self._report_locator), "parent": encode(self._parent_locator),
                 "format": "scar.source-attachments-input.v1",
                 "source_root_count": len(self._roots), "source_file_count": len(self._files)}
@@ -298,16 +422,22 @@ class SourceAttachments:
             f"#/source_files/{self._file_indexes[filename]}/{field}")
 
     def _artifact_path(self, locator, source_root, family):
-        _need(type(locator) is dict and locator["source_root"] == source_root, "artifact namespace mismatch")
-        if locator["origin"] == "PARENT":
+        _need(type(locator) is dict, "artifact locator must be an object")
+        if getattr(self, "_admission_mode", False):
+            _need(source_root in self._roots, "admission artifact namespace is unknown")
+            base, artifact = self._directory, locator
+        elif locator["origin"] == "PARENT":
+            _need(locator["source_root"] == source_root, "artifact namespace mismatch")
             base = Path(self._parent_locator.artifact.uri).parent
             _need(locator["parent_directory"] == str(base)
                   and locator["parent_report_raw_sha256"] == self._parent_locator.artifact.sha256,
                   "artifact does not name the pinned original parent")
+            artifact = locator["artifact"]
         else:
-            _need(locator["origin"] == "CONTINUATION", "unsupported source artifact origin")
+            _need(locator["source_root"] == source_root and locator["origin"] == "CONTINUATION",
+                  "unsupported source artifact origin/namespace")
             base = self._directory
-        artifact = locator["artifact"]
+            artifact = locator["artifact"]
         _need(set(artifact) == {"schema", "schema_version", "path", "canonical_sha256", "canonical_bytes", "compressed_bytes"}
               and type(artifact["schema_version"]) is int and artifact["schema_version"] == 1
               and type(artifact["canonical_sha256"]) is str

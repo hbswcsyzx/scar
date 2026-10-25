@@ -5,6 +5,15 @@ lowering or compilation. Module entry belongs to the other agent. The existing
 6 SOURCE_VERIFIED DefinitionIDs/context records and readonly4-key CodeWitness
 are inputs, not six published bodies; original9groups/271calls stay intact.
 
+Implementation amendment approved by root: the first slice now includes a fifth
+file, source_layers.py, solely for its original dependency graph reader's exact
+snapshot-locator discriminator. Original admissions supply a direct original
+artifact; continuations keep the existing complete PARENT locator. The helper
+previously accepted only PARENT. Unknown/partial locators or declaration schemas
+still reject; all existing canonical/hash/flag/root/context checks remain. No
+fake parent, continuation, trust flag, CP1 or CP3 is constructed. The frozen
+source set uses current main bytes including root's newly applied native4 files.
+
 ## Decision: a qualified entry resolver, then the existing worker
 
 Implement the first four-file slice below. It must feed one actual definition

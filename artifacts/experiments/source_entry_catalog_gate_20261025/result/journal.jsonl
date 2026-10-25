@@ -1,0 +1,3 @@
+{"elapsed_s": 0.07770291902124882, "phase": "FROZEN_INPUTS_VERIFIED"}
+{"elapsed_s": 1.166597732983064, "phase": "ENTRY_PLAN_COMPLETE", "candidate_entries": 6, "current_groups": 9, "current_calls": 271, "dispatch_entries": 1}
+{"elapsed_s": 6.455866603995673, "stage": "source_entry_attempt", "entry_key": "19244ad3decd10a3238228d19c5be77a0ce978aac685ef5c2dccd01d3faf01cc", "status": "SUCCEEDED"}
