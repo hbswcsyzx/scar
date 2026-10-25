@@ -6,6 +6,23 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：全39796次dispatch端口门终态通过
+
+root持有的第三次完整门已确认exit0：127静态接口、156执行分片、39796次dispatch全部
+接入，没有dispatch frontier；111189个Tensor端口，held对象资格109288、未定1901，
+几何资格107483、缺口3706。9项native-only/producer反例及fresh错序候选均实际拒绝，
+包括真prepared路径，不能用scope hash替代独立ABI检查。
+
+runner1720.893s、GNU28:41.75、peak1091472KiB，private index3973341184B、final report前
+published4337031496B。原1800s/4GB index/2GiB RSS/8GB输出预算未提高。没有新LeWM
+episode；这是原真实运行的离线接入，不是干净benchmark或目标加速。
+
+原样四份生产字节已应用main，其他265个冻结依赖一致。源码与实际小型交付在隔离分支
+444baadb；模型关系和使用边界见[NATIVE_CAPTURE_BATCH.md](NATIVE_CAPTURE_BATCH.md)。
+全部native内部、实现代码身份、logical value/state/alias/ready和跨片依赖仍OPEN。
+source/native的有界retained-context查询与通用kwargs协议正各自进入有限实档验收；
+第一阶段整体未完成，不进入优化。
+
 ### 2026-10-25：覆盖账本完整source/call归属门已通过，整体仍OPEN
 
 公共v2 producer已完整读取保留的2217个源码定义和100438条调用，生成102655个成员、

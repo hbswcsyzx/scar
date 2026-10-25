@@ -13,13 +13,16 @@
 [账本门](../artifacts/experiments/modeling_scope_retained_gate_20261025/RESULT.md)及
 [独立复核](../artifacts/experiments/modeling_scope_retained_review_20261025/REPORT.md)。
 
-全dispatch首次实档门在第3182次调用发现了原先假设的缺口：原生Tensor端口可能没有
-Python held Tensor见证，不能强迫两者一一对应。失败和原数据保持；V2已把原生端口、
-Python对象身份、存储几何、内容/状态/ready资格分开。第二次完整门已由root核277个
-冻结输入并启动，现因重复静态图处理成本由root主动中止，exit130：全部39796次枚举、
-127接口完成，仅20个分片/5120次调用验证。其余34676次未构建，完整门未通过。存档为
-`codex/native-scalar-model` 的31198ff9。当前在固定预算内修正SCAR处理成本；源码/原生
-片段间的对象、状态、控制及资源连接仍须完成，不开始化简、优化审批或性能A/B。
+**最新native门已通过：** 修正SCAR重复静态图处理后，第三次完整门实际exit0，39796次
+dispatch全部接入127接口/156执行分片；111189个Tensor端口中109288项有held对象资格，
+1901项未定；107483项有几何资格、3706项缺口。GNU wall28:41.75，peak1091472KiB。
+四份原样生产字节已应用到main，准确模型、范围和成本见
+[NATIVE_CAPTURE_BATCH.md](NATIVE_CAPTURE_BATCH.md)。没有增加原预算或重新执行目标。
+此门只关闭dispatch边界端口接入；全部库内部、逻辑来源、world/state及资源ready仍未闭合。
+
+第一次全门在3182次发现native Tensor不一定有Python held见证；第二次因处理成本在20片后
+主动中止。失败和原数据保留，不能把第二次的部分结果当全门通过。第三次实际代码与收据
+已存档于`codex/native-scalar-model`的444baadb；没有新优化backend、变换或LeWM加速比。
 
 **2026-10-25 当前实施：** 用户确认先审定模型和声明格式再完成自动接线。
 [当前执行计划](FIRST_STAGE_EXECUTION_PLAN.md)对应原S1—S5；

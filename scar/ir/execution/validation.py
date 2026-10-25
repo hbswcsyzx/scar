@@ -1,6 +1,7 @@
 """Validate declared execution links without certifying source/runtime identity."""
 from dataclasses import dataclass, fields, is_dataclass
 from copy import copy
+from enum import Enum
 import hashlib
 import json
 
@@ -19,6 +20,58 @@ from .coordinates import (
 from .ids import BlockVisitID, OperationOccurrenceID, RegionActivationID
 from .model import ExecutionModel
 from .snapshot import ExternalSnapshots, SnapshotError
+
+
+_PREPARED_PROGRAM = object()
+
+
+def _immutable_program_value(value):
+    """Reject mutable children rather than caching their current identities."""
+    if value is None or type(value) in (bool, int, float, str):
+        return
+    if isinstance(value, Enum):
+        _immutable_program_value(value.value)
+        return
+    if type(value) is tuple:
+        for item in value:
+            _immutable_program_value(item)
+        return
+    if is_dataclass(value) and not isinstance(value, type) and type(value).__dataclass_params__.frozen:
+        for field in fields(value):
+            _immutable_program_value(getattr(value, field.name))
+        return
+    raise ValueError('prepared program requires transitively immutable typed records')
+
+
+@dataclass(frozen=True, slots=True, init=False)
+class PreparedProgramSnapshot:
+    """One live canonical static proof; no native or execution qualification."""
+    _key: object
+    _program: object
+    _wire: bytes
+    sha256: str
+    schema_version: int
+
+    def __init__(self, key, program):
+        if key is not _PREPARED_PROGRAM:
+            raise TypeError('use prepare_program_snapshot with an actual program')
+        wire = program_dumps(program).encode('utf-8')
+        _immutable_program_value(program)
+        object.__setattr__(self, '_key', key)
+        object.__setattr__(self, '_program', program)
+        object.__setattr__(self, '_wire', wire)
+        object.__setattr__(self, 'sha256', hashlib.sha256(wire).hexdigest())
+        object.__setattr__(self, 'schema_version', json.loads(wire)['schema_version'])
+
+    def canonical_bytes(self, program):
+        if type(self) is not PreparedProgramSnapshot or self._key is not _PREPARED_PROGRAM or program is not self._program:
+            raise ValueError('prepared snapshot does not retain this exact immutable program')
+        return self._wire
+
+
+def prepare_program_snapshot(program):
+    """Run the ordinary codec/validator, then retain only an immutable program."""
+    return PreparedProgramSnapshot(_PREPARED_PROGRAM, program)
 
 
 @dataclass(frozen=True, slots=True)
@@ -457,7 +510,7 @@ def refresh_external_context(base_ctx):
 
 
 def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None,
-             provider_selector_resolver=None, native_port_evidence=None):
+             provider_selector_resolver=None, native_port_evidence=None, prepared_snapshot=None):
     if type(model) is not ExecutionModel:
         return ValidationReport((ExecutionIssue('record', 'model', 'expected exact ExecutionModel'),), ()), None
     if provider_selector_resolver is not None and not callable(provider_selector_resolver):
@@ -470,7 +523,12 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
         errors = record_errors(model, ExecutionModel, 'ExecutionModel')
         if errors:
             return ValidationReport(tuple(ExecutionIssue('record', 'model', e) for e in errors), ()), None
-        wire = program_dumps(program).encode('utf-8')
+        if prepared_snapshot is None:
+            wire = program_dumps(program).encode('utf-8')
+        else:
+            if type(prepared_snapshot) is not PreparedProgramSnapshot:
+                raise TypeError('prepared_snapshot must be a live PreparedProgramSnapshot')
+            wire = prepared_snapshot.canonical_bytes(program)
     except (TypeError, ValueError, AttributeError) as error:
         return ValidationReport((ExecutionIssue('record_or_program', 'model', str(error)),), ()), None
     if native_port_evidence is not None:
@@ -511,20 +569,23 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
 
 
 def validate(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None,
-             provider_selector_resolver=None, native_port_evidence=None):
+             provider_selector_resolver=None, native_port_evidence=None, prepared_snapshot=None):
     return _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
                     semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes,
-                    provider_selector_resolver=provider_selector_resolver, native_port_evidence=native_port_evidence)[0]
+                    provider_selector_resolver=provider_selector_resolver, native_port_evidence=native_port_evidence,
+                    prepared_snapshot=prepared_snapshot)[0]
 
 
 def require_valid(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None,
-                  provider_selector_resolver=None, native_port_evidence=None):
+                  provider_selector_resolver=None, native_port_evidence=None, prepared_snapshot=None):
     report = validate(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
                       semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes,
-                      provider_selector_resolver=provider_selector_resolver, native_port_evidence=native_port_evidence)
+                      provider_selector_resolver=provider_selector_resolver, native_port_evidence=native_port_evidence,
+                      prepared_snapshot=prepared_snapshot)
     if report.issues:
         raise ValueError('; '.join(f'{row.code} at {row.path}: {row.message}' for row in report.issues))
     return report
 
 
-__all__ = ['ExecutionIssue', 'ValidationReport', 'validate', 'require_valid']
+__all__ = ['ExecutionIssue', 'ValidationReport', 'validate', 'require_valid',
+           'PreparedProgramSnapshot', 'prepare_program_snapshot']

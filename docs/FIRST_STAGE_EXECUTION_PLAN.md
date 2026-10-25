@@ -40,18 +40,19 @@ witness，从当前 raw 独立读一次并调用既有 source→dispatch→SBA �
 
 native已推进到完整39796次dispatch，而非继续重复16-prefix：首次门暴露原生Tensor
 与Python held Tensor并非一一对应，V2改为端口/对象/几何/内容四项独立资格。
-第二门完成全域枚举和127接口，20个分片（5120次调用）验证后由root因实现成本主动
-中止，exit130；其余34676次尚未构建，不能称frontier或已通过。失败产物及代码已提交
-`codex/native-scalar-model` 的31198ff9。下一门先消除SCAR每片重复的静态图处理，
-预算不增加，再执行完整新门。
+第二门在20片后因处理成本主动中止，exit130；失败仍保留。静态快照/ABI复用已实施，
+第三门在相同预算实际exit0：全39796次/127接口/156分片，Tensor端口111189，
+held109288/未定1901，几何107483/缺口3706。GNU28:41.75，peak1091472KiB；没有目标重跑。
+这只关闭dispatch端口接入，不关闭所有native内部或内容/state/ready。
+[模型与实际结果](NATIVE_CAPTURE_BATCH.md)和444baadb保留范围、失败及准确版本。
 
 当前并行实施边界：
 
 | 分工 | 具体模型断口 | 下一项实际验收 |
 | --- | --- | --- |
-| native隔离树 | 同一静态图反复校验/编码；实际端口与对象身份必须独立 | 精确不可变prepared snapshot与原source/catalog绑定，所有动态ABI/producer/Unknown检查保留；同预算完整实档门 |
-| source-call隔离树 | 通用Call中kwargs pack/merge/call协议未建模 | 复用原IR/world/有序Uses，显式能力与独立compiler/异常审核；仅机械选原四个必要失败body |
-| main组合查询 | 原source ancestry与native actual occurrence尚不能有界联合导航 | 只读qualified endpoints和typed retained-context；不将祖先当direct call，不重扫100k stream |
+| native接入 | 全dispatch端口门已通过；逻辑内容/state/ready仍缺关系 | 保留全部动态资格与原分母；后继连接原生值、状态和资源，而非再跑prefix |
+| source-call隔离树 | 通用kwargs pack/merge/call协议已实现，有限实档门已准备 | 复用原IR/world/有序Uses，显式能力与独立compiler/异常审核；仅机械选原四个必要失败body |
+| main组合查询 | 有界只读adapter已实现，小检查及真实输入metadata preflight通过 | 原79592条retained associations与final native inventory各一次建导航；少量端点联合验收，不重扫raw/100k stream |
 
 计划及来源分别在`artifacts/analysis/kwargs_expansion_design_20261025`和
 `artifacts/analysis/source_native_composition_20261025`。历史collector只有HEAD label、缺
