@@ -20,6 +20,8 @@ from .resumption import (
     ResumeInput, SavedInput, SavedRole, SuspendTerminator, saved_actual_use,
 )
 from .drivers import BodyDriveResult
+from .source_subjects import FrameKind, FunctionFrameABI, MappingFramePorts, ModuleUnitSource
+from scar.ir.v2.common import SourceReference
 
 
 def _protocol(value, kind):
@@ -111,7 +113,7 @@ def control_errors(graph):
                                               P.RAW_DRIVER_REQUEST)]
     dispatches = [o for o in graph.operations if isinstance(
         o.terminator, (PendingDispatchTerminator, CleanupRouteTerminator))]
-    if not (scopes or ports or protocol_values or dispatches
+    if not (scopes or ports or protocol_values or dispatches or graph.frame_roots
             or graph.exception_packets or graph.pending_completions):
         return []
     issues = []
@@ -125,12 +127,12 @@ def control_errors(graph):
         if scope.region not in regions:
             error("control_scope_region", scope.id, "scope needs an existing region")
             continue
-        if scope.kind is ControlScopeKind.FUNCTION:
+        if scope.kind in (ControlScopeKind.FUNCTION, ControlScopeKind.FRAME):
             if scope.region in roots:
-                error("control_scope_root", scope.id, "one function scope per enabled region")
+                error("control_scope_root", scope.id, "one function/frame root per enabled region")
             roots[scope.region] = scope.id
             if regions[scope.region].entry not in scope.blocks:
-                error("control_scope_entry", scope.id, "function scope directly owns the region entry")
+                error("control_scope_entry", scope.id, "control root directly owns the region entry")
         elif scope.parent not in scopes or scopes[scope.parent].region != scope.region:
             error("control_scope_parent", scope.id, "parent must be in the same region")
         for block in scope.blocks:
@@ -148,7 +150,7 @@ def control_errors(graph):
             seen.add(current)
             current = scopes[current].parent
         if scope.region not in roots:
-            error("control_scope_root", scope.id, "enabled region needs one function root")
+            error("control_scope_root", scope.id, "enabled region needs one function/frame root")
     for region_id in {s.region for s in scopes.values()} & regions.keys():
         if set(b.id for b in regions[region_id].blocks) != {
                 b for b, s in owners.items() if scopes[s].region == region_id}:
@@ -156,6 +158,59 @@ def control_errors(graph):
     for value in protocol_values:
         if value.region not in roots:
             error("protocol_scope", value.id, "protocol values need declared lexical ownership")
+    frame_roots = {row.scope: row for row in graph.frame_roots}
+    environments = {row.id: row for row in graph.environments}
+    for scope in scopes.values():
+        if scope.kind is ControlScopeKind.FRAME and scope.id not in frame_roots:
+            error("frame_root_missing", scope.id, "FRAME scope needs its unique entry authority")
+    for root in graph.frame_roots:
+        scope = scopes.get(root.scope)
+        if scope is None or scope.kind is not ControlScopeKind.FRAME:
+            error("frame_root_scope", root.scope, "frame root must name an existing FRAME scope")
+            continue
+        if scope.region not in regions:
+            continue  # Already reported by the scope check.
+        region = regions[scope.region]
+        entry = blocks[region.entry]
+        module = root.kind is FrameKind.MODULE
+        expected_source = ModuleUnitSource if module else SourceReference
+        if type(scope.source) is not expected_source:
+            error("frame_root_subject", root.scope, "frame kind needs its exact source-subject category")
+        else:
+            path = scope.source.snapshot.path if module else scope.source.path
+            if root.code.filename != path:
+                error("frame_root_code", root.scope, "code filename must retain the source subject's logical path")
+        if type(root.entry) is FunctionFrameABI:
+            environment = environments.get(root.entry.environment)
+            if environment is None or environment.region != region.id:
+                error("frame_root_environment", root.scope,
+                      "function ABI must reference this region's existing environment")
+            if len([layout for layout in graph.function_entries
+                    if layout.environment == root.entry.environment]) != 1:
+                error("frame_root_function_entry", root.scope,
+                      "function ABI needs the unique existing formal/environment partition")
+            continue
+        if type(root.entry) is not MappingFramePorts:
+            continue  # Exact ABI/kind discrimination is a record invariant.
+        if any(environment.region == region.id for environment in graph.environments):
+            error("frame_root_entry_authority", root.scope,
+                  "mapping ABI cannot also declare a function environment entry")
+        references = (root.entry.locals_namespace, root.entry.globals_namespace,
+                      root.entry.builtins_namespace) + root.entry.closure_cells
+        expected_ports = references + (root.entry.world,)
+        if set(entry.arguments) != set(expected_ports):
+            error("frame_root_partition", root.scope,
+                  "mapping ABI must cover exactly this region's entry ports")
+        for identity in expected_ports:
+            value = values.get(identity)
+            kind = StateVersionValue if identity == root.entry.world else ReferenceValue
+            if (not isinstance(value, kind) or value.region != region.id
+                    or not isinstance(value.origin, BlockArgument)
+                    or value.origin.block != entry.id
+                    or not 0 <= value.origin.index < len(entry.arguments)
+                    or entry.arguments[value.origin.index] != identity):
+                error("frame_root_port", identity,
+                      "mapping role must name its exact typed region-entry argument")
     if issues:
         return issues
 
@@ -185,8 +240,9 @@ def control_errors(graph):
         if port.exit is not None:
             expected_kind = ExitKind.NORMAL if port.kind is K.RETURN else ExitKind.RAISE
             exit_port = next((p for p in regions[scope.region].exits if p.name == port.exit), None)
-            if scope.kind is not ControlScopeKind.FUNCTION or exit_port is None or exit_port.kind is not expected_kind:
-                error("control_port_exit", port.id, "function port must name the correct existing region exit")
+            if (scope.kind not in (ControlScopeKind.FUNCTION, ControlScopeKind.FRAME)
+                    or exit_port is None or exit_port.kind is not expected_kind):
+                error("control_port_exit", port.id, "root port must name the correct existing region exit")
             elif [t for t in exit_port.types if t.kind is not ValueKind.STATE] != [
                     ValueType(ValueKind.REFERENCE) if port.kind is K.RETURN
                     else ProtocolValueType(P.EXCEPTION_PACKET)]:

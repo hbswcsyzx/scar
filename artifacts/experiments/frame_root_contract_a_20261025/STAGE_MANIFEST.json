@@ -1,0 +1,246 @@
+{
+  "scope": "EXPLICIT_7_SOURCES_AND_THIS_A_LINE_ONLY",
+  "excluded": [
+    "class_entry_design",
+    "source_three_graph_add_plan",
+    "external retained graphs and raw"
+  ],
+  "files": [
+    {
+      "path": "artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md",
+      "bytes": 13390,
+      "sha256": "9e857b17721cea12e34a79d9c594b2f21b9113fadc60a16e8ed4009f2d330ac7"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/APPLICATION_RECEIPT.json",
+      "bytes": 3984,
+      "sha256": "1a900a6302d26ff22287ebc5d44bf6b4e74de14811000c05ca1b1b03ba576a82"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/PRODUCTION_A.patch",
+      "bytes": 27752,
+      "sha256": "db2fbf45c505535087264e59cc2e97ff484949d9c5fb14fdf6d7e6db5bb63b17"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/REPORT.md",
+      "bytes": 2616,
+      "sha256": "12a0d586d783540bc766180f97057494dc3b09e1f6cc8620c691b5eca2afab9b"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/RETENTION.json",
+      "bytes": 2297,
+      "sha256": "613ad01b88d0a63fc1ef8e775679d3a4e536081a3064ccf120de62e0788ac266"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/STAGE_PATHS.txt",
+      "bytes": 3575,
+      "sha256": "13f304c274c3ba9f63af621038963d1fa13bd459e6fb1924b0cf1b84b672a011"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/baseline/receipt.json",
+      "bytes": 1210,
+      "sha256": "6a5af021c67da290f82926781948f46739c089a92079f81ebe07b97f0918609e"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/baseline/scar/analysis/program_lowering.py",
+      "bytes": 77617,
+      "sha256": "a3cb7da0887d04cb0e449eda406a663cc3438bbf78aa4c0bdc4f8e89dc4804f2"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/baseline/scar/ir/program/codec.py",
+      "bytes": 40826,
+      "sha256": "63689ab9741b613f8ab0549c4618a4bc8a03e073da52c91dcf9a9342ecb4f443"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/baseline/scar/ir/program/control.py",
+      "bytes": 9227,
+      "sha256": "88d2640c7cb23c454f95888ced4130784fd829e8d1d60292a17000278fbe4ef2"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/baseline/scar/ir/program/control_validation.py",
+      "bytes": 19918,
+      "sha256": "3217ddedc8c00f5d19b299cd40f1ee7b5b53f3545f2ec7992d07312b6ee51fa5"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/baseline/scar/ir/program/model.py",
+      "bytes": 56397,
+      "sha256": "9f8cf2996cfefd45aeda92bc04877711f1da4d431b592c2d672128989bd9b7b0"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/baseline/scar/ir/program/module_entries.py",
+      "bytes": 15826,
+      "sha256": "c01e9d27c6a9153991d88ee537e9445a90e4f1cba56239791ae23b12ad075b35"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/PREPARATION_FAILURE01.json",
+      "bytes": 257,
+      "sha256": "6cea2f930a88fa304721e0896fb1bb85930f1e2f97a5b1dc5f571c2e8e000247"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/PREPARATION_RECEIPT.json",
+      "bytes": 2326,
+      "sha256": "52066e20875a80616d85d733caad4df7ead1eb49d072b3879a2d3787a8555c0e"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/attempt01/gnu-time.txt",
+      "bytes": 987,
+      "sha256": "b79dec3c40632e38d77bee260aad6ba9393169585ca1f797c6bfce7e592c0782"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/attempt01/legacy-guard.json",
+      "bytes": 374,
+      "sha256": "9a84767a50bbb90c20491a5407701cb9ed1350bb4f89bf48aeca74d1cbdebd46"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/attempt01/progress.jsonl",
+      "bytes": 873,
+      "sha256": "7d74d295557ee9e189b380b5d050847bc4c4b4f9c5e8b75680f22f5b4ae91ada"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/attempt01/result.json",
+      "bytes": 313,
+      "sha256": "59bb023e6a2267410db8d1a890ed3e2b1e0bc1d867f3f6881f012bc2bfb63f47"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/attempt01/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/attempt01/stdout.log",
+      "bytes": 873,
+      "sha256": "7d74d295557ee9e189b380b5d050847bc4c4b4f9c5e8b75680f22f5b4ae91ada"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/attempt01/typed-contract.json",
+      "bytes": 2166,
+      "sha256": "3ffc40e00e2e4632b321ee7ebbc56fb7c50f9eb902d93799063febc255e80603"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/attempt01/worker-result.json",
+      "bytes": 18720,
+      "sha256": "5f6c1f8c4dfe0712fec75bf97ab11c15f7f0213c6a0ce6fff60714104bbfc12e"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/freeze.json",
+      "bytes": 101035,
+      "sha256": "dd1389475165af88f91d1e8006ef95b576e1dfde383e490c44747bd50fc7d733"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/gate_guards.py",
+      "bytes": 12140,
+      "sha256": "c5a5608a63bdc20cc9ad8c0abc8000307425b745a5628411c18eef5963503750"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/prepare_freeze.failed01.py",
+      "bytes": 5694,
+      "sha256": "c7bb8a54e6c663d28658345a578ebda21a3e3fc0a5fd33036b0566bcdcbbcbae"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/prepare_freeze.py",
+      "bytes": 5626,
+      "sha256": "0c3586dc2690929a66f1d4217ea4751c9302596b3c77c4877d8d94fcb5bf53e9"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/run_gate.py",
+      "bytes": 11947,
+      "sha256": "30c1b2eefeed6965518e131f6c6175c80320a6c2bdb69c9fbe0ba6096bc1cce2"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/selection.json",
+      "bytes": 2817,
+      "sha256": "fac6b901a7c073b81b2f966bfc9baff7c0960822f5074cbad4bcae89ba316ebc"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/stdout.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/candidate01/time.txt",
+      "bytes": 955,
+      "sha256": "5846dff3b8080783803a7a05f06c67b966ede6d34cd2e34484446482084ef7dc"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/check_contract.py",
+      "bytes": 11205,
+      "sha256": "a041c1e55f35556d28ecefb23e944565ca3f087c181624197c7f34e26984b784"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/check_legacy_guard.py",
+      "bytes": 1905,
+      "sha256": "4730d548649fdbebc5ee9608bdd073cdb87b8e74b9d7e620143fa7cab139b4e9"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/guardcheck01/result.json",
+      "bytes": 419,
+      "sha256": "e25a35987b09f41ef6e1597043ffe42b52729e861dea3c0f11010d0c5cf3dc42"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/selfcheck01/check_contract.py",
+      "bytes": 11184,
+      "sha256": "1ae72918d814f77edfc4d49df418b0e33fe615b260d58a59939fe7c79fc28576"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/selfcheck01/failure.json",
+      "bytes": 373,
+      "sha256": "79ca788ba8863ccc63ca19b78d53fcc42d1c68e29d76720cf073e5a24a507c4c"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/selfcheck02/check_contract.py",
+      "bytes": 11182,
+      "sha256": "83aa1c8e4e901da49a4d68c03880fc2b76e3fd09e5f41deb7638c7db5b932fb2"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/selfcheck02/failure.json",
+      "bytes": 356,
+      "sha256": "e07ed014865d66625a174f7993926747c2dda66177a667c0f3d6d4cc49696bc6"
+    },
+    {
+      "path": "artifacts/experiments/frame_root_contract_a_20261025/selfcheck03/result.json",
+      "bytes": 2499,
+      "sha256": "7c449db294453a4a51649d47611d6a7f14281288075a4587b93a6390c697d2ec"
+    },
+    {
+      "path": "scar/analysis/program_lowering.py",
+      "bytes": 78974,
+      "sha256": "537d334da77daf64f81266cecfb5bb1a8d874425d41946c68faf5189d60a5e6d"
+    },
+    {
+      "path": "scar/ir/program/codec.py",
+      "bytes": 42773,
+      "sha256": "8024fdce331ffd21f3bff0004267d49ba2b67ad5302135f0923e4052072623b1"
+    },
+    {
+      "path": "scar/ir/program/control.py",
+      "bytes": 9606,
+      "sha256": "d85dc314e3948959d589a4b4bfec27c0f3f30fc221ef8d8fe5b381b6e01a5e51"
+    },
+    {
+      "path": "scar/ir/program/control_validation.py",
+      "bytes": 23538,
+      "sha256": "65867b452e8b118b7deb4e330e12568eb1ea865a9866ad8bb1624dff2ad454f4"
+    },
+    {
+      "path": "scar/ir/program/model.py",
+      "bytes": 56857,
+      "sha256": "ab6919fcf609393d0b3f1037c8a264c06a4655e94a9c86ab0666c6465a8835b9"
+    },
+    {
+      "path": "scar/ir/program/module_entries.py",
+      "bytes": 15199,
+      "sha256": "14317fdf81410a4362520f3b7783e221e6bc6958cbab604000ca370e35392933"
+    },
+    {
+      "path": "scar/ir/program/source_subjects.py",
+      "bytes": 4579,
+      "sha256": "c595bd536701f054446efebdd95e2cb8f34b75e01dd4d5dd1be2b91fe7438f3d"
+    }
+  ],
+  "self_manifest_digest_excluded": true
+}
