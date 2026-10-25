@@ -185,7 +185,7 @@ def lower_dictionary(builder, node, cursor):
         del builder.active_temporaries[initial_holds:]
 
 
-def validate_mapping_protocols(model, graph, interface, metadata, semantic):
+def validate_mapping_protocols(model, graph, interface, metadata, semantic, *, language=None):
     """Check dict protocol shapes; fixed-source replay owns exact child order."""
     from scar.ir.program.model import (CompletionResult, ReferenceValue, StateVersionValue,
         TerminatorKind, ValueKind, ValueType)
@@ -210,6 +210,14 @@ def validate_mapping_protocols(model, graph, interface, metadata, semantic):
             continue
         operation, link = operations[protocol.operation], links[protocol.operation]
         atom = semantic.source_atoms.get(link.source.atom_id)
+        if atom is not None and atom.kind == "Call":
+            from scar.ir.program.source_language import SourceLanguageCapability
+            if (language is None or SourceLanguageCapability.CALL_KWARGS_314_V1 not in language.capabilities
+                    or protocol.kind is PythonProtocolKind.DICT_UPDATE):
+                raise ValueError("call keyword packing requires its explicit capability and cannot use DICT_UPDATE")
+            # The independent call validator owns the original Call, compiler,
+            # receiver, ordered child Uses and both completion cleanup rules.
+            continue
         arity = len(operation.uses) - 1
         build = protocol.kind is PythonProtocolKind.BUILD_MAP
         arity_ok = 0 <= arity <= _STACK_GUIDELINE and arity % 2 == 0 if build else (

@@ -1,0 +1,64 @@
+{
+  "attempt_exists": false,
+  "body_lowerings": 0,
+  "candidate_scar_sources": 352,
+  "composition_json_decoded": 0,
+  "context_payloads_decoded": 0,
+  "files": [
+    {
+      "bytes": 3975,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/README.md",
+      "sha256": "e922c6b811dcb88f1302d4fa59defbd4a013c61d9d34dd4fd3012030e5632a2c"
+    },
+    {
+      "bytes": 98976,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/freeze.json",
+      "sha256": "936968d032a1ac74e2716427ee30140febfdadfc06e28e183da1d862944becac"
+    },
+    {
+      "bytes": 10956,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/gate_guards.py",
+      "sha256": "e14ac3a42a8bdaab2f54bab2a8f86af1a06fe12e3bbef6301b0f9b6983bc70ff"
+    },
+    {
+      "bytes": 14314,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/prepare_gate.py",
+      "sha256": "ed6f5f0fbfd4b9af2e39d79dd621720367b90345b80b31ba921a45583e95fe72"
+    },
+    {
+      "bytes": 19806,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/run_gate.py",
+      "sha256": "025410efc5990c18e8bce70e5f36434b887e5f837c40eb467bd8d628e044258d"
+    },
+    {
+      "bytes": 34258,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/selection.json",
+      "sha256": "1a57b41d868debe910d563730bc889c6b6decdedef0c8d06b7befc43390311f4"
+    }
+  ],
+  "freeze_sha256": "936968d032a1ac74e2716427ee30140febfdadfc06e28e183da1d862944becac",
+  "input_count": 21,
+  "main_production_writes": 0,
+  "marshal_payloads_loaded": 0,
+  "new_episode": false,
+  "preparation_checks": [
+    "3 runner modules AST syntax",
+    "11 production SHA match",
+    "default entry previously returned PREPARED_NOT_RUN without input streams; no real execute"
+  ],
+  "production_sources_unchanged": true,
+  "runtime_actual_repeated_input_budget": 256000000,
+  "schema": "scar.kwargs-four-body-gate-preparation-receipt",
+  "schema_version": 1,
+  "selected_sequences": [
+    4,
+    5,
+    10,
+    12
+  ],
+  "status": "FROZEN_NOT_RUN",
+  "target_executions": 0,
+  "unique_declared_input_gzip_decoded_bytes": 177532748,
+  "unique_declared_input_stored_bytes": 37877152,
+  "unique_source_files": 2
+}

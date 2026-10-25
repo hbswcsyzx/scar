@@ -1,0 +1,74 @@
+{
+  "body_lowerings": 0,
+  "compiler_cases": [
+    {
+      "named_keys": 0,
+      "packing": "LOAD_CONST",
+      "sequence": 4
+    },
+    {
+      "named_keys": 1,
+      "packing": "LOAD_CONST",
+      "sequence": 5
+    },
+    {
+      "named_keys": 1,
+      "packing": "BUILD_TUPLE",
+      "sequence": 10
+    },
+    {
+      "named_keys": 0,
+      "packing": "LOAD_CONST",
+      "sequence": 12
+    }
+  ],
+  "errors": 0,
+  "failures": 0,
+  "module_inputs": [
+    {
+      "bytes": 9582,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/f27c46dd473dba43f009cce431045481d2512476c6f5df329659ab24434269f8.marshal",
+      "sha256": "8cedd0b79b7009dbed49717dd9ade93a08443ca2f58dc51c5f88fa17fca0a01d"
+    },
+    {
+      "bytes": 29168,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/fa5ab74e29021a01cabc31ab79fd4b56f3a5cb0433a21ae2c150d00d5ad4cf11.marshal",
+      "sha256": "c3743fac636e9ba528b8fceb755c2e2993f3fe47cd26c86f786413e3caf3a4f9"
+    }
+  ],
+  "passed": true,
+  "raw_reads": 0,
+  "source_prepares": 0,
+  "source_receipt_sha256": "16b6d315d57f0dd850ab830fc2dc612a2008680ba7625d3006a650ffa4280f8d",
+  "target_executions": 0,
+  "tests": 3,
+  "witness_activity": {
+    "compile_attempts": 0,
+    "complete_descriptor_matches": 0,
+    "module_loads": 2,
+    "source_bytes_read": 0
+  },
+  "witness_manifest": {
+    "bytes": 42283,
+    "code_executed": false,
+    "module_count": 20,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/manifest.json",
+    "runtime": {
+      "cache_tag": "cpython-314",
+      "implementation": "cpython",
+      "magic": "2b0e0d0a",
+      "marshal_version": 5,
+      "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+      "version": [
+        3,
+        14,
+        7,
+        "final",
+        0
+      ]
+    },
+    "sha256": "56355f7ef10d16d8ab4fb02a84988cf2f0070b75e4cd5fccbf1c86c1ea34170d",
+    "source_count": 20,
+    "source_prepared": false
+  }
+}

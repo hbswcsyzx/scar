@@ -1,0 +1,5 @@
+{"actual_retained_input_bytes":0,"body":null,"elapsed_s":0.18604691699147224,"event":"BEGIN","output_accounted_bytes":0,"phase":"FREEZE","self_peak_rss_kib":57788}
+{"actual_retained_input_bytes":0,"body":null,"elapsed_s":0.946393711026758,"event":"STAGE_BEGIN","output_accounted_bytes":328,"phase":"CURRENT_INPUT_MEMBERSHIP","self_peak_rss_kib":57788}
+{"actual_retained_input_bytes":1013961,"body":null,"elapsed_s":0.9619513300131075,"event":"STAGE_BEGIN","output_accounted_bytes":704,"phase":"ORIGINAL_COMPOSITION","self_peak_rss_kib":57788}
+{"actual_retained_input_bytes":214498465,"body":1,"elapsed_s":4.742207303992473,"event":"STAGE_BEGIN","original_sequence":4,"output_accounted_bytes":1086,"phase":"EXACT_SOURCE_AND_CODE","self_peak_rss_kib":443784}
+{"actual_retained_input_bytes":226579885,"body":1,"elapsed_s":8.937883606995456,"event":"FAILED","exception":"AttributeError","message":"type object 'OperationKind' has no attribute 'CALL'","output_accounted_bytes":1514,"phase":"FAILED_RETAINED","self_peak_rss_kib":443784}

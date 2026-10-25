@@ -70,7 +70,9 @@ class SourceCodeEvidence:
 
 @dataclass(frozen=True)
 class SourceLanguageOptions:
-    capabilities: tuple[SourceLanguageCapability, ...] = tuple(SourceLanguageCapability)
+    capabilities: tuple[SourceLanguageCapability, ...] = (
+        SourceLanguageCapability.FIXED_UNPACK, SourceLanguageCapability.SLICE_KEYS,
+        SourceLanguageCapability.LEXICAL_LOCALS)
     code_evidence: SourceCodeEvidence | None = None
 
     def __post_init__(self):

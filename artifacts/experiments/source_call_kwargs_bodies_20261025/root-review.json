@@ -1,0 +1,10 @@
+{
+  "body_window_executed": false,
+  "candidate_sources": 352,
+  "freeze_sha256": "936968d032a1ac74e2716427ee30140febfdadfc06e28e183da1d862944becac",
+  "input_stat_pins": 21,
+  "large_inputs_opened": false,
+  "source_and_runner_guard_bytes": 42748581,
+  "status": "ROOT_FOUR_BODY_CODE_INPUT_AND_BUDGET_REVIEW_PASS",
+  "whole_program_model": "OPEN"
+}
