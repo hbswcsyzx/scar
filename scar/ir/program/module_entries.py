@@ -21,7 +21,8 @@ from scar.ir.program.structured import PythonProtocolKind, LoopInterface
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import Opcode, SourceSnapshot
 from scar.ir.v2.common import SourceReference
-from scar.ir.v2.ids import OperationDefinitionID, StaticValueID, ValueSlotID
+from scar.ir.v2.ids import (OperationDefinitionID, StaticValueID, ValueSlotID,
+    ControlFlowSuiteID, ControlFlowNodeID, InsertionPointID)
 
 
 class ModuleEntryProfile(str, Enum):
@@ -258,3 +259,122 @@ def encode_module_overlay(value):
 
 def decode_module_overlay(value):
     return decode(ModuleBodyOverlay, value, record_tags=MODULE_RECORD_TAGS)
+
+
+class ModuleBodyExpansionProfile(str, Enum):
+    IMPORT_PREFIX_314_V1 = "MODULE_IMPORT_PREFIX_314_V1"
+
+
+class ModulePrefixProtocolKind(str, Enum):
+    INVOKE_IMPORT_PREFIX = "INVOKE_IMPORT_PREFIX"
+    IMPORT_NAME_314 = "IMPORT_NAME_314"
+    STORE_NAME_314 = "STORE_NAME_314"
+    INVOKE_REMAINING = "INVOKE_REMAINING_STATEMENTS"
+    UNEXPANDED_SLICE = "UNEXPANDED_STATEMENT_SLICE"
+
+
+@dataclass(frozen=True, slots=True)
+class ModuleStatementSlice:
+    """Ordered original module.body suffix plus its original CFG boundary."""
+    unit: ModuleUnitSource
+    context: SourceContextDigest
+    statements: tuple[SourceReference, ...]
+    suite: ControlFlowSuiteID
+    before: InsertionPointID
+
+    def __post_init__(self):
+        _need(type(self.unit) is ModuleUnitSource and type(self.context) is SourceContextDigest
+              and self.context.namespace_root == self.unit.namespace_root, "slice source context differs")
+        _need(type(self.statements) is tuple and bool(self.statements)
+              and all(type(ref) is SourceReference and ref.path == self.unit.snapshot.path
+                      and ref.fingerprint == self.unit.snapshot.fingerprint for ref in self.statements)
+              and len(set(self.statements)) == len(self.statements), "slice requires unique ordered original statements")
+        _need(type(self.suite) is ControlFlowSuiteID and type(self.before) is InsertionPointID,
+              "slice requires original source control suite and BEFORE insertion")
+
+
+@dataclass(frozen=True, slots=True)
+class UnexpandedModuleSlice:
+    subject: ModuleStatementSlice
+    region: RegionID
+    operation: OperationID
+    required_expansion: RequiredModuleExpansion = RequiredModuleExpansion.REQUIRED
+
+    def __post_init__(self):
+        _need(type(self.subject) is ModuleStatementSlice and type(self.region) is RegionID
+              and type(self.operation) is OperationID, "residual requires its exact source subject and core endpoints")
+        _need(self.required_expansion is RequiredModuleExpansion.REQUIRED,
+              "residual body must retain required expansion")
+
+
+@dataclass(frozen=True, slots=True)
+class ModuleImportPrefix:
+    source: SourceReference
+    sg_definition: OperationDefinitionID
+    cfg_node: ControlFlowNodeID
+    region: RegionID
+    import_operation: OperationID
+    store_operation: OperationID
+    import_code_offset: int
+    store_code_offset: int
+
+    def __post_init__(self):
+        _need(type(self.source) is SourceReference and type(self.sg_definition) is OperationDefinitionID
+              and type(self.cfg_node) is ControlFlowNodeID and type(self.region) is RegionID
+              and type(self.import_operation) is OperationID and type(self.store_operation) is OperationID,
+              "import prefix requires original source/SG/CFG and existing core endpoints")
+        _need(type(self.import_code_offset) is int and self.import_code_offset >= 0
+              and type(self.store_code_offset) is int and self.store_code_offset > self.import_code_offset,
+              "prefix offsets require ordered locations in the same original root code")
+
+
+@dataclass(frozen=True, slots=True)
+class ModulePrefixProtocol:
+    operation: OperationID
+    kind: ModulePrefixProtocolKind | ModuleProtocolKind | PythonProtocolKind
+    source: ModuleSource
+
+
+@dataclass(frozen=True, slots=True)
+class ModulePrefixOverlay:
+    """SP7 indices over original facts/core, with no stored-content proof.
+
+    IMPORT_NAME owns level/fromlist until its opcode completion; STORE_NAME
+    consumes its stack input on both completions. Neither rule establishes
+    physical reclamation. Namespace addresses describe protocol attempts only.
+    """
+    declaration: ModuleEntryDeclaration
+    census: ModuleSourceCensus
+    interface: MappingFrameEntry
+    body_region: RegionID
+    prefix: ModuleImportPrefix
+    remaining: UnexpandedModuleSlice
+    frontiers: tuple[ModuleFrontier, ...]
+    operations_emitted: int
+    operation_links: tuple[ModuleOperationSource, ...]
+    value_links: tuple[ModuleValueSource, ...]
+    use_links: tuple[ModuleUseSource, ...]
+    protocols: tuple[ModulePrefixProtocol, ...]
+    frame_rules: FrameRules = FrameRules()
+    status: ModuleBodyStatus = ModuleBodyStatus.PARTIAL
+    profile: ModuleBodyExpansionProfile = ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1
+
+    def __post_init__(self):
+        _need(type(self.declaration) is ModuleEntryDeclaration and type(self.census) is ModuleSourceCensus
+              and type(self.interface) is MappingFrameEntry and type(self.body_region) is RegionID,
+              "prefix overlay requires the unchanged mapping ABI and original source census")
+        _need(type(self.prefix) is ModuleImportPrefix and type(self.remaining) is UnexpandedModuleSlice,
+              "prefix overlay requires exact prefix and residual subjects")
+        _need(self.profile is ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1
+              and self.status is ModuleBodyStatus.PARTIAL, "prefix capability remains partial")
+        _need(type(self.operations_emitted) is int and self.operations_emitted > 0
+              and type(self.frame_rules) is FrameRules, "invalid prefix construction/frame contract")
+        self.frame_rules.__post_init__()
+
+
+def encode_module_prefix(value):
+    return encode(value, record_tags=MODULE_RECORD_TAGS)
+
+
+def decode_module_prefix(value):
+    return decode(ModulePrefixOverlay, value, record_tags=MODULE_RECORD_TAGS)

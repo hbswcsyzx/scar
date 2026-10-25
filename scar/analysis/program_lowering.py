@@ -23,7 +23,8 @@ from scar.analysis.source_semantics_v2 import validate_source_semantics
 from scar.ir.program.codec import dumps as dump_graph
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
-from scar.ir.program.module_entries import ModuleBodyOverlay, ModuleEntryProfile
+from scar.ir.program.module_entries import (ModuleBodyOverlay, ModuleEntryProfile,
+    ModulePrefixOverlay, ModuleBodyExpansionProfile)
 from scar.ir.program.frames import (
     FrameBind, FrameDiscard, FrameEnter, FrameExit, FrameFormal, FrameModel,
 )
@@ -72,15 +73,29 @@ class SourceProgram:
     semantic: object
     semantics: object
     control: object
-    profile: BodyLoweringProfile | ModuleEntryProfile = BodyLoweringProfile.LEGACY
+    profile: BodyLoweringProfile | ModuleEntryProfile | ModuleBodyExpansionProfile = BodyLoweringProfile.LEGACY
     interface: BodyEntryInterface | None = None
     frame: FrameModel | None = None
     structured: StructuredBodyModel | None = None
     language: SourceLanguageOverlay | None = None
-    module: ModuleBodyOverlay | None = None
+    module: ModuleBodyOverlay | ModulePrefixOverlay | None = None
 
     def summary(self):
         """Separate declaration/link counts from program and effect coverage."""
+        if type(self.module) is ModulePrefixOverlay:
+            from scar.ir.record_codec import encode
+            return {"entry_kind": "MAPPING_FRAME", "entry": self.metadata.entry,
+                "body_status": self.module.status.value, "graph_present": self.graph is not None,
+                "entry_regions": len(self.graph.regions) if self.graph else 0,
+                "source_statement_interfaces_expanded": 1, "body_internal_operations_recovered": 0,
+                "remaining_statement_count": len(self.module.remaining.subject.statements),
+                "required_body_expansion": self.module.remaining.required_expansion.value,
+                "import_internal_expansion": "REQUIRED", "namespace_content_established": False,
+                "source_census": encode(self.module.census), "construction_operations": self.module.operations_emitted,
+                "frontier_counts": dict(sorted(Counter(row.kind for row in self.module.frontiers).items())),
+                "whole_program_coverage_established": False, "runtime_target_verified": False,
+                "namespace_alias_established": False, "import_module_object_established": False,
+                "fine_grained_state_effects_established": False, "transformation_authorized": False}
         if self.module is not None:
             from scar.ir.record_codec import encode
             return {"entry_kind": "MAPPING_FRAME", "entry": self.metadata.entry,
@@ -132,6 +147,20 @@ class SourceProgram:
         }
 
     def to_dict(self):
+        if type(self.module) is ModulePrefixOverlay:
+            from scar.ir.program.module_entries import encode_module_prefix
+            if (self.profile is not ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1 or self.interface is not None
+                    or self.frame is not None or self.structured is not None or self.language is not None):
+                raise ValueError("v7 prefix requires its separate capability and unchanged mapping ABI")
+            return {"schema": "scar.source-program", "schema_version": 7,
+                "entry_kind": "MAPPING_FRAME", "profile": self.profile.value,
+                "status": self.module.status.value,
+                "scope": "one original Import interface and exact residual module statement slice; runtime/content/effects remain OPEN",
+                "metadata": encode(self.metadata), "module": encode_module_prefix(self.module),
+                "graph": json.loads(dump_graph(self.graph)) if self.graph is not None else None,
+                "semantic": self.semantic.to_dict(), "semantics": self.semantics.to_dict(),
+                "control": self.control.to_dict(), "summary": self.summary(),
+                "runtime_target_verified": False, "transformation_authorized": False}
         if self.module is not None:
             from scar.ir.program.module_entries import encode_module_overlay
             if (self.profile is not ModuleEntryProfile.EXEC_MAPPING_314_V1 or self.interface is not None
@@ -192,6 +221,25 @@ class SourceProgram:
             raise ValueError("source program verification mode must be explicit")
         _check_structure_source_texts(verification, source_texts)
         version = document.get("schema_version")
+        if type(version) is int and version == 7:
+            from scar.ir.program.module_entries import decode_module_prefix
+            if (set(document) != expected_fields | {"entry_kind", "profile", "module"}
+                    or document["schema"] != "scar.source-program" or document["entry_kind"] != "MAPPING_FRAME"
+                    or document["profile"] != ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1.value
+                    or language_options is not None or verification != "STRUCTURE"):
+                raise ValueError("v7 prefix fields/capability/verification differ")
+            result = cls(load_graph(_canonical(document["graph"])) if document["graph"] is not None else None,
+                decode(LoweringMetadata, document["metadata"]), semantic_from_dict(document["semantic"]),
+                None, SourceControlFlowGraph.from_dict(document["control"]), ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1,
+                module=decode_module_prefix(document["module"]))
+            result = replace(result, semantics=SourceSemanticsGraph.from_dict(document["semantics"], result.semantic))
+            if _canonical(result.to_dict()) != _canonical(document):
+                raise ValueError("v7 prefix scope/status/authority differs")
+            checked = validate_source_program(result, max_operations=max_operations, verification=verification,
+                source_texts=source_texts, module_code_evidence=module_code_evidence)
+            if not checked["valid"]:
+                raise ValueError("; ".join(checked["errors"]))
+            return result
         if type(version) is int and version == 6:
             from scar.ir.program.module_entries import decode_module_overlay
             if (set(document) != expected_fields | {"entry_kind", "profile", "module"}
@@ -316,10 +364,12 @@ class PreparedSource:
         return _lower_prepared(self, entry, source=source, max_operations=max_operations,
                                expand_candidates=expand_candidates, profile=profile, language_options=language_options)
 
-    def lower_entry(self, selection, *, code_evidence, max_operations=10000):
+    def lower_entry(self, selection, *, code_evidence, max_operations=10000,
+                    profile=ModuleEntryProfile.EXEC_MAPPING_314_V1):
         """Explicit mapping-root capability; never changes function defaults."""
         from scar.analysis.source_module_lowering import lower_module_entry
-        return lower_module_entry(self, selection, code_evidence=code_evidence, max_operations=max_operations)
+        return lower_module_entry(self, selection, code_evidence=code_evidence, max_operations=max_operations,
+                                  profile=profile)
 
 
 def _lower_prepared(context, entry, *, source, max_operations, expand_candidates, profile,
