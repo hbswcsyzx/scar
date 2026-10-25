@@ -1,0 +1,2132 @@
+{
+  "schema": "scar.capture-import-progress",
+  "schema_version": 1,
+  "stages": [
+    {
+      "stage": "coordinates",
+      "status": "RUNNING",
+      "elapsed_s": 2.196000423282385e-06
+    },
+    {
+      "stage": "coordinates",
+      "status": "IMPORTED",
+      "elapsed_s": 0.8489536830456927,
+      "verified_raw_bytes": 19139044,
+      "artifact_members": 77,
+      "os_artifacts": 59,
+      "os_lines": 91641,
+      "processes": 2,
+      "threads": 59
+    },
+    {
+      "stage": "native",
+      "status": "RUNNING",
+      "elapsed_s": 0.8495449410402216
+    },
+    {
+      "stage": "dispatch_bridge",
+      "status": "RUNNING",
+      "elapsed_s": 1.755320214026142
+    },
+    {
+      "stage": "dispatch_bridge",
+      "status": "IMPORTED",
+      "elapsed_s": 2.291643896023743,
+      "dispatches": 261,
+      "slot_associations": 520,
+      "gaps": {}
+    },
+    {
+      "stage": "tensor_physical",
+      "status": "RUNNING",
+      "elapsed_s": 2.296972579031717
+    },
+    {
+      "stage": "tensor_physical",
+      "status": "IMPORTED_WITH_OPEN_OBLIGATIONS",
+      "elapsed_s": 3.0281137470155954,
+      "marker_nodes": 521,
+      "physical_slots": 520,
+      "allocation_epochs": 1026,
+      "gaps": {}
+    },
+    {
+      "stage": "native_schema",
+      "status": "RUNNING",
+      "elapsed_s": 3.0328697900404222
+    },
+    {
+      "stage": "native_schema",
+      "status": "IMPORTED",
+      "elapsed_s": 5.48585252603516,
+      "schemas": 11,
+      "formal_slots": 54,
+      "actual_tensor_slot_counts": {
+        "QUALIFIED": 3607,
+        "UNQUALIFIED": 1036
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "RUNNING",
+      "elapsed_s": 7.272455690021161
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.273085309017915,
+      "detail": {
+        "phase": "VALIDATION_BEGIN"
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.730904826021288,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "packages",
+        "table_records_expected": 0,
+        "records": 0,
+        "chunks": 0,
+        "decoded_bytes": 0,
+        "stored_bytes": 0
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.731367633037735,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "packages",
+        "table_records": 0,
+        "records": 0,
+        "chunks": 0,
+        "decoded_bytes": 0,
+        "stored_bytes": 0
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.731621768034529,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "modules",
+        "table_records_expected": 0,
+        "records": 0,
+        "chunks": 0,
+        "decoded_bytes": 0,
+        "stored_bytes": 0
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.731901741004549,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "modules",
+        "table_records": 0,
+        "records": 0,
+        "chunks": 0,
+        "decoded_bytes": 0,
+        "stored_bytes": 0
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.732158705010079,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "source_atoms",
+        "table_records_expected": 0,
+        "records": 0,
+        "chunks": 0,
+        "decoded_bytes": 0,
+        "stored_bytes": 0
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.7323976320330985,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "source_atoms",
+        "table_records": 0,
+        "records": 0,
+        "chunks": 0,
+        "decoded_bytes": 0,
+        "stored_bytes": 0
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.73264023399679,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "definitions",
+        "table_records_expected": 539,
+        "records": 0,
+        "chunks": 0,
+        "decoded_bytes": 0,
+        "stored_bytes": 0
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.790604424022604,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "definitions",
+        "table_records": 539,
+        "records": 539,
+        "chunks": 1,
+        "decoded_bytes": 563892,
+        "stored_bytes": 38429
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.790931408992037,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "slots",
+        "table_records_expected": 54,
+        "records": 539,
+        "chunks": 1,
+        "decoded_bytes": 563892,
+        "stored_bytes": 38429
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.797986124991439,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "slots",
+        "table_records": 54,
+        "records": 593,
+        "chunks": 2,
+        "decoded_bytes": 633356,
+        "stored_bytes": 42998
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.798292746010702,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "controls",
+        "table_records_expected": 0,
+        "records": 593,
+        "chunks": 2,
+        "decoded_bytes": 633356,
+        "stored_bytes": 42998
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.798569190024864,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "controls",
+        "table_records": 0,
+        "records": 593,
+        "chunks": 2,
+        "decoded_bytes": 633356,
+        "stored_bytes": 42998
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.798871194012463,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "contracts",
+        "table_records_expected": 0,
+        "records": 593,
+        "chunks": 2,
+        "decoded_bytes": 633356,
+        "stored_bytes": 42998
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.799147688027006,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "contracts",
+        "table_records": 0,
+        "records": 593,
+        "chunks": 2,
+        "decoded_bytes": 633356,
+        "stored_bytes": 42998
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.7994196460349485,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "effects",
+        "table_records_expected": 11,
+        "records": 593,
+        "chunks": 2,
+        "decoded_bytes": 633356,
+        "stored_bytes": 42998
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.80178998503834,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "effects",
+        "table_records": 11,
+        "records": 604,
+        "chunks": 3,
+        "decoded_bytes": 649512,
+        "stored_bytes": 44365
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.802114168996923,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "resources",
+        "table_records_expected": 0,
+        "records": 604,
+        "chunks": 3,
+        "decoded_bytes": 649512,
+        "stored_bytes": 44365
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.802415832004044,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "resources",
+        "table_records": 0,
+        "records": 604,
+        "chunks": 3,
+        "decoded_bytes": 649512,
+        "stored_bytes": 44365
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.802725557994563,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "semantic",
+        "table": "edges",
+        "table_records_expected": 67,
+        "records": 604,
+        "chunks": 3,
+        "decoded_bytes": 649512,
+        "stored_bytes": 44365
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.810351454012562,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "semantic",
+        "table": "edges",
+        "table_records": 67,
+        "records": 671,
+        "chunks": 4,
+        "decoded_bytes": 747258,
+        "stored_bytes": 48013
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 7.810730379016604,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "evidence",
+        "table": "instances",
+        "table_records_expected": 4386,
+        "records": 671,
+        "chunks": 4,
+        "decoded_bytes": 747258,
+        "stored_bytes": 48013
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.847984950989485,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "evidence",
+        "table": "instances",
+        "table_records": 4386,
+        "records": 5057,
+        "chunks": 5,
+        "decoded_bytes": 10909818,
+        "stored_bytes": 572680
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.848501086991746,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "evidence",
+        "table": "observations",
+        "table_records_expected": 0,
+        "records": 5057,
+        "chunks": 5,
+        "decoded_bytes": 10909818,
+        "stored_bytes": 572680
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.848846262029838,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "evidence",
+        "table": "observations",
+        "table_records": 0,
+        "records": 5057,
+        "chunks": 5,
+        "decoded_bytes": 10909818,
+        "stored_bytes": 572680
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.849159275996499,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "evidence",
+        "table": "provider_references",
+        "table_records_expected": 1028,
+        "records": 5057,
+        "chunks": 5,
+        "decoded_bytes": 10909818,
+        "stored_bytes": 572680
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.968589496042114,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "evidence",
+        "table": "provider_references",
+        "table_records": 1028,
+        "records": 6085,
+        "chunks": 6,
+        "decoded_bytes": 11776716,
+        "stored_bytes": 649937
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.969006394036114,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "evidence",
+        "table": "measurements",
+        "table_records_expected": 0,
+        "records": 6085,
+        "chunks": 6,
+        "decoded_bytes": 11776716,
+        "stored_bytes": 649937
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.970429155044258,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "evidence",
+        "table": "measurements",
+        "table_records": 0,
+        "records": 6085,
+        "chunks": 6,
+        "decoded_bytes": 11776716,
+        "stored_bytes": 649937
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.970778638031334,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "evidence",
+        "table": "control_events",
+        "table_records_expected": 0,
+        "records": 6085,
+        "chunks": 6,
+        "decoded_bytes": 11776716,
+        "stored_bytes": 649937
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.971114763990045,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "evidence",
+        "table": "control_events",
+        "table_records": 0,
+        "records": 6085,
+        "chunks": 6,
+        "decoded_bytes": 11776716,
+        "stored_bytes": 649937
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 8.971448949014302,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "evidence",
+        "table": "external_references",
+        "table_records_expected": 2832,
+        "records": 6085,
+        "chunks": 6,
+        "decoded_bytes": 11776716,
+        "stored_bytes": 649937
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.049082943995018,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "evidence",
+        "table": "external_references",
+        "table_records": 2832,
+        "records": 8917,
+        "chunks": 7,
+        "decoded_bytes": 12284798,
+        "stored_bytes": 720186
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.049463681003544,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "evidence",
+        "table": "edges",
+        "table_records_expected": 8254,
+        "records": 8917,
+        "chunks": 7,
+        "decoded_bytes": 12284798,
+        "stored_bytes": 720186
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.864933931035921,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "evidence",
+        "table": "edges",
+        "table_records": 8254,
+        "records": 17171,
+        "chunks": 8,
+        "decoded_bytes": 20974357,
+        "stored_bytes": 970975
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.866233728011139,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "values",
+        "table": "logical_values",
+        "table_records_expected": 0,
+        "records": 17171,
+        "chunks": 8,
+        "decoded_bytes": 20974357,
+        "stored_bytes": 970975
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.866637960018124,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "values",
+        "table": "logical_values",
+        "table_records": 0,
+        "records": 17171,
+        "chunks": 8,
+        "decoded_bytes": 20974357,
+        "stored_bytes": 970975
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.867053505033255,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "values",
+        "table": "versions",
+        "table_records_expected": 0,
+        "records": 17171,
+        "chunks": 8,
+        "decoded_bytes": 20974357,
+        "stored_bytes": 970975
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.867420612019487,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "values",
+        "table": "versions",
+        "table_records": 0,
+        "records": 17171,
+        "chunks": 8,
+        "decoded_bytes": 20974357,
+        "stored_bytes": 970975
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.867805287998635,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "values",
+        "table": "provenance",
+        "table_records_expected": 0,
+        "records": 17171,
+        "chunks": 8,
+        "decoded_bytes": 20974357,
+        "stored_bytes": 970975
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.868178033037111,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "values",
+        "table": "provenance",
+        "table_records": 0,
+        "records": 17171,
+        "chunks": 8,
+        "decoded_bytes": 20974357,
+        "stored_bytes": 970975
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 9.868560155038722,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "values",
+        "table": "allocations",
+        "table_records_expected": 2052,
+        "records": 17171,
+        "chunks": 8,
+        "decoded_bytes": 20974357,
+        "stored_bytes": 970975
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 10.141078335989732,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "values",
+        "table": "allocations",
+        "table_records": 2052,
+        "records": 19223,
+        "chunks": 9,
+        "decoded_bytes": 23579190,
+        "stored_bytes": 1127683
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 10.14172158902511,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "values",
+        "table": "regions",
+        "table_records_expected": 520,
+        "records": 19223,
+        "chunks": 9,
+        "decoded_bytes": 23579190,
+        "stored_bytes": 1127683
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 10.220470965025015,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "values",
+        "table": "regions",
+        "table_records": 520,
+        "records": 19743,
+        "chunks": 10,
+        "decoded_bytes": 24287803,
+        "stored_bytes": 1163980
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 10.220999946002848,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "values",
+        "table": "materializations",
+        "table_records_expected": 0,
+        "records": 19743,
+        "chunks": 10,
+        "decoded_bytes": 24287803,
+        "stored_bytes": 1163980
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 10.221465995011386,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "values",
+        "table": "materializations",
+        "table_records": 0,
+        "records": 19743,
+        "chunks": 10,
+        "decoded_bytes": 24287803,
+        "stored_bytes": 1163980
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 10.221977388020605,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "values",
+        "table": "objects",
+        "table_records_expected": 260,
+        "records": 19743,
+        "chunks": 10,
+        "decoded_bytes": 24287803,
+        "stored_bytes": 1163980
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 10.257268406043295,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "values",
+        "table": "objects",
+        "table_records": 260,
+        "records": 20003,
+        "chunks": 11,
+        "decoded_bytes": 24619582,
+        "stored_bytes": 1172201
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 10.257792352989782,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "graph": "values",
+        "table": "bindings",
+        "table_records_expected": 0,
+        "records": 20003,
+        "chunks": 11,
+        "decoded_bytes": 24619582,
+        "stored_bytes": 1172201
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "WRITING",
+      "elapsed_s": 10.258265133015811,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "graph": "values",
+        "table": "bindings",
+        "table_records": 0,
+        "records": 20003,
+        "chunks": 11,
+        "decoded_bytes": 24619582,
+        "stored_bytes": 1172201
+      }
+    },
+    {
+      "stage": "bundle_partitions",
+      "status": "PUBLISHED_WITH_OPEN_OBLIGATIONS",
+      "elapsed_s": 10.260689791990444
+    },
+    {
+      "stage": "native",
+      "status": "IMPORTED",
+      "elapsed_s": 10.760727545013651,
+      "cpu_rf_matches": 2330,
+      "runtime_gpu_matches": 0,
+      "lifetime_points": 2051
+    },
+    {
+      "stage": "os_resources",
+      "status": "RUNNING",
+      "elapsed_s": 10.918250408023596
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "RUNNING",
+      "elapsed_s": 17.086003659991547
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 17.086823703022674,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "observations",
+        "expected": 91581,
+        "records": 0,
+        "chunks": 0,
+        "decoded_bytes": 0,
+        "stored_bytes": 0
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 19.221927647013217,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "observations",
+        "table_records": 10412,
+        "records": 10412,
+        "chunks": 1,
+        "decoded_bytes": 15998907,
+        "stored_bytes": 936396
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 21.29815749003319,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "observations",
+        "table_records": 20846,
+        "records": 20846,
+        "chunks": 2,
+        "decoded_bytes": 31998190,
+        "stored_bytes": 1834096
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 23.40855404100148,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "observations",
+        "table_records": 31327,
+        "records": 31327,
+        "chunks": 3,
+        "decoded_bytes": 47997314,
+        "stored_bytes": 2573640
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 25.50260624702787,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "observations",
+        "table_records": 41951,
+        "records": 41951,
+        "chunks": 4,
+        "decoded_bytes": 63996675,
+        "stored_bytes": 3253898
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 27.58785740402527,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "observations",
+        "table_records": 52603,
+        "records": 52603,
+        "chunks": 5,
+        "decoded_bytes": 79995572,
+        "stored_bytes": 4010960
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 29.696828126034234,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "observations",
+        "table_records": 63091,
+        "records": 63091,
+        "chunks": 6,
+        "decoded_bytes": 95994604,
+        "stored_bytes": 4944230
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 31.760042926005553,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "observations",
+        "table_records": 73580,
+        "records": 73580,
+        "chunks": 7,
+        "decoded_bytes": 111994306,
+        "stored_bytes": 5629776
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 33.83631783700548,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "observations",
+        "table_records": 84229,
+        "records": 84229,
+        "chunks": 8,
+        "decoded_bytes": 127993739,
+        "stored_bytes": 6407227
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 35.55763428902719,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "observations",
+        "table_records": 91581,
+        "records": 91581,
+        "chunks": 9,
+        "decoded_bytes": 139505300,
+        "stored_bytes": 6946776
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 35.55833278200589,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "line_classifications",
+        "expected": 91641,
+        "records": 91581,
+        "chunks": 9,
+        "decoded_bytes": 139505300,
+        "stored_bytes": 6946776
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 38.857745871995576,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "line_classifications",
+        "table_records": 91641,
+        "records": 183222,
+        "chunks": 10,
+        "decoded_bytes": 146370876,
+        "stored_bytes": 7547037
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 38.85861807904439,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "resources",
+        "expected": 2695,
+        "records": 183222,
+        "chunks": 10,
+        "decoded_bytes": 146370876,
+        "stored_bytes": 7547037
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 39.360125658044126,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "resources",
+        "table_records": 2695,
+        "records": 185917,
+        "chunks": 11,
+        "decoded_bytes": 151220911,
+        "stored_bytes": 7646833
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 39.36068584304303,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "handles",
+        "expected": 2695,
+        "records": 185917,
+        "chunks": 11,
+        "decoded_bytes": 151220911,
+        "stored_bytes": 7646833
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 40.70040756900562,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "handles",
+        "table_records": 2695,
+        "records": 188612,
+        "chunks": 12,
+        "decoded_bytes": 166933000,
+        "stored_bytes": 7985658
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 40.7011316959979,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "target_lifetime_events",
+        "expected": 2695,
+        "records": 188612,
+        "chunks": 12,
+        "decoded_bytes": 166933000,
+        "stored_bytes": 7985658
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.62278206303017,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "target_lifetime_events",
+        "table_records": 2695,
+        "records": 191307,
+        "chunks": 13,
+        "decoded_bytes": 178046360,
+        "stored_bytes": 8215687
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.623434973007534,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "processes",
+        "expected": 2,
+        "records": 191307,
+        "chunks": 13,
+        "decoded_bytes": 178046360,
+        "stored_bytes": 8215687
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.624482745013665,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "processes",
+        "table_records": 2,
+        "records": 191309,
+        "chunks": 14,
+        "decoded_bytes": 178048219,
+        "stored_bytes": 8216192
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.62506268400466,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "threads",
+        "expected": 59,
+        "records": 191309,
+        "chunks": 14,
+        "decoded_bytes": 178048219,
+        "stored_bytes": 8216192
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.63189229200361,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "threads",
+        "table_records": 59,
+        "records": 191368,
+        "chunks": 15,
+        "decoded_bytes": 178113934,
+        "stored_bytes": 8220783
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.63241181202466,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "artifacts",
+        "expected": 59,
+        "records": 191368,
+        "chunks": 15,
+        "decoded_bytes": 178113934,
+        "stored_bytes": 8220783
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.635536598041654,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "artifacts",
+        "table_records": 59,
+        "records": 191427,
+        "chunks": 16,
+        "decoded_bytes": 178131455,
+        "stored_bytes": 8223959
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.636065486993175,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "gaps",
+        "expected": 554,
+        "records": 191427,
+        "chunks": 16,
+        "decoded_bytes": 178131455,
+        "stored_bytes": 8223959
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.67534153099405,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "gaps",
+        "table_records": 554,
+        "records": 191981,
+        "chunks": 17,
+        "decoded_bytes": 178387695,
+        "stored_bytes": 8233511
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 41.67588616599096,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "submissions",
+        "expected": 91581,
+        "records": 191981,
+        "chunks": 17,
+        "decoded_bytes": 178387695,
+        "stored_bytes": 8233511
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 43.2833480060217,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 3154,
+        "records": 195135,
+        "chunks": 18,
+        "decoded_bytes": 194387433,
+        "stored_bytes": 8538845
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 44.93390725099016,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 6306,
+        "records": 198287,
+        "chunks": 19,
+        "decoded_bytes": 210386985,
+        "stored_bytes": 8845456
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 46.71391025203047,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 9458,
+        "records": 201439,
+        "chunks": 20,
+        "decoded_bytes": 226386537,
+        "stored_bytes": 9163914
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 48.32294871204067,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 12605,
+        "records": 204586,
+        "chunks": 21,
+        "decoded_bytes": 242384170,
+        "stored_bytes": 9469385
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 50.002917831006926,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 15751,
+        "records": 207732,
+        "chunks": 22,
+        "decoded_bytes": 258381580,
+        "stored_bytes": 9787850
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 51.56135686300695,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 18897,
+        "records": 210878,
+        "chunks": 23,
+        "decoded_bytes": 274378990,
+        "stored_bytes": 10094136
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 53.166182017012034,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 22043,
+        "records": 214024,
+        "chunks": 24,
+        "decoded_bytes": 290376400,
+        "stored_bytes": 10399842
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 54.78870573703898,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 25189,
+        "records": 217170,
+        "chunks": 25,
+        "decoded_bytes": 306373810,
+        "stored_bytes": 10718291
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 56.38550110900542,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 28335,
+        "records": 220316,
+        "chunks": 26,
+        "decoded_bytes": 322371220,
+        "stored_bytes": 11023807
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 57.982753209013026,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 31481,
+        "records": 223462,
+        "chunks": 27,
+        "decoded_bytes": 338368630,
+        "stored_bytes": 11330190
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 59.605744155007415,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 34627,
+        "records": 226608,
+        "chunks": 28,
+        "decoded_bytes": 354366040,
+        "stored_bytes": 11648670
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 61.189086786995176,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 37773,
+        "records": 229754,
+        "chunks": 29,
+        "decoded_bytes": 370363450,
+        "stored_bytes": 11954314
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 62.792969745001756,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 40919,
+        "records": 232900,
+        "chunks": 30,
+        "decoded_bytes": 386360860,
+        "stored_bytes": 12260652
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 64.42543852102244,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 44065,
+        "records": 236046,
+        "chunks": 31,
+        "decoded_bytes": 402358270,
+        "stored_bytes": 12566161
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 66.04327590402681,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 47211,
+        "records": 239192,
+        "chunks": 32,
+        "decoded_bytes": 418355680,
+        "stored_bytes": 12884607
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 67.66730841103708,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 50357,
+        "records": 242338,
+        "chunks": 33,
+        "decoded_bytes": 434353090,
+        "stored_bytes": 13191300
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 69.32397851999849,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 53503,
+        "records": 245484,
+        "chunks": 34,
+        "decoded_bytes": 450350500,
+        "stored_bytes": 13496927
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 70.97751313302433,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 56649,
+        "records": 248630,
+        "chunks": 35,
+        "decoded_bytes": 466347910,
+        "stored_bytes": 13815376
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 72.74384105199715,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 59795,
+        "records": 251776,
+        "chunks": 36,
+        "decoded_bytes": 482345320,
+        "stored_bytes": 14120909
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 74.49221214302815,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 62941,
+        "records": 254922,
+        "chunks": 37,
+        "decoded_bytes": 498342730,
+        "stored_bytes": 14429445
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 76.06446218199562,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 66087,
+        "records": 258068,
+        "chunks": 38,
+        "decoded_bytes": 514340140,
+        "stored_bytes": 14747922
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 77.63075288303662,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 69233,
+        "records": 261214,
+        "chunks": 39,
+        "decoded_bytes": 530337550,
+        "stored_bytes": 15053556
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 79.26948836300289,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 72379,
+        "records": 264360,
+        "chunks": 40,
+        "decoded_bytes": 546334960,
+        "stored_bytes": 15360258
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 80.8751934710308,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 75525,
+        "records": 267506,
+        "chunks": 41,
+        "decoded_bytes": 562332370,
+        "stored_bytes": 15665804
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 82.53830648498842,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 78671,
+        "records": 270652,
+        "chunks": 42,
+        "decoded_bytes": 578329780,
+        "stored_bytes": 15984272
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 84.24976697500097,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 81817,
+        "records": 273798,
+        "chunks": 43,
+        "decoded_bytes": 594327190,
+        "stored_bytes": 16289680
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 85.82468963199062,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 84963,
+        "records": 276944,
+        "chunks": 44,
+        "decoded_bytes": 610324600,
+        "stored_bytes": 16595281
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 87.45285805902677,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 88109,
+        "records": 280090,
+        "chunks": 45,
+        "decoded_bytes": 626322010,
+        "stored_bytes": 16913735
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 89.04682520002825,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "submissions",
+        "table_records": 91258,
+        "records": 283239,
+        "chunks": 46,
+        "decoded_bytes": 642317411,
+        "stored_bytes": 17228013
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 89.20670111500658,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "submissions",
+        "table_records": 91581,
+        "records": 283562,
+        "chunks": 47,
+        "decoded_bytes": 643946624,
+        "stored_bytes": 17264158
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 89.20743481203681,
+      "detail": {
+        "phase": "TABLE_BEGIN",
+        "table": "outcomes",
+        "expected": 91518,
+        "records": 283562,
+        "chunks": 47,
+        "decoded_bytes": 643946624,
+        "stored_bytes": 17264158
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 90.83937138103647,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 4920,
+        "records": 288482,
+        "chunks": 48,
+        "decoded_bytes": 659944430,
+        "stored_bytes": 17617350
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 92.46733895404032,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 9837,
+        "records": 293399,
+        "chunks": 49,
+        "decoded_bytes": 675944006,
+        "stored_bytes": 17941198
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 94.10553534101928,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 14741,
+        "records": 298303,
+        "chunks": 50,
+        "decoded_bytes": 691943895,
+        "stored_bytes": 18269979
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 95.72762598301051,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 19644,
+        "records": 303206,
+        "chunks": 51,
+        "decoded_bytes": 707942123,
+        "stored_bytes": 18591825
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 97.35090106900316,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 24547,
+        "records": 308109,
+        "chunks": 52,
+        "decoded_bytes": 723940045,
+        "stored_bytes": 18929998
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 98.98791785002686,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 29450,
+        "records": 313012,
+        "chunks": 53,
+        "decoded_bytes": 739938534,
+        "stored_bytes": 19237883
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 100.60689462703886,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 34353,
+        "records": 317915,
+        "chunks": 54,
+        "decoded_bytes": 755937023,
+        "stored_bytes": 19545758
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 102.27639890200226,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 39256,
+        "records": 322818,
+        "chunks": 55,
+        "decoded_bytes": 771935473,
+        "stored_bytes": 19855709
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 103.86889785004314,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 44159,
+        "records": 327721,
+        "chunks": 56,
+        "decoded_bytes": 787933917,
+        "stored_bytes": 20166230
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 105.48275119403843,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 49062,
+        "records": 332624,
+        "chunks": 57,
+        "decoded_bytes": 803931779,
+        "stored_bytes": 20492731
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 107.11292012198828,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 53965,
+        "records": 337527,
+        "chunks": 58,
+        "decoded_bytes": 819930079,
+        "stored_bytes": 20811070
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 108.75604969303822,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 58868,
+        "records": 342430,
+        "chunks": 59,
+        "decoded_bytes": 835928307,
+        "stored_bytes": 21133492
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 110.39976112899603,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 63771,
+        "records": 347333,
+        "chunks": 60,
+        "decoded_bytes": 851926049,
+        "stored_bytes": 21467275
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 111.9970462580095,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 68674,
+        "records": 352236,
+        "chunks": 61,
+        "decoded_bytes": 867924520,
+        "stored_bytes": 21776010
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 113.64195983001264,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 73577,
+        "records": 357139,
+        "chunks": 62,
+        "decoded_bytes": 883923000,
+        "stored_bytes": 22084439
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 115.31186592101585,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 78480,
+        "records": 362042,
+        "chunks": 63,
+        "decoded_bytes": 899921444,
+        "stored_bytes": 22395078
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 116.97325377800735,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 83383,
+        "records": 366945,
+        "chunks": 64,
+        "decoded_bytes": 915919822,
+        "stored_bytes": 22709028
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 118.59295951103559,
+      "detail": {
+        "phase": "CHUNK_CLOSED",
+        "table": "outcomes",
+        "table_records": 88286,
+        "records": 371848,
+        "chunks": 65,
+        "decoded_bytes": 931918254,
+        "stored_bytes": 23020482
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "WRITING",
+      "elapsed_s": 119.64821777504403,
+      "detail": {
+        "phase": "TABLE_COMPLETE",
+        "table": "outcomes",
+        "table_records": 91518,
+        "records": 375080,
+        "chunks": 66,
+        "decoded_bytes": 942441904,
+        "stored_bytes": 23230765
+      }
+    },
+    {
+      "stage": "os_interfaces",
+      "status": "PUBLISHED_WITH_OPEN_OBLIGATIONS",
+      "elapsed_s": 119.65595111303264
+    },
+    {
+      "stage": "os_resources",
+      "status": "IMPORTED",
+      "elapsed_s": 119.73536489903927,
+      "physical_lines": 91641,
+      "tid_artifacts": 59,
+      "classification_counts": {
+        "COMPLETED": 91581,
+        "SIGNAL": 1,
+        "PROCESS_EXIT": 59
+      },
+      "unconnected_line_reasons": {
+        "outside_fd_profile": 73782,
+        "OFD_release_not_established": 59
+      },
+      "syscall_observations": 91581,
+      "open_file_descriptions": 2695,
+      "handle_generations": 2695,
+      "observed_handle_ends": 8,
+      "connected_io": 10,
+      "source_runtime_verified": false,
+      "transformation_authorized": false,
+      "complete_resource_model": false,
+      "interface_mode": "OBSERVED_KERNEL_INTERFACES_R1",
+      "interface_records": 91581,
+      "interface_counts": {
+        "access": 5,
+        "arch_prctl": 3,
+        "brk": 1036,
+        "clock_nanosleep": 57,
+        "clone3": 57,
+        "close": 2699,
+        "connect": 1,
+        "dup2": 3,
+        "epoll_create1": 1,
+        "eventfd2": 1,
+        "execve": 3,
+        "exit": 56,
+        "exit_group": 2,
+        "fcntl": 9,
+        "fstat": 2654,
+        "futex": 238,
+        "get_mempolicy": 1,
+        "getcwd": 9,
+        "getdents64": 633,
+        "getegid": 2,
+        "geteuid": 4,
+        "getgid": 2,
+        "getpid": 30250,
+        "getppid": 1,
+        "getrandom": 16,
+        "gettid": 527,
+        "getuid": 2,
+        "ioctl": 123,
+        "lseek": 2414,
+        "lstat": 23075,
+        "madvise": 56,
+        "mbind": 56,
+        "mkdir": 5,
+        "mmap": 779,
+        "mprotect": 199,
+        "mremap": 1,
+        "munmap": 159,
+        "newfstatat": 47,
+        "open": 2,
+        "openat": 3438,
+        "pipe2": 4,
+        "poll": 2,
+        "prctl": 2,
+        "pread64": 8,
+        "prlimit64": 5,
+        "read": 4805,
+        "readlink": 26,
+        "readlinkat": 2,
+        "rename": 3,
+        "rseq": 60,
+        "rt_sigaction": 137,
+        "rt_sigprocmask": 231,
+        "sched_get_priority_max": 5,
+        "sched_get_priority_min": 5,
+        "sched_getaffinity": 8,
+        "sched_setaffinity": 58,
+        "set_robust_list": 60,
+        "set_tid_address": 3,
+        "setsockopt": 1,
+        "socket": 1,
+        "stat": 10730,
+        "statfs": 1,
+        "symlink": 7,
+        "uname": 6,
+        "unlink": 9,
+        "vfork": 1,
+        "wait4": 1,
+        "write": 6314,
+        "writev": 460
+      },
+      "interface_families": {
+        "BYTE_IO": 11587,
+        "DESCRIPTOR_OR_DEVICE_INTERFACE": 5248,
+        "DESCRIPTOR_PRODUCER": 3446,
+        "EXECUTION_CONTEXT_INTERFACE": 119,
+        "FILESYSTEM_NAMESPACE_INTERFACE": 24,
+        "METADATA_QUERY": 37182,
+        "UNMODELED_KERNEL_INTERFACE": 31685,
+        "VIRTUAL_MEMORY_INTERFACE": 2287,
+        "WAIT_OR_LOCK_INTERFACE": 3
+      },
+      "legacy_syscall_observations": 17799,
+      "legacy_outside_fd_profile_count": 73782,
+      "legacy_outside_fd_profile_by_syscall": {
+        "access": 5,
+        "arch_prctl": 3,
+        "brk": 1036,
+        "clock_nanosleep": 57,
+        "connect": 1,
+        "epoll_create1": 1,
+        "eventfd2": 1,
+        "exit": 56,
+        "exit_group": 2,
+        "fstat": 2654,
+        "futex": 238,
+        "get_mempolicy": 1,
+        "getcwd": 9,
+        "getdents64": 633,
+        "getegid": 2,
+        "geteuid": 4,
+        "getgid": 2,
+        "getpid": 30250,
+        "getppid": 1,
+        "getrandom": 16,
+        "gettid": 527,
+        "getuid": 2,
+        "ioctl": 123,
+        "lseek": 2414,
+        "lstat": 23075,
+        "madvise": 56,
+        "mbind": 56,
+        "mkdir": 5,
+        "mmap": 779,
+        "mprotect": 199,
+        "mremap": 1,
+        "munmap": 159,
+        "newfstatat": 47,
+        "pipe2": 4,
+        "poll": 2,
+        "prctl": 2,
+        "prlimit64": 5,
+        "readlink": 26,
+        "readlinkat": 2,
+        "rename": 3,
+        "rseq": 60,
+        "rt_sigaction": 137,
+        "rt_sigprocmask": 231,
+        "sched_get_priority_max": 5,
+        "sched_get_priority_min": 5,
+        "sched_getaffinity": 8,
+        "sched_setaffinity": 58,
+        "set_robust_list": 60,
+        "set_tid_address": 3,
+        "setsockopt": 1,
+        "socket": 1,
+        "stat": 10730,
+        "statfs": 1,
+        "symlink": 7,
+        "uname": 6,
+        "unlink": 9,
+        "wait4": 1
+      },
+      "ordinary_return_outcomes": 91518,
+      "nonreturn_protocol_counts": {
+        "EXEC_IMAGE_REPLACED": 3,
+        "EXIT_REQUEST": 58,
+        "RETURN_RENDERING_UNRECOVERED": 2
+      },
+      "argument_frontiers": 35435,
+      "missing_duration": 59,
+      "process_coordinate_open": 0,
+      "legacy_process_coordinate_open": 0,
+      "actual_fd_producer_ports": 10,
+      "gap_groups": 554,
+      "gap_occurrences": 77706,
+      "quiescence_records": 0,
+      "canonical_dependencies_established": false,
+      "syscall_work_dependencies_coverage": "UNKNOWN",
+      "complete_work_effects_established": false
+    },
+    {
+      "stage": "capture",
+      "status": "IMPORTED_WITH_OPEN_OBLIGATIONS",
+      "elapsed_s": 120.01194267603569,
+      "coordinate_identity_consistent": true
+    }
+  ],
+  "whole_model_established": false
+}

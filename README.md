@@ -8,6 +8,8 @@
 - [当前交付与执行顺序](docs/FIRST_STAGE_DELIVERY.md)：真实产物、具体断口及下一项。
 - [实际运行记录](docs/FIRST_STAGE_MODEL_STATUS.md)：Observed / Implemented / Verified 与失败记录。
 - [模型设计](docs/WHOLE_PROGRAM_MODEL.md)、[现成工具与集成](docs/MODELING_INTEGRATION.md)。
+- [通用离线建模入口](docs/MODEL_RUN.md)：`model-run --from-capture`已跑通八阶段串联；
+  当前小样例仍无typed body连接，源码/原生入口及整个模型验收保持OPEN。
 
 工具入口是通用的，LeWM 只提供原始命令和外部验收范围。源码、调用、Tensor
 算子、GPU 与 OS 证据使用独立身份，并通过可核对的来源关系连接；不会把同名、

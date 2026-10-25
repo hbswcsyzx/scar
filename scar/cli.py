@@ -321,6 +321,18 @@ def _query_body_execution(args) -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="scar")
     sub = parser.add_subparsers(dest="subcommand", required=True)
+    model_run = sub.add_parser("model-run", help="build a partial model offline from an existing capture")
+    model_run.add_argument("--from-capture", required=True, dest="capture")
+    model_run.add_argument("--out", required=True)
+    model_run.add_argument("--plan-only", action="store_true", help="read bounded metadata only; no raw streams or compilation")
+    model_run.add_argument("--resume", action="store_true", help="preserve old attempts and create a fresh attempt")
+    for name, default in (("metadata-bytes", 2_000_000), ("raw-bytes", 64_000_000),
+                          ("record-bytes", 64_000_000), ("output-bytes", 128_000_000),
+                          ("calls", 256), ("codes", 128), ("source-files", 4),
+                          ("source-bytes", 256_000), ("bodies", 4), ("operations", 4000),
+                          ("seconds", 180), ("compile-keys", 4), ("witness-bytes", 16_000_000)):
+        model_run.add_argument("--max-" + name, type=int, default=default)
+    model_run.set_defaults(func=_model_run)
     trace = sub.add_parser("trace", help="trace an arbitrary child command")
     trace.add_argument("--out", default="artifacts/traces/run")
     trace.add_argument("--lines", action="store_true",
@@ -1462,6 +1474,16 @@ def _normalize_v2(args) -> int:
     print(json.dumps({"schema": result.bundle.SCHEMA, "out": str(out),
                       "report": str(report), "valid": validation["valid"]}))
     return 0
+
+
+def _model_run(args) -> int:
+    from scar.analysis.model_run import ModelRunBudget, run_model
+    options = {name: getattr(args, name) for name in ModelRunBudget.__dataclass_fields__}
+    report = run_model(args.capture, args.out, plan_only=args.plan_only,
+                       resume=args.resume, budget=ModelRunBudget(**options))
+    print(json.dumps({"out": str(Path(args.out).absolute()), "status": report["status"],
+                      "attempt": report["attempt"], "whole_model_established": False}), flush=True)
+    return 0 if report["status"] in ("METADATA_PLANNED_WITH_OPEN", "COMPONENTS_LINKED_WITH_OPEN") else 2
 
 
 def _import_capture(args) -> int:
