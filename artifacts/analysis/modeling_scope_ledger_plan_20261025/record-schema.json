@@ -1,0 +1,1325 @@
+{
+  "aliases": {
+    "CanonicalProgramID": "BlockID | LocationID | OperationID | RegionID | ResourceDefinitionID | ResourceRequirementID | UseID | ValueID",
+    "CoverageSubject": "SourceDefinitionSubject | QualifiedEntitySubject | ArtifactRecordSubject | CollectionSubject",
+    "EvidenceLocator": "JsonRecordRef | JsonlRecordRef | PartitionRecordRef | TextRangeRef",
+    "LedgerRow": "CoverageObligation | DenominatorInventory | DenominatorMember | CoverageAssessment | ScopeRevisionDelta"
+  },
+  "borrowed_shapes_not_new_graph_identities": [
+    "OriginalNamespaceArtifact",
+    "OriginalBodyIdentity",
+    "OriginalGraphNamespace",
+    "QualifiedProgramReference"
+  ],
+  "deployment_status": "DESIGN_ONLY_NOT_IMPLEMENTED",
+  "discriminator": "$ledger_record",
+  "duplicate_json_keys": "REJECT",
+  "enums": {
+    "Availability": [
+      "PRESENT",
+      "PARTIAL",
+      "MISSING",
+      "CONFLICT"
+    ],
+    "Axis": [
+      "STRUCTURAL_ATTRIBUTION",
+      "DEPENDENCY_CONNECTION",
+      "INTERNAL_EXPANSION",
+      "RUNTIME_EVIDENCE"
+    ],
+    "CollectionProfile": [
+      "PARTITIONED_SOURCE_DEFINITIONS_V1_V2",
+      "PARTITIONED_SOURCE_CONSTRUCTS_V1_V2",
+      "SOURCE_INVOCATION_ROWS_V1_V3",
+      "SOURCE_ORPHAN_EXIT_ROWS_V1_V3",
+      "DISPATCH_MARKER_OBSERVATIONS_V1",
+      "DISPATCH_GROUP_INVENTORY_V2",
+      "NATIVE_EVIDENCE_INSTANCES_V3_V6",
+      "NATIVE_OBJECTS_V1_V2",
+      "NATIVE_ALLOCATIONS_V1_V2",
+      "NATIVE_REGIONS_V1_V2",
+      "OS_INTERFACE_TABLE_V1",
+      "CAPTURE_MEMBERSHIP_V1"
+    ],
+    "Coverage": [
+      "COMPLETE",
+      "PARTIAL",
+      "UNKNOWN",
+      "CONFLICT"
+    ],
+    "DenominatorDomain": [
+      "SOURCE_DEFINITIONS",
+      "SOURCE_CONSTRUCTS",
+      "OBSERVED_PYTHON_CALLS",
+      "DISPATCH_ATTEMPTS",
+      "NATIVE_ACTIVITIES",
+      "OS_INTERFACES",
+      "OS_RESOURCES",
+      "PHYSICAL_OBJECTS_AND_RESOURCES"
+    ],
+    "Encoding": [
+      "JSON",
+      "GZIP_JSON",
+      "JSONL",
+      "GZIP_JSONL",
+      "TEXT",
+      "GZIP_TEXT"
+    ],
+    "Enumeration": [
+      "DECLARED",
+      "PARTIAL",
+      "ENUMERATED"
+    ],
+    "EvidenceMode": [
+      "STATIC_SOURCE",
+      "ACTUAL_OBSERVATION",
+      "VERSIONED_CONTRACT",
+      "CONDITIONAL"
+    ],
+    "Expansion": [
+      "SOURCE_BODY",
+      "PROVIDER_GRAPH",
+      "PROTOCOL_INTERFACE",
+      "PHYSICAL_DETAIL"
+    ],
+    "LedgerTableKind": [
+      "OBLIGATIONS",
+      "DENOMINATORS",
+      "MEMBERS",
+      "ASSESSMENTS",
+      "DELTAS"
+    ],
+    "RelationKind": [
+      "SOURCE_BINDING",
+      "ORDERED_INPUTS",
+      "ORDERED_RESULTS",
+      "STATE_PRE_POST",
+      "CONTROL_COMPLETION",
+      "CALL_ACTUAL_FORMAL",
+      "CALL_RETURN_EXCEPTION",
+      "ENVIRONMENT_IDENTITY",
+      "OWNER_SELECTOR",
+      "ALIAS_ESCAPE",
+      "VALUE_PROVENANCE",
+      "LOGICAL_MATERIALIZATION",
+      "RESOURCE_BINDING",
+      "RESOURCE_WORK",
+      "READY_ORDER",
+      "LIFETIME"
+    ],
+    "RequirementSelection": [
+      "SUBJECT_INTERFACE",
+      "ALL_ORIGINAL_INPUTS",
+      "ALL_ORIGINAL_RESULTS",
+      "ALL_ORIGINAL_STATE_PORTS",
+      "ALL_ORIGINAL_COMPLETION_PATHS",
+      "ALL_ORIGINAL_RESOURCE_USES"
+    ],
+    "RequirementStatus": [
+      "SATISFIED",
+      "OPEN",
+      "CONTRADICTED",
+      "NOT_APPLICABLE"
+    ],
+    "ReviewMode": [
+      "PRODUCER_GATE",
+      "REUSED_ACCEPTED",
+      "INDEPENDENT_AUDIT",
+      "UNREVIEWED"
+    ],
+    "ScopeFieldKind": [
+      "ARGV",
+      "CWD",
+      "CODE_VERSIONS",
+      "ENVIRONMENT",
+      "CONFIGURATION",
+      "INPUT_IDENTITIES",
+      "RUN_MODE",
+      "PROCESS_TREE",
+      "CAPTURE_INTERVAL",
+      "SOFTWARE_INTERFACES",
+      "HARDWARE_LAYERS"
+    ],
+    "VerificationStatus": [
+      "INVALID",
+      "OPEN",
+      "SATISFIED_WITHIN_SCOPE"
+    ]
+  },
+  "existing_types": [
+    "ProviderArtifact",
+    "SourceDefinitionReference",
+    "SourceReference",
+    "RunID",
+    "canonical Program IDs"
+  ],
+  "format": "exact Python type/field/union-tag specification for a future strict record_codec; not a deployed codec or an asserted JSON-Schema validator",
+  "id_rules": {
+    "DenominatorID": "hash(ScopeID, independent domain, original collection identity and fixed extraction profile)",
+    "ObligationID": "hash(ScopeID, original qualified subject key, stable rule_key), excluding status/mandatory/expansion",
+    "ScopeID": "hash(profile, original qualified Run, original command artifact identity and locator)",
+    "ScopeRevision": "hash(canonical AnalysisScope excluding revision itself)"
+  },
+  "invariants": [
+    "all fields required; optional values use explicit null",
+    "nonempty source/rule/requirement keys",
+    "nonnegative byte/count/ordinal fields; decoded and text/JSONL lines are one-based where specified",
+    "exact identifier wire kind/value/wire must match original ID class",
+    "four axes occur exactly once; expected requirement-key set comes from fixed policy and original port inventory",
+    "OPEN/CONTRADICTED results have concrete gaps; NOT_APPLICABLE requires exclusion proof",
+    "ENUMERATED is not observation completeness; unvisited cursor or missing domain blocks whole completion",
+    "SATISFIED claims only count after producer gate or precise accepted-evidence reuse",
+    "no execution facts, arbitrary metadata, caller PASS booleans or independent writable database authority"
+  ],
+  "planned_public_schema": "scar.modeling-scope-ledger",
+  "planned_public_schema_version": 1,
+  "public_api": [
+    "def plan_scope(inputs: ScopeInputs, policy: CoveragePolicy, resolver: LedgerResolver, budgets: LedgerBudgets) -> AnalysisScope:",
+    "def enumerate_obligations(scope: AnalysisScope, inputs: ScopeInputs, policy: CoveragePolicy, resolver: LedgerResolver, budgets: LedgerBudgets) -> Iterator[LedgerRow]:",
+    "def assess_obligation(scope: AnalysisScope, obligation: CoverageObligation, catalogs: ModelCatalogs, resolver: LedgerResolver, budgets: LedgerBudgets) -> CoverageAssessment:",
+    "def verify_ledger(scope: AnalysisScope, rows: Iterator[LedgerRow], catalogs: ModelCatalogs, resolver: LedgerResolver, budgets: LedgerBudgets) -> LedgerVerification:",
+    "def query_obligation(scope_revision: ScopeRevision, obligation_id: ObligationID, reader: LedgerReader) -> ObligationView:",
+    "def write_ledger(scope: AnalysisScope, rows: Iterator[LedgerRow], fresh_output: str, budgets: LedgerBudgets) -> LedgerReceipt:",
+    "def read_ledger(receipt: LedgerReceipt, resolver: LedgerResolver, budgets: LedgerBudgets) -> LedgerReader:"
+  ],
+  "records": [
+    {
+      "fields": [
+        {
+          "name": "original",
+          "required": true,
+          "type": "ProviderArtifact"
+        },
+        {
+          "name": "decoded_sha256",
+          "required": true,
+          "type": "Sha256"
+        },
+        {
+          "name": "decoded_bytes",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "encoding",
+          "required": true,
+          "type": "Encoding"
+        }
+      ],
+      "name": "RetainedArtifact",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "artifact",
+          "required": true,
+          "type": "RetainedArtifact"
+        },
+        {
+          "name": "pointer",
+          "required": true,
+          "type": "str"
+        }
+      ],
+      "name": "JsonRecordRef",
+      "wire_tag": "JsonRecordRef"
+    },
+    {
+      "fields": [
+        {
+          "name": "artifact",
+          "required": true,
+          "type": "RetainedArtifact"
+        },
+        {
+          "name": "line",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "line_sha256",
+          "required": true,
+          "type": "Sha256"
+        },
+        {
+          "name": "pointer",
+          "required": true,
+          "type": "str"
+        }
+      ],
+      "name": "JsonlRecordRef",
+      "wire_tag": "JsonlRecordRef"
+    },
+    {
+      "fields": [
+        {
+          "name": "manifest_chunk",
+          "required": true,
+          "type": "JsonRecordRef"
+        },
+        {
+          "name": "table",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "ordinal",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "line",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "line_sha256",
+          "required": true,
+          "type": "Sha256"
+        },
+        {
+          "name": "pointer",
+          "required": true,
+          "type": "str"
+        }
+      ],
+      "name": "PartitionRecordRef",
+      "wire_tag": "PartitionRecordRef"
+    },
+    {
+      "fields": [
+        {
+          "name": "artifact",
+          "required": true,
+          "type": "RetainedArtifact"
+        },
+        {
+          "name": "first_line",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "last_line",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "range_sha256",
+          "required": true,
+          "type": "Sha256"
+        }
+      ],
+      "name": "TextRangeRef",
+      "wire_tag": "TextRangeRef"
+    },
+    {
+      "fields": [
+        {
+          "name": "uri",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "decoded_sha256",
+          "required": true,
+          "type": "Sha256"
+        }
+      ],
+      "name": "OriginalNamespaceArtifact",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "definition",
+          "required": true,
+          "type": "OperationDefinitionID"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "SourceReference | None"
+        },
+        {
+          "name": "entry",
+          "required": true,
+          "type": "str"
+        }
+      ],
+      "name": "OriginalBodyIdentity",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "artifact",
+          "required": true,
+          "type": "OriginalNamespaceArtifact"
+        },
+        {
+          "name": "representation",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "record_pointer",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "body",
+          "required": true,
+          "type": "OriginalBodyIdentity"
+        }
+      ],
+      "name": "OriginalGraphNamespace",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "namespace",
+          "required": true,
+          "type": "OriginalGraphNamespace"
+        },
+        {
+          "name": "kind",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "local_id",
+          "required": true,
+          "type": "CanonicalProgramID"
+        }
+      ],
+      "name": "QualifiedProgramReference",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "record",
+          "required": true,
+          "type": "JsonRecordRef"
+        },
+        {
+          "name": "profile",
+          "required": true,
+          "type": "CollectionProfile"
+        }
+      ],
+      "name": "CollectionLocator",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "reference",
+          "required": true,
+          "type": "SourceDefinitionReference"
+        }
+      ],
+      "name": "SourceDefinitionSubject",
+      "wire_tag": "SourceDefinitionSubject"
+    },
+    {
+      "fields": [
+        {
+          "name": "reference",
+          "required": true,
+          "type": "QualifiedProgramReference"
+        },
+        {
+          "name": "record",
+          "required": true,
+          "type": "EvidenceLocator"
+        }
+      ],
+      "name": "QualifiedEntitySubject",
+      "wire_tag": "QualifiedEntitySubject"
+    },
+    {
+      "fields": [
+        {
+          "name": "record",
+          "required": true,
+          "type": "EvidenceLocator"
+        }
+      ],
+      "name": "ArtifactRecordSubject",
+      "wire_tag": "ArtifactRecordSubject"
+    },
+    {
+      "fields": [
+        {
+          "name": "collection",
+          "required": true,
+          "type": "CollectionLocator"
+        }
+      ],
+      "name": "CollectionSubject",
+      "wire_tag": "CollectionSubject"
+    },
+    {
+      "fields": [
+        {
+          "name": "code",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "requirement_key",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "EvidenceLocator"
+        },
+        {
+          "name": "reason",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "missing_count",
+          "required": true,
+          "type": "int | None"
+        }
+      ],
+      "name": "CoverageGap",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "kind",
+          "required": true,
+          "type": "ScopeFieldKind"
+        },
+        {
+          "name": "sources",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        },
+        {
+          "name": "availability",
+          "required": true,
+          "type": "Availability"
+        },
+        {
+          "name": "gaps",
+          "required": true,
+          "type": "tuple[CoverageGap, ...]"
+        }
+      ],
+      "name": "ScopeField",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "provider",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "domain",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "selection_source",
+          "required": true,
+          "type": "EvidenceLocator | None"
+        },
+        {
+          "name": "window_source",
+          "required": true,
+          "type": "EvidenceLocator | None"
+        },
+        {
+          "name": "loss_source",
+          "required": true,
+          "type": "EvidenceLocator | None"
+        },
+        {
+          "name": "coverage",
+          "required": true,
+          "type": "Coverage"
+        },
+        {
+          "name": "gaps",
+          "required": true,
+          "type": "tuple[CoverageGap, ...]"
+        }
+      ],
+      "name": "Observability",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "coordinate_record",
+          "required": true,
+          "type": "JsonRecordRef"
+        },
+        {
+          "name": "run",
+          "required": true,
+          "type": "RunID"
+        }
+      ],
+      "name": "RunBinding",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "id",
+          "required": true,
+          "type": "ScopeID"
+        },
+        {
+          "name": "revision",
+          "required": true,
+          "type": "ScopeRevision"
+        },
+        {
+          "name": "parent",
+          "required": true,
+          "type": "ScopeRevision | None"
+        },
+        {
+          "name": "contract",
+          "required": true,
+          "type": "TextRangeRef"
+        },
+        {
+          "name": "policy",
+          "required": true,
+          "type": "JsonRecordRef"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "EvidenceLocator"
+        },
+        {
+          "name": "run",
+          "required": true,
+          "type": "RunBinding"
+        },
+        {
+          "name": "fields",
+          "required": true,
+          "type": "tuple[ScopeField, ...]"
+        },
+        {
+          "name": "observability",
+          "required": true,
+          "type": "tuple[Observability, ...]"
+        },
+        {
+          "name": "denominators",
+          "required": true,
+          "type": "tuple[DenominatorID, ...]"
+        }
+      ],
+      "name": "AnalysisScope",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "key",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "kind",
+          "required": true,
+          "type": "RelationKind"
+        },
+        {
+          "name": "selection",
+          "required": true,
+          "type": "RequirementSelection"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "JsonRecordRef"
+        }
+      ],
+      "name": "RelationRequirement",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "rule",
+          "required": true,
+          "type": "JsonRecordRef"
+        },
+        {
+          "name": "origin",
+          "required": true,
+          "type": "EvidenceLocator"
+        }
+      ],
+      "name": "ObligationSource",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "id",
+          "required": true,
+          "type": "ObligationID"
+        },
+        {
+          "name": "scope_revision",
+          "required": true,
+          "type": "ScopeRevision"
+        },
+        {
+          "name": "rule_key",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "ObligationSource"
+        },
+        {
+          "name": "subject",
+          "required": true,
+          "type": "CoverageSubject"
+        },
+        {
+          "name": "required_relations",
+          "required": true,
+          "type": "tuple[RelationRequirement, ...]"
+        },
+        {
+          "name": "required_expansion",
+          "required": true,
+          "type": "Expansion"
+        },
+        {
+          "name": "mandatory",
+          "required": true,
+          "type": "bool"
+        }
+      ],
+      "name": "CoverageObligation",
+      "wire_tag": "CoverageObligation"
+    },
+    {
+      "fields": [
+        {
+          "name": "collection",
+          "required": true,
+          "type": "CollectionLocator"
+        },
+        {
+          "name": "next_partition",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "next_ordinal",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "end_ordinal",
+          "required": true,
+          "type": "int | None"
+        },
+        {
+          "name": "reason",
+          "required": true,
+          "type": "str"
+        }
+      ],
+      "name": "EnumerationCursor",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "id",
+          "required": true,
+          "type": "DenominatorID"
+        },
+        {
+          "name": "domain",
+          "required": true,
+          "type": "DenominatorDomain"
+        },
+        {
+          "name": "collection",
+          "required": true,
+          "type": "CollectionLocator"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "EvidenceLocator"
+        },
+        {
+          "name": "declared_count",
+          "required": true,
+          "type": "int | None"
+        },
+        {
+          "name": "enumerated_count",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "membership_sha256",
+          "required": true,
+          "type": "Sha256 | None"
+        },
+        {
+          "name": "enumeration",
+          "required": true,
+          "type": "Enumeration"
+        },
+        {
+          "name": "observation_coverage",
+          "required": true,
+          "type": "Coverage"
+        },
+        {
+          "name": "cursor",
+          "required": true,
+          "type": "EnumerationCursor | None"
+        },
+        {
+          "name": "gaps",
+          "required": true,
+          "type": "tuple[CoverageGap, ...]"
+        }
+      ],
+      "name": "DenominatorInventory",
+      "wire_tag": "DenominatorInventory"
+    },
+    {
+      "fields": [
+        {
+          "name": "denominator",
+          "required": true,
+          "type": "DenominatorID"
+        },
+        {
+          "name": "subject",
+          "required": true,
+          "type": "CoverageSubject"
+        },
+        {
+          "name": "obligations",
+          "required": true,
+          "type": "tuple[ObligationID, ...]"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "EvidenceLocator"
+        }
+      ],
+      "name": "DenominatorMember",
+      "wire_tag": "DenominatorMember"
+    },
+    {
+      "fields": [
+        {
+          "name": "key",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "RequirementStatus"
+        },
+        {
+          "name": "basis_modes",
+          "required": true,
+          "type": "tuple[EvidenceMode, ...]"
+        },
+        {
+          "name": "evidence",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        },
+        {
+          "name": "conditions",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        },
+        {
+          "name": "gaps",
+          "required": true,
+          "type": "tuple[CoverageGap, ...]"
+        },
+        {
+          "name": "cursor",
+          "required": true,
+          "type": "EnumerationCursor | None"
+        }
+      ],
+      "name": "RequirementResult",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "axis",
+          "required": true,
+          "type": "Axis"
+        },
+        {
+          "name": "results",
+          "required": true,
+          "type": "tuple[RequirementResult, ...]"
+        }
+      ],
+      "name": "AxisResult",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "gate_receipt",
+          "required": true,
+          "type": "EvidenceLocator"
+        },
+        {
+          "name": "producers",
+          "required": true,
+          "type": "tuple[ProviderArtifact, ...]"
+        },
+        {
+          "name": "scope",
+          "required": true,
+          "type": "CoverageSubject"
+        },
+        {
+          "name": "inputs",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        },
+        {
+          "name": "requirement_keys",
+          "required": true,
+          "type": "tuple[str, ...]"
+        },
+        {
+          "name": "remaining_conditions",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        }
+      ],
+      "name": "EvidenceReuseRef",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "rule_key",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "policy",
+          "required": true,
+          "type": "JsonRecordRef"
+        },
+        {
+          "name": "implementation",
+          "required": true,
+          "type": "tuple[ProviderArtifact, ...]"
+        },
+        {
+          "name": "inputs",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        },
+        {
+          "name": "reviewed_requirement_keys",
+          "required": true,
+          "type": "tuple[str, ...]"
+        },
+        {
+          "name": "result_sha256",
+          "required": true,
+          "type": "Sha256"
+        },
+        {
+          "name": "cursor",
+          "required": true,
+          "type": "EnumerationCursor | None"
+        },
+        {
+          "name": "review_mode",
+          "required": true,
+          "type": "ReviewMode"
+        },
+        {
+          "name": "reused_evidence",
+          "required": true,
+          "type": "tuple[EvidenceReuseRef, ...]"
+        }
+      ],
+      "name": "CheckReceipt",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "obligation",
+          "required": true,
+          "type": "ObligationID"
+        },
+        {
+          "name": "scope_revision",
+          "required": true,
+          "type": "ScopeRevision"
+        },
+        {
+          "name": "axes",
+          "required": true,
+          "type": "tuple[AxisResult, ...]"
+        },
+        {
+          "name": "checker",
+          "required": true,
+          "type": "CheckReceipt"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "EvidenceLocator"
+        }
+      ],
+      "name": "CoverageAssessment",
+      "wire_tag": "CoverageAssessment"
+    },
+    {
+      "fields": [
+        {
+          "name": "parent",
+          "required": true,
+          "type": "ScopeRevision"
+        },
+        {
+          "name": "child",
+          "required": true,
+          "type": "ScopeRevision"
+        },
+        {
+          "name": "added",
+          "required": true,
+          "type": "tuple[ObligationID, ...]"
+        },
+        {
+          "name": "removed",
+          "required": true,
+          "type": "tuple[ObligationID, ...]"
+        },
+        {
+          "name": "modified",
+          "required": true,
+          "type": "tuple[ObligationID, ...]"
+        },
+        {
+          "name": "reasons",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        },
+        {
+          "name": "source",
+          "required": true,
+          "type": "EvidenceLocator"
+        }
+      ],
+      "name": "ScopeRevisionDelta",
+      "wire_tag": "ScopeRevisionDelta"
+    },
+    {
+      "fields": [
+        {
+          "name": "name",
+          "required": true,
+          "type": "LedgerTableKind"
+        },
+        {
+          "name": "collection",
+          "required": true,
+          "type": "JsonRecordRef"
+        }
+      ],
+      "name": "LedgerTableRef",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "schema",
+          "required": true,
+          "type": "str"
+        },
+        {
+          "name": "schema_version",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "scope_revision",
+          "required": true,
+          "type": "ScopeRevision"
+        },
+        {
+          "name": "scope",
+          "required": true,
+          "type": "JsonRecordRef"
+        },
+        {
+          "name": "tables",
+          "required": true,
+          "type": "tuple[LedgerTableRef, ...]"
+        },
+        {
+          "name": "storage_receipts",
+          "required": true,
+          "type": "tuple[RetainedArtifact, ...]"
+        }
+      ],
+      "name": "LedgerReceipt",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "domain",
+          "required": true,
+          "type": "DenominatorDomain"
+        },
+        {
+          "name": "collection",
+          "required": true,
+          "type": "CollectionLocator"
+        }
+      ],
+      "name": "InputBinding",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "coordinates",
+          "required": true,
+          "type": "JsonRecordRef"
+        },
+        {
+          "name": "command",
+          "required": true,
+          "type": "JsonRecordRef"
+        },
+        {
+          "name": "collections",
+          "required": true,
+          "type": "tuple[InputBinding, ...]"
+        },
+        {
+          "name": "scope_evidence",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        },
+        {
+          "name": "provider_evidence",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        }
+      ],
+      "name": "ScopeInputs",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "contract",
+          "required": true,
+          "type": "TextRangeRef"
+        },
+        {
+          "name": "rules",
+          "required": true,
+          "type": "JsonRecordRef"
+        }
+      ],
+      "name": "CoveragePolicy",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "max_manifest_bytes",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "max_record_bytes",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "max_chunk_bytes",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "max_total_bytes",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "max_members",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "max_check_steps",
+          "required": true,
+          "type": "int"
+        }
+      ],
+      "name": "LedgerBudgets",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "artifacts",
+          "required": true,
+          "type": "tuple[RetainedArtifact, ...]"
+        },
+        {
+          "name": "accepted_evidence",
+          "required": true,
+          "type": "tuple[EvidenceReuseRef, ...]"
+        }
+      ],
+      "name": "ModelCatalogs",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "scope_revision",
+          "required": true,
+          "type": "ScopeRevision"
+        },
+        {
+          "name": "status",
+          "required": true,
+          "type": "VerificationStatus"
+        },
+        {
+          "name": "mandatory_obligations",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "unresolved_requirement_keys",
+          "required": true,
+          "type": "tuple[str, ...]"
+        },
+        {
+          "name": "gaps",
+          "required": true,
+          "type": "tuple[CoverageGap, ...]"
+        },
+        {
+          "name": "denominators",
+          "required": true,
+          "type": "tuple[DenominatorInventory, ...]"
+        },
+        {
+          "name": "bytes_read",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "checks_performed",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "evidence_reused",
+          "required": true,
+          "type": "int"
+        },
+        {
+          "name": "raw_replay_scope",
+          "required": true,
+          "type": "tuple[CollectionLocator, ...]"
+        }
+      ],
+      "name": "LedgerVerification",
+      "wire_tag": null
+    },
+    {
+      "fields": [
+        {
+          "name": "obligation",
+          "required": true,
+          "type": "CoverageObligation"
+        },
+        {
+          "name": "assessment",
+          "required": true,
+          "type": "CoverageAssessment | None"
+        },
+        {
+          "name": "memberships",
+          "required": true,
+          "type": "tuple[DenominatorMember, ...]"
+        },
+        {
+          "name": "gaps",
+          "required": true,
+          "type": "tuple[CoverageGap, ...]"
+        },
+        {
+          "name": "review_mode",
+          "required": true,
+          "type": "ReviewMode"
+        },
+        {
+          "name": "reused_evidence",
+          "required": true,
+          "type": "tuple[EvidenceReuseRef, ...]"
+        },
+        {
+          "name": "unreplayed_sources",
+          "required": true,
+          "type": "tuple[EvidenceLocator, ...]"
+        }
+      ],
+      "name": "ObligationView",
+      "wire_tag": null
+    }
+  ],
+  "schema": "scar.proposed.modeling-scope-record-codec",
+  "schema_version": 1,
+  "unknown_fields": "REJECT"
+}

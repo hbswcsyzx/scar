@@ -1,0 +1,54 @@
+{
+  "actual_ledger_generated": false,
+  "files": [
+    {
+      "bytes": 15152,
+      "path": "artifacts/analysis/modeling_scope_ledger_plan_20261025/proposed_api.pyi",
+      "sha256": "267e3d0930ded105e081cf04cecc663a676254cfef64737cb6aa5bbe080833e6"
+    },
+    {
+      "bytes": 19797,
+      "path": "artifacts/analysis/modeling_scope_ledger_plan_20261025/build_specs.py",
+      "sha256": "76dd1cfb4856bbedce0d03a13ff13c9950a7eda6c01bfaa9f48fb7a2a3333cb3"
+    },
+    {
+      "bytes": 1455,
+      "path": "artifacts/analysis/modeling_scope_ledger_plan_20261025/README.md",
+      "sha256": "28507824065571e0d624946d561acbf9b8009a6fc5cb189951c69f8c232477cb"
+    },
+    {
+      "bytes": 25853,
+      "path": "docs/MODELING_SCOPE_LEDGER_PLAN.md",
+      "sha256": "edb5d268674e00a7d2db024118664e35acb66a708985423a57e8eae556d58640"
+    },
+    {
+      "bytes": 6994,
+      "path": "artifacts/analysis/modeling_scope_ledger_plan_20261025/evidence-rules.json",
+      "sha256": "d42e63fd5c5338fa110427fd5175eb631536b6e6d9f37d8d5c00483891dd7d51"
+    },
+    {
+      "bytes": 5876,
+      "path": "artifacts/analysis/modeling_scope_ledger_plan_20261025/producer-map.json",
+      "sha256": "e64077f5c023e18cb58561603fab9d7d84c9ee613528cef3d51b83926bbdc648"
+    },
+    {
+      "bytes": 31363,
+      "path": "artifacts/analysis/modeling_scope_ledger_plan_20261025/record-schema.json",
+      "sha256": "f9efb27f324627f7e1f49a2d61ddea7f42f3a4440e83318cc6483cdbd7e44cce"
+    },
+    {
+      "bytes": 1852,
+      "path": "artifacts/analysis/modeling_scope_ledger_plan_20261025/schema-changes.json",
+      "sha256": "462512f3a75098d6f7983b351ace00bd0b3f746e9e5762a532c5e6bd4a15176c"
+    },
+    {
+      "bytes": 3481,
+      "path": "artifacts/analysis/modeling_scope_ledger_plan_20261025/source-receipts.json",
+      "sha256": "d9c28b10968a2f8a6dfb45f197cf8fe98c9f30aa0384596bd8084d49850603cb"
+    }
+  ],
+  "schema": "scar.proposed.modeling-scope-plan-receipt",
+  "schema_version": 1,
+  "scope": "only new plan doc and plan analysis directory written; no target/raw/archive/test/git operations",
+  "status": "DESIGN_FROZEN_NO_PRODUCTION_IMPLEMENTATION"
+}
