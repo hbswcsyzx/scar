@@ -24,6 +24,14 @@ dispatch全部接入127接口/156执行分片；111189个Tensor端口中109288�
 主动中止。失败和原数据保留，不能把第二次的部分结果当全门通过。第三次实际代码与收据
 已存档于`codex/native-scalar-model`的444baadb；没有新优化backend、变换或LeWM加速比。
 
+**source/native有界导航也已实际通过：** 79592条source associations、39796条native
+inventory各完整读一次，产出160压缩块约24MB。5个公共查询样本含body-linked、source-only、
+invocation-only/零Tensor、native-only及unresolved；最后一种保持null relationship。
+查询只连接保留的祖先上下文与准确native invoke/normal Return，不能当direct call、
+对象同一性或data/state关系。worker104.289s、peak194844KiB；独立复核全部stored块及
+一个派生关系样本通过。见[实际结果](../artifacts/experiments/source_native_context_gate_20261025/RESULT.md)
+与[复核](../artifacts/experiments/source_native_context_review_20261025/REPORT.md)。旧scope义务未关闭。
+
 **2026-10-25 当前实施：** 用户确认先审定模型和声明格式再完成自动接线。
 [当前执行计划](FIRST_STAGE_EXECUTION_PLAN.md)对应原S1—S5；
 [声明式图规范](DECLARATIVE_GRAPH_STORAGE.md)明确保留原typed IR/codec权威，

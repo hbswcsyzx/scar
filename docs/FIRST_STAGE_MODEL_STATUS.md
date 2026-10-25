@@ -6,6 +6,21 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：source/native有限组合查询实档通过
+
+新导航门实际exit0/outer104.434s，79592条source associations与40个native inventory
+chunks/39796条sequence各完整读一次。输出160压缩块24179311B，5个公共样本通过，
+其中seq4保CONTEXT_UNRESOLVED和null关系；其它只声明RETAINED_SOURCE_CONTEXT。
+每个样本读取1 index+2 data+1原EEG chunk，原association/invocation流不重扫。
+准确source definition/namespace及native invoke/normal Return保留各自限定引用。
+
+独立审查核全部160 stored块、五报告输入/导航/旧scope绑定，以及一个source派生chunk
+的双phase行SHA/ordinal/namespace；没有验证全部39796跨片语义。historical collector
+执行源码缺证assumption、logical/state/ready及旧scope欠账全部保留。导航不是自包含包，
+clone查询仍需原metadata及命中native模型/EEG依赖，不能隐式迁移原URI。详见
+[结果](../artifacts/experiments/source_native_context_gate_20261025/RESULT.md)及
+[复核](../artifacts/experiments/source_native_context_review_20261025/REPORT.md)。
+
 ### 2026-10-25：全39796次dispatch端口门终态通过
 
 root持有的第三次完整门已确认exit0：127静态接口、156执行分片、39796次dispatch全部

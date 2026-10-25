@@ -52,7 +52,7 @@ held109288/未定1901，几何107483/缺口3706。GNU28:41.75，peak1091472KiB�
 | --- | --- | --- |
 | native接入 | 全dispatch端口门已通过；逻辑内容/state/ready仍缺关系 | 保留全部动态资格与原分母；后继连接原生值、状态和资源，而非再跑prefix |
 | source-call隔离树 | 通用kwargs pack/merge/call协议已实现，有限实档门已准备 | 复用原IR/world/有序Uses，显式能力与独立compiler/异常审核；仅机械选原四个必要失败body |
-| main组合查询 | 有界只读adapter已实现，小检查及真实输入metadata preflight通过 | 原79592条retained associations与final native inventory各一次建导航；少量端点联合验收，不重扫raw/100k stream |
+| main组合查询 | 实际79592/39796完整一次导航门已exit0，5个不同角色的查询样本通过 | 160压缩块及一个派生关系样本独立复核通过；后继补实际数据/状态/控制连接，不把context当direct call |
 
 计划及来源分别在`artifacts/analysis/kwargs_expansion_design_20261025`和
 `artifacts/analysis/source_native_composition_20261025`。历史collector只有HEAD label、缺

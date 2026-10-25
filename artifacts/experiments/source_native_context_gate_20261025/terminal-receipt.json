@@ -1,0 +1,518 @@
+{
+  "actual_exit": 0,
+  "actual_exit_confirmation": "root held session16093 and confirmed actual exit0/104.4344s; launch receipt agrees",
+  "boundaries": {
+    "contents_state_ready_established": false,
+    "direct_call_established": false,
+    "historical_collector_implementation_assumption_retained": true,
+    "independent_review_status": "NOT_CLAIMED; root will arrange a separate limited review",
+    "object_identity_established": false,
+    "old_scope_obligations_closed": false,
+    "whole_program_model": "OPEN"
+  },
+  "costs": {
+    "builder": {
+      "chunks": 160,
+      "decoded_bytes": 717974537,
+      "output_bytes": 24181690,
+      "rows": 159184,
+      "stored_bytes": 116076040
+    },
+    "freeze_scope": "One launcher precheck and worker pre/post checks. These returned counters exclude each freeze.json read itself and imported-source rechecks, and are separate from builder/query metering.",
+    "freeze_verification_bytes_all_three_passes": 324344424,
+    "freeze_verification_bytes_per_pass": 108114808,
+    "freeze_verification_passes": 3,
+    "gate_worker_wall_seconds": 104.28904065303504,
+    "outer_wall_seconds": 104.43441399501171,
+    "output_counter_scope": {
+      "actual_navigation_files_bytes": 24228927,
+      "closed_transport_chunk_bytes": 24179311,
+      "navigation_BUILDING_bytes": 2379,
+      "navigation_manifest_bytes_excluded_from_reported_counter": 47237,
+      "other_excluded_outputs": "gate logs/query receipts/freeze source/runtime snapshots and this terminal documentation; builder budget prechecks final manifest too",
+      "reported_output_bytes": 24181690
+    },
+    "queries_total_decoded_bytes_including_repeats": 221487107,
+    "queries_total_stored_bytes_including_repeats": 107447252,
+    "query_scope": "five independent queries; costs include repeated metadata/model/selected EEG reads, not actual physical disk IO",
+    "self_peak_rss_kib": 194844
+  },
+  "counts": {
+    "classifications": {
+      "MODELED_COMPLETE_REFERENCE": 37895,
+      "MODELED_PARTIAL_REFERENCE": 1901
+    },
+    "native_sequences": 39796,
+    "source_associations": 79592
+  },
+  "freeze": {
+    "bytes": 218553,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/freeze.json",
+    "sha256": "00140598568a5c5776ed77b8a2a46f91392de837dd6806fb67921f678390cd24"
+  },
+  "launch": {
+    "bytes": 801,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/launch-result.json",
+    "sha256": "0e425d9e654d067e85a890eeb6abcae746b2ee02f165699be004d873b84677a7"
+  },
+  "lookup_and_transport_rows": 159184,
+  "native_inventory_enumeration": {
+    "actual_chunk_opens": {
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000000.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000001.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000002.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000003.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000004.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000005.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000006.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000007.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000008.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000009.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000010.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000011.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000012.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000013.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000014.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000015.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000016.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000017.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000018.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000019.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000020.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000021.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000022.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000023.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000024.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000025.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000026.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000027.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000028.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000029.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000030.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000031.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000032.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000033.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000034.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000035.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000036.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000037.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000038.jsonl": 1,
+      "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/000039.jsonl": 1
+    },
+    "actual_rows": 39796,
+    "classifications": {
+      "MODELED_COMPLETE_REFERENCE": 37895,
+      "MODELED_PARTIAL_REFERENCE": 1901
+    },
+    "declaration": {
+      "schema": "scar.native-capture-table-chunks",
+      "sha256": "7051fc7b4d1316698c9b9f305e8e875100a6265a042e8cc45cb8616dbbd39e37",
+      "size_bytes": 17357,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/manifest.json"
+    },
+    "scope": "all declared native inventory chunks byte/SHA/row/sequence enumeration by owned builder; not a repeat whole-native semantic gate"
+  },
+  "navigation": {
+    "schema": "scar.source-native-context-navigation",
+    "sha256": "8cef855ccfe081830a4548aaee80b4226d10aab22d4aa5e102cd1ebe18be8fa6",
+    "size_bytes": 47237,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/navigation/manifest.json"
+  },
+  "post_terminal_work": {
+    "codec_or_full_graph_runs": 0,
+    "git_operations": 0,
+    "input_stream_rescans": 0,
+    "only_small_receipts_and_160_stored_chunk_hashes_read": true,
+    "producer_runs": 0,
+    "query_reruns": 0,
+    "raw_input_reads": 0
+  },
+  "progress_receipt": {
+    "bytes": 5568,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/progress.jsonl",
+    "sha256": "67ac8939a897bd3d5af77b9f221a359ad4f668473e2b390daeac2d028d899f4b"
+  },
+  "queries": [
+    {
+      "costs": {
+        "archive_chunks": 1,
+        "completed_queries": 1,
+        "data_chunks": 2,
+        "decoded_bytes": 43077757,
+        "index_chunks": 1,
+        "stored_bytes": 21157113,
+        "wall_seconds": 1.720082375977654
+      },
+      "frontiers": [
+        "SOURCE_DEFINITION_UNAVAILABLE",
+        "CANONICAL_BODY_UNAVAILABLE",
+        "CODE_SOURCE_INCOMPLETE",
+        "NONFILE_CODE_FILENAME",
+        "ACTUAL_FORMAL_ROUTING_UNVERIFIED",
+        "RETURN_VALUE_ROUTING_UNVERIFIED",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "STATE_EFFECTS_UNVERIFIED",
+        "CANONICAL_CONTROL_COMPLETION_UNVERIFIED",
+        "HISTORICAL_SCAR_COLLECTOR_EXECUTION_SOURCE_UNRECORDED"
+      ],
+      "native_fact_count": 5,
+      "navigation": {
+        "schema": "scar.source-native-context-navigation",
+        "sha256": "8cef855ccfe081830a4548aaee80b4226d10aab22d4aa5e102cd1ebe18be8fa6",
+        "size_bytes": 47237,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/navigation/manifest.json"
+      },
+      "qualified_native_invoke_present": true,
+      "qualified_native_normal_return_present": true,
+      "receipt": {
+        "bytes": 16025,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/query-1.json",
+        "sha256": "ba8a980a8864d8e0adec092de93fa127d4d6f975c033304cbc48af30b59cd876"
+      },
+      "relationship": "RETAINED_SOURCE_CONTEXT",
+      "roles": [
+        "RETAINED_INVOCATION_LINKED",
+        "ZERO_TENSOR_FROM_SAVED_NATIVE_DECLARATION"
+      ],
+      "scope_revision": "scope_revision:1ae1c9387ba076a51170c9a60e0a0e5c63ef611c8e5fcc3320d6b0f6a3c03e73",
+      "sequence": 1,
+      "source_activation_fact_count": 0,
+      "source_definition_count": 0,
+      "source_invocations": [
+        {
+          "invocation_id": 103,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        },
+        {
+          "invocation_id": 103,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        }
+      ],
+      "source_namespace_field_count": 0,
+      "source_phases": [
+        "output",
+        "span"
+      ],
+      "status": "RETAINED_CONTEXT"
+    },
+    {
+      "costs": {
+        "archive_chunks": 1,
+        "completed_queries": 1,
+        "data_chunks": 2,
+        "decoded_bytes": 45346497,
+        "index_chunks": 1,
+        "stored_bytes": 21344495,
+        "wall_seconds": 1.8588884419878013
+      },
+      "frontiers": [
+        "ACTUAL_FORMAL_ROUTING_UNVERIFIED",
+        "RETURN_VALUE_ROUTING_UNVERIFIED",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "STATE_EFFECTS_UNVERIFIED",
+        "CANONICAL_CONTROL_COMPLETION_UNVERIFIED",
+        "HISTORICAL_SCAR_COLLECTOR_EXECUTION_SOURCE_UNRECORDED"
+      ],
+      "native_fact_count": 5,
+      "navigation": {
+        "schema": "scar.source-native-context-navigation",
+        "sha256": "8cef855ccfe081830a4548aaee80b4226d10aab22d4aa5e102cd1ebe18be8fa6",
+        "size_bytes": 47237,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/navigation/manifest.json"
+      },
+      "qualified_native_invoke_present": true,
+      "qualified_native_normal_return_present": true,
+      "receipt": {
+        "bytes": 26931,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/query-2331.json",
+        "sha256": "504a55fe760a400c8539eb744ab5677d66f1effb6932def9e403f6d2c12c1e41"
+      },
+      "relationship": "RETAINED_SOURCE_CONTEXT",
+      "roles": [
+        "RETAINED_BODY_LINKED"
+      ],
+      "scope_revision": "scope_revision:1ae1c9387ba076a51170c9a60e0a0e5c63ef611c8e5fcc3320d6b0f6a3c03e73",
+      "sequence": 2331,
+      "source_activation_fact_count": 2,
+      "source_definition_count": 2,
+      "source_invocations": [
+        {
+          "invocation_id": 1726,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        },
+        {
+          "invocation_id": 1726,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        }
+      ],
+      "source_namespace_field_count": 2,
+      "source_phases": [
+        "output",
+        "span"
+      ],
+      "status": "RETAINED_CONTEXT"
+    },
+    {
+      "costs": {
+        "archive_chunks": 1,
+        "completed_queries": 1,
+        "data_chunks": 2,
+        "decoded_bytes": 43077757,
+        "index_chunks": 1,
+        "stored_bytes": 21157113,
+        "wall_seconds": 1.687432712991722
+      },
+      "frontiers": [
+        "CANONICAL_BODY_UNAVAILABLE",
+        "CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT",
+        "ACTUAL_FORMAL_ROUTING_UNVERIFIED",
+        "RETURN_VALUE_ROUTING_UNVERIFIED",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "STATE_EFFECTS_UNVERIFIED",
+        "CANONICAL_CONTROL_COMPLETION_UNVERIFIED",
+        "HISTORICAL_SCAR_COLLECTOR_EXECUTION_SOURCE_UNRECORDED"
+      ],
+      "native_fact_count": 5,
+      "navigation": {
+        "schema": "scar.source-native-context-navigation",
+        "sha256": "8cef855ccfe081830a4548aaee80b4226d10aab22d4aa5e102cd1ebe18be8fa6",
+        "size_bytes": 47237,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/navigation/manifest.json"
+      },
+      "qualified_native_invoke_present": true,
+      "qualified_native_normal_return_present": true,
+      "receipt": {
+        "bytes": 24164,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/query-244.json",
+        "sha256": "6fb66b45893a85596ae00bec61f3785a0196fa6d64db995f3a186fc8c6368e2d"
+      },
+      "relationship": "RETAINED_SOURCE_CONTEXT",
+      "roles": [
+        "RETAINED_SOURCE_LINKED"
+      ],
+      "scope_revision": "scope_revision:1ae1c9387ba076a51170c9a60e0a0e5c63ef611c8e5fcc3320d6b0f6a3c03e73",
+      "sequence": 244,
+      "source_activation_fact_count": 0,
+      "source_definition_count": 2,
+      "source_invocations": [
+        {
+          "invocation_id": 1366,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        },
+        {
+          "invocation_id": 1366,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        }
+      ],
+      "source_namespace_field_count": 0,
+      "source_phases": [
+        "output",
+        "span"
+      ],
+      "status": "RETAINED_CONTEXT"
+    },
+    {
+      "costs": {
+        "archive_chunks": 1,
+        "completed_queries": 1,
+        "data_chunks": 2,
+        "decoded_bytes": 46907339,
+        "index_chunks": 1,
+        "stored_bytes": 22631418,
+        "wall_seconds": 1.7880233659525402
+      },
+      "frontiers": [
+        "CANONICAL_BODY_UNAVAILABLE",
+        "CANONICAL_BODY_NOT_MODELLED_BY_SOURCE_ATTACHMENT",
+        "ACTUAL_FORMAL_ROUTING_UNVERIFIED",
+        "RETURN_VALUE_ROUTING_UNVERIFIED",
+        "FUNCTION_ENVIRONMENT_UNVERIFIED",
+        "STATE_EFFECTS_UNVERIFIED",
+        "CANONICAL_CONTROL_COMPLETION_UNVERIFIED",
+        "HISTORICAL_SCAR_COLLECTOR_EXECUTION_SOURCE_UNRECORDED"
+      ],
+      "native_fact_count": 5,
+      "navigation": {
+        "schema": "scar.source-native-context-navigation",
+        "sha256": "8cef855ccfe081830a4548aaee80b4226d10aab22d4aa5e102cd1ebe18be8fa6",
+        "size_bytes": 47237,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/navigation/manifest.json"
+      },
+      "qualified_native_invoke_present": true,
+      "qualified_native_normal_return_present": true,
+      "receipt": {
+        "bytes": 24170,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/query-3182.json",
+        "sha256": "20f8a4fc387fbd84840c9834fb8a3eaaf925ecfb3077f5671ee139b61c3a0105"
+      },
+      "relationship": "RETAINED_SOURCE_CONTEXT",
+      "roles": [
+        "NATIVE_ONLY_FROM_FINAL_GATE_NEGATIVE"
+      ],
+      "scope_revision": "scope_revision:1ae1c9387ba076a51170c9a60e0a0e5c63ef611c8e5fcc3320d6b0f6a3c03e73",
+      "sequence": 3182,
+      "source_activation_fact_count": 0,
+      "source_definition_count": 2,
+      "source_invocations": [
+        {
+          "invocation_id": 40811,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        },
+        {
+          "invocation_id": 40811,
+          "process_id": 369749,
+          "thread_id": 134637364963136
+        }
+      ],
+      "source_namespace_field_count": 0,
+      "source_phases": [
+        "output",
+        "span"
+      ],
+      "status": "RETAINED_CONTEXT"
+    },
+    {
+      "costs": {
+        "archive_chunks": 1,
+        "completed_queries": 1,
+        "data_chunks": 2,
+        "decoded_bytes": 43077757,
+        "index_chunks": 1,
+        "stored_bytes": 21157113,
+        "wall_seconds": 1.7061647130176425
+      },
+      "frontiers": [
+        "RETAINED_ANCESTOR_MISSING",
+        "RETAINED_SOURCE_CONTEXT_UNAVAILABLE",
+        "HISTORICAL_SCAR_COLLECTOR_EXECUTION_SOURCE_UNRECORDED"
+      ],
+      "native_fact_count": 5,
+      "navigation": {
+        "schema": "scar.source-native-context-navigation",
+        "sha256": "8cef855ccfe081830a4548aaee80b4226d10aab22d4aa5e102cd1ebe18be8fa6",
+        "size_bytes": 47237,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/navigation/manifest.json"
+      },
+      "qualified_native_invoke_present": true,
+      "qualified_native_normal_return_present": true,
+      "receipt": {
+        "bytes": 13301,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/query-4.json",
+        "sha256": "070834624f68e805c65c91fb081681d5fb201ca110a1b50c4154301bb5a1163f"
+      },
+      "relationship": null,
+      "roles": [
+        "UNRESOLVED"
+      ],
+      "scope_revision": "scope_revision:1ae1c9387ba076a51170c9a60e0a0e5c63ef611c8e5fcc3320d6b0f6a3c03e73",
+      "sequence": 4,
+      "source_activation_fact_count": 0,
+      "source_definition_count": 0,
+      "source_invocations": [
+        null,
+        null
+      ],
+      "source_namespace_field_count": 0,
+      "source_phases": [
+        "output",
+        "span"
+      ],
+      "status": "CONTEXT_UNRESOLVED"
+    }
+  ],
+  "queries_are_samples": true,
+  "query_dependency_boundary": [
+    "Navigation transport is versionable, but is not a self-contained whole-program model.",
+    "Public queries still need exact original source/dispatch roots, source/native coordinates, old scope ledger root, final native batch report/inventory declaration, original native bundle manifest and selected EEG instance chunks.",
+    "Modeled samples also need their exact final-native shared ProgramGraph, selected execution and evidence projection artifacts.",
+    "Preserve qualified original URI layout and exact adapter bytes/path; no implicit retention relocation is implemented. Original association/invocation/operand raw streams are not queried.",
+    "Historical gate rerun additionally needs local frozen source/runtime snapshots; the public query API does not run the gate freeze checker."
+  ],
+  "result": {
+    "bytes": 19073,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/result.json",
+    "sha256": "603867faacae9903b1be6b76177dd43669ad76dec691e6917600df14ab17595e"
+  },
+  "root_session": 16093,
+  "schema": "scar.source-native-context-terminal-receipt",
+  "schema_version": 1,
+  "source_and_native_input_receipts": {
+    "dispatch_source_report": {
+      "schema": "scar.dispatch-source-associations",
+      "sha256": "a12c38060e23b94397287d2578e3d3b8f26d61b400d21de55e2cd7617b3acf70",
+      "size_bytes": 39419,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/dispatch/report.json"
+    },
+    "native_coordinates": {
+      "schema": "scar.capture-coordinates",
+      "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+      "size_bytes": 674239,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/native-coordinates.json"
+    },
+    "native_final_batch_report": {
+      "schema": "scar.native-capture-batch",
+      "sha256": "517651269df531129c3f5c1860550e8fd44a21fd9cb112620dce8d18a49ab8a7",
+      "size_bytes": 1082298,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/report.json"
+    },
+    "original_native_manifest": {
+      "schema": "scar.partitioned-ir-bundle",
+      "sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6",
+      "size_bytes": 72965,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json"
+    },
+    "scope_ledger_manifest": {
+      "schema": "scar.partitioned-modeling-scope-ledger",
+      "sha256": "966374f50fff220dd6016e053b409e57127384f863e1e0c154a36821f39685cd",
+      "size_bytes": 244461,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/attempt01/ledger/manifest.json"
+    },
+    "scope_revision": "scope_revision:1ae1c9387ba076a51170c9a60e0a0e5c63ef611c8e5fcc3320d6b0f6a3c03e73",
+    "source_coordinates": {
+      "schema": "scar.capture-coordinates",
+      "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+      "size_bytes": 674239,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+    },
+    "source_report": {
+      "schema": "scar.source-invocations",
+      "sha256": "d175012f3aab241ffeafd27c3de7a189ac55011b579f79790244d448f8573937",
+      "size_bytes": 113789,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/source/report.json"
+    }
+  },
+  "source_association_complete_eof": {
+    "decoded_bytes": 606200788,
+    "decoded_sha256": "5e5de5fe11f1bc89d7929c49cae2921df9e9fa54ac8c64aaf074be53b3818001",
+    "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_revision_current_20261025/result/connections/dispatch/associations.jsonl.gz",
+    "rows": 79592,
+    "stored_bytes": 15515861,
+    "stored_sha256": "f32c2a174121b098fe5c50f84d7615e86fe82c8ec6235ed97684ddd20c2411d0"
+  },
+  "status": "ACTUAL_EXIT0_RETAINED_CONTEXT_SAMPLES_MODEL_OPEN",
+  "stored_chunk_review": {
+    "bytes": 48673,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/navigation-stored-check.json",
+    "sha256": "fd2b974314d60f17cdb566c5b39a4a8cf4a20c0b8e13940af589c3e398e6c567"
+  },
+  "time_receipt": {
+    "bytes": 988,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/time.txt",
+    "sha256": "0e17523b942cdc62eeab78b55611c1d93bff557c0ab11c7e661860ae1448be89"
+  },
+  "versioning": {
+    "all_navigation_chunks_stage_eligible": true,
+    "frozen_source_snapshot_policy": "local-only duplicate; current Git source c955 was reported by root; exact byte receipts remain in freeze",
+    "largest_navigation_chunk_bytes": 219118,
+    "navigation_transport_contains_copied_retained_metadata_not_native_execution_or_EEG_models": true,
+    "runtime_snapshot_policy": "all 119 runtime snapshots remain local-only; do not vendor large binaries",
+    "strict_small_limit_bytes": 1000000
+  }
+}

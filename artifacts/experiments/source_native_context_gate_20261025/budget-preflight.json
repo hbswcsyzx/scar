@@ -1,0 +1,43 @@
+{
+  "actual_builder_runs": 0,
+  "actual_query_runs": 0,
+  "attempt_exists": false,
+  "builder_budgets": {
+    "max_chunk_bytes": 8000000,
+    "max_chunk_rows": 1000,
+    "max_chunks": 1000,
+    "max_decoded_bytes": 1000000000,
+    "max_metadata_bytes": 32000000,
+    "max_output_bytes": 256000000,
+    "max_record_bytes": 1000000,
+    "max_rows": 200000,
+    "max_seconds": 120,
+    "max_stored_bytes": 256000000
+  },
+  "builder_declared_decoded_bytes_including_root_metadata": 717974537,
+  "builder_declared_stored_bytes_including_root_metadata": 116076040,
+  "complete_freeze_verification_passes_in_current_entry": 3,
+  "freeze_IO_scope": "Separate from adapter input-stored budget; includes current+snapshot source/runtime and small metadata/runner checks. Actual imported-source checks add their small source reads. No global-I/O total is claimed by adapter meter.",
+  "freeze_sha256": "00140598568a5c5776ed77b8a2a46f91392de837dd6806fb67921f678390cd24",
+  "freeze_verification_bytes_per_complete_pass": 108114808,
+  "marker_index_stored_bytes_stat_only": 3714159,
+  "native_inventory_chunks_declared": 40,
+  "native_inventory_stored_equals_decoded_declared_bytes": 93927253,
+  "no_native_or_target_runs": true,
+  "parent_interrupt_cleanup": "SIGINT/SIGTERM forwards to owned worker process group and waits; no orphaned indexing worker",
+  "query_budgets": {
+    "max_archive_chunks": 2,
+    "max_data_chunks": 4,
+    "max_decoded_bytes": 64000000,
+    "max_index_chunks": 2,
+    "max_metadata_bytes": 32000000,
+    "max_record_bytes": 1000000,
+    "max_seconds": 10,
+    "max_stored_bytes": 64000000
+  },
+  "raw_opens": 0,
+  "script_AST_checks": "PASS",
+  "source_association_stored_bytes_stat_only": 15515861,
+  "status": "METADATA_BUDGET_AND_ENTRY_REVIEW_READY_NOT_EXECUTED",
+  "stream_opens": 0
+}

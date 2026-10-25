@@ -1,0 +1,9 @@
+{
+  "freeze_sha256": "00140598568a5c5776ed77b8a2a46f91392de837dd6806fb67921f678390cd24",
+  "original_streams_opened": false,
+  "reviewed_source_runtime_metadata_runner_bytes": 108114808,
+  "runtime_files": 119,
+  "source_files": 354,
+  "status": "ROOT_NAVIGATION_FREEZE_AND_BUDGET_REVIEW_PASS",
+  "whole_program_model": "OPEN"
+}
