@@ -1,0 +1,31 @@
+{
+  "authorization": "Await root confirmation of main gate terminal state and exact fixed input catalog",
+  "input_budgets": {
+    "max_calls_decoded_bytes": 1000000000,
+    "max_calls_stored_bytes": 128000000,
+    "max_line_bytes": 1000000,
+    "max_members": 200000,
+    "max_root_bytes": 32000000,
+    "max_seconds": 1800,
+    "max_shard_bytes": 32000000,
+    "max_source_files": 1000,
+    "max_total_read_bytes": 2000000000
+  },
+  "raw_capture_reads": 0,
+  "read_original_reports": false,
+  "schema": "scar.modeling-scope-prepared-budgets",
+  "schema_version": 1,
+  "status": "PREPARED_NOT_RUN",
+  "storage_budgets": {
+    "max_chunk_bytes": 8000000,
+    "max_chunk_rows": 1000,
+    "max_chunks": 10000,
+    "max_decoded_bytes": 8000000000,
+    "max_entries": 200000,
+    "max_manifest_bytes": 4000000,
+    "max_record_bytes": 1000000,
+    "max_seconds": 1800,
+    "max_stored_bytes": 1000000000
+  },
+  "target_executions": 0
+}
