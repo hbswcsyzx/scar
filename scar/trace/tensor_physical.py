@@ -19,6 +19,7 @@ import sys
 PROVIDER_REVISION = "cf30153c4c131c8164ee7798e5022d810682e2cb"
 PROFILE = "scar.tensor-physical-event-tree-v1"
 DISPATCH_PROFILE = "scar.dispatch-marker-collector-v1"
+NATIVE_INPUT_PROFILE = "scar.native-tensor-input-event-tree-v1"
 _NONCE = re.compile(r"[0-9a-f]{32}")
 
 
@@ -332,13 +333,126 @@ def _allocation(extra, event, parent_id, ordinal, torch):
     return result
 
 
+class _InputChunks:
+    """Companion transport only; it never changes the legacy event stream."""
+
+    def __init__(self, root, *, chunk_rows, chunk_bytes, max_rows, max_bytes, line_bytes):
+        root.mkdir()  # Exclusive directory ownership; never resume a partial export.
+        self.root, self.chunk_rows, self.chunk_bytes = root, chunk_rows, chunk_bytes
+        self.max_rows, self.max_bytes, self.line_bytes = max_rows, max_bytes, line_bytes
+        self.rows = self.bytes = self.local_rows = self.local_bytes = 0
+        self.fd = None
+        self.chunks = []
+        self.failure = None
+
+    def _finish_chunk(self):
+        if self.fd is None:
+            return
+        os.close(self.fd)
+        self.fd = None
+        self.chunks.append({"path": self.name, "raw_bytes": self.local_bytes,
+            "raw_sha256": self.digest.hexdigest(), "rows": self.local_rows,
+            "first_index": self.rows - self.local_rows + 1})
+
+    def emit(self, row):
+        if self.failure is not None:
+            return
+        data = (json.dumps(row, ensure_ascii=True, separators=(",", ":"),
+                           allow_nan=False) + "\n").encode("ascii")
+        if (len(data) > min(self.line_bytes, self.chunk_bytes)
+                or self.rows >= self.max_rows or self.bytes + len(data) > self.max_bytes):
+            self.failure = "native_input_transport_budget"
+            return
+        if self.fd is not None and (self.local_rows >= self.chunk_rows
+                or self.local_bytes + len(data) > self.chunk_bytes):
+            self._finish_chunk()
+        if self.fd is None:
+            if len(self.chunks) >= 4096:
+                self.failure = "native_input_chunk_count_budget"
+                return
+            self.name = f"{len(self.chunks):06d}.jsonl"
+            self.fd = os.open(self.root / self.name, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            self.digest, self.local_rows, self.local_bytes = hashlib.sha256(), 0, 0
+        offset = 0
+        try:
+            while offset < len(data):
+                written = os.write(self.fd, data[offset:])
+                if written <= 0:
+                    raise OSError("native input sidecar made no write progress")
+                self.digest.update(data[offset:offset + written])
+                self.bytes += written
+                self.local_bytes += written
+                offset += written
+        except OSError:
+            self.failure = "native_input_output_io_failure"
+            raise
+        self.rows += 1
+        self.local_rows += 1
+
+
+def _native_inputs(extra, event, parent_id, ordinal, torch, limits):
+    """Retain provider metadata/structure; never serialize scalar contents."""
+    gaps, slots = [], []
+    header = _header(event, parent_id, ordinal, gaps)
+    row = {"kind": "TORCH_OP_INPUTS", "event": header, "name": extra.name,
+        "overload_name": event.overload_name, "scope": None,
+        "inputs": {"availability": "UNAVAILABLE", "top_level_count": None, "slots": slots}, "gaps": gaps}
+    try:
+        scope = extra.scope
+        if type(scope) is not torch._C._profiler.RecordScope:
+            raise ValueError("unsupported provider scope")
+        row["scope"] = scope.name
+    except (AttributeError, TypeError, ValueError, RuntimeError):
+        gaps.append("provider_scope_unavailable")
+    try:
+        values = extra.inputs
+    except (AttributeError, TypeError, ValueError, RuntimeError):
+        gaps.append("provider_inputs_unavailable")
+        return row
+    if type(values) is not list:
+        gaps.append("provider_inputs_not_list")
+        return row
+    row["inputs"]["top_level_count"] = len(values)
+    if len(values) > limits["max_slots"]:
+        gaps.append("native_input_slot_budget")
+        return row
+    row["inputs"]["availability"] = "OBSERVED"
+    tensor_count = 0
+    for i, value in enumerate(values):
+        slot = {"ordinal": i}
+        if type(value) is torch._C._profiler._TensorMetadata:
+            tensor_count += 1
+            if tensor_count > limits["max_slots"]:
+                slot.update(kind="OPAQUE", reason="native_input_tensor_metadata_budget")
+            else:
+                slot.update(kind="TENSOR", path=[i], metadata=_tensor(value, torch, limits))
+        elif type(value) is list:
+            tensor_count += len(value)
+            if (tensor_count > limits["max_slots"] or len(value) > limits["max_slots"]
+                    or any(type(item) is not torch._C._profiler._TensorMetadata for item in value)):
+                slot.update(kind="OPAQUE", reason="unsupported_or_over_budget_tensor_list")
+            else:
+                slot.update(kind="TENSOR_LIST", items=[{"ordinal": j, "path": [i, j],
+                    "metadata": _tensor(item, torch, limits)} for j, item in enumerate(value)])
+        elif value is None:
+            slot.update(kind="OPAQUE", reason="provider_none_or_unsupported_or_undefined")
+        elif type(value) in (bool, int, float, complex):
+            slot.update(kind="SCALAR_OPAQUE", scalar_kind=type(value).__name__)
+        else:
+            slot.update(kind="OPAQUE", reason="unsupported_provider_input")
+        slots.append(slot)
+    return row
+
+
 def export_tensor_physical(profiler_result, out, *, nonce,
         provider_revision=PROVIDER_REVISION, dispatch_metadata_path,
         dispatch_observations_path, native_manifest_path,
         max_events=1000000, max_bytes=512000000, max_nodes=2000000,
         max_depth=1024, max_markers=250000, max_slots=4096, max_rank=64,
         max_line_bytes=2000000, max_metadata_bytes=2000000,
-        max_source_bytes=2000000000, max_source_rows=2000000):
+        max_source_bytes=2000000000, max_source_rows=2000000,
+        native_inputs_profile=None, native_chunk_rows=1000, native_chunk_bytes=8000000,
+        native_max_rows=1000000, native_max_bytes=512000000):
     """Export metadata/allocator receipts after the complete collector close.
 
     ``profiler_result`` is the still-live, caller-owned ``kineto_results`` of
@@ -361,6 +475,16 @@ def export_tensor_physical(profiler_result, out, *, nonce,
     if (provider_revision != PROVIDER_REVISION or type(nonce) is not str
             or _NONCE.fullmatch(nonce) is None):
         raise ValueError("unsupported physical metadata provider or capture nonce")
+    if native_inputs_profile not in (None, NATIVE_INPUT_PROFILE):
+        raise ValueError("unsupported native input metadata companion profile")
+    if native_inputs_profile is not None and any(type(v) is not int or v < 1 for v in
+            (native_chunk_rows, native_chunk_bytes, native_max_rows, native_max_bytes)):
+        raise ValueError("native input companion budgets must be positive exact integers")
+    if native_inputs_profile is not None and (native_chunk_rows > 1000 or native_chunk_bytes > 8000000):
+        raise ValueError("native input companion chunk ceiling exceeded")
+    if native_inputs_profile is not None and (max_slots > 4096 or max_rank > 64
+            or max_line_bytes > 2000000 or max_metadata_bytes > 2000000):
+        raise ValueError("native input companion structural ceiling exceeded")
     torch = sys.modules.get("torch")
     if (torch is None or getattr(getattr(torch, "version", None), "git_version", None) != provider_revision
             or type(profiler_result) is not torch._C._autograd._ProfilerResult):
@@ -371,6 +495,12 @@ def export_tensor_physical(profiler_result, out, *, nonce,
     meta, native, markers, inputs = _sources(out, nonce, provider_revision,
         dispatch_metadata_path, dispatch_observations_path, native_manifest_path, limits)
     pid = os.getpid()
+    if native_inputs_profile is not None:
+        requested = native.get("configuration", {}).get("native_tensor_input_observations", {})
+        if (requested.get("profile") != NATIVE_INPUT_PROFILE or requested.get("requested") is not True
+                or requested.get("chunk_rows") != native_chunk_rows
+                or requested.get("manifest") != str(out / f"native-tensor-inputs.{pid}.{nonce}" / "manifest.json")):
+            raise ValueError("native manifest does not declare this native input companion")
     event_path = out / f"tensor-physical.{pid}.{nonce}.jsonl"
     metadata_path = out / f"tensor-physical-meta.{pid}.{nonce}.json"
     if metadata_path.exists() or metadata_path.is_symlink():
@@ -378,6 +508,16 @@ def export_tensor_physical(profiler_result, out, *, nonce,
     # Reserve metadata before any observations. O_EXCL is the publication
     # ownership receipt, and a failed export never overwrites an earlier one.
     metadata_fd = os.open(metadata_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+    companion = None
+    native_counts, native_errors = Counter(), []
+    if native_inputs_profile is not None:
+        try:
+            companion = _InputChunks(out / f"native-tensor-inputs.{pid}.{nonce}",
+                chunk_rows=native_chunk_rows, chunk_bytes=native_chunk_bytes,
+                max_rows=native_max_rows, max_bytes=native_max_bytes, line_bytes=max_line_bytes)
+        except Exception:
+            os.close(metadata_fd)
+            raise
     writer = None
     counts, gaps, errors = Counter(), Counter(), []
     seen, stack = set(), []
@@ -422,6 +562,18 @@ def export_tensor_physical(profiler_result, out, *, nonce,
                 if row["physical_epoch_reference_observed"]:
                     counts["allocation_receipts_with_epoch_reference"] += 1
             elif tag == torch._C._profiler._EventType.TorchOp:
+                if companion is not None:
+                    native_counts["visited_torch_ops"] += 1
+                    if companion.failure is None:
+                        try:
+                            native_row = _native_inputs(extra, event, parent_id,
+                                counts["visited_nodes"], torch, limits)
+                            native_row.update(schema="scar.native-tensor-input-observation", schema_version=1,
+                                process_id=pid, nonce=nonce, index=companion.rows + 1)
+                            companion.emit(native_row)
+                        except Exception as error:
+                            companion.failure = "native_input_export_exception"
+                            native_errors.append({"type": type(error).__name__})
                 name = extra.name
                 if type(name) is not str:
                     raise ValueError("provider TorchOp name is not a string")
@@ -560,7 +712,38 @@ def export_tensor_physical(profiler_result, out, *, nonce,
             offset += size
     finally:
         os.close(metadata_fd)
+        if companion is not None:
+            companion._finish_chunk()
+    if companion is not None:
+        complete = (completed and not errors and not gaps["repeated_or_cyclic_result_node"]
+                    and companion.failure is None)
+        native_report = {"schema": "scar.native-tensor-input-trace", "schema_version": 1,
+            "profile": NATIVE_INPUT_PROFILE, "provider_revision": provider_revision,
+            "process_id": pid, "nonce": nonce,
+            "status": "COMPLETE_RETENTION" if complete else "OPEN",
+            "traversal_completed": completed, "frontier": frontier,
+            "transport_failure": companion.failure, "errors": native_errors,
+            "visited_torch_ops": native_counts["visited_torch_ops"],
+            "retained_rows": companion.rows,
+            "omitted_visited_torch_ops": native_counts["visited_torch_ops"] - companion.rows,
+            "raw_bytes": companion.bytes, "chunks": companion.chunks,
+            "limits": {"chunk_rows": native_chunk_rows, "chunk_bytes": native_chunk_bytes,
+                "max_rows": native_max_rows, "max_bytes": native_max_bytes, "line_bytes": max_line_bytes},
+            "inputs": inputs,
+            "legacy_physical_metadata": {"path": str(metadata_path), "raw_bytes": len(payload),
+                "raw_sha256": hashlib.sha256(payload).hexdigest()},
+            "capabilities": {"native_inputs": "PROVIDER_METADATA_ONLY", "native_outputs": "UNAVAILABLE_IN_PINNED_API",
+                "ETO_port_join_established": False, "Python_identity_established": False,
+                "logical_content_established": False, "resource_ready_established": False},
+            "assumptions": ["same caller-owned closed profiler result as the legacy physical exporter"],
+            "membership": "companion retention only; not an ordinary CaptureCoordinates member"}
+        encoded = (json.dumps(native_report, ensure_ascii=True, sort_keys=True,
+            separators=(",", ":"), allow_nan=False) + "\n").encode("ascii")
+        if len(encoded) > max_metadata_bytes:
+            raise ValueError("native input companion manifest budget")
+        with (companion.root / "manifest.json").open("xb") as target:
+            target.write(encoded)
     return report
 
 
-__all__ = ["export_tensor_physical", "PROFILE", "PROVIDER_REVISION"]
+__all__ = ["export_tensor_physical", "PROFILE", "PROVIDER_REVISION", "NATIVE_INPUT_PROFILE"]

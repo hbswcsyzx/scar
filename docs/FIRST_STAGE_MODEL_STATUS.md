@@ -6,6 +6,13 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：原生输入metadata的新保留路径实际回读通过
+
+新opt-in profile在同一次owned profiler DFS保留TorchOp输入metadata。独立CPU实验43行/
+22块已完整回读；原probe预期异常类型假设错误导致exit1保留，离线postflight exit0，
+没有第二采集。三文件原样从3b16c0d2接入。它尚未纳入普通membership/ETO端口绑定，
+不授旧1901端口或逻辑内容/ready资格；见[NATIVE_TENSOR_INPUTS.md](NATIVE_TENSOR_INPUTS.md)。
+
 ### 2026-10-25：65项普通函数窗口全部实际处理
 
 root确认exit0，outer174.766s/worker144.349s；65终态为12成功、51不支持、2失败，
