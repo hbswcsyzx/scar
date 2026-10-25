@@ -1,10 +1,50 @@
 # 第一阶段建模：实际状态与下一项
 
-日期：2026-10-23。**OPEN：完整 LeWM 自动建模未验收。**
+日期：2026-10-25。**OPEN：完整 LeWM 自动建模未验收。**
 
 当前交付与下一项统一见 [FIRST_STAGE_DELIVERY.md](FIRST_STAGE_DELIVERY.md)，
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
+
+### 2026-10-25：恢复后固定声明/存储职责，提交已冻结跨层连接
+
+声明式规范图、归档编码和查询索引分别承担职责。现有 ProgramGraph/
+ExecutionModel/ValueGraph/EvidenceGraph 与公共 codec 保留为事实来源；SQLite
+只是可删除重建的索引，不决定实体或关系，也不是新的必需主存储。具体设计见
+[声明式存储](DECLARATIVE_GRAPH_STORAGE.md)，当前 S1—S5 的执行和自行验收见
+[执行计划](FIRST_STAGE_EXECUTION_PLAN.md)。旧组件分母中把自动建图推到后续的范围
+已明确为历史，不能缩小当前完整建模要求。
+
+恢复后核对原 LeWM HEAD/工作区仍未改。三个冻结单元已分别审查并提交：
+
+- 366dd09c：精确 source membership ancestor；实际 depth2 查询、重复查询及
+  错祖先拒绝已验，原140 artifact receipt与两源码逐字匹配。没有重读raw或构造
+  private proof factory；843快照的统一 current-source/dispatch/SBA 门尚待执行。
+- 1e262f80：FD namespace 临时隔离；selection coverage 合格不能代替连续性。
+  实际负例门 exit0/0.72s，无raw打开或资源创建；FD数值独立保留。资格producer
+  尚未实现，不能把安全拒绝写成资源模型已完成。
+- 0678db92：native/reference→core bridge及独立ABI顺序检查。最终真实门为
+  attempt03，exit0/19.26s、GNU maxRSS660880KiB；16个选中dispatch中13个ATen调用、
+  4静态接口、27个Tensor参考denotation、0validation issues、41gaps。逻辑内容四表
+  仍0，完整state/alias/ready未闭合。其余39780个dispatch尚未访问，不算已覆盖。
+
+native交付独立只读审计复得新seal的错排候选，确认真实拒绝是NativePortOrderError
+而非旧scope hash；最终107项收据、六源码及三轮producer匹配。112文件交付含
+4个新审计小文件；旧失败、attempt02缺独立顺序证明和三条历史可变路径差异保留，
+没有改写旧收据。复核未重跑目标或gate，不能当作又一次实际运行。
+
+新843 source snapshot 的 fresh raw 联合绑定已实际启动，root持有session40820，
+Python PID1193139；原坐标公共校验及owned raw读取已通过，正在fresh source binder。
+此为启动时状态，终态另记，不凭此文字推断进程仍活着。未执行新LeWM/GPU或A/B；
+S3/S4仍OPEN。
+
+并行[实现审计](DECLARATIVE_MODEL_AUDIT.md)已完成21组实体映射及564个原dataclass
+字段清单；root独立核316项源/文档receipt无差异。这是代码审查，不是564种程序
+行为均已自动恢复。审计确认统一AnalysisScope/CoverageObligation持久化账本仍缺，
+现有source/provider覆盖条目不能替代它；现有typed格式优先保留，补自动producer。
+[全dispatch方案](NATIVE_CAPTURE_BATCH_PLAN.md)也已完成：一次owned来源获取和原档
+索引、全静态catalog、共享Snapshot及有界execution shards。该方案尚未实测；
+后继代码在独立工作树实现，主联合门参与的producer保持原freeze。
 
 ### 2026-10-23：新模型快照正式新增218ops并修订65ops
 

@@ -1,0 +1,1560 @@
+{
+  "audit_is_new_program_ir": false,
+  "authority": "docs/FIRST_STAGE_MODEL_CONTRACT.md",
+  "database_authority": "REBUILDABLE_INDEX_ONLY",
+  "date": "2026-10-25",
+  "document": "docs/DECLARATIVE_MODEL_AUDIT.md",
+  "entities": [
+    {
+      "boundary": "Loaded code, source snapshot and core definitions require exact correspondence; source code_id is not universally the loaded marshal SHA.",
+      "category": "code_identity",
+      "original_records": [
+        {
+          "class": "OperationSource",
+          "field_names": [
+            "operation",
+            "source",
+            "role",
+            "semantic_operation",
+            "opcode"
+          ],
+          "line": 49,
+          "path": "scar/ir/program/source.py"
+        },
+        {
+          "class": "ValueSource",
+          "field_names": [
+            "value",
+            "source",
+            "role",
+            "slot",
+            "semantic_value"
+          ],
+          "line": 58,
+          "path": "scar/ir/program/source.py"
+        },
+        {
+          "class": "UseSource",
+          "field_names": [
+            "operation",
+            "use",
+            "source",
+            "role",
+            "index",
+            "semantic_value"
+          ],
+          "line": 67,
+          "path": "scar/ir/program/source.py"
+        },
+        {
+          "class": "SourceReference",
+          "field_names": [
+            "atom_id",
+            "path",
+            "fingerprint",
+            "start_line",
+            "end_line",
+            "start_column",
+            "end_column"
+          ],
+          "line": 50,
+          "path": "scar/ir/v2/common.py"
+        },
+        {
+          "class": "OperationDefinition",
+          "field_names": [
+            "id",
+            "kind",
+            "label",
+            "code_id",
+            "source_file",
+            "source_start",
+            "source_end",
+            "parent_id",
+            "control_region",
+            "input_slots",
+            "output_slots",
+            "state_slots",
+            "source_atoms",
+            "contract",
+            "effect_summary",
+            "resource_requirements",
+            "metadata"
+          ],
+          "line": 117,
+          "path": "scar/ir/v2/semantic.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/ir/ids.py:CodeID.from_code",
+        "scar/analysis/program_lowering.py:prepare_source"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Supported source profiles generate canonical operations; opaque effects and unsupported constructs remain gaps.",
+      "category": "operation_definition",
+      "original_records": [
+        {
+          "class": "Operation",
+          "field_names": [
+            "id",
+            "label",
+            "behaviors",
+            "uses",
+            "results",
+            "accesses",
+            "effects_complete",
+            "terminator",
+            "callee",
+            "call_arguments",
+            "completions",
+            "invoke_arguments"
+          ],
+          "line": 637,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "Use",
+          "field_names": [
+            "id",
+            "value",
+            "role"
+          ],
+          "line": 373,
+          "path": "scar/ir/program/model.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/analysis/program_lowering.py:_Builder",
+        "scar/analysis/structured_lowering.py:StructuredBuilder",
+        "scar/analysis/source_heap_lowering.py:store_heap_target"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Operation.results and value.origin are mutually checked endpoints of one canonical definition; UseIDs remain distinct.",
+      "category": "value_definition",
+      "original_records": [
+        {
+          "class": "DataValue",
+          "field_names": [
+            "id",
+            "region",
+            "origin",
+            "data_type"
+          ],
+          "line": 204,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "ReferenceValue",
+          "field_names": [
+            "id",
+            "region",
+            "origin",
+            "referent_identity",
+            "targets",
+            "selector"
+          ],
+          "line": 229,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "StateVersionValue",
+          "field_names": [
+            "id",
+            "region",
+            "origin",
+            "location"
+          ],
+          "line": 257,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "LocalBindingValue",
+          "field_names": [
+            "id",
+            "region",
+            "origin",
+            "slot"
+          ],
+          "line": 270,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "ProtocolValue",
+          "field_names": [
+            "id",
+            "region",
+            "origin",
+            "protocol"
+          ],
+          "line": 285,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "OperationResult",
+          "field_names": [
+            "operation",
+            "index"
+          ],
+          "line": 185,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "BlockArgument",
+          "field_names": [
+            "block",
+            "index"
+          ],
+          "line": 174,
+          "path": "scar/ir/program/model.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/analysis/program_lowering.py:_Builder",
+        "scar/ir/program/validation.py:validate"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Actual owner/selector/alias/state-domain identity is not implied by coarse world IDs or PARTIAL refinements.",
+      "category": "state_location_and_address",
+      "original_records": [
+        {
+          "class": "StateLocation",
+          "field_names": [
+            "id",
+            "label",
+            "extent",
+            "stability"
+          ],
+          "line": 145,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "StateAccess",
+          "field_names": [
+            "location",
+            "before",
+            "mode",
+            "after",
+            "footprint",
+            "full_overwrite",
+            "reference"
+          ],
+          "line": 388,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "StateAddressRefinement",
+          "field_names": [
+            "site",
+            "effects",
+            "coverage",
+            "protocol"
+          ],
+          "line": 235,
+          "path": "scar/ir/program/state_addresses.py"
+        },
+        {
+          "class": "AddressEffect",
+          "field_names": [
+            "owner",
+            "path",
+            "mode",
+            "stage"
+          ],
+          "line": 204,
+          "path": "scar/ir/program/state_addresses.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/analysis/environment_lowering.py:StructuredEnvironmentBuilder._addresses",
+        "scar/analysis/source_heap_lowering.py:store_heap_target"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Containment is distinct from call references, path execution and ordered data transfer.",
+      "category": "region_and_control",
+      "original_records": [
+        {
+          "class": "Region",
+          "field_names": [
+            "id",
+            "label",
+            "entry",
+            "blocks",
+            "exits",
+            "parent"
+          ],
+          "line": 775,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "Block",
+          "field_names": [
+            "id",
+            "arguments",
+            "operations"
+          ],
+          "line": 756,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "Terminator",
+          "field_names": [
+            "kind",
+            "successors",
+            "condition",
+            "exit",
+            "values"
+          ],
+          "line": 580,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "Successor",
+          "field_names": [
+            "block",
+            "arguments"
+          ],
+          "line": 454,
+          "path": "scar/ir/program/model.py"
+        },
+        {
+          "class": "CompletionSuccessor",
+          "field_names": [
+            "kind",
+            "block",
+            "arguments"
+          ],
+          "line": 563,
+          "path": "scar/ir/program/model.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/analysis/structured_lowering.py:StructuredBuilder.make_graph",
+        "scar/analysis/program_composition.py:CompositionIndex"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Legacy v2 ResourceRequirement(ResourceID, selector) is not this canonical ResourceRequirementID or a dynamic resource instance.",
+      "category": "resource_definition_requirement",
+      "original_records": [
+        {
+          "class": "ResourceDefinition",
+          "field_names": [
+            "id",
+            "kind",
+            "role",
+            "origin"
+          ],
+          "line": 64,
+          "path": "scar/ir/program/resources.py"
+        },
+        {
+          "class": "ResourceRequirement",
+          "field_names": [
+            "id",
+            "owner",
+            "kind",
+            "role",
+            "capacities",
+            "relations"
+          ],
+          "line": 126,
+          "path": "scar/ir/program/resources.py"
+        },
+        {
+          "class": "ResourceUse",
+          "field_names": [
+            "operation",
+            "requirement",
+            "definition",
+            "handle"
+          ],
+          "line": 155,
+          "path": "scar/ir/program/resources.py"
+        },
+        {
+          "class": "ResourceLocation",
+          "field_names": [
+            "location",
+            "resource"
+          ],
+          "line": 173,
+          "path": "scar/ir/program/resources.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/ir/program/resource_validation.py:resource_errors",
+        "scar/store/graph_index.py:_index_body"
+      ],
+      "status": "SUPPLIED"
+    },
+    {
+      "boundary": "IDs distinguish incarnations; generic parent/start/end are not fields of these three records.",
+      "category": "run_process_thread",
+      "original_records": [
+        {
+          "class": "ExecutionRun",
+          "field_names": [
+            "id",
+            "source"
+          ],
+          "line": 65,
+          "path": "scar/ir/execution/coordinates.py"
+        },
+        {
+          "class": "ProcessInstance",
+          "field_names": [
+            "id",
+            "run",
+            "pid",
+            "source"
+          ],
+          "line": 75,
+          "path": "scar/ir/execution/coordinates.py"
+        },
+        {
+          "class": "HostThreadInstance",
+          "field_names": [
+            "id",
+            "process",
+            "tid",
+            "source"
+          ],
+          "line": 90,
+          "path": "scar/ir/execution/coordinates.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/trace/capture_coordinates.py",
+        "scar/trace/os_resources.py:import_os_resources"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Python InvocationKey association is not automatically a CallActivation; cross-body actual/formal/return remains open.",
+      "category": "activation_invocation",
+      "original_records": [
+        {
+          "class": "RegionActivation",
+          "field_names": [
+            "id",
+            "region",
+            "process",
+            "entry"
+          ],
+          "line": 114,
+          "path": "scar/ir/execution/coordinates.py"
+        },
+        {
+          "class": "ExecutionSegment",
+          "field_names": [
+            "id",
+            "activation",
+            "host_thread",
+            "ingress"
+          ],
+          "line": 172,
+          "path": "scar/ir/execution/coordinates.py"
+        },
+        {
+          "class": "BlockVisit",
+          "field_names": [
+            "id",
+            "segment",
+            "block"
+          ],
+          "line": 194,
+          "path": "scar/ir/execution/coordinates.py"
+        },
+        {
+          "class": "CallActivation",
+          "field_names": [
+            "id",
+            "caller",
+            "activation",
+            "entry",
+            "completion",
+            "source"
+          ],
+          "line": 13,
+          "path": "scar/ir/execution/calls.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/trace/native_protocol.py:_build_execution",
+        "scar/analysis/source_invocations.py"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Bounded native automatic producer exists; full source operation occurrences and all actual uses do not follow from frame entry alone.",
+      "category": "operation_value_use_occurrence",
+      "original_records": [
+        {
+          "class": "OperationOccurrence",
+          "field_names": [
+            "id",
+            "visit",
+            "operation"
+          ],
+          "line": 206,
+          "path": "scar/ir/execution/coordinates.py"
+        },
+        {
+          "class": "ValueOccurrence",
+          "field_names": [
+            "id",
+            "value",
+            "origin"
+          ],
+          "line": 218,
+          "path": "scar/ir/execution/coordinates.py"
+        },
+        {
+          "class": "UseOccurrence",
+          "field_names": [
+            "operation",
+            "use",
+            "value"
+          ],
+          "line": 235,
+          "path": "scar/ir/execution/coordinates.py"
+        },
+        {
+          "class": "ControlTransfer",
+          "field_names": [
+            "operation",
+            "successor_index",
+            "target"
+          ],
+          "line": 252,
+          "path": "scar/ir/execution/coordinates.py"
+        },
+        {
+          "class": "OccurrenceEvidenceBinding",
+          "field_names": [
+            "operation",
+            "legacy",
+            "source"
+          ],
+          "line": 45,
+          "path": "scar/ir/execution/model.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/trace/native_protocol.py:_build_execution",
+        "scar/ir/execution/validation.py:_coordinates"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "An object can have no known content version; first/last observation is not allocation/free.",
+      "category": "object_identity",
+      "original_records": [
+        {
+          "class": "ObjectInstance",
+          "field_names": [
+            "id",
+            "scope",
+            "evidence",
+            "metadata"
+          ],
+          "line": 180,
+          "path": "scar/ir/v2/values.py"
+        },
+        {
+          "class": "ObjectBinding",
+          "field_names": [
+            "object_id",
+            "value_version",
+            "relation",
+            "scope",
+            "evidence",
+            "metadata"
+          ],
+          "line": 216,
+          "path": "scar/ir/v2/values.py"
+        },
+        {
+          "class": "ObjectIdentity",
+          "field_names": [
+            "object"
+          ],
+          "line": 158,
+          "path": "scar/ir/execution/content.py"
+        },
+        {
+          "class": "ObjectRef",
+          "field_names": [
+            "artifact",
+            "object"
+          ],
+          "line": 80,
+          "path": "scar/ir/execution/content.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/trace/reference_import.py",
+        "scar/trace/dispatch_import.py",
+        "scar/trace/native_protocol.py:_build_execution"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Original reference ports are populated conditionally; defaults snapshots are not entry bindings or immutable cell contents.",
+      "category": "function_environment",
+      "original_records": [
+        {
+          "class": "EnvironmentInterface",
+          "field_names": [
+            "id",
+            "region",
+            "code_definition",
+            "members"
+          ],
+          "line": 79,
+          "path": "scar/ir/program/environments.py"
+        },
+        {
+          "class": "EnvironmentMember",
+          "field_names": [
+            "role",
+            "reference",
+            "locations",
+            "cell_slot",
+            "cell_position"
+          ],
+          "line": 39,
+          "path": "scar/ir/program/environments.py"
+        },
+        {
+          "class": "FunctionEntryLayout",
+          "field_names": [
+            "environment",
+            "parameters"
+          ],
+          "line": 121,
+          "path": "scar/ir/program/environments.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/analysis/environment_lowering.py:StructuredEnvironmentBuilder",
+        "scar/analysis/callable_environment_import.py"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Opt-in registry and provisional legacy snapshots exist; native actual content lineage is not automatically reconstructed.",
+      "category": "logical_content_version_provenance",
+      "original_records": [
+        {
+          "class": "LogicalValue",
+          "field_names": [
+            "id",
+            "semantic_type",
+            "description",
+            "metadata"
+          ],
+          "line": 51,
+          "path": "scar/ir/v2/values.py"
+        },
+        {
+          "class": "ValueVersion",
+          "field_names": [
+            "id",
+            "provenance_id",
+            "parent_versions",
+            "semantic_type",
+            "control_scope",
+            "metadata"
+          ],
+          "line": 63,
+          "path": "scar/ir/v2/values.py"
+        },
+        {
+          "class": "ProvenanceRecord",
+          "field_names": [
+            "id",
+            "relation",
+            "inputs",
+            "outputs",
+            "producer",
+            "equivalence",
+            "evidence",
+            "metadata"
+          ],
+          "line": 84,
+          "path": "scar/ir/v2/values.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/ir/provenance.py:ProvenanceRegistry",
+        "scar/trace/normalize_v2.py:_Normalizer.snapshot"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Reuse original epoch/region identity; pointer or overlap is not content identity; CUDA allocation claim remains provider-qualified.",
+      "category": "allocation_view_geometry",
+      "original_records": [
+        {
+          "class": "StorageAllocation",
+          "field_names": [
+            "id",
+            "device",
+            "nbytes",
+            "allocator_token",
+            "lifetime_scope",
+            "metadata"
+          ],
+          "line": 108,
+          "path": "scar/ir/v2/values.py"
+        },
+        {
+          "class": "StorageRegion",
+          "field_names": [
+            "id",
+            "allocation",
+            "offset",
+            "shape",
+            "strides",
+            "dtype",
+            "device",
+            "layout",
+            "metadata"
+          ],
+          "line": 121,
+          "path": "scar/ir/v2/values.py"
+        },
+        {
+          "class": "AllocationPlacement",
+          "field_names": [
+            "allocation",
+            "pool",
+            "source"
+          ],
+          "line": 546,
+          "path": "scar/ir/execution/resources.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/trace/native_memory.py:append_memory_events",
+        "scar/trace/tensor_physical_import.py:import_tensor_physical",
+        "scar/trace/native_protocol.py:_project"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Native whole-capture materialization/validity/readiness producer remains open; old ready_event string is insufficient for typed order proof.",
+      "category": "materialization",
+      "original_records": [
+        {
+          "class": "Materialization",
+          "field_names": [
+            "id",
+            "value_version",
+            "representation",
+            "device",
+            "region",
+            "producer",
+            "ready_event",
+            "validity_scope",
+            "evidence",
+            "metadata"
+          ],
+          "line": 152,
+          "path": "scar/ir/v2/values.py"
+        },
+        {
+          "class": "MaterializationRef",
+          "field_names": [
+            "artifact",
+            "materialization"
+          ],
+          "line": 33,
+          "path": "scar/ir/execution/work.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/ir/provenance.py:ProvenanceRegistry",
+        "scar/trace/normalize_v2.py:_Normalizer.snapshot"
+      ],
+      "status": "SUPPLIED"
+    },
+    {
+      "boundary": "Native window writes ObjectIdentity denotations only; DataValue must denote DataIdentity, ReferenceValue must denote ObjectIdentity.",
+      "category": "content_denotation_read",
+      "original_records": [
+        {
+          "class": "ValueDenotation",
+          "field_names": [
+            "id",
+            "value",
+            "identity",
+            "basis",
+            "source"
+          ],
+          "line": 166,
+          "path": "scar/ir/execution/content.py"
+        },
+        {
+          "class": "DataIdentity",
+          "field_names": [
+            "version"
+          ],
+          "line": 150,
+          "path": "scar/ir/execution/content.py"
+        },
+        {
+          "class": "VersionRef",
+          "field_names": [
+            "artifact",
+            "version"
+          ],
+          "line": 62,
+          "path": "scar/ir/execution/content.py"
+        },
+        {
+          "class": "ContentRead",
+          "field_names": [
+            "id",
+            "consumer",
+            "placement",
+            "effect",
+            "anchor",
+            "support",
+            "basis",
+            "source"
+          ],
+          "line": 309,
+          "path": "scar/ir/execution/content.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/trace/native_protocol.py:_build_execution",
+        "scar/ir/execution/content_validation.py:content_errors"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Attachments reference canonical sites/Use/results; no second heap or independent producer graph. No full native automatic production chain.",
+      "category": "stored_payload_and_production",
+      "original_records": [
+        {
+          "class": "StoredValueWrite",
+          "field_names": [
+            "site",
+            "effect_index",
+            "payload",
+            "completion"
+          ],
+          "line": 48,
+          "path": "scar/ir/program/stored_values.py"
+        },
+        {
+          "class": "StoredValueRead",
+          "field_names": [
+            "site",
+            "effect_index",
+            "result"
+          ],
+          "line": 62,
+          "path": "scar/ir/program/stored_values.py"
+        },
+        {
+          "class": "SourceEndpointBridge",
+          "field_names": [
+            "id",
+            "endpoint",
+            "target",
+            "source"
+          ],
+          "line": 166,
+          "path": "scar/ir/execution/production.py"
+        },
+        {
+          "class": "WriteAssociation",
+          "field_names": [
+            "id",
+            "stage",
+            "writer",
+            "production",
+            "placement",
+            "evidence",
+            "source"
+          ],
+          "line": 235,
+          "path": "scar/ir/execution/production.py"
+        },
+        {
+          "class": "OutcomeProduction",
+          "field_names": [
+            "id",
+            "write",
+            "outcome",
+            "frontier",
+            "actual",
+            "rule",
+            "source"
+          ],
+          "line": 263,
+          "path": "scar/ir/execution/production.py"
+        },
+        {
+          "class": "EstablishedProduction",
+          "field_names": [
+            "id",
+            "write",
+            "established",
+            "actual",
+            "result",
+            "rule",
+            "source"
+          ],
+          "line": 47,
+          "path": "scar/ir/execution/validity.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/ir/program/stored_values.py:stored_value_errors",
+        "scar/ir/execution/production_validation.py"
+      ],
+      "status": "SUPPLIED"
+    },
+    {
+      "boundary": "OS fragment has actual resources/handle observations and explicit unresolved continuity; canonical requirement/executor linkage is not complete.",
+      "category": "resource_instance_handle_access",
+      "original_records": [
+        {
+          "class": "ResourceInstance",
+          "field_names": [
+            "id",
+            "kind",
+            "role",
+            "realm",
+            "origin",
+            "source"
+          ],
+          "line": 172,
+          "path": "scar/ir/execution/resources.py"
+        },
+        {
+          "class": "ResourceRealization",
+          "field_names": [
+            "id",
+            "definition",
+            "site",
+            "target",
+            "source"
+          ],
+          "line": 202,
+          "path": "scar/ir/execution/resources.py"
+        },
+        {
+          "class": "RequirementBinding",
+          "field_names": [
+            "id",
+            "requirement",
+            "owner",
+            "target",
+            "source"
+          ],
+          "line": 218,
+          "path": "scar/ir/execution/resources.py"
+        },
+        {
+          "class": "HandleBinding",
+          "field_names": [
+            "id",
+            "handle",
+            "target",
+            "start",
+            "end",
+            "support",
+            "rights",
+            "ownership",
+            "source"
+          ],
+          "line": 432,
+          "path": "scar/ir/execution/resources.py"
+        },
+        {
+          "class": "ResourceAccessBinding",
+          "field_names": [
+            "id",
+            "operation",
+            "requirement",
+            "handle",
+            "support",
+            "constraints",
+            "source"
+          ],
+          "line": 526,
+          "path": "scar/ir/execution/resources.py"
+        },
+        {
+          "class": "ProviderResourceAccess",
+          "field_names": [
+            "id",
+            "work",
+            "purpose",
+            "target",
+            "handle",
+            "point",
+            "selector",
+            "source"
+          ],
+          "line": 564,
+          "path": "scar/ir/execution/resources.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/trace/os_resources.py:import_os_resources",
+        "scar/trace/os_fd_table_contexts.py"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "OS typed work has UNKNOWN executor/dependency/effect/retention closure; syscall return is not device ready/quiescence.",
+      "category": "resource_work_outcome_lifetime",
+      "original_records": [
+        {
+          "class": "WorkSubmission",
+          "field_names": [
+            "id",
+            "origin",
+            "executor",
+            "scheduling",
+            "dependencies",
+            "dependencies_coverage",
+            "effects",
+            "effects_coverage",
+            "materializations",
+            "materializations_coverage",
+            "retention",
+            "protocol",
+            "source"
+          ],
+          "line": 152,
+          "path": "scar/ir/execution/work.py"
+        },
+        {
+          "class": "ResourceOutcome",
+          "field_names": [
+            "id",
+            "ticket",
+            "kind",
+            "observed_at",
+            "protocol_result",
+            "effect_frontier",
+            "frontier_coverage",
+            "quiescence",
+            "source"
+          ],
+          "line": 229,
+          "path": "scar/ir/execution/work.py"
+        },
+        {
+          "class": "WorkQuiescence",
+          "field_names": [
+            "id",
+            "ticket",
+            "observed_at",
+            "source"
+          ],
+          "line": 212,
+          "path": "scar/ir/execution/work.py"
+        },
+        {
+          "class": "WorkRetention",
+          "field_names": [
+            "id",
+            "ticket",
+            "target",
+            "basis",
+            "start",
+            "support",
+            "authority",
+            "sharing",
+            "release",
+            "source"
+          ],
+          "line": 283,
+          "path": "scar/ir/execution/work.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/trace/os_resources.py:OSResourceFragment.iter_work_records",
+        "scar/ir/execution/work_validation.py"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "No generic whole-native enqueue/ready/wait producer; timestamp adjacency and provider correlation cannot supply these edges.",
+      "category": "queue_event_wait_order",
+      "original_records": [
+        {
+          "class": "QueuePrefix",
+          "field_names": [
+            "id",
+            "queue",
+            "previous",
+            "work",
+            "observed_at",
+            "protocol",
+            "source"
+          ],
+          "line": 104,
+          "path": "scar/ir/execution/work.py"
+        },
+        {
+          "class": "QueueOrderProfile",
+          "field_names": [
+            "id",
+            "queue",
+            "through",
+            "protocol",
+            "source"
+          ],
+          "line": 23,
+          "path": "scar/ir/execution/order.py"
+        },
+        {
+          "class": "EventRecord",
+          "field_names": [
+            "id",
+            "event",
+            "event_access",
+            "marker",
+            "captured",
+            "generation",
+            "observed_at",
+            "protocol",
+            "source"
+          ],
+          "line": 49,
+          "path": "scar/ir/execution/order.py"
+        },
+        {
+          "class": "QueueWait",
+          "field_names": [
+            "id",
+            "ticket",
+            "record",
+            "event_access",
+            "selection",
+            "observed_at",
+            "protocol",
+            "source"
+          ],
+          "line": 73,
+          "path": "scar/ir/execution/order.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/ir/execution/order_validation.py",
+        "scar/ir/execution/validity_order.py"
+      ],
+      "status": "SUPPLIED"
+    },
+    {
+      "boundary": "Fact provenance, proof status, observed roots and completeness remain separate; final required roots are not all automatically bound.",
+      "category": "evidence_contract_measurement",
+      "original_records": [
+        {
+          "class": "ProviderArtifact",
+          "field_names": [
+            "uri",
+            "sha256",
+            "size_bytes",
+            "schema"
+          ],
+          "line": 48,
+          "path": "scar/ir/program/providers.py"
+        },
+        {
+          "class": "ProviderFactReference",
+          "field_names": [
+            "artifact",
+            "locator"
+          ],
+          "line": 64,
+          "path": "scar/ir/program/providers.py"
+        },
+        {
+          "class": "ProviderEnvelope",
+          "field_names": [
+            "id",
+            "provider",
+            "provider_version",
+            "source_revision",
+            "artifact",
+            "kind",
+            "capture_mode",
+            "capture_scope",
+            "sources",
+            "stages",
+            "conditions",
+            "coverage",
+            "collection"
+          ],
+          "line": 182,
+          "path": "scar/ir/program/providers.py"
+        },
+        {
+          "class": "EvidenceClaim",
+          "field_names": [
+            "kind",
+            "references",
+            "scope",
+            "confidence",
+            "assumptions"
+          ],
+          "line": 84,
+          "path": "scar/ir/v2/common.py"
+        },
+        {
+          "class": "ProofClaim",
+          "field_names": [
+            "obligation",
+            "status",
+            "evidence",
+            "reason",
+            "required_next"
+          ],
+          "line": 110,
+          "path": "scar/ir/v2/common.py"
+        },
+        {
+          "class": "ContractDefinition",
+          "field_names": [
+            "id",
+            "name",
+            "required_outputs",
+            "facets",
+            "assumptions",
+            "evidence"
+          ],
+          "line": 136,
+          "path": "scar/ir/v2/contracts.py"
+        },
+        {
+          "class": "EffectSummary",
+          "field_names": [
+            "id",
+            "reads",
+            "writes",
+            "allocates",
+            "frees",
+            "aliases",
+            "escapes",
+            "rng",
+            "may_raise",
+            "external",
+            "ordering",
+            "evidence"
+          ],
+          "line": 65,
+          "path": "scar/ir/v2/contracts.py"
+        },
+        {
+          "class": "MeasurementRecord",
+          "field_names": [
+            "id",
+            "metric",
+            "value",
+            "unit",
+            "scope",
+            "samples",
+            "minimum",
+            "maximum",
+            "variance",
+            "instrumented",
+            "evidence"
+          ],
+          "line": 196,
+          "path": "scar/ir/v2/contracts.py"
+        },
+        {
+          "class": "ObservationRequirement",
+          "field_names": [
+            "id",
+            "contract",
+            "target",
+            "protocol",
+            "source"
+          ],
+          "line": 50,
+          "path": "scar/ir/execution/observations.py"
+        },
+        {
+          "class": "ObservationRoot",
+          "field_names": [
+            "id",
+            "requirement",
+            "actual",
+            "interval",
+            "anchor",
+            "support",
+            "source"
+          ],
+          "line": 90,
+          "path": "scar/ir/execution/observations.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/trace/native_import.py",
+        "scar/ir/v2/codec.py",
+        "scar/ir/execution/composition_query.py"
+      ],
+      "status": "AUTO_PARTIAL"
+    },
+    {
+      "boundary": "Existing source/provider/OS frontiers are not a complete AnalysisScope ledger with obligation ID, subject, required relations, required_expansion and mandatory.",
+      "category": "analysis_scope_coverage_obligation",
+      "original_records": [
+        {
+          "class": "CoverageEntry",
+          "field_names": [
+            "source",
+            "owner",
+            "phase",
+            "ast_kind",
+            "status",
+            "reason"
+          ],
+          "line": 131,
+          "path": "scar/ir/program/inventory.py"
+        },
+        {
+          "class": "BodyInventory",
+          "field_names": [
+            "definition",
+            "status",
+            "graph",
+            "metadata",
+            "reason",
+            "construction_operations"
+          ],
+          "line": 141,
+          "path": "scar/ir/program/inventory.py"
+        }
+      ],
+      "production_or_validation_paths": [
+        "scar/analysis/program_inventory.py",
+        "docs/FIRST_STAGE_MODEL_CONTRACT.md:2.1"
+      ],
+      "status": "DESIGN_ONLY"
+    }
+  ],
+  "formats": [
+    {
+      "codec": "scar/ir/program/codec.py",
+      "max_version": 28,
+      "schema": "scar.program-graph",
+      "selection": "populated capabilities, preserving old profiles"
+    },
+    {
+      "codec": "scar/ir/execution/codec.py",
+      "max_version": 9,
+      "schema": "scar.execution-model",
+      "selection": "populated capabilities; exact single ProgramSnapshot"
+    },
+    {
+      "codec": "scar/ir/v2/codec.py:semantic_from_dict",
+      "schema": "scar.ir.v2.semantic",
+      "versions": [
+        2
+      ]
+    },
+    {
+      "codec": "scar/ir/v2/codec.py:values_from_dict",
+      "schema": "scar.ir.v2.values",
+      "versions": [
+        1,
+        2
+      ]
+    },
+    {
+      "codec": "scar/ir/v2/codec.py:evidence_from_dict",
+      "schema": "scar.ir.v2.evidence",
+      "versions": [
+        3,
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "codec": "scar/ir/v2/codec.py:correspondence_from_dict",
+      "schema": "scar.ir.v2.correspondence",
+      "versions": [
+        1
+      ]
+    },
+    {
+      "codec": "scar/ir/v2/codec.py:bundle_from_dict",
+      "schema": "scar.ir.v2.bundle",
+      "versions": [
+        1,
+        2
+      ]
+    },
+    {
+      "codec": "scar/analysis/program_lowering.py:SourceProgram",
+      "schema": "scar.source-program",
+      "versions": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "codec": "scar/analysis/inventory_partitions.py:InventoryPartitions",
+      "schema": "scar.partitioned-program-inventory",
+      "versions": [
+        1,
+        2
+      ]
+    },
+    {
+      "codec": "scar/store/bundle_partitions.py:BundlePartitions",
+      "schema": "scar.partitioned-ir-bundle",
+      "semantic_reader_revalidation": false,
+      "versions": [
+        1
+      ]
+    },
+    {
+      "authoritative_records": false,
+      "codec": "scar/store/graph_index.py:GraphIndex",
+      "schema": "scar.readonly-program-graph-index",
+      "versions": [
+        1
+      ]
+    },
+    {
+      "codec": "scar/trace/os_resources.py:OSInterfacePartitions",
+      "schema": "scar.partitioned-os-resource-fragment",
+      "versions": [
+        1
+      ]
+    }
+  ],
+  "new_dsl_required": false,
+  "next_task": {
+    "acceptance": [
+      "exact original slot and run/body/artifact binding",
+      "no new canonical IDs or producer/use/state graph",
+      "independent scalar type/content replay",
+      "per-occurrence lineage; no equality-based merging",
+      "public codec/validator roundtrip",
+      "wrong run/body/ordinal/type/output rejected",
+      "Tensor reference/content/alias/ready unknowns retained",
+      "bounded old archive reads; target executions zero",
+      "original mandatory whole-stage OPEN obligations retained"
+    ],
+    "implementation": "Extend the existing bounded native_protocol window with exact builtin boxed scalar content at existing DataValue occurrences.",
+    "reuse": [
+      "DataValue",
+      "ValueOccurrence",
+      "ValueGraph",
+      "ProvenanceRecord",
+      "ValueDenotation",
+      "DataIdentity",
+      "VersionRef"
+    ],
+    "source": "scar/ir/execution/native_port_protocol.py:flat_native retains original path/type/value; native_protocol._build_execution currently skips non-Tensor denotations"
+  },
+  "relations": [
+    {
+      "boundary": "No independently writable database producer table.",
+      "category": "canonical_producer",
+      "original_endpoints": "value.origin <-> Operation.results",
+      "status": "IMPLEMENTED_VALIDATED",
+      "verification_path": "scar/ir/program/validation.py:117"
+    },
+    {
+      "boundary": "Duplicate values retain distinct UseID/ordinal.",
+      "category": "ordered_use",
+      "original_endpoints": "Operation.uses[j] -> Use(value,role)",
+      "status": "IMPLEMENTED_VALIDATED",
+      "verification_path": "scar/store/graph_index.py:ordered_uses"
+    },
+    {
+      "boundary": "Cross-body coarse-world domain/instance correspondence is OPEN.",
+      "category": "state_transition",
+      "original_endpoints": "StateAccess.before/after + StateVersionValue.location",
+      "status": "AUTO_PARTIAL",
+      "verification_path": "scar/ir/program/validation.py:437"
+    },
+    {
+      "boundary": "Source/operand conditional route reports do not by themselves instantiate complete calls.",
+      "category": "actual_formal_return_exception",
+      "original_endpoints": "canonical call ports + CallActivation + UseOccurrence/ControlTransfer",
+      "status": "INTEGRATION_OPEN",
+      "verification_path": "scar/analysis/source_invocations.py:880"
+    },
+    {
+      "boundary": "Identity is not mutable contents/default argument binding.",
+      "category": "object_environment_state",
+      "original_endpoints": "EnvironmentMember.reference/locations + exact actual reference",
+      "status": "AUTO_PARTIAL",
+      "verification_path": "scar/analysis/callable_environment_import.py:300"
+    },
+    {
+      "boundary": "Retained ancestry is not direct Python-to-native callsite.",
+      "category": "source_occurrence",
+      "original_endpoints": "OperationSource / qualified namespace / OccurrenceEvidenceBinding",
+      "status": "AUTO_PARTIAL",
+      "verification_path": "scar/trace/native_protocol.py:_build_execution"
+    },
+    {
+      "boundary": "Tensor reference cannot permanently denote content version; provider tokens are not content endpoints.",
+      "category": "content_version_materialization",
+      "original_endpoints": "ContentRead + VersionRef/MatRef + WriteAssociation/OutcomeProduction",
+      "status": "INTEGRATION_OPEN",
+      "verification_path": "scar/ir/execution/content_validation.py:411"
+    },
+    {
+      "boundary": "Unknown executor/effects stay unknown; old SG selectors do not establish instance realization.",
+      "category": "operation_resource_work",
+      "original_endpoints": "ResourceAccessBinding/ProviderResourceAccess + WorkSubmission",
+      "status": "AUTO_PARTIAL",
+      "verification_path": "scar/trace/os_resources.py:196"
+    },
+    {
+      "boundary": "Host return, language completion and resource completion are distinct.",
+      "category": "ready_order_lifetime",
+      "original_endpoints": "ResourceOutcome/Quiescence + EventRecord/QueueWait + WorkRetention",
+      "status": "INTEGRATION_OPEN",
+      "verification_path": "scar/ir/execution/work.py:152"
+    },
+    {
+      "boundary": "Whole mandatory ledger remains missing; OPEN cannot be removed by changing denominator.",
+      "category": "source_evidence_coverage",
+      "original_endpoints": "ProviderEnvelope/FactReference + source/provider/OS denominators",
+      "status": "INTEGRATION_OPEN",
+      "verification_path": "docs/FIRST_STAGE_MODEL_CONTRACT.md:2.1"
+    }
+  ],
+  "schema": "scar.audit.declarative-model",
+  "schema_version": 1,
+  "verification": {
+    "raw_archive_reads": 0,
+    "scope": "source and field/codec/producer inspection only",
+    "target_executions": 0,
+    "tests_run": 0
+  },
+  "whole_first_stage_status": "OPEN"
+}

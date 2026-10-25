@@ -5,6 +5,11 @@
 [当前状态](FIRST_STAGE_MODEL_STATUS.md)为 OPEN。下表是保留的历史组件分母，
 不能用这些 supplied-model 门的 PASS 代替自动模型验收，也不再据其编号盲目推进。
 
+**2026-10-25 范围澄清：** 本文第3—4节将自动建图放到“后续阶段”的文字仅为旧版
+历史范围，已被当前合同替代，不是执行指令。第一阶段必须完成自动 LeWM 建模及
+所涉软硬件资源接口；当前执行顺序见
+[FIRST_STAGE_EXECUTION_PLAN.md](FIRST_STAGE_EXECUTION_PLAN.md)。
+
 最新F19完整链（2026-10-20）：[限定验收](M1_ASYNC_CLOSE_CHAINS_ACCEPTANCE.md)
 在相同922输入上通过30新项+302直接受影响既有项，两次冻结运行并集332。
 原三完整单位和缺采/预算/release反例贯通，原copy、schema及旧tests/fixtures保持。

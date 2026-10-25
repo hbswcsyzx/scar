@@ -1,8 +1,17 @@
 # 第一阶段交付：自动恢复整个程序及其资源
 
-日期：2026-10-23。状态：**OPEN**。验收标准以
+日期：2026-10-25。状态：**OPEN**。验收标准以
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
+
+**2026-10-25 当前实施：** 用户确认先审定模型和声明格式再完成自动接线。
+[当前执行计划](FIRST_STAGE_EXECUTION_PLAN.md)对应原S1—S5；
+[声明式图规范](DECLARATIVE_GRAPH_STORAGE.md)明确保留原typed IR/codec权威，
+SQLite仅为可重建索引。已有native bridge不再是“完全没有producer”：最终真实
+attempt03已连接13个调用/4接口/27参考，但只覆盖16-prefix，41gaps与内容四表0
+保留，不能当完整native接入。FD namespace临时隔离阻止无证连续性结论，闭包
+producer仍待落实。原始完整源码runtime报告仍属于842快照；843的fresh联合门
+已启动，终态未到，不以启动替代通过。提交与准确实际范围见[当前状态](FIRST_STAGE_MODEL_STATUS.md)。
 
 **最新snapshot边界：** 正式source revision门已通过，active源码图为843/2217，含
 218ops新增图和65ops修订图；旧artifact保留，source/code验证不授完整lifetime。
