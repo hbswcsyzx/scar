@@ -1,0 +1,30 @@
+{
+  "schema": "scar.scope-membership-unpublished-prototype-checkpoint",
+  "schema_version": 1,
+  "status": "SMALL_CHECKS_ONLY_REVISION_REFINEMENT_REQUIRED",
+  "actual_retained_scan_performed": false,
+  "complete_program_model": false,
+  "known_next_fix": "ScopeRevision must include all typed input roots and all four producer source versions; no real ledger is published with this prototype",
+  "sources": [
+    {
+      "path": "scar/ir/modeling_scope.py",
+      "sha256": "26479585901a424775dc3e8ab264ea066d185eef4e3eb76a6c71543a26734df8",
+      "bytes": 16419
+    },
+    {
+      "path": "scar/ir/modeling_scope_codec.py",
+      "sha256": "cd62007442d1565b5960b664e10c93bc11e563216217a393fc9a55e655516a4d",
+      "bytes": 2125
+    },
+    {
+      "path": "scar/store/scope_partitions.py",
+      "sha256": "dca3fa8b0fe9a93fdc0f81762ad7ea89db60c4a41874434c9607ac20f6413b4c",
+      "bytes": 17957
+    },
+    {
+      "path": "scar/analysis/modeling_scope.py",
+      "sha256": "38ed125e81d303abb747c703a090014b8d20bf6bcf8cab8ac4bc6429b70b2cd6",
+      "bytes": 35515
+    }
+  ]
+}
