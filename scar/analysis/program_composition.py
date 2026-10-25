@@ -514,8 +514,9 @@ def compose_source_publication(base_composition, inventory_manifest, out_dir, *,
 
     This is an explicit partition2/composition3 path. It neither changes legacy
     compose_program nor rebuilds source layers or canonical graph producers.
-    Explicit source_texts forwards archived, fingerprint-checked source text
-    to CP2 structure readers; it grants no compiler or runtime evidence.
+    Explicit source_texts supplies an archive pool. Each CP2 structure reader
+    receives only its module's fingerprint-checked text; no runtime evidence
+    is granted by selecting that text.
     """
     import tempfile
     if type(base_composition) is not CompositionIndex or not base_composition.partitioned:
@@ -568,7 +569,13 @@ def compose_source_publication(base_composition, inventory_manifest, out_dir, *,
         if (fi, bi) in actual_changes or fi not in changed:
             raise ValueError("duplicate or out-of-file source body publication")
         actual_changes.add((fi, bi))
-        typed = inventory.partitions.typed_body(fi, bi, source_texts=source_texts)
+        body_source_texts = None
+        if source_texts is not None:
+            source_path = change["snapshot"]["path"]
+            if type(source_texts) is not dict or source_path not in source_texts:
+                raise ValueError("publication source archive lacks the changed module text")
+            body_source_texts = {source_path: source_texts[source_path]}
+        typed = inventory.partitions.typed_body(fi, bi, source_texts=body_source_texts)
         if (typed.language is None or not typed.public_language_structure_validated
                 or typed.body.definition != decode(OperationDefinitionID, change["definition"])
                 or typed.body.metadata.source != decode(SourceSnapshot, change["snapshot"])
