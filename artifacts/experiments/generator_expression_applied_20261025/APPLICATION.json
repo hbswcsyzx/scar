@@ -1,4 +1,5 @@
 {
+  "delivery_commit_role": "later archive of exact frozen producer bytes and retained evidence; not proof that this HEAD ran during capture",
   "effects_close_throw_ready": "OPEN",
   "excluded_isolated_worklist": true,
   "files": [
@@ -66,6 +67,7 @@
   "published_or_runtime_integrated": false,
   "schema": "scar.generator-expression-source-application",
   "schema_version": 1,
+  "source_delivery_commit": "aad9a5346afbd8663197fc96f23cb12740e03430",
   "source_program_version": 5,
   "source_static_bodies": 858,
   "source_tree": "/home/zyf/AAA/scar-worktrees/source-call-model",

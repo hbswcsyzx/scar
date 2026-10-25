@@ -87,6 +87,27 @@ stored仅声明/代码估计。12图后继用1800s ceiling的普通ADD/consumer�
 
 ## 3. 关键缺口与处理原则
 
+2026-10-25后继两门已按同一模型验收并接入main：
+
+- 原生输入metadata的owned归档与普通成员归属：唯一CPU采集target/CLI0，原验收脚本
+  因误读launch字段exit1；同一归档postflight0/1.760928s。2332条/3块、4个成员的
+  `process_for`及归档前后RunID通过。只关闭artifact/actor归属，不升级旧LeWM采集、
+  原生端口、Python对象或内容/state/ready。准确三源码及原失败/新consumer见
+  [归档与成员](NATIVE_TENSOR_INPUTS.md)，main e5343347、隔离存档350b3bc4。
+- GeneratorExp一主体门exit0/21.567357s，312静态操作；创建/lazy B/两个driver/
+  固定解包consumer以原core表达，独立source/CodeWitness及公共SourceProgram5通过。
+  main八文件精确接入后，同一图普通读回exit0/9.830950s，五Region全部保留。
+  原900父调用是权重；尚未发布/运行连接，source858/runtime843不变。默认能力与
+  `eligible_body_keys`保留，close/throw/effects等OPEN；见
+  [创建与驱动](SOURCE_GENERATOR_EXPRESSIONS.md)，main792b1228、隔离存档aad9a534。
+
+下一批源码只准备把三张已验收图（两string148/131、generator312）一次ADD/consume；
+禁止再lower或按body重扫runtime。自动入口P0则先接`--from-capture`的metadata规划及
+合法fresh monolithic链，原返回检查点handoff和partitioned frontend/schema接线仍是
+明确阻断。引用型workflow root不取代规范图、不以存在根报告计完整。
+准确接口、预算与分步验收见
+[自动入口设计](../artifacts/analysis/model_run_orchestration_design_20261025/PLAN.md)。
+
 - Python 源构造、函数环境、actual/formal、return、generator creation/drive：
   按实际失败类型补通用前端及协议接线，保持定义与动态发生独立。
 - 逻辑值及物化：区分引用、内容版本、来源、view 和物理副本；不依赖裸地址、

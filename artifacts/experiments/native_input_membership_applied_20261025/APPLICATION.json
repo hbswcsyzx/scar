@@ -1,4 +1,5 @@
 {
+  "delivery_commit_role": "later archive of exact frozen producer bytes and retained evidence; not proof that this HEAD ran during capture",
   "files": [
     {
       "after_bytes": 20661,
@@ -34,6 +35,7 @@
   "producer_freeze_sha256": "e5ddd0dafcfba3f2f0849f953cf6ed1cba8b496f10c329d2b3c8425361f73af9",
   "schema": "scar.native-input-membership-source-application",
   "schema_version": 1,
+  "source_delivery_commit": "350b3bc44094e35e4f525532c3d30a602c9c6fad",
   "source_static_bodies": 858,
   "source_tree": "/home/zyf/AAA/scar-worktrees/native-scalar-model",
   "status": "EXACT_FROZEN_THREE_FILES_APPLIED",
