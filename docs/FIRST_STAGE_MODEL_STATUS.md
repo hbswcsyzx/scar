@@ -6,6 +6,26 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：覆盖账本完整source/call归属门已通过，整体仍OPEN
+
+公共v2 producer已完整读取保留的2217个源码定义和100438条调用，生成102655个成员、
+102661项必需义务（另六项为未枚举领域的集合欠账）。实际exit0，worker wall694.39s、
+SELF peak114576KiB；637个压缩块stored126695719B、manifest声明decoded4268542417B。
+这是计入重复来源/规则字段后的真实成本，不据压缩比宣称查询或建模高效。
+
+独立审查核全部637个stored chunk及准确根SHA；十个原公共查询、LOWERED和UNSUPPORTED
+各一个原源码样本通过。未重解全量4.27GB或验证每行依赖，不能将样本说成全语义验证。
+record/transport2、六输入根和四producer源码绑定ScopeRevision。全部依赖、内部展开、
+运行语义仍OPEN；源码构造、dispatch/native、OS、physical等六域继续单列未访欠账。
+见[实际门](../artifacts/experiments/modeling_scope_retained_gate_20261025/RESULT.md)和
+[独立审查](../artifacts/experiments/modeling_scope_retained_review_20261025/REPORT.md)。
+
+原生全量门首次实际失败于第3182次调用：有原生Tensor端口却无Python held Tensor
+见证；不能把两种身份强行绑定或伪造对象。V2将端口/对象/几何/内容四项资格分开，
+保留准确原始位置和未证身份；第二次完整门在277项冻结输入核过后启动，终态另报。
+未运行新LeWM episode、变换、backend或性能A/B。接下来仍补原图之间的实际连接，
+不能以这份覆盖账本替代完整ProgramModel。
+
 ### 2026-10-25：843快照与完整保留运行的fresh统一接线通过
 
 `first_stage_source_revision_current_20261025` 已实际exit0，GNU wall24:18.35、

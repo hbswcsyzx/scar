@@ -1,10 +1,20 @@
 # AnalysisScope / CoverageObligation 最小公共账本方案
 
-2026-10-25。**Proposed，尚未实施、生成或验收真实账本。** 服从
+2026-10-25。**最小 v2 已实施，retained source/call membership 门实际 exit0；整体 OPEN。** 服从
 [第一阶段合同](FIRST_STAGE_MODEL_CONTRACT.md) §2.1；补充
 [声明模型审计](DECLARATIVE_MODEL_AUDIT.md)，不修改已冻结审计。
 后继接线主线是原完整运行的全部 dispatch，当前报告分母为 39,796；scalar 内容只是其中一项，
-不再以反复 16-prefix 子门代替全范围接入。本方案不执行目标、不读 raw、不改变生产 schema。
+不再以反复 16-prefix 子门代替全范围接入。本方案不执行目标、不读 raw、不改变原图 schema。
+本次真实门只完整枚举已保留的 2217 个 source 定义和 100438 次 source invocation，合计
+102655 个原成员，另有六个 mandatory 集合欠账，共 102661 条义务；没有完成全部依赖建模，
+也不是新 LeWM episode。实际[结果与限制](../artifacts/experiments/modeling_scope_retained_gate_20261025/RESULT.md)
+记录 637 块、stored 126695719B / decoded 4268542417B、worker 694.3875720299839s、
+SELF/GNU-time peak RSS 均 114576KiB。逐义务重复 locator/规则/证据/四轴编码的成本明显，
+不称高效；十个只读查询样本各定位一个 index chunk 和一个 data chunk，不是查询延迟基准。
+
+下文保留全合同目标与后继 adapter 设计；尚未实现的 qualified-entity 细化、全部域逐成员
+producer、语义 accepted-scope 复用、revision delta 与总体验收 API 均不能算本次已完成。
+实际公共 API 和严格支持范围以[实现说明](MODELING_SCOPE_MEMBERSHIP_IMPLEMENTATION.md)为准。
 
 ## 1. 目的与必须保持的权威
 
@@ -13,9 +23,11 @@ ProgramGraph、ExecutionModel、ValueGraph、EvidenceGraph 仍分别声明原事
 Operation/producer/Use/state/resource，也不补出原图中不存在的边。
 账本发布成功、记录结构合法、证据复核通过、完整建模通过必须分别报告。
 
-目前没有满足合同的统一 typed AnalysisScope/CoverageObligation 实现。现有 CoverageEntry、
-provider coverage、OS classifications、source frontiers 与 `whole_program=False` 是输入，
-不能作为已经存在统一账本的理由。新账本也不能仅保存这些全 False 汇总而不生成实际 obligation。
+方案制定前不存在合同字段齐备的统一 typed AnalysisScope/CoverageObligation；现已新增最小
+公共类型、strict codec、固定 source/call producer 和有界发布/只读查询。现有 CoverageEntry、
+provider coverage、OS classifications、source frontiers 与 `whole_program=False` 仍只是输入，
+不能作为满足覆盖义务的证据。本次 102655 个准确原成员各有实际 obligation；其他六域是
+准确 collection-level debt，未被一张全 False 汇总或空 manifest 替代。
 
 公共类型/API 草案和机器可读记录规格见
 [方案目录](../artifacts/analysis/modeling_scope_ledger_plan_20261025/README.md)。
@@ -23,13 +35,15 @@ provider coverage、OS classifications、source frontiers 与 `whole_program=Fal
 
 ## 2. 最小公共记录
 
-建议新增 `scar/ir/modeling_scope.py` 与独立 strict codec（**本轮不创建**）。顶层 schema
-拟为 `scar.modeling-scope-ledger`1；记录通过 `record_codec` 的显式 union tags 编码。
+已新增 `scar/ir/modeling_scope.py`、`modeling_scope_codec.py`、`scar/analysis/modeling_scope.py`
+及 `scar/store/scope_partitions.py`。实际 record 为 `scar.modeling-scope-record`2、transport 为
+`scar.partitioned-modeling-scope-ledger`2、policy 为 SOURCE_CALL_MEMBERSHIP_V2；v1 prototype
+被明确拒绝并保留历史，不静默迁移。原始方案目录仍是设计规格，以下记录表含后继未实现项。
 不改变 ProgramGraph28、ExecutionModel9 或 v2 图 codec；不把账本塞进任意 metadata。
 
 | 记录 | 必需字段 | 责任 |
 | --- | --- | --- |
-| `AnalysisScope` | `id,revision,parent,contract,policy,source,run,fields,observability,denominators` | 将验收绑定准确运行/入口、原输入与固定规则；字段缺证据仍可建立 OPEN scope。 |
+| `AnalysisScope` | `id,revision,parent,contract,policy,source,run,fields,observability,denominators,policy_sources` | 将验收绑定准确运行/入口、原输入与固定规则；字段缺证据仍可建立 OPEN scope。 |
 | `CoverageObligation` | **`id,source,subject,required_relations,required_expansion,mandatory`**，另有 `scope_revision,rule_key` | 原合同要求的稳定验收项；不存结论。source 同时引用规则原位置与独立发现该 subject 的原位置。 |
 | `DenominatorInventory` | `id,domain,collection,source,declared_count,enumerated_count,membership_sha256,enumeration,observation_coverage,cursor,gaps` | 独立保存范围与逐成员账；枚举完归档不意味着观察无丢失。 |
 | `DenominatorMember` | `denominator,subject,obligations,source` | 每个真实原成员到适用 obligation 的验收索引；跨域去重 obligation 不丢原独立 membership。 |
@@ -44,12 +58,14 @@ typed 子记录。`LedgerVerification` 是重新计算的查询返回值，不�
 稳定身份规则：
 
 - `ScopeID = sha256(profile, 原 Run 的限定引用, 原 command receipt 的身份及 command locator)`。
-  归档重定位/压缩不改原 Run；不得用当前 PID、时间或分析机器 cwd 生成 scope 身份。
+  原 logical URI/namespace 属于身份，不能靠相同 SHA 猜两份 artifact 同源；当前无 retention
+  relocation 映射，不承诺搬家后自动同身份。不得用当前 PID、时间或分析机器 cwd 生成 scope 身份。
 - `ScopeRevision = sha256(除 revision 自身外的规范 AnalysisScope 字节)`。原政策、源快照、
   输入身份、观察能力或分母变更形成新 revision，parent 与 delta 必须保留。
 - `ObligationID = sha256(ScopeID, 原 subject 的规范限定键, rule_key)`，不含评估结论、
   新鲜时间、数组序号、mandatory 或展开级别。后两者变化因此必须显式出现在 revision delta。
-  `rule_key` 是版本化规则中的稳定条款键；规则实现 SHA 放在 scope.policy，不用 status 命名条款。
+  `rule_key` 是版本化规则中的稳定条款键；四个必要源码的 URI/SHA/size 放在显式
+  scope.policy_sources，初始化冻结并在发布终检，不用程序 CODE_VERSIONS 或 status 替代。
 - 原 source/body 被显式 revision 替换时，原 subject 不再相同，新 obligation 保留旧项的
   supersession 记录。不能将旧 842 的实际调用关联迁移成新 843 的动态证明。
 - Ledger ID 是验收记录身份，不改任何原图 ID。不同独立分母可以指同一原 subject；
@@ -159,7 +175,7 @@ producer、Run/范围、已审 requirement 和遗留条件后可复用已验收�
 
 | domain | 机械枚举入口 | 必须保留 |
 | --- | --- | --- |
-| `SOURCE_DEFINITIONS` | `InventoryPartitions.file(fi)['definitions']` 的所有 source shards；使用 snapshot/context 和准确 `#/file/definitions/j`，有原 SourceDefinitionReference 时复用 | 全定义、无 graph 的定义、UNSUPPORTED、NOT_ATTEMPTED、未执行路径。当前公开报告 151 文件/2217 body 定义只是核对期望，producer 从原数组数数，不硬编码。 |
+| `SOURCE_DEFINITIONS` | `InventoryPartitions.file(fi)['definitions']` 的所有 source shards；使用 snapshot/context 和准确 `#/file/definitions/j`，有原 SourceDefinitionReference 时复用 | 全定义、无 graph 的定义、UNSUPPORTED、NOT_ATTEMPTED、未执行路径。当前公开报告 151 文件/2217 定义（header.summary.definitions）只是核对期望，不能混作 lowered body/graph 数；producer 从原数组数数，不硬编码。 |
 | `SOURCE_CONSTRUCTS` | 同一 shard 的 `coverage/calls/implicit_invocations`；规则按 phase/AST construct 保留 | 定义时求值、模块/类、隐式调用、非执行注释空白的来源角色，不把空白变执行节点。 |
 | `OBSERVED_PYTHON_CALLS` | 完整 source-invocations 的原 `invocations.jsonl.gz`（另保 orphan exits），每行 exact original InvocationKey/anchor | 当前报告 100438 调用全保留；body-linked、source-only、unresolved 都在，旧 842 关联不能成为新 843 动态证明。 |
 | `DISPATCH_ATTEMPTS` | 原 dispatch metadata 的 attempts 与 bridge 的完整 group 分母；关联完整 dispatch inventory，见下文 schema 缺口 | 当前 39796 不能缩到 16、可解析 schema 或有正常输出的子集。BEGIN/OUTPUT/END 缺段、失败、无 marker、未知 operator 都入账。 |
@@ -195,9 +211,18 @@ producer、Run/范围、已审 requirement 和遗留条件后可复用已验收�
   dispatch import report 时才需 schema2/capability，旧 schema1 reader 保原语义。
   不能从现有 summary 反造完整 entries，或单独重读一个小 prefix 冒充。
 
-## 7. 现在可以立即实施的最小切口
+## 7. 已完成的最小切口与后继接线
 
-第一项实现为**基于现有完整派生分片的义务 producer 与查询**，不恢复新事实、不重跑 raw：
+本次已完成 source/call 原成员 producer 与查询；SOURCE_DEFINITIONS 为 2217/2217、
+OBSERVED_PYTHON_CALLS 为 100438/100438 ENUMERATED。其它六域 declared/enumerated 分别为
+SOURCE_CONSTRUCTS 122323/0、DISPATCH_ATTEMPTS 39796/0、NATIVE_ACTIVITIES 461242/0、
+OS_INTERFACES 1067768/0、OS_RESOURCES 38307/0、PHYSICAL_OBJECTS_AND_RESOURCES
+225630/0，均为 DECLARED 并保未访 cursor/debt。OS 38307 是 resource/handle/lifetime/process/
+thread 表项之和，不能称所有真实 OS 资源的数量。八域 observation_coverage 仍为 UNKNOWN；
+native provider 同 Run 资格未在此 ledger policy 审查，原 CATALOG_RUN_BINDING_UNREVIEWED 保留。
+四轴只实核 102655 项 ORIGINAL_RECORD_MEMBERSHIP；依赖、内部展开、运行语义仍 OPEN。
+
+后继全范围工作仍按以下顺序推进，不恢复新事实、不重跑 raw；第2项的其它域遍历尚未实施：
 
 1. 输入准确当前 843 source inventory/composition、同 Run 的 capture coordinates、已存完整
    source-invocation/dispatch bridge/native bundle/OS fragment receipts 与固定合同/规则版本。
@@ -220,7 +245,11 @@ container 都可定位到具体 obligation/原 collection 债。完整遍历与�
 
 ## 8. 精确公共 API 与复核顺序
 
-拟定 API（签名在方案目录 `.pyi`）：
+下列为后继目标 API（签名在原方案目录 `.pyi`），不是本次全部已实现的接口。当前可调用
+`InputResolver.plan_scope/rows`、`produce_scope_ledger`、`publish_scope_ledger` 与
+`ScopePartitions.query(id,scope_revision=...)`；固定 typed InputCatalog 不接收任意 callback。
+语义评估、通用 qualified endpoint adapter 与 revision delta 尚无本次真实验收。
+
 
 ```python
 plan_scope(inputs, policy, resolver, budgets) -> AnalysisScope
@@ -270,12 +299,15 @@ unknown=0 但 missing_count>0、必需 domain 不存在、未枚举/未生成 ob
 
 | 修改 | 原因及兼容边界 |
 | --- | --- |
-| 新 `modeling-scope-ledger`1 公共类型/codec/producer/query | 现有图没有合同字段齐备的验收记录；这是非执行 ledger 新 schema，不是迁移/替换原 IR。 |
+| 已新增 v2 公共类型/codec/source-call producer/query | record 为 scar.modeling-scope-record2，transport 为 scar.partitioned-modeling-scope-ledger2；只验收原记录成员，语义及其它域未完成。非执行 ledger 不迁移/替换原 IR。 |
 | 完整 dispatch inventory 的显式发布 | 原 compact bridge 不保存所有 group/END/operator；新 `native-capture-batch` artifact 可独立发布完整库存及原来源/计数，直接被 ledger 消费。只有改旧 strict report 时才需其 schema2/capability，不强制迁移旧 bridge。 |
 | 下一次联合采集的 run/launch scope receipt 版本 | 当前收据缺 cwd、完整 code/env/input identity；需在 owned launch/capture 时保存实际来源。旧档不能用分析机值补写；没有证据则 OPEN。 |
-| 新 ledger bounded transport（或复用已有公共 chunk工具） | 只保存 obligation/assessment/reference；现有 BundlePartitions 只接受 SG/EEG/Value/Correspondence，不能静默往其 TABLES 加 ledger。可抽公共 chunk helper 后让独立 ledger transport使用，原 bundle schema保持。 |
+| 已新增独立 ledger bounded transport | data/index chunk 同时限制 stored/decoded 8MB 及1000行，只保存 obligation/assessment/reference；原 BundlePartitions TABLES 与 bundle schema保持。637块/4.27GB decoded 的实测重复编码成本须后续改进，不能以压缩后大小掩盖。 |
 | 不需改 ProgramGraph/ExecutionModel/v2 身份或 SQLite权威 | 原事实表达与端点已经存在；缺 producer/关联时沿各自原 schema正式补事实，ledger不产生替代边。 |
 
-真实实施前 root 只需审定本字段集、固定初版 rule table、scope/revision 身份规则与上述
-完整库存独立发布/旧报告 schema2 的兼容边界。此后直接实现 producer 与现档逐成员查询；不另开长期数据库/DSL工程，
-也不把账本设计完成当作 S2/S3/S4 完成。
+root 已审核 v2 字段/身份规则、准确 catalog/freeze 与预算并完成一次真实 retained source/call 门。
+后继最小接线仍是显式发布的完整 dispatch inventory：接准实际 native-capture-batch schema、
+原 Run/计数/端点收据并逐成员生成义务；未发布前不得猜字段或缩到 prefix/scalar 子集。语义轴
+只有准确 accepted-scope 资格审核后才可更新；PUBLISHED_MEMBERSHIP_ONLY/aggregate OPEN
+不作 S2/S3/S4 或全程序完成声明。独立 source_revision_current 复核结论由其自身报告负责，
+本账本结果不预先冒用；不另开长期数据库/DSL工程。

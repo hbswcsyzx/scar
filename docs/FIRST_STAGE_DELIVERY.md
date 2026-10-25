@@ -4,6 +4,21 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
+**当前可复核结果（2026-10-25）：** 新843源码快照已接回原完整运行；新增覆盖账本
+也已实际终态exit0，完整枚举2217个源码定义及100438次调用。账本发布的是原记录归属
+和具体待办，不是依赖已闭合的统一图：其聚合状态仍为OPEN。637个压缩块共
+126695719字节，manifest声明decoded4268542417字节；重复定位/规则字段使编码开销较大，
+本轮不称其高效。独立复核全部stored receipts及12个公共查询样本通过，没有重解全账本
+或证明所有行的语义。实际报告分别见
+[账本门](../artifacts/experiments/modeling_scope_retained_gate_20261025/RESULT.md)及
+[独立复核](../artifacts/experiments/modeling_scope_retained_review_20261025/REPORT.md)。
+
+全dispatch首次实档门在第3182次调用发现了原先假设的缺口：原生Tensor端口可能没有
+Python held Tensor见证，不能强迫两者一一对应。失败和原数据保持；V2已把原生端口、
+Python对象身份、存储几何、内容/状态/ready资格分开。第二次完整门已由root核277个
+冻结输入并启动；**此句仅记录启动，结果另行验收，不能当作PASS。** 源码/原生片段间
+的对象、状态、控制及资源连接仍须完成；不开始化简、优化审批或性能A/B。
+
 **2026-10-25 当前实施：** 用户确认先审定模型和声明格式再完成自动接线。
 [当前执行计划](FIRST_STAGE_EXECUTION_PLAN.md)对应原S1—S5；
 [声明式图规范](DECLARATIVE_GRAPH_STORAGE.md)明确保留原typed IR/codec权威，
@@ -84,10 +99,10 @@ Region 可以递归展开。定义、实际发生及外部 provider 图不强行
 | 联合运行坐标及资源导入 | 5 进程、252 线程；24,082 条 runtime→GPU 对应；74,574 条内存记录 | 未恢复的 OS 共享/继承、ready 与使用者仍 OPEN |
 | 原档逐槽审核 | 79,592 个 marker、109,288 个 Tensor 引用槽均保留 | 保留 480 个祖先缺失、383 个未资格化叶，不能计作直接 Python→ATen 调用 |
 | 版本匹配 ATen schema 适配 | 100 schemas、481 形式端口，467,756 个 Tensor 槽接形式端口 | 175,022 个无 schema；effects 均 PARTIAL；不证明纯性或逻辑内容相等 |
-| 分片源码图组合与当前调用绑定 | 当前369749正式两body接线gate exit0；100,438调用中6,674 body-linked、88,800 source-only、4,964 unresolved | 76 body groups、591 source-only、150 unresolved；242外部groups/86,688calls只接原定义；不复用旧Invocation，不是完整ProgramSnapshot |
+| 分片源码图组合与当前调用绑定 | 当前843快照fresh gate exit0；100,438调用中6,699 body-linked、88,775 source-only、4,964 unresolved | 77 body groups、590 source-only、150 unresolved；不复用旧Invocation，不是完整ProgramSnapshot |
 | 分片源码与marker连接 | 79,592 markers/109,288原slot全部保留；79,106条有准确source definition，20,592条body/activation/namespace关联 | 58,514条retained source-linked，6条仅invocation、480条无ancestor；retained ancestor不是direct call；状态/效果仍未闭合 |
-| 原参数、返回及环境路由接回 | 817groups/100,438调用、312,812operand与16,403env events守恒；17,022入口参数occurrences、27actual/formal与27completion条件路由、6,223返回root；3,347entry的10,087env ports | 全部只是带原条件的引用/端口连接；100,523条route问题、6,694未定defaults保留；不证明内容、状态、world等价 |
-| 更大范围源码归档 | 正式revision后151文件/2217定义，843 active图、784 UNSUPPORTED、590 NOT_ATTEMPTED；65ops旧图被准确修订、218ops新图准入 | 原256MB单JSON失败/旧artifact保留；新图已核source/code/局部tuple失败持有，未授全部normal/outer lifetime；843尚待统一runtime连接 |
+| 原参数、返回及环境路由接回 | 当前843门保留817groups/100,438调用、312,812operand与16,403env events；17,097入口参数occurrences、27actual/formal与27completion条件路由、6,223返回root；3,372entry的10,162env ports | 全部只是带原条件的引用/端口连接；100,523条route问题、6,744未定defaults保留；不证明内容、状态、world等价 |
+| 更大范围源码归档 | 正式revision后151文件/2217定义，843 active图、784 UNSUPPORTED、590 NOT_ATTEMPTED；65ops旧图被准确修订、218ops新图准入 | 原256MB单JSON失败/旧artifact保留；843已统一runtime接线，但source-only、源码语法、normal/outer lifetime等缺口仍在 |
 | 历史依赖源码准入与当前静态复用 | 原106文件/243groups准入保留；当前要求的105图各读一次，242groups/86,688calls接同版本static witness | 不把旧tool code或14旧calls移植当前；源码、body、effect为不同证明 |
 | 原source/body缺口按实际调用投影 | 原817groups/100,438calls逐项守恒；74body-linked、91source-only UNSUPPORTED、260source-only NOT_ATTEMPTED | 只是已保存metadata投影；不是canonical graph重验或新语言协议支持 |
 | 同次Tensor物理证据采集与导入 | 新完整LeWM episode成功；79,592 markers、109,288槽，108,682槽接物理epoch | 606槽为带provider ID但无storage pointer的空CPU Tensor；逻辑内容/ready与空表示接口仍OPEN |

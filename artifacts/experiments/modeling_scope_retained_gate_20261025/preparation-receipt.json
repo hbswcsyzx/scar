@@ -1,0 +1,70 @@
+{
+  "catalog_sha256": "2a5aeebe10efd4dc2bf5831d41c94252e0ac34e3cc52af92f2398d6ccbd929be",
+  "files": [
+    {
+      "bytes": 3164,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/README.md",
+      "sha256": "d300355ba530496ce830db8458fb229c60f75baa92ce33952379ceda33dbf6ee"
+    },
+    {
+      "bytes": 2160,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/catalog.json",
+      "sha256": "2a5aeebe10efd4dc2bf5831d41c94252e0ac34e3cc52af92f2398d6ccbd929be"
+    },
+    {
+      "bytes": 3198,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/check_invocation_descriptor.py",
+      "sha256": "e9c8afd7d6624f66bab7d8354968959677e67c7f75a721150def3bc0a2d0731a"
+    },
+    {
+      "bytes": 1022,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/descriptor-final-check-04.json",
+      "sha256": "9a4f195382bd7f506e0fe9bd0c2f845f8645bff493fdec35824c4815f5e1337f"
+    },
+    {
+      "bytes": 27080,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/freeze.json",
+      "sha256": "09949422bdf67dae6f4d9f24772a8af4b80e6745171187fec0798c72c1eb87d3"
+    },
+    {
+      "bytes": 7752,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/metadata-preflight.json",
+      "sha256": "773b36533921cf480cf9dd7d98be33124a73a72e6d6be908c12e6296499c6c94"
+    },
+    {
+      "bytes": 1088,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/preparation-check.json",
+      "sha256": "23bf39ff22986f9bcdca7347cb3caa9a69d58d90b5fd0f11f1360d32fb99b6a6"
+    },
+    {
+      "bytes": 11173,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/prepare_gate.py",
+      "sha256": "e177074d575d9910a2574d6ee4db5b4a5185daaaee26c4a90219d5e48f46569c"
+    },
+    {
+      "bytes": 11017,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/run_gate.py",
+      "sha256": "be4fb8636717f5892f8f859295865392ecc5f33ecf82b944ebdb4736b7c83ad0"
+    }
+  ],
+  "fixed_attempt_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/attempt01",
+  "fixed_ledger_manifest": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/attempt01/ledger/manifest.json",
+  "fixed_report": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/modeling_scope_retained_gate_20261025/attempt01/result.json",
+  "freeze_sha256": "09949422bdf67dae6f4d9f24772a8af4b80e6745171187fec0798c72c1eb87d3",
+  "input_body_reads": {
+    "invocation_rows": 0,
+    "native_chunks": 0,
+    "os_chunks": 0,
+    "raw_capture": 0,
+    "source_shards": 0
+  },
+  "main_production_writes": 0,
+  "old_receipts_overwritten": false,
+  "real_gate_executions": 0,
+  "root_owns_execution_session": true,
+  "schema": "scar.scope-retained-gate-preparation-receipt",
+  "schema_version": 1,
+  "scope_id": "scope:9c1d2930438fce3027c2f22266a4e42e0b4c207b05b546b68a7bfc2aa8a504bd",
+  "scope_revision": "scope_revision:1ae1c9387ba076a51170c9a60e0a0e5c63ef611c8e5fcc3320d6b0f6a3c03e73",
+  "status": "FROZEN_NOT_RUN"
+}
