@@ -450,5 +450,45 @@ class BundlePartitions:
                         "record_semantics_revalidated": False, "whole_bundle_revalidated": False}}
             _require(stream.read(1) == b"", "unexpected extra data after declared chunk rows")
 
+    def selected_records(self, graph, table, ordinals):
+        """Read selected original rows, checking each whole containing chunk.
+
+        Ordinals are navigation hints, never record identity/semantic proof.
+        The returned original locator and storage verification keep the same
+        meaning as iter_records; this method creates no graph or producer.
+        """
+        _require(graph in TABLES and table in TABLES[graph]
+                 and type(ordinals) is tuple and all(type(n) is int and n >= 0 for n in ordinals)
+                 and len(set(ordinals)) == len(ordinals), "invalid selected bundle coordinates")
+        descriptor = self.manifest["graphs"][graph]
+        _require(descriptor is not None and all(n < descriptor["tables"][table]["records"] for n in ordinals),
+                 "selected ordinal is outside the original table")
+        wanted, result = set(ordinals), {}
+        for chunk in descriptor["tables"][table]["chunks"]:
+            selected = {n for n in wanted if chunk["first_ordinal"] <= n <= chunk["last_ordinal"]}
+            if not selected:
+                continue
+            decoded = self._chunk(chunk)
+            stream = io.BytesIO(decoded)
+            for local_line in range(chunk["lines"]):
+                line = stream.readline(self.limits.max_record_bytes + 1)
+                _require(len(line) <= self.limits.max_record_bytes and line.endswith(b"\n"),
+                         "record line exceeds its independent reader budget")
+                ordinal = chunk["first_ordinal"] + local_line
+                if ordinal not in selected:
+                    continue
+                row = strict_loads(line.decode("utf-8"))
+                _require(type(row) is dict and set(row) == {"ordinal", "record"}
+                         and type(row["ordinal"]) is int and row["ordinal"] == ordinal,
+                         "selected record envelope/ordinal mismatch")
+                result[ordinal] = {**row, "locator": {"artifact": dict(chunk), "line": local_line + 1,
+                    "pointer_within_line": "/record", "manifest_receipt": dict(self.manifest_receipt)},
+                    "verification": {"whole_chunk_stored_sha_verified": True,
+                        "whole_chunk_decoded_sha_verified": True, "current_row_ordinal_verified": True,
+                        "record_semantics_revalidated": False, "whole_bundle_revalidated": False}}
+            _require(stream.read(1) == b"", "unexpected extra data after declared chunk rows")
+        _require(set(result) == wanted, "selected source record is missing")
+        return tuple(result[n] for n in ordinals)
+
 
 __all__ = ["BundleBudgets", "BundlePartitions", "publish_bundle", "SCHEMA", "VERSION", "TABLES"]

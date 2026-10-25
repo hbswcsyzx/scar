@@ -232,8 +232,15 @@ def resolve_basis(ctx, basis, path, *, identity=None, placement=None, operation=
         if resolved is not None and expected_value is not None and resolved['value'] is not None:
             if resolved['value'].id != expected_value:
                 ctx.issue('content_native_actual', path, 'native slot selects another actual value incarnation')
-        ctx.gap('content_native_correspondence_unverified', path,
-                'native slot association does not prove physical work/input or content correspondence')
+        evidence = ctx.native_port_evidence
+        reference_matched = (evidence is not None
+            and evidence.resolve(ctx, basis, resolved, identity, path))
+        if not reference_matched:
+            ctx.gap('content_native_correspondence_unverified', path,
+                    'native slot association does not prove physical work/input or content correspondence')
+        else:
+            ctx.gap('native_reference_content_unproved', path,
+                    'held reference correspondence does not prove contents, complete state/alias effects or readiness')
         return resolved
     graph = _evidence(ctx, basis.artifact, path)
     if graph is None:

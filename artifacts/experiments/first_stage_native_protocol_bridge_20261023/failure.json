@@ -1,0 +1,3364 @@
+{
+  "actual_io": [
+    {
+      "bytes": 145854,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/archive-index.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 145854,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/archive-index.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 756548,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369747.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 112038,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369747.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 163156342,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369749.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 25704672,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369749.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369808.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369808.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369809.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369809.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369810.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369810.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369811.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369811.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369812.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369812.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369813.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369813.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369814.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369814.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369815.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369815.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369816.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369816.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369817.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369817.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369818.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369818.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369819.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369819.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369820.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369820.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369821.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369821.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369822.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369822.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369823.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369823.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369824.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369824.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369825.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369825.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369826.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369826.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369827.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369827.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369828.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369828.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369829.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369829.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369830.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369830.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369831.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369831.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369832.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369832.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369833.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369833.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369834.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369834.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369835.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369835.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369836.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369836.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369837.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369837.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369838.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369838.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369839.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369839.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369840.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369840.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369841.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369841.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369842.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369842.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369843.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369843.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369844.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369844.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369845.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369845.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369846.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369846.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369847.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369847.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369848.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369848.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369849.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369849.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369850.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369850.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369851.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369851.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369852.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369852.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369853.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369853.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369854.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369854.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369855.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369855.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369856.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369856.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369857.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369857.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369858.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369858.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369859.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369859.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369860.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369860.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369861.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369861.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369862.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369862.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 12794,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369869.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 4410,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369869.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 1608,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369910.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 1002,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369910.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 988,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369974.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 798,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369974.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 22422,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369975.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 4533,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369975.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 1498,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369976.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 1044,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369976.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 1042,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369978.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 729,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369978.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 772,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369987.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 693,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.369987.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 31896,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370085.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 7122,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370085.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370090.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 696,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370090.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370091.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 708,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370091.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370092.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370092.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370093.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370093.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370094.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370094.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370095.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370095.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370096.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370096.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370097.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370097.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370098.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370098.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370099.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370099.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370100.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370100.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370101.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370101.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370102.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370102.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370103.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370103.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370104.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370104.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370105.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370105.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370106.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 708,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370106.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370107.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370107.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370108.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370108.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370109.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370109.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370110.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370110.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370111.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370111.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370112.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370112.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370113.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370113.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370114.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370114.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370115.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370115.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370116.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370116.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370117.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370117.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370118.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370118.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370119.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370119.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370120.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 711,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370120.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370121.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370121.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370122.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370122.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370123.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370123.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370124.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370124.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370125.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 708,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370125.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370126.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 711,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370126.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370127.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 708,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370127.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370128.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370128.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370129.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370129.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370130.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 711,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370130.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370131.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 711,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370131.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370132.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370132.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370133.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370133.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370134.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 708,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370134.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370135.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370135.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370136.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370136.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370137.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 702,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370137.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370138.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370138.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370139.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370139.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370140.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 708,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370140.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370141.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 708,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370141.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370142.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370142.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370143.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 708,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370143.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 686,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370144.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 705,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370144.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370153.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370153.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370154.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370154.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370155.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370155.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370156.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 357,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370156.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370157.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370157.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370158.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370158.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370159.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370159.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370160.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370160.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370161.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370161.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370162.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370162.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370163.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370163.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370164.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370164.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370165.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370165.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370166.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370166.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370167.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370167.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370168.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 360,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370168.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370169.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370169.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370170.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370170.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370171.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 360,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370171.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370172.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370172.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370173.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370173.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370174.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370174.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370175.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370175.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370176.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370176.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370177.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370177.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370178.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370178.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370179.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370179.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370180.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370180.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370181.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370181.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370182.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370182.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370183.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370183.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370184.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370184.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370185.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370185.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370186.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370186.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370187.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370187.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370188.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370188.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370189.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370189.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370190.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370190.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370191.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370191.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370192.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370192.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370194.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370194.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370195.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370195.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370196.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370196.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370197.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370197.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370198.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370198.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370199.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370199.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370200.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370200.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370201.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370201.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370202.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370202.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370203.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370203.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370204.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370204.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370205.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370205.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370206.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370206.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370207.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370207.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370208.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 369,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.370208.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 878,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371397.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 852,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371397.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371398.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 585,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371398.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 664,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371399.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 639,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371399.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371400.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 579,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371400.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371401.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 516,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371401.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371402.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 504,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371402.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371403.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 585,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371403.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371404.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 588,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371404.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371405.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 591,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371405.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371406.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 582,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371406.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371407.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 585,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371407.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371408.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 588,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371408.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371409.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 591,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371409.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371410.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 588,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371410.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371411.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 588,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371411.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371412.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 582,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371412.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 534,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371413.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 582,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371413.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371414.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 519,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371414.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371415.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 519,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371415.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371416.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 525,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371416.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371417.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 522,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371417.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371418.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 519,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371418.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371419.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 525,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371419.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371420.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 519,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371420.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371421.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 519,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371421.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371422.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 522,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371422.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 420,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371423.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 498,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371423.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 432,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371581.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 357,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371581.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 16368846,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371582.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 921723,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371582.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 954860,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371585.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 103182,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.371585.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 11290,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372873.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 3699,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372873.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 33392,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372874.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 10329,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372874.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 350,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372875.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 516,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372875.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 13252,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372876.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 2784,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372876.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 182876,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372877.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 29055,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372877.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 860,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372878.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 750,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372878.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 43062,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372879.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 9522,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372879.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372880.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372880.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372881.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372881.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372882.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372882.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372883.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372883.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372884.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 360,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372884.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372885.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372885.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372886.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372886.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372887.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372887.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372888.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372888.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372889.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372889.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372890.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372890.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372891.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372891.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372892.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372892.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372893.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372893.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372894.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 360,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372894.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372895.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372895.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372896.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372896.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372897.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372897.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372898.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372898.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372899.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372899.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372900.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372900.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372901.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372901.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372902.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372902.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372903.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372903.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372904.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 360,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372904.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372905.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 360,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372905.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372906.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372906.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372907.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372907.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372908.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372908.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372909.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372909.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372910.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372910.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372911.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372911.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372912.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 366,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372912.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372913.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372913.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372914.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372914.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372915.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372915.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372916.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 357,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372916.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372917.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372917.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372918.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 363,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372918.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 250,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372919.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 357,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372919.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 1348,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372920.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 942,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/os/syscalls.372920.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 226156,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-codes.369749.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 106448,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-codes.369749.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 187485595,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-events.369749.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 17261514,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-events.369749.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 1912,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-meta.369749.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 1912,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-meta.369749.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 3926,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operand-meta.369749.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 3926,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operand-meta.369749.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 114238539,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operands.369749.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 7045584,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/call-operands.369749.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 3044,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 3044,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 78870130,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-observations.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 5261308,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-observations.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 10374,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-evidence.369749.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 10374,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-evidence.369749.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 321287818,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-trace.369749.72816598bfa183a810428fe30a7873ff.json.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 21114364,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-trace.369749.72816598bfa183a810428fe30a7873ff.json.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 2898,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/function-environment-meta.369749.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 2898,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/function-environment-meta.369749.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 15731827,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/function-environments.369749.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 954648,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/function-environments.369749.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 215705815,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/kineto.369749.72816598bfa183a810428fe30a7873ff.json.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 25712808,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/kineto.369749.72816598bfa183a810428fe30a7873ff.json.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 654,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/run.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 654,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/run.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 8466,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 8466,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 146461974,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 14248360,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+      "phase": "coordinate_scope"
+    },
+    {
+      "bytes": 700550,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/capture-model.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 700550,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/capture-model.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 938149,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/evidence/instances/000000.jsonl.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 952193,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/evidence/instances/000063.jsonl.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 145930,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 145930,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 1203854,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/values/allocations/000003.jsonl.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 386157,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/values/objects/000000.jsonl.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 863969,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/values/regions/000000.jsonl.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 1522,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 1522,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 78870130,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-observations.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 2630654,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-observations.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 5187,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-evidence.369749.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 5187,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-evidence.369749.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 321287818,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-trace.369749.72816598bfa183a810428fe30a7873ff.json.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 10557182,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-trace.369749.72816598bfa183a810428fe30a7873ff.json.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 4233,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 4233,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical-meta.369749.72816598bfa183a810428fe30a7873ff.json",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 146461974,
+      "kind": "decoded",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+      "phase": "native_window"
+    },
+    {
+      "bytes": 7124180,
+      "kind": "stored",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical.369749.72816598bfa183a810428fe30a7873ff.jsonl.gz",
+      "phase": "native_window"
+    }
+  ],
+  "error_type": "AttributeError",
+  "message": "'ProgramGraph' object has no attribute 'assert_valid'",
+  "phase": "native_window",
+  "status": "FAILED",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_native_protocol_bridge_20261023/gate.py\", line 86, in <module>\n    result=bind_native_protocol_window(coordinates,CAPTURE,manifest,OUT/'result',\n     expected_manifest_sha256=hashlib.sha256(manifest.read_bytes()).hexdigest(),capture_model_path=model,\n     expected_capture_model_sha256=hashlib.sha256(model.read_bytes()).hexdigest(),\n     window=NativeProtocolWindow(1,16),budget=NativeProtocolBudget(),progress=emit)\n  File \"/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_protocol.py\", line 655, in bind_native_protocol_window\n    program, layouts = _build_program(interfaces, source, interface_artifact)\n                       ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_protocol.py\", line 465, in _build_program\n    graph.assert_valid()\n    ^^^^^^^^^^^^^^^^^^\nAttributeError: 'ProgramGraph' object has no attribute 'assert_valid'\n",
+  "wall_seconds": 123.80536456299888
+}

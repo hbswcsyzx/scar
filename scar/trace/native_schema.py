@@ -91,6 +91,17 @@ def _may_overlap(left, right):
     return bool(first & second or ("*" in first and second) or ("*" in second and first))
 
 
+def parse_schema_ports(raw_schema, *, provider_revision=PROVIDER_REVISION):
+    """Use the pinned installed parser; no target/module execution is involved."""
+    import torch
+    if (type(raw_schema) is not str or not raw_schema or provider_revision != PROVIDER_REVISION
+            or torch.version.git_version != provider_revision):
+        raise ValueError("native schema parser/provider revision or schema differs")
+    schema = torch._C.parse_schema(raw_schema)
+    return schema, [_argument(arg, index, "input") for index, arg in enumerate(schema.arguments)], [
+        _argument(arg, index, "output") for index, arg in enumerate(schema.returns)]
+
+
 def recover_schema_contracts(native_result, *, provider_revision=PROVIDER_REVISION):
     """Mutate native_result's existing slots/effects and return its bridge report.
 
@@ -106,7 +117,6 @@ def recover_schema_contracts(native_result, *, provider_revision=PROVIDER_REVISI
             or native_result.report.get("provider_revision") != provider_revision
             or torch.version.git_version != provider_revision):
         raise ValueError("native schema parser/imported provider revision mismatch")
-    parse_schema = torch._C.parse_schema
     graph, evidence = native_result.bundle.semantic, native_result.bundle.evidence
     scope = native_result.report["scope"] + ":schema-contracts"
     source_by_definition = {}
@@ -126,9 +136,7 @@ def recover_schema_contracts(native_result, *, provider_revision=PROVIDER_REVISI
             continue
         if raw not in parsed:
             try:
-                schema = parse_schema(raw)
-                arguments = [_argument(arg, index, "input") for index, arg in enumerate(schema.arguments)]
-                returns = [_argument(arg, index, "output") for index, arg in enumerate(schema.returns)]
+                schema, arguments, returns = parse_schema_ports(raw, provider_revision=provider_revision)
             except Exception as error:
                 failures[raw] = {"schema_sha256": sha256(raw.encode()).hexdigest(),
                                  "raw_schema": raw, "error_type": type(error).__name__}
@@ -283,4 +291,4 @@ def recover_schema_contracts(native_result, *, provider_revision=PROVIDER_REVISI
     return report
 
 
-__all__ = ["recover_schema_contracts", "PROVIDER_REVISION"]
+__all__ = ["recover_schema_contracts", "parse_schema_ports", "PROVIDER_REVISION"]

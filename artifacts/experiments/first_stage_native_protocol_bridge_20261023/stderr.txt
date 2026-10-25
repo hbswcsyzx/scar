@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_native_protocol_bridge_20261023/gate.py", line 86, in <module>
+    result=bind_native_protocol_window(coordinates,CAPTURE,manifest,OUT/'result',
+     expected_manifest_sha256=hashlib.sha256(manifest.read_bytes()).hexdigest(),capture_model_path=model,
+     expected_capture_model_sha256=hashlib.sha256(model.read_bytes()).hexdigest(),
+     window=NativeProtocolWindow(1,16),budget=NativeProtocolBudget(),progress=emit)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_protocol.py", line 655, in bind_native_protocol_window
+    program, layouts = _build_program(interfaces, source, interface_artifact)
+                       ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_protocol.py", line 465, in _build_program
+    graph.assert_valid()
+    ^^^^^^^^^^^^^^^^^^
+AttributeError: 'ProgramGraph' object has no attribute 'assert_valid'

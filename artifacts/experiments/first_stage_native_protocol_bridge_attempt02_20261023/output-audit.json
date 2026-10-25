@@ -1,0 +1,24 @@
+{
+  "all_negative_checks_rejected": true,
+  "compiler_witness_calls": 0,
+  "full_capture_dispatch_denominator": 39796,
+  "gap_counts": {
+    "host_thread_unresolved": 13,
+    "native_reference_content_unproved": 27,
+    "source_runtime_unverified": 1
+  },
+  "new_content_identity_claims": false,
+  "old_no_proof_gap_retained": true,
+  "ordinary_validation_issue_count": 0,
+  "prepare_calls": 0,
+  "production_frozen_bytes_unchanged": true,
+  "program_and_projection_artifact_SHA_bytes_verified": true,
+  "qualified_sequences": 13,
+  "selected_frontier_count": 3,
+  "selected_sequences": 16,
+  "source_projection_receipts_sha256": "19d9f2fc17aff30952773d474df64314751f736ea44a3133712809972473d9fe",
+  "source_report_sha256": "5c7e5dd27b998a3010853e199876e74b32c057721370d4df8e855a9b0c39f680",
+  "status": "READ_ONLY_OUTPUT_AUDIT_PASS",
+  "target_executions": 0,
+  "unvisited_sequences": 39780
+}

@@ -1,0 +1,75 @@
+{
+  "compiler_witness_calls": 0,
+  "counterexample_core_valid": true,
+  "counterexample_generic_execution_issue_count": 0,
+  "counterexample_new_execution_sha256": "bfc675484f6030c80a78351377b8215237a3311ccf5d4b48a0d14c7b80bafc41",
+  "counterexample_new_program_sha256": "b986b7101cd36814c5e7bde718aee34acd1c15fcbcf941efcfcb3f890e772c4e",
+  "counterexample_snapshot_matches_own_program": true,
+  "input_files": {
+    "execution.json": {
+      "bytes": 736486,
+      "sha256": "e9cd1ac4d663b74f45117d38f68ea074df2e0f90280d6a6951561b29e803e688"
+    },
+    "native-interface.json": {
+      "bytes": 2001,
+      "sha256": "302926a17ff1345a39ed00f2a14b77432290c36f6ca3e777206f20938d51a981"
+    },
+    "program.json": {
+      "bytes": 155941,
+      "sha256": "b38ad0b17e13a5b684a6faa712f7212604fab0fd6ed0e22c1b32cedc1bc4236d"
+    },
+    "report.json": {
+      "bytes": 6726,
+      "sha256": "5c7e5dd27b998a3010853e199876e74b32c057721370d4df8e855a9b0c39f680"
+    },
+    "source-evidence.json": {
+      "bytes": 175455,
+      "sha256": "4d417f45a113fded53563fbb832c802071f23577cb80ea8142876e167034c15a"
+    },
+    "source-values.json": {
+      "bytes": 55962,
+      "sha256": "8353fe3efa90f71f00462a48221b2f51abf1f64a0e0ff9cffb250d5867edb73f"
+    }
+  },
+  "native_port_protocol_sha256": "efc880368660782a856785968bfb53a35523cae48c1f75b6b73ed8dab4d586d0",
+  "order_errors": [
+    [
+      "native_core_order",
+      "interface:57416b64a353458ef7a2220fad1f7c58f199a6c80a945d93d37dcbf47488f965:inputs:0",
+      "native slot selects another canonical formal/exit ordinal"
+    ],
+    [
+      "native_core_order",
+      "interface:57416b64a353458ef7a2220fad1f7c58f199a6c80a945d93d37dcbf47488f965:inputs:1",
+      "native slot selects another canonical formal/exit ordinal"
+    ],
+    [
+      "actual_native_order",
+      "native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:9:inputs:0",
+      "native slot/denotation does not preserve the actual original Use value ordinal"
+    ],
+    [
+      "actual_native_order",
+      "native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:9:inputs:1",
+      "native slot/denotation does not preserve the actual original Use value ordinal"
+    ],
+    [
+      "actual_native_order",
+      "native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:13:inputs:0",
+      "native slot/denotation does not preserve the actual original Use value ordinal"
+    ],
+    [
+      "actual_native_order",
+      "native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:13:inputs:1",
+      "native slot/denotation does not preserve the actual original Use value ordinal"
+    ]
+  ],
+  "order_rejection": "native_port_order: native_core_order at interface:57416b64a353458ef7a2220fad1f7c58f199a6c80a945d93d37dcbf47488f965:inputs:0: native slot selects another canonical formal/exit ordinal; native_core_order at interface:57416b64a353458ef7a2220fad1f7c58f199a6c80a945d93d37dcbf47488f965:inputs:1: native slot selects another canonical formal/exit ordinal; actual_native_order at native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:9:inputs:0: native slot/denotation does not preserve the actual original Use value ordinal; actual_native_order at native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:9:inputs:1: native slot/denotation does not preserve the actual original Use value ordinal; actual_native_order at native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:13:inputs:0: native slot/denotation does not preserve the actual original Use value ordinal; actual_native_order at native-port:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:13:inputs:1: native slot/denotation does not preserve the actual original Use value ordinal",
+  "owned_evidence_created_or_restored": false,
+  "positive_actual_activation_count": 13,
+  "positive_actual_saved_program_order_errors": 0,
+  "prepare_calls": 0,
+  "raw_sources_read": 0,
+  "status": "PRODUCTION_PURE_PORT_ORDER_PREFLIGHT_PASS",
+  "target_executions": 0
+}

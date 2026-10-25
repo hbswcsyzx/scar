@@ -48,11 +48,12 @@ class ValidationReport:
 
 class _Context:
     def __init__(self, model, program, value_graphs, evidence_graphs, semantic_graphs=None, artifact_bytes=None,
-                 provider_selector_resolver=None):
+                 provider_selector_resolver=None, native_port_evidence=None):
         self.model, self.program = model, program
         self.issues, self.gaps = [], []
         self._gap_keys = set()
         self.provider_selector_resolver = provider_selector_resolver
+        self.native_port_evidence = native_port_evidence
         self.value_graphs = {} if value_graphs is None else value_graphs
         self.evidence_graphs = {} if evidence_graphs is None else evidence_graphs
         self.semantic_graphs = {} if semantic_graphs is None else semantic_graphs
@@ -426,6 +427,8 @@ def refresh_external_context(base_ctx):
     """
     if not isinstance(base_ctx, _Context) or base_ctx.issues:
         raise ValueError('external refresh requires a valid analyzed execution context')
+    if base_ctx.native_port_evidence is not None:
+        base_ctx.native_port_evidence.require_scope(base_ctx.model, base_ctx.program)
     ctx = copy(base_ctx)
     external = {'snapshots', 'issues', 'gaps', '_gap_keys', 'external_preparation',
         'source_resolutions', 'inventory_sources', 'resolved_source_bridges',
@@ -454,7 +457,7 @@ def refresh_external_context(base_ctx):
 
 
 def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None,
-             provider_selector_resolver=None):
+             provider_selector_resolver=None, native_port_evidence=None):
     if type(model) is not ExecutionModel:
         return ValidationReport((ExecutionIssue('record', 'model', 'expected exact ExecutionModel'),), ()), None
     if provider_selector_resolver is not None and not callable(provider_selector_resolver):
@@ -470,8 +473,16 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
         wire = program_dumps(program).encode('utf-8')
     except (TypeError, ValueError, AttributeError) as error:
         return ValidationReport((ExecutionIssue('record_or_program', 'model', str(error)),), ()), None
+    if native_port_evidence is not None:
+        from .native_port_protocol import NativePortEvidence
+        if type(native_port_evidence) is not NativePortEvidence:
+            return ValidationReport((ExecutionIssue("native_port_evidence", "model", "expected exact source-owned NativePortEvidence"),), ()), None
+        try:
+            native_port_evidence.require_scope(model, program)
+        except (TypeError, ValueError) as error:
+            return ValidationReport((ExecutionIssue("native_port_scope", "model", str(error)),), ()), None
     ctx = _Context(model, program, value_graphs, evidence_graphs, semantic_graphs, artifact_bytes,
-                   provider_selector_resolver)
+                   provider_selector_resolver, native_port_evidence)
     artifact = model.snapshot.artifact
     if (artifact.schema != 'scar.program-graph' or artifact.sha256 != hashlib.sha256(wire).hexdigest()
             or artifact.size_bytes != len(wire) or model.snapshot.schema_version != json.loads(wire)['schema_version']):
@@ -500,17 +511,17 @@ def _analyze(model, program, *, value_graphs=None, evidence_graphs=None, semanti
 
 
 def validate(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None,
-             provider_selector_resolver=None):
+             provider_selector_resolver=None, native_port_evidence=None):
     return _analyze(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
                     semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes,
-                    provider_selector_resolver=provider_selector_resolver)[0]
+                    provider_selector_resolver=provider_selector_resolver, native_port_evidence=native_port_evidence)[0]
 
 
 def require_valid(model, program, *, value_graphs=None, evidence_graphs=None, semantic_graphs=None, artifact_bytes=None,
-                  provider_selector_resolver=None):
+                  provider_selector_resolver=None, native_port_evidence=None):
     report = validate(model, program, value_graphs=value_graphs, evidence_graphs=evidence_graphs,
                       semantic_graphs=semantic_graphs, artifact_bytes=artifact_bytes,
-                      provider_selector_resolver=provider_selector_resolver)
+                      provider_selector_resolver=provider_selector_resolver, native_port_evidence=native_port_evidence)
     if report.issues:
         raise ValueError('; '.join(f'{row.code} at {row.path}: {row.message}' for row in report.issues))
     return report

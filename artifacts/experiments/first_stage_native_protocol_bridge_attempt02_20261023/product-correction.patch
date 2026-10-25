@@ -1,0 +1,12 @@
+--- attempt01/native_protocol.py
++++ attempt02/native_protocol.py
+@@ -462,7 +462,8 @@
+     graph = ProgramGraph(catalog, tuple(regions), tuple(operations), tuple(values), tuple(locations),
+         provider_envelopes=envelopes, provider_regions=tuple(provider_regions), provider_bindings=tuple(bindings),
+         native_boundaries=tuple(boundaries))
+-    graph.assert_valid()
++    from scar.ir.program.validation import require_valid
++    require_valid(graph)
+     return graph, layouts
+ 
+ 
