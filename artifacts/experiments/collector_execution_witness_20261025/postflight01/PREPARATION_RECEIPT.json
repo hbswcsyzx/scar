@@ -1,0 +1,28 @@
+{
+  "consumer_source": {
+    "bytes": 20885,
+    "path": "scar/trace/collector_execution_witness.py",
+    "sha256": "a09f40f32a16fd5aef2c5a20f56a2bc00d5829d27d49722f94e850007c2bb293"
+  },
+  "freeze": {
+    "bytes": 64909,
+    "path": "artifacts/experiments/collector_execution_witness_20261025/postflight01/freeze.json",
+    "sha256": "2d13e2382cb35f7df36f6c92c715d396c7826fa5c8396cc518013874c2a24fc7"
+  },
+  "old_LeWM_raw_or_DB_reads": 0,
+  "old_producer_registration_files_unchanged": true,
+  "original_producer_source": {
+    "bytes": 19568,
+    "path": "scar/trace/collector_execution_witness.py",
+    "sha256": "8a9374de5dbbba478db3bae93e48a42c3382f1f8e7909d3fb7503df7458f4d98"
+  },
+  "postflight_executed": false,
+  "preparation_checks": [
+    "AST only, witness module and offline runner",
+    "bash -n only, offline shell runner",
+    "354 source byte checks, exactly one changed consumer module",
+    "16 saved metadata/archive inputs byte checks"
+  ],
+  "status": "PREPARED_NOT_RUN",
+  "target_runs_during_preparation": 0
+}

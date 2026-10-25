@@ -1,0 +1,9 @@
+{
+  "command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/target/probe.py"
+  ],
+  "returncode": 0,
+  "wall_s": 24.07249321101699
+}

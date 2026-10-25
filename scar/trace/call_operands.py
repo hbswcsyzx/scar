@@ -143,6 +143,10 @@ class CallOperandObserver:
             self._release_tool()
             raise
         recorder.operand_observer = self
+        witness = getattr(recorder, 'collector_witness', None)
+        if witness is not None:
+            witness.register('operands', self, ('_on_instruction','_on_call','_reference'))
+            witness.register('environments', self.environment_observer, ('dispatch','entry'))
 
     def _acquire_tool(self):
         monitoring = sys.monitoring
@@ -379,6 +383,10 @@ class CallOperandObserver:
                 if matches:
                     self._emit("ENTRY_HANDSHAKE", invocation, self.recorder.index,
                                {"attempt_index": attempt_index, "entry_index": self.recorder.index})
+                    witness = getattr(self.recorder, 'collector_witness', None)
+                    if witness is not None and not witness.guard('environments'):
+                        self._stopped = True
+                        return
                     self.environment_observer.entry(target, attempt_index, invocation,
                         self.recorder.index, frame.f_globals, frame.f_builtins)
                 else:
@@ -621,6 +629,10 @@ class CallOperandObserver:
                 try:
                     if self._stopped or self._closed or os.getpid() != self.pid:
                         return self._disabled_callback_result(code)
+                    witness = getattr(self.recorder, 'collector_witness', None)
+                    if witness is not None and not witness.guard('operands', sys._getframe().f_code):
+                        self._stopped = True
+                        return self._disabled_callback_result(code)
                     if self._event_attempts >= self.limits.max_events:
                         self._dropped += 1
                         self._stopped = True
@@ -745,6 +757,10 @@ class CallOperandObserver:
                 try:
                     if self._stopped or self._closed or os.getpid() != self.pid:
                         return self._disabled_callback_result(code)
+                    witness = getattr(self.recorder, 'collector_witness', None)
+                    if witness is not None and not witness.guard('operands', sys._getframe().f_code):
+                        self._stopped = True
+                        return self._disabled_callback_result(code)
                     if self._event_attempts >= self.limits.max_events:
                         self._dropped += 1
                         self._stopped = True
@@ -785,6 +801,10 @@ class CallOperandObserver:
                         return self._disabled_callback_result(code)
                     if dispatch["kind"] == CallableKind.EXACT_FUNCTION.value and type(callable_object) is types.FunctionType:
                         target_code = observed_target_code
+                        witness = getattr(self.recorder, 'collector_witness', None)
+                        if witness is not None and not witness.guard('environments'):
+                            self._stopped = True
+                            return self._disabled_callback_result(code)
                         self.environment_observer.dispatch(callable_object, attempt_index, owner,
                             self.recorder.index, dispatch["code"],
                             lambda value: self._reference(value, seen, event_index, snapshots))

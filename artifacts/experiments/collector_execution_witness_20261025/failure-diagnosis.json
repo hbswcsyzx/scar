@@ -1,0 +1,197 @@
+{
+  "CLI_exit": 0,
+  "CLI_wall_seconds": 26.105367843993008,
+  "comparisons": [
+    {
+      "coordinate_artifact": {
+        "schema": "scar.call-edge-meta.v1",
+        "sha256": "97a5488c7c5ea26544b1294c4fb09eec49663ac3b945e97e3afe38efbb6496b2",
+        "size_bytes": 1025,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/call-meta.1334231.json"
+      },
+      "coordinate_member_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "field_equal": {
+        "schema": false,
+        "sha256": true,
+        "size_bytes": true,
+        "uri": true
+      },
+      "same_target_process": true,
+      "target_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "witness": {
+        "schema": "scar.call-edge-trace",
+        "sha256": "97a5488c7c5ea26544b1294c4fb09eec49663ac3b945e97e3afe38efbb6496b2",
+        "size_bytes": 1025,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/call-meta.1334231.json"
+      }
+    },
+    {
+      "coordinate_artifact": {
+        "schema": "scar.call-operands-trace",
+        "sha256": "d38e9b4fd49ba4eead07c4791df61bee700782e703e3042b19cfc93db17158e1",
+        "size_bytes": 2034,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/call-operand-meta.1334231.json"
+      },
+      "coordinate_member_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "field_equal": {
+        "schema": true,
+        "sha256": true,
+        "size_bytes": true,
+        "uri": true
+      },
+      "same_target_process": true,
+      "target_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "witness": {
+        "schema": "scar.call-operands-trace",
+        "sha256": "d38e9b4fd49ba4eead07c4791df61bee700782e703e3042b19cfc93db17158e1",
+        "size_bytes": 2034,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/call-operand-meta.1334231.json"
+      }
+    },
+    {
+      "coordinate_artifact": {
+        "schema": "scar.function-environment-trace",
+        "sha256": "07d66f596c9e0429d73c22a718ce8dee087e4fcd379f5568648bbdd9ef7e7aa7",
+        "size_bytes": 1417,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/function-environment-meta.1334231.json"
+      },
+      "coordinate_member_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "field_equal": {
+        "schema": true,
+        "sha256": true,
+        "size_bytes": true,
+        "uri": true
+      },
+      "same_target_process": true,
+      "target_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "witness": {
+        "schema": "scar.function-environment-trace",
+        "sha256": "07d66f596c9e0429d73c22a718ce8dee087e4fcd379f5568648bbdd9ef7e7aa7",
+        "size_bytes": 1417,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/function-environment-meta.1334231.json"
+      }
+    },
+    {
+      "coordinate_artifact": {
+        "schema": "scar.execution-evidence-collection",
+        "sha256": "7a001f97885b34532ee3d7842ed085a0c04e822e05dc3de80f3b3150be4622f2",
+        "size_bytes": 4959,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/execution-evidence.1334231.json"
+      },
+      "coordinate_member_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "field_equal": {
+        "schema": true,
+        "sha256": true,
+        "size_bytes": true,
+        "uri": true
+      },
+      "same_target_process": true,
+      "target_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "witness": {
+        "schema": "scar.execution-evidence-collection",
+        "sha256": "7a001f97885b34532ee3d7842ed085a0c04e822e05dc3de80f3b3150be4622f2",
+        "size_bytes": 4959,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/execution-evidence.1334231.json"
+      }
+    },
+    {
+      "coordinate_artifact": {
+        "schema": "scar.dispatch-observation-trace",
+        "sha256": "c1b2cab8a5a08c066348348017d04e53bba53229bc297bb8efe41ebcfb36fe43",
+        "size_bytes": 1512,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/dispatch-meta.1334231.6de3d9b7dd35226b9b9affc9cfea5094.json"
+      },
+      "coordinate_member_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "field_equal": {
+        "schema": true,
+        "sha256": true,
+        "size_bytes": true,
+        "uri": true
+      },
+      "same_target_process": true,
+      "target_process": {
+        "kind": "exec_process_instance",
+        "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+        "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+      },
+      "witness": {
+        "schema": "scar.dispatch-observation-trace",
+        "sha256": "c1b2cab8a5a08c066348348017d04e53bba53229bc297bb8efe41ebcfb36fe43",
+        "size_bytes": 1512,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/dispatch-meta.1334231.6de3d9b7dd35226b9b9affc9cfea5094.json"
+      }
+    }
+  ],
+  "failure": "ValueError: witness closed metadata has no exact target-process coordinate membership",
+  "gate_exit": 1,
+  "launch": {
+    "bytes": 836,
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/launch.json",
+    "sha256": "1733e289fbb010d55de3f122536445889898bf13c83185f668fab890c1f596e2"
+  },
+  "minimal_proposed_fix": "Explicit new-binder-only schema1 call-meta -> coordinate family-meta.v1 compatibility rule; retain URI/SHA/bytes/source schema checks and process_for using actual coordinate artifact. No generic schema bypass.",
+  "negative_executed": false,
+  "postcapture_bind_passed": false,
+  "raw_or_DB_reads": 0,
+  "registered_roles": [
+    "calls",
+    "operands",
+    "environments",
+    "native_manager",
+    "dispatch"
+  ],
+  "root_cause": "JSON document schema scar.call-edge-trace differs from the existing coordinate protocol family label scar.call-edge-meta.v1 for exactly the same call-meta bytes/URI/process",
+  "root_session": 19347,
+  "saved_CLI_coordinates": {
+    "bytes": 182662,
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/capture-coordinates.json",
+    "sha256": "ac4ee67eacfeb37a747160e7805cbbd16dac2ad655726e83b5ff00a46bea8abc"
+  },
+  "second_CPU_capture": false,
+  "source_or_capture_changed": false,
+  "status": "ACTUAL_CPU_GATE_FAILED_BINDER_SCHEMA_LABEL_JOIN",
+  "witness": {
+    "bytes": 30662,
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/collector-witness.1334231.e37202a152e5449085de86f2c33faade/manifest.json",
+    "sha256": "6631c1db162947c16c57db39922cc68c37a304e8aea42161795ddd961ab62cdd"
+  },
+  "witness_errors": [],
+  "witness_reader": "root gate passed before binder",
+  "witness_status": "CLOSED"
+}

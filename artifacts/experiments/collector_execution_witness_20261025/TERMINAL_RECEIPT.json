@@ -1,0 +1,53 @@
+{
+  "old_scope_upgraded": false,
+  "original_CPU_capture_runs": 1,
+  "original_gate": {
+    "CPU_CLI_actual_exit": 0,
+    "CPU_CLI_wall_seconds": 26.105367843993008,
+    "actual_exit_from_root": 1,
+    "failure": {
+      "bytes": 1191,
+      "path": "artifacts/experiments/collector_execution_witness_20261025/FAILURE.md",
+      "sha256": "a5b266657d1ae2f3e5b13b80d7501705e88a942f8f15cfe8a7e4ff83f3d9a908"
+    },
+    "launch": {
+      "bytes": 836,
+      "path": "artifacts/experiments/collector_execution_witness_20261025/launch.json",
+      "sha256": "1733e289fbb010d55de3f122536445889898bf13c83185f668fab890c1f596e2"
+    },
+    "root_session": 19347
+  },
+  "postflight": {
+    "GNU_time_exit_status": 0,
+    "GNU_time_wall_seconds": 1.66,
+    "actual_exit_from_root": 0,
+    "freeze": {
+      "bytes": 64909,
+      "path": "artifacts/experiments/collector_execution_witness_20261025/postflight01/freeze.json",
+      "sha256": "2d13e2382cb35f7df36f6c92c715d396c7826fa5c8396cc518013874c2a24fc7"
+    },
+    "internal_wall_seconds": 1.5696405959897675,
+    "max_RSS_KiB": 56080,
+    "result": {
+      "bytes": 5262,
+      "path": "artifacts/experiments/collector_execution_witness_20261025/postflight01/result.json",
+      "sha256": "52662e1a4afdba5d12def01daa3e32c858500f5d13c6441ea49904f4624db16c"
+    },
+    "root_session": 22567,
+    "saved_coordinates": {
+      "bytes": 182662,
+      "path": "artifacts/experiments/collector_execution_witness_20261025/capture/capture-coordinates.json",
+      "sha256": "ac4ee67eacfeb37a747160e7805cbbd16dac2ad655726e83b5ff00a46bea8abc"
+    },
+    "time": {
+      "bytes": 849,
+      "path": "artifacts/experiments/collector_execution_witness_20261025/postflight01/time.txt",
+      "sha256": "86dbad49717965c4e43466f57cb7f526bb99e4fc9020110b74e7ba1eb620ce87"
+    }
+  },
+  "postflight_new_target_runs": 0,
+  "producer_sources_still_match_postflight_freeze": true,
+  "schema": "scar.collector-witness-terminal-receipt",
+  "schema_version": 1,
+  "whole_model": "OPEN"
+}

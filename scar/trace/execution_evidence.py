@@ -45,6 +45,8 @@ class ExecutionEvidence:
         self._observer_owned = False
         self._profiler = None
         self._call_recorder = recorder
+        if getattr(recorder, "collector_witness", None) is not None:
+            recorder._collector_native_manager = self
         self._dispatch_evidence = None
         self._physical_requested = os.environ.get("SCAR_TENSOR_PHYSICAL") == "1"
         self._enter_attempted = False
@@ -436,7 +438,11 @@ class ExecutionEvidence:
 
 def install(out, *, recorder=None):
     """Install delayed raw collection; the caller must arrange manager.close()."""
-    return ExecutionEvidence(out, recorder=recorder)
+    manager = ExecutionEvidence(out, recorder=recorder)
+    witness = getattr(recorder, 'collector_witness', None)
+    if witness is not None:
+        witness.register('native_manager', manager, ('_start','close'))
+    return manager
 
 
 __all__ = ["ExecutionEvidence", "install"]

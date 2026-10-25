@@ -1,0 +1,5 @@
+实际唯一CPU门19347 exit1；内部CPU CLI exit0，wall26.105368s。实际hook/CPU记录/五role关闭及witness reader已通过，postcapture binder未通过，resealed-generation negative尚未执行。不能称全部链路PASS。
+
+唯一差异是call-meta.1334231.json的schema标签：witness保JSON文档schema scar.call-edge-trace；普通coordinate membership按operand base_manifest的family=meta保scar.call-edge-meta.v1。URI、1025bytes、SHA97a5488c7c5ea26544b1294c4fb09eec49663ac3b945e97e3afe38efbb6496b2及target process全部相同。其余四个closed metadata全部四字段和target process相同。原capture_coordinates先document读call-meta，再按base_manifest覆盖其family标签，是现有协议行为，不是身份/bytes矛盾。
+
+最小修复仅在新增binder声明版本限定的call-meta schema1→coordinate family-meta.v1映射，然后仍用准确coordinate artifact作process_for验证；不修改旧witness/coordinates，不广泛忽略schema。修复须root批准，可只读复用此次完整关闭数据验证，不能自动采第二CPU。原6source/freeze/采集/坐标均未改。PID birth join、连续篡改排除、内容/ready等仍OPEN。

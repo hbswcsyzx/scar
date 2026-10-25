@@ -195,6 +195,9 @@ class CallEdgeRecorder:
                 return
         if os.getpid() != self.pid:
             return
+        witness = getattr(self, 'collector_witness', None)
+        if witness is not None and not witness.guard('calls', sys._getframe().f_code):
+            return
         with self.lock:
             try:
                 if event == 'call':
@@ -301,6 +304,10 @@ def install(out, project_root):
         max_events=int(os.environ.get('SCAR_CALL_MAX_EVENTS',100000)),
         max_bytes=int(os.environ.get('SCAR_CALL_MAX_BYTES',64000000)))
     os.environ['SCAR_CALL_TRACE_OWNER_PID'] = str(os.getpid())
+    recorder.collector_witness = None
+    if os.environ.get('SCAR_COLLECTOR_EXECUTION_WITNESS') == '1':
+        from scar.trace.collector_execution_witness import CollectorExecutionWitness
+        recorder.collector_witness = CollectorExecutionWitness(recorder)
     main_thread = threading.get_ident()
     previous, previous_thread = sys.getprofile(),threading.getprofile()
     recorder.previous_profile_present = previous is not None or previous_thread is not None
@@ -319,6 +326,8 @@ def install(out, project_root):
             old(frame,event,arg)
     sys.setprofile(profile)
     threading.setprofile(profile)
+    if recorder.collector_witness is not None:
+        recorder.collector_witness.register_profile(profile)
     sampler = None
     if os.environ.get('SCAR_RESOURCE_SAMPLER') == '1':
         from scar.trace.resources import ResourceSampler
@@ -328,6 +337,8 @@ def install(out, project_root):
         if os.getpid() != recorder.pid:
             return
         observer = recorder.operand_observer
+        if recorder.collector_witness is not None:
+            recorder.collector_witness.before_close()
         if observer is not None:
             observer.stop()
         if sys.getprofile() is profile:
@@ -339,6 +350,8 @@ def install(out, project_root):
             observer.close()
         if sampler is not None:
             sampler.stop()
+        if recorder.collector_witness is not None:
+            recorder.collector_witness.close()
     def forked():
         if recorder.closed:
             return
@@ -353,4 +366,5 @@ def install(out, project_root):
     if hasattr(os,'register_at_fork'):
         os.register_at_fork(after_in_child=forked)
     atexit.register(finish)
+    recorder._collector_finish = finish
     return recorder

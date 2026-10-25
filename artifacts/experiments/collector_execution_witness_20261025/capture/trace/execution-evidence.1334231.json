@@ -1,0 +1,111 @@
+{
+  "schema": "scar.execution-evidence-collection",
+  "schema_version": 1,
+  "pid": 1334231,
+  "install_thread_id": 132368069556032,
+  "python_version": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "status": "CLOSED",
+  "whole_model_established": false,
+  "canonical_graph_imported": false,
+  "raw_json_validated": false,
+  "completeness": {
+    "all_paths": false,
+    "all_processes": false,
+    "all_threads": false,
+    "state_effects": false,
+    "logical_value_identity": false,
+    "resource_readiness": false
+  },
+  "window": {
+    "clock": "time.perf_counter_ns",
+    "start_requested_ns": 275427700644786,
+    "started_ns": 275437585270741,
+    "stop_requested_ns": 275438237508103,
+    "stopped_ns": 275438239673228,
+    "alignment": "one profiler lifecycle; provider start/stop calls are sequenced"
+  },
+  "provider": {
+    "torch_version": "2.13.0+cu132",
+    "torch_git_version": "cf30153c4c131c8164ee7798e5022d810682e2cb"
+  },
+  "configuration": {
+    "record_shapes": false,
+    "profile_memory": true,
+    "with_stack": false,
+    "with_modules": false,
+    "execution_trace_observer": true,
+    "extra_resources": false,
+    "extra_tensor_data": false,
+    "activities": [
+      "ProfilerActivity.CPU"
+    ],
+    "memory_dataflow_graph": false,
+    "experimental_config": {
+      "adjust_timestamps": false
+    },
+    "os_capture_intent": {
+      "capture_nonce": "f63fd2866ed05da81676dcdb4bd4e24c",
+      "intent": {
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/os-capture-intent.f63fd2866ed05da81676dcdb4bd4e24c.json",
+        "sha256": "a5f56311d7c581210bd0adf7fc86133c63b20cd760c129f91e8876e69b2cfe22",
+        "size_bytes": 1897,
+        "schema": "scar.os-capture-intent"
+      },
+      "native_nonce": "6de3d9b7dd35226b9b9affc9cfea5094",
+      "basis": "owned launcher environment and exact intent bytes; intent alone is not execution"
+    },
+    "extra_collection_environment": {},
+    "dispatch_observations": {
+      "profile": "scar.dispatch-marker-collector-v1",
+      "started": true,
+      "events": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/dispatch-observations.1334231.6de3d9b7dd35226b9b9affc9cfea5094.jsonl",
+      "metadata": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/dispatch-meta.1334231.6de3d9b7dd35226b9b9affc9cfea5094.json",
+      "owner_python_ident": 132368069556032,
+      "scope": "installing thread only; retained ancestor is not a direct caller"
+    }
+  },
+  "registration": {
+    "owned": true,
+    "rule": "previously_absent_nonce_path_created_by_registration",
+    "source_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+    "source_sha256": "c6ec2dac4140b28eea17c8c6054d42e084ab6014fa8f47e72282e7c4caba46db",
+    "source_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/profiler/standalone/execution_trace_observer.cpp",
+    "source_lines": "322-327,904-961",
+    "assumptions": [
+      "installed provider implements the declared source revision",
+      "no external actor creates the private random path concurrently"
+    ],
+    "path_absent_before_registration": true,
+    "path_created_after_registration": true,
+    "observer_registered": true
+  },
+  "artifacts": {
+    "execution_trace": {
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/execution-trace.1334231.6de3d9b7dd35226b9b9affc9cfea5094.json",
+      "size_bytes": 17123,
+      "exists": true
+    },
+    "kineto": {
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/kineto.1334231.6de3d9b7dd35226b9b9affc9cfea5094.json",
+      "size_bytes": 9890,
+      "exists": true
+    }
+  },
+  "failures": [],
+  "gaps": [
+    "only the installing process and provider capture window are observed",
+    "forked/child processes and complete thread coverage are not established",
+    "imports bypassing builtins.__import__ may not trigger delayed startup",
+    "profiler startup/shutdown must run on the installing thread",
+    "external provider mutation during capture cannot be globally excluded",
+    "Python-to-Torch occurrence correspondence is not established",
+    "host return does not establish GPU completion or materialization readiness",
+    "provider buffers have no collector-enforced hard memory budget",
+    "native observation can change reference lifetimes, allocation and timing"
+  ],
+  "provider_schemas": {
+    "execution_trace": "1.1.1-chakra.0.0.4",
+    "execution_trace_basis": "pinned provider source, not JSON validation",
+    "kineto": "provider Chrome trace; retained without schema conversion"
+  }
+}

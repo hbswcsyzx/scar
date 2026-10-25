@@ -1,0 +1,116 @@
+{
+  "GPU_runs": 0,
+  "LeWM_runs": 0,
+  "binding": {
+    "coordinate_birth_anchor": {
+      "artifact": {
+        "schema": "strace.syscalls.text.v1",
+        "sha256": "61acdd4931090ddb3e04035b3c1e3faf5e590d7804e2b36b0128f4bc4b099a97",
+        "size_bytes": 8408856,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/os/syscalls.1334231"
+      },
+      "locator": "#/lines/1"
+    },
+    "coordinates": {
+      "schema": "scar.capture-coordinates",
+      "sha256": "ac4ee67eacfeb37a747160e7805cbbd16dac2ad655726e83b5ff00a46bea8abc",
+      "size_bytes": 182662,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/capture-coordinates.json"
+    },
+    "dispatch_nonce": "6de3d9b7dd35226b9b9affc9cfea5094",
+    "frontiers": [
+      "CONTINUOUS_COLLECTOR_MUTATION_EXCLUSION_UNVERIFIED",
+      "PROCESS_BIRTH_JOIN_UNVERIFIED"
+    ],
+    "historical_scope_upgraded": false,
+    "issuer": {
+      "generation": 1,
+      "process_id": 1334231,
+      "uuid": "e37202a152e5449085de86f2c33faade"
+    },
+    "object_identity_established": false,
+    "pid_reuse_excluded": false,
+    "process": {
+      "kind": "exec_process_instance",
+      "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764",
+      "wire": "exec_process_instance:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632:process:6ede71b14ddc43a7a90cba679ee90400c106a090701f8ee96493b374c587d764"
+    },
+    "process_birth_fact": {
+      "proc_start_ticks": 27541491,
+      "source": "/proc/self/stat field22 at registration",
+      "status": "OBSERVED"
+    },
+    "profile": "SCAR_COLLECTOR_EXECUTION_WITNESS_V1",
+    "run": {
+      "kind": "exec_run",
+      "value": "capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632",
+      "wire": "exec_run:capture:2ce5ed4922a618e9b7a6c710c4e99fc4ff094216004dad5eb7e52bd591953632"
+    },
+    "schema_views": [
+      {
+        "basis": "existing capture_coordinates operand.base_manifest family=meta, exact call-meta path/bytes/PID",
+        "coordinate_artifact": {
+          "schema": "scar.call-edge-meta.v1",
+          "sha256": "97a5488c7c5ea26544b1294c4fb09eec49663ac3b945e97e3afe38efbb6496b2",
+          "size_bytes": 1025,
+          "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/call-meta.1334231.json"
+        },
+        "rule": "SCAR_CALL_META_SCHEMA1_TO_COORDINATE_FAMILY_META_V1",
+        "source_artifact": {
+          "schema": "scar.call-edge-trace",
+          "sha256": "97a5488c7c5ea26544b1294c4fb09eec49663ac3b945e97e3afe38efbb6496b2",
+          "size_bytes": 1025,
+          "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/call-meta.1334231.json"
+        },
+        "source_schema_version": 1
+      }
+    ],
+    "scope": "registration and closed collector ownership facts only",
+    "witness": {
+      "schema": "scar.collector-execution-witness",
+      "sha256": "6631c1db162947c16c57db39922cc68c37a304e8aea42161795ddd961ab62cdd",
+      "size_bytes": 30662,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/collector-witness.1334231.e37202a152e5449085de86f2c33faade/manifest.json"
+    }
+  },
+  "candidate_resealed": true,
+  "changed_issuer_rejected": "collector issuer generation/process mismatch",
+  "consumer_only": true,
+  "consumer_source": {
+    "bytes": 20885,
+    "path": "scar/trace/collector_execution_witness.py",
+    "sha256": "a09f40f32a16fd5aef2c5a20f56a2bc00d5829d27d49722f94e850007c2bb293"
+  },
+  "coordinates_sha256": "ac4ee67eacfeb37a747160e7805cbbd16dac2ad655726e83b5ff00a46bea8abc",
+  "elapsed_seconds": 1.5696405959897675,
+  "logical_content_ready_established": false,
+  "new_full_native_runs": 0,
+  "new_target_runs": 0,
+  "original_CPU_capture_runs": 1,
+  "original_gate_status": "FAILED_AT_POSTCAPTURE_BINDER_SCHEMA_VIEW",
+  "original_producer_freeze": {
+    "bytes": 61757,
+    "path": "artifacts/experiments/collector_execution_witness_20261025/freeze.json",
+    "sha256": "819328bc7d9bb0ac060decd4b2e7f33c858cd6b8d5b5a34ffd688745cc38e178"
+  },
+  "producer_source_archive": {
+    "bytes": 1387,
+    "path": "artifacts/experiments/collector_execution_witness_20261025/producer-frozen-source/receipt.json",
+    "sha256": "62e3f9cac60d3a84818938cb9ba591c0de8e1af4ba46ef4e525db2ceaf65411b"
+  },
+  "roles": [
+    "calls",
+    "dispatch",
+    "environments",
+    "native_manager",
+    "operands"
+  ],
+  "saved_coordinates_byte_equal": true,
+  "status": "SAVED_CPU_SHARED_REGISTRATION_CLOSED_AND_POSTCAPTURE_BOUND",
+  "whole_model": "OPEN",
+  "witness": {
+    "sha256": "6631c1db162947c16c57db39922cc68c37a304e8aea42161795ddd961ab62cdd",
+    "size_bytes": 30662,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/collector_execution_witness_20261025/capture/trace/collector-witness.1334231.e37202a152e5449085de86f2c33faade/manifest.json"
+  }
+}
