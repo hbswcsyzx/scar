@@ -87,7 +87,14 @@ live owned return只在该进程中有效，JSON不能恢复owner。后继可对
 独立准入，发布CP2未知成本，无需重复lower；publisher/binder及完整第一阶段仍OPEN。
 见[实际结果](../artifacts/experiments/source_entry_catalog_gate_20261025/RESULT.md)。
 
-下一入口拟为`model-run --from-model-run <dependency terminal> --stage source-entries`，
-**当前尚未实现该CLI阶段**。将固定原terminal/admission/archive/source scope，只复用
-现有catalog/plan/worker，独立默认窗口1entry/1file/4000ops；不重dependency/raw/native/OS，
+后继CLI已实现`model-run --from-model-run <dependency terminal> --stage source-entries`，
+真实门session48967 exit0/7.515233s，1entry/28ops及普通source/code读回通过。它固定
+原terminal/admission/archive/source scope，并自动带入
+原bootstrap的project composition与独立readonly archive。共同catalog保留全部9/271及
+六dependency候选；module无definition明确保留前沿。仅复用现有catalog/plan/worker，
+独立`--entry-max-*`默认窗口1entry/1file/4000ops；不重dependency/raw/native/OS，
 不混入publication/binding，也不创建第二份图权威。
+依赖archive实际1load/2matches/compile0，project archive0load/0match；两类原来源和
+module无definition前沿均保留。project+admissions是同原9/271的来源联合，不是新增调用；
+它与此前独立entry门分别保留实际producer/profile收据，不倒改历史。见
+[CLI实际结果](../artifacts/experiments/model_run_source_entries_gate_20261025/RESULT.md)。

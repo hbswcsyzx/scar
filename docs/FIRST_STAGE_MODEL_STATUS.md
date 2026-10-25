@@ -6,6 +6,15 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：统一 source-entries CLI 实际通过
+
+Root session48967 actual exit0/7.5152s；自动核对原项目、依赖与两份只读 archive，
+catalog 保原 9 groups/271 calls、6 candidates，正常 lower 1 body/28 ops 并完成普通读回。
+项目 module 的入口缺口明确保留；没有伪造函数定义或 project fi/bi。365 冻结源码
+前后不变；未重依赖准入、native/OS、目标或全 LeWM。publication/binding 仍为 0，
+正式 source858/runtime843 不变，下一项是同一个原 SP5 的 qualified 独立准入与接线。
+见 [CLI 实际结果](../artifacts/experiments/model_run_source_entries_gate_20261025/RESULT.md)。
+
 ### 2026-10-25：模块 mapping-frame 入口实际通过，内部仍待展开
 
 candidate04 actual exit0/4.3214s，原源码 95 atoms/92 definitions/45 CFG nodes/56 edges
