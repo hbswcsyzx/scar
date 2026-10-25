@@ -1,0 +1,27 @@
+{
+  "ETO_RF_IDs": [
+    41,
+    43
+  ],
+  "changed_marker_rejections": [
+    "native reference protocol: dispatch marker nonce/process/sequence/phase differs",
+    "native reference protocol: dispatch marker nonce/process/sequence/phase differs",
+    "native reference protocol: normal dispatch group marker mismatch"
+  ],
+  "checks": [
+    "batch identity",
+    "V2 exact ordered held slots and declared point geometry",
+    "V1 exact ordered held slots"
+  ],
+  "correlation_ids": [
+    1,
+    2
+  ],
+  "full_native_runs": 0,
+  "ids_distinct": true,
+  "owned_native_evidence_constructed": false,
+  "raw_DB_shard_reads": 0,
+  "status": "PURE_METADATA_DISTINCT_IDS_MARKER_CHAIN_CHECK_PASSED",
+  "synthetic_only_no_actual_C_qualification": true,
+  "target_or_collector_runs": 0
+}

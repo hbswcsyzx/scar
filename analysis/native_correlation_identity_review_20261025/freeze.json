@@ -1,0 +1,47 @@
+{
+  "before": {
+    "bytes": 5612,
+    "path": "analysis/native_correlation_identity_review_20261025/source-receipt-before.json",
+    "sha256": "195055cc802806bf8d0b3d68954d0b92f22526cc3902a33db67d49aace5de5bf"
+  },
+  "diff": {
+    "bytes": 3745,
+    "path": "analysis/native_correlation_identity_review_20261025/minimal.diff",
+    "sha256": "c76ffe635bff49908c4f6b103027c941a4f1de69b8dac48203496eb6a9452ccf"
+  },
+  "raw_DB_shard_reads": 0,
+  "report": {
+    "bytes": 4296,
+    "path": "analysis/native_correlation_identity_review_20261025/REPORT.md",
+    "sha256": "dc1397897e5ea924489c46e2e3bf53d5e339dd1bd2605a8500f82119f5c669e5"
+  },
+  "runner": [
+    {
+      "bytes": 6644,
+      "path": "analysis/native_correlation_identity_review_20261025/tiny_check.py",
+      "sha256": "3c7a47f5ea820bd8299633e91e81a1d25b2be037456e4464ae3e41973a85727d"
+    },
+    {
+      "bytes": 372,
+      "path": "analysis/native_correlation_identity_review_20261025/run.sh",
+      "sha256": "607fe427c768ab31b49c4c360ad32bb3101e68d25d9eb2eb55e7d41eab518bb2"
+    }
+  ],
+  "schema": "scar.native-correlation-fix-tiny-freeze",
+  "schema_version": 1,
+  "scope": "Remove exactly three cross-namespace ID equality checks; every original marker/owner/ordinal/thread check retained.",
+  "sources": [
+    {
+      "bytes": 64076,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "d0eac8d1adf64bae16703ac3289e159d23b2d8582a1110506def9f7b2e8de1ae"
+    },
+    {
+      "bytes": 62029,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "608ba93502637c600fe46f8e9cfe1fca1005610d9b282da0633f69de93286338"
+    }
+  ],
+  "status": "PREPARED_NOT_RUN",
+  "target_or_collector_runs": 0
+}

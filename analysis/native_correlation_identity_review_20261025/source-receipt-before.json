@@ -1,0 +1,152 @@
+{
+  "DB_reads": 0,
+  "Torch_import_or_probe": false,
+  "conclusion": "Redundant false-rejection equality; accepted held-marker C has a separate owned exact marker/ordered-slot proof under existing assumptions.",
+  "local_primary_sources": [
+    {
+      "bytes": 317,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/version.py",
+      "sha256": "aef3753721b655fb4e1369862a57652bde68009ba2cad63668b98288482542bf"
+    },
+    {
+      "bytes": 7824,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_C/_profiler.pyi",
+      "sha256": "c4656810004ee9569965f6c3fb80c0eec4e28d788a79b85368fa9556457c3757"
+    },
+    {
+      "bytes": 5737,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_C/_autograd.pyi",
+      "sha256": "d2959a593cf79d12dbff3f457c322908d72a82b0c01293d2f5b8649f6773f65b"
+    },
+    {
+      "bytes": 21477,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/include/torch/csrc/profiler/collection.h",
+      "sha256": "f6e92b28ee8b2ab737b1709c7b8a5d3327ad0d5cba445f90655e0a317102e811"
+    },
+    {
+      "bytes": 3880,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/include/torch/csrc/profiler/data_flow.h",
+      "sha256": "ab6a23a9cb336c05a1662a7a32e0a8d82dbdb00adf0450399e200c4cbb87f780"
+    },
+    {
+      "bytes": 24519,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/include/ATen/record_function.h",
+      "sha256": "75c04e55778beafa04fca700723c4a5201a456d23e259205ce937ebecace117d"
+    },
+    {
+      "bytes": 49566,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/profiler/_memory_profiler.py",
+      "sha256": "c905e005274968bbcd0cf9db0c9361cc48789f4da7982c71f14a350a6a3631de"
+    },
+    {
+      "bytes": 62482,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_native_scope_20261020/sources/torch-collection.cpp",
+      "sha256": "2142919c3fffffb87770d54b6c9ba5bd070164852c419b671195ea8031a1323d"
+    },
+    {
+      "bytes": 29942,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_native_scope_20261020/sources/output_json.cpp",
+      "sha256": "7301286695d55122f45bd1c2150df89cccd02104182a2f6580b055dccc354db2"
+    }
+  ],
+  "native_input_plan": {
+    "bytes": 4514,
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_tensor_metadata_plan_20261025/PLAN.md",
+    "sha256": "c9d74cba4854b4f7d4a4b56cf066d807d021f31a005e5a2b7c742b511ea6083a"
+  },
+  "official_exact_commit_line_reads": [
+    {
+      "lines_1based": [
+        [
+          232,
+          284
+        ],
+        [
+          812,
+          832
+        ]
+      ],
+      "path": "torch/csrc/profiler/standalone/execution_trace_observer.cpp",
+      "retained_full_bytes": false
+    },
+    {
+      "lines_1based": [
+        [
+          320,
+          322
+        ]
+      ],
+      "path": "torch/csrc/autograd/profiler_kineto.cpp",
+      "retained_full_bytes": false
+    },
+    {
+      "lines_1based": [
+        [
+          518,
+          561
+        ],
+        [
+          624,
+          650
+        ]
+      ],
+      "path": "torch/csrc/profiler/python/init.cpp",
+      "retained_full_bytes": false
+    }
+  ],
+  "owner_before": [
+    {
+      "bytes": 64032,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_capture_batch.py",
+      "sha256": "a1497c216d12436b55ee73538a1db192af65ac308b72f6c4ba9e3848f4959d44"
+    },
+    {
+      "bytes": 61884,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/execution/native_port_protocol.py",
+      "sha256": "acb12cc68657d456b7174dda5d7dd0da82173176fa2f6a6eeacc977283e58a8e"
+    }
+  ],
+  "production_changes_at_report": false,
+  "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+  "raw_reads": 0,
+  "report": {
+    "bytes": 4296,
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_correlation_identity_review_20261025/REPORT.md",
+    "sha256": "dc1397897e5ea924489c46e2e3bf53d5e339dd1bd2605a8500f82119f5c669e5"
+  },
+  "reviewed_SCAR_sources": [
+    {
+      "bytes": 31708,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/tensor_physical.py",
+      "sha256": "6a4026e6cbb038a243851e14156216b693c90dd2d587d56d0e02ebdabfaf94b3"
+    },
+    {
+      "bytes": 19916,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/tensor_physical_import.py",
+      "sha256": "c834d0a1072b610d9cc23d163709171ae329b6b175f1a9388c95e9842a5f0372"
+    },
+    {
+      "bytes": 14658,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/dispatch_evidence.py",
+      "sha256": "c5db7dba084b8ec903549ba48380eedd2fd24c5db80aa1aca18f4376327ebb77"
+    },
+    {
+      "bytes": 19932,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/dispatch_import.py",
+      "sha256": "71cd511cbc82188e1ade4a8a5a84f931f549d431ceda8cab9753ba2fb4a7d18e"
+    },
+    {
+      "bytes": 32455,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_import.py",
+      "sha256": "b65c817daf876855912a811196a97d89845d6fd7ae92d9df176c758b58f5613f"
+    },
+    {
+      "bytes": 21819,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/execution_evidence.py",
+      "sha256": "fadabefb7f81b30aa11db1374d1a59e01ad7aa6954b1406761bd6f1aaafb3fec"
+    }
+  ],
+  "schema": "scar.native-correlation-identity-review",
+  "schema_version": 1,
+  "target_runs": 0
+}

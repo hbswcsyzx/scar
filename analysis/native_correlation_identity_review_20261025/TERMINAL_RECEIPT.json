@@ -1,0 +1,32 @@
+{
+  "actual_C_newly_qualified": false,
+  "actual_check_runs": 1,
+  "actual_exit_from_root": 0,
+  "changed_nonce_rejected_at_three_entrypoints": true,
+  "elapsed_basis": "not recorded by this runner",
+  "elapsed_seconds": null,
+  "freeze": {
+    "bytes": 1690,
+    "path": "analysis/native_correlation_identity_review_20261025/freeze.json",
+    "sha256": "c843001e2f232a9d8ab53af388b2eb16db7ca70de6917a186d947ef1dc2f4d6f"
+  },
+  "full_native_runs": 0,
+  "old_C_retracted": false,
+  "owned_evidence_created": false,
+  "positive_distinct_IDs": [
+    "batch identity",
+    "V2 replay",
+    "V1 replay"
+  ],
+  "production_changes_after_actual_check": false,
+  "raw_DB_shard_reads": 0,
+  "result": {
+    "bytes": 778,
+    "path": "analysis/native_correlation_identity_review_20261025/tiny-result.json",
+    "sha256": "6e29c2c932a0dcd1ed0ef1ad80cd7b29c419937d21ebf967da869d191db79a4f"
+  },
+  "root_session": 4218,
+  "schema": "scar.native-correlation-fix-terminal",
+  "schema_version": 1,
+  "target_or_capture_runs": 0
+}

@@ -658,10 +658,11 @@ def _check_group_identity(source):
                     need(marker[field] == expected, "known physical marker source identity differs: " + field)
             if matches:
                 attrs, event = attributes(matches[0]), marker.get("event") or {}
-                for field, expected in (("record_function_thread_token", attrs.get("tid")),
-                                        ("correlation_id", attrs.get("rf_id"))):
-                    if event.get(field) is not None:
-                        need(event[field] == expected, "known physical marker ETO identity differs: " + field)
+                # Exact owned marker/ordered slots supply this bridge. Tree
+                # correlation_id and ETO RecordFunction ID are distinct keys.
+                if event.get("record_function_thread_token") is not None:
+                    need(event["record_function_thread_token"] == attrs.get("tid"),
+                         "known physical marker ETO thread differs")
         span = known_nodes.get("DISPATCH_BEGIN")
         result = known_nodes.get("DISPATCH_OUTPUT")
         if span is not None and result is not None:

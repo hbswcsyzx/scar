@@ -142,6 +142,8 @@ def replay_interfaces(source):
             need(len(marker_ports) == len(refs) and all(p["tensor"] for p in marker_ports),
                  "marker/native held Tensor arities differ")
             physical_row = physical.get(row["marker"])
+            # The closed owned marker and exact ordered held slots supply the
+            # bridge; tree correlation_id is not an ETO RecordFunction ID.
             need(physical_row is not None and not physical_row["gaps"]
                  and physical_row["binding_status"] == "PROVISIONAL_REQUIRES_FINAL_METADATA"
                  and physical_row["dispatch_source_line"] == row["index"]
@@ -149,7 +151,6 @@ def replay_interfaces(source):
                  and physical_row["dispatch_native_tid"] == obs["native_tid"]
                  and physical_row["dispatch_python_ident"] == obs["python_ident"]
                  and physical_row["event"]["record_function_thread_token"] == attributes(marker_node)["tid"]
-                 and physical_row["event"]["correlation_id"] == attributes(marker_node)["rf_id"]
                  and physical_row["expected_argument_count"] == len(refs)
                  and len(physical_row["arguments"]) == len(refs), "physical marker identity/slot inventory differs")
             for ordinal, (ref, marker_port, argument) in enumerate(zip(refs, marker_ports, physical_row["arguments"], strict=True)):
@@ -351,9 +352,11 @@ def replay_batch_interfaces(source):
                     if phys.get(field) is not None:
                         need(phys[field] == value, "known physical marker source identity differs")
                 event = phys.get("event") or {}
-                for field, value in (("correlation_id", attributes(marker)["rf_id"]), ("record_function_thread_token", attributes(marker)["tid"])):
-                    if event.get(field) is not None:
-                        need(event[field] == value, "known physical marker RF/thread differs")
+                # Preserve the owned-marker/slot and RecordFunction-thread
+                # checks without equating the independent correlation/RF IDs.
+                if event.get("record_function_thread_token") is not None:
+                    need(event["record_function_thread_token"] == attributes(marker)["tid"],
+                         "known physical marker thread differs")
             matched = set()
             for ordinal, (ref, marker_port) in enumerate(zip(refs, marker_ports, strict=True)):
                 path = ref.get("path")
