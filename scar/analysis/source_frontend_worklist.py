@@ -137,7 +137,11 @@ def _write_rows(root, name, rows, limit):
 
 
 def plan_source_frontend(composition, current_bindings, code_witnesses, *,
-                         budget=SourceFrontendBudget(), capabilities=tuple(SourceLanguageCapability),
+                         budget=SourceFrontendBudget(), capabilities=(
+                             SourceLanguageCapability.FIXED_UNPACK,
+                             SourceLanguageCapability.SLICE_KEYS,
+                             SourceLanguageCapability.LEXICAL_LOCALS,
+                             SourceLanguageCapability.CALL_KWARGS_314_V1),
                          out_dir=None, progress=None):
     """Inventory every body/group, then bound metadata-only dispatch candidates.
 

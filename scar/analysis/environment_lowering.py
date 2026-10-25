@@ -106,6 +106,10 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         return cursor, value
 
     def expr(self, node, cursor):
+        if (self.has_language("CALL_KWARGS_314_V1") and isinstance(node, ast.Call)
+                and any(keyword.arg is None for keyword in node.keywords)):
+            from scar.analysis.source_call_lowering import lower_kwargs_call
+            return lower_kwargs_call(self, node, cursor)
         if self.has_language("LEXICAL_LOCALS") and isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
             label = ("GENERATOR_EXPRESSION_CREATION_DRIVE_INTERFACE_UNIMPLEMENTED" if isinstance(node, ast.GeneratorExp)
                      else "COMPREHENSION_SCOPE_INTERFACE_UNIMPLEMENTED")

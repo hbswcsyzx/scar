@@ -145,7 +145,8 @@ class SourceProgram:
         return document
 
     @classmethod
-    def from_dict(cls, document, *, max_operations=10000, language_options=None, verification="SOURCE_REPLAY"):
+    def from_dict(cls, document, *, max_operations=10000, language_options=None, verification="SOURCE_REPLAY",
+                  source_texts: dict[str, str] | None = None):
         from scar.ir.program.codec import loads as load_graph
         from scar.ir.record_codec import decode
         from scar.ir.semantics_v2 import SourceSemanticsGraph
@@ -159,6 +160,7 @@ class SourceProgram:
             raise ValueError("source program fields mismatch")
         if verification not in ("SOURCE_REPLAY", "STRUCTURE"):
             raise ValueError("source program verification mode must be explicit")
+        _check_structure_source_texts(verification, source_texts)
         version = document.get("schema_version")
         if type(version) is not int or version not in (1, 2, 3, 4, 5):
             raise ValueError("source program schema/version mismatch")
@@ -199,15 +201,21 @@ class SourceProgram:
         if _canonical(result.to_dict()) != _canonical(document):
             raise ValueError("source program scope/status/authority or canonical fields differ")
         checked = validate_source_program(result, max_operations=max_operations, language_options=language_options,
-                                          verification=verification)
+                                          verification=verification, source_texts=source_texts)
         if not checked["valid"]:
             raise ValueError("; ".join(checked["errors"]))
         return result
 
     @classmethod
-    def read_structure(cls, document, *, max_operations=10000):
-        """Read v5 without a live CodeType; no constant/source proof is granted."""
-        return cls.from_dict(document, max_operations=max_operations, verification="STRUCTURE")
+    def read_structure(cls, document, *, max_operations=10000, source_texts: dict[str, str] | None = None):
+        """Read v5; optional retained texts feed the existing source/CFG checks.
+
+        This grants no CodeWitness or runtime proof. Omission preserves the
+        existing source-reader policy; provided texts are fingerprint-checked
+        and replayed by the ordinary semantics/control validators.
+        """
+        return cls.from_dict(document, max_operations=max_operations, verification="STRUCTURE",
+                             source_texts=source_texts)
 
 
 @dataclass(frozen=True)
@@ -1064,14 +1072,24 @@ def lower_source(path: str | Path, entry: str, *, max_operations: int = 10000,
                          profile, body.interface, body.frame, body.structured, body.language)
 
 
+def _check_structure_source_texts(verification, source_texts):
+    if source_texts is not None:
+        if verification != "STRUCTURE":
+            raise ValueError("explicit retained source_texts are only supported for STRUCTURE verification")
+        if type(source_texts) is not dict or any(type(path) is not str or type(text) is not str
+                                                for path, text in source_texts.items()):
+            raise TypeError("source_texts must be an explicit dict[path, str]")
+
+
 def validate_source_program(result: SourceProgram, *, max_operations: int = 10000, language_options=None,
-                            verification="SOURCE_REPLAY"):
+                            verification="SOURCE_REPLAY", source_texts: dict[str, str] | None = None):
     """Rebuild from current source; reported provenance cannot raise this budget."""
     try:
         if type(result) is not SourceProgram:
             raise ValueError("expected SourceProgram")
         if verification not in ("SOURCE_REPLAY", "STRUCTURE"):
             raise ValueError("source verification mode differs")
+        _check_structure_source_texts(verification, source_texts)
         structural_only = verification == "STRUCTURE"
         if structural_only and result.language is None:
             raise ValueError("historical source replay policy is unchanged")
@@ -1118,10 +1136,11 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
         if errors:
             return {"valid": False, "errors": errors}
         result.semantic.assert_valid()
-        source_check = validate_source_semantics(result.semantics, result.semantic)
+        source_check = validate_source_semantics(result.semantics, result.semantic, sources=source_texts)
         if not source_check["valid"]:
             return source_check
-        control_check = validate_source_control_flow(result.control, result.semantic, result.semantics)
+        control_check = validate_source_control_flow(result.control, result.semantic, result.semantics,
+                                                      sources=source_texts)
         if not control_check["valid"]:
             return control_check
         if result.graph is not None:

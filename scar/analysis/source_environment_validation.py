@@ -84,6 +84,17 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
     for protocol in model.protocols:
         operation, kind = operations[protocol.operation], protocol.kind
         link = links[operation.id]
+        if kind is Kind.CALL_FUNCTION_EX:
+            from scar.analysis.source_call_validation import is_original_call_definition
+            from scar.ir.program.source_language import SourceLanguageCapability
+            source = semantic.definitions.get(link.semantic_operation)
+            atom = semantic.source_atoms.get(link.source.atom_id)
+            need(language is not None and SourceLanguageCapability.CALL_KWARGS_314_V1 in language.capabilities
+                 and source is not None and is_original_call_definition(semantic, source, link.source)
+                 and source.code_id == link.source.atom_id.wire and link.source.atom_id in source.source_atoms
+                 and atom is not None and atom.kind == "Call" and atom.reference == link.source
+                 and link.opcode is Opcode.CALL, "kwargs call lost its capability or exact original SG Call")
+            continue  # Exact call ports/pending/world are checked by the language validator.
         if kind not in _KINDS:
             need(link.semantic_operation is None, "a source-linked operation has an invented protocol")
             continue

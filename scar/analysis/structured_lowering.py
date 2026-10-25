@@ -724,7 +724,8 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
             pass
         elif language is not None and protocol.kind in (
                 PythonProtocolKind.UNPACK_FIXED, PythonProtocolKind.BUILD_SLICE,
-                PythonProtocolKind.READ_CODE_CONSTANT):
+                PythonProtocolKind.READ_CODE_CONSTANT, PythonProtocolKind.BUILD_CALL_POSITIONALS,
+                PythonProtocolKind.DICT_MERGE, PythonProtocolKind.CALL_FUNCTION_EX):
             pass  # Exact shapes, source, payloads and lifetime are checked below.
         else:
             raise ValueError("opaque protocol has no implemented structured control interface")
@@ -736,7 +737,7 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
         from scar.analysis.source_string_lowering import validate_string_protocols
         validate_string_protocols(model, graph, interface, metadata, semantic)
         from scar.analysis.source_mapping_lowering import validate_mapping_protocols
-        validate_mapping_protocols(model, graph, interface, metadata, semantic)
+        validate_mapping_protocols(model, graph, interface, metadata, semantic, language=language)
     if language is not None:
         from scar.analysis.source_language_validation import validate_language_body
         validate_language_body(model, graph, interface, metadata, semantic, language,

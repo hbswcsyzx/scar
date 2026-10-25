@@ -51,7 +51,7 @@ held109288/未定1901，几何107483/缺口3706。GNU28:41.75，peak1091472KiB�
 | 分工 | 具体模型断口 | 下一项实际验收 |
 | --- | --- | --- |
 | native接入 | 全dispatch端口门已通过；逻辑内容/state/ready仍缺关系 | 保留全部动态资格与原分母；后继连接原生值、状态和资源，而非再跑prefix |
-| source-call隔离树 | 通用kwargs pack/merge/call协议已实现，有限实档门已准备 | 复用原IR/world/有序Uses，显式能力与独立compiler/异常审核；仅机械选原四个必要失败body |
+| source-call前端 | 原四项kwargs前沿已处理，3有限图通过分层验证、1项停于JoinedStr | 批量正式准入新图并连接原调用；保留旧失败、局部unwind/outer/runtime/effects与JoinedStr缺口 |
 | main组合查询 | 实际79592/39796完整一次导航门已exit0，5个不同角色的查询样本通过 | 160压缩块及一个派生关系样本独立复核通过；后继补实际数据/状态/控制连接，不把context当direct call |
 
 计划及来源分别在`artifacts/analysis/kwargs_expansion_design_20261025`和

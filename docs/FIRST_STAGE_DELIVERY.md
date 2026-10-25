@@ -32,6 +32,10 @@ invocation-only/零Tensor、native-only及unresolved；最后一种保持null re
 一个派生关系样本通过。见[实际结果](../artifacts/experiments/source_native_context_gate_20261025/RESULT.md)
 与[复核](../artifacts/experiments/source_native_context_review_20261025/REPORT.md)。旧scope义务未关闭。
 
+通用kwargs前端已获得92/85/217 ops三个有限图的结构、AST/CodeWitness及局部pending验证；
+另一项越过kwargs后停于JoinedStr。原失败和末窗口exit1/postflight0分别保留，未重lower
+已返回图。新图尚未正式加入843快照或接回运行，详见[SOURCE_CALL_MODEL.md](SOURCE_CALL_MODEL.md)。
+
 **2026-10-25 当前实施：** 用户确认先审定模型和声明格式再完成自动接线。
 [当前执行计划](FIRST_STAGE_EXECUTION_PLAN.md)对应原S1—S5；
 [声明式图规范](DECLARATIVE_GRAPH_STORAGE.md)明确保留原typed IR/codec权威，
