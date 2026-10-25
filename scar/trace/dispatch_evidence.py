@@ -138,11 +138,18 @@ class DispatchEvidence:
         self._mode = Observe()
         self._mode.__enter__()
         self._installed = True
+        witness = getattr(self.recorder, 'collector_witness', None)
+        if witness is not None:
+            witness.register('dispatch', self, ('_dispatch','_leaves'), hook=Observe.__torch_dispatch__)
         return True
 
     def _dispatch(self, func, args, kwargs):
         if (self._stopped or self._closed or os.getpid() != self.pid
                 or threading.get_ident() != self.owner_ident):
+            return func(*args, **({} if kwargs is None else kwargs))
+        witness = getattr(self.recorder, 'collector_witness', None)
+        if witness is not None and not witness.guard('dispatch', sys._getframe().f_code):
+            self._stopped = True
             return func(*args, **({} if kwargs is None else kwargs))
         with self._lock:
             self._sequence += 1

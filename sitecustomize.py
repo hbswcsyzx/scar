@@ -6,6 +6,9 @@ if os.environ.get("SCAR_TRACE_DIR"):
         if os.environ.get('SCAR_TRACE_CALL_EDGES') == '1':
             from scar.trace.call_edges import install
             _scar_recorder = install(os.environ['SCAR_TRACE_DIR'],os.environ['SCAR_CALL_PROJECT_ROOT'])
+            if _scar_recorder is not None and getattr(_scar_recorder, 'collector_witness', None) is not None:
+                import sys as _scar_sys
+                _scar_recorder.collector_witness.register_loader(_scar_sys._getframe())
             if _scar_recorder is not None and os.environ.get('SCAR_CALL_OPERANDS') == '1':
                 from scar.trace.call_operands import install as _scar_install_operands
                 _scar_install_operands(_scar_recorder)

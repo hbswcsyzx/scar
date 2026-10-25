@@ -65,6 +65,10 @@ held109288/未定1901，几何107483/缺口3706。GNU28:41.75，peak1091472KiB�
 执行时SCAR源码字节证明；同issuer实现机制是条件合同，不能据当前源码授原运行无条件
 对象身份。首个组合查询因此不发布跨source/native的对象同一性结论。
 
+后继采集的[collector来源profile](COLLECTOR_EXECUTION_WITNESS.md)已在唯一CPU样例完成
+实际注册/关闭/普通坐标绑定。它只补未来采集的可验证来源，不升级原LeWM scope。
+新episode仍待其它必要采集字段共同确定，不为此单独重跑目标。
+
 ## 3. 关键缺口与处理原则
 
 - Python 源构造、函数环境、actual/formal、return、generator creation/drive：

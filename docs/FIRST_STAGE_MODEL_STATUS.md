@@ -6,6 +6,14 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：五类采集器注册及保存CPU运行绑定通过
+
+可选collector来源profile已接入。唯一CPU采集CLI exit0/26.105s；原总门在schema标签
+映射处失败，修正consumer后离线postflight exit0/1.570s，坐标与原保存字节完全相等，
+issuer-generation反例明确拒绝。六文件从222b32aa接入；旧LeWM scope不升级，持续无篡改、
+PID birth join、内容/state/ready与第一阶段仍OPEN。详见
+[来源证据](COLLECTOR_EXECUTION_WITNESS.md)。
+
 ### 2026-10-25：字符串通用恢复越过原前沿，完整body仍未返回
 
 真实单body门exit0/9.882s，partial construction634 ops，下一实际缺口为comprehension
