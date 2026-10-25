@@ -1,0 +1,5 @@
+{
+  "status": "NOT_RUN",
+  "actual_worker_runs": 0,
+  "reason": "Superseded before root authorization: entry must return a conservative child-body Region with required expansion, rather than known first-Import GraphNone. Original scripts/freeze preserved."
+}
