@@ -1,0 +1,20 @@
+{
+  "head": "260c72bbb73458be7a6db55b2764e422c0f90ec9",
+  "new_capture_or_target": false,
+  "profile": "plan-only metadata2MB",
+  "schema": "scar.model-run-g0-source-freeze",
+  "schema_version": 1,
+  "sources": [
+    {
+      "bytes": 100916,
+      "path": "scar/cli.py",
+      "sha256": "646633a4f1f71d06e2c7952d04f45bcef7d0d369677775d61c06acd2f719cf41"
+    },
+    {
+      "bytes": 14040,
+      "path": "scar/analysis/model_run.py",
+      "sha256": "240e8823ffe909a638c07ebe7bfc00afbbf112e0414ffdf2b403b86e1cc57e8d"
+    }
+  ],
+  "whole_model": "OPEN"
+}
