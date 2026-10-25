@@ -1,0 +1,1367 @@
+{
+  "approved_freeze": "26b44d86b573624269b068d20d02e131a7b9237174fd467a307635422c976297",
+  "finite_artifacts": [
+    {
+      "evidence": {
+        "bytes": 24715,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate03/attempt03/body-01-result.json",
+        "sha256": "1dcf8f9b53f69b334f2902078a5f2daf1ce4ffe7143b5e7e498fba804a6ca708"
+      },
+      "operations": 92,
+      "program": {
+        "bytes": 643844,
+        "decoded_bytes": 6143395,
+        "decoded_sha256": "0091423837b7fac0306bb87dbb12e74646336c0c112c1ccb0dc1d12e340da4c8",
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/attempt02/body-01-source-program5.json.gz",
+        "sha256": "171b4f02dde88ce70c1a37418798003ded6fd8e0eb542bcb6c465798a793965d"
+      },
+      "provenance": "candidate02 artifact + candidate03 independent result",
+      "qualification_reused_from_exact_prior_receipt": true,
+      "sequence": 4
+    },
+    {
+      "operations": 85,
+      "program": {
+        "bytes": 1602195,
+        "decoded_bytes": 14769551,
+        "decoded_sha256": "afc1809be2642fca9116e90b33178db23e7c75a6b7529485f54dd3fa406920d8",
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-01-source-program5.json.gz",
+        "sha256": "6d13b95d22473d1712ebcf2852f512f5fcef2b56902dd0de4369e244027bbcfc"
+      },
+      "provenance": "candidate04 stored graph + per-body independent checks",
+      "qualification_reused_from_exact_prior_receipt": true,
+      "sequence": 10
+    },
+    {
+      "operations": 217,
+      "program": {
+        "bytes": 1701646,
+        "decoded_bytes": 15974502,
+        "decoded_sha256": "2473a003bc0bae268a282712ad2b4920916c0610dd02012631601d297c014be6",
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-02-source-program5.json.gz",
+        "sha256": "9487b7b432b9ab23cdb761e800125e5e3bdd704c9fd085f6565810841e6a5cab"
+      },
+      "provenance": "candidate04 stored graph + per-body independent checks",
+      "qualification_reused_from_exact_prior_receipt": true,
+      "sequence": 12
+    }
+  ],
+  "full_scope_subject_count": 4,
+  "full_scope_subjects": [
+    {
+      "ast_keyword_order": [
+        "DOUBLE_STARRED"
+      ],
+      "ast_positional_count": 0,
+      "body_index": 0,
+      "captured": {
+        "filename": "/home/zyf/AAA/le-wm/eval.py",
+        "first_line": 17,
+        "flags": 16777219,
+        "key": "pycode-v2:b454a32deb57e445ac73673152bfc3e7d79d541dec15b225c40af338da2666f7",
+        "parameters": [
+          "cfg"
+        ],
+        "qualname": "img_transform"
+      },
+      "code_link_index": 582,
+      "code_source_link": {
+        "code": "pycode-v2:b454a32deb57e445ac73673152bfc3e7d79d541dec15b225c40af338da2666f7",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:1d0050503e1baadc23f6e50d",
+          "wire": "opdef:op:1d0050503e1baadc23f6e50d"
+        },
+        "issues": [],
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "snapshot": {
+          "encoding": "utf-8",
+          "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+          "path": "/home/zyf/AAA/le-wm/eval.py",
+          "python_version": "3.14"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:3ce9d36aea40d2aae5c295c0",
+            "wire": "source:atom:3ce9d36aea40d2aae5c295c0"
+          },
+          "end_column": 20,
+          "end_line": 26,
+          "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+          "path": "/home/zyf/AAA/le-wm/eval.py",
+          "start_column": 0,
+          "start_line": 17
+        },
+        "status": "VERIFIED"
+      },
+      "context": {
+        "control_sha256": "b2140d795d0333e6aef4135db49f4cb9d5cc327a552cb4fd3c678f8336cf92cc",
+        "namespace_root": "/home/zyf/AAA/le-wm",
+        "semantic_sha256": "1877a5c1da20948a55c33c71f2209e6118e649cf515b76eb8f917d4822100bbe",
+        "semantics_sha256": "6ac1a391ee3a560cb1d235e58cb87b1b335876fc1d00af6c262ac8cc3ef5f503"
+      },
+      "current_body_locator": {
+        "artifact": {
+          "decoded_bytes": 486122,
+          "decoded_sha256": "3d47906de447d16623b190dc8c101da7fabe2dbb58a4c3945956bad799307008",
+          "external": true,
+          "physical_bytes": 33093,
+          "physical_sha256": "b057f37bc64c7bf4bfff1dcbfe2438ae887379deae547c5690539828c8fed102",
+          "representation": "scar.partitioned-file-inventory/1",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00000.json.gz"
+        },
+        "pointer": "#/file/bodies/0"
+      },
+      "definition": {
+        "body_supported": false,
+        "definition_inputs": [],
+        "id": {
+          "kind": "opdef",
+          "value": "op:1d0050503e1baadc23f6e50d",
+          "wire": "opdef:op:1d0050503e1baadc23f6e50d"
+        },
+        "kind": "FUNCTION",
+        "lexical_owner": null,
+        "name": "img_transform",
+        "parameters": [
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL",
+            "name": "cfg",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:28dd2777a0253f4a48706dae",
+                "wire": "source:atom:28dd2777a0253f4a48706dae"
+              },
+              "end_column": 21,
+              "end_line": 17,
+              "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+              "path": "/home/zyf/AAA/le-wm/eval.py",
+              "start_column": 18,
+              "start_line": 17
+            }
+          }
+        ],
+        "qualname": "img_transform",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:3ce9d36aea40d2aae5c295c0",
+            "wire": "source:atom:3ce9d36aea40d2aae5c295c0"
+          },
+          "end_column": 20,
+          "end_line": 26,
+          "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+          "path": "/home/zyf/AAA/le-wm/eval.py",
+          "start_column": 0,
+          "start_line": 17
+        }
+      },
+      "diagnosis_pointer": "#/rows/3",
+      "file_index": 0,
+      "frontier": {
+        "detail": "structured expression protocol still required for Call",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:b7216ec8b5673754156f37b5",
+            "wire": "source:atom:b7216ec8b5673754156f37b5"
+          },
+          "end_column": 67,
+          "end_line": 22,
+          "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+          "path": "/home/zyf/AAA/le-wm/eval.py",
+          "start_column": 12,
+          "start_line": 22
+        }
+      },
+      "original_body_key": "c355399c20693211282c837ff9e17eb0b8e99db7863db4a82abee4472da20799",
+      "original_calls": 2,
+      "original_sequence": 4,
+      "snapshot": {
+        "encoding": "utf-8",
+        "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+        "path": "/home/zyf/AAA/le-wm/eval.py",
+        "python_version": "3.14"
+      }
+    },
+    {
+      "ast_keyword_order": [
+        "DOUBLE_STARRED",
+        "NAMED"
+      ],
+      "ast_positional_count": 0,
+      "body_index": 3,
+      "captured": {
+        "filename": "/home/zyf/AAA/le-wm/eval.py",
+        "first_line": 49,
+        "flags": 83886083,
+        "key": "pycode-v2:e00fd01a3cf2a6faf55256a9bfe5d0fb7fedf4046a1a7fd10a4bd7532f0cb98c",
+        "parameters": [
+          "cfg"
+        ],
+        "qualname": "run"
+      },
+      "code_link_index": 714,
+      "code_source_link": {
+        "code": "pycode-v2:e00fd01a3cf2a6faf55256a9bfe5d0fb7fedf4046a1a7fd10a4bd7532f0cb98c",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:356f21bf651ee20bc481d2e2",
+          "wire": "opdef:op:356f21bf651ee20bc481d2e2"
+        },
+        "issues": [],
+        "optimize_levels": [
+          0
+        ],
+        "snapshot": {
+          "encoding": "utf-8",
+          "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+          "path": "/home/zyf/AAA/le-wm/eval.py",
+          "python_version": "3.14"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:fada02ba095f0be8b4662425",
+            "wire": "source:atom:fada02ba095f0be8b4662425"
+          },
+          "end_column": 70,
+          "end_line": 169,
+          "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+          "path": "/home/zyf/AAA/le-wm/eval.py",
+          "start_column": 0,
+          "start_line": 50
+        },
+        "status": "VERIFIED"
+      },
+      "context": {
+        "control_sha256": "b2140d795d0333e6aef4135db49f4cb9d5cc327a552cb4fd3c678f8336cf92cc",
+        "namespace_root": "/home/zyf/AAA/le-wm",
+        "semantic_sha256": "1877a5c1da20948a55c33c71f2209e6118e649cf515b76eb8f917d4822100bbe",
+        "semantics_sha256": "6ac1a391ee3a560cb1d235e58cb87b1b335876fc1d00af6c262ac8cc3ef5f503"
+      },
+      "current_body_locator": {
+        "artifact": {
+          "decoded_bytes": 486122,
+          "decoded_sha256": "3d47906de447d16623b190dc8c101da7fabe2dbb58a4c3945956bad799307008",
+          "external": true,
+          "physical_bytes": 33093,
+          "physical_sha256": "b057f37bc64c7bf4bfff1dcbfe2438ae887379deae547c5690539828c8fed102",
+          "representation": "scar.partitioned-file-inventory/1",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00000.json.gz"
+        },
+        "pointer": "#/file/bodies/3"
+      },
+      "definition": {
+        "body_supported": false,
+        "definition_inputs": [
+          {
+            "index": 0,
+            "role": "DECORATOR",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:cc1dcdd6dd9d501984c9b43f",
+                "wire": "source:atom:cc1dcdd6dd9d501984c9b43f"
+              },
+              "end_column": 80,
+              "end_line": 49,
+              "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+              "path": "/home/zyf/AAA/le-wm/eval.py",
+              "start_column": 1,
+              "start_line": 49
+            }
+          },
+          {
+            "index": 0,
+            "role": "ANNOTATION",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:fcb30a49563f392243005cda",
+                "wire": "source:atom:fcb30a49563f392243005cda"
+              },
+              "end_column": 23,
+              "end_line": 50,
+              "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+              "path": "/home/zyf/AAA/le-wm/eval.py",
+              "start_column": 13,
+              "start_line": 50
+            }
+          }
+        ],
+        "id": {
+          "kind": "opdef",
+          "value": "op:356f21bf651ee20bc481d2e2",
+          "wire": "opdef:op:356f21bf651ee20bc481d2e2"
+        },
+        "kind": "FUNCTION",
+        "lexical_owner": null,
+        "name": "run",
+        "parameters": [
+          {
+            "annotation": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:fcb30a49563f392243005cda",
+                "wire": "source:atom:fcb30a49563f392243005cda"
+              },
+              "end_column": 23,
+              "end_line": 50,
+              "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+              "path": "/home/zyf/AAA/le-wm/eval.py",
+              "start_column": 13,
+              "start_line": 50
+            },
+            "default": null,
+            "kind": "POSITIONAL",
+            "name": "cfg",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:66e3a12496921f67789863f8",
+                "wire": "source:atom:66e3a12496921f67789863f8"
+              },
+              "end_column": 23,
+              "end_line": 50,
+              "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+              "path": "/home/zyf/AAA/le-wm/eval.py",
+              "start_column": 8,
+              "start_line": 50
+            }
+          }
+        ],
+        "qualname": "run",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:fada02ba095f0be8b4662425",
+            "wire": "source:atom:fada02ba095f0be8b4662425"
+          },
+          "end_column": 70,
+          "end_line": 169,
+          "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+          "path": "/home/zyf/AAA/le-wm/eval.py",
+          "start_column": 0,
+          "start_line": 50
+        }
+      },
+      "diagnosis_pointer": "#/rows/4",
+      "file_index": 0,
+      "frontier": {
+        "detail": "structured expression protocol still required for Call",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:07bab8042e433d58ea83b2af",
+            "wire": "source:atom:07bab8042e433d58ea83b2af"
+          },
+          "end_column": 58,
+          "end_line": 58,
+          "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+          "path": "/home/zyf/AAA/le-wm/eval.py",
+          "start_column": 12,
+          "start_line": 58
+        }
+      },
+      "original_body_key": "120960f8d4c167a1f1a4acbd3f058756f9d244d9d09209f66cdbe0f060599d3c",
+      "original_calls": 1,
+      "original_sequence": 5,
+      "snapshot": {
+        "encoding": "utf-8",
+        "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+        "path": "/home/zyf/AAA/le-wm/eval.py",
+        "python_version": "3.14"
+      }
+    },
+    {
+      "ast_keyword_order": [
+        "NAMED",
+        "DOUBLE_STARRED"
+      ],
+      "ast_positional_count": 1,
+      "body_index": 0,
+      "captured": {
+        "filename": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+        "first_line": 59,
+        "flags": 16777227,
+        "key": "pycode-v2:62748f5758747457b438fff8911b3437eaa8679e6a98c32501814bb4e50c6277",
+        "parameters": [
+          "env_name",
+          "max_episode_steps",
+          "wrappers",
+          "add_pixels",
+          "kwargs"
+        ],
+        "qualname": "_make_env"
+      },
+      "code_link_index": 331,
+      "code_source_link": {
+        "code": "pycode-v2:62748f5758747457b438fff8911b3437eaa8679e6a98c32501814bb4e50c6277",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:f38ffb32feeb9befeb446c94",
+          "wire": "opdef:op:f38ffb32feeb9befeb446c94"
+        },
+        "issues": [],
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "snapshot": {
+          "encoding": "utf-8",
+          "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+          "python_version": "3.14"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:21de6bc60d3fcea756278d27",
+            "wire": "source:atom:21de6bc60d3fcea756278d27"
+          },
+          "end_column": 14,
+          "end_line": 67,
+          "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+          "start_column": 0,
+          "start_line": 59
+        },
+        "status": "VERIFIED"
+      },
+      "context": {
+        "control_sha256": "f67a78a029be9233b4ecf6977458e00bf90cbc596c3b3616006ab36361836ef9",
+        "namespace_root": "/home/zyf/AAA/le-wm",
+        "semantic_sha256": "ff581ed3a329cfbff179209ad12d331d38367d0417b4ed41f9edc889c13db03d",
+        "semantics_sha256": "c976db4b36462aaeb409885b692acea0dcf416ee25ed77744e6827b204440dfb"
+      },
+      "current_body_locator": {
+        "artifact": {
+          "decoded_bytes": 1427264,
+          "decoded_sha256": "51babec44648ca56584e648e4876aaba7b2a7726c80221d26864aac267fd2f29",
+          "external": true,
+          "physical_bytes": 88494,
+          "physical_sha256": "45140c30b0dc45c694828ae18c4157c4f95edbc54ddfaaab963134563aacecb7",
+          "representation": "scar.partitioned-file-inventory/1",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00147.json.gz"
+        },
+        "pointer": "#/file/bodies/0"
+      },
+      "definition": {
+        "body_supported": false,
+        "definition_inputs": [
+          {
+            "index": 0,
+            "role": "DEFAULT",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:34a92cc94c5ff61288ded6d0",
+                "wire": "source:atom:34a92cc94c5ff61288ded6d0"
+              },
+              "end_column": 58,
+              "end_line": 60,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 54,
+              "start_line": 60
+            }
+          }
+        ],
+        "id": {
+          "kind": "opdef",
+          "value": "op:f38ffb32feeb9befeb446c94",
+          "wire": "opdef:op:f38ffb32feeb9befeb446c94"
+        },
+        "kind": "FUNCTION",
+        "lexical_owner": null,
+        "name": "_make_env",
+        "parameters": [
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL",
+            "name": "env_name",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:4a2be28f3684d8063ce71714",
+                "wire": "source:atom:4a2be28f3684d8063ce71714"
+              },
+              "end_column": 12,
+              "end_line": 60,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 4,
+              "start_line": 60
+            }
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL",
+            "name": "max_episode_steps",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:aff6aeb2d339665d1d5f6850",
+                "wire": "source:atom:aff6aeb2d339665d1d5f6850"
+              },
+              "end_column": 31,
+              "end_line": 60,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 14,
+              "start_line": 60
+            }
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL",
+            "name": "wrappers",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:a941c9a992913b6ae2a8e7e1",
+                "wire": "source:atom:a941c9a992913b6ae2a8e7e1"
+              },
+              "end_column": 41,
+              "end_line": 60,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 33,
+              "start_line": 60
+            }
+          },
+          {
+            "annotation": null,
+            "default": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:34a92cc94c5ff61288ded6d0",
+                "wire": "source:atom:34a92cc94c5ff61288ded6d0"
+              },
+              "end_column": 58,
+              "end_line": 60,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 54,
+              "start_line": 60
+            },
+            "kind": "POSITIONAL",
+            "name": "add_pixels",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:ca751aada5032ab1d4c98470",
+                "wire": "source:atom:ca751aada5032ab1d4c98470"
+              },
+              "end_column": 53,
+              "end_line": 60,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 43,
+              "start_line": 60
+            }
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "VAR_KEYWORD",
+            "name": "kwargs",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:b6414a860b6e692bb4431bbf",
+                "wire": "source:atom:b6414a860b6e692bb4431bbf"
+              },
+              "end_column": 68,
+              "end_line": 60,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 62,
+              "start_line": 60
+            }
+          }
+        ],
+        "qualname": "_make_env",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:21de6bc60d3fcea756278d27",
+            "wire": "source:atom:21de6bc60d3fcea756278d27"
+          },
+          "end_column": 14,
+          "end_line": 67,
+          "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+          "start_column": 0,
+          "start_line": 59
+        }
+      },
+      "diagnosis_pointer": "#/rows/9",
+      "file_index": 147,
+      "frontier": {
+        "detail": "structured expression protocol still required for Call",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:85a63dee9453ab0443f931fa",
+            "wire": "source:atom:85a63dee9453ab0443f931fa"
+          },
+          "end_column": 75,
+          "end_line": 64,
+          "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+          "start_column": 10,
+          "start_line": 64
+        }
+      },
+      "original_body_key": "31b5db542f498f5e91b248510fe9af0bff8a45ddb7fefaca6aaff9356fe818bb",
+      "original_calls": 1,
+      "original_sequence": 10,
+      "snapshot": {
+        "encoding": "utf-8",
+        "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+        "python_version": "3.14"
+      }
+    },
+    {
+      "ast_keyword_order": [
+        "DOUBLE_STARRED"
+      ],
+      "ast_positional_count": 0,
+      "body_index": 25,
+      "captured": {
+        "filename": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+        "first_line": 601,
+        "flags": 16777219,
+        "key": "pycode-v2:2d88ae8dee4a5d4cd69ae10bb80079063ec1e8e1a9b6adaa46cac5734b9bec91",
+        "parameters": [
+          "env",
+          "callables",
+          "init_state"
+        ],
+        "qualname": "_apply_callables"
+      },
+      "code_link_index": 149,
+      "code_source_link": {
+        "code": "pycode-v2:2d88ae8dee4a5d4cd69ae10bb80079063ec1e8e1a9b6adaa46cac5734b9bec91",
+        "definition": {
+          "kind": "opdef",
+          "value": "op:c0f25aae109d71f2f064929a",
+          "wire": "opdef:op:c0f25aae109d71f2f064929a"
+        },
+        "issues": [],
+        "optimize_levels": [
+          0,
+          1,
+          2
+        ],
+        "snapshot": {
+          "encoding": "utf-8",
+          "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+          "python_version": "3.14"
+        },
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:3bf4eacaeec98b7a0439bca1",
+            "wire": "source:atom:3bf4eacaeec98b7a0439bca1"
+          },
+          "end_column": 40,
+          "end_line": 614,
+          "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+          "start_column": 0,
+          "start_line": 601
+        },
+        "status": "VERIFIED"
+      },
+      "context": {
+        "control_sha256": "f67a78a029be9233b4ecf6977458e00bf90cbc596c3b3616006ab36361836ef9",
+        "namespace_root": "/home/zyf/AAA/le-wm",
+        "semantic_sha256": "ff581ed3a329cfbff179209ad12d331d38367d0417b4ed41f9edc889c13db03d",
+        "semantics_sha256": "c976db4b36462aaeb409885b692acea0dcf416ee25ed77744e6827b204440dfb"
+      },
+      "current_body_locator": {
+        "artifact": {
+          "decoded_bytes": 1427264,
+          "decoded_sha256": "51babec44648ca56584e648e4876aaba7b2a7726c80221d26864aac267fd2f29",
+          "external": true,
+          "physical_bytes": 88494,
+          "physical_sha256": "45140c30b0dc45c694828ae18c4157c4f95edbc54ddfaaab963134563aacecb7",
+          "representation": "scar.partitioned-file-inventory/1",
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/sources/00147.json.gz"
+        },
+        "pointer": "#/file/bodies/25"
+      },
+      "definition": {
+        "body_supported": false,
+        "definition_inputs": [],
+        "id": {
+          "kind": "opdef",
+          "value": "op:c0f25aae109d71f2f064929a",
+          "wire": "opdef:op:c0f25aae109d71f2f064929a"
+        },
+        "kind": "FUNCTION",
+        "lexical_owner": null,
+        "name": "_apply_callables",
+        "parameters": [
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL",
+            "name": "env",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:f866e178a4e6777fbf6da70f",
+                "wire": "source:atom:f866e178a4e6777fbf6da70f"
+              },
+              "end_column": 24,
+              "end_line": 601,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 21,
+              "start_line": 601
+            }
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL",
+            "name": "callables",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:207741f038a181d9bcf34504",
+                "wire": "source:atom:207741f038a181d9bcf34504"
+              },
+              "end_column": 35,
+              "end_line": 601,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 26,
+              "start_line": 601
+            }
+          },
+          {
+            "annotation": null,
+            "default": null,
+            "kind": "POSITIONAL",
+            "name": "init_state",
+            "source": {
+              "atom_id": {
+                "kind": "source",
+                "value": "atom:cbd4a3c0e30280df6abd8405",
+                "wire": "source:atom:cbd4a3c0e30280df6abd8405"
+              },
+              "end_column": 47,
+              "end_line": 601,
+              "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+              "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+              "start_column": 37,
+              "start_line": 601
+            }
+          }
+        ],
+        "qualname": "_apply_callables",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:3bf4eacaeec98b7a0439bca1",
+            "wire": "source:atom:3bf4eacaeec98b7a0439bca1"
+          },
+          "end_column": 40,
+          "end_line": 614,
+          "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+          "start_column": 0,
+          "start_line": 601
+        }
+      },
+      "diagnosis_pointer": "#/rows/11",
+      "file_index": 147,
+      "frontier": {
+        "detail": "structured expression protocol still required for Call",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:09347d57fb89869f4b9e0ad5",
+            "wire": "source:atom:09347d57fb89869f4b9e0ad5"
+          },
+          "end_column": 40,
+          "end_line": 614,
+          "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+          "start_column": 8,
+          "start_line": 614
+        }
+      },
+      "original_body_key": "ca14e20344a9b5c9455a91fcbb3096eab8cdb155b3c2bd813e7cf0911207de59",
+      "original_calls": 1,
+      "original_sequence": 12,
+      "snapshot": {
+        "encoding": "utf-8",
+        "fingerprint": "sha256:39318b81ed151d8556d8540f460a63eedaed0ce4b2211ce0af9f8200e7d83bde",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/world/world.py",
+        "python_version": "3.14"
+      }
+    }
+  ],
+  "git_operations": 0,
+  "main_source_differences": [
+    {
+      "main": null,
+      "relative_path": "scar/analysis/source_call_lowering.py",
+      "reviewed_baseline": null,
+      "source_sha256": "cbc54b8d2ca128957c44f55388f62774ece23e9525311c7cbac6bb97b75afd98",
+      "state": "NEW_FILE"
+    },
+    {
+      "main": null,
+      "relative_path": "scar/analysis/source_call_validation.py",
+      "reviewed_baseline": null,
+      "source_sha256": "9b7446e5758f5a2c9d3faf826f4b2e4a110cde2884913f871f78950b1c354307",
+      "state": "NEW_FILE"
+    },
+    {
+      "main": {
+        "bytes": 6530,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/structured.py",
+        "sha256": "c100dd3b51665e462336efe0d555d60806922b1ec7c34c8c2b9c904755eca87f"
+      },
+      "relative_path": "scar/ir/program/structured.py",
+      "reviewed_baseline": {
+        "bytes": 6530,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/structured.py",
+        "reviewed_interfaces": [
+          "PythonProtocolKind",
+          "PythonProtocol",
+          "StructuredBodyModel"
+        ],
+        "sha256": "c100dd3b51665e462336efe0d555d60806922b1ec7c34c8c2b9c904755eca87f"
+      },
+      "source_sha256": "001ff3bdb685bfff3d4723624564756c04079ebd5e94d2178a6976124b72722e",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    },
+    {
+      "main": {
+        "bytes": 5920,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_language.py",
+        "sha256": "a6588f7c12299d503582520603fc5b4756f7434910ce2ccd7be8128f22ef06e6"
+      },
+      "relative_path": "scar/ir/program/source_language.py",
+      "reviewed_baseline": {
+        "bytes": 5920,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_language.py",
+        "reviewed_interfaces": [
+          "capability/default version/EXTENDED_PROTOCOLS",
+          "CodeConstantSource",
+          "SourceLanguageOverlay"
+        ],
+        "sha256": "a6588f7c12299d503582520603fc5b4756f7434910ce2ccd7be8128f22ef06e6"
+      },
+      "source_sha256": "1daa83c2c509f17f7d94f46d1440c983d13aae4d7650217ef7c06bbad97368cd",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    },
+    {
+      "main": {
+        "bytes": 5180,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language.py",
+        "sha256": "9b2ef877bbfc9d752313cf54738ddcdf9b424f519b6c836f37d738ddf44497c1"
+      },
+      "relative_path": "scar/analysis/source_language.py",
+      "reviewed_baseline": {
+        "bytes": 5180,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language.py",
+        "reviewed_interfaces": [
+          "SourceCodeEvidence",
+          "SourceLanguageOptions",
+          "require_source_tree"
+        ],
+        "sha256": "9b2ef877bbfc9d752313cf54738ddcdf9b424f519b6c836f37d738ddf44497c1"
+      },
+      "source_sha256": "6812c14975bf123dfe66a11b8d120a33c060c0dec1e3a02f37d17fea0fe94699",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    },
+    {
+      "main": {
+        "bytes": 21905,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/environment_lowering.py",
+        "sha256": "ae89cdbbe428e137ef1c372eb0625dd4989f691fdb7b06ee9ef469a88d7ec13b"
+      },
+      "relative_path": "scar/analysis/environment_lowering.py",
+      "reviewed_baseline": {
+        "bytes": 21905,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/environment_lowering.py",
+        "reviewed_interfaces": [
+          "StructuredEnvironmentBuilder.expr",
+          "_addresses",
+          "read_source_name"
+        ],
+        "sha256": "ae89cdbbe428e137ef1c372eb0625dd4989f691fdb7b06ee9ef469a88d7ec13b"
+      },
+      "source_sha256": "bc41b46fa0c332872e0768e87ad5f7e1c8f7b18c9dfa6528f2bfe57ac490f9a5",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    },
+    {
+      "main": {
+        "bytes": 14653,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_heap_lowering.py",
+        "sha256": "e0948eb09225b4e31e1c3ba72bbcd47eadfa4460d605e3a400435f3936ff8d97"
+      },
+      "relative_path": "scar/analysis/source_heap_lowering.py",
+      "reviewed_baseline": {
+        "bytes": 14653,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_heap_lowering.py",
+        "reviewed_interfaces": [
+          "_source_definition",
+          "_associate",
+          "expression_for_heap_target",
+          "_hold",
+          "_release"
+        ],
+        "sha256": "e0948eb09225b4e31e1c3ba72bbcd47eadfa4460d605e3a400435f3936ff8d97"
+      },
+      "source_sha256": "323f2f478a57c0a133648749323e9bfbfb942dbe9410ad35111a608515af2ff9",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    },
+    {
+      "main": {
+        "bytes": 55023,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/structured_lowering.py",
+        "sha256": "ff0efe4a806c22607753458eac11795103dbdf110d9867b400cc20638b8e2931"
+      },
+      "relative_path": "scar/analysis/structured_lowering.py",
+      "reviewed_baseline": {
+        "bytes": 55023,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/structured_lowering.py",
+        "reviewed_interfaces": [
+          "invoke_results",
+          "frame_transition",
+          "finish_exit",
+          "expr",
+          "validate_structured_body protocol dispatch"
+        ],
+        "sha256": "ff0efe4a806c22607753458eac11795103dbdf110d9867b400cc20638b8e2931"
+      },
+      "source_sha256": "82a476089dfba52cbd49727468838816c91bbeec88322a036b7fcc327583e87c",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    },
+    {
+      "main": {
+        "bytes": 12366,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_mapping_lowering.py",
+        "sha256": "2f9f3973dc2fe64ac95cd22010af4fb1c871d6cf520690388adf93cb415cdbf4"
+      },
+      "relative_path": "scar/analysis/source_mapping_lowering.py",
+      "reviewed_baseline": {
+        "bytes": 12366,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_mapping_lowering.py",
+        "reviewed_interfaces": [
+          "_invoke",
+          "_transfer",
+          "_run",
+          "_update",
+          "lower_dictionary",
+          "validate_mapping_protocols"
+        ],
+        "sha256": "2f9f3973dc2fe64ac95cd22010af4fb1c871d6cf520690388adf93cb415cdbf4"
+      },
+      "source_sha256": "66c8cabadb7cc933a452b6a7c797dd90dc551c0fcde8eb2e4fab1a9cd7bbb510",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    },
+    {
+      "main": {
+        "bytes": 13422,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_environment_validation.py",
+        "sha256": "d543bd8a8cbbf9ea51c675658eef1753576855e370ea61c2946c45a2eda4472a"
+      },
+      "relative_path": "scar/analysis/source_environment_validation.py",
+      "reviewed_baseline": {
+        "bytes": 13422,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_environment_validation.py",
+        "reviewed_interfaces": [
+          "validate_environment_body currently rejects non-environment protocol with semantic_operation; new capability-gated final Call exception must be explicit"
+        ],
+        "sha256": "d543bd8a8cbbf9ea51c675658eef1753576855e370ea61c2946c45a2eda4472a"
+      },
+      "source_sha256": "31a4eeeb97ee86099a675775f192297ec66cb65514c84cff59dcaffb88e81fec",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    },
+    {
+      "main": {
+        "bytes": 20560,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language_validation.py",
+        "sha256": "c2e697681e3c8d2f3fbc12325d59ab42f31680b3ea81fdce206af398056ba353"
+      },
+      "relative_path": "scar/analysis/source_language_validation.py",
+      "reviewed_baseline": {
+        "bytes": 20560,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language_validation.py",
+        "reviewed_interfaces": [
+          "validate_language_body source/options/shape equality",
+          "invoke",
+          "code constant/slice witness checking"
+        ],
+        "sha256": "c2e697681e3c8d2f3fbc12325d59ab42f31680b3ea81fdce206af398056ba353"
+      },
+      "source_sha256": "e5d26274c8b96efb760f37101069c8785c58d6b8afad59b712b6b3cd9715efdc",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    },
+    {
+      "main": {
+        "bytes": 66613,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py",
+        "sha256": "8366051f1f9584d2b44363c3310580b6e51594de182849bb43245218a697bee4"
+      },
+      "relative_path": "scar/analysis/program_lowering.py",
+      "reviewed_baseline": {
+        "bytes": 66613,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/program_lowering.py",
+        "sha256": "8366051f1f9584d2b44363c3310580b6e51594de182849bb43245218a697bee4"
+      },
+      "source_sha256": "c1d0a8a3204aff994933e957c8fdcfbab6e07300a6a9ee2ef257ed4446ab250d",
+      "state": "BASELINE_MATCH_NARROW_DIFF"
+    }
+  ],
+  "main_writes": 0,
+  "original_window": {
+    "exit_code": 1,
+    "failure": {
+      "bytes": 152399,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/failure.json",
+      "sha256": "641dc864300ad40cdba9e31c9cf8f9539f3081aa7c1517c5b02906e57c195915"
+    },
+    "failure_type": "PermissionError",
+    "launch": {
+      "bytes": 907,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/launch-result.json",
+      "sha256": "e41db578f9607547db339dd371378b6162113d68bbc131697e4fb24eaa301df2"
+    },
+    "reason": "own approved freeze.json reread omitted from tool allowlist at final verification; independent postflight repairs only that missing check",
+    "status": "FAILED_RETAINED_NO_RETRY",
+    "unchanged": true,
+    "wall_seconds": 52.88651964900782
+  },
+  "outer_prefix_verified": false,
+  "postflight": {
+    "body_lowerings": 0,
+    "composition_root_stream_reads": 0,
+    "elapsed_s": 0.24457272799918428,
+    "exit_code": 0,
+    "file": {
+      "bytes": 9278,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/postflight01/finalize.py",
+      "sha256": "82bfc98f3788f190398b77c80e8e75077938830fa13d919fb7f144b2be7c217e"
+    },
+    "frozen_input_stats": 27,
+    "frozen_source_count": 352,
+    "method": "fresh process; approved verify_freeze small SHA/27stat; stored SHA only for2 graphs; machine receipt/last-phase reconciliation",
+    "program_codec_or_decoded_graph_replays": 0,
+    "source_tool_guard_bytes": 42870616,
+    "target_executions": 0
+  },
+  "production_sources": [
+    {
+      "bytes": 12482,
+      "change": "NEW",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_call_lowering.py",
+      "relative_path": "scar/analysis/source_call_lowering.py",
+      "sha256": "cbc54b8d2ca128957c44f55388f62774ece23e9525311c7cbac6bb97b75afd98"
+    },
+    {
+      "bytes": 24345,
+      "change": "NEW",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_call_validation.py",
+      "relative_path": "scar/analysis/source_call_validation.py",
+      "sha256": "9b7446e5758f5a2c9d3faf826f4b2e4a110cde2884913f871f78950b1c354307"
+    },
+    {
+      "bytes": 6656,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/program/structured.py",
+      "relative_path": "scar/ir/program/structured.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 6530,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/structured.py",
+        "reviewed_interfaces": [
+          "PythonProtocolKind",
+          "PythonProtocol",
+          "StructuredBodyModel"
+        ],
+        "sha256": "c100dd3b51665e462336efe0d555d60806922b1ec7c34c8c2b9c904755eca87f"
+      },
+      "sha256": "001ff3bdb685bfff3d4723624564756c04079ebd5e94d2178a6976124b72722e"
+    },
+    {
+      "bytes": 6037,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/program/source_language.py",
+      "relative_path": "scar/ir/program/source_language.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 5920,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_language.py",
+        "reviewed_interfaces": [
+          "capability/default version/EXTENDED_PROTOCOLS",
+          "CodeConstantSource",
+          "SourceLanguageOverlay"
+        ],
+        "sha256": "a6588f7c12299d503582520603fc5b4756f7434910ce2ccd7be8128f22ef06e6"
+      },
+      "sha256": "1daa83c2c509f17f7d94f46d1440c983d13aae4d7650217ef7c06bbad97368cd"
+    },
+    {
+      "bytes": 5283,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_language.py",
+      "relative_path": "scar/analysis/source_language.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 5180,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language.py",
+        "reviewed_interfaces": [
+          "SourceCodeEvidence",
+          "SourceLanguageOptions",
+          "require_source_tree"
+        ],
+        "sha256": "9b2ef877bbfc9d752313cf54738ddcdf9b424f519b6c836f37d738ddf44497c1"
+      },
+      "sha256": "6812c14975bf123dfe66a11b8d120a33c060c0dec1e3a02f37d17fea0fe94699"
+    },
+    {
+      "bytes": 22198,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/environment_lowering.py",
+      "relative_path": "scar/analysis/environment_lowering.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 21905,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/environment_lowering.py",
+        "reviewed_interfaces": [
+          "StructuredEnvironmentBuilder.expr",
+          "_addresses",
+          "read_source_name"
+        ],
+        "sha256": "ae89cdbbe428e137ef1c372eb0625dd4989f691fdb7b06ee9ef469a88d7ec13b"
+      },
+      "sha256": "bc41b46fa0c332872e0768e87ad5f7e1c8f7b18c9dfa6528f2bfe57ac490f9a5"
+    },
+    {
+      "bytes": 14965,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_heap_lowering.py",
+      "relative_path": "scar/analysis/source_heap_lowering.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 14653,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_heap_lowering.py",
+        "reviewed_interfaces": [
+          "_source_definition",
+          "_associate",
+          "expression_for_heap_target",
+          "_hold",
+          "_release"
+        ],
+        "sha256": "e0948eb09225b4e31e1c3ba72bbcd47eadfa4460d605e3a400435f3936ff8d97"
+      },
+      "sha256": "323f2f478a57c0a133648749323e9bfbfb942dbe9410ad35111a608515af2ff9"
+    },
+    {
+      "bytes": 55169,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/structured_lowering.py",
+      "relative_path": "scar/analysis/structured_lowering.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 55023,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/structured_lowering.py",
+        "reviewed_interfaces": [
+          "invoke_results",
+          "frame_transition",
+          "finish_exit",
+          "expr",
+          "validate_structured_body protocol dispatch"
+        ],
+        "sha256": "ff0efe4a806c22607753458eac11795103dbdf110d9867b400cc20638b8e2931"
+      },
+      "sha256": "82a476089dfba52cbd49727468838816c91bbeec88322a036b7fcc327583e87c"
+    },
+    {
+      "bytes": 12995,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_mapping_lowering.py",
+      "relative_path": "scar/analysis/source_mapping_lowering.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 12366,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_mapping_lowering.py",
+        "reviewed_interfaces": [
+          "_invoke",
+          "_transfer",
+          "_run",
+          "_update",
+          "lower_dictionary",
+          "validate_mapping_protocols"
+        ],
+        "sha256": "2f9f3973dc2fe64ac95cd22010af4fb1c871d6cf520690388adf93cb415cdbf4"
+      },
+      "sha256": "66c8cabadb7cc933a452b6a7c797dd90dc551c0fcde8eb2e4fab1a9cd7bbb510"
+    },
+    {
+      "bytes": 14396,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_environment_validation.py",
+      "relative_path": "scar/analysis/source_environment_validation.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 13422,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_environment_validation.py",
+        "reviewed_interfaces": [
+          "validate_environment_body currently rejects non-environment protocol with semantic_operation; new capability-gated final Call exception must be explicit"
+        ],
+        "sha256": "d543bd8a8cbbf9ea51c675658eef1753576855e370ea61c2946c45a2eda4472a"
+      },
+      "sha256": "31a4eeeb97ee86099a675775f192297ec66cb65514c84cff59dcaffb88e81fec"
+    },
+    {
+      "bytes": 21423,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_language_validation.py",
+      "relative_path": "scar/analysis/source_language_validation.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 20560,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language_validation.py",
+        "reviewed_interfaces": [
+          "validate_language_body source/options/shape equality",
+          "invoke",
+          "code constant/slice witness checking"
+        ],
+        "sha256": "c2e697681e3c8d2f3fbc12325d59ab42f31680b3ea81fdce206af398056ba353"
+      },
+      "sha256": "e5d26274c8b96efb760f37101069c8785c58d6b8afad59b712b6b3cd9715efdc"
+    },
+    {
+      "bytes": 67819,
+      "change": "STRUCTURE_SOURCE_TEXTS_API_ONLY",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/program_lowering.py",
+      "previous_source": {
+        "bytes": 66613,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/program_lowering.py",
+        "sha256": "8366051f1f9584d2b44363c3310580b6e51594de182849bb43245218a697bee4"
+      },
+      "relative_path": "scar/analysis/program_lowering.py",
+      "sha256": "c1d0a8a3204aff994933e957c8fdcfbab6e07300a6a9ee2ef257ed4446ab250d"
+    }
+  ],
+  "restored_original_machine_counters": {
+    "guard": {
+      "actual_input_bytes": 243336909,
+      "ast_only_compile_calls": 8,
+      "decoded_bytes": 183151542,
+      "non_target_compile_audit_events": 1070,
+      "source_prepare_attempts": 0,
+      "stored_bytes": 60185367,
+      "symtable_calls": 2,
+      "target_analysis_compile_audit_events": 10,
+      "target_exec_attempts": 0,
+      "target_executable_compile_attempts": 0
+    },
+    "last_phase": {
+      "actual_retained_input_bytes": 243336909,
+      "body": 2,
+      "elapsed_s": 52.54055458196672,
+      "event": "STAGE_BEGIN",
+      "output_accounted_bytes": 69620008,
+      "phase": "FINAL_SOURCE_AND_INPUT_CHECK",
+      "self_peak_rss_kib": 581992
+    },
+    "launcher_wall_seconds": 52.88651964900782,
+    "output_before_final_failure": 69620414,
+    "self_peak_rss_kib": 581992,
+    "witness": {
+      "compile_attempts": 0,
+      "complete_descriptor_matches": 2,
+      "module_loads": 1,
+      "source_bytes_read": 0
+    },
+    "worker_wall_seconds": 52.54423483897699
+  },
+  "runtime_instance_verified": false,
+  "schema": "scar.kwargs-independent-postflight",
+  "schema_version": 1,
+  "seq5": {
+    "body_status": "UNSUPPORTED_OPEN",
+    "construction_operations": 350,
+    "evidence": {
+      "bytes": 33428,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate03/attempt03/body-02-result.json",
+      "sha256": "106ba5e133e236f7ab0e673b9bb37e36a113b8e292f85bd06cd0febd965cbb18"
+    },
+    "last_frontier": {
+      "detail": "missing target-child computational semantics require a checked rule for JoinedStr",
+      "kind": "UNSUPPORTED_SYNTAX",
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:c96659ff1770ca1387368ba5",
+          "wire": "source:atom:c96659ff1770ca1387368ba5"
+        },
+        "end_column": 33,
+        "end_line": 82,
+        "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+        "path": "/home/zyf/AAA/le-wm/eval.py",
+        "start_column": 20,
+        "start_line": 82
+      }
+    },
+    "program": null,
+    "sequence": 5
+  },
+  "stored_artifact_checks": [
+    {
+      "body_result": {
+        "bytes": 9745,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-01-result.json",
+        "sha256": "f5d48a283091d0e18b549482e591e5ca41dc934db3b516eb60189a4c44ef4666"
+      },
+      "program_decoded_replayed_in_postflight": false,
+      "stored_program": {
+        "bytes": 1602195,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-01-source-program5.json.gz",
+        "sha256": "6d13b95d22473d1712ebcf2852f512f5fcef2b56902dd0de4369e244027bbcfc"
+      },
+      "subject_sequence": 10
+    },
+    {
+      "body_result": {
+        "bytes": 21951,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-02-result.json",
+        "sha256": "54a356397361f93b94b37234bdea453c9fdf6f77520def78f7475d43908b38e9"
+      },
+      "program_decoded_replayed_in_postflight": false,
+      "stored_program": {
+        "bytes": 1701646,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-02-source-program5.json.gz",
+        "sha256": "9487b7b432b9ab23cdb761e800125e5e3bdd704c9fd085f6565810841e6a5cab"
+      },
+      "subject_sequence": 12
+    }
+  ],
+  "stored_graphs_retained_locally_not_staged": true,
+  "unwind_verified": false,
+  "whole_program_established": false,
+  "world_effects_verified": false
+}

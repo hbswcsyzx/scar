@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/run_gate.py", line 225, in worker
+    _freeze,final_guard_bytes=verify_freeze(expected)
+                              ~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/run_gate.py", line 24, in verify_freeze
+    data=(BASE/'freeze.json').read_bytes()
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py", line 777, in read_bytes
+    with self.open(mode='rb', buffering=0) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/gate_guards.py", line 81, in opened
+    return original(file,*args,**kwargs)
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/gate_guards.py", line 98, in audit
+    elif str(path.resolve()) not in internal:raise PermissionError('unfrozen isolated retained artifact read')
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+PermissionError: unfrozen isolated retained artifact read

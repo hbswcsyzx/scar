@@ -1,0 +1,12 @@
+{
+  "freeze_sha256": "26b44d86b573624269b068d20d02e131a7b9237174fd467a307635422c976297",
+  "input_stat_pins": 27,
+  "old_cases_retained_in_aggregate": true,
+  "remaining_sequences": [
+    10,
+    12
+  ],
+  "source_guard_bytes": 42870616,
+  "status": "ROOT_REMAINING_WINDOW_REVIEW_PASS",
+  "whole_program_model": "OPEN"
+}

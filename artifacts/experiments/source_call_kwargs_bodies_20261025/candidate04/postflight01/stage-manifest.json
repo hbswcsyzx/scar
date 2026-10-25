@@ -1,0 +1,218 @@
+{
+  "entries": [
+    {
+      "bytes": 12482,
+      "path": "scar/analysis/source_call_lowering.py",
+      "sha256": "cbc54b8d2ca128957c44f55388f62774ece23e9525311c7cbac6bb97b75afd98"
+    },
+    {
+      "bytes": 24345,
+      "path": "scar/analysis/source_call_validation.py",
+      "sha256": "9b7446e5758f5a2c9d3faf826f4b2e4a110cde2884913f871f78950b1c354307"
+    },
+    {
+      "bytes": 6656,
+      "path": "scar/ir/program/structured.py",
+      "sha256": "001ff3bdb685bfff3d4723624564756c04079ebd5e94d2178a6976124b72722e"
+    },
+    {
+      "bytes": 6037,
+      "path": "scar/ir/program/source_language.py",
+      "sha256": "1daa83c2c509f17f7d94f46d1440c983d13aae4d7650217ef7c06bbad97368cd"
+    },
+    {
+      "bytes": 5283,
+      "path": "scar/analysis/source_language.py",
+      "sha256": "6812c14975bf123dfe66a11b8d120a33c060c0dec1e3a02f37d17fea0fe94699"
+    },
+    {
+      "bytes": 22198,
+      "path": "scar/analysis/environment_lowering.py",
+      "sha256": "bc41b46fa0c332872e0768e87ad5f7e1c8f7b18c9dfa6528f2bfe57ac490f9a5"
+    },
+    {
+      "bytes": 14965,
+      "path": "scar/analysis/source_heap_lowering.py",
+      "sha256": "323f2f478a57c0a133648749323e9bfbfb942dbe9410ad35111a608515af2ff9"
+    },
+    {
+      "bytes": 55169,
+      "path": "scar/analysis/structured_lowering.py",
+      "sha256": "82a476089dfba52cbd49727468838816c91bbeec88322a036b7fcc327583e87c"
+    },
+    {
+      "bytes": 12995,
+      "path": "scar/analysis/source_mapping_lowering.py",
+      "sha256": "66c8cabadb7cc933a452b6a7c797dd90dc551c0fcde8eb2e4fab1a9cd7bbb510"
+    },
+    {
+      "bytes": 14396,
+      "path": "scar/analysis/source_environment_validation.py",
+      "sha256": "31a4eeeb97ee86099a675775f192297ec66cb65514c84cff59dcaffb88e81fec"
+    },
+    {
+      "bytes": 21423,
+      "path": "scar/analysis/source_language_validation.py",
+      "sha256": "e5d26274c8b96efb760f37101069c8785c58d6b8afad59b712b6b3cd9715efdc"
+    },
+    {
+      "bytes": 67819,
+      "path": "scar/analysis/program_lowering.py",
+      "sha256": "c1d0a8a3204aff994933e957c8fdcfbab6e07300a6a9ee2ef257ed4446ab250d"
+    },
+    {
+      "bytes": 10364,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/PREPARATION_RECEIPT.json",
+      "sha256": "4113861c794d02f5b194f0b3074b0246ed85c14009255368bc2f7366d2bddaba"
+    },
+    {
+      "bytes": 2008,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/README.md",
+      "sha256": "4b68d1c755b4b613fa75f5fb003daa00f74c1fb6782da965bb9ad6273f85486e"
+    },
+    {
+      "bytes": 3429,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/RESULT.md",
+      "sha256": "43bd1b4554761305daafff486a1b76e3c3108f12d312e69320efaab231671508"
+    },
+    {
+      "bytes": 129,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/BUILDING.json",
+      "sha256": "1481df8063e4561b76512af79c478c87a80e6cd6f841607bf6db6fdd30cf6e47"
+    },
+    {
+      "bytes": 11549,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-01-inputs.json",
+      "sha256": "9e24cf7751422aa08354bc1d5d209f6fcc33fd9611aae898ef73190b38588584"
+    },
+    {
+      "bytes": 9745,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-01-result.json",
+      "sha256": "f5d48a283091d0e18b549482e591e5ca41dc934db3b516eb60189a4c44ef4666"
+    },
+    {
+      "bytes": 377945,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-01-returned.json",
+      "sha256": "af866e0b0983834171896c19aa4aeda8f2f11704bd5d82dcdabcf0a1e8cb2512"
+    },
+    {
+      "bytes": 9898,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-02-inputs.json",
+      "sha256": "9580636d99cca0aac82b9ad7c81f644a70f8d8b68750aad50a70b7301cf51e64"
+    },
+    {
+      "bytes": 21951,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-02-result.json",
+      "sha256": "54a356397361f93b94b37234bdea453c9fdf6f77520def78f7475d43908b38e9"
+    },
+    {
+      "bytes": 152399,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/failure.json",
+      "sha256": "641dc864300ad40cdba9e31c9cf8f9539f3081aa7c1517c5b02906e57c195915"
+    },
+    {
+      "bytes": 1163,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/gnu-time.txt",
+      "sha256": "d442d81f710db36783567a8a56b08cc67b9a956f7c02e7b54ffc3f0891da5860"
+    },
+    {
+      "bytes": 907,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/launch-result.json",
+      "sha256": "e41db578f9607547db339dd371378b6162113d68bbc131697e4fb24eaa301df2"
+    },
+    {
+      "bytes": 3209,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/progress.jsonl",
+      "sha256": "1d5d666947c2548c99f46434c60222bc5e8718e1389bdc29066b96bb8d031498"
+    },
+    {
+      "bytes": 1572,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/stderr.log",
+      "sha256": "f01446f6cad8ed29b34718bced921bc9457c087fa889e24b4ac131c03c3ef446"
+    },
+    {
+      "bytes": 3209,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/stdout.log",
+      "sha256": "1d5d666947c2548c99f46434c60222bc5e8718e1389bdc29066b96bb8d031498"
+    },
+    {
+      "bytes": 104581,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/freeze.json",
+      "sha256": "26b44d86b573624269b068d20d02e131a7b9237174fd467a307635422c976297"
+    },
+    {
+      "bytes": 11352,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/gate_guards.py",
+      "sha256": "3a03ed014b09f622cdab335fafb27bf35398a18b43e4deb44b425aaf7a01ddce"
+    },
+    {
+      "bytes": 9278,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/postflight01/finalize.py",
+      "sha256": "82bfc98f3788f190398b77c80e8e75077938830fa13d919fb7f144b2be7c217e"
+    },
+    {
+      "bytes": 1247,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/postflight01/production-sha256.txt",
+      "sha256": "d0ed9c9c6b4ed23363b49150875c9378a8dd6904e4682c6a4a9f5e5edec645ba"
+    },
+    {
+      "bytes": 54097,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/postflight01/receipt.json",
+      "sha256": "0687d1a6a75adc62dc1b937ec4dd858cf57fe7d8b9859cc243bc6ec8cb5ab85d"
+    },
+    {
+      "bytes": 6768,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/prepare_remaining.py",
+      "sha256": "fab762f6644ef931ecd8465ae99d9727affb93291a0d4a03ba82a165af9a4aa1"
+    },
+    {
+      "bytes": 321,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/root-review.json",
+      "sha256": "983150d8211eeb0577ba48ac6bbd4c58132ba9ff363c922f39e0fb1114b68fee"
+    },
+    {
+      "bytes": 25597,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/run_gate.py",
+      "sha256": "9d02ff9f7c39ef08b75880d4e19e219c5956b8e284cfe704d4285ab639d2c2b1"
+    },
+    {
+      "bytes": 165639,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/selection.json",
+      "sha256": "145f8d5d69cc3cf579b32daab221fe7d659b47fd0f866c9abccd4e2ecd11a598"
+    },
+    {
+      "bytes": 2852,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/postflight01/stage-paths.txt",
+      "sha256": "1fe2f4be7bc8004f72d954992f191d845469e50debf6c880f58df97153d992ba"
+    }
+  ],
+  "excluded": [
+    {
+      "bytes": 1602195,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-01-source-program5.json.gz",
+      "reason": "decoded program graph retained locally"
+    },
+    {
+      "bytes": 1087656,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-02-returned.json",
+      "reason": "stored file exceeds1000000B"
+    },
+    {
+      "bytes": 1701646,
+      "path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-02-source-program5.json.gz",
+      "reason": "decoded program graph retained locally"
+    }
+  ],
+  "git_operations": 0,
+  "main_baseline_matches": 10,
+  "main_divergence": 0,
+  "main_new_files": 2,
+  "manifest_path": "artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/postflight01/stage-manifest.json",
+  "manifest_self_hash_omitted": true,
+  "max_file_bytes": 1000000,
+  "original_exit_code": 1,
+  "postflight_exit_code": 0,
+  "production_source_count": 12,
+  "schema": "scar.kwargs-small-stage-list",
+  "schema_version": 1
+}

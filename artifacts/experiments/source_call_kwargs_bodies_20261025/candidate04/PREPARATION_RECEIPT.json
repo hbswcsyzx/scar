@@ -1,0 +1,247 @@
+{
+  "active_source_files": 1,
+  "attempt04_exists": false,
+  "body_lowerings": 0,
+  "eval_utf8_reads": 0,
+  "files": [
+    {
+      "bytes": 2008,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/README.md",
+      "sha256": "4b68d1c755b4b613fa75f5fb003daa00f74c1fb6782da965bb9ad6273f85486e"
+    },
+    {
+      "bytes": 104581,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/freeze.json",
+      "sha256": "26b44d86b573624269b068d20d02e131a7b9237174fd467a307635422c976297"
+    },
+    {
+      "bytes": 11352,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/gate_guards.py",
+      "sha256": "3a03ed014b09f622cdab335fafb27bf35398a18b43e4deb44b425aaf7a01ddce"
+    },
+    {
+      "bytes": 6768,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/prepare_remaining.py",
+      "sha256": "fab762f6644ef931ecd8465ae99d9727affb93291a0d4a03ba82a165af9a4aa1"
+    },
+    {
+      "bytes": 25597,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/run_gate.py",
+      "sha256": "9d02ff9f7c39ef08b75880d4e19e219c5956b8e284cfe704d4285ab639d2c2b1"
+    },
+    {
+      "bytes": 165639,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/selection.json",
+      "sha256": "145f8d5d69cc3cf579b32daab221fe7d659b47fd0f866c9abccd4e2ecd11a598"
+    }
+  ],
+  "freeze_sha256": "26b44d86b573624269b068d20d02e131a7b9237174fd467a307635422c976297",
+  "full_parent_subjects": 4,
+  "git_operations": 0,
+  "inherited_prior_sequences": [
+    "4",
+    "5"
+  ],
+  "input_pins": 27,
+  "limits_unchanged": true,
+  "marshal_payload_loads": 0,
+  "new_tests": 0,
+  "old92_artifact_reads": 0,
+  "parent_archive_commit_from_root": "6c407666",
+  "production_bytes_unchanged": true,
+  "production_sources": [
+    {
+      "bytes": 12482,
+      "change": "NEW",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_call_lowering.py",
+      "relative_path": "scar/analysis/source_call_lowering.py",
+      "sha256": "cbc54b8d2ca128957c44f55388f62774ece23e9525311c7cbac6bb97b75afd98"
+    },
+    {
+      "bytes": 24345,
+      "change": "NEW",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_call_validation.py",
+      "relative_path": "scar/analysis/source_call_validation.py",
+      "sha256": "9b7446e5758f5a2c9d3faf826f4b2e4a110cde2884913f871f78950b1c354307"
+    },
+    {
+      "bytes": 6656,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/program/structured.py",
+      "relative_path": "scar/ir/program/structured.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 6530,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/structured.py",
+        "reviewed_interfaces": [
+          "PythonProtocolKind",
+          "PythonProtocol",
+          "StructuredBodyModel"
+        ],
+        "sha256": "c100dd3b51665e462336efe0d555d60806922b1ec7c34c8c2b9c904755eca87f"
+      },
+      "sha256": "001ff3bdb685bfff3d4723624564756c04079ebd5e94d2178a6976124b72722e"
+    },
+    {
+      "bytes": 6037,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/program/source_language.py",
+      "relative_path": "scar/ir/program/source_language.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 5920,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_language.py",
+        "reviewed_interfaces": [
+          "capability/default version/EXTENDED_PROTOCOLS",
+          "CodeConstantSource",
+          "SourceLanguageOverlay"
+        ],
+        "sha256": "a6588f7c12299d503582520603fc5b4756f7434910ce2ccd7be8128f22ef06e6"
+      },
+      "sha256": "1daa83c2c509f17f7d94f46d1440c983d13aae4d7650217ef7c06bbad97368cd"
+    },
+    {
+      "bytes": 5283,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_language.py",
+      "relative_path": "scar/analysis/source_language.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 5180,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language.py",
+        "reviewed_interfaces": [
+          "SourceCodeEvidence",
+          "SourceLanguageOptions",
+          "require_source_tree"
+        ],
+        "sha256": "9b2ef877bbfc9d752313cf54738ddcdf9b424f519b6c836f37d738ddf44497c1"
+      },
+      "sha256": "6812c14975bf123dfe66a11b8d120a33c060c0dec1e3a02f37d17fea0fe94699"
+    },
+    {
+      "bytes": 22198,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/environment_lowering.py",
+      "relative_path": "scar/analysis/environment_lowering.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 21905,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/environment_lowering.py",
+        "reviewed_interfaces": [
+          "StructuredEnvironmentBuilder.expr",
+          "_addresses",
+          "read_source_name"
+        ],
+        "sha256": "ae89cdbbe428e137ef1c372eb0625dd4989f691fdb7b06ee9ef469a88d7ec13b"
+      },
+      "sha256": "bc41b46fa0c332872e0768e87ad5f7e1c8f7b18c9dfa6528f2bfe57ac490f9a5"
+    },
+    {
+      "bytes": 14965,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_heap_lowering.py",
+      "relative_path": "scar/analysis/source_heap_lowering.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 14653,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_heap_lowering.py",
+        "reviewed_interfaces": [
+          "_source_definition",
+          "_associate",
+          "expression_for_heap_target",
+          "_hold",
+          "_release"
+        ],
+        "sha256": "e0948eb09225b4e31e1c3ba72bbcd47eadfa4460d605e3a400435f3936ff8d97"
+      },
+      "sha256": "323f2f478a57c0a133648749323e9bfbfb942dbe9410ad35111a608515af2ff9"
+    },
+    {
+      "bytes": 55169,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/structured_lowering.py",
+      "relative_path": "scar/analysis/structured_lowering.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 55023,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/structured_lowering.py",
+        "reviewed_interfaces": [
+          "invoke_results",
+          "frame_transition",
+          "finish_exit",
+          "expr",
+          "validate_structured_body protocol dispatch"
+        ],
+        "sha256": "ff0efe4a806c22607753458eac11795103dbdf110d9867b400cc20638b8e2931"
+      },
+      "sha256": "82a476089dfba52cbd49727468838816c91bbeec88322a036b7fcc327583e87c"
+    },
+    {
+      "bytes": 12995,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_mapping_lowering.py",
+      "relative_path": "scar/analysis/source_mapping_lowering.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 12366,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_mapping_lowering.py",
+        "reviewed_interfaces": [
+          "_invoke",
+          "_transfer",
+          "_run",
+          "_update",
+          "lower_dictionary",
+          "validate_mapping_protocols"
+        ],
+        "sha256": "2f9f3973dc2fe64ac95cd22010af4fb1c871d6cf520690388adf93cb415cdbf4"
+      },
+      "sha256": "66c8cabadb7cc933a452b6a7c797dd90dc551c0fcde8eb2e4fab1a9cd7bbb510"
+    },
+    {
+      "bytes": 14396,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_environment_validation.py",
+      "relative_path": "scar/analysis/source_environment_validation.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 13422,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_environment_validation.py",
+        "reviewed_interfaces": [
+          "validate_environment_body currently rejects non-environment protocol with semantic_operation; new capability-gated final Call exception must be explicit"
+        ],
+        "sha256": "d543bd8a8cbbf9ea51c675658eef1753576855e370ea61c2946c45a2eda4472a"
+      },
+      "sha256": "31a4eeeb97ee86099a675775f192297ec66cb65514c84cff59dcaffb88e81fec"
+    },
+    {
+      "bytes": 21423,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_language_validation.py",
+      "relative_path": "scar/analysis/source_language_validation.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 20560,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_language_validation.py",
+        "reviewed_interfaces": [
+          "validate_language_body source/options/shape equality",
+          "invoke",
+          "code constant/slice witness checking"
+        ],
+        "sha256": "c2e697681e3c8d2f3fbc12325d59ab42f31680b3ea81fdce206af398056ba353"
+      },
+      "sha256": "e5d26274c8b96efb760f37101069c8785c58d6b8afad59b712b6b3cd9715efdc"
+    },
+    {
+      "bytes": 67819,
+      "change": "STRUCTURE_SOURCE_TEXTS_API_ONLY",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/program_lowering.py",
+      "previous_source": {
+        "bytes": 66613,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/program_lowering.py",
+        "sha256": "8366051f1f9584d2b44363c3310580b6e51594de182849bb43245218a697bee4"
+      },
+      "relative_path": "scar/analysis/program_lowering.py",
+      "sha256": "c1d0a8a3204aff994933e957c8fdcfbab6e07300a6a9ee2ef257ed4446ab250d"
+    }
+  ],
+  "remaining_sequences": [
+    10,
+    12
+  ],
+  "schema": "scar.kwargs-remaining-preparation-receipt",
+  "schema_version": 1,
+  "source_context_payload_reads": 0,
+  "status": "FROZEN_NOT_RUN",
+  "whole_program_established": false
+}
