@@ -1,0 +1,7 @@
+{"actual_retained_input_bytes":0,"body":null,"elapsed_s":0.15860683500068262,"event":"BEGIN","output_accounted_bytes":0,"phase":"FREEZE","self_peak_rss_kib":57380}
+{"actual_retained_input_bytes":0,"body":null,"elapsed_s":0.9293042399804108,"event":"STAGE_BEGIN","output_accounted_bytes":328,"phase":"CURRENT_INPUT_MEMBERSHIP","self_peak_rss_kib":57380}
+{"actual_retained_input_bytes":1013961,"body":null,"elapsed_s":0.9477936619659886,"event":"STAGE_BEGIN","output_accounted_bytes":706,"phase":"ORIGINAL_COMPOSITION","self_peak_rss_kib":57380}
+{"actual_retained_input_bytes":214498465,"body":1,"elapsed_s":4.757114314008504,"event":"STAGE_BEGIN","original_sequence":4,"output_accounted_bytes":1088,"phase":"EXACT_SOURCE_AND_CODE","self_peak_rss_kib":443368}
+{"actual_retained_input_bytes":226579885,"body":1,"elapsed_s":8.907697058981284,"event":"STAGE_BEGIN","output_accounted_bytes":9915,"phase":"LOWER_BODY","self_peak_rss_kib":443368}
+{"actual_retained_input_bytes":226579885,"body":1,"elapsed_s":9.102033911971375,"event":"STAGE_BEGIN","output_accounted_bytes":364454,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":443368}
+{"actual_retained_input_bytes":226579885,"body":1,"elapsed_s":12.556453396973666,"event":"FAILED","exception":"ValueError","message":"live target source reads prohibited; use exact retained UTF8","output_accounted_bytes":13939356,"phase":"FAILED_RETAINED","self_peak_rss_kib":443368}

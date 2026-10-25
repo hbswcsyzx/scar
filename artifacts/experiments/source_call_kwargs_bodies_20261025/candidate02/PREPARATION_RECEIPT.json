@@ -1,0 +1,100 @@
+{
+  "attempt02_exists": false,
+  "body_lowerings": 0,
+  "budgets_identical_to_parent": true,
+  "files": [
+    {
+      "bytes": 1589,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/README.md",
+      "sha256": "1c7a891d982ef7719cd9e66351fcb2defbdc8e6cab6894202f7b2488bf4f9fb2"
+    },
+    {
+      "bytes": 2655,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/check_real_sg.py",
+      "sha256": "077b185aa16e2d79532b861cf8dcc7c2ec96339307fc851449df52df9cb9eaac"
+    },
+    {
+      "bytes": 99010,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/freeze.json",
+      "sha256": "c9991f4f5f6505aed8da79bb8f949d5c315cd9bea7cfd39e9f99a9cb616f68a0"
+    },
+    {
+      "bytes": 10956,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/gate_guards.py",
+      "sha256": "e14ac3a42a8bdaab2f54bab2a8f86af1a06fe12e3bbef6301b0f9b6983bc70ff"
+    },
+    {
+      "bytes": 11738,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/implementation-candidate02.json",
+      "sha256": "19ba9b29301b05752aa79e039bf5ebdf4f8555a4a4ce7ab147f7695a2df3b652"
+    },
+    {
+      "bytes": 14517,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/prepare_gate.py",
+      "sha256": "ad0442ac6b41fae395de814eee7dbe19f257ac2a477dc49cd1b46fb891a3fe1f"
+    },
+    {
+      "bytes": 2325,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/real-sg-check-receipt.json",
+      "sha256": "a76e7df6486e8d4d2e811c8f6af155ef2ae0b7b2a865b4967105c0380b53e194"
+    },
+    {
+      "bytes": 20152,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/run_gate.py",
+      "sha256": "d43d10aa14af581c0275edbaeee79d96dbbb57d8fdf9ca2a8ee514dad34333df"
+    },
+    {
+      "bytes": 34258,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate02/selection.json",
+      "sha256": "1a57b41d868debe910d563730bc889c6b6decdedef0c8d06b7befc43390311f4"
+    }
+  ],
+  "freeze_sha256": "c9991f4f5f6505aed8da79bb8f949d5c315cd9bea7cfd39e9f99a9cb616f68a0",
+  "frozen_source_and_runner_sha_checked": true,
+  "full_gate_runs": 0,
+  "git_operations": 0,
+  "inputs_identical_to_parent": true,
+  "legacy_tests_rerun": false,
+  "narrow_changed_sources": [
+    {
+      "bytes": 12482,
+      "change": "NEW",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_call_lowering.py",
+      "relative_path": "scar/analysis/source_call_lowering.py",
+      "sha256": "cbc54b8d2ca128957c44f55388f62774ece23e9525311c7cbac6bb97b75afd98"
+    },
+    {
+      "bytes": 24345,
+      "change": "NEW",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_call_validation.py",
+      "relative_path": "scar/analysis/source_call_validation.py",
+      "sha256": "9b7446e5758f5a2c9d3faf826f4b2e4a110cde2884913f871f78950b1c354307"
+    },
+    {
+      "bytes": 14396,
+      "change": "MODIFIED",
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_environment_validation.py",
+      "relative_path": "scar/analysis/source_environment_validation.py",
+      "reviewed_main_source_baseline": {
+        "bytes": 13422,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_environment_validation.py",
+        "reviewed_interfaces": [
+          "validate_environment_body currently rejects non-environment protocol with semantic_operation; new capability-gated final Call exception must be explicit"
+        ],
+        "sha256": "d543bd8a8cbbf9ea51c675658eef1753576855e370ea61c2946c45a2eda4472a"
+      },
+      "sha256": "31a4eeeb97ee86099a675775f192297ec66cb65514c84cff59dcaffb88e81fec"
+    }
+  ],
+  "new_ir_or_sg_reclassification": false,
+  "new_schema_fields": false,
+  "new_tests": 1,
+  "other_production_sources_unchanged": 8,
+  "parent_archived_commit_from_root": "e5e1013b",
+  "parent_freeze_sha256": "936968d032a1ac74e2716427ee30140febfdadfc06e28e183da1d862944becac",
+  "parent_small_frozen_files_unchanged": true,
+  "real_sg_check_passed": true,
+  "schema": "scar.kwargs-candidate02-preparation-receipt",
+  "schema_version": 1,
+  "status": "FROZEN_NOT_RUN"
+}

@@ -21,6 +21,18 @@ from scar.ir.v2.semantic import OperationKind
 CALL_PROTOCOLS = frozenset((Kind.BUILD_CALL_POSITIONALS, Kind.DICT_MERGE, Kind.CALL_FUNCTION_EX))
 
 
+def is_original_call_definition(semantic, definition, source):
+    """Recognize frontend_v2's unchanged opaque Call, never invent a CALL kind."""
+    atom = semantic.source_atoms.get(source.atom_id)
+    if atom is None or atom.kind != "Call" or atom.reference != source:
+        return False
+    matches = [row for row in semantic.definitions.values()
+               if row.kind is OperationKind.OPAQUE and row.metadata.get("ast_type") == "Call"
+               and row.code_id == source.atom_id.wire and source.atom_id in row.source_atoms
+               and len(row.output_slots) == 1]
+    return len(matches) == 1 and definition is matches[0]
+
+
 def _need(condition, detail):
     if not condition:
         raise ValueError("kwargs call validation: " + detail)
@@ -181,7 +193,7 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
         atom = semantic.source_atoms.get(source.atom_id)
         definition = semantic.definitions.get(links[final].semantic_operation)
         _need(atom is not None and atom.kind == "Call" and atom.reference == source
-              and definition is not None and definition.kind is OperationKind.CALL
+              and definition is not None and is_original_call_definition(semantic, definition, source)
               and definition.code_id == source.atom_id.wire and source.atom_id in definition.source_atoms
               and len(definition.output_slots) == 1 and links[final].opcode is Opcode.CALL,
               "final kwargs call has no unique original SG Call/output source")

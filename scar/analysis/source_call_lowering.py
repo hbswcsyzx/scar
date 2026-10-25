@@ -21,7 +21,7 @@ from scar.ir.program.source import GapKind, SourceRole
 from scar.ir.program.source_language import CodeConstantSource
 from scar.ir.program.structured import PythonProtocolKind as Kind
 from scar.ir.semantics_v2 import Opcode
-from scar.ir.v2.semantic import OperationKind
+from scar.analysis.source_call_validation import is_original_call_definition
 
 
 def _span(node):
@@ -143,7 +143,7 @@ def lower_kwargs_call(builder, node, cursor):
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "kwargs Call has ambiguous source computational records")
     old = records[0] if records else None
     definition = _source_definition(builder, node)
-    if definition.kind is not OperationKind.CALL:
+    if not is_original_call_definition(builder.semantic, definition, builder.source(node)):
         raise _Unsupported(GapKind.SOURCE_MAPPING, node, "kwargs Call needs its original SG Call definition")
     baseline = len(builder.active_temporaries)
     try:

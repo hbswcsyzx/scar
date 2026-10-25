@@ -1,0 +1,59 @@
+{
+  "ast_type": "Call",
+  "body_lowerings": 0,
+  "code_witness_payloads_loaded": 0,
+  "definition": {
+    "kind": "opdef",
+    "value": "op:a2978a876934e361dc394126",
+    "wire": "opdef:op:a2978a876934e361dc394126"
+  },
+  "existing_archive": {
+    "artifact": {
+      "schema": "scar.source-layers.record",
+      "sha256": "92a5bc65ca68739b7d54283c4067dccd6d71dd967adcb3e412f43abcf0240654",
+      "size_bytes": 579302,
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/b9585a0127148eee26c353e5c665979822466d9224ef06fadc86081322caa2c8.json.gz"
+    },
+    "declaration": {
+      "artifact": {
+        "schema": "scar.source-layers",
+        "sha256": "5c68691c28273676a8262f24fe9891e03433f06b7d16758e8620050c160a97c4",
+        "size_bytes": 135207,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/index.json"
+      },
+      "locator": "#/files/0"
+    },
+    "decoded_bytes": 5482298,
+    "decoded_sha256": "b9585a0127148eee26c353e5c665979822466d9224ef06fadc86081322caa2c8",
+    "pointer": "#",
+    "representation": "gzip-canonical-json"
+  },
+  "legacy_checks_rerun": false,
+  "new_source_prepares": 0,
+  "opcode": "call",
+  "passed": true,
+  "raw_capture_reads": 0,
+  "reused_legacy_checks": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_model_20261025/small-check-receipt-03.json",
+  "sg_kind": "opaque",
+  "source": {
+    "atom_id": {
+      "kind": "source",
+      "value": "atom:b7216ec8b5673754156f37b5",
+      "wire": "source:atom:b7216ec8b5673754156f37b5"
+    },
+    "end_column": 67,
+    "end_line": 22,
+    "fingerprint": "sha256:6584f009b40550fa0df2f8dee22b9329fbfacdfaf74464aa4fd105f464795245",
+    "path": "/home/zyf/AAA/le-wm/eval.py",
+    "start_column": 12,
+    "start_line": 22
+  },
+  "source_context": {
+    "control_sha256": "b2140d795d0333e6aef4135db49f4cb9d5cc327a552cb4fd3c678f8336cf92cc",
+    "namespace_root": "/home/zyf/AAA/le-wm",
+    "semantic_sha256": "1877a5c1da20948a55c33c71f2209e6118e649cf515b76eb8f917d4822100bbe",
+    "semantics_sha256": "6ac1a391ee3a560cb1d235e58cb87b1b335876fc1d00af6c262ac8cc3ef5f503"
+  },
+  "target_executions": 0,
+  "tests": 1
+}

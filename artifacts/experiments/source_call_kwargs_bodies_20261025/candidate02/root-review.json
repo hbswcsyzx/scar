@@ -1,0 +1,9 @@
+{
+  "candidate_sources": 352,
+  "freeze_sha256": "c9991f4f5f6505aed8da79bb8f949d5c315cd9bea7cfd39e9f99a9cb616f68a0",
+  "input_stat_pins": 21,
+  "large_inputs_opened": false,
+  "source_guard_bytes": 42751675,
+  "status": "ROOT_SG_CLASSIFICATION_FIX_AND_FREEZE_REVIEW_PASS",
+  "whole_program_model": "OPEN"
+}
