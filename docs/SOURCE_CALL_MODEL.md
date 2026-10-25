@@ -63,3 +63,10 @@ JoinedStr、完整kwargs cleanup/outer lifetime、内容/state/ready及第一阶
 partial construction分开，完整图上的独立字符串验证未在该真实body运行。实际报告在
 该分支的`artifacts/experiments/source_joinedstr_target_20261025/REPORT.md`；
 主树[应用收据](../artifacts/experiments/source_joinedstr_applied_20261025/receipt.json)记录准确四源码。
+
+后继65窗口实际完成12成功/51不支持/2失败。两失败暴露字符串verifier漏计插值Call结果的
+真实hold，现改按AST中的实际持有角色选择source，保有序hold/release及错误拒绝。
+42ops最小样例和两项释放反例通过，未知child consumption仍OPEN；原两真实失败不改写，
+重试结果另记。准确补丁和fixture在
+[修复应用收据](../artifacts/experiments/string_hold_source_repair_applied_20261025/receipt.json)。
+12成功图尚未发布，不能累加当前source846/runtime843。
