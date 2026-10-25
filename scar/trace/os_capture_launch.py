@@ -185,6 +185,45 @@ def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',
     return subprocess.CompletedProcess(target_argv,returncode),receipt
 
 
+def _native_input_archive_paths(root, budget):
+    """Follow only the exact opt-in declaration, never glob companion members."""
+    from scar.trace.tensor_physical import NATIVE_INPUT_PROFILE, PROVIDER_REVISION
+    from scar.trace.native_tensor_inputs import read_native_tensor_inputs
+    declarations = []
+    for path in sorted((root/'trace').glob('execution-evidence.*.json')):
+        native, _ = _document(path, budget.max_metadata_bytes)
+        request = native.get('configuration', {}).get('native_tensor_input_observations')
+        if request is not None:
+            declarations.append((path, native, request))
+    if not declarations:
+        return []
+    _need(len(declarations) == 1, 'one native input companion declaration required')
+    path, native, request = declarations[0]
+    _need(type(request) is dict, 'native input companion declaration must be an object')
+    pid = native.get('pid')
+    _need(type(pid) is int and pid > 0 and path.name == f'execution-evidence.{pid}.json'
+          and native.get('status') == 'CLOSED' and native.get('failures') == []
+          and native.get('provider', {}).get('torch_git_version') == PROVIDER_REVISION,
+          'native input companion owner/provider is not closed')
+    declared = Path(request.get('manifest', ''))
+    stem = declared.parent.name
+    prefix = f'native-tensor-inputs.{pid}.'
+    nonce = stem[len(prefix):] if stem.startswith(prefix) else ''
+    _need(len(nonce) == 32 and all(c in '0123456789abcdef' for c in nonce)
+          and declared == root/'trace'/f'{prefix}{nonce}'/'manifest.json'
+          and not declared.parent.is_symlink() and declared.parent.resolve().is_relative_to(root.resolve())
+          and request.get('requested') is True and request.get('profile') == NATIVE_INPUT_PROFILE,
+          'native input companion exact namespace/profile differs')
+    _need(all(native.get('artifacts', {}).get(label, {}).get('path') == str(root/'trace'/name)
+              for label, name in (('execution_trace', f'execution-trace.{pid}.{nonce}.json'),
+                                  ('kineto', f'kineto.{pid}.{nonce}.json'))),
+          'native input companion nonce differs from native artifacts')
+    doc, receipt = _document(declared, budget.max_metadata_bytes)
+    read_native_tensor_inputs(declared, expected_sha256=receipt['sha256'],
+        max_bytes=budget.max_raw_bytes)
+    return [declared.parent / chunk['path'] for chunk in doc['chunks']]
+
+
 def archive_owned_capture(capture_root,*,budgets=None):
     """Existing lossless archive v1, bounded store sink, no new graph format."""
     budget=budgets or OSCaptureBudgets();root=Path(capture_root).absolute()
@@ -198,6 +237,8 @@ def archive_owned_capture(capture_root,*,budgets=None):
     paths+=sorted((root/'trace').glob('*.jsonl'))
     paths+=sorted((root/'trace').glob('execution-trace.*.json'))
     paths+=sorted((root/'trace').glob('kineto.*.json'))
+    paths+=_native_input_archive_paths(root,budget)
+    _need(len(set(paths))==len(paths),'duplicate declared archive member')
     _need(paths and len(paths)<=budget.max_files,'raw archive file budget exceeded')
     totals={'stored_bytes':0};raw_total=0;os_lines=0;rows=[]
     for path in paths:
@@ -230,8 +271,10 @@ def archive_owned_capture(capture_root,*,budgets=None):
     return receipt
 
 
-def bind_os_capture_provider(root,*,run,native,native_artifact,command,archive,publish=False):
+def bind_os_capture_provider(root,*,run,native,native_artifact,command,archive,publish=False,
+                             allow_plain_preflight=False):
     """Derive profile after Run exists; never create a launch for an old run."""
+    _need(type(allow_plain_preflight) is bool, 'plain preflight phase must be explicit')
     declaration=native.get('configuration',{}).get('os_capture_intent')
     if declaration is None:return None,[]
     root=Path(root).absolute();nonce=declaration.get('capture_nonce')
@@ -251,11 +294,16 @@ def bind_os_capture_provider(root,*,run,native,native_artifact,command,archive,p
     native_nonce=Path(native['artifacts']['kineto']['path']).name.split('.')[2]
     _need(declaration.get('native_nonce')==native_nonce,'native/provider nonce association differs')
     _need(launch['status']=='CLOSED' and launch['returncode']==0 and launch['failure'] is None
-          and launch['budget_stop'] is None and archive is not None,'closed successful archived capture required')
+          and launch['budget_stop'] is None,'closed successful capture required')
     from scar.trace.os_capture_coverage import _explicit_all
     _explicit_all(launch['actual_exec_argv'][1:launch['target_argv_index']])
     gaps=[{'code':'os_event_loss_not_established','basis':'selection/roundtrip/exit do not prove an event-complete stream'}]
     if launch['running_image'].get('status')!='OBSERVED':gaps.append({'code':'os_running_provider_image_unverified'})
+    if archive is None:
+        _need(allow_plain_preflight and not publish,'closed successful archived capture required')
+        return {'launch':launch_receipt,'nonce':nonce,'profile':None,
+            'selection_qualification':'PENDING_LOSSLESS_ARCHIVE',
+            'observation_completeness':'UNKNOWN'},gaps+[{'code':'owned_archive_publication_pending'}]
     profile={'schema':PROFILE_SCHEMA,'schema_version':VERSION,'run':run,'nonce':nonce,
         'launch':launch_receipt,'intent':intent_receipt,'native_manifest':native_artifact,'archive':archive,
         'actual_exec_argv':launch['actual_exec_argv'],'executable_sha256':launch['executable_sha256'],

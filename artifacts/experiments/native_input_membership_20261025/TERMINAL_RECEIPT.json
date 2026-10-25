@@ -1,0 +1,48 @@
+{
+  "RunID": "capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44",
+  "capture_runs_this_gate": 1,
+  "chunks": 3,
+  "companion_raw_bytes": 3014193,
+  "new_members": 4,
+  "original": {
+    "CLI_exit": 0,
+    "GNU_wall_seconds": 29.46,
+    "failure": {
+      "bytes": 633,
+      "path": "artifacts/experiments/native_input_membership_20261025/failure.json",
+      "sha256": "3cb6fe669adadc38b1afdda0035116c626869bbc8a37f623604462b0d6837ace"
+    },
+    "internal_seconds": 29.343830679019447,
+    "max_RSS_KiB": 816632,
+    "outer_exit": 1,
+    "target_exit": 0,
+    "time": {
+      "bytes": 906,
+      "path": "artifacts/experiments/native_input_membership_20261025/time.txt",
+      "sha256": "df36bb0e22fbde04ba162337db3616833a75efae4fc9adb6ed2a125dd0cb2291"
+    }
+  },
+  "plain_archive_RunID_equal": true,
+  "postflight": {
+    "GNU_wall_seconds": 1.86,
+    "actual_exit": 0,
+    "internal_seconds": 1.7609279049793258,
+    "max_RSS_KiB": 55784,
+    "result": {
+      "bytes": 4929,
+      "path": "artifacts/experiments/native_input_membership_20261025/postflight01/result.json",
+      "sha256": "f974a4f6df930c912b989353393956afcd33fbf2f7d8d39bdfd3cffb63e7c035"
+    },
+    "root_session": 90965,
+    "time": {
+      "bytes": 845,
+      "path": "artifacts/experiments/native_input_membership_20261025/postflight01/time.txt",
+      "sha256": "cdeec02e7fc53670a02028b8d7042ff8e9814fbfd7466dd1e4c1652d42d844e9"
+    }
+  },
+  "postflight_new_capture_runs": 0,
+  "rows": 2332,
+  "schema": "scar.native-input-membership-terminal",
+  "schema_version": 1,
+  "whole_model": "OPEN"
+}

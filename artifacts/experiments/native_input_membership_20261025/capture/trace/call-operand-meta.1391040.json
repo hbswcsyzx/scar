@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 1391040,
+  "project_root": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "CPYTHON_CALL_WINDOWS_V1",
+  "limits": {
+    "max_events": 100000,
+    "max_bytes": 32000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 32,
+  "event_attempts": 32,
+  "instructions": 21,
+  "call_attempts": 11,
+  "handshakes": 0,
+  "gaps": 0,
+  "loads": 0,
+  "references": 21,
+  "bytes": 11266,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-codes.1391040.jsonl",
+      "family": "codes",
+      "process_id": 1391040,
+      "raw_sha256": "1f3460cf75d0908516fef16228480d3d90f969cc415f31895c18bff90ccc6a1c",
+      "raw_bytes": 2552,
+      "lines": 9
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-events.1391040.jsonl",
+      "family": "events",
+      "process_id": 1391040,
+      "raw_sha256": "971e40c6e0cbe21b4ecd80c81b224bc7cad830af10489a3747d7bff89a4ed56f",
+      "raw_bytes": 533107,
+      "lines": 542
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-meta.1391040.json",
+      "family": "meta",
+      "process_id": 1391040,
+      "raw_sha256": "83d42f1c9be7de576134f3e1e8564e20ba0e2499adac77c98a3078769e6e10b3",
+      "raw_bytes": 1025,
+      "lines": 34
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

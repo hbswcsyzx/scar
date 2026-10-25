@@ -1,0 +1,69 @@
+{
+  "Torch_executed": false,
+  "URI_and_Run_seed_changed": false,
+  "analysis_code": {
+    "bytes": 8193,
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_input_membership_plan_20261025/inspect_sample.py",
+    "sha256": "ba79a5ee67b728032b1cb3691d18fd0581684e37bf0104d4051ee7638667be70"
+  },
+  "current_main_sources": [
+    {
+      "bytes": 17615,
+      "isolated_same_bytes": true,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_capture_launch.py",
+      "sha256": "1a63840bb31036fbd1b32bb83cae3f5839a92496a9c1a7ea32d29e2cefeacd75"
+    },
+    {
+      "bytes": 37640,
+      "isolated_same_bytes": true,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/capture_coordinates.py",
+      "sha256": "b7069000d5c986984f98589917397a398728de0600b65ee5893ba9ddcdda2995"
+    },
+    {
+      "bytes": 15232,
+      "isolated_same_bytes": true,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_tensor_inputs.py",
+      "sha256": "548a013eaad9f795945769c03b60dd8f12adfa6acab6f2a1688a77eef5ec3474"
+    },
+    {
+      "bytes": 32455,
+      "isolated_same_bytes": true,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_import.py",
+      "sha256": "b65c817daf876855912a811196a97d89845d6fd7ae92d9df176c758b58f5613f"
+    },
+    {
+      "bytes": 10997,
+      "isolated_same_bytes": true,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/content.py",
+      "sha256": "1eee1822056e59a0be9f4f3a1524f97948df91497ad57072c7c0ca53c670cf9e"
+    },
+    {
+      "bytes": 62029,
+      "isolated_same_bytes": true,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/native_port_protocol.py",
+      "sha256": "608ba93502637c600fe46f8e9cfe1fca1005610d9b282da0633f69de93286338"
+    }
+  ],
+  "design": {
+    "bytes": 4289,
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_input_membership_plan_20261025/PLAN.md",
+    "sha256": "3be46a6117a5e95a59484444d39427fe0be5de83bac5e10035d174985a027b16"
+  },
+  "old_LeWM_raw_DB_reads": 0,
+  "production_changes": false,
+  "qualifications_created": 0,
+  "sample_audit": {
+    "bytes": 32310,
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_input_membership_plan_20261025/sample-audit.json",
+    "sha256": "b0a94109877ebd5e2b08105980797a089d4279a2c4c2e237d4dee979adcd542c"
+  },
+  "schema": "scar.native-input-membership-design-receipt",
+  "schema_version": 1,
+  "source_sample_payload_reads": {
+    "bytes": 115914,
+    "files": 25,
+    "passes": 1
+  },
+  "status": "DESIGN_ONLY",
+  "target_or_capture_runs": 0
+}

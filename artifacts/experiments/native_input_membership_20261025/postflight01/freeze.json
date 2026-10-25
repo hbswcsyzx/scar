@@ -1,0 +1,92 @@
+{
+  "CPU_target_capture_runs": 0,
+  "files": [
+    {
+      "bytes": 20661,
+      "path": "scar/trace/os_capture_launch.py",
+      "sha256": "94daeb4158feaeae45d6467fdd3cd2799a15b30c66aef8b5ea2bfa3e3c40cb44"
+    },
+    {
+      "bytes": 40987,
+      "path": "scar/trace/capture_coordinates.py",
+      "sha256": "e0d71eba04aab0a948ee6d07bbbcd30abc20ddb162dee62a7f0b7922ad8d8aba"
+    },
+    {
+      "bytes": 16604,
+      "path": "scar/trace/native_tensor_inputs.py",
+      "sha256": "f8cf28fa8b375ccab3932db3f371a67d6a518e467eff133d4e4b0c02047d3ff8"
+    },
+    {
+      "bytes": 9049,
+      "path": "artifacts/experiments/native_input_membership_20261025/postflight01/postflight.py",
+      "sha256": "eebfc226da95b8e2d5f0a902a1a1a6ccdc820ead64376931221b5ec9b3f3780a"
+    },
+    {
+      "bytes": 582,
+      "path": "artifacts/experiments/native_input_membership_20261025/postflight01/run.sh",
+      "sha256": "4b4a68da986d86464bd557a82e1dd423ba80df1676b58b1411f3f060432d1912"
+    }
+  ],
+  "inputs": [
+    {
+      "bytes": 61486,
+      "label": "original_freeze",
+      "path": "artifacts/experiments/native_input_membership_20261025/freeze.json",
+      "sha256": "e5ddd0dafcfba3f2f0849f953cf6ed1cba8b496f10c329d2b3c8425361f73af9"
+    },
+    {
+      "bytes": 633,
+      "label": "original_failure",
+      "path": "artifacts/experiments/native_input_membership_20261025/failure.json",
+      "sha256": "3cb6fe669adadc38b1afdda0035116c626869bbc8a37f623604462b0d6837ace"
+    },
+    {
+      "bytes": 198198,
+      "label": "plain_coordinates",
+      "path": "artifacts/experiments/native_input_membership_20261025/plain-coordinates.json",
+      "sha256": "ed01b50d632d8e29116e500127296dc1ccaf4a8981dce62e7d92783ff509fdbb"
+    },
+    {
+      "bytes": 3221,
+      "label": "launch",
+      "path": "artifacts/experiments/native_input_membership_20261025/capture/os-capture-launch.72e4825aa567b8a82d51a87388a7e52c.json",
+      "sha256": "e5991e36821662c80e74373663b95d8409df3c10378b6877b5ab43f17a6cee53"
+    },
+    {
+      "bytes": 1877,
+      "label": "intent",
+      "path": "artifacts/experiments/native_input_membership_20261025/capture/os-capture-intent.72e4825aa567b8a82d51a87388a7e52c.json",
+      "sha256": "9fd6a70af9c41f6f6635af5856cece25c4bdc7e97a34acfd85a4b638b93b516d"
+    },
+    {
+      "bytes": 258,
+      "label": "command",
+      "path": "artifacts/experiments/native_input_membership_20261025/capture/trace/run.json",
+      "sha256": "550842e8c75113664d35c3790daef5d526833fda5c571b326aa17ed1d8a848d7"
+    },
+    {
+      "bytes": 128,
+      "label": "target_result",
+      "path": "artifacts/experiments/native_input_membership_20261025/target-result.json",
+      "sha256": "dd65e2e75a89b2fa81840f49519660a9b351829342809dfb7b6dea165775920d"
+    },
+    {
+      "bytes": 36412,
+      "label": "archive_index",
+      "path": "artifacts/experiments/native_input_membership_20261025/capture/archive-index.json",
+      "sha256": "aa037dfa45757ac8ceec63632af65f03c6e6d69b18219e0c271c13e7f6ab6e69"
+    },
+    {
+      "bytes": 198782,
+      "label": "archived_coordinates",
+      "path": "artifacts/experiments/native_input_membership_20261025/capture/capture-coordinates.json",
+      "sha256": "637ce4a82da7aebabea13ed8f6885985115b7dbfc28f5e85dcaf4552ba0696da"
+    }
+  ],
+  "original_producer_freeze_sha256": "e5ddd0dafcfba3f2f0849f953cf6ed1cba8b496f10c329d2b3c8425361f73af9",
+  "plain_payload_reads_during_postflight": 1,
+  "schema": "scar.native-input-membership-offline-postflight-freeze",
+  "schema_version": 1,
+  "scope": "normal public archived binder/strict reader; saved plain report compared without restoring live authority",
+  "status": "PREPARED_NOT_RUN"
+}

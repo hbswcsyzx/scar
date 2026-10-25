@@ -1,0 +1,1043 @@
+{
+  "IR_modified": false,
+  "Torch_imported": false,
+  "chrome_category_inventory": {
+    "None": 10,
+    "Trace": 1,
+    "cpu_instant_event": 11,
+    "cpu_op": 30,
+    "user_annotation": 13
+  },
+  "counts": {
+    "CPU_external_records": 43,
+    "RF_thread_matches": 41,
+    "correlation_numerically_equals_RF": 41,
+    "empty_tensor_lists": 1,
+    "eto_nodes": 43,
+    "eto_positive_RF_nodes": 41,
+    "mapped_parent_checks": 34,
+    "native_tensor_paths_without_metadata": 0,
+    "parent_outside_exported_TorchOp_boundary": 7,
+    "schema_available": 21,
+    "schema_unavailable": 20,
+    "slot_OPAQUE": 47,
+    "slot_SCALAR_OPAQUE": 28,
+    "slot_TENSOR": 34,
+    "slot_TENSOR_LIST": 4,
+    "tensor_metadata_paths": 40,
+    "tensor_metadata_paths_with_schema": 21,
+    "tensor_metadata_paths_without_schema": 19,
+    "tree_rows": 43,
+    "unique_key_joins": 41
+  },
+  "duplicates": {
+    "CPU_external_keys": 0,
+    "ETO_positive_RF_keys": 0,
+    "tree_correlation_keys": 0
+  },
+  "inputs": [
+    {
+      "bytes": 5431,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/manifest.json",
+      "reads": 1,
+      "sha256": "bb4969380f7f5020007a832f5e1afb007fdce16a92da37f9169d1e454f676944"
+    },
+    {
+      "bytes": 1814,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000000.jsonl",
+      "reads": 1,
+      "sha256": "ce25cbb31d75d0ae9772cc24c9e5d15a41d287d5632ecfd9959734684fd56507"
+    },
+    {
+      "bytes": 1480,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000001.jsonl",
+      "reads": 1,
+      "sha256": "6a03ec5c2da5b1d3f930b8aff21e391384ecb7abba5e916a5091060bd8dbcbb5"
+    },
+    {
+      "bytes": 1996,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000002.jsonl",
+      "reads": 1,
+      "sha256": "460092f279b86c3552136470a5af7a73fa9bb45be6fddcafbf655c6e33df1211"
+    },
+    {
+      "bytes": 2492,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000003.jsonl",
+      "reads": 1,
+      "sha256": "943ade3aa39579ee4a7447ee6efcba36c15dfda676b54c393444ce9a1e243927"
+    },
+    {
+      "bytes": 2512,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000004.jsonl",
+      "reads": 1,
+      "sha256": "99f49e12ae01c64397485e138ae96e2f6b689891383c1335bbab4f772c2d7325"
+    },
+    {
+      "bytes": 2704,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000005.jsonl",
+      "reads": 1,
+      "sha256": "7c8076420d1c64dfb10b6a3c63dcb6775a4bd4d7e969433a57b596e137cb09ea"
+    },
+    {
+      "bytes": 2373,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000006.jsonl",
+      "reads": 1,
+      "sha256": "afad305da3b4b39d918f2ebe0a5d8e15506ec6342d920b803a2b4faace26fb07"
+    },
+    {
+      "bytes": 2510,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000007.jsonl",
+      "reads": 1,
+      "sha256": "012346ce02293e6d0107a0af03cfa9806c2745c0cbc29a2b9a68e4dae5b08b25"
+    },
+    {
+      "bytes": 2105,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000008.jsonl",
+      "reads": 1,
+      "sha256": "48cc93c5190aca4063eea86bc186f99bf6b41b9e41c7f9b559f56b3ebc2dbd1e"
+    },
+    {
+      "bytes": 2090,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000009.jsonl",
+      "reads": 1,
+      "sha256": "6143dbb8b6c153abcd816086e7e04acd2bac27a2c47dad3cfadbe132859fe468"
+    },
+    {
+      "bytes": 2086,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000010.jsonl",
+      "reads": 1,
+      "sha256": "d565f40f326e8b1e9f09bd445f406b0c7fc37ef4d04c0093f11c49a642c02726"
+    },
+    {
+      "bytes": 2105,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000011.jsonl",
+      "reads": 1,
+      "sha256": "0bca55096f267967fcebdee9f28caa0c8c4f3b019b915b967b4a2acca804638e"
+    },
+    {
+      "bytes": 2090,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000012.jsonl",
+      "reads": 1,
+      "sha256": "ed197c284803cb814704bc5f3b4b1ab58eb6a79c01d6542c81c74c4a91b5a180"
+    },
+    {
+      "bytes": 2086,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000013.jsonl",
+      "reads": 1,
+      "sha256": "b97d59c0974374b8a4b02e9f9e8fdb7f00b1f7e69fdc15a7316e2b6cf6d147ae"
+    },
+    {
+      "bytes": 3003,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000014.jsonl",
+      "reads": 1,
+      "sha256": "b52a500d1aa64d641780f7a8eedab03e5c103d25ecd84e65a0cfc527d81c0e3e"
+    },
+    {
+      "bytes": 2984,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000015.jsonl",
+      "reads": 1,
+      "sha256": "9e008202bd8a8d5ffd9aca2e8c5c68fea65b2bcf909f6948d3bfed7eaab4c13d"
+    },
+    {
+      "bytes": 2389,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000016.jsonl",
+      "reads": 1,
+      "sha256": "465fb7e27f1795eb7640c9f146ee354f93aa17a80ebbe5b8ebc58f197fe55993"
+    },
+    {
+      "bytes": 2397,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000017.jsonl",
+      "reads": 1,
+      "sha256": "68a4e3bd952ac410b41b413fb293ef02cc9cd44b2de8ca5b2e235b6294a01c58"
+    },
+    {
+      "bytes": 2320,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000018.jsonl",
+      "reads": 1,
+      "sha256": "eaea96b384a7eb6eef5ae7effcb5963995b1d10158d26b0d19df8e9f3b38b804"
+    },
+    {
+      "bytes": 1641,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000019.jsonl",
+      "reads": 1,
+      "sha256": "744cbdf5bd072a37fcd4b23c5699ee30039668eef4e813f2ae9626fd1dc2fe26"
+    },
+    {
+      "bytes": 1207,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000020.jsonl",
+      "reads": 1,
+      "sha256": "6d3929b27370ccdea21d028f6195f67f7da86b2c4a2fa356bbacc7f3abe988ea"
+    },
+    {
+      "bytes": 623,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000021.jsonl",
+      "reads": 1,
+      "sha256": "4652983ee3bb0b235ad6788d3cb0dbc01ba4b23ea1e29c7c4654c6fc54672c79"
+    },
+    {
+      "bytes": 39785,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/execution-trace.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "reads": 1,
+      "sha256": "06dc2337999fc2b86d380bcac56df046a559aaee8d938a8d8dff7a2dbff51bd0"
+    },
+    {
+      "bytes": 23691,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/kineto.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "reads": 1,
+      "sha256": "a99cf7c80f364c463111c6590d35d07990f06c18d107816c79db61708b240c6b"
+    }
+  ],
+  "issues": [
+    {
+      "candidates": 0,
+      "code": "ETO_RF_MISSING_OR_NONUNIQUE",
+      "index": 40
+    },
+    {
+      "candidates": 0,
+      "code": "ETO_RF_MISSING_OR_NONUNIQUE",
+      "index": 43
+    }
+  ],
+  "joins": [
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 1,
+      "correlation_id": 1,
+      "eto_node_id": 3,
+      "eto_original_node_ordinal": 7,
+      "eto_parent_node_id": 2,
+      "kineto_event_ordinal": 7,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [],
+      "tree_index": 1,
+      "tree_parent_result_id": null,
+      "tree_result_id": 97921738957440
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 2,
+      "correlation_id": 2,
+      "eto_node_id": 4,
+      "eto_original_node_ordinal": 6,
+      "eto_parent_node_id": 3,
+      "kineto_event_ordinal": 8,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [],
+      "tree_index": 2,
+      "tree_parent_result_id": 97921738957440,
+      "tree_result_id": 97921739850032
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 3,
+      "correlation_id": 3,
+      "eto_node_id": 5,
+      "eto_original_node_ordinal": 5,
+      "eto_parent_node_id": 4,
+      "kineto_event_ordinal": 9,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [],
+      "tree_index": 3,
+      "tree_parent_result_id": 97921739850032,
+      "tree_result_id": 97921739850640
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 4,
+      "correlation_id": 4,
+      "eto_node_id": 6,
+      "eto_original_node_ordinal": 3,
+      "eto_parent_node_id": 5,
+      "kineto_event_ordinal": 10,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [],
+      "tree_index": 4,
+      "tree_parent_result_id": 97921739850640,
+      "tree_result_id": 97921739855952
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 5,
+      "correlation_id": 5,
+      "eto_node_id": 7,
+      "eto_original_node_ordinal": 1,
+      "eto_parent_node_id": 6,
+      "kineto_event_ordinal": 11,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [],
+      "tree_index": 5,
+      "tree_parent_result_id": 97921739855952,
+      "tree_result_id": 97921739591232
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 6,
+      "correlation_id": 6,
+      "eto_node_id": 10,
+      "eto_original_node_ordinal": 2,
+      "eto_parent_node_id": 6,
+      "kineto_event_ordinal": 12,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 6,
+      "tree_parent_result_id": 97921739855952,
+      "tree_result_id": 97921739591840
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 7,
+      "correlation_id": 7,
+      "eto_node_id": 11,
+      "eto_original_node_ordinal": 4,
+      "eto_parent_node_id": 5,
+      "kineto_event_ordinal": 13,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 7,
+      "tree_parent_result_id": 97921739850640,
+      "tree_result_id": 97921739592448
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 8,
+      "correlation_id": 8,
+      "eto_node_id": 12,
+      "eto_original_node_ordinal": 16,
+      "eto_parent_node_id": 2,
+      "kineto_event_ordinal": 14,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ],
+        [
+          1
+        ]
+      ],
+      "tree_index": 8,
+      "tree_parent_result_id": null,
+      "tree_result_id": 97921739593056
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 9,
+      "correlation_id": 9,
+      "eto_node_id": 15,
+      "eto_original_node_ordinal": 15,
+      "eto_parent_node_id": 12,
+      "kineto_event_ordinal": 15,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ],
+        [
+          1
+        ]
+      ],
+      "tree_index": 9,
+      "tree_parent_result_id": 97921739593056,
+      "tree_result_id": 97921739593664
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 10,
+      "correlation_id": 10,
+      "eto_node_id": 16,
+      "eto_original_node_ordinal": 14,
+      "eto_parent_node_id": 15,
+      "kineto_event_ordinal": 16,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 10,
+      "tree_parent_result_id": 97921739593664,
+      "tree_result_id": 97921739594272
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 11,
+      "correlation_id": 11,
+      "eto_node_id": 17,
+      "eto_original_node_ordinal": 12,
+      "eto_parent_node_id": 16,
+      "kineto_event_ordinal": 17,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ],
+        [
+          1
+        ]
+      ],
+      "tree_index": 11,
+      "tree_parent_result_id": 97921739594272,
+      "tree_result_id": 97921739594880
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 12,
+      "correlation_id": 12,
+      "eto_node_id": 20,
+      "eto_original_node_ordinal": 11,
+      "eto_parent_node_id": 17,
+      "kineto_event_ordinal": 18,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 12,
+      "tree_parent_result_id": 97921739594880,
+      "tree_result_id": 97921738911792
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 13,
+      "correlation_id": 13,
+      "eto_node_id": 21,
+      "eto_original_node_ordinal": 10,
+      "eto_parent_node_id": 20,
+      "kineto_event_ordinal": 19,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 13,
+      "tree_parent_result_id": 97921738911792,
+      "tree_result_id": 97921738914352
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 14,
+      "correlation_id": 14,
+      "eto_node_id": 22,
+      "eto_original_node_ordinal": 8,
+      "eto_parent_node_id": 21,
+      "kineto_event_ordinal": 20,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [],
+      "tree_index": 14,
+      "tree_parent_result_id": 97921738914352,
+      "tree_result_id": 97921738916912
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 15,
+      "correlation_id": 15,
+      "eto_node_id": 25,
+      "eto_original_node_ordinal": 9,
+      "eto_parent_node_id": 21,
+      "kineto_event_ordinal": 21,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ],
+        [
+          1
+        ]
+      ],
+      "tree_index": 15,
+      "tree_parent_result_id": 97921738914352,
+      "tree_result_id": 97921738918016
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 16,
+      "correlation_id": 16,
+      "eto_node_id": 28,
+      "eto_original_node_ordinal": 13,
+      "eto_parent_node_id": 16,
+      "kineto_event_ordinal": 22,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 16,
+      "tree_parent_result_id": 97921739594272,
+      "tree_result_id": 97921738918624
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 17,
+      "correlation_id": 17,
+      "eto_node_id": 29,
+      "eto_original_node_ordinal": 22,
+      "eto_parent_node_id": 2,
+      "kineto_event_ordinal": 23,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 17,
+      "tree_parent_result_id": null,
+      "tree_result_id": 97921738919232
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 18,
+      "correlation_id": 18,
+      "eto_node_id": 30,
+      "eto_original_node_ordinal": 21,
+      "eto_parent_node_id": 29,
+      "kineto_event_ordinal": 24,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 18,
+      "tree_parent_result_id": 97921738919232,
+      "tree_result_id": 97921738919840
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 19,
+      "correlation_id": 19,
+      "eto_node_id": 31,
+      "eto_original_node_ordinal": 20,
+      "eto_parent_node_id": 30,
+      "kineto_event_ordinal": 25,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 19,
+      "tree_parent_result_id": 97921738919840,
+      "tree_result_id": 97921738920448
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 20,
+      "correlation_id": 20,
+      "eto_node_id": 32,
+      "eto_original_node_ordinal": 19,
+      "eto_parent_node_id": 31,
+      "kineto_event_ordinal": 26,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 20,
+      "tree_parent_result_id": 97921738920448,
+      "tree_result_id": 97921738921184
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 21,
+      "correlation_id": 21,
+      "eto_node_id": 33,
+      "eto_original_node_ordinal": 17,
+      "eto_parent_node_id": 32,
+      "kineto_event_ordinal": 27,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 21,
+      "tree_parent_result_id": 97921738921184,
+      "tree_result_id": 97921738922432
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 22,
+      "correlation_id": 22,
+      "eto_node_id": 35,
+      "eto_original_node_ordinal": 18,
+      "eto_parent_node_id": 32,
+      "kineto_event_ordinal": 28,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 22,
+      "tree_parent_result_id": 97921738921184,
+      "tree_result_id": 97921738336176
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 23,
+      "correlation_id": 23,
+      "eto_node_id": 36,
+      "eto_original_node_ordinal": 28,
+      "eto_parent_node_id": 2,
+      "kineto_event_ordinal": 29,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 23,
+      "tree_parent_result_id": null,
+      "tree_result_id": 97921739819008
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 24,
+      "correlation_id": 24,
+      "eto_node_id": 37,
+      "eto_original_node_ordinal": 27,
+      "eto_parent_node_id": 36,
+      "kineto_event_ordinal": 30,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 24,
+      "tree_parent_result_id": 97921739819008,
+      "tree_result_id": 97921739813632
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 25,
+      "correlation_id": 25,
+      "eto_node_id": 38,
+      "eto_original_node_ordinal": 26,
+      "eto_parent_node_id": 37,
+      "kineto_event_ordinal": 31,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 25,
+      "tree_parent_result_id": 97921739813632,
+      "tree_result_id": 97921738778144
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 26,
+      "correlation_id": 26,
+      "eto_node_id": 39,
+      "eto_original_node_ordinal": 25,
+      "eto_parent_node_id": 38,
+      "kineto_event_ordinal": 32,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 26,
+      "tree_parent_result_id": 97921738778144,
+      "tree_result_id": 97921738778880
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 27,
+      "correlation_id": 27,
+      "eto_node_id": 40,
+      "eto_original_node_ordinal": 23,
+      "eto_parent_node_id": 39,
+      "kineto_event_ordinal": 33,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 27,
+      "tree_parent_result_id": 97921738778880,
+      "tree_result_id": 97921738780128
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 28,
+      "correlation_id": 28,
+      "eto_node_id": 42,
+      "eto_original_node_ordinal": 24,
+      "eto_parent_node_id": 39,
+      "kineto_event_ordinal": 34,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 28,
+      "tree_parent_result_id": 97921738778880,
+      "tree_result_id": 97921738781056
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 29,
+      "correlation_id": 29,
+      "eto_node_id": 43,
+      "eto_original_node_ordinal": 33,
+      "eto_parent_node_id": 2,
+      "kineto_event_ordinal": 35,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "tree_index": 29,
+      "tree_parent_result_id": null,
+      "tree_result_id": 97921738782528
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 30,
+      "correlation_id": 30,
+      "eto_node_id": 44,
+      "eto_original_node_ordinal": 32,
+      "eto_parent_node_id": 43,
+      "kineto_event_ordinal": 36,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "tree_index": 30,
+      "tree_parent_result_id": 97921738782528,
+      "tree_result_id": 97921738783808
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 31,
+      "correlation_id": 31,
+      "eto_node_id": 45,
+      "eto_original_node_ordinal": 31,
+      "eto_parent_node_id": 44,
+      "kineto_event_ordinal": 37,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ],
+        [
+          1
+        ]
+      ],
+      "tree_index": 31,
+      "tree_parent_result_id": 97921738783808,
+      "tree_result_id": 97921738785024
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 32,
+      "correlation_id": 32,
+      "eto_node_id": 46,
+      "eto_original_node_ordinal": 29,
+      "eto_parent_node_id": 45,
+      "kineto_event_ordinal": 38,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ]
+      ],
+      "tree_index": 32,
+      "tree_parent_result_id": 97921738785024,
+      "tree_result_id": 97921738786368
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 33,
+      "correlation_id": 33,
+      "eto_node_id": 49,
+      "eto_original_node_ordinal": 30,
+      "eto_parent_node_id": 45,
+      "kineto_event_ordinal": 39,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 33,
+      "tree_parent_result_id": 97921738785024,
+      "tree_result_id": 97921738787136
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 34,
+      "correlation_id": 34,
+      "eto_node_id": 50,
+      "eto_original_node_ordinal": 39,
+      "eto_parent_node_id": 2,
+      "kineto_event_ordinal": 40,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 34,
+      "tree_parent_result_id": null,
+      "tree_result_id": 97921738790576
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 35,
+      "correlation_id": 35,
+      "eto_node_id": 51,
+      "eto_original_node_ordinal": 38,
+      "eto_parent_node_id": 50,
+      "kineto_event_ordinal": 41,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 35,
+      "tree_parent_result_id": 97921738790576,
+      "tree_result_id": 97921738864848
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 36,
+      "correlation_id": 36,
+      "eto_node_id": 52,
+      "eto_original_node_ordinal": 37,
+      "eto_parent_node_id": 51,
+      "kineto_event_ordinal": 42,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 36,
+      "tree_parent_result_id": 97921738864848,
+      "tree_result_id": 97921738865584
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 37,
+      "correlation_id": 37,
+      "eto_node_id": 53,
+      "eto_original_node_ordinal": 35,
+      "eto_parent_node_id": 52,
+      "kineto_event_ordinal": 43,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 37,
+      "tree_parent_result_id": 97921738865584,
+      "tree_result_id": 97921738868272
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 38,
+      "correlation_id": 38,
+      "eto_node_id": 54,
+      "eto_original_node_ordinal": 34,
+      "eto_parent_node_id": 53,
+      "kineto_event_ordinal": 44,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": true,
+      "tensor_paths": [],
+      "tree_index": 38,
+      "tree_parent_result_id": 97921738868272,
+      "tree_result_id": 97921738870864
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 39,
+      "correlation_id": 39,
+      "eto_node_id": 57,
+      "eto_original_node_ordinal": 36,
+      "eto_parent_node_id": 52,
+      "kineto_event_ordinal": 45,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [
+        [
+          0
+        ]
+      ],
+      "tree_index": 39,
+      "tree_parent_result_id": 97921738865584,
+      "tree_result_id": 97921738871632
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 41,
+      "correlation_id": 41,
+      "eto_node_id": 59,
+      "eto_original_node_ordinal": 41,
+      "eto_parent_node_id": 58,
+      "kineto_event_ordinal": 47,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [],
+      "tree_index": 41,
+      "tree_parent_result_id": 97921738872656,
+      "tree_result_id": 97921738873808
+    },
+    {
+      "RF_thread_token": 1,
+      "Record_function_id": 42,
+      "correlation_id": 42,
+      "eto_node_id": 60,
+      "eto_original_node_ordinal": 40,
+      "eto_parent_node_id": 59,
+      "kineto_event_ordinal": 48,
+      "kineto_host_tid_separate_namespace": 1372667,
+      "missing_metadata_tensor_paths": [],
+      "schema_available": false,
+      "tensor_paths": [],
+      "tree_index": 42,
+      "tree_parent_result_id": 97921738873808,
+      "tree_result_id": 97921738874448
+    }
+  ],
+  "old1901_qualified": 0,
+  "old_LeWM_raw_DB_reads": 0,
+  "opaque_ETO_type_inventory": {
+    "Device": 6,
+    "GenericList[Int]": 8,
+    "GenericList[]": 8,
+    "None": 25
+  },
+  "ordinary_membership_created": false,
+  "read_bytes": 115914,
+  "read_files": 25,
+  "sample_run_boundary": "Original CPU probe exit1; no owned OS/operand/run-success records. Ordinary retained-capture profile is not qualified by this sample.",
+  "scalar_opaque_ETO_type_inventory": {
+    "Bool": 13,
+    "Double": 1,
+    "Int": 14
+  },
+  "schema": "scar.native-input-small-sample-design-audit",
+  "schema_version": 1,
+  "source_helpers": [
+    "scar.ir.execution.native_port_protocol.attributes",
+    "scar.ir.execution.native_port_protocol.flat_native"
+  ],
+  "status": "BOUNDED_SAMPLE_INSPECTED_NOT_QUALIFIED",
+  "target_capture_runs": 0
+}

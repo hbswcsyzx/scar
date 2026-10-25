@@ -1,0 +1,27 @@
+{
+  "archive_files": 70,
+  "archive_index": {
+    "bytes": 36412,
+    "path": "artifacts/experiments/native_input_membership_20261025/capture/archive-index.json",
+    "sha256": "aa037dfa45757ac8ceec63632af65f03c6e6d69b18219e0c271c13e7f6ab6e69"
+  },
+  "archive_raw_bytes": 19119646,
+  "archive_stored_bytes": 1609159,
+  "local_only": [
+    {
+      "SHA_basis": "existing lossless archive inventory, checked by actual archived binder; no terminal large-payload reread",
+      "local_stored_URI": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391040.gz",
+      "logical_URI": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391040",
+      "raw_bytes": 8966352,
+      "raw_sha256": "a0dacc8348352bc53cf0cf1f1c2bbe97907787cd7b726cdb71fc2e193388a6f1",
+      "stage": false,
+      "stored_bytes": 1003708,
+      "stored_sha256": "d5bf99933a6807947a010c644b9cd502ee5bec4b653b4aee87523e0ebbec629f"
+    }
+  ],
+  "local_only_count": 1,
+  "raw_payloads_reparsed_during_packaging": false,
+  "schema": "scar.native-input-membership-retention",
+  "schema_version": 1,
+  "small_policy": "Stage files at most 1000000 bytes, including all three companion gzip chunks and complete small metadata/stdio. Larger raw payload remains local with exact original/stored references. No deletion/URI rewrite."
+}

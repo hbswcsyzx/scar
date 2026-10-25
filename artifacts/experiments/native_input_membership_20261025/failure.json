@@ -1,0 +1,7 @@
+{
+  "elapsed_seconds": 29.343830679019447,
+  "message": "'target_argv'",
+  "status": "MEMBERSHIP_GATE_FAILED",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/gate.py\", line 128, in <module>\n    result = main()\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/gate.py\", line 85, in main\n    assert launch['target_argv'] == command and launch['returncode'] == 0\n           ~~~~~~^^^^^^^^^^^^^^^\nKeyError: 'target_argv'\n",
+  "type": "KeyError"
+}

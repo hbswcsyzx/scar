@@ -1,0 +1,130 @@
+{
+  "LeWM_GPU_old_raw_DB_runs": 0,
+  "Torch_imported": false,
+  "actual_command": [
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target/probe.py"
+  ],
+  "actual_owned_exec_argv": [
+    "/usr/bin/strace",
+    "-ff",
+    "-ttt",
+    "-T",
+    "-s",
+    "256",
+    "-e",
+    "trace=all",
+    "-e",
+    "raw=read,write,readv,writev,pread64,pwrite64,preadv,pwritev,preadv2,pwritev2,ioctl,sendto,recvfrom,sendmsg,recvmsg,sendmmsg,recvmmsg,getdents,getdents64,getrandom,process_vm_readv,process_vm_writev,setsockopt,getsockopt",
+    "-o",
+    "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls",
+    "/home/zyf/miniconda3/envs/lewm/bin/python",
+    "-B",
+    "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target/probe.py"
+  ],
+  "archive_RunID": "capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44",
+  "archive_provider_status": "EXPLICIT_ARGV",
+  "archived_process_for_all_new_members_exact": true,
+  "elapsed_seconds": 1.7609279049793258,
+  "identity_seed_fields_unchanged": true,
+  "native_input_reader": {
+    "capabilities": {
+      "ETO_port_join_established": false,
+      "Python_identity_established": false,
+      "logical_content_established": false,
+      "native_inputs": "PROVIDER_METADATA_ONLY",
+      "native_outputs": "UNAVAILABLE_IN_PINNED_API",
+      "resource_ready_established": false
+    },
+    "counts": {
+      "OPAQUE": 2072,
+      "SCALAR_OPAQUE": 3084,
+      "TENSOR": 3089,
+      "TENSOR_LIST": 6,
+      "empty_tensor_lists": 3,
+      "tensor_metadata": 3095
+    },
+    "manifest_sha256": "b5ca4a3d067bb746689709363d162b597ae4cb2c18a6679790d33b088be422ba",
+    "ordinary_capture_membership_established": false,
+    "profile": "scar.native-tensor-input-event-tree-v1",
+    "raw_bytes": 3014193,
+    "retained_rows": 2332
+  },
+  "native_outputs": "UNAVAILABLE_IN_PINNED_API",
+  "native_port_C_value_ready_qualified": false,
+  "new_CPU_captures": 0,
+  "new_member_artifacts": 4,
+  "new_members_are_not_identity_seed_fields": true,
+  "old1901_newly_qualified": 0,
+  "open_obligations": [
+    {
+      "code": "os_process_witness_frontier",
+      "source": {
+        "artifact": {
+          "schema": "strace.syscalls.text.v1",
+          "sha256": "c434f9303e12e4dc0b03ea3ab5c6b0e9ac8d03da6b34490d6ee80dd31d197514",
+          "size_bytes": 1000,
+          "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/os/syscalls.1391119"
+        },
+        "locator": "#/lines/12"
+      }
+    },
+    {
+      "code": "python_ident_to_native_tid_unverified"
+    },
+    {
+      "code": "python_operation_to_torch_rf_unverified"
+    },
+    {
+      "code": "source_world_effect_correspondence_unverified"
+    },
+    {
+      "code": "collector_completeness_remains_declared_partial"
+    },
+    {
+      "code": "process_thread_observation_intervals_incomplete"
+    },
+    {
+      "code": "function_environment_event_to_canonical_entry_unverified"
+    },
+    {
+      "code": "dispatch_observation_to_canonical_source_ports_unverified"
+    },
+    {
+      "code": "collector_declared_incomplete_observations",
+      "collector": "calls"
+    },
+    {
+      "basis": "selection/roundtrip/exit do not prove an event-complete stream",
+      "code": "os_event_loss_not_established"
+    },
+    {
+      "code": "native_tensor_input_port_join_unverified",
+      "source": {
+        "schema": "scar.native-tensor-input-trace",
+        "sha256": "b5ca4a3d067bb746689709363d162b597ae4cb2c18a6679790d33b088be422ba",
+        "size_bytes": 2695,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/native-tensor-inputs.1391040.4c632006cdb40aef2065bd5d1309bcf5/manifest.json"
+      }
+    }
+  ],
+  "original_CLI_exit": 0,
+  "original_CPU_captures_this_gate": 1,
+  "original_URI_namespace_preserved": true,
+  "original_outer_exit": 1,
+  "original_outer_failure": "gate read nonexistent launch.target_argv; actual launch schema2 uses actual_exec_argv and target_argv_index",
+  "original_target_exit": 0,
+  "owned_launch_receipts": 1,
+  "plain_RunID": "capture:0819d8df4eb6d0a8e5990bdeeac4b5b1c88c5aa760d21c80904dfbef6ad28e44",
+  "plain_archive_RunID_equal": true,
+  "plain_coverage_published": false,
+  "plain_live_owner_restored": false,
+  "plain_payload_read_count": 1,
+  "plain_payload_sha256": "ed01b50d632d8e29116e500127296dc1ccaf4a8981dce62e7d92783ff509fdbb",
+  "plain_provider_status": "PENDING_LOSSLESS_ARCHIVE",
+  "recorded_plain_members_have_exact_target_and_creation_facts": true,
+  "retained_rows": 2332,
+  "status": "OFFLINE_NATIVE_INPUT_MEMBERSHIP_AND_ENCODING_INVARIANCE_VERIFIED",
+  "whole_model": "OPEN"
+}

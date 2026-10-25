@@ -1,0 +1,46 @@
+{
+  "capture_PROFILE_and_seed_assignments_AST_equal_to_main": true,
+  "files": [
+    {
+      "isolated_new": {
+        "bytes": 20661,
+        "path": "scar/trace/os_capture_launch.py",
+        "sha256": "94daeb4158feaeae45d6467fdd3cd2799a15b30c66aef8b5ea2bfa3e3c40cb44"
+      },
+      "main_old": {
+        "bytes": 17615,
+        "sha256": "1a63840bb31036fbd1b32bb83cae3f5839a92496a9c1a7ea32d29e2cefeacd75"
+      },
+      "path": "scar/trace/os_capture_launch.py"
+    },
+    {
+      "isolated_new": {
+        "bytes": 40987,
+        "path": "scar/trace/capture_coordinates.py",
+        "sha256": "e0d71eba04aab0a948ee6d07bbbcd30abc20ddb162dee62a7f0b7922ad8d8aba"
+      },
+      "main_old": {
+        "bytes": 37640,
+        "sha256": "b7069000d5c986984f98589917397a398728de0600b65ee5893ba9ddcdda2995"
+      },
+      "path": "scar/trace/capture_coordinates.py"
+    },
+    {
+      "isolated_new": {
+        "bytes": 16604,
+        "path": "scar/trace/native_tensor_inputs.py",
+        "sha256": "f8cf28fa8b375ccab3932db3f371a67d6a518e467eff133d4e4b0c02047d3ff8"
+      },
+      "main_old": {
+        "bytes": 15232,
+        "sha256": "548a013eaad9f795945769c03b60dd8f12adfa6acab6f2a1688a77eef5ec3474"
+      },
+      "path": "scar/trace/native_tensor_inputs.py"
+    }
+  ],
+  "main_changed": false,
+  "real_CPU_gate_executed": false,
+  "schema": "scar.native-input-membership-source-receipt",
+  "schema_version": 1,
+  "static_only": true
+}
