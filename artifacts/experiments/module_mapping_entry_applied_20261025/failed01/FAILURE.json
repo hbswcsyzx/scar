@@ -1,0 +1,9 @@
+{
+  "actual_terminal_exit": 1,
+  "actual_tool_session": 7109,
+  "failure": "application harness looked for store at outer SourceCodeEvidence rather than nested witness",
+  "new_lowerings": 0,
+  "production_code_changed": false,
+  "status": "FAILED_PRESERVED",
+  "v6_comparison_reached_and_returned_before_failure": true
+}

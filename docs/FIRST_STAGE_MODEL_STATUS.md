@@ -6,6 +6,15 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：模块 mapping-frame 入口实际通过，内部仍待展开
+
+candidate04 actual exit0/4.3214s，原源码 95 atoms/92 definitions/45 CFG nodes/56 edges
+核对通过，返回 2 Regions/9 个入口操作；普通 v6 reader 与只读编译根见证通过。
+主树同一 v6 及旧 v5 读回 actual exit0/4.1948s，原 worklist AST 节点全部保留。
+内部语句恢复 0、REQUIRED expansion、实际 namespace/activation/state 均保留缺口；
+原两次 producer 失败和主树 harness 失败均归档。source858/runtime843 不变，见
+[模块入口](SOURCE_MODULE_ENTRY.md)。
+
 ### 2026-10-25：通用entry正常lower及普通读回1项通过，尚未出版
 
 同CPU依赖门6组/265源码对应之后，entry门session67217 actualexit0/6.771874s，

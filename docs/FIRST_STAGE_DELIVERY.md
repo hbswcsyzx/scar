@@ -15,6 +15,11 @@
 样例，与旧LeWM独立；不授Python对象、内容/state或ready，也不增加其覆盖。见
 [归档与规范端口关联](NATIVE_TENSOR_INPUTS.md)。
 
+模块顶层也已补独立 mapping-frame 入口：真实源码自动选择原 MODULE initializer，
+2 Regions/9 个入口操作及普通 v6/v5 读回通过。内部语句恢复仍为 0，REQUIRED 展开
+债务和实际 namespace 绑定缺口保留；不是完整 module body。见
+[模块入口及下一步](SOURCE_MODULE_ENTRY.md)。
+
 **当前可复核结果（2026-10-25）：** 完整runtime接线仍为843快照；正式静态源码已发布
 到858，后继新增body尚未接回原运行。12原图普通ADD的恢复消费实际exit0/651.143247s；
 原两次消费失败与更早FAILED_ENV_FREEZE均保留。新增覆盖账本

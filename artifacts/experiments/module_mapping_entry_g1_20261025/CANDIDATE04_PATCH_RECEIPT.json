@@ -1,0 +1,426 @@
+{
+  "status": "PREPARED_NOT_RUN",
+  "old_source_sha256": "9f436e01a7cbd9cae850c228436b8e083dc17ea4f00e191fd9132fa7d4287ee5",
+  "new_source_sha256": "a8cfcbaadf8620f05d618ae3fb27d9ffb3be2cfcd85e2929839248b74723bd5a",
+  "only_change": {
+    "before": "len(context.semantic.source_atoms), len(context.semantics.operations),",
+    "after": "len(context.semantic.source_atoms), len(context.semantic.definitions),"
+  },
+  "shape_checks": {
+    "SourceProgram": {
+      "referenced_fields": [
+        "control",
+        "frame",
+        "graph",
+        "interface",
+        "language",
+        "metadata",
+        "module",
+        "profile",
+        "semantic",
+        "semantics",
+        "structured"
+      ],
+      "actual_fields": [
+        "graph",
+        "metadata",
+        "semantic",
+        "semantics",
+        "control",
+        "profile",
+        "interface",
+        "frame",
+        "structured",
+        "language",
+        "module"
+      ]
+    },
+    "ModuleBodyOverlay": {
+      "referenced_fields": [
+        "census",
+        "declaration",
+        "frame_rules",
+        "frontiers",
+        "interface",
+        "loops",
+        "operation_links",
+        "operations_emitted",
+        "protocols",
+        "status",
+        "unexpanded_body",
+        "use_links",
+        "value_links"
+      ],
+      "actual_fields": [
+        "declaration",
+        "status",
+        "census",
+        "interface",
+        "frontiers",
+        "operations_emitted",
+        "operation_links",
+        "value_links",
+        "use_links",
+        "protocols",
+        "loops",
+        "frame_rules",
+        "unexpanded_body"
+      ]
+    },
+    "ModuleCodeWitness": {
+      "referenced_fields": [
+        "captured",
+        "manifest",
+        "module_artifact",
+        "module_key",
+        "source_link"
+      ],
+      "actual_fields": [
+        "captured",
+        "source_link",
+        "manifest",
+        "module_artifact",
+        "module_key"
+      ]
+    },
+    "ModuleEntryDeclaration": {
+      "referenced_fields": [
+        "closure_names",
+        "profile",
+        "unit",
+        "witness"
+      ],
+      "actual_fields": [
+        "unit",
+        "witness",
+        "closure_names",
+        "profile"
+      ]
+    },
+    "MappingFrameEntry": {
+      "referenced_fields": [
+        "builtins_namespace",
+        "closure_cells",
+        "globals_namespace",
+        "locals_namespace",
+        "region",
+        "unit",
+        "world"
+      ],
+      "actual_fields": [
+        "unit",
+        "region",
+        "locals_namespace",
+        "globals_namespace",
+        "builtins_namespace",
+        "closure_cells",
+        "world"
+      ]
+    },
+    "ModuleSourceCensus": {
+      "referenced_fields": [
+        "cfg_edges",
+        "cfg_nodes",
+        "semantic_operations",
+        "source_atoms"
+      ],
+      "actual_fields": [
+        "source_atoms",
+        "semantic_operations",
+        "cfg_nodes",
+        "cfg_edges"
+      ]
+    },
+    "UnexpandedModuleBody": {
+      "referenced_fields": [
+        "context",
+        "operation",
+        "region",
+        "required_expansion",
+        "unit"
+      ],
+      "actual_fields": [
+        "unit",
+        "context",
+        "region",
+        "operation",
+        "required_expansion"
+      ]
+    },
+    "ModuleCatalogEntry": {
+      "referenced_fields": [
+        "context",
+        "file_index",
+        "unit"
+      ],
+      "actual_fields": [
+        "unit",
+        "context",
+        "file_index"
+      ]
+    },
+    "Region": {
+      "referenced_fields": [
+        "blocks",
+        "entry",
+        "exits",
+        "id",
+        "label",
+        "parent"
+      ],
+      "actual_fields": [
+        "id",
+        "label",
+        "entry",
+        "blocks",
+        "exits",
+        "parent"
+      ]
+    },
+    "ProgramGraph": {
+      "referenced_fields": [
+        "binding_definitions",
+        "binding_reads",
+        "environments",
+        "function_entries",
+        "operations",
+        "regions",
+        "root",
+        "state_address_refinements",
+        "values"
+      ],
+      "actual_fields": [
+        "root",
+        "regions",
+        "operations",
+        "values",
+        "locations",
+        "ordering",
+        "binding_definitions",
+        "binding_reads",
+        "resources",
+        "resource_requirements",
+        "resource_uses",
+        "resource_locations",
+        "environments",
+        "function_entries",
+        "control_scopes",
+        "control_ports",
+        "exception_packets",
+        "pending_completions",
+        "provider_envelopes",
+        "provider_regions",
+        "provider_bindings",
+        "native_boundaries",
+        "boundary_relations",
+        "handled_context_domains",
+        "cleanup_interfaces",
+        "cleanup_enters",
+        "cleanup_resumes",
+        "cleanup_replacements",
+        "handled_context_reads",
+        "resumable_bodies",
+        "frame_context_initials",
+        "frame_context_attaches",
+        "frame_context_detaches",
+        "raw_driver_requests",
+        "resumable_creates",
+        "async_request_creates",
+        "request_association_reads",
+        "driver_interfaces",
+        "final_body_gates",
+        "body_drives",
+        "driver_lifecycles",
+        "body_outcome_commits",
+        "created_close_tests",
+        "no_body_finishes",
+        "session_updates",
+        "terminal_frame_releases",
+        "state_address_refinements",
+        "literal_evaluations",
+        "protocol_scopes",
+        "protocol_operations",
+        "protocol_call_inputs",
+        "protocol_result_consumers",
+        "protocol_bindings",
+        "exception_matches",
+        "call_effect_expansions",
+        "stored_value_writes",
+        "stored_value_reads"
+      ]
+    },
+    "Operation": {
+      "referenced_fields": [
+        "accesses",
+        "behaviors",
+        "callee",
+        "completions",
+        "effects_complete",
+        "id",
+        "invoke_arguments",
+        "results",
+        "terminator",
+        "uses"
+      ],
+      "actual_fields": [
+        "id",
+        "label",
+        "behaviors",
+        "uses",
+        "results",
+        "accesses",
+        "effects_complete",
+        "terminator",
+        "callee",
+        "call_arguments",
+        "completions",
+        "invoke_arguments"
+      ]
+    },
+    "Block": {
+      "referenced_fields": [
+        "arguments",
+        "id",
+        "operations"
+      ],
+      "actual_fields": [
+        "id",
+        "arguments",
+        "operations"
+      ]
+    },
+    "BlockArgument": {
+      "referenced_fields": [
+        "block",
+        "index"
+      ],
+      "actual_fields": [
+        "block",
+        "index"
+      ]
+    },
+    "LiteralOrigin": {
+      "referenced_fields": [
+        "value"
+      ],
+      "actual_fields": [
+        "value"
+      ]
+    },
+    "CompletionSignature": {
+      "referenced_fields": [
+        "kind",
+        "types"
+      ],
+      "actual_fields": [
+        "kind",
+        "types"
+      ]
+    },
+    "CompletionSuccessor": {
+      "referenced_fields": [
+        "arguments",
+        "block",
+        "kind"
+      ],
+      "actual_fields": [
+        "kind",
+        "block",
+        "arguments"
+      ]
+    },
+    "CompletionResult": {
+      "referenced_fields": [
+        "index"
+      ],
+      "actual_fields": [
+        "index"
+      ]
+    },
+    "Terminator": {
+      "referenced_fields": [
+        "exit",
+        "kind",
+        "successors",
+        "values"
+      ],
+      "actual_fields": [
+        "kind",
+        "successors",
+        "condition",
+        "exit",
+        "values"
+      ]
+    },
+    "Use": {
+      "referenced_fields": [
+        "id",
+        "value"
+      ],
+      "actual_fields": [
+        "id",
+        "value",
+        "role"
+      ]
+    },
+    "StateAccess": {
+      "referenced_fields": [
+        "after",
+        "full_overwrite",
+        "mode",
+        "reference"
+      ],
+      "actual_fields": [
+        "location",
+        "before",
+        "mode",
+        "after",
+        "footprint",
+        "full_overwrite",
+        "reference"
+      ]
+    },
+    "ReferenceValue": {
+      "referenced_fields": [
+        "id",
+        "origin"
+      ],
+      "actual_fields": [
+        "id",
+        "region",
+        "origin",
+        "referent_identity",
+        "targets",
+        "selector"
+      ]
+    },
+    "StateVersionValue": {
+      "referenced_fields": [
+        "id",
+        "location",
+        "origin"
+      ],
+      "actual_fields": [
+        "id",
+        "region",
+        "origin",
+        "location"
+      ]
+    }
+  },
+  "census_semantics": {
+    "source_atoms": "len(context.semantic.source_atoms): original full-file SG atoms",
+    "semantic_operations": "len(context.semantic.definitions): original full-file SG OperationDefinitions, matching program_composition.py:412; not SourceSemanticsGraph computational Opcode records",
+    "cfg_nodes": "len(context.control.nodes): original full-file source CFG nodes, not newly constructed entry core blocks",
+    "cfg_edges": "len(context.control.edges): original full-file source CFG edges, not newly constructed core successors"
+  },
+  "expected_census_unchanged": {
+    "cfg_edges": 56,
+    "cfg_nodes": 45,
+    "semantic_operations": 92,
+    "source_atoms": 95
+  },
+  "old_candidate03_unchanged": true,
+  "six_source_snapshot": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/module_mapping_entry_g1_20261025/candidate03-source-snapshot",
+  "new_fixtures_or_model_runs": 0
+}

@@ -9,7 +9,7 @@ from __future__ import annotations
 import ast
 from collections import Counter, defaultdict
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import cached_property
 import hashlib
 import json
@@ -23,6 +23,7 @@ from scar.analysis.source_semantics_v2 import validate_source_semantics
 from scar.ir.program.codec import dumps as dump_graph
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
+from scar.ir.program.module_entries import ModuleBodyOverlay, ModuleEntryProfile
 from scar.ir.program.frames import (
     FrameBind, FrameDiscard, FrameEnter, FrameExit, FrameFormal, FrameModel,
 )
@@ -71,14 +72,29 @@ class SourceProgram:
     semantic: object
     semantics: object
     control: object
-    profile: BodyLoweringProfile = BodyLoweringProfile.LEGACY
+    profile: BodyLoweringProfile | ModuleEntryProfile = BodyLoweringProfile.LEGACY
     interface: BodyEntryInterface | None = None
     frame: FrameModel | None = None
     structured: StructuredBodyModel | None = None
     language: SourceLanguageOverlay | None = None
+    module: ModuleBodyOverlay | None = None
 
     def summary(self):
         """Separate declaration/link counts from program and effect coverage."""
+        if self.module is not None:
+            from scar.ir.record_codec import encode
+            return {"entry_kind": "MAPPING_FRAME", "entry": self.metadata.entry,
+                "body_status": self.module.status.value, "graph_present": self.graph is not None,
+                "entry_regions": len(self.graph.regions) if self.graph is not None else 0,
+                "body_internal_operations_recovered": 0,
+                "required_body_expansion": (self.module.unexpanded_body.required_expansion.value
+                    if self.module.unexpanded_body is not None else None),
+                "source_census": encode(self.module.census),
+                "construction_operations": self.module.operations_emitted,
+                "frontier_counts": dict(sorted(Counter(row.kind for row in self.module.frontiers).items())),
+                "whole_program_coverage_established": False, "runtime_target_verified": False,
+                "namespace_alias_established": False, "import_module_object_established": False,
+                "fine_grained_state_effects_established": False, "transformation_authorized": False}
         graph = self.graph
         return {
             "entry": self.metadata.entry,
@@ -116,6 +132,20 @@ class SourceProgram:
         }
 
     def to_dict(self):
+        if self.module is not None:
+            from scar.ir.program.module_entries import encode_module_overlay
+            if (self.profile is not ModuleEntryProfile.EXEC_MAPPING_314_V1 or self.interface is not None
+                    or self.frame is not None or self.structured is not None or self.language is not None):
+                raise ValueError("v6 mapping entry cannot acquire function ABI overlays")
+            return {"schema": "scar.source-program", "schema_version": 6,
+                "entry_kind": "MAPPING_FRAME", "profile": self.profile.value,
+                "status": self.module.status.value,
+                "scope": "selected exec-root mapping frame; body/runtime/effects debt remains explicit",
+                "metadata": encode(self.metadata), "module": encode_module_overlay(self.module),
+                "graph": json.loads(dump_graph(self.graph)) if self.graph is not None else None,
+                "semantic": self.semantic.to_dict(), "semantics": self.semantics.to_dict(),
+                "control": self.control.to_dict(), "summary": self.summary(),
+                "runtime_target_verified": False, "transformation_authorized": False}
         if self.language is None:
             reject_extended_protocols(self.structured)
         elif self.profile is not BodyLoweringProfile.STRUCTURED_ENV:
@@ -146,7 +176,7 @@ class SourceProgram:
 
     @classmethod
     def from_dict(cls, document, *, max_operations=10000, language_options=None, verification="SOURCE_REPLAY",
-                  source_texts: dict[str, str] | None = None):
+                  source_texts: dict[str, str] | None = None, module_code_evidence=None):
         from scar.ir.program.codec import loads as load_graph
         from scar.ir.record_codec import decode
         from scar.ir.semantics_v2 import SourceSemanticsGraph
@@ -162,6 +192,30 @@ class SourceProgram:
             raise ValueError("source program verification mode must be explicit")
         _check_structure_source_texts(verification, source_texts)
         version = document.get("schema_version")
+        if type(version) is int and version == 6:
+            from scar.ir.program.module_entries import decode_module_overlay
+            if (set(document) != expected_fields | {"entry_kind", "profile", "module"}
+                    or document["schema"] != "scar.source-program" or document["entry_kind"] != "MAPPING_FRAME"
+                    or document["profile"] != ModuleEntryProfile.EXEC_MAPPING_314_V1.value
+                    or language_options is not None):
+                raise ValueError("v6 mapping entry fields/capability differ")
+            if verification != "STRUCTURE":
+                raise ValueError("v6 uses explicit retained-source structure plus optional independent root evidence; function replay is unsupported")
+            result = cls(load_graph(_canonical(document["graph"])) if document["graph"] is not None else None,
+                decode(LoweringMetadata, document["metadata"]), semantic_from_dict(document["semantic"]),
+                None, SourceControlFlowGraph.from_dict(document["control"]), ModuleEntryProfile.EXEC_MAPPING_314_V1,
+                module=decode_module_overlay(document["module"]))
+            result = replace(result,
+                semantics=SourceSemanticsGraph.from_dict(document["semantics"], result.semantic))
+            if _canonical(result.to_dict()) != _canonical(document):
+                raise ValueError("v6 mapping entry scope/status/authority differs")
+            checked = validate_source_program(result, max_operations=max_operations, verification=verification,
+                source_texts=source_texts, module_code_evidence=module_code_evidence)
+            if not checked["valid"]:
+                raise ValueError("; ".join(checked["errors"]))
+            return result
+        if module_code_evidence is not None:
+            raise ValueError("module root evidence cannot alter historical function verification")
         if type(version) is not int or version not in (1, 2, 3, 4, 5):
             raise ValueError("source program schema/version mismatch")
         if version < 5 and verification != "SOURCE_REPLAY":
@@ -207,7 +261,8 @@ class SourceProgram:
         return result
 
     @classmethod
-    def read_structure(cls, document, *, max_operations=10000, source_texts: dict[str, str] | None = None):
+    def read_structure(cls, document, *, max_operations=10000, source_texts: dict[str, str] | None = None,
+                       module_code_evidence=None):
         """Read v5; optional retained texts feed the existing source/CFG checks.
 
         This grants no CodeWitness or runtime proof. Omission preserves the
@@ -215,7 +270,7 @@ class SourceProgram:
         and replayed by the ordinary semantics/control validators.
         """
         return cls.from_dict(document, max_operations=max_operations, verification="STRUCTURE",
-                             source_texts=source_texts)
+                             source_texts=source_texts, module_code_evidence=module_code_evidence)
 
 
 @dataclass(frozen=True)
@@ -260,6 +315,11 @@ class PreparedSource:
               expand_candidates=True, profile=BodyLoweringProfile.LEGACY, language_options=None):
         return _lower_prepared(self, entry, source=source, max_operations=max_operations,
                                expand_candidates=expand_candidates, profile=profile, language_options=language_options)
+
+    def lower_entry(self, selection, *, code_evidence, max_operations=10000):
+        """Explicit mapping-root capability; never changes function defaults."""
+        from scar.analysis.source_module_lowering import lower_module_entry
+        return lower_module_entry(self, selection, code_evidence=code_evidence, max_operations=max_operations)
 
 
 def _lower_prepared(context, entry, *, source, max_operations, expand_candidates, profile,
@@ -1082,7 +1142,8 @@ def _check_structure_source_texts(verification, source_texts):
 
 
 def validate_source_program(result: SourceProgram, *, max_operations: int = 10000, language_options=None,
-                            verification="SOURCE_REPLAY", source_texts: dict[str, str] | None = None):
+                            verification="SOURCE_REPLAY", source_texts: dict[str, str] | None = None,
+                            module_code_evidence=None):
     """Rebuild from current source; reported provenance cannot raise this budget."""
     try:
         if type(result) is not SourceProgram:
@@ -1090,6 +1151,14 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
         if verification not in ("SOURCE_REPLAY", "STRUCTURE"):
             raise ValueError("source verification mode differs")
         _check_structure_source_texts(verification, source_texts)
+        if result.module is not None:
+            if verification != "STRUCTURE" or language_options is not None:
+                raise ValueError("v6 mapping verification requires explicit retained STRUCTURE inputs")
+            from scar.analysis.source_module_validation import module_validation_report
+            return module_validation_report(result, source_texts=source_texts,
+                code_evidence=module_code_evidence, max_operations=max_operations)
+        if module_code_evidence is not None:
+            raise ValueError("module evidence cannot alter function validation")
         structural_only = verification == "STRUCTURE"
         if structural_only and result.language is None:
             raise ValueError("historical source replay policy is unchanged")

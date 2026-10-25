@@ -167,10 +167,19 @@ class StructuredBuilder(_Builder):
         cursor.env[name] = token.id
         return token.id
 
-    def finish_exit(self, cursor, node, value, kind, *, binding=None):
+    def frame_exit_references(self, cursor, node, value):
+        """Ordered retained inputs, independent of a function entry ABI.
+
+        Mapping-frame construction extends this list with its actual entry
+        ports. This default preserves the historical function-frame contract.
+        """
         refs = [(value, node, "held-payload")]
         refs.extend((cursor.env[name], node, "held-local") for name in sorted(cursor.env))
         refs.extend((value, node, "held-temporary") for value in self.active_temporaries)
+        return refs
+
+    def finish_exit(self, cursor, node, value, kind, *, binding=None):
+        refs = self.frame_exit_references(cursor, node, value)
         self.frame_transition(cursor, node, refs, PythonProtocolKind.FRAME_EXIT)
         operation_id = self.fresh(OperationID, "structured-exit")
         uses = (self.use(operation_id, value, node, "result", 0),
@@ -543,6 +552,18 @@ class StructuredBuilder(_Builder):
 
     def interface_region_entry(self):
         return self.values_by_id[self.interface.world].origin.block
+
+    def assemble_region(self, entry_world):
+        """Assemble existing core blocks/exits without choosing an entry ABI."""
+        blocks = tuple(Block(block, self.block_arguments[block], tuple(self.block_operations[block]))
+                       for block in self.function_blocks)
+        completed = {op.terminator.kind for op in self.operations if op.terminator is not None}
+        exits = tuple(ExitPort(kind.value.lower(), kind, (_REF, self.state_type))
+                      for kind, terminator in ((ExitKind.NORMAL, TerminatorKind.RETURN),
+                                              (ExitKind.RAISE, TerminatorKind.RAISE))
+                      if terminator in completed)
+        return Region(self.function_context, self.entry, self.values_by_id[entry_world].origin.block,
+                      blocks, exits)
 
     def make_graph(self):
         """Assemble canonical core; newer profiles may add existing interfaces."""
