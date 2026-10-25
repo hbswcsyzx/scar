@@ -1,0 +1,100 @@
+{
+  "audit": {
+    "bytes": 35562,
+    "one_complete_raw_frame_scan": 536684,
+    "operand_scan": 13285,
+    "original_line_anchor": {
+      "index": 10,
+      "line_number": 10,
+      "line_sha256": "82ba771431afe4a79026e1d6c25f833817f9ac1b345a57b57a54306fe0096b17",
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-events.1391040.jsonl"
+    },
+    "original_parameter_projection": [
+      {
+        "name": "op",
+        "ref": "weak:1391040:52"
+      },
+      {
+        "name": "torch_dispatch_class",
+        "ref": "weak:1391040:53"
+      }
+    ],
+    "sha256": "7c57bf5ac6b655b23d0eb3f96e5025150200c2b7c5815cfd560daa61a4368a5f",
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/callee_entry_routing_plan_20261025/observations.json"
+  },
+  "capability": "CALLEE_ENTRY_PARAMETER_ROUTING_V1",
+  "code_review_receipts_not_historical_execution_witness": [
+    {
+      "bytes": 18213,
+      "ranges": [
+        {
+          "first_line": 61,
+          "last_line": 78,
+          "symbol": "_write"
+        },
+        {
+          "first_line": 121,
+          "last_line": 130,
+          "symbol": "_bindings"
+        },
+        {
+          "first_line": 175,
+          "last_line": 276,
+          "symbol": "profile"
+        },
+        {
+          "first_line": 314,
+          "last_line": 326,
+          "symbol": "profile"
+        }
+      ],
+      "sha256": "804a0c93d3aac6ddedf5154f2956cac49823cf35d9d6aac45f47e24c234d6fe8",
+      "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/call_edges.py"
+    },
+    {
+      "bytes": 22103,
+      "ranges": [
+        {
+          "first_line": 66,
+          "last_line": 71,
+          "symbol": "_bindings"
+        },
+        {
+          "first_line": 163,
+          "last_line": 210,
+          "symbol": "_decode_event"
+        }
+      ],
+      "sha256": "684c16a34b27e233407e64cfa5a313515d95fbcea13152ae253a21e1b9bb0416",
+      "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/analysis/call_trace_reader.py"
+    },
+    {
+      "bytes": 68523,
+      "ranges": [
+        {
+          "first_line": 259,
+          "last_line": 264,
+          "symbol": "fact"
+        }
+      ],
+      "sha256": "4d85853099e8aa8e9c9af2779131b32339369dc7deb11d4dd9194ce75d66ae40",
+      "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/analysis/source_invocations.py"
+    }
+  ],
+  "extra_raw_reads_for_this_contract": 0,
+  "formal_source_reference": "separate original FormalParameter.source, preserved unchanged in ReferenceOccurrence",
+  "line_locator": "#/lines/N is the existing _Members.fact one-based whole-original-JSONL-record locator",
+  "mapping_invented_from_dataclass_fields": false,
+  "not_a_content_literal_or_object_identity": true,
+  "parameter_locator": "#/lines/N/parameters/i selects the original top-level parameters array element, zero-based i",
+  "qualification_requires": "same live checked session, exact original anchor/SHA/index, artifact/process/Run and independent ordered port/source checker",
+  "reader_evidence": "_ENTER_FIELDS requires top-level parameters; _decode_event directly decodes row[parameters] through _bindings into tuple[NamedReference], preserving names/ref/order",
+  "schema": "scar.callee-entry-raw-locator-contract",
+  "schema_version": 1,
+  "selected_record_shape": {
+    "name": "original captured formal name",
+    "ref": "original reference token"
+  },
+  "source_representation": "ORIGINAL_JSONL_RECORD; not normalized FrameEntry",
+  "writer_evidence": "CallEdgeRecorder.profile forms row dict with top-level parameters=_bindings(...); _write serializes that row directly with newline, without payload envelope"
+}
