@@ -19,16 +19,19 @@ S1 审计、已有数据的 S3 接线和独立产品复核可以并行；会改�
 
 ## 2. 当前实际下一门
 
-当前正式源码快照为843个 active bodies/2217个定义/151个文件；已冻结完整
-runtime 报告仍属于842快照，不能合并数字。新 source-membership ancestor API
-已通过 depth2 的实际查询和错误祖先拒绝，private factory/新快照的完整接线尚待
-运行。两项分别见 [revision](SOURCE_BODY_REVISION.md) 和
+当前正式源码快照为843个 active bodies/2217个定义/151个文件。新的fresh联合门
+现已exit0，source binder1次、不resume旧842；原100438调用中6699接当前body，
+其余source-only/unresolved全保留。source-membership ancestor API及private factory/
+安装/公共消费均在此门实际执行。不能合并新旧snapshot数字。两项分别见
+[revision](SOURCE_BODY_REVISION.md) 和
 [ancestor](SOURCE_REVISION_RUNTIME_ANCESTRY.md)。
 
-下一门消费新843快照、原完整 capture、原静态证明和准确 readonly compiler
+本轮已完成门消费新843快照、原完整 capture、原静态证明和准确 readonly compiler
 witness，从当前 raw 独立读一次并调用既有 source→dispatch→SBA 公共链路。
 不能 resume842 checkpoint、重 lower/compile/执行目标或移植历史动态身份。
 计数由实际执行推导，保存新旧 namespace 及全部原未连接项。
+准确结果、成本和剩余义务见
+[联合门结果](../artifacts/experiments/first_stage_source_revision_current_review_20261025/RESULT.md)。
 
 同时复核已有 native bridge 的终态：它只验过16个 dispatch prefix 中的13个
 ATen调用、4种静态接口及27条 Tensor 参考；内容版本、完整状态与 ready 未闭合。

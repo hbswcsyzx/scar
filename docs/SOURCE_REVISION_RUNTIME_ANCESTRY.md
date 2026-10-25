@@ -1,6 +1,12 @@
 # Revision后复用source membership：最窄runtime接线设计
 
-2026-10-23。**Implemented / 真实ancestor query与wrong-ancestor拒绝Verified；private factory/current绑定未运行。**
+**2026-10-25 实际集成补充：** 843快照的fresh联合门已exit0，private factory、
+ANCESTRY_V2安装及source/dispatch/SBA公共消费均实际运行；depth2、严格compiler
+inventory等式及新namespace均核过。准确结果和有限范围见
+[实际报告](../artifacts/experiments/first_stage_source_revision_current_review_20261025/RESULT.md)。
+以下保留原设计起点及当时的未运行状态，不作为最新终态。
+
+2026-10-23。**Implemented / 当时真实ancestor query与wrong-ancestor拒绝Verified；private factory/current绑定待运行。**
 前置门`first_stage_source_body_revision_20261023`已PASS：ADD218+REVISE65发布为843 active
 bodies；下一步只把此已完成batch接回同一既有capture，不重新lower/compile/执行目标。
 实现门见 `artifacts/experiments/first_stage_source_membership_ancestor_20261023/README.md`：

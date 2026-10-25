@@ -6,6 +6,35 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：843快照与完整保留运行的fresh统一接线通过
+
+`first_stage_source_revision_current_20261025` 已实际exit0，GNU wall24:18.35、
+maxRSS2226076KiB。与旧842门分开：本门新读原raw，source binder实际1次、旧checkpoint
+resume0；frame/operand/environment各扫描1次，原855 codes、817 groups、100438
+entries=exits、312812 operands、16403 environment events均保留。
+
+当前843快照的77 body groups/6699 calls，590 source-only groups/88775 calls，
+150 unresolved groups/4964 calls。新增218ops图接25次调用，修订65ops图接150次，
+其余准确active namespaces接6524次。79592 markers/109288 slots守恒；retained
+body/source/invocation关联分别20592/58514/6，480未解；它们不是direct-call证明。
+
+入口参数17097；27 argument+27 completion条件路由、6223返回root；3372 entry的
+10162环境ports。100523 route issues、6744未定defaults等原缺口保留。原坏65只作
+历史accounting，不被重新typed准入；所有新formal/return/environment引用从新snapshot
+重派。ANCESTRY_V2 private factory、安装及公共消费在本门实际运行，原compiler inventory
+严格相等，ancestor depth2且两个parent各parse1次；仅复用静态membership/原guard，
+不复用旧Invocation/activation，原guard也不冒称fresh live源码测量。
+
+CodeWitness compile0、load20、descriptor matches227，prepare/lower/publish/target均0。
+SBA报告104798011 canonical bytes、SHA
+`2f8d567e658eb23a77272975ff2e0c4dd7e6179b09485de9f3be977d9e363d4a`，
+按有限chunks保存。root独立流式复原全部canonical字节并匹配SHA，核179实际参与源码
+及归档copy，exit0/4.35s；没有重新读raw、解源码图或运行binder。
+
+完整结果见[联合门报告](../artifacts/experiments/first_stage_source_revision_current_review_20261025/RESULT.md)。
+此门是实际source/引用端口连接，不是内容、world/state、alias、ready或完整lifetime闭合。
+全dispatch桥接和覆盖账本在隔离工作树实施；S3/S4及第一阶段整体继续OPEN。
+
 ### 2026-10-25：恢复后固定声明/存储职责，提交已冻结跨层连接
 
 声明式规范图、归档编码和查询索引分别承担职责。现有 ProgramGraph/

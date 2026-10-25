@@ -10,13 +10,21 @@
 SQLite仅为可重建索引。已有native bridge不再是“完全没有producer”：最终真实
 attempt03已连接13个调用/4接口/27参考，但只覆盖16-prefix，41gaps与内容四表0
 保留，不能当完整native接入。FD namespace临时隔离阻止无证连续性结论，闭包
-producer仍待落实。原始完整源码runtime报告仍属于842快照；843的fresh联合门
-已启动，终态未到，不以启动替代通过。提交与准确实际范围见[当前状态](FIRST_STAGE_MODEL_STATUS.md)。
+producer仍待落实。843的fresh联合门已实际exit0，已取代旧842报告成为最新runtime
+连接结果。提交与准确实际范围见[当前状态](FIRST_STAGE_MODEL_STATUS.md)。
+
+**联合门现已终态（2026-10-25）：** 新843快照fresh source→dispatch→SBA实际exit0，
+wall24:18.35/RSS2226076KiB。817 groups/100438 calls新读且各扫描一次，77 body groups/
+6699 calls、590 source-only/88775 calls、150 unresolved/4964 calls；新增图25次、修订图
+150次，未移植旧动态身份。此前“842报告仍为最新”的描述仅为启动前历史状态。
+报告按chunks保存，root已独立流式复得canonical SHA并核179个参与源码。见
+[实际结果](../artifacts/experiments/first_stage_source_revision_current_review_20261025/RESULT.md)。
+state/content/ready、全部native及资源依赖仍未闭合，第一阶段继续OPEN。
 
 **最新snapshot边界：** 正式source revision门已通过，active源码图为843/2217，含
 218ops新增图和65ops修订图；旧artifact保留，source/code验证不授完整lifetime。
-当前完整runtime连接报告仍来自先前842 snapshot，尚未把新body attachments/ports
-重派到同Run，不能把两份snapshot的覆盖数字相加。具体见
+当前完整runtime连接报告已由fresh门重派到843 snapshot，新body attachments/ports
+来自新namespace，不能把与旧842快照的覆盖数字相加。具体见
 [SOURCE_BODY_REVISION.md](SOURCE_BODY_REVISION.md) 与
 [runtime ancestor设计](SOURCE_REVISION_RUNTIME_ANCESTRY.md)。第一阶段S3/S4仍OPEN。
 

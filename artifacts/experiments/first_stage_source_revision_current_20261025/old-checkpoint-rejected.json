@@ -1,0 +1,12 @@
+{
+  "detail": "source/body access: source report composition/inventory receipt differs",
+  "historical_bad_graph_typed": false,
+  "old_report": {
+    "bytes": 108709,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_attempt02_20261023/result/connections/source/report.json",
+    "sha256": "a69d44a76cc051b7e8e9d406de0a27756cc60ee377c33e55b35509c8afeb55af"
+  },
+  "raw_read_performed_by_this_check": false,
+  "resume_attempt_executed": false,
+  "type": "ValueError"
+}
