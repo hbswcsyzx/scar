@@ -1,0 +1,388 @@
+{
+  "excluded_large_local_artifacts": [
+    {
+      "bytes": 1260679,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/body-01-returned.json"
+    },
+    {
+      "bytes": 1021473,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/body-01-source-program5.json.gz"
+    }
+  ],
+  "external_inputs_copied": false,
+  "files": [
+    {
+      "bytes": 5820,
+      "path": "artifacts/analysis/generator_expression_design_20261025/PLAN.md",
+      "sha256": "904fed86b5825c5ceeea32ccfe8c8e06ce20ce6d5f95164d875f9fa4afa409cc"
+    },
+    {
+      "bytes": 41124,
+      "path": "artifacts/analysis/generator_expression_design_20261025/SOURCE_RECEIPTS.json",
+      "sha256": "62bacff700b103ab411b1d32b36a3ed6d895e8533ddd7b23bda101eb0ea7f590"
+    },
+    {
+      "bytes": 3560,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/APPLICATION_RECEIPT.json",
+      "sha256": "c3e3c10f9f77478e908e85c4619f24da8e7ff96dbad2b61da3bbd495a5afac84"
+    },
+    {
+      "bytes": 3612,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/APPLICATION_RECEIPT.v2.json",
+      "sha256": "b3418218a6bc1c10f6341b18b5ddfc14943c275aa223e0f9bfc893f9afcb0dc0"
+    },
+    {
+      "bytes": 325,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/CANDIDATE01_NOT_RUN.json",
+      "sha256": "c4d3ca75e9a710525025586b79feb30e7eda0226f7dfba7700eca5c82510fb1a"
+    },
+    {
+      "bytes": 382,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/CANDIDATE02_NOT_RUN.json",
+      "sha256": "793ac04fa320fafce3beafc903b4d7f6b25b5895ca6c48b4f275466c9842d85e"
+    },
+    {
+      "bytes": 3413,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/RESULT.md",
+      "sha256": "b936da5658dc6599128b26c4473eba1679507502963b8e6aaa66efe3d3b32815"
+    },
+    {
+      "bytes": 1268,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/RETAINED_ARTIFACTS.json",
+      "sha256": "2a4b0c7f2c60a1b73468793fdd7b547010b2a73dbc40a7f6e270c9fb3cf39f17"
+    },
+    {
+      "bytes": 72173,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate-production.patch",
+      "sha256": "a770a7775a7d882be2be23a362457c951c1af551edf380d7901928df82e61725"
+    },
+    {
+      "bytes": 72296,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate-production.v2.patch",
+      "sha256": "33ddeb32e8d958f0c8bfe0120514b2077f1a56bf9376a9d9127b79b4de6299d0"
+    },
+    {
+      "bytes": 3804,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate01/PREPARATION_RECEIPT.json",
+      "sha256": "56ad75d9c376956709b85445724ff04e4c0d64a94f7b2323c0f1fba0cf78588d"
+    },
+    {
+      "bytes": 156830,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate01/freeze.json",
+      "sha256": "24cfb08fcac3c2208834e9c22e2593d93fb78357e98e1bdc19b88d7bc12a6270"
+    },
+    {
+      "bytes": 12140,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate01/gate_guards.py",
+      "sha256": "c5a5608a63bdc20cc9ad8c0abc8000307425b745a5628411c18eef5963503750"
+    },
+    {
+      "bytes": 10292,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate01/prepare_gate.py",
+      "sha256": "406176bd6cfea4c3fb6bbd87ee28136108138f019cd67673110c05f7438fefa9"
+    },
+    {
+      "bytes": 20105,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate01/run_gate.py",
+      "sha256": "2c38e8c62e1fd603365a209b76a2e904b9afb7de85ab181c769c9f67dfc3541a"
+    },
+    {
+      "bytes": 75285,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate01/selection.json",
+      "sha256": "7ac225d494c168e05b0dcaceac09f2a08ecaf404502ecd07693fcb62dd8cbec9"
+    },
+    {
+      "bytes": 3804,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate02/PREPARATION_RECEIPT.json",
+      "sha256": "e9156ec65c9f8af8cabb53fda09de0ce6c04c273d1a26d200adf2deaeb39aa6a"
+    },
+    {
+      "bytes": 156818,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate02/freeze.json",
+      "sha256": "70fd4b8444c635a1dd4b9dd8332aa132438e69e391c54a9ad10b3f69495bad55"
+    },
+    {
+      "bytes": 12140,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate02/gate_guards.py",
+      "sha256": "c5a5608a63bdc20cc9ad8c0abc8000307425b745a5628411c18eef5963503750"
+    },
+    {
+      "bytes": 10563,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate02/prepare_gate.py",
+      "sha256": "ef6f19eb55078d8d2aa1b22ca030716895115c21e7a1475e21e858f36b86107c"
+    },
+    {
+      "bytes": 20891,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate02/run_gate.py",
+      "sha256": "462d3311fa8d4379a7be2e572e33c4a22a1cbb2c3956185374ebd38d0e83d937"
+    },
+    {
+      "bytes": 75285,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate02/selection.json",
+      "sha256": "7ac225d494c168e05b0dcaceac09f2a08ecaf404502ecd07693fcb62dd8cbec9"
+    },
+    {
+      "bytes": 3804,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/PREPARATION_RECEIPT.json",
+      "sha256": "f3ec873e500845c358775eecdda17d54d0939d51ffa79b41ea1d534be7199446"
+    },
+    {
+      "bytes": 129,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/BUILDING.json",
+      "sha256": "a49bd7f8b6df2e8e6f5b9a9c1e532f7d89d4e24d5630c47f714dd06d8b649961"
+    },
+    {
+      "bytes": 59869,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/body-01-inputs.json",
+      "sha256": "9eb9bba1f6105cf61f4b57da61d03974fd047001ab3b9c06acc622aaec4d11ad"
+    },
+    {
+      "bytes": 17945,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/body-01-result.json",
+      "sha256": "68fc2cb54f0337bf66942bcd7fd3fe8408b0398407002483c097f0922869a07e"
+    },
+    {
+      "bytes": 1120,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/gnu-time.txt",
+      "sha256": "f9ff3b825dfe28c62ebdbaab9b9ef741cec1e73ed03cbf64ffcdb5afa1823f20"
+    },
+    {
+      "bytes": 893,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/launch-result.json",
+      "sha256": "a4677920fece44b31cc539a1bd773363e953c4878438478ac59675e41583657c"
+    },
+    {
+      "bytes": 2048,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/progress.jsonl",
+      "sha256": "b347a3c23bd9f79bc075ea5a7f267e919c66bfd39361f166ba9d0734ad11e97f"
+    },
+    {
+      "bytes": 49624,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/result.json",
+      "sha256": "1f6f226416d21b4e05f7f95bb27d4b9525415f62fad0ad43f8c759c690ebb8db"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2048,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/stdout.log",
+      "sha256": "b347a3c23bd9f79bc075ea5a7f267e919c66bfd39361f166ba9d0734ad11e97f"
+    },
+    {
+      "bytes": 156818,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/freeze.json",
+      "sha256": "bf198d1d81581c46cc6e2ca46bf9afb39f4f1a80197be94729b8652ee2f2d643"
+    },
+    {
+      "bytes": 12140,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/gate_guards.py",
+      "sha256": "c5a5608a63bdc20cc9ad8c0abc8000307425b745a5628411c18eef5963503750"
+    },
+    {
+      "bytes": 10563,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/prepare_gate.py",
+      "sha256": "d4e49597353413280845bf83670db6e34d423577343c2fac62d24e24ac53f8f4"
+    },
+    {
+      "bytes": 20899,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/run_gate.py",
+      "sha256": "44505f6c5bf8b95bfc393e8891459bf957c3b01ee52b0f1e73d1b8241b805b65"
+    },
+    {
+      "bytes": 75285,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/candidate03/selection.json",
+      "sha256": "7ac225d494c168e05b0dcaceac09f2a08ecaf404502ecd07693fcb62dd8cbec9"
+    },
+    {
+      "bytes": 7502,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check.py",
+      "sha256": "fd0987c67e7b0c5e79ee63666110f8b44e28975c79c0af348191103b56869f9f"
+    },
+    {
+      "bytes": 2024,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check01.json",
+      "sha256": "489ca1a5627d2c5ee1fa9ec5180b7aed44136886ae522fa9f53b9ac9bddaa8a4"
+    },
+    {
+      "bytes": 2302,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check02.json",
+      "sha256": "a1c768f69667e30b41beab9ab350761e8fe12bd035cd4b2e1c5719edcde26b6a"
+    },
+    {
+      "bytes": 3700,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check03.json",
+      "sha256": "2e108039f3749d24ea467513a9b491e95145424d64a7815a8439ebb4eec90aa6"
+    },
+    {
+      "bytes": 1873,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check04.json",
+      "sha256": "0c477db651cb154ce59e5a633650f7c941f9e9b5166391115dca5adcc4031c68"
+    },
+    {
+      "bytes": 665,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check05.json",
+      "sha256": "2cd20ddc1b209b09cd88ec21836a1444cf5c0d1506af7d20f6480b149371d72f"
+    },
+    {
+      "bytes": 462,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check06.json",
+      "sha256": "9c6a2b88ce63883aa42e200ce61baf787830b4355b9f55045c14b645c376a810"
+    },
+    {
+      "bytes": 462,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check07.json",
+      "sha256": "2fcd97895f831b879106fabd331f18d52decc3ebe900b468f7ff1978d7d29412"
+    },
+    {
+      "bytes": 930,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check08.json",
+      "sha256": "122021189059c9abe1ac5cae917fab3bcd0a1acfb40257d6524427fad0c9c5b3"
+    },
+    {
+      "bytes": 638,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check09.json",
+      "sha256": "039bfc19bd470a7a6b00946312d8b74427b41bdd74abd1e1dc62ae4342966c48"
+    },
+    {
+      "bytes": 638,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check10.json",
+      "sha256": "c5108e0ab500df162fa9681b2d292f6a3ff2b04b9af9d225ce54db40f187de6b"
+    },
+    {
+      "bytes": 730,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check11.json",
+      "sha256": "ae324f305494f4d407ad31a00a031bc09dedc0402abdf0229c040677d346083c"
+    },
+    {
+      "bytes": 730,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/check12.json",
+      "sha256": "ae324f305494f4d407ad31a00a031bc09dedc0402abdf0229c040677d346083c"
+    },
+    {
+      "bytes": 94,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/fixture.py",
+      "sha256": "af4f1281580606342f4cb5dedac9b9a96ffa395fc91688b23bad7b67fb6b36df"
+    },
+    {
+      "bytes": 4540,
+      "path": "artifacts/experiments/generator_expression_p0_20261025/stage-paths.txt",
+      "sha256": "b3033554307439205883e80034270c314727d9b8f16f33801c8e4fa2b80b2a79"
+    },
+    {
+      "bytes": 22626,
+      "path": "scar/analysis/environment_lowering.py",
+      "sha256": "a105749b764e2d13ee134f6b7f337d4634933a8e4fc7d64e01e87b74378b6f5e"
+    },
+    {
+      "bytes": 33040,
+      "path": "scar/analysis/source_frontend_worklist.py",
+      "sha256": "f6e8312d23601a5c633a09f38a906de2e2d06b7896b4af23d9b826a50023748c"
+    },
+    {
+      "bytes": 36405,
+      "path": "scar/analysis/source_generator_lowering.py",
+      "sha256": "e237c5eec86eb5d0dc1739f14dc9487b37c6a7e6144acd0e4a5a49d8ff287d00"
+    },
+    {
+      "bytes": 28212,
+      "path": "scar/analysis/source_generator_validation.py",
+      "sha256": "211cfc23e064249e3c2a686df598d9cf3d42b4fddc63ed5723c173b3bec38ecf"
+    },
+    {
+      "bytes": 22250,
+      "path": "scar/analysis/source_language_validation.py",
+      "sha256": "48d6a2f4f2c04c6247999b73705c76cb38f956a20c12a6b793e5b56b37c9e6de"
+    },
+    {
+      "bytes": 3928,
+      "path": "scar/analysis/source_unpack_lowering.py",
+      "sha256": "532ca1a2c355dd6c3c2fc3a4fc90ee0f3b249e3e7b7d175dfa2ec7d8b1217167"
+    },
+    {
+      "bytes": 55840,
+      "path": "scar/analysis/structured_lowering.py",
+      "sha256": "e7c13799bf5f92cb5d1b9cc0e1675d40eadae815c331a25b868156087709e307"
+    },
+    {
+      "bytes": 6206,
+      "path": "scar/ir/program/source_language.py",
+      "sha256": "1e2b6e456c10532f9189aeaeb319d20a8520c5a78efcf1c1abe47dcba4474b63"
+    },
+    {
+      "bytes": 6896,
+      "path": "scar/ir/program/structured.py",
+      "sha256": "93d0c61e2d552d16079822dbb88fedd048c862f33a29b54100efad97a737fdac"
+    }
+  ],
+  "main_application_excludes": "scar/analysis/source_frontend_worklist.py",
+  "max_file_bytes": 1000000,
+  "paths": [
+    "artifacts/analysis/generator_expression_design_20261025/PLAN.md",
+    "artifacts/analysis/generator_expression_design_20261025/SOURCE_RECEIPTS.json",
+    "artifacts/experiments/generator_expression_p0_20261025/APPLICATION_RECEIPT.json",
+    "artifacts/experiments/generator_expression_p0_20261025/APPLICATION_RECEIPT.v2.json",
+    "artifacts/experiments/generator_expression_p0_20261025/CANDIDATE01_NOT_RUN.json",
+    "artifacts/experiments/generator_expression_p0_20261025/CANDIDATE02_NOT_RUN.json",
+    "artifacts/experiments/generator_expression_p0_20261025/RESULT.md",
+    "artifacts/experiments/generator_expression_p0_20261025/RETAINED_ARTIFACTS.json",
+    "artifacts/experiments/generator_expression_p0_20261025/STAGE_MANIFEST.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate-production.patch",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate-production.v2.patch",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate01/PREPARATION_RECEIPT.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate01/freeze.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate01/gate_guards.py",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate01/prepare_gate.py",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate01/run_gate.py",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate01/selection.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate02/PREPARATION_RECEIPT.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate02/freeze.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate02/gate_guards.py",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate02/prepare_gate.py",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate02/run_gate.py",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate02/selection.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/PREPARATION_RECEIPT.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/BUILDING.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/body-01-inputs.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/body-01-result.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/gnu-time.txt",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/launch-result.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/progress.jsonl",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/result.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/stderr.log",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/stdout.log",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/freeze.json",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/gate_guards.py",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/prepare_gate.py",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/run_gate.py",
+    "artifacts/experiments/generator_expression_p0_20261025/candidate03/selection.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check.py",
+    "artifacts/experiments/generator_expression_p0_20261025/check01.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check02.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check03.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check04.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check05.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check06.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check07.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check08.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check09.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check10.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check11.json",
+    "artifacts/experiments/generator_expression_p0_20261025/check12.json",
+    "artifacts/experiments/generator_expression_p0_20261025/fixture.py",
+    "artifacts/experiments/generator_expression_p0_20261025/stage-paths.txt",
+    "scar/analysis/environment_lowering.py",
+    "scar/analysis/source_frontend_worklist.py",
+    "scar/analysis/source_generator_lowering.py",
+    "scar/analysis/source_generator_validation.py",
+    "scar/analysis/source_language_validation.py",
+    "scar/analysis/source_unpack_lowering.py",
+    "scar/analysis/structured_lowering.py",
+    "scar/ir/program/source_language.py",
+    "scar/ir/program/structured.py"
+  ],
+  "schema": "scar.explicit-small-stage-manifest",
+  "schema_version": 1
+}

@@ -1,0 +1,1563 @@
+{
+  "body_lowerings": 0,
+  "composition_root_stream_reads": 0,
+  "interpretation": "900+4 are existing parent-body call weights, not created objects/yields/drives",
+  "production_writes": 0,
+  "raw_capture_reads": 0,
+  "schema": "scar.generator-expression-design-sources",
+  "schema_version": 1,
+  "status": "DESIGN_ONLY",
+  "subjects": [
+    {
+      "AST": "GeneratorExp(elt=Call(func=Name(id='rearrange', ctx=Load()), args=[Name(id='t', ctx=Load()), Constant(value='b t (h d) -> b h t d')], keywords=[keyword(arg='h', value=Attribute(value=Name(id='self', ctx=Load()), attr='heads', ctx=Load()))]), generators=[comprehension(target=Name(id='t', ctx=Store()), iter=Name(id='qkv', ctx=Load()), is_async=0)])",
+      "body_key": "63baf552aebd035e2a9a32674e209bf8c590a8f23dc4087973f777629e1db0fe",
+      "child_metadata": {
+        "argcount": 1,
+        "cellvars": [],
+        "descriptor": {
+          "filename": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+          "first_line": 62,
+          "flags": 51,
+          "key": "pycode-v2:7aac4fd5fb8f3f124511b79a3554c6300d79fec94e934229b01b8f1acc437064",
+          "parameters": [
+            ".0"
+          ],
+          "qualname": "Attention.forward.<locals>.<genexpr>"
+        },
+        "flags": 51,
+        "freevars": [
+          "self"
+        ],
+        "instructions": [
+          {
+            "arg": 1,
+            "argrepr": "",
+            "offset": 0,
+            "opname": "COPY_FREE_VARS",
+            "positions": [
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 2,
+            "opname": "RETURN_GENERATOR",
+            "positions": [
+              62,
+              62,
+              null,
+              null
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 4,
+            "opname": "POP_TOP",
+            "positions": [
+              62,
+              62,
+              null,
+              null
+            ]
+          },
+          {
+            "arg": 0,
+            "argrepr": "",
+            "offset": 6,
+            "opname": "RESUME",
+            "positions": [
+              62,
+              62,
+              0,
+              0
+            ]
+          },
+          {
+            "arg": 0,
+            "argrepr": ".0",
+            "offset": 8,
+            "opname": "LOAD_FAST",
+            "positions": [
+              62,
+              64,
+              18,
+              9
+            ]
+          },
+          {
+            "arg": 29,
+            "argrepr": "to L2",
+            "offset": 10,
+            "opname": "FOR_ITER",
+            "positions": [
+              63,
+              63,
+              72,
+              75
+            ]
+          },
+          {
+            "arg": 1,
+            "argrepr": "t",
+            "offset": 14,
+            "opname": "STORE_FAST",
+            "positions": [
+              63,
+              63,
+              67,
+              68
+            ]
+          },
+          {
+            "arg": 1,
+            "argrepr": "rearrange + NULL",
+            "offset": 16,
+            "opname": "LOAD_GLOBAL",
+            "positions": [
+              63,
+              63,
+              12,
+              21
+            ]
+          },
+          {
+            "arg": 1,
+            "argrepr": "t",
+            "offset": 26,
+            "opname": "LOAD_FAST_BORROW",
+            "positions": [
+              63,
+              63,
+              22,
+              23
+            ]
+          },
+          {
+            "arg": 0,
+            "argrepr": "'b t (h d) -> b h t d'",
+            "offset": 28,
+            "opname": "LOAD_CONST",
+            "positions": [
+              63,
+              63,
+              25,
+              47
+            ]
+          },
+          {
+            "arg": 2,
+            "argrepr": "self",
+            "offset": 30,
+            "opname": "LOAD_DEREF",
+            "positions": [
+              63,
+              63,
+              51,
+              55
+            ]
+          },
+          {
+            "arg": 2,
+            "argrepr": "heads",
+            "offset": 32,
+            "opname": "LOAD_ATTR",
+            "positions": [
+              63,
+              63,
+              51,
+              61
+            ]
+          },
+          {
+            "arg": 1,
+            "argrepr": "('h',)",
+            "offset": 52,
+            "opname": "LOAD_CONST",
+            "positions": [
+              63,
+              63,
+              12,
+              62
+            ]
+          },
+          {
+            "arg": 3,
+            "argrepr": "",
+            "offset": 54,
+            "opname": "CALL_KW",
+            "positions": [
+              63,
+              63,
+              12,
+              62
+            ]
+          },
+          {
+            "arg": 0,
+            "argrepr": "",
+            "offset": 62,
+            "opname": "YIELD_VALUE",
+            "positions": [
+              63,
+              63,
+              12,
+              62
+            ]
+          },
+          {
+            "arg": 5,
+            "argrepr": "",
+            "offset": 64,
+            "opname": "RESUME",
+            "positions": [
+              63,
+              63,
+              12,
+              62
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 66,
+            "opname": "POP_TOP",
+            "positions": [
+              63,
+              63,
+              12,
+              62
+            ]
+          },
+          {
+            "arg": 31,
+            "argrepr": "to L1",
+            "offset": 68,
+            "opname": "JUMP_BACKWARD",
+            "positions": [
+              63,
+              63,
+              12,
+              62
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 72,
+            "opname": "END_FOR",
+            "positions": [
+              63,
+              63,
+              72,
+              75
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 74,
+            "opname": "POP_ITER",
+            "positions": [
+              63,
+              63,
+              72,
+              75
+            ]
+          },
+          {
+            "arg": 2,
+            "argrepr": "None",
+            "offset": 76,
+            "opname": "LOAD_CONST",
+            "positions": [
+              63,
+              63,
+              72,
+              75
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 78,
+            "opname": "RETURN_VALUE",
+            "positions": [
+              63,
+              63,
+              72,
+              75
+            ]
+          },
+          {
+            "arg": 3,
+            "argrepr": "INTRINSIC_STOPITERATION_ERROR",
+            "offset": 80,
+            "opname": "CALL_INTRINSIC_1",
+            "positions": [
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "arg": 1,
+            "argrepr": "",
+            "offset": 82,
+            "opname": "RERAISE",
+            "positions": [
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ],
+        "kwonlyargcount": 0,
+        "module_constant_path": [
+          8,
+          3,
+          3
+        ],
+        "parent_constant_index": 3,
+        "varnames": [
+          ".0",
+          "t"
+        ]
+      },
+      "context": {
+        "control_sha256": "51da3a5127c4016ad1a1db60f6fca0c195fdabace13c154c80ba761163e61182",
+        "namespace_root": "/home/zyf/AAA/le-wm",
+        "semantic_sha256": "42c2ba9bcd5e2961154dbe08f5dda93ff3ee5f3ac07ac21867b551dc56d7cd8f",
+        "semantics_sha256": "df1db7e4f7363ae176336c6adaab169e77d0f633ee77c59d8faad44504377551"
+      },
+      "generator_atom": {
+        "id": {
+          "kind": "source",
+          "value": "atom:75408edb52da39aabdfffd22",
+          "wire": "source:atom:75408edb52da39aabdfffd22"
+        },
+        "kind": "GeneratorExp",
+        "reference": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:75408edb52da39aabdfffd22",
+            "wire": "source:atom:75408edb52da39aabdfffd22"
+          },
+          "end_column": 9,
+          "end_line": 64,
+          "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+          "start_column": 18,
+          "start_line": 62
+        },
+        "text_fingerprint": null
+      },
+      "generator_definition": {
+        "code_id": "source:atom:75408edb52da39aabdfffd22",
+        "contract": null,
+        "control_region": null,
+        "effect_summary": {
+          "kind": "effect",
+          "value": "op:11656f0f9d69016497a036f2",
+          "wire": "effect:op:11656f0f9d69016497a036f2"
+        },
+        "id": {
+          "kind": "opdef",
+          "value": "op:11656f0f9d69016497a036f2",
+          "wire": "opdef:op:11656f0f9d69016497a036f2"
+        },
+        "input_slots": [],
+        "kind": "opaque",
+        "label": "GeneratorExp",
+        "metadata": {
+          "ast_type": "GeneratorExp",
+          "evidence": "Inferred",
+          "frontend": "python_ast_v2",
+          "module": "stable-worldmodel.stable_worldmodel.wm.lewm.module",
+          "opaque_reason": "dynamic Python semantics"
+        },
+        "output_slots": [
+          {
+            "kind": "slot",
+            "value": "slot:afb0e3ba3dd588f19f0e2ad0",
+            "wire": "slot:slot:afb0e3ba3dd588f19f0e2ad0"
+          }
+        ],
+        "parent_id": {
+          "kind": "opdef",
+          "value": "op:24bcf4c5644793fae9f71377",
+          "wire": "opdef:op:24bcf4c5644793fae9f71377"
+        },
+        "resource_requirements": [],
+        "source_atoms": [
+          {
+            "kind": "source",
+            "value": "atom:75408edb52da39aabdfffd22",
+            "wire": "source:atom:75408edb52da39aabdfffd22"
+          }
+        ],
+        "source_end": 64,
+        "source_file": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "source_start": 62,
+        "state_slots": []
+      },
+      "generator_scope_slots": [
+        {
+          "direction": "binding",
+          "metadata": {
+            "scope_kind": "comprehension"
+          },
+          "mutable": null,
+          "name": "t",
+          "owner": {
+            "kind": "opdef",
+            "value": "op:11656f0f9d69016497a036f2",
+            "wire": "opdef:op:11656f0f9d69016497a036f2"
+          },
+          "semantic_type": null,
+          "slot_id": {
+            "kind": "slot",
+            "value": "slot:7729bdfb978de2c28fb734a4",
+            "wire": "slot:slot:7729bdfb978de2c28fb734a4"
+          }
+        },
+        {
+          "direction": "output",
+          "metadata": {},
+          "mutable": null,
+          "name": "$result",
+          "owner": {
+            "kind": "opdef",
+            "value": "op:11656f0f9d69016497a036f2",
+            "wire": "opdef:op:11656f0f9d69016497a036f2"
+          },
+          "semantic_type": null,
+          "slot_id": {
+            "kind": "slot",
+            "value": "slot:afb0e3ba3dd588f19f0e2ad0",
+            "wire": "slot:slot:afb0e3ba3dd588f19f0e2ad0"
+          }
+        }
+      ],
+      "legacy_generator_computational_records": [
+        {
+          "attribute": null,
+          "binding_use": null,
+          "block": "opdef:op:24bcf4c5644793fae9f71377:call:0",
+          "callee": null,
+          "dispatch": "unresolved",
+          "import_spec": null,
+          "literal": null,
+          "opcode": "opaque",
+          "operands": [],
+          "operation": {
+            "kind": "opdef",
+            "value": "op:11656f0f9d69016497a036f2",
+            "wire": "opdef:op:11656f0f9d69016497a036f2"
+          },
+          "position": 29,
+          "result": {
+            "kind": "static_value",
+            "value": "d3b414a9878727e382df5b49fa38b524",
+            "wire": "static_value:d3b414a9878727e382df5b49fa38b524"
+          },
+          "scope": {
+            "kind": "opdef",
+            "value": "op:24bcf4c5644793fae9f71377",
+            "wire": "opdef:op:24bcf4c5644793fae9f71377"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:75408edb52da39aabdfffd22",
+              "wire": "source:atom:75408edb52da39aabdfffd22"
+            },
+            "end_column": 9,
+            "end_line": 64,
+            "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+            "start_column": 18,
+            "start_line": 62
+          }
+        }
+      ],
+      "module": {
+        "bytes": 14046,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/8e40fca22a28c5a2a268b3c17656b174cbb035aef331880a54a4351a4ef506c9.marshal",
+        "sha256": "84e67e182de6c1e179dd35bdb2a9ebb89919edadac331ef9b8d0d353a0366171"
+      },
+      "original_sequence": 1,
+      "outer_instruction_metadata": [
+        {
+          "arg": 0,
+          "argrepr": "self",
+          "offset": 170,
+          "opname": "LOAD_FAST_BORROW",
+          "positions": [
+            62,
+            64,
+            18,
+            9
+          ]
+        },
+        {
+          "arg": 1,
+          "argrepr": "",
+          "offset": 172,
+          "opname": "BUILD_TUPLE",
+          "positions": [
+            62,
+            64,
+            18,
+            9
+          ]
+        },
+        {
+          "arg": 3,
+          "argrepr": "<code object <genexpr> at 0x71457f186d50, file \"/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py\", line 62>",
+          "offset": 174,
+          "opname": "LOAD_CONST",
+          "positions": [
+            62,
+            64,
+            18,
+            9
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 176,
+          "opname": "MAKE_FUNCTION",
+          "positions": [
+            62,
+            64,
+            18,
+            9
+          ]
+        },
+        {
+          "arg": 8,
+          "argrepr": "closure",
+          "offset": 178,
+          "opname": "SET_FUNCTION_ATTRIBUTE",
+          "positions": [
+            62,
+            64,
+            18,
+            9
+          ]
+        },
+        {
+          "arg": 4,
+          "argrepr": "qkv",
+          "offset": 180,
+          "opname": "LOAD_FAST_BORROW",
+          "positions": [
+            63,
+            63,
+            72,
+            75
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 182,
+          "opname": "GET_ITER",
+          "positions": [
+            63,
+            63,
+            72,
+            75
+          ]
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 184,
+          "opname": "CALL",
+          "positions": [
+            62,
+            64,
+            18,
+            9
+          ]
+        },
+        {
+          "arg": 3,
+          "argrepr": "",
+          "offset": 192,
+          "opname": "UNPACK_SEQUENCE",
+          "positions": [
+            62,
+            62,
+            8,
+            15
+          ]
+        },
+        {
+          "arg": 86,
+          "argrepr": "q, k",
+          "offset": 196,
+          "opname": "STORE_FAST_STORE_FAST",
+          "positions": [
+            62,
+            62,
+            8,
+            9
+          ]
+        },
+        {
+          "arg": 7,
+          "argrepr": "v",
+          "offset": 198,
+          "opname": "STORE_FAST",
+          "positions": [
+            62,
+            62,
+            14,
+            15
+          ]
+        }
+      ],
+      "parent_calls_in_existing_catalog": 900,
+      "parent_cellvars": [
+        "self"
+      ],
+      "parent_descriptor": {
+        "filename": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "first_line": 53,
+        "flags": 201326595,
+        "key": "pycode-v2:980182afb3c0db62164bffc5a3f500fa4bf71cd6858d904f309e02bf19f2efbb",
+        "parameters": [
+          "self",
+          "x",
+          "causal"
+        ],
+        "qualname": "Attention.forward"
+      },
+      "result": {
+        "bytes": 50717,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_attempt02_20261025/worker/attempt-00001/result.json",
+        "sha256": "118b97ee739e8a42320d48a20ac8872f6f472a300dbe72b4914117a1d07a4faf"
+      },
+      "snapshot": {
+        "encoding": "utf-8",
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "python_version": "3.14"
+      },
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:18054de0f41d0eb867f2df01",
+          "wire": "source:atom:18054de0f41d0eb867f2df01"
+        },
+        "end_column": 31,
+        "end_line": 69,
+        "fingerprint": "sha256:3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+        "start_column": 4,
+        "start_line": 53
+      },
+      "source_archive": {
+        "bytes": 820097,
+        "decoded_bytes": 7856396,
+        "decoded_sha256": "25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/25eedf0b31140093cb9d1b9eea0ca83c1d7c87f06ff8344254fc57bafb555a93.json.gz",
+        "sha256": "a6bdaa92e60ac3f18ff4e45b02d264a9e512e9123fcc795133ab5c811b0e170e"
+      },
+      "source_snippet": "        q, k, v = (\n            rearrange(t, 'b t (h d) -> b h t d', h=self.heads) for t in qkv\n        )",
+      "source_utf8": {
+        "bytes": 8062,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/40d02b07f148d10eff22d691fd9651f60514a9c866fbcc46400ba1e5a2ddfb86.source.utf8",
+        "sha256": "3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7"
+      },
+      "work_key": "f030d6784791fc753c862f371b6fcfeafb138cc3ed263fea5c0b1ff0ff66a66d"
+    },
+    {
+      "AST": "GeneratorExp(elt=Compare(left=Name(id='dim', ctx=Load()), ops=[Eq()], comparators=[Constant(value=3)]), generators=[comprehension(target=Name(id='dim', ctx=Store()), iter=Name(id='shape', ctx=Load()), is_async=0)])",
+      "body_key": "e30ff8592993f732ef0bcea0477458bb4301bdc919b3f27eb4bc8d3b3384ddad",
+      "child_metadata": {
+        "argcount": 1,
+        "cellvars": [],
+        "descriptor": {
+          "filename": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+          "first_line": 483,
+          "flags": 51,
+          "key": "pycode-v2:a4c318a027ff0b7f517acc825cb98ce7d575c986da17c89614c8d5ddee9d6bb6",
+          "parameters": [
+            ".0"
+          ],
+          "qualname": "RGBBox.__init__.<locals>.<genexpr>"
+        },
+        "flags": 51,
+        "freevars": [],
+        "instructions": [
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 0,
+            "opname": "RETURN_GENERATOR",
+            "positions": [
+              483,
+              483,
+              null,
+              null
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 2,
+            "opname": "POP_TOP",
+            "positions": [
+              483,
+              483,
+              null,
+              null
+            ]
+          },
+          {
+            "arg": 0,
+            "argrepr": "",
+            "offset": 4,
+            "opname": "RESUME",
+            "positions": [
+              483,
+              483,
+              0,
+              0
+            ]
+          },
+          {
+            "arg": 0,
+            "argrepr": ".0",
+            "offset": 6,
+            "opname": "LOAD_FAST",
+            "positions": [
+              483,
+              483,
+              18,
+              45
+            ]
+          },
+          {
+            "arg": 9,
+            "argrepr": "to L2",
+            "offset": 8,
+            "opname": "FOR_ITER",
+            "positions": [
+              483,
+              483,
+              39,
+              44
+            ]
+          },
+          {
+            "arg": 17,
+            "argrepr": "dim, dim",
+            "offset": 12,
+            "opname": "STORE_FAST_LOAD_FAST",
+            "positions": [
+              483,
+              483,
+              32,
+              35
+            ]
+          },
+          {
+            "arg": 3,
+            "argrepr": "",
+            "offset": 14,
+            "opname": "LOAD_SMALL_INT",
+            "positions": [
+              483,
+              483,
+              26,
+              27
+            ]
+          },
+          {
+            "arg": 72,
+            "argrepr": "==",
+            "offset": 16,
+            "opname": "COMPARE_OP",
+            "positions": [
+              483,
+              483,
+              19,
+              27
+            ]
+          },
+          {
+            "arg": 0,
+            "argrepr": "",
+            "offset": 20,
+            "opname": "YIELD_VALUE",
+            "positions": [
+              483,
+              483,
+              19,
+              27
+            ]
+          },
+          {
+            "arg": 5,
+            "argrepr": "",
+            "offset": 22,
+            "opname": "RESUME",
+            "positions": [
+              483,
+              483,
+              19,
+              27
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 24,
+            "opname": "POP_TOP",
+            "positions": [
+              483,
+              483,
+              19,
+              27
+            ]
+          },
+          {
+            "arg": 11,
+            "argrepr": "to L1",
+            "offset": 26,
+            "opname": "JUMP_BACKWARD",
+            "positions": [
+              483,
+              483,
+              19,
+              27
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 30,
+            "opname": "END_FOR",
+            "positions": [
+              483,
+              483,
+              39,
+              44
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 32,
+            "opname": "POP_ITER",
+            "positions": [
+              483,
+              483,
+              39,
+              44
+            ]
+          },
+          {
+            "arg": 1,
+            "argrepr": "None",
+            "offset": 34,
+            "opname": "LOAD_CONST",
+            "positions": [
+              483,
+              483,
+              39,
+              44
+            ]
+          },
+          {
+            "arg": null,
+            "argrepr": "",
+            "offset": 36,
+            "opname": "RETURN_VALUE",
+            "positions": [
+              483,
+              483,
+              39,
+              44
+            ]
+          },
+          {
+            "arg": 3,
+            "argrepr": "INTRINSIC_STOPITERATION_ERROR",
+            "offset": 38,
+            "opname": "CALL_INTRINSIC_1",
+            "positions": [
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "arg": 1,
+            "argrepr": "",
+            "offset": 40,
+            "opname": "RERAISE",
+            "positions": [
+              null,
+              null,
+              null,
+              null
+            ]
+          }
+        ],
+        "kwonlyargcount": 0,
+        "module_constant_path": [
+          14,
+          4,
+          1
+        ],
+        "parent_constant_index": 1,
+        "varnames": [
+          ".0",
+          "dim"
+        ]
+      },
+      "context": {
+        "control_sha256": "f9f5d1619bc73eb4c2585d66216a3720ee79c650a129f62424ff427aa4c9e4d6",
+        "namespace_root": "/home/zyf/AAA/le-wm",
+        "semantic_sha256": "5a169c19b9539f13c166d1268f526fb392476d72e0a19dfa83a324b66bfb969a",
+        "semantics_sha256": "e4d4866026d3ae94ac9626c0c9c33de52afac80dc626bdafaafeaf76c9feb6f6"
+      },
+      "generator_atom": {
+        "id": {
+          "kind": "source",
+          "value": "atom:f37893df79c510678adf3a16",
+          "wire": "source:atom:f37893df79c510678adf3a16"
+        },
+        "kind": "GeneratorExp",
+        "reference": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:f37893df79c510678adf3a16",
+            "wire": "source:atom:f37893df79c510678adf3a16"
+          },
+          "end_column": 45,
+          "end_line": 483,
+          "fingerprint": "sha256:73079b2a66dace087abc7c417691e3cc339887866915553e21d0936a362229eb",
+          "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+          "start_column": 18,
+          "start_line": 483
+        },
+        "text_fingerprint": null
+      },
+      "generator_definition": {
+        "code_id": "source:atom:f37893df79c510678adf3a16",
+        "contract": null,
+        "control_region": null,
+        "effect_summary": {
+          "kind": "effect",
+          "value": "op:0aadeac44ee77faf3872881e",
+          "wire": "effect:op:0aadeac44ee77faf3872881e"
+        },
+        "id": {
+          "kind": "opdef",
+          "value": "op:0aadeac44ee77faf3872881e",
+          "wire": "opdef:op:0aadeac44ee77faf3872881e"
+        },
+        "input_slots": [],
+        "kind": "opaque",
+        "label": "GeneratorExp",
+        "metadata": {
+          "ast_type": "GeneratorExp",
+          "evidence": "Inferred",
+          "frontend": "python_ast_v2",
+          "module": "stable-worldmodel.stable_worldmodel.spaces",
+          "opaque_reason": "dynamic Python semantics"
+        },
+        "output_slots": [
+          {
+            "kind": "slot",
+            "value": "slot:16fd4f124a942820f03d856f",
+            "wire": "slot:slot:16fd4f124a942820f03d856f"
+          }
+        ],
+        "parent_id": {
+          "kind": "opdef",
+          "value": "op:a298e715c1fe5d242f0a22df",
+          "wire": "opdef:op:a298e715c1fe5d242f0a22df"
+        },
+        "resource_requirements": [],
+        "source_atoms": [
+          {
+            "kind": "source",
+            "value": "atom:f37893df79c510678adf3a16",
+            "wire": "source:atom:f37893df79c510678adf3a16"
+          }
+        ],
+        "source_end": 483,
+        "source_file": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+        "source_start": 483,
+        "state_slots": []
+      },
+      "generator_scope_slots": [
+        {
+          "direction": "binding",
+          "metadata": {
+            "scope_kind": "comprehension"
+          },
+          "mutable": null,
+          "name": "dim",
+          "owner": {
+            "kind": "opdef",
+            "value": "op:0aadeac44ee77faf3872881e",
+            "wire": "opdef:op:0aadeac44ee77faf3872881e"
+          },
+          "semantic_type": null,
+          "slot_id": {
+            "kind": "slot",
+            "value": "slot:093c8f3e86df3ea93d5c183f",
+            "wire": "slot:slot:093c8f3e86df3ea93d5c183f"
+          }
+        },
+        {
+          "direction": "output",
+          "metadata": {},
+          "mutable": null,
+          "name": "$result",
+          "owner": {
+            "kind": "opdef",
+            "value": "op:0aadeac44ee77faf3872881e",
+            "wire": "opdef:op:0aadeac44ee77faf3872881e"
+          },
+          "semantic_type": null,
+          "slot_id": {
+            "kind": "slot",
+            "value": "slot:16fd4f124a942820f03d856f",
+            "wire": "slot:slot:16fd4f124a942820f03d856f"
+          }
+        }
+      ],
+      "legacy_generator_computational_records": [
+        {
+          "attribute": null,
+          "binding_use": null,
+          "block": "opdef:op:a298e715c1fe5d242f0a22df:call:0",
+          "callee": null,
+          "dispatch": "unresolved",
+          "import_spec": null,
+          "literal": null,
+          "opcode": "opaque",
+          "operands": [],
+          "operation": {
+            "kind": "opdef",
+            "value": "op:0aadeac44ee77faf3872881e",
+            "wire": "opdef:op:0aadeac44ee77faf3872881e"
+          },
+          "position": 3,
+          "result": {
+            "kind": "static_value",
+            "value": "bba3750daad5a5a9fa9aead848f7c6ab",
+            "wire": "static_value:bba3750daad5a5a9fa9aead848f7c6ab"
+          },
+          "scope": {
+            "kind": "opdef",
+            "value": "op:a298e715c1fe5d242f0a22df",
+            "wire": "opdef:op:a298e715c1fe5d242f0a22df"
+          },
+          "source": {
+            "atom_id": {
+              "kind": "source",
+              "value": "atom:f37893df79c510678adf3a16",
+              "wire": "source:atom:f37893df79c510678adf3a16"
+            },
+            "end_column": 45,
+            "end_line": 483,
+            "fingerprint": "sha256:73079b2a66dace087abc7c417691e3cc339887866915553e21d0936a362229eb",
+            "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+            "start_column": 18,
+            "start_line": 483
+          }
+        }
+      ],
+      "module": {
+        "bytes": 39773,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/340fe050fc48e13a111a1bbb0f89cd41ff8c5dc83d2ae44485419a51948b8a16.marshal",
+        "sha256": "c5e7ee18aff799680edb5b64282507e8b483f7997be0a80cd0648cc4cb40a0d5"
+      },
+      "original_sequence": 19,
+      "outer_instruction_metadata": [
+        {
+          "arg": 0,
+          "argrepr": "any",
+          "offset": 4,
+          "opname": "LOAD_GLOBAL",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 1,
+          "argrepr": "",
+          "offset": 14,
+          "opname": "COPY",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 4,
+          "argrepr": "<built-in function any>",
+          "offset": 16,
+          "opname": "LOAD_COMMON_CONSTANT",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 0,
+          "argrepr": "is",
+          "offset": 18,
+          "opname": "IS_OP",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 28,
+          "argrepr": "to L4",
+          "offset": 20,
+          "opname": "POP_JUMP_IF_FALSE",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 24,
+          "opname": "NOT_TAKEN",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 26,
+          "opname": "POP_TOP",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 1,
+          "argrepr": "<code object <genexpr> at 0x71457f05a730, file \"/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py\", line 483>",
+          "offset": 28,
+          "opname": "LOAD_CONST",
+          "positions": [
+            483,
+            483,
+            18,
+            45
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 30,
+          "opname": "MAKE_FUNCTION",
+          "positions": [
+            483,
+            483,
+            18,
+            45
+          ]
+        },
+        {
+          "arg": 1,
+          "argrepr": "shape",
+          "offset": 32,
+          "opname": "LOAD_FAST_BORROW",
+          "positions": [
+            483,
+            483,
+            39,
+            44
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 34,
+          "opname": "GET_ITER",
+          "positions": [
+            483,
+            483,
+            39,
+            44
+          ]
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 36,
+          "opname": "CALL",
+          "positions": [
+            483,
+            483,
+            18,
+            45
+          ]
+        },
+        {
+          "arg": 12,
+          "argrepr": "to L3",
+          "offset": 44,
+          "opname": "FOR_ITER",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 48,
+          "opname": "TO_BOOL",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 3,
+          "argrepr": "to L2",
+          "offset": 56,
+          "opname": "POP_JUMP_IF_TRUE",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 60,
+          "opname": "NOT_TAKEN",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 11,
+          "argrepr": "to L1",
+          "offset": 62,
+          "opname": "JUMP_BACKWARD",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 66,
+          "opname": "POP_ITER",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 2,
+          "argrepr": "True",
+          "offset": 68,
+          "opname": "LOAD_CONST",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 17,
+          "argrepr": "to L5",
+          "offset": 70,
+          "opname": "JUMP_FORWARD",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 72,
+          "opname": "END_FOR",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 74,
+          "opname": "POP_ITER",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 3,
+          "argrepr": "False",
+          "offset": 76,
+          "opname": "LOAD_CONST",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 13,
+          "argrepr": "to L5",
+          "offset": 78,
+          "opname": "JUMP_FORWARD",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 80,
+          "opname": "PUSH_NULL",
+          "positions": [
+            483,
+            483,
+            15,
+            18
+          ]
+        },
+        {
+          "arg": 1,
+          "argrepr": "<code object <genexpr> at 0x71457f05a730, file \"/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py\", line 483>",
+          "offset": 82,
+          "opname": "LOAD_CONST",
+          "positions": [
+            483,
+            483,
+            18,
+            45
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 84,
+          "opname": "MAKE_FUNCTION",
+          "positions": [
+            483,
+            483,
+            18,
+            45
+          ]
+        },
+        {
+          "arg": 1,
+          "argrepr": "shape",
+          "offset": 86,
+          "opname": "LOAD_FAST_BORROW",
+          "positions": [
+            483,
+            483,
+            39,
+            44
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 88,
+          "opname": "GET_ITER",
+          "positions": [
+            483,
+            483,
+            39,
+            44
+          ]
+        },
+        {
+          "arg": 0,
+          "argrepr": "",
+          "offset": 90,
+          "opname": "CALL",
+          "positions": [
+            483,
+            483,
+            18,
+            45
+          ]
+        },
+        {
+          "arg": 1,
+          "argrepr": "",
+          "offset": 98,
+          "opname": "CALL",
+          "positions": [
+            483,
+            483,
+            15,
+            45
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 106,
+          "opname": "TO_BOOL",
+          "positions": [
+            483,
+            483,
+            15,
+            45
+          ]
+        },
+        {
+          "arg": 12,
+          "argrepr": "to L6",
+          "offset": 114,
+          "opname": "POP_JUMP_IF_TRUE",
+          "positions": [
+            483,
+            483,
+            15,
+            45
+          ]
+        },
+        {
+          "arg": null,
+          "argrepr": "",
+          "offset": 118,
+          "opname": "NOT_TAKEN",
+          "positions": [
+            483,
+            483,
+            15,
+            45
+          ]
+        }
+      ],
+      "parent_calls_in_existing_catalog": 4,
+      "parent_cellvars": [],
+      "parent_descriptor": {
+        "filename": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+        "first_line": 467,
+        "flags": 201326603,
+        "key": "pycode-v2:a36ba2a39b35c2528614f6d083227c39d859eca9aef9f89a138796c67304e2ec",
+        "parameters": [
+          "self",
+          "shape",
+          "init_value",
+          "kwargs"
+        ],
+        "qualname": "RGBBox.__init__"
+      },
+      "result": {
+        "bytes": 50707,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_attempt02_20261025/worker/attempt-00019/result.json",
+        "sha256": "53435011d2cbe95848ce05f1a3111de347ce6683f6281477b30b36c565043dc3"
+      },
+      "snapshot": {
+        "encoding": "utf-8",
+        "fingerprint": "sha256:73079b2a66dace087abc7c417691e3cc339887866915553e21d0936a362229eb",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+        "python_version": "3.14"
+      },
+      "source": {
+        "atom_id": {
+          "kind": "source",
+          "value": "atom:daa8fc3cdcc9777856b8be05",
+          "wire": "source:atom:daa8fc3cdcc9777856b8be05"
+        },
+        "end_column": 9,
+        "end_line": 493,
+        "fingerprint": "sha256:73079b2a66dace087abc7c417691e3cc339887866915553e21d0936a362229eb",
+        "path": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+        "start_column": 4,
+        "start_line": 467
+      },
+      "source_archive": {
+        "bytes": 1766281,
+        "decoded_bytes": 15433932,
+        "decoded_sha256": "a8cbf608054987e7bfa36be2d05bc2f886b2458265101c4bd3c6dd2a2cda6a25",
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_context_20261022/result/source-layers/archives/a8cbf608054987e7bfa36be2d05bc2f886b2458265101c4bd3c6dd2a2cda6a25.json.gz",
+        "sha256": "424af26d64acfd161cf82675aff2dcd85d6e4180c672a7d16394ac405f783b2d"
+      },
+      "source_snippet": "        if not any(dim == 3 for dim in shape):",
+      "source_utf8": {
+        "bytes": 26887,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/10cfd814a993dabb16e0cc083e40ceabf5a7fe9f4fff6e1315b07aaaea95f091.source.utf8",
+        "sha256": "73079b2a66dace087abc7c417691e3cc339887866915553e21d0936a362229eb"
+      },
+      "work_key": "60f262741758a92bdec3f8af79e4a101a1c06439984afea6db0d80aa238e415a"
+    }
+  ],
+  "target_compilations": 0,
+  "target_executions": 0
+}

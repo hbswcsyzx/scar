@@ -1,0 +1,18 @@
+{
+  "checks": {
+    "creation_does_not_execute_elt_and_captures_cell": true,
+    "fixed_unpack_N_plus_one_and_exception_close_boundary": true
+  },
+  "core_wire_version": 15,
+  "fixture_module_compiles": 1,
+  "operations": 149,
+  "public_code_witness_check": false,
+  "raw_reads": 0,
+  "real_body_lowerings": 0,
+  "regions": 5,
+  "rejected": [
+    "source generator: Create must remain outside its lazy body"
+  ],
+  "status": "PASSED",
+  "target_executions": 0
+}

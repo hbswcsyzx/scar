@@ -27,6 +27,12 @@ def _need(condition, detail):
 
 def validate_language_body(model, graph, interface, metadata, semantic, language,
                            *, source_tree=None, options=None, structural_only=False):
+    if (language is not None and Capability.GENEXPR_314_V1 in language.capabilities
+            and graph.resumable_creates):
+        from scar.analysis.source_generator_validation import validate_generator_regions, root_projection
+        delegated = validate_generator_regions(model, graph, interface, metadata, semantic, language,
+            source_tree=source_tree, options=options, structural_only=structural_only)
+        model, graph, metadata, language = root_projection(model, graph, metadata, language, delegated)
     _need(type(language) is SourceLanguageOverlay and language.source == metadata.source,
           "overlay source differs from original body metadata")
     _need(type(structural_only) is bool, "verification mode must be explicit")

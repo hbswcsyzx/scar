@@ -1,0 +1,7 @@
+{
+  "status": "NOT_RUN_SUPERSEDED",
+  "reason": "tool description inherited old kwargs schema; final candidate02 uses accurate generator schema/selection and final hardened validator SHA",
+  "body_lowerings": 0,
+  "target_executions": 0,
+  "prior_freeze": "24cfb08fcac3c2208834e9c22e2593d93fb78357e98e1bdc19b88d7bc12a6270"
+}

@@ -1,0 +1,6 @@
+{
+  "error": "AttributeError",
+  "message": "type object 'ProgramGraph' has no attribute 'from_dict'",
+  "status": "FAILED",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/check.py\", line 97, in <module>\n    try:r=main()\n          ~~~~^^\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/check.py\", line 63, in main\n    restored=type(graph).from_dict(graph.to_dict())\n             ^^^^^^^^^^^^^^^^^^^^^\nAttributeError: type object 'ProgramGraph' has no attribute 'from_dict'\n"
+}

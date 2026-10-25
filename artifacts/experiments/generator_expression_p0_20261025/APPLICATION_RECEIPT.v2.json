@@ -1,0 +1,91 @@
+{
+  "application_note": "Apply 8 exact diffs; never replace main source_frontend_worklist.py. main default4/eligible_body_keys stay intact.",
+  "capability": "PYTHON_GENEXPR_314_V1",
+  "core_codec_maximum_version": 28,
+  "default_capability_growth": false,
+  "new_wire_fields": [],
+  "production_files": [
+    {
+      "application": "REVIEW_EXACT_DIFF",
+      "bytes": 6206,
+      "main_bytes": 6037,
+      "main_sha256": "1daa83c2c509f17f7d94f46d1440c983d13aae4d7650217ef7c06bbad97368cd",
+      "path": "scar/ir/program/source_language.py",
+      "sha256": "1e2b6e456c10532f9189aeaeb319d20a8520c5a78efcf1c1abe47dcba4474b63"
+    },
+    {
+      "application": "REVIEW_EXACT_DIFF",
+      "bytes": 6896,
+      "main_bytes": 6656,
+      "main_sha256": "001ff3bdb685bfff3d4723624564756c04079ebd5e94d2178a6976124b72722e",
+      "path": "scar/ir/program/structured.py",
+      "sha256": "93d0c61e2d552d16079822dbb88fedd048c862f33a29b54100efad97a737fdac"
+    },
+    {
+      "application": "REVIEW_EXACT_DIFF",
+      "bytes": 36405,
+      "main_bytes": 0,
+      "main_sha256": null,
+      "path": "scar/analysis/source_generator_lowering.py",
+      "sha256": "e237c5eec86eb5d0dc1739f14dc9487b37c6a7e6144acd0e4a5a49d8ff287d00"
+    },
+    {
+      "application": "REVIEW_EXACT_DIFF",
+      "bytes": 28212,
+      "main_bytes": 0,
+      "main_sha256": null,
+      "path": "scar/analysis/source_generator_validation.py",
+      "sha256": "211cfc23e064249e3c2a686df598d9cf3d42b4fddc63ed5723c173b3bec38ecf"
+    },
+    {
+      "application": "REVIEW_EXACT_DIFF",
+      "bytes": 22626,
+      "main_bytes": 22198,
+      "main_sha256": "bc41b46fa0c332872e0768e87ad5f7e1c8f7b18c9dfa6528f2bfe57ac490f9a5",
+      "path": "scar/analysis/environment_lowering.py",
+      "sha256": "a105749b764e2d13ee134f6b7f337d4634933a8e4fc7d64e01e87b74378b6f5e"
+    },
+    {
+      "application": "REVIEW_EXACT_DIFF",
+      "bytes": 3928,
+      "main_bytes": 3390,
+      "main_sha256": "96ccbde846eb5a4eb0f1cdf1428a2a1f2c429e06c340863b1c2b3747e3a43a44",
+      "path": "scar/analysis/source_unpack_lowering.py",
+      "sha256": "532ca1a2c355dd6c3c2fc3a4fc90ee0f3b249e3e7b7d175dfa2ec7d8b1217167"
+    },
+    {
+      "application": "REVIEW_EXACT_DIFF",
+      "bytes": 22250,
+      "main_bytes": 21725,
+      "main_sha256": "9aab0db3459c3cc31124c5630bca365a35cd4b70d82183fc3e98dd46d8d37d7e",
+      "path": "scar/analysis/source_language_validation.py",
+      "sha256": "48d6a2f4f2c04c6247999b73705c76cb38f956a20c12a6b793e5b56b37c9e6de"
+    },
+    {
+      "application": "REVIEW_EXACT_DIFF",
+      "bytes": 55840,
+      "main_bytes": 55169,
+      "main_sha256": "82a476089dfba52cbd49727468838816c91bbeec88322a036b7fcc327583e87c",
+      "path": "scar/analysis/structured_lowering.py",
+      "sha256": "e7c13799bf5f92cb5d1b9cc0e1675d40eadae815c331a25b868156087709e307"
+    },
+    {
+      "application": "EXCLUDE_ISOLATED_DEFAULT_COMPATIBILITY_ONLY",
+      "bytes": 33040,
+      "main_bytes": 34557,
+      "main_sha256": "00581a66490ba62730022aab2772a4b0e6e47bcc2c5bd5a0d4e23423592424d2",
+      "path": "scar/analysis/source_frontend_worklist.py",
+      "sha256": "f6e8312d23601a5c633a09f38a906de2e2d06b7896b4af23d9b826a50023748c"
+    }
+  ],
+  "raw_capture_reads": 0,
+  "real_body_lowerings": 0,
+  "schema": "scar.generator-expression-candidate-receipt",
+  "schema_version": 1,
+  "small_check": "check12.json",
+  "small_check_sha256": "ae324f305494f4d407ad31a00a031bc09dedc0402abdf0229c040677d346083c",
+  "source_program_version": 5,
+  "status": "SMALL_CHECK_PASSED_REAL_GATE_NOT_RUN",
+  "supersedes_receipt": "APPLICATION_RECEIPT.json",
+  "target_executions": 0
+}

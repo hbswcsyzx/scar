@@ -621,6 +621,14 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
     # Every newly constructed core, interface, protocol and correspondence is
     # still checked below. Only the unchanged private source layer is reused.
     require_valid(graph)
+    delegated = set()
+    if language is not None:
+        from scar.ir.program.source_language import SourceLanguageCapability
+        if SourceLanguageCapability.GENEXPR_314_V1 in language.capabilities:
+            from scar.analysis.source_generator_validation import validate_generator_regions, root_projection
+            delegated = validate_generator_regions(model, graph, interface, metadata, semantic, language,
+                source_tree=source_tree, options=language_options, structural_only=structural_only)
+            model, graph, metadata, language = root_projection(model, graph, metadata, language, delegated)
     environment_profile = interface.profile is BodyLoweringProfile.STRUCTURED_ENV
     if (interface.profile not in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV) or model.region != graph.root
             or model.definition != interface.definition or model.region != interface.region):
@@ -642,6 +650,7 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
     binding_readers = {read.operation for read in graph.binding_reads}
     synthetic = {operation.id for operation in graph.operations
         if links[operation.id].semantic_operation is None
+        and operation.id not in delegated
         and operation.id not in binding_producers | binding_readers
         and (operation.terminator is None or operation.terminator.kind is TerminatorKind.INVOKE)}
     protocol_ids = {protocol.operation for protocol in model.protocols}

@@ -1,0 +1,10 @@
+{"actual_retained_input_bytes":0,"body":null,"elapsed_s":1.1259869540226646,"event":"BEGIN","output_accounted_bytes":0,"phase":"FREEZE","self_peak_rss_kib":77788}
+{"actual_retained_input_bytes":142532,"body":null,"elapsed_s":1.1283953280071728,"event":"STAGE_BEGIN","output_accounted_bytes":326,"phase":"CURRENT_INPUT_MEMBERSHIP","self_peak_rss_kib":77788}
+{"actual_retained_input_bytes":1156493,"body":null,"elapsed_s":1.1477463960181922,"event":"STAGE_BEGIN","output_accounted_bytes":714,"phase":"ONE_ORIGINAL_COMPOSITION","self_peak_rss_kib":77788}
+{"actual_retained_input_bytes":100720888,"body":1,"elapsed_s":4.002518266031984,"event":"STAGE_BEGIN","output_accounted_bytes":1104,"phase":"EXACT_QUALIFIED_SUBJECT","self_peak_rss_kib":444092}
+{"actual_retained_input_bytes":111521958,"body":1,"elapsed_s":9.387824273027945,"event":"STAGE_BEGIN","output_accounted_bytes":61361,"phase":"LOWER_EXACT_GENEXPR_BODY","self_peak_rss_kib":444092}
+{"actual_retained_input_bytes":111521958,"body":1,"elapsed_s":9.909807876043487,"event":"STAGE_BEGIN","output_accounted_bytes":1322432,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":444092}
+{"actual_retained_input_bytes":111521958,"body":1,"elapsed_s":20.005771320022177,"event":"HEARTBEAT","output_accounted_bytes":23685056,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":444092}
+{"actual_retained_input_bytes":111521958,"body":1,"elapsed_s":20.984740915009752,"event":"BODY_END","operations_emitted":312,"output_accounted_bytes":23703427,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":444092,"status":"RECOVERED_WITH_OPEN"}
+{"actual_retained_input_bytes":111521958,"body":1,"elapsed_s":21.007332339009736,"event":"STAGE_BEGIN","output_accounted_bytes":23703963,"phase":"FINAL_SOURCE_AND_INPUT_CHECK","self_peak_rss_kib":444092}
+{"actual_retained_input_bytes":111521958,"body":1,"elapsed_s":21.27077887899941,"event":"FINISHED","output_accounted_bytes":23753995,"phase":"FINISHED_OPEN","self_peak_rss_kib":444092,"whole_program":"OPEN"}

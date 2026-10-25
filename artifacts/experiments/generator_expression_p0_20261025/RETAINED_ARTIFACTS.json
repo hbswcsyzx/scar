@@ -1,0 +1,24 @@
+{
+  "body_key": "63baf552aebd035e2a9a32674e209bf8c590a8f23dc4087973f777629e1db0fe",
+  "current_run_integrated": false,
+  "not_staged_reason": "Both payloads exceed 1000000 bytes; retained local original URI and exact SHA, no external inputs copied.",
+  "original_sequence": 1,
+  "publication_performed": false,
+  "returned_construction": {
+    "bytes": 1260679,
+    "decoded_bytes": 1260679,
+    "decoded_sha256": "e7c10434d6085d952ef63dce8c161ee38b922c03646ac115f3d1cbbcdd260f05",
+    "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/body-01-returned.json",
+    "sha256": "e7c10434d6085d952ef63dce8c161ee38b922c03646ac115f3d1cbbcdd260f05"
+  },
+  "schema": "scar.genexpr-retained-artifact-receipt",
+  "schema_version": 1,
+  "source_program5": {
+    "bytes": 1021473,
+    "decoded_bytes": 10159626,
+    "decoded_sha256": "32dbd996b9ebe6e43772837d9baed28c3bfbd618050540556fc8be52bba38b01",
+    "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/body-01-source-program5.json.gz",
+    "sha256": "f951c65a4e6a7cd9b58b00c6512b5abcc8edd45d30dc39bf7faa3efd16fc004b"
+  },
+  "whole_program_established": false
+}

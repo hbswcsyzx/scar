@@ -1,0 +1,9 @@
+{
+  "body_lowerings": 0,
+  "candidate02_freeze_sha256": "70fd4b8444c635a1dd4b9dd8332aa132438e69e391c54a9ad10b3f69495bad55",
+  "production_changed": false,
+  "reason": "Root found inherited two-failure result schema/status labels before launch; candidate03 changes reporting labels only",
+  "scope_budget_changed": false,
+  "status": "NOT_RUN_SUPERSEDED",
+  "target_executions": 0
+}

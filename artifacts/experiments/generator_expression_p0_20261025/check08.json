@@ -1,0 +1,6 @@
+{
+  "error": "ValueError",
+  "message": "source use correspondence is incomplete",
+  "status": "FAILED",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/check.py\", line 107, in <module>\n    try:r=main()\n          ~~~~^^\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/check.py\", line 72, in main\n    SourceProgram.from_dict(document,verification='STRUCTURE',source_texts={str(context.path):context.text})\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/program_lowering.py\", line 206, in from_dict\n    raise ValueError(\"; \".join(checked[\"errors\"]))\nValueError: source use correspondence is incomplete\n"
+}
