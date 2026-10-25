@@ -1,4 +1,4 @@
-"""Owned replay of pinned native reference ports, without content/ready proof.
+"""Owned native reference replay and opt-in scalar input roots; no ready proof.
 
 Only trace.native_protocol's source-owning reader creates this session. Saved
 reports, arbitrary provider tokens and callers' slot dictionaries cannot replace
@@ -11,11 +11,14 @@ from hashlib import sha256
 from types import MappingProxyType
 import json
 
-from scar.ir.program.providers import ProviderArtifact
-from .content import NativeInputRef, NativeOutputRef, ObjectIdentity
+from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+from scar.ir.literals import PythonLiteral
+from .ids import ValueOccurrenceID
+from .content import NativeInputRef, NativeOutputRef, ObjectIdentity, VersionRef
 
 PROFILE = "PINNED_ATEN_HELD_REFERENCE_PORT_V1"
 PROFILE_V2 = "PINNED_TORCH_NATIVE_PORT_HELD_SUBSET_V2"
+SCALAR_INPUT_CAPABILITY = 'SCAR_NATIVE_SCALAR_OBSERVED_ROOT_V1'
 _OWNER = object()
 
 
@@ -201,6 +204,49 @@ def _native_slot_fact(source, interface, direction, port):
     suffix = "/".join(str(i) for i in port["path"])
     return {"artifact": source["artifacts"]["eto"], "locator": "#/nodes/" +
         str(source["node_ordinals"][str(interface["node"]["id"])] ) + "/" + direction + "/values/" + suffix}
+
+
+def _scalar_input(port, formal, revision):
+    """Decode actual formal leaves; strings/defaults never stand in for kinds."""
+    from scar.trace.native_scalar_content import decode_pinned_scalar
+    from scar.ir.record_codec import encode
+    declared, real = formal.type, formal.real_type
+    for selector in port['path'][1:]:
+        for name in ('declared', 'real'):
+            value = declared if name == 'declared' else real
+            while value.kind() == 'OptionalType':
+                value = value.getElementType()
+            if value.kind() == 'ListType':
+                value = value.getElementType()
+            elif value.kind() == 'TupleType' and selector < len(value.elements()):
+                value = value.elements()[selector]
+            else:
+                return {'frontier': 'FORMAL_SCALAR_PATH_UNSUPPORTED'}
+            if name == 'declared': declared = value
+            else: real = value
+    if port['type'] != 'None':
+        while declared.kind() == 'OptionalType': declared = declared.getElementType()
+        while real.kind() == 'OptionalType': real = real.getElementType()
+    decoded = decode_pinned_scalar(revision, port['type'], declared.kind(), port['value'],
+                                  formal_real_kind=real.kind())
+    result = {'formal_kind': declared.kind(), 'formal_real_kind': real.kind(),
+              'frontier': None if decoded.frontier is None else decoded.frontier.value}
+    if decoded.literal is not None:
+        result.update(literal=encode(decoded.literal), builtin_type=decoded.builtin_type)
+    return result
+
+
+def _scalar_root_records(source, interface, position):
+    """Each input occurrence is an independent observed root, never its consumer's output."""
+    from scar.ir.v2.ids import LogicalValueID, ValueVersionID, ProvenanceID
+    from scar.ir.v2.values import LogicalValue, ValueVersion, ProvenanceRecord, ProvenanceRelation
+    port = interface['ports']['inputs'][position]
+    logical = LogicalValueID('native-scalar:' + source['native_scope'] + ':' + source['run'] + ':' + str(interface['sequence']) + ':inputs:' + str(position))
+    version, origin = ValueVersionID(logical, 0), ProvenanceID(logical.value + ':origin')
+    semantic_type = 'native.boxed:' + port['type']
+    return (LogicalValue(logical, semantic_type, 'observed native scalar input; upstream producer unknown'),
+            ValueVersion(version, provenance_id=origin, semantic_type=semantic_type),
+            ProvenanceRecord(origin, ProvenanceRelation.ORIGIN, (), (version,), producer=None))
 
 
 def _native_region_layout_view(region, *, point_layout, profile, provider_revision):
@@ -420,6 +466,13 @@ def replay_batch_interfaces(source):
                 else:
                     port["identity_reason"] = "ORIGINAL_HELD_OBJECT_RECORD_UNAVAILABLE"
                 port["geometry"] = _geometry_v2(source, port, marker, phys, ordinal)
+        if source.get('scalar_input_profile') is not None:
+            need(source['scalar_input_profile'] == SCALAR_INPUT_CAPABILITY, 'unsupported owned scalar profile')
+            for port in ports['inputs']:
+                if not port['tensor']:
+                    need(port['path'] and type(port['path'][0]) is int and 0 <= port['path'][0] < len(schema.arguments),
+                         'scalar input has no exact formal argument')
+                    port['scalar_input'] = _scalar_input(port, schema.arguments[port['path'][0]], PROVIDER_REVISION)
         signature = {"provider_revision": PROVIDER_REVISION, "schema": raw_schema,
             **{d: [{"path": p["path"], "type": p["type"], "tensor": p["tensor"]} for p in ports[d]] for d in ports}}
         interface.update(signature=signature, signature_id=sha256(canonical(signature)).hexdigest())
@@ -709,7 +762,34 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
                 if not check(len(values) == len(uses) == 1 and uses[0].value == values[0].id,
                              "actual_use_order", path, "actual original Use does not read this exact formal ValueOccurrence"):
                     continue
-                if i >= len(item["signature"][direction]) or not item["signature"][direction][i]["tensor"]:
+                if i >= len(item['signature'][direction]):
+                    continue
+                if not item['signature'][direction][i]['tensor']:
+                    if profile == PROFILE_V2 and direction == 'inputs' and source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY:
+                        from .content import DataIdentity
+                        from .common import Unresolved
+                        from scar.ir.record_codec import decode
+                        from scar.ir.program.providers import ProviderFactReference
+                        candidates = by_value.get(values[0].id, ())
+                        if not check(len(candidates) == 1, 'native_scalar_inventory', path, 'each scalar input needs one qualification/frontier denotation'):
+                            continue
+                        d = candidates[0]; expected_denotations.add(d.id)
+                        native = item['ports']['inputs'][i]
+                        fact = decode(ProviderFactReference, _native_slot_fact(source, item, 'inputs', native))
+                        check(d.basis == NativeInputRef(boundary.id, entry_visit.id, i) and d.source == fact
+                              and d.id.value == expected_id + ':inputs:denotation:' + str(i),
+                              'native_scalar_source', path, 'scalar input lost its exact original basis/source/ordinal')
+                        scalar = native['scalar_input']
+                        if scalar['frontier'] is None:
+                            version = _scalar_root_records(source, item, i)[1].id
+                            check(type(d.identity) is DataIdentity and d.identity.version.artifact == value_artifact
+                                  and d.identity.version.version == version,
+                                  'native_scalar_identity', path, 'scalar input borrows or erases another observed root/version')
+                        else:
+                            check(type(d.identity) is Unresolved and d.identity.reason == 'NATIVE_SCALAR_' + scalar['frontier']
+                                  and d.identity.point.run.value == run and len(target_processes) == 1
+                                  and d.identity.point.process == target_processes[0].id and d.identity.point.source == fact,
+                                  'native_scalar_frontier', path, 'unsupported scalar must retain exact frontier/Run/process/source')
                     continue
                 if profile == PROFILE_V2:
                     from scar.ir.execution.common import Unresolved
@@ -796,7 +876,7 @@ def _static_source_identity(source):
     return canonical({key: source.get(key) for key in (
         "reference_profile", "pid", "nonce", "provider_revision", "run", "coordinate_artifact",
         "owner_native_tid", "owner_python_ident", "native_scope", "physical_scope", "physical_profile",
-        "artifacts", "source_manifest")})
+        "artifacts", "source_manifest", 'scalar_input_profile')})
 
 
 @dataclass(frozen=True, slots=True, init=False)
@@ -837,17 +917,35 @@ def _prepare_native_catalog(owned, program, snapshot):
     return _PreparedNativeCatalog(_OWNER, owned, program, snapshot)
 
 
+@dataclass(frozen=True, slots=True, init=False)
+class NativeScalarObservation:
+    """Owned typed query result; no static literal or Python object identity."""
+    literal: PythonLiteral
+    builtin_type: str
+    source: ProviderFactReference
+    version: VersionRef
+    value: ValueOccurrenceID
+
+    def __init__(self, key, literal, builtin_type, source, version, value):
+        need(key is _OWNER, 'scalar observation needs its actual owned resolver')
+        from scar.ir.literals import require_exact_literal
+        require_exact_literal(literal)
+        for name, item in (('literal', literal), ('builtin_type', builtin_type), ('source', source), ('version', version), ('value', value)):
+            object.__setattr__(self, name, item)
+
+
 class NativePortEvidence:
     """Immutable source-owned port resolver, sealed to one exact native window.
 
-    This grants reference/port correspondence only. It does not interpret
-    logical contents, hidden effects, alias completeness, CUDA order or ready.
+    Default profiles grant reference/port correspondence only. The explicit
+    scalar input capability grants exact local primitive content/observed roots,
+    without upstream producers, hidden effects, alias completeness or readiness.
     """
     __slots__ = ("_owned", "_program_sha", "_model_sha", "_value_artifact", "_evidence_artifact",
                  "_interfaces", "_source", "_lookup", "_definitions", "_profile", "_prepared",
-                 "_invoke_index", "_binding_index")
+                 "_invoke_index", "_binding_index", '_scalar_projection', '_scalar_versions', '_scalar_denotations')
 
-    def __init__(self, key, owned, program, model, value_artifact, evidence_artifact, *, _prepared=None):
+    def __init__(self, key, owned, program, model, value_artifact, evidence_artifact, *, _prepared=None, _scalar_projection=None):
         need(key is _OWNER and type(owned) is _OwnedNativeCapture, "owned source session is required")
         from scar.ir.program.codec import dumps as program_dumps
         from .codec import dumps
@@ -860,6 +958,29 @@ class NativePortEvidence:
         need(self._profile in (PROFILE, PROFILE_V2), "unsupported owned native profile")
         interfaces = (replay_batch_interfaces(self._source) if self._profile == PROFILE_V2 else replay_interfaces(self._source))[0]
         self._interfaces = canonical(interfaces)
+        self._scalar_denotations = MappingProxyType({d.value: d for d in model.denotations})
+        self._scalar_projection, self._scalar_versions = None, {}
+        if self._source.get('scalar_input_profile') == SCALAR_INPUT_CAPABILITY:
+            need(type(_scalar_projection) is bytes and sha256(_scalar_projection).hexdigest() == value_artifact.sha256
+                 and len(_scalar_projection) == value_artifact.size_bytes, 'scalar source needs exact immutable value projection bytes')
+            from scar.ir.v2.codec import values_from_dict
+            scalar_graph = values_from_dict(json.loads(_scalar_projection))
+            expected = {'logical_values': {}, 'versions': {}, 'provenance': {}}
+            for interface in interfaces:
+                for position, port in enumerate(interface['ports']['inputs']):
+                    if port['tensor'] or port['scalar_input']['frontier'] is not None:
+                        continue
+                    records = _scalar_root_records(self._source, interface, position)
+                    for table, record in zip(expected, records, strict=True):
+                        expected[table][record.id] = record.as_dict()
+                    self._scalar_versions[records[1].id] = (interface, position)
+            for table, records in expected.items():
+                actual = getattr(scalar_graph, table)
+                need(set(actual) == set(records) and all(canonical(actual[k].as_dict()) == canonical(v) for k, v in records.items()),
+                     'scalar observed-root projection inventory/ORIGIN/provenance differs')
+            self._scalar_projection = _scalar_projection
+        else:
+            need(_scalar_projection is None, 'scalar projection cannot enable an undeclared source profile')
         self._lookup = {"native-port:" + self._source["run"] + ":" + str(i["sequence"]): i for i in interfaces}
         self._definitions = owned.definitions()
         self._prepared = None
@@ -927,6 +1048,8 @@ class NativePortEvidence:
         if boundary.id.value != expected_boundary or basis.position >= len(interface["ports"][direction]):
             ctx.issue("native_reference_slot", path, "canonical boundary/ordered slot differs from actual native schema"); return False
         native = interface["ports"][direction][basis.position]
+        if not native['tensor']:
+            return False
         if self._profile == PROFILE_V2 and native.get("geometry", {}).get("status") != "QUALIFIED":
             ctx.gap("native_port_geometry_unproved", path, native.get("geometry", {}).get("reason", "geometry unavailable"))
         if type(identity) is not ObjectIdentity:
@@ -963,9 +1086,70 @@ class NativePortEvidence:
             ctx.issue("native_reference_record", path, "projected held object changed its complete original record"); return False
         return True
 
+    def _scalar_observation(self, denotation):
+        from .content import DataIdentity
+        from scar.ir.literals import PythonLiteral
+        from scar.ir.record_codec import decode
+        from scar.ir.program.providers import ProviderFactReference
+        identity = denotation.identity
+        need(self._scalar_projection is not None and type(identity) is DataIdentity
+             and identity.version.artifact == self._value_artifact, 'scalar query has no exact owned version projection')
+        selected = self._scalar_versions.get(identity.version.version)
+        need(selected is not None, 'scalar query version is not an independently observed input root')
+        interface, position = selected
+        fact = decode(ProviderFactReference, _native_slot_fact(self._source, interface, 'inputs', interface['ports']['inputs'][position]))
+        activation = 'native-port:' + self._source['run'] + ':' + str(interface['sequence'])
+        need(type(denotation.basis) is NativeInputRef and denotation.basis.position == position
+             and denotation.basis.entry.value == activation + ':entry'
+             and denotation.value.value == activation + ':inputs:' + str(position) and denotation.source == fact,
+             'scalar query source/version/occurrence/ordered port differs')
+        scalar = interface['ports']['inputs'][position]['scalar_input']
+        return NativeScalarObservation(_OWNER, decode(PythonLiteral, scalar['literal']), scalar['builtin_type'],
+                                       fact, identity.version, denotation.value)
 
-def _make_evidence(owned, program, model, value_artifact, evidence_artifact, *, _prepared=None):
-    return NativePortEvidence(_OWNER, owned, program, model, value_artifact, evidence_artifact, _prepared=_prepared)
+    def scalar_value(self, model, program, denotation, values):
+        """Fresh typed lookup, sealed to the exact program/model/artifact scope."""
+        return self.scalar_values(model, program, (denotation,), values)[0]
+
+    def scalar_values(self, model, program, denotations, values):
+        """One scope/projection check, followed by ordered local typed lookups.
+
+        No token or ID-only memo survives this call. The immutable owned bytes
+        remain the source of truth even when callers supply mutable graphs.
+        """
+        self.require_scope(model, program)
+        need(type(denotations) is tuple and canonical(values.to_dict()) == self._scalar_projection,
+             'scalar batch query changed its exact value projection')
+        result = []
+        for denotation in denotations:
+            need(self._scalar_denotations.get(denotation.value) == denotation,
+                 'scalar batch query changed its exact occurrence')
+            result.append(self._scalar_observation(denotation))
+        return tuple(result)
+
+    def resolve_scalar(self, ctx, basis, resolved, identity, path):
+        from .content import DataIdentity
+        if self._scalar_projection is None or type(identity) is not DataIdentity:
+            return None
+        try:
+            need(type(basis) is NativeInputRef and resolved is not None and resolved['value'] is not None,
+                 'scalar content needs an actual original native input occurrence')
+            denotation = self._scalar_denotations.get(resolved['value'].id)
+            need(denotation is not None and denotation.basis == basis and denotation.identity == identity,
+                 'scalar input denotation/source/slot is absent or contradictory')
+            graph = ctx.external_values(self._value_artifact, path)
+            need(graph is not None, 'scalar value projection unavailable')
+            # ExternalSnapshots checks the complete projection SHA/registry;
+            # immutable source bytes and ORIGIN inventory were checked above.
+            return self._scalar_observation(denotation)
+        except (ValueError, TypeError) as error:
+            ctx.issue('native_scalar_content', path, str(error))
+            return None
 
 
-__all__ = ["NativePortEvidence", "PROFILE", "PROFILE_V2"]
+def _make_evidence(owned, program, model, value_artifact, evidence_artifact, *, _prepared=None, _scalar_projection=None):
+    return NativePortEvidence(_OWNER, owned, program, model, value_artifact, evidence_artifact,
+                              _prepared=_prepared, _scalar_projection=_scalar_projection)
+
+
+__all__ = ["NativePortEvidence", "PROFILE", "PROFILE_V2", 'SCALAR_INPUT_CAPABILITY', 'NativeScalarObservation']

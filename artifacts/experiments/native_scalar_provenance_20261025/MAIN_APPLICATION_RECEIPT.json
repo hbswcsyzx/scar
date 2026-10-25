@@ -1,0 +1,86 @@
+{
+  "files": [
+    {
+      "expected_main_baseline": {
+        "bytes": 57495,
+        "path": "artifacts/experiments/native_scalar_provenance_20261025/attempt01/baseline-source/native_protocol.py",
+        "sha256": "8a328d05036804f34c8d5b77ce99a240a27ea4de834c3a47e381dd44618d544e"
+      },
+      "final_iso": {
+        "bytes": 59606,
+        "sha256": "fa9c8a6d8f7e4aed9a7da6a1310981d129e3537b82a53236307e9d617c092214",
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_protocol.py"
+      },
+      "main_current_observed": {
+        "bytes": 59606,
+        "sha256": "fa9c8a6d8f7e4aed9a7da6a1310981d129e3537b82a53236307e9d617c092214",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_protocol.py"
+      },
+      "main_status": "MATCHES_FINAL",
+      "path": "scar/trace/native_protocol.py"
+    },
+    {
+      "expected_main_baseline": {
+        "bytes": 64011,
+        "path": "artifacts/experiments/native_scalar_provenance_20261025/attempt01/baseline-source/native_port_protocol.py",
+        "sha256": "1c1765e25f2aa8829f1b3cd6fa7826ff2c2c01bf0deacf7d2b24d96241e8c10d"
+      },
+      "final_iso": {
+        "bytes": 76340,
+        "sha256": "175c4fc3140ce5333135bf9b542ea6c37bf286825188990baef957b75e490d8a",
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/execution/native_port_protocol.py"
+      },
+      "main_current_observed": {
+        "bytes": 76340,
+        "sha256": "175c4fc3140ce5333135bf9b542ea6c37bf286825188990baef957b75e490d8a",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/native_port_protocol.py"
+      },
+      "main_status": "MATCHES_FINAL",
+      "path": "scar/ir/execution/native_port_protocol.py"
+    },
+    {
+      "expected_main_baseline": {
+        "bytes": 38926,
+        "path": "artifacts/experiments/native_scalar_provenance_20261025/attempt01/baseline-source/content_validation.py",
+        "sha256": "3a71d980f10e1d6c80057439baa35a68230e037d74f9aec793885cc9cf7fb4b8"
+      },
+      "final_iso": {
+        "bytes": 39939,
+        "sha256": "7bafa81925f16b6f1b5374b68313c8d766ca37a88467f291413763d6efc442fc",
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/execution/content_validation.py"
+      },
+      "main_current_observed": {
+        "bytes": 39939,
+        "sha256": "7bafa81925f16b6f1b5374b68313c8d766ca37a88467f291413763d6efc442fc",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/content_validation.py"
+      },
+      "main_status": "MATCHES_FINAL",
+      "path": "scar/ir/execution/content_validation.py"
+    },
+    {
+      "expected_main_baseline": {
+        "bytes": 84113,
+        "path": "artifacts/experiments/native_scalar_provenance_20261025/attempt01/baseline-source/native_capture_batch.py",
+        "sha256": "d765fb25def905892e5d7e7d23f9fa9c1a7f666b2094782c623a3ffb13b778f3"
+      },
+      "final_iso": {
+        "bytes": 89554,
+        "sha256": "21f9cf606906f7171de57e92090cf8d603d371ad304b22e5e7fbd258783c9f8b",
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_capture_batch.py"
+      },
+      "main_current_observed": {
+        "bytes": 89554,
+        "sha256": "21f9cf606906f7171de57e92090cf8d603d371ad304b22e5e7fbd258783c9f8b",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_capture_batch.py"
+      },
+      "main_status": "MATCHES_FINAL",
+      "path": "scar/trace/native_capture_batch.py"
+    }
+  ],
+  "historical_collector_source_proved_by_consumer_hash": false,
+  "main_HEAD_not_inferred": true,
+  "main_written_by_this_agent": false,
+  "schema": "scar.native-scalar-main-application-receipt",
+  "schema_version": 1,
+  "static_ProgramSnapshot_changed": false
+}

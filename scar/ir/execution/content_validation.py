@@ -233,6 +233,20 @@ def resolve_basis(ctx, basis, path, *, identity=None, placement=None, operation=
             if resolved['value'].id != expected_value:
                 ctx.issue('content_native_actual', path, 'native slot selects another actual value incarnation')
         evidence = ctx.native_port_evidence
+        scalar = (evidence.resolve_scalar(ctx, basis, resolved, identity, path)
+                  if evidence is not None and type(identity) is DataIdentity else None)
+        if scalar is not None:
+            from .native_port_protocol import NativeScalarObservation
+            if type(scalar) is not NativeScalarObservation:
+                ctx.issue('native_scalar_content', path, 'native scalar content requires the exact owned typed query result')
+            else:
+                resolved['scalar_content'] = scalar
+                ctx.gap('native_scalar_upstream_unproved', path, 'observed scalar input root has no established upstream producer')
+                if require_read:
+                    ctx.gap('native_scalar_read_effect_unproved', path, 'input content alone does not prove a content-read effect')
+                # Exact local input content is distinct from upstream lineage,
+                # Python identity, native writes, complete state and readiness.
+                return resolved
         reference_matched = (evidence is not None
             and evidence.resolve(ctx, basis, resolved, identity, path))
         if not reference_matched:
