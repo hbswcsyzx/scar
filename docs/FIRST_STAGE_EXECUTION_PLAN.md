@@ -8,7 +8,7 @@
 
 | 工作 | 当前边界与下一验收 |
 | --- | --- |
-| 通用 frame/control 根 | 模块没有 SourceAtom，既有 C0 只收函数根，不能用假函数补齐。先实施 core29 的 typed FRAME/ModuleUnitSource/单一 ABI 权威六处；旧 core28/SP6/7 不放宽。类型门后再接同一通用 SP8 的11句及异常清理，整体12文件方案见[设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
+| 通用 frame/control 根 | core29 的 typed FRAME/ModuleUnitSource/单一 ABI 权威及旧 source 守卫七处已通过 A 类型门；主树旧 SP5/6/7 正常读回。尚未生成 SP8/模块正文或绑定实际 frame。下一步接通用 namespace/source producer，再接 Try/异常清理，整体12文件方案见[设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
 | callee-entry 参数边 | 保存样例实际有260次入口/520个参数引用观测；先实现 snapshot→原 formal port 的局部 projection。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[证据与设计](../artifacts/analysis/callee_entry_routing_plan_20261025/PLAN.md)。 |
 | project/dependency 统一出版 | 当前自动 CLI 对 project SP5 的 adapter 明确 BLOCKED；先审原 origin、父 body/CAS 和 namespace，保所有成功产物，不能只留下方便处理的 external case。该项仍处设计审查，未授权新代码。 |
 

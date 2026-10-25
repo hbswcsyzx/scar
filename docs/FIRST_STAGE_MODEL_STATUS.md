@@ -6,6 +6,16 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：通用 FRAME 根与旧 source 能力守卫 A 通过
+
+Root45676 actual exit0/3.4203s，22项 typed/codec 和5项历史 wrapper 守卫核对，
+原真实 SP6/7 普通只读回读通过；无新 lower/compile/target。七份原样源码已接入，
+main71621 actual exit0/5.3365s，SP7/SP6/SP5 均保持原 wire；ModuleUnitSource 下移
+后仍为同一 re-export class。新 core29 只表达静态 frame/code/source/ABI 关系，
+不证明 actual activation/namespace/import 进入，也不代表 SP8/body 已完成。
+后继继续通用 namespace 与 C0/C1 source producer；见
+[A 准确报告](../artifacts/experiments/frame_root_contract_a_20261025/REPORT.md)。
+
 ### 2026-10-25：源码入口出版/绑定已接通用 CLI
 
 Root session71666 actual exit0/40.8172s，四阶段机械完成，260 body-linked、5 source-linked、

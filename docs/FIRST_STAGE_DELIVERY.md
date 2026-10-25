@@ -41,6 +41,10 @@ Native scalar V2 后继已在隔离树和主树真实公共路径通过，主树
 4 Regions/19 ops，剩余 10 句及 importer 内部仍 REQUIRED。原构造门的报告变量错误
 exit1 保留，丢失测量未重建；主树同一 SP7、旧 SP6/SP5 正常读回通过，未再 lower。
 见 [前缀模型](SOURCE_MODULE_IMPORT_PREFIX.md)。
+后继 A 类型门已修正模块不能作为 C0 根的模型缺口：新增 core29 FRAME 根、准确
+ModuleUnitSource 及单一 entry ABI，旧 source1–7 显式拒新能力。原 SP5/6/7 普通读回
+兼容通过；这仅是类型/codec 基础，SP8 正文与实际 frame 对应仍未实现。见
+[A 报告](../artifacts/experiments/frame_root_contract_a_20261025/REPORT.md)。
 
 **当前可复核结果（2026-10-25）：** 完整runtime接线仍为843快照；正式静态源码已发布
 到858，后继新增body尚未接回原运行。12原图普通ADD的恢复消费实际exit0/651.143247s；

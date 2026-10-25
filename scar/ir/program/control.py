@@ -15,6 +15,7 @@ from scar.ir.program.ids import (
 )
 from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import SourceAtomID
+from scar.ir.program.source_subjects import ModuleUnitSource
 
 
 def _exact(value, expected, name):
@@ -72,6 +73,7 @@ class LanguageCompletionKind(str, Enum):
 
 class ControlScopeKind(str, Enum):
     FUNCTION = "FUNCTION"
+    FRAME = "FRAME"
     BLOCK = "BLOCK"
     LOOP = "LOOP"
     CLEANUP = "CLEANUP"
@@ -89,7 +91,7 @@ class ControlScope:
     region: RegionID
     parent: ControlScopeID | None
     kind: ControlScopeKind
-    source: SourceReference
+    source: SourceReference | ModuleUnitSource
     blocks: tuple[BlockID, ...]
 
     def __post_init__(self):
@@ -98,17 +100,22 @@ class ControlScope:
         if self.parent is not None:
             _exact(self.parent, ControlScopeID, "control scope parent")
         _exact(self.kind, ControlScopeKind, "control scope kind")
-        _source_reference(self.source)
+        if type(self.source) is ModuleUnitSource:
+            self.source.__post_init__()
+            if self.kind is not ControlScopeKind.FRAME:
+                raise ValueError("a module unit subject requires a FRAME control root")
+        else:
+            _source_reference(self.source)
         _exact(self.blocks, tuple, "control scope blocks")
         for block in self.blocks:
             _exact(block, BlockID, "control scope block")
         if not self.blocks or len(set(self.blocks)) != len(self.blocks):
             raise ValueError("control scope needs nonempty distinct directly owned blocks")
-        if self.kind is ControlScopeKind.FUNCTION:
+        if self.kind in (ControlScopeKind.FUNCTION, ControlScopeKind.FRAME):
             if self.parent is not None:
-                raise ValueError("function control scope must not have a parent")
+                raise ValueError("function/frame control root must not have a parent")
         elif self.parent is None:
-            raise ValueError("non-function control scope needs a parent")
+            raise ValueError("non-root control scope needs a parent")
 
 
 @dataclass(frozen=True, slots=True)

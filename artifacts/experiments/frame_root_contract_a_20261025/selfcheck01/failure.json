@@ -1,0 +1,10 @@
+{
+  "status": "FAILED_SELF_CHECK_HARNESS_ASSERTION",
+  "actual_exit": 1,
+  "wall_time_seconds": 0.917903102,
+  "phase": "closed ABI discriminator rejects unknown",
+  "actual_codec_result": "ValueError: value does not match union type",
+  "harness_expected_substring": "typed record",
+  "production_rejected_unknown_ABI": true,
+  "production_changed_after_failure": false
+}

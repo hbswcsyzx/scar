@@ -20,7 +20,7 @@ from types import MappingProxyType
 
 from scar.analysis.control_flow_v2 import _build_generated_source_layers, validate_source_control_flow
 from scar.analysis.source_semantics_v2 import validate_source_semantics
-from scar.ir.program.codec import dumps as dump_graph
+from scar.ir.program.codec import dumps as dump_graph, _has_frame_root_capability
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
 from scar.ir.program.module_entries import (ModuleBodyOverlay, ModuleEntryProfile,
@@ -147,6 +147,10 @@ class SourceProgram:
         }
 
     def to_dict(self):
+        # Every implemented wrapper is historical source1-7. A future source8
+        # must enter its explicit new branch rather than upgrade an old ABI.
+        if self.graph is not None and _has_frame_root_capability(self.graph):
+            raise ValueError("historical source1-7 writer cannot contain frame-root core capability")
         if type(self.module) is ModulePrefixOverlay:
             from scar.ir.program.module_entries import encode_module_prefix
             if (self.profile is not ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1 or self.interface is not None
@@ -221,6 +225,21 @@ class SourceProgram:
             raise ValueError("source program verification mode must be explicit")
         _check_structure_source_texts(verification, source_texts)
         version = document.get("schema_version")
+        if type(version) is int and 1 <= version <= 7:
+            graph_wire = document.get("graph")
+            if type(graph_wire) is dict:
+                core_version = graph_wire.get("schema_version")
+                if ("frame_roots" in graph_wire
+                        or type(core_version) is int and core_version >= 29):
+                    raise ValueError("historical source1-7 reader cannot contain frame-root core capability")
+                scopes = graph_wire.get("control_scopes")
+                for scope in scopes if type(scopes) is list else ():
+                    if type(scope) is not dict:
+                        continue
+                    source = scope.get("source")
+                    if (scope.get("kind") == "FRAME" or type(source) is dict
+                            and (source.get("source_kind") == "MODULE_UNIT" or "snapshot" in source)):
+                        raise ValueError("historical source1-7 reader cannot contain frame-root core capability")
         if type(version) is int and version == 7:
             from scar.ir.program.module_entries import decode_module_prefix
             if (set(document) != expected_fields | {"entry_kind", "profile", "module"}

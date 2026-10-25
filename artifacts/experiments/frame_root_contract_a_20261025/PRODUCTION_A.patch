@@ -1,0 +1,547 @@
+--- a/scar/analysis/program_lowering.py
++++ b/scar/analysis/program_lowering.py
+@@ -20,7 +20,7 @@
+ 
+ from scar.analysis.control_flow_v2 import _build_generated_source_layers, validate_source_control_flow
+ from scar.analysis.source_semantics_v2 import validate_source_semantics
+-from scar.ir.program.codec import dumps as dump_graph
++from scar.ir.program.codec import dumps as dump_graph, _has_frame_root_capability
+ from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
+ from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
+ from scar.ir.program.module_entries import (ModuleBodyOverlay, ModuleEntryProfile,
+@@ -147,6 +147,10 @@
+         }
+ 
+     def to_dict(self):
++        # Every implemented wrapper is historical source1-7. A future source8
++        # must enter its explicit new branch rather than upgrade an old ABI.
++        if self.graph is not None and _has_frame_root_capability(self.graph):
++            raise ValueError("historical source1-7 writer cannot contain frame-root core capability")
+         if type(self.module) is ModulePrefixOverlay:
+             from scar.ir.program.module_entries import encode_module_prefix
+             if (self.profile is not ModuleBodyExpansionProfile.IMPORT_PREFIX_314_V1 or self.interface is not None
+@@ -221,6 +225,21 @@
+             raise ValueError("source program verification mode must be explicit")
+         _check_structure_source_texts(verification, source_texts)
+         version = document.get("schema_version")
++        if type(version) is int and 1 <= version <= 7:
++            graph_wire = document.get("graph")
++            if type(graph_wire) is dict:
++                core_version = graph_wire.get("schema_version")
++                if ("frame_roots" in graph_wire
++                        or type(core_version) is int and core_version >= 29):
++                    raise ValueError("historical source1-7 reader cannot contain frame-root core capability")
++                scopes = graph_wire.get("control_scopes")
++                for scope in scopes if type(scopes) is list else ():
++                    if type(scope) is not dict:
++                        continue
++                    source = scope.get("source")
++                    if (scope.get("kind") == "FRAME" or type(source) is dict
++                            and (source.get("source_kind") == "MODULE_UNIT" or "snapshot" in source)):
++                        raise ValueError("historical source1-7 reader cannot contain frame-root core capability")
+         if type(version) is int and version == 7:
+             from scar.ir.program.module_entries import decode_module_prefix
+             if (set(document) != expected_fields | {"entry_kind", "profile", "module"}
+--- a/scar/ir/program/source_subjects.py
++++ b/scar/ir/program/source_subjects.py
+@@ -0,0 +1,114 @@
++"""Static source subjects and frame-entry ports for lexical control roots.
++
++These declarations refer to canonical core Values and existing code identities.
++They assert neither an activation, a FunctionObject/ModuleObject, namespace
++contents/aliasing, an import protocol, nor verified source/code correspondence.
++No Python-frame normal-result or closure rule follows from a frame kind.
++"""
++from __future__ import annotations
++
++from dataclasses import dataclass
++from enum import Enum
++from pathlib import PurePosixPath
++
++from scar.ir.program.call_edges import CapturedCode
++from scar.ir.program.ids import ControlScopeID, EnvironmentInterfaceID, ValueID
++from scar.ir.semantics_v2 import SourceSnapshot
++from scar.ir.v2.ids import OperationDefinitionID
++
++
++@dataclass(frozen=True, slots=True)
++class ModuleUnitSource:
++    """The original MODULE declaration; a module need not have a SourceAtom."""
++
++    snapshot: SourceSnapshot
++    namespace_root: str
++    initializer: OperationDefinitionID
++
++    def __post_init__(self):
++        if not (type(self.snapshot) is SourceSnapshot
++                and type(self.initializer) is OperationDefinitionID):
++            raise ValueError("module entry: unit requires original snapshot and MODULE initializer")
++        if not (type(self.namespace_root) is str
++                and PurePosixPath(self.namespace_root).is_absolute()
++                and PurePosixPath(self.snapshot.path).is_relative_to(
++                    PurePosixPath(self.namespace_root))):
++            raise ValueError("module entry: unit must retain its absolute original source namespace")
++
++
++class FrameKind(str, Enum):
++    """Static code/source-body category, independent of the entering protocol."""
++
++    FUNCTION = "FUNCTION"
++    MODULE = "MODULE"
++    CLASS = "CLASS"
++
++
++@dataclass(frozen=True, slots=True)
++class MappingFramePorts:
++    """Exact entry ports; different ValueIDs never prove different objects.
++
++    Cells retain their declared positional port order. Source/compiler and
++    activation evidence must separately check their meaning and actuals.
++    """
++
++    locals_namespace: ValueID
++    globals_namespace: ValueID
++    builtins_namespace: ValueID
++    closure_cells: tuple[ValueID, ...]
++    world: ValueID
++
++    def __post_init__(self):
++        references = (self.locals_namespace, self.globals_namespace, self.builtins_namespace)
++        if (any(type(value) is not ValueID for value in references)
++                or type(self.world) is not ValueID):
++            raise TypeError("mapping frame ports require exact existing ValueIDs")
++        if type(self.closure_cells) is not tuple or any(
++                type(value) is not ValueID for value in self.closure_cells):
++            raise TypeError("mapping frame cells require an ordered tuple of ValueIDs")
++        ports = references + self.closure_cells + (self.world,)
++        if len(set(ports)) != len(ports):
++            raise ValueError("mapping frame roles need distinct entry ports, without object-disjointness claims")
++
++
++@dataclass(frozen=True, slots=True)
++class FunctionFrameABI:
++    """Reference the existing environment/formal partition, without copying it."""
++
++    environment: EnvironmentInterfaceID
++
++    def __post_init__(self):
++        if type(self.environment) is not EnvironmentInterfaceID:
++            raise TypeError("function frame ABI requires an existing EnvironmentInterfaceID")
++
++
++@dataclass(frozen=True, slots=True)
++class FrameRoot:
++    """One entry authority for one FRAME scope, not a dynamic frame instance."""
++
++    scope: ControlScopeID
++    kind: FrameKind
++    code: CapturedCode
++    entry: MappingFramePorts | FunctionFrameABI
++
++    def __post_init__(self):
++        if type(self.scope) is not ControlScopeID or type(self.kind) is not FrameKind:
++            raise TypeError("frame root requires exact scope identity and frame kind")
++        if type(self.code) is not CapturedCode:
++            raise TypeError("frame root requires the existing CapturedCode descriptor")
++        self.code.__post_init__()
++        expected = FunctionFrameABI if self.kind is FrameKind.FUNCTION else MappingFramePorts
++        if type(self.entry) is not expected:
++            raise TypeError("frame kind requires its exact declared entry ABI")
++        self.entry.__post_init__()
++
++
++FRAME_ROOT_RECORD_TAGS = {
++    ModuleUnitSource: ("source_kind", "MODULE_UNIT"),
++    MappingFramePorts: ("entry_kind", "MAPPING_PORTS"),
++    FunctionFrameABI: ("entry_kind", "FUNCTION_ENVIRONMENT"),
++}
++
++
++__all__ = ["ModuleUnitSource", "FrameKind", "MappingFramePorts", "FunctionFrameABI",
++           "FrameRoot", "FRAME_ROOT_RECORD_TAGS"]
+--- a/scar/ir/program/module_entries.py
++++ b/scar/ir/program/module_entries.py
+@@ -8,7 +8,6 @@
+ 
+ from dataclasses import dataclass
+ from enum import Enum
+-from pathlib import PurePosixPath
+ import re
+ 
+ from scar.ir.program.call_edges import CapturedCode, CodeSourceLink
+@@ -17,9 +16,10 @@
+ from scar.ir.program.inventory import SourceContextDigest
+ from scar.ir.program.providers import ProviderArtifact
+ from scar.ir.program.source import SourceRole
++from scar.ir.program.source_subjects import ModuleUnitSource
+ from scar.ir.program.structured import PythonProtocolKind, LoopInterface
+ from scar.ir.record_codec import decode, encode
+-from scar.ir.semantics_v2 import Opcode, SourceSnapshot
++from scar.ir.semantics_v2 import Opcode
+ from scar.ir.v2.common import SourceReference
+ from scar.ir.v2.ids import (OperationDefinitionID, StaticValueID, ValueSlotID,
+     ControlFlowSuiteID, ControlFlowNodeID, InsertionPointID)
+@@ -46,20 +46,6 @@
+ def _need(condition, detail):
+     if not condition:
+         raise ValueError("module entry: " + detail)
+-
+-
+-@dataclass(frozen=True, slots=True)
+-class ModuleUnitSource:
+-    snapshot: SourceSnapshot
+-    namespace_root: str
+-    initializer: OperationDefinitionID
+-
+-    def __post_init__(self):
+-        _need(type(self.snapshot) is SourceSnapshot and type(self.initializer) is OperationDefinitionID,
+-              "unit requires original snapshot and MODULE initializer")
+-        _need(type(self.namespace_root) is str and PurePosixPath(self.namespace_root).is_absolute()
+-              and PurePosixPath(self.snapshot.path).is_relative_to(PurePosixPath(self.namespace_root)),
+-              "unit must retain its absolute original source namespace")
+ 
+ 
+ ModuleSource = ModuleUnitSource | SourceReference
+--- a/scar/ir/program/control.py
++++ b/scar/ir/program/control.py
+@@ -15,6 +15,7 @@
+ )
+ from scar.ir.v2.common import SourceReference
+ from scar.ir.v2.ids import SourceAtomID
++from scar.ir.program.source_subjects import ModuleUnitSource
+ 
+ 
+ def _exact(value, expected, name):
+@@ -72,6 +73,7 @@
+ 
+ class ControlScopeKind(str, Enum):
+     FUNCTION = "FUNCTION"
++    FRAME = "FRAME"
+     BLOCK = "BLOCK"
+     LOOP = "LOOP"
+     CLEANUP = "CLEANUP"
+@@ -89,7 +91,7 @@
+     region: RegionID
+     parent: ControlScopeID | None
+     kind: ControlScopeKind
+-    source: SourceReference
++    source: SourceReference | ModuleUnitSource
+     blocks: tuple[BlockID, ...]
+ 
+     def __post_init__(self):
+@@ -98,17 +100,22 @@
+         if self.parent is not None:
+             _exact(self.parent, ControlScopeID, "control scope parent")
+         _exact(self.kind, ControlScopeKind, "control scope kind")
+-        _source_reference(self.source)
++        if type(self.source) is ModuleUnitSource:
++            self.source.__post_init__()
++            if self.kind is not ControlScopeKind.FRAME:
++                raise ValueError("a module unit subject requires a FRAME control root")
++        else:
++            _source_reference(self.source)
+         _exact(self.blocks, tuple, "control scope blocks")
+         for block in self.blocks:
+             _exact(block, BlockID, "control scope block")
+         if not self.blocks or len(set(self.blocks)) != len(self.blocks):
+             raise ValueError("control scope needs nonempty distinct directly owned blocks")
+-        if self.kind is ControlScopeKind.FUNCTION:
++        if self.kind in (ControlScopeKind.FUNCTION, ControlScopeKind.FRAME):
+             if self.parent is not None:
+-                raise ValueError("function control scope must not have a parent")
++                raise ValueError("function/frame control root must not have a parent")
+         elif self.parent is None:
+-            raise ValueError("non-function control scope needs a parent")
++            raise ValueError("non-root control scope needs a parent")
+ 
+ 
+ @dataclass(frozen=True, slots=True)
+--- a/scar/ir/program/model.py
++++ b/scar/ir/program/model.py
+@@ -16,6 +16,7 @@
+     ControlPort, ControlScope, ExceptionPacketDefinition, PendingCompletionDefinition,
+     PendingDispatchTerminator, ProtocolValueKind, ProtocolValueType,
+ )
++from scar.ir.program.source_subjects import FrameRoot
+ from scar.ir.program.cleanup import (
+     CleanupEnter, CleanupInterface, CleanupReplace, CleanupResume,
+     CleanupRouteTerminator, HandledContextDomain, HandledContextRead,
+@@ -872,10 +873,17 @@
+     call_effect_expansions: tuple[CallEffectExpansion, ...] = ()
+     stored_value_writes: tuple[StoredValueWrite, ...] = ()
+     stored_value_reads: tuple[StoredValueRead, ...] = ()
++    frame_roots: tuple[FrameRoot, ...] = ()
+ 
+     def __post_init__(self) -> None:
+         if not isinstance(self.root, RegionID):
+             raise TypeError("ProgramGraph.root must be RegionID")
++        roots = _tuple(self.frame_roots, "ProgramGraph.frame_roots")
++        if any(type(row) is not FrameRoot for row in roots):
++            raise TypeError("ProgramGraph.frame_roots requires exact FrameRoot records")
++        for row in roots:
++            row.__post_init__()
++        _unique(tuple(row.scope for row in roots), "ProgramGraph frame root scopes")
+         for name, row_type in (("stored_value_writes", StoredValueWrite),
+                                ("stored_value_reads", StoredValueRead)):
+             rows = _tuple(getattr(self, name), "ProgramGraph." + name)
+--- a/scar/ir/program/codec.py
++++ b/scar/ir/program/codec.py
+@@ -10,8 +10,9 @@
+ 
+ from scar.ir.program.model import LocalBindingValue, Operation, ProgramGraph, ProtocolValue, TerminatorKind
+ from scar.ir.program.control import (
+-    PendingDispatchTerminator, ProtocolValueKind, ProtocolValueType,
++    ControlScopeKind, PendingDispatchTerminator, ProtocolValueKind, ProtocolValueType,
+ )
++from scar.ir.program.source_subjects import FRAME_ROOT_RECORD_TAGS, ModuleUnitSource
+ from scar.ir.program.cleanup import CleanupRouteTerminator
+ from scar.ir.program.resumption import (
+     ResumeInput, SavedInput, SuspendTerminator,
+@@ -40,7 +41,7 @@
+ 
+ 
+ SCHEMA = "scar.program-graph"
+-SCHEMA_VERSION = 28
++SCHEMA_VERSION = 29
+ _GRAPH_FIELDS = frozenset(item.name for item in fields(ProgramGraph))
+ _BINDING_FIELDS = frozenset({"binding_definitions", "binding_reads"})
+ _RESOURCE_FIELDS = frozenset({"resources", "resource_requirements", "resource_uses",
+@@ -68,8 +69,10 @@
+ _EXCEPTION_MATCH_FIELDS = frozenset({"exception_matches"})
+ _CALL_EFFECT_FIELDS = frozenset({"call_effect_expansions"})
+ _STORED_VALUE_FIELDS = frozenset({"stored_value_writes", "stored_value_reads"})
+-_V27_GRAPH_FIELDS = _GRAPH_FIELDS
+-_V28_GRAPH_FIELDS = _V27_GRAPH_FIELDS
++_FRAME_ROOT_FIELDS = frozenset({"frame_roots"})
++_V29_GRAPH_FIELDS = _GRAPH_FIELDS
++_V28_GRAPH_FIELDS = _V29_GRAPH_FIELDS - _FRAME_ROOT_FIELDS
++_V27_GRAPH_FIELDS = _V28_GRAPH_FIELDS
+ _V26_GRAPH_FIELDS = _V27_GRAPH_FIELDS - _STORED_VALUE_FIELDS
+ _V25_GRAPH_FIELDS = _V26_GRAPH_FIELDS
+ _V24_GRAPH_FIELDS = _V25_GRAPH_FIELDS - _CALL_EFFECT_FIELDS
+@@ -122,6 +125,7 @@
+ _V26_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V26_GRAPH_FIELDS
+ _V27_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V27_GRAPH_FIELDS
+ _V28_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V28_GRAPH_FIELDS
++_V29_ENVELOPE_FIELDS = frozenset({"schema", "schema_version"}) | _V29_GRAPH_FIELDS
+ _V19_CONNECTION_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_CONNECTION_RECORD_TAGS.items()
+                               if record is not SessionOccupancyCondition}
+ _V17_PROTOCOL_RECORD_TAGS = {record: tag for record, tag in PROTOCOL_RECORD_TAGS.items()
+@@ -266,6 +270,12 @@
+ def _has_handle_table_capability(graph: ProgramGraph) -> bool:
+     return (any(row.role is ResourceRole.HANDLE_TABLE for row in graph.resources)
+             or any(row.role is ResourceRole.HANDLE_TABLE for row in graph.resource_requirements))
++
++
++def _has_frame_root_capability(graph: ProgramGraph) -> bool:
++    return (bool(graph.frame_roots)
++            or any(scope.kind is ControlScopeKind.FRAME
++                   or type(scope.source) is ModuleUnitSource for scope in graph.control_scopes))
+ 
+ 
+ def dumps(graph: ProgramGraph) -> str:
+@@ -297,6 +307,7 @@
+     has_stored_values = has_stored_value_capability(graph)
+     has_admission = _has_admission_capability(graph)
+     has_invoke_subset = _has_invoke_subset_capability(graph)
++    has_frame_roots = _has_frame_root_capability(graph)
+     tags = (_V11_RECORD_TAGS if has_driver else
+             _V10_RECORD_TAGS if has_resumption else _CLEANUP_RECORD_TAGS)
+     if has_addresses or has_protocols or has_exception_matches:
+@@ -317,8 +328,13 @@
+         tags = {**tags, **CALL_EFFECT_EXPANSION_RECORD_TAGS}
+     if has_stored_values:
+         tags = {**tags, **STORED_VALUE_RECORD_TAGS}
++    if has_frame_roots:
++        tags = {**tags, **FRAME_ROOT_RECORD_TAGS}
+     encoded = encode(graph, record_tags=tags)
+-    if _has_handle_table_capability(graph):
++    if has_frame_roots:
++        document = {"schema": SCHEMA, "schema_version": 29,
++                    **{name: encoded[name] for name in _V29_GRAPH_FIELDS}}
++    elif _has_handle_table_capability(graph):
+         document = {"schema": SCHEMA, "schema_version": 28,
+                     **{name: encoded[name] for name in _V28_GRAPH_FIELDS}}
+     elif has_stored_values:
+@@ -443,7 +459,7 @@
+ 
+ 
+ def loads(payload: str) -> ProgramGraph:
+-    """Decode exact capability profiles v1–v28 without upgrading old wire."""
++    """Decode exact capability profiles v1–v29 without upgrading old wire."""
+     if type(payload) is not str:
+         raise TypeError("program graph JSON payload must be str")
+     document: Any = _loads(payload)
+@@ -454,7 +470,7 @@
+     if document["schema"] != SCHEMA:
+         raise ValueError("unsupported program graph schema")
+     version = document["schema_version"]
+-    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28):
++    if type(version) is not int or version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29):
+         raise ValueError("unsupported program graph schema version")
+     expected_fields = {1: _V1_V2_ENVELOPE_FIELDS, 2: _V1_V2_ENVELOPE_FIELDS,
+                        3: _V3_ENVELOPE_FIELDS, 4: _V4_ENVELOPE_FIELDS,
+@@ -469,7 +485,8 @@
+                        21: _V21_ENVELOPE_FIELDS, 22: _V22_ENVELOPE_FIELDS,
+                        23: _V23_ENVELOPE_FIELDS, 24: _V24_ENVELOPE_FIELDS,
+                        25: _V25_ENVELOPE_FIELDS, 26: _V26_ENVELOPE_FIELDS,
+-                       27: _V27_ENVELOPE_FIELDS, 28: _V28_ENVELOPE_FIELDS}[version]
++                       27: _V27_ENVELOPE_FIELDS, 28: _V28_ENVELOPE_FIELDS,
++                       29: _V29_ENVELOPE_FIELDS}[version]
+     if set(document) != expected_fields:
+         raise ValueError("program graph document has incorrect top-level fields")
+     graph_fields = {1: _V1_V2_GRAPH_FIELDS, 2: _V1_V2_GRAPH_FIELDS,
+@@ -484,8 +501,21 @@
+                     21: _V21_GRAPH_FIELDS, 22: _V22_GRAPH_FIELDS,
+                     23: _V23_GRAPH_FIELDS, 24: _V24_GRAPH_FIELDS,
+                     25: _V25_GRAPH_FIELDS, 26: _V26_GRAPH_FIELDS,
+-                    27: _V27_GRAPH_FIELDS, 28: _V28_GRAPH_FIELDS}[version]
++                    27: _V27_GRAPH_FIELDS, 28: _V28_GRAPH_FIELDS,
++                    29: _V29_GRAPH_FIELDS}[version]
+     record = {name: document[name] for name in graph_fields}
++    if version < 29:
++        record.update({name: [] for name in _FRAME_ROOT_FIELDS})
++        # The expanded typed source union and enum must not expand old wire.
++        scopes = record.get("control_scopes")
++        if type(scopes) is list:
++            for scope in scopes:
++                if type(scope) is not dict:
++                    continue
++                source = scope.get("source")
++                if (scope.get("kind") == "FRAME" or type(source) is dict
++                        and (source.get("source_kind") == "MODULE_UNIT" or "snapshot" in source)):
++                    raise ValueError("historical schema cannot contain frame-root source capability")
+     if version < 27:
+         record.update({name: [] for name in _STORED_VALUE_FIELDS})
+     if version < 25:
+@@ -607,7 +637,13 @@
+         tags = {**tags, **CALL_EFFECT_EXPANSION_RECORD_TAGS}
+     if version >= 27:
+         tags = {**tags, **STORED_VALUE_RECORD_TAGS}
++    if version >= 29:
++        tags = {**tags, **FRAME_ROOT_RECORD_TAGS}
+     graph = decode(ProgramGraph, record, record_tags=tags)
++    if version < 29 and _has_frame_root_capability(graph):
++        raise ValueError("historical schema cannot contain frame-root capability")
++    if version == 29 and not graph.frame_roots:
++        raise ValueError("schema version 29 requires explicit frame-root capability")
+     has_handle_table = _has_handle_table_capability(graph)
+     if version < 28 and has_handle_table:
+         raise ValueError("historical schema cannot contain handle-table resource role")
+--- a/scar/ir/program/control_validation.py
++++ b/scar/ir/program/control_validation.py
+@@ -20,6 +20,8 @@
+     ResumeInput, SavedInput, SavedRole, SuspendTerminator, saved_actual_use,
+ )
+ from .drivers import BodyDriveResult
++from .source_subjects import FrameKind, FunctionFrameABI, MappingFramePorts, ModuleUnitSource
++from scar.ir.v2.common import SourceReference
+ 
+ 
+ def _protocol(value, kind):
+@@ -111,7 +113,7 @@
+                                               P.RAW_DRIVER_REQUEST)]
+     dispatches = [o for o in graph.operations if isinstance(
+         o.terminator, (PendingDispatchTerminator, CleanupRouteTerminator))]
+-    if not (scopes or ports or protocol_values or dispatches
++    if not (scopes or ports or protocol_values or dispatches or graph.frame_roots
+             or graph.exception_packets or graph.pending_completions):
+         return []
+     issues = []
+@@ -125,12 +127,12 @@
+         if scope.region not in regions:
+             error("control_scope_region", scope.id, "scope needs an existing region")
+             continue
+-        if scope.kind is ControlScopeKind.FUNCTION:
++        if scope.kind in (ControlScopeKind.FUNCTION, ControlScopeKind.FRAME):
+             if scope.region in roots:
+-                error("control_scope_root", scope.id, "one function scope per enabled region")
++                error("control_scope_root", scope.id, "one function/frame root per enabled region")
+             roots[scope.region] = scope.id
+             if regions[scope.region].entry not in scope.blocks:
+-                error("control_scope_entry", scope.id, "function scope directly owns the region entry")
++                error("control_scope_entry", scope.id, "control root directly owns the region entry")
+         elif scope.parent not in scopes or scopes[scope.parent].region != scope.region:
+             error("control_scope_parent", scope.id, "parent must be in the same region")
+         for block in scope.blocks:
+@@ -148,7 +150,7 @@
+             seen.add(current)
+             current = scopes[current].parent
+         if scope.region not in roots:
+-            error("control_scope_root", scope.id, "enabled region needs one function root")
++            error("control_scope_root", scope.id, "enabled region needs one function/frame root")
+     for region_id in {s.region for s in scopes.values()} & regions.keys():
+         if set(b.id for b in regions[region_id].blocks) != {
+                 b for b, s in owners.items() if scopes[s].region == region_id}:
+@@ -156,6 +158,59 @@
+     for value in protocol_values:
+         if value.region not in roots:
+             error("protocol_scope", value.id, "protocol values need declared lexical ownership")
++    frame_roots = {row.scope: row for row in graph.frame_roots}
++    environments = {row.id: row for row in graph.environments}
++    for scope in scopes.values():
++        if scope.kind is ControlScopeKind.FRAME and scope.id not in frame_roots:
++            error("frame_root_missing", scope.id, "FRAME scope needs its unique entry authority")
++    for root in graph.frame_roots:
++        scope = scopes.get(root.scope)
++        if scope is None or scope.kind is not ControlScopeKind.FRAME:
++            error("frame_root_scope", root.scope, "frame root must name an existing FRAME scope")
++            continue
++        if scope.region not in regions:
++            continue  # Already reported by the scope check.
++        region = regions[scope.region]
++        entry = blocks[region.entry]
++        module = root.kind is FrameKind.MODULE
++        expected_source = ModuleUnitSource if module else SourceReference
++        if type(scope.source) is not expected_source:
++            error("frame_root_subject", root.scope, "frame kind needs its exact source-subject category")
++        else:
++            path = scope.source.snapshot.path if module else scope.source.path
++            if root.code.filename != path:
++                error("frame_root_code", root.scope, "code filename must retain the source subject's logical path")
++        if type(root.entry) is FunctionFrameABI:
++            environment = environments.get(root.entry.environment)
++            if environment is None or environment.region != region.id:
++                error("frame_root_environment", root.scope,
++                      "function ABI must reference this region's existing environment")
++            if len([layout for layout in graph.function_entries
++                    if layout.environment == root.entry.environment]) != 1:
++                error("frame_root_function_entry", root.scope,
++                      "function ABI needs the unique existing formal/environment partition")
++            continue
++        if type(root.entry) is not MappingFramePorts:
++            continue  # Exact ABI/kind discrimination is a record invariant.
++        if any(environment.region == region.id for environment in graph.environments):
++            error("frame_root_entry_authority", root.scope,
++                  "mapping ABI cannot also declare a function environment entry")
++        references = (root.entry.locals_namespace, root.entry.globals_namespace,
++                      root.entry.builtins_namespace) + root.entry.closure_cells
++        expected_ports = references + (root.entry.world,)
++        if set(entry.arguments) != set(expected_ports):
++            error("frame_root_partition", root.scope,
++                  "mapping ABI must cover exactly this region's entry ports")
++        for identity in expected_ports:
++            value = values.get(identity)
++            kind = StateVersionValue if identity == root.entry.world else ReferenceValue
++            if (not isinstance(value, kind) or value.region != region.id
++                    or not isinstance(value.origin, BlockArgument)
++                    or value.origin.block != entry.id
++                    or not 0 <= value.origin.index < len(entry.arguments)
++                    or entry.arguments[value.origin.index] != identity):
++                error("frame_root_port", identity,
++                      "mapping role must name its exact typed region-entry argument")
+     if issues:
+         return issues
+ 
+@@ -185,8 +240,9 @@
+         if port.exit is not None:
+             expected_kind = ExitKind.NORMAL if port.kind is K.RETURN else ExitKind.RAISE
+             exit_port = next((p for p in regions[scope.region].exits if p.name == port.exit), None)
+-            if scope.kind is not ControlScopeKind.FUNCTION or exit_port is None or exit_port.kind is not expected_kind:
+-                error("control_port_exit", port.id, "function port must name the correct existing region exit")
++            if (scope.kind not in (ControlScopeKind.FUNCTION, ControlScopeKind.FRAME)
++                    or exit_port is None or exit_port.kind is not expected_kind):
++                error("control_port_exit", port.id, "root port must name the correct existing region exit")
+             elif [t for t in exit_port.types if t.kind is not ValueKind.STATE] != [
+                     ValueType(ValueKind.REFERENCE) if port.kind is K.RETURN
+                     else ProtocolValueType(P.EXCEPTION_PACKET)]:

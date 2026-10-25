@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import PurePosixPath
 import re
 
 from scar.ir.program.call_edges import CapturedCode, CodeSourceLink
@@ -17,9 +16,10 @@ from scar.ir.program.ids import OperationID, RegionID, UseID, ValueID
 from scar.ir.program.inventory import SourceContextDigest
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.program.source import SourceRole
+from scar.ir.program.source_subjects import ModuleUnitSource
 from scar.ir.program.structured import PythonProtocolKind, LoopInterface
 from scar.ir.record_codec import decode, encode
-from scar.ir.semantics_v2 import Opcode, SourceSnapshot
+from scar.ir.semantics_v2 import Opcode
 from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import (OperationDefinitionID, StaticValueID, ValueSlotID,
     ControlFlowSuiteID, ControlFlowNodeID, InsertionPointID)
@@ -46,20 +46,6 @@ class RequiredModuleExpansion(str, Enum):
 def _need(condition, detail):
     if not condition:
         raise ValueError("module entry: " + detail)
-
-
-@dataclass(frozen=True, slots=True)
-class ModuleUnitSource:
-    snapshot: SourceSnapshot
-    namespace_root: str
-    initializer: OperationDefinitionID
-
-    def __post_init__(self):
-        _need(type(self.snapshot) is SourceSnapshot and type(self.initializer) is OperationDefinitionID,
-              "unit requires original snapshot and MODULE initializer")
-        _need(type(self.namespace_root) is str and PurePosixPath(self.namespace_root).is_absolute()
-              and PurePosixPath(self.snapshot.path).is_relative_to(PurePosixPath(self.namespace_root)),
-              "unit must retain its absolute original source namespace")
 
 
 ModuleSource = ModuleUnitSource | SourceReference
