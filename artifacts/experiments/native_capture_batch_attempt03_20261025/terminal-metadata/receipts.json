@@ -1,0 +1,35 @@
+{
+  "backups": [
+    {
+      "original_artifact_identity_unchanged": true,
+      "original_decoded": {
+        "sha256": "45dacac67ce3edeba7fa9ea7a8831c7e95aac9885b37504f9528fcf90ef8433a",
+        "size_bytes": 2073872,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/summary.json"
+      },
+      "stored": {
+        "bytes": 288049,
+        "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/terminal-metadata/summary.json.gz",
+        "sha256": "5380db2e3e7a4b6a5108f6f1624aaa34f95430077d5ed140abb9784eb00443fc"
+      },
+      "transport_only": true
+    },
+    {
+      "original_artifact_identity_unchanged": true,
+      "original_decoded": {
+        "sha256": "517651269df531129c3f5c1860550e8fd44a21fd9cb112620dce8d18a49ab8a7",
+        "size_bytes": 1082298,
+        "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/report.json"
+      },
+      "stored": {
+        "bytes": 236780,
+        "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/terminal-metadata/report.json.gz",
+        "sha256": "33e4c5e875abb9e2fc7b6db990f48257ab8a67784d079da8efb3dddce17c8ea5"
+      },
+      "transport_only": true
+    }
+  ],
+  "implicit_relocation_authorized": false,
+  "schema": "scar.terminal-metadata-lossless-transport",
+  "schema_version": 1
+}

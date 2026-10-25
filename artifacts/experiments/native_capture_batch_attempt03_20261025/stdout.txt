@@ -1,0 +1,322 @@
+{"stage": "coordinate_scope", "whole_elapsed_s": 0.8407958269817755}
+{"stage": "native_capture_batches", "whole_elapsed_s": 11.148761303978972}
+{"elapsed_s": 39.45675900002243, "lines": 1862477, "raw_bytes": 321287818, "schema": "pytorch.execution-trace.v1", "stage": "native_source_verified", "whole_elapsed_s": 50.60579585202504}
+{"elapsed_s": 50.80637831403874, "lines": 119388, "raw_bytes": 78870130, "schema": "scar.dispatch-observation.events.v1", "stage": "native_source_verified", "whole_elapsed_s": 61.955414703988936}
+{"elapsed_s": 67.87204873503651, "lines": 132445, "raw_bytes": 146461974, "schema": "scar.tensor-physical-observation.v1", "stage": "native_source_verified", "whole_elapsed_s": 79.02109003602527}
+{"chunks": 76, "decoded_bytes": 1200966077, "elapsed_s": 135.88052584504476, "graph": "evidence", "stage": "archive_table_indexed", "stored_bytes": 76212360, "table": "instances", "whole_chunks_verified_by_BundlePartitions": true, "whole_elapsed_s": 147.02956257702317}
+{"chunks": 4, "decoded_bytes": 54018019, "elapsed_s": 141.237269150035, "graph": "values", "stage": "archive_table_indexed", "stored_bytes": 1304314, "table": "objects", "whole_chunks_verified_by_BundlePartitions": true, "whole_elapsed_s": 152.3863060150179}
+{"chunks": 9, "decoded_bytes": 142927166, "elapsed_s": 155.81378724600654, "graph": "values", "stage": "archive_table_indexed", "stored_bytes": 7693289, "table": "regions", "whole_chunks_verified_by_BundlePartitions": true, "whole_elapsed_s": 166.96282391803106}
+{"chunks": 6, "decoded_bytes": 92998937, "elapsed_s": 166.9814033670118, "graph": "values", "stage": "archive_table_indexed", "stored_bytes": 5834508, "table": "allocations", "whole_chunks_verified_by_BundlePartitions": true, "whole_elapsed_s": 178.13043982401723}
+{"actual_begin_rows": 39796, "actual_groups": 39796, "declared_attempts": 39796, "elapsed_s": 178.19045971002197, "source_domain_complete": true, "stage": "dispatch_domain_enumerated", "whole_elapsed_s": 189.33949661400402}
+{"elapsed_s": 181.26843702601036, "stage": "dispatch_discovery", "static_signatures": 9, "visited_actual_groups": 255, "whole_elapsed_s": 192.41747971001314}
+{"elapsed_s": 182.33351911103819, "stage": "dispatch_discovery", "static_signatures": 14, "visited_actual_groups": 511, "whole_elapsed_s": 193.4825594020076}
+{"elapsed_s": 183.3349075030419, "stage": "dispatch_discovery", "static_signatures": 14, "visited_actual_groups": 767, "whole_elapsed_s": 194.48394426499726}
+{"elapsed_s": 184.42102670902386, "stage": "dispatch_discovery", "static_signatures": 23, "visited_actual_groups": 1023, "whole_elapsed_s": 195.57006786298007}
+{"elapsed_s": 185.49072904401692, "stage": "dispatch_discovery", "static_signatures": 30, "visited_actual_groups": 1279, "whole_elapsed_s": 196.63976541999727}
+{"elapsed_s": 186.63339126104256, "stage": "dispatch_discovery", "static_signatures": 30, "visited_actual_groups": 1535, "whole_elapsed_s": 197.78243248100625}
+{"elapsed_s": 187.83352536300663, "stage": "dispatch_discovery", "static_signatures": 30, "visited_actual_groups": 1791, "whole_elapsed_s": 198.98256174603011}
+{"elapsed_s": 188.9557441570214, "stage": "dispatch_discovery", "static_signatures": 30, "visited_actual_groups": 2047, "whole_elapsed_s": 200.10478578699986}
+{"elapsed_s": 190.09998613101197, "stage": "dispatch_discovery", "static_signatures": 30, "visited_actual_groups": 2303, "whole_elapsed_s": 201.24902256397763}
+{"elapsed_s": 191.2525021660258, "stage": "dispatch_discovery", "static_signatures": 35, "visited_actual_groups": 2559, "whole_elapsed_s": 202.40153868001653}
+{"elapsed_s": 192.6380449020071, "stage": "dispatch_discovery", "static_signatures": 35, "visited_actual_groups": 2815, "whole_elapsed_s": 203.78708170697792}
+{"elapsed_s": 194.0465657870518, "stage": "dispatch_discovery", "static_signatures": 37, "visited_actual_groups": 3071, "whole_elapsed_s": 205.19560221303254}
+{"elapsed_s": 195.6677315090201, "stage": "dispatch_discovery", "static_signatures": 77, "visited_actual_groups": 3327, "whole_elapsed_s": 206.81678041699342}
+{"elapsed_s": 197.05586676701205, "stage": "dispatch_discovery", "static_signatures": 95, "visited_actual_groups": 3583, "whole_elapsed_s": 208.20490474201506}
+{"elapsed_s": 198.42681470501702, "stage": "dispatch_discovery", "static_signatures": 97, "visited_actual_groups": 3839, "whole_elapsed_s": 209.57585647300584}
+{"elapsed_s": 199.74780540005304, "stage": "dispatch_discovery", "static_signatures": 108, "visited_actual_groups": 4095, "whole_elapsed_s": 210.89684166997904}
+{"elapsed_s": 201.07016068400117, "stage": "dispatch_discovery", "static_signatures": 110, "visited_actual_groups": 4351, "whole_elapsed_s": 212.21920067601604}
+{"elapsed_s": 202.40587178204441, "stage": "dispatch_discovery", "static_signatures": 112, "visited_actual_groups": 4607, "whole_elapsed_s": 213.5549137360067}
+{"elapsed_s": 203.742781819019, "stage": "dispatch_discovery", "static_signatures": 112, "visited_actual_groups": 4863, "whole_elapsed_s": 214.8918183160131}
+{"elapsed_s": 205.03576804703334, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 5119, "whole_elapsed_s": 216.18480792100308}
+{"elapsed_s": 206.3966158440453, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 5375, "whole_elapsed_s": 217.54565213201568}
+{"elapsed_s": 207.81002757902024, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 5631, "whole_elapsed_s": 218.95906418201048}
+{"elapsed_s": 209.13723227201262, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 5887, "whole_elapsed_s": 220.2862686580047}
+{"elapsed_s": 210.47107313905144, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 6143, "whole_elapsed_s": 221.6201130740228}
+{"elapsed_s": 211.76113482902292, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 6399, "whole_elapsed_s": 222.9101709750248}
+{"elapsed_s": 213.1005308640306, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 6655, "whole_elapsed_s": 224.24956712598214}
+{"elapsed_s": 214.44271161605138, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 6911, "whole_elapsed_s": 225.5917480069911}
+{"elapsed_s": 215.76868541701697, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 7167, "whole_elapsed_s": 226.91772177402163}
+{"elapsed_s": 217.14483905601082, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 7423, "whole_elapsed_s": 228.2938796430244}
+{"elapsed_s": 218.5229440710391, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 7679, "whole_elapsed_s": 229.67198043799726}
+{"elapsed_s": 219.85794898000313, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 7935, "whole_elapsed_s": 231.0069853310124}
+{"elapsed_s": 221.32905559503706, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 8191, "whole_elapsed_s": 232.4780920399935}
+{"elapsed_s": 222.69940557004884, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 8447, "whole_elapsed_s": 233.848441782}
+{"elapsed_s": 224.01700435305247, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 8703, "whole_elapsed_s": 235.16604098700918}
+{"elapsed_s": 225.34294786205282, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 8959, "whole_elapsed_s": 236.49198416800937}
+{"elapsed_s": 226.70479136204813, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 9215, "whole_elapsed_s": 237.85382776800543}
+{"elapsed_s": 228.03834111901233, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 9471, "whole_elapsed_s": 239.18737762398086}
+{"elapsed_s": 229.36981523700524, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 9727, "whole_elapsed_s": 240.5188512870227}
+{"elapsed_s": 230.71678253501887, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 9983, "whole_elapsed_s": 241.8658196600154}
+{"elapsed_s": 232.0321707080002, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 10239, "whole_elapsed_s": 243.18120725400513}
+{"elapsed_s": 233.37229060800746, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 10495, "whole_elapsed_s": 244.52132715901826}
+{"elapsed_s": 234.75902403402142, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 10751, "whole_elapsed_s": 245.9080604389892}
+{"elapsed_s": 236.13489121902967, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 11007, "whole_elapsed_s": 247.28392761101713}
+{"elapsed_s": 237.5247156540281, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 11263, "whole_elapsed_s": 248.67375217698282}
+{"elapsed_s": 238.8452700340422, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 11519, "whole_elapsed_s": 249.99430639698403}
+{"elapsed_s": 240.15764129004674, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 11775, "whole_elapsed_s": 251.3066775270272}
+{"elapsed_s": 241.48349856300047, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 12031, "whole_elapsed_s": 252.63253493403317}
+{"elapsed_s": 242.86604466702556, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 12287, "whole_elapsed_s": 254.01508470298722}
+{"elapsed_s": 244.17785373399965, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 12543, "whole_elapsed_s": 255.32689003797714}
+{"elapsed_s": 245.53528164303862, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 12799, "whole_elapsed_s": 256.68432004301576}
+{"elapsed_s": 246.92009422701085, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 13055, "whole_elapsed_s": 258.06913065502886}
+{"elapsed_s": 248.21377652004594, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 13311, "whole_elapsed_s": 259.3628130140132}
+{"elapsed_s": 249.56005551904673, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 13567, "whole_elapsed_s": 260.7090919080074}
+{"elapsed_s": 250.96907575102523, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 13823, "whole_elapsed_s": 262.1181122889975}
+{"elapsed_s": 252.2818190920516, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 14079, "whole_elapsed_s": 263.4308592749876}
+{"elapsed_s": 253.62076782103395, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 14335, "whole_elapsed_s": 264.7698041360127}
+{"elapsed_s": 254.9780381710152, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 14591, "whole_elapsed_s": 266.127074619988}
+{"elapsed_s": 256.3296451460337, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 14847, "whole_elapsed_s": 267.4786814280087}
+{"elapsed_s": 257.67350322799757, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 15103, "whole_elapsed_s": 268.8225395770278}
+{"elapsed_s": 259.0340443600435, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 15359, "whole_elapsed_s": 270.18308064201847}
+{"elapsed_s": 260.3470633440302, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 15615, "whole_elapsed_s": 271.4960996999871}
+{"elapsed_s": 261.6705447230488, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 15871, "whole_elapsed_s": 272.8195811350015}
+{"elapsed_s": 263.0325942330528, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 16127, "whole_elapsed_s": 274.1816310249851}
+{"elapsed_s": 264.3345454230439, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 16383, "whole_elapsed_s": 275.4835820129956}
+{"elapsed_s": 265.72909320000326, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 16639, "whole_elapsed_s": 276.8781300110277}
+{"elapsed_s": 267.1038673710427, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 16895, "whole_elapsed_s": 278.2529079010128}
+{"elapsed_s": 268.44170784100424, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 17151, "whole_elapsed_s": 279.5907442200114}
+{"elapsed_s": 269.8116676050122, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 17407, "whole_elapsed_s": 280.96070423797937}
+{"elapsed_s": 271.13851152401185, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 17663, "whole_elapsed_s": 282.28754786000354}
+{"elapsed_s": 272.4510300940019, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 17919, "whole_elapsed_s": 283.6000666919863}
+{"elapsed_s": 273.774800520041, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 18175, "whole_elapsed_s": 284.92383682198124}
+{"elapsed_s": 275.14067780104233, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 18431, "whole_elapsed_s": 286.2897141419817}
+{"elapsed_s": 276.476122282038, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 18687, "whole_elapsed_s": 287.6251590460306}
+{"elapsed_s": 277.809082145046, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 18943, "whole_elapsed_s": 288.9581186660216}
+{"elapsed_s": 279.1355280710268, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 19199, "whole_elapsed_s": 290.2845644269837}
+{"elapsed_s": 280.43385348201264, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 19455, "whole_elapsed_s": 291.5828902749927}
+{"elapsed_s": 281.80987615999766, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 19711, "whole_elapsed_s": 292.958913000999}
+{"elapsed_s": 283.1502961270162, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 19967, "whole_elapsed_s": 294.2993325039861}
+{"elapsed_s": 284.45452856301563, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 20223, "whole_elapsed_s": 295.6035646509845}
+{"elapsed_s": 285.7630213579978, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 20479, "whole_elapsed_s": 296.91205778799485}
+{"elapsed_s": 287.108075501048, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 20735, "whole_elapsed_s": 298.25711188302375}
+{"elapsed_s": 288.48071515903575, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 20991, "whole_elapsed_s": 299.6297518200008}
+{"elapsed_s": 289.94368655601284, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 21247, "whole_elapsed_s": 301.0927233059774}
+{"elapsed_s": 291.2477178990375, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 21503, "whole_elapsed_s": 302.3967542339815}
+{"elapsed_s": 292.6259404470329, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 21759, "whole_elapsed_s": 303.77497731603216}
+{"elapsed_s": 293.98272498103324, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 22015, "whole_elapsed_s": 305.13176125800237}
+{"elapsed_s": 295.32525745005114, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 22271, "whole_elapsed_s": 306.47429376700893}
+{"elapsed_s": 296.63850245199865, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 22527, "whole_elapsed_s": 307.7875387360109}
+{"elapsed_s": 298.00284354103496, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 22783, "whole_elapsed_s": 309.1518800589838}
+{"elapsed_s": 299.3436724220519, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 23039, "whole_elapsed_s": 310.4927087739925}
+{"elapsed_s": 300.6843228560174, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 23295, "whole_elapsed_s": 311.8333593279822}
+{"elapsed_s": 302.0221252019983, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 23551, "whole_elapsed_s": 313.17116155900294}
+{"elapsed_s": 303.3291309500346, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 23807, "whole_elapsed_s": 314.4781673810212}
+{"elapsed_s": 304.6561236010166, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 24063, "whole_elapsed_s": 315.805159725016}
+{"elapsed_s": 305.99380105902674, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 24319, "whole_elapsed_s": 317.1428374039824}
+{"elapsed_s": 307.3975263570319, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 24575, "whole_elapsed_s": 318.5465628650272}
+{"elapsed_s": 308.85930664202897, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 24831, "whole_elapsed_s": 320.0083431400126}
+{"elapsed_s": 310.2372210980393, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 25087, "whole_elapsed_s": 321.3862622809829}
+{"elapsed_s": 311.695494419022, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 25343, "whole_elapsed_s": 322.8445310299867}
+{"elapsed_s": 313.03879293304635, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 25599, "whole_elapsed_s": 324.18782914901385}
+{"elapsed_s": 314.359396001033, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 25855, "whole_elapsed_s": 325.5084343299968}
+{"elapsed_s": 315.706093255023, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 26111, "whole_elapsed_s": 326.8551297080121}
+{"elapsed_s": 317.0624515520176, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 26367, "whole_elapsed_s": 328.21148807997815}
+{"elapsed_s": 318.395987283031, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 26623, "whole_elapsed_s": 329.5450236769975}
+{"elapsed_s": 319.7706514770398, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 26879, "whole_elapsed_s": 330.91968793200795}
+{"elapsed_s": 321.10056646104204, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 27135, "whole_elapsed_s": 332.2496027650195}
+{"elapsed_s": 322.4606536659994, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 27391, "whole_elapsed_s": 333.6096901189885}
+{"elapsed_s": 323.8093912950135, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 27647, "whole_elapsed_s": 334.958428020007}
+{"elapsed_s": 325.1626271510031, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 27903, "whole_elapsed_s": 336.3116704300046}
+{"elapsed_s": 326.50018879800336, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 28159, "whole_elapsed_s": 337.64922518498497}
+{"elapsed_s": 327.80097284005024, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 28415, "whole_elapsed_s": 338.9500093460083}
+{"elapsed_s": 329.1384867870365, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 28671, "whole_elapsed_s": 340.2875230060308}
+{"elapsed_s": 330.4536707100342, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 28927, "whole_elapsed_s": 341.60270681302063}
+{"elapsed_s": 331.84301016503014, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 29183, "whole_elapsed_s": 342.9920513050165}
+{"elapsed_s": 333.18262074002996, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 29439, "whole_elapsed_s": 344.33165692997864}
+{"elapsed_s": 334.502498861053, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 29695, "whole_elapsed_s": 345.6515352370334}
+{"elapsed_s": 335.8219427530421, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 29951, "whole_elapsed_s": 346.9709795539966}
+{"elapsed_s": 337.16241364902817, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 30207, "whole_elapsed_s": 348.3114499520161}
+{"elapsed_s": 338.5010974530014, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 30463, "whole_elapsed_s": 349.65013380901655}
+{"elapsed_s": 339.8306966290111, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 30719, "whole_elapsed_s": 350.97973333398113}
+{"elapsed_s": 341.19558414199855, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 30975, "whole_elapsed_s": 352.3446207109955}
+{"elapsed_s": 342.4925102140405, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 31231, "whole_elapsed_s": 353.6415465460159}
+{"elapsed_s": 343.86638543603476, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 31487, "whole_elapsed_s": 355.0154217300005}
+{"elapsed_s": 345.2603684500209, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 31743, "whole_elapsed_s": 356.40940506203333}
+{"elapsed_s": 346.6675067280303, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 31999, "whole_elapsed_s": 357.8165430910303}
+{"elapsed_s": 348.0053143630503, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 32255, "whole_elapsed_s": 359.1543510159827}
+{"elapsed_s": 349.3614200410084, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 32511, "whole_elapsed_s": 360.5104564980138}
+{"elapsed_s": 350.74986450205324, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 32767, "whole_elapsed_s": 361.89890093402937}
+{"elapsed_s": 352.0477708620019, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 33023, "whole_elapsed_s": 363.19680718303425}
+{"elapsed_s": 353.375304554007, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 33279, "whole_elapsed_s": 364.524340959033}
+{"elapsed_s": 354.6991756830248, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 33535, "whole_elapsed_s": 365.84821203601314}
+{"elapsed_s": 356.04358169500483, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 33791, "whole_elapsed_s": 367.19261813600315}
+{"elapsed_s": 357.3697206360521, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 34047, "whole_elapsed_s": 368.5187570049893}
+{"elapsed_s": 358.75962256401544, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 34303, "whole_elapsed_s": 369.90865942899836}
+{"elapsed_s": 360.1090486140456, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 34559, "whole_elapsed_s": 371.25808523898013}
+{"elapsed_s": 361.486001598998, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 34815, "whole_elapsed_s": 372.6350381569937}
+{"elapsed_s": 363.149935775029, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 35071, "whole_elapsed_s": 374.2989720629994}
+{"elapsed_s": 364.4894867039984, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 35327, "whole_elapsed_s": 375.6385230750311}
+{"elapsed_s": 365.8532367950538, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 35583, "whole_elapsed_s": 377.00227301899577}
+{"elapsed_s": 367.19745743100066, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 35839, "whole_elapsed_s": 378.34649373800494}
+{"elapsed_s": 368.5687073460431, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 36095, "whole_elapsed_s": 379.7177434400073}
+{"elapsed_s": 369.90832986001624, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 36351, "whole_elapsed_s": 381.05736658902606}
+{"elapsed_s": 371.31104233005317, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 36607, "whole_elapsed_s": 382.46007872000337}
+{"elapsed_s": 372.68130342604127, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 36863, "whole_elapsed_s": 383.8303397510317}
+{"elapsed_s": 374.0156613190193, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 37119, "whole_elapsed_s": 385.16469750902615}
+{"elapsed_s": 375.36331817304017, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 37375, "whole_elapsed_s": 386.5123542119982}
+{"elapsed_s": 376.7323763910099, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 37631, "whole_elapsed_s": 387.8814128949889}
+{"elapsed_s": 378.13209005404497, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 37887, "whole_elapsed_s": 389.28112663299544}
+{"elapsed_s": 379.5001688839984, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 38143, "whole_elapsed_s": 390.6492055199924}
+{"elapsed_s": 380.8498824140406, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 38399, "whole_elapsed_s": 391.9989186460152}
+{"elapsed_s": 382.1801516410196, "stage": "dispatch_discovery", "static_signatures": 125, "visited_actual_groups": 38655, "whole_elapsed_s": 393.3291880239849}
+{"elapsed_s": 383.37951827503275, "stage": "dispatch_discovery", "static_signatures": 127, "visited_actual_groups": 38911, "whole_elapsed_s": 394.5285545170191}
+{"elapsed_s": 384.65958897100063, "stage": "dispatch_discovery", "static_signatures": 127, "visited_actual_groups": 39167, "whole_elapsed_s": 395.8086254619993}
+{"elapsed_s": 385.8673303880496, "stage": "dispatch_discovery", "static_signatures": 127, "visited_actual_groups": 39423, "whole_elapsed_s": 397.0163669229951}
+{"elapsed_s": 386.98656778002623, "stage": "dispatch_discovery", "static_signatures": 127, "visited_actual_groups": 39679, "whole_elapsed_s": 398.1356042510015}
+{"activations": 256, "elapsed_s": 396.6089481090312, "number": 0, "stage": "actual_shard_verified", "tensor_denotations": 560, "whole_elapsed_s": 407.7579856039956}
+{"activations": 256, "elapsed_s": 403.24413497099886, "number": 1, "stage": "actual_shard_verified", "tensor_denotations": 385, "whole_elapsed_s": 414.39317217399366}
+{"activations": 256, "elapsed_s": 410.0025831700186, "number": 2, "stage": "actual_shard_verified", "tensor_denotations": 384, "whole_elapsed_s": 421.1516248349799}
+{"activations": 256, "elapsed_s": 416.93332186801126, "number": 3, "stage": "actual_shard_verified", "tensor_denotations": 383, "whole_elapsed_s": 428.0823586130282}
+{"activations": 256, "elapsed_s": 423.56155765702715, "number": 4, "stage": "actual_shard_verified", "tensor_denotations": 391, "whole_elapsed_s": 434.7105947249802}
+{"activations": 256, "elapsed_s": 430.25809550104896, "number": 5, "stage": "actual_shard_verified", "tensor_denotations": 474, "whole_elapsed_s": 441.4071323099779}
+{"activations": 256, "elapsed_s": 436.87933514104225, "number": 6, "stage": "actual_shard_verified", "tensor_denotations": 477, "whole_elapsed_s": 448.0283722250024}
+{"activations": 256, "elapsed_s": 443.93133389303694, "number": 7, "stage": "actual_shard_verified", "tensor_denotations": 477, "whole_elapsed_s": 455.080370939977}
+{"activations": 256, "elapsed_s": 450.6382381390431, "number": 8, "stage": "actual_shard_verified", "tensor_denotations": 476, "whole_elapsed_s": 461.78727512498153}
+{"activations": 256, "elapsed_s": 457.3281260460499, "number": 9, "stage": "actual_shard_verified", "tensor_denotations": 416, "whole_elapsed_s": 468.47716315399157}
+{"activations": 256, "elapsed_s": 465.769517467008, "number": 10, "stage": "actual_shard_verified", "tensor_denotations": 768, "whole_elapsed_s": 476.91855429002317}
+{"activations": 256, "elapsed_s": 474.82081326300977, "number": 11, "stage": "actual_shard_verified", "tensor_denotations": 550, "whole_elapsed_s": 485.9698504669941}
+{"activations": 256, "elapsed_s": 482.271212924039, "number": 12, "stage": "actual_shard_verified", "tensor_denotations": 537, "whole_elapsed_s": 493.4202501969994}
+{"activations": 256, "elapsed_s": 490.7976753440453, "number": 13, "stage": "actual_shard_verified", "tensor_denotations": 719, "whole_elapsed_s": 501.9467124820221}
+{"activations": 256, "elapsed_s": 498.7784472160274, "number": 14, "stage": "actual_shard_verified", "tensor_denotations": 724, "whole_elapsed_s": 509.9274842070299}
+{"activations": 256, "elapsed_s": 506.9736652360298, "number": 15, "stage": "actual_shard_verified", "tensor_denotations": 738, "whole_elapsed_s": 518.1227025319822}
+{"activations": 256, "elapsed_s": 515.4366095580044, "number": 16, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 526.5856469839928}
+{"activations": 256, "elapsed_s": 523.3521407200024, "number": 17, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 534.5011779810302}
+{"activations": 256, "elapsed_s": 531.8069221060141, "number": 18, "stage": "actual_shard_verified", "tensor_denotations": 752, "whole_elapsed_s": 542.955959325016}
+{"activations": 256, "elapsed_s": 539.9281871500425, "number": 19, "stage": "actual_shard_verified", "tensor_denotations": 725, "whole_elapsed_s": 551.077224306995}
+{"activations": 256, "elapsed_s": 548.2798829200328, "number": 20, "stage": "actual_shard_verified", "tensor_denotations": 745, "whole_elapsed_s": 559.4289203180233}
+{"activations": 256, "elapsed_s": 556.4963926750352, "number": 21, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 567.6454300670302}
+{"activations": 256, "elapsed_s": 565.162202106032, "number": 22, "stage": "actual_shard_verified", "tensor_denotations": 745, "whole_elapsed_s": 576.311239023984}
+{"activations": 256, "elapsed_s": 573.129446564999, "number": 23, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 584.2784834760241}
+{"activations": 256, "elapsed_s": 581.3253236540477, "number": 24, "stage": "actual_shard_verified", "tensor_denotations": 729, "whole_elapsed_s": 592.4743605820113}
+{"activations": 256, "elapsed_s": 589.3177012790111, "number": 25, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 600.4667382590123}
+{"activations": 256, "elapsed_s": 597.7703117900528, "number": 26, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 608.9193489900208}
+{"activations": 256, "elapsed_s": 605.8769744980382, "number": 27, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 617.0260117049911}
+{"activations": 256, "elapsed_s": 614.1364073520526, "number": 28, "stage": "actual_shard_verified", "tensor_denotations": 730, "whole_elapsed_s": 625.2854445570265}
+{"activations": 256, "elapsed_s": 622.4559792470536, "number": 29, "stage": "actual_shard_verified", "tensor_denotations": 742, "whole_elapsed_s": 633.6050161960302}
+{"activations": 256, "elapsed_s": 630.4738627520273, "number": 30, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 641.6229001649772}
+{"activations": 256, "elapsed_s": 638.9310117430286, "number": 31, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 650.0800489800167}
+{"activations": 256, "elapsed_s": 647.1890955070267, "number": 32, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 658.3381324700313}
+{"activations": 256, "elapsed_s": 655.551259532047, "number": 33, "stage": "actual_shard_verified", "tensor_denotations": 730, "whole_elapsed_s": 666.7002965619904}
+{"activations": 256, "elapsed_s": 663.4889624110074, "number": 34, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 674.6379994950257}
+{"activations": 256, "elapsed_s": 671.8368299350259, "number": 35, "stage": "actual_shard_verified", "tensor_denotations": 744, "whole_elapsed_s": 682.9858672569972}
+{"activations": 256, "elapsed_s": 680.2368748680456, "number": 36, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 691.3859119489789}
+{"activations": 256, "elapsed_s": 688.1132347400417, "number": 37, "stage": "actual_shard_verified", "tensor_denotations": 738, "whole_elapsed_s": 699.2622720280197}
+{"activations": 256, "elapsed_s": 696.6846940780524, "number": 38, "stage": "actual_shard_verified", "tensor_denotations": 742, "whole_elapsed_s": 707.8337318010163}
+{"activations": 256, "elapsed_s": 704.6507076100097, "number": 39, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 715.7997447309899}
+{"activations": 256, "elapsed_s": 713.0288012170349, "number": 40, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 724.1778384090285}
+{"activations": 256, "elapsed_s": 721.1354634980089, "number": 41, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 732.2845007670112}
+{"activations": 256, "elapsed_s": 729.532076847041, "number": 42, "stage": "actual_shard_verified", "tensor_denotations": 724, "whole_elapsed_s": 740.6811140350183}
+{"activations": 256, "elapsed_s": 737.5611555380165, "number": 43, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 748.7101924740127}
+{"activations": 256, "elapsed_s": 745.9133956599981, "number": 44, "stage": "actual_shard_verified", "tensor_denotations": 745, "whole_elapsed_s": 757.0624326370307}
+{"activations": 256, "elapsed_s": 753.9257825190434, "number": 45, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 765.0748194209882}
+{"activations": 256, "elapsed_s": 762.2934840810485, "number": 46, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 773.4425212779897}
+{"activations": 256, "elapsed_s": 770.6135684910114, "number": 47, "stage": "actual_shard_verified", "tensor_denotations": 729, "whole_elapsed_s": 781.7626058360329}
+{"activations": 256, "elapsed_s": 778.6048182950472, "number": 48, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 789.753855567018}
+{"activations": 256, "elapsed_s": 786.9881704190047, "number": 49, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 798.1372077700216}
+{"activations": 256, "elapsed_s": 794.8988893680507, "number": 50, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 806.0479266120237}
+{"activations": 256, "elapsed_s": 803.1525269800331, "number": 51, "stage": "actual_shard_verified", "tensor_denotations": 727, "whole_elapsed_s": 814.3015637620119}
+{"activations": 256, "elapsed_s": 811.5493952160468, "number": 52, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 822.6984323179931}
+{"activations": 256, "elapsed_s": 819.794954765006, "number": 53, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 830.9439922500169}
+{"activations": 256, "elapsed_s": 828.2036401910009, "number": 54, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 839.3526770480094}
+{"activations": 256, "elapsed_s": 836.3227772920509, "number": 55, "stage": "actual_shard_verified", "tensor_denotations": 750, "whole_elapsed_s": 847.4718144669896}
+{"activations": 256, "elapsed_s": 844.974962339038, "number": 56, "stage": "actual_shard_verified", "tensor_denotations": 728, "whole_elapsed_s": 856.1239994339994}
+{"activations": 256, "elapsed_s": 853.1686316510313, "number": 57, "stage": "actual_shard_verified", "tensor_denotations": 742, "whole_elapsed_s": 864.3176690639812}
+{"activations": 256, "elapsed_s": 861.6834573800443, "number": 58, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 872.8324945439817}
+{"activations": 256, "elapsed_s": 869.8468462850433, "number": 59, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 880.9958833940327}
+{"activations": 256, "elapsed_s": 878.1693817380001, "number": 60, "stage": "actual_shard_verified", "tensor_denotations": 732, "whole_elapsed_s": 889.3184190570028}
+{"activations": 256, "elapsed_s": 886.1541215470061, "number": 61, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 897.3031584169948}
+{"activations": 256, "elapsed_s": 894.5908670110512, "number": 62, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 905.7399044600315}
+{"activations": 256, "elapsed_s": 902.5736291439971, "number": 63, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 913.7226661969908}
+{"activations": 256, "elapsed_s": 910.784138040035, "number": 64, "stage": "actual_shard_verified", "tensor_denotations": 745, "whole_elapsed_s": 921.9331751799909}
+{"activations": 256, "elapsed_s": 918.7563214840484, "number": 65, "stage": "actual_shard_verified", "tensor_denotations": 728, "whole_elapsed_s": 929.9053584950161}
+{"activations": 256, "elapsed_s": 926.9586678300402, "number": 66, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 938.1077053879853}
+{"activations": 256, "elapsed_s": 934.8742779720342, "number": 67, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 946.0233157349867}
+{"activations": 256, "elapsed_s": 943.2779649520526, "number": 68, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 954.4270020650001}
+{"activations": 256, "elapsed_s": 951.847162576043, "number": 69, "stage": "actual_shard_verified", "tensor_denotations": 721, "whole_elapsed_s": 962.9961996779894}
+{"activations": 256, "elapsed_s": 959.8845408010529, "number": 70, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 971.0335784929921}
+{"activations": 256, "elapsed_s": 968.2278915450443, "number": 71, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 979.3769287660252}
+{"activations": 256, "elapsed_s": 976.2612960870028, "number": 72, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 987.4103330079815}
+{"activations": 256, "elapsed_s": 984.8977130540297, "number": 73, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 996.0467498829821}
+{"activations": 256, "elapsed_s": 992.9432722530328, "number": 74, "stage": "actual_shard_verified", "tensor_denotations": 727, "whole_elapsed_s": 1004.0923091830336}
+{"activations": 256, "elapsed_s": 1001.2705348349991, "number": 75, "stage": "actual_shard_verified", "tensor_denotations": 751, "whole_elapsed_s": 1012.4195717970142}
+{"activations": 256, "elapsed_s": 1009.7996787330485, "number": 76, "stage": "actual_shard_verified", "tensor_denotations": 744, "whole_elapsed_s": 1020.9487159770215}
+{"activations": 256, "elapsed_s": 1017.7323655200307, "number": 77, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1028.8814026000327}
+{"activations": 256, "elapsed_s": 1025.8461098350235, "number": 78, "stage": "actual_shard_verified", "tensor_denotations": 727, "whole_elapsed_s": 1036.9951469579828}
+{"activations": 256, "elapsed_s": 1033.8139144210145, "number": 79, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 1044.9629517070134}
+{"activations": 256, "elapsed_s": 1042.3028255859972, "number": 80, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1053.451862669026}
+{"activations": 256, "elapsed_s": 1050.240573711053, "number": 81, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1061.3896110510104}
+{"activations": 256, "elapsed_s": 1058.7333483170369, "number": 82, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1069.88238559803}
+{"activations": 256, "elapsed_s": 1067.1238569240086, "number": 83, "stage": "actual_shard_verified", "tensor_denotations": 732, "whole_elapsed_s": 1078.2728938860237}
+{"activations": 256, "elapsed_s": 1075.6608043450397, "number": 84, "stage": "actual_shard_verified", "tensor_denotations": 745, "whole_elapsed_s": 1086.8098412510008}
+{"activations": 256, "elapsed_s": 1084.584348821023, "number": 85, "stage": "actual_shard_verified", "tensor_denotations": 744, "whole_elapsed_s": 1095.7333860389772}
+{"activations": 256, "elapsed_s": 1092.612209166051, "number": 86, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1103.761246012}
+{"activations": 256, "elapsed_s": 1101.4272415040177, "number": 87, "stage": "actual_shard_verified", "tensor_denotations": 729, "whole_elapsed_s": 1112.5762784989784}
+{"activations": 256, "elapsed_s": 1110.1744255630183, "number": 88, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1121.3234626480262}
+{"activations": 256, "elapsed_s": 1118.3068335510325, "number": 89, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 1129.4558707100223}
+{"activations": 256, "elapsed_s": 1126.9515662470367, "number": 90, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 1138.1006032020086}
+{"activations": 256, "elapsed_s": 1135.0216782230418, "number": 91, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 1146.1707153960015}
+{"activations": 256, "elapsed_s": 1143.2802120110136, "number": 92, "stage": "actual_shard_verified", "tensor_denotations": 723, "whole_elapsed_s": 1154.429248836008}
+{"activations": 256, "elapsed_s": 1151.6493324180483, "number": 93, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1162.7983694369905}
+{"activations": 256, "elapsed_s": 1159.708852923999, "number": 94, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 1170.8578902269946}
+{"activations": 256, "elapsed_s": 1168.1468157010386, "number": 95, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1179.2958527170122}
+{"activations": 256, "elapsed_s": 1176.2601684780093, "number": 96, "stage": "actual_shard_verified", "tensor_denotations": 730, "whole_elapsed_s": 1187.4092056700028}
+{"activations": 256, "elapsed_s": 1184.6899246070534, "number": 97, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 1195.8389619470108}
+{"activations": 256, "elapsed_s": 1192.6708963820129, "number": 98, "stage": "actual_shard_verified", "tensor_denotations": 744, "whole_elapsed_s": 1203.8199334240053}
+{"activations": 256, "elapsed_s": 1201.0124518470257, "number": 99, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1212.161488984013}
+{"activations": 256, "elapsed_s": 1209.115170471021, "number": 100, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1220.2642076310003}
+{"activations": 256, "elapsed_s": 1217.5963563180412, "number": 101, "stage": "actual_shard_verified", "tensor_denotations": 727, "whole_elapsed_s": 1228.7453937639948}
+{"activations": 256, "elapsed_s": 1225.6095127270091, "number": 102, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1236.758549761027}
+{"activations": 256, "elapsed_s": 1233.9227195620188, "number": 103, "stage": "actual_shard_verified", "tensor_denotations": 752, "whole_elapsed_s": 1245.071756771009}
+{"activations": 256, "elapsed_s": 1241.974142357998, "number": 104, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1253.1231792920153}
+{"activations": 256, "elapsed_s": 1250.339112377027, "number": 105, "stage": "actual_shard_verified", "tensor_denotations": 724, "whole_elapsed_s": 1261.4881493819994}
+{"activations": 256, "elapsed_s": 1258.3896197810536, "number": 106, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1269.538656899007}
+{"activations": 256, "elapsed_s": 1266.6797655820264, "number": 107, "stage": "actual_shard_verified", "tensor_denotations": 745, "whole_elapsed_s": 1277.8288026369992}
+{"activations": 256, "elapsed_s": 1274.828044006019, "number": 108, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1285.9770810590126}
+{"activations": 256, "elapsed_s": 1283.3821060950286, "number": 109, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1294.5311431770097}
+{"activations": 256, "elapsed_s": 1291.5254900419968, "number": 110, "stage": "actual_shard_verified", "tensor_denotations": 730, "whole_elapsed_s": 1302.6745273220004}
+{"activations": 256, "elapsed_s": 1300.0168372280314, "number": 111, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1311.1658742629807}
+{"activations": 256, "elapsed_s": 1308.2030761640053, "number": 112, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 1319.3521159350057}
+{"activations": 256, "elapsed_s": 1316.599769993045, "number": 113, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 1327.7488068609964}
+{"activations": 256, "elapsed_s": 1324.6245717530255, "number": 114, "stage": "actual_shard_verified", "tensor_denotations": 727, "whole_elapsed_s": 1335.7736088259844}
+{"activations": 256, "elapsed_s": 1332.9911720390082, "number": 115, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 1344.1402090750053}
+{"activations": 256, "elapsed_s": 1341.0710945710307, "number": 116, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 1352.2201313279802}
+{"activations": 256, "elapsed_s": 1349.6999581510318, "number": 117, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1360.848995162989}
+{"activations": 256, "elapsed_s": 1357.7944084060146, "number": 118, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 1368.9434453860158}
+{"activations": 256, "elapsed_s": 1366.2586069600075, "number": 119, "stage": "actual_shard_verified", "tensor_denotations": 728, "whole_elapsed_s": 1377.4076438579941}
+{"activations": 256, "elapsed_s": 1374.2660017140443, "number": 120, "stage": "actual_shard_verified", "tensor_denotations": 743, "whole_elapsed_s": 1385.4150386549882}
+{"activations": 256, "elapsed_s": 1382.9097172610345, "number": 121, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1394.0587556469836}
+{"activations": 256, "elapsed_s": 1391.0117865910288, "number": 122, "stage": "actual_shard_verified", "tensor_denotations": 749, "whole_elapsed_s": 1402.16082349699}
+{"activations": 256, "elapsed_s": 1399.5064542690525, "number": 123, "stage": "actual_shard_verified", "tensor_denotations": 732, "whole_elapsed_s": 1410.655491424026}
+{"activations": 256, "elapsed_s": 1407.7583978420007, "number": 124, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 1418.907434955996}
+{"activations": 256, "elapsed_s": 1416.238278112025, "number": 125, "stage": "actual_shard_verified", "tensor_denotations": 746, "whole_elapsed_s": 1427.3873152729939}
+{"activations": 256, "elapsed_s": 1424.1399249730166, "number": 126, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1435.288962052029}
+{"activations": 256, "elapsed_s": 1432.7834243680118, "number": 127, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1443.932461665012}
+{"activations": 256, "elapsed_s": 1440.8892403840437, "number": 128, "stage": "actual_shard_verified", "tensor_denotations": 725, "whole_elapsed_s": 1452.038277374988}
+{"activations": 256, "elapsed_s": 1449.428126970015, "number": 129, "stage": "actual_shard_verified", "tensor_denotations": 744, "whole_elapsed_s": 1460.5771641770261}
+{"activations": 256, "elapsed_s": 1457.6455892180093, "number": 130, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1468.7946263669874}
+{"activations": 256, "elapsed_s": 1466.2920814000536, "number": 131, "stage": "actual_shard_verified", "tensor_denotations": 755, "whole_elapsed_s": 1477.4411184630007}
+{"activations": 256, "elapsed_s": 1474.239287962031, "number": 132, "stage": "actual_shard_verified", "tensor_denotations": 721, "whole_elapsed_s": 1485.3883250179933}
+{"activations": 256, "elapsed_s": 1482.717020007025, "number": 133, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1493.866057811014}
+{"activations": 256, "elapsed_s": 1490.7563648860087, "number": 134, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1501.9054019150208}
+{"activations": 256, "elapsed_s": 1499.1756826300407, "number": 135, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1510.324720107019}
+{"activations": 256, "elapsed_s": 1507.2942711900105, "number": 136, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1518.4433082150063}
+{"activations": 256, "elapsed_s": 1515.7575314990245, "number": 137, "stage": "actual_shard_verified", "tensor_denotations": 727, "whole_elapsed_s": 1526.9065685250098}
+{"activations": 256, "elapsed_s": 1523.8514894190012, "number": 138, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1535.0005265009822}
+{"activations": 256, "elapsed_s": 1532.3998037429992, "number": 139, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1543.5488414660213}
+{"activations": 256, "elapsed_s": 1540.5691428940045, "number": 140, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1551.7181803000276}
+{"activations": 256, "elapsed_s": 1549.0523193540284, "number": 141, "stage": "actual_shard_verified", "tensor_denotations": 731, "whole_elapsed_s": 1560.2013562709908}
+{"activations": 256, "elapsed_s": 1557.335717245005, "number": 142, "stage": "actual_shard_verified", "tensor_denotations": 742, "whole_elapsed_s": 1568.4847544750082}
+{"activations": 256, "elapsed_s": 1565.8602295370074, "number": 143, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1577.0092669120058}
+{"activations": 256, "elapsed_s": 1573.8811805560254, "number": 144, "stage": "actual_shard_verified", "tensor_denotations": 748, "whole_elapsed_s": 1585.0302175449906}
+{"activations": 256, "elapsed_s": 1582.308539427002, "number": 145, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1593.4575765479822}
+{"activations": 256, "elapsed_s": 1590.4559101190534, "number": 146, "stage": "actual_shard_verified", "tensor_denotations": 732, "whole_elapsed_s": 1601.6049471470178}
+{"activations": 256, "elapsed_s": 1598.9417986380286, "number": 147, "stage": "actual_shard_verified", "tensor_denotations": 745, "whole_elapsed_s": 1610.090835687006}
+{"activations": 256, "elapsed_s": 1607.0562926700222, "number": 148, "stage": "actual_shard_verified", "tensor_denotations": 747, "whole_elapsed_s": 1618.2053297099774}
+{"activations": 256, "elapsed_s": 1615.6205014210427, "number": 149, "stage": "actual_shard_verified", "tensor_denotations": 745, "whole_elapsed_s": 1626.7695386260166}
+{"activations": 256, "elapsed_s": 1623.7633454840397, "number": 150, "stage": "actual_shard_verified", "tensor_denotations": 736, "whole_elapsed_s": 1634.9123826670111}
+{"activations": 256, "elapsed_s": 1631.2023332330282, "number": 151, "stage": "actual_shard_verified", "tensor_denotations": 566, "whole_elapsed_s": 1642.3513702490018}
+{"activations": 256, "elapsed_s": 1638.3810269840178, "number": 152, "stage": "actual_shard_verified", "tensor_denotations": 548, "whole_elapsed_s": 1649.530064416991}
+{"activations": 256, "elapsed_s": 1645.4959292120184, "number": 153, "stage": "actual_shard_verified", "tensor_denotations": 542, "whole_elapsed_s": 1656.644966111984}
+{"activations": 256, "elapsed_s": 1652.632669831044, "number": 154, "stage": "actual_shard_verified", "tensor_denotations": 546, "whole_elapsed_s": 1663.7817068939912}
+{"activations": 116, "elapsed_s": 1655.4452263390413, "number": 155, "stage": "actual_shard_verified", "tensor_denotations": 246, "whole_elapsed_s": 1666.5942634780076}
+{"frontier": 0, "modeled": 39796, "stage": "complete", "status": "PASS_V2_SOURCE_ACCOUNTING_WITH_EXPLICIT_PORT_GAPS", "whole_elapsed_s": 1720.9498131769942}

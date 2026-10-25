@@ -1,0 +1,2 @@
+{"index": 1, "process_id": 11, "sequence": 2, "kind": "DISPATCH_BEGIN", "operator": "synthetic"}
+{"index": 2, "process_id": 11, "sequence": 4, "kind": "DISPATCH_END", "outcome": "RAISED"}

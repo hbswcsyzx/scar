@@ -1,0 +1,29 @@
+{
+  "archive_chunk_reads": 0,
+  "checks": [
+    "3182 has all native ports, two held identities and a native-only input; missing C does not erase B",
+    "V1 still rejects 3182 non-bijection",
+    "V1 prefix/16 limits preserved",
+    "B-only ordinary ValueGraph projection closes without geometry and prepares no files",
+    "all three exact native basis/source/occurrences validate with existing Unresolved IR",
+    "unknown basis/source/Run/process, borrowed ObjectID, erased known identity and missing denotation all reject independently",
+    "producer binding and original node ordinal are independently required regardless of B identity",
+    "new snapshot generic-valid consistent permutation raises NativePortOrderError including unknown port",
+    "synthetic empty CPU Tensor keeps held identity while geometry remains missing",
+    "actual saved geometry/birth qualifies independently; contradictory known region rejects",
+    "B and C dynamic qualifications change neither static signature nor native function; C projection reuses only original records",
+    "observed registered non-ATen schema qualifies same A ABI; V1 domain stays unchanged",
+    "None/default/empty container tags preserve native structure and create no fabricated Tensor reference",
+    "2501 transport rows split 1000/1000/501 under 8MB with original sequence preserved"
+  ],
+  "full_gate_run": false,
+  "original_raw_reads": 0,
+  "producer_files": {
+    "scar/ir/execution/native_port_protocol.py": "b61454d32df2cffd4156d3ab0ab920152a5c87a0e909b9f18f678b429b7147f7",
+    "scar/trace/native_capture_batch.py": "a1497c216d12436b55ee73538a1db192af65ac308b72f6c4ba9e3848f4959d44",
+    "scar/trace/native_protocol.py": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+  },
+  "runtime_owned_authority_recreated": false,
+  "sqlite_read_only_diagnostic_rows_only": true,
+  "status": "V2_SMALL_API_CHECK_PASS"
+}

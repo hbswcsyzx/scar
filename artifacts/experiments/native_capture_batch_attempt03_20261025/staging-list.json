@@ -1,0 +1,208 @@
+{
+  "base_directory": "/home/zyf/AAA/scar-worktrees/native-scalar-model",
+  "bytes": 868276,
+  "count": 38,
+  "exclusions": [
+    "actual gate runtime files until terminal receipt",
+    "all large/private projection/execution/qualification/index data",
+    "unrelated scope-ledger files"
+  ],
+  "files": [
+    {
+      "bytes": 5025,
+      "path": "analysis/native_batch_cost_review_20261025/PREPARED_STATIC_PLAN.md",
+      "sha256": "2828b9c8241f7cf63ec2dab818a7d2478efa4c18e398398dd19bef4a177a7643"
+    },
+    {
+      "bytes": 494,
+      "path": "analysis/native_batch_cost_review_20261025/prepared-plan-receipt.json",
+      "sha256": "7b2190816e2e97f9a3dd71dd5e873c6ee7ddce9b0bbffac5bac6cdb512f1c74b"
+    },
+    {
+      "bytes": 4941,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/README.md",
+      "sha256": "f33562fe2ed13d1019a34c467d952c7795930fe0a9ba1134300bd79b08c02e7f"
+    },
+    {
+      "bytes": 1906,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/api-check-01.json",
+      "sha256": "4b25d4db6fe142279d5826b838441ce12230873607e56a6bc9f71affbaf7e96c"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/api-check-01.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1906,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/api-check-02.json",
+      "sha256": "6fbbcab0351577e635d341edc38882c0ba5c300ee469e3275c8dc3f061c00770"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/api-check-02.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 16589,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/api_check.py",
+      "sha256": "53f23a9446f52c22dbe5b8bda0fda18db73f9dd06e8ce0294009ea863cb5ad73"
+    },
+    {
+      "bytes": 61786,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/chunk-check-candidate01/000000.jsonl",
+      "sha256": "2961777379ed85f9579d370b4ccc425b5431b212a5f9d7250eedca4e2b4822ae"
+    },
+    {
+      "bytes": 64000,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/chunk-check-candidate01/000001.jsonl",
+      "sha256": "efcad56d1eacc8845e273f561fd36c8c4001e9e0d92b8b9e52caebc1b63366f4"
+    },
+    {
+      "bytes": 32064,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/chunk-check-candidate01/000002.jsonl",
+      "sha256": "e84db693fba32fd53aba0b21eddb9194d242c1ce7f163dd5a7d4574583e63b8d"
+    },
+    {
+      "bytes": 1553,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/chunk-check-candidate01/manifest.json",
+      "sha256": "a10dd2d54bcfda22a022363c3cd8dbacda1acfc6802500e0c22e7bf76a1058c2"
+    },
+    {
+      "bytes": 61786,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/chunk-check-candidate02/000000.jsonl",
+      "sha256": "2961777379ed85f9579d370b4ccc425b5431b212a5f9d7250eedca4e2b4822ae"
+    },
+    {
+      "bytes": 64000,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/chunk-check-candidate02/000001.jsonl",
+      "sha256": "efcad56d1eacc8845e273f561fd36c8c4001e9e0d92b8b9e52caebc1b63366f4"
+    },
+    {
+      "bytes": 32064,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/chunk-check-candidate02/000002.jsonl",
+      "sha256": "e84db693fba32fd53aba0b21eddb9194d242c1ce7f163dd5a7d4574583e63b8d"
+    },
+    {
+      "bytes": 1553,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/chunk-check-candidate02/manifest.json",
+      "sha256": "b6534ddd2d9f0167e41ec47203f91feea3bf6b5bbe2d206d5aee35eec40d7355"
+    },
+    {
+      "bytes": 3802,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/codec-compare/compare_once.py",
+      "sha256": "362d91f0594a06e5b3e175429afb09d3c04692e2b666b0881e1c944ecb24b8fd"
+    },
+    {
+      "bytes": 52565,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/freeze.json",
+      "sha256": "4408b9b23ed9b2e4f04ee1ba5e35b803709284b796f9e956cdb5ac09bb04fd44"
+    },
+    {
+      "bytes": 18988,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/gate.py",
+      "sha256": "598b7c7cac69c1280af8d298f96ca84a3d7637362ee7f132a258046e48ccbcad"
+    },
+    {
+      "bytes": 61884,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/review-candidate01/scar/ir/execution/native_port_protocol.py",
+      "sha256": "acb12cc68657d456b7174dda5d7dd0da82173176fa2f6a6eeacc977283e58a8e"
+    },
+    {
+      "bytes": 30851,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/review-candidate01/scar/ir/execution/validation.py",
+      "sha256": "ade5f14338eeca223eb57b77f228fe4d40b2d37db50d904a3935b2813a3fda30"
+    },
+    {
+      "bytes": 64032,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/review-candidate01/scar/trace/native_capture_batch.py",
+      "sha256": "a1497c216d12436b55ee73538a1db192af65ac308b72f6c4ba9e3848f4959d44"
+    },
+    {
+      "bytes": 56622,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/review-candidate01/scar/trace/native_protocol.py",
+      "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+    },
+    {
+      "bytes": 945,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/review-candidate01/source-receipt.json",
+      "sha256": "b9e8276d979aa75cbdb6ea9913768c2d5fa6d17ec5cbff8877ffa9ef3e75ed24"
+    },
+    {
+      "bytes": 769,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/root-candidate-review.json",
+      "sha256": "ae01d1f3ecbcd247f86eca751211806eb3d3b4180aaaf2352f8ed94a8b471a96"
+    },
+    {
+      "bytes": 425,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/root-launch-review.json",
+      "sha256": "0912c8a8916a28fe0ec07ca6cae81958b2dbedf6886e492b5cd5873a30e4c41d"
+    },
+    {
+      "bytes": 510,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/run.sh",
+      "sha256": "ffbff15d5a9db256b8b2f24e28abd7798a93f06a75fb7a0f7a334c782ee20b41"
+    },
+    {
+      "bytes": 434,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/runner-static-check.json",
+      "sha256": "1c0a16b26b446fff349bca8068c8060c7ae4527d19ca8072d7d18212c709707a"
+    },
+    {
+      "bytes": 3393,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/staging-paths.txt",
+      "sha256": "b171516b4eb87559afa2f29a522ff60b42ff5dcbbf6cdcfdd4318801c4259f3e"
+    },
+    {
+      "bytes": 188,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/v1-compat/synthetic-source-check/tiny-dispatch.jsonl",
+      "sha256": "c2d9af3e1e4a0ac010fb46feb38840e815fca8fc85ff2c8f255f59ffd2c61192"
+    },
+    {
+      "bytes": 416,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/v1-compat/synthetic-source-check/tiny-eto.json",
+      "sha256": "7b70002487dda0263b5e510208667c2761660a7e65ba59c4342c9bce534475c6"
+    },
+    {
+      "bytes": 1580,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/v1-compat-check.json",
+      "sha256": "ba15f31df755e5f25ce485511815d57f4752329870cd185d54d209d0b83859bb"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/v1-compat-check.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 7816,
+      "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/v1_compat_check.py",
+      "sha256": "fadb18214165fef13db74ae800069a1a3b3cf1c5e4ea4226d8da12620713b627"
+    },
+    {
+      "bytes": 61884,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "acb12cc68657d456b7174dda5d7dd0da82173176fa2f6a6eeacc977283e58a8e"
+    },
+    {
+      "bytes": 30851,
+      "path": "scar/ir/execution/validation.py",
+      "sha256": "ade5f14338eeca223eb57b77f228fe4d40b2d37db50d904a3935b2813a3fda30"
+    },
+    {
+      "bytes": 64032,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "a1497c216d12436b55ee73538a1db192af65ac308b72f6c4ba9e3848f4959d44"
+    },
+    {
+      "bytes": 56622,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+    }
+  ],
+  "historical_checkpoint": "31198ff9 preserves attempt02 full code/freeze and finite result; no historical bytes changed",
+  "status": "ATTEMPT03_PREPARATION_ONLY",
+  "unhashed_self_and_final_receipt": [
+    "artifacts/experiments/native_capture_batch_attempt03_20261025/staging-list.json",
+    "artifacts/experiments/native_capture_batch_attempt03_20261025/preparation-receipts.json"
+  ]
+}

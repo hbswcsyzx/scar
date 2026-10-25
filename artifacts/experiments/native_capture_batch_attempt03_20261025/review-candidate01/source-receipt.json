@@ -1,0 +1,33 @@
+{
+  "baseline_checkpoint": "31198ff9",
+  "files": [
+    {
+      "bytes": 64032,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "a1497c216d12436b55ee73538a1db192af65ac308b72f6c4ba9e3848f4959d44"
+    },
+    {
+      "bytes": 56622,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+    },
+    {
+      "bytes": 61884,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "acb12cc68657d456b7174dda5d7dd0da82173176fa2f6a6eeacc977283e58a8e"
+    },
+    {
+      "bytes": 30851,
+      "path": "scar/ir/execution/validation.py",
+      "sha256": "ade5f14338eeca223eb57b77f228fe4d40b2d37db50d904a3935b2813a3fda30"
+    }
+  ],
+  "full_gate_run": false,
+  "preflight": [
+    "api-check-02.json",
+    "v1-compat-check.json",
+    "codec-compare/summary.json"
+  ],
+  "source_raw_reads": 0,
+  "status": "PREPARED_STATIC_CANDIDATE01_FROZEN"
+}

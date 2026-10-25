@@ -22,7 +22,7 @@ import time
 from scar.ir.record_codec import decode, encode
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.execution.native_port_protocol import (
-    PROFILE_V2, _make_evidence, _own_capture, attributes, canonical, need, replay_batch_interfaces,
+    PROFILE_V2, _make_evidence, _own_capture, _prepare_native_catalog, attributes, canonical, need, replay_batch_interfaces,
 )
 from scar.trace.native_protocol import (
     NativeProtocolWindowResult, _artifact, _build_execution, _build_program,
@@ -779,9 +779,8 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
     Coordinates must already be freshly bound by the ordinary public binder.
     This call does not execute the target or restore a serialized owner.
     """
-    from scar.ir.program.codec import dumps as program_dumps
     from scar.ir.execution.codec import dumps as execution_dumps
-    from scar.ir.execution.validation import validate
+    from scar.ir.execution.validation import prepare_program_snapshot, validate
     need(type(budget) is NativeCaptureBatchBudget, "exact native batch budget required")
     budget.__post_init__()
     out = Path(out_dir).resolve()
@@ -856,15 +855,17 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
         program_source = {**owner.base, "max_sequences": owner.declared_attempts}
         representatives = [owner.representatives[sig] for sig in sorted(owner.representatives)]
         program, layouts = _build_program(representatives, program_source, interface_artifact)
-        program_bytes = program_dumps(program).encode()
+        prepared_snapshot = prepare_program_snapshot(program)
+        program_bytes = prepared_snapshot.canonical_bytes(program)
         need(len(program_bytes) <= budget.max_program_bytes, "shared static program byte budget exceeded")
         program_artifact = _artifact(out / "program.json", program_bytes, "scar.program-graph")
         publish(out / "program.json", program_bytes, budget.max_program_bytes)
         shard_reports, first_shard, first_partial_shard = [], None, None
+        prepared_catalog = None
         pending = []
 
         def emit_shard(selected_sequences):
-            nonlocal first_shard, first_partial_shard
+            nonlocal first_shard, first_partial_shard, prepared_catalog
             owner.check()
             shard_started = time.monotonic()
             source = owner.source_for(tuple(selected_sequences), definitions=True)
@@ -877,7 +878,8 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             selected = owner.selected_v2(source, interfaces)
             shard_dir = out / "shards" / f"{len(shard_reports):06d}"
             values, evidence, va, ea, geometry, payloads = _prepare_projection(source, interfaces, selected, shard_dir, budget)
-            execution = _build_execution(program, layouts, interfaces, source, coordinates, program_artifact, va, ea)
+            execution = _build_execution(program, layouts, interfaces, source, coordinates, program_artifact, va, ea,
+                                         prepared_snapshot=prepared_snapshot)
             execution_bytes = execution_dumps(execution).encode()
             need(len(execution_bytes) <= budget.max_shard_execution_bytes and va.size_bytes <= budget.max_shard_values_bytes
                  and ea.size_bytes <= budget.max_shard_evidence_bytes, "materialized shard byte budget exceeded")
@@ -886,10 +888,12 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
             source["definition_signatures"] = definitions
             source["selected_sequences"] = sorted(expected)
             owned = _own_capture(source)
-            native = _make_evidence(owned, program, execution, va, ea)
+            if prepared_catalog is None:
+                prepared_catalog = _prepare_native_catalog(owned, program, prepared_snapshot)
+            native = _make_evidence(owned, program, execution, va, ea, _prepared=prepared_catalog)
             catalogs = {"value_graphs": {va.sha256: values}, "evidence_graphs": {ea.sha256: evidence},
                         "artifact_bytes": {interface_artifact.sha256: interface_bytes}, "native_port_evidence": native}
-            validation = validate(execution, program, **catalogs)
+            validation = validate(execution, program, prepared_snapshot=prepared_snapshot, **catalogs)
             validation_doc = {"valid": validation.valid, "issues": [encode(i) for i in validation.issues],
                               "gaps": [encode(g) for g in validation.gaps]}
             need(validation.valid, "actual shard validation failed: " + json.dumps(validation_doc["issues"][:10], sort_keys=True))

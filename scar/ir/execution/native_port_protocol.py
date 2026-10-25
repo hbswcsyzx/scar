@@ -6,7 +6,9 @@ it. The raw capture and projected catalogs retain distinct qualified identities.
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
 from hashlib import sha256
+from types import MappingProxyType
 import json
 
 from scar.ir.program.providers import ProviderArtifact
@@ -396,8 +398,7 @@ class NativePortOrderError(ValueError):
     """This pinned adapter's ordered ABI disagrees with the original core."""
 
 
-def _native_port_order_errors(program, model, interfaces, run, *, definition_signatures=None,
-                              profile=PROFILE, source=None, value_artifact=None, evidence_artifact=None):
+def _native_static_order(program, interfaces, *, definition_signatures=None, profile=PROFILE):
     """Pure ABI interpretation, not ownership or runtime authority.
 
     Generic NativeBoundary permits arbitrary representation order. Only this
@@ -410,7 +411,6 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
     from scar.ir.program.ids import NativeBoundaryID, ProviderID, RegionID
     from scar.ir.program.providers import (ProviderArtifactKind, ProviderElementKind,
         ProviderPathIndex, ProviderPathKey, ProviderRegionRelation)
-    from .coordinates import InitialEntry
     from .content import NativeInputRef, NativeOutputRef
     need(profile in (PROFILE, PROFILE_V2), "unsupported native source profile")
     region_prefix = "torch-interface:" if profile == PROFILE_V2 else "aten-interface:"
@@ -424,6 +424,9 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
         return bool(ok)
 
     regions = {r.id: r for r in program.regions}
+    binding_index = {}
+    for binding in program.provider_bindings:
+        binding_index.setdefault((binding.provider, binding.region, binding.target), []).append(binding)
     boundaries = {b.id: b for b in program.native_boundaries}
     core_values = {v.id: v for v in program.values}
     operations = {o.id: o for o in program.operations}
@@ -542,8 +545,7 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
                 if direction == "inputs":
                     targets.append((original_use.id, ProviderElementKind.USE))
                 for target, kind in targets:
-                    matches = [b for b in program.provider_bindings if b.provider == expected_provider
-                        and b.region == region_id and b.target == target]
+                    matches = binding_index.get((expected_provider, region_id, target), ())
                     check(len(matches) == 1 and matches[0].external.kind is kind
                           and matches[0].external.key == sig and matches[0].external.path == expected_path,
                           "provider_path_order", port_path, "provider binding path does not select this exact original ordered endpoint")
@@ -551,6 +553,35 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
         check(type(before_world) is type(after_world) is StateVersionValue and before_world.location == after_world.location,
               "world_location", path, "normal opaque world does not preserve the declared state domain")
         layouts[sig] = (region_id, boundary, entry, invoke, normal_index, normal, returned)
+    return tuple(errors), layouts
+
+
+def _native_port_order_errors(program, model, interfaces, run, *, definition_signatures=None,
+                              profile=PROFILE, source=None, value_artifact=None, evidence_artifact=None,
+                              _prepared=None):
+    """Independent actual-port checking, with optional privately proved static ABI."""
+    from .coordinates import InitialEntry
+    need(profile in (PROFILE, PROFILE_V2), "unsupported native source profile")
+    if _prepared is None:
+        static_errors, layouts = _native_static_order(program, interfaces,
+            definition_signatures=definition_signatures, profile=profile)
+        errors = list(static_errors)
+    else:
+        need(profile == PROFILE_V2 and type(_prepared) is _PreparedNativeCatalog,
+             "prepared native ABI must be the live V2 source-bound catalog")
+        _prepared.require(program, source, definition_signatures)
+        layouts, errors = _prepared._layouts, []
+        for item in interfaces:
+            signature = item["signature"]
+            sig = sha256(canonical(signature)).hexdigest()
+            if item["signature_id"] != sig or sig not in layouts or signature != definition_signatures.get(sig):
+                errors.append(("signature_catalog", sig, "actual native signature differs from original prepared catalog"))
+
+    def check(ok, code, path, message):
+        if not ok:
+            errors.append((code, str(path), message))
+        return bool(ok)
+
     # Actual coordinates are checked independently of denotation identity and
     # alongside the normal generic execution-flow validation, never instead.
     segments = {s.id: s for s in model.segments}
@@ -562,6 +593,22 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
     actual_uses = {}
     for use in model.uses:
         actual_uses.setdefault((use.operation, use.use), []).append(use)
+    by_activation, by_visit_block, by_occurrence, by_binding, by_transfer, by_value = ({} for _ in range(6))
+    for segment in model.segments:
+        by_activation.setdefault(segment.activation, []).append(segment)
+    for visit in model.visits:
+        by_visit_block.setdefault((visit.segment, visit.block), []).append(visit)
+    for occurrence in model.operations:
+        by_occurrence.setdefault((occurrence.visit, occurrence.operation), []).append(occurrence)
+    for binding in model.evidence_bindings:
+        by_binding.setdefault(binding.operation, []).append(binding)
+    for transfer in model.transfers:
+        by_transfer.setdefault(transfer.operation, []).append(transfer)
+    for denotation in model.denotations:
+        by_value.setdefault(denotation.value, []).append(denotation)
+    by_activation_name = {}
+    for activation in model.activations:
+        by_activation_name.setdefault(activation.id.value, []).append(activation)
     expected_activations = set()
     expected_denotations = set()
     expected_bindings = set()
@@ -577,25 +624,25 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
             continue
         region_id, boundary, entry, invoke, normal_index, normal, returned = layouts[sig]
         expected_id = "native-port:" + run + ":" + str(item["sequence"])
-        candidates = [a for a in model.activations if a.id.value == expected_id]
+        candidates = by_activation_name.get(expected_id, ())
         if not check(len(candidates) == 1 and candidates[0].region == region_id,
                      "activation", expected_id, "source sequence has no unique exact native activation"):
             continue
         activation = candidates[0];expected_activations.add(activation.id)
-        owned_segments = [s for s in model.segments if s.activation == activation.id]
+        owned_segments = by_activation.get(activation.id, ())
         if not check(len(owned_segments) == 1 and type(owned_segments[0].ingress) is InitialEntry
                      and activation.entry.run.value == run,
                      "segment", expected_id, "normal native protocol activation/Run has no exact initial segment"):
             continue
         segment = owned_segments[0]
-        entry_visits = [v for v in model.visits if v.segment == segment.id and v.block == entry.id]
-        normal_visits = [v for v in model.visits if v.segment == segment.id and v.block == normal.id]
+        entry_visits = by_visit_block.get((segment.id, entry.id), ())
+        normal_visits = by_visit_block.get((segment.id, normal.id), ())
         if not check(len(entry_visits) == len(normal_visits) == 1,
                      "visit", expected_id, "normal native call has no unique entry/completion visits"):
             continue
         entry_visit, normal_visit = entry_visits[0], normal_visits[0]
-        invoked = [o for o in model.operations if o.visit == entry_visit.id and o.operation == invoke.id]
-        completed = [o for o in model.operations if o.visit == normal_visit.id and o.operation == returned.id]
+        invoked = by_occurrence.get((entry_visit.id, invoke.id), ())
+        completed = by_occurrence.get((normal_visit.id, returned.id), ())
         if not check(len(invoked) == len(completed) == 1, "occurrence", expected_id,
                      "native invocation/normal Return occurrence missing or ambiguous"):
             continue
@@ -605,7 +652,7 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
             from scar.ir.record_codec import decode
             from scar.ir.program.providers import ProviderFactReference
             for occurrence, suffix in ((invoked, ""), (completed, "/outputs")):
-                bindings = [b for b in model.evidence_bindings if b.operation == occurrence.id]
+                bindings = by_binding.get(occurrence.id, ())
                 expected_bindings.add(occurrence.id)
                 fact = decode(ProviderFactReference, {"artifact": source["artifacts"]["eto"],
                     "locator": "#/nodes/" + str(source["node_ordinals"][str(item["node"]["id"])]) + suffix})
@@ -615,7 +662,7 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
                       and bindings[0].source == fact,
                       "native_producer_binding", occurrence.id.value,
                       "actual native invocation/completion lost its exact original producer/artifact/ordinal")
-        transfers = [t for t in model.transfers if t.operation == invoked.id]
+        transfers = by_transfer.get(invoked.id, ())
         check(len(transfers) == 1 and transfers[0].successor_index == normal_index
               and transfers[0].target == normal_visit.id,
               "actual_completion", expected_id, "actual normal completion does not select its original normal result edge")
@@ -635,7 +682,7 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
                     from scar.ir.execution.common import Unresolved
                     from scar.ir.record_codec import decode
                     from scar.ir.program.providers import ProviderFactReference
-                    candidates = [d for d in model.denotations if d.value == values[0].id]
+                    candidates = by_value.get(values[0].id, ())
                     if not check(len(candidates) == 1, "actual_native_denotation", path,
                                  "each native Tensor occurrence requires exactly one denotation"):
                         continue
@@ -682,10 +729,10 @@ def _native_port_order_errors(program, model, interfaces, run, *, definition_sig
 
 
 def _require_native_port_order(program, model, interfaces, run, *, definition_signatures=None,
-                               profile=PROFILE, source=None, value_artifact=None, evidence_artifact=None):
+                               profile=PROFILE, source=None, value_artifact=None, evidence_artifact=None, _prepared=None):
     errors = _native_port_order_errors(program, model, interfaces, run,
                                        definition_signatures=definition_signatures, profile=profile,
-                                       source=source, value_artifact=value_artifact, evidence_artifact=evidence_artifact)
+                                       source=source, value_artifact=value_artifact, evidence_artifact=evidence_artifact, _prepared=_prepared)
     if errors:
         raise NativePortOrderError("native_port_order: " + "; ".join(
             code + " at " + path + ": " + message for code, path, message in errors))
@@ -712,6 +759,51 @@ def _own_capture(source):
     return _OwnedNativeCapture(_OWNER, source)
 
 
+def _static_source_identity(source):
+    return canonical({key: source.get(key) for key in (
+        "reference_profile", "pid", "nonce", "provider_revision", "run", "coordinate_artifact",
+        "owner_native_tid", "owner_python_ident", "native_scope", "physical_scope", "physical_profile",
+        "artifacts", "source_manifest")})
+
+
+@dataclass(frozen=True, slots=True, init=False)
+class _PreparedNativeCatalog:
+    _key: object
+    _snapshot: object
+    _source_identity: bytes
+    _definitions: bytes
+    _layouts: object
+
+    def __init__(self, key, owned, program, snapshot):
+        from .validation import PreparedProgramSnapshot
+        need(key is _OWNER and type(owned) is _OwnedNativeCapture
+             and type(snapshot) is PreparedProgramSnapshot, "prepared catalog needs actual owned source and static proof")
+        snapshot.canonical_bytes(program)
+        source, definitions = owned.source(), owned.definitions()
+        need(source.get("reference_profile") == PROFILE_V2 and type(definitions) is dict,
+             "prepared catalog needs the complete V2 original definition inventory")
+        interfaces = replay_batch_interfaces(source)[0]
+        errors, layouts = _native_static_order(program, interfaces, definition_signatures=definitions, profile=PROFILE_V2)
+        if errors:
+            raise NativePortOrderError("native_port_order: " + "; ".join(code + " at " + path + ": " + message for code, path, message in errors))
+        object.__setattr__(self, '_key', key)
+        object.__setattr__(self, '_snapshot', snapshot)
+        object.__setattr__(self, '_source_identity', _static_source_identity(source))
+        object.__setattr__(self, '_definitions', canonical(definitions))
+        object.__setattr__(self, '_layouts', MappingProxyType(layouts))
+
+    def require(self, program, source, definitions):
+        need(type(self) is _PreparedNativeCatalog and self._key is _OWNER,
+             "prepared native catalog is not a live owned capability")
+        self._snapshot.canonical_bytes(program)
+        need(self._source_identity == _static_source_identity(source) and self._definitions == canonical(definitions),
+             "prepared native catalog belongs to another source/Run/namespace/definition inventory")
+
+
+def _prepare_native_catalog(owned, program, snapshot):
+    return _PreparedNativeCatalog(_OWNER, owned, program, snapshot)
+
+
 class NativePortEvidence:
     """Immutable source-owned port resolver, sealed to one exact native window.
 
@@ -719,14 +811,14 @@ class NativePortEvidence:
     logical contents, hidden effects, alias completeness, CUDA order or ready.
     """
     __slots__ = ("_owned", "_program_sha", "_model_sha", "_value_artifact", "_evidence_artifact",
-                 "_interfaces", "_source", "_lookup", "_definitions", "_profile")
+                 "_interfaces", "_source", "_lookup", "_definitions", "_profile", "_prepared",
+                 "_invoke_index", "_binding_index")
 
-    def __init__(self, key, owned, program, model, value_artifact, evidence_artifact):
+    def __init__(self, key, owned, program, model, value_artifact, evidence_artifact, *, _prepared=None):
         need(key is _OWNER and type(owned) is _OwnedNativeCapture, "owned source session is required")
         from scar.ir.program.codec import dumps as program_dumps
         from .codec import dumps
         self._owned = owned
-        self._program_sha = sha256(program_dumps(program).encode()).hexdigest()
         self._model_sha = sha256(dumps(model).encode()).hexdigest()
         need(type(value_artifact) is type(evidence_artifact) is ProviderArtifact, "projection artifacts are required")
         self._value_artifact, self._evidence_artifact = value_artifact, evidence_artifact
@@ -737,19 +829,52 @@ class NativePortEvidence:
         self._interfaces = canonical(interfaces)
         self._lookup = {"native-port:" + self._source["run"] + ":" + str(i["sequence"]): i for i in interfaces}
         self._definitions = owned.definitions()
+        self._prepared = None
+        if _prepared is not None:
+            need(type(_prepared) is _PreparedNativeCatalog and self._profile == PROFILE_V2,
+                 "only a source-bound V2 prepared catalog can reuse static proof")
+            # A fresh changed program still receives full independent ABI checks.
+            # The old token cannot turn that constructor into a scope-hash refusal.
+            if program is _prepared._snapshot._program:
+                _prepared.require(program, self._source, self._definitions)
+                self._prepared = _prepared
+        self._program_sha = (self._prepared._snapshot.sha256 if self._prepared is not None else
+                             sha256(program_dumps(program).encode()).hexdigest())
+        self._invoke_index, self._binding_index = {}, {}
+        if self._prepared is not None:
+            from scar.ir.program.model import TerminatorKind
+            visits = {v.id: v for v in model.visits}
+            segments = {s.id: s for s in model.segments}
+            operations = {o.id: o for o in program.operations}
+            for occurrence in model.operations:
+                original = operations.get(occurrence.operation)
+                visit = visits.get(occurrence.visit)
+                segment = None if visit is None else segments.get(visit.segment)
+                if (original is not None and original.terminator is not None
+                        and original.terminator.kind is TerminatorKind.INVOKE and segment is not None):
+                    self._invoke_index.setdefault(segment.activation, []).append(occurrence)
+            for binding in model.evidence_bindings:
+                self._binding_index.setdefault(binding.operation, []).append(binding)
         _require_native_port_order(program, model, interfaces, self._source["run"],
                                    definition_signatures=self._definitions, profile=self._profile,
-                                   source=self._source, value_artifact=self._value_artifact, evidence_artifact=self._evidence_artifact)
+                                   source=self._source, value_artifact=self._value_artifact, evidence_artifact=self._evidence_artifact,
+                                   _prepared=self._prepared)
 
     def require_scope(self, model, program):
         from scar.ir.program.codec import dumps as program_dumps
         from .codec import dumps
-        need(self._program_sha == sha256(program_dumps(program).encode()).hexdigest()
+        if self._prepared is None:
+            program_sha = sha256(program_dumps(program).encode()).hexdigest()
+        else:
+            self._prepared._snapshot.canonical_bytes(program)
+            program_sha = self._prepared._snapshot.sha256
+        need(self._program_sha == program_sha
              and self._model_sha == sha256(dumps(model).encode()).hexdigest(),
              "owned native port evidence does not apply to this exact program/execution/Run")
         _require_native_port_order(program, model, json.loads(self._interfaces), self._source["run"],
                                    definition_signatures=self._definitions, profile=self._profile,
-                                   source=self._source, value_artifact=self._value_artifact, evidence_artifact=self._evidence_artifact)
+                                   source=self._source, value_artifact=self._value_artifact, evidence_artifact=self._evidence_artifact,
+                                   _prepared=self._prepared)
 
     def resolve(self, ctx, basis, resolved, identity, path):
         """Replay original ordered ports independently of builder declarations."""
@@ -785,9 +910,13 @@ class NativePortEvidence:
             ctx.issue("native_reference_object", path, "denotation selects another original held object/projection"); return False
         # Actual invocation must retain the exact original instance, with the
         # new projection namespace rather than the whole-source graph identity.
-        occurrences = [o for o in ctx.model.operations if ctx.activation_of(o.id) == activation.id
-                       and ctx.core_operations[o.operation].terminator.kind.value == "INVOKE"]
-        bindings = [b for b in ctx.model.evidence_bindings if len(occurrences) == 1 and b.operation == occurrences[0].id]
+        if self._prepared is None:
+            occurrences = [o for o in ctx.model.operations if ctx.activation_of(o.id) == activation.id
+                           and ctx.core_operations[o.operation].terminator.kind.value == "INVOKE"]
+            bindings = [b for b in ctx.model.evidence_bindings if len(occurrences) == 1 and b.operation == occurrences[0].id]
+        else:
+            occurrences = self._invoke_index.get(activation.id, ())
+            bindings = self._binding_index.get(occurrences[0].id, ()) if len(occurrences) == 1 else ()
         expected_instance = source["native_scope"] + ":eto:" + str(interface["node"]["id"])
         if (len(bindings) != 1 or bindings[0].legacy.artifact != self._evidence_artifact
                 or bindings[0].legacy.instance.value != expected_instance):
@@ -802,8 +931,8 @@ class NativePortEvidence:
         return True
 
 
-def _make_evidence(owned, program, model, value_artifact, evidence_artifact):
-    return NativePortEvidence(_OWNER, owned, program, model, value_artifact, evidence_artifact)
+def _make_evidence(owned, program, model, value_artifact, evidence_artifact, *, _prepared=None):
+    return NativePortEvidence(_OWNER, owned, program, model, value_artifact, evidence_artifact, _prepared=_prepared)
 
 
 __all__ = ["NativePortEvidence", "PROFILE", "PROFILE_V2"]

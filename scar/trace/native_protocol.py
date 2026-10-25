@@ -558,7 +558,7 @@ def _build_program(interfaces, source, interface_artifact):
     return graph, layouts
 
 
-def _build_execution(program, layouts, interfaces, source, coordinates, program_artifact, values_artifact, evidence_artifact):
+def _build_execution(program, layouts, interfaces, source, coordinates, program_artifact, values_artifact, evidence_artifact, *, prepared_snapshot=None):
     from scar.ir.program.codec import dumps as program_dumps
     from scar.ir.execution.coordinates import (BlockVisit, ControlTransfer, ExecutionSegment, InitialEntry,
         OperationOccurrence, ProgramSnapshot, RegionActivation, UseOccurrence, ValueOccurrence)
@@ -620,7 +620,17 @@ def _build_execution(program, layouts, interfaces, source, coordinates, program_
         if source.get("reference_profile") == PROFILE_V2:
             evidence_bindings.append(OccurrenceEvidenceBinding(returned, LegacyOperationRef(evidence_artifact, native_id),
                 ProviderFactReference(eto_artifact, native_fact.locator + "/outputs")))
-    return ExecutionModel(ProgramSnapshot(program_artifact, json.loads(program_dumps(program))["schema_version"]),
+    if prepared_snapshot is None:
+        schema_version = json.loads(program_dumps(program))["schema_version"]
+    else:
+        from scar.ir.execution.validation import PreparedProgramSnapshot
+        need(source.get("reference_profile") == PROFILE_V2 and type(prepared_snapshot) is PreparedProgramSnapshot,
+             "prepared execution builder needs an actual V2 static snapshot")
+        wire = prepared_snapshot.canonical_bytes(program)
+        need(prepared_snapshot.sha256 == program_artifact.sha256 and len(wire) == program_artifact.size_bytes
+             and program_artifact.schema == "scar.program-graph", "prepared program artifact differs")
+        schema_version = prepared_snapshot.schema_version
+    return ExecutionModel(ProgramSnapshot(program_artifact, schema_version),
         runs=(coordinates.run,), processes=coordinates.processes, threads=coordinates.threads,
         activations=tuple(activations), segments=tuple(segments), visits=tuple(visits), operations=tuple(operations),
         values=tuple(values), uses=tuple(uses), transfers=tuple(transfers), evidence_bindings=tuple(evidence_bindings),

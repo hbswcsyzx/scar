@@ -1,0 +1,11 @@
+{
+  "budget_change": false,
+  "bytes": 5025,
+  "fourth_file_requested": "scar/ir/execution/validation.py",
+  "path": "analysis/native_batch_cost_review_20261025/PREPARED_STATIC_PLAN.md",
+  "production_changes": 0,
+  "raw_retry": false,
+  "sha256": "2828b9c8241f7cf63ec2dab818a7d2478efa4c18e398398dd19bef4a177a7643",
+  "single_profile_result": "analysis/native_batch_cost_review_20261025/single-shard-profile/result.json",
+  "status": "DESIGN_ONLY_REQUIRES_ROOT_REVIEW_AND_CHECKPOINT_RELEASE"
+}

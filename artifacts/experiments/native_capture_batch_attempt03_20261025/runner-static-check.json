@@ -1,0 +1,15 @@
+{
+  "changed_paths": [
+    "scar/ir/execution/native_port_protocol.py",
+    "scar/ir/execution/validation.py",
+    "scar/trace/native_capture_batch.py",
+    "scar/trace/native_protocol.py"
+  ],
+  "frozen_dependencies": 269,
+  "frozen_runners": 2,
+  "full_gate_executed": false,
+  "readonly_metadata": 6,
+  "shell_syntax": "bash -n passed",
+  "sources_match_candidate01": true,
+  "status": "FOUR_PRODUCER_AND_RUNNER_STATIC_AST_PASS"
+}

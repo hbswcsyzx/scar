@@ -1,0 +1,13 @@
+{
+  "counts": {
+    "dependencies": 269,
+    "read_only_metadata": 6,
+    "runner_files": 2
+  },
+  "free_bytes": 138653941760,
+  "freeze_sha256": "4408b9b23ed9b2e4f04ee1ba5e35b803709284b796f9e956cdb5ac09bb04fd44",
+  "full_gate_complete": false,
+  "raw_reads": 0,
+  "scope": "reviewed 4 production changes and exact frozen dependencies; not full-gate success",
+  "status": "ROOT_PREPARED_STATIC_CODE_AND_FREEZE_REVIEW_PASS"
+}

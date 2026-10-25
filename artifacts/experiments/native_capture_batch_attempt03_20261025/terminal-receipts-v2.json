@@ -1,0 +1,89 @@
+{
+  "actual_exit": 0,
+  "actual_negatives": {
+    "bytes": 120043,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/negative-checks.json",
+    "sha256": "77eb82bd28a71490eae4aa16e352a5b4043183fab6bcd65f2279c149c2ed9c8c"
+  },
+  "actual_result": {
+    "bytes": 8732,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/terminal-result.json",
+    "sha256": "d4df89e0ef0650caad0490dbfb8a681acfca8947abd2a5e19a849ad3cdedf2b7"
+  },
+  "actual_summary": {
+    "bytes": 2073872,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/summary.json",
+    "sha256": "45dacac67ce3edeba7fa9ea7a8831c7e95aac9885b37504f9528fcf90ef8433a"
+  },
+  "actual_time": {
+    "bytes": 850,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/time.txt",
+    "sha256": "a3e4558bdc79cff2770c680c71a445d999fce5c96fa1fae8fd97690fef0c3bd6"
+  },
+  "all_public_outputs": {
+    "bytes": 543144,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/terminal-output-inventory.json",
+    "sha256": "f38382843ba2a497f7e3c43243cefc1e3c8757b51ceb9b93978ba5ca44b2007a"
+  },
+  "archive_chunk_reads": 0,
+  "freeze": {
+    "bytes": 52565,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/freeze.json",
+    "sha256": "4408b9b23ed9b2e4f04ee1ba5e35b803709284b796f9e956cdb5ac09bb04fd44"
+  },
+  "gate_retries_by_this_agent": 0,
+  "hashed_stage_files": 530,
+  "logical_state_ready_whole_model": "OPEN",
+  "original_raw_reads": 0,
+  "output_sha_review": "reuse explicit closed artifact SHA/current sizes; bounded manifests newly hashed; only unreferenced receipts/metadata stream-hashed once; not an independent rehash of4.337GB",
+  "oversized_metadata_lossless_transport": {
+    "bytes": 1432,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/terminal-metadata/receipts.json",
+    "sha256": "392da2c8a89b1fe3460b9671b0a2525f46c06789d3f5c11f972d35f8fda64f55"
+  },
+  "private_index_reads": 0,
+  "producer_or_runner_changes_after_freeze": 0,
+  "readable_result": {
+    "bytes": 3031,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/RESULT.md",
+    "sha256": "7dcbf847083393ad4753f82b689ab5b5fd61bd90669925635b4d45b266f5fe53"
+  },
+  "root_session": 38088,
+  "semantic_codec_calls": 0,
+  "small_bytes": 51868802,
+  "source_files": [
+    {
+      "bytes": 64032,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "a1497c216d12436b55ee73538a1db192af65ac308b72f6c4ba9e3848f4959d44"
+    },
+    {
+      "bytes": 56622,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "2e0a6092b6f08a6c257d7686cf89c763e52ee8536d4fdef9d0b2479736f7bb1d"
+    },
+    {
+      "bytes": 61884,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "acb12cc68657d456b7174dda5d7dd0da82173176fa2f6a6eeacc977283e58a8e"
+    },
+    {
+      "bytes": 30851,
+      "path": "scar/ir/execution/validation.py",
+      "sha256": "ade5f14338eeca223eb57b77f228fe4d40b2d37db50d904a3935b2813a3fda30"
+    }
+  ],
+  "stage_paths_count": 532,
+  "staging_list": {
+    "bytes": 126305,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/staging-list-v2.json",
+    "sha256": "30b3a5174dffddbae6605075798ce09f93960153e1602684746685c059c6556f"
+  },
+  "staging_paths": {
+    "bytes": 53883,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/staging-paths-v2.txt",
+    "sha256": "eaed0a6a2bf3c263f9ec7d9d188131fb9999089f7b0184e2bc396b0ec4ebdaa3"
+  },
+  "staging_policy": "single <=1MB; large local-only; metadata transport not a new IR/root identity",
+  "status": "ACTUAL_EXIT0_TERMINAL_SMALL_DELIVERY_FROZEN"
+}

@@ -1,0 +1,15 @@
+{
+  "candidate": {
+    "bytes": 945,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/review-candidate01/source-receipt.json",
+    "sha256": "b9e8276d979aa75cbdb6ea9913768c2d5fa6d17ec5cbff8877ffa9ef3e75ed24"
+  },
+  "freeze": {
+    "bytes": 52565,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/freeze.json",
+    "sha256": "4408b9b23ed9b2e4f04ee1ba5e35b803709284b796f9e956cdb5ac09bb04fd44"
+  },
+  "full_gate_run_by_this_agent": false,
+  "review": "Root read full four-file diff; immutable canonical static capability, default behavior, complete static/dynamic/source key and local indexes approved. Actual gate negatives must use live prepared token.",
+  "status": "ROOT_REVIEWED_CANDIDATE01_FOR_NEXT_ACTUAL_GATE"
+}

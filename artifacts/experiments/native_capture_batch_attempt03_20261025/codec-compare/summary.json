@@ -1,0 +1,64 @@
+{
+  "bytes_read": 18042265,
+  "cap_seconds": 60,
+  "checks": {
+    "canonical_bytes_equal": true,
+    "default_prepared_reports_identical": true,
+    "fresh_equal_program_old_token_rejected": true,
+    "generic_gaps": 817,
+    "generic_valid": true,
+    "native_evidence_used": false
+  },
+  "error": null,
+  "later_shard_reads": 0,
+  "owned_authority_restored": false,
+  "private_index_reads": 0,
+  "raw_reads": 0,
+  "reads": [
+    {
+      "bytes": 5251093,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/result/program.json",
+      "sha256": "c48f71cc954436726056119d5810c09072d3615a663d5190952718f19f9b0bd4"
+    },
+    {
+      "bytes": 8176036,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000000/execution.json",
+      "sha256": "7a654dcef587b0625ca9befc73e29c2e724492907f5ecf2e4cad797f39535740"
+    },
+    {
+      "bytes": 1090712,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000000/source-values.json",
+      "sha256": "364cd740c1a104735268b08dc06eb24ce94398f9d0400bcb69a80d07119d3b2c"
+    },
+    {
+      "bytes": 3520763,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000000/source-evidence.json",
+      "sha256": "ae13332f65ee994d149577b0c6ff6e13002aabab624e59a1211cec3e59a3680c"
+    },
+    {
+      "bytes": 3661,
+      "path": "artifacts/experiments/native_capture_batch_attempt02_20261025/result/shards/000000/report.json",
+      "sha256": "e163773548fb63ebf15894a36a5d8869b0fee7239dfb5a29853920df147597d6"
+    }
+  ],
+  "scope": "Codec/static-snapshot reuse only; not fullbatch timing share, source proof or freshfull gate qualification",
+  "stages": [
+    {
+      "profiled_seconds": 2.088483573985286,
+      "program_codec_dumps_calls": 1,
+      "stage": "prepare_static_once"
+    },
+    {
+      "profiled_seconds": 5.128176888974849,
+      "program_codec_dumps_calls": 1,
+      "stage": "default_generic_validation_without_native"
+    },
+    {
+      "profiled_seconds": 3.39106771099614,
+      "program_codec_dumps_calls": 0,
+      "stage": "prepared_generic_validation_without_native"
+    }
+  ],
+  "status": "BOUNDED_CODEC_COMPARE_PASS",
+  "whole_seconds": 13.191978475020733
+}

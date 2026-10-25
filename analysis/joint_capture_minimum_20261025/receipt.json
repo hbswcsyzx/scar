@@ -1,0 +1,78 @@
+{
+  "archive_chunk_reads": 0,
+  "current_gate_inputs_changed": false,
+  "episode_runs": 0,
+  "index_reads": 0,
+  "note": {
+    "bytes": 6670,
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/joint_capture_minimum_20261025/NOTE.md",
+    "sha256": "085323ce4c5d65550291b70bc032926e7350c2bd4edc50ff35c636cd3132dff2"
+  },
+  "online_research": 0,
+  "producer_changes": 0,
+  "raw_reads": 0,
+  "sources": [
+    {
+      "bytes": 7072,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/docs/OS_CAPTURE_LAUNCH.md",
+      "sha256": "47fa64c801d241abcc08053b5dc2cf99469d6a17d38797417264566c70636765"
+    },
+    {
+      "bytes": 11072,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/docs/SCOPED_FD_CONTROL_QUALIFICATION.md",
+      "sha256": "656520050d88e493df505378d5ff8f89473bf423077bdfdcbb9ec5606ebe8d59"
+    },
+    {
+      "bytes": 4026,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_physical_delta_20261025/DELTA.md",
+      "sha256": "e65f329a9bba58d231de0fb1203309757011aa00aca31df053ad17f6f2b0541f"
+    },
+    {
+      "bytes": 13765,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/source_native_composition_20261025/PLAN.md",
+      "sha256": "c9f4da231c52929b2ed12d78221233bcc2227d679c6a90a0f86f3d8898d7bb9e"
+    },
+    {
+      "bytes": 6528,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/source_native_composition_20261025/FIRST_PATCH.md",
+      "sha256": "aa069f0a5182a7474f45d73fbabeb3835352c3e499fe815c9cdced63db29a5f7"
+    },
+    {
+      "bytes": 17615,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/os_capture_launch.py",
+      "sha256": "1a63840bb31036fbd1b32bb83cae3f5839a92496a9c1a7ea32d29e2cefeacd75"
+    },
+    {
+      "bytes": 17435,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/call_edges.py",
+      "sha256": "bb25102a67a41b94323ea4c3d82cd6cfe3690e3693de378a8121ef1644ad7cc2"
+    },
+    {
+      "bytes": 14193,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/dispatch_evidence.py",
+      "sha256": "05d3527a2a06005ed5b557c457dc851529c8efe249d37900bc1335ae9b5fb388"
+    },
+    {
+      "bytes": 21515,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/execution_evidence.py",
+      "sha256": "7e884f51210d57261eea6f21c9e5ba21fd1eb8fcf881088c572d52ebc5a82298"
+    },
+    {
+      "bytes": 31708,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/tensor_physical.py",
+      "sha256": "6a4026e6cbb038a243851e14156216b693c90dd2d587d56d0e02ebdabfaf94b3"
+    },
+    {
+      "bytes": 9612,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/code_snapshot.py",
+      "sha256": "3a00de3ef3dbac1e0ceca379f89dc501e95f9256dc59d77b318cc6f9f4c332cb"
+    },
+    {
+      "bytes": 22036,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/callable_environment.py",
+      "sha256": "14e4a319ec9024752eff907422fbc886da1e735db88360b8871c345669c39428"
+    }
+  ],
+  "status": "LOCAL_CONTRACTS_ONLY_JOINT_CAPTURE_FIELD_NOTE",
+  "status_of_future_schema_or_provider_output_API": "NOT_IMPLEMENTED_NOT_VERIFIED"
+}

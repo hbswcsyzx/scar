@@ -1,0 +1,234 @@
+{
+  "B_complete_dispatches": 37895,
+  "B_held_ports": 109288,
+  "B_partial_dispatches": 1901,
+  "B_unresolved_ports": 1901,
+  "C_gap_ports": 3706,
+  "C_qualified_ports": 107483,
+  "actual_dispatch_groups": 39796,
+  "actual_exit": 0,
+  "actual_exit_source": "root-owned session38088 terminal confirmation and GNU time exit0",
+  "actual_imported_frozen_SCAR_sources": 154,
+  "archive_receipts": [
+    {
+      "chunks": 76,
+      "decoded_bytes": 1200966077,
+      "graph": "evidence",
+      "stored_bytes": 76212360,
+      "table": "instances",
+      "whole_chunks_verified_by_BundlePartitions": true
+    },
+    {
+      "chunks": 4,
+      "decoded_bytes": 54018019,
+      "graph": "values",
+      "stored_bytes": 1304314,
+      "table": "objects",
+      "whole_chunks_verified_by_BundlePartitions": true
+    },
+    {
+      "chunks": 9,
+      "decoded_bytes": 142927166,
+      "graph": "values",
+      "stored_bytes": 7693289,
+      "table": "regions",
+      "whole_chunks_verified_by_BundlePartitions": true
+    },
+    {
+      "chunks": 6,
+      "decoded_bytes": 92998937,
+      "graph": "values",
+      "stored_bytes": 5834508,
+      "table": "allocations",
+      "whole_chunks_verified_by_BundlePartitions": true
+    }
+  ],
+  "batch_seconds": 1668.1152642829693,
+  "clean_benchmark_established": false,
+  "coordinate_binds_inside_batch": 0,
+  "critical_negatives": {
+    "dynamic_cases": {
+      "all_producer_bindings_erased": {
+        "failure_kind": "NativePortOrderError",
+        "generic_issue_count": 0,
+        "rejected": true
+      },
+      "known_identity_erased": {
+        "failure_kind": "NativePortOrderError",
+        "generic_issue_count": 0,
+        "rejected": true
+      },
+      "producer_changed_same_run": {
+        "failure_kind": "NativePortOrderError",
+        "generic_issue_count": 0,
+        "rejected": true
+      },
+      "unknown_basis_erased": {
+        "failure_kind": "NativePortOrderError",
+        "generic_issue_count": 0,
+        "rejected": true
+      },
+      "unknown_borrowed_object": {
+        "failure_kind": "NativePortOrderError",
+        "generic_issue_count": 0,
+        "rejected": true
+      },
+      "unknown_missing_denotation": {
+        "failure_kind": "NativePortOrderError",
+        "generic_issue_count": 0,
+        "rejected": true
+      },
+      "unknown_wrong_process": {
+        "failure_kind": "NativePortOrderError",
+        "generic_issue_count": 0,
+        "rejected": true
+      },
+      "unknown_wrong_run": {
+        "failure_kind": "NativePortOrderError",
+        "generic_issue_count": 2,
+        "rejected": true
+      },
+      "unknown_wrong_source": {
+        "failure_kind": "NativePortOrderError",
+        "generic_issue_count": 0,
+        "rejected": true
+      }
+    },
+    "fresh_order": {
+      "failure_kind": "NativePortOrderError",
+      "generic_issues": 0,
+      "old_scope_hash_rejection_used": false,
+      "order_error_counts": {
+        "actual_native_order": 6,
+        "native_core_order": 2,
+        "native_object_identity": 6,
+        "native_source": 6
+      },
+      "own_snapshot_sha256": "f65b40455d7d0762cc76030d0b0ea403e9cedbfa652c6b1681cc8930bf9f9d4d"
+    },
+    "legacy_gap_retained": true,
+    "wrong_run_rejected": true
+  },
+  "custom_implementation_code_identity_established": false,
+  "declared_dispatch_attempts": 39796,
+  "dispatch_inventory": {
+    "schema": "scar.native-capture-table-chunks",
+    "sha256": "7051fc7b4d1316698c9b9f305e8e875100a6265a042e8cc45cb8616dbbd39e37",
+    "size_bytes": 17357,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/dispatch-inventory/manifest.json"
+  },
+  "execution_shards": 156,
+  "frontier_dispatches": 0,
+  "frozen_dependencies_match": 269,
+  "frozen_runners_match": 2,
+  "fullgate_rerun_by_auditor": false,
+  "gnu_whole_seconds": 1721.75,
+  "logical_contents_established": false,
+  "max_rss_kib": 1091472,
+  "modeled_dispatches": 39796,
+  "native_raw_bytes_once": 546619922,
+  "native_tensor_ports": 111189,
+  "observed_dispatch_inventory": {
+    "schema": "scar.native-capture-table-chunks",
+    "sha256": "68dadcfd6f981911150f577aa8a3ab32dbc0be874c2aae92123b70f8a2d8d264",
+    "size_bytes": 17110,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/observed-dispatches/manifest.json"
+  },
+  "observed_execution_instrumented": true,
+  "output_inventory": {
+    "bytes": 543144,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/terminal-output-inventory.json",
+    "sha256": "f38382843ba2a497f7e3c43243cefc1e3c8757b51ceb9b93978ba5ca44b2007a"
+  },
+  "oversized_metadata_lossless_transport": {
+    "bytes": 1432,
+    "path": "artifacts/experiments/native_capture_batch_attempt03_20261025/terminal-metadata/receipts.json",
+    "sha256": "392da2c8a89b1fe3460b9671b0a2525f46c06789d3f5c11f972d35f8fda64f55"
+  },
+  "private_index_bytes": 3973341184,
+  "published_bytes_before_report": 4337031496,
+  "qualified_shard_totals": {
+    "actual_activations": 39796,
+    "geometry_gap_ports": 3706,
+    "geometry_qualified_ports": 107483,
+    "held_object_ports": 109288,
+    "native_tensor_ports": 111189,
+    "unresolved_object_ports": 1901
+  },
+  "raw_receipts": [
+    {
+      "artifact": {
+        "schema": "pytorch.execution-trace.v1",
+        "sha256": "625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6",
+        "size_bytes": 321287818,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/execution-trace.369749.72816598bfa183a810428fe30a7873ff.json"
+      },
+      "complete_raw_sha_verified": true,
+      "complete_semantic_parse_performed": true,
+      "newlines": 1862477,
+      "raw_bytes_read": 321287818,
+      "stored_bytes_read": 10557182
+    },
+    {
+      "artifact": {
+        "schema": "scar.dispatch-observation.events.v1",
+        "sha256": "b54e19dcdb7e19817fa1519f42109cf67afee891141bf685bd28a9b201d5ef5f",
+        "size_bytes": 78870130,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/dispatch-observations.369749.72816598bfa183a810428fe30a7873ff.jsonl"
+      },
+      "complete_raw_sha_verified": true,
+      "complete_semantic_parse_performed": true,
+      "newlines": 119388,
+      "raw_bytes_read": 78870130,
+      "stored_bytes_read": 2630654
+    },
+    {
+      "artifact": {
+        "schema": "scar.tensor-physical-observation.v1",
+        "sha256": "d666fa820e88d95a6ea0a2539c8241126ac605ea48094bb2e330318c7756a778",
+        "size_bytes": 146461974,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_physical_20261023/trace/tensor-physical.369749.72816598bfa183a810428fe30a7873ff.jsonl"
+      },
+      "complete_raw_sha_verified": true,
+      "complete_semantic_parse_performed": true,
+      "newlines": 132445,
+      "raw_bytes_read": 146461974,
+      "stored_bytes_read": 7124180
+    }
+  ],
+  "readonly_metadata_match": 6,
+  "ready_established": false,
+  "root_session": 38088,
+  "shared_interface": {
+    "schema": "scar.pinned-torch-protocol-interface",
+    "sha256": "25fe9fc2750d3a379671aadcc85bc5ea6db4d0318cb43f80144a34d62bcfb146",
+    "size_bytes": 64328,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/native-interface.json"
+  },
+  "shared_program": {
+    "schema": "scar.program-graph",
+    "sha256": "6f5549691b4b7eb01028ea7a03632b865548c0710b9ac6f35ea7dd4a65c7127a",
+    "size_bytes": 5251093,
+    "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_attempt03_20261025/result/program.json"
+  },
+  "source_raw_acquisitions": 1,
+  "state_effects_established": false,
+  "static_interfaces": 127,
+  "status": "ACTUAL_EXIT0_SOURCE_ACCOUNTING_NATIVE_PORTS_PASS_MODEL_OPEN",
+  "summary_seconds": 1720.8925972009893,
+  "target_executions": 0,
+  "target_observer_attribution_established": false,
+  "terminal_review_original_raw_or_DB_reads": 0,
+  "timing_interpretation": "1720.892597s summary vs1721.75s GNU whole vs1668.115264s batch; attempt02 interrupted duration is not a target speedup baseline",
+  "transformation_authorized": false,
+  "validation_gap_counts": {
+    "content_denotation_unresolved": 1901,
+    "content_native_correspondence_unverified": 1901,
+    "host_thread_unresolved": 39796,
+    "native_port_geometry_unproved": 3706,
+    "native_reference_content_unproved": 109288,
+    "source_runtime_unverified": 156,
+    "unresolved": 1901
+  },
+  "whole_model_established": false
+}
