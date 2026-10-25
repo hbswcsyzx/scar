@@ -6,6 +6,15 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：65项普通函数窗口全部实际处理
+
+root确认exit0，outer174.766s/worker144.349s；65终态为12成功、51不支持、2失败，
+分别关联原运行179/1501/33次调用。12图共1111 graph ops，尚不计入source846/runtime843。
+两个失败是字符串校验器漏收Call结果hold，窄修已应用，原失败保留；12图不重lower。
+CodeWitness compile0；真实rchar430228980不包含gzip解码，总I/O计费仍OPEN。
+完整结果及下一实际frontier见
+[批次报告](../artifacts/experiments/source_frontend_remainder_attempt02_20261025/RESULT.md)。
+
 ### 2026-10-25：五类采集器注册及保存CPU运行绑定通过
 
 可选collector来源profile已接入。唯一CPU采集CLI exit0/26.105s；原总门在schema标签
