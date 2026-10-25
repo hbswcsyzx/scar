@@ -14,6 +14,8 @@ from scar.ir.literals import PythonLiteral, require_exact_literal
 from scar.trace.native_schema import PROVIDER_REVISION
 
 PINNED_SCALAR_PROVIDER_REVISION = 'cf30153c4c131c8164ee7798e5022d810682e2cb'
+SCALAR_CONTENT_PROFILE_V1 = 'SCAR_NATIVE_SCALAR_OBSERVED_ROOT_V1'
+SCALAR_CONTENT_PROFILE_V2 = 'SCAR_NATIVE_SCALAR_OBSERVED_ROOT_V2'
 
 
 class ScalarFrontier(str, Enum):
@@ -32,11 +34,16 @@ class ScalarFrontier(str, Enum):
     DOUBLE_PRECISION = 'DOUBLE_SERIALIZATION_NOT_PROVEN_LOSSLESS'
     STRING_ENCODING = 'NONASCII_PROVIDER_STRING_CONTENT_UNESTABLISHED'
     PAYLOAD_BUDGET = 'SCALAR_EXACT_LITERAL_PAYLOAD_BUDGET'
+    NUMBER_TAG = 'NUMBER_FORMAL_PROVIDER_TAG_UNSUPPORTED'
 
 
 @dataclass(frozen=True, slots=True)
 class ScalarDecode:
-    """Local decode result, not an IR record or an evidence capability."""
+    """Local decode result, not an IR record or an evidence capability.
+
+    builtin_type names the normalized PythonLiteral representation, never the
+    class of an original Python object before provider conversion.
+    """
 
     literal: PythonLiteral | None
     builtin_type: str | None
@@ -70,7 +77,8 @@ def _gap(frontier):
 
 def decode_pinned_scalar(provider_revision: str, provider_type: str,
                          formal_kind: str, value: object, *,
-                         formal_real_kind: str) -> ScalarDecode:
+                         formal_real_kind: str,
+                         profile: str = SCALAR_CONTENT_PROFILE_V1) -> ScalarDecode:
     """Decode one already selected leaf without coercing type or ownership.
 
     ``formal_kind`` and ``formal_real_kind`` are the exact leaf ``kind()`` values
@@ -81,7 +89,11 @@ def decode_pinned_scalar(provider_revision: str, provider_type: str,
 
     A supported result is abstract builtin content under this provider contract,
     not evidence of a Python object's class, identity, origin or constancy.
+    The explicit V2 profile additionally interprets actual Int/Bool IValues at
+    a NumberType formal. Earlier enum/symbolic conversions remain unknown.
     """
+    if type(profile) is not str or profile not in (SCALAR_CONTENT_PROFILE_V1, SCALAR_CONTENT_PROFILE_V2):
+        raise ValueError('unsupported scalar content profile')
     for name, item, maximum in (('provider_revision', provider_revision, 128),
             ('provider_type', provider_type, 4096), ('formal_kind', formal_kind, 128),
             ('formal_real_kind', formal_real_kind, 128)):
@@ -97,13 +109,21 @@ def decode_pinned_scalar(provider_revision: str, provider_type: str,
     if provider_type in ('SymInt', 'SymFloat', 'SymBool') or (
             formal_kind in _SYMBOLIC_KINDS or formal_real_kind in _SYMBOLIC_KINDS):
         return _gap(ScalarFrontier.SYMBOLIC)
-    if formal_kind not in _PRIMITIVE_KINDS or formal_real_kind not in _PRIMITIVE_KINDS:
-        return _gap(ScalarFrontier.NON_BUILTIN_FORMAL)
-    kinds = _SCALAR_KINDS.get(provider_type)
-    if kinds is None:
-        return _gap(ScalarFrontier.PROVIDER_TAG)
-    if formal_kind != formal_real_kind or formal_kind not in kinds:
-        return _gap(ScalarFrontier.FORMAL_KIND)
+    number = (profile == SCALAR_CONTENT_PROFILE_V2
+              and formal_kind == formal_real_kind == 'NumberType')
+    if number:
+        # The original formal remains NumberType. Never replace it with a
+        # guessed primitive formal or infer a pre-conversion Python type.
+        if provider_type not in ('Int', 'Bool'):
+            return _gap(ScalarFrontier.NUMBER_TAG)
+    else:
+        if formal_kind not in _PRIMITIVE_KINDS or formal_real_kind not in _PRIMITIVE_KINDS:
+            return _gap(ScalarFrontier.NON_BUILTIN_FORMAL)
+        kinds = _SCALAR_KINDS.get(provider_type)
+        if kinds is None:
+            return _gap(ScalarFrontier.PROVIDER_TAG)
+        if formal_kind != formal_real_kind or formal_kind not in kinds:
+            return _gap(ScalarFrontier.FORMAL_KIND)
     if provider_type == 'None':
         # The pinned getScalarValue fallback serializes this exact tag sentinel.
         if type(value) is not str or value != '<None>':
@@ -143,4 +163,5 @@ def decode_pinned_scalar(provider_revision: str, provider_type: str,
     return ScalarDecode(literal, _BUILTIN_TYPES[type(decoded)], None)
 
 
-__all__ = ['ScalarDecode', 'ScalarFrontier', 'decode_pinned_scalar', 'PINNED_SCALAR_PROVIDER_REVISION']
+__all__ = ['ScalarDecode', 'ScalarFrontier', 'decode_pinned_scalar', 'PINNED_SCALAR_PROVIDER_REVISION',
+           'SCALAR_CONTENT_PROFILE_V1', 'SCALAR_CONTENT_PROFILE_V2']

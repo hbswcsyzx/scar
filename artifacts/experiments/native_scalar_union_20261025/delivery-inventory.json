@@ -1,0 +1,371 @@
+{
+  "graph_qualification_row_privateDB_reads_for_delivery": 0,
+  "local_only": [
+    {
+      "bytes": 8440093,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": null,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/input-associations.json"
+    },
+    {
+      "bytes": 615230,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "bdc6cba1c053160a26430a5931a42ed590bbde58a698a34e1dcc7a793e416617",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/dispatch-inventory/000000.jsonl"
+    },
+    {
+      "bytes": 1142792,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "81525f2646f9133370a1c67f9a7a48350f670b02a71eafdb391b317da0aa934d",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/native-parent-inventory/000000.jsonl"
+    },
+    {
+      "bytes": 1148655,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "d429893a2ed3c9315e6aad8c92fe18649c325b1c4a19d330e34f4a7e97a059d1",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/native-parent-inventory/000001.jsonl"
+    },
+    {
+      "bytes": 381525,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "93603605ffdf6629f72ce5ac6818f3ba9cd677016a474f200595bd2a0bb1ad9c",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/native-parent-inventory/000002.jsonl"
+    },
+    {
+      "bytes": 346405,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "517a3170e448b67a3a80c564dbafdd5ab966d3b521b4fc0e731db62599ce4389",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/observed-dispatches/000000.jsonl"
+    },
+    {
+      "authority": "DISPOSABLE_NAVIGATION_NOT_OWNED_AUTHORITY",
+      "bytes": 36573184,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": null,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/private/navigation.sqlite"
+    },
+    {
+      "bytes": 156893,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": null,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/program.json"
+    },
+    {
+      "bytes": 9738081,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "69b155897e53aae9a91fcedc1a669bc4057e22d2fba457859a0572aa8855f71c",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/execution.json"
+    },
+    {
+      "bytes": 2653792,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "35f542a65ffe738251e06e821fccbe4b6144e8388f7a6897f93aedf1c2a129d7",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/port-qualifications/000000.jsonl"
+    },
+    {
+      "bytes": 685685,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "598fb92afa02f5d83b2e2d7e6f083cf1a0c97f0237c571fda846e80c02a33d66",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/scalar-input-qualifications/000000.jsonl"
+    },
+    {
+      "bytes": 3951512,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "75cd7d8813f03e7c057352e9f7760760798db0ef3e17f12bb6fbccb96548e1e1",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/source-evidence.json"
+    },
+    {
+      "bytes": 8599064,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": null,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/source-projection-receipts.json"
+    },
+    {
+      "bytes": 2029513,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "63447674eedee12a397df4880096eb98eb8225daca073f0c271106cc752f36f4",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/source-values.json"
+    },
+    {
+      "bytes": 227000,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "66a7018de6ddb07cf764960bc96de5715abc1f9a27631a4c4b8a9881afa93c9d",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/execution.json"
+    },
+    {
+      "bytes": 35318,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "1e08106ad0ff0c44509288d478afc5f8a345f628182dc5caa0c5651fb8de77f2",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/port-qualifications/000000.jsonl"
+    },
+    {
+      "bytes": 10854,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "e3278020e6fdce7f5dd4b77ad1df44ae0512af1d61e8d2e33e051278c2c626e0",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/scalar-input-qualifications/000000.jsonl"
+    },
+    {
+      "bytes": 67299,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "61f70977a76b6b353329cca9d1dec13b5e4bfa21760f0fc93e74b2060730f96a",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/source-evidence.json"
+    },
+    {
+      "bytes": 146108,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": null,
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/source-projection-receipts.json"
+    },
+    {
+      "bytes": 27826,
+      "retention": "LOCAL_ONLY_STAT_NO_NEW_DATA_READ",
+      "sha256": "3df234337ef32a66ddb39fdee7e6258e2dc31d53c7803c28cc378e46edd70177",
+      "sha_basis": "EXISTING_WRITER_DESCRIPTOR_REUSED_NOT_POST_GATE_HASH",
+      "uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/source-values.json"
+    }
+  ],
+  "local_only_bytes": 76976829,
+  "new_producer_runs_for_delivery": 0,
+  "old_scope_dirty_changes_staged": false,
+  "schema": "scar.native-scalar-union-delivery-inventory",
+  "schema_version": 1,
+  "self_hash": "EXCLUDED_TO_AVOID_RECURSIVE_SELF_HASH; exact file retained by Git commit",
+  "staged_bytes_excluding_this_inventory": 2466647,
+  "staged_entries_excluding_this_inventory": [
+    {
+      "bytes": 6801,
+      "path": "analysis/native_scalar_union_plan_20261025/PLAN.md",
+      "sha256": "700b9344f89be9149a60f334310b5a185d237d153cfd6af2e4ce77061fe1b7c4"
+    },
+    {
+      "bytes": 4280,
+      "path": "analysis/native_scalar_union_plan_20261025/receipt.json",
+      "sha256": "e5d5e731db62afe1c1fe18af4430f68ab0029ae939aa0cf6260d48ed9bd860f4"
+    },
+    {
+      "bytes": 5999,
+      "path": "artifacts/experiments/native_scalar_union_20261025/ACTUAL_TERMINAL.json",
+      "sha256": "892258144b10848b3c12295a5d1515a526497f8de75d1a1dae4abe85a339b5e9"
+    },
+    {
+      "bytes": 1725,
+      "path": "artifacts/experiments/native_scalar_union_20261025/MAIN_APPLICATION_RECEIPT.json",
+      "sha256": "59ce47dec1e1a52a13dd5f38f5f4b3da21a0dd34fa512e52a7ae2500400f4fe7"
+    },
+    {
+      "bytes": 3095,
+      "path": "artifacts/experiments/native_scalar_union_20261025/README.md",
+      "sha256": "bb308da69e9ef0994a5e5a374c0074bdac34e5af0f0b5fb8a694b75b8fd1196f"
+    },
+    {
+      "bytes": 4130,
+      "path": "artifacts/experiments/native_scalar_union_20261025/REPORT.md",
+      "sha256": "f911552ed725e4540203d94da81a6f11fd28f2394f2dac39c9399888578c2db0"
+    },
+    {
+      "bytes": 1828,
+      "path": "artifacts/experiments/native_scalar_union_20261025/RETENTION.md",
+      "sha256": "abb1325335bb0a59c7175a97532b59bfd66d0eb152099a8516f66b9a45d05e87"
+    },
+    {
+      "bytes": 1125,
+      "path": "artifacts/experiments/native_scalar_union_20261025/api-check.json",
+      "sha256": "0a3e06dffa10162b6992721ee0b312bb5e090b705efdd96c1ff34f0163cb6976"
+    },
+    {
+      "bytes": 2636,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/PREPARATION.json",
+      "sha256": "0aa9a14079f24436f28f35e82d5e1d1f23f4c528ab340515ea5fd20c3cef8e9e"
+    },
+    {
+      "bytes": 89554,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/baseline-source/native_capture_batch.py",
+      "sha256": "21f9cf606906f7171de57e92090cf8d603d371ad304b22e5e7fbd258783c9f8b"
+    },
+    {
+      "bytes": 76340,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/baseline-source/native_port_protocol.py",
+      "sha256": "175c4fc3140ce5333135bf9b542ea6c37bf286825188990baef957b75e490d8a"
+    },
+    {
+      "bytes": 59606,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/baseline-source/native_protocol.py",
+      "sha256": "fa9c8a6d8f7e4aed9a7da6a1310981d129e3537b82a53236307e9d617c092214"
+    },
+    {
+      "bytes": 7171,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/baseline-source/native_scalar_content.py",
+      "sha256": "e920bfa213c7a4684128a087ecbe8e1f90e75934f3d9b93404114db7bfad44a8"
+    },
+    {
+      "bytes": 128397,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/freeze.json",
+      "sha256": "748696f8e349b5431e1a1fa9bebc5447fad154dbe68a3dd1ae8feb015796fa13"
+    },
+    {
+      "bytes": 10128,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/gate.py",
+      "sha256": "184f7395ef5ccda07cf7e83cae7a1903766099bd0c3026c6e4fd1d73b2e30279"
+    },
+    {
+      "bytes": 16841,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/implementation.diff",
+      "sha256": "1b909e1a8e37694df68e3a9746877f9f0271778364c0ea64222141742db3851c"
+    },
+    {
+      "bytes": 198782,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/capture-coordinates.json",
+      "sha256": "637ce4a82da7aebabea13ed8f6885985115b7dbfc28f5e85dcaf4552ba0696da"
+    },
+    {
+      "bytes": 1062,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/dispatch-inventory/manifest.json",
+      "sha256": "da41a2575522d5a5cf4d29085c36ab7a1ddada9de630b3fb41f19411c696b979"
+    },
+    {
+      "bytes": 2011,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/native-interface.json",
+      "sha256": "4f59cdd35e48da185a2b3495de4fc65f9189eb0488b8a49b326b4a49e33f3e9e"
+    },
+    {
+      "bytes": 2275,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/native-parent-inventory/manifest.json",
+      "sha256": "27685ade8bf39d275158aff668438d43006f7dfb2fdde4f9fb45c60486e9fbef"
+    },
+    {
+      "bytes": 763,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/observed-dispatches/manifest.json",
+      "sha256": "ed6136c5eb237b02636cc404a2aa8ce217910fdbf8d0739742486817e1fca6e6"
+    },
+    {
+      "bytes": 15068,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/report.json",
+      "sha256": "5574f7a6a6b6581ea35e861930ee192806de4776cf82222037479b6230d080a5"
+    },
+    {
+      "bytes": 1089,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/port-qualifications/manifest.json",
+      "sha256": "925023206b5b6c5a5f7d0df3eb223146a19fcd801580d5321a22b6f40685d94a"
+    },
+    {
+      "bytes": 3992,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/report.json",
+      "sha256": "40a417c7d725839766b77a7619d027ee39ffd71a188ff2fc16847bedf96a5e88"
+    },
+    {
+      "bytes": 1165,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/scalar-input-qualifications/manifest.json",
+      "sha256": "e8675ff4ba609d2c9f1586a9d59625fae779db2f3e681640a5df04b71f34e805"
+    },
+    {
+      "bytes": 533574,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000000/validation.json",
+      "sha256": "5c6931efc8b3f2704f177c7c81fd361dfc3d53de89c5ae78baf29602e78b58be"
+    },
+    {
+      "bytes": 1085,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/port-qualifications/manifest.json",
+      "sha256": "e1f3a95f22ca4b0488735b235b749cfff2ea03b5baa6dddf04e0a7c532a2346d"
+    },
+    {
+      "bytes": 3082,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/report.json",
+      "sha256": "ed8b14cc5720cfa9ac7814f61aa2405c8f3fed1dbee309f99cf8b643fcb89fc6"
+    },
+    {
+      "bytes": 1160,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/scalar-input-qualifications/manifest.json",
+      "sha256": "49ae5be5e505a25b1473570938b4e2b9f977dd045c75b0d8caf699409ef3eaec"
+    },
+    {
+      "bytes": 6909,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/native/shards/000001/validation.json",
+      "sha256": "1c64f97a0dc5d4a43e10e8c72113f13353f8893abcd3b29942c6c0663e2abb1d"
+    },
+    {
+      "bytes": 9897,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/products/report.json",
+      "sha256": "308c1cff99377b169b8566e4e9601ab958a28fd3d81275758fdf94b375414118"
+    },
+    {
+      "bytes": 125,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/progress.json",
+      "sha256": "cdc3f4410f7e8592cd66b48d10171c92297d3562373d619b45871a1be59fd739"
+    },
+    {
+      "bytes": 554427,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/result.json",
+      "sha256": "34a871267039d7e43a19db2eb1cf0a665d63209abb6d015d27ed774dc4aee652"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/root-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 462306,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/root-stdout.txt",
+      "sha256": "2dadb1b419742acf46d58093b23741d870d657406d795affc46aa5299111b6dd"
+    },
+    {
+      "bytes": 589,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/run.sh",
+      "sha256": "aeee6fbedfa742bfc9adb426ae6416fdd74b75f5bc4bf524b612c6a1af8e6ea6"
+    },
+    {
+      "bytes": 871,
+      "path": "artifacts/experiments/native_scalar_union_20261025/attempt01/time.txt",
+      "sha256": "072a691c72e5c9e856add8c762f584b8a74b039b7e71a9817bbba471b1eace42"
+    },
+    {
+      "bytes": 3769,
+      "path": "artifacts/experiments/native_scalar_union_20261025/check_api.py",
+      "sha256": "8487532ed3fb031ee101cc00fecd3d8f9429472bd423634edc215c132b0a84d4"
+    },
+    {
+      "bytes": 3679,
+      "path": "artifacts/experiments/native_scalar_union_20261025/stage-paths.txt",
+      "sha256": "f36cc6ed03b51e7f4b3a733cf6bba1bc6b34cdc78871f7b06764acbff0322b34"
+    },
+    {
+      "bytes": 4964,
+      "path": "docs/NATIVE_SCALAR_OBSERVED_ROOT_API.md",
+      "sha256": "2f79b806fecd3825b413979f93651ae98443f2b8f67a5fd13957c649d36ed73b"
+    },
+    {
+      "bytes": 76747,
+      "path": "scar/ir/execution/native_port_protocol.py",
+      "sha256": "6e30bb657916abd617c02ccfd6969148a9f87935336f5a7571c0f5358c93776c"
+    },
+    {
+      "bytes": 89587,
+      "path": "scar/trace/native_capture_batch.py",
+      "sha256": "fb881e08460b7d12eab62a9f36971ec4880d8e592995a0bba591773e06115cbc"
+    },
+    {
+      "bytes": 59623,
+      "path": "scar/trace/native_protocol.py",
+      "sha256": "14ac2da5789ca93635bfe85a1b08c3312a4fca9ea97ae7dbba8cc2f2bc3c2757"
+    },
+    {
+      "bytes": 8390,
+      "path": "scar/trace/native_scalar_content.py",
+      "sha256": "b1f2ac13d24d7bc8765e7fac593dce915f0c083a5b70e82bab912ebb89dcfdd0"
+    }
+  ],
+  "staged_file_count_including_this_inventory": 45
+}

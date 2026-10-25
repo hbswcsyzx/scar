@@ -22,7 +22,7 @@ import time
 from scar.ir.record_codec import decode, encode
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.execution.native_port_protocol import (
-    PROFILE_V2, SCALAR_INPUT_CAPABILITY, _make_evidence, _own_capture, _prepare_native_catalog, attributes, canonical, need, replay_batch_interfaces,
+    PROFILE_V2, SCALAR_INPUT_CAPABILITY, SCALAR_INPUT_CAPABILITIES, _make_evidence, _own_capture, _prepare_native_catalog, attributes, canonical, need, replay_batch_interfaces,
 )
 from scar.trace.native_protocol import (
     NativeProtocolWindowResult, _artifact, _build_execution, _build_program,
@@ -846,7 +846,7 @@ def bind_native_capture_batches(coordinates, capture_directory, partitioned_nati
     from scar.ir.execution.validation import prepare_program_snapshot, validate
     need(type(budget) is NativeCaptureBatchBudget, "exact native batch budget required")
     need(on_verified_shard is None or callable(on_verified_shard), "verified shard consumer must be callable")
-    need(scalar_input_profile in (None, SCALAR_INPUT_CAPABILITY), 'unsupported requested scalar capability')
+    need(scalar_input_profile in (None, *SCALAR_INPUT_CAPABILITIES), 'unsupported requested scalar capability')
     need(static_artifacts is None or type(static_artifacts) is NativeStaticArtifacts, 'exact static artifact input required')
     budget.__post_init__()
     out = Path(out_dir).resolve()
@@ -1201,7 +1201,7 @@ def bind_native_capture_model_batches(capture_model_path, out_dir, *, expected_s
     need(limits.max_wall_seconds <= 120 and limits.max_index_bytes <= 128_000_000
          and limits.max_output_bytes <= 64_000_000, 'small capture model entry budget exceeds hard cap')
     need(on_verified_shard is None or callable(on_verified_shard), 'verified shard consumer must be callable')
-    need(scalar_input_profile in (None, SCALAR_INPUT_CAPABILITY), 'unsupported scalar capability')
+    need(scalar_input_profile in (None, *SCALAR_INPUT_CAPABILITIES), 'unsupported scalar capability')
     need((static_program is None) == (static_interface is None), 'program/catalog must be supplied together')
     out = Path(out_dir).resolve()
     need(not out.exists(), 'capture model binding output must be fresh')
