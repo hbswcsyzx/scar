@@ -1,0 +1,8 @@
+{
+  "publication_performed": false,
+  "reading_cache_implementation_authorized": false,
+  "reason": "Root preserves this cost design and prioritizes the separate module/native-entry model gap.",
+  "source858_runtime843_unchanged": true,
+  "status": "DEFERRED_MODEL_ENTRY_FIRST",
+  "three_graph_add_run_authorized": false
+}

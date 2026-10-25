@@ -1,0 +1,13 @@
+{
+  "decoded_bytes": 1178068,
+  "decoded_sha256": "031a6a9872592ebbb5af096e6ed940ddaa3ad5715440b2f8341180f707752b41",
+  "git_storage": "READ_PLAN.v2.json.gz",
+  "original_bytes": 1178068,
+  "original_logical_uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/analysis/source_three_graph_add_plan_20261025/READ_PLAN.v2.json",
+  "original_sha256": "031a6a9872592ebbb5af096e6ed940ddaa3ad5715440b2f8341180f707752b41",
+  "reason": "Original JSON exceeds1000000 bytes; conventional gzip retained without changing its logical identity.",
+  "schema": "scar.analysis-retention",
+  "schema_version": 1,
+  "stored_bytes": 154174,
+  "stored_sha256": "cc308f5702f9f51518560e28ba3c1b8e1472c3cd232a75bf3485edd45b1ffc8a"
+}

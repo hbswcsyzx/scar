@@ -1,0 +1,207 @@
+{
+  "graph_or_big_root_or_context_reads": 0,
+  "metadata_reads": [
+    {
+      "decoded_bytes": 900,
+      "decoded_sha256": "18374efe46c2c04f9f7277ca20459e0c30521200bf779d5826fc3852f7fd97ad",
+      "stored_bytes": 900,
+      "stored_sha256": "18374efe46c2c04f9f7277ca20459e0c30521200bf779d5826fc3852f7fd97ad",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/launch-result.json"
+    },
+    {
+      "decoded_bytes": 64657,
+      "decoded_sha256": "bb58ee8676222091b1666d6a89dbe788a2392c9bc406c913dd59ef8457ef18cb",
+      "stored_bytes": 64657,
+      "stored_sha256": "bb58ee8676222091b1666d6a89dbe788a2392c9bc406c913dd59ef8457ef18cb",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/result.json"
+    },
+    {
+      "decoded_bytes": 146967,
+      "decoded_sha256": "b64a798d8c24df6df191a604e85e2dc05218baf08931727a3f17e2b65a23f8d3",
+      "stored_bytes": 146967,
+      "stored_sha256": "b64a798d8c24df6df191a604e85e2dc05218baf08931727a3f17e2b65a23f8d3",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/selection.json"
+    },
+    {
+      "decoded_bytes": 14931,
+      "decoded_sha256": "15b742662a0c3fea333b08f98135d1d2a6d3f361a064c1673d99f00d2ab01eb2",
+      "stored_bytes": 14931,
+      "stored_sha256": "15b742662a0c3fea333b08f98135d1d2a6d3f361a064c1673d99f00d2ab01eb2",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-01-result.json"
+    },
+    {
+      "decoded_bytes": 17040,
+      "decoded_sha256": "2a15147b2b4f6a621feb3654e8e193de524e7a1d3c18459aee1ad4e4c616720c",
+      "stored_bytes": 17040,
+      "stored_sha256": "2a15147b2b4f6a621feb3654e8e193de524e7a1d3c18459aee1ad4e4c616720c",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-02-result.json"
+    },
+    {
+      "decoded_bytes": 893,
+      "decoded_sha256": "a4677920fece44b31cc539a1bd773363e953c4878438478ac59675e41583657c",
+      "stored_bytes": 893,
+      "stored_sha256": "a4677920fece44b31cc539a1bd773363e953c4878438478ac59675e41583657c",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/launch-result.json"
+    },
+    {
+      "decoded_bytes": 49624,
+      "decoded_sha256": "1f6f226416d21b4e05f7f95bb27d4b9525415f62fad0ad43f8c759c690ebb8db",
+      "stored_bytes": 49624,
+      "stored_sha256": "1f6f226416d21b4e05f7f95bb27d4b9525415f62fad0ad43f8c759c690ebb8db",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/result.json"
+    },
+    {
+      "decoded_bytes": 75285,
+      "decoded_sha256": "7ac225d494c168e05b0dcaceac09f2a08ecaf404502ecd07693fcb62dd8cbec9",
+      "stored_bytes": 75285,
+      "stored_sha256": "7ac225d494c168e05b0dcaceac09f2a08ecaf404502ecd07693fcb62dd8cbec9",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/candidate03/selection.json"
+    },
+    {
+      "decoded_bytes": 17945,
+      "decoded_sha256": "68fc2cb54f0337bf66942bcd7fd3fe8408b0398407002483c097f0922869a07e",
+      "stored_bytes": 17945,
+      "stored_sha256": "68fc2cb54f0337bf66942bcd7fd3fe8408b0398407002483c097f0922869a07e",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/generator_expression_p0_20261025/candidate03/attempt01/body-01-result.json"
+    },
+    {
+      "decoded_bytes": 31829,
+      "decoded_sha256": "0effc10a7c77bb032bce82bd106b01cac759f29257f601efd70baa3d5f694bbe",
+      "stored_bytes": 31829,
+      "stored_sha256": "0effc10a7c77bb032bce82bd106b01cac759f29257f601efd70baa3d5f694bbe",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result.json"
+    },
+    {
+      "decoded_bytes": 83792,
+      "decoded_sha256": "4959e7a58abe42415ad2a066f96572a83c83f5b4aaebe9462778d5569439ef5d",
+      "stored_bytes": 83792,
+      "stored_sha256": "4959e7a58abe42415ad2a066f96572a83c83f5b4aaebe9462778d5569439ef5d",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_publication_20261025/result/publication/manifest.json"
+    },
+    {
+      "decoded_bytes": 83792,
+      "decoded_sha256": "4959e7a58abe42415ad2a066f96572a83c83f5b4aaebe9462778d5569439ef5d",
+      "stored_bytes": 83792,
+      "stored_sha256": "4959e7a58abe42415ad2a066f96572a83c83f5b4aaebe9462778d5569439ef5d",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_publication_20261025/result/publication/manifest.json"
+    },
+    {
+      "decoded_bytes": 218640,
+      "decoded_sha256": "8dee95d9d3e3fb2d729831554dd0f347fad31d77839e1e31c653c5caa349e0cd",
+      "stored_bytes": 18342,
+      "stored_sha256": "60ed0c0b9da3f925832accaa344b4e83cd571cdf67d1c95ad84f55050847eeea",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_publication_20261025/result/publication/components/publication.json.gz"
+    },
+    {
+      "decoded_bytes": 84419,
+      "decoded_sha256": "cf8e9a49b310337188ffb7a9bf2c99134dcf0c868c0474f1e09be93309237877",
+      "stored_bytes": 84419,
+      "stored_sha256": "cf8e9a49b310337188ffb7a9bf2c99134dcf0c868c0474f1e09be93309237877",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_call_kwargs_publication_20261025/result/publication/manifest.json"
+    },
+    {
+      "decoded_bytes": 58211,
+      "decoded_sha256": "cd8d6ae941df75a81852b9b8c80819c2c405a17a0e704146ece61159c6181919",
+      "stored_bytes": 5947,
+      "stored_sha256": "3bb21d5561280c0f2e347e37fbd6c5d1c39fa53f468e91fc6d926ef122e33acb",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_call_kwargs_publication_20261025/result/publication/components/publication.json.gz"
+    },
+    {
+      "decoded_bytes": 84407,
+      "decoded_sha256": "97342c29aaab8460f45b67a038e3a3cee22d1781393e1f57a4d7b22e58d26505",
+      "stored_bytes": 84407,
+      "stored_sha256": "97342c29aaab8460f45b67a038e3a3cee22d1781393e1f57a4d7b22e58d26505",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_body_revision_20261023/result/publication/manifest.json"
+    },
+    {
+      "decoded_bytes": 46603,
+      "decoded_sha256": "0674e4643980db96f032765c6259e3e8e3560195de7de3aa3212ed4fd2cb02af",
+      "stored_bytes": 5258,
+      "stored_sha256": "8f275b8074a3e551d12ae59cb73d872a46d202bc099444fd11306b47d943c747",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_body_revision_20261023/result/publication/components/publication.json.gz"
+    },
+    {
+      "decoded_bytes": 84488,
+      "decoded_sha256": "bc29bf5b9068085f2fe9b800638cadc875c6a32d2c9706514af3f01933f7ae14",
+      "stored_bytes": 84488,
+      "stored_sha256": "bc29bf5b9068085f2fe9b800638cadc875c6a32d2c9706514af3f01933f7ae14",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/result/publication/manifest.json"
+    },
+    {
+      "decoded_bytes": 15606,
+      "decoded_sha256": "643b8e1812937f83a560787097e471208d32c395556dd26bdd0a9c5d7fa6b6df",
+      "stored_bytes": 3312,
+      "stored_sha256": "a3edf32cdb8da1f37582d34fa05a04d9cd0f6b50684411e46faa9f3812558a4e",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/result/publication/components/publication.json.gz"
+    }
+  ],
+  "reader_source_receipts": [
+    {
+      "bytes": 88201,
+      "sha256": "f64d10aa2d3a397519670c65514948405ff384b093995017b543730a08fdeb31",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_composition.py"
+    },
+    {
+      "bytes": 40950,
+      "sha256": "bfd6fdd3879d4b6311e987718d72c8e88e091e8ee482d41a1ef5882c274b464a",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_program_publication.py"
+    },
+    {
+      "bytes": 37877,
+      "sha256": "4eb3814294b10d4f15c0464d13b78094eca0351295b7cd93092bf00bf470eb5d",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/inventory_partitions.py"
+    },
+    {
+      "bytes": 67819,
+      "sha256": "c1d0a8a3204aff994933e957c8fdcfbab6e07300a6a9ee2ef257ed4446ab250d",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py"
+    },
+    {
+      "bytes": 10085,
+      "sha256": "cf1245d1405628e1c719fd6099bc37c10055ee62007394946c1b3244e811b7ac",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/function_interfaces.py"
+    },
+    {
+      "bytes": 28212,
+      "sha256": "211cfc23e064249e3c2a686df598d9cf3d42b4fddc63ed5723c173b3bec38ecf",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_generator_validation.py"
+    },
+    {
+      "bytes": 22863,
+      "sha256": "2be18373563d4850c95f341e3c57fe33f7e0c31aa6de5fd35ac81c8baab44b2e",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_string_validation.py"
+    },
+    {
+      "bytes": 40826,
+      "sha256": "63689ab9741b613f8ab0549c4618a4bc8a03e073da52c91dcf9a9342ecb4f443",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/codec.py"
+    },
+    {
+      "bytes": 6206,
+      "sha256": "1e2b6e456c10532f9189aeaeb319d20a8520c5a78efcf1c1abe47dcba4474b63",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_language.py"
+    }
+  ],
+  "schema": "scar.small-preparation-source-receipts",
+  "schema_version": 1,
+  "source_text_receipts": [
+    {
+      "bytes": 26887,
+      "logical_source": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/spaces.py",
+      "sha256": "73079b2a66dace087abc7c417691e3cc339887866915553e21d0936a362229eb",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/10cfd814a993dabb16e0cc083e40ceabf5a7fe9f4fff6e1315b07aaaea95f091.source.utf8"
+    },
+    {
+      "bytes": 10080,
+      "logical_source": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/solver/cem.py",
+      "sha256": "a6662e7f1f2c6ecaf0a8527255d531aa05ed583339aabdf2798d0206382ef51b",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/c86ff03b6335180ea42f68ea29b1c04919986c6b9a281e3034724c261726b938.source.utf8"
+    },
+    {
+      "bytes": 8062,
+      "logical_source": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/lewm/module.py",
+      "sha256": "3a6209baf30c11f77a5f6637282a1821fc62cea827438a97b23933caab51d8c7",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/40d02b07f148d10eff22d691fd9651f60514a9c866fbcc46400ba1e5a2ddfb86.source.utf8"
+    }
+  ]
+}
