@@ -1,0 +1,41 @@
+{
+  "apply_status": "NOT_APPLIED_BY_IMPLEMENTATION_AGENT",
+  "files": [
+    {
+      "isolated_new": {
+        "bytes": 41956,
+        "sha256": "cbfcbc00d21c4a0c636af22bde8ebd8672481fcf759f326b3de99c804b56f164"
+      },
+      "main_old": {
+        "bytes": 31708,
+        "sha256": "6a4026e6cbb038a243851e14156216b693c90dd2d587d56d0e02ebdabfaf94b3"
+      },
+      "path": "scar/trace/tensor_physical.py"
+    },
+    {
+      "isolated_new": {
+        "bytes": 23140,
+        "sha256": "ac1c9f1d88b91b37f8c46b4c8c9ba26ffca1510f9b9683d265fe1202cf903b53"
+      },
+      "main_old": {
+        "bytes": 21819,
+        "sha256": "fadabefb7f81b30aa11db1374d1a59e01ad7aa6954b1406761bd6f1aaafb3fec"
+      },
+      "path": "scar/trace/execution_evidence.py"
+    },
+    {
+      "isolated_new": {
+        "bytes": 15232,
+        "sha256": "548a013eaad9f795945769c03b60dd8f12adfa6acab6f2a1688a77eef5ec3474"
+      },
+      "main_old": null,
+      "path": "scar/trace/native_tensor_inputs.py"
+    }
+  ],
+  "isolated_root": "/home/zyf/AAA/scar-worktrees/native-scalar-model",
+  "main_root": "/home/zyf/AAA/scar-worktrees/structured-program-model",
+  "method": "current main byte receipts; no Git command/main write",
+  "schema": "scar.native-input-retention-main-application",
+  "schema_version": 1,
+  "scope": "explicit opt-in native input companion retention; no ordinary membership or old1901 qualification"
+}

@@ -1,0 +1,7 @@
+{
+  "elapsed_seconds": 2.984560853044968,
+  "message": "torch.cat(): expected a non-empty list of Tensors",
+  "status": "FEATURE_CPU_PROBE_FAILED",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/probe.py\", line 107, in <module>\n    result = main()\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/probe.py\", line 49, in main\n    torch.ops.aten.cat.default([], 0)\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^\n  File \"/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_ops.py\", line 875, in __call__\n    return self._op(*args, **kwargs)\n           ~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/dispatch_evidence.py\", line 137, in __torch_dispatch__\n    return owner._dispatch(func, args, kwargs)\n           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/dispatch_evidence.py\", line 176, in _dispatch\n    result = func(*args, **({} if kwargs is None else kwargs))\n  File \"/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/torch/_ops.py\", line 875, in __call__\n    return self._op(*args, **kwargs)\n           ~~~~~~~~^^^^^^^^^^^^^^^^^\nValueError: torch.cat(): expected a non-empty list of Tensors\n",
+  "type": "ValueError"
+}

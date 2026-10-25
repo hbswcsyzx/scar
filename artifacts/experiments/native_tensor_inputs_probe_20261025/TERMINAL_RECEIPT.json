@@ -1,0 +1,57 @@
+{
+  "ETO_port_join": false,
+  "actual_feature_CPU_capture_runs": 1,
+  "offline_postflight": {
+    "GNU_wall_seconds": 0.17,
+    "Torch_imported": false,
+    "actual_exit_from_root": 0,
+    "freeze": {
+      "bytes": 3434,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/postflight01/freeze.json",
+      "sha256": "64c0950a539a40d685bbbe3b44d6df40beadab2eba92720bc85e8a5a17e8a802"
+    },
+    "internal_seconds": 0.09984895400702953,
+    "max_RSS_KiB": 23716,
+    "new_capture_runs": 0,
+    "result": {
+      "bytes": 2168,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/postflight01/result.json",
+      "sha256": "e90d5191daa4bff815fafa8b65e8f7b9b9c0c6809aa12e2b483fd0a96114f345"
+    },
+    "time": {
+      "bytes": 845,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/postflight01/time.txt",
+      "sha256": "7d8b0a320c6fba78fd0fe37edd9ceaff40fcdb06a19de2b294c63f64222a1207"
+    }
+  },
+  "old1901_new_qualification": 0,
+  "ordinary_membership": false,
+  "original_probe": {
+    "GNU_wall_seconds": 3.85,
+    "actual_exit": 1,
+    "failure": {
+      "bytes": 1460,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/failure.json",
+      "sha256": "52564cbe26b8fc0b415707eddee47ef43ddb737c0540d6164b7f84770d8e44d1"
+    },
+    "failure_cause": "probe exception-class assumption",
+    "failure_type": "ValueError",
+    "freeze": {
+      "bytes": 61480,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/freeze.json",
+      "sha256": "9f749dff6a8bd4bb29f748bd7f5d1f3d93fc717af85d3ec5675f9ec60aa35153"
+    },
+    "internal_seconds": 2.984560853044968,
+    "max_RSS_KiB": 801900,
+    "root_session": 12421,
+    "time": {
+      "bytes": 904,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/time.txt",
+      "sha256": "89e6cff0d67d3c4682672edc85e863fe969ef98f0766795f68e77a188c996bb0"
+    }
+  },
+  "prior_witness_CPU_gate_captures_separately": 1,
+  "schema": "scar.native-input-retention-terminal",
+  "schema_version": 1,
+  "whole_model": "OPEN"
+}

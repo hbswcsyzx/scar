@@ -1,0 +1,62 @@
+{
+  "ETO_port_join_established": false,
+  "GPU_runs": 0,
+  "LeWM_runs": 0,
+  "Torch_imported": false,
+  "actual_dispatch_raised": {
+    "begin_index": 19,
+    "end_index": 20,
+    "operator": "aten.cat.default",
+    "sequence": 7
+  },
+  "chunks": 22,
+  "consumer_only": true,
+  "elapsed_seconds": 0.09984895400702953,
+  "empty_tensor_lists_seen": 3,
+  "feature_CPU_captures": 1,
+  "full_native_runs": 0,
+  "logical_content_or_ready_established": false,
+  "native_input_manifest": {
+    "bytes": 5431,
+    "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/manifest.json",
+    "sha256": "bb4969380f7f5020007a832f5e1afb007fdce16a92da37f9169d1e454f676944"
+  },
+  "observed_torch_ops": 43,
+  "old_1901_ports_newly_qualified": 0,
+  "old_raw_DB_reads": 0,
+  "ordinary_capture_membership_established": false,
+  "original_actual_exit": 1,
+  "original_failure_cause": "probe caught RuntimeError but actual intended empty-list operation raised ValueError",
+  "original_failure_message": "torch.cat(): expected a non-empty list of Tensors",
+  "original_failure_type": "ValueError",
+  "original_root_session": 12421,
+  "postflight_new_CPU_captures": 0,
+  "prior_witness_CPU_gate_captures": 1,
+  "reader": {
+    "capabilities": {
+      "ETO_port_join_established": false,
+      "Python_identity_established": false,
+      "logical_content_established": false,
+      "native_inputs": "PROVIDER_METADATA_ONLY",
+      "native_outputs": "UNAVAILABLE_IN_PINNED_API",
+      "resource_ready_established": false
+    },
+    "counts": {
+      "OPAQUE": 47,
+      "SCALAR_OPAQUE": 30,
+      "TENSOR": 34,
+      "TENSOR_LIST": 6,
+      "empty_tensor_lists": 3,
+      "tensor_metadata": 40
+    },
+    "manifest_sha256": "bb4969380f7f5020007a832f5e1afb007fdce16a92da37f9169d1e454f676944",
+    "ordinary_capture_membership_established": false,
+    "profile": "scar.native-tensor-input-event-tree-v1",
+    "raw_bytes": 47007,
+    "retained_rows": 43
+  },
+  "saved_dispatch_bytes_read": 6617,
+  "status": "OFFLINE_SAVED_NATIVE_INPUT_RETENTION_VERIFIED",
+  "whole_model": "OPEN",
+  "zero_dim_metadata_seen": true
+}

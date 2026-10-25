@@ -1,0 +1,284 @@
+{
+  "URI_boundary": "No implicit relocation or URI rewriting; the recorded original namespace is retained.",
+  "file_count": 54,
+  "files": [
+    {
+      "bytes": 1342,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/FAILURE.md",
+      "sha256": "ab848723716cd8b7dcb896246cccf4e5363be2e24fc317adc8182686a692a6f5"
+    },
+    {
+      "bytes": 1395,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/MAIN_APPLICATION_RECEIPT.json",
+      "sha256": "4b348b3a2794eccb678a64a5d3844975cca16c8401480c8573d35ce603768516"
+    },
+    {
+      "bytes": 2799,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/README.md",
+      "sha256": "ed5617b4eed30463294feae7f4206528d688013f0127d8228980639d23d9b7d3"
+    },
+    {
+      "bytes": 2518,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/RESULT.md",
+      "sha256": "b312249dd7def2fe45965be40beb32ff56cd4eb79df8a148d87ef67b4ed2a432"
+    },
+    {
+      "bytes": 1397,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/SOURCE_RECEIPT.json",
+      "sha256": "159092e3646d4c0a69ab80a63d5ce8808f86e90d2aa583a4fba56591f9640750"
+    },
+    {
+      "bytes": 2085,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/TERMINAL_RECEIPT.json",
+      "sha256": "a086ee18b722b2aca163c8b089ebbe8953eb4451479d630d4ad0c95ff82fffa0"
+    },
+    {
+      "bytes": 1460,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/failure.json",
+      "sha256": "52564cbe26b8fc0b415707eddee47ef43ddb737c0540d6164b7f84770d8e44d1"
+    },
+    {
+      "bytes": 61480,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/freeze.json",
+      "sha256": "9f749dff6a8bd4bb29f748bd7f5d1f3d93fc717af85d3ec5675f9ec60aa35153"
+    },
+    {
+      "bytes": 32380,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/implementation.diff",
+      "sha256": "819705732cf9453ea184c8bcfa828daf2e31e97ab73f7f8aefd38871f4e4849a"
+    },
+    {
+      "bytes": 3434,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/postflight01/freeze.json",
+      "sha256": "64c0950a539a40d685bbbe3b44d6df40beadab2eba92720bc85e8a5a17e8a802"
+    },
+    {
+      "bytes": 5797,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/postflight01/postflight.py",
+      "sha256": "8c0452c4f9e659b83a2eb9afa4e0c5e5685dc2646f48a01d0ea4ac9f9fa22039"
+    },
+    {
+      "bytes": 2168,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/postflight01/result.json",
+      "sha256": "e90d5191daa4bff815fafa8b65e8f7b9b9c0c6809aa12e2b483fd0a96114f345"
+    },
+    {
+      "bytes": 588,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/postflight01/run.sh",
+      "sha256": "2d6c3f4541df9be4f7af6a6b782d6a768699ea7b3f6ada9d9b4f33f192a31744"
+    },
+    {
+      "bytes": 845,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/postflight01/time.txt",
+      "sha256": "7d8b0a320c6fba78fd0fe37edd9ceaff40fcdb06a19de2b294c63f64222a1207"
+    },
+    {
+      "bytes": 5765,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/probe.py",
+      "sha256": "b5682b55934e7752743d1e420597de95ad92cc7c15031eb1d308d61aab7c9230"
+    },
+    {
+      "bytes": 583,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/run.sh",
+      "sha256": "9b37f42d5e1a1d897bffb5c6e8c4c0799e1e535058246e58f6de3efa6ffffabf"
+    },
+    {
+      "bytes": 904,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/time.txt",
+      "sha256": "89e6cff0d67d3c4682672edc85e863fe969ef98f0766795f68e77a188c996bb0"
+    },
+    {
+      "bytes": 5781,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace-local-only.json",
+      "sha256": "2a1c7fc749d90bbd5a7c5e1ed679deb82313dd96005c5d329479ec3e230b6d7a"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/call-codes.1372667.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/call-events.1372667.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 1005,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/call-meta.1372667.json",
+      "sha256": "8f41d3209367b7bc8e9702b82a6ac17214f608f176f67b77609d42deda5af3b6"
+    },
+    {
+      "bytes": 1496,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/dispatch-meta.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "sha256": "f453ea013d7903a33d00a6351a2490f84651a63f66905253b29a55dcba767be8"
+    },
+    {
+      "bytes": 6617,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/dispatch-observations.1372667.6c9a810a1cb819a172db1e49b723a125.jsonl",
+      "sha256": "aa31fd146230cb016d974ca47b7ba3f8feb29dd037130cf9266b99e193743153"
+    },
+    {
+      "bytes": 5593,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/execution-evidence.1372667.json",
+      "sha256": "a6cd23b97c013840c8e4fe54dd30138794a9a2d18c407250ed486f865b5c8d33"
+    },
+    {
+      "bytes": 39785,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/execution-trace.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "sha256": "06dc2337999fc2b86d380bcac56df046a559aaee8d938a8d8dff7a2dbff51bd0"
+    },
+    {
+      "bytes": 23691,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/kineto.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "sha256": "a99cf7c80f364c463111c6590d35d07990f06c18d107816c79db61708b240c6b"
+    },
+    {
+      "bytes": 1814,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000000.jsonl",
+      "sha256": "ce25cbb31d75d0ae9772cc24c9e5d15a41d287d5632ecfd9959734684fd56507"
+    },
+    {
+      "bytes": 1480,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000001.jsonl",
+      "sha256": "6a03ec5c2da5b1d3f930b8aff21e391384ecb7abba5e916a5091060bd8dbcbb5"
+    },
+    {
+      "bytes": 1996,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000002.jsonl",
+      "sha256": "460092f279b86c3552136470a5af7a73fa9bb45be6fddcafbf655c6e33df1211"
+    },
+    {
+      "bytes": 2492,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000003.jsonl",
+      "sha256": "943ade3aa39579ee4a7447ee6efcba36c15dfda676b54c393444ce9a1e243927"
+    },
+    {
+      "bytes": 2512,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000004.jsonl",
+      "sha256": "99f49e12ae01c64397485e138ae96e2f6b689891383c1335bbab4f772c2d7325"
+    },
+    {
+      "bytes": 2704,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000005.jsonl",
+      "sha256": "7c8076420d1c64dfb10b6a3c63dcb6775a4bd4d7e969433a57b596e137cb09ea"
+    },
+    {
+      "bytes": 2373,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000006.jsonl",
+      "sha256": "afad305da3b4b39d918f2ebe0a5d8e15506ec6342d920b803a2b4faace26fb07"
+    },
+    {
+      "bytes": 2510,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000007.jsonl",
+      "sha256": "012346ce02293e6d0107a0af03cfa9806c2745c0cbc29a2b9a68e4dae5b08b25"
+    },
+    {
+      "bytes": 2105,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000008.jsonl",
+      "sha256": "48cc93c5190aca4063eea86bc186f99bf6b41b9e41c7f9b559f56b3ebc2dbd1e"
+    },
+    {
+      "bytes": 2090,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000009.jsonl",
+      "sha256": "6143dbb8b6c153abcd816086e7e04acd2bac27a2c47dad3cfadbe132859fe468"
+    },
+    {
+      "bytes": 2086,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000010.jsonl",
+      "sha256": "d565f40f326e8b1e9f09bd445f406b0c7fc37ef4d04c0093f11c49a642c02726"
+    },
+    {
+      "bytes": 2105,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000011.jsonl",
+      "sha256": "0bca55096f267967fcebdee9f28caa0c8c4f3b019b915b967b4a2acca804638e"
+    },
+    {
+      "bytes": 2090,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000012.jsonl",
+      "sha256": "ed197c284803cb814704bc5f3b4b1ab58eb6a79c01d6542c81c74c4a91b5a180"
+    },
+    {
+      "bytes": 2086,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000013.jsonl",
+      "sha256": "b97d59c0974374b8a4b02e9f9e8fdb7f00b1f7e69fdc15a7316e2b6cf6d147ae"
+    },
+    {
+      "bytes": 3003,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000014.jsonl",
+      "sha256": "b52a500d1aa64d641780f7a8eedab03e5c103d25ecd84e65a0cfc527d81c0e3e"
+    },
+    {
+      "bytes": 2984,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000015.jsonl",
+      "sha256": "9e008202bd8a8d5ffd9aca2e8c5c68fea65b2bcf909f6948d3bfed7eaab4c13d"
+    },
+    {
+      "bytes": 2389,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000016.jsonl",
+      "sha256": "465fb7e27f1795eb7640c9f146ee354f93aa17a80ebbe5b8ebc58f197fe55993"
+    },
+    {
+      "bytes": 2397,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000017.jsonl",
+      "sha256": "68a4e3bd952ac410b41b413fb293ef02cc9cd44b2de8ca5b2e235b6294a01c58"
+    },
+    {
+      "bytes": 2320,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000018.jsonl",
+      "sha256": "eaea96b384a7eb6eef5ae7effcb5963995b1d10158d26b0d19df8e9f3b38b804"
+    },
+    {
+      "bytes": 1641,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000019.jsonl",
+      "sha256": "744cbdf5bd072a37fcd4b23c5699ee30039668eef4e813f2ae9626fd1dc2fe26"
+    },
+    {
+      "bytes": 1207,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000020.jsonl",
+      "sha256": "6d3929b27370ccdea21d028f6195f67f7da86b2c4a2fa356bbacc7f3abe988ea"
+    },
+    {
+      "bytes": 623,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/000021.jsonl",
+      "sha256": "4652983ee3bb0b235ad6788d3cb0dbc01ba4b23ea1e29c7c4654c6fc54672c79"
+    },
+    {
+      "bytes": 5431,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/manifest.json",
+      "sha256": "bb4969380f7f5020007a832f5e1afb007fdce16a92da37f9169d1e454f676944"
+    },
+    {
+      "bytes": 4171,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/tensor-physical-meta.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "sha256": "67124a33bfcd7e4ad3526e35d50b6f26d3e509f2f21d9365b8cff3be387bf876"
+    },
+    {
+      "bytes": 21931,
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/tensor-physical.1372667.6c9a810a1cb819a172db1e49b723a125.jsonl",
+      "sha256": "dd242c126da47f42fc415244740921be8300742c367da2dfa834c1ed7cb926f3"
+    },
+    {
+      "bytes": 23140,
+      "path": "scar/trace/execution_evidence.py",
+      "sha256": "ac1c9f1d88b91b37f8c46b4c8c9ba26ffca1510f9b9683d265fe1202cf903b53"
+    },
+    {
+      "bytes": 15232,
+      "path": "scar/trace/native_tensor_inputs.py",
+      "sha256": "548a013eaad9f795945769c03b60dd8f12adfa6acab6f2a1688a77eef5ec3474"
+    },
+    {
+      "bytes": 41956,
+      "path": "scar/trace/tensor_physical.py",
+      "sha256": "cbfcbc00d21c4a0c636af22bde8ebd8672481fcf759f326b3de99c804b56f164"
+    }
+  ],
+  "manifest_self_excluded": true,
+  "max_single_bytes": 61480,
+  "new_companion_chunks_staged": 22,
+  "original_trace_bytes_staged": 104289,
+  "original_trace_files_staged": 10,
+  "schema": "scar.native-input-retention-small-staging",
+  "schema_version": 1,
+  "total_bytes": 369776
+}

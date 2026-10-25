@@ -34,7 +34,7 @@ _EXTRA_ENV = (
 class ExecutionEvidence:
     """One delayed capture. close() is idempotent and never stops a foreign ETO."""
 
-    def __init__(self, out, *, recorder=None):
+    def __init__(self, out, *, recorder=None, native_input_chunk_rows=1000):
         self.pid = os.getpid()
         self.thread = threading.get_ident()
         self.status = "WAITING_FOR_TORCH"
@@ -49,6 +49,13 @@ class ExecutionEvidence:
             recorder._collector_native_manager = self
         self._dispatch_evidence = None
         self._physical_requested = os.environ.get("SCAR_TENSOR_PHYSICAL") == "1"
+        self._native_inputs_requested = os.environ.get("SCAR_NATIVE_TENSOR_INPUTS") == "1"
+        if self._native_inputs_requested and not self._physical_requested:
+            raise ValueError("native input metadata requires the owned physical exporter")
+        if self._native_inputs_requested and (type(native_input_chunk_rows) is not int
+                or not 1 <= native_input_chunk_rows <= 1000):
+            raise ValueError("native input chunk rows must be within 1..1000")
+        self._native_input_chunk_rows = native_input_chunk_rows
         self._enter_attempted = False
         self._recording = False
         self._previous_import = None
@@ -115,6 +122,13 @@ class ExecutionEvidence:
                     "metadata": str(root / f"tensor-physical-meta.{self.pid}.{nonce}.json"),
                     "failure": str(root / f"tensor-physical-failure.{self.pid}.{nonce}.json"),
                     "export_timing": "after final native manifest and dispatch metadata close",
+                }
+            if self._native_inputs_requested:
+                self._config["native_tensor_input_observations"] = {
+                    "profile": "scar.native-tensor-input-event-tree-v1", "requested": True,
+                    "manifest": str(root / f"native-tensor-inputs.{self.pid}.{nonce}" / "manifest.json"),
+                    "chunk_rows": native_input_chunk_rows,
+                    "scope": "post-close input metadata retention only; no ETO port or object qualification",
                 }
             self._manifest_path = root / f"execution-evidence.{self.pid}.json"
             self._manifest_temp = root / f".execution-evidence.{self.pid}.{nonce}.tmp"
@@ -415,12 +429,15 @@ class ExecutionEvidence:
             if self._dispatch_evidence is None or self._profiler is None:
                 raise ValueError("physical export requires owned dispatch and profiler results")
             nonce = self._paths["kineto"].name.split(".")[2]
+            companion = ({"native_inputs_profile": "scar.native-tensor-input-event-tree-v1",
+                          "native_chunk_rows": self._native_input_chunk_rows}
+                if self._native_inputs_requested else {})
             export_tensor_physical(self._profiler.profiler.kineto_results,
                 self._paths["kineto"].parent, nonce=nonce,
                 provider_revision=self._provider["torch_git_version"],
                 dispatch_metadata_path=self._dispatch_evidence.meta_path,
                 dispatch_observations_path=self._dispatch_evidence.event_path,
-                native_manifest_path=self._manifest_path)
+                native_manifest_path=self._manifest_path, **companion)
         except Exception as error:
             # The prior native manifest is already bound by dispatch metadata.
             # Export failure must not mutate either receipt or fail the target.

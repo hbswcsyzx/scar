@@ -1,0 +1,92 @@
+{
+  "URI_boundary": "Captured artifact URIs remain exact original URIs. A copy into another directory does not implicitly relocate/rewrite them or establish ordinary membership.",
+  "bytes": 104289,
+  "companion_chunk_bytes": 47007,
+  "companion_chunk_count": 22,
+  "companion_manifest": {
+    "bytes": 5431,
+    "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/native-tensor-inputs.1372667.6c9a810a1cb819a172db1e49b723a125/manifest.json",
+    "sha256": "bb4969380f7f5020007a832f5e1afb007fdce16a92da37f9169d1e454f676944"
+  },
+  "delivery_update": "Root requested inclusion of the complete small reader source sample; only delivery metadata changed.",
+  "file_count": 10,
+  "files": [
+    {
+      "bytes": 0,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/call-codes.1372667.jsonl",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/call-codes.1372667.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stage": true
+    },
+    {
+      "bytes": 0,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/call-events.1372667.jsonl",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/call-events.1372667.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stage": true
+    },
+    {
+      "bytes": 1005,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/call-meta.1372667.json",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/call-meta.1372667.json",
+      "sha256": "8f41d3209367b7bc8e9702b82a6ac17214f608f176f67b77609d42deda5af3b6",
+      "stage": true
+    },
+    {
+      "bytes": 1496,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/dispatch-meta.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/dispatch-meta.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "sha256": "f453ea013d7903a33d00a6351a2490f84651a63f66905253b29a55dcba767be8",
+      "stage": true
+    },
+    {
+      "bytes": 6617,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/dispatch-observations.1372667.6c9a810a1cb819a172db1e49b723a125.jsonl",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/dispatch-observations.1372667.6c9a810a1cb819a172db1e49b723a125.jsonl",
+      "sha256": "aa31fd146230cb016d974ca47b7ba3f8feb29dd037130cf9266b99e193743153",
+      "stage": true
+    },
+    {
+      "bytes": 5593,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/execution-evidence.1372667.json",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/execution-evidence.1372667.json",
+      "sha256": "a6cd23b97c013840c8e4fe54dd30138794a9a2d18c407250ed486f865b5c8d33",
+      "stage": true
+    },
+    {
+      "bytes": 39785,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/execution-trace.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/execution-trace.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "sha256": "06dc2337999fc2b86d380bcac56df046a559aaee8d938a8d8dff7a2dbff51bd0",
+      "stage": true
+    },
+    {
+      "bytes": 23691,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/kineto.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/kineto.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "sha256": "a99cf7c80f364c463111c6590d35d07990f06c18d107816c79db61708b240c6b",
+      "stage": true
+    },
+    {
+      "bytes": 4171,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/tensor-physical-meta.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/tensor-physical-meta.1372667.6c9a810a1cb819a172db1e49b723a125.json",
+      "sha256": "67124a33bfcd7e4ad3526e35d50b6f26d3e509f2f21d9365b8cff3be387bf876",
+      "stage": true
+    },
+    {
+      "bytes": 21931,
+      "local_uri": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_tensor_inputs_probe_20261025/trace/tensor-physical.1372667.6c9a810a1cb819a172db1e49b723a125.jsonl",
+      "path": "artifacts/experiments/native_tensor_inputs_probe_20261025/trace/tensor-physical.1372667.6c9a810a1cb819a172db1e49b723a125.jsonl",
+      "sha256": "dd242c126da47f42fc415244740921be8300742c367da2dfa834c1ed7cb926f3",
+      "stage": true
+    }
+  ],
+  "historical_basename": "trace-local-only.json is retained as the delivery metadata path; the current policy stages every listed file.",
+  "local_only_file_count": 0,
+  "ordinary_membership": "OPEN",
+  "policy": "All ten small original trace files are staged with the companion manifest and all 22 chunks. Original capture bytes are unchanged; no files deleted.",
+  "schema": "scar.native-input-probe-small-trace-retention",
+  "schema_version": 1,
+  "sha_basis": "terminal byte hashing of this new small CPU experiment only, no parsing/replay; no old LeWM/raw/DB read"
+}

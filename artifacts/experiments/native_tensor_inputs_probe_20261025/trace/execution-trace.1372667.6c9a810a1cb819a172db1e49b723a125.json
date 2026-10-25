@@ -1,0 +1,264 @@
+{
+  "schema": "1.1.1-chakra.0.0.4", "pid": 1372667, "time": "2026-10-25 16:58:21", "start_ts": 280239373,
+  "nodes": [
+      {
+        "id": 2, "name": "[pytorch|profiler|execution_trace|thread]", "ctrl_deps": 1,
+        "inputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 0},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 7, "name": "aten::empty", "ctrl_deps": 6,
+        "inputs": {"values": [[],6,"<None>","cpu",false,"<None>"], "shapes": [[],[],[],[],[],[]], "types": ["GenericList[]","Int","None","Device","Bool","None"], "strides": [[],[],[],[],[],[]]},
+        "outputs": {"values": [[8,9,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 5},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::empty.memory_format(SymInt[] size, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None, MemoryFormat? memory_format=None) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 10, "name": "aten::fill_", "ctrl_deps": 6,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],1.000000], "shapes": [[],[]], "types": ["Tensor(float)","Double"], "strides": [[],[]]},
+        "outputs": {"values": [[8,9,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 6},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::fill_.Scalar(Tensor(a!) self, Scalar value) -> Tensor(a!)"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 6, "name": "aten::ones", "ctrl_deps": 5,
+        "inputs": {"values": [[],"<None>","<None>","cpu",false], "shapes": [[],[],[],[],[]], "types": ["GenericList[]","None","None","Device","Bool"], "strides": [[],[],[],[],[]]},
+        "outputs": {"values": [[8,9,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 4},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::ones(SymInt[] size, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 11, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:1:output", "ctrl_deps": 5,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 7},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 5, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:1:span", "ctrl_deps": 4,
+        "inputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 3},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 4, "name": "PythonDispatchMode", "ctrl_deps": 3,
+        "inputs": {"values": [[],"<None>","<None>","cpu",false], "shapes": [[],[],[],[],[]], "types": ["GenericList[]","None","None","Device","Bool"], "strides": [[],[],[],[],[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 2},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 3, "name": "aten::ones", "ctrl_deps": 2,
+        "inputs": {"values": [[],"<None>","<None>","cpu",false], "shapes": [[],[],[],[],[]], "types": ["GenericList[]","None","None","Device","Bool"], "strides": [[],[],[],[],[]]},
+        "outputs": {"values": [[8,9,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 1},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::ones(SymInt[] size, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 22, "name": "aten::empty_strided", "ctrl_deps": 21,
+        "inputs": {"values": [[],[],6,0,"cpu",false], "shapes": [[],[],[],[],[],[]], "types": ["GenericList[]","GenericList[]","Int","Int","Device","Bool"], "strides": [[],[],[],[],[],[]]},
+        "outputs": {"values": [[23,24,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 14},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::empty_strided(SymInt[] size, SymInt[] stride, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 25, "name": "aten::copy_", "ctrl_deps": 21,
+        "inputs": {"values": [[23,24,0,1,4,"cpu"],[18,19,0,1,8,"cpu"],false], "shapes": [[],[],[]], "types": ["Tensor(float)","Tensor(long int)","Bool"], "strides": [[],[],[]]},
+        "outputs": {"values": [[23,24,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 15},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::copy_(Tensor(a!) self, Tensor src, bool non_blocking=False) -> Tensor(a!)"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 21, "name": "aten::_to_copy", "ctrl_deps": 20,
+        "inputs": {"values": [[18,19,0,1,8,"cpu"],6,"<None>","<None>","<None>",false,"<None>"], "shapes": [[],[],[],[],[],[],[]], "types": ["Tensor(long int)","Int","None","None","None","Bool","None"], "strides": [[],[],[],[],[],[],[]]},
+        "outputs": {"values": [[23,24,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 13},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::_to_copy(Tensor self, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None, bool non_blocking=False, MemoryFormat? memory_format=None) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 20, "name": "aten::to", "ctrl_deps": 17,
+        "inputs": {"values": [[18,19,0,1,8,"cpu"],6,false,false,"<None>"], "shapes": [[],[],[],[],[]], "types": ["Tensor(long int)","Int","Bool","Bool","None"], "strides": [[],[],[],[],[]]},
+        "outputs": {"values": [[23,24,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 12},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::to.dtype(Tensor(a) self, ScalarType dtype, bool non_blocking=False, bool copy=False, MemoryFormat? memory_format=None) -> Tensor(a)"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 17, "name": "aten::add", "ctrl_deps": 16,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],[18,19,0,1,8,"cpu"],1], "shapes": [[],[],[]], "types": ["Tensor(float)","Tensor(long int)","Int"], "strides": [[],[],[]]},
+        "outputs": {"values": [[26,27,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 11},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::add.Tensor(Tensor self, Tensor other, *, Scalar alpha=1) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 28, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:2:output", "ctrl_deps": 16,
+        "inputs": {"values": [[26,27,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 16},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 16, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:2:span", "ctrl_deps": 15,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 10},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 15, "name": "PythonDispatchMode", "ctrl_deps": 12,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],[13,14,0,1,8,"cpu"],1], "shapes": [[],[],[]], "types": ["Tensor(float)","Tensor(long int)","Int"], "strides": [[],[],[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 9},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 12, "name": "aten::add", "ctrl_deps": 2,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],[13,14,0,1,8,"cpu"],1], "shapes": [[],[],[]], "types": ["Tensor(float)","Tensor(long int)","Int"], "strides": [[],[],[]]},
+        "outputs": {"values": [[26,27,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 8},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": 0},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::add.Tensor(Tensor self, Tensor other, *, Scalar alpha=1) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 33, "name": "aten::view", "ctrl_deps": 32,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],[1]], "shapes": [[],[[]]], "types": ["Tensor(float)","GenericList[Int]"], "strides": [[],[[]]]},
+        "outputs": {"values": [[34,9,0,1,4,"cpu"]], "shapes": [[1]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 21},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::view(Tensor(a) self, SymInt[] size) -> Tensor(a)"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 35, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:3:output", "ctrl_deps": 32,
+        "inputs": {"values": [[34,9,0,1,4,"cpu"]], "shapes": [[1]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 22},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 32, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:3:span", "ctrl_deps": 31,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 20},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 31, "name": "PythonDispatchMode", "ctrl_deps": 30,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],[1]], "shapes": [[],[[]]], "types": ["Tensor(float)","GenericList[Int]"], "strides": [[],[[]]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 19},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 30, "name": "aten::view", "ctrl_deps": 29,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],[1]], "shapes": [[],[[]]], "types": ["Tensor(float)","GenericList[Int]"], "strides": [[],[[]]]},
+        "outputs": {"values": [[34,9,0,1,4,"cpu"]], "shapes": [[1]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 18},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": 0},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::view(Tensor(a) self, SymInt[] size) -> Tensor(a)"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 29, "name": "aten::reshape", "ctrl_deps": 2,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],[1]], "shapes": [[],[[]]], "types": ["Tensor(float)","GenericList[Int]"], "strides": [[],[[]]]},
+        "outputs": {"values": [[34,9,0,1,4,"cpu"]], "shapes": [[1]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 17},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": 0},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::reshape(Tensor(a) self, SymInt[] shape) -> Tensor(a)"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 40, "name": "aten::view", "ctrl_deps": 39,
+        "inputs": {"values": [[26,27,0,1,4,"cpu"],[1]], "shapes": [[],[[]]], "types": ["Tensor(float)","GenericList[Int]"], "strides": [[],[[]]]},
+        "outputs": {"values": [[41,27,0,1,4,"cpu"]], "shapes": [[1]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 27},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::view(Tensor(a) self, SymInt[] size) -> Tensor(a)"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 42, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:4:output", "ctrl_deps": 39,
+        "inputs": {"values": [[41,27,0,1,4,"cpu"]], "shapes": [[1]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 28},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 39, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:4:span", "ctrl_deps": 38,
+        "inputs": {"values": [[26,27,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 26},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 38, "name": "PythonDispatchMode", "ctrl_deps": 37,
+        "inputs": {"values": [[26,27,0,1,4,"cpu"],[1]], "shapes": [[],[[]]], "types": ["Tensor(float)","GenericList[Int]"], "strides": [[],[[]]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 25},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 37, "name": "aten::view", "ctrl_deps": 36,
+        "inputs": {"values": [[26,27,0,1,4,"cpu"],[1]], "shapes": [[],[[]]], "types": ["Tensor(float)","GenericList[Int]"], "strides": [[],[[]]]},
+        "outputs": {"values": [[41,27,0,1,4,"cpu"]], "shapes": [[1]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 24},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": 0},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::view(Tensor(a) self, SymInt[] size) -> Tensor(a)"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 36, "name": "aten::reshape", "ctrl_deps": 2,
+        "inputs": {"values": [[26,27,0,1,4,"cpu"],[1]], "shapes": [[],[[]]], "types": ["Tensor(float)","GenericList[Int]"], "strides": [[],[[]]]},
+        "outputs": {"values": [[41,27,0,1,4,"cpu"]], "shapes": [[1]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 23},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": 0},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::reshape(Tensor(a) self, SymInt[] shape) -> Tensor(a)"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 46, "name": "aten::cat", "ctrl_deps": 45,
+        "inputs": {"values": [[[34,9,0,1,4,"cpu"],[41,27,0,1,4,"cpu"]],0], "shapes": [[[1],[1]],[]], "types": ["GenericList[Tensor(float),Tensor(float)]","Int"], "strides": [[[1],[1]],[]]},
+        "outputs": {"values": [[47,48,0,2,4,"cpu"]], "shapes": [[2]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 32},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::cat(Tensor[] tensors, int dim=0) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 49, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:5:output", "ctrl_deps": 45,
+        "inputs": {"values": [[47,48,0,2,4,"cpu"]], "shapes": [[2]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 33},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 45, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:5:span", "ctrl_deps": 44,
+        "inputs": {"values": [[34,9,0,1,4,"cpu"],[41,27,0,1,4,"cpu"]], "shapes": [[1],[1]], "types": ["Tensor(float)","Tensor(float)"], "strides": [[1],[1]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 31},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 44, "name": "PythonDispatchMode", "ctrl_deps": 43,
+        "inputs": {"values": [[[34,9,0,1,4,"cpu"],[41,27,0,1,4,"cpu"]],0], "shapes": [[[1],[1]],[]], "types": ["GenericList[Tensor(float),Tensor(float)]","Int"], "strides": [[[1],[1]],[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 30},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 43, "name": "aten::cat", "ctrl_deps": 2,
+        "inputs": {"values": [[[34,9,0,1,4,"cpu"],[41,27,0,1,4,"cpu"]],0], "shapes": [[[1],[1]],[]], "types": ["GenericList[Tensor(float),Tensor(float)]","Int"], "strides": [[[1],[1]],[]]},
+        "outputs": {"values": [[47,48,0,2,4,"cpu"]], "shapes": [[2]], "types": ["Tensor(float)"], "strides": [[1]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 29},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": 0},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::cat(Tensor[] tensors, int dim=0) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 54, "name": "aten::empty_strided", "ctrl_deps": 53,
+        "inputs": {"values": [[],[],6,0,"cpu",false], "shapes": [[],[],[],[],[],[]], "types": ["GenericList[]","GenericList[]","Int","Int","Device","Bool"], "strides": [[],[],[],[],[],[]]},
+        "outputs": {"values": [[55,56,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 38},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::empty_strided(SymInt[] size, SymInt[] stride, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 53, "name": "aten::empty_like", "ctrl_deps": 52,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],"<None>","<None>","<None>",false,"<None>"], "shapes": [[],[],[],[],[],[]], "types": ["Tensor(float)","None","None","None","Bool","None"], "strides": [[],[],[],[],[],[]]},
+        "outputs": {"values": [[55,56,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 37},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::empty_like(Tensor self, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None, MemoryFormat? memory_format=None) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 57, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:6:output", "ctrl_deps": 52,
+        "inputs": {"values": [[55,56,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 39},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 52, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:6:span", "ctrl_deps": 51,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 36},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 51, "name": "PythonDispatchMode", "ctrl_deps": 50,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],"<None>","<None>","<None>",false,"<None>"], "shapes": [[],[],[],[],[],[]], "types": ["Tensor(float)","None","None","None","Bool","None"], "strides": [[],[],[],[],[],[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 35},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 50, "name": "aten::empty_like", "ctrl_deps": 2,
+        "inputs": {"values": [[8,9,0,1,4,"cpu"],"<None>","<None>","<None>",false,"<None>"], "shapes": [[],[],[],[],[],[]], "types": ["Tensor(float)","None","None","None","Bool","None"], "strides": [[],[],[],[],[],[]]},
+        "outputs": {"values": [[55,56,0,1,4,"cpu"]], "shapes": [[]], "types": ["Tensor(float)"], "strides": [[]]},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 34},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": "aten::empty_like(Tensor self, *, ScalarType? dtype=None, Layout? layout=None, Device? device=None, bool? pin_memory=None, MemoryFormat? memory_format=None) -> Tensor"},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 60, "name": "scar-dispatch:6c9a810a1cb819a172db1e49b723a125:1372667:7:span", "ctrl_deps": 59,
+        "inputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 42},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 59, "name": "PythonDispatchMode", "ctrl_deps": 58,
+        "inputs": {"values": [[],0], "shapes": [[],[]], "types": ["GenericList[]","Int"], "strides": [[],[]]},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 41},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 0},{"name": "tid", "type": "uint64", "value": 1},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      },
+      {
+        "id": 1, "name": "[pytorch|profiler|execution_trace|process]", "ctrl_deps": 1,
+        "inputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "outputs": {"values": [], "shapes": [], "types": [], "strides": []},
+        "attrs": [{"name": "rf_id", "type": "uint64", "value": 0},{"name": "fw_parent", "type": "uint64", "value": 0},{"name": "seq_id", "type": "int64", "value": -1},{"name": "scope", "type": "uint64", "value": 7},{"name": "tid", "type": "uint64", "value": 0},{"name": "fw_tid", "type": "uint64", "value": 0},{"name": "op_schema", "type": "string", "value": ""},{"name": "kernel_backend", "type": "string", "value": ""},{"name": "kernel_file", "type": "string", "value": ""},{"name": "tensor_range", "type": "string", "value": ""}]
+      }
+  ],
+  "finish_ts": 280240528
+}
