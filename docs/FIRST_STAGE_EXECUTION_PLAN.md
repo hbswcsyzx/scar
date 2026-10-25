@@ -4,6 +4,17 @@
 [第一阶段合同](FIRST_STAGE_MODEL_CONTRACT.md)的 S1—S5，不新设一个缩小的完成目标。
 已完成的有限源码/接口门和失败均保留；不增加 detector、backend 或变换。
 
+当前三项并行工作都服务于完整模型，先设计再实现、由 root 自行验收：
+
+| 工作 | 当前边界与下一验收 |
+| --- | --- |
+| 通用 frame/control 根 | 模块没有 SourceAtom，既有 C0 只收函数根，不能用假函数补齐。先实施 core29 的 typed FRAME/ModuleUnitSource/单一 ABI 权威六处；旧 core28/SP6/7 不放宽。类型门后再接同一通用 SP8 的11句及异常清理，整体12文件方案见[设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
+| callee-entry 参数边 | 保存样例实际有260次入口/520个参数引用观测；先实现 snapshot→原 formal port 的局部 projection。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[证据与设计](../artifacts/analysis/callee_entry_routing_plan_20261025/PLAN.md)。 |
+| project/dependency 统一出版 | 当前自动 CLI 对 project SP5 的 adapter 明确 BLOCKED；先审原 origin、父 body/CAS 和 namespace，保所有成功产物，不能只留下方便处理的 external case。该项仍处设计审查，未授权新代码。 |
+
+这些是模型连接与类型修正，不是优化候选或 backend。下一版本仍必须保完整源码、
+调用和资源分母，并分别报告 source topology、运行对应、效果与完成状态。
+
 ## 1. 顺序与可并行边界
 
 | 合同节点 | 本次落实 | 交付与通过条件 |

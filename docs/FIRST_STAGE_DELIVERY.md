@@ -26,6 +26,12 @@ CLI 的精确资格与范围见
 调用/2shards；3095路径中2579项仍保frontier。此资格及上述source结果均属于新CPU
 样例，与旧LeWM独立；不授Python对象、内容/state或ready，也不增加其覆盖。见
 [归档与规范端口关联](NATIVE_TENSOR_INPUTS.md)。
+Native scalar V2 后继已在隔离树和主树真实公共路径通过，主树21.6171s：264个输入
+中260个 native boxed 内容观测根、4个明确 frontier；新增 decoder 已实际加载。
+这是原生层内容，不证明原 Python 类、上游 producer、Tensor 内容或 state/ready。
+精确类型、来源交换反例和主树158个真实导入见
+[V2 报告](../artifacts/experiments/native_scalar_union_20261025/REPORT.md)与
+[主树实门](../artifacts/experiments/native_scalar_union_main_20261025/attempt01/RESULT.md)。
 
 模块顶层也已补独立 mapping-frame 入口：真实源码自动选择原 MODULE initializer，
 2 Regions/9 个入口操作及普通 v6/v5 读回通过。内部语句恢复仍为 0，REQUIRED 展开
