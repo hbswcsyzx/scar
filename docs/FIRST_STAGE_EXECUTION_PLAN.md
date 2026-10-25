@@ -30,13 +30,18 @@ S1 审计、已有数据的 S3 接线和独立产品复核可以并行；会改�
 
 ## 2. 当前实际下一门
 
-通用CPU入口已推进到265调用的源码对应，以及1entry/28ops的正常lower、同SP5普通
-source/code读回（6.771874s）；9/271及全部前沿保留，260权重不计runtime。
-下一小门先把现有catalog/plan/worker接回通用`model-run --stage source-entries`入口，
-严格固定dependency terminal/products，默认1entry，不重raw/dependency/native/OS。
-然后消费原SP5进行qualified publication与普通binding；不用重新lower来恢复已失效
-live owner，CP2仍为未知成本。详见[入口](MODEL_RUN.md)与
-[实际门](../artifacts/experiments/source_entry_catalog_gate_20261025/RESULT.md)。
+通用 CPU 入口的 source-entries、qualified publication、source-entry-bindings CLI
+已实际通过；同样例保9 groups/271调用、260 body-linked/5 source-linked/6 unresolved。
+本轮入口 snapshot→formal 局部对应也已通过，不能当完整数据流。
+当前下一门为两条互不改同一 producer 的实现：
+
+- 在通用 FRAME 根上生成模块 SP8：机械选择真实源码最大可支持连续段，展开
+  import/namespace/expression/loop，准确保剩余语句和 required expansion；不造函数环境。
+- 同一新 CPU capture 的 project/dependency 正常函数统一出版和普通绑定，实际核
+  原来源、命名空间、ADD/REVISE 和父版本，不拼接旧样例，不重新 lower 已有产物。
+
+两条先过各自真实有限门再合入；异常传播、内容/state/ready、完整 LeWM 链仍须继续。
+CP2 未知成本和历史失败保留。详见[入口](MODEL_RUN.md)及上述三项工作表。
 
 当前正式静态源码快照为858个active bodies/2217个定义/151个文件，769 UNSUPPORTED、
 590 NOT_ATTEMPTED。三kwargs图的846父快照上，后继12个既有图普通ADD及组合消费已完成；

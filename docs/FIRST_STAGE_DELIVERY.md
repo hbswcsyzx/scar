@@ -22,6 +22,11 @@ CLI 的精确资格与范围见
 自动完成 publication、普通 query、genuine coordinates、普通 binder 四阶段；仍保
 同一 CPU 样例的 260/5/6 与上述未连接关系。见
 [CLI 门](../artifacts/experiments/model_run_source_entry_bindings_gate_20261025/RESULT.md)。
+独立后继参数门现已接主树：271 次入口/566 个参数观测中，260 次入口的520个
+正式端口局部对应通过，11 次入口仍缺规范 body。该 projection 只回答入口保存的
+参数引用对应哪个原 formal port；不清除上述 caller/return/environment/control/state
+未连接项，也不授对象或内容身份。主树普通 SP5/typed 回读 3.5341s通过，见
+[参数接入报告](../artifacts/experiments/callee_entry_routing_applied_20261025/REPORT.md)。
 同CPU后继native门已将516个metadata路径关联实际规范NativeInputRef端口，260正常
 调用/2shards；3095路径中2579项仍保frontier。此资格及上述source结果均属于新CPU
 样例，与旧LeWM独立；不授Python对象、内容/state或ready，也不增加其覆盖。见

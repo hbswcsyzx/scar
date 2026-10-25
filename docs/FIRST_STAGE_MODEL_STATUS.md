@@ -6,6 +6,16 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：函数入口局部参数接线已接主树
+
+隔离门 actual93681 exit0/38.8904s；主树普通兼容 consumer actual66781
+exit0/3.5341s，566 个 typed 参数观测与原 SP5 均读回，520 个对应原正式端口，
+11 次入口保留 frontier。参数按原名字/slot 查找，不按编译器与源码不同的顺序盲目 zip。
+主树 core29 的兼容读回不重授原 core28 live session 的资格；该 CPU 样例不计入 LeWM。
+caller actual-expression、return、environment、state 和 ready 尚未因此连接；
+原五项各271的未连接记录仍保留。提交 0d5d7e10，见
+[接入报告](../artifacts/experiments/callee_entry_routing_applied_20261025/REPORT.md)。
+
 ### 2026-10-25：通用 FRAME 根与旧 source 能力守卫 A 通过
 
 Root45676 actual exit0/3.4203s，22项 typed/codec 和5项历史 wrapper 守卫核对，
