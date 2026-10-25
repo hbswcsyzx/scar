@@ -1,0 +1,23 @@
+{"stage": "coordinate_scope", "whole_elapsed_s": 0.8783347280113958}
+{"stage": "native_capture_batches", "whole_elapsed_s": 11.376588910992723}
+{"elapsed_s": 37.39515365799889, "lines": 1862477, "raw_bytes": 321287818, "schema": "pytorch.execution-trace.v1", "stage": "native_source_verified", "whole_elapsed_s": 48.77199174501584}
+{"elapsed_s": 47.25700849099667, "lines": 119388, "raw_bytes": 78870130, "schema": "scar.dispatch-observation.events.v1", "stage": "native_source_verified", "whole_elapsed_s": 58.63384639300057}
+{"elapsed_s": 63.20549485197989, "lines": 132445, "raw_bytes": 146461974, "schema": "scar.tensor-physical-observation.v1", "stage": "native_source_verified", "whole_elapsed_s": 74.58233193898923}
+{"chunks": 76, "decoded_bytes": 1200966077, "elapsed_s": 129.00928504799958, "graph": "evidence", "stage": "archive_table_indexed", "stored_bytes": 76212360, "table": "instances", "whole_chunks_verified_by_BundlePartitions": true, "whole_elapsed_s": 140.38612425001338}
+{"chunks": 4, "decoded_bytes": 54018019, "elapsed_s": 134.3499611489824, "graph": "values", "stage": "archive_table_indexed", "stored_bytes": 1304314, "table": "objects", "whole_chunks_verified_by_BundlePartitions": true, "whole_elapsed_s": 145.72679983699345}
+{"chunks": 9, "decoded_bytes": 142927166, "elapsed_s": 148.807884283975, "graph": "values", "stage": "archive_table_indexed", "stored_bytes": 7693289, "table": "regions", "whole_chunks_verified_by_BundlePartitions": true, "whole_elapsed_s": 160.18473434401676}
+{"chunks": 6, "decoded_bytes": 92998937, "elapsed_s": 159.6124972749967, "graph": "values", "stage": "archive_table_indexed", "stored_bytes": 5834508, "table": "allocations", "whole_chunks_verified_by_BundlePartitions": true, "whole_elapsed_s": 170.98933564900653}
+{"actual_begin_rows": 39796, "actual_groups": 39796, "declared_attempts": 39796, "elapsed_s": 169.90164150798228, "source_domain_complete": true, "stage": "dispatch_domain_enumerated", "whole_elapsed_s": 181.27848454899504}
+{"elapsed_s": 172.93469586997526, "stage": "dispatch_discovery", "static_signatures": 8, "visited_actual_groups": 255, "whole_elapsed_s": 184.3115378380171}
+{"elapsed_s": 173.584055135987, "stage": "dispatch_discovery", "static_signatures": 8, "visited_actual_groups": 511, "whole_elapsed_s": 184.96089304899215}
+{"elapsed_s": 174.23304440098582, "stage": "dispatch_discovery", "static_signatures": 8, "visited_actual_groups": 767, "whole_elapsed_s": 185.60989460500423}
+{"elapsed_s": 175.0673029680038, "stage": "dispatch_discovery", "static_signatures": 15, "visited_actual_groups": 1023, "whole_elapsed_s": 186.4441407470149}
+{"elapsed_s": 176.0350667439925, "stage": "dispatch_discovery", "static_signatures": 22, "visited_actual_groups": 1279, "whole_elapsed_s": 187.41190440001083}
+{"elapsed_s": 177.09024222698645, "stage": "dispatch_discovery", "static_signatures": 22, "visited_actual_groups": 1535, "whole_elapsed_s": 188.46708495900384}
+{"elapsed_s": 178.0998552259989, "stage": "dispatch_discovery", "static_signatures": 22, "visited_actual_groups": 1791, "whole_elapsed_s": 189.476692997996}
+{"elapsed_s": 179.13172183200368, "stage": "dispatch_discovery", "static_signatures": 22, "visited_actual_groups": 2047, "whole_elapsed_s": 190.50855996800237}
+{"elapsed_s": 180.15312241498032, "stage": "dispatch_discovery", "static_signatures": 22, "visited_actual_groups": 2303, "whole_elapsed_s": 191.5299638909928}
+{"elapsed_s": 181.1486043809855, "stage": "dispatch_discovery", "static_signatures": 27, "visited_actual_groups": 2559, "whole_elapsed_s": 192.5254421819991}
+{"elapsed_s": 182.3165130839916, "stage": "dispatch_discovery", "static_signatures": 27, "visited_actual_groups": 2815, "whole_elapsed_s": 193.69335088299704}
+{"elapsed_s": 183.52392913997755, "stage": "dispatch_discovery", "static_signatures": 29, "visited_actual_groups": 3071, "whole_elapsed_s": 194.90076684299856}
+{"error_type": "ValueError", "message": "native reference protocol: native Tensor leaf lacks held-reference correspondence", "phase": "native_capture_batches", "stage": "failed", "whole_elapsed_s": 195.47075131800375}

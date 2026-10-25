@@ -1,0 +1,22 @@
+{
+  "archive_chunk_reads": 0,
+  "checks": [
+    "wrong dispatch nonce rejects before missing physical frontier",
+    "known output parent mismatch rejects without physical rows",
+    "known matching native child thread mismatch rejects without physical rows",
+    "gapped physical marker cannot hide wrong original dispatch line",
+    "valid identities with no physical witness remain explicit absence",
+    "zero matching native children is explicit absence",
+    "multiple matching native children reject",
+    "SQLite returns SQLITE_FULL before index grows beyond 16 KiB test cap",
+    "projection preparation has no publication call"
+  ],
+  "full_gate_run": false,
+  "original_raw_reads": 0,
+  "sqlite_official_references": [
+    "https://www.sqlite.org/pragma.html#pragma_max_page_count",
+    "https://www.sqlite.org/limits.html"
+  ],
+  "sqlite_version": "3.53.4",
+  "status": "IDENTITY_AND_PREWRITE_BUDGET_CHECK_PASS"
+}

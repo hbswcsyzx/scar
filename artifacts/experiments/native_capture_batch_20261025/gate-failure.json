@@ -1,0 +1,8 @@
+{
+  "error_type": "ValueError",
+  "message": "native reference protocol: native Tensor leaf lacks held-reference correspondence",
+  "phase": "native_capture_batches",
+  "status": "FAILED",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_capture_batch_20261025/gate.py\", line 187, in <module>\n    result = bind_native_capture_batches(coordinates, CAPTURE, MANIFEST, OUT / 'result',\n        expected_manifest_sha256=freeze['native_manifest_sha256'], capture_model_path=MODEL,\n        expected_capture_model_sha256=freeze['capture_model_sha256'], budget=NativeCaptureBatchBudget(), progress=emit)\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_capture_batch.py\", line 715, in bind_native_capture_batches\n    interfaces, frontiers = replay_interfaces(source)\n                            ~~~~~~~~~~~~~~~~~^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/execution/native_port_protocol.py\", line 186, in replay_interfaces\n    need(held_paths == set(tensor_ports), \"native Tensor leaf lacks held-reference correspondence\")\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/ir/execution/native_port_protocol.py\", line 26, in need\n    raise ValueError(\"native reference protocol: \" + message)\nValueError: native reference protocol: native Tensor leaf lacks held-reference correspondence\n",
+  "wall_seconds": 195.47038940299535
+}

@@ -1,0 +1,21 @@
+{
+  "archive_chunk_reads": 0,
+  "availability_precheck_result": {
+    "dispatch_line": 1,
+    "reason": "PHYSICAL_MARKER_UNAVAILABLE"
+  },
+  "batch_path": "availability result is consumed before replay_interfaces; classification continues",
+  "code_review_is_full_native_verified": false,
+  "full_batch_gate_executed": false,
+  "independent_identity_rejection": {
+    "detail": "native reference protocol: normal dispatch group marker mismatch",
+    "type": "ValueError"
+  },
+  "raw_capture_reads": 0,
+  "source_sha256": {
+    "scar/ir/execution/native_port_protocol.py": "ed41a77fcb3296422a46b1053b64acfdfd5bff360593af437dff5878a4908cfc",
+    "scar/trace/native_capture_batch.py": "1b05a41e9b4e258b8ee02cd3b53da6535113a60c2324c66d8d7ffdd3c68f0617"
+  },
+  "status": "SYNTHETIC_ORDERING_COUNTEREXAMPLE_CONFIRMED",
+  "target_executed": false
+}

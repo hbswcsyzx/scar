@@ -253,7 +253,7 @@ def _selected_chunks(partitions, requests, budget):
     return chunks
 
 
-def _project(source, interfaces, selected, out, budget):
+def _prepare_projection(source, interfaces, selected, out, budget):
     from scar.ir.v2.codec import values_from_dict, evidence_from_dict
     from scar.ir.v2.values import ValueGraph
     from scar.ir.v2.evidence import EvidenceGraph
@@ -338,11 +338,19 @@ def _project(source, interfaces, selected, out, budget):
     vp, ep = canonical(values.to_dict()), canonical(evidence.to_dict())
     va = _artifact(out / "source-values.json", vp, values.SCHEMA)
     ea = _artifact(out / "source-evidence.json", ep, evidence.SCHEMA)
-    _write(out / "source-values.json", vp); _write(out / "source-evidence.json", ep)
-    _write(out / "source-projection-receipts.json", canonical({"schema": "scar.native-source-window-receipts", "schema_version": 1,
+    rp = canonical({"schema": "scar.native-source-window-receipts", "schema_version": 1,
         "values_projection": encode(va), "evidence_projection": encode(ea), "records": receipts,
-        "physical_associations": geometry, "whole_source_graph_identity_claimed": False}))
-    return values, evidence, va, ea, geometry
+        "physical_associations": geometry, "whole_source_graph_identity_claimed": False})
+    return values, evidence, va, ea, geometry, {
+        "source-values.json": vp, "source-evidence.json": ep, "source-projection-receipts.json": rp}
+
+
+def _project(source, interfaces, selected, out, budget):
+    """Preserve prefix publication while batch callers preflight pure bytes."""
+    *result, payloads = _prepare_projection(source, interfaces, selected, out, budget)
+    for name, payload in payloads.items():
+        _write(out / name, payload)
+    return tuple(result)
 
 
 def _build_program(interfaces, source, interface_artifact):

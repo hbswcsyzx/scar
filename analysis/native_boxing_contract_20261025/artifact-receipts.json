@@ -1,0 +1,26 @@
+{
+  "artifacts": [
+    {
+      "bytes": 5645,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_boxing_contract_20261025/CONTRACT.md",
+      "sha256": "cd39c11572e93cc2b3d5a9dbe6dee1147283dc928f7bcd35a46529659607d166"
+    },
+    {
+      "bytes": 2109,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_boxing_contract_20261025/owner-observation.json",
+      "sha256": "081262d8ac215765740f4f641872a39a62719eb1b2737f1744488f6ebe6bc130"
+    },
+    {
+      "bytes": 10287,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_boxing_contract_20261025/source-receipts.json",
+      "sha256": "b62141be1af32a779956e05fb9077a5a6f49e3c93e3b1bee59a7c9a363c43cf3"
+    }
+  ],
+  "new_gate_run": false,
+  "production_changes": false,
+  "raw_or_sqlite_reads": 0,
+  "schema": "scar.native-boxing-contract-artifacts",
+  "schema_version": 1,
+  "status": "PRIMARY_SOURCE_RESEARCH_COMPLETE_OCCURRENCE_MECHANISM_UNPROVEN",
+  "target_executed": false
+}

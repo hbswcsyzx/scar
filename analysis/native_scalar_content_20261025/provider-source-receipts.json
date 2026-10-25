@@ -1,0 +1,57 @@
+{
+  "full_source_republished": false,
+  "lookup_only_not_owned_capture_authority": true,
+  "raw_capture_files_read": 0,
+  "schema": "scar.native-scalar-official-source-review",
+  "schema_version": 1,
+  "sources": [
+    {
+      "bytes": 33269,
+      "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "reviewed_line_ranges_1_based": [
+        [
+          63,
+          82
+        ],
+        [
+          379,
+          389
+        ],
+        [
+          489,
+          539
+        ],
+        [
+          733,
+          757
+        ]
+      ],
+      "sha256": "c6ec2dac4140b28eea17c8c6054d42e084ab6014fa8f47e72282e7c4caba46db",
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/profiler/standalone/execution_trace_observer.cpp"
+    },
+    {
+      "bytes": 52756,
+      "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "reviewed_line_ranges_1_based": [
+        [
+          147,
+          177
+        ],
+        [
+          550,
+          623
+        ],
+        [
+          645,
+          685
+        ],
+        [
+          960,
+          969
+        ]
+      ],
+      "sha256": "8c7708ae3c16679d58f70c4010a1d3ee3b7ee526130cd7b6fda4960334fb82da",
+      "url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/aten/src/ATen/core/ivalue.h"
+    }
+  ]
+}

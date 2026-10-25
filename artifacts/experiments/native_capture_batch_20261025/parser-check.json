@@ -1,0 +1,279 @@
+{
+  "archive_chunk_reads": 0,
+  "checks": [
+    {
+      "kind": "numeric_boundary",
+      "split": 1,
+      "token": "-0.25"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 2,
+      "token": "-0.25"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 3,
+      "token": "-0.25"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 4,
+      "token": "-0.25"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 1,
+      "token": "1e-10"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 2,
+      "token": "1e-10"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 3,
+      "token": "1e-10"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 4,
+      "token": "1e-10"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 1,
+      "token": "-1.25E+12"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 2,
+      "token": "-1.25E+12"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 3,
+      "token": "-1.25E+12"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 4,
+      "token": "-1.25E+12"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 5,
+      "token": "-1.25E+12"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 6,
+      "token": "-1.25E+12"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 7,
+      "token": "-1.25E+12"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 8,
+      "token": "-1.25E+12"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 1,
+      "token": "0.125e-7"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 2,
+      "token": "0.125e-7"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 3,
+      "token": "0.125e-7"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 4,
+      "token": "0.125e-7"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 5,
+      "token": "0.125e-7"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 6,
+      "token": "0.125e-7"
+    },
+    {
+      "kind": "numeric_boundary",
+      "split": 7,
+      "token": "0.125e-7"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 1,
+      "text": "é"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 2,
+      "text": "é"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 3,
+      "text": "é"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 1,
+      "text": "中"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 2,
+      "text": "中"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 3,
+      "text": "中"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 4,
+      "text": "中"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 1,
+      "text": "🙂"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 2,
+      "text": "🙂"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 3,
+      "text": "🙂"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 4,
+      "text": "🙂"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 5,
+      "text": "🙂"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 1,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 2,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 3,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 4,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 5,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 6,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 7,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 8,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 9,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 10,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 11,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "utf8_boundary",
+      "split": 12,
+      "text": "aé中🙂z"
+    },
+    {
+      "kind": "rejection",
+      "raw_hex": "3165"
+    },
+    {
+      "kind": "rejection",
+      "raw_hex": "312e"
+    },
+    {
+      "kind": "rejection",
+      "raw_hex": "2d31652b"
+    },
+    {
+      "kind": "rejection",
+      "raw_hex": "7b2261223a317d67617262616765"
+    },
+    {
+      "kind": "rejection",
+      "raw_hex": "7b2261223a312c2261223a327d"
+    },
+    {
+      "kind": "rejection",
+      "raw_hex": "7b2261223a5b312c32"
+    },
+    {
+      "kind": "rejection",
+      "raw_hex": "22756e66696e6973686564"
+    },
+    {
+      "kind": "rejection",
+      "raw_hex": "c2a031"
+    },
+    {
+      "kind": "rejection",
+      "raw_hex": "31c2a0"
+    }
+  ],
+  "full_gate_run": false,
+  "original_raw_reads": 0,
+  "status": "PURE_PARSER_CHECK_PASS"
+}

@@ -1,0 +1,14 @@
+{
+  "archive_chunk_reads": 0,
+  "checks": [
+    "missing original archive record is MissingDependency",
+    "original ETO ordinal mismatch is hard rejection",
+    "zero positive births is MissingDependency",
+    "duplicate positive births is hard rejection",
+    "changed private payload is hard rejection",
+    "deleted previously indexed record is hard rejection even for optional lookup"
+  ],
+  "full_gate_run": false,
+  "original_raw_reads": 0,
+  "status": "INTEGRITY_ABSENCE_CHECK_PASS"
+}

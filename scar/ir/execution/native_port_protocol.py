@@ -197,7 +197,7 @@ class NativePortOrderError(ValueError):
     """This pinned adapter's ordered ABI disagrees with the original core."""
 
 
-def _native_port_order_errors(program, model, interfaces, run):
+def _native_port_order_errors(program, model, interfaces, run, *, definition_signatures=None):
     """Pure ABI interpretation, not ownership or runtime authority.
 
     Generic NativeBoundary permits arbitrary representation order. Only this
@@ -232,13 +232,24 @@ def _native_port_order_errors(program, model, interfaces, run):
         if sig in unique:
             check(unique[sig]["signature"] == signature, "signature", sig, "same signature ID has different native tree")
         unique[sig] = item
+    definitions = unique
+    if definition_signatures is not None:
+        need(type(definition_signatures) is dict, "owned definition catalog must be an exact dictionary")
+        definitions = {}
+        for sig, signature in definition_signatures.items():
+            if check(type(sig) is str and sha256(canonical(signature)).hexdigest() == sig,
+                     "signature", sig, "owned static signature hash changed"):
+                definitions[sig] = {"signature": signature}
+        for sig in unique:
+            check(sig in definitions and definitions[sig]["signature"] == unique[sig]["signature"],
+                  "signature_catalog", sig, "actual signature is absent from shared source catalog")
     # Independently reconstruct this provider profile's declared interface
     # document, rather than trusting a builder-produced mapping/boolean.
     definition_doc = {"schema": "scar.pinned-aten-protocol-interface", "schema_version": 1,
-        "profile": PROFILE, "interfaces": {sig: item["signature"] for sig, item in unique.items()},
+        "profile": PROFILE, "interfaces": {sig: item["signature"] for sig, item in definitions.items()},
         "effect_contract": "UNKNOWN outside partial provider schema annotations", "content_version_claimed": False}
     definition_bytes = canonical(definition_doc)
-    expected_provider = ProviderID("aten-schema:" + next(iter(unique.values()))["signature"]["provider_revision"]) if unique else None
+    expected_provider = ProviderID("aten-schema:" + next(iter(definitions.values()))["signature"]["provider_revision"]) if definitions else None
     envelope = next((e for e in program.provider_envelopes if e.id == expected_provider), None)
     check(envelope is not None and envelope.kind is ProviderArtifactKind.DEFINITION_GRAPH
           and envelope.artifact.schema == definition_doc["schema"]
@@ -246,7 +257,10 @@ def _native_port_order_errors(program, model, interfaces, run):
           and envelope.artifact.size_bytes == len(definition_bytes),
           "definition_artifact", "provider", "definition owner differs from independently reconstructed schema interface")
     layouts = {}
-    for sig, item in unique.items():
+    if definition_signatures is not None:
+        check(set(boundaries) == {NativeBoundaryID("aten-interface:" + sig + ":boundary") for sig in definitions},
+              "definition_inventory", "program", "shared program boundary inventory differs from owned source catalog")
+    for sig, item in definitions.items():
         path = "interface:" + sig
         region_id = RegionID("aten-interface:" + sig)
         region = regions.get(region_id)
@@ -401,22 +415,29 @@ def _native_port_order_errors(program, model, interfaces, run):
     return tuple(errors)
 
 
-def _require_native_port_order(program, model, interfaces, run):
-    errors = _native_port_order_errors(program, model, interfaces, run)
+def _require_native_port_order(program, model, interfaces, run, *, definition_signatures=None):
+    errors = _native_port_order_errors(program, model, interfaces, run,
+                                       definition_signatures=definition_signatures)
     if errors:
         raise NativePortOrderError("native_port_order: " + "; ".join(
             code + " at " + path + ": " + message for code, path, message in errors))
 
 
 class _OwnedNativeCapture:
-    __slots__ = ("_payload",)
+    __slots__ = ("_payload", "_definitions")
 
     def __init__(self, key, source):
         need(key is _OWNER, "native evidence can only originate in its owning reader")
-        self._payload = canonical(source)
+        detached = dict(source)
+        definitions = detached.pop("definition_signatures", None)
+        self._definitions = None if definitions is None else canonical(definitions)
+        self._payload = canonical(detached)
 
     def source(self):
         return json.loads(self._payload)
+
+    def definitions(self):
+        return None if self._definitions is None else json.loads(self._definitions)
 
 
 def _own_capture(source):
@@ -429,7 +450,8 @@ class NativePortEvidence:
     This grants reference/port correspondence only. It does not interpret
     logical contents, hidden effects, alias completeness, CUDA order or ready.
     """
-    __slots__ = ("_owned", "_program_sha", "_model_sha", "_value_artifact", "_evidence_artifact", "_interfaces")
+    __slots__ = ("_owned", "_program_sha", "_model_sha", "_value_artifact", "_evidence_artifact",
+                 "_interfaces", "_source", "_lookup", "_definitions")
 
     def __init__(self, key, owned, program, model, value_artifact, evidence_artifact):
         need(key is _OWNER and type(owned) is _OwnedNativeCapture, "owned source session is required")
@@ -440,8 +462,13 @@ class NativePortEvidence:
         self._model_sha = sha256(dumps(model).encode()).hexdigest()
         need(type(value_artifact) is type(evidence_artifact) is ProviderArtifact, "projection artifacts are required")
         self._value_artifact, self._evidence_artifact = value_artifact, evidence_artifact
-        self._interfaces = canonical(replay_interfaces(owned.source())[0])
-        _require_native_port_order(program, model, json.loads(self._interfaces), owned.source()["run"])
+        self._source = owned.source()
+        interfaces = replay_interfaces(self._source)[0]
+        self._interfaces = canonical(interfaces)
+        self._lookup = {"native-port:" + self._source["run"] + ":" + str(i["sequence"]): i for i in interfaces}
+        self._definitions = owned.definitions()
+        _require_native_port_order(program, model, interfaces, self._source["run"],
+                                   definition_signatures=self._definitions)
 
     def require_scope(self, model, program):
         from scar.ir.program.codec import dumps as program_dumps
@@ -449,7 +476,8 @@ class NativePortEvidence:
         need(self._program_sha == sha256(program_dumps(program).encode()).hexdigest()
              and self._model_sha == sha256(dumps(model).encode()).hexdigest(),
              "owned native port evidence does not apply to this exact program/execution/Run")
-        _require_native_port_order(program, model, json.loads(self._interfaces), self._owned.source()["run"])
+        _require_native_port_order(program, model, json.loads(self._interfaces), self._source["run"],
+                                   definition_signatures=self._definitions)
 
     def resolve(self, ctx, basis, resolved, identity, path):
         """Replay original ordered ports independently of builder declarations."""
@@ -459,12 +487,10 @@ class NativePortEvidence:
         # canonical current visit/completion independently in content_validation.
         activation = (ctx.activations[ctx.segments[ctx.visits[basis.entry].segment].activation]
                       if type(basis) is NativeInputRef else ctx.activations[ctx.activation_of(basis.operation)])
-        source = self._owned.source()
-        candidates = [i for i in json.loads(self._interfaces)
-                      if activation.id.value == "native-port:" + source["run"] + ":" + str(i["sequence"])]
-        if len(candidates) != 1:
+        source = self._source
+        interface = self._lookup.get(activation.id.value)
+        if interface is None:
             ctx.issue("native_reference_activation", path, "activation has no exact owned native sequence"); return False
-        interface = candidates[0]
         direction = "inputs" if type(basis) is NativeInputRef else "outputs"
         boundary = resolved["boundary"]
         expected_boundary = "aten-interface:" + interface["signature_id"] + ":boundary"

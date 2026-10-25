@@ -1,0 +1,276 @@
+{
+  "schema": "scar.native-batch-first-real-failure-checkpoint",
+  "schema_version": 1,
+  "gate_session": 88951,
+  "actual_exit": 1,
+  "wall_seconds_gnu": 196.92,
+  "max_rss_kib_gnu": 910204,
+  "classified_actual_groups": 3181,
+  "enumerated_dispatch_groups": 39796,
+  "failing_sequence_diagnostic": 3182,
+  "state": "IMPLEMENTED_REAL_GATE_FAILED",
+  "whole_model_complete": false,
+  "producer_freeze_sha256": "36917f11e0fc5d521d301b23d8e0bfa241e3fe17b7309e93adb0aecced857f00",
+  "files": [
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/README.md",
+      "bytes": 7303,
+      "sha256": "c46199ab6caaf2609ee67a8df292990694736911b7beac094866d00edc460a81",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/actual-io.json",
+      "bytes": 155902,
+      "sha256": "28c651345737681797be98abbe86721c2941ed26bd9ad3a570843215da423ce1",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/api-check.json",
+      "bytes": 1580,
+      "sha256": "ba15f31df755e5f25ce485511815d57f4752329870cd185d54d209d0b83859bb",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/api_check.py",
+      "bytes": 7790,
+      "sha256": "3d44ffdd817fa133819f763a12da8d76bef297559a8d1b2a1ab51dc82eac1240",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/freeze-candidate01.json",
+      "bytes": 47703,
+      "sha256": "58e0fb1f3717cee9acfb3ab3e14d6e61807825e020e5119b7f1aa00089baab48",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/freeze-candidate02.json",
+      "bytes": 48699,
+      "sha256": "85d203aeac2ffc83727d4b5b76aeb1d40b3902c14455606df57214c469a1166e",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/freeze-candidate03.json",
+      "bytes": 49319,
+      "sha256": "36917f11e0fc5d521d301b23d8e0bfa241e3fe17b7309e93adb0aecced857f00",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/freeze.json",
+      "bytes": 49319,
+      "sha256": "36917f11e0fc5d521d301b23d8e0bfa241e3fe17b7309e93adb0aecced857f00",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/gate-failure.json",
+      "bytes": 1600,
+      "sha256": "a2672cd99b95006a99897ecf2a2b79dec4b399d1d43424cf0462893fcca3e553",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/gate-started.json",
+      "bytes": 139,
+      "sha256": "a91a7699191f98dbd8d0660e67308ea2839623e359619bc6675cd23a4ae4e6d7",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/gate.py",
+      "bytes": 12962,
+      "sha256": "da276c6b8e13f97183def4cf99c1648ff85a8685bed961ea6478e8ef4930b2fb",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/identity-budget-check.json",
+      "bytes": 926,
+      "sha256": "a5b754a36f17095c044c7c00821bcd3c0ce3e6ceb2f1577dbac5baf63f7c5fe7",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/identity_budget_check.py",
+      "bytes": 4675,
+      "sha256": "c6ef1b397fbb7404782d21bfb852e6ad5ab33d1fb474e8fa3aa994ffe673392a",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/integrity-check.json",
+      "bytes": 494,
+      "sha256": "ca3395c59285a03062fb12a30c9d4f358a904ae7a66a718ce74305364a1a59be",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/integrity-source-check/private/navigation.sqlite",
+      "bytes": 8192,
+      "sha256": "3f21fa2f8485895376452db46e269e81f0ca9407e3b0822331b1406289854c96",
+      "retention": "LOCAL_PRIVATE_DIAGNOSTIC_OR_LARGE_DERIVED"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/integrity_check.py",
+      "bytes": 2595,
+      "sha256": "b55fa05e5fed0e119345a0372bfb79728977ee70882ef48c549f132b9db08403",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/native-coordinates.json",
+      "bytes": 674239,
+      "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/page-cap-check/private/navigation.sqlite",
+      "bytes": 8192,
+      "sha256": "9722c0d2c258ba58f45c8d6a5389f28d99e23552a574545881c21dccfb289677",
+      "retention": "LOCAL_PRIVATE_DIAGNOSTIC_OR_LARGE_DERIVED"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/parser-check.json",
+      "bytes": 4948,
+      "sha256": "8f07b484a09beaa7eb0ff53912d8bb0be0c235615c303285498b23a82f14cd93",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/parser_check.py",
+      "bytes": 1588,
+      "sha256": "3a3e6d256044c949b1d8bf3c96cfaa8be6693baaf42bc255fdd856483ff14e76",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/preparation-receipts-candidate02.json",
+      "bytes": 4209,
+      "sha256": "d32c88198ea187e0ba9084ea40095e5efc6b6c11e3c94c08e89c59f03a82872c",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/preparation-receipts.json",
+      "bytes": 5268,
+      "sha256": "f07a58f2a60b8c00fd174f03770ba3828f59893cd6f4cba1c72ff403f63ae82e",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/progress.jsonl",
+      "bytes": 4123,
+      "sha256": "19ef1356f3f0a917bad3a46c94733e9e041fb9aa99686cdd3b208cd98068348d",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/result/failure.json",
+      "bytes": 2767,
+      "sha256": "a8e67a00e1e9551c3ce14494768e4c92c9039c9d7966f09bccacce9b7a38b720",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/result/observed-dispatches.jsonl",
+      "bytes": 53666449,
+      "sha256": "07fe064d1b3368403a6a059dad4340f8c34771ba779292e6a21d7e40adc6457b",
+      "retention": "LOCAL_PRIVATE_DIAGNOSTIC_OR_LARGE_DERIVED"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/result/private/navigation.sqlite",
+      "bytes": 3973341184,
+      "sha256": "576db013a50594a556b7d22e387516c9c7a5519fbe83b0482221e3f416a23502",
+      "retention": "LOCAL_PRIVATE_DIAGNOSTIC_OR_LARGE_DERIVED"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/run.sh",
+      "bytes": 500,
+      "sha256": "4e13ea396b5e081fe8b87e56c0cc91ebeeb9af657bfb9e607e91f86a1777259a",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/stderr.txt",
+      "bytes": 1327,
+      "sha256": "95815ca1bf2cd733d551e727cba59058eed8e47551b1e2e1bd02dd0d2b02d0f0",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/stdout.txt",
+      "bytes": 4123,
+      "sha256": "19ef1356f3f0a917bad3a46c94733e9e041fb9aa99686cdd3b208cd98068348d",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/synthetic-source-check/private/navigation.sqlite",
+      "bytes": 8192,
+      "sha256": "96d163f427b3242990e53a46dadda83f0a382ba7a3258cb4aad4473335a7d723",
+      "retention": "LOCAL_PRIVATE_DIAGNOSTIC_OR_LARGE_DERIVED"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/synthetic-source-check/tiny-dispatch.jsonl",
+      "bytes": 188,
+      "sha256": "c2d9af3e1e4a0ac010fb46feb38840e815fca8fc85ff2c8f255f59ffd2c61192",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/synthetic-source-check/tiny-eto.json",
+      "bytes": 416,
+      "sha256": "7b70002487dda0263b5e510208667c2761660a7e65ba59c4342c9bce534475c6",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "artifacts/experiments/native_capture_batch_20261025/time.txt",
+      "bytes": 873,
+      "sha256": "d314da51c591ca3e26593ee179e6493fa982350859512653da93f70e13bd60a0",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_scalar_content_20261025/check_api.py",
+      "bytes": 6956,
+      "sha256": "f8c3bfbda051380a3ef523380e9810afe67894ca6633c358354f1f9c363a62c8",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_scalar_content_20261025/provider-source-receipts.json",
+      "bytes": 1394,
+      "sha256": "7e99133dbeb4172280822670cd19cc563dc0cfe8deb1ec77c2d34236f68f3283",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_scalar_content_20261025/summary-02.json",
+      "bytes": 6058,
+      "sha256": "4c45415bcaa91cc2f6c522f2c5d6071c604adafef341f698b5e2a74d30fdbf11",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_scalar_content_20261025/summary.json",
+      "bytes": 6057,
+      "sha256": "ba7474ba2f45b07a356f10312f7710d3d4b934e5c498bcd861bdd67ce2273d5b",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_batch_readonly_review_20261025/counterexample.json",
+      "bytes": 842,
+      "sha256": "7c5dbea800507d0045bf3e5d6c143b0b84f46fa57af9e04f9f8cf7b5de016ea8",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_batch_readonly_review_20261025/counterexample.py",
+      "bytes": 2346,
+      "sha256": "f9d3a6bd95258fe93643680a0300b516c8ab4a908c95ebdcd264915c617294f7",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_boxing_contract_20261025/CONTRACT.md",
+      "bytes": 5645,
+      "sha256": "cd39c11572e93cc2b3d5a9dbe6dee1147283dc928f7bcd35a46529659607d166",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_boxing_contract_20261025/artifact-receipts.json",
+      "bytes": 1019,
+      "sha256": "0dcd54e974965552ec3b10104f2058e287334e3064011d14aa7bf2ba1346bf78",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_boxing_contract_20261025/owner-observation.json",
+      "bytes": 2109,
+      "sha256": "081262d8ac215765740f4f641872a39a62719eb1b2737f1744488f6ebe6bc130",
+      "retention": "GIT_CHECKPOINT"
+    },
+    {
+      "path": "analysis/native_boxing_contract_20261025/source-receipts.json",
+      "bytes": 10287,
+      "sha256": "b62141be1af32a779956e05fb9077a5a6f49e3c93e3b1bee59a7c9a363c43cf3",
+      "retention": "GIT_CHECKPOINT"
+    }
+  ],
+  "diagnostic_ownership": "private SQLite is retained for diagnosis; opening it does not restore owned runtime evidence",
+  "next": "separate native ports, Python-held identities and physical geometry under an explicit new profile; no operator-name special case"
+}

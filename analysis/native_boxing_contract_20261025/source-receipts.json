@@ -1,0 +1,295 @@
+{
+  "archive_chunk_reads": 0,
+  "branch_or_wrapped_bit_for_sequence_3182_established": false,
+  "elapsed_seconds": 12.31318952399306,
+  "full_source_files_republished": false,
+  "local_source_review": [
+    {
+      "bytes": 14193,
+      "original_capture_archive_independently_rehashed_here": false,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/dispatch_evidence.py",
+      "reviewed_symbols": [
+        "_leaves",
+        "_dispatch"
+      ],
+      "sha256": "05d3527a2a06005ed5b557c457dc851529c8efe249d37900bc1335ae9b5fb388"
+    }
+  ],
+  "official_sources": [
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/PyInterpreter.cpp",
+      "bytes": 34740,
+      "lines": 997,
+      "path": "torch/csrc/PyInterpreter.cpp",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/PyInterpreter.cpp",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          273,
+          324
+        ]
+      ],
+      "reviewed_symbols": [
+        "ConcretePyInterpreterVTable::dispatch"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "30e3bc10022f906f681208025feaeea1cbc7a1784fef8d1957c3877fcbee903b"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/autograd/python_variable.cpp",
+      "bytes": 140349,
+      "lines": 3940,
+      "path": "torch/csrc/autograd/python_variable.cpp",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/autograd/python_variable.cpp",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          130,
+          187
+        ],
+        [
+          190,
+          283
+        ]
+      ],
+      "reviewed_symbols": [
+        "OperatorArgsKwargsView",
+        "parseIValuesToPyArgsKwargs"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "c1666025f2d08becb85b32029cdf81088297edda8a9cd49308320d5904248fd8"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/jit/python/pybind_utils.cpp",
+      "bytes": 38184,
+      "lines": 1034,
+      "path": "torch/csrc/jit/python/pybind_utils.cpp",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/jit/python/pybind_utils.cpp",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          22,
+          30
+        ],
+        [
+          70,
+          118
+        ],
+        [
+          586,
+          632
+        ]
+      ],
+      "reviewed_symbols": [
+        "ToIValueAllowNumbersAsTensors",
+        "toIValue",
+        "toPyObject"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "c8e44f0751003eab1d942b2bc29027c82b0d8216bf389ab2edef66475528cb4a"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/jit/python/pybind_utils.h",
+      "bytes": 45739,
+      "lines": 1342,
+      "path": "torch/csrc/jit/python/pybind_utils.h",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/jit/python/pybind_utils.h",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          59,
+          68
+        ],
+        [
+          759,
+          784
+        ],
+        [
+          942,
+          1011
+        ]
+      ],
+      "reviewed_symbols": [
+        "ToIValueAllowNumbersAsTensors",
+        "argumentToIValue",
+        "createStackForSchema"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "e482336e686b382bcda992d33b538ac81cae1e50c153ea8d801ee5c2352a6e6f"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/jit/python/init.cpp",
+      "bytes": 93937,
+      "lines": 2397,
+      "path": "torch/csrc/jit/python/init.cpp",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/jit/python/init.cpp",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          151,
+          155
+        ],
+        [
+          1727,
+          1758
+        ],
+        [
+          1826,
+          1837
+        ]
+      ],
+      "reviewed_symbols": [
+        "opAllowsNumbersAsTensors",
+        "ToIValueAllowNumbersAsTensors",
+        "_get_operation_overload"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "e485503c077ed2e590565f6a43e773acc49ee6d00812c1658cb9ccaf4c5f455c"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/utils/python_arg_parser.cpp",
+      "bytes": 66753,
+      "lines": 2048,
+      "path": "torch/csrc/utils/python_arg_parser.cpp",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/utils/python_arg_parser.cpp",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          83,
+          118
+        ],
+        [
+          1064,
+          1072
+        ],
+        [
+          1409,
+          1436
+        ],
+        [
+          1830,
+          1888
+        ]
+      ],
+      "reviewed_symbols": [
+        "should_allow_numbers_as_tensors",
+        "PythonArgs::tensor_slow"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "8e3600160f1f5f3ffb13ba882bee45b078fd3aae5aafbd260ceff877e4acdc60"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/utils/python_arg_parser.h",
+      "bytes": 42442,
+      "lines": 1331,
+      "path": "torch/csrc/utils/python_arg_parser.h",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/utils/python_arg_parser.h",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          374,
+          379
+        ]
+      ],
+      "reviewed_symbols": [
+        "PythonArgs::tensor"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "96f337ea15dca376b29dece4a8db13df4c1374a93e6d376fab7159b58fdd78d5"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/_ops.py",
+      "bytes": 64164,
+      "lines": 1523,
+      "path": "torch/_ops.py",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/_ops.py",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          798,
+          805
+        ],
+        [
+          1124,
+          1142
+        ]
+      ],
+      "reviewed_symbols": [
+        "_get_operation_overload",
+        "self._op"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "f257870f316b84aaa884185f04a63f9f506bfac1c9ce86130cc8950be7132ff2"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/utils/python_dispatch.cpp",
+      "bytes": 39244,
+      "lines": 1075,
+      "path": "torch/csrc/utils/python_dispatch.cpp",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/utils/python_dispatch.cpp",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          170,
+          184
+        ],
+        [
+          211,
+          229
+        ]
+      ],
+      "reviewed_symbols": [
+        "ophandle_call_boxed",
+        "createStackForSchema"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "0953d4a1807089b4502c68d13d9226ce8529d2364767d7cc95dea8e556fc902f"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/utils/pybind.h",
+      "bytes": 13800,
+      "lines": 443,
+      "path": "torch/csrc/utils/pybind.h",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/utils/pybind.h",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          32,
+          44
+        ]
+      ],
+      "reviewed_symbols": [
+        "type_caster<at::Tensor>"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "ca2a74d71a929a3d68148fe3f233fdb546e03f03b7bac9e79deaf6a1a233bebb"
+    },
+    {
+      "browse_url": "https://github.com/pytorch/pytorch/blob/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/profiler/standalone/execution_trace_observer.cpp",
+      "bytes": 33269,
+      "lines": 1010,
+      "path": "torch/csrc/profiler/standalone/execution_trace_observer.cpp",
+      "raw_url": "https://raw.githubusercontent.com/pytorch/pytorch/cf30153c4c131c8164ee7798e5022d810682e2cb/torch/csrc/profiler/standalone/execution_trace_observer.cpp",
+      "repository": "https://github.com/pytorch/pytorch",
+      "reviewed_line_ranges_1_based": [
+        [
+          379,
+          455
+        ]
+      ],
+      "reviewed_symbols": [
+        "convertIValue"
+      ],
+      "revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+      "sha256": "c6ec2dac4140b28eea17c8c6054d42e084ab6014fa8f47e72282e7c4caba46db"
+    }
+  ],
+  "official_total_bytes": 612621,
+  "production_files_changed": 0,
+  "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+  "raw_capture_or_sqlite_reads": 0,
+  "schema": "scar.native-boxing-primary-source-receipts",
+  "schema_version": 1,
+  "scope": "PRIMARY_SOURCE_CONDITIONAL_CONTRACT_RESEARCH_ONLY",
+  "target_executions": 0
+}

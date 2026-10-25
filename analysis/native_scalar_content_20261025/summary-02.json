@@ -1,0 +1,246 @@
+{
+  "case_count": 32,
+  "cases": [
+    {
+      "builtin_type": "builtins.NoneType",
+      "case": "none",
+      "literal": {
+        "items": [],
+        "kind": "none",
+        "payload": null
+      }
+    },
+    {
+      "builtin_type": "builtins.NoneType",
+      "case": "optional-none",
+      "literal": {
+        "items": [],
+        "kind": "none",
+        "payload": null
+      }
+    },
+    {
+      "builtin_type": "builtins.bool",
+      "case": "bool",
+      "literal": {
+        "items": [],
+        "kind": "bool",
+        "payload": false
+      }
+    },
+    {
+      "builtin_type": "builtins.int",
+      "case": "int64-min",
+      "literal": {
+        "items": [],
+        "kind": "int",
+        "payload": "-9223372036854775808"
+      }
+    },
+    {
+      "builtin_type": "builtins.int",
+      "case": "int64-max",
+      "literal": {
+        "items": [],
+        "kind": "int",
+        "payload": "9223372036854775807"
+      }
+    },
+    {
+      "builtin_type": "builtins.str",
+      "case": "string-controls",
+      "literal": {
+        "items": [],
+        "kind": "str",
+        "payload": "a\u0000\n\\\"z"
+      }
+    },
+    {
+      "builtin_type": "builtins.str",
+      "case": "empty-string",
+      "literal": {
+        "items": [],
+        "kind": "str",
+        "payload": ""
+      }
+    },
+    {
+      "case": "bool-is-not-int",
+      "frontier": "SCALAR_BUILTIN_PAYLOAD_TYPE_MISMATCH"
+    },
+    {
+      "case": "int-is-not-bool",
+      "frontier": "SCALAR_BUILTIN_PAYLOAD_TYPE_MISMATCH"
+    },
+    {
+      "case": "enum-payload",
+      "frontier": "SCALAR_BUILTIN_PAYLOAD_TYPE_MISMATCH"
+    },
+    {
+      "case": "subclass-payload",
+      "frontier": "SCALAR_BUILTIN_PAYLOAD_TYPE_MISMATCH"
+    },
+    {
+      "case": "enum-erased-formal",
+      "frontier": "ENUM_OR_NONBUILTIN_SCALAR_FORMAL"
+    },
+    {
+      "case": "symint-erased-formal",
+      "frontier": "SYMBOLIC_SCALAR_CONTENT_UNESTABLISHED"
+    },
+    {
+      "case": "symbolic-tag",
+      "frontier": "SYMBOLIC_SCALAR_CONTENT_UNESTABLISHED"
+    },
+    {
+      "case": "int64-overflow",
+      "frontier": "SCALAR_INTEGER_OUTSIDE_PROVIDER_INT64"
+    },
+    {
+      "case": "int64-underflow",
+      "frontier": "SCALAR_INTEGER_OUTSIDE_PROVIDER_INT64"
+    },
+    {
+      "case": "number-string",
+      "frontier": "SCALAR_BUILTIN_PAYLOAD_TYPE_MISMATCH"
+    },
+    {
+      "case": "none-json-null",
+      "frontier": "SCALAR_NONE_PROVIDER_SENTINEL_MISMATCH"
+    },
+    {
+      "case": "none-wrong-sentinel",
+      "frontier": "SCALAR_NONE_PROVIDER_SENTINEL_MISMATCH"
+    },
+    {
+      "case": "none-not-string",
+      "frontier": "SCALAR_FORMAL_LEAF_KIND_MISMATCH"
+    },
+    {
+      "case": "double-finite",
+      "frontier": "DOUBLE_SERIALIZATION_NOT_PROVEN_LOSSLESS"
+    },
+    {
+      "case": "double-negative-zero",
+      "frontier": "DOUBLE_SERIALIZATION_NOT_PROVEN_LOSSLESS"
+    },
+    {
+      "case": "double-nonfinite",
+      "frontier": "NONFINITE_SCALAR_CONTENT_UNESTABLISHED"
+    },
+    {
+      "case": "double-nan",
+      "frontier": "NONFINITE_SCALAR_CONTENT_UNESTABLISHED"
+    },
+    {
+      "case": "double-stringified",
+      "frontier": "DOUBLE_STRINGIFIED_OR_NONFINITE_CONTENT"
+    },
+    {
+      "case": "nonascii",
+      "frontier": "NONASCII_PROVIDER_STRING_CONTENT_UNESTABLISHED"
+    },
+    {
+      "case": "surrogate",
+      "frontier": "NONASCII_PROVIDER_STRING_CONTENT_UNESTABLISHED"
+    },
+    {
+      "case": "string-budget",
+      "frontier": "SCALAR_EXACT_LITERAL_PAYLOAD_BUDGET"
+    },
+    {
+      "case": "tensor",
+      "frontier": "TENSOR_REFERENCE_IS_NOT_SCALAR_CONTENT"
+    },
+    {
+      "case": "empty-container",
+      "frontier": "CONTAINER_OR_TRUNCATED_LEAF_IS_NOT_SCALAR"
+    },
+    {
+      "case": "unknown-tag",
+      "frontier": "UNSUPPORTED_PROVIDER_SCALAR_TAG"
+    },
+    {
+      "case": "provider-revision",
+      "frontier": "SCALAR_PROVIDER_REVISION_UNSUPPORTED"
+    }
+  ],
+  "code_witness_compile_performed": false,
+  "content_chain_closed": false,
+  "elapsed_seconds": 1.7760236150061246,
+  "first_stage_complete": false,
+  "graph_records_created": false,
+  "owned_native_scalar_resolver_executed": false,
+  "provider_revision": "cf30153c4c131c8164ee7798e5022d810682e2cb",
+  "raw_capture_reads": 0,
+  "sources": [
+    {
+      "bytes": 7171,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/scar/trace/native_scalar_content.py",
+      "sha256": "e920bfa213c7a4684128a087ecbe8e1f90e75934f3d9b93404114db7bfad44a8"
+    },
+    {
+      "bytes": 7352,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/docs/NATIVE_SCALAR_CONTENT_CONTRACT.md",
+      "sha256": "64cff41a012bdb7beec624f9935c1bb269ed13e6021c7fc9c110b90c6ab8280e"
+    },
+    {
+      "bytes": 6956,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/analysis/native_scalar_content_20261025/check_api.py",
+      "sha256": "f8c3bfbda051380a3ef523380e9810afe67894ca6633c358354f1f9c363a62c8"
+    }
+  ],
+  "status": "PASS_PURE_METADATA_API_CHECKS",
+  "synthetic_schema_formals": [
+    {
+      "kind": "IntType",
+      "name": "value",
+      "real_kind": "IntType",
+      "real_type": "int",
+      "type": "int"
+    },
+    {
+      "kind": "BoolType",
+      "name": "flag",
+      "real_kind": "BoolType",
+      "real_type": "bool",
+      "type": "bool"
+    },
+    {
+      "kind": "StringType",
+      "name": "name",
+      "real_kind": "StringType",
+      "real_type": "str",
+      "type": "str"
+    },
+    {
+      "kind": "IntType",
+      "name": "dtype",
+      "real_kind": "ScalarTypeType",
+      "real_type": "ScalarType",
+      "type": "int"
+    },
+    {
+      "kind": "IntType",
+      "name": "count",
+      "real_kind": "SymIntType",
+      "real_type": "int",
+      "type": "int"
+    },
+    {
+      "kind": "FloatType",
+      "name": "scale",
+      "real_kind": "FloatType",
+      "real_type": "float",
+      "type": "float"
+    },
+    {
+      "kind": "OptionalType",
+      "name": "maybe",
+      "real_kind": "OptionalType",
+      "real_type": "Optional[int]",
+      "type": "Optional[int]"
+    }
+  ],
+  "target_executed": false
+}

@@ -1,0 +1,54 @@
+{
+  "schema": "scar.native-boxing-owner-observation-summary",
+  "schema_version": 1,
+  "evidence_level": "OWNER_REPORTED_OBSERVED_NOT_INDEPENDENTLY_READ_HERE",
+  "supplied_by": "/root/native_bridge_delivery",
+  "owner_diagnostic_directory": "artifacts/analysis/native_capture_batch_failure01_20261025",
+  "sequence": 3182,
+  "operator": "aten.mul_.Tensor",
+  "schema_text": "aten::mul_.Tensor(Tensor(a!) self, Tensor other) -> Tensor(a!)",
+  "dispatch": {
+    "begin_line": 9544,
+    "input_held_paths": [[0, 0]],
+    "input_held_weak_tokens": ["weak:369749:354301"],
+    "output_line": 9545,
+    "output_held_paths": [[]],
+    "output_held_weak_tokens": ["weak:369749:354301"],
+    "end_line": 9546,
+    "outcome": "RETURNED",
+    "span_enter_returned": true,
+    "slot_gaps": []
+  },
+  "inner_native": {
+    "node_id": 24616,
+    "node_ordinal": 20477,
+    "parent_node_id": 24615,
+    "inputs": [
+      {"path": [0], "type": "Tensor(float)", "value": [24607, 24608, 0, 150528, 4, "cpu"], "shape": [3, 224, 224], "strides": [1, 672, 3]},
+      {"path": [1], "type": "Tensor(double)", "value": [24617, 24618, 0, 1, 8, "cpu"], "shape": [], "strides": []}
+    ],
+    "output_same_provider_tuple_as_self": true
+  },
+  "surrounding_native": {
+    "span_node_id": 24615,
+    "span_node_ordinal": 20479,
+    "span_inputs_self_only": true,
+    "output_marker_node_id": 24625,
+    "output_marker_node_ordinal": 20478,
+    "output_marker_inputs_self_only": true,
+    "python_dispatch_mode_node_id": 24614,
+    "python_dispatch_mode_ordinal": 20480,
+    "python_dispatch_mode_inputs_two_tensors": true,
+    "outer_node_id": 24611,
+    "outer_node_ordinal": 20481,
+    "outer_parent_node_id": 2,
+    "outer_same_schema": true,
+    "outer_other_provider_tuple": [24612, 24613, 0, 1, 8, "cpu"]
+  },
+  "interpretation": "WRAPPED_NUMBER_UNBOX_REBOX_IS_CONSISTENT_INFERENCE_ONLY",
+  "wrapped_number_bit_observed": false,
+  "original_primitive_type_or_value_observed": false,
+  "same_content_across_other_tensor_ids_established": false,
+  "raw_or_sqlite_read_by_this_agent": false,
+  "target_executed_by_this_agent": false
+}
