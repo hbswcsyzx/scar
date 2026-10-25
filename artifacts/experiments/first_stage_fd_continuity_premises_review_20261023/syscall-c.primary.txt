@@ -1,0 +1,162 @@
+17: #include "mmap_notify.h"
+18: #include "native_defs.h"
+19: #include "ptrace.h"
+20: #include "ptrace_syscall_info.h"
+21: #include "nsig.h"
+22: #include "number_set.h"
+23: #include "delay.h"
+24: #include "poke.h"
+577:  * Returns:
+578:  * 0: "ignore this ptrace stop", bail out silently.
+579:  * 1: ok, decoded; call
+580:  *    syscall_entering_finish(tcp, syscall_entering_trace(tcp, ...)).
+581:  * other: error; call syscall_entering_finish(tcp, res), where res is the value
+582:  *    returned.
+583:  */
+584: int
+621: }
+622: 
+623: int
+624: syscall_entering_trace(struct tcb *tcp, unsigned int *sig)
+625: {
+626: 	if (hide_log(tcp)) {
+627: 		/*
+628: 		 * Restrain from fault injection
+629: 		 * while the tracee executes strace code.
+630: 		 */
+646: 		}
+647: 	}
+648: 
+649: 	if (hide_log(tcp) || !traced(tcp)
+650: 	    || ((tracing_paths || tracing_fds) && !pathtrace_match(tcp))) {
+651: 		tcp->flags |= TCB_FILTERED;
+652: 		return 0;
+653: 	}
+654: 
+655: 	tcp->flags &= ~TCB_FILTERED;
+656: 
+657: 	if (inject(tcp))
+658: 		tamper_with_syscall_entering(tcp, sig);
+659: 
+686: 	tcp->sys_func_rval = res;
+687: 
+688: 	/* Measure the entrance time as late as possible to avoid errors. */
+689: 	if ((Tflag || cflag) && !filtered(tcp))
+690: 		clock_gettime(CLOCK_MONOTONIC, &tcp->etime);
+691: 
+692: 	/* Start tracking system time */
+693: 	if (cflag) {
+712:  * 1: ok.
+713:  * -1: error in one of ptrace ops.
+714:  *
+715:  * If not 0, call syscall_exiting_trace(tcp, res), where res is the return
+716:  *    value. Anyway, call syscall_exiting_finish(tcp) then.
+717:  */
+718: int
+719: syscall_exiting_decode(struct tcb *tcp, struct timespec *pts)
+720: {
+721: 	/* Measure the exit time as early as possible to avoid errors. */
+722: 	if ((Tflag || cflag) && !filtered(tcp))
+723: 		clock_gettime(CLOCK_MONOTONIC, pts);
+724: 
+725: 	if (tcp_sysent(tcp)->sys_flags & MEMORY_MAPPING_CHANGE)
+726: 		mmap_notify_report(tcp);
+729: 	    (tcp_sysent(tcp)->sen != SEN_prctl || tcp->u_arg[0] == PR_SET_NAME))
+730: 		maybe_load_task_comm(tcp);
+731: 
+732: 	if (filtered(tcp))
+733: 		return 0;
+734: 
+735: 	if (check_exec_syscall(tcp)) {
+736: 		/* The check failed, hide the log.  */
+789: }
+790: 
+791: int
+792: syscall_exiting_trace(struct tcb *tcp, struct timespec *ts, int res)
+793: {
+794: 	if (syscall_tampered(tcp) ||
+795: 	    inject_delay_exit(tcp) ||
+796: 	    inject_poke_exit(tcp))
+1077: 	tcp->u_error = saved_u_error;
+1078: }
+1079: 
+1080: static struct_ptrace_syscall_info ptrace_sci;
+1081: 
+1082: static bool
+1083: ptrace_syscall_info_is_valid(void)
+1084: {
+1085: 	return ptrace_get_syscall_info_supported &&
+1086: 	       ptrace_sci.op <= PTRACE_SYSCALL_INFO_SECCOMP;
+1087: }
+1289: 	 */
+1290: 	if (ptrace_sci.op == 0xff) {
+1291: 		const size_t size = sizeof(ptrace_sci);
+1292: 		if (ptrace(PTRACE_GET_SYSCALL_INFO, tcp->pid,
+1293: 			   (void *) size, &ptrace_sci) < 0) {
+1294: 			get_regs_error = -2;
+1295: 			return false;
+1296: 		}
+1304: 	if (entering(tcp)) {
+1305: 		if (ptrace_sci.op == PTRACE_SYSCALL_INFO_EXIT) {
+1306: 			error_msg("pid %d: entering"
+1307: 				  ", ptrace_syscall_info.op == %u",
+1308: 				  tcp->pid, ptrace_sci.op);
+1309: 			/* TODO: handle this.  */
+1310: 		}
+1311: 	} else {
+1312: 		if (ptrace_sci.op == PTRACE_SYSCALL_INFO_ENTRY) {
+1313: 			error_msg("pid %d: exiting"
+1314: 				  ", ptrace_syscall_info.op == %u",
+1315: 				  tcp->pid, ptrace_sci.op);
+1316: 			/* TODO: handle this.  */
+1317: 		}
+1318: 	}
+1412: 	if (get_syscall_regs(tcp) < 0)
+1413: 		return -1;
+1414: 
+1415: 	if (ptrace_syscall_info_is_valid()) {
+1416: 		/* Apply arch-specific workarounds.  */
+1417: 		int rc = arch_check_scno(tcp);
+1418: 		if (rc != 1)
+1419: 			return rc;
+1460: static int
+1461: get_syscall_args(struct tcb *tcp)
+1462: {
+1463: 	if (ptrace_syscall_info_is_valid()) {
+1464: 		const unsigned int n =
+1465: 			MIN(ARRAY_SIZE(tcp->u_arg),
+1466: 			    ARRAY_SIZE(ptrace_sci.entry.args));
+1467: 		for (unsigned int i = 0; i < n; ++i)
+1491: #endif
+1492: 
+1493: /* Returns:
+1494:  * 1: ok, continue in syscall_exiting_trace().
+1495:  * -1: error, syscall_exiting_trace() should print error indicator
+1496:  *    ("???" etc) and bail out.
+1497:  */
+1498: static int
+1499: get_syscall_result(struct tcb *tcp)
+1511: static void
+1512: get_error(struct tcb *tcp, const bool check_errno)
+1513: {
+1514: 	if (ptrace_syscall_info_is_valid()) {
+1515: 		if (ptrace_sci.exit.is_error) {
+1516: 			tcp->u_rval = -1;
+1517: 			tcp->u_error = -ptrace_sci.exit.rval;
+1518: 		} else {
+1544: 		tcp->u_error = old_error;
+1545: 		/* arch_set_error does not update u_rval */
+1546: 	} else {
+1547: 		if (ptrace_syscall_info_is_valid())
+1548: 			tcp->u_rval = -1;
+1549: 		else
+1550: 			get_error(tcp, !(tcp_sysent(tcp)->sys_flags &
+1551: 					 SYSCALL_NEVER_FAILS));
+1568: 		tcp->u_rval = old_rval;
+1569: 		/* arch_set_success does not update u_error */
+1570: 	} else {
+1571: 		if (ptrace_syscall_info_is_valid())
+1572: 			tcp->u_error = 0;
+1573: 		else
+1574: 			get_error(tcp, !(tcp_sysent(tcp)->sys_flags &
+1575: 					 SYSCALL_NEVER_FAILS));

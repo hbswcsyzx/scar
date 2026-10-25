@@ -1,0 +1,38 @@
+{
+  "inputs": {
+    "archive": {
+      "bytes": 6817,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/archive-index.json",
+      "sha256": "6cca49aadd42121842224e9d06c00fece23ea0d83f637b4ecda603843b6f0c17"
+    },
+    "coordinates": {
+      "bytes": 45674,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/capture-coordinates.json",
+      "sha256": "51c3d55c4492ff2f4f769d53f41ebb465a5529620b314b8d334d0f8be8ff9920"
+    },
+    "launch": {
+      "bytes": 3334,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os-capture-launch.d7eb67dc4256e75ef6e85144300085af.json",
+      "sha256": "e10d9b08fb0d89fe115400bb737b2b0613a34828ee409b55a2171648522e2f4e"
+    },
+    "profile": {
+      "bytes": 3114,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_owned_os_capture_20261023/gate-attempt02/capture/os-capture-coverage.d7eb67dc4256e75ef6e85144300085af.json",
+      "sha256": "603ecfabb1c97436048d67b93960762d3ba3dd38f235b53c9f72f4f796badfea"
+    }
+  },
+  "revision": "9da2ea3c14282ccec536fc1c844c4fc78d363057",
+  "schema": "scar.fd-namespace-quarantine-producer",
+  "schema_version": 1,
+  "scope": "one same public guard using genuine retained CPU coverage; no fake Base, target, R1 or raw scan",
+  "script": {
+    "bytes": 4704,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_namespace_quarantine_20261023/run.py",
+    "sha256": "eca1fac0a0dd60bea61e38aed68ccf4a66f75bbdd16f92fa3217f5e1593a31f5"
+  },
+  "source_freeze": {
+    "bytes": 3844,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_fd_namespace_quarantine_20261023/static-freeze.json",
+    "sha256": "cf5e2d5435999b73fb5be20b5eb431c3390566090d57f07e01f1390eb857d2c2"
+  }
+}

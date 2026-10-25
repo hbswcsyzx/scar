@@ -1,0 +1,30 @@
+{
+  "first_line": 721,
+  "last_line": 742,
+  "lines": [
+    "",
+    "static void",
+    "outf_perror(const struct tcb * const tcp)",
+    "{",
+    "\tif (tcp->outf == stderr)",
+    "\t\treturn;",
+    "",
+    "\t/* This is ugly, but we don't store separate file names */",
+    "\tif (output_separately)",
+    "\t\tperror_msg(\"%s.%u\", outfname, tcp->pid);",
+    "\telse",
+    "\t\tperror_msg(\"%s\", outfname);",
+    "}",
+    "",
+    "ATTRIBUTE_FORMAT((printf, 1, 0))",
+    "static void",
+    "tvprintf(const char *const fmt, va_list args)",
+    "{",
+    "\tif (current_tcp) {",
+    "\t\tint n = vfprintf(current_tcp->outf, fmt, args);",
+    "\t\tif (n < 0) {",
+    "\t\t\t/* very unlikely due to vfprintf buffering */"
+  ],
+  "sha256": "21fe0b653612b9354ff783a9ca1643d39682d85fd38bf32a14b09cdea41febd1",
+  "url": "https://raw.githubusercontent.com/strace/strace/v6.8/src/strace.c"
+}

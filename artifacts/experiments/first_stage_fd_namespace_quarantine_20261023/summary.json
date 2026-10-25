@@ -1,0 +1,23 @@
+{
+  "FD_values_source_unchanged": "bound by static freeze; no reexecution claimed",
+  "R1_imports": 0,
+  "elapsed_seconds": 0.6333550070121419,
+  "full_execution_model_semantics": "OPEN",
+  "namespace_continuity": {
+    "exception": "FDNamespaceContinuityUnproven",
+    "message": "OS FD table context OPEN: selection coverage is qualified; independent scoped descriptor-namespace continuity qualification is not implemented. No container coidentity may be inferred from zero observed transitions; use the FD_VALUES_ONLY_R2 path to preserve FD evidence.",
+    "reason_code": "FD_NAMESPACE_CONTINUITY_QUALIFICATION_NOT_IMPLEMENTED",
+    "status": "OPEN"
+  },
+  "old_schema1_reader_version_guard_unchanged": true,
+  "peak_rss_kib": 44416,
+  "public_build_and_read_bodies_unchanged": true,
+  "raw_open_attempts": [],
+  "resources_created": 0,
+  "schema": "scar.fd-namespace-quarantine-check",
+  "schema_version": 1,
+  "selection_profile": "STRACE_EXPLICIT_SELECTION_CAPTURE_BOUND_V2",
+  "shared_prepare_only_guard_call_changed": true,
+  "status": "PASS_EXPECTED_NAMESPACE_REFUSAL",
+  "target_runs": 0
+}
