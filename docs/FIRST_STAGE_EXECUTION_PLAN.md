@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | S1 模型与来源 | 审计真实类/字段/codec/producer、身份与关系；固定声明/归档/索引职责 | 每个必需部分有明确表达及获取来源；缺失 producer 和重复权威逐条列明；审计通过不代表自动建模已完成 |
 | S2 自动分母 | 复用已保存 source/call/native/OS 清单，保留定义、实际调用和资源的独立分母 | 入口自动发现，不手选业务函数；原缺采、未尝试和不支持项始终可查 |
-| S3 自动连接 | 843快照已接回原真实运行；继续消费新846静态快照的增量，并审查原生端口、内容/状态及资源关系 | 正规来源和有序端口接回唯一规范模型；source、引用、内容、state、ready 分别验收；不能以局部 PASS 关闭 S3 |
+| S3 自动连接 | 843快照已接回原真实运行；后继858静态快照已组合消费，继续汇总runtime增量与原生端口、内容/状态及资源关系 | 正规来源和有序端口接回唯一规范模型；source、引用、内容、state、ready 分别验收；不能以局部 PASS 关闭 S3 |
 | S4 全流程 | 在所需新采集字段共同确定后跑未修改 LeWM 原完整入口，自动产生统一模型 | 从启动/import/加载，经推理/环境到视频写入和退出，全部必需关系无未解释断点；固定范围、版本和分母 |
 | S5 汇报停止 | 给出实体、关系、自动流程、真实模型与覆盖说明 | 原合同 S1—S4 全部满足后停止讲解，不提前进入化简 |
 
@@ -19,11 +19,13 @@ S1 审计、已有数据的 S3 接线和独立产品复核可以并行；会改�
 
 ## 2. 当前实际下一门
 
-当前正式静态源码快照为846个active bodies/2217个定义/151个文件，来自三个既有
-kwargs图的普通ADD_GRAPH发布。publisher/composer已完成且三项公共reader实际PASS，
-原总门281.584s/exit1，因`_compat_pickle.py`缺预冻结字节保持FAILED_ENV_FREEZE。
-独立metadata postflight exit0只核保存产物/引用/源码freeze，不追认历史runtime字节或
-把原门改称通过。[准确结果与边界](SOURCE_CALL_MODEL.md)保留全部失败及原receipt。
+当前正式静态源码快照为858个active bodies/2217个定义/151个文件，769 UNSUPPORTED、
+590 NOT_ATTEMPTED。三kwargs图的846父快照上，后继12个既有图普通ADD及组合消费已完成；
+resume02 actual exit0/651.143247s、12 ordinary-reader通过。原publisher消费失败396.750s
+及首恢复失败140.046s保留；只修consumer顺序和module文本转交，未重publisher/lower。
+更早三图门FAILED_ENV_FREEZE及metadata postflight0也不倒改。
+[准确结果](../artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/RESULT.md)
+与[模型边界](SOURCE_CALL_MODEL.md)区分旧producer/新consumer及全部历史失败。
 
 最新完整runtime接线仍绑定843快照：该fresh联合门已exit0，source binder1次、
 不resume旧842；原100438调用中6699接其body，
@@ -57,7 +59,7 @@ held109288/未定1901，几何107483/缺口3706。GNU28:41.75，peak1091472KiB�
 | 分工 | 具体模型断口 | 下一项实际验收 |
 | --- | --- | --- |
 | native接入 | 全dispatch端口门已通过；逻辑内容/state/ready仍缺关系 | 保留全部动态资格与原分母；后继连接原生值、状态和资源，而非再跑prefix |
-| source-call前端 | 3个kwargs原图已正式发布到846静态快照，三reader PASS；禁止live源码读取的CP2消费检查已通过，原总门FAILED_ENV_FREEZE | 汇总增量接线；runtime仍843，保留局部unwind/outer/runtime/effects；JoinedStr独立门另记真实结果 |
+| source-call前端 | 65窗口产12成功图；原12ADD publication经修consumer后已组合为858静态快照，12普通reader通过，旧失败保留 | 汇总增量接线；runtime仍843，179calls仅潜在权重；原2FAILED/后续重试不在本12ADD，保留unwind/outer/effects和comprehension等缺口 |
 | main组合查询 | 实际79592/39796完整一次导航门已exit0，5个不同角色的查询样本通过 | 160压缩块及一个派生关系样本独立复核通过；后继补实际数据/状态/控制连接，不把context当direct call |
 
 计划及来源分别在`artifacts/analysis/kwargs_expansion_design_20261025`和
@@ -69,17 +71,19 @@ held109288/未定1901，几何107483/缺口3706。GNU28:41.75，peak1091472KiB�
 实际注册/关闭/普通坐标绑定。它只补未来采集的可验证来源，不升级原LeWM scope。
 新episode仍待其它必要采集字段共同确定，不为此单独重跑目标。
 
-下一批源码窗口是65个此前未进入新前端的普通函数，关联原运行1713次调用、13文件。
+已完成的源码窗口为65个此前未进入新前端的普通函数，关联原运行1713次调用、13文件。
 它们来自原自动候选/实际尝试/新发布delta的准确qualified key扣重，不是业务函数名单。
 590项NOT_ATTEMPTED中的260次已见调用属于class-entry接口，不能当普通函数批量补lower。
-规划继续使用准确匹配的843 composition及其runtime报告；846仅作发布排除和后续ADD目标，
+该窗口规划使用准确匹配的843 composition及其runtime报告；846仅作发布排除和后续ADD目标，
 不能伪造846运行报告。新`eligible_body_keys`只缩调度窗口，保完整2217定义和100438调用分母，
 选择及当前producer进入新plan digest/work key，不resume旧window。
 
 本批已批准65/13的调度上限，计算预算4000ops/body、24000总ops、worker180s，
-record/output128MB、outer300s、累计stored+decoded输入1GiB。读取量约570MB decoded、
-100MB stored为代码/manifest估计，尚非实测；不称沿用原单body256MB输入门。
-实际budget stop、code缺证和新frontier逐项保留；本段是计划，未声称已lower65项。
+record/output128MB、outer300s、批准累计stored+decoded输入1GiB。实际65全terminal：
+12成功/179calls、51不支持/1501calls、2失败/33calls，outer174.766s/worker144.349s。
+process rchar430228980不含解码；累计I/O计费/上限验证仍OPEN，原570MB decoded/100MB
+stored仅声明/代码估计。12图后继用1800s ceiling的普通ADD/consumer完成858静态快照，
+完整runtime仍843；没有为每个body重扫100438调用或把2失败改为成功。
 
 ## 3. 关键缺口与处理原则
 

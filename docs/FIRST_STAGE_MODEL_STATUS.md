@@ -6,6 +6,26 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-25：12原图普通ADD的恢复消费完成，source858/runtime843
+
+root确认resume02 session20761 actual exit0/651.143247s，peak1494132KiB；12个ordinary
+reader实际返回，7份归档文本按准确body snapshot singleton消费。按actual changed-body
+顺序核发生，再以唯一(fi,bi)查原plan的ref/namespace；公共根/lineage及严格compiler-origin
+保持。当前静态858/2217定义/151文件，769 UNSUPPORTED、590 NOT_ATTEMPTED；CP2新增
+construction仍Unknown，header unknown18/totalNone，不用图大小代替成本。
+
+原publisher gate20197在保存12ADD后exit1/396.750s（active追加顺序），resume01 gate18536
+exit1/140.046s（多文件pool违反单module exact-cover）均保留。只修consumer、消费原
+publication，不重publisher/lower12图；新consumer HEAD3423c9bf与原producer字节分列，
+CodeWitness compile/load/match均0。没有新raw/binder/target或额外外部typed-reader循环。
+
+完整runtime仍843/6699 body-linked calls；179次是潜在可接权重，不直接相加。原65窗口
+两项FAILED及其后续重试没有纳入本12ADD，历史记录不倒改。组合根17MB及12原program
+local-only，Git小metadata不能当自包含模型包。总I/O计费、scope债务、collector assumption、
+内容/state/ready/lifetime与第一阶段继续OPEN。见
+[实际结果](../artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/RESULT.md)
+及[准确收据](../artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/terminal-receipt.json)。
+
 ### 2026-10-25：原生输入metadata的新保留路径实际回读通过
 
 新opt-in profile在同一次owned profiler DFS保留TorchOp输入metadata。独立CPU实验43行/
@@ -16,7 +36,8 @@
 ### 2026-10-25：65项普通函数窗口全部实际处理
 
 root确认exit0，outer174.766s/worker144.349s；65终态为12成功、51不支持、2失败，
-分别关联原运行179/1501/33次调用。12图共1111 graph ops，尚不计入source846/runtime843。
+分别关联原运行179/1501/33次调用。12图共1111 graph ops；该窗口结束时未计入source846/runtime843，
+后继普通ADD消费结果见上方source858条目，调用权重仍不作为runtime增量。
 两个失败是字符串校验器漏收Call结果hold，窄修已应用，原失败保留；12图不重lower。
 CodeWitness compile0；真实rchar430228980不包含gzip解码，总I/O计费仍OPEN。
 完整结果及下一实际frontier见
