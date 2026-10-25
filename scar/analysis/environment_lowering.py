@@ -61,10 +61,14 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         self.address_refinements = []
 
     def make_graph(self):
-        return replace(super().make_graph(),
+        graph = replace(super().make_graph(),
             environments=(self.environment,),
             function_entries=(FunctionEntryLayout(self.environment.id, self.interface.parameters),),
             state_address_refinements=tuple(self.address_refinements))
+        if hasattr(self, "generator_records"):
+            from scar.analysis.source_generator_lowering import assemble_generators
+            graph = assemble_generators(self, graph)
+        return graph
 
     def _addresses(self, operation_id, effects):
         operation = self.operation_records[operation_id]
@@ -106,6 +110,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         return cursor, value
 
     def expr(self, node, cursor):
+        if self.has_language("GENEXPR_314_V1") and isinstance(node, ast.GeneratorExp):
+            from scar.analysis.source_generator_lowering import lower_generator
+            return lower_generator(self, node, cursor)
         if (self.has_language("CALL_KWARGS_314_V1") and isinstance(node, ast.Call)
                 and any(keyword.arg is None for keyword in node.keywords)):
             from scar.analysis.source_call_lowering import lower_kwargs_call

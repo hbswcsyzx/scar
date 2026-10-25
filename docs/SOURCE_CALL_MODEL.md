@@ -81,3 +81,11 @@ CodeWitness compile/load/match均0，原publisher的独立AST/CodeWitness准入�
 完整runtime仍843/6699 body-linked calls，179calls只是12图的潜在调用权重，不能直接相加。
 原两个FAILED及其后续重试不在本12项ADD中；总I/O计费、collector assumption和第一阶段OPEN。
 见[实际消费结果](../artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/RESULT.md)。
+
+后继显式GeneratorExp能力现可从同一原SG、AST和readonly子code恢复创建、lazy B、
+两个NEXT driver及固定解包consumer。一次真实qualified主体门exit0/21.567357s，
+312静态构造ops，独立source/CodeWitness和SourceProgram5读回通过；main再以同一图
+普通read_structure确认全部五Region原记录保留，exit0/9.830950s，无新lower/target。
+原900次父函数调用只作调度权重，尚未发布或接回runtime；source858/runtime843保持。
+guarded消费者、close/throw、状态/effects与运行实例缺口见
+[GeneratorExp模型与范围](SOURCE_GENERATOR_EXPRESSIONS.md)。

@@ -47,6 +47,15 @@ def lower_unpack_target(builder, target, rhs, cursor, *, rhs_held=False):
         builder.protocol(operation, PythonProtocolKind.UNPACK_FIXED, target)
         builder.language_unpackings.append(UnpackShape(operation, builder.source(target),
             tuple(builder.source(child) for child in target.elts)))
+        if builder.has_language("GENEXPR_314_V1"):
+            from dataclasses import replace
+            from scar.analysis.source_generator_lowering import unpack_callee
+            callee = unpack_callee(builder, target, rhs)
+            if callee is not None:
+                original = builder.operation_records[operation]
+                connected = replace(original, callee=callee)
+                builder.operations[builder.operations.index(original)] = connected
+                builder.operation_records[operation] = connected
         _transfer(builder, consumed, target)
         # Normal results are published stack references; reverse holds put
         # the first target on top. No extra INCREF or allocation is asserted.
