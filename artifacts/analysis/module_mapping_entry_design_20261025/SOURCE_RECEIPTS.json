@@ -1,0 +1,408 @@
+{
+  "actual_closure_cells": "UNOBSERVED; static co_freevars/co_cellvars empty",
+  "body_graphs_created": 0,
+  "budget": {
+    "additional_source_inspection_bytes": 41668,
+    "additional_source_inspection_method": "Full-file conservative accounting: source_language.py6206 + state_addresses.py9581 + structured.py6896 + source_statement_lowering.py12089 + structured.py6896 repeated enum inspection. No additional hash reads.",
+    "compile_attempts": 0,
+    "conservative_prior_source_inspection_bytes": 834581,
+    "large_composition_reads": 0,
+    "lowerings": 0,
+    "metadata_bound_method": "Original inspection conservative full-file sum remains below1.5MB (retention/navigation/composition/inventory/witness manifest+marshal/layer index and small reports); additional derived design-receipt review/validation included in rounded1.6MB bound. No source-layer840089B payload read.",
+    "metadata_limit": 2000000,
+    "metadata_read_upper_bound": 1600000,
+    "raw_reads": 0,
+    "source_context_payload_reads": 0,
+    "source_hash_reads": 91064,
+    "source_limit": 1000000,
+    "target_executions": 0,
+    "target_source_read_allowance": 1172,
+    "total_source_read_upper_bound": 968485
+  },
+  "core_codec_design_version": 28,
+  "current_source_hashes": [
+    {
+      "bytes": 10570,
+      "sha256": "aa6440229e87cfbf67d57d9d268c1d6b4c89b824ff379c24509caa1af94b922f",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/functions.py"
+    },
+    {
+      "bytes": 7546,
+      "sha256": "14e9c16d89db388793236a3636adaac0557c410a5c633c65f7558d413db029f8",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/environments.py"
+    },
+    {
+      "bytes": 5129,
+      "sha256": "826868c6754cc0490c0477f6f0f0ec09e5f45b70b360a6624ba45b03f6bf26ba",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/inventory.py"
+    },
+    {
+      "bytes": 67819,
+      "sha256": "c1d0a8a3204aff994933e957c8fdcfbab6e07300a6a9ee2ef257ed4446ab250d",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py"
+    }
+  ],
+  "current_source_hashes_scope": "Four critical ABI/codec files only; other cited source paths inspected at recorded line anchors, not claimed as a frozen full producer closure.",
+  "import_module_object": "UNPROVEN",
+  "inventory_published": false,
+  "invocation_mode": "UNPROVEN_FROM_CODE_ONLY",
+  "observed_module": {
+    "binding_frontiers": [
+      "VERIFIED_CODE_WITHOUT_DEFINITION_WITNESS"
+    ],
+    "binding_status": "UNRESOLVED",
+    "call_weight": 1,
+    "category": "VERIFIED_MODULE_WITHOUT_DEFINITION_INTERFACE",
+    "descriptor": {
+      "filename": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target/probe.py",
+      "first_line": 1,
+      "flags": 0,
+      "key": "pycode-v2:cc8bd3da78178c1c96f4b53f2db2837013f0d42c0014cb765ef4ff865b8c6f31",
+      "parameters": [],
+      "qualname": "<module>"
+    },
+    "descriptor_anchor": {
+      "index": null,
+      "line_number": 1,
+      "line_sha256": "3e1f9c69ee345dff10010e997bc743487f7c077cdc6d927bedc002e5f02d619f",
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-codes.1391040.jsonl"
+    },
+    "first_invocation_anchor": {
+      "index": 1,
+      "line_number": 1,
+      "line_sha256": "7cdd90a38e9ba39f3bbb9a733b8aaded1c5909a0a70829745417a4d502ce864a",
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-events.1391040.jsonl"
+    },
+    "last_invocation_anchor": {
+      "index": 1,
+      "line_number": 1,
+      "line_sha256": "7cdd90a38e9ba39f3bbb9a733b8aaded1c5909a0a70829745417a4d502ce864a",
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/capture/trace/call-events.1391040.jsonl"
+    },
+    "process_id": 1391040,
+    "source_link": {
+      "code": "pycode-v2:cc8bd3da78178c1c96f4b53f2db2837013f0d42c0014cb765ef4ff865b8c6f31",
+      "definition": null,
+      "issues": [
+        {
+          "anchor": null,
+          "detail": "verified code has no unique inventoried function/class definition",
+          "kind": "TARGET_DEFINITION_MISSING"
+        }
+      ],
+      "optimize_levels": [
+        0
+      ],
+      "snapshot": {
+        "encoding": "utf-8",
+        "fingerprint": "sha256:f838ded2da95e6689bf437c9435367200d3d9ccc4c1244f17f205d89858e7c1b",
+        "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target/probe.py",
+        "python_version": "3.14"
+      },
+      "source": null,
+      "status": "VERIFIED"
+    },
+    "source_status": "VERIFIED"
+  },
+  "original_counts": {
+    "all_calls": 271,
+    "canonical_bodies": 0,
+    "cfg_edges": 56,
+    "cfg_nodes": 45,
+    "control_regions": 6,
+    "function_class_definitions": 0,
+    "module_calls": 1,
+    "source_atoms": 95,
+    "source_semantic_operations": 92
+  },
+  "original_initializer": {
+    "id": "opdef:init:2d91d50cf13f1e1f61014373",
+    "namespace_root": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target",
+    "pointer": "#/files/0/module_roots/0",
+    "qualified_source_artifact": {
+      "decoded_bytes": 40161,
+      "decoded_sha256": "224b4e93eca46b6ca006c2879a3e271da3d19ea510f62d5934c80f44df04cdf2",
+      "stored_bytes": 8872,
+      "stored_sha256": "9e07829e78e314b258a80e71f575352406f50696a3a89b9a46dfe5f929ff620e",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/06-source-composition/composition/index.json.gz"
+    }
+  },
+  "production_modified": false,
+  "readonly_code_inspection": {
+    "cellvars": [],
+    "constant_path": [],
+    "error_cleanup": [
+      {
+        "offset": 578,
+        "opname": "STORE_NAME"
+      },
+      {
+        "offset": 620,
+        "opname": "STORE_NAME"
+      },
+      {
+        "offset": 622,
+        "opname": "DELETE_NAME"
+      },
+      {
+        "offset": 628,
+        "opname": "STORE_NAME"
+      },
+      {
+        "offset": 630,
+        "opname": "DELETE_NAME"
+      }
+    ],
+    "exception_table_entries": 4,
+    "flags": 0,
+    "freevars": [],
+    "imports": [
+      {
+        "name": "json",
+        "opname": "IMPORT_NAME"
+      },
+      {
+        "name": "os",
+        "opname": "IMPORT_NAME"
+      },
+      {
+        "name": "pathlib",
+        "opname": "IMPORT_NAME"
+      },
+      {
+        "name": "Path",
+        "opname": "IMPORT_FROM"
+      },
+      {
+        "name": "torch",
+        "opname": "IMPORT_NAME"
+      }
+    ],
+    "method": "SHA-checked1455B existing marshal; no compile/eval/exec or target call",
+    "name_opcodes": [
+      "DELETE_NAME",
+      "IMPORT_NAME",
+      "LOAD_NAME",
+      "STORE_NAME"
+    ],
+    "returns": [
+      {
+        "offset": 564,
+        "opname": "RETURN_VALUE",
+        "preceding_argval": null,
+        "preceding_op": "LOAD_CONST"
+      }
+    ],
+    "varnames": []
+  },
+  "runtime_namespace_alias": "UNOBSERVED",
+  "schema": "scar.module-mapping-entry-design",
+  "schema_version": 1,
+  "small_inputs": [
+    {
+      "decoded_bytes": 40161,
+      "decoded_sha256": "224b4e93eca46b6ca006c2879a3e271da3d19ea510f62d5934c80f44df04cdf2",
+      "stored_bytes": 8872,
+      "stored_sha256": "9e07829e78e314b258a80e71f575352406f50696a3a89b9a46dfe5f929ff620e",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/06-source-composition/composition/index.json.gz"
+    },
+    {
+      "decoded_bytes": 107405,
+      "decoded_sha256": "b11e9cc1e2e8e7c6eeb0aa8871c9ea0407a74dbcd03ccb7f77cb005608752749",
+      "stored_bytes": 9524,
+      "stored_sha256": "ff587f1bcc6e70d7e680b0d248bb889c955620c8aacce650bf85ea098cb0ff64",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/04-source-inventory/inventory.json.gz"
+    },
+    {
+      "decoded_bytes": 3674,
+      "decoded_sha256": "1dabc285204e65350af8177396e7534b163d7a20de52116de280680d6b9dac00",
+      "stored_bytes": 3674,
+      "stored_sha256": "1dabc285204e65350af8177396e7534b163d7a20de52116de280680d6b9dac00",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/08-workload-witness/archive/manifest.json"
+    },
+    {
+      "decoded_bytes": 1455,
+      "decoded_sha256": "cc5fbf3744e079d1a5eeb651f99248353c1a73fbd0c3da13746a18d0f5673fde",
+      "stored_bytes": 1455,
+      "stored_sha256": "cc5fbf3744e079d1a5eeb651f99248353c1a73fbd0c3da13746a18d0f5673fde",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/08-workload-witness/archive/90d7182d15e88422d396566eb3aace8e7c5df83cf7a1f687f942178c01d84690.marshal"
+    },
+    {
+      "decoded_bytes": 586,
+      "decoded_sha256": "f838ded2da95e6689bf437c9435367200d3d9ccc4c1244f17f205d89858e7c1b",
+      "stored_bytes": 586,
+      "stored_sha256": "f838ded2da95e6689bf437c9435367200d3d9ccc4c1244f17f205d89858e7c1b",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/08-workload-witness/archive/ba2db01c7be2c626b0b22dc8f173d17a8a287c2a223d951b2ce43e381d4f2a5d.source.utf8"
+    }
+  ],
+  "source_context": {
+    "control_sha256": "606db31ff10da650336098c88c00a9421afba727970c309067bc95e7575530ea",
+    "namespace_root": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target",
+    "semantic_sha256": "df99e56b28b70b2c0710eaf3fdf7fbb1a9bc43f9d5a7109152caa33221bb9e5c",
+    "semantics_sha256": "dcb8622daf6e827ea62926a0abaf47ddc01aee66c61d40d31e794f6fb9b5d73e"
+  },
+  "source_line_anchors": [
+    {
+      "lines": [
+        320,
+        324,
+        329,
+        338
+      ],
+      "path": "scar/ir/frontend_v2.py"
+    },
+    {
+      "lines": [
+        470,
+        490,
+        643,
+        679,
+        705
+      ],
+      "path": "scar/analysis/program_inventory.py"
+    },
+    {
+      "lines": [
+        300,
+        309
+      ],
+      "path": "scar/analysis/call_edges.py"
+    },
+    {
+      "lines": [
+        195,
+        207,
+        223
+      ],
+      "path": "scar/analysis/source_frontend_worklist.py"
+    },
+    {
+      "lines": [
+        20,
+        36,
+        57
+      ],
+      "path": "scar/analysis/source_language.py"
+    },
+    {
+      "lines": [
+        18,
+        80
+      ],
+      "path": "scar/ir/program/functions.py"
+    },
+    {
+      "lines": [
+        26,
+        101
+      ],
+      "path": "scar/ir/program/environments.py"
+    },
+    {
+      "lines": [
+        164,
+        182,
+        265,
+        1095
+      ],
+      "path": "scar/analysis/program_lowering.py"
+    },
+    {
+      "lines": [
+        13,
+        91,
+        164
+      ],
+      "path": "scar/ir/program/inventory.py"
+    },
+    {
+      "lines": [
+        375,
+        385
+      ],
+      "path": "scar/analysis/inventory_partitions.py"
+    },
+    {
+      "lines": [
+        19,
+        27,
+        90,
+        108
+      ],
+      "path": "scar/ir/program/source_language.py"
+    },
+    {
+      "lines": [
+        49,
+        79,
+        117,
+        204,
+        234
+      ],
+      "path": "scar/ir/program/state_addresses.py"
+    },
+    {
+      "lines": [
+        19,
+        64,
+        106,
+        141
+      ],
+      "path": "scar/ir/program/structured.py"
+    },
+    {
+      "lines": [
+        99,
+        125,
+        161,
+        192
+      ],
+      "path": "scar/analysis/source_statement_lowering.py"
+    }
+  ],
+  "source_program_design_version": 6,
+  "source_snapshot": {
+    "encoding": "utf-8",
+    "fingerprint": "sha256:f838ded2da95e6689bf437c9435367200d3d9ccc4c1244f17f205d89858e7c1b",
+    "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target/probe.py",
+    "python_version": "3.14"
+  },
+  "status": "DESIGN_ONLY",
+  "sys_modules_membership": "UNPROVEN",
+  "witness_manifest": {
+    "artifact": {
+      "bytes": 1455,
+      "path": "90d7182d15e88422d396566eb3aace8e7c5df83cf7a1f687f942178c01d84690.marshal",
+      "sha256": "cc5fbf3744e079d1a5eeb651f99248353c1a73fbd0c3da13746a18d0f5673fde"
+    },
+    "compile_key": {
+      "compile_filename": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target/probe.py",
+      "dont_inherit": true,
+      "future_flags": 0,
+      "implementation": "cpython",
+      "mode": "exec",
+      "optimize": 0,
+      "path": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target/probe.py",
+      "profile": "RECORDED_FUTURE_FLAGS_V1",
+      "source_fingerprint": "sha256:f838ded2da95e6689bf437c9435367200d3d9ccc4c1244f17f205d89858e7c1b",
+      "version": [
+        3,
+        14,
+        7,
+        "final",
+        0
+      ]
+    },
+    "module_key": "90d7182d15e88422d396566eb3aace8e7c5df83cf7a1f687f942178c01d84690",
+    "original_g1_complete_descriptor_evidence": "G1 workload-witness terminal/resolution; not newly claimed by this direct marshal inspection",
+    "original_module_descriptor": {
+      "filename": "/home/zyf/AAA/scar-worktrees/native-scalar-model/artifacts/experiments/native_input_membership_20261025/target/probe.py",
+      "first_line": 1,
+      "flags": 0,
+      "key": "pycode-v2:cc8bd3da78178c1c96f4b53f2db2837013f0d42c0014cb765ef4ff865b8c6f31",
+      "parameters": [],
+      "qualname": "<module>"
+    },
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_offline_g0_20261025/model/attempts/1792955052545386845-1400879/08-workload-witness/archive/manifest.json"
+  }
+}
