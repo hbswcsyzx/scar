@@ -1,0 +1,15 @@
+{"actual_retained_input_bytes":0,"body":null,"elapsed_s":1.043703758972697,"event":"BEGIN","output_accounted_bytes":0,"phase":"FREEZE","self_peak_rss_kib":76120}
+{"actual_retained_input_bytes":418085,"body":null,"elapsed_s":1.0483246659860015,"event":"STAGE_BEGIN","output_accounted_bytes":324,"phase":"CURRENT_INPUT_MEMBERSHIP","self_peak_rss_kib":76120}
+{"actual_retained_input_bytes":1432046,"body":null,"elapsed_s":1.0643294839537703,"event":"STAGE_BEGIN","output_accounted_bytes":712,"phase":"ONE_ORIGINAL_COMPOSITION","self_peak_rss_kib":76120}
+{"actual_retained_input_bytes":100996441,"body":1,"elapsed_s":3.949798956979066,"event":"STAGE_BEGIN","output_accounted_bytes":1102,"phase":"EXACT_FAILED_SUBJECT","self_peak_rss_kib":444660}
+{"actual_retained_input_bytes":122205740,"body":1,"elapsed_s":14.725299420999363,"event":"STAGE_BEGIN","output_accounted_bytes":60054,"phase":"LOWER_EXACT_FAILED_BODY","self_peak_rss_kib":444660}
+{"actual_retained_input_bytes":122205740,"body":1,"elapsed_s":14.975925968959928,"event":"STAGE_BEGIN","output_accounted_bytes":655080,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":444660}
+{"actual_retained_input_bytes":122205740,"body":1,"elapsed_s":20.00555107096443,"event":"HEARTBEAT","output_accounted_bytes":37347212,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":463504}
+{"actual_retained_input_bytes":122205740,"body":1,"elapsed_s":34.97662015998503,"event":"BODY_END","operations_emitted":148,"output_accounted_bytes":37362567,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":505996,"status":"RECOVERED_WITH_OPEN"}
+{"actual_retained_input_bytes":122205740,"body":2,"elapsed_s":35.01213139295578,"event":"STAGE_BEGIN","output_accounted_bytes":37363101,"phase":"EXACT_FAILED_SUBJECT","self_peak_rss_kib":505996}
+{"actual_retained_input_bytes":131720165,"body":2,"elapsed_s":39.82345855899621,"event":"STAGE_BEGIN","output_accounted_bytes":37425414,"phase":"LOWER_EXACT_FAILED_BODY","self_peak_rss_kib":505996}
+{"actual_retained_input_bytes":131720165,"body":2,"elapsed_s":39.91294663195731,"event":"STAGE_BEGIN","output_accounted_bytes":37944900,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":505996}
+{"actual_retained_input_bytes":131720165,"body":2,"elapsed_s":40.02100927598076,"event":"HEARTBEAT","output_accounted_bytes":37945328,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":505996}
+{"actual_retained_input_bytes":131720165,"body":2,"elapsed_s":49.07045057695359,"event":"BODY_END","operations_emitted":131,"output_accounted_bytes":55594474,"phase":"PUBLIC_STRUCTURE_AND_INDEPENDENT_CHECKS","self_peak_rss_kib":505996,"status":"RECOVERED_WITH_OPEN"}
+{"actual_retained_input_bytes":131720165,"body":2,"elapsed_s":49.089450858999044,"event":"STAGE_BEGIN","output_accounted_bytes":55595008,"phase":"FINAL_SOURCE_AND_INPUT_CHECK","self_peak_rss_kib":505996}
+{"actual_retained_input_bytes":131720165,"body":2,"elapsed_s":49.360257424996234,"event":"FINISHED","output_accounted_bytes":55660073,"phase":"FINISHED_OPEN","self_peak_rss_kib":505996,"whole_program":"OPEN"}

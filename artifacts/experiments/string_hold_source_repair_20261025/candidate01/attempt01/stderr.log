@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate01/run_gate.py", line 108, in worker
+    if current.code_source_origin()!=comp.original_code_source_origin():raise ValueError('current/original compiler-source inventory origin differs')
+       ~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/inventory_partitions.py", line 332, in code_source_origin
+    current._read(parent_ref)  # Actual SHA/bytes/schema receipt verification.
+    ~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/inventory_partitions.py", line 293, in _read
+    document, receipt = _read_receipt(path, limit=self.max_shard_bytes)
+                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/inventory_partitions.py", line 46, in _read_receipt
+    physical_hash, physical_size = _file_hash(path)
+                                   ~~~~~~~~~~^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/inventory_partitions.py", line 35, in _file_hash
+    with Path(path).open("rb") as stream:
+         ~~~~~~~~~~~~~~~^^^^^^
+  File "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate01/gate_guards.py", line 87, in opened
+    return original(file,*args,**kwargs)
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate01/gate_guards.py", line 100, in audit
+    if path.is_relative_to(self.main/'artifacts'):self.check_input(path)
+                                                  ~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate01/gate_guards.py", line 74, in check_input
+    if row is None:raise ValueError('unfrozen retained input read: '+str(path))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: unfrozen retained input read: /home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/result/publication/manifest.json

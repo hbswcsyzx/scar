@@ -341,8 +341,22 @@ def validate_string_source(model, graph, interface, metadata, semantic, *,
                     _need(instruction.arg == {115: 1, 114: 2, 97: 3}.get(node.conversion), "compiler conversion differs")
                 offsets.append(instruction.offset)
             _need(offsets == sorted(set(offsets)), "compiler string stage ordering differs")
-        sources = {reference(n).atom_id for n in ast.walk(root) if hasattr(n, "end_lineno")
-                   and isinstance(n, (ast.JoinedStr, ast.FormattedValue, ast.Name, ast.Constant))}
+        # Select the exact AST roles held by string construction. An
+        # interpolation value can be any supported expression, including a
+        # Call/Attribute/Subscript; its hold is sourced at that expression,
+        # not at the Names nested inside it. Hold instances still retain
+        # their individual operation IDs and ordered references below.
+        held_nodes = set()
+        for node in ast.walk(root):
+            if isinstance(node, ast.JoinedStr) and len(node.values) > 1:
+                held_nodes.update(node.values)
+            elif isinstance(node, ast.FormattedValue):
+                held_nodes.add(node.value)
+                if node.conversion != -1:
+                    held_nodes.add(node)
+                if node.format_spec is not None:
+                    held_nodes.add(node.format_spec)
+        sources = {reference(node).atom_id for node in held_nodes}
         pending = _pending_group(stages, sources, operations, protocols, blocks, positions, uses, values, failure_holds)
         parent = parents.get(root)
         if isinstance(parent, ast.Subscript) and isinstance(parent.ctx, ast.Store) and parent.slice is root:

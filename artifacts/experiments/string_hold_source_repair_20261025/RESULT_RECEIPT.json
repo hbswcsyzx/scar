@@ -1,0 +1,282 @@
+{
+  "body_graphs": [
+    {
+      "body_key": "5d3a0e23fb224b90d2d803f6bb2a268ec474badcd4f47e894e9f081430f628a4",
+      "current_runtime_integrated": false,
+      "metadata_result": {
+        "bytes": 14931,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-01-result.json",
+        "sha256": "15b742662a0c3fea333b08f98135d1d2a6d3f361a064c1673d99f00d2ab01eb2"
+      },
+      "operations_emitted": 148,
+      "original_sequence": 15,
+      "program": {
+        "bytes": 1861213,
+        "decoded_bytes": 16484640,
+        "decoded_sha256": "c6ca084448431fece208618a35eeea009ceee7ff6d5b841dbfc56074f7f97480",
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-01-source-program5.json.gz",
+        "sha256": "975591c681a1072da68775ba26c96753c521bddcf7b1fa61ab59b590d24e3a33"
+      },
+      "publication_performed": false,
+      "qualification": {
+        "default_filesystem_replay": false,
+        "effects_established": false,
+        "independent_source_and_code": {
+          "code_constant_provenance_verified": false,
+          "effects_established": false,
+          "kwargs_call_protocols": {
+            "calls": 0,
+            "records": [],
+            "whole_lifetime_verified": false
+          },
+          "runtime_code_instance_established": false,
+          "source_shape_verified": true,
+          "string_protocols": {
+            "effects_established": false,
+            "outer_pending_verified": false,
+            "policy": "CPYTHON_314_FSTRING_SOURCE_V1",
+            "protocol_operations": 3,
+            "records": [
+              {
+                "both_completion_releases_checked": true,
+                "compiler_verified": true,
+                "effects_established": false,
+                "frontiers": [
+                  "FSTRING_OUTER_PENDING_PREFIX_UNVERIFIED",
+                  "FSTRING_RUNTIME_AND_EFFECTS_UNVERIFIED"
+                ],
+                "pending": {
+                  "enclosing_prefix_consistency_checked": true,
+                  "frontiers": [
+                    {
+                      "kind": "FSTRING_CHILD_PRIMITIVE_CONSUMPTION_UNVERIFIED",
+                      "operation": "program_operation:939e4e118e1e92f606d522eeca602f5f"
+                    },
+                    {
+                      "kind": "FSTRING_CHILD_PRIMITIVE_CONSUMPTION_UNVERIFIED",
+                      "operation": "program_operation:e4b6627a1e5fdd5d133a07a43e5baf74"
+                    }
+                  ],
+                  "intermediate_consumption_verified": false,
+                  "ordered_local_pending_checked": true,
+                  "outer_pending_verified": false,
+                  "whole_lifetime_verified": false
+                },
+                "protocol_operations": 3,
+                "runtime_code_instance_established": false,
+                "source": "source:atom:987eec598f8f27148341baf6",
+                "source_shape_verified": true,
+                "whole_lifetime_verified": false
+              }
+            ],
+            "runtime_code_instance_established": false,
+            "whole_lifetime_verified": false
+          },
+          "tuple_key_pending_references": {
+            "frontiers": [],
+            "modeled_pending_refs_verified": true,
+            "records": [],
+            "tuple_keys": 0,
+            "whole_lifetime_verified": false
+          },
+          "valid": true,
+          "verification": "SOURCE_AND_CODE_WITNESS"
+        },
+        "public_structure_roundtrip_equal": true,
+        "runtime_instance_verified": false,
+        "source_mode": "EXACT_RETAINED_AST_OPTIONS_AND_VALIDATOR_SOURCES",
+        "whole_lifetime_verified": false
+      },
+      "stored_or_decoded_payload_replayed_here": false
+    },
+    {
+      "body_key": "094603d271aa22b64e3672e6954e8ea7f8bdb8591a5bc1f8bf8165689937a4f2",
+      "current_runtime_integrated": false,
+      "metadata_result": {
+        "bytes": 17040,
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-02-result.json",
+        "sha256": "2a15147b2b4f6a621feb3654e8e193de524e7a1d3c18459aee1ad4e4c616720c"
+      },
+      "operations_emitted": 131,
+      "original_sequence": 61,
+      "program": {
+        "bytes": 819307,
+        "decoded_bytes": 7996534,
+        "decoded_sha256": "f15cd6bdf15e99fa839fabb399f035e61b8c9fa748de8dfa97191968531c6453",
+        "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-02-source-program5.json.gz",
+        "sha256": "1e9660ecaf14df18f71e6a8061d9ff0f03ffde5289e2351aa9000de8efeed7e3"
+      },
+      "publication_performed": false,
+      "qualification": {
+        "default_filesystem_replay": false,
+        "effects_established": false,
+        "independent_source_and_code": {
+          "code_constant_provenance_verified": true,
+          "effects_established": false,
+          "kwargs_call_protocols": {
+            "calls": 0,
+            "records": [],
+            "whole_lifetime_verified": false
+          },
+          "runtime_code_instance_established": false,
+          "source_shape_verified": true,
+          "string_protocols": {
+            "effects_established": false,
+            "outer_pending_verified": false,
+            "policy": "CPYTHON_314_FSTRING_SOURCE_V1",
+            "protocol_operations": 2,
+            "records": [
+              {
+                "both_completion_releases_checked": true,
+                "compiler_verified": true,
+                "effects_established": false,
+                "frontiers": [
+                  "FSTRING_OUTER_PENDING_PREFIX_UNVERIFIED",
+                  "FSTRING_RUNTIME_AND_EFFECTS_UNVERIFIED"
+                ],
+                "pending": {
+                  "enclosing_prefix_consistency_checked": true,
+                  "frontiers": [
+                    {
+                      "kind": "FSTRING_CHILD_PRIMITIVE_CONSUMPTION_UNVERIFIED",
+                      "operation": "program_operation:1c0837496f99025de0455dce99483b1a"
+                    },
+                    {
+                      "kind": "FSTRING_CHILD_PRIMITIVE_CONSUMPTION_UNVERIFIED",
+                      "operation": "program_operation:576d468250ca9a74b3facebdd96655b3"
+                    }
+                  ],
+                  "intermediate_consumption_verified": false,
+                  "ordered_local_pending_checked": true,
+                  "outer_pending_verified": false,
+                  "whole_lifetime_verified": false
+                },
+                "protocol_operations": 2,
+                "runtime_code_instance_established": false,
+                "source": "source:atom:d598d2f74d6b1cfd3b65908c",
+                "source_shape_verified": true,
+                "whole_lifetime_verified": false
+              }
+            ],
+            "runtime_code_instance_established": false,
+            "whole_lifetime_verified": false
+          },
+          "tuple_key_pending_references": {
+            "frontiers": [],
+            "modeled_pending_refs_verified": true,
+            "records": [],
+            "tuple_keys": 0,
+            "whole_lifetime_verified": false
+          },
+          "valid": true,
+          "verification": "SOURCE_AND_CODE_WITNESS"
+        },
+        "public_structure_roundtrip_equal": true,
+        "runtime_instance_verified": false,
+        "source_mode": "EXACT_RETAINED_AST_OPTIONS_AND_VALIDATOR_SOURCES",
+        "whole_lifetime_verified": false
+      },
+      "stored_or_decoded_payload_replayed_here": false
+    }
+  ],
+  "candidate01_body_lowerings": 0,
+  "candidate01_exit_code": 1,
+  "candidate01_failure_note": {
+    "bytes": 707,
+    "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate01/FAILURE_NOTE.json",
+    "sha256": "9f15a9a55c36a9cf789e94de90fa918a40e4184cb4dac61b42a888019afddb3d"
+  },
+  "candidate01_root_session": 61807,
+  "candidate01_startup_failure": {
+    "bytes": 6874,
+    "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate01/attempt01/failure.json",
+    "sha256": "155b18397f6e402d88f635546617cdf44266c07cc6a3d10dab90c246220bfb82"
+  },
+  "candidate01_wall_seconds_supplied_by_root": 4.172,
+  "code_witness_activity": {
+    "compile_attempts": 0,
+    "complete_descriptor_matches": 2,
+    "module_loads": 2,
+    "source_bytes_read": 0
+  },
+  "current_runtime_integrated": false,
+  "exit_code": 0,
+  "freeze_sha256": "e78b0a1d30e710c7410b91a0dad520f76ef254e27c122baeadec6e31533b99b2",
+  "git_operations": 0,
+  "gnu_time": {
+    "bytes": 1125,
+    "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/gnu-time.txt",
+    "sha256": "1842238e264b0b90b0f8e9fdf8fd3ab508afc839ee635c9e91cf44b2c4d10aef"
+  },
+  "guard_counts": {
+    "actual_input_bytes": 131720165,
+    "ast_only_compile_calls": 10,
+    "decoded_bytes": 107719507,
+    "internal_freeze_check_reads": 1,
+    "non_target_compile_audit_events": 1063,
+    "source_prepare_attempts": 0,
+    "stored_bytes": 24000658,
+    "symtable_calls": 4,
+    "target_analysis_compile_audit_events": 14,
+    "target_exec_attempts": 0,
+    "target_executable_compile_attempts": 0
+  },
+  "last_progress": {
+    "actual_retained_input_bytes": 131720165,
+    "body": 2,
+    "elapsed_s": 49.360257424996234,
+    "event": "FINISHED",
+    "output_accounted_bytes": 55660073,
+    "phase": "FINISHED_OPEN",
+    "self_peak_rss_kib": 505996,
+    "whole_program": "OPEN"
+  },
+  "launch": {
+    "bytes": 900,
+    "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/launch-result.json",
+    "sha256": "18374efe46c2c04f9f7277ca20459e0c30521200bf779d5826fc3852f7fd97ad"
+  },
+  "launcher_wall_seconds": 50.08191322203493,
+  "original_hard_failures": [
+    {
+      "artifact": {
+        "bytes": 54392,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_attempt02_20261025/worker/attempt-00015/result.json",
+        "sha256": "a3566373dafd0feb330c9bf33467880b34adbdc2c4bc1be45d99bfc68cad5073"
+      },
+      "body_key": "5d3a0e23fb224b90d2d803f6bb2a268ec474badcd4f47e894e9f081430f628a4",
+      "calls_in_original_scope": 32,
+      "original_sequence": 15,
+      "status": "FAILED_PRESERVED_UNCHANGED",
+      "work_key": "1b002a98e56fff32fa4cfe70db2674cf1d2d8605ce05c510a75644831f7b1c09"
+    },
+    {
+      "artifact": {
+        "bytes": 54518,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_attempt02_20261025/worker/attempt-00061/result.json",
+        "sha256": "4b952b8bdd847264105184aa6669750b1af8dfed0730ec6cb464ad52f5bac712"
+      },
+      "body_key": "094603d271aa22b64e3672e6954e8ea7f8bdb8591a5bc1f8bf8165689937a4f2",
+      "calls_in_original_scope": 1,
+      "original_sequence": 61,
+      "status": "FAILED_PRESERVED_UNCHANGED",
+      "work_key": "c22d9d1234d597730d0ce4baa2d3fb6b875b6b8f0c3dc757c3e2e6bb7bae374a"
+    }
+  ],
+  "output_accounted_before_footer": 55595416,
+  "prior_65_summary_recomputed": false,
+  "producer_source_guard_bytes": 102478508,
+  "publication_performed": false,
+  "result": {
+    "bytes": 64657,
+    "path": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/result.json",
+    "sha256": "bb58ee8676222091b1666d6a89dbe788a2392c9bc406c913dd59ef8457ef18cb"
+  },
+  "root_session": 49716,
+  "schema": "scar.string-hold-repair-actual-result",
+  "schema_version": 1,
+  "self_peak_rss_kib": 505996,
+  "twelve_add_graphs_replayed_or_recounted": false,
+  "whole_program_established": false,
+  "worker_wall_seconds": 49.35878724697977
+}

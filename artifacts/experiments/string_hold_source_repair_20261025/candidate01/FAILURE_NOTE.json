@@ -1,0 +1,15 @@
+{
+  "body_lowerings": 0,
+  "composition_index_constructor_completed": true,
+  "composition_root_was_original840": true,
+  "constructor_root_change_required": false,
+  "failed_code_location": "inventory_partitions.py:332 current._read(parent_ref)",
+  "failed_operation": "current.code_source_origin()",
+  "missing_small_input": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/result/publication/manifest.json",
+  "original_failure_json_unchanged": true,
+  "root_confirmed_exit_code": 1,
+  "root_confirmed_wall_seconds": 4.172,
+  "root_session": 61807,
+  "schema": "scar.retained-retry-launch-failure-note",
+  "schema_version": 1
+}

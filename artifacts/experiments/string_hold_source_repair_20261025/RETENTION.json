@@ -1,0 +1,305 @@
+{
+  "entries": [
+    {
+      "bytes": 22863,
+      "path": "scar/analysis/source_string_validation.py",
+      "sha256": "2be18373563d4850c95f341e3c57fe33f7e0c31aa6de5fd35ac81c8baab44b2e"
+    },
+    {
+      "bytes": 899,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/MAIN_RECEIPT.json",
+      "sha256": "3a10936fda8352b7420c913df86c42967c2042ec6f8584483f4fc761e8951699"
+    },
+    {
+      "bytes": 2910,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/REPORT.md",
+      "sha256": "aec0ae1320de480ead0a3d4e5d1a97e68280d10cbf74b9125526d0da0ab0b5d5"
+    },
+    {
+      "bytes": 12076,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/RESULT_RECEIPT.json",
+      "sha256": "fd219ae9372c374926f83b28b92fb6fd24b5f07a2a506244743f740ba91a7f49"
+    },
+    {
+      "bytes": 707,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/FAILURE_NOTE.json",
+      "sha256": "9f15a9a55c36a9cf789e94de90fa918a40e4184cb4dac61b42a888019afddb3d"
+    },
+    {
+      "bytes": 1764,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/PATCH.diff",
+      "sha256": "23b86f4c5a4294dd1f829899c87dd3fa79da3a9214889aaaa472cad4600c20ee"
+    },
+    {
+      "bytes": 1387,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/PREPARATION_RECEIPT.json",
+      "sha256": "e1bbb209b0d133700ff51246697242f01e6ba4c2d38c8f54403ebb4b33a27804"
+    },
+    {
+      "bytes": 129,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/attempt01/BUILDING.json",
+      "sha256": "0a3abb27b7898c10aa38b74b487dc1bbd2ae3976105771b0c27f6ff06bf65237"
+    },
+    {
+      "bytes": 6874,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/attempt01/failure.json",
+      "sha256": "155b18397f6e402d88f635546617cdf44266c07cc6a3d10dab90c246220bfb82"
+    },
+    {
+      "bytes": 1159,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/attempt01/gnu-time.txt",
+      "sha256": "64a8c614703d4d6ddf7c5a5d3f702f0777b6b8eb7fbc5efad995092c422f564c"
+    },
+    {
+      "bytes": 907,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/attempt01/launch-result.json",
+      "sha256": "55512d34b28fdb2449de60c327a4b2be1d0ad6da77c091797d99c5f335941036"
+    },
+    {
+      "bytes": 960,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/attempt01/progress.jsonl",
+      "sha256": "54a025a7620fb8917d90ec0e988fa25482393ebc370686a15ef7d7b282a91755"
+    },
+    {
+      "bytes": 2552,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/attempt01/stderr.log",
+      "sha256": "6b3e99e7154dac83e55c2d1897924ee163c9b4d33a7362fc3b8be13875838d49"
+    },
+    {
+      "bytes": 960,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/attempt01/stdout.log",
+      "sha256": "54a025a7620fb8917d90ec0e988fa25482393ebc370686a15ef7d7b282a91755"
+    },
+    {
+      "bytes": 356,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/changed-source.json",
+      "sha256": "39d70defdb069acdff5843bc60766b852b2f47480a451d37c39db1cfa7c755a1"
+    },
+    {
+      "bytes": 157312,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/freeze.json",
+      "sha256": "e2d2863b13ebc2149f98c45c2fc5d1ffab84d50fd126d21c016f8a58f374d62c"
+    },
+    {
+      "bytes": 12140,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/gate_guards.py",
+      "sha256": "c5a5608a63bdc20cc9ad8c0abc8000307425b745a5628411c18eef5963503750"
+    },
+    {
+      "bytes": 13431,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/prepare_gate.py",
+      "sha256": "6f7623820d9d4d37d558d074c5d8b63ec14c9ee0c7e3d5746be7fcd242254eae"
+    },
+    {
+      "bytes": 20008,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/run_gate.py",
+      "sha256": "a647966424b64c423d446151340cbfca62bfb472654724073e16f7f3f6de9ceb"
+    },
+    {
+      "bytes": 146967,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/selection.json",
+      "sha256": "b64a798d8c24df6df191a604e85e2dc05218baf08931727a3f17e2b65a23f8d3"
+    },
+    {
+      "bytes": 1764,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/PATCH.diff",
+      "sha256": "23b86f4c5a4294dd1f829899c87dd3fa79da3a9214889aaaa472cad4600c20ee"
+    },
+    {
+      "bytes": 1963,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/PREPARATION_RECEIPT.json",
+      "sha256": "84928ada141e491dada3a2045e91a268e3a6eeffdde61a36fde1938832bc9eb7"
+    },
+    {
+      "bytes": 129,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/BUILDING.json",
+      "sha256": "c3f13105782e52b4df2c688b4607daedb73d10aa93f48f7a0bcc1d501b0b11fe"
+    },
+    {
+      "bytes": 58570,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-01-inputs.json",
+      "sha256": "edec15e6259cf1b1303b6257f604e490dd043dae856ea40bbc04b2bcd52ef692"
+    },
+    {
+      "bytes": 14931,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-01-result.json",
+      "sha256": "15b742662a0c3fea333b08f98135d1d2a6d3f361a064c1673d99f00d2ab01eb2"
+    },
+    {
+      "bytes": 594634,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-01-returned.json",
+      "sha256": "3c9167e2a9a11bcbed2dd1f33368bd9c380d6136b02b6a667d9c525ef244e567"
+    },
+    {
+      "bytes": 61923,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-02-inputs.json",
+      "sha256": "6db840adf743e58f6fa781cff1d61f627eb5513634f376fe225773c94f30e9af"
+    },
+    {
+      "bytes": 17040,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-02-result.json",
+      "sha256": "2a15147b2b4f6a621feb3654e8e193de524e7a1d3c18459aee1ad4e4c616720c"
+    },
+    {
+      "bytes": 519090,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-02-returned.json",
+      "sha256": "63769b9455e27edfceed4c3921085c430025681755795cdb8f98ad4441859487"
+    },
+    {
+      "bytes": 1125,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/gnu-time.txt",
+      "sha256": "1842238e264b0b90b0f8e9fdf8fd3ab508afc839ee635c9e91cf44b2c4d10aef"
+    },
+    {
+      "bytes": 900,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/launch-result.json",
+      "sha256": "18374efe46c2c04f9f7277ca20459e0c30521200bf779d5826fc3852f7fd97ad"
+    },
+    {
+      "bytes": 3129,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/progress.jsonl",
+      "sha256": "f6f86292637452ada4307888c632e9128866f550cd5e84a940fc32a2c222031a"
+    },
+    {
+      "bytes": 64657,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/result.json",
+      "sha256": "bb58ee8676222091b1666d6a89dbe788a2392c9bc406c913dd59ef8457ef18cb"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 3129,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/stdout.log",
+      "sha256": "f6f86292637452ada4307888c632e9128866f550cd5e84a940fc32a2c222031a"
+    },
+    {
+      "bytes": 356,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/changed-source.json",
+      "sha256": "39d70defdb069acdff5843bc60766b852b2f47480a451d37c39db1cfa7c755a1"
+    },
+    {
+      "bytes": 159061,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/freeze.json",
+      "sha256": "e78b0a1d30e710c7410b91a0dad520f76ef254e27c122baeadec6e31533b99b2"
+    },
+    {
+      "bytes": 12140,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/gate_guards.py",
+      "sha256": "c5a5608a63bdc20cc9ad8c0abc8000307425b745a5628411c18eef5963503750"
+    },
+    {
+      "bytes": 14708,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/prepare_gate.py",
+      "sha256": "af4bb2cb63614ff81099c18e001c35c07f2b5623beae2c8a36cb87d4fb2bddb9"
+    },
+    {
+      "bytes": 20008,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/run_gate.py",
+      "sha256": "a647966424b64c423d446151340cbfca62bfb472654724073e16f7f3f6de9ceb"
+    },
+    {
+      "bytes": 146967,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/selection.json",
+      "sha256": "b64a798d8c24df6df191a604e85e2dc05218baf08931727a3f17e2b65a23f8d3"
+    },
+    {
+      "bytes": 3899,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/check01/baseline.json",
+      "sha256": "1876ec301d37842344f6f4f5a6946cb56c3eab135053221fc29e63cc9f6abbf5"
+    },
+    {
+      "bytes": 672,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/check01/candidate.json",
+      "sha256": "181b1628ec91dca5b37a521d727eb1690ec32398e9dab905432ab0f6349c4730"
+    },
+    {
+      "bytes": 2838,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/check01/candidate02.json",
+      "sha256": "b8c978e08c005aea736f50199cf28ae9d0be8f535aaccf14b802a7dde183d443"
+    },
+    {
+      "bytes": 4135,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/check01/check-call-value.py",
+      "sha256": "bd70461453e222dc2be8347e410262e63bf69a39b0902ee0dbdfecdf7fbf602f"
+    },
+    {
+      "bytes": 4130,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/check01/check.py",
+      "sha256": "b399fae41f93555635c193fe7d01df0924e3e1c0a80ef140d8b1426dbfc215b8"
+    },
+    {
+      "bytes": 89,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/check01/fixture.py",
+      "sha256": "b55614d119ad6650862da6f5a7866304facd9e1db0a8c452cc9ff1c3f1c605ba"
+    },
+    {
+      "bytes": 4220,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/stage-paths.txt",
+      "sha256": "52062bf26de6f19a9de572723a482b22d08dbe86c2a3c1422b52130e206b3b65"
+    }
+  ],
+  "excluded": [
+    {
+      "bytes": 2300,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/prefix.txt",
+      "reason": "unused assembly fragment; final runner is retained"
+    },
+    {
+      "bytes": 2456,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/suffix.txt",
+      "reason": "unused assembly fragment; final runner is retained"
+    },
+    {
+      "bytes": 15103,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate01/worker.txt",
+      "reason": "unused assembly fragment; final runner is retained"
+    },
+    {
+      "bytes": 1861213,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-01-source-program5.json.gz",
+      "reason": "large derived program retained locally"
+    },
+    {
+      "bytes": 819307,
+      "path": "artifacts/experiments/string_hold_source_repair_20261025/candidate02/attempt01/body-02-source-program5.json.gz",
+      "reason": "large derived program retained locally"
+    }
+  ],
+  "external_inputs_staged": false,
+  "git_operations": 0,
+  "main_replacement_required": false,
+  "manifest_self_hash_omitted": true,
+  "max_file_bytes": 1000000,
+  "original_65_failed_results_preserved_by_exact_URI_and_SHA": [
+    {
+      "artifact": {
+        "bytes": 54392,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_attempt02_20261025/worker/attempt-00015/result.json",
+        "sha256": "a3566373dafd0feb330c9bf33467880b34adbdc2c4bc1be45d99bfc68cad5073"
+      },
+      "body_key": "5d3a0e23fb224b90d2d803f6bb2a268ec474badcd4f47e894e9f081430f628a4",
+      "calls_in_original_scope": 32,
+      "original_sequence": 15,
+      "status": "FAILED_PRESERVED_UNCHANGED",
+      "work_key": "1b002a98e56fff32fa4cfe70db2674cf1d2d8605ce05c510a75644831f7b1c09"
+    },
+    {
+      "artifact": {
+        "bytes": 54518,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_attempt02_20261025/worker/attempt-00061/result.json",
+        "sha256": "4b952b8bdd847264105184aa6669750b1af8dfed0730ec6cb464ad52f5bac712"
+      },
+      "body_key": "094603d271aa22b64e3672e6954e8ea7f8bdb8591a5bc1f8bf8165689937a4f2",
+      "calls_in_original_scope": 1,
+      "original_sequence": 61,
+      "status": "FAILED_PRESERVED_UNCHANGED",
+      "work_key": "c22d9d1234d597730d0ce4baa2d3fb6b875b6b8f0c3dc757c3e2e6bb7bae374a"
+    }
+  ],
+  "production_sources": 1,
+  "schema": "scar.string-hold-repair-small-retention",
+  "schema_version": 1
+}

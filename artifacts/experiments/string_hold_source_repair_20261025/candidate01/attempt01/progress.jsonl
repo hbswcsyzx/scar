@@ -1,0 +1,4 @@
+{"actual_retained_input_bytes":0,"body":null,"elapsed_s":1.0011668030056171,"event":"BEGIN","output_accounted_bytes":0,"phase":"FREEZE","self_peak_rss_kib":76320}
+{"actual_retained_input_bytes":418085,"body":null,"elapsed_s":1.0057940169936046,"event":"STAGE_BEGIN","output_accounted_bytes":326,"phase":"CURRENT_INPUT_MEMBERSHIP","self_peak_rss_kib":76320}
+{"actual_retained_input_bytes":1432046,"body":null,"elapsed_s":1.0218876180006191,"event":"STAGE_BEGIN","output_accounted_bytes":714,"phase":"ONE_ORIGINAL_COMPOSITION","self_peak_rss_kib":76320}
+{"actual_retained_input_bytes":95893896,"body":null,"elapsed_s":3.9142362540005706,"event":"FAILED","exception":"ValueError","message":"unfrozen retained input read: /home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/result/publication/manifest.json","output_accounted_bytes":1104,"phase":"FAILED_RETAINED","self_peak_rss_kib":444188}

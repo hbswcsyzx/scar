@@ -1,0 +1,54 @@
+{
+  "body_lowerings": 0,
+  "code_payloads_loaded": 0,
+  "composition_stream_reads_in_prepare": 0,
+  "context_compressed_bytes_hashed_in_prepare": 2501284,
+  "current843_origin_equals_original840_and_both_failed": true,
+  "exact_failed_sequences": [
+    15,
+    61
+  ],
+  "freeze_sha256": "e78b0a1d30e710c7410b91a0dad520f76ef254e27c122baeadec6e31533b99b2",
+  "input_stat_pins": 30,
+  "limits": {
+    "bodies": 2,
+    "body_seconds": 180,
+    "composition_root_bytes": 96000000,
+    "heartbeat_seconds": 20,
+    "operations_per_body": 4000,
+    "outer_seconds": 660,
+    "record_context_bytes": 64000000,
+    "source_files": 2,
+    "total_input_bytes": 256000000,
+    "total_operations": 8000,
+    "total_output_bytes": 256000000,
+    "worker_seconds": 600
+  },
+  "only_small_inventory_ancestry_added": {
+    "bytes": 84488,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_source_publication_current_20261023/result/publication/manifest.json",
+    "sha256": "bc29bf5b9068085f2fe9b800638cadc875c6a32d2c9706514af3f01933f7ae14"
+  },
+  "original840_root_unchanged": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_composition_bindings_20261023/composition/index.json.gz",
+  "original_composition_roots": 1,
+  "prior_65_replanned": false,
+  "production_sources": [
+    {
+      "bytes": 22863,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_string_validation.py",
+      "previous_sha256": "917e69c4e2907b4118eae66ed66da291b7b65396384377c64298a5f6be790a65",
+      "relative_path": "scar/analysis/source_string_validation.py",
+      "sha256": "2be18373563d4850c95f341e3c57fe33f7e0c31aa6de5fd35ac81c8baab44b2e"
+    }
+  ],
+  "retry_calls": [
+    32,
+    1
+  ],
+  "runtime_files": 145,
+  "source_contexts": 2,
+  "source_files_frozen": 353,
+  "status": "FROZEN_NOT_RUN",
+  "successful_graphs_read": 0,
+  "tool_guard_bytes": 51239254
+}

@@ -1,0 +1,6 @@
+{
+  "error": "AssertionError",
+  "message": "",
+  "status": "FAILED",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/check01/check.py\", line 63, in <module>\n    receipt=main()\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/string_hold_source_repair_20261025/check01/check.py\", line 32, in main\n    assert not [r for r in context.semantics.operations.values() if r.source.atom_id == atoms[0].id]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+}
