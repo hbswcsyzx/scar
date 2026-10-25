@@ -1,0 +1,10 @@
+{
+  "first_body_policy": "reuse old 92-operation artifact, independent readback; no lowering",
+  "freeze_sha256": "500187b4d9aede9184573cff0b0f55a0d5ff7812a21f78091d1ee57cb2573d4a",
+  "input_stat_pins": 24,
+  "large_inputs_opened": false,
+  "new_body_lowerings_maximum": 3,
+  "source_guard_bytes": 42760723,
+  "status": "ROOT_RETAINED_SOURCE_READER_AND_REUSE_GATE_REVIEW_PASS",
+  "whole_program_model": "OPEN"
+}

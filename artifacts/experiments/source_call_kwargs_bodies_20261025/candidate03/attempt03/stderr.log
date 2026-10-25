@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate03/run_gate.py", line 119, in worker
+    view=comp.source(cfi);views[fi]=view
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/program_composition.py", line 1214, in source
+    view = load_source_layers(self.layers, row["snapshot"]["path"], max_record_bytes=self.max_record_bytes)
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_layers.py", line 707, in load_source_layers
+    block = stream.read(min(1024 * 1024, max_record_bytes + 1 - decoded_size))
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate03/gate_guards.py", line 149, in gzip_read
+    self.charge(len(data),'decoded_bytes');stream._gate_decoded_hash.update(data);stream._gate_decoded_count+=len(data)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate03/gate_guards.py", line 59, in charge
+    raise ValueError('retained actual stored+decoded input budget exceeded, including repeated reads')
+ValueError: retained actual stored+decoded input budget exceeded, including repeated reads
