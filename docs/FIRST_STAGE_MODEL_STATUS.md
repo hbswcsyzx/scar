@@ -20,6 +20,14 @@ unresolved4964全部保留。静态仍151files/2217definitions/858active bodies�
 
 ### 2026-10-26：原归档源码的编译见证入口已接入
 
+后继外部source-entry真实批次40479已actual exit0 / 958.56s：完整50入口中26成功、
+7不支持、17因worker时限未尝试；没有FAILED或无终态的STARTED。26原SP5均经普通
+source/code reader，压59,422,305B / 解516,098,986B留本地原URI及双SHA。
+只读8loads/59matches/compile0，累计实际输入2,120,118,563B、pending0；实际8份上下文、
+396,976B源码。FILE_GROUPED_V1保原选择集合，不能把未执行的完整12文件预测当实测。
+这仍是原272038的静态建图，尚未publication或当前运行绑定；858/6882指针不变。
+见[全50状态及实际范围](../artifacts/experiments/lewm_external_source_entries_20261026/REPORT.md)。
+
 通用 SourceAttachments → CodeWitnessStore 入口已合入 f9467972；原源码的编码、
 raw/normalized fingerprint、来源 locator 和 owner 保留。独立静态门从自动窗口
 16 个 descriptor / 8 份源码生成 8 个编译模块，随后 readonly 完整重验通过。

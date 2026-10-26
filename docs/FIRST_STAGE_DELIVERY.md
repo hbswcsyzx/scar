@@ -24,6 +24,11 @@ GPU活动（22457kernel/543copy/1082memset）获得单activity静止关系，220
 可用源码，补continuation出版和当前运行对应；见
 [实际消费](../artifacts/experiments/lewm_archived_compiler_main_consumer_20261026/REPORT.md)。
 
+**外部source-entry实际批次：** 50个自动候选入口已尝试33个，26个原图普通读回通过、
+7个不支持、17个因900s执行界未试；整门actual exit0 / 958.56s，不是50项全通过。
+26份原SP5留本地原URI，普通组合出版及当前Run对应尚待验收；不把历史调用权重
+加到runtime6882。详见[报告与完整分母](../artifacts/experiments/lewm_external_source_entries_20261026/REPORT.md)。
+
 **当前模块C的有限结果：** 同SP8已表达Try传播pair与except-as正常/异常两条清理路径，
 原C0/C1 validator及normal reader通过；主树同图与旧function SP5读回通过。
 当前354ops/9顶层接口，精确余2句REQUIRED；实际namespace/传播/runtime/状态仍OPEN。

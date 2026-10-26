@@ -99,6 +99,11 @@ held109288/未定1901，几何107483/缺口3706。GNU28:41.75，peak1091472KiB�
 | source-call前端 | 858静态快照已在完整当前capture重新接线，6882次调用对应92个body groups；原归档源码的16个descriptor编译见证也已普通消费 | 自动调度外部source-entry，补continuation出版和当前运行静态复用接线；状态/环境/效果仍独立验收，不将历史权重当运行增量 |
 | main组合查询 | 实际79592/39796完整一次导航门已exit0，5个不同角色的查询样本通过 | 160压缩块及一个派生关系样本独立复核通过；后继补实际数据/状态/控制连接，不把context当direct call |
 
+外部源码后继实际50-window已保全对账：26成功SP5普通读回、7不支持、17未试，
+whole958.56s；不是50全部完成，也未增加当前运行body计数。下一项消费全部26原图
+进行schema3组合出版和独立普通query，再补剩余入口与当前Run对应；不重新lower已成功图。
+见[准确报告](../artifacts/experiments/lewm_external_source_entries_20261026/REPORT.md)。
+
 计划及来源分别在`artifacts/analysis/kwargs_expansion_design_20261025`和
 `artifacts/analysis/source_native_composition_20261025`。历史collector只有HEAD label、缺
 执行时SCAR源码字节证明；同issuer实现机制是条件合同，不能据当前源码授原运行无条件
