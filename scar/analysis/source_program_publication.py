@@ -431,6 +431,27 @@ def _entry_module_receipts():
 
 def publish_source_entries(base_composition, catalog, source_programs, out_dir, *, max_programs=1,
                            max_operations_per_body=4000, max_record_bytes=64_000_000, progress=None, plan=None):
+    """Ordinary per-body admission, with a private source-input read scope."""
+    from scar.analysis.source_entry_catalog import SourceEntryCatalog
+    _need(type(catalog) is SourceEntryCatalog and type(base_composition) is CompositionIndex
+          and (progress is None or callable(progress))
+          and (plan is None or type(plan) is SourceEntryPublicationPlan), "exact entry publisher inputs/progress required")
+    if catalog._ordinary_read_active():
+        return _publish_source_entries(base_composition, catalog, source_programs, out_dir,
+            max_programs=max_programs, max_operations_per_body=max_operations_per_body,
+            max_record_bytes=max_record_bytes, progress=progress, plan=plan)
+    controls = (source_programs, plan.document if plan is not None else None)
+    with catalog._ordinary_read_session(base_composition, controls=controls) as session:
+        callback = None if progress is None else lambda row: session.progress(progress, row)
+        fixed = json.loads(session.control_bytes)
+        private_plan = SourceEntryPublicationPlan(fixed[1], plan.sha256) if plan is not None else None
+        return _publish_source_entries(session.target, session.catalog, tuple(fixed[0]), out_dir,
+            max_programs=max_programs, max_operations_per_body=max_operations_per_body,
+            max_record_bytes=max_record_bytes, progress=callback, plan=private_plan)
+
+
+def _publish_source_entries(base_composition, catalog, source_programs, out_dir, *, max_programs=1,
+                            max_operations_per_body=4000, max_record_bytes=64_000_000, progress=None, plan=None):
     """Independently admit saved external SP5s; publish only qualified navigation.
 
     No lower owner, fi/bi, copied graph or known construction cost is created.
@@ -486,6 +507,27 @@ def publish_source_entries(base_composition, catalog, source_programs, out_dir, 
 def read_source_entry_publication(path, *, expected_sha256, catalog, max_programs=1,
                                   max_operations_per_body=4000, max_record_bytes=64_000_000,
                                   target_composition=None, _compact_body_cache=False):
+    """Normal source/code read; private caches do not survive as proof flags."""
+    from scar.analysis.source_entry_catalog import SourceEntryCatalog
+    _need(type(catalog) is SourceEntryCatalog, "exact ordinary source-entry catalog required")
+    if catalog._ordinary_read_active():
+        return _read_source_entry_publication(path, expected_sha256=expected_sha256, catalog=catalog,
+            max_programs=max_programs, max_operations_per_body=max_operations_per_body,
+            max_record_bytes=max_record_bytes, target_composition=target_composition,
+            _compact_body_cache=_compact_body_cache)
+    target = target_composition or catalog.projects[0]
+    with catalog._ordinary_read_session(target) as session:
+        document, receipt, checked = _read_source_entry_publication(path,
+            expected_sha256=expected_sha256, catalog=session.catalog, max_programs=max_programs,
+            max_operations_per_body=max_operations_per_body, max_record_bytes=max_record_bytes,
+            target_composition=session.target if target_composition is not None else None,
+            _compact_body_cache=_compact_body_cache)
+    return document, receipt, tuple({**row, 'entry':session.entry(row['entry'])} for row in checked)
+
+
+def _read_source_entry_publication(path, *, expected_sha256, catalog, max_programs=1,
+                                   max_operations_per_body=4000, max_record_bytes=64_000_000,
+                                   target_composition=None, _compact_body_cache=False):
     """Ordinary source/code reader; returned records are a cache, not new graphs."""
     from scar.ir.program.source_references import SourceDefinitionReference
     _need(all(type(value) is int and value > 0 for value in
@@ -627,6 +669,19 @@ def _entry_parent2(target, catalog, *, publication_version=2):
 
 
 def plan_source_entry_publication(target, catalog, source_programs, *, max_programs=1, publication_version=2):
+    """Exact original CAS plan; no canonical body or lowering owner is made."""
+    from scar.analysis.source_entry_catalog import SourceEntryCatalog
+    _need(type(catalog) is SourceEntryCatalog and type(target) is CompositionIndex,
+          "exact ordinary entry planner owners required")
+    if catalog._ordinary_read_active():
+        return _plan_source_entry_publication(target, catalog, source_programs,
+            max_programs=max_programs, publication_version=publication_version)
+    with catalog._ordinary_read_session(target, controls=(source_programs,)) as session:
+        return _plan_source_entry_publication(session.target, session.catalog, tuple(json.loads(session.control_bytes)[0]),
+            max_programs=max_programs, publication_version=publication_version)
+
+
+def _plan_source_entry_publication(target, catalog, source_programs, *, max_programs=1, publication_version=2):
     """Exact source-qualified ADD/REVISE expectations; never admit a graph."""
     _need(type(max_programs) is int and max_programs > 0 and type(source_programs) is tuple
           and 0 < len(source_programs) <= max_programs, "bounded complete program requests required")

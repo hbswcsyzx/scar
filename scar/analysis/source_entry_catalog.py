@@ -2,12 +2,14 @@
 from __future__ import annotations
 
 import ast
+from collections import OrderedDict
 from copy import deepcopy
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import hashlib
 import inspect
 import json
 from pathlib import Path
+from weakref import WeakKeyDictionary
 
 from scar.analysis.compiler_witness_archives import CompilerWitnessArchives
 from scar.analysis.program_composition import CompositionIndex
@@ -29,6 +31,131 @@ def _hash(value):
 def _need(value, detail):
     if not value:
         raise ValueError("source entry catalog: " + detail)
+
+
+_PRIVATE_READ_SESSIONS = WeakKeyDictionary()
+
+
+class _EntryReadSession:
+    """Private copies for one ordinary, callback-free reader interval.
+
+    No public owner is put into fast mode. The existing normal guards bracket
+    the whole session and every user callback; only copies unreachable by that
+    callback reuse checked input receipts and PreparedSource. Returned entry
+    queries are rebound to their still-checked original catalog, not restored
+    lowering owners or JSON proof tokens.
+    """
+    def __init__(self, catalog, target, controls):
+        self.original, self.original_target = catalog, target
+        self.controls, self.control_bytes = controls, _bytes(controls)
+        self.catalog, self.target, self.base = catalog, target, None
+        self.contexts = OrderedDict()
+        self.catalog_counts = dict(catalog._measurements)
+        self.owner_counts = [dict(x._measurements) for x in catalog.admissions]
+        self.archive_counts = {k:dict(x.counts) for k,x in catalog.archives._stores.items()}
+        self.index_receipts = [_bytes(x.index_receipt) for x in catalog.projects]
+
+    def check(self):
+        self.original.require_unchanged()
+        _need([_bytes(x.index_receipt) for x in self.original.projects] == self.index_receipts,
+              "original composition receipt changed in reader scope")
+        if self.original_target not in self.original.projects:
+            _need(self.original_target.source_inputs() == self.target_inputs, "publication target changed in reader scope")
+        _need(_bytes(self.controls) == self.control_bytes, "publication requests/plan changed in reader scope")
+
+    def __enter__(self):
+        self.target_inputs = self.original_target.source_inputs()
+        self.check()
+        # Existing overlay/attachment variants keep their old normal path.
+        # The common plain-base path can own a completely private copy.
+        if (len(self.original.projects) != 1 or self.original_target is not self.original.projects[0]
+                or self.original_target.has_source_attachments or self.original_target.has_source_entry_publication
+                or self.original_target._static_source_proof is not None):
+            return self
+        try:
+            self.base = self.original_target._private_read_snapshot()
+            self.catalog = deepcopy(self.original, {id(self.original_target): self.base})
+            self.target = self.base
+            # Deepcopy preserves the genuine local catalog/entry cycle. It
+            # does not execute a constructor from saved metadata or create a
+            # CodeType. All mutable source/manifest documents are now owned.
+            _need(self.catalog._catalog_json == self.original._catalog_json
+                  and self.catalog._source_inputs == self.original._source_inputs,
+                  "private reader catalog differs from its checked original")
+            # Validate the actual copied rows, owner documents and archive
+            # documents before registration, not just copied digest strings.
+            self.catalog.require_unchanged()
+            _PRIVATE_READ_SESSIONS[self.catalog] = self
+            self.check()
+            return self
+        except BaseException:
+            _PRIVATE_READ_SESSIONS.pop(self.catalog, None)
+            if self.base is not None:
+                self.base._end_private_read_snapshot()
+            raise
+
+    def progress(self, callback, row):
+        self.check()
+        try:
+            callback(row)
+        finally:
+            self.check()
+
+    def __exit__(self, kind, error, traceback):
+        try:
+            self.check()
+            if self.catalog is not self.original:
+                for key, entry in self.catalog._resolved.items():
+                    previous = self.original._resolved.get(key)
+                    exported = replace(entry, _owner=self.original)
+                    _need(previous is None or previous == exported,
+                          "original resolved entry changed during ordinary reading")
+                    self.original._resolved[key] = previous or exported
+                # Preserve ordinary source-reference caches, never lowered
+                # bodies/owners. They came from normal readers in this same
+                # scope and exact unchanged original artifact namespace.
+                for original, private in zip(self.original.admissions, self.catalog.admissions):
+                    for name in ('_definitions', '_resolved', '_file_graph_locators'):
+                        target, values = getattr(original, name), getattr(private, name)
+                        for key, value in values.items():
+                            _need(key not in target or _bytes(encode(target[key])) == _bytes(encode(value)),
+                                  'original source reference cache changed in reader scope')
+                            target.setdefault(key, deepcopy(value))
+        finally:
+            # Always revoke the private fast path, including budget failures
+            # while merging actual read accounting below.
+            _PRIVATE_READ_SESSIONS.pop(self.catalog, None)
+            if self.base is not None:
+                self.base._end_private_read_snapshot()
+            self.contexts.clear()
+            if self.catalog is not self.original:
+                for key, before in self.catalog_counts.items():
+                    self.original._measurements[key] += self.catalog._measurements[key] - before
+                for original, private, counts in zip(self.original.admissions, self.catalog.admissions, self.owner_counts):
+                    for key, before in counts.items():
+                        original._measurements[key] += private._measurements[key] - before
+                    # Union new normal graph charges without double charging a
+                    # file also read by the callback through its original API.
+                    new = private._charged - original._charged
+                    if new:
+                        for row in private._files.values():
+                            if row['source_graph_artifact'] is not None:
+                                path, artifact = private._artifact_path(row['source_graph_artifact'], row['source_root'], 'graphs')
+                                if (str(path), artifact['canonical_sha256']) in new:
+                                    original._charge(path, artifact)
+                for key, counts in self.archive_counts.items():
+                    original, private = self.original.archives._stores[key], self.catalog.archives._stores[key]
+                    for name, before in counts.items():
+                        original.counts[name] += private.counts[name] - before
+                    for name in ('modules', 'module_indexes', 'texts'):
+                        destination = getattr(original, name)
+                        for identity, value in getattr(private, name).items():
+                            destination.setdefault(identity, value)
+        return False
+
+    def entry(self, entry):
+        _need(entry.key in self.original._resolved, "reader did not export its genuine entry query")
+        return self.original._resolved[entry.key]
 
 
 @dataclass(frozen=True)
@@ -178,6 +305,8 @@ class SourceEntryCatalog:
                 "projects": [x.source_inputs() for x in self.projects], "archives": self.archives.receipts()}
 
     def require_unchanged(self):
+        if self in _PRIVATE_READ_SESSIONS:
+            return  # Only an unexposed, owned copy can enter this registry.
         _need(self._inputs() == self._source_inputs, "source owner/archive inputs changed")
         _need(_bytes({"groups": self._rows, "candidates": self._candidates}).decode() == self._catalog_json,
               "entry catalog mutated")
@@ -244,6 +373,11 @@ class SourceEntryCatalog:
         return self.archives.store_for(entry.store_receipt)
 
     def prepare(self, entry):
+        session = _PRIVATE_READ_SESSIONS.get(self)
+        if session is not None and entry.file_key in session.contexts:
+            self.require_entry(entry)
+            session.contexts.move_to_end(entry.file_key)
+            return session.contexts[entry.file_key]
         owner = self.require_entry(entry)
         view = owner.source_view(entry.reference)
         _need(view.snapshot == entry.reference.snapshot and view.context == entry.reference.context,
@@ -258,8 +392,19 @@ class SourceEntryCatalog:
         self._measurements["symtable_parses"] += 1
         self._measurements["decoded_source_bytes"] += len(text.encode())
         self._check_decode_budget()
-        return PreparedSource(Path(entry.reference.snapshot.path), Path(view.context.namespace_root), text,
-                              view.semantic, view.semantics, view.control, tree, tables)
+        result = PreparedSource(Path(entry.reference.snapshot.path), Path(view.context.namespace_root), text,
+                                view.semantic, view.semantics, view.control, tree, tables)
+        if session is not None:
+            session.contexts[entry.file_key] = result
+            while len(session.contexts) > 2:
+                session.contexts.popitem(last=False)
+        return result
+
+    def _ordinary_read_session(self, target, *, controls=()):
+        return _EntryReadSession(self, target, controls)
+
+    def _ordinary_read_active(self):
+        return self in _PRIVATE_READ_SESSIONS
 
     def measurements(self):
         return {**self._measurements, "owners": [x.measurements() for x in self.admissions],
