@@ -13,7 +13,7 @@ from scar.ir.program.model import (
     LocalBindingValue, ReferenceValue, StateVersionValue, TerminatorKind, ValueKind, ValueType,
 )
 from scar.ir.program.state_addresses import (
-    AddressCoverage, AddressEffect, CellContent, Element, InvokeStateOperand, NamespaceKey, ReferenceOwner,
+    AddressCoverage, AddressEffect, CellContent, Element, InvokeStateOperand, NamespaceKey, ObjectField, ReferenceOwner,
 )
 from scar.ir.program.state_modes import AccessMode
 from scar.ir.program.structured import PythonProtocolKind as Kind
@@ -227,6 +227,33 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
         expected_rows.add(operation.id)
     if language is not None:
         from scar.ir.program.source_language import SourceLanguageCapability
+        if SourceLanguageCapability.HEAP_AUGASSIGN_314_V1 in language.capabilities:
+            # Attribute AugAssign reads use the same saved target address as
+            # its ordinary store. INDEX refinements retain the old rule below.
+            for link in metadata.operation_links:
+                if link.opcode not in (Opcode.ATTRIBUTE,Opcode.INDEX) or link.operation not in rows:
+                    continue
+                operation = operations[link.operation]
+                source = semantic.definitions.get(link.semantic_operation)
+                atom = semantic.source_atoms.get(link.source.atom_id)
+                attribute = link.opcode is Opcode.ATTRIBUTE
+                need(source is not None and source.kind is (OperationKind.ATTRIBUTE if attribute else OperationKind.INDEX)
+                     and source.code_id == link.source.atom_id.wire
+                     and link.source.atom_id in source.source_atoms and source.metadata.get('role') != 'binding'
+                     and atom is not None and atom.kind == ('Attribute' if attribute else 'Subscript') and atom.reference == link.source
+                     and operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
+                     and not operation.effects_complete and len(operation.uses) == (2 if attribute else 3)
+                     and operation.invoke_arguments == tuple(u.id for u in operation.uses)
+                     and all(type(values[u.value]) is ReferenceValue for u in operation.uses[:-1])
+                     and type(values[operation.uses[-1].value]) is StateVersionValue,
+                     'heap AugAssign read lost its original attribute/receiver/world')
+                effect = AddressEffect(ReferenceOwner(operation.uses[0].id),
+                    (ObjectField(source.metadata['attribute']) if attribute else Element(operation.uses[1].id),), AccessMode.READ)
+                row = rows[operation.id]
+                need(row.site == InvokeStateOperand(operation.id,operation.uses[-1].id)
+                     and row.coverage is AddressCoverage.PARTIAL and row.protocol is None
+                     and row.effects == (effect,), 'heap attribute read address differs from original Uses')
+                expected_rows.add(operation.id)
         if SourceLanguageCapability.SLICE_KEYS in language.capabilities:
             for link in metadata.operation_links:
                 if link.opcode is not Opcode.INDEX:

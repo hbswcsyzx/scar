@@ -34,7 +34,7 @@ def _unsupported(node, detail):
     raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, detail)
 
 
-def _source_definition(builder, node, *, binding=False):
+def _source_definition(builder, node, *, binding=False, parent=None):
     """Select a definition by its exact source atom and declared source role."""
     reference = builder.source(node)
     definitions = builder.by_atom.get(reference.atom_id.wire, ())
@@ -46,6 +46,13 @@ def _source_definition(builder, node, *, binding=False):
                       if definition.output_slots
                       and definition.kind not in (OperationKind.FUNCTION, OperationKind.METHOD)
                       and definition.metadata.get("role") != "binding"]
+    if parent is not None:
+        # AugAssign has both a read subtree and a binding subtree for the
+        # same AST atoms. Original SG port edges distinguish their roles;
+        # source position or definition order alone cannot choose one.
+        ports = {edge.target.id for edge in builder.semantic.edges.values()
+                 if edge.relation is SemanticRelation.READS_SLOT and edge.source.id == parent.id}
+        candidates = [definition for definition in candidates if set(definition.output_slots) & ports]
     if len(candidates) != 1:
         raise _Unsupported(GapKind.SOURCE_MAPPING, node,
             "heap target requires one exact SG source definition for its evaluation role")
@@ -88,7 +95,7 @@ def _normal_producer(builder, node, value, first_operation):
     return producers[0]
 
 
-def expression_for_heap_target(builder, node, cursor):
+def expression_for_heap_target(builder, node, cursor, *, parent_definition=None):
     """Evaluate an existing overlay or recover a source-backed leaf.
 
     A missing old record is not an opaque computational record, an immutable
@@ -105,12 +112,16 @@ def expression_for_heap_target(builder, node, cursor):
         from scar.analysis.source_slice_lowering import lower_key
         return lower_key(builder, node, cursor)
     records = builder.old_by_atom.get(builder.source(node).atom_id, ())
+    definition = _source_definition(builder, node, parent=parent_definition) if parent_definition is not None else None
     if len(records) == 1:
+        if definition is not None and records[0].operation != definition.id:
+            raise _Unsupported(GapKind.SOURCE_MAPPING, node,
+                'heap child computational record differs from its original SG parent operand')
         return builder.expr(node, cursor)
     if records:
         raise _Unsupported(GapKind.SOURCE_MAPPING, node,
             "heap target child has ambiguous legacy computational records")
-    definition = _source_definition(builder, node)
+    definition = definition or _source_definition(builder, node)
     if isinstance(node, ast.JoinedStr):
         if (definition.kind is not OperationKind.OPERATOR
                 or definition.metadata.get("ast_type") != "JoinedStr"
@@ -206,7 +217,8 @@ def expression_for_heap_target(builder, node, cursor):
         # requiring that overlay to invent values in the target subtree.
         inputs = []
         for child, role, index in children:
-            cursor, value = expression_for_heap_target(builder, child, cursor)
+            cursor, value = expression_for_heap_target(builder, child, cursor,
+                parent_definition=definition if parent_definition is not None else None)
             if cursor is None:
                 return None, None
             inputs.append((value, child, role, index, None))
@@ -288,16 +300,8 @@ def store_heap_target(builder, target, rhs, cursor, *, rhs_held=False):
                 return None
             _hold(builder, cursor, target.slice, key)
             references.append((key, target.slice, "element-key", 0, None))
-        references.append((rhs, target, "assigned-reference", 0, None))
-        cursor, _, operation_id = builder.invoke(cursor, target, tuple(references),
-            role=SourceRole.LOCAL_BINDING, result_type=None)
-        _associate(builder, operation_id, target, definition, Opcode.OPAQUE)
-        builder.protocol(operation_id, protocol, target)
-        operation = builder.operation_records[operation_id]
-        selector = (ObjectField(target.attr) if isinstance(target, ast.Attribute)
-                    else Element(operation.uses[1].id))
-        builder._addresses(operation_id, (AddressEffect(ReferenceOwner(operation.uses[0].id),
-            (selector,), AccessMode.WRITE),))
+        cursor = store_prepared_heap_target(builder, target, rhs, cursor, receiver,
+            key if isinstance(target, ast.Subscript) else None, definition=definition)
         if isinstance(target, ast.Subscript):
             _release(builder, cursor, target.slice, key)
         _release(builder, cursor, target.value, receiver)
@@ -310,6 +314,68 @@ def store_heap_target(builder, target, rhs, cursor, *, rhs_held=False):
         # FRAME_EXIT already owns the pending references; do not emit releases
         # into a different branch or retain them in subsequent construction.
         del builder.active_temporaries[initial_holds:]
+
+
+def store_prepared_heap_target(builder, target, rhs, cursor, receiver, key=None, *, definition=None):
+    """Emit the existing store protocol with already evaluated reference ports.
+
+    This helper never evaluates an AST child or manages its caller's holds.
+    Both ordinary assignment and AugAssign retain the original store/world
+    contract; normal mapping/descriptor completion does not prove contents.
+    """
+    definition = definition or _source_definition(builder, target, binding=True)
+    references = [(receiver, target.value, "heap-owner", 0, None)]
+    if isinstance(target, ast.Subscript):
+        references.append((key, target.slice, "element-key", 0, None))
+    references.append((rhs, target, "assigned-reference", 0, None))
+    cursor, _, identity = builder.invoke(cursor, target, tuple(references),
+        role=SourceRole.LOCAL_BINDING, result_type=None)
+    _associate(builder, identity, target, definition, Opcode.OPAQUE)
+    builder.protocol(identity, PythonProtocolKind.STORE_ATTRIBUTE if isinstance(target, ast.Attribute)
+                     else PythonProtocolKind.STORE_SUBSCRIPT, target)
+    operation = builder.operation_records[identity]
+    selector = ObjectField(target.attr) if isinstance(target, ast.Attribute) else Element(operation.uses[1].id)
+    builder._addresses(identity, (AddressEffect(ReferenceOwner(operation.uses[0].id),
+        (selector,), AccessMode.WRITE),))
+    return cursor
+
+
+def augmented_heap_target(builder, target, cursor):
+    """Locate once and load before RHS, retaining the saved receiver/key.
+
+    This is a source-language protocol, not evidence of actual descriptor,
+    indexing, aliasing, contents or physical reference-count behavior.
+    """
+    if (not isinstance(target, (ast.Attribute, ast.Subscript)) or not isinstance(target.ctx, ast.Store)
+            or not builder.has_language('HEAP_AUGASSIGN_314_V1')):
+        _unsupported(target, 'HEAP_AUGASSIGN_CAPABILITY_REQUIRED')
+    if isinstance(target, ast.Attribute) and target.attr.startswith('__') and not target.attr.endswith('__'):
+        _unsupported(target, 'private augmented attribute needs exact compiler-class name mangling')
+    if isinstance(target, ast.Subscript) and any(isinstance(n, ast.Slice) for n in ast.walk(target.slice)):
+        _unsupported(target, 'SLICE_AUGASSIGN_LIFETIME_UNRECOVERED')
+    definition = _source_definition(builder, target)
+    _source_definition(builder, target, binding=True)
+    cursor, receiver = expression_for_heap_target(builder, target.value, cursor, parent_definition=definition)
+    if cursor is None:
+        return None, None, None, None
+    _hold(builder, cursor, target.value, receiver)
+    key = None
+    references = [(receiver, target.value, 'receiver', 0, None)]
+    if isinstance(target, ast.Subscript):
+        cursor, key = expression_for_heap_target(builder, target.slice, cursor, parent_definition=definition)
+        if cursor is None:
+            return None, None, None, None
+        _hold(builder, cursor, target.slice, key)
+        references.append((key, target.slice, 'index', 1, None))
+    cursor, left, identity = builder.invoke(cursor, target, tuple(references))
+    _associate(builder, identity, target, definition,
+        Opcode.ATTRIBUTE if isinstance(target, ast.Attribute) else Opcode.INDEX)
+    operation = builder.operation_records[identity]
+    selector = ObjectField(target.attr) if isinstance(target, ast.Attribute) else Element(operation.uses[1].id)
+    builder._addresses(identity, (AddressEffect(ReferenceOwner(operation.uses[0].id),
+        (selector,), AccessMode.READ),))
+    builder.link_value(builder.values_by_id[left], target, SourceRole.EXPRESSION)
+    return cursor, receiver, key, left
 
 
 __all__ = ["expression_for_heap_target", "store_heap_target"]

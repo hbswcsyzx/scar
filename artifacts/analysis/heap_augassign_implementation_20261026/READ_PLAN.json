@@ -1,0 +1,219 @@
+{
+  "all_four": [
+    {
+      "archive_manifest": {
+        "bytes": 438185,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179"
+      },
+      "archived_source": {
+        "bytes": 130712,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/d94a266f30c07dc0fa809b733b48a1afaf156bd5924aa7c0cfec578b61f6b748.source.utf8",
+        "sha256": "4e4588e51cf26364c0b28c1ee7694a9029798a6c6e34b1098bcbac1149da0325"
+      },
+      "entry_key": "5ceec2709e6e347e59ad71f45cefc50c87dce4e2cf01dae0dcb9f39d2f77c94b",
+      "expression": "X *= xp.astype(self.scale_, X.dtype)",
+      "frontier": {
+        "detail": "structured control/effect protocol still required for AugAssign",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:1b41e8fe9f124bd929a2ad5e",
+            "wire": "source:atom:1b41e8fe9f124bd929a2ad5e"
+          },
+          "end_column": 52,
+          "end_line": 1176,
+          "fingerprint": "sha256:4e4588e51cf26364c0b28c1ee7694a9029798a6c6e34b1098bcbac1149da0325",
+          "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/sklearn/preprocessing/_data.py",
+          "start_column": 16,
+          "start_line": 1176
+        }
+      },
+      "historical_calls": 25,
+      "public_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00002/result.json",
+      "target_kind": "Name",
+      "terminal_receipt": {
+        "bytes": 10976,
+        "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00002/result.json",
+        "sha256": "dd2c7d288ee73ed5c92149a554e5fe5581486f71d47e224439cdbcc81f535a17"
+      }
+    },
+    {
+      "archive_manifest": {
+        "bytes": 438185,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179"
+      },
+      "archived_source": {
+        "bytes": 21286,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/0539b2e0ce8711ab87055c7ee0e94d4ea2769198ea02c14335fd8cd6d25e6600.source.utf8",
+        "sha256": "2a2cd78973296d5871af0ae1334f4c567cacef380bc69b4a759fcc29cbcff51a"
+      },
+      "entry_key": "67455b76dece1d3a3157481796dc1ac16f27efc78094bfa2f2300ed374a97546",
+      "expression": "self._elapsed_steps += 1",
+      "frontier": {
+        "detail": "structured control/effect protocol still required for AugAssign",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:f240d059994259eac59522d6",
+            "wire": "source:atom:f240d059994259eac59522d6"
+          },
+          "end_column": 32,
+          "end_line": 125,
+          "fingerprint": "sha256:2a2cd78973296d5871af0ae1334f4c567cacef380bc69b4a759fcc29cbcff51a",
+          "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/wrappers/common.py",
+          "start_column": 8,
+          "start_line": 125
+        }
+      },
+      "historical_calls": 25,
+      "public_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00005/result.json",
+      "target_kind": "Attribute",
+      "terminal_receipt": {
+        "bytes": 10903,
+        "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00005/result.json",
+        "sha256": "ceb997e163a16e0f4127ab7df192b04009f56683489b18e50aae9e74f4d66a1c"
+      }
+    },
+    {
+      "archive_manifest": {
+        "bytes": 438185,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179"
+      },
+      "archived_source": {
+        "bytes": 136036,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/e63f3bd3f89dfd3568a4f08e0c47d80bf45f17f399f008e049f2dd66db9c7917.source.utf8",
+        "sha256": "de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b"
+      },
+      "entry_key": "34b767a23425e6b9f20204de2934e0304f5c10905005f01d7a20b55256aad09a",
+      "expression": "invalid_generic_forms += (ClassVar,)",
+      "frontier": {
+        "detail": "structured control/effect protocol still required for AugAssign",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:48ec536334250737733cb258",
+            "wire": "source:atom:48ec536334250737733cb258"
+          },
+          "end_column": 44,
+          "end_line": 198,
+          "fingerprint": "sha256:de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b",
+          "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/typing.py",
+          "start_column": 8,
+          "start_line": 198
+        }
+      },
+      "historical_calls": 2,
+      "public_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00015/result.json",
+      "target_kind": "Name",
+      "terminal_receipt": {
+        "bytes": 10745,
+        "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00015/result.json",
+        "sha256": "cc4fe92a20f64477a5aae6567306f889c3caa2c6d0178ffbe91d47b5c8e5d1c4"
+      }
+    },
+    {
+      "archive_manifest": {
+        "bytes": 438185,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179"
+      },
+      "archived_source": {
+        "bytes": 4767,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/9e7ed65f998134b9a825d3feec877df3ef380d4a9dc4e441ee56753d2e66ed87.source.utf8",
+        "sha256": "72b07de4133a7e39b2f6a7920465669aa04626f217e800779587bc0713fe002e"
+      },
+      "entry_key": "80f24c27516743da2dfd9d1d9e04791f8a943f6327499b8ef05b08265ab499b6",
+      "expression": "level += 1",
+      "frontier": {
+        "detail": "structured control/effect protocol still required for AugAssign",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:06759c4bedc4f2efe08c1342",
+            "wire": "source:atom:06759c4bedc4f2efe08c1342"
+          },
+          "end_column": 22,
+          "end_line": 87,
+          "fingerprint": "sha256:72b07de4133a7e39b2f6a7920465669aa04626f217e800779587bc0713fe002e",
+          "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py",
+          "start_column": 12,
+          "start_line": 87
+        }
+      },
+      "historical_calls": 1,
+      "public_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00010/result.json",
+      "target_kind": "Name",
+      "terminal_receipt": {
+        "bytes": 10693,
+        "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00010/result.json",
+        "sha256": "93568b8df635b399e6c46f6f123d739eba5a151397d946bbed54b9786c2aa1e8"
+      }
+    }
+  ],
+  "base": "c6e31a9a",
+  "budget": {
+    "body": 1,
+    "elapsed_seconds": 600,
+    "operations": 4000,
+    "output_bytes": 256000000,
+    "record_bytes": 128000000,
+    "source_files": 1
+  },
+  "compile": 0,
+  "frontiers": {
+    "bytes": 45711,
+    "path": "/home/zyf/AAA/scar-worktrees/source-comprehension-model/artifacts/analysis/source_comprehension_implementation_20261026/FRONTIERS.json",
+    "sha256": "10f6032801e46edbe5f2ec13490b4c8424b240b4325a42f80352ab97143fe015"
+  },
+  "lower": 0,
+  "selected": [
+    {
+      "archive_manifest": {
+        "bytes": 438185,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+        "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179"
+      },
+      "archived_source": {
+        "bytes": 21286,
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/0539b2e0ce8711ab87055c7ee0e94d4ea2769198ea02c14335fd8cd6d25e6600.source.utf8",
+        "sha256": "2a2cd78973296d5871af0ae1334f4c567cacef380bc69b4a759fcc29cbcff51a"
+      },
+      "entry_key": "67455b76dece1d3a3157481796dc1ac16f27efc78094bfa2f2300ed374a97546",
+      "expression": "self._elapsed_steps += 1",
+      "frontier": {
+        "detail": "structured control/effect protocol still required for AugAssign",
+        "kind": "UNSUPPORTED_SYNTAX",
+        "source": {
+          "atom_id": {
+            "kind": "source",
+            "value": "atom:f240d059994259eac59522d6",
+            "wire": "source:atom:f240d059994259eac59522d6"
+          },
+          "end_column": 32,
+          "end_line": 125,
+          "fingerprint": "sha256:2a2cd78973296d5871af0ae1334f4c567cacef380bc69b4a759fcc29cbcff51a",
+          "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/gymnasium/wrappers/common.py",
+          "start_column": 8,
+          "start_line": 125
+        }
+      },
+      "historical_calls": 25,
+      "public_terminal": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00005/result.json",
+      "target_kind": "Attribute",
+      "terminal_receipt": {
+        "bytes": 10903,
+        "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00005/result.json",
+        "sha256": "ceb997e163a16e0f4127ab7df192b04009f56683489b18e50aae9e74f4d66a1c"
+      }
+    }
+  ],
+  "selection": "original AugAssign frontier + archived AST Attribute/Subscript; historical_calls DESC, entry_key ASC",
+  "target": 0
+}
