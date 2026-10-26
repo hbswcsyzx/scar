@@ -1,0 +1,1957 @@
+{
+  "count": 161,
+  "layers": [
+    {
+      "receipt": {
+        "bytes": 696151,
+        "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/analysis/complete_source_entry_selection_20261026/complete-latest-ledger.json",
+        "sha256": "57f9651a2a3788a1e8c0ca89c5052e661c1dacbc40e00f6e80133c8bd7d4210e"
+      },
+      "statuses": {
+        "ENTRY_ADAPTER_MISSING:RESUMABLE_FUNCTION": 1,
+        "SUCCEEDED": 161,
+        "UNSUPPORTED": 81
+      }
+    }
+  ],
+  "owner_config": {
+    "bytes": 15137,
+    "path": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/inputs.json",
+    "sha256": "d4b5039d61dd0cc8a7bb9570b626f87dfded0dffba1f734f9c767d23b5b609db"
+  },
+  "requests": [
+    {
+      "entry_key": "e4c3bc337428ffe3a4bee6402ea331ab4b8218dd47054f9fe2b8d210fb8c5685",
+      "source_program": {
+        "decoded_bytes": 23597704,
+        "decoded_sha256": "5e6a033281356a3762b01f7efe6f4e6455e69d66f19ea5e7d9d6832e578a3b68",
+        "external": true,
+        "physical_bytes": 2590757,
+        "physical_sha256": "acce74d47f201df1443afe76ba20427564049c379dc5e074d3dc0e3d92f62f76",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-01/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "e3df179b3780d77b3c43cca414246e7f4b47550a5926f1ce496da095c75604a7",
+      "source_program": {
+        "decoded_bytes": 23270334,
+        "decoded_sha256": "d4f87ab551b029d2e6a00274a65a1db444263f1198dcadf206110815a43cb199",
+        "external": true,
+        "physical_bytes": 2562712,
+        "physical_sha256": "4915a2fc44b3dfadddf732ed8897f7c9fccb26bbd720496dd5a6f5d7437ec6c1",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-01/worker/attempt-00005/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "df356710346cebcea1d1ab20382b6978eb6afb8fa0629dcfd9342f5b4c4c7d4a",
+      "source_program": {
+        "decoded_bytes": 22614925,
+        "decoded_sha256": "2436fa70dda414e6ad38fd170489ad1868cce1f96dd6b7c0f3eeee7d7ea77e77",
+        "external": true,
+        "physical_bytes": 2506033,
+        "physical_sha256": "5f279e11a289599ce699a68689462a5706cbda0a1ffa97445c4868c1bd46a2ea",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-01/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "28f10231292c4b910ab6487f352d0cf6bba896351fa284bb6cfbe466856dc687",
+      "source_program": {
+        "decoded_bytes": 24255033,
+        "decoded_sha256": "d2fd18a2a98358fa57b671d98dea10a7479347b185f79c284a648674a5b62ecf",
+        "external": true,
+        "physical_bytes": 2643008,
+        "physical_sha256": "27602d26f8d3ba858f531240a1318be8f8abb850f11ad332bb4b57fdc0fe65eb",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-01/worker/attempt-00007/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "1ee916c976c96053223c24f701487007688b112aeee9634ff6c41426c0fae96a",
+      "source_program": {
+        "decoded_bytes": 16892463,
+        "decoded_sha256": "c285d837eec69e62fb670cd53358436f4fc013038808c072bd784593a70fd6c1",
+        "external": true,
+        "physical_bytes": 1794590,
+        "physical_sha256": "201be77aa7ab046e117f1071690ce3d64367be7dc6ebfe238a846be1fb444d27",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-01/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "7f079f674607f02ae55efbb8e5e88652b70ab395de9e1b0fa4d1191248ea74c0",
+      "source_program": {
+        "decoded_bytes": 30280069,
+        "decoded_sha256": "6760246bf61600fbcd364a5fd314032ac2541fe2be66c0d92d17b0ecde498d27",
+        "external": true,
+        "physical_bytes": 3393898,
+        "physical_sha256": "8ec5a385bd6572a53ab13f64914a7ae6c4f32392c051f566bf7237ef1cc8c42b",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-01/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "19189f43c35fade10d337711181c2f05e7c5fc951e94c6cc78b490b837e4a0a5",
+      "source_program": {
+        "decoded_bytes": 76082349,
+        "decoded_sha256": "a16c4d99b713c068ee7dfbc8148bc7d99728cb9c238dfd32e7562ca78e6a23cc",
+        "external": true,
+        "physical_bytes": 9108948,
+        "physical_sha256": "ff677183318a11d967d0478f249abc357cfa5b15a3808aab922eb67edf47a6db",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-02/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "086e042df73bbe9b8d96e732dfc9c52cf95310942f9b99b5d8073cf91aa980d2",
+      "source_program": {
+        "decoded_bytes": 14179341,
+        "decoded_sha256": "d1b83b9fb32ee84b8e039c9bcf70e318c0d7cbb713832f0d95b73c88ffa0d887",
+        "external": true,
+        "physical_bytes": 1451384,
+        "physical_sha256": "ec562c84366e0ac34adae2d8e645dcd0a9143b09f8d844ad28dde14f1a310e97",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-02/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "6cfa088cc3eddc95027d7c0d59b80ae17a96de8d32207f4c3b420d3c1a80bc42",
+      "source_program": {
+        "decoded_bytes": 34295818,
+        "decoded_sha256": "1e9884cfc1b4fc20553b53714a4546db92854cf54684bdac6d1225117a138bc6",
+        "external": true,
+        "physical_bytes": 4019851,
+        "physical_sha256": "143c27f359722c7df40110bc7d7f4f0702fb9da6aebfa5269fde4b463b8aa655",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-02/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "bc2a9cb85b9366107c78ecf738e89f3a91c6f210564d05a8fe4fdbbe59a87162",
+      "source_program": {
+        "decoded_bytes": 33775810,
+        "decoded_sha256": "9f902a35e25aff28a1884292bbd9a59a643bc762af7cb3b28e70814f4e4ac5c8",
+        "external": true,
+        "physical_bytes": 3972666,
+        "physical_sha256": "98ad1470e834c522929cd426c363dd90e13c4addffc287884643607c6782be23",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-02/worker/attempt-00005/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "e2524b4c6e4005a756ba8d90238a36eaa1dc4968be82d91cad4c08becbbb8af9",
+      "source_program": {
+        "decoded_bytes": 36153178,
+        "decoded_sha256": "04d6d378087b24172c34925b3f0c2f69498cc9d87458e25d530b20154506d960",
+        "external": true,
+        "physical_bytes": 4173919,
+        "physical_sha256": "61f574d9a0ad3901865e5013d7fc190e94efe04e10bcb4b57e463db9657617ea",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-02/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "bbf85621f7eb59485e2d11e36e7cb91bd3d425823bfc2ad2ab27f7b881e2bf31",
+      "source_program": {
+        "decoded_bytes": 13474826,
+        "decoded_sha256": "eca7084a373d5b2aa37481c04234b9ce865259e85ca8fb230d5200df1a93a010",
+        "external": true,
+        "physical_bytes": 1543957,
+        "physical_sha256": "ef8f3057a1f073d2d551b57f82beb05240242bf5dfbfde57e81266c6f860c06c",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_20261026/result/batch-02/worker/attempt-00011/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "29c178837dac1b240df0990a4463fe61deb81882eef6615d30a3285f6e29e3bf",
+      "source_program": {
+        "decoded_bytes": 36305909,
+        "decoded_sha256": "65557724e1af060e4a2cd46b39f30f16770296c6fc054613ca38fbaca2fb2488",
+        "external": true,
+        "physical_bytes": 4191557,
+        "physical_sha256": "0a97776757e01ff181f805b11d91a1d8b5acf9c17155e8c24a814305e5e52d4d",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_retry01_20261026/result/batch-01/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "cceb9f840881bb9155db2d1cc6f27b76b0d466ee1c12794f218272f7f38c6346",
+      "source_program": {
+        "decoded_bytes": 12247611,
+        "decoded_sha256": "418214e9bd5a9d67c6b10c6e71cbf3e6facfec12e4d16d20569c127f5c1cd5f9",
+        "external": true,
+        "physical_bytes": 1162076,
+        "physical_sha256": "0dcdc1a38bcbd10ff9939454d879629b9280321994f9189b762ce8a58cf1ad64",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_retry01_20261026/result/batch-01/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "7510f3ec13cd9593f9a2a1d2edf456a3d36d91bfe83bc789c123215f1c3e70fd",
+      "source_program": {
+        "decoded_bytes": 81297769,
+        "decoded_sha256": "8a565c7efb56684b8f64666ed4522339fc31c4198ab7e576cda13d6a71d096df",
+        "external": true,
+        "physical_bytes": 9757186,
+        "physical_sha256": "89d7561b288aebbad66c53c9e5b6c3d1ff839d6fbcfc5c9239c34cd93d67d62f",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_retry01_20261026/result/batch-01/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "94787b7e23cd796d5464f5dc99d165e7a727de8f7aef09cc3847d01180dcfc4e",
+      "source_program": {
+        "decoded_bytes": 81185123,
+        "decoded_sha256": "e6abde0b9d1f648bf1d0c9c87f6fb9d2e62ec76872023f56e322d0d26a2ac62e",
+        "external": true,
+        "physical_bytes": 9747050,
+        "physical_sha256": "090a708fc978b01cb732329ab83aba97c8415dcec24e24c11961f1fb4b04696a",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_real20_retry01_20261026/result/batch-01/worker/attempt-00005/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "82acd335d3a5138b60353a1634a1c4aa91d11f96b7f9f16d11d6f0cc421bc55f",
+      "source_program": {
+        "decoded_bytes": 28318738,
+        "decoded_sha256": "4f7e996830d9b19f08b4928e06291faf3e5e992af9125ed75bb9d247da67d31e",
+        "external": true,
+        "physical_bytes": 3054202,
+        "physical_sha256": "052bbca280ffbdd650616a7b45b9ca02ac7e4a5148fe6706cbf6e87afded4aef",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_remaining4_20261026/result/batch-01/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "b89dd526ef5dd7875f8f0a0e9c9efc63816358c906a5790e90ca77770ecdc099",
+      "source_program": {
+        "decoded_bytes": 113236730,
+        "decoded_sha256": "5c19f0236ba124537572c502276fca8ff46d09ed403dc39567e2623050d8a85b",
+        "external": true,
+        "physical_bytes": 12812124,
+        "physical_sha256": "b4c091322193fa83eeaf5c9464b9a0751033b982203934be3a9c07b12f85c29c",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_remaining4_20261026/result/batch-01/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "9e1745b07528482a10be30a538957b2dfabc8d4ddb04557bb558287b8ca442cb",
+      "source_program": {
+        "decoded_bytes": 69509281,
+        "decoded_sha256": "88463cdb6ed0f1018f9e1db65a70f60963fb46e65d6cd5c2938f8db8780350bb",
+        "external": true,
+        "physical_bytes": 7060609,
+        "physical_sha256": "7e9b5f7f772198753cb0b1b407d76cf0d545e0c3746bc2b6db93000ec164ee46",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_remaining4_20261026/result/batch-01/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "85a9fe01833f5cd3ebe1cb4f0d9b0cfd1212306efeedcc050ac8089c8dc1e0fa",
+      "source_program": {
+        "decoded_bytes": 78988775,
+        "decoded_sha256": "c5e960675c6273073c7bcdf972f6a556291929f6296d795b41123780474c0e28",
+        "external": true,
+        "physical_bytes": 9554200,
+        "physical_sha256": "b24c2b73dd447d1854d06cfc68924b324e732318bedb102a024296e473395d69",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_remaining4_20261026/result/batch-01/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "768db23cfb04545b363e86157e9de63958e2a6b33d61086b90e5b65ec0924113",
+      "source_program": {
+        "decoded_bytes": 445671,
+        "decoded_sha256": "e12da69b67c1a9d867663ffbb41f1be9e71868e3bfa68fb7d78c4bb50db6aa60",
+        "external": true,
+        "physical_bytes": 38174,
+        "physical_sha256": "9f8663ea4cdc066590e3f6f1b3f88018a610f2871f01a8c5d8b9682f8c7df353",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "219796fa8bc90926878ec3f83fe14ec292b6a3cdf3a8971cc22be29e37af1042",
+      "source_program": {
+        "decoded_bytes": 5975269,
+        "decoded_sha256": "c6ad2cedfaa510d09605b236bcd38218ef2bf7352dabd4e920f7627e56ffe149",
+        "external": true,
+        "physical_bytes": 631963,
+        "physical_sha256": "ae05d8c62114263dc0513446115ba7f72414244b92f1ee0cacb25001559241ec",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "ee21f2fd7f41a17d76c9db2d83b3f0a50e83255c11f817a79465d778d3cb525c",
+      "source_program": {
+        "decoded_bytes": 22072774,
+        "decoded_sha256": "a2219b163a5f006fde22310ef5a31ef8ac2082dfc5dc4a9501024a3b2b90ba85",
+        "external": true,
+        "physical_bytes": 2532405,
+        "physical_sha256": "d9fffaa824ba11e8b295c66f6f0847ed69ebf0e1ffac37e32d04d8911af298f8",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00007/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "504f61a9c249660cedb8b9e0d563abdacebe13e51509d0ab76504266ef2469f5",
+      "source_program": {
+        "decoded_bytes": 23230475,
+        "decoded_sha256": "cf65d6978eecd5bc03bdeeed0dc80c2b6fa082055b9b710576f65de0cd9aab86",
+        "external": true,
+        "physical_bytes": 2633474,
+        "physical_sha256": "7ecd5956ba8c2cb6bac1d1c0fc6b3655394cfc8d1f67d385dadad7d02f8d6b36",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "4048d0219a6257ae5af3511766374f95367c5235ee9ec9aceb78493ef3326d13",
+      "source_program": {
+        "decoded_bytes": 21871765,
+        "decoded_sha256": "b61ae7a6face5d48c64c06b8248254e465aa8e9bbf87344957bde1041b0fbb36",
+        "external": true,
+        "physical_bytes": 2512313,
+        "physical_sha256": "351c8c47fbf0807b270380f366e32f69e180cecc9c4ae493a251e8a1541ba273",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "e7092d45e8f4fc59ac3d6e4169579138434d3fb270b56ffdf2346fd3c133d6d6",
+      "source_program": {
+        "decoded_bytes": 22004407,
+        "decoded_sha256": "fe04be5da39db2013af1a24017a6e39b002eae52bbd9c0465ec78d57bf61ba4f",
+        "external": true,
+        "physical_bytes": 2525247,
+        "physical_sha256": "4bac12df243b6dab1d37bcdd26abacba88e3a18c247e69567b530612e5a11e18",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00012/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "91e458518d901f2836b856fd76854e25059635c743f079f47d740eccda23bb28",
+      "source_program": {
+        "decoded_bytes": 5606865,
+        "decoded_sha256": "7159b2fecf1bee36842c5a0c356fadd4e3d415ea953f1858561f3f591a3195ef",
+        "external": true,
+        "physical_bytes": 564687,
+        "physical_sha256": "ce25edd221c85bd2fb057cb1d0ce52ce20289142477d2dcd063a18c694e63444",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00013/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "f048468bfdde52dd413c99943b9e730f4a8508bbf835b5e35072a276dac64792",
+      "source_program": {
+        "decoded_bytes": 24509057,
+        "decoded_sha256": "19420c6151710a47d14d02cbcab301ef99fc625c5ad6517805bfb36c502f9ec3",
+        "external": true,
+        "physical_bytes": 2820193,
+        "physical_sha256": "f09c60945a3585c24bc88870e3e8fa6cb5b363d8ea0249d2720d47cbe2cbbd50",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00014/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "447590f1ebd8d2dfe15b31b239b43c150782d927ba7222add6570cb4a9c515db",
+      "source_program": {
+        "decoded_bytes": 25620427,
+        "decoded_sha256": "f0a162b206097849b0a5b490bbb2c360d9d599ed47d2786eb2f2b39d6dcb042c",
+        "external": true,
+        "physical_bytes": 2917229,
+        "physical_sha256": "0ac20b727c7a4fb91b64ef2374bac7fc57d10a8d53b8e62003ac33248af1cab1",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00015/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "ef7a8dd55c072c4742fb10e4d2ea3d269d33817b452511cc24e7c824b01b666c",
+      "source_program": {
+        "decoded_bytes": 24892991,
+        "decoded_sha256": "2ab9ada8bfaf952cb0af060ece340c93fe1b62f5bec659f8da9292b3837ed4a1",
+        "external": true,
+        "physical_bytes": 2857386,
+        "physical_sha256": "5271145d3623dc48e00e279a8f438dbfd761233edc28bcc3cfa3feb884dac0cd",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00016/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "64051742e240f146f07a9e54b09fbcd1d2bb164546c5ff6f49f61880eaf7ecfc",
+      "source_program": {
+        "decoded_bytes": 24568741,
+        "decoded_sha256": "6d15faea2e9330d61b27b10c3e1512d4b2eccccd20c3a5155c297ef276aa69aa",
+        "external": true,
+        "physical_bytes": 2824746,
+        "physical_sha256": "3e6d5e2980f14aa88325138315b3d481849975c7c0b6c78a44cd633ce1c1ee0f",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00017/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "669ff41ee3f000995663e12c62f4c722ce70cf67773ead90cab2ee3d2a6d9446",
+      "source_program": {
+        "decoded_bytes": 14897626,
+        "decoded_sha256": "5374b741c94d60e77f9f2ced53d81936e992426777466c3045346201c27f5c00",
+        "external": true,
+        "physical_bytes": 1721923,
+        "physical_sha256": "c901fa632da022e46f8f6bbe4078d2439683d6ecc4ef470768c3748d3f9efe46",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00020/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "c16678b9d5fe1f6023499a15b39f7fb4005ac36b4bd3a94105aaee20556b1147",
+      "source_program": {
+        "decoded_bytes": 52506275,
+        "decoded_sha256": "a87d3d8fbfe6df77642779e971444922de2ad6c35d57a417330a88bf8ecc35d2",
+        "external": true,
+        "physical_bytes": 6215631,
+        "physical_sha256": "ff4d55de785d15e3d53127d3d3601e284be60465296cb9c64156790713bed097",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-001/worker/attempt-00021/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "8f9ea87571cdc191a7b20c4fbd5cf6bd77f3015e06d8a5cb282aa93d18197549",
+      "source_program": {
+        "decoded_bytes": 30416231,
+        "decoded_sha256": "3f5dc4fe5e798cd55443d9c39bf4909c4190c744d3d8e5c0a05e4db3c699fa43",
+        "external": true,
+        "physical_bytes": 3406191,
+        "physical_sha256": "d60941b2a441c7de625f88b6bf42fdcf54593b895c5ead3cd690ab2164ce7b53",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "a2ac18b477e6180146e4c841959d717c06c751d8e530de152fbe86266ee564f2",
+      "source_program": {
+        "decoded_bytes": 7400687,
+        "decoded_sha256": "3f97f5320ba702bce5cd334dd7d8b2eee7d93b526d6819f0fa1a3dd004d9ca98",
+        "external": true,
+        "physical_bytes": 785694,
+        "physical_sha256": "8fbfc56324f722636d38d39359a0816a8fd834ce383df573584addadc18195da",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00007/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "5bbd56819b9f11f41eca99c2b27669a5129ea7baeaa3c91538336d870e255c6c",
+      "source_program": {
+        "decoded_bytes": 78289627,
+        "decoded_sha256": "f1bc5c368fa1b9f410e4ab96ab7935fdaf9eb8b2a9c32f49f7a1c1682a33ae90",
+        "external": true,
+        "physical_bytes": 9488894,
+        "physical_sha256": "6ffed82b76b4490e828c5949b479d63ebdb3e55a6c50622918c72f2d7a2afacc",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00013/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "96900635be6cc3362c01dd7005fe3bda0606bed39d05e4b1d42677d0ec0f77e7",
+      "source_program": {
+        "decoded_bytes": 6127818,
+        "decoded_sha256": "a720612511b13a14a87fa65f7478d21c5a2222b001bc85ab105b1da2981b4dcb",
+        "external": true,
+        "physical_bytes": 676299,
+        "physical_sha256": "a1c07cb5cb66ec07523dc934a90566cfdb25b79fc2972fa5680bbc3c0dc477b2",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00019/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "2712d52b870b65e29345d44f118dee1fa3d351b26d30135ec57594e1053549fe",
+      "source_program": {
+        "decoded_bytes": 5923092,
+        "decoded_sha256": "9bf1264aa5c959a4f657b9f1de62eff9b0c0b6cbeb3855a0af38a5f9d675e814",
+        "external": true,
+        "physical_bytes": 657255,
+        "physical_sha256": "3ecbaff55e2454e09870f071360ef49a42d4a78382af612ae592d17abd3fe4bc",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00020/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "f7c2161806664ecafc5c6107d5e7d631f1abdfeab79053ffc9a57372effae212",
+      "source_program": {
+        "decoded_bytes": 13274508,
+        "decoded_sha256": "ad8d4d2414a8a06b690319562e8391f5c107ff9daa5e850d417f1faa7f4c13c9",
+        "external": true,
+        "physical_bytes": 1476034,
+        "physical_sha256": "27cac4734336f79ff093808fb959521c1f2a91515cd40d5818b81a116308b1b7",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00021/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "5f35b5e8a4d0d030145ca02ebb9313e806075769783b62950cda631cb201c91b",
+      "source_program": {
+        "decoded_bytes": 13292280,
+        "decoded_sha256": "2fa78ca0dd9eba03645c8f4b4cfef77bb312074bfe2d29c7918e082e3913cce3",
+        "external": true,
+        "physical_bytes": 1477924,
+        "physical_sha256": "e11aef39ce3425905931d152864613e17d0bd90eae05d95b6decd45815cfc929",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00022/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "39c853cd57caf6851af0f522cfea56a8beb73f05b702e9acf6e4b631802d75d8",
+      "source_program": {
+        "decoded_bytes": 12771208,
+        "decoded_sha256": "b12d095dd9bab023091f7086b69f137417b7c151e2d3a7411bc2d969c56a8e46",
+        "external": true,
+        "physical_bytes": 1431068,
+        "physical_sha256": "d9c702bdb8179d9465113ae552d1b0af86f0ac7b5910190951718a746798a3cf",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00023/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "ce8f899e83a47b0a75403c242f3be23ba753eb6f48d15069d85f0dd56cab383a",
+      "source_program": {
+        "decoded_bytes": 13218083,
+        "decoded_sha256": "39ae9ae8755d61704a8fabfb708b155f0c8eccf3ddb800ec746c7a4a9beb3d87",
+        "external": true,
+        "physical_bytes": 1472448,
+        "physical_sha256": "7770759a5d5c9c24124e21f8aaf7260283b9590a50a541b048ae51964cc7f0cf",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00024/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "43c591c3e21bc2031bc46f2a4f97086ed74efe6f564e2f39a5b1d50c361c975b",
+      "source_program": {
+        "decoded_bytes": 13102316,
+        "decoded_sha256": "73ec2bbd1c02c318c24ef58d6fbc90a16632a350b25858bf0c0191a7989128e6",
+        "external": true,
+        "physical_bytes": 1462243,
+        "physical_sha256": "bf6b196a2bcd0b188153d37ebdac6165a51f6eb9a6db0eaf220a91b99a64d028",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00025/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "fc4b2850c3e390f0632e7e22a466495b7a5f59d63af984028b106b25cdafc1e8",
+      "source_program": {
+        "decoded_bytes": 14453832,
+        "decoded_sha256": "27a27a28ebaa5aa9c607a9228e213baf23d2cf631dbde05feeed7c166f32d934",
+        "external": true,
+        "physical_bytes": 1577057,
+        "physical_sha256": "1a1dcfb9f3eab72e828b50c36efe5e7605b33c214ed9cf1bce288fb25335a008",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00026/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "bd33fa9b8dd13b9611ed94cbba0999527572b2253496e873750c62601ad54e81",
+      "source_program": {
+        "decoded_bytes": 19791974,
+        "decoded_sha256": "6ed0fb1d01dcb4b63049b2417dfd1cccc54c32e3c29a10eafd129675899b507d",
+        "external": true,
+        "physical_bytes": 2018581,
+        "physical_sha256": "9145696811858d285e167fc6ac50bdfca9fbdbc60c0176dd021c38bf6ebf7444",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00029/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "1e809f624956a1dffc64a57e94f318dc3a097b7a42847d86f7b52a55b9130a71",
+      "source_program": {
+        "decoded_bytes": 41731477,
+        "decoded_sha256": "94915d0580dddd5d8120877049a7a47eeea87cdd85c1abd683bec893536186f7",
+        "external": true,
+        "physical_bytes": 4811951,
+        "physical_sha256": "e2f432f8a282355fe7a7dd2d280671efa9a387b0088a625c4eda2631afa5786b",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00030/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "93a862f8d3fe7362e2825f590e37cb44b90fbfdc65e0b83d15259e1d05971571",
+      "source_program": {
+        "decoded_bytes": 28611320,
+        "decoded_sha256": "70903dcad0e348444f46c6aafa2834fb3e15a9f4e080f33bc7d9b10a9e6fb48a",
+        "external": true,
+        "physical_bytes": 3109184,
+        "physical_sha256": "8b0bba653ebb535199631f854ad46b3313bd4845fb938f4f5abc8063f6685eeb",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-003/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "fbbb47378bb793c3d6ef37f2ca570488e37d75ab53df90b8c737623f47c127e8",
+      "source_program": {
+        "decoded_bytes": 22335979,
+        "decoded_sha256": "3940769113ca67046b548442f840cadf86eeeeb398ba37929cdcddfb9f0caf02",
+        "external": true,
+        "physical_bytes": 2482033,
+        "physical_sha256": "840d1d73389cc7e3d5962988a1900a3893095bd9bf7f0901113f3b196139bd16",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-003/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "0c550d006816d583e2e6cb74597f8b26de2e3d25fa3d47d0f4554354e45de099",
+      "source_program": {
+        "decoded_bytes": 4882390,
+        "decoded_sha256": "5b528c155377aa91fd7399d538e840042d6c427d49d6d7e4e82e8ebba3e20d47",
+        "external": true,
+        "physical_bytes": 506723,
+        "physical_sha256": "93628b478f6c1edadcef588a1dee2ad173ac11c5af51a18659e4f1aacc14660b",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-003/worker/attempt-00010/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "71a6dd1700bc10f666a4099508761d123fa5501fb37b909c3fe84df3d41d9afc",
+      "source_program": {
+        "decoded_bytes": 4667321,
+        "decoded_sha256": "780e68fc652048b72fbe314dc96928ab36bbd0c82c200f0149bd94b223e17a53",
+        "external": true,
+        "physical_bytes": 486087,
+        "physical_sha256": "09591bb38168ea739ec53e1ca8ebd9ce0733e8585e36cbdf891fdd129bd1d283",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-003/worker/attempt-00011/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "c9b191783d35d491ca9e326ba65c22a0e85d9704b0cfd83c4945a14fcdbf2054",
+      "source_program": {
+        "decoded_bytes": 6332289,
+        "decoded_sha256": "a0ae6e444a8a395cf904cd5f0980a9232277ee3885d1b828f1d1596a1582a8cb",
+        "external": true,
+        "physical_bytes": 643793,
+        "physical_sha256": "24bf77b94297214969538d59c9eed288cb86b41bcc6d57e8b98c76bc0ce5603f",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-003/worker/attempt-00012/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "c3ae9ec0b126afb43956fbb1d44b5227a3418391d8b9e40458d0e7eaa66c88d5",
+      "source_program": {
+        "decoded_bytes": 5264907,
+        "decoded_sha256": "edb9a73dc10d46caac9b407ddc6e970a9ee7e279853c8e4cb5d1edf1a568d661",
+        "external": true,
+        "physical_bytes": 551281,
+        "physical_sha256": "96526afc6d8817559f7347762fe999308a7df3739421596663dd7df51fec7cc1",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-003/worker/attempt-00013/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "3470952f761abc2e3980c43c39b895741be24390744c5d44cd4878726dca8de0",
+      "source_program": {
+        "decoded_bytes": 25072177,
+        "decoded_sha256": "d809f4dc27b2ec78f8172be84ad93ed997c025ff8b919e520fa7848f9d16863d",
+        "external": true,
+        "physical_bytes": 2892545,
+        "physical_sha256": "0e7fe7230654c53c10aa90e12a751cc17b918aada3b84b12ffd84cd18ce9ba8f",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-003/worker/attempt-00014/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "8b535b6027c0c7f5555170ed2545b180b7c6e6d1b981024e91fc61483b8971be",
+      "source_program": {
+        "decoded_bytes": 114979987,
+        "decoded_sha256": "b64437bf9fd028149105c99ca266d7222254821cbff069a503b378cf62162e3f",
+        "external": true,
+        "physical_bytes": 13384696,
+        "physical_sha256": "1980617bfb1dae8f879f77e8deaa3673f09f4437aaaee7fc84d740d0c3b6e558",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-003/worker/attempt-00015/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "38b8412e3475a43086fe5138968273efc4d5fd330000150b4fc1151344bfd358",
+      "source_program": {
+        "decoded_bytes": 10331611,
+        "decoded_sha256": "fd113e0ddf3e6c1b75d920b2e93bac2efba9df542eab260efb372a83039b3747",
+        "external": true,
+        "physical_bytes": 1119534,
+        "physical_sha256": "5657b35cf498dd59b96918ef92acf15c91c0fd0d1adaddfe674d74102fc84d7b",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "c7558016f3f8cee4b4202ad718b998ad27c94a9fe7224e6a45f83a9ed6d58b3a",
+      "source_program": {
+        "decoded_bytes": 10331611,
+        "decoded_sha256": "9b7c5548caefcc31a0f36acbb5d169152249bde3f598938d488bedeb0f2eb726",
+        "external": true,
+        "physical_bytes": 1119445,
+        "physical_sha256": "8f22ba913036d927e81cdd127cafa71de9d54ba662d3fa995a58f4426f4501f7",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "e7021c365e0e7ab901377cfb2fe005a8c80328a26d9caddf2dbdce31f86aca9e",
+      "source_program": {
+        "decoded_bytes": 10037073,
+        "decoded_sha256": "efcbed12d437a2290be8d63c3620406305bdaacf0967c0d510bcd359f655191c",
+        "external": true,
+        "physical_bytes": 1090226,
+        "physical_sha256": "2843b67c1d58e0d15172ae1051e7c21dc19312c70cded9cbbd61dbca4a559c11",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "fd996db4ffc0113d6028b3ddb373a548cfefba5d4e0d1ffa73a396469bd8c7dd",
+      "source_program": {
+        "decoded_bytes": 9274268,
+        "decoded_sha256": "b7604d01cc475c31b86a6ef78ffe7b41563169e597ba19df6b9c97bcca525d72",
+        "external": true,
+        "physical_bytes": 1055730,
+        "physical_sha256": "e3de1adfd69ebb5a5c0e7878eec0ff73f854e57d32f42b8e3a36a21e9e5caaa3",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "1fa5268ae8fb5932383482c9f09c4816f89de8215a3eae2436689073e6df1bbd",
+      "source_program": {
+        "decoded_bytes": 9379421,
+        "decoded_sha256": "dc63e5b7c9a88dfbc85c2624a8bfd2dd8258a9a78fdb18c230434ad862ab1ee0",
+        "external": true,
+        "physical_bytes": 1064913,
+        "physical_sha256": "3404aa2f88c512d9c7f2a1ecc8240ba1313fbee9132bf5997f97a019df0bcbd5",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00005/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "6009bd179207c7901e4e9d425b37e5106920294c9e90a5bb91da583ff2d481ec",
+      "source_program": {
+        "decoded_bytes": 9294806,
+        "decoded_sha256": "7c95d5bcf490f5e044b87326b59b638e8c214dbb478982d57db1409f9c30ea55",
+        "external": true,
+        "physical_bytes": 1056966,
+        "physical_sha256": "de23f39ddd04c1f8a0e5dbd3a74a9bd9ea10c8a69cc1651d35e1d62b17842b60",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "c06363a8129a9235da3c74f52eb81238108ca921f7040bc88a5658f6122cb715",
+      "source_program": {
+        "decoded_bytes": 9310319,
+        "decoded_sha256": "a799c6a2d1f88fee0014564151d802170a144dbd1a961a279aa5b9a76860d284",
+        "external": true,
+        "physical_bytes": 1057966,
+        "physical_sha256": "ac261b4763cbdc5e67c79f886328e59b3b17e36c130908f1b1295ceeea31191c",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00007/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "3dcb47ce97f2ae23c0bb2594384ff3c6d4551c572850bb10aeea7f79d8061169",
+      "source_program": {
+        "decoded_bytes": 9788988,
+        "decoded_sha256": "9ed9078cbf777f154fb7d1e68d1edc3b70ef125fd0e4d12048aa978be04a432d",
+        "external": true,
+        "physical_bytes": 1102332,
+        "physical_sha256": "a6b6844fe63dd6ef3894a9363f389bfcbee1f374f8ac81df8b219b0733dc727a",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "24b721b3c15f1b965f8a7da82a2392d84b1ecab32192f0f8e33766873e508cd3",
+      "source_program": {
+        "decoded_bytes": 9379447,
+        "decoded_sha256": "9ac3bbf87ad7820811d476b5dd3f2ed5049ea7cd40a35db6dcd179ee8d01518a",
+        "external": true,
+        "physical_bytes": 1064917,
+        "physical_sha256": "96d2f630c15b0f4ec7884ea27265a5c44716a6bebc53c078006c7de45d4877fb",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "f701c21eb125250514d4eeaca5abf47892a856a33d64e2dd61a54168898dc586",
+      "source_program": {
+        "decoded_bytes": 9325862,
+        "decoded_sha256": "af4be245a66bf3d7286bbf96b23e3a6d9b219b743e8af7ff5fb82950be808bec",
+        "external": true,
+        "physical_bytes": 1059420,
+        "physical_sha256": "135c93a2babc27acdb8f04b7d8ab77055d46c22529b730183a063377e85cc75f",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00011/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "7ca87705af9ada39575ed60e9e9a33525791b26266886a5b778cf3841a4950ec",
+      "source_program": {
+        "decoded_bytes": 5062071,
+        "decoded_sha256": "f0c01a86cf12cfe97b8bebe34155a68e8295ddca2488738e169a93ebde77d68b",
+        "external": true,
+        "physical_bytes": 550838,
+        "physical_sha256": "b411468487919906a9c1f2e365d4fa8485777ae3209be49f100433c3f967f755",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00013/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "903ae402b3786df862896daf26612dcc859c2443c22d5201eaba71d59fc03d07",
+      "source_program": {
+        "decoded_bytes": 2813442,
+        "decoded_sha256": "df5850136e8e9a3072a7385b4e2686958851c4c27977b0296147111e4c3c84a3",
+        "external": true,
+        "physical_bytes": 286154,
+        "physical_sha256": "6307ab854fc9c2f67e2fc600f3b05c9d2f1e6e85e5eda3989e09be302b33a021",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00014/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "262acdab5b37f453462745dea03cf0d1b7c3413a77adeac8d7d3aed38c2ad98d",
+      "source_program": {
+        "decoded_bytes": 2921723,
+        "decoded_sha256": "2868dab0e44c8531ffab7b5b18cd6ca00861b6a5de26af95148e564861bac192",
+        "external": true,
+        "physical_bytes": 296315,
+        "physical_sha256": "df679b47f5b3efe90e32da64fcdef7672d2e342c668c7f2c68ab4d1af30cb343",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00015/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "d8c2653fc9c05fdc724c7403d330595e730e9a5eb6a4cdbd4d75c13b278b20b5",
+      "source_program": {
+        "decoded_bytes": 27597034,
+        "decoded_sha256": "fa5733b8584367e3aea81219e302ee047eb5c22f438256c8dcea3f4089edaf81",
+        "external": true,
+        "physical_bytes": 3114512,
+        "physical_sha256": "f956441af2b61eef3d5e28b989e71dca7ae44ed9d31310c03e85d0c33c779075",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00016/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "02d99412f726fc120d8572a864a3edce2a1cdf1919fc04128d07a51d67e9538e",
+      "source_program": {
+        "decoded_bytes": 27220930,
+        "decoded_sha256": "89fbe155fbf9cb54de9875ec081f03a833d707947a4794afc060d3b9ea6b1015",
+        "external": true,
+        "physical_bytes": 3078311,
+        "physical_sha256": "9ec80b757bb50553b470483bf337a8ce48e821440378df884ce1627a535974c5",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00017/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "2549d022fa5f2ab1d3b7a5c934b8f1c08e759098709ab6f03858586c84cd6bd5",
+      "source_program": {
+        "decoded_bytes": 27340091,
+        "decoded_sha256": "c64cca8ed69b8ca01c274fa87938068bc19e4811e3688dd6e3b49547c0aeda3a",
+        "external": true,
+        "physical_bytes": 3090912,
+        "physical_sha256": "ddbd91548c3ad8c220d9a93865f3b88b38718d3d89a521eeafbbf672c12a5262",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00018/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "2e62c1a5e1224180edd32afb8009a5586043c10123eee24316860c1e1089e754",
+      "source_program": {
+        "decoded_bytes": 27040000,
+        "decoded_sha256": "15ab7ce9c73b9f3e9111c473ea82e6aa2cbc154f5f60e7f77de9fab084d2c9f1",
+        "external": true,
+        "physical_bytes": 3061398,
+        "physical_sha256": "c2d5798f4f493a786928ee4a6e4e9b769d3d55b68653f6ab09faff737f8dfefd",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00019/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "e3c3aee8f057419daa03a4f53708d43ce1487b12a5531bc57bac3378bf8cd0d9",
+      "source_program": {
+        "decoded_bytes": 14315417,
+        "decoded_sha256": "004504c1bf900c5b21f8b8de6461879a6cf9d7d93c9541534af26dfb858469cb",
+        "external": true,
+        "physical_bytes": 1618079,
+        "physical_sha256": "07bb14cbcabb29c57c4a588159f8d8e2b483d2af72c9001d8a2ff14e91a1351a",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00021/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "040bdaffb634f88297cb4fe8795a1b30455511e2fd6fd72c88c0bc8a796330be",
+      "source_program": {
+        "decoded_bytes": 34795779,
+        "decoded_sha256": "2355fdeb592f039736736299bf5017caad58d7e70a034f06dda5e705359f1bd4",
+        "external": true,
+        "physical_bytes": 3990893,
+        "physical_sha256": "dad134a1279672e948ab669261248895fc97e58f3b053fda1019e8825b14c34e",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00024/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "add832232abb5c681879a47e44c0e32ce8fa59670d47197230f32275b3351492",
+      "source_program": {
+        "decoded_bytes": 34891035,
+        "decoded_sha256": "2905ecfd5e7fc0772e571fa6d0afb69860b480573b9222e79de54aac9668c168",
+        "external": true,
+        "physical_bytes": 3999327,
+        "physical_sha256": "840cc5b191ac82b96beb9d2e19cdb58740f2e026395f2aa2a2381f572fa8d90b",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00025/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "229df6263154617756f83901ad1457506a7c38a1d85408d5a15a297d62537688",
+      "source_program": {
+        "decoded_bytes": 7644203,
+        "decoded_sha256": "ff88bd6347c8cbc945ca7aa5939f5d7c6a2981a623b06831c97fa4266b87a481",
+        "external": true,
+        "physical_bytes": 775771,
+        "physical_sha256": "cb9f8d63261a177414625dbe61ce67a01c6bf962d210ebd63195b43245a437d7",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "4011620c2eb3d663ed8c695c6ebb493022b8455fb88d9d1cb09bf3eeafb9f2c2",
+      "source_program": {
+        "decoded_bytes": 47546461,
+        "decoded_sha256": "aedb3d71b7148262317a6813903dff8f7d78876b0533bbc3f0447a504b6770fd",
+        "external": true,
+        "physical_bytes": 5463240,
+        "physical_sha256": "f26505c183da7a53998a0e8cc5d94825736fe303779580164c5c97fb5b67662c",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "e5588bd360190aba6c541ec81a1d6e63920dffe7669fa571fbeb27d098f864f1",
+      "source_program": {
+        "decoded_bytes": 47591377,
+        "decoded_sha256": "dc0e605e1449189835f7de3be23e229ced5361022327c8515f9ecf5f93252eb4",
+        "external": true,
+        "physical_bytes": 5467599,
+        "physical_sha256": "69f5ca902a0b0d61d030d4455e8207d0db028d1332212374631970ed9811367d",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "303960bb1113111829a386af4ec5fbb388f1b2fbb8f13da10c0eba8cdd72a6bf",
+      "source_program": {
+        "decoded_bytes": 9452026,
+        "decoded_sha256": "045d98c8b9d2e112bce73814a8eec17b8d9b2e8b229a28794d82febd4bfdb3ed",
+        "external": true,
+        "physical_bytes": 1027516,
+        "physical_sha256": "a13dac9b7aa68759610c0089e621934a37f01a5ffd182d3a739a49e80e91557a",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "d421f35ff03b9e2fbb64bb005d247878f5b3ae097ba8c8c4b603924f94674dc9",
+      "source_program": {
+        "decoded_bytes": 15859324,
+        "decoded_sha256": "19eef026e376c22767e804e44d8793fe8dd5233c7bc5f15598fa306877e37f07",
+        "external": true,
+        "physical_bytes": 1735067,
+        "physical_sha256": "2096e2fa6874623191d7592d1db5305ee82fbd4a8f27a03f944b3084d930fe67",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "eee6b978a6e56d8f962353014fcd747dea53a734643e118659caa6b893ccb9e8",
+      "source_program": {
+        "decoded_bytes": 11587670,
+        "decoded_sha256": "5c59e75878de69f9593afd83f7e3bf8576a8dd3b475dccbd464eceee9aed130f",
+        "external": true,
+        "physical_bytes": 1296767,
+        "physical_sha256": "1688d291c220518d04323506974bc24ba3568f632cfeb64ebae36d10834bbaf4",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00010/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "a72efe3dc2e74bead71d2286140f1476d42b3b4c9c394166cc22e26ce2ef7870",
+      "source_program": {
+        "decoded_bytes": 2373101,
+        "decoded_sha256": "8244c4629ecfc5d76493ac74581295c62524d52b5f58a3a019d0533f742b06e8",
+        "external": true,
+        "physical_bytes": 237376,
+        "physical_sha256": "e9d84a78ac92f8d376c66b184b2a967bf10c902edb81e2042b2d27d1a2dad3ff",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-005/worker/attempt-00011/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "b0ae2aaeea30eb5f0ed720ae47aea82f9bf1abf086e033a23efc956691f82579",
+      "source_program": {
+        "decoded_bytes": 33605877,
+        "decoded_sha256": "5fb8f873aad01862db6c489a29601bdf62f9f8077525e6329d0e9dc00b5c1832",
+        "external": true,
+        "physical_bytes": 3956767,
+        "physical_sha256": "1b84cad5eefa41186cd868a5540823b0fc59f94461401b4c761fefbbab22ecb8",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-006/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "15fc1b14a24923e11ed35edf5f7a43c591bc5962fd86981535ff0d1faa1df553",
+      "source_program": {
+        "decoded_bytes": 33377644,
+        "decoded_sha256": "89550589f30325452a6cf45a0218fc267f14bf37f000f965beaf4ee8552cda86",
+        "external": true,
+        "physical_bytes": 3934217,
+        "physical_sha256": "d1f2d0a6a0723998ef40fae86048574e9be3b4939b31d037dbb6617d613edcee",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-006/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "7eab2a6fe4fb8e2da86b027cb6b84f4030b324c12a363ce49c54ec6354c541ab",
+      "source_program": {
+        "decoded_bytes": 14034112,
+        "decoded_sha256": "a3a63795853414e3d3d6a58a716cd472d841b4d56fd1bc52e2059c48f41ce545",
+        "external": true,
+        "physical_bytes": 1532325,
+        "physical_sha256": "c52e58aa0b3a9f4e718de2528500ef300ab65f532c6729fc3942e213b8f33ceb",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-001/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "264724a71cb141cc4053734f53d2784e55faa5e3a4cea6073a4da9d4be0b1246",
+      "source_program": {
+        "decoded_bytes": 63360136,
+        "decoded_sha256": "91b54cde4d6b1397223adfc37143061ac6613b582959839100f6b5f759f5e312",
+        "external": true,
+        "physical_bytes": 7532417,
+        "physical_sha256": "bdf097860866881da8d583b0d82f984a6ffef04e3b11f2d1394dc3f6659e32ad",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-001/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "94139cbf2636d9d97900909c4b45ece1df71349c76b8d5d7309014c1a159bb68",
+      "source_program": {
+        "decoded_bytes": 2829293,
+        "decoded_sha256": "2fd3ad8b40b782fa7f6a6c62514c86a74c7b4af04b9f4599190051ef73f24fd7",
+        "external": true,
+        "physical_bytes": 292156,
+        "physical_sha256": "aa0d33a45722b2b396123cfe48e67445b7a0cf1e0ce26cc423753444123d0c07",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-001/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "602c828b0e6f6559cf05b2cfbec6e6e5b8c15783c0a86734f9fe13bc2886e58e",
+      "source_program": {
+        "decoded_bytes": 6164995,
+        "decoded_sha256": "b37c86da0c56162e4ee46789e3b4e513dd80ae62143ccf2f64e3ae35e6b77835",
+        "external": true,
+        "physical_bytes": 666513,
+        "physical_sha256": "fd8b17f4cb21aa2c89f09570f5dfee354779bfdb461ee72d152514135454d70c",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-001/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "9fc87675e49ecdcc5ea2fb0c38348ca09a011b0dda3624ae2e121bf5f54aa466",
+      "source_program": {
+        "decoded_bytes": 6207198,
+        "decoded_sha256": "32586fa638ed682fc2155e852713f56cabde6e2a45a6dc5f8466cbcb5f0a5c2f",
+        "external": true,
+        "physical_bytes": 670570,
+        "physical_sha256": "b59fd5f8602408d0561cb4d3358b28ae7091434870a91d575055337a18c286f7",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-001/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "17a4f6774be911d19c52f17ee8fa7ab6f23e1eb44e7debde0e6de820c6234769",
+      "source_program": {
+        "decoded_bytes": 34726845,
+        "decoded_sha256": "05f6962db7020463f079f86cd0807e108cd23861b4d27cbd925426edbdbc605e",
+        "external": true,
+        "physical_bytes": 4020604,
+        "physical_sha256": "b2f2c8c36b4e6cc288321c608676291313c9c40923aefd067f09ad79c5b86ec1",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-001/worker/attempt-00011/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "bc056633be06979ce6c481b8162620c112f6a99a7fda402593d817f0ca75657f",
+      "source_program": {
+        "decoded_bytes": 21125386,
+        "decoded_sha256": "ebd4b5622571792f430b8a7aea2c4d3e047c072bd3758ed4f993dc63dbb9f701",
+        "external": true,
+        "physical_bytes": 2305888,
+        "physical_sha256": "756ca1e938c88f06e9f1d8c99669efba0c0ce5c10e139db9b074dc76f69032ac",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-001/worker/attempt-00014/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "525ad9edd892de01c7d5ff897a26e5e000dd83630541f386215ddb6846f6d3aa",
+      "source_program": {
+        "decoded_bytes": 20264628,
+        "decoded_sha256": "95b909bbd2e5866715a089076daf5e2b3e545b5b800f2f733a49183815373c42",
+        "external": true,
+        "physical_bytes": 2226786,
+        "physical_sha256": "7be6fba3f228da237a8cd35b5902c2d3f5f3b3e57054fe6fc0c3b13bedba65c3",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-001/worker/attempt-00015/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "da12d958093df01cbce8a108cf4d61f81415b5b97e9b2967e5953a48b9252919",
+      "source_program": {
+        "decoded_bytes": 23771638,
+        "decoded_sha256": "dbb87508afe6d67a2e4a023fcd84fefc75710af9814c44e77cdc0d420b331712",
+        "external": true,
+        "physical_bytes": 2685363,
+        "physical_sha256": "6cdf4bdef2a05f6a0efc0e4a6ecff246b343921bc50bc861fd8e14654be0746e",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "7a3e67850805a829dd1f55007d396ba270ba41dcb234a0c2baffcf20de3bcd6b",
+      "source_program": {
+        "decoded_bytes": 23771621,
+        "decoded_sha256": "1a421259a9503d417400738ef49680578031487fb0e781cc0ceaa77a0489bb65",
+        "external": true,
+        "physical_bytes": 2685332,
+        "physical_sha256": "66a16880162675d9d4b08c9aaa08c3df1d02064de46d62100ffe409d9a871b58",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "c790bd68b070d208d2aa426eb3b5df2e4ef02ac9a33053e49eed15b51e7fabc4",
+      "source_program": {
+        "decoded_bytes": 23771968,
+        "decoded_sha256": "bfcc684eb942b48ff64ab22a944e97f355d5a6d892e4306f98c34af02fe31f3e",
+        "external": true,
+        "physical_bytes": 2685349,
+        "physical_sha256": "511fe1f93bd093ce16c2f1d09ff089d5a6e0efd5ceb83f0d4b313d48f56d5e0c",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "e09afb34d9b7f40d43da217b469bf17b41a3798b02db5946fb41f09f7d180075",
+      "source_program": {
+        "decoded_bytes": 579333,
+        "decoded_sha256": "6d7e372fbabc3a6f57baa069bcca7a9c59248daa3915ec65eb0889f1c0c5922c",
+        "external": true,
+        "physical_bytes": 55155,
+        "physical_sha256": "370ffba231e5f0543a011b571183ec8460591965a1bea244f905f8dfa72abe8f",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "f89526e559122cebd472e075ce59a6bd01937c93c85e2c42f9f5d4e5d74dd4ec",
+      "source_program": {
+        "decoded_bytes": 7711401,
+        "decoded_sha256": "6b21f019eb6419af91642e1e3a17c073caa32b5e39f87b28cc400a64f51b1e82",
+        "external": true,
+        "physical_bytes": 749855,
+        "physical_sha256": "45fdb19307ca43e09f30d4fd23514a00e2e13687bc95ae00f3af2cc0ce328e0d",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "e640d33cc658ff982b52b5880c91bb8ba11bac69a549c4f58deb0aaa79baca4b",
+      "source_program": {
+        "decoded_bytes": 5164179,
+        "decoded_sha256": "d0ecee1af6d6846573666f699041167432660a3808ffdf3841927bedf4297ba2",
+        "external": true,
+        "physical_bytes": 557869,
+        "physical_sha256": "36610a29fe146de30948fdf890aad8be3d468fa2a410f1d8359d45f310ef61ca",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00007/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "c99e0082f5b6586aaabc85572c42a6040527ee4b3829d7179e0dd8866824d747",
+      "source_program": {
+        "decoded_bytes": 5185040,
+        "decoded_sha256": "64d4d238c44a3dc38f1c074d73f07256ab43e9748a3f427ef5f0813f327a6ae8",
+        "external": true,
+        "physical_bytes": 559444,
+        "physical_sha256": "ee3f4d6faa5e0da2b8736ca9d5c1fe960ed66022c6e465afa48da6451726d809",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "ca525c641b611ea8f534646cae09d0f29cd46e409b48a327153d8f60f2ee2b07",
+      "source_program": {
+        "decoded_bytes": 5147919,
+        "decoded_sha256": "f91d1bd57878d298e0ced9af726d80724f1ed4e5e9b57d02e3526c083e8981f0",
+        "external": true,
+        "physical_bytes": 556465,
+        "physical_sha256": "4f56cfc90bc894fe5a924b98996996d0478233dc1ff55632e2e0b15e01f0d9a8",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "b8c1dc8dc71e94ed4069bdd1d075f38e851b80a36413224723e2c88c95174568",
+      "source_program": {
+        "decoded_bytes": 43424852,
+        "decoded_sha256": "4764343004eb37bf62bf9834dfa8eed19e7e8581208f9377a22389b27a601ff4",
+        "external": true,
+        "physical_bytes": 5188195,
+        "physical_sha256": "93dafb4bfb6ea2ebd4aa0c2c7459ffa59df94e90c828decf694162186c301cdd",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00015/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "7953ed273923df0d9fc216888dd127f2534e983de92456e63e0e030b9b8cbade",
+      "source_program": {
+        "decoded_bytes": 33459685,
+        "decoded_sha256": "0ced2c1a8a6e7b559c47b0c3c2ae4a0fc962cdcf9aaa4b3e51f2e6ffeccb41dc",
+        "external": true,
+        "physical_bytes": 3942311,
+        "physical_sha256": "00f638dcb7493392f17fe0e5cfa9251b9876cc2da40c480d9ef0a7823b314fb0",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00016/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "7df1c740dd08741b9ce27ddc476748a7fbf9ca714a9c9a763e82feed779ba45f",
+      "source_program": {
+        "decoded_bytes": 33275983,
+        "decoded_sha256": "dfaf7c92dcd0ab39162994da208f4cb02e3a8c8671d2916d921700f9cd151487",
+        "external": true,
+        "physical_bytes": 3925783,
+        "physical_sha256": "576a92b2fb979eb33fd8bc8f172ccc7a9cc6e70471e16b6633167969d935e4a9",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00019/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "a3e12de06e4db8a4a02421ea10e8783789af4a11afd6c8dbd9c4cd564f4a2826",
+      "source_program": {
+        "decoded_bytes": 33556296,
+        "decoded_sha256": "317f33a5ab802e37f8eb77e916a44f68bf2df2cf3d5d50f1016bf82427e9ff95",
+        "external": true,
+        "physical_bytes": 3952170,
+        "physical_sha256": "876c929f066e8989903de4f52c29424254a63c3f783bfdb381ce6eb0a7023525",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00020/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "f8f77f9872627aaa2ac3a6cd63f7ceaad6ba8739078e76243f5708f47f27efad",
+      "source_program": {
+        "decoded_bytes": 4216011,
+        "decoded_sha256": "fee80161b4328686c13483f76df274cdcdf0093e779038efc2a59830295ebd3b",
+        "external": true,
+        "physical_bytes": 457437,
+        "physical_sha256": "3059ebbd5f6215c4124e34f47cdebfbdb27573c24e5b01cd361801c19ce47a20",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-002/worker/attempt-00021/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "09135324b066652eedffa315f17f73b8e0ee35d8a6c377e9df20eb5d6e6b2f47",
+      "source_program": {
+        "decoded_bytes": 30578883,
+        "decoded_sha256": "48ee65cdaaf7de5c8c4b05209ef8d69a157d6774accbe10bfbfe50f07ad2fd9a",
+        "external": true,
+        "physical_bytes": 3639613,
+        "physical_sha256": "b693959fffb7f47fb4b70d00b48177441890ec141cb101ae3acfb65ca1c852f7",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-003/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "6a36df661ac3afb5248055c0e1479973ea14cbbe1da2669d311382484d2c6435",
+      "source_program": {
+        "decoded_bytes": 15247641,
+        "decoded_sha256": "e770099417e40eb52357dff9dab8379a6890c1bf35ca85f173abe31ef4ca536e",
+        "external": true,
+        "physical_bytes": 1706970,
+        "physical_sha256": "e4fe13eadb2166be89818b0a7c704104dbc19da19138f4c9f26e2ea9c502cbd4",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-003/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "a178705e42c127dd09921130eab53f3c0e7ab98c4b1326965365a926e452f96b",
+      "source_program": {
+        "decoded_bytes": 15133156,
+        "decoded_sha256": "ae10c336aeb6693db8d32ab0c074573412215cf18e83f1179631b62ceed811a6",
+        "external": true,
+        "physical_bytes": 1697698,
+        "physical_sha256": "4b209b211725b2256fcc9a60619402811b38355f976ec0b389402ca6cfe1bf17",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-003/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "960c43d53203622d0233699b1eca41824df3001006115757c827f2398b1bebc1",
+      "source_program": {
+        "decoded_bytes": 13331586,
+        "decoded_sha256": "c15843a9e9f69efddfdaf30a49d5af241c2a20472a3cfec465c31be4cbb5dadc",
+        "external": true,
+        "physical_bytes": 1460387,
+        "physical_sha256": "0f5b111668dc2a00101b3b32b552b4d7aa2ecd592b82866d135dea8b83ed9576",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-003/worker/attempt-00011/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "a2739ed34a3a1f39c46e753dd8b16ff8f6ac0ba3df0a14b407fce83a1d2589f7",
+      "source_program": {
+        "decoded_bytes": 4790333,
+        "decoded_sha256": "b5fcc59358be8092cd20494a4990b831df3b8ca4ed269675378072dc66df0081",
+        "external": true,
+        "physical_bytes": 505382,
+        "physical_sha256": "919c6ddaef2cda8c9291276154b2e05fe8d148e37f0c86009d35915c6e045ffb",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-003/worker/attempt-00015/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "d2c372ad72f53111d8cd7e3e4f7944d59d75d6bc3cb209aca53397a15234f31b",
+      "source_program": {
+        "decoded_bytes": 42147467,
+        "decoded_sha256": "067b8e3097de7376a26ff59de3d68bb3fb055cc7dcf499f40ba27a9582cebf85",
+        "external": true,
+        "physical_bytes": 4666765,
+        "physical_sha256": "2d56110e5eb04c0cbcafccb710e6141f1610846944bc95fd7776b7f1ef0d3432",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-004/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "5bb00be2f18f2023b50c3888dfd0d25e02248fa3470ca314ba3626ebf6096e77",
+      "source_program": {
+        "decoded_bytes": 38087792,
+        "decoded_sha256": "508cbb6ecc0cc389b8d833457c6884723e5509998fdbc085a19a1a69de90d01f",
+        "external": true,
+        "physical_bytes": 4342770,
+        "physical_sha256": "8c22f32082738811cd94e6e78a97fbbe445705767de046ed0a9ec90fc0b317c8",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-004/worker/attempt-00005/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "1b62143c5090b0c8c308bca0b64e8d98b49232d0e3c43b6689163d58b1ff3895",
+      "source_program": {
+        "decoded_bytes": 17012890,
+        "decoded_sha256": "41a668477d6b424bff7370c705f5a1155cb4105784542bba4e14a8ace44d910a",
+        "external": true,
+        "physical_bytes": 1871283,
+        "physical_sha256": "77fc2793788ce1043f73fd3073c056961337521d3104b96dec3a1af003e7d25f",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-004/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "2703da5468a45507c40e08a39cbdf70ecc8928e8f65c8752b66e5e565596f1cb",
+      "source_program": {
+        "decoded_bytes": 3297246,
+        "decoded_sha256": "bb1a91ffe2ada0623df5fd42e311da0e201d53c69ed435e391c5290652d147cd",
+        "external": true,
+        "physical_bytes": 338603,
+        "physical_sha256": "7fc0a828107bb51302f9a2b65f2e58db2af9757581904fb7959ba44cc242bce4",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-004/worker/attempt-00011/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "2add370517b990a954049a9e2fd9c148d32baea58737bbfe55551b35b660be09",
+      "source_program": {
+        "decoded_bytes": 43246084,
+        "decoded_sha256": "8d0f4ab4d202b1924dad82a0a1b922d9972e492d854155966dc18cfd715ddf98",
+        "external": true,
+        "physical_bytes": 5059181,
+        "physical_sha256": "8e9f8c0fe94e51dc63b5903b47657a7339accf2a8f13ee2833ae66af4d1ba61e",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-004/worker/attempt-00014/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "2b6a4b132008bd9eeb035ddd4b506946281f730f3377af528fc73eec97852415",
+      "source_program": {
+        "decoded_bytes": 4705714,
+        "decoded_sha256": "f0cef42a7f17b0ab4cc68532f2d63351e4772fa57dbd59f1a10ecf344149469e",
+        "external": true,
+        "physical_bytes": 511419,
+        "physical_sha256": "cc0b442f1cf23ea911f3938e6b0763cc0b7599cf25557b61823817cdfa94368e",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "41c3355ffd4a245ea4e2db96a70b93b786df68586c55248a5a82530c155ef579",
+      "source_program": {
+        "decoded_bytes": 11432419,
+        "decoded_sha256": "31657295208e57a25e03c2f76aa793b90e5a3584b2b35dee6aa00bb053f97380",
+        "external": true,
+        "physical_bytes": 1286541,
+        "physical_sha256": "8030aa44a8415bae245ede728f22e12a34b854877d058365d8c28ca5139d59e7",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "519181189f8ebe87a3b1bf0fbc54798f2161beb372bfbcc223bdbf93ac22ff29",
+      "source_program": {
+        "decoded_bytes": 9288650,
+        "decoded_sha256": "246c29ef343980e048700c521eee9fcfd34083dc299d0a1dbef8d4c8ce250553",
+        "external": true,
+        "physical_bytes": 1054093,
+        "physical_sha256": "5781a85196e5f08a478177ba615f14eabe11e5facac77cec14913f30e89966ab",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "5bf18bfb6aa5e5e51c2030681bab7b0b0a9c209929b56c595121ec2f5c8716e9",
+      "source_program": {
+        "decoded_bytes": 4896061,
+        "decoded_sha256": "831b8142ebe712f8c7bf12b4eb1366d4279ee52e5e1a0ce9fe93c44d1c9eb56e",
+        "external": true,
+        "physical_bytes": 518665,
+        "physical_sha256": "8dcbcff3855742343258a32c2f2286cfcc1b54432a45b2f2b02e955a2ee9953a",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00005/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "5e9940072844e0bac56e760f84a2ee69d1f682a14306369b17bc614970c85ec8",
+      "source_program": {
+        "decoded_bytes": 30415926,
+        "decoded_sha256": "e1395a55dc209d40aaa76bdc0a9b9fecbb8f08bfc6da39e5234e03466a5ed7b5",
+        "external": true,
+        "physical_bytes": 3436257,
+        "physical_sha256": "6c0cb91c71adea93561a64f6009da13174721c123c0eb4a5bdd5d6f9d3e19329",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "807adfac1c17913b3cc9287ae1c7fd67296506890d6e5e8e1a6f2afa9616eba8",
+      "source_program": {
+        "decoded_bytes": 24754825,
+        "decoded_sha256": "3275afd43697de24f4c61d2c689af519e464821cd0ba085a0f5163a5991b68f1",
+        "external": true,
+        "physical_bytes": 2785486,
+        "physical_sha256": "406097fad33b952d44eff6af8410b37cd6bdcb31056e01b1f557647fbd1e0678",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "8cc08aadf9b907e91093755e9ff9f9bbb9c4d081c68dea7472b89e3ed9c7c4c3",
+      "source_program": {
+        "decoded_bytes": 25047167,
+        "decoded_sha256": "6465fe0c3b35a786884962077adcb969c9831d990b3f31879d1ca4f0ed753c87",
+        "external": true,
+        "physical_bytes": 2811417,
+        "physical_sha256": "df2af27712ab1ee4f708d247ffe361e5096831080cff4ae19a5921becb560d77",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-005/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "811e5aeaa3fbf95bd4bce5108ed62c6c5f2e1a1069a9cbeb964ec00c212e5956",
+      "source_program": {
+        "decoded_bytes": 3024646,
+        "decoded_sha256": "c77c5a1df70fe7a3bf86057a8ffe0184fc9d16ffd30813ee38ed831632e26fca",
+        "external": true,
+        "physical_bytes": 272619,
+        "physical_sha256": "f149eda361b546a74c5eefe1488eec5440af40a524ee3e0a64ac10ff78fcb72e",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-006/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "db07b6181b9d1999f3706c3ffbcdb5aef1bf8578ee3c0bb002c3e380cb9204d6",
+      "source_program": {
+        "decoded_bytes": 22121912,
+        "decoded_sha256": "1218d9c33b9e545820c4c2775dd0b279ca1367d2a17744f22d665d699c4b743d",
+        "external": true,
+        "physical_bytes": 2523989,
+        "physical_sha256": "01477a18bd8e12fbba5932421162d6102685597c2c03001334fd9e122d24ecbf",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-006/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "977da761227bb603c1aaff0c6e66e588b0bdc1daba287417c307bb99ed488ba8",
+      "source_program": {
+        "decoded_bytes": 9280272,
+        "decoded_sha256": "ac3efcd0eff0a911fe7699e8eac0653a639863cd81d4b2f91382d9350b4efcc8",
+        "external": true,
+        "physical_bytes": 1012103,
+        "physical_sha256": "dc163b00433014639ffc4057a92ec4ea65ffe4272f844de7cf989867d3a03b4f",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-006/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "9c61ef29fd4fbcfd35e712508168020c516b25a89d74a29289ca0964ef6c9082",
+      "source_program": {
+        "decoded_bytes": 17455916,
+        "decoded_sha256": "787b12b51120067cf6fde2c99879cb1d75fc1b032678ed5f3d84737c06b13a6a",
+        "external": true,
+        "physical_bytes": 1906584,
+        "physical_sha256": "8da2d66bacdb72fbd868918dbcbdc28f07457a689738be8d15184e02fc29cfdc",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-006/worker/attempt-00007/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "9ff4d86cf2395ba3ceee5a0250f7ef233fe3dcefdf65990f9258f039ab679afd",
+      "source_program": {
+        "decoded_bytes": 33440360,
+        "decoded_sha256": "6fd4c0fd78aab649ca1bb5ac5709815e3db40f25a68e0306c22555d60b11355a",
+        "external": true,
+        "physical_bytes": 3945601,
+        "physical_sha256": "fcbbad79fa64e966c2c6b572d2e805d8f56aa80e090bc9504a6c19c34bfe94e4",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-006/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "a0291994fd14e4a18af470c83b2beb8ebde7cd647a42d00d6b44c45f28ae0d30",
+      "source_program": {
+        "decoded_bytes": 8409488,
+        "decoded_sha256": "468ad1406f9aafe9fcd9aaf64fe03c7776bf0dd4cd5c7ba081032bac4d30d7cc",
+        "external": true,
+        "physical_bytes": 948618,
+        "physical_sha256": "7636566a86f1ed97374359b9397f398f9903dd5e55b3871b38e974bec847bc42",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-006/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "ad81e81f3525a7a9a8340d753e4dff5e6295a620f9372a5314bfad2ae0ade714",
+      "source_program": {
+        "decoded_bytes": 25777987,
+        "decoded_sha256": "914d365c6bc528f6017757196cbededf419b07035e26fbd537f466b7b25b6003",
+        "external": true,
+        "physical_bytes": 2976825,
+        "physical_sha256": "2058c18acf08f2fe88e6218f3b8a8fa7c77ec7db9f22882f1b144e2ba8e9be58",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-006/worker/attempt-00010/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "bf9b5d50cf799af52b9c79c46560bf765db326ab7191675d75b3955eb6c19511",
+      "source_program": {
+        "decoded_bytes": 1944262,
+        "decoded_sha256": "38bf20114640f6bc1c51d5e63453b500deac0eccd86e8271a5a6d0eb1920a9cb",
+        "external": true,
+        "physical_bytes": 196013,
+        "physical_sha256": "a639836206f953373806c490ae2e4ac9799286153e4e47dadec077330c0b2b18",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-007/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "c566d01a333b63afbf51d44e59319c6aa93b88cf0f5b64f06cf1d4790f26d6ec",
+      "source_program": {
+        "decoded_bytes": 11896662,
+        "decoded_sha256": "97abd86f8a8116d376c36665b40b40da950ee03f696cbfacd2de096355938c94",
+        "external": true,
+        "physical_bytes": 1336437,
+        "physical_sha256": "c7677584cf55eb4ded10aee3909e0d433c592febf6e544a10a4a3cd0cb065180",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-007/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "cd0404aa81fd1379adab64e9318ce4753d1ccf2c92a16241e352d0c1e7004d01",
+      "source_program": {
+        "decoded_bytes": 7153891,
+        "decoded_sha256": "e73c89b31f25b09f53afa2cf9ae41827d7134fff8d9d50902e893295367541e9",
+        "external": true,
+        "physical_bytes": 739541,
+        "physical_sha256": "0471f44d0bd936f1e5bdd033d9fb0ffdafcfedf118a44e9e0a7080656cc11a80",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-007/worker/attempt-00007/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "cf9e93cbbeca47f6705ad0f4fee906922592393b9b6e283ad089e3a8879628a8",
+      "source_program": {
+        "decoded_bytes": 30659647,
+        "decoded_sha256": "4f67d93050a76c9b6e537d2ea9004352f14bc504b6c8349b7c508de34555f0ea",
+        "external": true,
+        "physical_bytes": 3511401,
+        "physical_sha256": "147421eaad08178aa8162ee5cc345845ca2ff5cad6cd92d5b1416c2d94899b33",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-007/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "db685d805e345ff1d787214f55e187fa36a868be923f71136d0a33ebd32515f4",
+      "source_program": {
+        "decoded_bytes": 2397459,
+        "decoded_sha256": "97ce01f07e74a74e0fae525583271823106f5b5ca83225a1a5524c9c4c94c5e1",
+        "external": true,
+        "physical_bytes": 251562,
+        "physical_sha256": "50df670be0fc048e0a57c274c65459dc09081cc0903c4949a8d62eaee06451ab",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-007/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "dd9ee3d19a05a950d95077fb7482006bc18db23b899fd68ffa7988ad2d7b0e1a",
+      "source_program": {
+        "decoded_bytes": 19914032,
+        "decoded_sha256": "1ce530741eb99a481455f464ef7a6904f48ae497f1ad3d3acba1cfe3192c85f9",
+        "external": true,
+        "physical_bytes": 2124513,
+        "physical_sha256": "4cc88adf2610250597055c497708fe2bddc64b518ee58d796110a50c9a5b0fea",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-007/worker/attempt-00010/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "f3abdff85c766f78ed4f9f2c7c155be9464d188541385e965a4bb087efd0e084",
+      "source_program": {
+        "decoded_bytes": 18540900,
+        "decoded_sha256": "d35b1363af1ec1934c798f47c4be2a66568359caf6b23d7a31a3805a030d2a19",
+        "external": true,
+        "physical_bytes": 2077516,
+        "physical_sha256": "f02befa9cb7a85458dcc1ab256372c2496a73cbbbdfb0e8ff3868d2b3556c5e2",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_resume01_20261026/result/batches/batch-008/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "2a4cce2f97c89e1ce33e1673af6f2f37d449da83806e2b923e87d660354e55a1",
+      "source_program": {
+        "decoded_bytes": 21830386,
+        "decoded_sha256": "3a1db206dcd057c92997ab8bcf5ec0fbbd25c9830427a0e13091f24635f92e23",
+        "external": true,
+        "physical_bytes": 2555042,
+        "physical_sha256": "e17b93e1f6bc41563ddd8093129a70763509347a8c65905871a59f9d1218da5b",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00001/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "8250fe7322097ca33ed5034d62f9ef2953d60f035888bcc2742ae46686cc807f",
+      "source_program": {
+        "decoded_bytes": 21943172,
+        "decoded_sha256": "728d6f18380dfbac49a5245b1c8e5c53a710e60f784843b14b83ed0b390a2e05",
+        "external": true,
+        "physical_bytes": 2566362,
+        "physical_sha256": "469355e8dde42c5d24c4086cf07bce28f7892335eea55b86ffea2f5f745b9327",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00002/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "494efda0ea3d89b425173777c8ceeacd01deb5097d4fc9b3549d6c4640c3fe72",
+      "source_program": {
+        "decoded_bytes": 21790741,
+        "decoded_sha256": "c417ce7c9c9536d2926e4b4f9f2ccb3718d53d8ec6d327180a73b22b70e30c6b",
+        "external": true,
+        "physical_bytes": 2551901,
+        "physical_sha256": "afbe9798d298cc858561ecfb1774cd80f01e2929bb30fbb61141aca741fa524b",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00003/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "91d21b3dce7f9b06d8fe4a9f1e8b2ec107f093ee8ec1f9e1b699108e3ddbd67b",
+      "source_program": {
+        "decoded_bytes": 21826659,
+        "decoded_sha256": "e651478de4c9eff8731a6e6966d3956dd1784056b7da75d276f2ae0ed8e59bb4",
+        "external": true,
+        "physical_bytes": 2555180,
+        "physical_sha256": "7637f87f29af3665cbd7365ef25b87e680ff0446b9f13eb1cc27ad171bce60d2",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00004/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "944900cd7c39c879044e3c450b398b9b6b3bcd5035f60d58c72c46edbb50c42c",
+      "source_program": {
+        "decoded_bytes": 21839003,
+        "decoded_sha256": "c5d1ba881273ced5e68bc6c16d1c40585f093ded7efcc788d1fb416bc873b5ca",
+        "external": true,
+        "physical_bytes": 2555869,
+        "physical_sha256": "ec9c08068eae246e894d574f35aa2716d500c1215a6164b94cb6ad0c7a5e1e75",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00005/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "fa0af76902c743bfeed34214b09037f5729bca2b85e9d35e957f10c809e835cb",
+      "source_program": {
+        "decoded_bytes": 21957559,
+        "decoded_sha256": "c408a63962ded7d7128dc90b355a8c5030d2a1de66169dd7daceac048283d1e7",
+        "external": true,
+        "physical_bytes": 2567847,
+        "physical_sha256": "8526bff1bc3e105ec2b240bd5ff2b9a48a1c9d284a2f5ba87e135621ed05d2cc",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00006/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "202294480d322ff269c17baee3697d33f465ea3ae3cec6863a0915fd0614dfd0",
+      "source_program": {
+        "decoded_bytes": 21812152,
+        "decoded_sha256": "81390d84504b8eeb1e18313c94b35149f5f6ea8327e389903ac778b105f057e2",
+        "external": true,
+        "physical_bytes": 2553988,
+        "physical_sha256": "972d93640801e5aa086bcdf7a7b328ddc56faad7f00c5a4368f9158b5019f6e4",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00007/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "4034b8cd31197e5725501f7782a0fa70f70e01f79da8478eb0516011e65fc29c",
+      "source_program": {
+        "decoded_bytes": 21825108,
+        "decoded_sha256": "f3d2d85f121cc4f8eccb249bec32b05bd4567c8ff7b1a30566a4e9d739cf1e94",
+        "external": true,
+        "physical_bytes": 2554598,
+        "physical_sha256": "1373e5605add220c8582bcc752cf103e21c9c7f561a5a211dd17acf18a037cbc",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00008/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "c09850b36904a860354a18c2632c145fd5bf1d215cf65c9e00a91942be4fe070",
+      "source_program": {
+        "decoded_bytes": 22546520,
+        "decoded_sha256": "438673abdbc8467ece4bf31d042c395d95aba9720b9a9e4731d6fe481a6d719d",
+        "external": true,
+        "physical_bytes": 2621635,
+        "physical_sha256": "fa7bf56937004545fdd6bce5cb3dda32c84b3835cc41c8e0c75c3322e99517d7",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00009/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "fe6605c1d5344ebc23771e7a639eff0783845beb6ebfa1b9f8656f4cbbf507de",
+      "source_program": {
+        "decoded_bytes": 21782248,
+        "decoded_sha256": "626e0387876337777f51798b68e190f5278eb1ae3d761def7b241fb3c677feee",
+        "external": true,
+        "physical_bytes": 2550937,
+        "physical_sha256": "75f2bd1450083197e8c945df5f6f19bf9cbc92688a903bec8d2b7a301c038d73",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00010/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "8c14db815dc29bdf65814ef7970b96bf09d3e661ee2a9eba6de850a137505c1e",
+      "source_program": {
+        "decoded_bytes": 2893534,
+        "decoded_sha256": "1349a85225193a00ba261b9585e865e063541aa2e558ad83b17894fe9d4d05a8",
+        "external": true,
+        "physical_bytes": 299358,
+        "physical_sha256": "bb9a9eca44c2a499f62c6e51f2da3d58a67481a2d1cee2946eb49e533961578e",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00011/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "15449fac92343dc90b4111afa1dea65c6f606405253af3319e84c50e19afcdab",
+      "source_program": {
+        "decoded_bytes": 55036743,
+        "decoded_sha256": "ed09ffb674dcf9163f485c3eb6cb48a8c75ee010a7756a0563c6f4e32d4d3f78",
+        "external": true,
+        "physical_bytes": 6389998,
+        "physical_sha256": "08b9f74e8f42f7c4c3c86bdb6b6db3de975baa7d188d1a798eadb924db12e0ac",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00013/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "11d43d80d82f57f815b2e2d6a8f334b71ca07cc2d1015fa8e5e2cc184655ac0d",
+      "source_program": {
+        "decoded_bytes": 54037873,
+        "decoded_sha256": "91c735ed45bea1cc5d7ebe460938ab8383040719abf2a740190477301f83539f",
+        "external": true,
+        "physical_bytes": 6300958,
+        "physical_sha256": "eeadbdcb0df863c010b12fd8716cc74b7bdc0fdee3466ce11d1da5ca4d53de45",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00016/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "f3f1a965d23ce9d68c7352bea2b1ba4f1364bbe361ec1946b1b58ac34720df70",
+      "source_program": {
+        "decoded_bytes": 53811202,
+        "decoded_sha256": "76540066e4bf329a8cee6e9677d2927562d74f0557f61865c1a7be7df1ca916b",
+        "external": true,
+        "physical_bytes": 6281114,
+        "physical_sha256": "3b1d2e767a04903c7b13df16ee1331adf8e38e492be418adfa22882c1f76a80b",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00019/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "ff3433862bc84befaadb133783423eedb61fc2a1f93b65268b46be9b5813cf9f",
+      "source_program": {
+        "decoded_bytes": 25088885,
+        "decoded_sha256": "6dfc74a4f7b024751fd4207898065e89dcb4d17ec4225e531a409b72cc7f2d9b",
+        "external": true,
+        "physical_bytes": 2841071,
+        "physical_sha256": "cbfabd555f7d06b11bb75005d61c8d27094b93d87ecdfcd9225c862f98a5602b",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00020/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "bd24eda3af0988022b3e10d76492aa38bd1e63e55af6ba9facc08dd73012da95",
+      "source_program": {
+        "decoded_bytes": 4992796,
+        "decoded_sha256": "ac5da18a45b68f90181257b85a3a70d7f6bd1ad9df0d9c7624b16d259a670da7",
+        "external": true,
+        "physical_bytes": 516445,
+        "physical_sha256": "022808cdf5b271974e28bc007a410ca5641667e9750350647f0247b97fb7aebf",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00022/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "6446eac9c17ad17853ee0cdaf7ad755d37d06ec7a2051875a868956a20c02ce6",
+      "source_program": {
+        "decoded_bytes": 6082218,
+        "decoded_sha256": "5317cffd15bbb340a7a687edabebbce789cf5d78a2069403cbf9dcbd2928965e",
+        "external": true,
+        "physical_bytes": 608853,
+        "physical_sha256": "6d680e7ce9485b3d9aa9c308a0c7d6deac3ab616aa1a963a8e13bf457f87e6df",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00023/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "394328aa70aaca57bfa857d3a11a8fef0daf08da64311d33ad4d94c292b82b26",
+      "source_program": {
+        "decoded_bytes": 11633729,
+        "decoded_sha256": "c4eed8a63b7fc5b94adb401f3aaa471924c41c43df9ceadb1e74b01d74edc091",
+        "external": true,
+        "physical_bytes": 1305959,
+        "physical_sha256": "e25064fc32dac90ed7265fc696f4315dfd82c081eda4fa67fbdc03e1cb431eec",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00024/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "d4145db0b6eb8afc92d0ee7af65e5ce562665a712997594304409b7734218d94",
+      "source_program": {
+        "decoded_bytes": 11633730,
+        "decoded_sha256": "dbecb5d85cc912e945c0dfbeefbc23c8b7f3d4079b22441b813240b1206df8ed",
+        "external": true,
+        "physical_bytes": 1305920,
+        "physical_sha256": "8a02d687cbda9cf88982fc92d257797e4a124f35cf96186eb01e22988fdee4e6",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00025/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "1d009b0ca4b2712461dd26a1dc78a27fa43319cfc67c43b2a1a0a4cf25295bf9",
+      "source_program": {
+        "decoded_bytes": 11792406,
+        "decoded_sha256": "6f672348bc40516eff78d69dd93e9a664a0824f9e48ce9995e6e5b5acfee3597",
+        "external": true,
+        "physical_bytes": 1321224,
+        "physical_sha256": "22298fd84b04676c5280b4bfe5d969b9cd707f105027afe63f4a4019fc08b9b2",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00026/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "4ff4ddb6a64b6696abfd800a6efaba83d7638d62a542aab5b7eb0e56d0c1ef23",
+      "source_program": {
+        "decoded_bytes": 11492225,
+        "decoded_sha256": "1fe2af338d0e35030ebd6b6bb6c84ae763ef66638ca67347c7254bf9740ad802",
+        "external": true,
+        "physical_bytes": 1292945,
+        "physical_sha256": "62eada8904f6add26e5295f4220495887264ce52bd0a8f0de907749012aa5522",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00027/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "cd5aa5395fbc5cc981307727f4a3a777098de05300ca58949af91f05b9fa4cd5",
+      "source_program": {
+        "decoded_bytes": 11518416,
+        "decoded_sha256": "56f9765fc10db082ebcd50e967b482550e4c19ab3e68889a0da1c0be4cccea51",
+        "external": true,
+        "physical_bytes": 1295164,
+        "physical_sha256": "b7e8a997bb11f8c65010f0573dc155edc1e870c871526b4cd6fdc80066601da3",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00028/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "170bd6086cd464077c48670fcaf8bac1466ad79567354e6d55e0adf52e402d37",
+      "source_program": {
+        "decoded_bytes": 9435140,
+        "decoded_sha256": "c03cb5824b99560f1c8830c9c58704cd9c81553d3b3fa37f7014b463e1ebe263",
+        "external": true,
+        "physical_bytes": 1026546,
+        "physical_sha256": "91277e04d47af4962af295b74b000bc0da3a7a6db35b01900653183893604b15",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00030/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "2f0ae0ddcac693d6922cc65eda22b52fd2f9e8e7e5eff5f9ee5aa8923f790a7d",
+      "source_program": {
+        "decoded_bytes": 9191803,
+        "decoded_sha256": "f8839625dc6ddbc516819fe7bf7642843927c3af6b5582801129fe7580b88249",
+        "external": true,
+        "physical_bytes": 1003850,
+        "physical_sha256": "786f91910969e1e9ce4d92c41259a1ff49f715800e06d39b255d0a2919ab7f59",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00031/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "672203ab1f4e3a3db6fad6ab6a756a86bdbf828cccde124bbbbf3c9ea39bb246",
+      "source_program": {
+        "decoded_bytes": 9024495,
+        "decoded_sha256": "1fb0e5cca596d5c9dd1701b22c24c26603b5201e814035dec5844fe2b07f4360",
+        "external": true,
+        "physical_bytes": 987492,
+        "physical_sha256": "5baf35aea8300d9c40731f25fad310fece3ed46716823936da1b135c645a3676",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00032/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "ece337176e5119727a2798aa8c839ade2363f41c5900f013af8a60e690dc0280",
+      "source_program": {
+        "decoded_bytes": 9280243,
+        "decoded_sha256": "f86e0be3573679bdff420e9c493e05cb0a6811e70ab32e513d8374dd36f2b8fd",
+        "external": true,
+        "physical_bytes": 1012049,
+        "physical_sha256": "28a6b45272f52e754501db2d0b80abb493164507515ae938810483b9b22d763d",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_external_source_entries_20261026/worker/attempt-00033/source-program5.json.gz"
+      }
+    }
+  ],
+  "revisions": []
+}
