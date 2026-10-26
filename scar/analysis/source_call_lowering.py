@@ -93,6 +93,94 @@ def _instructions(builder, node):
     return tuple(dis.get_instructions(evidence.code))
 
 
+def _expansion_witness_plan(node, instructions):
+    """Recognize the complete original Call window, ending at its own call.
+
+    CPython may give the following implicit return the same source position.
+    It is not an argument-packing stage. Duplicated call sites remain a gap.
+    """
+    direct = len(node.args) == 1 and isinstance(node.args[0], ast.Starred)
+    stars = [i for i, arg in enumerate(node.args) if isinstance(arg, ast.Starred)]
+    expected = []
+    if stars and not direct:
+        expected.append(('BUILD_LIST', stars[0], None))
+        for index in range(stars[0], len(node.args)):
+            expected.append(('LIST_EXTEND' if isinstance(node.args[index], ast.Starred) else 'LIST_APPEND', 1, index))
+        expected.append(('CALL_INTRINSIC_1', 'INTRINSIC_LIST_TO_TUPLE', None))
+    elif not direct:
+        expected.append(('PACK', len(node.args), None))
+    have_dict = False
+    for start, end in _keyword_runs(node):
+        if node.keywords[start].arg is None:
+            if not have_dict:
+                expected.append(('BUILD_MAP', 0, None)); have_dict = True
+            expected.append(('DICT_MERGE', 1, start))
+        else:
+            if (end-start)*2 > 30:
+                raise _Unsupported(GapKind.CODE_VERSION, node, 'KWARGS_LARGE_KEYWORD_RUN_COMPILER_FRONTIER')
+            expected.extend(('KEY', node.keywords[i].arg, i) for i in range(start, end))
+            expected.append(('BUILD_MAP', end-start, None))
+            if have_dict:
+                expected.append(('DICT_MERGE', 1, start))
+            have_dict = True
+    expected.append(('CALL_FUNCTION_EX', None, None))
+    own = [i for i in instructions if tuple(i.positions) == _span(node)]
+    calls = [i for i in own if i.opname == 'CALL_FUNCTION_EX']
+    if len(calls) != 1:
+        raise _Unsupported(GapKind.CODE_VERSION, node, 'CALL_EXPANSION_EXACT_CALL_OCCURRENCE_UNAVAILABLE')
+    names = {'LOAD_CONST', 'BUILD_TUPLE', 'BUILD_LIST', 'LIST_APPEND', 'LIST_EXTEND',
+             'CALL_INTRINSIC_1', 'BUILD_MAP', 'MAP_ADD', 'DICT_MERGE', 'DICT_UPDATE',
+             'CALL_FUNCTION_EX', 'CALL_KW', 'CALL'}
+    actual = [i for i in own if i.offset <= calls[0].offset and i.opname in names]
+    if len(actual) != len(expected):
+        raise _Unsupported(GapKind.CODE_VERSION, node, 'CALL_EXPANSION_EXACT_COMPILER_SEQUENCE_UNAVAILABLE')
+    packing, keys = None, {}
+    for row, (kind, arg, index) in zip(actual, expected):
+        if kind == 'PACK':
+            ok = row.opname == 'BUILD_TUPLE' and row.arg == arg or arg == 0 and row.opname == 'LOAD_CONST' and row.argval == ()
+            packing = row
+        elif kind == 'KEY':
+            ok = row.opname == 'LOAD_CONST' and type(row.argval) is str and row.argval == arg
+            keys[index] = row
+        elif kind == 'CALL_INTRINSIC_1':
+            ok = row.opname == kind and dis._intrinsic_1_descs[row.arg] == arg
+        else:
+            ok = row.opname == kind and (arg is None or row.arg == arg)
+        if not ok:
+            raise _Unsupported(GapKind.CODE_VERSION, node, 'CALL_EXPANSION_EXACT_COMPILER_SEQUENCE_UNAVAILABLE')
+    return packing, keys
+
+
+def _expanded_positionals(builder, node, cursor):
+    """Build only real list/extend/append/tuple stages, keeping every hold."""
+    first = next(i for i, arg in enumerate(node.args) if isinstance(arg, ast.Starred))
+    held, inputs = [], []
+    for index, child in enumerate(node.args[:first]):
+        cursor, value = builder.expr(child, cursor)
+        if cursor is None: return None, None
+        _hold(builder, cursor, child, value, 'positional')
+        held.append((child, value));inputs.append((value, child, 'argument', index, None))
+    cursor, receiver, _ = _invoke(builder, cursor, node, tuple(inputs),
+        Kind.BUILD_CALL_POSITIONAL_LIST, tuple(held), raise_consumed=(), result=True)
+    _hold(builder, cursor, node, receiver, 'positional-list')
+    for index in range(first, len(node.args)):
+        argument = node.args[index]
+        child = argument.value if isinstance(argument, ast.Starred) else argument
+        cursor, value = builder.expr(child, cursor)
+        if cursor is None: return None, None
+        _hold(builder, cursor, child, value, 'starred-update' if isinstance(argument, ast.Starred) else 'positional')
+        cursor, _, _ = _invoke(builder, cursor, node,
+            ((receiver, node, 'call-positional-list', 0, None),
+             (value, child, 'starred-argument' if isinstance(argument, ast.Starred) else 'argument', index, None)),
+            Kind.EXTEND_CALL_POSITIONALS if isinstance(argument, ast.Starred) else Kind.APPEND_CALL_POSITIONAL,
+            ((child, value),))
+    cursor, positional, _ = _invoke(builder, cursor, node,
+        ((receiver, node, 'call-positional-list', 0, None),), Kind.CALL_POSITIONALS_TO_TUPLE,
+        ((node, receiver),), result=True)
+    _hold(builder, cursor, node, positional, 'positionals')
+    return cursor, positional
+
+
 def _hold(builder, cursor, node, reference, role):
     builder.frame_transition(cursor, node, ((reference, node, "call-held-" + role),), Kind.FRAME_HOLD_TEMPORARY)
     builder.active_temporaries.append(reference)
@@ -141,9 +229,10 @@ def lower_kwargs_call(builder, node, cursor):
     """Prepare arbitrary mappings, preserving fixed compiler stage boundaries."""
     if not builder.has_language("CALL_KWARGS_314_V1"):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, "KWARGS_CAPABILITY_REQUIRED")
-    packing, constants = _witness_plan(node, _instructions(builder, node))
+    expanded = builder.has_language('CALL_EXPANSION_314_V1')
+    packing, constants = (_expansion_witness_plan if expanded else _witness_plan)(node, _instructions(builder, node))
     starred = len(node.args) == 1 and isinstance(node.args[0], ast.Starred)
-    if starred and not builder.has_language("FUNCTION_TRY_314_V1"):
+    if starred and not (builder.has_language("FUNCTION_TRY_314_V1") or expanded):
         raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
             "DIRECT_STAR_CALL_REQUIRES_FUNCTION_TRY_CAPABILITY")
     records = builder.old_by_atom.get(builder.source(node).atom_id, ())
@@ -158,22 +247,26 @@ def lower_kwargs_call(builder, node, cursor):
         cursor, callee = builder.expr(node.func, cursor)
         if cursor is None: return None, None
         _hold(builder, cursor, node.func, callee, "callee")
-        parts, inputs = [], []
-        for index, argument in enumerate(node.args):
-            child = argument.value if starred else argument
-            cursor, value = builder.expr(child, cursor)
+        if expanded and not starred and any(isinstance(arg, ast.Starred) for arg in node.args):
+            cursor, positional = _expanded_positionals(builder, node, cursor)
             if cursor is None: return None, None
-            _hold(builder, cursor, child, value, "starred-positionals" if starred else "positional")
-            parts.append((child, value)); inputs.append((value, child, "argument", index, None))
-        if starred:
-            positional = parts[0][1]
-        elif packing.opname == "LOAD_CONST":
-            positional = _constant(builder, node, cursor, packing)
         else:
-            cursor, positional, _ = _invoke(builder, cursor, node, inputs, Kind.BUILD_CALL_POSITIONALS,
-                tuple(parts), raise_consumed=(), result=True)
-        if not starred:
-            _hold(builder, cursor, node, positional, "positionals")
+            parts, inputs = [], []
+            for index, argument in enumerate(node.args):
+                child = argument.value if starred else argument
+                cursor, value = builder.expr(child, cursor)
+                if cursor is None: return None, None
+                _hold(builder, cursor, child, value, "starred-positionals" if starred else "positional")
+                parts.append((child, value)); inputs.append((value, child, "argument", index, None))
+            if starred:
+                positional = parts[0][1]
+            elif packing.opname == "LOAD_CONST":
+                positional = _constant(builder, node, cursor, packing)
+            else:
+                cursor, positional, _ = _invoke(builder, cursor, node, inputs, Kind.BUILD_CALL_POSITIONALS,
+                    tuple(parts), raise_consumed=(), result=True)
+            if not starred:
+                _hold(builder, cursor, node, positional, "positionals")
         receiver = None
         for start, end in _keyword_runs(node):
             keyword = node.keywords[start]

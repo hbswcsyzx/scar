@@ -778,7 +778,9 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
         elif language is not None and protocol.kind in (
                 PythonProtocolKind.UNPACK_FIXED, PythonProtocolKind.BUILD_SLICE,
                 PythonProtocolKind.READ_CODE_CONSTANT, PythonProtocolKind.BUILD_CALL_POSITIONALS,
-                PythonProtocolKind.DICT_MERGE, PythonProtocolKind.CALL_FUNCTION_EX):
+                PythonProtocolKind.DICT_MERGE, PythonProtocolKind.CALL_FUNCTION_EX,
+                PythonProtocolKind.BUILD_CALL_POSITIONAL_LIST, PythonProtocolKind.EXTEND_CALL_POSITIONALS,
+                PythonProtocolKind.APPEND_CALL_POSITIONAL, PythonProtocolKind.CALL_POSITIONALS_TO_TUPLE):
             pass  # Exact shapes, source, payloads and lifetime are checked below.
         elif language is not None and protocol.kind.value in FUNCTION_TRY_PROTOCOLS:
             pass  # Exact canonical C0/C1/source checks belong to the opt-in Try adapter.

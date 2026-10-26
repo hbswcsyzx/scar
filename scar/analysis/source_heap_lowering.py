@@ -95,8 +95,9 @@ def expression_for_heap_target(builder, node, cursor):
     value, or evidence of a reaching binding.  SG ownership and real core Uses
     are retained while semantic_value remains absent.
     """
-    if (getattr(builder, "has_language", lambda _: False)("CALL_KWARGS_314_V1")
-            and isinstance(node, ast.Call) and any(keyword.arg is None for keyword in node.keywords)):
+    if (isinstance(node, ast.Call) and (
+            getattr(builder, "has_language", lambda _: False)("CALL_KWARGS_314_V1") and any(keyword.arg is None for keyword in node.keywords)
+            or getattr(builder, "has_language", lambda _: False)("CALL_EXPANSION_314_V1") and any(isinstance(arg, ast.Starred) for arg in node.args))):
         from scar.analysis.source_call_lowering import lower_kwargs_call
         return lower_kwargs_call(builder, node, cursor)
     if (getattr(builder, "has_language", lambda _: False)("SLICE_KEYS")

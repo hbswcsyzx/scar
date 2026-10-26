@@ -20,7 +20,9 @@ from scar.ir.program.structured import PythonProtocolKind as Kind
 from scar.ir.semantics_v2 import Opcode
 from scar.ir.v2.semantic import OperationKind
 
-CALL_PROTOCOLS = frozenset((Kind.BUILD_CALL_POSITIONALS, Kind.DICT_MERGE, Kind.CALL_FUNCTION_EX))
+EXPANSION_PROTOCOLS = frozenset((Kind.BUILD_CALL_POSITIONAL_LIST, Kind.EXTEND_CALL_POSITIONALS,
+    Kind.APPEND_CALL_POSITIONAL, Kind.CALL_POSITIONALS_TO_TUPLE))
+CALL_PROTOCOLS = frozenset((Kind.BUILD_CALL_POSITIONALS, Kind.DICT_MERGE, Kind.CALL_FUNCTION_EX)) | EXPANSION_PROTOCOLS
 
 
 def is_original_call_definition(semantic, definition, source):
@@ -48,10 +50,17 @@ def _ast_span(node):
     return node.lineno, node.end_lineno, node.col_offset, node.end_col_offset
 
 
-def _expected(node):
+def _expected(node, *, expanded=False):
     """Independent AST staging: packing, complete named runs, then merges."""
     starred = len(node.args) == 1 and isinstance(node.args[0], ast.Starred)
-    result = [] if starred else [("PACK", len(node.args), None)]
+    stars = [i for i, arg in enumerate(node.args) if isinstance(arg, ast.Starred)]
+    if expanded and stars and not starred:
+        result = [('BUILD_LIST', stars[0], None)]
+        for index in range(stars[0], len(node.args)):
+            result.append(('LIST_EXTEND' if isinstance(node.args[index], ast.Starred) else 'LIST_APPEND', 1, index))
+        result.append(('TO_TUPLE', None, None))
+    else:
+        result = [] if starred else [("PACK", len(node.args), None)]
     receiver, index = False, 0
     while index < len(node.keywords):
         child = node.keywords[index]
@@ -135,8 +144,12 @@ def _local_pending(group, all_operations, protocols, use_links, blocks, values, 
         refs = tuple(use.value for use in operation.uses[:-1])
         normal_stack, failure_stack = stack, stack
         if identity in group_set:
-            if kind is Kind.BUILD_CALL_POSITIONALS:
+            if kind in (Kind.BUILD_CALL_POSITIONALS, Kind.BUILD_CALL_POSITIONAL_LIST):
                 normal_stack = _pop_suffix(stack, refs)  # failure is success-only steal.
+            elif kind in (Kind.EXTEND_CALL_POSITIONALS, Kind.APPEND_CALL_POSITIONAL):
+                normal_stack = failure_stack = _pop_suffix(stack, refs[-1:])
+            elif kind is Kind.CALL_POSITIONALS_TO_TUPLE:
+                normal_stack = failure_stack = _pop_suffix(stack, refs)
             elif kind is Kind.BUILD_MAP:
                 normal_stack = failure_stack = _pop_suffix(stack, refs)
             elif kind is Kind.DICT_MERGE:
@@ -179,6 +192,9 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
         _need(not auxiliary, "orphan call packing/constant has no final kwargs call")
         return {"calls": 0, "records": [], "whole_lifetime_verified": False}
     _need(Capability.CALL_KWARGS_314_V1 in language.capabilities, "new protocol has no explicit kwargs capability")
+    expanded = Capability.CALL_EXPANSION_314_V1 in language.capabilities
+    _need(expanded or not any(protocols[i].kind in EXPANSION_PROTOCOLS for i in new),
+          'list-based argument expansion has no explicit capability')
     if not structural_only:
         _need(isinstance(source_tree, ast.Module) and type(options) is SourceLanguageOptions
               and options.code_evidence is not None, "exact kwargs checking requires independent source/code inputs")
@@ -217,17 +233,18 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
             _need(len(selected) == 1, "kwargs call has no unique exact source AST")
             node = selected[0]
             direct_star = len(node.args) == 1 and isinstance(node.args[0], ast.Starred)
-            _need(direct_star or any(k.arg is None for k in node.keywords)
+            _need(expanded and any(isinstance(a, ast.Starred) for a in node.args)
+                  or direct_star or any(k.arg is None for k in node.keywords)
                   and not any(isinstance(a, ast.Starred) for a in node.args),
                   "call profile requires fixed positionals/** or one direct starred iterable")
-        built_maps, packed, stage, receiver = {}, {}, [], None
+        built_maps, packed, lists, stage, receiver = {}, {}, {}, [], None
         final_refs = tuple(use.value for use in operations[final].uses[:-1])
         final_sources = [uses[(final, u.id)] for u in operations[final].uses[:-1]]
         direct_star = len(final_sources) >= 2 and final_sources[1].role == 'call-starred-positionals'
-        _need(len(final_refs) == 3 or direct_star and len(final_refs) == 2,
+        _need(len(final_refs) == 3 or (direct_star or expanded) and len(final_refs) == 2,
               "final call needs callee/positionals and optional original kwargs dict")
         if direct_star:
-            _need(Capability.FUNCTION_TRY_314_V1 in language.capabilities and isinstance(source_tree, ast.Module),
+            _need((Capability.FUNCTION_TRY_314_V1 in language.capabilities or expanded) and isinstance(source_tree, ast.Module),
                   'direct starred call requires the explicit function capability and retained AST')
             candidates = [n for n in require_source_tree(source_tree, language.source, source) if isinstance(n, ast.Call)]
             _need(len(candidates) == 1 and len(candidates[0].args) == 1
@@ -255,7 +272,8 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
                   and all(b in operation.behaviors for b in (Behavior.CONTROL, Behavior.READ, Behavior.WRITE, Behavior.MEMORY)),
                   "call protocol lost ordered references/incomplete world invoke")
             count = len(operation.uses) - 1
-            result_count = 1 if kind in (Kind.BUILD_MAP, Kind.BUILD_CALL_POSITIONALS, Kind.CALL_FUNCTION_EX) else 0
+            result_count = 1 if kind in (Kind.BUILD_MAP, Kind.BUILD_CALL_POSITIONALS, Kind.CALL_FUNCTION_EX,
+                                       Kind.BUILD_CALL_POSITIONAL_LIST, Kind.CALL_POSITIONALS_TO_TUPLE) else 0
             _need(tuple((c.kind, c.types) for c in operation.completions) ==
                   ((ExitKind.NORMAL, (ref,) * result_count + (world,)), (ExitKind.RAISE, function_exception_types(language, ref, world)))
                   and tuple(e.kind for e in operation.terminator.successors) == (ExitKind.NORMAL, ExitKind.RAISE)
@@ -285,6 +303,21 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
                 _need(links[identity].semantic_operation is None
                       and [(u.role, u.index) for u in source_uses] == [("argument", i) for i in range(count)],
                       "positional tuple lost ordered original argument Uses")
+                packed[normal.arguments[0]] = identity
+            elif kind is Kind.BUILD_CALL_POSITIONAL_LIST:
+                _need(links[identity].semantic_operation is None
+                      and [(u.role, u.index) for u in source_uses] == [('argument', i) for i in range(count)],
+                      'call positional list lost its original ordered prefix')
+                lists[normal.arguments[0]] = identity
+            elif kind in (Kind.EXTEND_CALL_POSITIONALS, Kind.APPEND_CALL_POSITIONAL):
+                _need(count == 2 and refs[0] in lists and source_uses[0].role == 'call-positional-list'
+                      and source_uses[0].index == 0 and source_uses[0].source == source
+                      and source_uses[1].role == ('starred-argument' if kind is Kind.EXTEND_CALL_POSITIONALS else 'argument'),
+                      'call list update lost its same held list or original argument')
+            elif kind is Kind.CALL_POSITIONALS_TO_TUPLE:
+                _need(count == 1 and refs[0] in lists and source_uses[0].role == 'call-positional-list'
+                      and source_uses[0].index == 0 and source_uses[0].source == source,
+                      'call positional tuple conversion did not consume its own original list')
                 packed[normal.arguments[0]] = identity
             elif kind is Kind.DICT_MERGE:
                 _need(links[identity].semantic_operation is None and count == 3 and refs[0] == callee
@@ -335,7 +368,8 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
                     raise ValueError("kwargs call validation: child normal path skips later call stage")
             _need(found == {expected_next}, "ordered call preparation stages can be reordered or skipped")
         if node is not None:
-            _check_source_and_code(node, group, operations, protocols, uses, constants, values, options.code_evidence)
+            _check_source_and_code(node, group, operations, protocols, uses, constants, values, options.code_evidence,
+                                   expanded=expanded)
         _need(any(g.kind is GapKind.FRAME_EFFECT and g.source == source
                   and g.detail.startswith("CALL_EX_LOCAL_UNWIND_CONTRACT_UNVERIFIED:") for g in metadata.gaps),
               "call must retain its explicit unverified runtime cleanup frontier")
@@ -350,8 +384,8 @@ def validate_call_protocols(model, graph, interface, metadata, semantic, languag
             "effects_established": False, "whole_lifetime_verified": False}
 
 
-def _check_source_and_code(node, group, operations, protocols, uses, constants, values, evidence):
-    expected = _expected(node)
+def _check_source_and_code(node, group, operations, protocols, uses, constants, values, evidence, *, expanded=False):
+    expected = _expected(node, expanded=expanded)
     actual = []
     for identity in group:
         operation, kind = operations[identity], protocols[identity].kind
@@ -363,6 +397,12 @@ def _check_source_and_code(node, group, operations, protocols, uses, constants, 
             actual.append(("PACK" if type(value) is tuple and not value else "KEY", value, identity))
         elif kind is Kind.BUILD_CALL_POSITIONALS:
             actual.append(("PACK", len(operation.uses) - 1, identity))
+        elif kind is Kind.BUILD_CALL_POSITIONAL_LIST:
+            actual.append(('BUILD_LIST', len(operation.uses)-1, identity))
+        elif kind in (Kind.EXTEND_CALL_POSITIONALS, Kind.APPEND_CALL_POSITIONAL):
+            actual.append(('LIST_EXTEND' if kind is Kind.EXTEND_CALL_POSITIONALS else 'LIST_APPEND', 1, identity))
+        elif kind is Kind.CALL_POSITIONALS_TO_TUPLE:
+            actual.append(('TO_TUPLE', None, identity))
         else:
             actual.append((kind.value, (len(operation.uses) - 1) // 2 if kind is Kind.BUILD_MAP else 1 if kind is Kind.DICT_MERGE else None, identity))
     _need(len(actual) == len(expected), "call stage count differs from original keyword runs")
@@ -374,6 +414,15 @@ def _check_source_and_code(node, group, operations, protocols, uses, constants, 
         if kind == "PACK" and protocols[identity].kind is Kind.BUILD_CALL_POSITIONALS:
             _need(tuple(_span(u.source) for u in source_uses) == tuple(_ast_span(n) for n in node.args),
                   "positional tuple children differ from exact AST order")
+        elif kind == 'BUILD_LIST':
+            _need(tuple(_span(u.source) for u in source_uses) == tuple(_ast_span(n) for n in node.args[:argument]),
+                  'call list prefix differs from the original AST before its first star')
+        elif kind in ('LIST_EXTEND', 'LIST_APPEND'):
+            original = node.args[index]
+            _need(isinstance(original, ast.Starred) == (kind == 'LIST_EXTEND')
+                  and source_uses[1].index == index
+                  and _span(source_uses[1].source) == _ast_span(original.value if isinstance(original, ast.Starred) else original),
+                  'call list update lost its exact original argument position/source')
         elif kind == "BUILD_MAP" and argument:
             for pair, keyword_index in enumerate(range(index, index + argument)):
                 _need(source_uses[pair * 2].index == keyword_index
@@ -395,7 +444,13 @@ def _check_source_and_code(node, group, operations, protocols, uses, constants, 
                       'direct starred iterable lost its original single evaluation')
     names = {"LOAD_CONST", "BUILD_TUPLE", "BUILD_LIST", "LIST_APPEND", "LIST_EXTEND", "LIST_TO_TUPLE",
              "BUILD_MAP", "MAP_ADD", "DICT_MERGE", "DICT_UPDATE", "CALL_FUNCTION_EX", "CALL_KW", "CALL"}
-    instructions = [i for i in dis.get_instructions(evidence.code) if tuple(i.positions) == _ast_span(node) and i.opname in names]
+    own = [i for i in dis.get_instructions(evidence.code) if tuple(i.positions) == _ast_span(node)]
+    if expanded:
+        calls = [i for i in own if i.opname == 'CALL_FUNCTION_EX']
+        _need(len(calls) == 1, 'expanded call has no unique exact compiler call occurrence')
+        names.add('CALL_INTRINSIC_1')
+        own = [i for i in own if i.offset <= calls[0].offset]
+    instructions = [i for i in own if i.opname in names]
     _need(len(instructions) == len(expected), "compiler uses a different packing/merge call sequence")
     for instruction, (kind, argument, _index), (_actual, _value, identity) in zip(instructions, expected, actual):
         if kind in ("PACK", "KEY") and protocols[identity].kind is Kind.READ_CODE_CONSTANT:
@@ -403,6 +458,10 @@ def _check_source_and_code(node, group, operations, protocols, uses, constants, 
                   "call code constant does not identify exact compiler instruction/slot")
         elif kind == "PACK":
             _need(instruction.opname == "BUILD_TUPLE" and instruction.arg == argument, "call positional packing differs from exact compiler")
+        elif kind == 'TO_TUPLE':
+            _need(instruction.opname == 'CALL_INTRINSIC_1'
+                  and dis._intrinsic_1_descs[instruction.arg] == 'INTRINSIC_LIST_TO_TUPLE',
+                  'call list conversion is not the exact pinned list-to-tuple intrinsic')
         else:
             _need(instruction.opname == kind and (argument is None or instruction.arg == argument),
                   "call merge/named-run differs from exact compiler")

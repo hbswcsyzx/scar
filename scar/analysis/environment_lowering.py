@@ -48,8 +48,9 @@ def dispatch_source_expression(builder, node, cursor):
     if builder.has_language("GENEXPR_314_V1") and isinstance(node, ast.GeneratorExp):
         from scar.analysis.source_generator_lowering import lower_generator
         return lower_generator(builder, node, cursor)
-    if (builder.has_language("CALL_KWARGS_314_V1") and isinstance(node, ast.Call)
-            and any(keyword.arg is None for keyword in node.keywords)):
+    if (isinstance(node, ast.Call) and (
+            builder.has_language("CALL_KWARGS_314_V1") and any(keyword.arg is None for keyword in node.keywords)
+            or builder.has_language("CALL_EXPANSION_314_V1") and any(isinstance(arg, ast.Starred) for arg in node.args))):
         from scar.analysis.source_call_lowering import lower_kwargs_call
         return lower_kwargs_call(builder, node, cursor)
     if builder.has_language("LEXICAL_LOCALS") and isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
