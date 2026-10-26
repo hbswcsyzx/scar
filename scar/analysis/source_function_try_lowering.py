@@ -160,8 +160,16 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             if facts.get(token)==frozenset((BindingState.BOUND,)):
                 self.known_binding_states[token]=BindingState.BOUND
         if self.known_binding_states.get(token) is not BindingState.BOUND:
-            raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
-                'FUNCTION_TRY_LOCAL_BINDING_PROPAGATION_UNIMPLEMENTED')
+            # A merge can genuinely contain BOUND and UNBOUND. Keep its real
+            # BindingRead NORMAL/RAISE split; do not invent a reaching binding.
+            # The canonical binding checker additionally requires the paired
+            # failure to reach its own actual ExceptionPacketDefinition.
+            from scar.ir.program.model import BindingRead
+            normal, value, identity = self.invoke(cursor, node,
+                ((token, node, 'local-binding', 0, None),), old=old)
+            self.binding_reads.append(BindingRead(identity,
+                self.operation_records[identity].uses[0].id, value))
+            return normal, value
         return super().read_local(node, cursor, old)
 
     @contextmanager
@@ -187,8 +195,8 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
                 'FUNCTION_TRY_RESUMABLE_PROPAGATION_ABI_UNIMPLEMENTED')
         if isinstance(node, ast.Call) and (any(isinstance(arg, ast.Starred) for arg in node.args)
                                          or any(kw.arg is None for kw in node.keywords)):
-            raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
-                'FUNCTION_TRY_EXTENDED_CALL_LIFETIME_UNIMPLEMENTED')
+            from scar.analysis.source_call_lowering import lower_kwargs_call
+            return lower_kwargs_call(self, node, cursor)
         return super().expr(node, cursor)
 
     def invoke_protocol(self, cursor, node, values, kind, *, result_type=_REF, failure_handler=None):
@@ -646,9 +654,49 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
                 self.completion_sinks[-1][0](cursor,node,kind,None);cursor=None
             elif cursor is not None and isinstance(node, ast.Try):
                 cursor = (self.try_except(node, cursor) if node.handlers else self.try_finally(node, cursor))
+            elif cursor is not None and isinstance(node, ast.AugAssign):
+                cursor = self.augmented_assignment(node, cursor)
             else:
                 cursor = super().statements((node,), cursor)
         return cursor
+
+    def augmented_assignment(self, node, cursor):
+        """Read local target once, then RHS, in-place dispatch, then rebind.
+
+        The result may alias the old reference or be a new object; neither is
+        presumed. __iop__/fallback and mutation stay inside the world INVOKE.
+        Heap targets need separately saved receiver/index ports, never a
+        second evaluation of their original target subtree.
+        """
+        from scar.analysis.source_heap_lowering import expression_for_heap_target
+        from scar.analysis.source_call_lowering import _invoke
+        if (not isinstance(node.target, ast.Name) or node.target.id not in self.locals
+                or node.target.id in self.cell_references):
+            raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node.target,
+                'FUNCTION_TRY_AUGMENTED_HEAP_TARGET_UNIMPLEMENTED')
+        baseline = len(self.active_temporaries)
+        def hold(at, value):
+            self.frame_transition(cursor, at, ((value, at, 'augassign-held-reference'),), K.FRAME_HOLD_TEMPORARY)
+            self.active_temporaries.append(value)
+        try:
+            cursor, left = expression_for_heap_target(self, node.target, cursor)
+            if cursor is None:
+                return None
+            hold(node.target, left)
+            cursor, right = self.expr(node.value, cursor)
+            if cursor is None:
+                return None
+            hold(node.value, right)
+            cursor, result, _ = _invoke(self, cursor, node,
+                ((left, node.target, 'augassign-left', 0, None),
+                 (right, node.value, 'augassign-right', 1, None)),
+                K.FUNCTION_INPLACE_BINARY,
+                ((node.target, left), (node.value, right)), result=True)
+            self.gap(GapKind.EFFECT_SUMMARY, node,
+                'in-place/fallback dispatch and original assignment are connected; aliasing, mutation and finalizer effects remain unproved')
+            return self.store(node.target, result, cursor)
+        finally:
+            del self.active_temporaries[baseline:]
 
     def build_function(self):
         node = super().build_function()

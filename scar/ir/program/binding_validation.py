@@ -144,6 +144,96 @@ def _normal_completion_reference_for_read(graph, reference, operation, blocks,
             and signature.types[actual.index] == ValueType(ValueKind.REFERENCE))
 
 
+def _paired_read_failure_packet(graph, operation, blocks, operations, values,
+                                operation_block, block_region):
+    """Recognize this read's pair, current world and exact packet corridor.
+
+    Two reference types alone are insufficient. The actual RAISE completion
+    must enter its own block, and every intervening ordinary state transition
+    and single-successor CFG edge must preserve the ordered pair and current
+    world until the existing C0 ExceptionPacketDefinition consumes both Uses.
+    Core SSA validation separately checks ownership/dominance and C0 checks
+    the packet constructor. No new source/exception authority is introduced.
+    """
+    failure = next((e for e in operation.terminator.successors
+                    if isinstance(e, CompletionSuccessor) and e.kind is ExitKind.RAISE), None)
+    signature = next((s for s in operation.completions if s.kind is ExitKind.RAISE), None)
+    reference = ValueType(ValueKind.REFERENCE)
+    if (failure is None or signature is None or len(signature.types) != 3
+            or signature.types[:2] != (reference, reference)
+            or signature.types[2].kind is not ValueKind.STATE
+            or failure.arguments != tuple(CompletionResult(i) for i in range(3))):
+        return False
+    first = blocks.get(failure.block)
+    if first is None or len(first.arguments) != 3:
+        return False
+    incoming = {b: [] for b in blocks}
+    for source in blocks.values():
+        if not source.operations:
+            continue
+        last = operations.get(source.operations[-1])
+        for edge in getattr(getattr(last, 'terminator', None), 'successors', ()):
+            if edge.block in incoming:
+                incoming[edge.block].append((last.id, edge))
+    if incoming[first.id] != [(operation.id, failure)]:
+        return False
+    region = block_region.get(operation_block.get(operation.id))
+    exception, traceback, world = first.arguments
+    if (not all(isinstance(values.get(v), ReferenceValue) for v in (exception, traceback))
+            or not isinstance(values.get(world), StateVersionValue)):
+        return False
+    packets = {values[p.value].origin.operation:p for p in graph.exception_packets
+               if p.value in values and isinstance(values[p.value].origin, OperationResult)}
+    block, seen = first, set()
+    while block.id not in seen:
+        seen.add(block.id)
+        if block_region.get(block.id) != region:
+            return False
+        for identity in block.operations:
+            current = operations[identity]
+            own = {u.id:u for u in current.uses}
+            packet = packets.get(identity)
+            if packet is not None:
+                return (packet.exception in own and packet.traceback in own
+                    and own[packet.exception].value == exception
+                    and own[packet.traceback].value == traceback
+                    and values[packet.value].region == region
+                    and isinstance(values.get(world), StateVersionValue)
+                    and values[world].location == signature.types[2].location)
+            if current.terminator is not None:
+                if current.terminator.kind is not TerminatorKind.JUMP or len(current.terminator.successors) != 1:
+                    return False
+                edge = current.terminator.successors[0]
+                target = blocks.get(edge.block)
+                if target is None or len(edge.arguments) != len(target.arguments):
+                    return False
+                mapping = [(own[a].value, f) for a, f in zip(edge.arguments, target.arguments) if a in own]
+                transferred = []
+                for actual in (exception, traceback, world):
+                    formals = [f for a, f in mapping if a == actual]
+                    if len(formals) != 1:
+                        return False
+                    transferred.append(formals[0])
+                exception, traceback, world = transferred
+                block = target
+                break
+            # Before packing, the pair is only forwarded, never read, mixed,
+            # replaced or interpreted by an unrelated operation.
+            if any(u.value in (exception, traceback) for u in current.uses):
+                return False
+            states = [u for u in current.uses if isinstance(values.get(u.value), StateVersionValue)]
+            if states:
+                if len(states) != 1 or states[0].value != world:
+                    return False
+                after = [a.after for a in current.accesses if a.before == states[0].id and a.after is not None]
+                if len(after) != 1 or after[0] not in current.results:
+                    return False
+                world = after[0]
+        else:
+            return False
+    return False
+
+
 def validate_bindings(graph: ProgramGraph) -> tuple[BindingValidationIssue, ...]:
     """Validate binding definitions, CFG carries, and read completion shape.
 
@@ -474,11 +564,15 @@ def validate_bindings(graph: ProgramGraph) -> tuple[BindingValidationIssue, ...]
                             if item == ValueType(ValueKind.REFERENCE)]
                     states_out = [item.location for item in signature.types
                                   if item.kind is ValueKind.STATE]
-                    if (len(refs) != 1 or set(states_out) != state_locations
+                    paired = (kind is ExitKind.RAISE and len(refs) == 2
+                        and _paired_read_failure_packet(graph, operation, blocks, operations,
+                            values, operation_block, block_region))
+                    reference_count = 2 if paired else 1
+                    if (len(refs) != reference_count or set(states_out) != state_locations
                             or len(states_out) != len(state_locations)
-                            or len(signature.types) != 1 + len(state_locations)):
+                            or len(signature.types) != reference_count + len(state_locations)):
                         error("binding_read_completion", read.operation,
-                              "each read completion must carry one reference and every current world state")
+                              "read completion needs one reference/current world or its exact packet-bound RAISE pair")
 
     # A frame protocol may consume a binding token as a lifetime dependency.
     # The exact transition meaning is checked by StructuredBodyModel/source

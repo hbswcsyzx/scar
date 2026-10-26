@@ -9,6 +9,41 @@ from scar.ir.program.model import (ProtocolValue, StateVersionValue, ReferenceVa
 from scar.ir.program.control import ControlScopeKind as S, ProtocolValueKind as P, ProtocolValueType
 
 
+def exception_handoff_holds(block_id, operations, protocols, blocks, use_links):
+    """Read actual unwind Uses up to this validated exception's cleanup entry.
+
+    This query does not run a handler or certify finalizers/whole-frame
+    lifetime. It follows only the single exception corridor already checked
+    by the canonical C0/C1 and function-source consumers.
+    """
+    cursor, seen, released = (block_id, 0), set(), []
+    while cursor not in seen:
+        seen.add(cursor)
+        block = blocks[cursor[0]]
+        if cursor[1] >= len(block.operations):
+            raise ValueError('function exception handoff falls out of block')
+        op = operations[block.operations[cursor[1]]]
+        marker = protocols.get(op.id)
+        kind = marker.kind if marker is not None else None
+        first = use_links.get((op.id, op.uses[0].id)) if op.uses else None
+        if kind is K.FRAME_RELEASE_TEMPORARY and first is not None and first.role == 'function-exception-unwind':
+            released.append(op.uses[0].value)
+        if kind in (K.FRAME_EXIT, K.FUNCTION_FRAME_EXIT_EXCEPTION_PACKET):
+            retained = tuple(u.value for u in op.uses
+                if (link := use_links.get((op.id, u.id))) is not None and link.role == 'held-temporary')
+            return retained + tuple(reversed(released))
+        if kind is K.FUNCTION_HANDLED_CONTEXT_ENTER:
+            return tuple(reversed(released))
+        term = op.terminator
+        if term is None:
+            cursor = block.id, cursor[1] + 1
+        elif term.kind in (TerminatorKind.JUMP, TerminatorKind.PENDING_DISPATCH, TerminatorKind.CLEANUP_ROUTE) and len(term.successors) == 1:
+            cursor = term.successors[0].block, 0
+        else:
+            raise ValueError('function exception handoff lost its single canonical continuation')
+    raise ValueError('function exception handoff cycles without a cleanup endpoint')
+
+
 def validate_function_try_protocols(model, graph, interface, metadata, semantic, language, *, source_tree=None):
     def need(value, detail):
         if not value:
@@ -320,7 +355,34 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
              'packet/world differs from actual frame post-state')
     for identity in actual:
         kind = protocols[identity].kind
-        if kind is K.FUNCTION_START_PROPAGATION:
+        if kind is K.FUNCTION_INPLACE_BINARY:
+            node = node_for(protocols[identity].source, ast.AugAssign)
+            operation = operations[identity]
+            need(isinstance(node.target, ast.Name) and isinstance(node.op,
+                 (ast.Add, ast.Sub, ast.Mult, ast.MatMult, ast.Div, ast.FloorDiv,
+                  ast.Mod, ast.Pow, ast.LShift, ast.RShift, ast.BitOr, ast.BitXor, ast.BitAnd)),
+                 'in-place operation needs an original supported Name AugAssign')
+            need(operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
+                 and len(operation.uses) == 3 and operation.invoke_arguments == tuple(u.id for u in operation.uses)
+                 and all(type(values[u.value]) is ReferenceValue for u in operation.uses[:-1])
+                 and type(values[operation.uses[-1].value]) is StateVersionValue
+                 and not operation.effects_complete and operation.callee is None
+                 and tuple(s.types for s in operation.completions) == ((ref, state), (ref, ref, state)),
+                 'in-place operation lost its ordered references/world/completions')
+            sources = {(r.operation, r.use):r for r in metadata.use_links}
+            for use, original, role, index in zip(operation.uses, (node.target, node.value),
+                                                ('augassign-left', 'augassign-right'), (0, 1)):
+                link = sources[(identity, use.id)]
+                need(node_for(link.source, ast.expr) is original and (link.role, link.index) == (role, index),
+                     'in-place operands do not use the original target-before-RHS AST')
+            normal = blocks[operation.terminator.successors[0].block]
+            assigned = [r for r in graph.binding_definitions if r.payload is not None
+                        and uses[r.payload].value == normal.arguments[0]]
+            need(len(assigned) == 1 and semantic.slots[values[assigned[0].value].slot].name == node.target.id
+                 and semantic.slots[values[assigned[0].value].slot].owner == interface.definition,
+                 'in-place result must rebind the original local slot')
+            expected[identity] = kind
+        elif kind is K.FUNCTION_START_PROPAGATION:
             node_for(protocols[identity].source, ast.Assert)
             operation = operations[identity]
             constructors = [operations[r.operation] for r in model.protocols
