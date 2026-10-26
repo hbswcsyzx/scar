@@ -1,0 +1,56 @@
+{
+  "normal_owner_requires_all106_graph_paths": true,
+  "selected99_and_additional7_present": true,
+  "files": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/bab01071a53581f6c43d21741ab0c9c6771545901d888676a25064d09b2f2289.json.gz",
+      "bytes": 1914477,
+      "sha256": "6955d3d93e4aa775705c59679545a4c51217695ac46c2dd1edb1485c099f52c4",
+      "exact_git_blob_match": true,
+      "graph_decoded": false
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/d4ad330de6455701f38d1ecbc2d5830223eb56798b3529613b261d5c5d01de23.json.gz",
+      "bytes": 2818104,
+      "sha256": "10cd804b7536de70bb182462f49bef2ffdcc77d5f2a86133689b4d4629bce030",
+      "exact_git_blob_match": true,
+      "graph_decoded": false
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/6ddf9a39a0c1c876670f047298a87a3c7c767544f64f47f103c9fa8bf66abf0d.json.gz",
+      "bytes": 2543929,
+      "sha256": "ca5668e3b26e9b53e927202fd8956b48a8150086dc91ea6954a58e0c3c268c41",
+      "exact_git_blob_match": true,
+      "graph_decoded": false
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/b20e8afde5c1503afc08360a225abcb4acbe42abe20aa3718e13f7468d6a07a6.json.gz",
+      "bytes": 1281866,
+      "sha256": "61b4c1f4325e5e99a2e650b9e168ca4c6360edc6c809553577a87a8825bf4d8a",
+      "exact_git_blob_match": true,
+      "graph_decoded": false
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/163a0a59a71c15410ef40b12b7d80589985b70131f4041454537ac5eb169055d.json.gz",
+      "bytes": 477374,
+      "sha256": "fe07a7cf8d037886cc4970c7b39dce9bf62150281dcbb891ed11bd5977e66a11",
+      "exact_git_blob_match": true,
+      "graph_decoded": false
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/graphs/7874681b4a2253a24695153800a49ef86de194a0f7d28f67c90765cb81ea069d.json.gz",
+      "bytes": 279163,
+      "sha256": "930612913eb293a85a2640809323c3074cc4c80dc6b3f2b4ed8355c7c01c24d5",
+      "exact_git_blob_match": true,
+      "graph_decoded": false
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_continuation_20261023/result/graphs/a466a13a303f1beca1b4127d1e5017508cac5df02ec240d50741605cf6bc15d0.json.gz",
+      "bytes": 6271889,
+      "sha256": "eb077ee77465f362b5bff000e699e2ac4c7a119466c5474e558f56cf16c01b42",
+      "exact_git_blob_match": true,
+      "graph_decoded": false
+    }
+  ],
+  "decoded_graph_payloads": false
+}
