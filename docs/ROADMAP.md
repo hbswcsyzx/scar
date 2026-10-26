@@ -1,5 +1,14 @@
 # SCAR roadmap and scope
 
+> **2026-10-26 modeling scope audit:** Prioritize a compact, compositional program
+> model for simplification. Keep program operations and necessary value/state/
+> resource dependencies; fold language-management encoding and keep collector,
+> verification and physical implementation details as optional evidence. A full
+> Linux FD-table replay is not required. See the concrete retain/fold/move/exclude
+> decisions and measured duplication in [MODELING_SCOPE_AUDIT.md](MODELING_SCOPE_AUDIT.md).
+> No new all-layer capture or parallel graph authority is planned before this
+> contraction. Historical protocol gates below are not the development queue.
+
 > **Current scope correction (2026-10-20):** The first stage includes design,
 > automatic recovery and actual whole-LeWM software/hardware-resource coverage.
 > See the [contract](FIRST_STAGE_MODEL_CONTRACT.md) and

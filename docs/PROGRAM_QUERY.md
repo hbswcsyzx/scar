@@ -82,7 +82,7 @@ FD绑定未决，`resource_path`为空；不能宣称已经连接到NVMe。
 
 ```bash
 python -m scar.cli query-native-inputs \
-  --manifest PATH/input-metadata/manifest.json --sha256 EXPECTED_SHA256 \
+  --manifest PATH/port-navigation/manifest.json --sha256 EXPECTED_SHA256 \
   --row 21 --associations --limit 2
 ```
 
@@ -92,5 +92,7 @@ provider位置和元数据来源；这是保留产物查询，不恢复producer�
 
 本次原LeWM批次156片/39,796个规范边界实际通过，65,130条Tensor输入路径已关联，
 355,314条仍为`CANONICAL_NATIVE_BOUNDARY_UNAVAILABLE`。后者包含真实库内算子，
-不能都称为注解。当前关联中的片内端点还需要父ProgramSnapshot/execution定位，
-查询成功不将这些ID升级为全局限定数据流，不建立内容、alias、状态或ready事实。
+不能都称为注解。已发布父片导航为这65,130条关联提供原ProgramSnapshot/execution/
+denotation限定端点；普通typed样例读回核对ValueOccurrence及实际UseOccurrence复合
+端点，不制造新的UseOccurrence ID。原metadata manifest只用于行查询，端口关联须
+使用port-navigation manifest。查询不建立内容、alias、状态或ready事实。

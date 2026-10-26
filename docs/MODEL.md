@@ -1,5 +1,13 @@
 # SCAR execution model
 
+2026-10-26 scope audit: the model exists to support simplification, not to
+reconstruct every implementation layer. Keep adjustable program actions and
+the dependencies necessary for legality/cost; summarize runtime/OS interfaces,
+share definitions across composable fragments, and retain low-level supporting
+evidence on demand. See [MODELING_SCOPE_AUDIT.md](MODELING_SCOPE_AUDIT.md).
+This supersedes older plans that treat complete internal protocol reconstruction
+as a prerequisite. It does not claim whole-program modeling is complete.
+
 ## Current first-stage scope (2026-10-20)
 
 The user requires **complete program modeling and automatic LeWM abstraction**

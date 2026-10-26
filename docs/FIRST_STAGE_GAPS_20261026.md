@@ -3,6 +3,10 @@
 2026-10-26。**OPEN。当前不能声称已完成 LeWM 全程序、全部软硬件资源的建图。**
 本页按现有[验收合同](FIRST_STAGE_MODEL_CONTRACT.md)列缺口，不改变其分母或降低要求。
 
+2026-10-26用户明确修订：建模服务于化简，以[范围审计](MODELING_SCOPE_AUDIT.md)的
+最小充分依赖为准。完整Linux FD表、内核/驱动/解释器内部实现不作为必需展开项；
+程序侧操作与必要状态/资源依赖仍须接通。以下历史细化缺口不自动成为开发任务。
+
 ## 三种状态分别回答
 
 - **模型设计：**已有 Operation、Value、StateLocation、Region、Resource 及版本、
@@ -20,7 +24,7 @@
 | 层层函数调用 | 原完整100438调用均入账，6882次对应92个body groups；另88592 source-only、4964 unresolved。 | 对应函数体不等于传递已闭合。须连接源实参Use→正式端口、返回载荷→调用结果、闭包/全局状态和准确调用/完成。深层region不可用祖先上下文替代直接调用。 |
 | 值、对象与可变内容 | 有引用、storage/allocation及view的真实记录和类型接口。 | 逻辑来源/值版本→物理副本、原位写入后态、alias范围和失效须接通。不能以相同ObjectID/StorageID/shape/样本或来源证明内容未变；采样仅用于排除。 |
 | Python→Torch→GPU工作 | main新门72613实际exit0：24082物理work均有retained source context/code来源；11541 exact、12541 enclosing，6普通查询通过。 | enclosing仅为提交scope嵌套；内部host exact occurrence仍缺12541，static body member未核14932，state/content/ready均未证24082。不能当作每个kernel的完整源数据流。 |
-| OS、存储与进程 | 旧Run有大量read/pread/mmap、FD selector、exec/pipe/wait等原始接口及部分规范投影。 | 精确文件身份/内容版本/range→实际buffer→反序列化输出，FD/OFD与namespace生命周期、子进程/pipe/输出文件依赖仍需接通。路径、FD数字或进程退出不够。 |
+| OS、存储与进程 | 原始接口及部分规范投影已在；新Run有34项registration backing条件连接。 | 程序侧文件/内容/range→buffer→反序列化、子进程/pipe/输出及完成关系仍需表达；优先上层接口摘要。完整共享FD表回放已移出必需任务，路径或FD数字仍不作数据身份。 |
 | 设备、内存与异步顺序 | GPU/kernel/copy/memset、部分allocation/region/stream/provider actor已有事实；24082活动有单activity结束关系。 | allocation生命周期、读写range/版本、跨队列event/wait、consumer可见性及value ready须有证据。host返回、activity结束、同步调用三者不能混用。 |
 | 采集时软件/资源身份 | 有固定provider源码合同与版本标签；新的collector注册见证已在独立样例验证。 | 历史LeWM缺失的信息不可事后补认。下一同Run需保实际callback代码、issuer/process incarnation、已加载映像及ordinary成员链；驱动/ABI/build对应和未采内容保明确边界。 |
 | 加载到保存的整体依赖 | 已有实际完成的LeWM episode和输出文件；若干层已有独立图。 | 必须串起模型/数据加载→CPU处理→H2D/推理→action/环境→render→编码/pipe→文件保存，逐层能查询输入、状态、结果、资源与失败/完成。产物存在不能代替这些边。 |
@@ -31,8 +35,8 @@
 
 “底层硬件”按既定合同包括程序实际可分配、调度、访问和等待的接口资源：CPU/GPU、
 进程/线程、内存与allocation、queue/stream/event、storage/file等。SM/cache/控制器、
-内核driver/firmware等内部细化未自动恢复，必须显式列出，不能宣称已完成其内部建图。
-这不允许把缺少的必要接口依赖改标为可忽略物理细节。
+内核driver/firmware等内部实现不属于默认核心展开范围；保必要接口、资源属性及
+按需证据，不宣称已恢复其内部，也不将必要的程序依赖改标为可忽略细节。
 
 ## 当前实施顺序与自身验收
 
