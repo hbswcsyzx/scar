@@ -62,6 +62,13 @@ class CallEdgeRecorder:
         filename = frame.f_code.co_filename
         return os.path.isabs(filename) and (filename == self.root or filename.startswith(self.root_prefix))
 
+    def _observe_entry(self, frame):
+        if self._inside(frame) or self._inside(frame.f_back):
+            return True
+        observer = self.operand_observer
+        targets = getattr(observer, 'python_targets', None) if observer is not None else None
+        return targets is not None and targets.accepts_frame(frame)
+
     def _write(self, fd, row):
         data = (json.dumps(row,ensure_ascii=True,separators=(",",":"),allow_nan=False)+"\n").encode()
         if self.bytes + len(data) > self.limits['max_bytes']:
@@ -199,7 +206,7 @@ class CallEdgeRecorder:
         if frame.f_code.co_filename in self.observer_files:
             return
         if event == 'call':
-            if not self._inside(frame) and not self._inside(frame.f_back):
+            if not self._observe_entry(frame):
                 return
         else:
             # No observation is produced for an unretained return. Read only
@@ -223,7 +230,7 @@ class CallEdgeRecorder:
             try:
                 if event == 'call':
                     caller = frame.f_back
-                    if not self._inside(frame) and not self._inside(caller):
+                    if not self._observe_entry(frame):
                         return
                     if self.index >= self.limits['max_events']:
                         self.dropped += 1

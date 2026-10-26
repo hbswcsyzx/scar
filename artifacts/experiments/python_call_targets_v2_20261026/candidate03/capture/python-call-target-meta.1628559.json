@@ -1,0 +1,72 @@
+{
+  "schema": "scar.python-call-target-collection",
+  "schema_version": 2,
+  "capabilities": [
+    "PYTHON_CALL_TARGETS_V2",
+    "OBSERVED_PYTHON_CALLEE_SCOPE_V1"
+  ],
+  "process_id": 1628559,
+  "project_root": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate03/project",
+  "scope_policy": "OBSERVED_EXACT_PYTHON_CALLEES_V1",
+  "budget": {
+    "max_records": 4096,
+    "max_bytes": 2000000,
+    "max_selected_codes": 4096
+  },
+  "counts": {
+    "TARGET": 7,
+    "ENTRY": 3,
+    "GAP": 0
+  },
+  "stopped": false,
+  "file": {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate03/capture/python-call-targets.1628559.jsonl",
+    "bytes": 4766,
+    "sha256": "97b4507d87de615c2ba715081fd5030594ec9553fcb53ffb854c12dac2816564",
+    "rows": 10
+  },
+  "legacy_inputs": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate03/capture/call-codes.1628559.jsonl",
+      "family": "codes",
+      "process_id": 1628559,
+      "raw_sha256": "de94cc098b8b1438b6a225b61ef167d3bf54c3c43e123b6bff2f945fbeef36ed",
+      "raw_bytes": 1838,
+      "lines": 6
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate03/capture/call-events.1628559.jsonl",
+      "family": "events",
+      "process_id": 1628559,
+      "raw_sha256": "6b9ef7e7518afb1c65cf580d3c742a21b4611b442e814840859a404483296e1c",
+      "raw_bytes": 9427,
+      "lines": 12
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate03/capture/call-meta.1628559.json",
+      "family": "meta",
+      "process_id": 1628559,
+      "raw_sha256": "be78ba7c347ce773324088e83f3371f34d84f80f31b77bfa778c91b2c5ab7de4",
+      "raw_bytes": 1029,
+      "lines": 34
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate03/capture/call-operands.1628559.jsonl",
+      "family": "operands",
+      "process_id": 1628559,
+      "raw_sha256": "4f4777618330efc1088de58b226c150f1a476d01615929a6f41a2c63a948d9b9",
+      "raw_bytes": 9019,
+      "lines": 26
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate03/capture/call-operand-meta.1628559.json",
+      "family": "operand-meta",
+      "process_id": 1628559,
+      "raw_sha256": "ebe052c6079d6fd54151c1a807b06e977f52b0290f04bc35fbe225c04f1c9a90",
+      "raw_bytes": 2042,
+      "lines": 58
+    }
+  ],
+  "receiver_is_separate_from_monitoring_arg0": true,
+  "contents_state_ready_or_complete_program_established": false
+}

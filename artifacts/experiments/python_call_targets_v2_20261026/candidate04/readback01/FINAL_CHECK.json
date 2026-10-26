@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "actual_bindings": 3,
+  "receiver_ports": 2,
+  "explicit_argument_ports": 3,
+  "normal_core_graphs": 3,
+  "wrong_receiver_formal_rejected": "receiver must identify the original first formal",
+  "new_capture_or_source_lowering": false,
+  "model_sha256": "af7c15ab40be08a5ac3d289366a183a327c184d11f7b9c6dac5590b6d6bafe0b",
+  "source_sha256": {
+    "scar/trace/call_edges.py": "4f8d299baff10412cc8b1f6d09c707c1303998ebc4deab7e1348987819a3ed35",
+    "scar/trace/call_operands.py": "fed436f61d54c5a3dff50c18881c04245c18dc63a436685dabb7e5c474dd0de2",
+    "scar/trace/python_call_targets.py": "bbb4fcdb97a8d9960d7e93589e759c6a5c8a4b70757996fe19e9e22d613f153a",
+    "scar/ir/program/python_call_targets.py": "db78b9068b1ec8c6c4bd60ffe12c6916ac893baf82543ecfc96ffbde596f428e",
+    "scar/analysis/python_call_targets.py": "257de0af1e1c13a0770b3dc96655d74a240e33ba1382c27ac1387939d71339d3"
+  }
+}

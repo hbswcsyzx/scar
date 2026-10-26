@@ -1,0 +1,41 @@
+{
+  "status": "PASS",
+  "wall_seconds": 0.31730922003043815,
+  "actual_capture_replayed": false,
+  "LeWM_or_target_executed": false,
+  "normal_retained_frame_operand_target_read": true,
+  "source_model_roundtrip": true,
+  "normal_core_graphs": 3,
+  "qualified_actual_formal_endpoints": 5,
+  "observed": {
+    "targets": 7,
+    "entries": 5,
+    "gaps": 0,
+    "kinds": {
+      "OTHER_UNCLASSIFIED": 1,
+      "NORMALIZED_RECEIVER_FUNCTION": 2,
+      "FUNCTION": 3,
+      "NATIVE_BUILTIN": 1
+    },
+    "receiver_entries": 2,
+    "contents_state_ready_established": false,
+    "whole_program_complete": false
+  },
+  "source_ports": {
+    "targets": 7,
+    "bound_calls": 3,
+    "receiver_ports": 2,
+    "explicit_argument_ports": 3,
+    "open_targets": 4,
+    "reference_identity_established": false,
+    "effects_state_ready_established": false,
+    "whole_program_complete": false
+  },
+  "final_source_sha256": {
+    "scar/trace/call_operands.py": "fed436f61d54c5a3dff50c18881c04245c18dc63a436685dabb7e5c474dd0de2",
+    "scar/trace/call_edges.py": "4f8d299baff10412cc8b1f6d09c707c1303998ebc4deab7e1348987819a3ed35",
+    "scar/trace/python_call_targets.py": "bbb4fcdb97a8d9960d7e93589e759c6a5c8a4b70757996fe19e9e22d613f153a",
+    "scar/ir/program/python_call_targets.py": "e5737e1d8773610c6834e61db0156f1acbf1cadbbfe3699de3949020b430cdee",
+    "scar/analysis/python_call_targets.py": "181c476db81a02d01800d5bf101d6bd9c49c0c2c2386b673a63a33d30484763a"
+  }
+}
