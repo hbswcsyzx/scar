@@ -95,13 +95,21 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         for index, name in enumerate(self.control_names[target.block]):
             value = cursor.env[name]
             values.append(self.use(self._transfer_id, value, node, 'carried-binding', index))
-            states = self.incoming_states.setdefault((target.block, name), [])
-            states.append(self.known_binding_states.get(value))
-            if all(state is BindingState.BOUND for state in states):
-                self.known_binding_states[target.env[name]] = BindingState.BOUND
-            else:
-                self.known_binding_states.pop(target.env[name], None)
+            self.incoming_binding(target, name, value)
         return values
+
+    def incoming_binding(self, target, name, value):
+        states = self.incoming_states.setdefault((target.block, name), [])
+        states.append(self.known_binding_states.get(value))
+        if states[0] is not None and all(state is states[0] for state in states):
+            self.known_binding_states[target.env[name]] = states[0]
+        else:
+            self.known_binding_states.pop(target.env[name], None)
+
+    def jump(self, cursor, target, names, node):
+        for name in names:
+            self.incoming_binding(target, name, cursor.env[name])
+        return super().jump(cursor, target, names, node)
 
     def jump_values(self, cursor, target, values, node):
         from scar.ir.program.model import Successor
@@ -130,8 +138,6 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
 
     def read_local(self, node, cursor, old):
         token = cursor.env[node.id]
-        if node.id in self.formal_names:
-            self.known_binding_states[token] = BindingState.BOUND
         if self.known_binding_states.get(token) is not BindingState.BOUND:
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
                 'FUNCTION_TRY_LOCAL_BINDING_PROPAGATION_UNIMPLEMENTED')
@@ -301,27 +307,78 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             if child is not node and isinstance(child, (ast.Try, ast.TryStar, ast.Return, ast.Break, ast.Continue,
                                                         ast.Yield, ast.YieldFrom, ast.Await)):
                 raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, child, 'FUNCTION_TRY_NONLOCAL_TRANSFER_OR_NESTED_UNIMPLEMENTED')
-        if node.handlers and (len(node.handlers) != 1 or node.handlers[0].name):
-            raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, 'FUNCTION_TRY_MULTIPLE_OR_AS_HANDLERS_UNIMPLEMENTED')
         if not node.finalbody and not node.handlers:
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, 'FUNCTION_TRY_WITHOUT_CLEANUP_UNIMPLEMENTED')
 
-    def try_except(self, node, cursor):
-        self._try_shape(node)
+    def bind_exception_name(self, handler, reference, cursor):
+        name = handler.name
+        if name not in self.locals or name in self.cell_references:
+            raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, handler,
+                'FUNCTION_TRY_NONLOCAL_EXCEPTION_ALIAS_UNIMPLEMENTED')
+        previous = cursor.env[name]
+        self.frame_transition(cursor, handler, ((previous, handler, 'previous-exception-binding'),
+            (reference, handler, 'caught-exception-binding')), K.FRAME_BIND)
+        self.define_binding(name, cursor, handler, reference)
+        return cursor
+
+    def clear_exception_name(self, handler, cursor):
+        cursor = self.bind_exception_name(handler, self.literal(handler, None), cursor)
+        self.frame_transition(cursor, handler, ((cursor.env[handler.name], handler, 'cleared-exception-binding'),),
+                              K.FUNCTION_CLEAR_EXCEPTION_NAME)
+        self.define_binding(handler.name, cursor, handler)
+        return cursor
+
+    def match_handler(self, handler, current, caught_ref, entry):
         from scar.ir.program.exception_matches import ExceptionMatcher, ExceptionHandlerOperand
         from scar.ir.program.state_addresses import ExistingAccess
         from scar.ir.program.model import BlockArgument
-        parent, handler = self.current_owner, node.handlers[0]
-        after = None
+        with self.handler_expression():
+            current, handler_ref = self.expr(handler.type, current)
+        self.frame_transition(current, handler, ((handler_ref, handler.type, 'handler-type-hold'),), K.FRAME_HOLD_TEMPORARY)
+        self.active_temporaries.append(handler_ref)
+        def invalid_type(failed, payload):
+            held = self.active_temporaries.pop()
+            try:
+                self.frame_transition(failed, handler, ((held, handler.type, 'handler-type-release'),), K.FRAME_RELEASE_TEMPORARY)
+                self.finish_exit(failed, handler, payload, ExitKind.RAISE)
+            finally:
+                self.active_temporaries.append(held)
+        current, validated, operation = self.invoke(current, handler,
+            ((handler_ref, handler.type, 'handler-type', 0, None),), failure_handler=invalid_type)
+        self.protocol(operation, K.VALIDATE_EXCEPT_TYPE_314, handler)
+        identity = self.fresh(OperationID, 'borrowed-function-exception-match')
+        exc = self.use(identity, caught_ref, handler, 'caught-exception', 0)
+        selected = self.use(identity, validated, handler.type, 'dynamic-handler', 0)
+        world = self.use(identity, current.state, handler, 'match-world', 0)
+        boolean = DataValue(self.fresh(ValueID, 'exception-match'), self.function_context,
+                            OperationResult(identity, 0), 'builtins.bool')
+        self.add_value(boolean); self.link_value(boolean, handler, SourceRole.TRUTH)
+        self.emit(current, Operation(identity, 'borrowed-function-exception-match',
+            (Behavior.COMPUTE, Behavior.READ, Behavior.CONTROL), (exc, selected, world), (boolean.id,),
+            (StateAccess(self.world, world.id, AccessMode.READ, footprint=Footprint(FootprintKind.WHOLE)),), effects_complete=True), handler, SourceRole.TRUTH)
+        self.protocol(identity, K.MATCH_EXCEPTION_BORROWED_314, handler)
+        self.active_temporaries.pop()
+        self.frame_transition(current, handler, ((handler_ref, handler.type, 'handler-type-release'),), K.FRAME_RELEASE_TEMPORARY)
+        yes, no = self.new_block(handler), self.new_block(handler)
+        self.branch(current, boolean.id, yes, no, handler)
+        self.exception_matches.append(ExceptionMatcher(identity, exc.id,
+            BlockArgument(entry.block, len(self.control_names[entry.block]) + 1),
+            ExceptionHandlerOperand(selected.id, self.values_by_id[validated].origin),
+            OperationResult(identity, 0), None, self.operations[-1].id, (ExistingAccess(identity, 0),)))
+        return yes, no
+
+    def try_except(self, node, cursor):
+        self._try_shape(node)
+        parent, after = self.current_owner, None
         body_scope = self.new_scope(S.BLOCK, node, parent)
         gate_scope = self.new_scope(S.BLOCK, node, parent)
-        cleanup = self.new_scope(S.CLEANUP, handler, parent)
+        cleanup = self.new_scope(S.CLEANUP, node, parent)
         with self.in_owner(body_scope):
             body = self.control_block(node)
         with self.in_owner(gate_scope):
             gate = self.control_block(node, extra_types=(_REF, _REF))
         with self.in_owner(cleanup):
-            entry = self.control_block(handler, extra_types=(ProtocolValueType(P.PENDING_COMPLETION), _REF))
+            entry = self.control_block(node, extra_types=(ProtocolValueType(P.PENDING_COMPLETION), _REF))
         self.cleanup_interfaces.append(CleanupInterface(cleanup, gate_scope, entry.block, self.block_arguments[entry.block][-3]))
         self.jump_values(cursor, body, (), node)
         caught_edges = []
@@ -338,7 +395,6 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         if not caught_edges:
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
                 'FUNCTION_TRY_NO_RAISING_PROTECTED_OPERATION_UNIMPLEMENTED')
-        # Else is outside the handler's protected suite and current context.
         if normal is not None:
             with self.in_owner(parent):
                 else_entry = self.control_block(node)
@@ -354,60 +410,61 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             token = self.pending(gate, node, original_port, self.packet(gate, node, pair))
             self.route_to_cleanup(gate, node, token, original_port, entry, (pair.exception,))
         with self.in_owner(cleanup):
-            original, saved = self.enter_cleanup(entry, handler, cleanup, trailing_references=1)
+            original, saved = self.enter_cleanup(entry, node, cleanup, trailing_references=1)
             caught_ref = self.block_arguments[entry.block][-2]
             def replaced(failed, payload):
-                port = self.raise_landing(handler)
-                fresh = self.pending(failed, handler, port, self.packet(failed, handler, payload))
-                self.cleanup_exit(failed, handler, cleanup, original, fresh, saved, (port,))
+                port = self.raise_landing(node)
+                fresh = self.pending(failed, node, port, self.packet(failed, node, payload))
+                self.cleanup_exit(failed, node, cleanup, original, fresh, saved, (port,))
             self.failure_sinks.append(replaced)
             current = entry
             try:
-                if handler.type is not None:
-                    with self.handler_expression():
-                        current, handler_ref = self.expr(handler.type, current)
-                    self.frame_transition(current, handler, ((handler_ref, handler.type, 'handler-type-hold'),), K.FRAME_HOLD_TEMPORARY)
-                    self.active_temporaries.append(handler_ref)
-                    def invalid_type(failed, payload):
-                        held = self.active_temporaries.pop()
+                for handler in node.handlers:
+                    if handler.type is None:
+                        selected, current = current, None
+                    else:
+                        selected, current = self.match_handler(handler, current, caught_ref, entry)
+                    body_owner = self.new_scope(S.BLOCK, handler, cleanup)
+                    with self.in_owner(body_owner):
+                        handler_body = self.control_block(handler)
+                        self.jump_values(selected, handler_body, (), handler)
+                        if handler.name:
+                            handler_body = self.bind_exception_name(handler, caught_ref, handler_body)
+                        hold_base = len(self.active_temporaries)
+                        def body_failed(failed, payload):
+                            held = tuple(self.active_temporaries[hold_base:])
+                            del self.active_temporaries[hold_base:]
+                            try:
+                                for reference in reversed(held):
+                                    self.frame_transition(failed, handler, ((reference, handler, 'handler-unwind-temporary'),), K.FRAME_RELEASE_TEMPORARY)
+                                if handler.name:
+                                    self.clear_exception_name(handler, failed)
+                                replaced(failed, payload)
+                            finally:
+                                self.active_temporaries.extend(held)
+                        self.failure_sinks.append(body_failed)
                         try:
-                            self.frame_transition(failed, handler, ((held, handler.type, 'handler-type-release'),), K.FRAME_RELEASE_TEMPORARY)
-                            replaced(failed, payload)
+                            completed = self.statements(handler.body, handler_body)
                         finally:
-                            self.active_temporaries.append(held)
-                    current, validated, operation = self.invoke(current, handler,
-                        ((handler_ref, handler.type, 'handler-type', 0, None),), failure_handler=invalid_type)
-                    self.protocol(operation, K.VALIDATE_EXCEPT_TYPE_314, handler)
-                    identity = self.fresh(OperationID, 'borrowed-function-exception-match')
-                    exc = self.use(identity, caught_ref, handler, 'caught-exception', 0)
-                    selected = self.use(identity, validated, handler.type, 'dynamic-handler', 0)
-                    world = self.use(identity, current.state, handler, 'match-world', 0)
-                    boolean = DataValue(self.fresh(ValueID, 'exception-match'), self.function_context,
-                                        OperationResult(identity, 0), 'builtins.bool')
-                    self.add_value(boolean); self.link_value(boolean, handler, SourceRole.TRUTH)
-                    self.emit(current, Operation(identity, 'borrowed-function-exception-match',
-                        (Behavior.COMPUTE, Behavior.READ, Behavior.CONTROL), (exc, selected, world), (boolean.id,),
-                        (StateAccess(self.world, world.id, AccessMode.READ, footprint=Footprint(FootprintKind.WHOLE)),), effects_complete=True), handler, SourceRole.TRUTH)
-                    self.protocol(identity, K.MATCH_EXCEPTION_BORROWED_314, handler)
-                    self.active_temporaries.pop()
-                    self.frame_transition(current, handler, ((handler_ref, handler.type, 'handler-type-release'),), K.FRAME_RELEASE_TEMPORARY)
-                    yes, no = self.new_block(handler), self.new_block(handler)
-                    self.branch(current, boolean.id, yes, no, handler)
-                    self.exception_matches.append(ExceptionMatcher(identity, exc.id,
-                        BlockArgument(entry.block, len(self.control_names[entry.block]) + 1),
-                        ExceptionHandlerOperand(selected.id, self.values_by_id[validated].origin),
-                        OperationResult(identity, 0), None, self.operations[-1].id, (ExistingAccess(identity, 0),)))
-                    self.cleanup_exit(no, handler, cleanup, original, original, saved, (original_port,), resume=True)
-                    current = yes
-                completed = self.statements(handler.body, current)
-                if completed is not None:
-                    if after is None:
-                        with self.in_owner(parent):
-                            after = self.control_block(node)
-                    port = ControlPort(self.fresh(ControlPortID, 'handler-fallthrough'), parent, L.FALLTHROUGH, block=after.block)
-                    self.control_ports.append(port)
-                    token = self.pending(completed, handler, port)
-                    self.cleanup_exit(completed, handler, cleanup, original, token, saved, (port,))
+                            self.failure_sinks.pop()
+                        if completed is not None:
+                            if after is None:
+                                with self.in_owner(parent):
+                                    after = self.control_block(node)
+                            with self.in_owner(parent):
+                                target = self.control_block(handler) if handler.name else after
+                            port = ControlPort(self.fresh(ControlPortID, 'handler-fallthrough'), parent, L.FALLTHROUGH, block=target.block)
+                            self.control_ports.append(port)
+                            selected_pending = self.pending(completed, handler, port)
+                            self.cleanup_exit(completed, handler, cleanup, original, selected_pending, saved, (port,))
+                            if handler.name:
+                                with self.in_owner(parent):
+                                    self.clear_exception_name(handler, target)
+                                    self.jump_values(target, after, (), handler)
+                    if current is None:
+                        break
+                if current is not None:
+                    self.cleanup_exit(current, node, cleanup, original, original, saved, (original_port,), resume=True)
             finally:
                 self.failure_sinks.pop(); self.try_depth -= 1
         return after

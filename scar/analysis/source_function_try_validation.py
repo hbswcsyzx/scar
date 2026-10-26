@@ -26,6 +26,7 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
     owners = {b: s.id for s in graph.control_scopes for b in s.blocks}
     scopes = {r.id: r for r in graph.control_scopes}
     links = {r.operation: r for r in metadata.operation_links}
+    operation_blocks = {identity:b.id for b in blocks.values() for identity in b.operations}
     protocols = {r.operation: r for r in model.protocols}
     uses = {u.id: u for op in graph.operations for u in op.uses}
     roots = [r for r in graph.control_scopes if r.parent is None]
@@ -93,19 +94,75 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
         atom = semantic.source_atoms.get(reference.atom_id)
         need(atom is not None and atom.reference == reference, 'scope source atom differs')
         return found[0]
+    def within(owner, ancestor):
+        while owner is not None:
+            if owner == ancestor:
+                return True
+            owner = scopes[owner].parent
+        return False
+
+    def check_handler(handler, scope, entry):
+        handler_source = next(a.reference for a in semantic.source_atoms.values() if a.kind == 'ExceptHandler' and (a.reference.start_line,a.reference.end_line,a.reference.start_column,a.reference.end_column)==(handler.lineno,handler.end_lineno,handler.col_offset,handler.end_col_offset))
+        matches = [r for r in graph.exception_matches if protocols[r.operation].source == handler_source]
+        validations = [operations[r.operation] for r in model.protocols
+                       if r.kind is K.VALIDATE_EXCEPT_TYPE_314 and r.source == handler_source]
+        if handler.type is not None:
+            need(len(matches) == len(validations) == 1 and uses[matches[0].input_use].value == entry.arguments[-2],
+                 'handler must match its own borrowed original caught reference')
+            normal = next(e for e in validations[0].terminator.successors if e.kind is ExitKind.NORMAL)
+            need(uses[matches[0].handler.use].value == blocks[normal.block].arguments[0],
+                 'matcher did not consume its own handler validation result')
+            handler_value = validations[0].uses[0].value
+            origin = values[handler_value].origin
+            if type(origin) is OperationResult:
+                producer = operations[origin.operation]
+            else:
+                producers = [op for op in graph.operations if op.terminator is not None
+                    and op.terminator.kind is TerminatorKind.INVOKE
+                    and any(e.kind is ExitKind.NORMAL and e.block == origin.block for e in op.terminator.successors)]
+                need(len(producers) == 1, 'handler result has no unique actual evaluation')
+                producer = producers[0]
+            need(node_for(links[producer.id].source, ast.expr) is handler.type,
+                 'handler validation did not evaluate its original AST expression')
+            definition = semantic.definitions.get(links[producer.id].semantic_operation)
+            if definition is None:
+                # The initial explicit capability admitted only this exact
+                # ordinary formal-name BindingRead, before the SG bridge.
+                formals = {semantic.slots[p.slot].name:p.slot for p in interface.parameters}
+                reads = [r for r in graph.binding_reads if r.operation == producer.id and r.normal_result == handler_value]
+                need(isinstance(handler.type, ast.Name) and handler.type.id in formals
+                     and len(reads) == 1 and values[uses[reads[0].binding].value].slot == formals[handler.type.id],
+                     'legacy handler has no exact original formal binding')
+            else:
+                need(definition.code_id == links[producer.id].source.atom_id.wire
+                     and links[producer.id].source.atom_id in definition.source_atoms,
+                     'handler evaluation lost exact original SG ownership')
+        else:
+            need(not matches and not validations, 'bare handler must not fabricate matching/type validation')
+        return matches[0] if matches else None
+
     for record in graph.cleanup_interfaces:
         scope, protected = scopes[record.scope], scopes[record.protected]
         atom = semantic.source_atoms[scope.source.atom_id]
         if atom.kind == 'Try':
             node = node_for(scope.source, ast.Try)
-            need(node.finalbody and not node.handlers and protected.source == scope.source,
-                 'cleanup is precisely the original try/finally')
-            suites = ((protected, node.body), (scope, node.finalbody))
+            need(protected.source == scope.source, 'cleanup/protected original Try differs')
+            if node.finalbody:
+                need(not node.handlers, 'combined handler/finally protocol not implemented')
+                suites = ((protected, node.body), (scope, node.finalbody))
+                handlers = ()
+            else:
+                need(bool(node.handlers), 'exception cleanup has no original handler clauses')
+                suites = ((scope, node.handlers),)
+                handlers = node.handlers
         else:
             handler = node_for(scope.source, ast.ExceptHandler)
             node = node_for(protected.source, ast.Try)
             need(len(node.handlers) == 1 and node.handlers[0] is handler and not handler.name and not node.finalbody,
-                 'handler cleanup is not the supported original no-as single handler')
+                 'legacy handler cleanup original source differs')
+            suites = ((scope, [handler]),)
+            handlers = (handler,)
+        if handlers:
             gate = blocks[next(iter(protected.blocks))]
             need(len(protected.blocks) == 1, 'handler must keep its single propagation gate')
             route = operations[gate.operations[-1]]
@@ -118,50 +175,61 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
                            and r.value == uses[pending.payload].value), None)
             need(packet is not None and uses[edges[0].arguments[-2]].value == uses[packet.exception].value,
                  'handler caught-reference must come from this original pending packet')
-            matches = [r for r in graph.exception_matches if protocols[r.operation].source == scope.source]
-            validations = [operations[r.operation] for r in model.protocols
-                           if r.kind is K.VALIDATE_EXCEPT_TYPE_314 and r.source == scope.source]
-            if handler.type is not None:
-                need(len(matches) == len(validations) == 1 and uses[matches[0].input_use].value == entry.arguments[-2],
-                     'handler must match its own borrowed original caught reference')
-                normal = next(e for e in validations[0].terminator.successors if e.kind is ExitKind.NORMAL)
-                need(uses[matches[0].handler.use].value == blocks[normal.block].arguments[0],
-                     'matcher did not consume its own handler validation result')
-                handler_value = validations[0].uses[0].value
-                origin = values[handler_value].origin
-                if type(origin) is OperationResult:
-                    producer = operations[origin.operation]
-                else:
-                    producers = [op for op in graph.operations if op.terminator is not None
-                        and op.terminator.kind is TerminatorKind.INVOKE
-                        and any(e.kind is ExitKind.NORMAL and e.block == origin.block for e in op.terminator.successors)]
-                    need(len(producers) == 1, 'handler result has no unique actual evaluation')
-                    producer = producers[0]
-                need(node_for(links[producer.id].source, ast.expr) is handler.type,
-                     'handler validation did not evaluate its original AST expression')
-                definition = semantic.definitions.get(links[producer.id].semantic_operation)
-                if definition is None:
-                    # The initial explicit capability admitted only this exact
-                    # ordinary formal-name BindingRead, before the SG bridge.
-                    formals = {semantic.slots[p.slot].name:p.slot for p in interface.parameters}
-                    reads = [r for r in graph.binding_reads if r.operation == producer.id and r.normal_result == handler_value]
-                    need(isinstance(handler.type, ast.Name) and handler.type.id in formals
-                         and len(reads) == 1 and values[uses[reads[0].binding].value].slot == formals[handler.type.id],
-                         'legacy handler has no exact original formal binding')
-                else:
-                    need(definition.code_id == links[producer.id].source.atom_id.wire
-                         and links[producer.id].source.atom_id in definition.source_atoms,
-                         'handler evaluation lost exact original SG ownership')
-            else:
-                need(not matches and not validations, 'bare handler must not fabricate matching/type validation')
-            suites = ((scope, [handler]),)
+            checked = [(handler,check_handler(handler,scope,entry)) for handler in handlers]
+            def local_reachable(start):
+                seen=set();todo=[start]
+                while todo:
+                    block=todo.pop()
+                    if block in seen or not within(owners[block],scope.id):continue
+                    seen.add(block);last=operations[blocks[block].operations[-1]]
+                    todo.extend(e.block for e in getattr(last.terminator,'successors',()))
+                return seen
+            for index,(handler,matcher) in enumerate(checked):
+                if matcher is None:continue
+                branch=operations[matcher.branch]
+                yes,no=branch.terminator.successors
+                matched=local_reachable(yes.block);missed=local_reachable(no.block)
+                for later,later_match in checked[index+1:]:
+                    if later_match is None:continue
+                    target=operation_blocks[later_match.operation]
+                    need(target in missed and target not in matched,
+                         'later handler evaluated on an earlier match or lost clause order')
+            for handler,matcher in checked:
+                if not handler.name:continue
+                source=next(a.reference for a in semantic.source_atoms.values() if a.kind=='ExceptHandler'
+                    and (a.reference.start_line,a.reference.end_line,a.reference.start_column,a.reference.end_column)==
+                    (handler.lineno,handler.end_lineno,handler.col_offset,handler.end_col_offset))
+                bound=[op for op in graph.operations if links[op.id].source==source
+                    and protocols.get(op.id) is not None and protocols[op.id].kind is K.FRAME_BIND
+                    and len(op.uses)==3 and op.uses[1].value==entry.arguments[-2]]
+                need(len(bound)==1,'handler alias must bind this one original caught reference')
+                clears={op.id for op in graph.operations if links[op.id].source==source
+                    and protocols.get(op.id) is not None and protocols[op.id].kind is K.FUNCTION_CLEAR_EXCEPTION_NAME}
+                need(bool(clears),'handler alias omitted all normal/exceptional name cleanup')
+                start=operation_blocks[bound[0].id];todo=[(start,blocks[start].operations.index(bound[0].id)+1)];seen=set()
+                while todo:
+                    block,offset=todo.pop()
+                    if(block,offset)in seen:continue
+                    seen.add((block,offset));identities=blocks[block].operations[offset:]
+                    if any(identity in clears for identity in identities):continue
+                    need(block!=entry.id,'handler alias crossed a new caught entry without clearing')
+                    last=operations[blocks[block].operations[-1]]
+                    need(last.terminator is not None and last.terminator.kind not in (TerminatorKind.RETURN,TerminatorKind.RAISE),
+                         'handler completion bypassed as-name clear/delete')
+                    for edge in getattr(last.terminator,'successors',()):
+                        target=blocks[edge.block]
+                        need(within(owners[target.id],scope.id) or links[target.operations[0]].source==source,
+                             'handler alias escaped its cleanup corridor before clearing')
+                        todo.append((target.id,0))
         for source_scope, suite in suites:
             spans = [(n.lineno, n.end_lineno, n.col_offset, n.end_col_offset) for n in suite]
-            for block in source_scope.blocks:
-                for identity in blocks[block].operations:
+            for block in blocks.values():
+                if not within(owners[block.id], source_scope.id):
+                    continue
+                for identity in block.operations:
                     source = links[identity].source
                     if source == scope.source or source == protected.source:
-                        continue  # Canonical control operations use the original Try atom.
+                        continue
                     need(source.path == scope.source.path and source.fingerprint == scope.source.fingerprint
                          and any((a, c) <= (source.start_line, source.start_column)
                              and (source.end_line, source.end_column) <= (b, d) for a, b, c, d in spans),
@@ -217,6 +285,37 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
             edge = next(e for e in constructors[0].terminator.successors if e.kind is ExitKind.NORMAL)
             need(operation.uses[0].value == blocks[edge.block].arguments[0],
                  'assert propagation is not its actual newly allocated exception reference')
+            expected[identity] = kind
+        elif kind is K.FUNCTION_CLEAR_EXCEPTION_NAME:
+            from scar.ir.program.bindings import BindingState
+            from scar.ir.program.model import LiteralOrigin
+            handler = node_for(protocols[identity].source, ast.ExceptHandler)
+            op = operations[identity]
+            need(handler.name is not None and len(op.uses) == 2
+                 and type(values[op.uses[0].value]) is LocalBindingValue
+                 and type(values[op.uses[1].value]) is StateVersionValue
+                 and not op.effects_complete and op.terminator is None
+                 and set(op.behaviors) == {Behavior.READ,Behavior.WRITE,Behavior.MEMORY}
+                 and len(op.accesses) == 1 and op.accesses[0].mode is AccessMode.READ_WRITE,
+                 'exception alias deletion lost exact binding/current world')
+            bound = values[op.uses[0].value]
+            slot = semantic.slots[bound.slot]
+            need(slot.owner == interface.definition and slot.name == handler.name,
+                 'exception alias deletion targets another source local')
+            definition = next((r for r in graph.binding_definitions if r.value == bound.id), None)
+            need(definition is not None and definition.state is BindingState.BOUND
+                 and type(values[uses[definition.payload].value].origin) is LiteralOrigin
+                 and values[uses[definition.payload].value].origin.value is None,
+                 'exception alias must be overwritten with None before deletion')
+            block = next(b for b in blocks.values() if identity in b.operations)
+            position = block.operations.index(identity)
+            need(position + 1 < len(block.operations), 'exception alias missing unbound definition')
+            deleted = operations[block.operations[position+1]]
+            records = [r for r in graph.binding_definitions if r.value in deleted.results]
+            need(len(records) == 1 and records[0].state is BindingState.UNBOUND
+                 and values[records[0].value].slot == bound.slot
+                 and links[deleted.id].source == protocols[identity].source,
+                 'exception alias deletion must define this same local UNBOUND')
             expected[identity] = kind
         elif kind is K.VALIDATE_EXCEPT_TYPE_314:
             node = node_for(protocols[identity].source, ast.ExceptHandler)
