@@ -1,0 +1,9 @@
+{
+  "corrupt_copy_rejected": "source entry catalog: entry catalog mutated",
+  "status": "COPIED_MEMORY_REJECT_AND_NORMAL_METADATA_PASS",
+  "graph_decode": 0,
+  "CodeType_load": 0,
+  "compile": 0,
+  "target": 0,
+  "elapsed_s": 41.02968335204059
+}

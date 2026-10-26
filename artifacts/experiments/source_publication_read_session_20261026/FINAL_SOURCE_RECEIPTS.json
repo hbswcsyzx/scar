@@ -1,0 +1,44 @@
+{
+  "baseline": "main edd4b259; alignment-only isolated commit4cebb87d must not be replayed on main",
+  "final_delta_after_body_check": "one extra ordinary check of copied rows/owner/archive memory before private registry; final metadata positive and deliberately corrupted copy negative passed",
+  "final_metadata_check": {
+    "bytes": 246,
+    "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/copied-memory-result.json",
+    "sha256": "340dd2fbb96ed87ecd7db80978cc1e9096fb97f275d1e64c5089adf28c23af26"
+  },
+  "ordinary_body_check_source_pins": [
+    {
+      "bytes": 114807,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/scar/analysis/program_composition.py",
+      "sha256": "78c7ca8b322f68d0282b86058f9ce79f009d485039deaa3448868c9a16326b39"
+    },
+    {
+      "bytes": 23042,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/scar/analysis/source_entry_catalog.py",
+      "sha256": "85c8de4ffd0952d4503b2bddaaf713bb5a14b1fd4e5b3fa1740bc7cd799d019b"
+    },
+    {
+      "bytes": 75739,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/scar/analysis/source_program_publication.py",
+      "sha256": "7891141ba66612e06686e43bb92f2101780d8a926720b1a57199816d4ca42df4"
+    }
+  ],
+  "patch_commit": "a7dc1aa08ac7f9caea224f2f889735f9a3146f1c",
+  "sources": [
+    {
+      "bytes": 75739,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/scar/analysis/source_program_publication.py",
+      "sha256": "7891141ba66612e06686e43bb92f2101780d8a926720b1a57199816d4ca42df4"
+    },
+    {
+      "bytes": 114807,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/scar/analysis/program_composition.py",
+      "sha256": "78c7ca8b322f68d0282b86058f9ce79f009d485039deaa3448868c9a16326b39"
+    },
+    {
+      "bytes": 23239,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/scar/analysis/source_entry_catalog.py",
+      "sha256": "1b79c8949dc679a876b079ac8b8f752128c07eb621a63031a16fc7bc5578547d"
+    }
+  ]
+}

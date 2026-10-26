@@ -1,0 +1,87 @@
+{
+  "files": [
+    {
+      "bytes": 2030,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/FINAL_SOURCE_RECEIPTS.json",
+      "sha256": "6fadee4e2a381b84e980beb528e993793f3e23c3e55d2f8f956e6463a54955bc"
+    },
+    {
+      "bytes": 3193,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/REPORT.md",
+      "sha256": "7127679a923440fdf07ed19996742644f9769fd9364fd34df6d8f4b5c020b16a"
+    },
+    {
+      "bytes": 5642,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/check.py",
+      "sha256": "e752eb4b7dac7369e18653e3ae3e436746f2f0969c234391da0b232551fd1aa2"
+    },
+    {
+      "bytes": 246,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/copied-memory-result.json",
+      "sha256": "340dd2fbb96ed87ecd7db80978cc1e9096fb97f275d1e64c5089adf28c23af26"
+    },
+    {
+      "bytes": 0,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/copied-memory-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 230,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/copied-memory-stdout.txt",
+      "sha256": "151fef0367cdd539ddc5164bfbf21fd6df628fdd7560e003aa386052ba54b3e7"
+    },
+    {
+      "bytes": 2985,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/copied_memory_check.py",
+      "sha256": "cc28ce192aabb92a3c84ff2447c6d9855710cafdf3eeea414dd1debbe18f27e7"
+    },
+    {
+      "bytes": 1703,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/publication/bodies/00000.json.gz",
+      "sha256": "48e7fbc39f5234ef3a529aae709fe2a262768caeeaf4a4e717702c1918708860"
+    },
+    {
+      "bytes": 1706,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/publication/bodies/00001.json.gz",
+      "sha256": "f7b948ee506a75076d3f09f53fa7031431a5ea7304b3fc9f46a481a6de94859c"
+    },
+    {
+      "bytes": 69765,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/publication/manifest.json",
+      "sha256": "c16cd797ae853b17b898af6b64210ebcb49242798aa613c7627c40b42295a277"
+    },
+    {
+      "bytes": 5734,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/result.json",
+      "sha256": "0dc700701ad2b96c2c766c63bae4c95bee9cd69f3fa04813bb20587e44f61f6e"
+    },
+    {
+      "bytes": 1122,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/selection.json",
+      "sha256": "586b4a07ff9c82a47497d71bb08d245ef5a2e4ae504aff41d45d7f1abdb4ebd7"
+    },
+    {
+      "bytes": 23322,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/source-reader-session.diff",
+      "sha256": "02ce8fdf6485a4c30b46cccb94fdeb9ef35aa2616f1384d95ca1a8396953645d"
+    },
+    {
+      "bytes": 0,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 4682,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/stdout.txt",
+      "sha256": "3c1d547aaa3e712dd42f4908e95772bbfe1c237c8a113f68605438c2c24930de"
+    },
+    {
+      "bytes": 853,
+      "path": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/source_publication_read_session_20261026/time.txt",
+      "sha256": "237a82215dc49e250604402940fb33c49384b6560f5d208bd0c759d3c65ded24"
+    }
+  ],
+  "original_SP5_payloads_copied": false,
+  "raw_native_OS_models_copied": false,
+  "scope": "component/source-reader compatibility only; existing program references preserved; all old main131 artifacts untouched"
+}
