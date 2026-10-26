@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_source_entries_20261026/prepare.py", line 139, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/experiments/function_try_source_entries_20261026/prepare.py", line 126, in main
+    need(owner.measurements()['graph_artifacts_read']==0 and all(s.counts['module_loads']==s.counts['compile_attempts']==0 for s in archives._stores.values()),'preparation acquired graph/CodeType')
+         ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'graph_artifacts_read'

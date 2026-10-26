@@ -1,0 +1,100 @@
+"""Root launches one normal archived function-Try worker, never a target."""
+from collections import Counter
+from pathlib import Path
+import gc, json, resource, signal, threading, time, traceback
+from common import HERE, ROOT, OLD, OBSERVER, canonical, need, normal_inputs, worker_budget
+
+
+def main():
+    need(not (HERE / 'result').exists(), 'fresh output required')
+    config = json.loads((HERE / 'inputs.json').read_bytes())
+    freeze = json.loads((HERE / 'freeze.json').read_bytes())
+    observer = OBSERVER.Driver(config, freeze)
+    observer.output = HERE / 'result'; observer.output.mkdir()
+    observer.phase = 'PRE_FROZEN_CHECK'
+    OBSERVER.START = time.monotonic()
+    resource.setrlimit(resource.RLIMIT_AS, (config['budgets']['AS_bytes'],) * 2)
+    def terminated(signum, frame):
+        raise OBSERVER.WallFrontier('external timeout; original partial worker retained')
+    signal.signal(signal.SIGTERM, terminated)
+    heartbeat = threading.Thread(target=observer.heartbeat, daemon=True); heartbeat.start()
+    failure = None; owner = archives = catalog = result = plan = None
+    selected = config['selected_keys']; started = time.monotonic(); manifest = None; owned = 0
+    try:
+        observer.check_frozen(); observer.install_readers()
+        read_plan = observer.read_json(config['read_plan']['path'], config['read_plan'])
+        observer.phase = 'NORMAL_CATALOG_ONCE'
+        owner, archives, catalog, metadata = normal_inputs(config, observer)
+        ready = {r['entry_key']: r for r in metadata['candidates']
+                 if r['status'] == 'CANDIDATE_SOURCE_GRAPH_UNVERIFIED'}
+        need(set(selected) <= set(ready), 'selected original Try candidate is no longer ready')
+        for row in read_plan['selected']:
+            need(ready[row['entry_key']]['basis'] == row['original_candidate']['basis'],
+                 'selected complete descriptor/source/definition/namespace differs')
+        observer.graph_allowed = {r['source_graph']['path']: r['source_graph']['declaration']
+                                  for r in read_plan['selected_files']}
+        from scar.analysis.source_frontend_worklist import plan_source_entries, run_source_entries
+        from scar.ir.program.source_language import SourceLanguageCapability
+        capabilities = tuple(SourceLanguageCapability(x) for x in config['capabilities'])
+        observer.phase = 'NORMAL_PLAN'
+        plan = plan_source_entries(catalog, budget=worker_budget(), capabilities=capabilities,
+            eligible_entry_keys=tuple(selected), dispatch_order='FILE_GROUPED_V1',
+            out_dir=observer.output / 'plan')
+        need([r['entry_key'] for r in plan.dispatch] == selected, 'normal dispatch order differs')
+        observer.phase = 'NORMAL_WORKER'
+        def progress(row):
+            observer.active_key = row['entry_key']; observer.event(row); observer.check_output()
+        result = run_source_entries(plan, observer.output / 'worker', budget=worker_budget(), progress=progress)
+        manifest = result.document; owned = len(result.owned_returns)
+        observer.save(observer.output / 'public-return.json',
+            {'document': manifest, 'digest': result.digest, 'live_returns_before_release': owned,
+             'second_full_graph_reader': 'NOT_REPEATED', 'publication': 'NOT_RUN'})
+    except BaseException as error:
+        failure = {'type': type(error).__name__, 'detail': str(error), 'traceback': traceback.format_exc(),
+            'category': 'BUDGET' if isinstance(error, OBSERVER.BudgetFrontier) else
+                        'WALL' if isinstance(error, OBSERVER.WallFrontier) else 'SOURCE_OR_INPUT_CONTRADICTION'}
+        error.__traceback__ = None
+    finally:
+        result = plan = None; gc.collect(); observer.active_key = None
+        observer.phase = 'LEDGER_AND_FROZEN_POSTCHECK'
+        terminals = {}
+        for path in (observer.output / 'worker').glob('attempt-*/result.json'):
+            row = observer.read_json(path, kind='ledger_terminal'); terminals[row['entry_key']] = row
+        starts = {}
+        for path in (observer.output / 'worker').glob('attempt-*/started.json'):
+            row = observer.read_json(path, kind='ledger_started'); starts[row['entry_key']] = row
+        need(set(terminals) <= set(selected) and set(starts) <= set(selected), 'worker wrote an entry outside selected window')
+        rows = [terminals.get(key, {'entry_key': key,
+            'status': 'STARTED_NO_TERMINAL' if key in starts else 'NOT_ATTEMPTED'}) for key in selected]
+        try:
+            observer.check_frozen(); observer.check_output()
+            if archives:
+                need(all(s.counts['compile_attempts'] == 0 and s.counts['source_bytes_read'] == 0
+                         for s in archives._stores.values()), 'readonly worker compiled/read live source')
+        except BaseException as error:
+            post = {'type': type(error).__name__, 'detail': str(error)}
+            if failure: failure['postcheck'] = post
+            else: failure = post
+        counts = dict(Counter(r['status'] for r in rows))
+        final = {'status': 'FAILED_RETAINED_WITH_OPEN' if failure else 'NORMAL_TRY_SOURCE_ENTRY_ATTEMPT_WITH_OPEN',
+            'failure': failure, 'counts': counts, 'entries': rows, 'original_groups': 817, 'original_calls': 100438,
+            'source_candidates': 243, 'selected_window': len(selected), 'worker_manifest': manifest,
+            'normal_catalog_constructed_once': catalog is not None,
+            'catalog_measurements': catalog.measurements() if catalog else None,
+            'readonly_counts': [dict(s.counts) for s in archives._stores.values()] if archives else [],
+            'owned_returns_before_release': owned, 'owned_returns_released': True,
+            'source_scope': 'original272038 static source qualification; current369749 runtime unchanged',
+            'original_source209_terminals_preserved': True, 'compile_target_episode_raw_publication_current_binding': False,
+            'whole_first_stage_complete': False, 'elapsed_s': time.monotonic() - started, 'IO': observer.io()}
+        observer.stop.set(); heartbeat.join(timeout=1)
+        try:
+            observer.save(observer.output / 'terminal.json', final)
+        except OBSERVER.BudgetFrontier:
+            (HERE / 'terminal-budget-frontier.json').write_bytes(canonical(final) + b'\n')
+        print(json.dumps({'status': final['status'], 'counts': counts, 'elapsed_s': final['elapsed_s'],
+                          'failure': failure, 'IO': observer.io()}), flush=True)
+    return 1 if failure else 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
