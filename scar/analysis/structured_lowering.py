@@ -90,7 +90,9 @@ class StructuredBuilder(_Builder):
             tuple(self.language_constants) if graph is not None else (),
             tuple(self.language_compiler_locals),
             self.language_options.code_evidence.to_dict() if self.language_options.code_evidence else None,
-            namespace_root=self.language_namespace_root)
+            namespace_root=self.language_namespace_root,
+            version='PYTHON_SOURCE_LANGUAGE_V2' if self.has_language('LAMBDA_EXPRESSION_314_V1') else 'PYTHON_SOURCE_LANGUAGE_V1',
+            lambda_bodies=tuple(getattr(self,'lambda_bodies',())) if graph is not None else ())
 
     def emit(self, cursor, operation, node, role, old=None):
         super().emit(cursor, operation, node, role, old=old)
@@ -667,12 +669,17 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
     require_valid(graph)
     delegated = set()
     if language is not None:
+        if language.lambda_bodies:
+            from scar.analysis.source_lambda_validation import validate_lambda_regions,root_projection as lambda_projection
+            delegated.update(validate_lambda_regions(model,graph,interface,metadata,semantic,control,language,
+                source_tree=source_tree,options=language_options,structural_only=structural_only,sealed_source=sealed_source))
+            model,graph,metadata,language=lambda_projection(model,graph,metadata,language,delegated)
         from scar.ir.program.source_language import SourceLanguageCapability
         if any(c in language.capabilities for c in (SourceLanguageCapability.GENEXPR_314_V1,
                 SourceLanguageCapability.GENEXPR_CREATION_314_V1)):
             from scar.analysis.source_generator_validation import validate_generator_regions, root_projection
-            delegated = validate_generator_regions(model, graph, interface, metadata, semantic, language,
-                source_tree=source_tree, options=language_options, structural_only=structural_only)
+            delegated.update(validate_generator_regions(model, graph, interface, metadata, semantic, language,
+                source_tree=source_tree, options=language_options, structural_only=structural_only))
             model, graph, metadata, language = root_projection(model, graph, metadata, language, delegated)
     environment_profile = interface.profile is BodyLoweringProfile.STRUCTURED_ENV
     if (interface.profile not in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV) or model.region != graph.root
@@ -799,7 +806,8 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
     if language is not None:
         from scar.analysis.source_language_validation import validate_language_body
         validate_language_body(model, graph, interface, metadata, semantic, language,
-                               source_tree=source_tree, options=language_options, structural_only=structural_only)
+                               source_tree=source_tree, options=language_options, structural_only=structural_only,
+                               control=control,sealed_source=sealed_source)
     expected_loops = {link.source.atom_id for link in metadata.operation_links
         if semantic.source_atoms[link.source.atom_id].kind in ("While", "For")
         and operations[link.operation].terminator is not None

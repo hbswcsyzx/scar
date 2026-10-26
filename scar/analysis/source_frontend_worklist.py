@@ -26,7 +26,7 @@ from scar.ir.program.call_edges import CapturedCode, CodeCapture, CodeSourceLink
 from scar.ir.program.compilation import CallCompilationProfile
 from scar.ir.program.functions import BodyLoweringProfile
 from scar.ir.program.inventory import DefinitionKind, DefinitionInventory, SourceContextDigest
-from scar.ir.program.source_language import SourceLanguageCapability
+from scar.ir.program.source_language import SourceLanguageCapability, encode_language_overlay
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import SourceSnapshot
 
@@ -503,7 +503,7 @@ def run_source_frontend(plan, code_witnesses, out_dir, *, budget=SourceFrontendB
                     # before any potentially large source-program serialization.
                     returned = {'schema': 'scar.source-frontend-lowered-return', 'schema_version': 1,
                         'metadata': encode(result.metadata), 'interface': encode(result.interface), 'frame': encode(result.frame),
-                        'structured': encode(result.structured), 'language': encode(result.language),
+                        'structured': encode(result.structured), 'language': encode_language_overlay(result.language) if result.language is not None else None,
                         'operations_emitted': result.operations_emitted, 'graph_present': result.graph is not None,
                         'graph_artifact': None, 'whole_program_established': False}
                     (attempt / 'returned-metadata.json').write_bytes(_bytes(returned) + b'\n')
@@ -590,8 +590,9 @@ SOURCE_ENTRY_PROFILE_314_V4 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V4'
 SOURCE_ENTRY_PROFILE_314_V5 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V5'
 SOURCE_ENTRY_PROFILE_314_V6 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V6'
 SOURCE_ENTRY_PROFILE_314_V7 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V7'
-SOURCE_ENTRY_PROFILES = (SOURCE_ENTRY_PROFILE_314_V2, SOURCE_ENTRY_PROFILE_314_V3, SOURCE_ENTRY_PROFILE_314_V4, SOURCE_ENTRY_PROFILE_314_V5, SOURCE_ENTRY_PROFILE_314_V6, SOURCE_ENTRY_PROFILE_314_V7)
-LATEST_SOURCE_ENTRY_PROFILE = SOURCE_ENTRY_PROFILE_314_V7
+SOURCE_ENTRY_PROFILE_314_V8 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V8'
+SOURCE_ENTRY_PROFILES = (SOURCE_ENTRY_PROFILE_314_V2, SOURCE_ENTRY_PROFILE_314_V3, SOURCE_ENTRY_PROFILE_314_V4, SOURCE_ENTRY_PROFILE_314_V5, SOURCE_ENTRY_PROFILE_314_V6, SOURCE_ENTRY_PROFILE_314_V7, SOURCE_ENTRY_PROFILE_314_V8)
+LATEST_SOURCE_ENTRY_PROFILE = SOURCE_ENTRY_PROFILE_314_V8
 
 
 def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=(
@@ -617,6 +618,8 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
     V6 additionally selects ordered non-starred set display construction and
     the existing function protocol for AugAssign (heap targets stay unsupported).
     V7 additionally connects fixed unpack results to original heap/cell targets.
+    V8 additionally selects original Lambda creation/expression-body Regions and
+    witnessed non-scalar code constants from the exact definition-time AST.
     """
     from scar.analysis.source_entry_catalog import SourceEntryCatalog
     _need(type(catalog) is SourceEntryCatalog and type(budget) is SourceFrontendBudget,
@@ -725,12 +728,18 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
             for child in (*node.decorator_list,*node.args.defaults,*(x for x in node.args.kw_defaults if x is not None)):
                 yield from own_nodes(child)
             return
-        if isinstance(node,(ast.Lambda,ast.ClassDef)):return
+        if isinstance(node,ast.Lambda):
+            if profile == SOURCE_ENTRY_PROFILE_314_V8:
+                yield node
+                for value in (*node.args.defaults,*(v for v in node.args.kw_defaults if v is not None)):
+                    yield from own_nodes(value)
+            return
+        if isinstance(node,ast.ClassDef):return
         yield node
         for child in ast.iter_child_nodes(node):yield from own_nodes(child)
     own=tuple(n for root in nodes[0].body for n in own_nodes(root))
-    with_scope=profile in (SOURCE_ENTRY_PROFILE_314_V3,SOURCE_ENTRY_PROFILE_314_V4,SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7) and any(isinstance(n,ast.With)for n in own)
-    augmented_scope=profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7) and any(isinstance(n,ast.AugAssign)for n in own)
+    with_scope=profile in (SOURCE_ENTRY_PROFILE_314_V3,SOURCE_ENTRY_PROFILE_314_V4,SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,ast.With)for n in own)
+    augmented_scope=profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,ast.AugAssign)for n in own)
     if ((automatic or policy is not None) and (any(isinstance(n,ast.Try)for n in own)or with_scope or augmented_scope)
             and SourceLanguageCapability.FUNCTION_TRY_314_V1 not in capabilities):
         capabilities+=(SourceLanguageCapability.FUNCTION_TRY_314_V1,)
@@ -746,12 +755,19 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
         capabilities+=(SourceLanguageCapability.FUNCTION_WITH_314_V1,)
     if profile == SOURCE_ENTRY_PROFILE_314_V4 and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.GENEXPR_314_V1,)
-    if profile in (SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7) and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_CREATION_314_V1 not in capabilities:
+    if profile in (SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_CREATION_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.GENEXPR_CREATION_314_V1,)
-    if profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7) and any(isinstance(n,ast.Set)for n in own) and SourceLanguageCapability.SET_DISPLAY_314_V1 not in capabilities:
+    if profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,ast.Set)for n in own) and SourceLanguageCapability.SET_DISPLAY_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.SET_DISPLAY_314_V1,)
-    if profile == SOURCE_ENTRY_PROFILE_314_V7 and any(isinstance(n,(ast.Tuple,ast.List))and isinstance(n.ctx,ast.Store)for n in own) and SourceLanguageCapability.UNPACK_TARGETS_314_V1 not in capabilities:
+    if profile in (SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,(ast.Tuple,ast.List))and isinstance(n.ctx,ast.Store)for n in own) and SourceLanguageCapability.UNPACK_TARGETS_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.UNPACK_TARGETS_314_V1,)
+    if profile == SOURCE_ENTRY_PROFILE_314_V8 and any(isinstance(n,ast.Lambda)for n in own) and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 not in capabilities:
+        capabilities+=(SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1,)
+    if profile == SOURCE_ENTRY_PROFILE_314_V8:
+        from scar.analysis.source_constant_lowering import needs_code_constant
+        if (any(needs_code_constant(node) for node in own)
+                and SourceLanguageCapability.CODE_CONSTANTS_314_V1 not in capabilities):
+            capabilities += (SourceLanguageCapability.CODE_CONSTANTS_314_V1,)
     return capabilities
 
 
@@ -792,7 +808,7 @@ class _OwnedEntryReturn:
         return {'schema': 'scar.source-frontend-lowered-return', 'schema_version': 2,
             'entry_reference': encode(self.entry.reference), 'code_source_origin': self.entry.origin,
             'work_key': self.work_key, 'metadata': encode(r.metadata), 'interface': encode(r.interface),
-            'frame': encode(r.frame), 'structured': encode(r.structured), 'language': encode(r.language),
+            'frame': encode(r.frame), 'structured': encode(r.structured), 'language': encode_language_overlay(r.language) if r.language is not None else None,
             'operations_emitted': r.operations_emitted, 'graph_present': r.graph is not None,
             'graph_artifact': self.program_reference, 'live_owner_restored_by_record': False,
             'normal_publication_checkpoint': 'CP2_UNKNOWN_COST_NOT_YET_PUBLISHED', 'whole_program_established': False}
@@ -1013,7 +1029,7 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
 __all__ = ['SourceFrontendBudget', 'SourceFrontendPlan', 'plan_source_frontend', 'run_source_frontend',
            'SourceEntryFrontendPlan', 'SourceEntryFrontendResult', 'plan_source_entries', 'run_source_entries',
            'SOURCE_ENTRY_PROFILE_314_V2', 'SOURCE_ENTRY_PROFILE_314_V3', 'SOURCE_ENTRY_PROFILE_314_V4',
-           'SOURCE_ENTRY_PROFILE_314_V5', 'SOURCE_ENTRY_PROFILE_314_V6', 'SOURCE_ENTRY_PROFILE_314_V7', 'SOURCE_ENTRY_PROFILES', 'LATEST_SOURCE_ENTRY_PROFILE']
+           'SOURCE_ENTRY_PROFILE_314_V5', 'SOURCE_ENTRY_PROFILE_314_V6', 'SOURCE_ENTRY_PROFILE_314_V7', 'SOURCE_ENTRY_PROFILE_314_V8', 'SOURCE_ENTRY_PROFILES', 'LATEST_SOURCE_ENTRY_PROFILE']
 
 
 def module_entry_catalog(composition, *, max_files=4096):

@@ -49,6 +49,9 @@ def dispatch_source_expression(builder, node, cursor):
         from scar.analysis.source_constant_lowering import needs_code_constant, lower_code_constant
         if needs_code_constant(node):
             return lower_code_constant(builder, node, cursor)
+    if builder.has_language('LAMBDA_EXPRESSION_314_V1') and isinstance(node,ast.Lambda):
+        from scar.analysis.source_lambda_lowering import lower_lambda
+        return lower_lambda(builder,node,cursor)
     if builder.has_language("SET_DISPLAY_314_V1") and isinstance(node, ast.Set):
         from scar.analysis.source_set_lowering import lower_set_display
         return lower_set_display(builder, node, cursor)
@@ -118,6 +121,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         if hasattr(self, "generator_records"):
             from scar.analysis.source_generator_lowering import assemble_generators
             graph = assemble_generators(self, graph)
+        if hasattr(self,'lambda_bodies'):
+            from scar.analysis.source_lambda_lowering import assemble_lambda_bodies
+            graph = assemble_lambda_bodies(self,graph)
         return graph
 
     def _addresses(self, operation_id, effects):

@@ -237,7 +237,8 @@ class SourceProgram:
         if self.profile in (BodyLoweringProfile.STRUCTURED_BODY, BodyLoweringProfile.STRUCTURED_ENV):
             document["structured"] = encode(self.structured)
         if self.language is not None:
-            document["language"] = encode(self.language)
+            from scar.ir.program.source_language import encode_language_overlay
+            document["language"] = encode_language_overlay(self.language)
         if not include_context:
             for name in ("semantic", "semantics", "control"):
                 del document[name]
@@ -373,7 +374,8 @@ class SourceProgram:
             frame = FrameModel.from_dict(document["frame"]) if document["frame"] is not None else None
         if version in (3, 4, 5):
             structured = decode(StructuredBodyModel, document["structured"]) if document["structured"] is not None else None
-        language = decode(SourceLanguageOverlay, document["language"]) if version == 5 else None
+        from scar.ir.program.source_language import decode_language_overlay
+        language = decode_language_overlay(document["language"]) if version == 5 else None
         if version < 5:
             reject_extended_protocols(structured)
             if language_options is not None:
@@ -1382,7 +1384,8 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             creation_source = result.language is not None and SourceLanguageCapability.GENEXPR_CREATION_314_V1 in result.language.capabilities
             set_source = result.language is not None and SourceLanguageCapability.SET_DISPLAY_314_V1 in result.language.capabilities
             unpack_source = result.language is not None and SourceLanguageCapability.UNPACK_TARGETS_314_V1 in result.language.capabilities
-            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source):
+            lambda_source = result.language is not None and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 in result.language.capabilities
+            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source or lambda_source):
                 if not structural_only and language_options is None:
                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
                 if structural_only:
@@ -1393,6 +1396,7 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
                                          else "generator creation STRUCTURE requires its exact retained source text" if creation_source
                                          else "set display STRUCTURE requires its exact retained source text" if set_source
                                          else "unpack target STRUCTURE requires its exact retained source text" if unpack_source
+                                         else "Lambda expression STRUCTURE requires its exact retained source text" if lambda_source
                                          else "expanded call STRUCTURE requires its exact retained source text")
                     source_text = source_texts[result.metadata.source.path]
                 else:

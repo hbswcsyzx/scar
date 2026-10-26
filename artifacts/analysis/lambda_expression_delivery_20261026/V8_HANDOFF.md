@@ -1,0 +1,8 @@
+V8选择已实现Lambda与其definition-time defaults；Lambda.body不当outer执行，child adapter仅在原Region中处理已实现表达式。旧None/V2–V7选择保持。
+
+Root已实现的CODE_CONSTANTS可窄加同V8：从source_constant_lowering导入needs_code_constant，对own AST nodes有任一匹配时增加SourceLanguageCapability.CODE_CONSTANTS_314_V1；无需新profile版本。child非legacy Constant需由parent真实code的原lambda constant slot派生child code context，不能拿parent LOAD_CONST按span猜；本次Dict/str/Name不依赖该扩展。
+
+SourceFunctionTry.build_function现有后处理会重写所有self.regions的RAISE ABI。组合Lambda child现已将该改写限于region.id==self.function_context；这是独立普通函数frame出口，不能误用创建帧except/packet。本次functools无Try/With/Aug，未声明该组合实际通过；已按Root要求补此精确一行修正，未另开组合门，不追认为本次实际覆盖。
+
+主线已落实：V8自动选择nonlegacy Constant；两个lowered-return writer使用V1兼容codec；
+FunctionTry后处理只改self.function_context。原实测/后续窄改的代码收据分别保留，未新增Try组合成绩。

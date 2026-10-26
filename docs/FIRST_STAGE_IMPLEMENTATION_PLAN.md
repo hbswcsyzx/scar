@@ -65,7 +65,7 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 - 源前端新增 expanded call、函数 Try、nested function 能力已合入主分支；归并后的
   函数内import、flat With及独立generator creation已分别补通4、2、1个真实body；
   新增Set显示式、既有AugAssign接线及通用heap/cell解包后，243个外部入口现在
-  197个可恢复、45个未支持、1个resumable adapter缺口。
+  198个可恢复、44个未支持、1个resumable adapter缺口。
   这是源恢复结果，不是全部已接回动态调用。
 - 161 个旧成功入口已正常发布；新能力对应的 body 还需按原 ID 接回正式模型。
   不重跑已完成的整批普通发布/读取。
@@ -82,6 +82,10 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
   generator创建/惰性body与未知消费接口分开。
   V7固定解包继续复用原heap/cell/global store；真实新PIL body92ops完整恢复，另一
   入口越过解包后停在Lambda，仍按未支持计数，不扩写成功范围。
+  随后V8补通该原入口：187个操作中包含独立Lambda表达式Region（17个操作），
+  结构和独立source/readonly CodeWitness正常读回通过；创建只产一个函数引用，
+  捕获cell引用，未来调用读取内容。V8也按原AST自动选择CodeConstant能力。
+  这是新增1个源body，尚未计入正式发布或当前运行绑定。
   model-run source-entries默认选择latest，API旧None/CLI legacy保留。
   它仍要求正常entry及readonly CodeWitness，不把选择策略当作运行对应证明。
 - native端口全源流式生成已实际完成：310412原节点、230818算子实例、1256501端口，

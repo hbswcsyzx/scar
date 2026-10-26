@@ -702,7 +702,8 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         node = super().build_function()
         packet = ProtocolValueType(P.EXCEPTION_PACKET)
         self.regions = [replace(region, exits=tuple(replace(port, types=(packet, self.state_type))
-            if port.kind is ExitKind.RAISE else port for port in region.exits)) for region in self.regions]
+            if port.kind is ExitKind.RAISE else port for port in region.exits))
+            if region.id == self.function_context else region for region in self.regions]
         return node
 
     def make_graph(self):

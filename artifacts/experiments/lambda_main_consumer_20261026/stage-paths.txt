@@ -1,0 +1,7 @@
+artifacts/experiments/lambda_main_consumer_20261026/run.py
+artifacts/experiments/lambda_main_consumer_20261026/stdout.json
+artifacts/experiments/lambda_main_consumer_20261026/stderr.txt
+artifacts/experiments/lambda_main_consumer_20261026/receipt.json
+artifacts/experiments/lambda_main_consumer_20261026/EXPLANATION.json
+artifacts/experiments/lambda_main_consumer_20261026/REPORT.md
+artifacts/experiments/lambda_main_consumer_20261026/stage-paths.txt

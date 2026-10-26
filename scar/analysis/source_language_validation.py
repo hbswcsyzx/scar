@@ -29,7 +29,13 @@ def _need(condition, detail):
 
 
 def validate_language_body(model, graph, interface, metadata, semantic, language,
-                           *, source_tree=None, options=None, structural_only=False):
+                           *, source_tree=None, options=None, structural_only=False,control=None,sealed_source=None):
+    if language is not None and language.lambda_bodies:
+        from scar.analysis.source_lambda_validation import validate_lambda_regions,root_projection as lambda_projection
+        _need(control is not None,'Lambda body checking requires the original control context, not a fabricated suite')
+        delegated=validate_lambda_regions(model,graph,interface,metadata,semantic,control,language,
+            source_tree=source_tree,options=options,structural_only=structural_only,sealed_source=sealed_source)
+        model,graph,metadata,language=lambda_projection(model,graph,metadata,language,delegated)
     if (language is not None and any(c in language.capabilities for c in
             (Capability.GENEXPR_314_V1, Capability.GENEXPR_CREATION_314_V1))
             and graph.resumable_creates):

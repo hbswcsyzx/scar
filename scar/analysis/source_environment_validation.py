@@ -152,9 +152,24 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
             continue
         source = semantic.definitions.get(link.semantic_operation)
         atom = semantic.source_atoms[link.source.atom_id]
+        unpacked_source=False
+        if kind in (Kind.STORE_CELL,Kind.STORE_GLOBAL) and language is not None and link.opcode is Opcode.OPAQUE:
+            from scar.ir.program.source_language import SourceLanguageCapability
+            if SourceLanguageCapability.UNPACK_TARGETS_314_V1 in language.capabilities:
+                # The old overlay had no tuple-element value, hence OPAQUE.
+                # Preserve that original record. Only the exact new NORMAL
+                # result -> original Name store is owned by the unpack rule.
+                for shape in language.unpackings:
+                    original=operations[shape.operation]
+                    normal=[e for e in original.terminator.successors if e.kind is ExitKind.NORMAL]
+                    if len(normal)!=1:continue
+                    arguments=blocks[normal[0].block].arguments
+                    for index,target in enumerate(shape.child_targets):
+                        if target==link.source and index<len(arguments)-1 and operation.uses[-2].value==arguments[index]:
+                            unpacked_source=True
         need(source is not None and source.code_id == link.source.atom_id.wire and atom.kind == "Name"
-             and link.opcode is (Opcode.ALIAS if kind in _STORES else Opcode.READ),
-             "cell/namespace protocol must correspond to its exact Name read/write")
+             and (link.opcode is (Opcode.ALIAS if kind in _STORES else Opcode.READ) or unpacked_source),
+             "cell/namespace protocol must correspond to its exact Name read/write: "+kind.value+" / "+str(link.opcode)+" / "+str(link.source.start_line))
         relation = SemanticRelation.WRITES_SLOT if kind in _STORES else SemanticRelation.READS_SLOT
         slots = source_bindings.get((source.id, relation), ())
         need(len(slots) == 1, "Name has no unique source binding slot")

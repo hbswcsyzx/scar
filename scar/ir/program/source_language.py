@@ -11,6 +11,7 @@ from enum import Enum
 from typing import Any
 
 from scar.ir.program.ids import OperationID
+from scar.ir.program.lambda_bodies import LambdaBodyDefinition
 from scar.ir.semantics_v2 import SourceSnapshot
 from scar.ir.v2.common import SourceReference
 from scar.ir.v2.ids import ValueSlotID
@@ -31,6 +32,7 @@ class SourceLanguageCapability(str, Enum):
     SET_DISPLAY_314_V1 = "PYTHON_SET_DISPLAY_314_V1"
     UNPACK_TARGETS_314_V1 = "PYTHON_UNPACK_TARGETS_314_V1"
     CODE_CONSTANTS_314_V1 = "PYTHON_CODE_CONSTANTS_314_V1"
+    LAMBDA_EXPRESSION_314_V1 = "PYTHON_LAMBDA_EXPRESSION_314_V1"
 
 
 EXTENDED_PROTOCOLS = frozenset(("UNPACK_FIXED", "BUILD_SLICE", "READ_CODE_CONSTANT",
@@ -52,6 +54,8 @@ FUNCTION_WITH_PROTOCOLS = frozenset(('WITH_ENTER_CONTEXT', 'WITH_EXIT_NORMAL', '
 EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | FUNCTION_WITH_PROTOCOLS
 FUNCTION_SET_PROTOCOLS = frozenset(('BUILD_SET_DISPLAY',))
 EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | FUNCTION_SET_PROTOCOLS
+LAMBDA_PROTOCOLS = frozenset(('MAKE_LAMBDA_FUNCTION',))
+EXTENDED_PROTOCOLS = EXTENDED_PROTOCOLS | LAMBDA_PROTOCOLS
 
 
 def _need(condition, detail):
@@ -140,9 +144,10 @@ class SourceLanguageOverlay:
     code_evidence: dict[str, Any] | None = None
     version: str = "PYTHON_SOURCE_LANGUAGE_V1"
     namespace_root: str | None = None
+    lambda_bodies: tuple[LambdaBodyDefinition, ...] = ()
 
     def __post_init__(self):
-        _need(type(self.source) is SourceSnapshot and self.version == "PYTHON_SOURCE_LANGUAGE_V1",
+        _need(type(self.source) is SourceSnapshot and self.version in ("PYTHON_SOURCE_LANGUAGE_V1", "PYTHON_SOURCE_LANGUAGE_V2"),
               "overlay needs its pinned source/version")
         from pathlib import PurePosixPath
         _need(type(self.namespace_root) is str and PurePosixPath(self.namespace_root).is_absolute()
@@ -156,6 +161,30 @@ class SourceLanguageOverlay:
             _need(type(rows) is tuple and all(type(row) is kind for row in rows), "overlay record type differs")
         _need(self.code_evidence is None or type(self.code_evidence) is dict,
               "code evidence must be a receipt projection, never a CodeType")
+        _need(type(self.lambda_bodies) is tuple and all(type(row) is LambdaBodyDefinition for row in self.lambda_bodies),
+              'Lambda body interfaces require their exact typed source record')
+        _need((self.version == 'PYTHON_SOURCE_LANGUAGE_V2') == (SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 in self.capabilities),
+              'Lambda expression bodies require their distinct language version/capability')
+        _need(not self.lambda_bodies or self.version == 'PYTHON_SOURCE_LANGUAGE_V2', 'historical source language has no Lambda body table')
+
+
+def encode_language_overlay(language):
+    """Preserve the exact V1 wire; only V2 carries Lambda body interfaces."""
+    from scar.ir.record_codec import encode
+    document = encode(language)
+    if language.version == 'PYTHON_SOURCE_LANGUAGE_V1':
+        document.pop('lambda_bodies')
+    return document
+
+
+def decode_language_overlay(document):
+    """Decode the exact historical V1 fields or the distinct V2 body table."""
+    from scar.ir.record_codec import decode
+    _need(type(document) is dict,'source language wire must be a record')
+    if document.get('version') == 'PYTHON_SOURCE_LANGUAGE_V1':
+        _need('lambda_bodies' not in document,'historical V1 wire cannot contain a Lambda body field')
+        document={**document,'lambda_bodies':[]}
+    return decode(SourceLanguageOverlay,document)
 
 
 __all__ = ["SourceLanguageCapability", "SourceLanguageOverlay", "UnpackShape", "SliceShape",
