@@ -5,6 +5,8 @@
 新 detector、backend 或加速比实验。完成后先停止并向用户讲解。
 
 - [实体、关系及完整性合同](docs/FIRST_STAGE_MODEL_CONTRACT.md)：什么东西需要建模、什么叫连接完整。
+- [图的节点、边与采集职责](docs/GRAPH_MODEL_GUIDE.md)：程序如何对应强类型记录，如何自动连接及递归展开。
+- [已实现的跨层查询入口](docs/PROGRAM_QUERY.md)：work到源码、跨函数端口和OS文件资源引用。
 - [当前交付与执行顺序](docs/FIRST_STAGE_DELIVERY.md)：真实产物、具体断口及下一项。
 - [实际运行记录](docs/FIRST_STAGE_MODEL_STATUS.md)：Observed / Implemented / Verified 与失败记录。
 - [模型设计](docs/WHOLE_PROGRAM_MODEL.md)、[现成工具与集成](docs/MODELING_INTEGRATION.md)。

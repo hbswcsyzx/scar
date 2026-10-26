@@ -163,3 +163,19 @@ def query_program_cli(args):
     else:
         print(payload, end="")
     return 1 if result.get("status") == "NOT_FOUND" else 0
+
+
+def query_os_topology_cli(args):
+    import json
+    from pathlib import Path
+    from scar.analysis.os_file_topology import query_os_file_topology
+
+    result = query_os_file_topology(args.manifest, expected_sha256=args.sha256,
+                                    path=args.path, syscall=args.syscall, limit=args.limit)
+    payload = json.dumps(encode(result), ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+    if args.out:
+        with Path(args.out).open("x", encoding="utf-8") as stream:
+            stream.write(payload)
+    else:
+        print(payload, end="")
+    return 0

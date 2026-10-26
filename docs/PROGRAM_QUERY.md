@@ -50,3 +50,30 @@ GPU work关系，未重新运行episode，也未修改LeWM。
 当前不能称为轻量。后续在不改变来源/版本判定的前提下复用会话级不可变记录。
 `verification.json`保留实际成本。最初缺少本地归档端点的失败保留在计时记录中；
 仅恢复原Git对象的准确分片后重跑成功，没有生成替代证据。
+
+## 跨函数数据端口和文件资源
+
+```bash
+python -m scar.cli query-call-ports \
+  --model PATH/model.json.gz --sha256 EXPECTED_STORED_SHA256 \
+  --invocation PID:TID:INVOCATION --direction callee --actual-index 0
+
+python -m scar.cli query-os-file-topology \
+  --manifest PATH/manifest.json --sha256 EXPECTED_SHA256 \
+  --path weights.pt --limit 3
+```
+
+跨函数查询按完整调用身份、attempt或参数序号选择，保留caller/callee原body命名空间、
+有序Use、formal slot/value、原调用/入口依据和条件。默认可枚举少量已绑定调用，
+`--direction caller`同时列出该调用者的具体未绑定原因。这里只校验准确保留的模型
+transport；不重新运行producer，也不据端口连接推断对象身份、内容或return关系。
+
+真实LeWM归档为100,550 attempts，每项均有binding或issue；其中2,516 calls有6,805
+argument ports。选中真实callee 40398的第0参数，查询准确返回`to_pygame`的`p`端口
+和调用者的原Use。结果在`artifacts/experiments/call_port_query_20261026/`。
+原runner最后的legacy比较字段写错，原exit1保留；生产consumer已完成，独立postflight
+核原输入并确认旧27条调用关系全部保留。查询成功不改变该失败历史。
+
+OS查询返回原syscall/work/actor/handle依据及逐项资源路径；不将路径导航候选当作
+已绑定的文件身份。本次checkpoint查询能找到原read和work，状态明确为共享/未知
+FD绑定未决，`resource_path`为空；不能宣称已经连接到NVMe。
