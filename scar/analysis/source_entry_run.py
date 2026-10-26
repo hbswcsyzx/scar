@@ -143,9 +143,11 @@ def _terminal(path, reader):
 
 
 def run_source_entry_stage(model_run_path, out, *, plan_only=False, resume=False,
-                           budget=SourceEntryRunBudget(), budget_sources=None, source_entry_profile=None):
+                           budget=SourceEntryRunBudget(), budget_sources=None, source_entry_profile=None, shared_context=False):
     if type(budget) is not SourceEntryRunBudget or type(plan_only) is not bool or type(resume) is not bool:
         raise ValueError('source-entry stage requires exact budget and Boolean options')
+    if type(shared_context) is not bool:
+        raise ValueError('shared context output must be an explicit bool')
     budget.__post_init__()
     from scar.analysis.source_frontend_worklist import SOURCE_ENTRY_PROFILES
     if source_entry_profile is not None and source_entry_profile not in SOURCE_ENTRY_PROFILES:
@@ -226,7 +228,7 @@ def run_source_entry_stage(model_run_path, out, *, plan_only=False, resume=False
             'raw_read': False, 'graph_decode': False, 'lower_run': False}, maximum=budget.max_report_bytes)
         result['status'] = 'BLOCKED' if blockers else 'METADATA_PLANNED_WITH_OPEN'
         if not blockers and not plan_only:
-            _execute(inputs, attempt, result, budget, source_entry_profile=source_entry_profile)
+            _execute(inputs, attempt, result, budget, source_entry_profile=source_entry_profile, shared_context=shared_context)
     except BaseException as error:
         result.update(status='FAILED', failure={'type': type(error).__name__, 'detail': str(error)})
     finally:
@@ -247,7 +249,7 @@ def run_source_entry_stage(model_run_path, out, *, plan_only=False, resume=False
     return navigation
 
 
-def _execute(inputs, attempt, result, budget, *, source_entry_profile=None):
+def _execute(inputs, attempt, result, budget, *, source_entry_profile=None, shared_context=False):
     from scar.analysis.code_witness import CodeWitnessBudget
     from scar.analysis.compiler_witness_archives import CompilerArchiveBudget, CompilerWitnessArchives
     from scar.analysis.source_attachments import SourceAttachmentBudget, SourceAttachments
@@ -307,7 +309,7 @@ def _execute(inputs, attempt, result, budget, *, source_entry_profile=None):
                 # A future capture selector is optional to source recovery.
                 # Missing/stale code or source keeps an explicit local frontier.
                 result['capture_plan_frontier'] = {'type': type(error).__name__, 'detail': str(error)}
-        worker = run_source_entries(plan, stage / 'worker', budget=worker_budget, progress=progress)
+        worker = run_source_entries(plan, stage / 'worker', budget=worker_budget, progress=progress, shared_context=shared_context)
         worker.require_unchanged()
         after = [dict(archives.store_for(ref).counts) for ref in archives.receipts()]
         result['readonly_activity'] = [{key: right[key] - left[key] for key in left} for left, right in zip(before, after)]
@@ -322,8 +324,11 @@ def _execute(inputs, attempt, result, budget, *, source_entry_profile=None):
             if returned.program_reference is not None:
                 programs.append({'entry_reference': encode(returned.entry.reference),
                                  'source_program': returned.program_reference['artifact'],
-                                 'worker_terminal': _receipt(Path(returned.program_reference['artifact']['uri']).parent / 'result.json')})
+                                 'worker_terminal': _receipt(returned._attempt_directory / 'result.json')})
         result['products']['source_programs'] = programs
+        if shared_context:
+            result['source_program_storage'] = 'SHARED_SOURCE_CONTEXT_V1'
+            result['source_fragment_costs'] = worker.document['source_fragment_costs']
         if worker.document['original_current_groups'] != result['original_denominators']['groups'] or worker.document['original_current_calls'] != result['original_denominators']['calls']:
             raise ValueError('entry worker changed the original source denominator')
         stored = sum(path.stat().st_size for path in _regular_files(attempt))

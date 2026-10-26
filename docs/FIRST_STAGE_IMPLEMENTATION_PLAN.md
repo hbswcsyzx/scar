@@ -46,7 +46,8 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 
 - 源前端新增 expanded call、函数 Try、nested function 能力已合入主分支；归并后的
   函数内import、flat With及独立generator creation已分别补通4、2、1个真实body；
-  243个外部入口现在193个可恢复、49个未支持、1个resumable adapter缺口。
+  新增Set显示式及复用既有AugAssign接线后，243个外部入口现在196个可恢复、
+  46个未支持、1个resumable adapter缺口。
   这是源恢复结果，不是全部已接回动态调用。
 - 161 个旧成功入口已正常发布；新能力对应的 body 还需按原 ID 接回正式模型。
   不重跑已完成的整批普通发布/读取。
@@ -59,7 +60,8 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 - source context/body分离已接入通用存储/区域查询入口：两份真实SP5共用一次context，
   5.15MB→2.74MB，原图视图相同。旧格式兼容，现publisher尚待迁移。
 - 最新source-entry profile已自动按原函数AST选择已实现的Try/expanded-call/nested/
-  import/flat With/generator creation能力；generator创建/惰性body与未知消费接口分开。
+  import/flat With/generator creation/Set能力，AugAssign自动复用既有FunctionTry协议；
+  generator创建/惰性body与未知消费接口分开。
   model-run source-entries默认选择latest，API旧None/CLI legacy保留。
   它仍要求正常entry及readonly CodeWitness，不把选择策略当作运行对应证明。
 - native端口全源流式生成已实际完成：310412原节点、230818算子实例、1256501端口，
@@ -75,6 +77,9 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
   已做一个真实native输出的符号payload投影：保原ReferenceValue/ObjectIdentity，
   另以Inferred关联连到LV/version/UNKNOWN provenance与region=None物化，未冒充
   已证内容、alias或ready；原主bundle未改。这是接线原型，尚未批量生成全程序值生命周期。
+- source-entry共享存储模式已接公共入口`--shared-source-context`，保持可选，未改旧CP2
+  格式边界。两个真实85/217-op body以1context+2body发布并正常读回：3.30MB→1.76MB。
+  省的是存储/重复读取；仍先生成和验证SP5，尚未消除该生产成本。
 
 每次提交记录具体完成的功能与保留的缺口。当前详细差距见
 [FIRST_STAGE_GAPS_20261026.md](FIRST_STAGE_GAPS_20261026.md)；某个组件通过不把整体改为完成。

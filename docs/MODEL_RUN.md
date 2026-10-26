@@ -7,9 +7,10 @@ python -B -m scar.cli model-run --from-model-run DEPENDENCY_RUN/model-run.json \
   --stage source-entries --out fresh-entry-run
 ```
 
-CLI默认`--source-entry-profile latest`，从公共registry选择当前V5。
+CLI默认`--source-entry-profile latest`，从公共registry选择当前V6。
 原entry/catalog/readonly CodeWitness解析后，准确的own-function AST自动选择Try、
-expanded-call、nested-function、import、flat With和独立generator创建能力。创建和
+expanded-call、nested-function、import、flat With、独立generator创建及Set能力。
+AugAssign自动启用已有FunctionTry/in-place协议，不新增重复实现。创建和
 惰性body可以建模，不要求先证明未知C消费者的驱动次数。策略写入plan digest，每次实际选择记录
 active capabilities；缺依据保原frontier。`legacy`与API默认None保留旧能力选择。
 本阶段也自动导出`products.capture_plan`，可交给`trace --capture-plan URI
@@ -18,6 +19,17 @@ active capabilities；缺依据保原frontier。`legacy`与API默认None保留�
 这还没有迁移纯source-only inventory的默认能力，也没有完成所有语法或自动发布/绑定。
 一次真实import入口自动选择并普通读回148ops，12.086s、compile0，原SP5双SHA不变；
 记录见`artifacts/analysis/source_entry_auto_profile_20261026/`。
+
+同一source-entry命令增加`--shared-source-context`可发布共享上下文和独立body片段。
+默认关闭；正常SP5与独立CodeWitness检查完成后才拆分，只移除本次新attempt的重复
+SP5副本，旧输入不变。fragment保原decoded receipt及`#/program/graph`准确端点，
+普通region查询可以直接读；旧CP2/SP5 admission尚未迁移到该transport，后续绑定
+不能把fragment冒充SP5。此模式尚未减少原SP5生成/检查的成本。
+
+实际两个原85/217-op body以1context+2body保存，stored3,303,841→1,764,854B，
+decoded30,744,053→16,639,065B；正常共享session仅读取/检查context一次，24.355s。
+主树普通region读取同一85-op片段0.223s，不重放context，完整性声明限core。
+记录见`artifacts/experiments/source_entry_shared_context_20261026/`。
 
 `source-entry-bindings` 通用 CLI 现同时支持 project 与 dependency 的原 SP5。
 2026-10-26 同一次 generic CPU 采集的后段实际退出 0：schema2 publication 包含

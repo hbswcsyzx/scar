@@ -484,6 +484,8 @@ def main(argv=None) -> int:
     model_run.add_argument("--resume", action="store_true", help="preserve old attempts and create a fresh attempt")
     model_run.add_argument("--source-entry-profile", choices=("latest", "legacy"), default="latest",
                            help="source-entries selects supported syntax automatically by default; legacy preserves the old capability policy")
+    model_run.add_argument("--shared-source-context", action="store_true",
+                           help="source-entries only: store independent bodies with shared context (optional transport)")
     for name, default in (("metadata-bytes", 2_000_000), ("raw-bytes", 64_000_000),
                           ("record-bytes", 64_000_000), ("output-bytes", 128_000_000),
                           ("calls", 256), ("codes", 128), ("source-files", 4),
@@ -1661,6 +1663,8 @@ def _model_run(args) -> int:
     tokens = args._model_run_options
     if '--source-entry-profile' in tokens and args.stage != 'source-entries':
         raise SystemExit('--source-entry-profile applies only to --stage source-entries')
+    if args.shared_source_context and args.stage != 'source-entries':
+        raise SystemExit('--shared-source-context applies only to --stage source-entries')
     if args.from_model_run is not None and args.stage == "source-entry-bindings":
         from scar.analysis.source_entry_run import SourceEntryBindingBudget, run_source_entry_binding_stage
         if any(option.startswith(("--max-", "--dependency-", "--entry-")) for option in tokens):
@@ -1686,7 +1690,8 @@ def _model_run(args) -> int:
             sources[name] = "SOURCE_ENTRY_PROFILE_DEFAULT" if value is None else "CLI:--entry-" + name.replace("_", "-")
         report = run_source_entry_stage(args.from_model_run, args.out, plan_only=args.plan_only,
             resume=args.resume, budget=SourceEntryRunBudget(**options), budget_sources=sources,
-            source_entry_profile=(LATEST_SOURCE_ENTRY_PROFILE if args.source_entry_profile == 'latest' else None))
+            source_entry_profile=(LATEST_SOURCE_ENTRY_PROFILE if args.source_entry_profile == 'latest' else None),
+            shared_context=args.shared_source_context)
     elif args.from_model_run is not None:
         if args.stage != "dependency-sources" or any(option.startswith(("--max-", "--entry-", "--binding-")) for option in tokens):
             raise SystemExit("--from-model-run requires --stage dependency-sources; use --dependency-max-* budgets")

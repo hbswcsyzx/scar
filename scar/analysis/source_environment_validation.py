@@ -107,6 +107,17 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
                  and atom is not None and atom.kind == 'FunctionDef' and atom.reference == link.source
                  and link.opcode is None, 'function creation lost its capability or original definition-time declaration')
             continue  # Exact code/default/cell/name/world checks remain in the ordinary language validator.
+        if kind is Kind.BUILD_SET_DISPLAY:
+            from scar.ir.program.source_language import SourceLanguageCapability
+            declaration = semantic.definitions.get(link.semantic_operation)
+            atom = semantic.source_atoms.get(link.source.atom_id)
+            need(language is not None and SourceLanguageCapability.SET_DISPLAY_314_V1 in language.capabilities
+                 and declaration is not None and declaration.kind is OperationKind.OPERATOR
+                 and declaration.metadata.get('ast_type') == 'Set' and len(declaration.output_slots) == 1
+                 and declaration.code_id == link.source.atom_id.wire and link.source.atom_id in declaration.source_atoms
+                 and atom is not None and atom.kind == 'Set' and atom.reference == link.source
+                 and link.opcode is Opcode.BUILD_SET, 'set display lost its capability or original SG source')
+            continue  # Ordered elements, incomplete world and both completions remain independently checked below.
         if kind not in _KINDS:
             need(link.semantic_operation is None, "a source-linked operation has an invented protocol")
             continue

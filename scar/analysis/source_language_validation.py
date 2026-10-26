@@ -72,9 +72,12 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     from scar.analysis.source_with_validation import validate_with
     withs = validate_with(model, graph, interface, metadata, semantic, language,
         source_tree=source_tree, options=options, structural_only=structural_only)
-    indexed = set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs
+    from scar.analysis.source_set_lowering import validate_set_displays
+    sets = validate_set_displays(model, graph, interface, metadata, semantic, language,
+        source_tree=source_tree, options=options, structural_only=structural_only)
+    indexed = set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs | sets
     actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
-    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs),
+    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs) + len(sets),
           "new language operations must have one exact shape/provenance record")
 
     def source_node(reference, classes):

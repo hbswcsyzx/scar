@@ -1,0 +1,45 @@
+{
+  "status": "MAIN_TYPED_CORE_READBACK_PASS",
+  "latest_profile": "PYTHON_SOURCE_ENTRY_314_CAPS_V6",
+  "paths": [
+    {
+      "name": "set-display",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-try-model/artifacts/analysis/set_display_entries_resume01_20261026/worker/attempt-00001/source-program5.json.gz",
+      "sha256": "d66f588dc305f2fb3a019b5d40a1cab68a6138faecfa65eea6dc6ebdcb135324",
+      "core_validated": true,
+      "source_context_replayed": false,
+      "context_reference_verified": null,
+      "summary": {
+        "original_operations": 240,
+        "view_nodes": 176,
+        "program_operations": 96,
+        "folded_operations": 144,
+        "original_uses": 860,
+        "crossing_uses": 810,
+        "internal_uses": 50
+      },
+      "counts": null,
+      "elapsed_s": 3.167635669989977
+    },
+    {
+      "name": "shared-body",
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_shared_context_20261026/attempt01/worker/source-fragments/bodies/609c2e87bb4128c6669013715d43160f2d042997d59bdcaa4e1d82a36efe42bf.json.gz",
+      "sha256": "15989c54ae3bc92b0f41d4bfd2f40eb9952bd88bd4c0055e74cd9bda8662a77d",
+      "core_validated": true,
+      "source_context_replayed": false,
+      "context_reference_verified": false,
+      "summary": {
+        "original_operations": 85,
+        "view_nodes": 60,
+        "program_operations": 31,
+        "folded_operations": 54,
+        "original_uses": 305,
+        "crossing_uses": 290,
+        "internal_uses": 15
+      },
+      "counts": null,
+      "elapsed_s": 0.22311050799908116
+    }
+  ],
+  "scope": "two actual preserved bodies; no relower, target, full-context replay, runtime binding or full-model claim"
+}

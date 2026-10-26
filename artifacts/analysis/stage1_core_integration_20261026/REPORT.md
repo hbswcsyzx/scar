@@ -34,3 +34,18 @@ body解码及索引各2次，同会话复用。当前旧查询仍偏重，不称
 
 下一轮只推进三项功能：剩余通用source结构、native引用流邻接、共享context的publisher。
 全链缺口按`docs/FIRST_STAGE_IMPLEMENTATION_PLAN.md`继续，不推进性能优化。
+
+## 后续主要功能集成
+
+- V6自动选择Set display，并让ordinary-local AugAssign复用已有FunctionTry/in-place
+  规则。两个真实Set body240/235ops、一个AugAssign body65ops正常恢复与读回，
+  不支持清单49→46（source成功196/243；运行绑定和正式发布数未因此变化）。
+- 共享context接入source-entry API/CLI可选模式；两个原85/217-op body正常发布和
+  共享session读回，1context2body，stored3,303,841→1,764,854B。旧CP2仅支持SP5的
+  边界保留，仍有原SP5生成/验证成本，不默认开启影响后续绑定。
+- 主树新增语法与共享transport集成后的正常core读取均通过：实际Set240ops/860Uses
+  的默认视图176nodes，3.168s；共享85ops/305Uses的视图60nodes，0.223s。仅core
+  读回，未重放全source context，不据此补runtime/state/content证明。
+
+具体原件见`set_display_delivery_20261026/`、共享storage实验目录和本目录
+`main-storage-and-syntax-readback.json`。只读必要真实路径，未运行批量测试。
