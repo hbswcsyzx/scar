@@ -1,0 +1,50 @@
+{
+  "status": "ACTUAL_GENERIC_CAPTURE_AND_NORMAL_SOURCE_BINDINGS_WITH_OPEN",
+  "capture_exit": 0,
+  "source_builder_exit": 0,
+  "normal_membership_check_exit": 0,
+  "frozen_inputs_final_sha_verified": 10,
+  "LeWM_episode_run": false,
+  "old_candidate04_modified": false,
+  "model": {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/candidate04/readback01/model.json",
+    "bytes": 60237,
+    "sha256": "af7c15ab40be08a5ac3d289366a183a327c184d11f7b9c6dac5590b6d6bafe0b"
+  },
+  "source_ports": {
+    "targets": 7,
+    "bound_calls": 3,
+    "receiver_ports": 2,
+    "explicit_argument_ports": 3,
+    "open_targets": 4,
+    "reference_identity_established": false,
+    "effects_state_ready_established": false,
+    "whole_program_complete": false
+  },
+  "observed": {
+    "targets": 7,
+    "entries": 5,
+    "gaps": 0,
+    "kinds": {
+      "OTHER_UNCLASSIFIED": 1,
+      "NORMALIZED_RECEIVER_FUNCTION": 2,
+      "FUNCTION": 3,
+      "NATIVE_BUILTIN": 1
+    },
+    "receiver_entries": 2,
+    "contents_state_ready_established": false,
+    "whole_program_complete": false
+  },
+  "source_sha256": {
+    "scar/trace/call_edges.py": "4f8d299baff10412cc8b1f6d09c707c1303998ebc4deab7e1348987819a3ed35",
+    "scar/trace/call_operands.py": "fed436f61d54c5a3dff50c18881c04245c18dc63a436685dabb7e5c474dd0de2",
+    "scar/trace/python_call_targets.py": "bbb4fcdb97a8d9960d7e93589e759c6a5c8a4b70757996fe19e9e22d613f153a",
+    "scar/ir/program/python_call_targets.py": "db78b9068b1ec8c6c4bd60ffe12c6916ac893baf82543ecfc96ffbde596f428e",
+    "scar/analysis/python_call_targets.py": "257de0af1e1c13a0770b3dc96655d74a240e33ba1382c27ac1387939d71339d3"
+  },
+  "legacy_default_check": {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_v2_20261026/legacy-default-check.txt",
+    "result": "1 passed in 1.71s"
+  },
+  "known_style_note": "git diff --check flags a cosmetic extra blank line at EOF in the frozen new IR source; no frozen bytes changed"
+}

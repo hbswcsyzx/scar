@@ -73,7 +73,7 @@ class CallOperandObserver:
 
     def __init__(self, recorder, *, capture="instructions", max_events=100_000,
                  max_bytes=32_000_000, max_loads=64, max_namespace_items=4096,
-                 max_references=None):
+                 max_references=None, python_targets=False):
         if type(capture) is not str or capture not in _CAPTURE_RULES:
             raise ValueError("operand capture must be 'instructions' or 'windows'")
         for name, value in (("max_events", max_events), ("max_bytes", max_bytes),
@@ -125,6 +125,10 @@ class CallOperandObserver:
         self._disabled_instruction_count = 0
         self._pending = {}
         self.environment_observer = None
+        self.python_targets = None
+        if type(python_targets) is not bool:
+            raise TypeError("python_targets must be an explicit bool")
+        self._target_event_digest = hashlib.sha256() if python_targets else None
         self._arg0_missing = getattr(sys.monitoring, "MISSING", _MISSING)
         if self._arg0_missing is _MISSING:
             raise RuntimeError("sys.monitoring.MISSING is required for exact no-argument CALL capture")
@@ -136,6 +140,10 @@ class CallOperandObserver:
             self.environment_observer = CallableEnvironmentObserver(
                 recorder.out, self.pid, max_events=max_events, max_bytes=max_bytes,
                 max_references=max_references)
+            if python_targets:
+                from scar.trace.python_call_targets import PythonTargetObserver, PythonTargetBudget
+                self.python_targets = PythonTargetObserver(self, PythonTargetBudget(
+                    max_records=max_events,max_bytes=max_bytes,max_selected_codes=recorder.limits["max_codes"]))
         except BaseException:
             if self._fd is not None:
                 os.close(self._fd)
@@ -222,6 +230,8 @@ class CallOperandObserver:
                     raise OSError("operand sidecar write made no progress")
                 offset += written
                 self._bytes += written
+                if self._target_event_digest is not None:
+                    self._target_event_digest.update(data[offset - written:offset])
             self._event_count += 1
             if kind == "INSTRUCTION":
                 self._instruction_count += 1
@@ -310,7 +320,9 @@ class CallOperandObserver:
                 if setter_kind is None:
                     return
             elif event == "call":
-                if not self._code_inside(frame.f_code):
+                if not (self._code_inside(frame.f_code) or (self.python_targets is not None
+                        and ((self.python_targets.observed_code(frame.f_code) and self._base_state(frame) is not None)
+                             or self.python_targets.accepts_frame(frame)))):
                     return
             elif event == "return":
                 locked = self._lock.acquire(blocking=False)
@@ -353,7 +365,8 @@ class CallOperandObserver:
 
     def _on_frame_enter(self, frame):
         code = frame.f_code
-        if not self._code_inside(code):
+        target_entry = self.python_targets.on_frame_enter(frame) if self.python_targets is not None else False
+        if not (self._code_inside(code) or target_entry or (self.python_targets is not None and self.python_targets.observed_code(code))):
             return
         if self._event_attempts >= self.limits.max_events:
             self._dropped += 1
@@ -799,6 +812,9 @@ class CallOperandObserver:
                         self._gap(reason, owner, advance=False)
                     if attempt_index is None:
                         return self._disabled_callback_result(code)
+                    if self.python_targets is not None:
+                        self.python_targets.on_call(callable_object, arg0, missing, code, owner, row_site, attempt_index,
+                            lambda value: self._reference(value, seen, event_index, snapshots), _layout)
                     if dispatch["kind"] == CallableKind.EXACT_FUNCTION.value and type(callable_object) is types.FunctionType:
                         target_code = observed_target_code
                         witness = getattr(self.recorder, 'collector_witness', None)
@@ -969,12 +985,20 @@ class CallOperandObserver:
                     position += written
             finally:
                 os.close(fd)
+            if self.python_targets is not None:
+                self.python_targets.legacy_inputs = (*manifest,
+                    CallTraceFile(str(self._event_path), "operands", self.pid,
+                        self._target_event_digest.hexdigest(), self._bytes, self._event_count),
+                    CallTraceFile(str(self._metadata_path), "operand-meta", self.pid,
+                        hashlib.sha256(data).hexdigest(), len(data), data.count(b"\n")))
         except BaseException as error:
             self._remember_error(error)
             raise
         finally:
             if self.environment_observer is not None:
                 self.environment_observer.close()
+            if self.python_targets is not None:
+                self.python_targets.close()
             self._closed = True
             if self.recorder.operand_observer is self:
                 self.recorder.operand_observer = None
@@ -990,7 +1014,7 @@ def _environment_limit(name, default):
 
 
 def install(recorder, *, capture=None, max_events=None, max_bytes=None,
-            max_loads=None, max_namespace_items=None, max_references=None):
+            max_loads=None, max_namespace_items=None, max_references=None, python_targets=False):
     """Attach the sidecar without replacing the existing sys.setprofile hook."""
     if capture is None:
         capture = os.environ.get("SCAR_OPERAND_CAPTURE", _CAPTURE_INSTRUCTIONS)
@@ -1003,7 +1027,7 @@ def install(recorder, *, capture=None, max_events=None, max_bytes=None,
                            if max_namespace_items is None else max_namespace_items)
     return CallOperandObserver(recorder, capture=capture, max_events=max_events, max_bytes=max_bytes,
                                max_loads=max_loads, max_namespace_items=max_namespace_items,
-                               max_references=max_references)
+                               max_references=max_references, python_targets=python_targets)
 
 
 __all__ = ["CallOperandObserver", "install"]
