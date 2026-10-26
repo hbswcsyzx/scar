@@ -1,0 +1,18 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/validation_primitive_compare_20261026/run.py", line 335, in <module>
+    if args.child:child(args.child,args.allowance,args.seconds)
+                  ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/validation_primitive_compare_20261026/run.py", line 246, in child
+    program=lowering.SourceProgram.read_structure(doc,max_operations=10000,source_texts={snapshot.path:text})
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py", line 388, in read_structure
+    return cls.from_dict(document, max_operations=max_operations, verification="STRUCTURE",
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                         source_texts=source_texts, module_code_evidence=module_code_evidence)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_lowering.py", line 371, in from_dict
+    if _canonical(result.to_dict()) != _canonical(document):
+       ~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/validation_primitive_compare_20261026/run.py", line 237, in canonical_observed
+    beg=time.monotonic();digest=hashlib.sha256(data).hexdigest();digest_wall+=time.monotonic()-beg
+                                ~~~~~~~~~~~~~~^^^^^^
+TypeError: Strings must be encoded before hashing

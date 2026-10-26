@@ -1,0 +1,13 @@
+--- original9750/run.py
++++ resume02/run.py
+@@ -234,8 +234,8 @@
+                 nonlocal digest_wall
+                 data=canonical_impl(value)
+                 if type(value) is dict and value.get('schema')=='scar.source-program' and value.get('schema_version')==5:
+-                    beg=time.monotonic();digest=hashlib.sha256(data).hexdigest();digest_wall+=time.monotonic()-beg
+-                    seen.append({'role':'input' if value is doc else 'output','sha256':digest,'bytes':len(data)})
++                    beg=time.monotonic();encoded=data.encode('utf-8');digest=hashlib.sha256(encoded).hexdigest();digest_wall+=time.monotonic()-beg
++                    seen.append({'role':'input' if value is doc else 'output','sha256':digest,'bytes':len(encoded)})
+                 return data
+             lowering._canonical=canonical_observed
+             profiler=cProfile.Profile() if mode=='candidate_profile' else None
