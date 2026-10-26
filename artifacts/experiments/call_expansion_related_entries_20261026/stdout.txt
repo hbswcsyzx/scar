@@ -1,0 +1,23 @@
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "84e6dc922321b0ca4c33f3c0f620909ba1f014968ef3b4a26a123efe04642565", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "aeecef00f24a6ff3bf39a9743f9c4d7365e27b6e5317735c3ea0e271173609be", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "48868439c812714d134fbe3f623363ab752a6ccc61acb89a6ea78f1aeb9169df", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "ea1e57c4f92586c68dd63def283bc965b9362e2d3baec6536ad7aa5a015bee19", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "c2f47d49a0b11178a00efd8e769be5cfe70f18fa8bc8485ee3bb0e19160babf8", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "7184c61e989897ebc59947afe2bc74bb7ae370da2cf65268057f4ef7b657a67a", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "1bedea5fd0784d9338b1a84c35c7a9f3488aaae5f16b358c39cdaf8171ed44a6", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "ad8548ebaaef31b4c21ee3a0b859d0a4d0c8fb53a327d6b1d0e8a2c983937473", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "dbd49537b70fccf0573e684e709da7e8cbaf67929d494186afa1a1bb2577ddf3", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "8e387588894572494ea6b3531e35bb6f83b5aaaffbf4f3c4ecde9ce4162fef3e", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "f31c349686df3187d98fd758363cc1c06041a4c61ceee8a3bd77f98d2fce9a5d", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "17f972bbdb8c6c1fe43803198db91a97b2de089d4360d0899461920ccc0f62ce", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "05479e85d82ae30c342dcfbe0e60505a7f8f9a59c68ff6fd723638d526bec0a3", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "853d42ce2bfc3bd873eeda434f3550b0be36eac64a688317c522e3dd34b41c1d", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "9cf6041280138b81a13ea3b5a86a5d8c0752ba2153ead60425ae4e3e33ac56a0", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "d8b535365fceb276a4fde502ee75ef0c988bca9c54e8db975edaee671b415d57", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "5912b9f4bda29ddb188b71c389d558959c99eee1928b8050b6f85d39471ee7a0", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "6ca25eccfdde26f9943c9b7b6823a651f5b466e382828373a158330f95423c2b", "status": "FAILED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "7a2e1da495a4843f3ea217798a694f917e90aaef763abee0d6fb99e9fac8e9cd", "status": "FAILED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "87d89e95a4089f493c74c0beb4b7d34192354c6f032bf739858b62c9dfac5677", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "c2fc7ca6d0fefdddac080fce4e6253a2a75409e5acb9127b2648752db0beadc1", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "cf295f5b66bb531694d768dbb2af6c00ecaa03e20ff97715d26e6fd5637c5df1", "status": "SUCCEEDED"}
+{"status": "FAILED_RETAINED_WITH_OPEN", "counts": {"SUCCEEDED": 17, "UNSUPPORTED": 3, "NOT_ATTEMPTED": 1, "FAILED": 2}, "groups": {"EXPANDED_CALL": {"SUCCEEDED": 9, "UNSUPPORTED": 3, "NOT_ATTEMPTED": 1}, "OLD_TRY_POLICY": {"SUCCEEDED": 8, "FAILED": 2}}, "elapsed_s": 1250.147994914034, "failure": null}

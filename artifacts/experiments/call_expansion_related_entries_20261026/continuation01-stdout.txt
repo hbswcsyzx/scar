@@ -1,0 +1,4 @@
+{"stage": "source_entry_attempt", "entry_key": "9f256de8375362f8a676b3a0fa693b11bf26a29cbda4cf8a2e3d05e88d72f6be", "status": "SUCCEEDED"}
+{"stage": "source_entry_attempt", "entry_key": "6ca25eccfdde26f9943c9b7b6823a651f5b466e382828373a158330f95423c2b", "status": "UNSUPPORTED"}
+{"stage": "source_entry_attempt", "entry_key": "7a2e1da495a4843f3ea217798a694f917e90aaef763abee0d6fb99e9fac8e9cd", "status": "UNSUPPORTED"}
+{"counts": {"SUCCEEDED": 1, "UNSUPPORTED": 2}, "elapsed_s": 113.6462484379881}
