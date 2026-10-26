@@ -21,10 +21,16 @@ class ProgramQuery:
     """Bounded access to original work, invocation and source references."""
 
     def __init__(self, manifest, *, expected_sha256, budgets=None):
+        from pathlib import Path
+
         self.budgets = budgets or RelationBudgets(
             max_input_bytes=256_000_000, max_seconds=60)
+        path = Path(manifest).absolute()
+        need(not path.is_symlink() and path.is_file()
+             and path.stat().st_size <= self.budgets.max_metadata_bytes,
+             "relation manifest must be a bounded regular file")
         self.relations = RelationPartitions(
-            manifest, expected_sha256=expected_sha256, budgets=self.budgets)
+            path, expected_sha256=expected_sha256, budgets=self.budgets)
 
     def list_work(self, *, offset=0, limit=20):
         """Page the compact index without opening every work/source record."""
