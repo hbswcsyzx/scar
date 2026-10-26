@@ -38,6 +38,12 @@ enqueue/wait仍是操作，可以在上层区域中消除、合并或移动。
 CodeID/源码定义给静态操作提供版本身份，Invocation/activation给动态发生提供身份。
 来源和观察记录在证据层，通过引用支持程序图中的关系。
 
+例如bytes等不在旧标量表示范围内的源码常量，通过`CODE_CONSTANTS_314_V1`指向独立
+CodeWitness中原`LOAD_CONST`的准确位置和常量槽；复用现有`CodeConstantSource`及
+`ReferenceValue`，不新建一类对象或把内容塞进对象身份。源码/槽内容匹配不证明
+活动CodeType或常量Python对象实例相同。该能力只接受有准确槽依据的原常量；编译折叠
+等导致原表达式没有对应`LOAD_CONST`时保留具体前沿，不补造运行操作。
+
 ## 边怎样连接
 
 | 边/关系 | 必须保留的含义 |

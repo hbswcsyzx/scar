@@ -45,6 +45,10 @@ def captured_cell_slot(definition, name):
 
 
 def dispatch_source_expression(builder, node, cursor):
+    if builder.has_language("CODE_CONSTANTS_314_V1") and isinstance(node, ast.Constant):
+        from scar.analysis.source_constant_lowering import needs_code_constant, lower_code_constant
+        if needs_code_constant(node):
+            return lower_code_constant(builder, node, cursor)
     if builder.has_language("SET_DISPLAY_314_V1") and isinstance(node, ast.Set):
         from scar.analysis.source_set_lowering import lower_set_display
         return lower_set_display(builder, node, cursor)

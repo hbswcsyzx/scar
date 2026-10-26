@@ -262,14 +262,15 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
                           "index receiver/key differs from exact source expression")
     for identity, constant in constants.items():
         atom = semantic.source_atoms.get(constant.source.atom_id)
+        literal_constant = atom is not None and atom.kind == "Constant"
         call_constant = atom is not None and atom.kind == "Call"
         function_constant = atom is not None and atom.kind == 'FunctionDef'
         import_constant = atom is not None and atom.kind == 'ImportFrom'
-        capability = (Capability.FUNCTION_IMPORT_314_V1 if import_constant else Capability.NESTED_FUNCTION_314_V1
+        capability = (Capability.CODE_CONSTANTS_314_V1 if literal_constant else Capability.FUNCTION_IMPORT_314_V1 if import_constant else Capability.NESTED_FUNCTION_314_V1
             if function_constant else Capability.CALL_KWARGS_314_V1 if call_constant else Capability.SLICE_KEYS)
         _need(capability in language.capabilities and protocols[identity].kind.value == "READ_CODE_CONSTANT"
               and constant.source == protocols[identity].source, "code constant kind/capability differs")
-        node = source_node(constant.source, (ast.ImportFrom,) if import_constant else (ast.FunctionDef,)
+        node = source_node(constant.source, (ast.Constant,) if literal_constant else (ast.ImportFrom,) if import_constant else (ast.FunctionDef,)
             if function_constant else (ast.Call,) if call_constant else (ast.Slice, ast.Tuple))
         operation = operations[identity]
         _need(operation.terminator is None and not operation.effects_complete and len(operation.results) == 1
@@ -285,6 +286,10 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
             _need(evidence is not None and evidence.captured.key == constant.code_key,
                   "constant provenance is not backed by the independently loaded CodeWitness")
             _need(len(constant.constant_path) == 1, "this capability only indexes direct code constants")
+            if literal_constant:
+                from scar.analysis.source_constant_lowering import witnessed_constant
+                witnessed_constant(evidence, node, index=constant.constant_path[0])
+                continue
             candidates = [row for row in dis.get_instructions(evidence.code)
                 if row.opname == "LOAD_CONST" and row.arg == constant.constant_path[0]
                 and tuple(row.positions) == (node.lineno, node.end_lineno, node.col_offset, node.end_col_offset)]
