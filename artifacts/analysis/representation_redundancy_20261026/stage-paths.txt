@@ -1,0 +1,10 @@
+artifacts/analysis/representation_redundancy_20261026/MEASUREMENTS.json
+artifacts/analysis/representation_redundancy_20261026/RECEIPTS.json
+artifacts/analysis/representation_redundancy_20261026/REPORT.md
+artifacts/analysis/representation_redundancy_20261026/SOURCE.json
+artifacts/analysis/representation_redundancy_20261026/audit.py
+artifacts/analysis/representation_redundancy_20261026/audit.stderr.txt
+artifacts/analysis/representation_redundancy_20261026/audit.stdout.json
+artifacts/analysis/representation_redundancy_20261026/relation-manifest.json
+artifacts/analysis/representation_redundancy_20261026/relation-samples.json
+artifacts/analysis/representation_redundancy_20261026/stage-paths.txt

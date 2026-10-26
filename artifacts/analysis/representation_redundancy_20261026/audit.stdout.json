@@ -1,0 +1,57 @@
+{
+  "scope": "bounded representation audit, no graph logical changes, no typed-model validation or whole-corpus extrapolation",
+  "SP5_selection_policy": "minimum combined decoded same-file pair, then largest remaining artifact fitting100MB; no name filter",
+  "SP5_sample_count": 3,
+  "SP5_stored_bytes_read": 10071363,
+  "SP5_decoded_bytes": 84024792,
+  "context_fields": [
+    "semantic",
+    "semantics",
+    "control"
+  ],
+  "context_bytes_per_sample": [
+    2472945,
+    2472945,
+    78129600
+  ],
+  "context_total_bytes": 83075490,
+  "context_fraction_of_three_samples": 0.9887021202028087,
+  "same_file_pair_context_duplicate_payload_bytes": 2472945,
+  "same_file_pair_duplicate_context_fraction": 0.4311898611461048,
+  "largest_declared_program_excluded_by100MB_budget": 114979987,
+  "relation_sample_rows": 6,
+  "relation_stored_chunk_bytes": 545900,
+  "relation_decoded_manifest_and_rows": 285995,
+  "relation_row_bytes": 160353,
+  "relation_nonoverlap_maximal_fact_stats": {
+    "FactSourceLocator": {
+      "occurrences": 123,
+      "unique_exact_objects": 23,
+      "payload_bytes": 43455,
+      "duplicate_payload_bytes_before_refs": 35359
+    },
+    "ProviderArtifact": {
+      "occurrences": 120,
+      "unique_exact_objects": 12,
+      "payload_bytes": 37554,
+      "duplicate_payload_bytes_before_refs": 33797
+    },
+    "RuntimeScope": {
+      "occurrences": 15,
+      "unique_exact_objects": 1,
+      "payload_bytes": 13230,
+      "duplicate_payload_bytes_before_refs": 12348
+    },
+    "SourceReference": {
+      "occurrences": 9,
+      "unique_exact_objects": 1,
+      "payload_bytes": 3294,
+      "duplicate_payload_bytes_before_refs": 2928
+    }
+  },
+  "relation_nonoverlap_duplicate_payload_bytes_before_reference_overhead": 84432,
+  "relation_nonoverlap_duplicate_fraction": 0.5265383248208639,
+  "actual_new_compact_transport_savings": "NOT_MEASURED; refs/table/check overhead not implemented",
+  "original_programs_relations_unchanged": true,
+  "target_worker_fixture": "NOT_RUN"
+}

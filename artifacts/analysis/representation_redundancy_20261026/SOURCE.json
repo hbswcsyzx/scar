@@ -1,0 +1,7 @@
+{
+  "access": "exact committed actual normative artifact; sparse working tree copy absent; main untouched",
+  "git_path": "artifacts/experiments/fragment_relations_v2_main_20261026/candidate01/attempt01/result/manifest.json",
+  "main_commit": "5a0b50eeeab83a1ed97d2314f9f0233882f77804",
+  "manifest_bytes": 125642,
+  "manifest_sha256": "c1d3fbe9ab99a4bf121cc421d6d4f3e6b6fbfd8be07c5710eeff71c85cd8b594"
+}

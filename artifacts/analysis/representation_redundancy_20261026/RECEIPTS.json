@@ -1,0 +1,139 @@
+{
+  "SP5": [
+    {
+      "entry_key": "903ae402b3786df862896daf26612dcc859c2443c22d5201eaba71d59fc03d07",
+      "original_program": {
+        "decoded_bytes": 2813442,
+        "decoded_sha256": "df5850136e8e9a3072a7385b4e2686958851c4c27977b0296147111e4c3c84a3",
+        "external": true,
+        "physical_bytes": 286154,
+        "physical_sha256": "6307ab854fc9c2f67e2fc600f3b05c9d2f1e6e85e5eda3989e09be302b33a021",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00014/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "262acdab5b37f453462745dea03cf0d1b7c3413a77adeac8d7d3aed38c2ad98d",
+      "original_program": {
+        "decoded_bytes": 2921723,
+        "decoded_sha256": "2868dab0e44c8531ffab7b5b18cd6ca00861b6a5de26af95148e564861bac192",
+        "external": true,
+        "physical_bytes": 296315,
+        "physical_sha256": "df679b47f5b3efe90e32da64fcdef7672d2e342c668c7f2c68ab4d1af30cb343",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-004/worker/attempt-00015/source-program5.json.gz"
+      }
+    },
+    {
+      "entry_key": "5bbd56819b9f11f41eca99c2b27669a5129ea7baeaa3c91538336d870e255c6c",
+      "original_program": {
+        "decoded_bytes": 78289627,
+        "decoded_sha256": "f1bc5c368fa1b9f410e4ab96ab7935fdaf9eb8b2a9c32f49f7a1c1682a33ae90",
+        "external": true,
+        "physical_bytes": 9488894,
+        "physical_sha256": "6ffed82b76b4490e828c5949b479d63ebdb3e55a6c50622918c72f2d7a2afacc",
+        "representation": "scar.source-program/5",
+        "uri": "/home/zyf/AAA/scar-worktrees/source209-model/artifacts/experiments/source209_model_20261026/result/batches/batch-002/worker/attempt-00013/source-program5.json.gz"
+      }
+    }
+  ],
+  "input_budgets": {
+    "SP5_decoded": 100000000,
+    "SP5_stored": 64000000,
+    "relation_decoded": 5000000
+  },
+  "main_relation_manifest_source": {
+    "access": "exact committed actual normative artifact; sparse working tree copy absent; main untouched",
+    "git_path": "artifacts/experiments/fragment_relations_v2_main_20261026/candidate01/attempt01/result/manifest.json",
+    "main_commit": "5a0b50eeeab83a1ed97d2314f9f0233882f77804",
+    "manifest_bytes": 125642,
+    "manifest_sha256": "c1d3fbe9ab99a4bf121cc421d6d4f3e6b6fbfd8be07c5710eeff71c85cd8b594"
+  },
+  "outputs": [
+    {
+      "bytes": 24407,
+      "path": "artifacts/analysis/representation_redundancy_20261026/MEASUREMENTS.json",
+      "sha256": "1f2e4d5ea424f724697f77931c66adffa07e335015f2233fbd996c9ea68812ee"
+    },
+    {
+      "bytes": 2898,
+      "path": "artifacts/analysis/representation_redundancy_20261026/REPORT.md",
+      "sha256": "d2be41706ceb27cf23d9c1d25b8aa35a94f707d2786fa9036cb7fc6e659275c1"
+    },
+    {
+      "bytes": 405,
+      "path": "artifacts/analysis/representation_redundancy_20261026/SOURCE.json",
+      "sha256": "333df96eaa33fbb74d4289b01fab55d2a49002f19d21d0454c8edb1f7f252bf0"
+    },
+    {
+      "bytes": 9220,
+      "path": "artifacts/analysis/representation_redundancy_20261026/audit.py",
+      "sha256": "dd7d649a5bf3ad82f8fe9faf61c8d2e57115329aba91258ce3cd2d58e1dfa7f4"
+    },
+    {
+      "bytes": 0,
+      "path": "artifacts/analysis/representation_redundancy_20261026/audit.stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 2011,
+      "path": "artifacts/analysis/representation_redundancy_20261026/audit.stdout.json",
+      "sha256": "64275faf05326aac25ba0e07fbca955070c8eb13c7e6281588590f7bae3bfe77"
+    },
+    {
+      "bytes": 125642,
+      "path": "artifacts/analysis/representation_redundancy_20261026/relation-manifest.json",
+      "sha256": "c1d3fbe9ab99a4bf121cc421d6d4f3e6b6fbfd8be07c5710eeff71c85cd8b594"
+    },
+    {
+      "bytes": 164191,
+      "path": "artifacts/analysis/representation_redundancy_20261026/relation-samples.json",
+      "sha256": "06dc098cac2d2e9c82a7e5fb2bd275e0777f2eb46f2835d3ce78426e3be4f661"
+    }
+  ],
+  "sample_line_hashes": [
+    {
+      "Git_path": "artifacts/experiments/fragment_relations_v2_main_20261026/candidate01/attempt01/result/work/000000.jsonl.gz",
+      "SHA": "3b4fb20dca56b9e3be0fc53d3fb3a37c4b636819a629dbac8d57fc836159f212",
+      "bytes": 49650,
+      "kind": "work",
+      "ordinal": 0
+    },
+    {
+      "Git_path": "artifacts/experiments/fragment_relations_v2_main_20261026/candidate01/attempt01/result/work/000000.jsonl.gz",
+      "SHA": "bf02eb2de33e321601fd79597b48fef3a8738b0c7b9cabc5272d0ccd8a3ad84c",
+      "bytes": 49650,
+      "kind": "work",
+      "ordinal": 1
+    },
+    {
+      "Git_path": "artifacts/experiments/fragment_relations_v2_main_20261026/candidate01/attempt01/result/work/000000.jsonl.gz",
+      "SHA": "ec19234cf977864a2cf7161a977d26b7e748567859014eff00a59f59eab1f5a5",
+      "bytes": 49650,
+      "kind": "work",
+      "ordinal": 2
+    },
+    {
+      "Git_path": "artifacts/experiments/fragment_relations_v2_main_20261026/candidate01/attempt01/result/source/000000.jsonl.gz",
+      "SHA": "1404013c2860b2a7db2fad3155fed02f6a82b0067fcf272d32ed33817a1f4354",
+      "bytes": 3800,
+      "kind": "source",
+      "ordinal": 0
+    },
+    {
+      "Git_path": "artifacts/experiments/fragment_relations_v2_main_20261026/candidate01/attempt01/result/source/000000.jsonl.gz",
+      "SHA": "32dd6cd30d88baeccdf406a13468f6e797ca7d617c5b5a521f526dd008693886",
+      "bytes": 3802,
+      "kind": "source",
+      "ordinal": 1
+    },
+    {
+      "Git_path": "artifacts/experiments/fragment_relations_v2_main_20261026/candidate01/attempt01/result/source/000000.jsonl.gz",
+      "SHA": "31e82a1a6246b42cf0c8cabce2a13ac6f6b9ba70c7537379118d306a6ea4fe1a",
+      "bytes": 3801,
+      "kind": "source",
+      "ordinal": 2
+    }
+  ],
+  "scope": "bounded sample receipts only; original SP5/transports unchanged"
+}
