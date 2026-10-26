@@ -130,6 +130,12 @@ class ExecutionEvidence:
                     "chunk_rows": native_input_chunk_rows,
                     "scope": "post-close input metadata retention only; no ETO port or object qualification",
                 }
+            witness=getattr(recorder,'collector_witness',None)
+            if os.environ.get('SCAR_PROCESS_IMAGE_RECEIPTS')=='1' and witness is None:
+                raise ValueError('process image receipts require a live collector witness')
+            if witness is not None and os.environ.get('SCAR_PROCESS_IMAGE_RECEIPTS')=='1':
+                declaration=witness.process_declaration(nonce)
+                if declaration is not None:self._config['collector_execution_witness']=declaration
             self._manifest_path = root / f"execution-evidence.{self.pid}.json"
             self._manifest_temp = root / f".execution-evidence.{self.pid}.{nonce}.tmp"
             # A second manager must not overwrite a previous collection manifest.
@@ -333,6 +339,8 @@ class ExecutionEvidence:
                                  with_stack=False, with_modules=False,
                                  execution_trace_observer=self._observer, **options)
         self._config["activities"] = sorted(str(item) for item in self._profiler.activities)
+        witness=getattr(self._call_recorder,'collector_witness',None)
+        if witness is not None and getattr(witness,'process_images',None) is not None:witness.image_boundary('NATIVE_START')
         self._window["start_requested_ns"] = time.perf_counter_ns()
         self._enter_attempted = True
         self._profiler.__enter__()
@@ -401,6 +409,8 @@ class ExecutionEvidence:
             self._closed = True
             self._restore_import()
             self._finish_owned()
+            witness=getattr(self._call_recorder,'collector_witness',None)
+            if witness is not None and getattr(witness,'process_images',None) is not None:witness.image_boundary('NATIVE_CLOSE')
             if self.status == "RECORDING":
                 self.status = "FAILED" if self._failures else "CLOSED"
             elif self.status == "WAITING_FOR_TORCH":
