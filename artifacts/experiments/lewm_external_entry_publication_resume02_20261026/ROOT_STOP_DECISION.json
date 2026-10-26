@@ -1,0 +1,12 @@
+{
+  "status": "ROOT_STOP_FOR_MEASURED_PUBLICATION_COST",
+  "pid": 1520765,
+  "verified_entry_checkpoints": 9,
+  "last_progress_elapsed_s": 689.6591831420083,
+  "observed_recent_per_entry_s": 37.72731399501208,
+  "reason": "Recent entries take about37s each; remaining publication plus independent factory/query is inferred to exceed the unchanged wall ceiling. Retain all partials; investigate repeated canonicalization before a new gate.",
+  "signal": "SIGTERM",
+  "production_or_frozen_inputs_changed": false,
+  "old_attempt_pass": false,
+  "whole_program_complete": false
+}

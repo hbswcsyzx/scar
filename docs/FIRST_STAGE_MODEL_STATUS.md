@@ -37,6 +37,12 @@ source/code reader，压59,422,305B / 解516,098,986B留本地原URI及双SHA。
 这仍是原272038的静态建图，尚未publication或当前运行绑定；858/6882指针不变。
 见[全50状态及实际范围](../artifacts/experiments/lewm_external_source_entries_20261026/REPORT.md)。
 
+26图组合验收尚未通过：首门因缺少原inventory文件退出；恢复精确引用闭包后，
+resume02仅完成9个CP2，Root依据每项约37s的实测开销主动终止。没有生效manifest，
+独立factory/query未完成，不能计为已出版9图。旧失败及所有原件保留，下一项先做
+单条分段profiling，区分整图指纹和结构检查开销，再修复而不提高wall或缩小26名单。
+见[准确现场](../artifacts/experiments/lewm_external_entry_publication_resume02_20261026/REPORT.md)。
+
 通用 SourceAttachments → CodeWitnessStore 入口已合入 f9467972；原源码的编码、
 raw/normalized fingerprint、来源 locator 和 owner 保留。独立静态门从自动窗口
 16 个 descriptor / 8 份源码生成 8 个编译模块，随后 readonly 完整重验通过。
