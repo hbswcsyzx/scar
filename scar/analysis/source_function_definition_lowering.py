@@ -108,6 +108,16 @@ def _hold(builder, cursor, node, reference, role):
     builder.active_temporaries.append(reference)
 
 
+def _code_reference(builder, node, cursor, instruction, role):
+    value = _constant(builder, node, cursor, instruction)
+    identity = builder.values_by_id[value].origin.operation
+    old = builder.operation_records[identity]
+    marked = replace(old, label='original function ' + role + ' reference')
+    builder.operations[builder.operations.index(old)] = marked
+    builder.operation_records[identity] = marked
+    return value
+
+
 def lower_function_definition(builder, node, cursor):
     evidence = builder.language_options.code_evidence
     if evidence is None or evidence.store.document['runtime']['version'][:3] != [3, 14, 7]:
@@ -128,9 +138,9 @@ def lower_function_definition(builder, node, cursor):
                 _hold(builder, cursor, source, value, 'default')
                 defaults.append((value, source, 'function-default', index, None))
         else:
-            value = _constant(builder, node, cursor, default_constant)
+            value = _code_reference(builder, node, cursor, default_constant, 'defaults')
             defaults.append((value, node, 'function-defaults-tuple', 0, None))
-        main_code = _constant(builder, node, cursor, child)
+        main_code = _code_reference(builder, node, cursor, child, 'code')
         inputs = [(main_code, node, 'function-code', 0, None),
                   (builder.environment_references[EnvironmentRole.GLOBALS_NAMESPACE], node, 'function-globals', 0, None)]
         inputs.extend(defaults)
@@ -138,7 +148,7 @@ def lower_function_definition(builder, node, cursor):
             if load is None:
                 continue
             if role == 'annotation':
-                inputs.append((_constant(builder, node, cursor, load), node, 'annotation-code', 0, None))
+                inputs.append((_code_reference(builder, node, cursor, load, 'annotation code'), node, 'annotation-code', 0, None))
             for index, name in enumerate(load.argval.co_freevars):
                 if name not in builder.cell_references:
                     unsupported(node, 'CAPTURE_HAS_NO_ACTUAL_PARENT_CELL')
@@ -150,6 +160,10 @@ def lower_function_definition(builder, node, cursor):
         # incomplete; no runtime callable/code identity or purity is granted.
         cursor, function, identity = _invoke(builder, cursor, node, tuple(inputs),
             K.MAKE_NESTED_FUNCTION, consumed, result=True)
+        old = builder.operation_records[identity]
+        marked = replace(old, label='create function ' + node.name)
+        builder.operations[builder.operations.index(old)] = marked
+        builder.operation_records[identity] = marked
         declarations = [d for d in builder.by_atom.get(builder.source(node).atom_id.wire, ())
                         if d.metadata.get('phase') == 'definition_time']
         if len(declarations) != 1:
