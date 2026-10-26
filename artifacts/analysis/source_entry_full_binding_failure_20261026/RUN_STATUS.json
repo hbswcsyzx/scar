@@ -1,0 +1,37 @@
+{
+  "archive_count": 4,
+  "archive_paths": [
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/manifest.json",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_dependency_gate_20261025/model/attempts/1792957279902353768-1410025/02-dependency-witness/archive/manifest.json",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/lewm_archived_compiler_gate_20261026/result/archive/manifest.json",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json"
+  ],
+  "body_rows": 196,
+  "capture_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023",
+  "elapsed_seconds": 2699.927772283554,
+  "exception": "source fragment wall budget exceeded",
+  "exception_type": "ValueError",
+  "expected_capture_pid": 272038,
+  "io_start": {
+    "cancelled_write_bytes": 0,
+    "rchar": 8596951,
+    "read_bytes": 0,
+    "syscr": 8801,
+    "syscw": 32,
+    "wchar": 4511,
+    "write_bytes": 0
+  },
+  "phase": "FAIL",
+  "phase_started_utc_epoch": 1793052111.5067463,
+  "pid": 1979848,
+  "publication_bodies": 196,
+  "publication_bytes": 5505173,
+  "publication_sha256_actual": "a124d78bb5e50e4ff96d1af2858357651cb9eda13918c328fd753a3a4bd4650b",
+  "publication_sha256_expected": "a124d78bb5e50e4ff96d1af2858357651cb9eda13918c328fd753a3a4bd4650b",
+  "publication_uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/manifest.json",
+  "schema": "scar.source-entry-full-binding-run-status.v1",
+  "selected_decode_budget_bytes": 8000000000,
+  "source_snapshot_file_count": 414,
+  "source_snapshot_total_bytes": 8469996,
+  "source_snapshot_tree_sha256": "d81c68a9cfd43d974711691eaa040aee91758a8f6667cc69b3580b7adf7c9d25"
+}

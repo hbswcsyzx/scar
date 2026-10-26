@@ -1,0 +1,31 @@
+{
+  "interpretation": "Linux /proc/PID/io rchar/wchar are process read/write syscall byte counters across all FDs; read_bytes/write_bytes are storage I/O counters. They are reported as raw counters, not equated with artifact payload bytes.",
+  "proc_io_delta": {
+    "cancelled_write_bytes": 0,
+    "rchar": 2427059955,
+    "read_bytes": 0,
+    "syscr": 24198,
+    "syscw": 114,
+    "wchar": 96991424,
+    "write_bytes": 12288
+  },
+  "proc_io_end": {
+    "cancelled_write_bytes": 0,
+    "rchar": 2435656906,
+    "read_bytes": 0,
+    "syscr": 32999,
+    "syscw": 146,
+    "wchar": 96995935,
+    "write_bytes": 12288
+  },
+  "proc_io_start": {
+    "cancelled_write_bytes": 0,
+    "rchar": 8596951,
+    "read_bytes": 0,
+    "syscr": 8801,
+    "syscw": 32,
+    "wchar": 4511,
+    "write_bytes": 0
+  },
+  "schema": "scar.native-source-reader-io-record.v1"
+}
