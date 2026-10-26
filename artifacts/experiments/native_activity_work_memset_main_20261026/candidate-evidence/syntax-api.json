@@ -1,0 +1,37 @@
+{
+  "budgets_unchanged": {
+    "max_input_bytes": 4000000000,
+    "max_output_io_bytes": 512000000,
+    "max_record_bytes": 4000000,
+    "max_rss_kib": 2097152,
+    "max_shard_decoded_bytes": 16000000,
+    "max_shard_rows": 256,
+    "max_wall_seconds": 600
+  },
+  "distinct_start_end_sources": true,
+  "effects_coverage": "UNKNOWN",
+  "existing_typed_records": [
+    "WorkSubmission",
+    "WorkEvidenceBinding",
+    "WorkQuiescence"
+  ],
+  "memset_metadata_admission": true,
+  "native_qualification_granted": false,
+  "owner_acquisitions": 0,
+  "raw_reads": 0,
+  "sources": [
+    {
+      "bytes": 29256,
+      "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_work_bridge.py",
+      "sha256": "986a74bc6282deb7ab7a642874c2078850640088bc1077e5d4058ea5f03448d5"
+    },
+    {
+      "bytes": 11124,
+      "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/ir/execution/native_work_protocol.py",
+      "sha256": "79979e0bdab0de1bd85c5c732ef40fa5f2c62ce20da2043c23cca77fed84ddd3"
+    }
+  ],
+  "status": "SYNTAX_AND_SYNTHETIC_TYPED_API_ONLY",
+  "target_executions": 0,
+  "torch_imported": false
+}

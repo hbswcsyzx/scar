@@ -8,6 +8,12 @@ unresolved4964全部保留。静态仍151files/2217definitions/858active bodies�
 590not attempted。下文按日期保留的runtime843/6699是历史结果，不再是最新运行指针。
 见[完整真实门报告](../artifacts/experiments/first_stage_source858_current_20261026/REPORT.md)。
 
+**GPU资源关系最新有限结果：** main79428 actual0/GNU101.88s，完整GPU分母46142中，
+24082 kernel/copy/memset单activity获独立WorkQuiescence，22060非物理annotation单列。
+源/actor/原EEG/不同起止端点及真实memset错producer负例通过，输入2.887GB、输出含回读310.69MB。
+这些typed work仍UNATTACHED_TO_PROGRAM_SNAPSHOT，内容/state/ready及全模型仍OPEN；见
+[主树完整资源门](../artifacts/experiments/native_activity_work_memset_main_20261026/REPORT.md)。
+
 当前交付与下一项统一见 [FIRST_STAGE_DELIVERY.md](FIRST_STAGE_DELIVERY.md)，
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。

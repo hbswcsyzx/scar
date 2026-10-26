@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "after_sha256": "986a74bc6282deb7ab7a642874c2078850640088bc1077e5d4058ea5f03448d5",
+      "before_sha256": null,
+      "bytes": 29256,
+      "path": "scar/trace/native_work_bridge.py"
+    },
+    {
+      "after_sha256": "79979e0bdab0de1bd85c5c732ef40fa5f2c62ce20da2043c23cca77fed84ddd3",
+      "before_sha256": null,
+      "bytes": 11124,
+      "path": "scar/ir/execution/native_work_protocol.py"
+    }
+  ],
+  "original_v1_actual_session": 44866,
+  "original_v1_commit": "461156466016859fb17559b2a8564b683694c4dc",
+  "original_v1_exit": 0,
+  "original_v1_qualification_scope": "isolated e017 base; not transferred to main",
+  "program_snapshot_attachment": "OPEN",
+  "schema": "scar.native-work-v2-main-application/1",
+  "status": "FROZEN_CANDIDATE_APPLIED_GATE_PENDING",
+  "whole_model": "OPEN"
+}

@@ -1,0 +1,14 @@
+{
+  "actual_post_gate_metadata_decoded_bytes": 290886,
+  "actual_post_gate_metadata_stored_bytes": 17854,
+  "actual_post_gate_metadata_total_bytes": 308740,
+  "exact_negative_shard": 1,
+  "join_basis": "exact raw_reference and projection_index in the saved source-receipt metadata; filesystem time only navigation hint",
+  "original_eeg_ordinal": 311864,
+  "original_raw_or_EEG_model_reads": 0,
+  "projection_index": 74,
+  "purpose": "retain exact negative EEG sample; small receipt metadata only, not producer revalidation",
+  "raw_reference": "sha256:256f688f0c767a6302fccaec088fab9b1232ca429c24de4254a984329c3be875#/traceEvents/387936",
+  "runtime_io_report_not_changed": true,
+  "source_owner_restored": false
+}

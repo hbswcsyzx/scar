@@ -1,0 +1,49 @@
+{
+  "compile_guard": {
+    "condition": "CUDA_VERSION>=12000",
+    "historical_build_flags_observed": false,
+    "type": "CUpti_ActivityMemset4"
+  },
+  "fixed_kineto_sources": [
+    {
+      "bytes": 21301,
+      "name": "kineto_cupti_activity",
+      "reviewed_locations": [
+        "1-based45-69",
+        "1-based271-307",
+        "1-based532-544"
+      ],
+      "sha256": "ab02afc2fd9b63e4aa99f20d24ed66a829f6e0b8fc2a6eb8d28183ff0a06e5a2",
+      "url": "https://raw.githubusercontent.com/pytorch/kineto/094d3c1d072362d0a919a77299459eee94f97931/libkineto/src/CuptiActivity.h"
+    },
+    {
+      "bytes": 1968,
+      "name": "kineto_actual_typedefs",
+      "reviewed_locations": [
+        "1-based25-42"
+      ],
+      "sha256": "b5d9432148dd20337ebfc432e8289fcac1d93bf5b6c57109929f12765ec8ce10",
+      "url": "https://raw.githubusercontent.com/pytorch/kineto/094d3c1d072362d0a919a77299459eee94f97931/libkineto/src/DeviceProperties.h"
+    }
+  ],
+  "gpu_chunk_raw_projection_reads": 0,
+  "inherited_primary_receipt": {
+    "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/resource_completion_bridge_20261025/primary-receipts.json",
+    "qualification": "exact old controlled receipt is unchanged",
+    "sha256": "f88f056f75bc5084f72f0d886248c8e1af7bb19ab5781493364c536edfe23f0a"
+  },
+  "new_primary": {
+    "bytes": 74278,
+    "line_basis": "web extracted lines, not raw HTML lines",
+    "reviewed_fields": "start/end/deviceId/contextId/streamId; rendered0-based283-306",
+    "sha256": "07fc937112de36abda36db094220874aa03f90d3446a296b126558dc7ea73985",
+    "url": "https://docs.nvidia.com/cupti/13.2.1/api/structCUpti__ActivityMemset4.html"
+  },
+  "old_memset_interval_actor_distribution": "NOT_MEASURED",
+  "old_passed_commit": "461156466016859fb17559b2a8564b683694c4dc",
+  "production_changes": 0,
+  "schema": "scar.native-memset-contract-primary-review",
+  "schema_version": 1,
+  "status": "READONLY_PLAN_NOT_IMPLEMENTED",
+  "target_runs": 0
+}

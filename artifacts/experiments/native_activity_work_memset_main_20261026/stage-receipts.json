@@ -1,0 +1,1662 @@
+{
+  "large_raw_inputs_copied": false,
+  "main_index_or_git_touched": false,
+  "notes": [
+    "Main final production is V2; original V1 259 files must be retained from commit4611564.",
+    "EEG projections0 and1 retained, all compressed work/source receipts and GPU inventory retained.",
+    "All original URI semantics remain; no implicit relocation or source-owner restoration."
+  ],
+  "old_v1_paths_included": false,
+  "paths": [
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 1081,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/ACTUAL_TERMINAL.json",
+      "sha256": "972afe5eb4afe4bbdbbbc76faf6d03fbe199a9eaad0399313030810a25fd4b53"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 824,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/APPLICATION.json",
+      "sha256": "6a4a13d6effc2d89c0ed23afb5d844025d5d1067c95fd5ab9402833438f24213"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 716,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/DELIVERY_METADATA_READS.json",
+      "sha256": "821cfbeb74a62556b4959b06b58865a886582a0e0d8190077d5a9bb91fa69381"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 2183,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/README.md",
+      "sha256": "ea4ce4afa5d3e851dd620576bcc92795bfc1eb49c6ef8864588fe04cdff00465"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 3504,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/REPORT.md",
+      "sha256": "7473c30b2bad565a9a3d43b73f8e14272f73c6055729b43c6370e0e4862525c2"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 1920,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/RETENTION.md",
+      "sha256": "81b26f4bdaafd33ad19878843ad80059ccefdc1be0120c551c70aa926ea18b88"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 2152,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/ROOT_APPLICATION_RESULT.json",
+      "sha256": "c08ca9072ab238852b415d41d0106fe4a0c1d664e6d17428d3be87853429dceb"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 257324,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/artifact-inventory.json",
+      "sha256": "719a1688df528bf279039cd0dad6c625b078486babc3634d806bcc7186c29a1e"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 1138,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/budget-plan.json",
+      "sha256": "f80bf0b0aa062135a0f9f165755d90827c2c14c4c6b03539ecb9c2b5f702d6a3"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 1440,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/candidate-evidence/README.md",
+      "sha256": "d1d1140e1d03d97d4e99221ad7a2eceba141f152bd2e0c20f16735060a3c7217"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 1905,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/candidate-evidence/SOURCE_CANDIDATE.json",
+      "sha256": "9c8aa011b4a4d79abef227c89ab356d2f1f937f4fae9693ae2443b39d3ebdf18"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 2903,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/candidate-evidence/minimal.diff",
+      "sha256": "4dff0a6375ab1eeddb4127c53f09fe37df1d3182d2f33cba9986c8b8417bac7d"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 1128,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/candidate-evidence/syntax-api.json",
+      "sha256": "b1e3058418ac06a1b5deae5362523be54d82c01ae3df772bb6b417023396d6f1"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 2525,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/candidate-evidence/syntax_api.py",
+      "sha256": "d2f63f812d3ff58c7da437d3f53e94e6a653a5458d10f107de8a923d28452584"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 247810,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/freeze.json",
+      "sha256": "81c976910b6d032d4c41dc9952dbc835d66d35c07e213bc96d721c755f843b1c"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 7231,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/gate.py",
+      "sha256": "1e618e1b40d3705b8501649eaedb091315ec07dc1e38777174e131e5514dbd48"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 888,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/gnu-time.txt",
+      "sha256": "3142a3973d0e0de2792e3eec9e04e868d4d2c780f11786bbf554d74dca04eb48"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 24064,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/imports.json",
+      "sha256": "006f19468ea7e051a35ff6767a1914e8504dfb72c975509449ca616bd3679d88"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 758,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/negative.json",
+      "sha256": "ac362ce6c9ecc21269f0aaf2974e0db1a3b5cdaaf935cb24244e5b3b3c102627"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 6472,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/prepare.py",
+      "sha256": "c1e1b8beab39fe872ac7101f034df9cf5260ca1781e5d65a3b37ae0a78f66b4d"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 11124,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/producer/scar/ir/execution/native_work_protocol.py",
+      "sha256": "79979e0bdab0de1bd85c5c732ef40fa5f2c62ce20da2043c23cca77fed84ddd3"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 29256,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/producer/scar/trace/native_work_bridge.py",
+      "sha256": "986a74bc6282deb7ab7a642874c2078850640088bc1077e5d4058ea5f03448d5"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 10588,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/provider-contract/COMPLETION_CONTRACT.md",
+      "sha256": "2c8dd006105b8450bfd4e87696d9287923b0117522e6ee242017302302db60cd"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 3435,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/provider-contract/MEMSET_PLAN.md",
+      "sha256": "b20833ba6c98423f7dcbe44052da3a0ab03252f1febf03cb6430789100054ff1"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 1976,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/provider-contract/memset-primary-receipts.json",
+      "sha256": "11f8dcdbca80f7edc139113adf18ffa2527e6f5c8f2640bdeb86ddd8abe6a7b1"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 7952,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/provider-contract/primary-receipts.json",
+      "sha256": "f88f056f75bc5084f72f0d886248c8e1af7bb19ab5781493364c536edfe23f0a"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 170529,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result.json",
+      "sha256": "e6b0d71439a7ea92789812690a2857a8f111647aa41183ae98576e67326ba4f5"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9594,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000000.jsonl.gz",
+      "sha256": "57f72211462112db0de702a153e312e94ddaae96c9408e6c61ae72b38b948b11"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9376,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000001.jsonl.gz",
+      "sha256": "67faf2ed191e7efca88a0a42f111bb4b3c98432d2639d859f76fc57e9c465ac0"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9329,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000002.jsonl.gz",
+      "sha256": "f2d255c0925360fcd710ed9974311d6f37473cd1b122f931a3f4806ffcb076c5"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9425,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000003.jsonl.gz",
+      "sha256": "3cffe4f15423822a8ad83998e3a701b8e1cf17f6ff0675413af2a1ca07fc0742"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9401,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000004.jsonl.gz",
+      "sha256": "0713c5a7fb639ee5d1d7e9adf8d371f226af44ea6403f5ec350c7e0f06125362"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9359,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000005.jsonl.gz",
+      "sha256": "ef8d748f4ba207d479f308334793574130bf8beb3b6c8bb15565270f47b91cac"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9326,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000006.jsonl.gz",
+      "sha256": "ad684f511c0418f17abab576caaaa89c6c3dec2c43730f6e9100b0982022810d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9453,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000007.jsonl.gz",
+      "sha256": "85a1ce6b69559e674659939a42ecae6b7c6069f7c52472853e91cb7375453010"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9297,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000008.jsonl.gz",
+      "sha256": "4c82deb55c841df29a85dd2f184f909d55805d954e2465899351b297c2ca40a1"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9356,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000009.jsonl.gz",
+      "sha256": "f413c1d67c69d27dc98e1b2c1653e3a5547943fd1da603e85d518fedefbb4ab9"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9371,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000010.jsonl.gz",
+      "sha256": "eb78a83038c14dac20d5589ffd751f018eb581308a179becccf16e345ce190cf"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9444,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000011.jsonl.gz",
+      "sha256": "3fa7f464acf7a5dfad9c4592502ddb95ad524ee04ef7b3177f36f3f047784c7d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9295,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000012.jsonl.gz",
+      "sha256": "7d833b219e5211cadb5ef8e9b4b8b2256d65be19ecd6e8b1ac073df01ddac79b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9375,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000013.jsonl.gz",
+      "sha256": "d2b13c9c87e28d5f2554cc41738cf8317cbededb212aa48a183be54a2b2f4f2c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9423,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000014.jsonl.gz",
+      "sha256": "121d2849b26d2f47ffd5b5013ff8985a48a1693b7e1725fa783e5ae052319090"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9397,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000015.jsonl.gz",
+      "sha256": "067fd1aeb4d4f9bc5c14e6c4894ceb9c05bbde9829a9a2851d67415611d67aa9"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9314,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000016.jsonl.gz",
+      "sha256": "c8cc6eac43d9c55c17b73fab8a0a86d12c116ed274db5e2bf9ac838ce7fae79d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9421,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000017.jsonl.gz",
+      "sha256": "344cd6ae1bd71ebecefd1899a07e81d3be77808fa0d644cfda04b4fff54e5484"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9410,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000018.jsonl.gz",
+      "sha256": "b832e685bd9afb101c78ce71799f35690f973d3d44b43eb9309ad98bacd94e0c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9330,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000019.jsonl.gz",
+      "sha256": "cdf2c1169b7f681d66fcd5e391d2e07ae0745ba81f2ad026709032a92831deb9"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9335,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000020.jsonl.gz",
+      "sha256": "00464b6988ac8f2c68dbffb2896971eba5763fae94179ee25889c351db0c5b50"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9402,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000021.jsonl.gz",
+      "sha256": "b738e1ea30ae99fac31929dc0c528300f91f5e2515b3fb137ba6620bc518a6f8"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9373,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000022.jsonl.gz",
+      "sha256": "039f00717ded6fe886574693d28810c5f7e4f4d7bbbb1f59804fac76150236aa"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9285,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000023.jsonl.gz",
+      "sha256": "b8ce119b4bf4329a5befb034c25aeef148279b6e46d9823341ffc160c9b7a589"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9754,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000024.jsonl.gz",
+      "sha256": "ab57a39dd64062e9a9059ea75c123e1342784894f4267ae014a041197521326b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000025.jsonl.gz",
+      "sha256": "15bf0da657a6cbc42289d3f83d635d81a9c3bf562b0ef58075c79aa7c896a54f"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000026.jsonl.gz",
+      "sha256": "1e8deb0083663d0bbccf49d9d6c01732f05788300a725f18d03a1e3238168ccc"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000027.jsonl.gz",
+      "sha256": "e0c26a1b210ca338dbc1885077233732fa99bdcd5ee63f9b03caaba39b7820f5"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000028.jsonl.gz",
+      "sha256": "6893496abed02a1535798a7c96d30c9875f6a96b42027d130a1f9f101a268785"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9579,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000029.jsonl.gz",
+      "sha256": "301a29c9076542a0de9c4b29fd3e055ae87b3cfa0ca4447b3ce0b7a869913eeb"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9582,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000030.jsonl.gz",
+      "sha256": "9986b6020ea58f69a3fb6408f477d85f86d818c162ea28d3fde9209181a0c87f"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000031.jsonl.gz",
+      "sha256": "ac542e9415379d916de0793e7ab0064c6582d79d1cb3256d590ea3f3364d3703"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9577,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000032.jsonl.gz",
+      "sha256": "bdc9fae88eab1cadd257dc1cd53f0271a81fb3d78499b2a4cded12f0d41eabdc"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000033.jsonl.gz",
+      "sha256": "c6b0aa922e7bca9837bfc1d88718de6e41a9924947deeb94b176cede86bcd684"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000034.jsonl.gz",
+      "sha256": "a02729c0098c0360bd4346112d9a9aa46697abb212febcc827ec7b92ee875849"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9577,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000035.jsonl.gz",
+      "sha256": "58883ceae5ac1d7a222bf34228801e151ddbe039b8a8251d440d739233e8de2a"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9577,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000036.jsonl.gz",
+      "sha256": "61ccf970671421ee3792d3809aa1f7bb6a128b79432d6189e918bb7ef1b8e2fe"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000037.jsonl.gz",
+      "sha256": "c7235a755ce65b1df255d135ac3a16290bf717dffb7958b6c7ad0734119e8935"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000038.jsonl.gz",
+      "sha256": "5f5170a1a49a39862a6090e7a4deca826ee4a7f461efd64d6cc78a0af00eed7c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9579,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000039.jsonl.gz",
+      "sha256": "675bbf8d8b86c2713700a53d5ae7ef9c0afe2e940c62648c60a7963e26cbe46c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9580,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000040.jsonl.gz",
+      "sha256": "f587d93e4984f7adc7b3715034ffb03e218745f3a16ad335009e3a601b4c9b51"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000041.jsonl.gz",
+      "sha256": "f61ea5b66483f105f4ed36b543f5533ebc35de3b150599fd0b53f3e2a96cf008"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000042.jsonl.gz",
+      "sha256": "78108ae45377b23a70616ded233241f156769d062881caf42330365ab945420a"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000043.jsonl.gz",
+      "sha256": "2395601ffd5c86a94c5dda8b7ef3e1383505ff1ef810a5c4f7bac50cf33477fe"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000044.jsonl.gz",
+      "sha256": "6bf98896dd44c99531aed0af98f5d30131de02814d2c645393765817937c19f3"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 9576,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000045.jsonl.gz",
+      "sha256": "69e9452aac371b12be98e5116b87f769cfb787655869a6aaff741f47ab64d665"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 1537,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/inventory/000046.jsonl.gz",
+      "sha256": "8918abe6a962e981b7487656754bebe847db24b42d533b03c0de0766a6853215"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 169344,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/manifest.json",
+      "sha256": "32f1b2e705ca0ef63cddb985ce1ef17ee470c72dff2164ab0b751626d39b4dd2"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 52746,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/progress.jsonl",
+      "sha256": "358f7797e982193057f812002ce7bc5bd9fd3e4593a597a70d162fecfdd8edc8"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 284517,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000000.evidence.json",
+      "sha256": "9336114d211365df9f0066fddcfa3523b3db78c362c7929e7842652dac1a6a67"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17780,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000000.receipts.jsonl.gz",
+      "sha256": "4a0003fd799ab5903ec4830ed9a459f73e126d1b35e6f8689b2f246eb605a43c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41229,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000000.work.jsonl.gz",
+      "sha256": "939a54f4f9a12dde8e6e945ed62fd91a3147784ffa9796db797c3ec04fda0108"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 281378,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000001.evidence.json",
+      "sha256": "772cb21726aa6100bee0d6ab3c8de35e6ffc2977733eda110581c7e1f0075f87"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17854,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000001.receipts.jsonl.gz",
+      "sha256": "7467c192f7174a678fe4e086bbb800b110317e2eccbea244e45211dbbfac11c5"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41120,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000001.work.jsonl.gz",
+      "sha256": "3c6ffae8eb58a41de74f18b08eb7bffc0f0f923f933153d300b349b264a0eada"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17688,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000002.receipts.jsonl.gz",
+      "sha256": "ecb0fe0acfd55c1480b4d002d6159fe50a621635ed79256e966c7c7ecc082bab"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41091,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000002.work.jsonl.gz",
+      "sha256": "22f9d966c16fcbb8c00857b7d9b1c05bb15645805793cc42e1f4070d872052f0"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17705,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000003.receipts.jsonl.gz",
+      "sha256": "5c60084a8329ad9f4f69d251dd0983c88c915b5da65a983b2c44085903e8a392"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41020,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000003.work.jsonl.gz",
+      "sha256": "1c3e6f385949a20592411fb86e85e3d7e07cadbc7a5a8d061e9b049e3c2dc840"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17667,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000004.receipts.jsonl.gz",
+      "sha256": "1745fc04c1f0e0f07640b192f253c5e9cc4f859d4b0e5f64904992ccb0bf3d59"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41018,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000004.work.jsonl.gz",
+      "sha256": "1e13b6b4df5284fd0a166ec70742b212f27ac549cb9ad618ff72876c6807c7ed"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17634,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000005.receipts.jsonl.gz",
+      "sha256": "268722bd4200a2f50bcbdd79477e2bc247f45d46f1177b8ccddc83080136eff0"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41012,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000005.work.jsonl.gz",
+      "sha256": "2e9f5c39e78247d207372575ec038fb2281d3a6619b993745e3bfb69e2c489a6"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17664,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000006.receipts.jsonl.gz",
+      "sha256": "5290b459ab5402fd470f977f43180929ae0c9fb5cd6633bf201d84d6bb08b755"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41056,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000006.work.jsonl.gz",
+      "sha256": "6487aaf3685b17bee5460d969d9ef51538de262a10295b0dd8eaf4a8dc8147f8"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17643,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000007.receipts.jsonl.gz",
+      "sha256": "448e7ac1a94af5432ddbf21bc21e0860f0b6c1fe855277922e5fef01d0fb1641"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41060,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000007.work.jsonl.gz",
+      "sha256": "81658a49b58cd6695f43f273011c5a2c94af38f0d033064e7e0ecaa3ad08f604"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17611,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000008.receipts.jsonl.gz",
+      "sha256": "3b845187efa2e54a6e3db2996c98c65cce199c55381db2a717af91807f8e647f"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41104,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000008.work.jsonl.gz",
+      "sha256": "100cff5220cfe3cac39c586b759553ac7dc563a34a888016320a1459f6c653cd"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17668,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000009.receipts.jsonl.gz",
+      "sha256": "4da0eb396bb3e21e3854f84d5335d0faa6a63d4f601d84657a6e4e9c2f770a01"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41051,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000009.work.jsonl.gz",
+      "sha256": "71b6e50878200e02a7e81cf2cec4b4f1cb8ea6b94a82c3b45a3509c639c43392"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17653,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000010.receipts.jsonl.gz",
+      "sha256": "89c85f42d2871f3218c969a712b814505c9aab3cf34d65f8c3f652d1af753e7d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41044,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000010.work.jsonl.gz",
+      "sha256": "cc7de3be56a3e12a3bf8f9a371d7427d1a02677288783cbab68d2e823c9b1cc0"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17603,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000011.receipts.jsonl.gz",
+      "sha256": "86d246dcd95b2f878ebe477590ef94373d2d0ecd70d33abb014449921a6a143a"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41016,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000011.work.jsonl.gz",
+      "sha256": "3d36ea45ca25e5a1f1e6fe15d0da47a56a81c93f7e511d9b0489f252998f5449"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17673,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000012.receipts.jsonl.gz",
+      "sha256": "0a52d30ea2f9a862afa7323628dbe0cf6d118c3528d1de9d651fa4c38ba81121"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41046,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000012.work.jsonl.gz",
+      "sha256": "0bb1e03b539608b656f8a42e78cf62b23087f74b55a1f68010dd5e05dd5e57e1"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17677,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000013.receipts.jsonl.gz",
+      "sha256": "9c85479de23b9deea4ff0a578acca1307278685b977021be955477b6d1f92505"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41075,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000013.work.jsonl.gz",
+      "sha256": "22205c7b9b08f6664eac8b5ec76fd2335bb688bd3747b984007bc0fdaf2460b2"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17609,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000014.receipts.jsonl.gz",
+      "sha256": "18675ca06342725aa5e81dd2fcbd480ff3142c45a0801e5dfb2187f90b91d680"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41031,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000014.work.jsonl.gz",
+      "sha256": "a818e5ed463f8a5c3073952af7c40de55fb792f0ff017d74df4b023744b19310"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17664,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000015.receipts.jsonl.gz",
+      "sha256": "9f26e58a79abdf3b7ef57c73e6be17994f7b2cef4ffddc4f43c0f28598f491f6"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41059,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000015.work.jsonl.gz",
+      "sha256": "b406932b55c16f37b1da5bcb5c39ff0ccecd8011155866dd691b8836f37c7c4e"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17652,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000016.receipts.jsonl.gz",
+      "sha256": "1fb93ca0db8578b75bf7137fe9a1e6505af6296c18d296be1d3a861aefd78de0"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41052,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000016.work.jsonl.gz",
+      "sha256": "350220865fc74ead8e3a73dcf5634c524d00c95ffe7fd417b042ece91d9470a4"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17641,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000017.receipts.jsonl.gz",
+      "sha256": "676a5ba652a3dba645fb03d119c452f4fd9b38b1d623593be2dda78f104f42d8"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41048,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000017.work.jsonl.gz",
+      "sha256": "fc01bdb0efcde8d3fac435b6d35342738a408647f1b57120df8939dc57b1e40d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17675,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000018.receipts.jsonl.gz",
+      "sha256": "48cf340723284b0e1c22a1d9e6b5eb17fa38a07e6204fa4db4bee6b1f822afbb"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41033,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000018.work.jsonl.gz",
+      "sha256": "8435d2db77a0e213fdca23bd95513f7c7dc0cebe2ab8235e801dbe0bb5cb680c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17660,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000019.receipts.jsonl.gz",
+      "sha256": "e05cf30ac9754f2adb466328cfc97dfa9b3b8f7d7fb354a6335e4ad9b6a51c30"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41030,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000019.work.jsonl.gz",
+      "sha256": "e9b3f39949ca2d9ec789b1db762b5e22b5e29b4f5ae7b27083c092b289251435"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17613,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000020.receipts.jsonl.gz",
+      "sha256": "da74a26480e04fca3f7f71094047a06a010ef32973d33459c4caef4be6b45266"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41083,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000020.work.jsonl.gz",
+      "sha256": "f32fddee970778849d255ac2bb6fa54fe80a73fa41f13fe5a2a8e1500cb857fc"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17656,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000021.receipts.jsonl.gz",
+      "sha256": "fd6a8f4625440698a49822d432035eee6fa4c4b9239369aa6e073cb4b99e2b05"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41050,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000021.work.jsonl.gz",
+      "sha256": "d046e6498bf177fa24f1595258ddf9159b55802e25e13225b19638b409d19f31"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17694,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000022.receipts.jsonl.gz",
+      "sha256": "0cbe4d5fdbd0bd785fa7efb9097269846d47e7f7ec47ac8d7512efbb489366a8"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41046,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000022.work.jsonl.gz",
+      "sha256": "b2c097162fd9e53cfb914cf58a3ad3111c19f4b8c631e37dd0891b0358f95cd3"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17634,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000023.receipts.jsonl.gz",
+      "sha256": "715d2ccb9ddc045689247b8a42d76a297caba7c22ffe12e114f13e847f3f57b8"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41030,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000023.work.jsonl.gz",
+      "sha256": "1d04dea0883d9fafa00452106ddf52015827d6f090fe2695a8ff29ef0bb72e17"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17658,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000024.receipts.jsonl.gz",
+      "sha256": "af109605599de50cb8813e7d436d313fc2e09bea0e652c74749cbe302493d376"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41065,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000024.work.jsonl.gz",
+      "sha256": "61dcc7afa3a09ad677e38c7cb9b5619d57123a6f53e3e7f1edbea963168550b7"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17805,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000025.receipts.jsonl.gz",
+      "sha256": "c12241eebcf72f5c0adf40654a1c859b6ed064873dbba1901862b60e89002a65"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41063,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000025.work.jsonl.gz",
+      "sha256": "cc0459b034df9808f1bbacf5b6f05317d5c1977aec4d1733ce52918691c933f4"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17633,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000026.receipts.jsonl.gz",
+      "sha256": "c3ebb01194298f7172e016df3ea614e5bbcd5eb50cf19f47a6c07dc53fff7697"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41040,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000026.work.jsonl.gz",
+      "sha256": "6298175fec7f475f9b06eb580cfc1cb2196da96231a79ab98c2d72d657727de6"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17668,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000027.receipts.jsonl.gz",
+      "sha256": "0bf843207cc815055f6de73b74063b2471af7f41803ee93ea86d0bf0eb7507f5"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41069,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000027.work.jsonl.gz",
+      "sha256": "e482a685521871bdfc092e30f782ba77b52a060c04f52220b553a55eab40552d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17648,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000028.receipts.jsonl.gz",
+      "sha256": "f5aaf4f562a758209f3980241d3f4f9f9a65c413a9449098e59144830867da56"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41032,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000028.work.jsonl.gz",
+      "sha256": "3c97892137ee7a8a053f98e927f6dffcd8e8b8da399004ca322cb22afcdc9dc3"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17598,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000029.receipts.jsonl.gz",
+      "sha256": "3e118b9281885bf6a81ebf99972ee555bb092b6bffe4e12bae0f60e104aebef6"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41035,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000029.work.jsonl.gz",
+      "sha256": "ca6bdbaa273176f8f8173c8eaf70922de5532c01d9c1c7b8cab197a57be8800b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17671,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000030.receipts.jsonl.gz",
+      "sha256": "d27fbf13f0050e11f2c17bda1120b1d1235d6f794294dd3368eb721cb997117d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41049,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000030.work.jsonl.gz",
+      "sha256": "6cfa2fe5f9b1f5be41a303de3f49ef622e8eafe3695ae08a1be1426a6029495b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17672,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000031.receipts.jsonl.gz",
+      "sha256": "4d19b75a89d06330bfbab5bcd0f9a05b4d655b318b1510e2549bd67ca5fe993d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41035,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000031.work.jsonl.gz",
+      "sha256": "8049dfdecf0cd46712021a9f4024addd06d6c6ccf5d6fc4c87421287e7d26cf4"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17643,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000032.receipts.jsonl.gz",
+      "sha256": "ff5a7a7586399c2216db024f27e8a87a6f6572af8150660fac75097c28a51bd9"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41045,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000032.work.jsonl.gz",
+      "sha256": "896771aaa9c561d9ed8c4f0be93d4e45abf32ec60caa67091dd147d3886b5a6b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17652,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000033.receipts.jsonl.gz",
+      "sha256": "9f97a045140d066705d96857790310cf8321fb97b7662ed0615ee0573d47269a"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41024,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000033.work.jsonl.gz",
+      "sha256": "3509c6e70c028af372bd07d28d67c0f1c2dfc02fda5d3e950145c7b59fd09633"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17686,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000034.receipts.jsonl.gz",
+      "sha256": "2782ce45159e7f893a8ecc0764df54b8ebad8c7cbe496b98482f02938ac0134d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41014,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000034.work.jsonl.gz",
+      "sha256": "8d57bc6afa26babf6ea31a839a6303b909a0cd2ad2650f16a51a1ed4edb2b2c1"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17619,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000035.receipts.jsonl.gz",
+      "sha256": "803cd1773e983ab686bca60375518e335eebc9a86e2e43bf8f3c8222572711f6"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 40999,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000035.work.jsonl.gz",
+      "sha256": "efc4bc9fafed1dafda9d79d44e1b6ba51059925c5de16a479dc95d92dbbc998c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17644,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000036.receipts.jsonl.gz",
+      "sha256": "84068e37cee29eb9890dc1b653fa861a521f866e4dcd2d502e845bdf11b6d184"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41032,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000036.work.jsonl.gz",
+      "sha256": "064baacf22b4e02647d617cc3d641c78c39c478220462d0b38613993a303b74e"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17709,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000037.receipts.jsonl.gz",
+      "sha256": "1b7dd4467e86542782c9f44f7cff5caf569847ff0ab66cde61bd5aa055ac755f"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41025,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000037.work.jsonl.gz",
+      "sha256": "ff8468bc88f0c5426841a9e62093602f0e146ee3c8680cbe1437c91678ce83d1"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17625,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000038.receipts.jsonl.gz",
+      "sha256": "e0d9e97f7ee535ffa48085f200308788f13e7a9340c5e44b45702cc8116e6bf3"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41015,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000038.work.jsonl.gz",
+      "sha256": "9c143bff512f9f23ffa92e6719eb76ce72806ded30b4a56281e7c46c279cc2e7"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17679,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000039.receipts.jsonl.gz",
+      "sha256": "fef8b0ab6cac044c57e3f9969c1da2d49b596851dfafbe448ca50b7dc8f92df6"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 40997,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000039.work.jsonl.gz",
+      "sha256": "988d8cb67bdc18a7e932fafe6b670fa87d28a2872299778239aca4ab249e08d7"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17710,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000040.receipts.jsonl.gz",
+      "sha256": "49467a915311b7647845d5605b91d46ab58ccef6eeb92a717e9dd2279c21e9e9"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 40965,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000040.work.jsonl.gz",
+      "sha256": "746cc365fcf6078951b3223179857ec35a6cca6d146e01edb5ad48e7cf746665"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17609,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000041.receipts.jsonl.gz",
+      "sha256": "25b2cb7731833ce34a5225e338b3684ce2915b960cadaf309a6ef013d384fd98"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41030,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000041.work.jsonl.gz",
+      "sha256": "f3dc225a56d3edbf2dbe3e080f00e1ebcbf1f6df005919983e3da876b87e04bd"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17649,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000042.receipts.jsonl.gz",
+      "sha256": "7f700babbd70247c15810726b3ac25c1e7b15a5409c33ddfa23df360ba81e5a5"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41053,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000042.work.jsonl.gz",
+      "sha256": "dadd7f0386212728154fb2884bb2e1fb3a794194215a31594ec51fc44c98538d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17695,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000043.receipts.jsonl.gz",
+      "sha256": "b2913fa282ed4f3d7e965db19a8edeb2faf64545ee8d9ef504d8d0321d46f6ef"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 40984,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000043.work.jsonl.gz",
+      "sha256": "c60e297aeddb824e72c3ec822ba1dc70cb1cc3cfebe8c3890e1c6890bdd254d7"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17617,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000044.receipts.jsonl.gz",
+      "sha256": "0318130f33bf721beb212898d8bf1560770ed2d2d9cb88a676a121d4d92ca2f0"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41026,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000044.work.jsonl.gz",
+      "sha256": "622cbd8080b2ab3c714afcdaebaf6b18392eac71b7c42a4c877e1a8634bd2a41"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17663,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000045.receipts.jsonl.gz",
+      "sha256": "45e319e2d63b26b73b825aadf9307c1f2638a1ca4c939cc7ee0530f0e494f451"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41011,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000045.work.jsonl.gz",
+      "sha256": "91914259441102536dae202d138ecce84dedc26017e98497e046c0f3eb40f052"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17702,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000046.receipts.jsonl.gz",
+      "sha256": "0c2d5309af961c1f4e4adfed7d15d569fda4703d13426e1378b2289c2c060e4c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41043,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000046.work.jsonl.gz",
+      "sha256": "b9518b06da0600b98cee9c1f11ba064b90d88178366a9655a4435ba9b432883d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17627,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000047.receipts.jsonl.gz",
+      "sha256": "aeef54cc7ee2919827729504788d36d723afa268c60e64cc678e853ddf640b3e"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41013,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000047.work.jsonl.gz",
+      "sha256": "fbfae7aebc8b0b48a3d002fb66305d808090fca4b56ace6d2bd800933b596618"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17662,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000048.receipts.jsonl.gz",
+      "sha256": "145ecf6a5450be50653a65fa0c3ed9152b4568100798575fb901b1320ec45571"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41027,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000048.work.jsonl.gz",
+      "sha256": "e0e90e9288798470dbc1104ed92ec7ab916936e02977cfcff5b36def277bea8b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17660,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000049.receipts.jsonl.gz",
+      "sha256": "7058646ce0e6d8722606cdac2031dab366b14fab1c8652518b1b90fc556b4f7e"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41038,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000049.work.jsonl.gz",
+      "sha256": "ccaf759232b6086bd10a8f0149892c1417274a498e5d54616da7f21c9c817222"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17619,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000050.receipts.jsonl.gz",
+      "sha256": "c42cd1aeaa5f5bf71f7d9613a7e628db07ab7b7707b1e25b1cefba164f5a7777"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41023,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000050.work.jsonl.gz",
+      "sha256": "169cb271ffe36b58998ea179436f0febb44022ac64aa1a57473b5821c54bb809"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17800,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000051.receipts.jsonl.gz",
+      "sha256": "e339780da553dfc54fe6164d1de448fb81f276c4a3c99ea0270258dccfd37d79"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41044,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000051.work.jsonl.gz",
+      "sha256": "f35db84b296977f6919c10aefcf0b55d02e0a8bcaf0e29e69e168f9371d0647f"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17688,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000052.receipts.jsonl.gz",
+      "sha256": "f0129d8eca3739ec67c99f8932ca05c94acf8ae3dd4be935cd6f425293df51a3"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41044,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000052.work.jsonl.gz",
+      "sha256": "df1512c9a76a50760ee62bb60540b4183cb5c56c15cb57cf2995723757421b85"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17618,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000053.receipts.jsonl.gz",
+      "sha256": "393dc49a44604355a4bf1cdef9cb88bf920ff01da8fde9db47272700b11d197a"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41007,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000053.work.jsonl.gz",
+      "sha256": "e8f5bea17bdff76a536470b176c724a30bc3920c1e6dd13bf0674beaffde56f1"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17659,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000054.receipts.jsonl.gz",
+      "sha256": "33ec9b3980282244a80296a6ae2000c5a77d7d75b39bd8e046856d84cdf5e70d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41011,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000054.work.jsonl.gz",
+      "sha256": "fbb59fce5e9e1aae145e880e2ea2bb12978af23227839a1347b1370754f89adf"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17688,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000055.receipts.jsonl.gz",
+      "sha256": "67725065012d8ba57434849d1ef38d19f80b693d4057392e2fd16e770316e448"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41044,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000055.work.jsonl.gz",
+      "sha256": "8ca1a3363433eec2321d2a9b9a042652fba2ca1f20e75dab709900fde70467cb"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17616,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000056.receipts.jsonl.gz",
+      "sha256": "3f05911a208d8f27bda2ed37e41ab71beed0e751f2d180cbfc1fac4d3e0e77ec"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 40991,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000056.work.jsonl.gz",
+      "sha256": "bb5a51d0188d9c9e3ae323a2a9571ec23a7a503e4f250bc9ea9a81073f431525"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17635,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000057.receipts.jsonl.gz",
+      "sha256": "1f32016cdcc3805b83a666f769a110829558b15b652b7cd5b098f7d23ee7dc6e"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41010,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000057.work.jsonl.gz",
+      "sha256": "4fe70eb9befa3cf70356546a51c0ad8d337da5254be074a55abca57a8fc82e29"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17657,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000058.receipts.jsonl.gz",
+      "sha256": "5e00567eebcd6c48990e941a408be737946a3e92b0d91025d37d415afa461cdc"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41018,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000058.work.jsonl.gz",
+      "sha256": "e727c741990a96c81489ed4ce5d9a874684de5e8909f8dbaca0892248d00776a"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17639,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000059.receipts.jsonl.gz",
+      "sha256": "dc00a6127d854ea4c544341dde097afb311fc4a4d94f7c25f4d767c43b4739b0"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41015,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000059.work.jsonl.gz",
+      "sha256": "a3bc7642b2c8799042a11865a6a901e8f80e97b6904376aa952656f59a62861b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17682,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000060.receipts.jsonl.gz",
+      "sha256": "cf03144ad548ee6c0e945a92888efd8722392acb55b88e1bed18864759a368fe"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 40994,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000060.work.jsonl.gz",
+      "sha256": "936ca85047dabb31a122bf18a6e47a9a03c41133301318cf2044997cd7cffdad"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17685,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000061.receipts.jsonl.gz",
+      "sha256": "afda810a36e26baa015c97224f09163c40a2ebff676b5622a14064caee05f931"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41072,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000061.work.jsonl.gz",
+      "sha256": "cd7d2d05f2811c93398ff4f727c68b0c847b9222782df11508a8bbdeada7d1e7"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17653,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000062.receipts.jsonl.gz",
+      "sha256": "a62a680a03b3f539d1f50ca3793a1257fa7e1029f38bf5803211e2fc7496392e"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41038,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000062.work.jsonl.gz",
+      "sha256": "aaca5ee8f20bd11a17487e215b02a7030a53a7388f8582137ffa7400caab5c95"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17660,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000063.receipts.jsonl.gz",
+      "sha256": "0ad2836daa0a44184291bce8fbc313b38913197847b2cdd55d547bbf5c769a20"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41061,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000063.work.jsonl.gz",
+      "sha256": "0209cf0fc3a7d5caee14689ac870e755c76ba0d89000336311ed9c1d19406618"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17680,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000064.receipts.jsonl.gz",
+      "sha256": "ac83478fb5a1a5bec4cb276787dda610b3f2b4512887ed44f008c4e48d50632c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41057,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000064.work.jsonl.gz",
+      "sha256": "c166b2d25ebbe5e254a3fa0429f5e3012c84902ef6df35f6cabe9106d13c0c4a"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17660,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000065.receipts.jsonl.gz",
+      "sha256": "c62f83a09121924db97e766b40c85889b12b378187cf24e40cfe05af7933cd72"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41052,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000065.work.jsonl.gz",
+      "sha256": "01574c20828044a720890c1034cf2640b898cbc30e551f83f9ac32759f10cbcb"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17628,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000066.receipts.jsonl.gz",
+      "sha256": "31aa77a1df7935b183a0e683b44e0a5b82f185fcef0f2316aacf066ab3389ce5"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41030,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000066.work.jsonl.gz",
+      "sha256": "d41d8530e59b6b0af50664c898059696fac02778bcc10cb38d47e7ff8fcd4f53"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17691,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000067.receipts.jsonl.gz",
+      "sha256": "38b3e08b4bc0ab74099461c496b34fa35e29fe8418c6a1ed5e023b8ed0df723d"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41042,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000067.work.jsonl.gz",
+      "sha256": "7432ddf38a026600d9b2a83018bb094c8cb0e1f6fa51da7656d5428c870fc99c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17622,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000068.receipts.jsonl.gz",
+      "sha256": "ecfc0c3888582b542ccce3c69bbd9c529398a82b0361df7be6bdfce64c7ab375"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41067,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000068.work.jsonl.gz",
+      "sha256": "8070f385cda0f7fd675a80c0d41b26ce3c6e7e58126eb322df064fe001575acc"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17649,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000069.receipts.jsonl.gz",
+      "sha256": "5bb43fe170189f3ad24da8d8b8ff073a25154f3cd2aebf2bcd87318c2ff6c735"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41045,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000069.work.jsonl.gz",
+      "sha256": "9010cc33fc5a8dde7dd9f6291056d3d12fc6defaa1fe16e97517bfb4fcbb7dbd"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17683,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000070.receipts.jsonl.gz",
+      "sha256": "108a3c793583b3973ebc01d029644c68b8735660472e720ecb110c8be1767a56"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41075,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000070.work.jsonl.gz",
+      "sha256": "d902da2684df7c90b9204dd584b4f7b2a30caa3ee7c4df319470f6b2c90ccf07"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17649,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000071.receipts.jsonl.gz",
+      "sha256": "40d05afa2f57b063a1fb80a5ec8c963f5ab44ef38149c8d88492927ef3e3ba9b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41054,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000071.work.jsonl.gz",
+      "sha256": "8041676ed9a8c77a09ff6ecd85f00c8d4bb7cb62c796e43aab9944541136ccd2"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17646,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000072.receipts.jsonl.gz",
+      "sha256": "9d1f70105fed8dfa2581440f9ebfdfbcfda9fd6d93daaa3c7c07442129d90444"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 40988,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000072.work.jsonl.gz",
+      "sha256": "a920ddbaf967f83b72d4082d9b5775025e9d71fa225d110dcb80dc7ff233d6cc"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17648,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000073.receipts.jsonl.gz",
+      "sha256": "26555bc6e47c9acf6beb0d661510e24ab7cb12ef048f16b844a2ee189361104e"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 40995,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000073.work.jsonl.gz",
+      "sha256": "2565c675412518f338a97fe900db1cf6731abb5a12b67b309274fc8976287268"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17639,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000074.receipts.jsonl.gz",
+      "sha256": "06ccffbfa78ad314efd1dcce54af8e82462db7ab7234b8d51c5e849c2581914c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41016,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000074.work.jsonl.gz",
+      "sha256": "aad70c77cff9db70fe98803f9686d0975470299887016f40252518f10eda5c3a"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17647,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000075.receipts.jsonl.gz",
+      "sha256": "44d53385b13754ab10df9202711362afe8fc2dcb9b84ecf02b124205f88f6a5c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41027,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000075.work.jsonl.gz",
+      "sha256": "c6e3cc8c2402af382a63fbe880763509c3843a2f09610621d60117d1856c7964"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17663,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000076.receipts.jsonl.gz",
+      "sha256": "267cc0d10fa2b85fcbcfef8b0ecedf6d37bac0cff204ae0cb357d9bcc21d3911"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41058,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000076.work.jsonl.gz",
+      "sha256": "aa4d7fd5a2e990001ee2b7f283dcb8a63bd74e318cfb9ed0a3b9c8cbe82ae216"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17796,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000077.receipts.jsonl.gz",
+      "sha256": "5ced68937107faca28072c32e67a5517971abba6a2eaac77eb150ed9c8fe582f"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41044,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000077.work.jsonl.gz",
+      "sha256": "65ce4e68da6ad01f8eed7c32dc9d91ea12e20fac5d9a4770472d7891dbbe11f3"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17622,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000078.receipts.jsonl.gz",
+      "sha256": "3625e886300c55511b0db7b5fd470c8b445c520ac2f5cd5759bfbacc4edf02e2"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41053,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000078.work.jsonl.gz",
+      "sha256": "1db6dd73cf79305ea2bceaa5b8b47ca25f1711f9ad11a7819c9148ac0c4cbf89"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17708,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000079.receipts.jsonl.gz",
+      "sha256": "41686326525d30db6b4088c42528b3c990f9dea24d95484d58b6e5aceb11627b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41036,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000079.work.jsonl.gz",
+      "sha256": "bab0d8b2e1d1b13b53d00db4944584c3b520a0e26ee1b926e1817b8fdcb0a2ee"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17622,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000080.receipts.jsonl.gz",
+      "sha256": "d4e07d68a08cf5443ce3893e512014b7b310b32916e228acfe05ab11d974454e"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41008,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000080.work.jsonl.gz",
+      "sha256": "c08b090e0383f28eda9b508299690a0d968866d1a0f99d08eff7d510bdf87b51"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17638,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000081.receipts.jsonl.gz",
+      "sha256": "dfbf5ab4ec5a657667dc7511003b461b8d48d8062228459fba5e07ba6a5196c3"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41008,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000081.work.jsonl.gz",
+      "sha256": "b745c5fd2203dacdbd015f0a8ea3bb209595bfcca01957f01bd0e2f70a03210e"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17674,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000082.receipts.jsonl.gz",
+      "sha256": "ba6956bc6b675ed6f7301919bd91bdb3d082b06239fc4334dd260858fdc7a990"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41070,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000082.work.jsonl.gz",
+      "sha256": "04376f46e83f38f94a93ae3db69cbec7c16a3b1e6aca34a908c36553f9dd1dd1"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17668,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000083.receipts.jsonl.gz",
+      "sha256": "01b07f90361f48795981edc6344fc8d5822b5a411be63cdab64db484b175e30c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41041,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000083.work.jsonl.gz",
+      "sha256": "8b3f1412c4718f9dfb5835b5258c0ba782e0ddcbbaf28e9a6d010156a3d9a795"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17631,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000084.receipts.jsonl.gz",
+      "sha256": "211069bf3d969579055eb38529f0c2b6a3a4211bbf3a5460ae68aa0e18dcf5e8"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41025,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000084.work.jsonl.gz",
+      "sha256": "bb2a0a13490fd7252a1ef37cd53ca5ff6031f0e20d1936562e6605c7c69fc2bf"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17663,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000085.receipts.jsonl.gz",
+      "sha256": "e0ab0fbbdf3e40e9a71ed1430ae45b345185f007a465480195f82e0737a34362"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41057,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000085.work.jsonl.gz",
+      "sha256": "09d132fc4491be2c5468918c08c687a232ffd52ed24fe7d89c8d8bc2cd6e4669"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17656,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000086.receipts.jsonl.gz",
+      "sha256": "9724952ae8ae4c1ac68b0f7e51d6a2abbfa26577e26264e7d42a5d7ddc1a8f11"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41078,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000086.work.jsonl.gz",
+      "sha256": "1fb9790c9ce2809839bf8748d835569d46fcdbd512245c0b94b23db94cbe2df0"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17679,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000087.receipts.jsonl.gz",
+      "sha256": "5d0b2c75b31115befb5f1197ff858a2684bd2d660bd557e3a2e09ba8f4b20024"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41018,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000087.work.jsonl.gz",
+      "sha256": "d8a4742279284d9299f68e5aa04cba3412842ba68fe357302e5a9ae95c45ea5c"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17697,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000088.receipts.jsonl.gz",
+      "sha256": "1d9e1419c52d83e866d647038cd12ad2e560338a57c82da91493676a0ba0cd8f"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41074,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000088.work.jsonl.gz",
+      "sha256": "1db6fa14ca776d5f82dfb9105fbe41740416accda1f2258b7c172f096b8ca7ba"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17666,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000089.receipts.jsonl.gz",
+      "sha256": "a3990ae2369b3c839dd1c79417f54079b0fb975f317265bc2ac654979f9140da"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41064,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000089.work.jsonl.gz",
+      "sha256": "2ea771502c416c60da243b56c61899a5f81b7d1c5f06feece85d0d83a10c7012"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17653,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000090.receipts.jsonl.gz",
+      "sha256": "151d3b91552eacb26cb418b5a89000ce7ad8334a9ccb8950757be7e7c9b4df0a"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41012,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000090.work.jsonl.gz",
+      "sha256": "5825b98106251f55dd37a17f72de3222665fbc9d2496d6c99851e546554445f3"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17687,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000091.receipts.jsonl.gz",
+      "sha256": "514f32a31e43b7d42eb93520edeb68fd8b961e755bdb1320090fe4dc67babcb7"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41088,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000091.work.jsonl.gz",
+      "sha256": "a05bf1357aa5cda1e377fa5037da5d3552b77843477c7a38283f1a2784a50829"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17664,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000092.receipts.jsonl.gz",
+      "sha256": "69fe3dc896c2353e590300d6510834c2859939fc4a6232de7bbbc82649d40d9b"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41106,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000092.work.jsonl.gz",
+      "sha256": "10e07f13a539854e52562a91d36b55f0dec8832e5af4e56070f79b9cd72b58be"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 17652,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000093.receipts.jsonl.gz",
+      "sha256": "5e846efd821e998f06887830097d3e21e85aff5da52507c90d2ae3ef30d105f3"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 41081,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000093.work.jsonl.gz",
+      "sha256": "3cf44e5c2dded6784a8a0f5d0de445a7477866eb1333bda70d850ccb1a6774dc"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 1848,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000094.receipts.jsonl.gz",
+      "sha256": "c210168888f42cc0a1bb556264e22125cde3c52530e80b68dddfd92401cd4d60"
+    },
+    {
+      "basis": "ACTUAL_MAIN_WRITER_AND_READBACK; delivery stat only",
+      "bytes": 3698,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000094.work.jsonl.gz",
+      "sha256": "7af7b93a321e80620bd31088ef594af2c65ac1bb640ece9dbc7e58c6eca42e4c"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 613,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/run.sh",
+      "sha256": "129c8b9f6df87df279df6a247f7d01e34e84993ffc02c92ff1b27b726bb4bc1a"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 26983,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/stage-paths.txt",
+      "sha256": "1656c7324238f90aaf290d809433eeaaf140caf53a31f7dca2beb28f5c65481e"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 0,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 100,
+      "path": "artifacts/experiments/native_activity_work_memset_main_20261026/stdout.txt",
+      "sha256": "1d4b57389df0fdac5f004f236a144ee9309d61946a838d3b981d996f4fb75aed"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 11124,
+      "path": "scar/ir/execution/native_work_protocol.py",
+      "sha256": "79979e0bdab0de1bd85c5c732ef40fa5f2c62ce20da2043c23cca77fed84ddd3"
+    },
+    {
+      "basis": "DELIVERY_SMALL_METADATA_SOURCE_HASH",
+      "bytes": 29256,
+      "path": "scar/trace/native_work_bridge.py",
+      "sha256": "986a74bc6282deb7ab7a642874c2078850640088bc1077e5d4058ea5f03448d5"
+    }
+  ],
+  "schema": "scar.explicit-main-stage-paths",
+  "schema_version": 1,
+  "self_hash_excluded": true,
+  "self_path": "artifacts/experiments/native_activity_work_memset_main_20261026/stage-receipts.json",
+  "stage_file_count": 275,
+  "staged_bytes_excluding_self": 7620206
+}

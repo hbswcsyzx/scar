@@ -4,6 +4,38 @@
 与 [完整模型](WHOLE_PROGRAM_MODEL.md)、[集成设计](MODELING_INTEGRATION.md)配合阅读。
 本轮不增加 detector/backend，不修改 LeWM，不升级运行环境。
 
+## 2026-10-26：编译器方法与当前实现核对
+
+SCAR复用编译器的前端、分层IR与分析方法；词法和语法复用CPython，不另写语言。
+“语义分析”指名称绑定、求值顺序、类型约束、读写、alias与异常等程序行为，
+不是识别人类业务名。静态图保留可能分支，动态证据分别给实际occurrence及资源活动，
+通过CodeVersion/SourceSnapshot、Run和原限定引用连接，不能互相替代覆盖率。
+
+| 编译器方法 | 当前落实与边界 |
+|---|---|
+| tokenize / AST / symbol table / bytecode | program_lowering复用tokenize.open、ast.parse、symtable；CodeWitness/dis固定编译选项与异常表。不是全部Python语法已有producer。 |
+| CFG、SSA、def-use | 原Operation/Value/Block/Region、block arguments、有序Use与显式状态流；validation核支配关系和可用性。当前主要在单图内部，不能当跨过程完整数据流。 |
+| effects、alias、内存依赖 | StateAccess、StateAddress和前后态已存在；很多真实alias/效果仍partial。没有实现完整LLVM MemorySSA或通用全程序别名分析。 |
+| region与多层表达 | function/module/loop/exception到native活动使用独立层级与来源；新C模块Try已接原控制/清理合同，scope扩展仍有明确debt。 |
+| interprocedural analysis / linking | 当前source858/6882实际调用对应通过；跨snapshot持久typed关系仍缺，正在补原qualified端点/证据链。 |
+| profile-guided feedback | 真实调用、Tensor/native活动和物理copy参与静态范围及来源核对；一次没执行的分支不判dead，活动结束不判value ready。 |
+| Pass管线与失效 | 需要明确每项analysis依赖与变更后失效/重算；现精确producer guards保守拒绝过期派生索引，不应暗降为兼容。统一analysis manager尚未实现。 |
+| SCCP / CSE-GVN / LICM / DCE / partial evaluation | 后续化简规则的明确参考，当前未作为完整通用优化管线接入；本阶段仍先完整建模。 |
+
+[MLIR LangRef](https://mlir.llvm.org/docs/LangRef/)说明Operation/Value/Block/Region和
+block arguments的SSA结构；SCAR已有对应结构，不声称已集成MLIR运行时。
+[MLIR effects/speculation](https://mlir.llvm.org/docs/Rationale/SideEffectsAndSpeculation/)
+提示数据依赖之外还须处理可变资源、异常与不完成；不能仅凭相同输入搬动操作。
+[LLVM MemorySSA](https://llvm.org/docs/MemorySSA.html)提供内存定义/使用和可能覆盖关系的参考，
+SCAR的粗状态流不能冒称同等精度。
+[LLVM LICM及其他passes](https://llvm.org/docs/Passes.html#licm-loop-invariant-code-motion)
+作为未来常量传播、冗余消除、代码外提规则参考，不把这些名字写成已完成实现。
+
+例如`if needed: y=1/x`中，x即使在循环内不变，提前到条件外也可能新引入除零异常。
+从深层上移必须核控制执行条件、alias写入和保留效果；跨function还需要上下文摘要与guard。
+语法未支持是前端缺口；已表达操作的值/alias未证是分析信息缺口，二者分别补齐，不能都
+用UNKNOWN掩盖。后续每项模型验收同时列静态来源、动态事实及二者对应关系。
+
 最新复审基线为 `78c5fda`：P0 来源声明与 P1 薄边界已实现，FX/Export/ETO adapter
 仍未接入。面向阅读的[现状与建模决定](MODELING_REUSE_DECISION.md)汇总五类实体、
 连接规则和工具分工。复用设计保留原生 artifact + 薄边界引用，避免再次自制

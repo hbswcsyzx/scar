@@ -12,6 +12,12 @@
 collector/runtime适用性、state/content/ready和第一阶段均OPEN。详见
 [真实终态与完整范围](../artifacts/experiments/first_stage_source858_current_20261026/REPORT.md)。
 
+**GPU资源关系主树实门：** 已全量核515398 provider记录及461242 EEG实例；24082物理
+GPU活动（22457kernel/543copy/1082memset）获得单activity静止关系，22060 annotation另列。
+79428 actual0/101.88s，源/端点/错producer校验通过，原IR没有新Outcome或ready真值。
+程序snapshot/owner与state/materialization/visibility仍待跨片模型接线，见
+[完整资源结果](../artifacts/experiments/native_activity_work_memset_main_20261026/REPORT.md)。
+
 **当前模块C的有限结果：** 同SP8已表达Try传播pair与except-as正常/异常两条清理路径，
 原C0/C1 validator及normal reader通过；主树同图与旧function SP5读回通过。
 当前354ops/9顶层接口，精确余2句REQUIRED；实际namespace/传播/runtime/状态仍OPEN。

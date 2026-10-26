@@ -12,6 +12,7 @@
 | callee-entry 参数边 | snapshot→原 formal port 的局部 projection 已通过真实隔离门及主树旧 SP5/typed consumer：271次入口/566个参数观测，260次入口/520 ports 对应，11次保留 frontier。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[实际接入报告](../artifacts/experiments/callee_entry_routing_applied_20261025/REPORT.md)。 |
 | project/dependency 统一出版 | 同一次新CPU capture的正常CLI已实际通过：3成功SP5全部消费，project REVISE2、dependency ADD1，5groups/12calls保全，body-linked10/source-only1/unresolved1。五类动态接口仍各12 OPEN；project ADD、父overlay继承和v5新路径未实测。见[真实门报告](../artifacts/experiments/project_dependency_publication_gate_20261025/REPORT.md)。 |
 | 真实 LeWM source858 运行接线 | root11969已actual0/GNU39:42.90，完整100438 calls保留；当前92bodygroups/6882calls、source-only88592/unresolved4964。15图实测4+179次，旧6699在本门重新统计；原source guards/collector/runtime/state等欠账保留。见[真实终态](../artifacts/experiments/first_stage_source858_current_20261026/REPORT.md)。 |
+| 真实 GPU 活动资源关系 | main79428 actual0/GNU101.88s；461242 EEG实例/515398 provider记录全遍历，24082物理活动=22457kernel+543copy+1082memset均获单activity quiescence，22060 annotation单列。仍未挂ProgramSnapshot、不授成功/ready。见[实际完整门](../artifacts/experiments/native_activity_work_memset_main_20261026/REPORT.md)。 |
 
 这些是模型连接与类型修正，不是优化候选或 backend。下一版本仍必须保完整源码、
 调用和资源分母，并分别报告 source topology、运行对应、效果与完成状态。
@@ -46,12 +47,11 @@ S1 审计、已有数据的 S3 接线和独立产品复核可以并行；会改�
 传播端口、pending dispatch后packet frame-exit和except-as两条清理走廊使用原core；
 见[原设计与实施决定](../artifacts/analysis/module_try_propagation_c_plan_20261026/ROOT_DECISION.md)。
 随后继续实际数据/状态及资源完成关系。
-资源完成合同已有后继主要来源核对：严格单GPU activity的有效end可按原IR表示独立
-WorkQuiescence；不是child完成、输出正确或value ready。Root已授权原两源通用producer/checker，
-以全部原GPU活动和76个instances chunks为分母，逐记录有效性判定、分片输出；
-不采用为≥1.47GB扫描只保1手选活动的原提案。一次实门上限stored+decoded4GB、输出512MB，
-原EEG namespace/ordinal及不同start/end字段保留；ProgramSnapshot挂接仍须明确保OPEN，
-不造空图/任取host图。当前仅实施中，尚未实跑或授全量资格；
+资源两源通用producer/checker已在main完整通过：原76 instances chunks/GPU候选全入账，
+24082单activity quiescence逐条核不同start/end与来源；原4GB输入/512MB输出预算内。
+这不是child完成、输出正确或value ready。ProgramSnapshot挂接仍OPEN，不造空图/任取host图。
+下一步补持久typed跨fragment关系，区分静态定义与动态发生，复用原qualified端点和原EEG
+SUBMITS_WORK/PROVIDER_SCOPE_ASSOCIATION证据；context不改成direct call，旧派生索引失效须重建。
 早期[有界方案](../artifacts/analysis/resource_completion_bridge_20261025/PLAN.md)保留为设计历史。
 完整LeWM链、CP2未知成本和历史失败均保留。详见[入口](MODEL_RUN.md)及上述三项工作表。
 
