@@ -1,0 +1,11 @@
+{
+  "production_delta": "one _observe_entry predicate; no buffering/close/fork delta",
+  "main_before_sha256": "b661a8c508daaa6c52b064254ab6aa995dd320ba1c25f3989e5bceedc47fcc08",
+  "expected_main_after_sha256": "44b14b3a7794a9e39342a3e32454c969b745bab890a214dbc1fbe890831f0c11",
+  "isolated_commit_before_sha256": "4f8d299baff10412cc8b1f6d09c707c1303998ebc4deab7e1348987819a3ed35",
+  "isolated_commit_after_sha256": "75e47f3de2f3bdefc65be5bce6409bb647c5cc051ac2b955430c09c34cc3159f",
+  "tests_used_main_buffered_dependencies": true,
+  "normal_reader_check_exit_code": 0,
+  "lewm_capture_retried": false,
+  "original_lewm_gap_callee": "NOT_RECORDED; not inferred as a unique identity"
+}

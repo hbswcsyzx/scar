@@ -1,0 +1,17 @@
+[
+  {
+    "main": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/call_edges.py",
+    "main_sha256": "b661a8c508daaa6c52b064254ab6aa995dd320ba1c25f3989e5bceedc47fcc08",
+    "isolated_before_sha256": "4f8d299baff10412cc8b1f6d09c707c1303998ebc4deab7e1348987819a3ed35"
+  },
+  {
+    "main": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/call_operands.py",
+    "main_sha256": "318bc00d5b872e6717b666ddc904df7bf35b88d940cf81c2370d3c2ad535369f",
+    "isolated_before_sha256": "720f77e48710e8e9c5bf1dd17ef41fb5b8832b107af3ceb2b0a44952ed6628a7"
+  },
+  {
+    "main": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/python_call_targets.py",
+    "main_sha256": "7bba5d2c6e65ab2f14c7fa0b798c783880a251b8076ae46c2511e73fb60ae205",
+    "isolated_before_sha256": "bbb4fcdb97a8d9960d7e93589e759c6a5c8a4b70757996fe19e9e22d613f153a"
+  }
+]

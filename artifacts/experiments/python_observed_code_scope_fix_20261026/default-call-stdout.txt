@@ -1,0 +1,1 @@
+{"status": "CPU_EXAMPLE_RETURNED", "output": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_observed_code_scope_fix_20261026/default-with-call", "v2": false}

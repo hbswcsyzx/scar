@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 1699391,
+  "project_root": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_observed_code_scope_fix_20261026/example/project",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "CPYTHON_CALL_WINDOWS_V1",
+  "limits": {
+    "max_events": 10000,
+    "max_bytes": 4000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 16,
+  "event_attempts": 16,
+  "instructions": 12,
+  "call_attempts": 3,
+  "handshakes": 1,
+  "gaps": 0,
+  "loads": 6,
+  "references": 18,
+  "bytes": 6833,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_observed_code_scope_fix_20261026/default-with-call/call-codes.1699391.jsonl",
+      "family": "codes",
+      "process_id": 1699391,
+      "raw_sha256": "3681435124a37a8b3a6a0e8211bcb0530bd0f9b53047b2ec78c84d6aa7b005c3",
+      "raw_bytes": 1528,
+      "lines": 5
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_observed_code_scope_fix_20261026/default-with-call/call-events.1699391.jsonl",
+      "family": "events",
+      "process_id": 1699391,
+      "raw_sha256": "74f248f2db9460aa17da6ba9b1899f776f37798806a71bc8852ce841bf37aab4",
+      "raw_bytes": 6172,
+      "lines": 8
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_observed_code_scope_fix_20261026/default-with-call/call-meta.1699391.json",
+      "family": "meta",
+      "process_id": 1699391,
+      "raw_sha256": "6f1f2c87c7c5669b194054266bebc6c5f3105ffb6528c244ca6777ba1efc0695",
+      "raw_bytes": 1029,
+      "lines": 34
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

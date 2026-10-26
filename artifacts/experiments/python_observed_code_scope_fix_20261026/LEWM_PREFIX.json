@@ -1,0 +1,331 @@
+{
+  "qualification": "bounded actual first24 frame records; code descriptor stream EOF/SHA checked, frame stream prefix only; no missing GAP code fabricated",
+  "frame_prefix_bytes": 24104,
+  "frame_artifact": {
+    "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_v2_20261026/capture/trace/call-events.1684268.jsonl.gz",
+    "compressed_bytes": 12603099,
+    "gzip_sha256": "d74bfd1dd0c4ab25bc4f9715a3640b3fe31f2481b39ae53d51dba15b0d82b1e7",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_v2_20261026/capture/trace/call-events.1684268.jsonl",
+    "raw_bytes": 185338926,
+    "raw_sha256": "6176f918e11b94e156397be610c4bc2b2c95125ef36f7a71ea2f2beb825dd2e5"
+  },
+  "code_artifact": {
+    "actual_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_v2_20261026/capture/trace/call-codes.1684268.jsonl.gz",
+    "compressed_bytes": 61815,
+    "gzip_sha256": "801e55726cec7a4ff7fe6658afb94f2b5649d5b285e3d93b18339657b2173c8e",
+    "logical_path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_v2_20261026/capture/trace/call-codes.1684268.jsonl",
+    "raw_bytes": 226265,
+    "raw_sha256": "2485ff6b7392971a4cb84fdf6b50da0f47c4f52f96d39407f3cad32349699254"
+  },
+  "rows": [
+    {
+      "index": 15,
+      "kind": "call_exit",
+      "invocation_id": 8,
+      "caller_invocation_id": null,
+      "code": "pycode-v2:43cc1d7c1815e3d620977fcee6707fab0619821afe3ef1e9c392936297245a3f",
+      "caller": null,
+      "path": null,
+      "descriptor": {
+        "key": "pycode-v2:43cc1d7c1815e3d620977fcee6707fab0619821afe3ef1e9c392936297245a3f",
+        "filename": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+        "qualname": "PurePath.__init__",
+        "first_line": 135,
+        "flags": 134217735,
+        "parameters": [
+          "self",
+          "args"
+        ]
+      }
+    },
+    {
+      "index": 16,
+      "kind": "call_enter",
+      "invocation_id": 9,
+      "caller_invocation_id": 1,
+      "code": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+      "caller": {
+        "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+        "offset": 88,
+        "opname": "CALL",
+        "position": [
+          17,
+          17,
+          7,
+          31
+        ]
+      },
+      "path": [
+        {
+          "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+          "offset": 88,
+          "opname": "CALL",
+          "position": [
+            17,
+            17,
+            7,
+            31
+          ]
+        }
+      ],
+      "descriptor": {
+        "key": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+        "filename": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+        "qualname": "Path.resolve",
+        "first_line": 932,
+        "flags": 201326595,
+        "parameters": [
+          "self",
+          "strict"
+        ]
+      }
+    },
+    {
+      "index": 17,
+      "kind": "call_enter",
+      "invocation_id": 10,
+      "caller_invocation_id": 9,
+      "code": "pycode-v2:88d986abd1d0478caa5205e7cb8b41de1d90b6d16806010d9e459d4b886e15df",
+      "caller": {
+        "code": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+        "offset": 78,
+        "opname": "CALL_KW",
+        "position": [
+          938,
+          938,
+          34,
+          71
+        ]
+      },
+      "path": [
+        {
+          "code": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+          "offset": 78,
+          "opname": "CALL_KW",
+          "position": [
+            938,
+            938,
+            34,
+            71
+          ]
+        }
+      ],
+      "descriptor": {
+        "key": "pycode-v2:88d986abd1d0478caa5205e7cb8b41de1d90b6d16806010d9e459d4b886e15df",
+        "filename": "<frozen posixpath>",
+        "qualname": "realpath",
+        "first_line": 388,
+        "flags": 67108867,
+        "parameters": [
+          "filename",
+          "strict"
+        ]
+      }
+    },
+    {
+      "index": 18,
+      "kind": "call_exit",
+      "invocation_id": 10,
+      "caller_invocation_id": null,
+      "code": "pycode-v2:88d986abd1d0478caa5205e7cb8b41de1d90b6d16806010d9e459d4b886e15df",
+      "caller": null,
+      "path": null,
+      "descriptor": {
+        "key": "pycode-v2:88d986abd1d0478caa5205e7cb8b41de1d90b6d16806010d9e459d4b886e15df",
+        "filename": "<frozen posixpath>",
+        "qualname": "realpath",
+        "first_line": 388,
+        "flags": 67108867,
+        "parameters": [
+          "filename",
+          "strict"
+        ]
+      }
+    },
+    {
+      "index": 19,
+      "kind": "call_enter",
+      "invocation_id": 11,
+      "caller_invocation_id": 9,
+      "code": "pycode-v2:7d5c4ef9e741c461ad5b1962b47ed7321d4073edf38423e7f6ca840172b906bb",
+      "caller": {
+        "code": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+        "offset": 86,
+        "opname": "CALL",
+        "position": [
+          938,
+          938,
+          15,
+          72
+        ]
+      },
+      "path": [
+        {
+          "code": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+          "offset": 86,
+          "opname": "CALL",
+          "position": [
+            938,
+            938,
+            15,
+            72
+          ]
+        }
+      ],
+      "descriptor": {
+        "key": "pycode-v2:7d5c4ef9e741c461ad5b1962b47ed7321d4073edf38423e7f6ca840172b906bb",
+        "filename": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+        "qualname": "PurePath.with_segments",
+        "first_line": 157,
+        "flags": 201326599,
+        "parameters": [
+          "self",
+          "pathsegments"
+        ]
+      }
+    },
+    {
+      "index": 20,
+      "kind": "call_exit",
+      "invocation_id": 11,
+      "caller_invocation_id": null,
+      "code": "pycode-v2:7d5c4ef9e741c461ad5b1962b47ed7321d4073edf38423e7f6ca840172b906bb",
+      "caller": null,
+      "path": null,
+      "descriptor": {
+        "key": "pycode-v2:7d5c4ef9e741c461ad5b1962b47ed7321d4073edf38423e7f6ca840172b906bb",
+        "filename": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+        "qualname": "PurePath.with_segments",
+        "first_line": 157,
+        "flags": 201326599,
+        "parameters": [
+          "self",
+          "pathsegments"
+        ]
+      }
+    },
+    {
+      "index": 21,
+      "kind": "call_exit",
+      "invocation_id": 9,
+      "caller_invocation_id": null,
+      "code": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+      "caller": null,
+      "path": null,
+      "descriptor": {
+        "key": "pycode-v2:36443b4d02a05661e264573ed5fe1dba5f6e1abd56f57844f94412e37efd553e",
+        "filename": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+        "qualname": "Path.resolve",
+        "first_line": 932,
+        "flags": 201326595,
+        "parameters": [
+          "self",
+          "strict"
+        ]
+      }
+    },
+    {
+      "index": 22,
+      "kind": "call_enter",
+      "invocation_id": 12,
+      "caller_invocation_id": 1,
+      "code": "pycode-v2:b11324f35a4111e9d3f31116791b1933dac9c188c6f16ab37c3d2aff8c81a0ad",
+      "caller": {
+        "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+        "offset": 96,
+        "opname": "LOAD_ATTR",
+        "position": [
+          17,
+          17,
+          7,
+          38
+        ]
+      },
+      "path": [
+        {
+          "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+          "offset": 96,
+          "opname": "LOAD_ATTR",
+          "position": [
+            17,
+            17,
+            7,
+            38
+          ]
+        }
+      ],
+      "descriptor": {
+        "key": "pycode-v2:b11324f35a4111e9d3f31116791b1933dac9c188c6f16ab37c3d2aff8c81a0ad",
+        "filename": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+        "qualname": "PurePath.parent",
+        "first_line": 381,
+        "flags": 201326595,
+        "parameters": [
+          "self"
+        ]
+      }
+    },
+    {
+      "index": 23,
+      "kind": "call_exit",
+      "invocation_id": 12,
+      "caller_invocation_id": null,
+      "code": "pycode-v2:b11324f35a4111e9d3f31116791b1933dac9c188c6f16ab37c3d2aff8c81a0ad",
+      "caller": null,
+      "path": null,
+      "descriptor": {
+        "key": "pycode-v2:b11324f35a4111e9d3f31116791b1933dac9c188c6f16ab37c3d2aff8c81a0ad",
+        "filename": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+        "qualname": "PurePath.parent",
+        "first_line": 381,
+        "flags": 201326595,
+        "parameters": [
+          "self"
+        ]
+      }
+    },
+    {
+      "index": 24,
+      "kind": "call_enter",
+      "invocation_id": 13,
+      "caller_invocation_id": 1,
+      "code": "pycode-v2:13d538c3c7081646bed762c03ff0758b890cbfcfc9c23260e267f4eaef31ccc9",
+      "caller": {
+        "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+        "offset": 168,
+        "opname": "CALL",
+        "position": [
+          19,
+          21,
+          4,
+          5
+        ]
+      },
+      "path": [
+        {
+          "code": "pycode-v2:c0ae657136e059abd7eb11655cdd3e390c164a258ac1d7c498ce7b5fec2fb622",
+          "offset": 168,
+          "opname": "CALL",
+          "position": [
+            19,
+            21,
+            4,
+            5
+          ]
+        }
+      ],
+      "descriptor": {
+        "key": "pycode-v2:13d538c3c7081646bed762c03ff0758b890cbfcfc9c23260e267f4eaef31ccc9",
+        "filename": "<frozen _collections_abc>",
+        "qualname": "Mapping.get",
+        "first_line": 792,
+        "flags": 201326595,
+        "parameters": [
+          "self",
+          "key",
+          "default"
+        ]
+      }
+    }
+  ]
+}

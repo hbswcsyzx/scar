@@ -1,0 +1,16 @@
+--- a/scar/trace/call_edges.py
++++ b/scar/trace/call_edges.py
+@@ -63,7 +63,12 @@
+             return True
+         observer = self.operand_observer
+         targets = getattr(observer, 'python_targets', None) if observer is not None else None
+-        return targets is not None and targets.accepts_frame(frame)
++        # Local monitoring masks belong to CodeType, not one invocation.
++        # Once v2 selects an external code, retain all its later real entries,
++        # including entry through an unobserved wrapper. This supplies a base
++        # frame; only the separate exact pending-call rule can give a handshake.
++        return targets is not None and (targets.observed_code(frame.f_code)
++                                        or targets.accepts_frame(frame))
+ 
+     def _write(self, fd, row):
+         data = (json.dumps(row,ensure_ascii=True,separators=(",",":"),allow_nan=False)+"\n").encode()

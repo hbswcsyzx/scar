@@ -1,0 +1,47 @@
+{
+  "before-with-call": {
+    "frame_entries": 5,
+    "selected_entries": 1,
+    "attempts": 3,
+    "sentinel_attempts": 0,
+    "gaps": [
+      "INSTRUCTION_FRAME_UNAVAILABLE"
+    ],
+    "collector_errors": []
+  },
+  "after-with-call": {
+    "frame_entries": 7,
+    "selected_entries": 2,
+    "attempts": 5,
+    "sentinel_attempts": 1,
+    "gaps": [],
+    "collector_errors": [],
+    "exact_selected_target_entry_relations": 1,
+    "indirect_entry_fabricated_handshake": false,
+    "observed": {
+      "targets": 5,
+      "entries": 4,
+      "gaps": 0,
+      "kinds": {
+        "FUNCTION": 4,
+        "OTHER_UNCLASSIFIED": 1
+      },
+      "receiver_entries": 0,
+      "contents_state_ready_established": false,
+      "whole_program_complete": false
+    }
+  },
+  "default-with-call": {
+    "frame_entries": 4,
+    "selected_entries": 1,
+    "attempts": 3,
+    "sentinel_attempts": 1,
+    "gaps": [],
+    "collector_errors": []
+  },
+  "source_sha256": {
+    "scar/trace/call_edges.py": "44b14b3a7794a9e39342a3e32454c969b745bab890a214dbc1fbe890831f0c11",
+    "scar/trace/call_operands.py": "318bc00d5b872e6717b666ddc904df7bf35b88d940cf81c2370d3c2ad535369f",
+    "scar/trace/python_call_targets.py": "7bba5d2c6e65ab2f14c7fa0b798c783880a251b8076ae46c2511e73fb60ae205"
+  }
+}
