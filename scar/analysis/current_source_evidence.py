@@ -378,7 +378,9 @@ def connect_current_capture(composition, coordinates, trace_directory, out_dir, 
                             include_environments=True, progress=None,
                             resume_source_directory=None, resume_source_report_sha256=None,
                             resume_source_bindings_sha256=None,
-                            source_port_consumer=None, source_port_budget=None):
+                            source_port_consumer=None, source_port_budget=None,
+                            python_source_port_consumer=None, python_source_port_budget=None,
+                            python_source_body_composition=None, python_source_inventory_artifact=None):
     """Open/verify current raw once, then privately share it across source/SBA."""
     from scar.analysis.call_operand_reader import read_call_operands
     from scar.analysis.call_operands import _link_call_operands_owned
@@ -409,6 +411,24 @@ def connect_current_capture(composition, coordinates, trace_directory, out_dir, 
         from scar.ir.program.source_call_bindings import SourceCallPortBudget
         _need(type(source_port_budget) is SourceCallPortBudget, "source-port budget must be typed")
         source_port_budget.__post_init__()
+    _need(python_source_port_consumer is None or callable(python_source_port_consumer),
+          "Python source-port consumer must be callable")
+    _need(python_source_port_consumer is not None or all(x is None for x in
+        (python_source_port_budget, python_source_body_composition, python_source_inventory_artifact)),
+        "Python source-port inputs require the explicit v2 consumer")
+    if python_source_port_budget is not None:
+        from scar.ir.program.python_call_targets import PythonSourcePortBudget
+        _need(type(python_source_port_budget) is PythonSourcePortBudget, "Python source-port budget must be typed")
+        python_source_port_budget.__post_init__()
+    if python_source_body_composition is not None:
+        _need(type(python_source_body_composition) is CompositionIndex
+              and python_source_body_composition.has_source_entry_publication,
+              "Python body input requires an ordinary qualified entry composition")
+    if python_source_inventory_artifact is not None:
+        from scar.ir.program.source_references import SourceArtifactLocator
+        _need(type(python_source_inventory_artifact) is SourceArtifactLocator,
+              "Python inventory artifact must be its exact typed original locator")
+        python_source_inventory_artifact.__post_init__()
     resume_fields = (resume_source_directory, resume_source_report_sha256, resume_source_bindings_sha256)
     _need(all(value is None for value in resume_fields) or all(value is not None for value in resume_fields),
           "completed source checkpoint requires its explicit directory and both exact document SHAs")
@@ -441,7 +461,10 @@ def connect_current_capture(composition, coordinates, trace_directory, out_dir, 
         source_bindings=source_directory, coordinates=coordinates, code_witnesses=code_witnesses,
         frame_budget=frame_budget, operand_budget=operand_budget, route_budget=route_budget,
         include_environments=include_environments, progress=progress,
-        source_port_consumer=source_port_consumer, source_port_budget=source_port_budget)
+        source_port_consumer=source_port_consumer, source_port_budget=source_port_budget,
+        python_source_port_consumer=python_source_port_consumer, python_source_port_budget=python_source_port_budget,
+        python_source_body_composition=python_source_body_composition,
+        python_source_inventory_artifact=python_source_inventory_artifact)
     counts = {"frame_scans": 1, "operand_scans": 1, "environment_scans": int(include_environments),
         "captured_codes": len(operands.frame_scan.captures), "entries": len(operands.entries),
         "exits": len(operands.exits), "operand_events": len(operands.events)}

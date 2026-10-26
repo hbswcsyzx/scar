@@ -64,6 +64,42 @@ def _layout_matches(layout, code):
             and layout.parameters == code.co_varnames[:count])
 
 
+def _checked_formal_ports(body, interface, signature, values, blocks, definition):
+    region = next((region for region in body.graph.regions if region.id == body.graph.root), None)
+    _need(region is not None and interface.region == region.id
+          and interface.definition == signature.definition == definition,
+          Issue.SOURCE_CORE_BOUNDARY, 'formal interface has no matching root/definition')
+    entry = blocks[region.entry]
+    _need(len(signature.parameters) == len(interface.parameters)
+          and tuple(parameter.slot for parameter in signature.parameters)
+          == tuple(port.slot for port in interface.parameters),
+          Issue.SOURCE_CORE_BOUNDARY, 'explicit formal slots do not cover the declared signature')
+    for port in interface.parameters:
+        value = values.get(port.value)
+        _need(type(value) is ReferenceValue and isinstance(value.origin, BlockArgument)
+              and value.region == region.id and value.origin.block == entry.id
+              and 0 <= value.origin.index < len(entry.arguments)
+              and entry.arguments[value.origin.index] == port.value,
+              Issue.SOURCE_CORE_BOUNDARY, 'formal is not its exact declared entry reference port')
+    if interface.profile is BodyLoweringProfile.STRUCTURED_ENV:
+        environments = [environment for environment in body.graph.environments if environment.region == region.id]
+        _need(len(environments) == 1, Issue.SOURCE_CORE_BOUNDARY,
+              'environment body has no unique existing environment interface')
+        environment, = environments
+        layouts = [layout for layout in body.graph.function_entries if layout.environment == environment.id]
+        _need(len(layouts) == 1 and layouts[0].parameters == interface.parameters
+              and environment.code_definition == definition,
+              Issue.SOURCE_CORE_BOUNDARY, 'explicit formal layout differs from the environment entry')
+        expected = (tuple(member.reference for member in environment.members)
+                    + tuple(port.value for port in interface.parameters) + (interface.world,))
+    else:
+        expected = tuple(port.value for port in interface.parameters) + (interface.world,)
+    _need(entry.arguments == expected and type(values.get(interface.world)) is StateVersionValue,
+          Issue.SOURCE_CORE_BOUNDARY, 'formal/environment/world partition differs from the actual entry')
+    return interface.parameters
+
+
+
 class _Core:
     def __init__(self, sources):
         self.sources = sources
@@ -78,43 +114,19 @@ class _Core:
         return self.value_records[definition]
 
     def formal_ports(self, definition):
-        """Check explicit Python formals independently of physical env offsets."""
+        """Check original project formals under the existing local namespace."""
         body, _, _, blocks = self.sources.core[definition]
-        interface = self.sources.ports[definition]
-        signature = self.sources.signatures[definition]
-        values = self.values(definition)
-        region = next((region for region in body.graph.regions if region.id == body.graph.root), None)
-        _need(region is not None and interface.region == region.id
-              and interface.definition == signature.definition == definition,
-              Issue.SOURCE_CORE_BOUNDARY, 'formal interface has no matching root/definition')
-        entry = blocks[region.entry]
-        _need(len(signature.parameters) == len(interface.parameters)
-              and tuple(parameter.slot for parameter in signature.parameters)
-              == tuple(port.slot for port in interface.parameters),
-              Issue.SOURCE_CORE_BOUNDARY, 'explicit formal slots do not cover the declared signature')
-        for port in interface.parameters:
-            value = values.get(port.value)
-            _need(type(value) is ReferenceValue and isinstance(value.origin, BlockArgument)
-                  and value.region == region.id and value.origin.block == entry.id
-                  and 0 <= value.origin.index < len(entry.arguments)
-                  and entry.arguments[value.origin.index] == port.value,
-                  Issue.SOURCE_CORE_BOUNDARY, 'formal is not its exact declared entry reference port')
-        if interface.profile is BodyLoweringProfile.STRUCTURED_ENV:
-            environments = [environment for environment in body.graph.environments if environment.region == region.id]
-            _need(len(environments) == 1, Issue.SOURCE_CORE_BOUNDARY,
-                  'environment body has no unique existing environment interface')
-            environment, = environments
-            layouts = [layout for layout in body.graph.function_entries if layout.environment == environment.id]
-            _need(len(layouts) == 1 and layouts[0].parameters == interface.parameters
-                  and environment.code_definition == definition,
-                  Issue.SOURCE_CORE_BOUNDARY, 'explicit formal layout differs from the environment entry')
-            expected = (tuple(member.reference for member in environment.members)
-                        + tuple(port.value for port in interface.parameters) + (interface.world,))
-        else:
-            expected = tuple(port.value for port in interface.parameters) + (interface.world,)
-        _need(entry.arguments == expected and type(values.get(interface.world)) is StateVersionValue,
-              Issue.SOURCE_CORE_BOUNDARY, 'formal/environment/world partition differs from the actual entry')
-        return interface.parameters
+        return _checked_formal_ports(body, self.sources.ports[definition],
+            self.sources.signatures[definition], self.values(definition), blocks, definition)
+
+    def qualified_formal_ports(self, context):
+        """The same ABI guard, after an exact original qualified body lookup."""
+        from scar.analysis.call_edges import _QualifiedBodyContext
+        if type(context) is not _QualifiedBodyContext:
+            raise TypeError('exact original qualified body context required')
+        body, _, _, blocks = context.core
+        return _checked_formal_ports(body, context.bundle.interface, context.signature,
+            {value.id: value for value in body.graph.values}, blocks, context.reference.definition.definition)
 
     def return_root(self, edge):
         if (not edge.exit_verified or edge.exit is None

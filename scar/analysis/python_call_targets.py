@@ -7,6 +7,7 @@ from scar.ir.program.python_call_targets import PythonCallTarget,PythonEntryBind
 from scar.ir.program.call_edges import CallRecordAnchor, CallTraceFile
 from scar.ir.program.call_operands import CallableKind
 from scar.ir.record_codec import decode,encode,loads as strict_loads
+from scar.trace.files import open_binary,resolve as resolve_trace_file
 
 
 
@@ -15,7 +16,7 @@ def read_python_call_targets(trace,*,max_bytes=32_000_000,max_rows=100_000):
     if any(type(x) is not int or x<1 for x in (max_bytes,max_rows)):raise ValueError('positive independent reader ceilings required')
     root=Path(trace.directory);metas=sorted(root.glob('python-call-target-meta.*.json'))
     if not metas:raise ValueError('explicit v2 Python target capability missing')
-    targets=[];entries=[];gaps=[];target_anchors=[];entry_anchors=[];total=rows=0;digests=[];processes=set()
+    targets=[];entries=[];gaps=[];target_anchors=[];entry_anchors=[];total=rows=stored_total=0;digests=[];processes=set()
     attempts={(a.process_id,a.index):a for a in trace.attempts}
     frames={e.invocation:e for e in trace.entries}
     descriptors={(c.process_id,c.code.key):c.code for c in trace.frame_scan.captures}
@@ -41,10 +42,14 @@ def read_python_call_targets(trace,*,max_bytes=32_000_000,max_rows=100_000):
         if legacy_meta is None or legacy_meta.errors or legacy_meta.io_failed or legacy_meta.dropped_events or legacy_meta.previous_profile or any(i.process_id==process for i in trace.issues):raise ValueError('partial/interposed normal operand inputs cannot establish Python target entries')
         ref=meta['file'];path=Path(ref['path'])
         if any(type(ref[k]) is not int or ref[k]<0 for k in ('bytes','rows')):raise ValueError('exact target artifact byte/row counts required')
-        if set(ref)!={'path','bytes','sha256','rows'} or path!=root/f'python-call-targets.{process}.jsonl' or path.is_symlink() or not path.is_file():raise ValueError('target file outside original trace scope')
+        physical=resolve_trace_file(path)
+        if set(ref)!={'path','bytes','sha256','rows'} or path!=root/f'python-call-targets.{process}.jsonl' or path.is_symlink() or physical.is_symlink() or not physical.is_file() or physical not in (path,Path(str(path)+'.gz')):raise ValueError('target file outside original trace scope')
+        if path.is_file() and Path(str(path)+'.gz').exists():raise ValueError('ambiguous plain/gzip target artifact')
+        stored_total+=physical.stat().st_size
+        if stored_total>max_bytes:raise ValueError('target stored-byte ceiling before decode')
         digest=hashlib.sha256();file_bytes=file_rows=0
         counts={'TARGET':0,'ENTRY':0,'GAP':0}
-        with path.open('rb') as stream:
+        with open_binary(path) as stream:
             while raw:=stream.readline(2_000_001):
                 total+=len(raw);file_bytes+=len(raw);file_rows+=1;rows+=1
                 if total>max_bytes or rows>max_rows or len(raw)>2_000_000:raise ValueError('target stream ceiling')
@@ -100,7 +105,8 @@ def read_python_call_targets(trace,*,max_bytes=32_000_000,max_rows=100_000):
 
 
 
-def build_python_source_ports(*,trace,call_model,inventory,sources,inventory_artifact=None):
+def build_python_source_ports(*,trace,call_model,inventory,sources,inventory_artifact=None,
+                              body_composition=None,budget=None,consumer=None):
     """Bind current normal source/Use/formal ports without minting a core value.
 
     Partitioned bodies retain their original locator; unpartitioned normal
@@ -124,7 +130,13 @@ def build_python_source_ports(*,trace,call_model,inventory,sources,inventory_art
     # A serialized target graph is a query product, never an authorization
     # token. This producer reads the original sidecar against the same normal
     # frame/operand scan; it does not rescan those raw streams or restore owners.
-    observed=read_python_call_targets(trace)
+    from scar.ir.program.python_call_targets import PythonSourcePortBudget
+    budget=PythonSourcePortBudget() if budget is None else budget
+    if type(budget) is not PythonSourcePortBudget:raise TypeError("typed Python source-port budget required")
+    budget.__post_init__()
+    if consumer is not None and not callable(consumer):raise TypeError("Python source-port consumer must be callable")
+    observed=read_python_call_targets(trace,max_bytes=budget.max_sidecar_bytes,max_rows=budget.max_sidecar_rows)
+    if len(observed.targets)>budget.max_attempts:raise ValueError("complete Python target denominator exceeds budget")
     class Session(_Session):
         def namespace(self,definition):
             if self.sources.source_access is not None:return super().namespace(definition)
@@ -166,90 +178,128 @@ def build_python_source_ports(*,trace,call_model,inventory,sources,inventory_art
     watermarks=defaultdict(list);operand_indices=defaultdict(list)
     for event in trace.events:
         watermarks[event.process_id].append(event.frame_index);operand_indices[event.process_id].append(event.index)
-    bindings=[];issues=[]
+    def bind(target,target_anchor):
+        attempt=attempts[target.caller.process_id,target.attempt_index]
+        _need(target.code is not None,Issue.DISPATCH_BOUNDARY,'native/unclassified callable has no Python target')
+        _need((target.caller.process_id,target.attempt_index) in entry_map,Issue.HANDSHAKE_BOUNDARY,'no exact retained Python entry')
+        entry,entry_anchor=entry_map[target.caller.process_id,target.attempt_index]
+        caller,callee=session.edges.get(target.caller),session.edges.get(entry.callee)
+        _need(caller is not None and callee is not None and callee.caller_identity_verified
+            and len(callee.path)==1,Issue.HANDSHAKE_BOUNDARY,'normal direct frame/caller path unavailable')
+        caller_q=sources.qualified_body(target.caller.process_id,caller.entry.code,
+            composition=body_composition,operands=trace)
+        callee_q=sources.qualified_body(entry.callee.process_id,callee.entry.code,
+            composition=body_composition,operands=trace)
+        caller_link=caller.target if caller_q is None else caller_q.link
+        callee_link=callee.target if callee_q is None else callee_q.link
+        _need(caller_link.status is callee_link.status is CallLinkStatus.VERIFIED
+            and (caller_q is not None or caller_link.definition in sources.core)
+            and (callee_q is not None or callee_link.definition in sources.core and callee_link.definition in sources.ports),
+            Issue.SOURCE_CORE_BOUNDARY,'normal caller/callee source/core ports unavailable')
+        call=callee.path[0] if caller_q is None else sources.qualified_call_site(attempt.site,caller_q)
+        _need(call.status is CallLinkStatus.VERIFIED and call.site==attempt.site and call.execution_owner==caller_link.definition
+            and callee.entry.anchor.index==entry.entry_index and callee.entry.caller_invocation==target.caller,
+            Issue.HANDSHAKE_BOUNDARY,'normal direct caller/site/entry differs')
+        _need((callee_q is not None or target.code in sources.objects)
+            and (caller_q is not None or attempt.site.code in sources.objects),
+            Issue.CODE_WITNESS_UNAVAILABLE,'normal complete caller/callee CodeWitness unavailable')
+        code=callee_q.code if callee_q is not None else sources.objects[target.code]
+        caller_code=caller_q.code if caller_q is not None else sources.objects[attempt.site.code]
+        layout=target.layout
+        suspended=inspect.CO_GENERATOR|inspect.CO_COROUTINE|inspect.CO_ASYNC_GENERATOR
+        _need(_layout_matches(layout,code) and not layout.flags&(suspended|inspect.CO_VARARGS|inspect.CO_VARKEYWORDS)
+            and layout.kwonlyargcount==0 and not caller_code.co_flags&suspended,
+            Issue.DISPATCH_BOUNDARY,'unsupported Python positional/suspended entry layout')
+        _need(target.caller.process_id not in session.bad_processes,Issue.CAPTURE_GAP,'normal operand capture process incomplete')
+        # Operand and target-sidecar indices are different domains. The
+        # normal frame watermark locates the first operand row at entry.
+        indices=operand_indices[target.caller.process_id]
+        position=bisect_left(watermarks[target.caller.process_id],entry.entry_index)
+        entry_operand_index=indices[position] if position<len(indices) else indices[-1]+1
+        for table,key in ((session.global_gaps,target.caller.process_id),(session.local_gaps,target.caller),
+                (session.local_gaps,entry.callee),(session.read_issues,target.caller),(session.read_issues,entry.callee)):
+            _need(not _has_index(table.get(key,()),attempt.index,entry_operand_index),Issue.CAPTURE_GAP,'call-to-entry capture gap')
+        source_span=(call.source.start_line,call.source.end_line,call.source.start_column,call.source.end_column)
+        matches=() if caller_q is None else caller_q.context.nodes.get(source_span,())
+        node=sources.node(call.source) if caller_q is None else next((n for n in matches if isinstance(n,ast.Call)),None)
+        _need(isinstance(node,ast.Call) and not node.keywords and not any(isinstance(a,ast.Starred) for a in node.args),Issue.DISPATCH_BOUNDARY,'only explicit positional AST arguments')
+        offset=int(target.receiver is not None)
+        _need(layout.argcount==len(node.args)+offset and callee.entry.parameters_complete
+            and tuple(p.name for p in callee.entry.parameters)==layout.parameters,
+            Issue.DISPATCH_BOUNDARY,'receiver/explicit argument/entry layout mismatch')
+        if attempt.site.code not in session.instructions:
+            session.instructions[attempt.site.code]={i.offset:i for i in dis.get_instructions(caller_code)}
+        instruction=session.instructions[attempt.site.code].get(attempt.site.offset)
+        _need(instruction is not None and instruction.opname=='CALL' and instruction.arg==len(node.args)
+            and attempt.site.position==_span(node) and decode(CapturedSite,code_site(caller_code,attempt.site.offset))==attempt.site,
+            Issue.CALL_INSTRUCTION_BOUNDARY,'normal CALL n/current source position mismatch')
+        signature=sources.signatures[callee_link.definition] if callee_q is None else callee_q.signature
+        formals=session.core.formal_ports(callee_link.definition) if callee_q is None else session.core.qualified_formal_ports(callee_q)
+        _need(tuple(p.name for p in signature.parameters)==layout.parameters
+            and all(p.kind in (ParameterKind.POSITIONAL,ParameterKind.POSITIONAL_ONLY) for p in signature.parameters)
+            and not signature.decorators,Issue.SOURCE_CORE_BOUNDARY,'normal signature differs/has unexpanded decorators')
+        body,operations,uses,_=sources.core[call.execution_owner] if caller_q is None else caller_q.core
+        _need(call.core_operation in operations,Issue.SOURCE_CORE_BOUNDARY,'source CALL has no original qualified core operation')
+        operation=operations[call.core_operation]
+        _need(operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
+            and len(operation.invoke_arguments)==len(node.args)+2 and operation.invoke_arguments[0]==call.callee_use
+            and uses[call.callee_use].value==call.callee_value,Issue.SOURCE_CORE_BOUNDARY,'original callee/explicit actual/world partition differs')
+        values=session.core.values(call.execution_owner) if caller_q is None else {v.id:v for v in body.graph.values}
+        world=uses[operation.invoke_arguments[-1]]
+        _need(world.role is UseRole.STATE_CONTENT and type(values[world.value]) is StateVersionValue
+            and all(type(values[uses[u].value]) is ReferenceValue for u in operation.invoke_arguments[:-1]),Issue.SOURCE_CORE_BOUNDARY,'original reference/world roles differ')
+        use_key=call.execution_owner if caller_q is None else ('qualified',json.dumps(encode(caller_q.reference),sort_keys=True))
+        if use_key not in session.use_sources:
+            grouped=defaultdict(list)
+            for link in body.metadata.use_links:grouped[link.operation,link.use].append(link.source)
+            session.use_sources[use_key]=grouped
+        source_uses=session.use_sources[use_key]
+        actuals=[]
+        for index,arg in enumerate(node.args):
+            use=operation.invoke_arguments[index+1]
+            source=(sources.source(call.source.path,arg) if caller_q is None else
+                caller_q.context.references[type(arg).__name__,*_span(arg)])
+            _need(source_uses[operation.id,use]==[source],Issue.SOURCE_CORE_BOUNDARY,'actual Use is not its unique source expression')
+            actuals.append(CallArgument(index,source,ArgumentKind.POSITIONAL,use=use))
+        caller_body=session.namespace(caller_link.definition) if caller_q is None else caller_q.namespace
+        callee_body=session.namespace(callee_link.definition) if callee_q is None else callee_q.namespace
+        receiver=None;candidate=None
+        if offset:
+            parameter,formal=signature.parameters[0],formals[0]
+            receiver=SourceReceiverPort(caller_body,operation.id,call.callee_use,call.callee_value,
+                callee_body,parameter.slot,formal.value,parameter.name,target.receiver)
+        else:
+            candidate=bind_call(signature,call=call.call,target=signature.definition,source=call.source,arguments=tuple(actuals))
+            _need(candidate.status is CallBindingStatus.CONDITIONAL and all(r.origin is BindingOrigin.ARGUMENT for r in candidate.routes),Issue.BINDING_INCOMPLETE,'original function binder did not cover explicit arguments')
+        ports=tuple(SourceArgumentPort(index,caller_body,operation.id,actual.source,actual.use,uses[actual.use].value,
+            callee_body,parameter.slot,formal.value,parameter.name,ParameterBinding(parameter.slot,BindingOrigin.ARGUMENT,(index,)))
+            for index,(actual,parameter,formal) in enumerate(zip(actuals,signature.parameters[offset:],formals[offset:])))
+        return PythonSourcePortBinding(target,target_anchor,entry,entry_anchor,attempt.anchor,callee.entry.anchor,
+            caller_link,callee_link,call,caller_body,callee_body,receiver,ports,candidate)
+    bindings=[];issues=[];port_count=0
     for target,target_anchor in zip(observed.targets,observed.target_anchors):
         try:
-            attempt=attempts[target.caller.process_id,target.attempt_index]
-            _need(target.code is not None,Issue.DISPATCH_BOUNDARY,'native/unclassified callable has no Python target')
-            _need((target.caller.process_id,target.attempt_index) in entry_map,Issue.HANDSHAKE_BOUNDARY,'no exact retained Python entry')
-            entry,entry_anchor=entry_map[target.caller.process_id,target.attempt_index]
-            caller,callee=session.edges.get(target.caller),session.edges.get(entry.callee)
-            _need(caller is not None and callee is not None and callee.caller_identity_verified
-                and caller.target.status is callee.target.status is CallLinkStatus.VERIFIED
-                and len(callee.path)==1 and callee.path[0].status is CallLinkStatus.VERIFIED
-                and caller.target.definition in sources.core and callee.target.definition in sources.core
-                and callee.target.definition in sources.ports,Issue.SOURCE_CORE_BOUNDARY,'normal caller/callee source/core ports unavailable')
-            call=callee.path[0]
-            _need(call.site==attempt.site and call.execution_owner==caller.target.definition
-                and callee.entry.anchor.index==entry.entry_index and callee.entry.caller_invocation==target.caller,
-                Issue.HANDSHAKE_BOUNDARY,'normal direct caller/site/entry differs')
-            _need(target.code in sources.objects and attempt.site.code in sources.objects,
-                Issue.CODE_WITNESS_UNAVAILABLE,'normal complete caller/callee CodeWitness unavailable')
-            code,caller_code=sources.objects[target.code],sources.objects[attempt.site.code]
-            layout=target.layout
-            suspended=inspect.CO_GENERATOR|inspect.CO_COROUTINE|inspect.CO_ASYNC_GENERATOR
-            _need(_layout_matches(layout,code) and not layout.flags&(suspended|inspect.CO_VARARGS|inspect.CO_VARKEYWORDS)
-                and layout.kwonlyargcount==0 and not caller_code.co_flags&suspended,
-                Issue.DISPATCH_BOUNDARY,'unsupported Python positional/suspended entry layout')
-            _need(target.caller.process_id not in session.bad_processes,Issue.CAPTURE_GAP,'normal operand capture process incomplete')
-            # Operand and target-sidecar indices are different domains. The
-            # normal frame watermark locates the first operand row at entry.
-            indices=operand_indices[target.caller.process_id]
-            position=bisect_left(watermarks[target.caller.process_id],entry.entry_index)
-            entry_operand_index=indices[position] if position<len(indices) else indices[-1]+1
-            for table,key in ((session.global_gaps,target.caller.process_id),(session.local_gaps,target.caller),
-                    (session.local_gaps,entry.callee),(session.read_issues,target.caller),(session.read_issues,entry.callee)):
-                _need(not _has_index(table.get(key,()),attempt.index,entry_operand_index),Issue.CAPTURE_GAP,'call-to-entry capture gap')
-            node=sources.node(call.source)
-            _need(isinstance(node,ast.Call) and not node.keywords and not any(isinstance(a,ast.Starred) for a in node.args),Issue.DISPATCH_BOUNDARY,'only explicit positional AST arguments')
-            offset=int(target.receiver is not None)
-            _need(layout.argcount==len(node.args)+offset and callee.entry.parameters_complete
-                and tuple(p.name for p in callee.entry.parameters)==layout.parameters,
-                Issue.DISPATCH_BOUNDARY,'receiver/explicit argument/entry layout mismatch')
-            if attempt.site.code not in session.instructions:
-                session.instructions[attempt.site.code]={i.offset:i for i in dis.get_instructions(caller_code)}
-            instruction=session.instructions[attempt.site.code].get(attempt.site.offset)
-            _need(instruction is not None and instruction.opname=='CALL' and instruction.arg==len(node.args)
-                and attempt.site.position==_span(node) and decode(CapturedSite,code_site(caller_code,attempt.site.offset))==attempt.site,
-                Issue.CALL_INSTRUCTION_BOUNDARY,'normal CALL n/current source position mismatch')
-            signature=sources.signatures[callee.target.definition]
-            formals=session.core.formal_ports(callee.target.definition)
-            _need(tuple(p.name for p in signature.parameters)==layout.parameters
-                and all(p.kind in (ParameterKind.POSITIONAL,ParameterKind.POSITIONAL_ONLY) for p in signature.parameters)
-                and not signature.decorators,Issue.SOURCE_CORE_BOUNDARY,'normal signature differs/has unexpanded decorators')
-            body,operations,uses,_=sources.core[call.execution_owner];operation=operations[call.core_operation]
-            _need(operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
-                and len(operation.invoke_arguments)==len(node.args)+2 and operation.invoke_arguments[0]==call.callee_use
-                and uses[call.callee_use].value==call.callee_value,Issue.SOURCE_CORE_BOUNDARY,'original callee/explicit actual/world partition differs')
-            values=session.core.values(call.execution_owner);world=uses[operation.invoke_arguments[-1]]
-            _need(world.role is UseRole.STATE_CONTENT and type(values[world.value]) is StateVersionValue
-                and all(type(values[uses[u].value]) is ReferenceValue for u in operation.invoke_arguments[:-1]),Issue.SOURCE_CORE_BOUNDARY,'original reference/world roles differ')
-            if call.execution_owner not in session.use_sources:
-                grouped=defaultdict(list)
-                for link in body.metadata.use_links:grouped[link.operation,link.use].append(link.source)
-                session.use_sources[call.execution_owner]=grouped
-            source_uses=session.use_sources[call.execution_owner]
-            actuals=[]
-            for index,arg in enumerate(node.args):
-                use=operation.invoke_arguments[index+1];source=sources.source(call.source.path,arg)
-                _need(source_uses[operation.id,use]==[source],Issue.SOURCE_CORE_BOUNDARY,'actual Use is not its unique source expression')
-                actuals.append(CallArgument(index,source,ArgumentKind.POSITIONAL,use=use))
-            caller_body,callee_body=session.namespace(caller.target.definition),session.namespace(callee.target.definition)
-            receiver=None;candidate=None
-            if offset:
-                parameter,formal=signature.parameters[0],formals[0]
-                receiver=SourceReceiverPort(caller_body,operation.id,call.callee_use,call.callee_value,
-                    callee_body,parameter.slot,formal.value,parameter.name,target.receiver)
-            else:
-                candidate=bind_call(signature,call=call.call,target=signature.definition,source=call.source,arguments=tuple(actuals))
-                _need(candidate.status is CallBindingStatus.CONDITIONAL and all(r.origin is BindingOrigin.ARGUMENT for r in candidate.routes),Issue.BINDING_INCOMPLETE,'original function binder did not cover explicit arguments')
-            ports=tuple(SourceArgumentPort(index,caller_body,operation.id,actual.source,actual.use,uses[actual.use].value,
-                callee_body,parameter.slot,formal.value,parameter.name,ParameterBinding(parameter.slot,BindingOrigin.ARGUMENT,(index,)))
-                for index,(actual,parameter,formal) in enumerate(zip(actuals,signature.parameters[offset:],formals[offset:])))
-            bindings.append(PythonSourcePortBinding(target,target_anchor,entry,entry_anchor,attempt.anchor,callee.entry.anchor,
-                caller.target,callee.target,call,caller_body,callee_body,receiver,ports,candidate))
+            binding=bind(target,target_anchor)
+            count=len(binding.arguments)+int(binding.receiver is not None)
+            _need(len(bindings)<budget.max_bindings and port_count+count<=budget.max_ports,
+                Issue.BUDGET,'Python source-port output budget exhausted')
+            bindings.append(binding);port_count+=count
         except (_Boundary,CoreBoundary) as error:
             issues.append(PythonSourcePortIssue(target_anchor,target.attempt_index,error.detail))
     model=PythonSourcePortModel(observed,tuple(bindings),tuple(issues))
     if len(bindings)+len(issues)!=len(observed.targets):raise ValueError('full observed target denominator lost')
+    if consumer is not None:
+        originals=dict(zip(observed.target_anchors,observed.targets))
+        def check(binding):
+            if type(binding) is not PythonSourcePortBinding or binding.target_anchor not in originals:
+                raise ValueError('Python source binding has no original target')
+            if bind(originals[binding.target_anchor],binding.target_anchor)!=binding:
+                raise ValueError('Python source binding differs from original code/source/receiver/ports')
+            return binding
+        consumer(model,check)
+    if body_composition is not None:
+        body_composition._require_entry_publication()  # ordinary immutable-input final guard
+        for (owner,_,_),context in sources.qualified_bodies.items():
+            if owner==id(body_composition) and context is not None:
+                body_composition._qualified_entry_item(context.reference)
     return model

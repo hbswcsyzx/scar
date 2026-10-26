@@ -1014,10 +1014,15 @@ def _environment_limit(name, default):
 
 
 def install(recorder, *, capture=None, max_events=None, max_bytes=None,
-            max_loads=None, max_namespace_items=None, max_references=None, python_targets=False):
+            max_loads=None, max_namespace_items=None, max_references=None, python_targets=None):
     """Attach the sidecar without replacing the existing sys.setprofile hook."""
     if capture is None:
         capture = os.environ.get("SCAR_OPERAND_CAPTURE", _CAPTURE_INSTRUCTIONS)
+    if python_targets is None:
+        selection = os.environ.get("SCAR_PYTHON_CALL_TARGETS", "0")
+        if selection not in ("0", "PYTHON_CALL_TARGETS_V2"):
+            raise ValueError("SCAR_PYTHON_CALL_TARGETS must be 0 or PYTHON_CALL_TARGETS_V2")
+        python_targets = selection == "PYTHON_CALL_TARGETS_V2"
     if type(capture) is not str or capture not in _CAPTURE_RULES:
         raise ValueError("SCAR_OPERAND_CAPTURE must be 'instructions' or 'windows'")
     max_events = _environment_limit("SCAR_OPERAND_MAX_EVENTS", 100_000) if max_events is None else max_events

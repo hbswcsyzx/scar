@@ -5,6 +5,9 @@
 3.14.7. Default capture, the old operand/frame wire, ArgumentRoute and the
 source-port v1 model retain their contracts. This is metadata for modeling,
 not performance sampling.
+The environment selector is exactly
+`SCAR_PYTHON_CALL_TARGETS=PYTHON_CALL_TARGETS_V2`; unset or `0` keeps it off.
+An explicit bool passed to `install` overrides that environment setting.
 
 The new sidecar records every original attempt. Exact functions retain their
 function/code/layout; exact MethodType retains `__func__`, code and an independent
@@ -38,10 +41,22 @@ original first formal. It creates no SSA value. Explicit AST argument i retains
 its original Use/Value and ParameterBinding(ARGUMENT,i), and targets formal i+1.
 Ordinary functions continue through `bind_call`/CandidateBinding. No receiver is
 invented as a CallArgument, ValueOccurrence, Invocation or CallActivation.
-The existing `link_call_operands` consumer still emits its original v1 model;
-the new builder is an explicit same-normal-session API. A future full-capture
-owned coordinator must forward a distinct v2 consumer, rather than silently
-changing the v1 rule. No full LeWM v2 acceptance is claimed here.
+`link_call_operands` and `connect_current_capture` now forward the explicit
+`python_source_port_consumer(model, check)` and typed `PythonSourcePortBudget`
+in the same normal owned session. The original `source_port_consumer` remains
+v1. `check` recomputes from that session's original targets/code/source/ports;
+serialized rows cannot restore its owner. No full LeWM v2 acceptance is claimed.
+
+An optional `python_source_body_composition` must be an ordinary
+`CompositionIndex` with checked entry publication. `_Sources.qualified_body`
+uses the bound complete `SourceDefinitionReference` (or the exact same-capture
+catalog group on the normal inventory path), `body_reference`, and
+`typed_qualified_body`. `_Core` applies its existing formal/environment/world
+guard inside this qualified context. External bodies never enter the global
+bare DefinitionID maps. Original SP5 receipt/namespace/declaration and readonly
+compiler archive select the endpoints; available source alone is insufficient.
+This separate static-body input preserves the old source-invocations2/3 guards
+and the existing same-capture4/5 contract. It creates no dynamic admission.
 
 The actual generic check retained 7 attempts, 5 exact entry relations, 2 receiver
 ports and 3 explicit argument ports across 3 source calls. The external helper
@@ -56,3 +71,8 @@ Primary contract: fixed [CPython 3.14.7 bytecodes.c](https://github.com/python/c
 [monitoring callback arguments](https://docs.python.org/3.14/library/sys.monitoring.html#callback-function-arguments).
 Actual inputs/results and prototype boundaries are in
 `artifacts/experiments/python_call_targets_v2_20261026/REPORT.md`.
+The subsequent owned/external/gzip case is in
+`artifacts/experiments/python_call_targets_owned_20261026/REPORT.md`: 8 attempts,
+5 source calls, 2 receiver ports and 5 explicit argument ports, including both
+project→external and external→external normal SP5 bodies. Class/native/default
+layout boundaries and all environment/effect/ready/return-identity debt remain.

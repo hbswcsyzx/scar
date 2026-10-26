@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import ast
 from collections import Counter, defaultdict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import json
 import os
@@ -90,6 +90,20 @@ class _LightSource:
     return_nodes_by_position: dict
 
 
+@dataclass(frozen=True)
+class _QualifiedBodyContext:
+    """A view of an original admitted body; no records enter bare-ID maps."""
+    reference: object
+    bundle: object
+    signature: object
+    link: CodeSourceLink
+    code: CodeType
+    context: _LightSource
+    indexed: object
+    namespace: object
+    core: tuple
+
+
 def _source_witness_projection(prepared):
     """Publish only the source/signature records consumed by this matcher."""
     indexed = _Inventory(prepared, 0, 0).source_witness_index()
@@ -117,6 +131,7 @@ class _Sources:
         self.contexts, self.indexes, self.compiled, self.links, self.objects = {}, {}, {}, {}, {}
         self.context_errors = {}
         self.site_links, self.operand_links = {}, {}
+        self.qualified_bodies = {}
         self.total_source_bytes = 0
         from scar.analysis.source_body_access import SourceBodyAccess
         self.source_access = inventory if type(inventory) is SourceBodyAccess else None
@@ -317,6 +332,130 @@ class _Sources:
         # An Expr and its Call can share a span; callers need the expression.
         return next((node for node in matches if isinstance(node, ast.Call)), matches[0] if matches else None)
 
+    def qualified_body(self, process_id, code_key, *, composition, operands):
+        """Resolve an explicit original body through its full source reference.
+
+        Current source bindings authorize only their original source witness.
+        The separate publication supplies the static body, never a dynamic
+        admission or a replacement source/body namespace.
+        """
+        if composition is None:
+            return None
+        from scar.analysis.program_composition import CompositionIndex
+        from scar.ir.program.source_references import SourceArtifactLocator, SourceDefinitionReference
+        from scar.ir.program.source_call_bindings import SourceBodyNamespace
+        from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+        from scar.ir.program.functions import FunctionSignature
+        _require(type(composition) is CompositionIndex and composition.has_source_entry_publication,
+                 'Python body resolver requires an ordinary qualified entry composition')
+        key = id(composition), process_id, code_key
+        if key in self.qualified_bodies:
+            return self.qualified_bodies[key]
+        capture = next((c for c in operands.frame_scan.captures
+                        if (c.process_id, c.code.key) == (process_id, code_key)), None)
+        _require(capture is not None, 'qualified body has no original current descriptor')
+        reference = None
+        if self.source_access is not None:
+            access = self.source_access
+            _require(access.bound, 'qualified body requires the current bound raw/source scan')
+            row = access.by_group.get((process_id, code_key))
+            if row is None or row.get('definition') is None:
+                self.qualified_bodies[key] = None
+                return None
+            _require(access.formal and row['complete_descriptor_match'] is True
+                     and row['code_capture'] == encode(capture)
+                     and access.code_link(capture.code).status is CallLinkStatus.VERIFIED,
+                     'qualified body differs from the current exact code/source binding')
+            reference = decode(SourceDefinitionReference, row['definition'])
+            qualified = composition.body_reference(reference)
+            if qualified is None:
+                self.qualified_bodies[key] = None
+                return None
+            item = composition._qualified_entry_item(qualified)
+            link = access.code_link(capture.code)
+        else:
+            # The normal inventory path has no saved current binding report.
+            # Its catalog must name this exact original raw capture, including
+            # file receipts and the complete entered group, before selection.
+            matches = []
+            for item in composition._require_entry_publication()['checked']:
+                entry = item['entry']
+                catalog = entry._owner
+                groups = [g for g in catalog.metadata()['groups']
+                          if (g['process_id'], g['code']) == (process_id, code_key)
+                          and g.get('entry_key') == entry.key]
+                if not groups or entry.captured != capture.code:
+                    continue
+                owner = catalog.require_entry(entry)
+                original = (owner.capture_declaration()['trace_files']
+                    if hasattr(owner, 'capture_declaration') else owner.inventory_component('call_sources')['model']['files'])
+                _require(original == encode(operands.frame_scan.files),
+                         'qualified body catalog belongs to another exact raw capture')
+                count = sum(e.invocation.process_id == process_id and e.code == code_key for e in operands.entries)
+                _require(len(groups) == 1 and groups[0]['entered_invocations'] == count,
+                         'qualified body catalog changes the original entered denominator')
+                matches.append(item)
+            _require(len(matches) <= 1, 'multiple qualified original body namespaces for one captured code')
+            if not matches:
+                self.qualified_bodies[key] = None
+                return None
+            item, = matches
+            reference = item['entry'].reference
+            qualified = composition.body_reference(reference)
+            link = item['entry'].source_link
+        _require(item['entry'].captured == capture.code and link.code == code_key
+                 and link.snapshot == reference.snapshot and link.definition == reference.definition
+                 and link.source == reference.source,
+                 'qualified static body changes current CodeVersion/source identity')
+        entry = item['entry']; catalog = entry._owner
+        bundle = composition.typed_qualified_body(qualified)
+        signature = decode(FunctionSignature, item['record']['signature'])
+        from scar.analysis.function_interfaces import validate_body_interface
+        validate_body_interface(bundle.body, bundle.interface, signature)
+        prepared = catalog.prepare(entry)  # Original archived SG/AST; no lower or compile.
+        indexed, text, tree, _ = _source_witness_projection(prepared)
+        _require(indexed.snapshot == reference.snapshot and bundle.body.metadata.source == reference.snapshot,
+                 'qualified source context differs from its original namespace')
+        references = {(x.ast_kind, x.source.start_line, x.source.end_line,
+                       x.source.start_column, x.source.end_column): x.source for x in indexed.coverage}
+        nodes, returns = defaultdict(list), defaultdict(list)
+        for node in ast.walk(tree):
+            if hasattr(node, 'end_lineno'): nodes[_span(node)].append(node)
+            if isinstance(node, ast.Return) and node.value is not None:
+                for position in dict.fromkeys((_span(node), _span(node.value))): returns[position].append(node)
+        context = _LightSource(Path(reference.snapshot.path), text, tree, reference.snapshot,
+            references, dict(nodes), {k: tuple(v) for k, v in returns.items()})
+        code, _ = catalog.store_for(entry).resolve(capture.code, reference.snapshot,
+                                                   link.optimize_levels, allow_compile=False)
+        # A real declaration must occur in this publication or an exact parent;
+        # a body's JSON pointer is not an artifact declaration.
+        current = composition
+        declaration = None
+        while current is not None and current.has_source_entry_publication:
+            state = current._require_entry_publication()
+            for index, record in enumerate(state['document']['bodies']):
+                if record['definition'] == encode(reference) and record['source_program'] == item['record']['source_program']:
+                    receipt = state['receipt']
+                    declaration = ProviderFactReference(ProviderArtifact(state['path'], receipt['physical_sha256'],
+                        receipt['physical_bytes'], 'scar.source-entry-publication/' + str(state['document']['schema_version'])),
+                        f'#/bodies/{index}/source_program')
+                    break
+            if declaration is not None: break
+            current = state.get('parent_view')
+        _require(declaration is not None, 'qualified source program lost its original declaration')
+        locator = replace(qualified.source_program, pointer='#/graph', declaration=declaration)
+        namespace = SourceBodyNamespace(locator, bundle.namespace['representation'], reference.definition,
+            reference.source, bundle.body.metadata.entry, qualified.identity)
+        _require(namespace.original_namespace() == bundle.namespace,
+                 'qualified endpoint changes the original source/body namespace')
+        graph = bundle.body.graph
+        core = (bundle.body, {op.id: op for op in graph.operations},
+                {use.id: use for op in graph.operations for use in op.uses},
+                {block.id: block for region in graph.regions for block in region.blocks})
+        result = _QualifiedBodyContext(qualified, bundle, signature, link, code, context, indexed, namespace, core)
+        self.qualified_bodies[key] = result
+        return result
+
     def source(self, filename, node):
         context = self.contexts[filename]
         return context.references[(type(node).__name__, *_span(node))]
@@ -346,7 +485,22 @@ class _Sources:
         if captured.opname is None or not captured.opname.startswith("CALL"):
             return CallSiteLink(captured, CallLinkStatus.INCOMPLETE,
                                 issues=(_issue(CallEdgeIssueKind.NO_SOURCE_CALL, "frame entry is not located at a source CALL instruction"),))
-        indexed = self.indexes[description.filename]
+        return self._call_site_body(captured, self.indexes[description.filename], code_link, self.core)
+
+    def qualified_call_site(self, captured, context):
+        if type(context) is not _QualifiedBodyContext:
+            raise TypeError('exact qualified caller body context required')
+        actual = decode(CapturedSite, site(context.code, captured.offset))
+        if actual != captured or captured.position is None or captured.opname is None or not captured.opname.startswith('CALL'):
+            return CallSiteLink(captured, CallLinkStatus.MISMATCH,
+                issues=(_issue(CallEdgeIssueKind.POSITION_MISMATCH, 'qualified caller CodeWitness/source CALL differs'),))
+        # The original body was selected by its complete qualified reference.
+        # This temporary local view only reuses the existing CallSiteLink guard.
+        return self._call_site_body(captured, context.indexed, context.link,
+            {context.reference.definition.definition: context.core})
+
+    @staticmethod
+    def _call_site_body(captured, indexed, code_link, cores):
         matches = [call for call in indexed.calls if
                    (call.source.start_line, call.source.end_line, call.source.start_column, call.source.end_column) == captured.position
                    and (code_link.definition is None or call.execution_owner == code_link.definition)]
@@ -355,8 +509,8 @@ class _Sources:
                                 issues=(_issue(CallEdgeIssueKind.NO_SOURCE_CALL, "instruction span does not identify one call in its verified owner"),))
         call, = matches
         core_matches = []
-        if call.execution_owner in self.core:
-            body, operations, uses, blocks = self.core[call.execution_owner]
+        if call.execution_owner in cores:
+            body, operations, uses, blocks = cores[call.execution_owner]
             for link in body.metadata.operation_links:
                 if link.source == call.source and link.opcode is Opcode.CALL and link.semantic_operation == call.semantic_operation:
                     operation = operations[link.operation]
