@@ -83,9 +83,10 @@ def validate_function_definitions(model, graph, interface, metadata, semantic, l
              and all(e.arguments == tuple(CompletionResult(i) for i in range(len(s.types)))
                      for e, s in zip(op.terminator.successors, op.completions)),
              'creation/write lost its original references, world or normal/raise interface')
-        need(len(op.accesses) == 1 and op.accesses[0].mode is AccessMode.READ_WRITE
-             and op.accesses[0].before == op.uses[-1].id and not op.accesses[0].full_overwrite,
-             'creation/write does not retain its incomplete input and post-world')
+        # Canonical source INVOKE carries world as its final Use and as a
+        # completion-specific result, not a redundant ordinary StateAccess.
+        need(not op.accesses and set(op.behaviors) == {Behavior.CONTROL, Behavior.READ, Behavior.WRITE, Behavior.MEMORY},
+             'creation/write must use its exact incomplete completion-specific world interface')
         return op, blocks[op.terminator.successors[0].block]
 
     makes = [r.operation for r in model.protocols if r.kind is K.MAKE_NESTED_FUNCTION]
