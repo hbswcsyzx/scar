@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "elapsed_seconds": 26.06103813200025,
+  "v1": {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate04/result/source-ports/model.json.gz",
+    "sha256": "8b9e8abc8731880bb08ee92ce789f3abe359389c52eb402ba8cf069f15f123d2",
+    "matched_bindings": 2516,
+    "format_unchanged": true
+  },
+  "v2": {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/model.json",
+    "sha256": "d71743e6e58a4b90975a725cfa0ac53486e1abc7178754085fd404288037288b",
+    "matched_caller_argument0_bindings": 4,
+    "receiver_records": 2,
+    "plain_gzip_equal": true,
+    "caller_issues": 3
+  },
+  "rejections": {
+    "wrong_stored_sha": "source port model stored receipt differs",
+    "illegal_schema_version_pair": "unsupported source port model schema/version",
+    "gzip_decode_ceiling": "source port model exceeds decoded byte limit"
+  },
+  "query_source_sha256": "36cd0b5629ab02ce6cc6451b81fdce2ee092538735d088300921670697f70520",
+  "producer_inputs_replayed": false,
+  "target_executed": false
+}

@@ -105,6 +105,8 @@ class CallOperandObserver:
         self.tool_name = f"{_MONITOR_NAME}-{self.pid}-{id(self):x}"
         self._lock = threading.RLock()
         self._fd = None
+        self._buffer = bytearray()
+        self._buffer_limit = 65536
         self._event_path = recorder.out / f"call-operands.{self.pid}.jsonl"
         self._metadata_path = recorder.out / f"call-operand-meta.{self.pid}.json"
         self._event_index = self._event_count = self._event_attempts = 0
@@ -223,15 +225,15 @@ class CallOperandObserver:
                 self._stopped = True
                 self._hook_epoch += 1
                 return None
-            offset = 0
-            while offset < len(data):
-                written = os.write(self._fd, data[offset:])
-                if written <= 0:
-                    raise OSError("operand sidecar write made no progress")
-                offset += written
-                self._bytes += written
-                if self._target_event_digest is not None:
-                    self._target_event_digest.update(data[offset - written:offset])
+            if len(self._buffer) + len(data) > self._buffer_limit:
+                self._flush()
+            if len(data) >= self._buffer_limit:
+                self._write_all(data)
+            else:
+                self._buffer.extend(data)
+            self._bytes += len(data)
+            if self._target_event_digest is not None:
+                self._target_event_digest.update(data)
             self._event_count += 1
             if kind == "INSTRUCTION":
                 self._instruction_count += 1
@@ -249,6 +251,21 @@ class CallOperandObserver:
             self._dropped += 1
             self._remember_error(error)
             return None
+
+    def _write_all(self, data):
+        if os.getpid() != self.pid:
+            raise OSError("forked process cannot flush parent operand records")
+        offset = 0
+        while offset < len(data):
+            written = os.write(self._fd, data[offset:])
+            if written <= 0:
+                raise OSError("operand sidecar write made no progress")
+            offset += written
+
+    def _flush(self):
+        if self._buffer:
+            self._write_all(self._buffer)
+            self._buffer.clear()
 
     def _gap(self, reason, owner=None, frame_index=None, *, advance=True):
         if frame_index is None:
@@ -887,6 +904,14 @@ class CallOperandObserver:
                     self._release_tool()
                 if self._fd is not None:
                     try:
+                        if not self._io_failed:
+                            self._flush()
+                    except OSError as error:
+                        self._io_failed = True
+                        self._remember_error(error)
+                    finally:
+                        self._buffer.clear()
+                    try:
                         os.close(self._fd)
                     except OSError as error:
                         self._io_failed = True
@@ -898,6 +923,7 @@ class CallOperandObserver:
         if os.getpid() == self.pid:
             return
         self._stopped = self._closed = True
+        self._buffer.clear()
         if not self._monitoring_interfered and self.tool_id is not None:
             try:
                 monitoring = sys.monitoring

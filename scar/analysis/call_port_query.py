@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 import time
 
-from scar.ir.record_codec import encode
+from scar.ir.record_codec import encode, loads as strict_loads
 
 
 def query_call_ports(model_path, *, expected_sha256, invocation=None,
@@ -51,37 +51,67 @@ def query_call_ports(model_path, *, expected_sha256, invocation=None,
         raw = stored
     if len(raw) > max_decoded_bytes:
         raise ValueError("source port model exceeds decoded byte limit")
-    model = SourceCallPortModel.loads(raw.decode("utf-8"))
+    text = raw.decode("utf-8")
+    document = strict_loads(text)
+    if (type(document) is not dict or type(document.get("schema")) is not str
+            or type(document.get("schema_version")) is not int):
+        raise ValueError("unsupported source port model schema/version")
+    transport = document["schema"], document["schema_version"]
+    if transport == ("scar.source-call-port-bindings", 1):
+        model = SourceCallPortModel.from_dict(document)
+        del document
+        version = 1
+    elif transport == ("scar.python-source-port-bindings", 2):
+        from scar.ir.program.python_call_targets import PythonSourcePortModel
+        # Its normal strict reader is the sole transport authority. Release
+        # header-dispatch JSON before parsing the bounded v2 payload there.
+        del document
+        model = PythonSourcePortModel.loads(text)
+        version = 2
+    else:
+        raise ValueError("unsupported source port model schema/version")
     after = path.stat()
     if (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns, before.st_ctime_ns) != (
             after.st_dev, after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns):
         raise ValueError("source port model changed during query")
     bindings, issues, matched, issue_count = [], [], 0, 0
     for binding in model.bindings:
-        if invocation is not None and getattr(binding, direction) != invocation:
+        owner = getattr(binding, direction) if version == 1 else getattr(binding.entry, direction)
+        if invocation is not None and owner != invocation:
             continue
         if attempt_index is not None and binding.attempt.index != attempt_index:
             continue
-        ports = tuple(p for p in binding.ports if actual_index is None or p.index == actual_index)
+        original_ports = binding.ports if version == 1 else binding.arguments
+        ports = tuple(p for p in original_ports if actual_index is None or p.index == actual_index)
         if actual_index is not None and not ports:
             continue
         matched += 1
         if len(bindings) < limit:
             item = encode(binding)
-            item["ports"] = encode(ports)
+            item["ports" if version == 1 else "arguments"] = encode(ports)
+            # v2 receiver is an independent callable projection. It retains
+            # no actual index and is never shifted into explicit arguments.
             bindings.append(item)
     # Issues only identify callers. A callee selector cannot establish their
     # missing destination, so the query does not invent one.
     if direction == "caller":
+        targets = ({} if version == 1 else
+                   dict(zip(model.observed.target_anchors, model.observed.targets)))
         for issue in model.issues:
-            if invocation is not None and issue.caller != invocation:
+            target = None if version == 1 else targets[issue.target_anchor]
+            caller = issue.caller if version == 1 else target.caller
+            index = issue.attempt.index if version == 1 else issue.attempt_index
+            if invocation is not None and caller != invocation:
                 continue
-            if attempt_index is not None and issue.attempt.index != attempt_index:
+            if attempt_index is not None and index != attempt_index:
                 continue
             issue_count += 1
             if len(issues) < limit:
-                issues.append(encode(issue))
-    return {"schema": "scar.source-call-port-query", "schema_version": 1,
+                item = encode(issue)
+                if version == 2:
+                    item["observed_target"] = encode(target)
+                issues.append(item)
+    result = {"schema": "scar.source-call-port-query", "schema_version": version,
             "artifact": {"uri": str(path), "stored_bytes": len(stored),
                          "stored_sha256": expected_sha256, "decoded_bytes": len(raw),
                          "decoded_sha256": sha256(raw).hexdigest()},
@@ -90,13 +120,19 @@ def query_call_ports(model_path, *, expected_sha256, invocation=None,
             "summary": model.summary(), "matched_bindings": matched,
             "bindings": bindings, "matching_caller_issues": issue_count, "issues": issues,
             "truncated": matched > len(bindings) or issue_count > len(issues),
-            "qualification": "RETAINED_CONDITIONAL_SOURCE_USE_TO_FORMAL_PORTS",
+            "qualification": ("RETAINED_CONDITIONAL_SOURCE_USE_TO_FORMAL_PORTS" if version == 1 else
+                              "RETAINED_CONDITIONAL_PYTHON_SOURCE_PORTS_V2"),
             "transport_validated": True, "producer_inputs_replayed": False,
             "reference_identity_established": False, "contents_state_ready_established": False,
             "return_routes_implied": False, "whole_program_complete": False,
             "transformation_authorized": False,
             "costs": {"stored_bytes": len(stored), "decoded_bytes": len(raw),
                       "elapsed_s": time.monotonic() - started}}
+    if version == 2:
+        result["model_transport"] = {"schema": transport[0], "schema_version": transport[1]}
+        result["selector"]["actual_index_role"] = "EXPLICIT_SOURCE_ARGUMENT_INDEX"
+        result["receiver_selection"] = "INDEPENDENT_CALLABLE_RECEIVER_PORT"
+    return result
 
 
 def query_call_ports_cli(args):

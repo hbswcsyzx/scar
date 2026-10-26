@@ -29,18 +29,31 @@ class PythonTargetObserver:
         self.fd=os.open(self.path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
         self.pending={};self.codes={};self.records=self.bytes=0;self.closed=self.stopped=False
         self.counts={'TARGET':0,'ENTRY':0,'GAP':0};self.digest=hashlib.sha256()
+        self._buffer=bytearray();self._buffer_limit=65536
+        self._io_failed=False
         self.legacy_inputs=None
     def emit(self,kind,value):
         if self.closed or self.stopped:return
         raw=(json.dumps(target_record(kind,value),ensure_ascii=True,separators=(',',':'),allow_nan=False)+'\n').encode('ascii')
         if self.records>=self.budget.max_records or self.bytes+len(raw)>self.budget.max_bytes:
             self.stopped=True;return
+        try:
+            if len(self._buffer)+len(raw)>self._buffer_limit:self._flush()
+            if len(raw)>=self._buffer_limit:self._write_all(raw)
+            else:self._buffer.extend(raw)
+        except BaseException:
+            self.stopped=self._io_failed=True
+            raise
+        self.digest.update(raw);self.bytes+=len(raw);self.records+=1;self.counts[kind]+=1
+    def _write_all(self,raw):
+        if os.getpid()!=self.recorder.pid:raise OSError('forked process cannot flush parent Python target records')
         offset=0
         while offset<len(raw):
             n=os.write(self.fd,raw[offset:])
             if n<=0:raise OSError('Python target sidecar made no write progress')
             offset+=n
-        self.digest.update(raw);self.bytes+=len(raw);self.records+=1;self.counts[kind]+=1
+    def _flush(self):
+        if self._buffer:self._write_all(self._buffer);self._buffer.clear()
     def gap(self,attempt,reason):self.emit('GAP',PythonTargetGap(attempt,reason))
     def observed_code(self,code):
         ref=self.codes.get(id(code));return ref is not None and ref() is code
@@ -126,8 +139,15 @@ class PythonTargetObserver:
         self.emit('ENTRY',PythonEntryBinding(pending['attempt'],pending['caller'],InvocationKey(self.recorder.pid,threading.get_ident(),state[0]),self.recorder.index,pending['code_key'],receiver_index,receiver_ref))
         return True
     def close(self):
-        if self.closed:return
-        for pending in tuple(self.pending.values()):self.gap(pending['attempt'],'PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED')
-        self.pending.clear();os.close(self.fd);self.closed=True
+        if self.closed or os.getpid()!=self.recorder.pid:return
+        try:
+            if self._io_failed:raise OSError('Python target sidecar has an earlier write failure')
+            for pending in tuple(self.pending.values()):self.gap(pending['attempt'],'PYTHON_TARGET_NO_IMMEDIATE_ENTRY_RETAINED')
+            self._flush()
+        except BaseException:
+            self.stopped=self._io_failed=True
+            raise
+        finally:
+            self.pending.clear();self._buffer.clear();os.close(self.fd);self.closed=True
         document={'schema':'scar.python-call-target-collection','schema_version':2,'capabilities':['PYTHON_CALL_TARGETS_V2','OBSERVED_PYTHON_CALLEE_SCOPE_V1'],'process_id':self.recorder.pid,'project_root':self.recorder.root,'scope_policy':'OBSERVED_EXACT_PYTHON_CALLEES_V1','budget':encode(self.budget),'counts':self.counts,'stopped':self.stopped,'file':{'path':str(self.path),'bytes':self.bytes,'sha256':self.digest.hexdigest(),'rows':self.records},'legacy_inputs':encode(self.legacy_inputs),'receiver_is_separate_from_monitoring_arg0':True,'contents_state_ready_or_complete_program_established':False}
         with self.meta.open('x') as stream:json.dump(document,stream,indent=2);stream.write('\n')
