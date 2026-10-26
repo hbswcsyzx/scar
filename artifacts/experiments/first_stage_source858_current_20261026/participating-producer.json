@@ -1,0 +1,1924 @@
+{
+  "actual_imports": [
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/audit.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/config.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/prepare.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/report_archive.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/run.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_compilation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_edges.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_operand_reader.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_operand_routes.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_operands.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_seeds.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_trace_reader.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/callable_environment_import.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/candidates.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/code_witness.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/constants.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/control_flow_v2.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/correspondence_v2.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/current_source_evidence.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/dispatch_sources.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/environment_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/function_interfaces.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/graph_candidates.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/graph_loops.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/invariance.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/inventory.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/inventory_partitions.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/liveness.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/loops.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/materialization.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/memory.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/program_composition.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/program_inventory.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/program_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/rejection_audit.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/repetition.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/runtime_inventory.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/runtime_sources.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_attachments.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_body_access.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_call_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_discovery.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_environment_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_heap_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_invocations.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_language.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_language_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_layers.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_mapping_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_program_publication.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_semantics_v2.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_statement_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_string_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_string_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_tuple_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/static_candidates.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/structured_lowering.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/synchronization.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/topdown.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/cfg.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/control_flow_v2.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/correspondence.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/effects.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/entities.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/events.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/calls.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/common.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/composition.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/content.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/coordinates.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/coverage.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/ids.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/observations.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/order.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/production.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/resources.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/resumables.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/snapshot.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/validity.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/work.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/frontend_v2.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/graph.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/ids.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/literals.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/binding_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/bindings.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_demand.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_edges.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_effect_expansion.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_operand_routes.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_operands.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_seeds.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/cleanup.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/cleanup_forward.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/cleanup_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/codec.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/compilation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/control.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/control_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/discovery.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/driver_flow.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/driver_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/drivers.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/environment_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/environments.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/exception_matches.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/expansion.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/frames.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/functions.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/ids.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/inventory.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/lifecycle.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/lifecycle_analysis.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/lifecycle_flow.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/lifecycle_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/literal_sources.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/literal_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/model.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/module_entries.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/native.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/native_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/no_body_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_await_records.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_connections.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_flow.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_rules.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocols.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/provider_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/providers.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resource_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resources.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resumption.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resumption_flow.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resumption_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/runtime_sources.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/session_flow.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/session_release_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/source.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/source_language.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/source_references.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/source_subjects.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/state_address_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/state_addresses.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/state_modes.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/stored_values.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/structured.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/proofs.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/provenance.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/record_codec.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/semantics_v2.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/static.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/_validation.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/codec.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/common.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/contracts.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/correspondence.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/evidence.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/ids.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/optimization.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/schemas.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/semantic.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/values.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/versions.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/__init__.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/capture_coordinates.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/code_snapshot.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/dispatch_evidence.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/files.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/operand_bytecode.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/os_resources.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/reader.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/session.py",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/sitecustomize.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__future__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_collections_abc.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_colorize.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_opcode_metadata.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_py_warnings.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_sitebuiltins.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_weakrefset.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/abc.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/annotationlib.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/argparse.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ast.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/base64.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/bisect.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/bz2.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/codecs.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/codeop.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/collections/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/_common/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/_common/_streams.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/zstd/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/zstd/_zstdfile.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/contextlib.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/copyreg.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/csv.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/datetime.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/dis.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/_encoded_words.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/_header_value_parser.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/_parseaddr.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/_policybase.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/base64mime.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/charset.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/contentmanager.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/encoders.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/errors.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/feedparser.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/header.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/headerregistry.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/iterators.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/message.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/parser.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/policy.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/quoprimime.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/utils.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/aliases.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/utf_8.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/utf_8_sig.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/enum.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/fnmatch.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/functools.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/genericpath.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/gettext.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/glob.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/gzip.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/hashlib.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/hmac.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/_abc.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/_bootstrap.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/_bootstrap_external.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/machinery.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/util.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/inspect.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/io.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ipaddress.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/decoder.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/encoder.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/scanner.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/keyword.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_bisect.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_blake2.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_bz2.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_csv.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_hashlib.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_hmac.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_json.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_lzma.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_random.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_struct.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_uuid.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_zstd.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/binascii.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/fcntl.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/grp.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/math.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/resource.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/zlib.cpython-314-x86_64-linux-gnu.so",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/linecache.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lzma.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ntpath.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/opcode.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/operator.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/os.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/_os.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/platform.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/posixpath.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/quopri.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/random.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_casefix.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_compiler.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_constants.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_parser.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/reprlib.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/secrets.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/shutil.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/signal.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/__editable___stable_pretraining_0_1_8_finder.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/_distutils_hack/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/stat.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/string/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/struct.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/symtable.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/sysconfig/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/tempfile.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/textwrap.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/threading.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/token.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/tokenize.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/traceback.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/types.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/typing.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/urllib/__init__.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/urllib/parse.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/uuid.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/warnings.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/weakref.py",
+    "/home/zyf/miniconda3/envs/lewm/lib/python3.14/zipimport.py"
+  ],
+  "all_imported_sources_unchanged": true,
+  "checked": [
+    {
+      "bytes": 14433,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/audit.py",
+      "sha256": "fa25070374c47cf43cc922327d00acadc2461d42abc3314f555231d4825c791d"
+    },
+    {
+      "bytes": 2486,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/config.py",
+      "sha256": "357d8ed433adfa693db7e588ba9db08d01fb73d3e84dab6f4fa3594794e1bb08"
+    },
+    {
+      "bytes": 9111,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/prepare.py",
+      "sha256": "be93522b94313dd14c545e7af39daa8c6121d80ef65ba0441662e0b5e6999090"
+    },
+    {
+      "bytes": 428,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/prepare.sh",
+      "sha256": "210f0f7a7e14584eb3283148a724c312e5f88834655a1cfcb77f8d8443a479d1"
+    },
+    {
+      "bytes": 4625,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/report_archive.py",
+      "sha256": "a13fae9ddea04d74b53c3ce2f899f8710f36ea81717489ece9b2d8e4ec42da5b"
+    },
+    {
+      "bytes": 16015,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/run.py",
+      "sha256": "84dcc7d8e96b7aec9e20f7dbac62bf8f460dbd34476e2fcd1679e6d62a65c185"
+    },
+    {
+      "bytes": 462,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/run.sh",
+      "sha256": "ce316890cf0ffaaae99d298308e3bae3d8c765d69ae7436dd120b061e728547d"
+    },
+    {
+      "bytes": 86,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/__init__.py",
+      "sha256": "06c291b537285645ebef96a29bd5de6440ed2649c5a5c2fcb1d91e8cc058ba4c"
+    },
+    {
+      "bytes": 1587,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/__init__.py",
+      "sha256": "d00d3f539d292f3bf90d84a49d20f81a1723fb7284e7303a3a200bbd8582652b"
+    },
+    {
+      "bytes": 5901,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_compilation.py",
+      "sha256": "9913057f2594541ba960bdb0221a1b613ff3a7f3526aa7db5643547aec9eef05"
+    },
+    {
+      "bytes": 55428,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_edges.py",
+      "sha256": "639eeb6ddafaeb7e74b406b0190d425ba5fe3acde66d15f88b01a7919324ca01"
+    },
+    {
+      "bytes": 18120,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_operand_reader.py",
+      "sha256": "5dc26ce1e4e3fb2eed5fcaf4cda9fd0650f3c794d49c61d171f0dd933f08bf3d"
+    },
+    {
+      "bytes": 38341,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_operand_routes.py",
+      "sha256": "1fcf016dc0941c64682c1c6a452ad12e1f0f7e61ef3ad0dd62f93c6aa286a7fb"
+    },
+    {
+      "bytes": 14906,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_operands.py",
+      "sha256": "12cb6a2301ebae6d2c41c93b3b29a827315f557ec998ad4352494dd93d264638"
+    },
+    {
+      "bytes": 9364,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_seeds.py",
+      "sha256": "e8c480b6146500cec09cd529170bcba80e33f70628c6b37737069062f3e77de7"
+    },
+    {
+      "bytes": 22103,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/call_trace_reader.py",
+      "sha256": "684c16a34b27e233407e64cfa5a313515d95fbcea13152ae253a21e1b9bb0416"
+    },
+    {
+      "bytes": 25860,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/callable_environment_import.py",
+      "sha256": "eb902edcd18f54a68b26fd141de936484703fdf772f6de856229bdd82b8cef86"
+    },
+    {
+      "bytes": 625,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/candidates.py",
+      "sha256": "6dd95a2fd55a1f28f489bcb2e90280c88c73f5464400e3512ba20c29a3a17f53"
+    },
+    {
+      "bytes": 16601,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/code_witness.py",
+      "sha256": "fb4b2be1274750ebbc0a3971d8c43bca261e5769d088765ee42f6f05d3c26a52"
+    },
+    {
+      "bytes": 20341,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/constants.py",
+      "sha256": "bdefa5e32789f2e735232a5a32a5c20ff20581d77c3b18ba0555c97fca248d4f"
+    },
+    {
+      "bytes": 59355,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/control_flow_v2.py",
+      "sha256": "595917215df8ff593142a1e6beb517acc891c78b6b7693d5260e7ca4de09f367"
+    },
+    {
+      "bytes": 20920,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/correspondence_v2.py",
+      "sha256": "74da61b7413e0fb46ae353bc967743d64484e80a51cbf9debbadebf59abf0d9a"
+    },
+    {
+      "bytes": 29100,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/current_source_evidence.py",
+      "sha256": "1886477d1845dd5ddf669aec8b2b5830c375cbb328647e345b6329615d09cdf2"
+    },
+    {
+      "bytes": 54675,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/dispatch_sources.py",
+      "sha256": "039a57281a860d1d66aa5d4ebf36294fce7751c001065091789fea6d094c6cb7"
+    },
+    {
+      "bytes": 22919,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/environment_lowering.py",
+      "sha256": "f29a039fa3820c6a0a2bd74c6ec95e1d096b510f5b87d7ea7f2e645bc5f849dc"
+    },
+    {
+      "bytes": 11940,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/function_interfaces.py",
+      "sha256": "1d9d64b552f378d20239155994c6e889a2c40cbd9b3c796cd85df90afd62eef4"
+    },
+    {
+      "bytes": 9734,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/graph_candidates.py",
+      "sha256": "0cba159cd741159dc6349e9249030d477c91a7bbe0933e1dc923630a1bdbd564"
+    },
+    {
+      "bytes": 10618,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/graph_loops.py",
+      "sha256": "27930dea62b3aea8d7d0c79c42d04b9478bd4cf2d5b67a67db0fe4459c36c7c1"
+    },
+    {
+      "bytes": 247,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/invariance.py",
+      "sha256": "3a89e48d684a0f687f83b5c8304c0b550ff450e31e681fab0a5efea87efb4b7c"
+    },
+    {
+      "bytes": 5620,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/inventory.py",
+      "sha256": "246c292b9c4d71e20e1eb01ec6d76cef3b68bfa22bae16be8f20b92bbf7a7093"
+    },
+    {
+      "bytes": 37877,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/inventory_partitions.py",
+      "sha256": "4eb3814294b10d4f15c0464d13b78094eca0351295b7cd93092bf00bf470eb5d"
+    },
+    {
+      "bytes": 3228,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/liveness.py",
+      "sha256": "125177d1f67870489bc278e0fae0ff2828181581f73020ab0a3c4cdcb24a317d"
+    },
+    {
+      "bytes": 4416,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/loops.py",
+      "sha256": "3a0d17920ffdd9eecf0a45d676e1191d49dd880f6c9b0e154105ebd3e5a16cac"
+    },
+    {
+      "bytes": 7762,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/materialization.py",
+      "sha256": "457d798746b7ca63daf4db9cd9b9bc7409cd534a1026e56d5a8547e15edd6f12"
+    },
+    {
+      "bytes": 3211,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/memory.py",
+      "sha256": "dd95d0743048b80540053a3e7631cb8602ec399e4a381b3be92fd12c31d5a36b"
+    },
+    {
+      "bytes": 108876,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/program_composition.py",
+      "sha256": "c0addde68217b558fde4c9ecdc1ed5036bc16cd7bcc70eb034db481b0aee3cb9"
+    },
+    {
+      "bytes": 60606,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/program_inventory.py",
+      "sha256": "0a2e80c69f1af56400caedd39d308d96ff64f9a60a1dfd3295c498e5524831dc"
+    },
+    {
+      "bytes": 83281,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/program_lowering.py",
+      "sha256": "77b1d7b2ac4c980c7ef922fbcb0fef61b425cc0906de7f9ca835ff53066bf767"
+    },
+    {
+      "bytes": 6354,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/rejection_audit.py",
+      "sha256": "720155d11974203527adf95d07ddcebebe8de0ae19b23ecbdcbe0fbdc5c107ba"
+    },
+    {
+      "bytes": 11012,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/repetition.py",
+      "sha256": "482256e38c5cef6f1dfced78606561e2a32bd59967eed9bd11be1c1ffbb727a5"
+    },
+    {
+      "bytes": 12294,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/runtime_inventory.py",
+      "sha256": "8360727acde8135dc4b883777661ac42fa6cc561f7e099bfd9fe96cd6da064cc"
+    },
+    {
+      "bytes": 19041,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/runtime_sources.py",
+      "sha256": "d31380d3175dd18eb0a8d46b7398bd9b029c8d2207bd1dcaada7ed32220adf81"
+    },
+    {
+      "bytes": 48566,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_attachments.py",
+      "sha256": "7352f0293c5b31d2923d5a1b632da7cdca679beb8d98f49c9e6a6dca502307d1"
+    },
+    {
+      "bytes": 37785,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_body_access.py",
+      "sha256": "545b6cc3bd73b05027507e9ff242d4f01b332a5394c7a4a8ea4697159f194995"
+    },
+    {
+      "bytes": 24345,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_call_validation.py",
+      "sha256": "9b7446e5758f5a2c9d3faf826f4b2e4a110cde2884913f871f78950b1c354307"
+    },
+    {
+      "bytes": 46767,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_discovery.py",
+      "sha256": "7b4e1af9ed88fe8fe1ede7ccf087ae1b8924ba451054e4ed19f700ab353f36ad"
+    },
+    {
+      "bytes": 14396,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_environment_validation.py",
+      "sha256": "31a4eeeb97ee86099a675775f192297ec66cb65514c84cff59dcaffb88e81fec"
+    },
+    {
+      "bytes": 2211,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_heap_validation.py",
+      "sha256": "2ce2113cbe6e8a201fc6fe4f9bdb18225e56bbfb53424aa5d63b640dbff9c2bd"
+    },
+    {
+      "bytes": 69653,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_invocations.py",
+      "sha256": "9f80874b0ec0346801bc5d12ff9d4842562ece8336e18adf4a408844648eeea1"
+    },
+    {
+      "bytes": 7467,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_language.py",
+      "sha256": "38c6556946d56f42e71f8485d2f524370e3dc1c52a9b97d51220cc681317ea27"
+    },
+    {
+      "bytes": 22250,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_language_validation.py",
+      "sha256": "48d6a2f4f2c04c6247999b73705c76cb38f956a20c12a6b793e5b56b37c9e6de"
+    },
+    {
+      "bytes": 43738,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_layers.py",
+      "sha256": "2afcf3138573a555b181ebca65380897d2773d97c4d396b31f5292810860051c"
+    },
+    {
+      "bytes": 12995,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_mapping_lowering.py",
+      "sha256": "66c8cabadb7cc933a452b6a7c797dd90dc551c0fcde8eb2e4fab1a9cd7bbb510"
+    },
+    {
+      "bytes": 66524,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_program_publication.py",
+      "sha256": "21a99ab721863995e2c2cd7358d4606c9b1796cbd86d5bf66107e2b34807e53b"
+    },
+    {
+      "bytes": 33881,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_semantics_v2.py",
+      "sha256": "2c20b09a3affc372f1103904bdf100dd3e0963c6ed89463bd57dbcae1e512a96"
+    },
+    {
+      "bytes": 12089,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_statement_lowering.py",
+      "sha256": "9d6b86482d3d6202534803b095233cc8228aeb54a1e964e85e0e8764d12c8b26"
+    },
+    {
+      "bytes": 13200,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_string_lowering.py",
+      "sha256": "5c7b5483effa97cfebb5905c4fc64050a200399c944a5f9eb48bde3b10759d7f"
+    },
+    {
+      "bytes": 22863,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_string_validation.py",
+      "sha256": "2be18373563d4850c95f341e3c57fe33f7e0c31aa6de5fd35ac81c8baab44b2e"
+    },
+    {
+      "bytes": 17856,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/source_tuple_validation.py",
+      "sha256": "31813718ae82e5747b691f204b94e10c010e490c5bd93f0c14b4342f214345ee"
+    },
+    {
+      "bytes": 7417,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/static_candidates.py",
+      "sha256": "973b77a3965e5d003cb55951914458ce19425f271a20ae926aa50d58360ad0ec"
+    },
+    {
+      "bytes": 57622,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/structured_lowering.py",
+      "sha256": "1bf6e192cc268a2d327e5279cccc029be85c7324ef57efdfd6ed195a0593cc20"
+    },
+    {
+      "bytes": 4912,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/synchronization.py",
+      "sha256": "6c09397ee2335e405b1fc7b33e99bfe24d42276e248a544d603668b4229809ab"
+    },
+    {
+      "bytes": 16134,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/analysis/topdown.py",
+      "sha256": "211266a77b3ebc88bda1e29887ab019ae17cadd3c590db775e8ee4eb9ed568aa"
+    },
+    {
+      "bytes": 1445,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/__init__.py",
+      "sha256": "104501dea2488611e70e31a3579604c3e5249c1315bfc60591e1c26cd91a27fe"
+    },
+    {
+      "bytes": 7725,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/cfg.py",
+      "sha256": "8cf0ba8584735ff87ab0ef9ea049fea9169450e5c4f956faf3e4f55ccc0f74df"
+    },
+    {
+      "bytes": 31560,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/control_flow_v2.py",
+      "sha256": "d31fed629ff80fb80294343bb1904c9375c5a976d3073e274c6e4b6c5a52e92e"
+    },
+    {
+      "bytes": 5784,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/correspondence.py",
+      "sha256": "4d657909fed7734337510262f7788bab09cee3753a1f7b49b930a6f5a2ed47c5"
+    },
+    {
+      "bytes": 2834,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/effects.py",
+      "sha256": "56f9500bc2e0ae08a59ab2b93e67adcbb33518e0e9376b5a772c5f555f06022f"
+    },
+    {
+      "bytes": 4408,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/entities.py",
+      "sha256": "92ac005de66ea22b8217115285f34d9619f14705f644d8c22dece3791c48b341"
+    },
+    {
+      "bytes": 2281,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/events.py",
+      "sha256": "e7a7a0458f71fa2822e4c23aadd2dc4e713a48da5262707a381e41d243580017"
+    },
+    {
+      "bytes": 1756,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/__init__.py",
+      "sha256": "6f5096f7edee3c263001a204f4c3c14f5f373344edc0389730474ed59e380b0e"
+    },
+    {
+      "bytes": 2085,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/calls.py",
+      "sha256": "a287446babd077c072f51182d12ecc5e670bd2e1700b6396e914e134d95a183f"
+    },
+    {
+      "bytes": 2313,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/common.py",
+      "sha256": "a6a4287df931d21221be181023df0233f0b7b8cfbe0fdb69798fc9238ea2c0b8"
+    },
+    {
+      "bytes": 1377,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/composition.py",
+      "sha256": "6190ab8faa17c4b2823a061ce5179fb850fa9dd32c77806f04bc478052171852"
+    },
+    {
+      "bytes": 10997,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/content.py",
+      "sha256": "1eee1822056e59a0be9f4f3a1524f97948df91497ad57072c7c0ca53c670cf9e"
+    },
+    {
+      "bytes": 10753,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/coordinates.py",
+      "sha256": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09"
+    },
+    {
+      "bytes": 22116,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/coverage.py",
+      "sha256": "53da83b9cb3b67ae63a12163d74e58cf9d9d6d76511e2d4011a6918d43c59411"
+    },
+    {
+      "bytes": 3959,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/ids.py",
+      "sha256": "bf88d2d9cb0d82ad38021ff853eea93ddd057890e79b1ffe73026260f9a684ea"
+    },
+    {
+      "bytes": 3932,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/observations.py",
+      "sha256": "8c8237c855680e78f6e1c256a30086105636c2af5ad6fb59958385840ed7d882"
+    },
+    {
+      "bytes": 4625,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/order.py",
+      "sha256": "e4ce65c33bb8169e643eb5bebd8bf5f3620d8d2cc5c8d333b62b52e2e4aea43a"
+    },
+    {
+      "bytes": 10458,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/production.py",
+      "sha256": "abd9700207262eed121af4a7edb064c01afe903cbd3898f99d8d4653bee24097"
+    },
+    {
+      "bytes": 19262,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/resources.py",
+      "sha256": "4fc743695164cc6700b00190ea8f6b1398328c2abf41e68a6eb626dddea09139"
+    },
+    {
+      "bytes": 2236,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/resumables.py",
+      "sha256": "fdb741f337f7537533c77b2461dcbd424e9723f3ef3e4402907499519c52203f"
+    },
+    {
+      "bytes": 8916,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/snapshot.py",
+      "sha256": "7757c299a965e37f5e73eeaa1f4ed304da6b7bfb970cded5d274fdc4e8483107"
+    },
+    {
+      "bytes": 7730,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/validity.py",
+      "sha256": "55df8f7cc20c06b246e92822ea51ea4fcf9a64647ede17613e4325b8b8d0f120"
+    },
+    {
+      "bytes": 12864,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/execution/work.py",
+      "sha256": "67faa8771822b3994fc7ad34a7527c2888c0fc5859bf99b4a887627094ec8f0f"
+    },
+    {
+      "bytes": 47032,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/frontend_v2.py",
+      "sha256": "dd258588e3c68f121c7652b6d5c639d3f851f9b401e61920ad15a410867695f9"
+    },
+    {
+      "bytes": 36440,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/graph.py",
+      "sha256": "ba39496a99441ee855d5cd761afb202afd9cb916480e28dadc2d9587b36ad301"
+    },
+    {
+      "bytes": 3055,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/ids.py",
+      "sha256": "3507c19a291f10a3ddeffa22ba2be274b33c15f28904786ea5ca9c87c2e74f5e"
+    },
+    {
+      "bytes": 21708,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/literals.py",
+      "sha256": "a2ef2cb826378d034143134f3c85f0e3fb91c9adb67415ce88e74b64812f24f9"
+    },
+    {
+      "bytes": 10277,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/__init__.py",
+      "sha256": "50d1763436541150853644fae4dcec4f792c5f56eb31dbb0d959c7f8d5e9984b"
+    },
+    {
+      "bytes": 32060,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/binding_validation.py",
+      "sha256": "498e7515e4951013822befc419c85b842159be70c1ced08e5cd6ab74d8cd99cd"
+    },
+    {
+      "bytes": 3302,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/bindings.py",
+      "sha256": "8bb4dfaddbeaf0fb70f675da4db60ba655f9b8f4ee56047f0b9a95f0009e3a46"
+    },
+    {
+      "bytes": 10375,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_demand.py",
+      "sha256": "7307de2bdfbebcdce3e66e6146012eb3e4321fefac01730c2ae034ead04b59c6"
+    },
+    {
+      "bytes": 13751,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_edges.py",
+      "sha256": "b2a414942e7d236596e088bdf36396a86afaf247cc1cf3b069978d93f0499063"
+    },
+    {
+      "bytes": 3165,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_effect_expansion.py",
+      "sha256": "c4f7778bb29570f151ebe8ebdd22c781492b382c6e90cf9341b00fd30413ba79"
+    },
+    {
+      "bytes": 13293,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_operand_routes.py",
+      "sha256": "339dbd3433c1beadc5e4a038ff8f447f637c498036946696a650b9e0579e829e"
+    },
+    {
+      "bytes": 14524,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_operands.py",
+      "sha256": "3f7a8ce71c2e2ba706b5fac952cfeb1b6ebc381fb0531058f6eab844fe8cbd14"
+    },
+    {
+      "bytes": 19352,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/call_seeds.py",
+      "sha256": "c20e12f2d5d3ee95a8f58cffcae2fbd827f929589955b983e726ecd7a526a0fb"
+    },
+    {
+      "bytes": 6282,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/cleanup.py",
+      "sha256": "79b5888885bf8c4ad50df77e8f6dc7ffff4e5aa8956aca9010a98a055cbd372c"
+    },
+    {
+      "bytes": 6328,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/cleanup_forward.py",
+      "sha256": "ff99ec4320a1e65079c0988d483faec604838f0e84a260962d85a3a1955629a2"
+    },
+    {
+      "bytes": 26115,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/cleanup_validation.py",
+      "sha256": "2bc12af79a58a08728196e0a9ec7907da9b16a810a444d46c009f91b63a948c3"
+    },
+    {
+      "bytes": 42773,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/codec.py",
+      "sha256": "8024fdce331ffd21f3bff0004267d49ba2b67ad5302135f0923e4052072623b1"
+    },
+    {
+      "bytes": 242,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/compilation.py",
+      "sha256": "2924eb78ece2c6fa3c993f84a0f84f29768ad9d19b835b3e34ab3aba9c57058c"
+    },
+    {
+      "bytes": 9606,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/control.py",
+      "sha256": "d85dc314e3948959d589a4b4bfec27c0f3f30fc221ef8d8fe5b381b6e01a5e51"
+    },
+    {
+      "bytes": 23538,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/control_validation.py",
+      "sha256": "65867b452e8b118b7deb4e330e12568eb1ea865a9866ad8bb1624dff2ad454f4"
+    },
+    {
+      "bytes": 16780,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/discovery.py",
+      "sha256": "d9bfc4b5218413a3dc72ea7cc65be8f4746c87b07576bca495a8091d60556617"
+    },
+    {
+      "bytes": 4516,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/driver_flow.py",
+      "sha256": "1815918ff1419257a33d19060ec3d7ca941fb84f80af8fc8733612d4c3f244aa"
+    },
+    {
+      "bytes": 23277,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/driver_validation.py",
+      "sha256": "cdd8439fb1cd63c3ecd52c42f796a4c0cf15ec53591b0859f25137bee2f0e4d6"
+    },
+    {
+      "bytes": 12741,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/drivers.py",
+      "sha256": "d1a4844d3b00fefed05e2fb743daaf32c9082ae8f0fec3a9db6bce255561aabd"
+    },
+    {
+      "bytes": 6999,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/environment_validation.py",
+      "sha256": "edfefa6a74b80fbbe425de3dce2a0d4750ab971c42f372072f7252c6d19da834"
+    },
+    {
+      "bytes": 7546,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/environments.py",
+      "sha256": "14e9c16d89db388793236a3636adaac0557c410a5c633c65f7558d413db029f8"
+    },
+    {
+      "bytes": 4372,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/exception_matches.py",
+      "sha256": "bbdbdbc098da785e6b86713a829f513ebe809ebd28f8cb60be98f62eb7b21bd0"
+    },
+    {
+      "bytes": 4323,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/expansion.py",
+      "sha256": "7b9c9e1fcc091d994e820b2c6e9dd5d0b18ae323f0801098396556d7ccd78e04"
+    },
+    {
+      "bytes": 8049,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/frames.py",
+      "sha256": "4c24a8719043778fdfaec6285c5b579a8855b6b0c8b31bde6c9ec2e81613cba2"
+    },
+    {
+      "bytes": 10570,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/functions.py",
+      "sha256": "aa6440229e87cfbf67d57d9d268c1d6b4c89b824ff379c24509caa1af94b922f"
+    },
+    {
+      "bytes": 1613,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/ids.py",
+      "sha256": "d13dcf373b8ca771bb107becad41fc6bd1dd6d8f1bf146ea4c48b0e962e342c8"
+    },
+    {
+      "bytes": 5129,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/inventory.py",
+      "sha256": "826868c6754cc0490c0477f6f0f0ec09e5f45b70b360a6624ba45b03f6bf26ba"
+    },
+    {
+      "bytes": 5507,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/lifecycle.py",
+      "sha256": "326422e0b5c0a89fef3abda0f27037928d6c20bfc5adbd9afc875236678d17d7"
+    },
+    {
+      "bytes": 1619,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/lifecycle_analysis.py",
+      "sha256": "153c309f0cd32a6b6b719f0266dbc68209a107c9746bb88c2463194d7d650dd7"
+    },
+    {
+      "bytes": 13823,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/lifecycle_flow.py",
+      "sha256": "9fc23f943b8389764876856579db2e82797b2fb375a8c9ecc701b785b094d7f7"
+    },
+    {
+      "bytes": 7010,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/lifecycle_validation.py",
+      "sha256": "49dee4e82ebe09964a1a72c0d5d19fc91b67645822e7b1abc4961d13ba381daa"
+    },
+    {
+      "bytes": 3842,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/literal_sources.py",
+      "sha256": "9b3e99c0335d4177ee1814301a0be0da52039dfa10575bb78e46f411ba5c7a06"
+    },
+    {
+      "bytes": 3996,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/literal_validation.py",
+      "sha256": "1c0cc6ce2464804dfb29fced4cdf9ba7f4f0ffa65407b62073e0f17fd91436ca"
+    },
+    {
+      "bytes": 56857,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/model.py",
+      "sha256": "ab6919fcf609393d0b3f1037c8a264c06a4655e94a9c86ab0666c6465a8835b9"
+    },
+    {
+      "bytes": 21641,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/module_entries.py",
+      "sha256": "07f423efa81b514aa9a08d7d1ee16d6cd8abcb6a06bf042a06984ae9a2c8c360"
+    },
+    {
+      "bytes": 8354,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/native.py",
+      "sha256": "17543d01b8351d74eefc665d48c74383bca27d820507fff98646dc3cef2a22b0"
+    },
+    {
+      "bytes": 5120,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/native_validation.py",
+      "sha256": "7fb36d01c70dc36889cf6dea65aa23763c0dd5139afc1bccdee65324e5e2743b"
+    },
+    {
+      "bytes": 9243,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/no_body_validation.py",
+      "sha256": "22669aec4d7c608b1b60c7d161908452f1135e4a1b434b7b80fccccca12607ea"
+    },
+    {
+      "bytes": 10593,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_await_records.py",
+      "sha256": "af6513c1589025467d5e75f78f9a9b539159ca18efb4532f6199a3026db0a2c5"
+    },
+    {
+      "bytes": 27630,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_connections.py",
+      "sha256": "a632e35f625abb2a6725361d29fa3180233a6eae3873e9a050ff92b634ca6cfb"
+    },
+    {
+      "bytes": 29640,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_flow.py",
+      "sha256": "9cb0bbe7c2d0ac3ebf6d9da413d88126b1d4dacb4e69d1db4ac27cf52b7498d4"
+    },
+    {
+      "bytes": 16795,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_rules.py",
+      "sha256": "828ad23a2a14f6aa56ca4bbaa2f1fc45cc68f927dd895e12a71ae3c57692b865"
+    },
+    {
+      "bytes": 52909,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocol_validation.py",
+      "sha256": "814b68bfb9d3299aa6c89346314b55241992940ab26b6437242806950be07cbd"
+    },
+    {
+      "bytes": 30175,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/protocols.py",
+      "sha256": "894f432e6b9ca4525fb6465b11199fef53fc70a5172fe7dde8d42027106e1885"
+    },
+    {
+      "bytes": 7468,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/provider_validation.py",
+      "sha256": "1db55a3b5ab2c67f32496601a946b97263083b3d19af58bdedba3a83ef3e7877"
+    },
+    {
+      "bytes": 12334,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/providers.py",
+      "sha256": "fb96fe41a8c5f6cf33a01fd6974830b9dd73ee622107b3659411cc0c4f8d1343"
+    },
+    {
+      "bytes": 5892,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resource_validation.py",
+      "sha256": "f2709a6d9e9898bc5ecb87ae2396510750550fde1bb071f8ab9808569f352c39"
+    },
+    {
+      "bytes": 7545,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resources.py",
+      "sha256": "4cfd796ec46731bcdb170da7b8ab2ea3a78d9938fe10ce5bda26663d262deb22"
+    },
+    {
+      "bytes": 9452,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resumption.py",
+      "sha256": "ef9d208d57ff6d3cd834529df7b68f377d1ac210f3f262b421c15aeadf5109ac"
+    },
+    {
+      "bytes": 2304,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resumption_flow.py",
+      "sha256": "c7c6b5c8e6d84d568fa87e52f71f9b66a6c1a50930633d0e97ea8613ce014cbc"
+    },
+    {
+      "bytes": 17070,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/resumption_validation.py",
+      "sha256": "3e8f0a60bc9b636af1b4e25abc1caeaadfa208dc54b6abf9db89e8d468bf182a"
+    },
+    {
+      "bytes": 10865,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/runtime_sources.py",
+      "sha256": "74843e78617e5a76f6f671df344b5843af3d332323893a97407d6ee06cb537a6"
+    },
+    {
+      "bytes": 11636,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/session_flow.py",
+      "sha256": "13e90d83f74bd46281a678c778c559ad1d6d52d3d5722137be38848f853a7387"
+    },
+    {
+      "bytes": 6687,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/session_release_validation.py",
+      "sha256": "b96e989a611a518630e2c33bbf61b5f69d4cc015b54166d27f78a6486482e0fc"
+    },
+    {
+      "bytes": 4845,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/source.py",
+      "sha256": "dbff369035e06452de1f6c0e741e68553f188addac8483859ae47a444f5a002b"
+    },
+    {
+      "bytes": 6206,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/source_language.py",
+      "sha256": "1e2b6e456c10532f9189aeaeb319d20a8520c5a78efcf1c1abe47dcba4474b63"
+    },
+    {
+      "bytes": 5912,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/source_references.py",
+      "sha256": "3b3f466571b83f298588e3bdb0329240c21371082e678b0df431af56b364d69e"
+    },
+    {
+      "bytes": 4579,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/source_subjects.py",
+      "sha256": "c595bd536701f054446efebdd95e2cb8f34b75e01dd4d5dd1be2b91fe7438f3d"
+    },
+    {
+      "bytes": 16239,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/state_address_validation.py",
+      "sha256": "03c1d4f8b3e9fe991f902a4e775051b2fbc8f048b49e4758fb3431833937a096"
+    },
+    {
+      "bytes": 9581,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/state_addresses.py",
+      "sha256": "6ff4052771e4c92cf248f298131037f9a25a5bda8059e1547da44410d3577b61"
+    },
+    {
+      "bytes": 227,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/state_modes.py",
+      "sha256": "8d841907f306ee66996b9b45b3c7b5a6a4c799361e818851dff66534e0ee519e"
+    },
+    {
+      "bytes": 16100,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/stored_values.py",
+      "sha256": "8fb11f28816e0e19997722f59b6156909f6b987a10aec58f929eb079b548cb6f"
+    },
+    {
+      "bytes": 6896,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/structured.py",
+      "sha256": "93d0c61e2d552d16079822dbb88fedd048c862f33a29b54100efad97a737fdac"
+    },
+    {
+      "bytes": 45594,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/program/validation.py",
+      "sha256": "55ea38011ebee30d9e5606f466c12c1de6c9422e7dcf66a9cd435a2a13dd5f90"
+    },
+    {
+      "bytes": 3665,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/proofs.py",
+      "sha256": "57d0ba9768d0a5e9db79d4f468c41ae73058e46df18e6f28cdb4039581ecf527"
+    },
+    {
+      "bytes": 53719,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/provenance.py",
+      "sha256": "f8f11d353a05c9b2ec893ae5ab3da7be747b4a2ea3b28a21eb1f7891237523c1"
+    },
+    {
+      "bytes": 7478,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/record_codec.py",
+      "sha256": "0954c05e53a6dcb31f449461db71c63fdcdd9f95a9c053424d86bf5217a89ef3"
+    },
+    {
+      "bytes": 28661,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/semantics_v2.py",
+      "sha256": "5d943b7d48b159cfb8512ffff228236aee29d3c4f795ff0319d44489a81a4094"
+    },
+    {
+      "bytes": 21470,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/static.py",
+      "sha256": "30be3dc04e6f03d8c91e8469dbd50771120b3c91ecedc3ea2cfdb4fd0cd495ca"
+    },
+    {
+      "bytes": 5226,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/__init__.py",
+      "sha256": "6d1da8e107dfb8fb6a424fd2e6004f8ef71e8d18add1324d939334d94eefbd91"
+    },
+    {
+      "bytes": 6576,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/_validation.py",
+      "sha256": "f1c640101d6d9ffc8baa7a647cad2862353fcdcd196c698f1f97b7764be04ede"
+    },
+    {
+      "bytes": 44003,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/codec.py",
+      "sha256": "8b1392d3840daee80f21a88b87e09443f06f186cc2ed4bec9d0cd001c45dee9b"
+    },
+    {
+      "bytes": 4677,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/common.py",
+      "sha256": "691a7ec169c81cb51e271731ea11ee4c2aed38b5553b1f48f072a8ff368979b9"
+    },
+    {
+      "bytes": 7129,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/contracts.py",
+      "sha256": "c7aaae3ea0e292e425cfbe820d4508363b9e26e0c94427cefc5a4bb0ae6e15b1"
+    },
+    {
+      "bytes": 5260,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/correspondence.py",
+      "sha256": "7882dfa21e7877f41dc441f40875433d6b340f4fdb657df547ca57fc34953de5"
+    },
+    {
+      "bytes": 24584,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/evidence.py",
+      "sha256": "c789c7aca05e217f95d4ca7bef6c761d9a5244a9779fed5174a0f4132c09630d"
+    },
+    {
+      "bytes": 3963,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/ids.py",
+      "sha256": "d11e038a6a4c7de6dee5c8050182a97ddb4a6a6a399c466836ca64d6d9cb0a23"
+    },
+    {
+      "bytes": 44870,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/optimization.py",
+      "sha256": "429313a4b30d82fb0dbbb908d48caec5d4849142ac72cc1ab10cdf2bd919620f"
+    },
+    {
+      "bytes": 12417,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/schemas.py",
+      "sha256": "de5c56960aa70ad5633758ccd61f9bc6ae3f66a97aea67b85d994b66e1ad0682"
+    },
+    {
+      "bytes": 24191,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/semantic.py",
+      "sha256": "9d0af8a2b4a868df00388ccb910cdabdc93066aad7ff0e593d1c8d0e969885ab"
+    },
+    {
+      "bytes": 22415,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/v2/values.py",
+      "sha256": "e12586470c294701c315d6108a80746f08a14ba26a4ca6dcf6374f458d1078b5"
+    },
+    {
+      "bytes": 4606,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/ir/versions.py",
+      "sha256": "e6f31b33c3854244c52e26977942beb57909f4526752396f052c56555c57b98d"
+    },
+    {
+      "bytes": 95,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/__init__.py",
+      "sha256": "5151c57e95553b9bcc4a21568a77c29fbc95075cc68671ae1597afeeb9245f73"
+    },
+    {
+      "bytes": 40987,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/capture_coordinates.py",
+      "sha256": "e0d71eba04aab0a948ee6d07bbbcd30abc20ddb162dee62a7f0b7922ad8d8aba"
+    },
+    {
+      "bytes": 9612,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/code_snapshot.py",
+      "sha256": "3a00de3ef3dbac1e0ceca379f89dc501e95f9256dc59d77b318cc6f9f4c332cb"
+    },
+    {
+      "bytes": 14658,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/dispatch_evidence.py",
+      "sha256": "c5db7dba084b8ec903549ba48380eedd2fd24c5db80aa1aca18f4376327ebb77"
+    },
+    {
+      "bytes": 833,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/files.py",
+      "sha256": "cc0dee95dde97b488272e4b23ccb23df9cd84fca98fe5c2bb05003e8dad6e8b0"
+    },
+    {
+      "bytes": 8463,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/operand_bytecode.py",
+      "sha256": "17b6ba703296c279e893ff6c44481108a2dc1899c2702195b6c2a82458997743"
+    },
+    {
+      "bytes": 58928,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/os_resources.py",
+      "sha256": "c52f45a62693e3e78875b3a23b7c56e0a4cdb48862436981f8d98941a4900c1b"
+    },
+    {
+      "bytes": 1016,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/reader.py",
+      "sha256": "a36b508f5a4744570af2b9b095ffce9045b4a3c83e5e0dc90d4f6a3359c2d8b3"
+    },
+    {
+      "bytes": 43790,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/scar/trace/session.py",
+      "sha256": "c08a75b4bd2ee520b302373b406392c4f083a413a7b46692dcedff2dcdd3747a"
+    },
+    {
+      "bytes": 2076,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/sitecustomize.py",
+      "sha256": "cca59e4a827d66a42d77609c89cbdefb03281d6b41459d09903fa1dda0bdf6e0"
+    },
+    {
+      "bytes": 5218,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/__future__.py",
+      "sha256": "981d4c398849f9ebcab72300d9c1fe288fd6d7f28957b3b3fa3a493a5836d95c"
+    },
+    {
+      "bytes": 32147,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_collections_abc.py",
+      "sha256": "50b68b76687edc29824e5d735914b9c9ebb5145b663ba4ab7fce273283356a1c"
+    },
+    {
+      "bytes": 11031,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_colorize.py",
+      "sha256": "15db41bec8e25fd1ba81cf234df2cc7446d0fbc10285fda73186176365efd730"
+    },
+    {
+      "bytes": 10115,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_opcode_metadata.py",
+      "sha256": "d9badc5ab19a66415e230bf8f4299491b2207d584981a92b6e7c447cfa1aeac3"
+    },
+    {
+      "bytes": 30631,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_py_warnings.py",
+      "sha256": "7728580177727fa3b295478cef4777a9d2a364c5cbd809efcea352db31144f85"
+    },
+    {
+      "bytes": 2699,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_sitebuiltins.py",
+      "sha256": "f688c89b860d5839aff1047d4f3df6c9695f136e2ae8a167bbbfa51846bbdaa5"
+    },
+    {
+      "bytes": 3962,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/_weakrefset.py",
+      "sha256": "2dd7cb459d654fe78b00c5c47ee8e786c037ee77763304603f5e976dd62cbf81"
+    },
+    {
+      "bytes": 6538,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/abc.py",
+      "sha256": "e558702a95cdce3febd289da021715d2b92bc43995b8a1bc58dfa1c3d8010287"
+    },
+    {
+      "bytes": 44420,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/annotationlib.py",
+      "sha256": "1cce29393714b91e3f71571ffbedacc7f73f11ad26be10701debeb86ec059a32"
+    },
+    {
+      "bytes": 106825,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/argparse.py",
+      "sha256": "b9f0fa53be3d7c9c10a71a8eecc538a27c32fbe7abe337818d0d36e138bfc5c5"
+    },
+    {
+      "bytes": 25479,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ast.py",
+      "sha256": "5ea9a796353544bea0d706153516f04ef3d92be305d15a73238403837d77e34c"
+    },
+    {
+      "bytes": 22301,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/base64.py",
+      "sha256": "87fca266896d1069fa218eafd976be35bca402b29fdf24bc2863f855e60c2027"
+    },
+    {
+      "bytes": 3423,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/bisect.py",
+      "sha256": "f1cf7b85fc36b5da249813fc5ab97d9464f8cc1bc817f7146206fa2713e35999"
+    },
+    {
+      "bytes": 11978,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/bz2.py",
+      "sha256": "368b9ee55f0b6dbfc81b15e1a17c51cccddb009389eae8e9a7acf2402ca4109a"
+    },
+    {
+      "bytes": 36840,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/codecs.py",
+      "sha256": "718f39b3ea68fe934214d789c5bce3005fa828040b03a72d2f715fc5e2647b7e"
+    },
+    {
+      "bytes": 5902,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/codeop.py",
+      "sha256": "6777d19fa0f88c415d615c78e214ede057dd7507db8494744ca2c53fe9911a3a"
+    },
+    {
+      "bytes": 53021,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/collections/__init__.py",
+      "sha256": "cb8367b8edd188662143ea2e3942d360c2deae51c72fd779ec898f5076d2c2b9"
+    },
+    {
+      "bytes": 0,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 0,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/_common/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 5670,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/_common/_streams.py",
+      "sha256": "8b8e943815c748d030e540a023400cb87fb13f75c2f0615a63ec42ef9f156c92"
+    },
+    {
+      "bytes": 8769,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/zstd/__init__.py",
+      "sha256": "4575544839872594ad5c9be284d062384dd5abdd0ddcc0258f6d66dac2c51d60"
+    },
+    {
+      "bytes": 12325,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/compression/zstd/_zstdfile.py",
+      "sha256": "84da3160987a2ee10f3b99813a68e70f16ec42a52612fef32581eb628aabc720"
+    },
+    {
+      "bytes": 27801,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/contextlib.py",
+      "sha256": "c1e0d67b2007de11ae93cd36cf6faf38d9ab32656a832d592a49325eec579f96"
+    },
+    {
+      "bytes": 8582,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/copy.py",
+      "sha256": "15154fde290d6e65b5007905689a47a9a5a724822c5e06eec35d9ffbb2a3aa69"
+    },
+    {
+      "bytes": 7716,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/copyreg.py",
+      "sha256": "6376eb5722806396f5842997ac18add369ea9ac3ff4fcfe1460c41a088cac425"
+    },
+    {
+      "bytes": 20133,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/csv.py",
+      "sha256": "1919637c2fbec5a385774b0c7edace6139b3222295a0ba1ba2ea6da75bc28243"
+    },
+    {
+      "bytes": 71537,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/dataclasses.py",
+      "sha256": "e8439c8b111856645a8b31e0dbbba532b494426399bad456079c0e5730ad322e"
+    },
+    {
+      "bytes": 331,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/datetime.py",
+      "sha256": "742884b0c8e7dc69911858245db4f34d42e8ec0f769d580c570bd56032b0866c"
+    },
+    {
+      "bytes": 45533,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/dis.py",
+      "sha256": "17d4d9a9195c9ee5aa27a96f3e0871f9363fd501e3a64ef20cb1cc876d7ad553"
+    },
+    {
+      "bytes": 1759,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/__init__.py",
+      "sha256": "dafca994154b9a6eb2b69d0e6e69e7596f397c2aec9bc62702259f4b39bd111a"
+    },
+    {
+      "bytes": 8541,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/_encoded_words.py",
+      "sha256": "f856ad8d42b87d60c596de64beb9bcc1d0bb1fa189af79ea4bfb0a6f5564b7b4"
+    },
+    {
+      "bytes": 113183,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/_header_value_parser.py",
+      "sha256": "7beea37afd292ebc963afec0efb6e003638ec93d894dbd2ce631fd989c5106b7"
+    },
+    {
+      "bytes": 18121,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/_parseaddr.py",
+      "sha256": "ab5eb0af4e62eec9fbbf23db36c35d85ecdae49e1a653604d4af286a7daaab13"
+    },
+    {
+      "bytes": 15960,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/_policybase.py",
+      "sha256": "b39778a6dd7803ca768e99c0f3c2f814af8b6fc9ec6a7c8265fcb15e53f2a3f3"
+    },
+    {
+      "bytes": 3546,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/base64mime.py",
+      "sha256": "f9afd67a21d496a2cb571595ecbf79db1f1d4140e6b8b453a569a7eb8a688822"
+    },
+    {
+      "bytes": 16993,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/charset.py",
+      "sha256": "83859d1c941ef69f6f0226bd231d37209278e6fd01f44fe85fdf7de6d310c84a"
+    },
+    {
+      "bytes": 10594,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/contentmanager.py",
+      "sha256": "b76b572c0adfd3b3c6e08978e82895fcf9a6da5782d488f26d192759fa3cc94d"
+    },
+    {
+      "bytes": 1773,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/encoders.py",
+      "sha256": "cc09bd113246fd8084162298948bdf64c3684ed2c8780f03814c7897ce32dca3"
+    },
+    {
+      "bytes": 3809,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/errors.py",
+      "sha256": "16e9ae1143667e7224e2ab4048339d0175ed02f3e4946f30daf94d98a25968be"
+    },
+    {
+      "bytes": 22864,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/feedparser.py",
+      "sha256": "2e68e34c6e956e94bdbd5077d75f1fff3e0d2423726914555f5695fc5cb2bacd"
+    },
+    {
+      "bytes": 24459,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/header.py",
+      "sha256": "0af6a163dca4e3405c0b1be9093d0e9f6bb9d3f661a453dfbcf11c286af1e27e"
+    },
+    {
+      "bytes": 21244,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/headerregistry.py",
+      "sha256": "48e7496d406346a7032107f3d8682e87c709d83ae7dede3c7d23970538c7161f"
+    },
+    {
+      "bytes": 2124,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/iterators.py",
+      "sha256": "3fa231c15961a6cf3f61ef8362d9558417b23ab93ce43ab5fc66cb5847e5fcf2"
+    },
+    {
+      "bytes": 48437,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/message.py",
+      "sha256": "65620d24398c60137ea750c3830365916193978af32bd0b412131ee3fa6c7ee7"
+    },
+    {
+      "bytes": 4970,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/parser.py",
+      "sha256": "5af6ef2ef9eb5aed6cae264ec2418ac466fe4316b41fd3f7ece4b149d521a1ee"
+    },
+    {
+      "bytes": 10695,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/policy.py",
+      "sha256": "9dcd0d4849a92b8e3250b04ac02ebccead57b7172057984fc8abb85f818ba01d"
+    },
+    {
+      "bytes": 9866,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/quoprimime.py",
+      "sha256": "d5cadc6903aa0e977d44b46d21608ed7dc4ba99ab6d910a052826402bbda8e14"
+    },
+    {
+      "bytes": 16443,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/email/utils.py",
+      "sha256": "1712b710b29fc7c9f22d8ee522be470695c6bf4d580458cfc7e32dcd5cc31c6e"
+    },
+    {
+      "bytes": 5945,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/__init__.py",
+      "sha256": "2b708410495acf12a6fad9d2de928dd89e567537c253eaa2b51aaae578e96c59"
+    },
+    {
+      "bytes": 16255,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/aliases.py",
+      "sha256": "1ee993f8eb4986999b6501381e53947be9a04443626cb48b4190bcff2e87d3b4"
+    },
+    {
+      "bytes": 1005,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/utf_8.py",
+      "sha256": "ba0cac060269583523ca9506473a755203037c57d466a11aa89a30a5f6756f3d"
+    },
+    {
+      "bytes": 4133,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/encodings/utf_8_sig.py",
+      "sha256": "1ef3da8d8aa08149e7f274dc64dbfce2155da812e5258ca8e8f832428d3b5c2d"
+    },
+    {
+      "bytes": 85450,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/enum.py",
+      "sha256": "fd23a7598fa1104ef892abcd4154d3627283e6361eb7a91cd11dc4a7b6fb3a93"
+    },
+    {
+      "bytes": 6791,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/fnmatch.py",
+      "sha256": "ce582bc266922e4c682e2a85d72095124430a6bf58716c6f2537103480eae742"
+    },
+    {
+      "bytes": 43564,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/functools.py",
+      "sha256": "9db56d38172c4c9e689b21cc58c8538008b09d86b682faf4dd193b529cdd79d5"
+    },
+    {
+      "bytes": 6247,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/genericpath.py",
+      "sha256": "cdac5a68dd738051e0d66fc81d5947d6a1776248fc6fe862253477608d870ec4"
+    },
+    {
+      "bytes": 21595,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/gettext.py",
+      "sha256": "54c00df11915aafb017ed23860dcb5197ed063f7ee07e5612625ec86afadcaf5"
+    },
+    {
+      "bytes": 20775,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/glob.py",
+      "sha256": "21d290be171e3d0643a444e4b58a2c4ee9bfe2c1474bb36ead043794bb769365"
+    },
+    {
+      "bytes": 25247,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/gzip.py",
+      "sha256": "bc3f00153a2cfdf28ae0cb41f2dde3ee2e39d88efc220c1e47de87fc58e970cb"
+    },
+    {
+      "bytes": 9459,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/hashlib.py",
+      "sha256": "88fa624821fbdee7eb2ef87c2437b207afe328cf117c7463367e2db5eb1af492"
+    },
+    {
+      "bytes": 9589,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/hmac.py",
+      "sha256": "10e8952ae06300f63a1a8f4898f7f828e8e5ad17bf29240d4e2d106418f0226b"
+    },
+    {
+      "bytes": 4767,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/__init__.py",
+      "sha256": "72b07de4133a7e39b2f6a7920465669aa04626f217e800779587bc0713fe002e"
+    },
+    {
+      "bytes": 1354,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/_abc.py",
+      "sha256": "80aab7931dc999dee581c8b8b56fcd973fe156335a96ceeaf6acfc03cebf10e8"
+    },
+    {
+      "bytes": 57937,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/_bootstrap.py",
+      "sha256": "e50d35b1191ecbc5f7faecc73f54efd242bcf24c510e4ea5eb64bfba9458c0e3"
+    },
+    {
+      "bytes": 57685,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/_bootstrap_external.py",
+      "sha256": "b9af1fb7b625030cf5ee06b39aeb7838c2a30c97ddee09410286b7afbd8b7098"
+    },
+    {
+      "bytes": 2166,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/machinery.py",
+      "sha256": "34b7583fd83ebb2629b7645c0dd293839ce16b19cf8742801e21a21fe08f5811"
+    },
+    {
+      "bytes": 11414,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/importlib/util.py",
+      "sha256": "7bdfadad42664ba169ffac8160765673cd79937f74324f4664de8d820c35b863"
+    },
+    {
+      "bytes": 127725,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/inspect.py",
+      "sha256": "7a2878507255eb568a6ecfa04e051009f197513aa052eebc9e7e60d667d78cb4"
+    },
+    {
+      "bytes": 4736,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/io.py",
+      "sha256": "1b75584d4efcc612dc0db2ae98619408276585a106f0544879edb5e25b55430a"
+    },
+    {
+      "bytes": 81162,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ipaddress.py",
+      "sha256": "4cba28ab40dc34c685950535cf9adf6251bee5b63c82eed1f315d93853d4eaca"
+    },
+    {
+      "bytes": 14132,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/__init__.py",
+      "sha256": "2dd10f1bf4c9ea5478e589216805e7f279d0e4bce134a19efa297404fb87407d"
+    },
+    {
+      "bytes": 12877,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/decoder.py",
+      "sha256": "dc98d3e677612ea7311303f06a144cec6b91ebadc7ec037d1777501647578a07"
+    },
+    {
+      "bytes": 16990,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/encoder.py",
+      "sha256": "d68a4d04d2cfd95897498307f29349058b42c3f48ea6aa6739714a09200a7d01"
+    },
+    {
+      "bytes": 2434,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/json/scanner.py",
+      "sha256": "572958017eae8842eeddd0e3d18d3c56cc0a197348224915e1d87ce937841764"
+    },
+    {
+      "bytes": 1073,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/keyword.py",
+      "sha256": "18c2be738c04ad20ad375f6a71db34b3823c7f40b0340f5294d0e89f3c9b093b"
+    },
+    {
+      "bytes": 83560,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_bisect.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "5ac32f8dec3fdbc3cd1a519e6e7491a6052df5eafaaedea72ed346eb2adc1149"
+    },
+    {
+      "bytes": 1537880,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_blake2.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "9b54040d138fcad1961b45f8d54cd293d5cc76ecf3e2befe5ed78c7c4c928772"
+    },
+    {
+      "bytes": 93328,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_bz2.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "8e31f1af4325895ac75d840544d27a3bad8196279c7872a3ad74fd31bd24aa56"
+    },
+    {
+      "bytes": 144880,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_csv.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "a5fb767df14dd113826654a21725bcc43e0c7a5c239e0b2e3da195f798565a31"
+    },
+    {
+      "bytes": 331664,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_hashlib.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "3281645a0753a2d4964542f710e1953b8629183bf9f0269a5fd8bfa972054bd8"
+    },
+    {
+      "bytes": 2035424,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_hmac.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "cb516285aa7a919d4ae1dbac8208f2922cb05f3f395295a4c02c21f594b43e78"
+    },
+    {
+      "bytes": 300800,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_json.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "4b826392419bc2936c9f23e5e0a93db4eddf6b8fd1a6677b74534e7c3ffe3dbc"
+    },
+    {
+      "bytes": 253888,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_lzma.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "639cbc8bef07de8e4f2fa158e07e0bce8c8bdc18a6cecee1d7650a15b0c3f83d"
+    },
+    {
+      "bytes": 62496,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_random.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "fb3a7a85ddab9ba611eb5b354412169e290a1953f232d4c4d3aa121d14cae3c9"
+    },
+    {
+      "bytes": 234392,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_struct.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "e7a95e55ed9e10ae084d425d0571cbfedec30a8f1d704fc79c171a0dedf2eab5"
+    },
+    {
+      "bytes": 21616,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_uuid.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "025891ea6547e3b6159fdb5b4f27e5e079af9f528a011a636ddb25b801982ff5"
+    },
+    {
+      "bytes": 211696,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/_zstd.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "1632655a0e3e5ebdbbff0f71a7c187e1939e8a47f66430e4c3c0caa64e97de5d"
+    },
+    {
+      "bytes": 197392,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/binascii.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "dfb46355b36af4f7b541eef891ba94f02a6d9370d46996b2cda2cc595f3c05f2"
+    },
+    {
+      "bytes": 54960,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/fcntl.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "0ae2672b7a2452d549f8bf41483a5711e7f6e0eed2424e4041aad465ec06af6d"
+    },
+    {
+      "bytes": 56488,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/grp.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "a7b42f9b18b85b6fc5eb73556ec8e6c8c4af4d8210602681cbfec46362857f4c"
+    },
+    {
+      "bytes": 395976,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/math.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "423e3cbe15f3a8d1122f1b377b8139b963277252bca5328ac0877a598b13a0ff"
+    },
+    {
+      "bytes": 52944,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/resource.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "f5dcb95199babfcd86602d050047f3a8518f0f6a32030cddeb3ee51133f17ff8"
+    },
+    {
+      "bytes": 178488,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lib-dynload/zlib.cpython-314-x86_64-linux-gnu.so",
+      "sha256": "39fe7021f158ffe97323ff877cd71cd6d3d41459f53a520c44c3cb8ea20573ef"
+    },
+    {
+      "bytes": 8044,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/linecache.py",
+      "sha256": "692daec68e2a419adf46bafc0eb2f8a2fb36c482183fa1ac47e00fec440f7d7e"
+    },
+    {
+      "bytes": 13426,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/lzma.py",
+      "sha256": "b01a78a04c6a9ba6c645758cace78ed53a53871ea3ff88744e23f6263613d507"
+    },
+    {
+      "bytes": 30905,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/ntpath.py",
+      "sha256": "bf16566322f41f7052b7516fb684b2d64a437b39f5bbd21731b1bda1697d1a2e"
+    },
+    {
+      "bytes": 3152,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/opcode.py",
+      "sha256": "1036d90c917bb27c540ac3205d22896ee747214df1f2682458ab915758e4fdf2"
+    },
+    {
+      "bytes": 11158,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/operator.py",
+      "sha256": "a9f9910965c31f841caad0447ee47299ac539a371422aefe200c86c60f3b4697"
+    },
+    {
+      "bytes": 41958,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/os.py",
+      "sha256": "976bdb3e24925f2fb3ce43a4d788de6dcbb88a7cc8604c60ae690fbdd6507546"
+    },
+    {
+      "bytes": 46807,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/__init__.py",
+      "sha256": "042a4d0a5e1ef66778daa86dc269af205bd42d06e793e53d8b99dff4c45928ca"
+    },
+    {
+      "bytes": 18161,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/pathlib/_os.py",
+      "sha256": "61e844988e54bdf47c0b11ad2b3fd961f058bb370793428f4c6868bd40cab6f2"
+    },
+    {
+      "bytes": 49385,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/platform.py",
+      "sha256": "810dd0533e715dfa28faef184f9077f6512a22a6d4576caf283d38aabc1c3d98"
+    },
+    {
+      "bytes": 18813,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/posixpath.py",
+      "sha256": "8a5bc2b6674e76efe0f507b873a41d746beba466a191153ed18a7580ef6e08e1"
+    },
+    {
+      "bytes": 7159,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/quopri.py",
+      "sha256": "744ae69027b180e7155b8be70ea2bb264c2358f7ea4e3af986a215d4c743390f"
+    },
+    {
+      "bytes": 37553,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/random.py",
+      "sha256": "cf8e72f887d838e273c274b79758b2bf8630a0927112b8876fa3a9e4b9b1756b"
+    },
+    {
+      "bytes": 17876,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/__init__.py",
+      "sha256": "741a9de729ed8207bfa19db990f8826f1bf3661f33d0970a80c08cd1338ebc35"
+    },
+    {
+      "bytes": 5444,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_casefix.py",
+      "sha256": "1b12d9136f23db6c3f6f26053fefc15ca964b886838c7b9c1fabf8d2efc1e5c8"
+    },
+    {
+      "bytes": 26855,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_compiler.py",
+      "sha256": "d49f30cf9a1dbae33b200ed8befd9d0ce3ac612783a10ac35196536f98923e91"
+    },
+    {
+      "bytes": 6036,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_constants.py",
+      "sha256": "42253b3181b81aad6c46392f44a0ab26dcfa31feea411296f43ba16616a1ab0b"
+    },
+    {
+      "bytes": 40353,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/re/_parser.py",
+      "sha256": "e57bd194a2d42398355ae7c1ccc2ddfb78421dd431eb81e3809dbe8ca9057dc4"
+    },
+    {
+      "bytes": 8064,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/reprlib.py",
+      "sha256": "b04872e10d76252e44eae50cc785eb0fe478491afc4d7f0825a93f82b2eaba5f"
+    },
+    {
+      "bytes": 1984,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/secrets.py",
+      "sha256": "277000574358a6ecda4bb40e73332ae81a3bc1c8e1fa36f50e5c6a7d4d3f0f17"
+    },
+    {
+      "bytes": 60235,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/shutil.py",
+      "sha256": "28a5df6415bf1a7ab36cbd544d6d35ae0f056a198e3872a786dc4e156d5fcd7d"
+    },
+    {
+      "bytes": 2495,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/signal.py",
+      "sha256": "0363c964c90ac0b3e515de5749205e6e6454051a1211058375d84d91eab6071a"
+    },
+    {
+      "bytes": 3430,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/__editable___stable_pretraining_0_1_8_finder.py",
+      "sha256": "726f9e356884e9ccb6869d9ccff2748042ce964e809df1072c405bb42b7933f0"
+    },
+    {
+      "bytes": 6755,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/_distutils_hack/__init__.py",
+      "sha256": "df81e6bcba34ee3e3952f776551fb669143b9490fdd6c4caeb32609f97e985b4"
+    },
+    {
+      "bytes": 25768,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site.py",
+      "sha256": "bf3567b10092d10189a9f7eb12eb1f0c72d023c0d4e72cfa93a5f2e7d3122fd0"
+    },
+    {
+      "bytes": 6308,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/stat.py",
+      "sha256": "07217986d9b2172b509dab3578d18ac05ba768b418e1f1e8c90e38a8f7c2b3c6"
+    },
+    {
+      "bytes": 12807,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/string/__init__.py",
+      "sha256": "8c9751e6ae9776b4e94c1c9850b53c0d24e8407196901aeaebffbb1a11a64e05"
+    },
+    {
+      "bytes": 285,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/struct.py",
+      "sha256": "50c14e55f94957804c1e45e975fedbe8e86f7e1dbb745b150370ff681155370a"
+    },
+    {
+      "bytes": 15264,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/symtable.py",
+      "sha256": "7069b0eae8fc568986887d27c1d1eb2c0d17eacd4215e0600a7692c7c197aef5"
+    },
+    {
+      "bytes": 29162,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/sysconfig/__init__.py",
+      "sha256": "92ffd7d6e53704e74486860f674b6e9bf277896e4fa6fc89c350309ab1fd2b27"
+    },
+    {
+      "bytes": 33112,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/tempfile.py",
+      "sha256": "3714372b63f6bc05a5273425d446f6ad3a2112a659c71c321bb4575fd082d634"
+    },
+    {
+      "bytes": 19382,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/textwrap.py",
+      "sha256": "7f05d89c983f5aa8cefcff707a9cc561ed60c51fc8a68e2e3ab61cc6dfa84544"
+    },
+    {
+      "bytes": 56923,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/threading.py",
+      "sha256": "5323909624ec2165e70b6d31333e4191b63d383d2dc5a7d7d516a3475ea2b7e3"
+    },
+    {
+      "bytes": 2584,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/token.py",
+      "sha256": "61d4270311099c8a0c0b2e45fb363fd1c4e347a720bcc25f682b63dc28c34234"
+    },
+    {
+      "bytes": 21849,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/tokenize.py",
+      "sha256": "65ba1bacdc42e768382208ff27f3001ee77d9d61aafba686c67652d22b84b330"
+    },
+    {
+      "bytes": 70064,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/traceback.py",
+      "sha256": "a8fbeea470aa4e29691560de889de136570bead76d9c8a2b6a891849c047a3b3"
+    },
+    {
+      "bytes": 11464,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/types.py",
+      "sha256": "8c54d3d5ffc1d1204237e6c69b25c27c7b05b483128f185eeed9ba7ef2229ac2"
+    },
+    {
+      "bytes": 136036,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/typing.py",
+      "sha256": "de569368c2c4958b7aaddbe755056860a89b1d313f69d437177864f37cb2503b"
+    },
+    {
+      "bytes": 0,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/urllib/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "bytes": 46980,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/urllib/parse.py",
+      "sha256": "484b633b81d024da52649c7ff775c81b338de9f60585c94e5adfe335a27d9509"
+    },
+    {
+      "bytes": 38286,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/uuid.py",
+      "sha256": "915321474fa4b27c3e289751e8ffc86e6a134b1244a37ca9053aeb2bf3c7e150"
+    },
+    {
+      "bytes": 1966,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/warnings.py",
+      "sha256": "142225786de63c593f1c9abdacf5b4fc0b05dd847f6bed0ebb4b4aa2d4d93b02"
+    },
+    {
+      "bytes": 17771,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/weakref.py",
+      "sha256": "5e5f727a19a858cb4c56dbaf3e0a138ded02fb954a9a58a840a0764216ae9522"
+    },
+    {
+      "bytes": 33466,
+      "path": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/zipimport.py",
+      "sha256": "4de64633a484e16c39fdb46a3f939ce7c577b14a6e9ee49b79871ec1880b4597"
+    }
+  ],
+  "consumer_worktree": "/home/zyf/AAA/scar-worktrees/source858-runtime",
+  "historical_capture_producer_requalified": false,
+  "mismatches": [],
+  "source_payload_copies": false,
+  "unused_candidates_not_authority": true
+}
