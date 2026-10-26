@@ -800,7 +800,8 @@ class CompositionIndex:
         """
         from scar.analysis.compiler_witness_archives import CompilerWitnessArchives
         from scar.analysis.source_entry_catalog import SourceEntryCatalog
-        from scar.analysis.source_program_publication import read_source_entry_publication, _entry_attachment3
+        from scar.analysis.source_program_publication import (
+            read_source_entry_publication, _entry_attachment3, _check_entry_artifact_files)
         if (cls is not CompositionIndex or type(archives) is not CompilerWitnessArchives
                 or type(max_parent_depth) is not int or not 1 <= max_parent_depth <= 16
                 or _depth >= max_parent_depth):
@@ -809,6 +810,7 @@ class CompositionIndex:
         if (receipt["raw_sha256"] != expected_sha256
                 or document.get("schema") != "scar.source-entry-publication" or document.get("schema_version") not in (1, 2, 3)):
             raise ValueError("entry publication root receipt/schema differs")
+        _check_entry_artifact_files(document, max_programs)
         original = document["parent_composition"]
         catalog_original = document.get("catalog_project_composition", original)
         catalog_project = cls(catalog_original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)

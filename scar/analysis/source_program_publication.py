@@ -610,6 +610,37 @@ def _publish_source_entries(base_composition, catalog, source_programs, out_dir,
             "body_count": len(rows), "construction_operations": None, **_ENTRY_AUTHORITY}
 
 
+def _check_entry_artifact_files(document, max_programs):
+    """Fail before graph decoding if an original body/checkpoint is unavailable.
+
+    This only checks availability and declared size. Ordinary readers still
+    authenticate every artifact and validate its contents; these stats grant
+    no source, runtime or transformation qualification.
+    """
+    rows = document.get("bodies")
+    _need(type(max_programs) is int and max_programs > 0
+          and type(rows) is list and 0 < len(rows) <= max_programs,
+          "entry artifact denominator exceeds bound")
+    unavailable = []
+    for row in rows:
+        for name in ("source_program", "checkpoint"):
+            ref = row.get(name) if type(row) is dict else None
+            _need(type(ref) is dict and type(ref.get("uri")) is str
+                  and type(ref.get("physical_bytes")) is int and ref["physical_bytes"] > 0,
+                  "entry artifact needs its original URI and byte count")
+            path = Path(ref["uri"])
+            try:
+                available = (path.is_absolute() and not path.is_symlink()
+                             and path.is_file() and path.resolve(strict=True) == path
+                             and path.stat().st_size == ref["physical_bytes"])
+            except OSError:
+                available = False
+            if not available:
+                unavailable.append(f"{row.get('entry_key')}: {name}: {path}")
+    _need(not unavailable, "unavailable or size-mismatched entry artifacts ("
+          + str(len(unavailable)) + "): " + "; ".join(unavailable[:8]))
+
+
 def read_source_entry_publication(path, *, expected_sha256, catalog, max_programs=1,
                                   max_operations_per_body=4000, max_record_bytes=64_000_000,
                                   target_composition=None, _compact_body_cache=False, max_context_seconds=1800):
@@ -640,6 +671,7 @@ def read_source_entry_publication(path, *, expected_sha256, catalog, max_program
               and type(preview.get("bodies")) is list
               and 0 < len(preview["bodies"]) <= max_programs,
               "compact reader root receipt/schema/body denominator differs")
+        _check_entry_artifact_files(preview, max_programs)
         requests = tuple({"entry_key": row["entry_key"], "source_program": row["source_program"]}
                          for row in preview["bodies"])
         controls = (requests,)
@@ -825,7 +857,16 @@ def _plan_source_entry_publication(target, catalog, source_programs, *, max_prog
     """Exact source-qualified ADD/REVISE expectations; never admit a graph."""
     _need(type(max_programs) is int and max_programs > 0 and type(source_programs) is tuple
           and 0 < len(source_programs) <= max_programs, "bounded complete program requests required")
-    parent, expected, seen = _entry_parent2(target, catalog, publication_version=publication_version), [], set()
+    parent = _entry_parent2(target, catalog, publication_version=publication_version)
+    expected = _entry_expectations(target, catalog, source_programs)
+    document = {"schema": "scar.source-entry-publication-plan", "schema_version": publication_version,
+                **parent, "expectations": expected, "source_admission_authorized": False}
+    return SourceEntryPublicationPlan(document, sha256(_canonical(document)).hexdigest())
+
+
+def _entry_expectations(target, catalog, source_programs):
+    """Check individual CAS slots within an already checked parent scope."""
+    expected, seen = [], set()
     for request in source_programs:
         _need(type(request) is dict and set(request) == {"entry_key", "source_program"}, "exact entry request required")
         entry = catalog.resolve(request["entry_key"])
@@ -840,9 +881,7 @@ def _plan_source_entry_publication(target, catalog, source_programs, *, max_prog
             "entry_navigation_origin": entry.origin, "owner_kind": entry.origin["kind"],
             "operation": "REVISE_GRAPH" if state["body"] is not None else "ADD_GRAPH",
             "expected_parent_body": state, "source_program": deepcopy(request["source_program"])})
-    document = {"schema": "scar.source-entry-publication-plan", "schema_version": publication_version,
-                **parent, "expectations": expected, "source_admission_authorized": False}
-    return SourceEntryPublicationPlan(document, sha256(_canonical(document)).hexdigest())
+    return expected
 
 
 def _entry2_checkpoint(entry, program, expected):
@@ -951,6 +990,9 @@ def _read_source_entries2(document, receipt, *, expected_sha256, catalog, target
         _need(all(document.get(key) == value for key, value in parent.items()),
               "compact original parent/source/catalog/CAS differs")
         common = {key: value for key, value in saved_plan.items() if key != "expectations"}
+        _need(common == {"schema": "scar.source-entry-publication-plan", "schema_version": version,
+                         **parent, "source_admission_authorized": False},
+              "compact plan common parent/source/catalog/CAS differs")
         candidates = catalog.metadata()["candidates"]
         file_keys = {row["entry_key"]: row["file_key"] for row in candidates}
         _need(len(file_keys) == len(candidates), "duplicate catalog entry metadata")
@@ -967,12 +1009,11 @@ def _read_source_entries2(document, receipt, *, expected_sha256, catalog, target
             for file_key in sorted(groups):
                 group = groups[file_key]
                 group_requests = tuple(requests[index] for index, _ in group)
-                # The original planner performs every source/CAS check, but
-                # only for the group whose bodies will immediately be read.
-                fresh = plan_source_entry_publication(target, catalog, group_requests,
-                    max_programs=max_programs, publication_version=version)
-                _need({key: value for key, value in fresh.document.items() if key != "expectations"} == common
-                      and fresh.document["expectations"] == [expected for _, (_, expected) in group],
+                # Check each source/CAS slot immediately before its body.
+                # Global immutable inputs are checked at the scope boundaries,
+                # rather than reparsed for every original source file.
+                fresh = _entry_expectations(target, catalog, group_requests)
+                _need(fresh == [expected for _, (_, expected) in group],
                       "compact group plan differs from original indexed expectations")
                 yield from group
                 catalog._finish_shared_group()
@@ -994,6 +1035,9 @@ def _read_source_entries2(document, receipt, *, expected_sha256, catalog, target
               "schema2 original checkpoint/program/signature/admission differs")
         checked[index] = {"record": deepcopy(row), "body": body,
                           "program": _entry_body_cache(program, compact_body_cache), "entry": entry}
+    if compact_body_cache:
+        _need(_entry_parent2(target, catalog, publication_version=version) == parent,
+              "compact parent/source/catalog/CAS changed during body reads")
     return document, receipt, tuple(checked)
 
 
