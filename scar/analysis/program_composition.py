@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, OrderedDict
-from copy import deepcopy
+from copy import copy, deepcopy
 from dataclasses import dataclass, replace
 import gzip
 import hashlib
@@ -17,6 +17,7 @@ from io import BytesIO
 import json
 from pathlib import Path
 from typing import Any
+from weakref import WeakKeyDictionary
 
 from scar.analysis.source_layers import SourceLayerView, load_source_layers
 from scar.analysis.source_attachments import SourceAttachments, SourceAttachmentBudget
@@ -47,6 +48,10 @@ _AUTHORITY = {
     "execution_model_established": False,
     "transformation_authorized": False,
 }
+
+# Only private, freshly copied reader views are registered. Original public
+# CompositionIndex objects always retain their full mutable-document guard.
+_READ_INPUT_SNAPSHOTS = WeakKeyDictionary()
 
 
 def _canonical(value: Any) -> bytes:
@@ -842,7 +847,8 @@ class CompositionIndex:
             admissions.append(owner)
         previous = document.get("parent_entry_publication") if document["schema_version"] in (2, 3) else None
         if previous is None:
-            parent = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
+            parent = (catalog_project if original == catalog_original else
+                      cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes))
         else:
             parent = cls.from_source_entry_publication(previous["uri"], expected_sha256=previous["sha256"], archives=archives,
                 max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes, max_programs=max_programs,
@@ -860,7 +866,7 @@ class CompositionIndex:
             max_record_bytes=max_record_bytes, target_composition=parent, _compact_body_cache=True)
         # Keep catalog's original parent separate: its source_inputs must never
         # be changed recursively by installation of this publication overlay.
-        result = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
+        result = parent._copy_bound_base()
         result._attachments = list(admissions)
         watched = []
         for ref in ({"uri": str(Path(path).resolve()), "physical_sha256": actual["physical_sha256"],
@@ -1297,6 +1303,9 @@ class CompositionIndex:
 
     def source_inputs(self):
         """Explicit input receipts; the original composition document stays intact."""
+        snapshot = _READ_INPUT_SNAPSHOTS.get(self)
+        if snapshot is not None:
+            return deepcopy(snapshot)
         if hashlib.sha256(_canonical(self.document)).hexdigest() != self._original_document_sha256:
             raise ValueError("composition document changed after its bound original receipt")
         result = {"composition_canonical_sha256": self._original_document_sha256,
@@ -1306,6 +1315,61 @@ class CompositionIndex:
             state = self._require_entry_publication()
             result["entry_publication"] = {"path": state["path"], **deepcopy(state["receipt"])}
         return result
+
+    def _copy_bound_base(self):
+        """Copy an already checked base, not reconstruct its revision history.
+
+        The document is privately owned and checked again after copying. The
+        inventory is reopened through its normal receipt reader; no historical
+        graph/source validity is inferred from a saved success flag. Public
+        guards on both views remain active unless a private read scope owns
+        the new copy, and no entry overlay is installed by this operation.
+        """
+        self.source_inputs()
+        self._verify_parent_composition(self.index_receipt,
+            canonical_sha256=self._original_document_sha256)
+        result = copy(self)
+        # Copy current memory through the normal JSON domain. No mutable
+        # public document (or user-defined deepcopy callback) enters the scope.
+        result.document = strict_loads(_canonical(self.document).decode('utf-8'))
+        if hashlib.sha256(_canonical(result.document)).hexdigest() != self._original_document_sha256:
+            raise ValueError("composition changed while making its private reader view")
+        result.index_receipt = deepcopy(self.index_receipt)
+        result._inventory = _InventorySource(result.document["inventory"]["path"],
+            max_input_bytes=max(self._inventory.receipt["raw_bytes"], self._inventory.receipt["decoded_bytes"]),
+            max_record_bytes=self.max_record_bytes)
+        if (result._inventory.receipt != self._inventory.receipt
+                or result._inventory.receipt != result.document["inventory"]):
+            raise ValueError("private reader inventory differs from its checked parent")
+        before = (self._inventory.partitions.manifest if self.partitioned else self._inventory.document)
+        after = (result._inventory.partitions.manifest if self.partitioned else result._inventory.document)
+        if _canonical(before) != _canonical(after):
+            raise ValueError("current in-memory inventory differs from its original receipt")
+        result.inventory = result._inventory.partitions or result._inventory.document
+        result._attachments = list(self._attachments)
+        result._views, result._bodies = OrderedDict(), OrderedDict()
+        result._project_definition_refs, result._project_definitions = {}, {}
+        result._project_snapshot_indexes = {_canonical(row["snapshot"]): index
+            for index, row in enumerate(result.document["files"])}
+        result._static_source_proof = None
+        result._source_membership_nodes, result._source_membership_queries = {}, {}
+        result._source_membership_reads = {"parent_compositions": 0, "parent_inventories": 0, "decoded_bytes": 0}
+        result._entry_publication = None
+        return result
+
+    def _private_read_snapshot(self):
+        """Owned source-input snapshot for a callback-free internal scope."""
+        if self.has_source_attachments or self.has_source_entry_publication or self._static_source_proof is not None:
+            raise ValueError("private base snapshot requires a plain original composition")
+        expected = self.source_inputs()
+        result = self._copy_bound_base()
+        if result.source_inputs() != expected:
+            raise ValueError("private composition inputs differ after ordinary validation")
+        _READ_INPUT_SNAPSHOTS[result] = deepcopy(expected)
+        return result
+
+    def _end_private_read_snapshot(self):
+        _READ_INPUT_SNAPSHOTS.pop(self, None)
 
     def verify_source_attachments(self, scanned, groups):
         return [attachment.verify_capture(scanned, groups) for attachment in self._attachments]
