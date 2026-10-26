@@ -1,0 +1,40 @@
+{
+  "budgets": {
+    "max_input_bytes": 4000000000,
+    "max_output_io_bytes": 512000000,
+    "max_record_bytes": 4000000,
+    "max_rss_kib": 2097152,
+    "max_shard_decoded_bytes": 16000000,
+    "max_shard_rows": 256,
+    "max_wall_seconds": 600
+  },
+  "distinct_start_end_sources": true,
+  "existing_typed_records": [
+    "WorkSubmission",
+    "WorkEvidenceBinding",
+    "WorkQuiescence"
+  ],
+  "native_qualification_granted": false,
+  "owner_acquisitions": 0,
+  "raw_reads": 0,
+  "sources": [
+    {
+      "bytes": 29256,
+      "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_work_bridge.py",
+      "sha256": "dc6754154fee5d54c20aed15f5fe0fc44d9fe320c14fb5d4a01cfc225d66cdb3"
+    },
+    {
+      "bytes": 11110,
+      "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/ir/execution/native_work_protocol.py",
+      "sha256": "687f4de8c6d281dfaf97a2fce883cdd04c866cebca26f75738bfc99f25ceb68a"
+    },
+    {
+      "bytes": 6315,
+      "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/native_activity_work_20261026/attempt01/gate.py",
+      "sha256": "b3575d2f67a173f5c778a37cee4c69f625fc2807d3f13a3c1bcb8d81f9a52e5b"
+    }
+  ],
+  "status": "SYNTAX_AND_TYPED_API_ONLY",
+  "target_executions": 0,
+  "torch_imported": false
+}
