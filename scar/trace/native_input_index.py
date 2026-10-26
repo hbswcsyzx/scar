@@ -306,23 +306,231 @@ def prepare_native_input_metadata_index(coordinates,owner,out,*,budget=None,prog
     return NativeInputIndexSession(_INDEX_OWNER,coordinates,owner,out,limits,progress).prepare()
 
 
-def query_native_input_associations(manifest,*,row=None,node_id=None,native_input=None,limit=10,expected_sha256=None,associations=False):
-    path=Path(manifest).absolute();raw=path.read_bytes();_need(len(raw)<=16_000_000,'association manifest bound')
-    if expected_sha256 is not None:_need(hashlib.sha256(raw).hexdigest()==expected_sha256,'association manifest SHA')
-    doc=_json(raw);_need(doc['schema']=='scar.native-input-association-index' and doc['status']=='PUBLISHED_WITH_OPEN','published association result required')
-    _need(type(limit)is int and 1<=limit<=1000,'query limit')
-    table='associations' if native_input is not None or associations else 'rows';result=[];visited=0
+def _query_regular_bytes(path, maximum):
+    import os
+    import stat
+    fd = os.open(path, os.O_RDONLY | os.O_CLOEXEC | os.O_NONBLOCK | os.O_NOFOLLOW)
+    try:
+        before = os.fstat(fd)
+        _need(stat.S_ISREG(before.st_mode) and 0 <= before.st_size <= maximum, 'query file must be bounded regular nonsymlink')
+        with os.fdopen(fd, 'rb') as stream:
+            fd = None
+            raw = stream.read(maximum + 1)
+            after = os.fstat(stream.fileno())
+        stamp = lambda value: (value.st_dev, value.st_ino, value.st_size, value.st_mtime_ns, value.st_ctime_ns)
+        _need(len(raw) == before.st_size and stamp(before) == stamp(after), 'query file changed during read')
+        return raw
+    finally:
+        if fd is not None:
+            os.close(fd)
+
+
+def query_native_input_associations(manifest, *, row=None, node_id=None, native_input=None, limit=10, expected_sha256=None, associations=False):
+    from io import BytesIO
+    _need(row is None or (type(row) is int and row >= 0), 'row selector must be an exact nonnegative int')
+    _need(node_id is None or (type(node_id) is int and node_id >= 0), 'node selector must be an exact nonnegative int')
+    _need(type(limit) is int and 1 <= limit <= 1000 and type(associations) is bool, 'query limit/mode')
+    table = 'associations' if native_input is not None or associations else 'rows'
+    _need(node_id is None or table == 'rows', 'node_id selects retained rows; query its original row index before association mode')
+    if native_input is not None:
+        from scar.ir.execution.content import NativeInputRef
+        from scar.ir.record_codec import decode
+        _need(type(native_input) is dict, 'native_input must be a complete encoded NativeInputRef')
+        _need(_canonical(encode(decode(NativeInputRef, native_input))) == _canonical(native_input), 'native_input encoding differs')
+    path = Path(manifest).absolute()
+    raw = _query_regular_bytes(path, 16_000_000)
+    if expected_sha256 is not None:
+        _need(hashlib.sha256(raw).hexdigest() == expected_sha256, 'association manifest SHA')
+    doc = _json(raw)
+    is_navigation = doc['schema'] == 'scar.native-input-port-navigation'
+    _need(type(doc['schema_version']) is int and doc['schema_version'] == 1
+          and doc['status'] == 'PUBLISHED_WITH_OPEN'
+          and ((is_navigation and doc['profile'] == NAVIGATION_PROFILE)
+               or (doc['schema'] == 'scar.native-input-association-index' and doc['profile'] == PROFILE)),
+          'published supported association result required')
+    if is_navigation and table == 'rows':
+        member = doc['metadata']
+        return query_native_input_associations(member['uri'], row=row, node_id=node_id, limit=limit,
+            expected_sha256=member['sha256'])
+    _need(table != 'associations' or is_navigation,
+          'association endpoints need the published canonical parent navigation manifest')
+    root = path.parent.resolve()
+    result, visited = [], 0
     for chunk in doc['tables'][table]['chunks']:
-        if row is not None and not chunk['first_row']<=row<=chunk['last_row']:continue
-        _need(type(chunk['raw_bytes'])is int and 0<=chunk['raw_bytes']<=8_000_000,'association chunk bound')
-        p=path.parent/chunk['path'];_need(not p.is_symlink() and p.resolve().is_relative_to(path.parent),'association chunk path')
-        stored=p.read_bytes();_need(len(stored)==chunk['size_bytes'] and hashlib.sha256(stored).hexdigest()==chunk['sha256'],'association stored receipt')
-        decoded=gzip.decompress(stored);_need(len(decoded)==chunk['raw_bytes'] and hashlib.sha256(decoded).hexdigest()==chunk['raw_sha256'],'association raw receipt')
+        if row is not None and not chunk['first_row'] <= row <= chunk['last_row']:
+            continue
+        _need(type(chunk['raw_bytes']) is int and 0 <= chunk['raw_bytes'] <= 8_000_000, 'association chunk bound')
+        relative = Path(chunk['path'])
+        _need(not relative.is_absolute() and '..' not in relative.parts, 'association chunk path')
+        p = root / relative
+        _need(p.resolve().is_relative_to(root), 'association chunk escapes result root')
+        stored = _query_regular_bytes(p, 8_100_000)
+        _need(len(stored) == chunk['size_bytes'] and hashlib.sha256(stored).hexdigest() == chunk['sha256'], 'association stored receipt')
+        with gzip.GzipFile(fileobj=BytesIO(stored), mode='rb') as stream:
+            decoded = stream.read(chunk['raw_bytes'] + 1)
+        _need(len(decoded) == chunk['raw_bytes'] and hashlib.sha256(decoded).hexdigest() == chunk['raw_sha256'], 'association raw receipt')
         for line in decoded.splitlines():
-            value=_json(line);visited+=1
-            if row is not None and value.get('index',value.get('row'))!=row:continue
-            if node_id is not None and value.get('node_id')!=node_id:continue
-            if native_input is not None and value.get('native_input')!=native_input:continue
+            value = _json(line)
+            visited += 1
+            if row is not None and value.get('index', value.get('row')) != row:
+                continue
+            if node_id is not None and value.get('node_id') != node_id:
+                continue
+            if native_input is not None and value.get('native_input') != native_input:
+                continue
             result.append(value)
-            if len(result)>=limit:return {'counts':doc['counts'],'matches':result,'visited':visited,'complete_scan':False,'scope':'published transport only; no owner restored','whole_model_established':False}
-    return {'counts':doc['counts'],'matches':result,'visited':visited,'complete_scan':True,'scope':'published transport only; no owner restored','whole_model_established':False}
+            # Published index profile has one row per original ETO node. This
+            # stops navigation, and makes no claim to have rechecked other chunks.
+            if len(result) >= limit or node_id is not None:
+                return {'counts': doc['counts'], 'matches': result, 'visited': visited, 'complete_scan': False,
+                    'scope': 'published transport only; no owner restored', 'whole_model_established': False}
+    return {'counts': doc['counts'], 'matches': result, 'visited': visited, 'complete_scan': True,
+        'scope': 'published transport only; no owner restored', 'whole_model_established': False}
+
+
+NAVIGATION_PROFILE = 'SCAR_NATIVE_INPUT_CANONICAL_PARENT_NAVIGATION_V1'
+
+
+def publish_native_input_port_navigation(batch_report, out_dir, *, expected_sha256,
+                                         max_read_bytes=1_500_000_000, max_output_bytes=128_000_000):
+    """Receipt-checked navigation over published records, never a restored owner.
+
+    Candidate keys are local endpoint plus original source, not globally unique
+    IDs. Exactly one original parent qualification must match each association.
+    Parent execution bodies are not reimported; a normal reader can follow their
+    exact receipts on demand.
+    """
+    from scar.ir.execution.native_port_protocol import PROFILE_V2
+    _need(type(max_read_bytes) is int and max_read_bytes > 0 and type(max_output_bytes) is int and max_output_bytes > 0, 'navigation budgets')
+    out = Path(out_dir).absolute()
+    _need(not out.exists(), 'fresh navigation output required')
+    out.mkdir(parents=True)
+    (out / 'private').mkdir()
+    db_path = out / 'private/navigation.sqlite'
+    db = sqlite3.connect(db_path)
+    db.execute('PRAGMA journal_mode=OFF')
+    db.execute('PRAGMA synchronous=OFF')
+    db.execute('PRAGMA max_page_count=262144')
+    db.execute('CREATE TABLE endpoints(key BLOB, original BLOB, context BLOB)')
+    db.execute('CREATE INDEX endpoint_keys ON endpoints(key)')
+    ledger = {'reserved_stored_plus_decoded': 0, 'completed_stored_plus_decoded': 0, 'artifacts': []}
+    def read(artifact, maximum=16_000_000):
+        n = artifact['size_bytes']
+        _need(type(n) is int and 0 <= n <= maximum, 'navigation source bound')
+        ledger['reserved_stored_plus_decoded'] += 2 * n
+        _need(ledger['reserved_stored_plus_decoded'] <= max_read_bytes, 'navigation input budget')
+        raw = _query_regular_bytes(Path(artifact['uri']), n)
+        _need(len(raw) == n and hashlib.sha256(raw).hexdigest() == artifact['sha256'], 'navigation source receipt')
+        ledger['completed_stored_plus_decoded'] += 2 * len(raw)
+        ledger['artifacts'].append(artifact)
+        return raw
+    try:
+        path = Path(batch_report).absolute()
+        st = path.stat()
+        parent = {'uri': str(path), 'size_bytes': st.st_size, 'sha256': expected_sha256, 'schema': 'scar.native-capture-batch'}
+        report = _json(read(parent))
+        _need(report['schema'] == parent['schema'] and report['profile'] == PROFILE_V2
+              and report['status'] == 'SOURCE_DOMAIN_ACCOUNTED_WITH_PORT_GAPS', 'completed canonical native batch required')
+        original = report['native_input_metadata']['artifact']
+        metadata = _json(read(original))
+        _need(metadata['schema'] == 'scar.native-input-association-index' and metadata['schema_version'] == 1
+              and metadata['profile'] == PROFILE and metadata['run']['value'] == report['run'], 'metadata parent Run/profile differs')
+        indexed = 0
+        for shard in report['shards']:
+            qualification = _json(read(shard['port_qualifications']))
+            _need(qualification['role'] == 'native-port-qualifications' and qualification['profile'] == PROFILE_V2
+                  and qualification['program_snapshot'] == shard['program_snapshot']
+                  and shard['program_snapshot']['artifact'] == report['shared_program'], 'qualification parent snapshot differs')
+            execution = shard['execution']
+            _need(Path(execution['uri']).is_file() and not Path(execution['uri']).is_symlink()
+                  and Path(execution['uri']).stat().st_size == execution['size_bytes'], 'parent execution transport absent')
+            observed = 0
+            for chunk in qualification['chunks']:
+                raw = read(chunk['artifact'], 8_000_000)
+                lines = raw.splitlines()
+                _need(len(lines) == chunk['rows'], 'qualification row count differs')
+                observed += len(lines)
+                for ordinal, line in enumerate(lines, 1):
+                    port = _json(line)
+                    if port['direction'] != 'inputs':
+                        continue
+                    denotation = port['denotation']
+                    _need('entry' in denotation['basis'] and denotation['source'] == port['source'], 'original input qualification differs')
+                    key = _canonical([denotation['basis'], denotation['value'], denotation['source']])
+                    context = {'program_snapshot': shard['program_snapshot'], 'execution': execution,
+                        'denotation': denotation['id'], 'native_path': port['native_path'],
+                        'qualification_row': {'artifact': chunk['artifact'], 'line_1_based': ordinal,
+                            'representation': 'derived port-qualification JSONL transport; not original ETO coordinate'}}
+                    db.execute('INSERT INTO endpoints VALUES(?,?,?)', (hashlib.sha256(key).digest(), key, _canonical(context)))
+                    indexed += 1
+            _need(observed == qualification['rows'], 'complete qualification denominator differs')
+            db.commit()
+        directory = out / 'associations'
+        directory.mkdir()
+        chunks, buffer, length, total, stored_total = [], [], 0, 0, 0
+        def flush():
+            nonlocal buffer, length, total, stored_total
+            if not buffer:
+                return
+            raw = b''.join(buffer)
+            packed = gzip.compress(raw, compresslevel=1, mtime=0)
+            stored_total += len(packed)
+            _need(stored_total <= max_output_bytes, 'navigation output budget')
+            name = 'associations/' + str(len(chunks)).zfill(6) + '.jsonl.gz'
+            with (out / name).open('xb') as stream:
+                stream.write(packed)
+            chunks.append({'path': name, 'rows': len(buffer), 'first_ordinal': total,
+                'first_row': _json(buffer[0])['row'], 'last_row': _json(buffer[-1])['row'],
+                'raw_bytes': len(raw), 'raw_sha256': hashlib.sha256(raw).hexdigest(),
+                'size_bytes': len(packed), 'sha256': hashlib.sha256(packed).hexdigest()})
+            total += len(buffer)
+            buffer, length = [], 0
+        metadata_root = Path(original['uri']).parent
+        for chunk in metadata['tables']['associations']['chunks']:
+            artifact = {'uri': str(metadata_root / chunk['path']), 'size_bytes': chunk['size_bytes'], 'sha256': chunk['sha256']}
+            packed = read(artifact, 8_100_000)
+            # Replace the plain-file decoded reservation with the actual gzip plane.
+            ledger['reserved_stored_plus_decoded'] += chunk['raw_bytes'] - len(packed)
+            _need(ledger['reserved_stored_plus_decoded'] <= max_read_bytes, 'navigation gzip input budget')
+            from io import BytesIO
+            with gzip.GzipFile(fileobj=BytesIO(packed), mode='rb') as stream:
+                raw = stream.read(chunk['raw_bytes'] + 1)
+            _need(len(raw) == chunk['raw_bytes'] and hashlib.sha256(raw).hexdigest() == chunk['raw_sha256'], 'association decoded receipt')
+            ledger['completed_stored_plus_decoded'] += len(raw) - len(packed)
+            lines = raw.splitlines()
+            _need(len(lines) == chunk['rows'], 'association source row count')
+            for line in lines:
+                association = _json(line)
+                key = _canonical([association['native_input'], association['value_occurrence'], association['original_input']])
+                candidates = [context for original_key, context in db.execute('SELECT original,context FROM endpoints WHERE key=?', (hashlib.sha256(key).digest(),)) if original_key == key]
+                _need(len(candidates) == 1, 'canonical parent endpoint missing or ambiguous')
+                context = _json(candidates[0])
+                _need(context.pop('native_path') == association['path'], 'parent ordered input path differs')
+                association['canonical_parent'] = context
+                wire = _canonical(association) + b'\n'
+                _need(len(wire) <= 4_000_000, 'navigation record bound')
+                if buffer and (len(buffer) >= 1000 or length + len(wire) > 8_000_000):
+                    flush()
+                buffer.append(wire)
+                length += len(wire)
+        flush()
+        _need(total == metadata['counts']['associated_metadata_paths'], 'complete association navigation denominator differs')
+        result = {'schema': 'scar.native-input-port-navigation', 'schema_version': 1, 'profile': NAVIGATION_PROFILE,
+            'status': 'PUBLISHED_WITH_OPEN', 'metadata': original, 'canonical_batch': parent,
+            'run': metadata['run'], 'process': metadata['process'], 'counts': metadata['counts'],
+            'tables': {'associations': {'records': total, 'chunks': chunks}},
+            'navigation': {'qualified_input_port_records': indexed, 'scoped_associations': total,
+                'canonical_input_ports_without_retained_metadata': indexed - total,
+                'local_endpoint_keys_not_assumed_globally_unique': True},
+            'input_accounting': ledger, 'private_navigation_bytes': db_path.stat().st_size,
+            'scope': 'receipt-anchored parent navigation; preserves original producer qualification; no new IR authority',
+            'parent_execution_bodies_revalidated': False, 'whole_model_established': False,
+            'logical_content_established': False, 'alias_established': False, 'resource_ready_established': False}
+        wire = _canonical(result) + b'\n'
+        _need(stored_total + len(wire) <= max_output_bytes, 'navigation manifest output budget')
+        target = out / 'manifest.json'
+        with target.open('xb') as stream:
+            stream.write(wire)
+        return {'uri': str(target), 'size_bytes': len(wire), 'sha256': hashlib.sha256(wire).hexdigest(), 'schema': result['schema']}
+    finally:
+        db.close()

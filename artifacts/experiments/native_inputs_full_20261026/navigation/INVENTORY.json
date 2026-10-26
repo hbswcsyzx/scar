@@ -1,0 +1,89 @@
+{
+  "files": [
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/NAVIGATION_FAILURE.json",
+      "size_bytes": 583,
+      "sha256": "c59724ac5393efcaa1990fd1e8cd056321dbf4e2df993396a696c3b54f1bd843"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/NAVIGATION_READBACK.json",
+      "size_bytes": 6061,
+      "sha256": "8cc2d6fb02acca53b50fa1a77617c8be020ca58a0760fc00887ad802946214ca"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/PRIVATE_INDEX_CLEANUP.json",
+      "size_bytes": 1770,
+      "sha256": "7de86aae7b057206df9f0c1f9f7bbd1d0846b412a1fb6732dd20fe9080418b9e"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/REPORT.md",
+      "size_bytes": 2459,
+      "sha256": "5450657d39010c3190db4761a63de31fa1dabc8182719c2b34b7a9108b5b2341"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/SOURCE.json",
+      "size_bytes": 419,
+      "sha256": "576347f6847ccc367cfa8f68c5968f66747ad1b0c3de5b04ddfd9053ef734491"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/associations/000000.jsonl.gz",
+      "size_bytes": 260779,
+      "sha256": "ee4e7f4802c44ae67ac4a558a3d3324257f76e4938ebd8122e52e0bae1916f12"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/manifest.json",
+      "size_bytes": 146783,
+      "sha256": "4436b171be0dec2782e7843bc097227d675efa5e33155a6e8a2bf2408b4b6f72"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/navigation-gnu-time.txt",
+      "size_bytes": 945,
+      "sha256": "a74ff15006d300f7608053a7ff077e7de3d7ad08a6b4b1510d2dc9952f34110f"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/navigation-readback-gnu-time.txt",
+      "size_bytes": 898,
+      "sha256": "61b6aab701e66ad74e4f8166002ab8ed4c87cb0a77d478ccdc9738c71606dc80"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/navigation-readback-stderr.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/navigation-readback-stdout.txt",
+      "size_bytes": 412,
+      "sha256": "5c8edd2e15fc5da7d9b7e056e35a6cbf16e9466e5360bb4a74eee2388643f769"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/navigation-stderr.txt",
+      "size_bytes": 422,
+      "sha256": "f0ae13b4fb262c06b311782b4b9397bc8f1ec114d2f4707cf32dc0723f37138f"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/navigation-stdout.txt",
+      "size_bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/publish_navigation.py",
+      "size_bytes": 3697,
+      "sha256": "830a8bee1331cd4f8a7903770ceaaa0748912a4f28a3f44a1008adc3aa00851e"
+    },
+    {
+      "path": "artifacts/experiments/native_inputs_full_20261026/navigation/verify_navigation.py",
+      "size_bytes": 3795,
+      "sha256": "a6a634ad66c61da2194e20e4aa5e778da68931192f3f367b8d27aeef3ea12ca1"
+    },
+    {
+      "path": "docs/NATIVE_INPUT_ASSOCIATIONS.md",
+      "size_bytes": 4711,
+      "sha256": "0e06ddc4678c5f4b482fd3661d0e256dada97faef96c71f3660c09d2a07ef1ee"
+    },
+    {
+      "path": "scar/trace/native_input_index.py",
+      "size_bytes": 38082,
+      "sha256": "7ae10c062ec5d692b05f66c6c855f07086967742977e86ae9f243e4b1a713dce"
+    }
+  ]
+}
