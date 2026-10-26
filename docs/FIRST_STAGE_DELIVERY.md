@@ -4,6 +4,10 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
+最新软件runtime/kernel与CPU/GPU/DRAM/SSD/NVMe深度、有序任务及验收依据见
+[第一阶段实施计划](FIRST_STAGE_IMPLEMENTATION_PLAN.md)。本阶段不展开机器指令，
+资源清单、使用和依赖闭合分别验收，完成前不进入化简。
+
 **真实 LeWM 最新完整运行接线：source858 / runtime858。** Root11969实际exit0，
 39:42.90/峰2228264KiB；原100438 calls中6882次接92个body，88592 source-only、4964 unresolved。
 全部15个post843原图本门实测参加183次（4+179），不从历史权重相加；

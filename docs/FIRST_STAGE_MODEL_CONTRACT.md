@@ -26,6 +26,12 @@
 stream、文件及进程。SM/cache/磁盘控制器的内部实现若未观测，必须单列为未解析
 的物理细化；不能宣称已恢复所有硬件内部活动，也不能因而无限手写驱动解释器。
 
+2026-10-26用户明确深度：软件从最高入口、层层函数和依赖深入runtime API/kernel；
+硬件包含CPU/GPU、DRAM及实际涉及的SSD/NVMe等存储层次，不需要机器指令层。
+NVMe协议、SSD介质、文件系统和逻辑块设备分别表达；GPU内存不一概标HBM。
+实际拓扑、使用关系和来源须核实，不能从路径/设备名称猜测。具体工作和Root自身
+验收节点见[FIRST_STAGE_IMPLEMENTATION_PLAN.md](FIRST_STAGE_IMPLEMENTATION_PLAN.md)。
+
 覆盖至少分别报告：
 
 1. **结构归属**：源码/库/事件/资源属于哪里，是否漏项。
