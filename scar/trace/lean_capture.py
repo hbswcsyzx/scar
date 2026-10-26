@@ -72,6 +72,36 @@ class LeanCapturePlan:
             unsupported=tuple(i.offset for i in instructions if i.opname.startswith('CALL') and i.opname!='CALL')
             bodies.append(LeanBodyPlan(sources[str(path)],decode(CapturedCode,describe_code(code)),calls,unsupported))
         return cls(str(Path(namespace_root).resolve()),tuple(bodies),max_codes)
+    @classmethod
+    def from_source_entry_plan(cls,plan,*,namespace_root,max_codes=4096):
+        """Derive selectors from one live normal entry plan, not its JSON.
+
+        Readonly CodeWitness supplies archived code identity. Neither source
+        preparation/lowering nor target execution/current-source guessing is
+        used. The result is still only a capture selection policy.
+        """
+        from scar.analysis.source_frontend_worklist import SourceEntryFrontendPlan
+        from scar.analysis.source_language import SourceCodeEvidence
+        _need(type(plan) is SourceEntryFrontendPlan,'a live normal source-entry plan is required')
+        _need(type(max_codes) is int and max_codes>0,'lean plan needs an independent positive code budget')
+        plan.require_unchanged()
+        bodies={}
+        for row in plan.dispatch:
+            entry=plan.catalog.resolve(row['entry_key'])
+            evidence=SourceCodeEvidence.from_entry(plan.catalog,entry)
+            evidence.require_definition(entry.reference.snapshot,entry.reference.definition,entry.reference.source)
+            code=evidence.code
+            _need(describe_code(code)==encode(entry.captured),'readonly entry code descriptor changed')
+            instructions=tuple(dis.get_instructions(code))
+            body=LeanBodyPlan(entry.reference.snapshot,entry.captured,
+                tuple(i.offset for i in instructions if i.opname.startswith('CALL')),
+                tuple(i.offset for i in instructions if i.opname.startswith('CALL') and i.opname!='CALL'))
+            previous=bodies.setdefault(body.code.key,body)
+            _need(previous==body,'one selector key has conflicting source/code variants')
+            _need(len(bodies)<=max_codes,'lean plan code budget exceeded')
+        plan.require_unchanged()
+        return cls(str(Path(namespace_root).resolve()),tuple(bodies.values()),max_codes)
+
     def candidate(self,code):
         bodies=self._by_source.get((code.co_filename,code.co_qualname,code.co_firstlineno),())
         return bodies[0] if bodies else None
@@ -109,3 +139,31 @@ class LeanCapturePlan:
         self.verify_sources();raw=_raw(self.to_dict());path=Path(directory)/f'lean-plan.{pid}.json'
         with path.open('xb') as stream:stream.write(raw)
         return ProviderArtifact(str(path),hashlib.sha256(raw).hexdigest(),len(raw),'scar.lean-capture-plan/1')
+
+
+def read_plan(path,*,expected_sha256,max_bytes=16_000_000,max_codes=4096):
+    """Bounded immutable selector read; never restores a catalog/live owner."""
+    import re
+    _need(type(max_bytes) is int and max_bytes>0,'positive independent plan byte budget required')
+    _need(type(expected_sha256) is str and re.fullmatch('[0-9a-f]{64}',expected_sha256),'exact plan SHA256 required')
+    p=Path(path)
+    _need(p.is_file() and not p.is_symlink(),'plan must be an existing regular file')
+    stat=p.stat();before=(stat.st_dev,stat.st_ino,stat.st_size,stat.st_mtime_ns,stat.st_ctime_ns)
+    _need(0<stat.st_size<=max_bytes,'plan byte budget exceeded')
+    with p.open('rb') as stream:raw=stream.read(max_bytes+1)
+    _need(len(raw)<=max_bytes,'plan byte budget exceeded during read')
+    stat=p.stat()
+    _need(not p.is_symlink() and before==(stat.st_dev,stat.st_ino,stat.st_size,stat.st_mtime_ns,stat.st_ctime_ns)
+          and hashlib.sha256(raw).hexdigest()==expected_sha256,'plan input/SHA changed')
+    def pairs(items):
+        result={}
+        for key,value in items:
+            _need(key not in result,'duplicate lean plan JSON field');result[key]=value
+        return result
+    def invalid(value):raise ValueError('nonfinite lean plan number: '+value)
+    document=json.loads(raw.decode('utf-8'),object_pairs_hook=pairs,parse_constant=invalid)
+    plan=LeanCapturePlan.from_dict(document,max_codes=max_codes)
+    # Current-source checks are only version guards against the original
+    # snapshot. Code identity still comes from the original typed descriptor.
+    plan.verify_sources()
+    return plan

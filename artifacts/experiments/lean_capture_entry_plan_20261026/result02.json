@@ -1,0 +1,86 @@
+{
+  "status": "PASSED_NORMAL_LIVE_ENTRY_PLAN_SELECTOR",
+  "source_entry_plan_digest": "72fb103742dfcf284262b1977c7c8d12e833082cc39c3ed54f475151d76ec639",
+  "dispatch_entries": 2,
+  "selectors": 2,
+  "profile": "SCAR_LEAN_PORTS_V1",
+  "selector_artifact": {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_entry_plan_20261026/lean-plan.2.json",
+    "sha256": "674ca9f80ad738b6ec9e27f1a43854de51bf9d4cd58b3b10a8b6a2b718eda079",
+    "bytes": 1566
+  },
+  "source_snapshots": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/dependency/helper.py",
+      "fingerprint": "sha256:a6085dcc08ca07bbabdc2a33aab6bd1629dc154bafdab16a9f790e5a42a60a99",
+      "code": "pycode-v2:23ff346e76f370da36be1321812a327161facdec9554f328ab69c9e13f0f5076"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/dependency/helper.py",
+      "fingerprint": "sha256:a6085dcc08ca07bbabdc2a33aab6bd1629dc154bafdab16a9f790e5a42a60a99",
+      "code": "pycode-v2:35b03c2ff4bade0cdef705d2a9aa35fd896b63019ac6ca4dab0c0e0f697a4de7"
+    }
+  ],
+  "wrong_sha_rejected": "plan input/SHA changed",
+  "catalog_measurements": {
+    "source_prepare_attempts": 0,
+    "ast_parses": 0,
+    "symtable_parses": 0,
+    "decoded_source_bytes": 0,
+    "owners": [
+      {
+        "auxiliary_artifacts_read": 1,
+        "physical_artifact_bytes_read": 12412,
+        "graph_artifacts_read": 1,
+        "unique_artifact_canonical_bytes": 150745,
+        "resolved_code_definitions": 2,
+        "cached_original_definition_records": 2,
+        "cached_source_files": 1,
+        "source_reprepared": false,
+        "source_recompiled": false
+      }
+    ],
+    "resolved_entries": 2,
+    "raw_read": false,
+    "target_executed": false
+  },
+  "archive_receipts": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/compiler/archive/manifest.json",
+      "sha256": "305e429ec8f9e229e542e53171bda20a4db3de98cd5bd752e7d45d50844512a5",
+      "bytes": 5796,
+      "runtime": {
+        "implementation": "cpython",
+        "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+        "version": [
+          3,
+          14,
+          7,
+          "final",
+          0
+        ],
+        "cache_tag": "cpython-314",
+        "magic": "2b0e0d0a",
+        "marshal_version": 5
+      },
+      "module_count": 1,
+      "source_count": 1,
+      "code_executed": false,
+      "source_prepared": false
+    }
+  ],
+  "archive_activity": {
+    "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/compiler/archive/manifest.json": {
+      "compile_attempts": 0,
+      "module_loads": 1,
+      "complete_descriptor_matches": 2,
+      "source_bytes_read": 0
+    }
+  },
+  "source_prepare_or_lower": 0,
+  "target_exec": 0,
+  "new_capture": false,
+  "runtime_source_compiler_qualification_granted_by_selector": false,
+  "elapsed_seconds": 0.2003284509992227,
+  "source_sha256": "1aa1abdf29fa06b109309463fac473c8a82dd1d5a0e8bc20ccc0d95c240d2d24"
+}
