@@ -213,6 +213,53 @@ class CodeWitnessStore:
         self.texts[key] = text
         return text
 
+    def admit_archived_source(self, snapshot, *, source_owner):
+        """Admit text from a normal original source owner into this new writer.
+
+        No bare text, serialized owner or applicability boolean is accepted.
+        Compilation and independent nested-descriptor replay remain resolve's
+        ordinary responsibilities. Existing archives and live text() are unchanged.
+        """
+        from scar.analysis.source_attachments import SourceAttachments
+        from scar.ir.semantics_v2 import SourceSnapshot
+        _need(self.writable and self.compile_missing and type(snapshot) is SourceSnapshot
+              and type(source_owner) is SourceAttachments,
+              "archived source admission requires a new writer and normal source owner")
+        original = source_owner.archived_source(snapshot)
+        text = original["text"]
+        _need(original["snapshot"] == snapshot and type(text) is str
+              and snapshot.fingerprint == "sha256:" + _sha(text.encode("utf-8"))
+              and original["owner"] == source_owner.receipts(),
+              "original source owner/text fingerprint differs")
+        provenance = {"kind": "ORIGINAL_ARCHIVED_SOURCE",
+            "snapshot": encode(snapshot), "artifact": encode(original["locator"]),
+            "declaration": encode(original["declaration"]), "owner": original["owner"],
+            "source_root": original["source_root"], "namespace_root": original["namespace_root"],
+            "raw_bytes": original["raw_bytes"]}
+        key = _sha(_bytes(encode(snapshot)))
+        existing = self.document["sources"].get(key)
+        if existing is not None:
+            _need(existing.get("archived_source_origin") == provenance
+                  and existing["original_encoding"] == original["encoding"]
+                  and existing["original_raw_sha256"] == original["raw_sha256"]
+                  and self.text(snapshot) == text,
+                  "existing writer source conflicts with its original archive provenance")
+            return {"snapshot": encode(snapshot), "artifact": dict(existing["artifact"]),
+                    "archived_source_origin": provenance}
+        normalized = text.encode("utf-8")
+        _need(len(self.document["sources"]) < self.budget.max_source_files
+              and sum(row["artifact"]["bytes"] for row in self.document["sources"].values())
+                  + len(normalized) <= self.budget.max_source_bytes,
+              "archived source-file/byte budget exceeded")
+        declaration = self._write(key + ".source.utf8", normalized)
+        self.document["sources"][key] = {"snapshot": encode(snapshot), "artifact": declaration,
+            "original_encoding": original["encoding"], "original_raw_sha256": original["raw_sha256"],
+            "archived_source_origin": provenance}
+        self.texts[key] = text
+        self._publish()
+        return {"snapshot": encode(snapshot), "artifact": dict(declaration),
+                "archived_source_origin": provenance}
+
     def _walk(self, module):
         pending, count = [(module, ())], 0
         while pending:
