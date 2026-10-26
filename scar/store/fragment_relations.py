@@ -135,8 +135,8 @@ class _Sink:
 
 
 class _Writer:
-    def __init__(self, root, meter):
-        self.root, self.meter = root, meter
+    def __init__(self, root, meter, schema_version=VERSION):
+        self.root, self.meter, self.schema_version = root, meter, schema_version
         self.data = _Sink(root, "work", meter)
         self.source = _Sink(root, "source", meter)
         self.work_lookup, self.source_lookup = {}, {}
@@ -151,7 +151,7 @@ class _Writer:
         exact(row, WorkRelations, "work relations")
         need(row.id not in self.work_lookup, "duplicate work denominator member")
         need(len(self.work_lookup) < self.meter.budget.max_records, "work member budget exceeded")
-        self.work_lookup[row.id] = self.data.add(to_dict(row))
+        self.work_lookup[row.id] = self.data.add(to_dict(row, schema_version=self.schema_version))
 
     def _index(self, family, values):
         sink = _Sink(self.root, family, self.meter)
@@ -169,10 +169,11 @@ class _Writer:
 def publish_fragment_relations(producer, fresh_output, *, budgets=RelationBudgets()):
     from scar.analysis.fragment_relations import FragmentRelationProducer
     exact(producer, FragmentRelationProducer, "fixed relation producer")
+    version = producer.schema_version
     root = Path(fresh_output).absolute(); root.mkdir(parents=False, exist_ok=False)
     meter = Meter(budgets)
-    _atomic(root, "BUILDING.json", canonical({"schema": SCHEMA, "schema_version": VERSION}), meter)
-    writer = _Writer(root, meter)
+    _atomic(root, "BUILDING.json", canonical({"schema": SCHEMA, "schema_version": version}), meter)
+    writer = _Writer(root, meter, version)
     try:
         report = producer.produce(writer, meter)
         writer.data.close(); writer.source.close()
@@ -180,7 +181,7 @@ def publish_fragment_relations(producer, fresh_output, *, budgets=RelationBudget
         work_index = writer._index("work-index", writer.work_lookup)
         source_index = writer._index("source-index", writer.source_lookup)
         producer.finish()
-        manifest = {"schema": SCHEMA, "schema_version": VERSION, "status": "PUBLISHED",
+        manifest = {"schema": SCHEMA, "schema_version": version, "status": "PUBLISHED",
             "catalog": producer.catalog_document(), "producer": producer.producer_receipts(),
             "report": report, "work": writer.data.descriptors, "source": writer.source.descriptors,
             "work_index": work_index, "source_index": source_index, "io": meter.receipt(),
@@ -204,7 +205,7 @@ class RelationPartitions:
         expected = {"schema", "schema_version", "status", "catalog", "producer", "report", "work", "source",
                     "work_index", "source_index", "io", "budgets", "scope", "whole_program_complete"}
         need(set(m) == expected and m["schema"] == SCHEMA and type(m["schema_version"]) is int
-             and m["schema_version"] == VERSION and m["status"] == "PUBLISHED"
+             and m["schema_version"] in (1, 2) and m["status"] == "PUBLISHED"
              and m["whole_program_complete"] is False, "unsupported relation publication")
         need(m["report"]["declared_work_count"] == m["report"]["visited_work_count"]
              == sum(row["rows"] for row in m["work"]), "published work denominator differs")
@@ -254,6 +255,7 @@ class RelationPartitions:
         document = self._lookup("work", identity, meter, cache)
         if document is None:
             return {"record": None, "costs": meter.receipt(), "whole_program_complete": False}
+        need(document.get("schema_version") == self.manifest["schema_version"], "work/manifest transport version differs")
         row = from_dict(document)
         need(type(row) is WorkRelations and row.id == identity, "lookup changed the qualified work")
         validation = validate_retained_relation(row, self.manifest["catalog"], self.manifest["producer"],

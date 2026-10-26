@@ -1,0 +1,30 @@
+{
+  "commit": "01d9ea53417f5c094e2ffb65861f97f93fc6b9ea",
+  "four_sources": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations.py",
+      "snapshot": "artifacts/experiments/fragment_relations_enclosing_20261026/baseline01d9/scar/ir/execution/fragment_relations.py",
+      "bytes": 14444,
+      "sha256": "019386a04c316b64349c051fd72f067ab3742f1907b0118f045f23ceb8059595"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations_codec.py",
+      "snapshot": "artifacts/experiments/fragment_relations_enclosing_20261026/baseline01d9/scar/ir/execution/fragment_relations_codec.py",
+      "bytes": 1662,
+      "sha256": "62b281d9128a0411fff46f6b7cacc0f9f7f2164ad02333ade440f9cfb67d0e11"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/store/fragment_relations.py",
+      "snapshot": "artifacts/experiments/fragment_relations_enclosing_20261026/baseline01d9/scar/store/fragment_relations.py",
+      "bytes": 14524,
+      "sha256": "3dc3ab1ae64179047d242d8382311e5f7a147ed6a274c756abcbcdab9c111132"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/fragment_relations.py",
+      "snapshot": "artifacts/experiments/fragment_relations_enclosing_20261026/baseline01d9/scar/analysis/fragment_relations.py",
+      "bytes": 54540,
+      "sha256": "5e7818c0f8593fccb174003481bf5cda9ae316596ad7a71f691440f41ee9307f"
+    }
+  ],
+  "source_native_composition_untouched": true
+}

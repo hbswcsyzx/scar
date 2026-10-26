@@ -1,0 +1,40 @@
+{
+  "status": "ROOT_VERIFIED_FULL_WORK_RELATION_GATE_WITH_OPEN",
+  "tool_session": 82912,
+  "actual_exit_code": 0,
+  "outer_s": 798.5961448419839,
+  "worker_s": 797.271622350032,
+  "counts": {
+    "declared_work_count": 24082,
+    "visited_work_count": 24082,
+    "work_with_exact_source_context": 11541,
+    "work_with_enclosing_source_context": 12541,
+    "work_without_any_native_context": 0,
+    "work_with_static_code_source": 24082,
+    "missing_relations": {
+      "NATIVE_OCCURRENCE_UNRESOLVED": 12541,
+      "STATE_CONTENT_READY_UNPROVED": 24082,
+      "STATIC_BODY_MEMBER_UNREVIEWED": 14932
+    },
+    "parent_record_replay": {
+      "additional_original_chunk_reads": 0,
+      "owned_original_field_records": 23655,
+      "source": "fresh original strict-decode pass; no old-index reuse"
+    }
+  },
+  "normal_queries": 6,
+  "static_member": "Region",
+  "IO": {
+    "actual_input_bytes": 8640110167,
+    "code_source_input_bytes": 31095464,
+    "core_input_bytes": 8609014703,
+    "decoded_bytes": 6179223827,
+    "elapsed_s": 795.4916952680214,
+    "scope": "returned stored plus decoded bytes, including repeats; source/runner guards separate",
+    "stored_bytes": 2460886340,
+    "stored_output_bytes": 814554885
+  },
+  "peak_RSS_KiB": 312440,
+  "whole_program_complete": false,
+  "main_code_applied": false
+}

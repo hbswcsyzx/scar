@@ -1,0 +1,26 @@
+{
+  "authorization": "Root follow-up: exact suffix only; same DB SHA remeasurement; additional deterministic nodes.parent candidate audit",
+  "input_budget_bytes": 1500000000,
+  "wall_budget_seconds": 180,
+  "ordinal_prefix_1based": [
+    1,
+    16086
+  ],
+  "ordinal_suffix_1based": [
+    16087,
+    24082
+  ],
+  "compressed_chunk_suffix_0based": [
+    75,
+    114
+  ],
+  "gzip_prefix_redecoded_but_not_reclassified": 178,
+  "planned_input": {
+    "sqlite_stored_bytes": 697589760,
+    "work_stored_bytes": 16047473,
+    "work_decoded_bytes_including_gzip_skip": 312623043,
+    "subtotal_excluding_small_sources_and_receipts": 1026260276
+  },
+  "namespace_and_identity": "same original qualified URI and same manifest; no normal producer guard relaxation",
+  "first_window_failure_preserved": true
+}

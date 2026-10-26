@@ -1,0 +1,12 @@
+{
+  "exit_code": 1,
+  "phase": "AFTER_SELECTED_READER_BEFORE_TYPED_DECODE",
+  "error": "IndexError: tuple indexed with archive ordinal; actual selected_records returns tuple in requested order",
+  "original_manifest_read_bytes": 72965,
+  "selected_chunk_stored_bytes": 944913,
+  "selected_chunk_decoded_bytes": 15999562,
+  "selected_record_count": 2,
+  "whole_chunk_stored_decoded_sha_verified_before_error": true,
+  "typed_decode_or_checks_completed": false,
+  "original_input_or_production_changed": false
+}

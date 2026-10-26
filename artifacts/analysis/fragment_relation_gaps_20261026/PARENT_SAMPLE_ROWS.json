@@ -1,0 +1,255 @@
+{
+  "17303": {
+    "ordinal": 17303,
+    "record": {
+      "control_scope": null,
+      "definition": {
+        "kind": "opdef",
+        "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9",
+        "wire": "opdef:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9"
+      },
+      "end_ns": 1872133815677331,
+      "id": {
+        "kind": "opinst",
+        "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20837",
+        "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20837"
+      },
+      "iteration": {},
+      "metadata": {
+        "category": "cpu_op",
+        "clock_domain": "kineto",
+        "correlation": null,
+        "cpu_join_assumptions": [
+          "artifacts belong to the same supplied capture"
+        ],
+        "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+        "cpu_join_status": "Inferred",
+        "ctrl_deps": 20833,
+        "eto_tid": 1,
+        "external_id": 17308,
+        "kineto_reference": "sha256:256f688f0c767a6302fccaec088fab9b1232ca429c24de4254a984329c3be875#/traceEvents/17366",
+        "node_id": 20837,
+        "parent_basis": "ETO ctrl_deps collector stack only",
+        "provider": "ETO",
+        "raw_pid": 369749,
+        "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/17303",
+        "raw_resource": {},
+        "raw_tid": 369749,
+        "rf_id": 17308,
+        "tensor_slots": [
+          {
+            "descriptor_id": "47bc4c93fc55655efacab5d2c6cf593ef1fa33801a9d4ebd7deb39a4e25d81c3",
+            "native_schema_binding": {
+              "formal_slot": {
+                "kind": "slot",
+                "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:0",
+                "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:0"
+              },
+              "gap": null,
+              "schema_sha256": "fe4718df3a2d866d6c1051787300fe19158f94500c37dc64b1ad552f140c5706",
+              "status": "QUALIFIED"
+            },
+            "ordered_path": [
+              0
+            ],
+            "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:20835",
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/17303/inputs/values/0",
+            "role": "inputs"
+          },
+          {
+            "descriptor_id": "3bdc460dbcd43ebc170609560d5e69da48e3195bc987e5b3699c3abf7eee8c35",
+            "native_schema_binding": {
+              "formal_slot": {
+                "kind": "slot",
+                "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:1",
+                "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:input_slots:1"
+              },
+              "gap": null,
+              "schema_sha256": "fe4718df3a2d866d6c1051787300fe19158f94500c37dc64b1ad552f140c5706",
+              "status": "QUALIFIED"
+            },
+            "ordered_path": [
+              1
+            ],
+            "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:5451",
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/17303/inputs/values/1",
+            "role": "inputs"
+          },
+          {
+            "descriptor_id": "47bc4c93fc55655efacab5d2c6cf593ef1fa33801a9d4ebd7deb39a4e25d81c3",
+            "native_schema_binding": {
+              "formal_slot": {
+                "kind": "slot",
+                "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:output_slots:0",
+                "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:ca7395838270677a7ae3b26d85d104197a6e2bcfbd66201257d5d126a562dec9:schema:output_slots:0"
+              },
+              "gap": null,
+              "schema_sha256": "fe4718df3a2d866d6c1051787300fe19158f94500c37dc64b1ad552f140c5706",
+              "status": "QUALIFIED"
+            },
+            "ordered_path": [
+              0
+            ],
+            "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:20835",
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/17303/outputs/values/0",
+            "role": "outputs"
+          }
+        ],
+        "thread_namespace": "Kineto host thread"
+      },
+      "parent": {
+        "kind": "opinst",
+        "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20833",
+        "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20833"
+      },
+      "process_id": 369749,
+      "start_ns": 1872133815466084,
+      "status": "Observed",
+      "thread_id": 369749
+    },
+    "locator": {
+      "artifact": {
+        "compression": "gzip",
+        "decoded_bytes": 15999562,
+        "decoded_sha256": "291bba8cec6174fdf78b30e7835843a442c7d422f66e5f0e7554d030094ef36b",
+        "first_ordinal": 12176,
+        "last_ordinal": 17772,
+        "lines": 5597,
+        "physical_bytes": 944913,
+        "physical_sha256": "5b282e53ae18713c43933cec22cb88fb123d35d695b6ebdf79ec105d21d63b84",
+        "uri": "evidence/instances/000002.jsonl.gz"
+      },
+      "line": 5128,
+      "pointer_within_line": "/record",
+      "manifest_receipt": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+        "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6",
+        "physical_bytes": 72965
+      }
+    },
+    "verification": {
+      "whole_chunk_stored_sha_verified": true,
+      "whole_chunk_decoded_sha_verified": true,
+      "current_row_ordinal_verified": true,
+      "record_semantics_revalidated": false,
+      "whole_bundle_revalidated": false
+    }
+  },
+  "17304": {
+    "ordinal": 17304,
+    "record": {
+      "control_scope": null,
+      "definition": {
+        "kind": "opdef",
+        "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:4d7086dbdb7095b424e3997c5536c4b308f2e0157e4f350e3c961fd411dce796",
+        "wire": "opdef:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:4d7086dbdb7095b424e3997c5536c4b308f2e0157e4f350e3c961fd411dce796"
+      },
+      "end_ns": 1872133815811874,
+      "id": {
+        "kind": "opinst",
+        "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20833",
+        "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20833"
+      },
+      "iteration": {},
+      "metadata": {
+        "category": "cpu_op",
+        "clock_domain": "kineto",
+        "correlation": null,
+        "cpu_join_assumptions": [
+          "artifacts belong to the same supplied capture"
+        ],
+        "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+        "cpu_join_status": "Inferred",
+        "ctrl_deps": 20832,
+        "eto_tid": 1,
+        "external_id": 17306,
+        "kineto_reference": "sha256:256f688f0c767a6302fccaec088fab9b1232ca429c24de4254a984329c3be875#/traceEvents/17364",
+        "node_id": 20833,
+        "parent_basis": "ETO ctrl_deps collector stack only",
+        "provider": "ETO",
+        "raw_pid": 369749,
+        "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/17304",
+        "raw_resource": {},
+        "raw_tid": 369749,
+        "rf_id": 17306,
+        "tensor_slots": [
+          {
+            "descriptor_id": "3bdc460dbcd43ebc170609560d5e69da48e3195bc987e5b3699c3abf7eee8c35",
+            "native_schema_binding": {
+              "formal_slot": {
+                "kind": "slot",
+                "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:4d7086dbdb7095b424e3997c5536c4b308f2e0157e4f350e3c961fd411dce796:schema:input_slots:0",
+                "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:4d7086dbdb7095b424e3997c5536c4b308f2e0157e4f350e3c961fd411dce796:schema:input_slots:0"
+              },
+              "gap": null,
+              "schema_sha256": "a968ce2b51295b75978f500aeff890791412a118f8c24b1e832f771876c278e2",
+              "status": "QUALIFIED"
+            },
+            "ordered_path": [
+              0
+            ],
+            "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:5451",
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/17304/inputs/values/0",
+            "role": "inputs"
+          },
+          {
+            "descriptor_id": "47bc4c93fc55655efacab5d2c6cf593ef1fa33801a9d4ebd7deb39a4e25d81c3",
+            "native_schema_binding": {
+              "formal_slot": {
+                "kind": "slot",
+                "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:4d7086dbdb7095b424e3997c5536c4b308f2e0157e4f350e3c961fd411dce796:schema:output_slots:0",
+                "wire": "slot:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:symbol:4d7086dbdb7095b424e3997c5536c4b308f2e0157e4f350e3c961fd411dce796:schema:output_slots:0"
+              },
+              "gap": null,
+              "schema_sha256": "a968ce2b51295b75978f500aeff890791412a118f8c24b1e832f771876c278e2",
+              "status": "QUALIFIED"
+            },
+            "ordered_path": [
+              0
+            ],
+            "provider_reference": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:tensor-token:20835",
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/17304/outputs/values/0",
+            "role": "outputs"
+          }
+        ],
+        "thread_namespace": "Kineto host thread"
+      },
+      "parent": {
+        "kind": "opinst",
+        "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20832",
+        "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20832"
+      },
+      "process_id": 369749,
+      "start_ns": 1872133581635377,
+      "status": "Observed",
+      "thread_id": 369749
+    },
+    "locator": {
+      "artifact": {
+        "compression": "gzip",
+        "decoded_bytes": 15999562,
+        "decoded_sha256": "291bba8cec6174fdf78b30e7835843a442c7d422f66e5f0e7554d030094ef36b",
+        "first_ordinal": 12176,
+        "last_ordinal": 17772,
+        "lines": 5597,
+        "physical_bytes": 944913,
+        "physical_sha256": "5b282e53ae18713c43933cec22cb88fb123d35d695b6ebdf79ec105d21d63b84",
+        "uri": "evidence/instances/000002.jsonl.gz"
+      },
+      "line": 5129,
+      "pointer_within_line": "/record",
+      "manifest_receipt": {
+        "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json",
+        "physical_sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6",
+        "physical_bytes": 72965
+      }
+    },
+    "verification": {
+      "whole_chunk_stored_sha_verified": true,
+      "whole_chunk_decoded_sha_verified": true,
+      "current_row_ordinal_verified": true,
+      "record_semantics_revalidated": false,
+      "whole_bundle_revalidated": false
+    }
+  }
+}

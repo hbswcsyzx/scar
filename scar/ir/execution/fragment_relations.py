@@ -197,6 +197,37 @@ class WorkHostRelation:
 
 
 @dataclass(frozen=True, slots=True)
+class EnclosingNativeRelation:
+    """Original ETO collector-scope containment, never identity or direct call."""
+    scope: RuntimeScope
+    host: EvidenceInstanceRef
+    parents: tuple[EvidenceInstanceRef, ...]
+    native: QualifiedOccurrenceRef
+
+    def __post_init__(self):
+        exact(self.scope, RuntimeScope, "enclosing scope")
+        exact(self.host, EvidenceInstanceRef, "internal ETO host")
+        exact(self.native, QualifiedOccurrenceRef, "enclosing native occurrence")
+        need(type(self.parents) is tuple and bool(self.parents), "nonempty ordered parent path")
+        chain = (self.host,) + self.parents
+        for item in chain:
+            exact(item, EvidenceInstanceRef, "original parent record")
+            need(item.locator.declaration.artifact == self.host.locator.declaration.artifact,
+                 "parent path changes original EEG namespace")
+            need(":eto:" in item.instance.value
+                 and item.instance.value.rsplit(":eto:", 1)[0] == self.host.instance.value.rsplit(":eto:", 1)[0],
+                 "parent path changes ETO namespace")
+        need(len({item.instance for item in chain}) == len(chain), "cyclic parent path")
+        need(self.parents[-1].instance == self.native.binding.legacy.instance,
+             "enclosing terminal changes canonical instance identity")
+
+    @property
+    def id(self):
+        return "fragment_relation:" + stable_key(("ETO_ENCLOSING_NATIVE", self.scope,
+            self.host, self.parents, self.native))
+
+
+@dataclass(frozen=True, slots=True)
 class InvocationRef:
     scope: RuntimeScope
     invocation: InvocationKey
@@ -301,11 +332,13 @@ class WorkRelations:
     source_contexts: tuple[NativeSourceContextRelation, ...]
     static_bindings: tuple[InvocationStaticBinding, ...]
     gaps: tuple[RelationGap, ...]
+    enclosing_native: tuple[EnclosingNativeRelation, ...] = ()
 
     def __post_init__(self):
         exact(self.projection, WorkActivityProjectionLink, "work projection")
         for name, kind in (("hosts", WorkHostRelation), ("source_contexts", NativeSourceContextRelation),
-                           ("static_bindings", InvocationStaticBinding), ("gaps", RelationGap)):
+                           ("static_bindings", InvocationStaticBinding), ("gaps", RelationGap),
+                           ("enclosing_native", EnclosingNativeRelation)):
             rows = getattr(self, name)
             need(type(rows) is tuple, name + " must be a tuple")
             for row in rows:
@@ -313,6 +346,11 @@ class WorkRelations:
         need(bool(self.hosts) or any(g.code == "HOST_RELATION_UNRESOLVED" for g in self.gaps), "missing host must remain explicit debt")
         native = {stable_key(h.native) for h in self.hosts if h.native is not None}
         need(all(h.work == self.projection.work and h.activity == self.projection.original for h in self.hosts), "host relation belongs to another work/activity")
+        for row in self.enclosing_native:
+            need(row.scope == self.projection.scope and any(
+                h.host == row.host and h.kind is HostRelationKind.PROVIDER_SCOPE_CONTEXT for h in self.hosts),
+                "enclosing relation belongs to another scope/host")
+            native.add(stable_key(row.native))
         for row in self.source_contexts:
             need(stable_key(row.native) in native and row.invocation.scope == self.projection.scope, "context/native/Run scope differs")
         for row in self.static_bindings:
@@ -328,3 +366,4 @@ RECORD_TYPES = (FragmentLocator, RuntimeScope, QualifiedOccurrenceRef, WorkTicke
     EvidenceInstanceRef, EvidenceEdgeRef, WorkActivityProjectionLink, WorkHostRelation,
     InvocationRef, StaticEntityRef, InvocationStaticBinding, NativeSourceContextRelation,
     RelationGap, WorkRelations)
+RECORD_TYPES_V2 = RECORD_TYPES + (EnclosingNativeRelation,)

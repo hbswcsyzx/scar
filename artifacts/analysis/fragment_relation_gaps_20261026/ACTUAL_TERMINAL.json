@@ -1,0 +1,50 @@
+{
+  "status": "PARTIAL_BUDGET_STOP",
+  "process_exit_code": 1,
+  "error": "TimeoutError",
+  "wall_seconds": 180.00348399794893,
+  "budget_seconds": 180,
+  "counter_snapshot_is_non_atomic": true,
+  "strict_decoded_rows_before_interrupt": 16087,
+  "fully_eof_verified_chunks": 75,
+  "fully_eof_verified_rows": 15908,
+  "interrupted_chunk": "work/000075.jsonl.gz",
+  "completed_reason_classifications": 8476,
+  "counts_do_not_cover_all_12541_missing": true,
+  "main_or_original_artifacts_modified": false,
+  "normal_query_or_guard_used_or_relaxed": false,
+  "raw_or_large_eeg_or_native_models_decoded": false,
+  "read_io": {
+    "actual_input_bytes": 1334213422,
+    "decoded_bytes": 605735339,
+    "limit": 2000000000,
+    "sqlite_read_once_then_readonly_memory_queries": true,
+    "stored_bytes": 728478083
+  },
+  "separately_read_code_check_bytes": 81017,
+  "separately_read_old_preparation_receipt_bytes": 1455,
+  "final_original_input_stat_guards_completed": false,
+  "producer_proof_status": "NOT_REQUALIFIED",
+  "codec_sources": [
+    {
+      "path": "scar/analysis/source_native_composition.py",
+      "bytes": 50387,
+      "sha256": "4ae4b980d0bdc65a44af1f44c8c92dd6191341f3348316d9782707e61dd73d21"
+    },
+    {
+      "path": "scar/ir/execution/fragment_relations.py",
+      "bytes": 14444,
+      "sha256": "019386a04c316b64349c051fd72f067ab3742f1907b0118f045f23ceb8059595"
+    },
+    {
+      "path": "scar/ir/execution/fragment_relations_codec.py",
+      "bytes": 1662,
+      "sha256": "62b281d9128a0411fff46f6b7cacc0f9f7f2164ad02333ade440f9cfb67d0e11"
+    },
+    {
+      "path": "scar/store/fragment_relations.py",
+      "bytes": 14524,
+      "sha256": "3dc3ab1ae64179047d242d8382311e5f7a147ed6a274c756abcbcdab9c111132"
+    }
+  ]
+}

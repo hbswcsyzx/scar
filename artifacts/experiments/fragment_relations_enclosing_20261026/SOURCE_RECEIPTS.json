@@ -1,0 +1,35 @@
+{
+  "sources": [
+    {
+      "path": "scar/ir/execution/fragment_relations.py",
+      "baseline_sha256": "019386a04c316b64349c051fd72f067ab3742f1907b0118f045f23ceb8059595",
+      "after_sha256": "287d5a62f7ff72757311be4a14db24b69289e74c092d67bd7b80528642a5e4b1",
+      "after_bytes": 16515
+    },
+    {
+      "path": "scar/ir/execution/fragment_relations_codec.py",
+      "baseline_sha256": "62b281d9128a0411fff46f6b7cacc0f9f7f2164ad02333ade440f9cfb67d0e11",
+      "after_sha256": "24f23464756e0f3cce7cdecf7e06ce4d3de393ab2ddb8958ca3fa53a8f252556",
+      "after_bytes": 2545
+    },
+    {
+      "path": "scar/store/fragment_relations.py",
+      "baseline_sha256": "3dc3ab1ae64179047d242d8382311e5f7a147ed6a274c756abcbcdab9c111132",
+      "after_sha256": "4d50e4149f993857b4a0a8961d2cf316d7d3130266d7a5d64ff774fa77263770",
+      "after_bytes": 14790
+    },
+    {
+      "path": "scar/analysis/fragment_relations.py",
+      "baseline_sha256": "5e7818c0f8593fccb174003481bf5cda9ae316596ad7a71f691440f41ee9307f",
+      "after_sha256": "a64505c60da4f8456026fa152772e5cb90351706bf8ff074a9bc422833522440",
+      "after_bytes": 64951
+    }
+  ],
+  "unchanged_source_native_sha256": "4ae4b980d0bdc65a44af1f44c8c92dd6191341f3348316d9782707e61dd73d21",
+  "main_not_changed": true,
+  "actual_gate_exit_code": 0,
+  "actual_gate_status_receipt": "ACTUAL_TERMINAL.json",
+  "main_applied": true,
+  "main_fresh_gate": "NOT_RUN",
+  "main_application_reference": "MAIN_APPLICATION_REFERENCE.json"
+}

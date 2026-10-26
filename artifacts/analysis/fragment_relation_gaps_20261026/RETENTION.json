@@ -1,0 +1,33 @@
+{
+  "original_failure_preserved": [
+    "AUDIT.json",
+    "ACTUAL_TERMINAL.json",
+    "INITIAL_PARTIAL_REPORT.md",
+    "READ_PLAN.json",
+    "audit.py"
+  ],
+  "authorized_resume": [
+    "resume.py",
+    "RESUME.json",
+    "RESUME_READ_PLAN.json",
+    "RESUME_ACTUAL_TERMINAL.json"
+  ],
+  "current_report": "REPORT.md",
+  "inputs_copied": false,
+  "sqlite_raw_eeg_native_or_static_graphs_staged": false,
+  "main_or_production_changed": false,
+  "git_operations": false,
+  "new_database_sha_is_not_old_producer_receipt": true,
+  "parent_sample": {
+    "current": "PARENT_SAMPLE.json",
+    "two_original_rows": "PARENT_SAMPLE_ROWS.json",
+    "small_harness_failures": [
+      "PARENT_SAMPLE_FAILED01.json",
+      "PARENT_SAMPLE_FAILED02.json"
+    ],
+    "all_three_original_input_bytes": 34107845,
+    "primary_source_bytes": 33269,
+    "original_eeg_chunks_copied": false
+  },
+  "design": "ENCLOSING_NATIVE_PLAN.md"
+}

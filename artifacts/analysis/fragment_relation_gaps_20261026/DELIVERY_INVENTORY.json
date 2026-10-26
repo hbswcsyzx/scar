@@ -1,0 +1,110 @@
+{
+  "scope": "NEW_DIAGNOSTIC_DIRECTORY_ONLY; NO_GIT_OR_PRODUCTION_CHANGES",
+  "files": [
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/ACTUAL_TERMINAL.json",
+      "bytes": 1741,
+      "sha256": "df49aa68dac0353a797131b1bc81071f82e29ca04bb595720d19ba4371e2e2e6"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/AUDIT.json",
+      "bytes": 17612,
+      "sha256": "122fd0ae99879043e4f952444402645fb2d78480d101eef0ecb0a70a284cc123"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/BUILDING.json",
+      "bytes": 73,
+      "sha256": "b3bcb2963193fb819d7c8607c813750e5daa015175680a92d878221072df59fe"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/ENCLOSING_NATIVE_PLAN.md",
+      "bytes": 4373,
+      "sha256": "e98d3d6534887876d656f196bda0e1a9b4958c0e63127c66e5f6b4cff4a328d1"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/INITIAL_PARTIAL_REPORT.md",
+      "bytes": 5351,
+      "sha256": "3a31094d9f6097e4d702bf402b7590af13b83c4ff4cbce8d7ed012ac0c2a2961"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/PARENT_SAMPLE.json",
+      "bytes": 14524,
+      "sha256": "8d3631e9fa5988721f497a26853c06fc159df93906720ad68587a9b2524957ba"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/PARENT_SAMPLE_FAILED01.json",
+      "bytes": 266,
+      "sha256": "1df7534358d72a9c51d255957d2c58426dafcd7953d592ce387e6585ded2a5da"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/PARENT_SAMPLE_FAILED02.json",
+      "bytes": 510,
+      "sha256": "45fa3aaea16405255bf4e3f5d34dd66550564500f50062c851e5966a65b13c38"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/PARENT_SAMPLE_ROWS.json",
+      "bytes": 12357,
+      "sha256": "f6ae1afadb0c878b974201dc62b5173989aa167926eec59cf14ebc6a81aef5db"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/READ_PLAN.json",
+      "bytes": 853,
+      "sha256": "5979e6d0f859e5098749c553d6bd52d5fa7326cd7a7fe6264e0f0fc3b6f61313"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/REPORT.md",
+      "bytes": 5785,
+      "sha256": "3b67e74167be576c1d7dfd79340e795a877589ccdb378e82d17440127a40780f"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/RESUME.json",
+      "bytes": 17542,
+      "sha256": "f8ee132b57706af72b17569e20d6cba20004c398b2a3b4066cb479676e1422c2"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/RESUME_ACTUAL_TERMINAL.json",
+      "bytes": 961,
+      "sha256": "d28ccd794887c66d87cfcc451d3ec0422eee2e4189adb660e6946b4e7724438f"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/RESUME_READ_PLAN.json",
+      "bytes": 801,
+      "sha256": "b7db3d37a0fefa52c8af0df855c2c30a4e5ee65a76f5391418792928965edf2d"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/RETENTION.json",
+      "bytes": 916,
+      "sha256": "15d5264d49aa22ee1a61fef1f97480374e348fa75abc26e27eb7799975267213"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/audit.py",
+      "bytes": 9462,
+      "sha256": "9b84b7acc6955d1aa1f2aa544d13a1896174159a1fc8922399d1c1bc00c0ad5a"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/check_parent_sample.py",
+      "bytes": 3003,
+      "sha256": "66815c702ffef109ecf80d040d33af6fc47aeffac55fe27f0536c9fc3c7760fc"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/check_parent_sample_02.py",
+      "bytes": 3012,
+      "sha256": "c233e7ed94c7f91be8aaa4325d31d4110810c60da8840742c6128e746b0b147f"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/check_parent_sample_03.py",
+      "bytes": 3138,
+      "sha256": "0a3dd0fb5b6016612acbfe717c702ba7feaf7509976f88467daf3253e4eca279"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/execution_trace_observer.cpp",
+      "bytes": 33269,
+      "sha256": "c6ec2dac4140b28eea17c8c6054d42e084ab6014fa8f47e72282e7c4caba46db"
+    },
+    {
+      "path": "artifacts/analysis/fragment_relation_gaps_20261026/resume.py",
+      "bytes": 12653,
+      "sha256": "1543ed2b6cb30fd7e05f67cd3c1ed390a714e43dd5c08f1b90bdc12d7cb59a9f"
+    }
+  ]
+}

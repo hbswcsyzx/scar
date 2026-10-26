@@ -1,0 +1,10 @@
+{
+  "artifact": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/fragment_relations_v2_main_20261026/APPLICATION.json",
+    "sha256": "b3904b3c5c31d51689ec6e8e8e63f57f7607ac337668bb7306489402f2639bf4",
+    "bytes": 1492
+  },
+  "status": "ROOT_APPLIED_FOUR_MODULES_AND_PREVIOUSLY_APPROVED_REEXPORT",
+  "main_fresh_gate": "NOT_RUN",
+  "qualification": "root imports/same-class alias only; no fresh main full producer proof"
+}

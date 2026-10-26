@@ -1,0 +1,28 @@
+{
+  "scope": "FOUR_PRODUCTION_SOURCES_V2_RELATIONS_SMALL_GATES_AND_GAP_DIAGNOSTIC",
+  "normative_relations": "RELATION_ARTIFACTS.json",
+  "root_verification": "candidate01/ROOT_VERIFICATION.json",
+  "old_failures_preserved": [
+    "../fragment_relations_implementation_20261026 (already in f3a1c96/01d9)",
+    "../../analysis/fragment_relation_gaps_20261026/AUDIT.json",
+    "../../analysis/fragment_relation_gaps_20261026/PARENT_SAMPLE_FAILED01.json",
+    "../../analysis/fragment_relation_gaps_20261026/PARENT_SAMPLE_FAILED02.json"
+  ],
+  "local_only": [
+    {
+      "path": "artifacts/experiments/fragment_relations_enclosing_20261026/candidate01/attempt01/result/locator.sqlite",
+      "bytes": 716791808,
+      "sha256": "NOT_REMEASURED; DISPOSABLE_FRESH_OWNED_INDEX"
+    }
+  ],
+  "raw_eeg_static_graph_inputs_copied": false,
+  "large_decoded_output_copied": false,
+  "source_native_untouched_in_this_commit": true,
+  "unrelated_excluded": [
+    "artifacts/analysis/class_entry_design_20261025",
+    "artifacts/analysis/source_three_graph_add_plan_20261025/READ_PLAN.v2.json"
+  ],
+  "main_applied": true,
+  "main_fresh_gate": "NOT_RUN",
+  "main_application_reference": "MAIN_APPLICATION_REFERENCE.json"
+}

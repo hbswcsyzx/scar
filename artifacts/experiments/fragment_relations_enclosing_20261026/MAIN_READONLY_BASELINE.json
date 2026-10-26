@@ -1,0 +1,42 @@
+{
+  "qualification": "READONLY_CURRENT_BYTES; MAIN_NOT_CHANGED",
+  "files": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/fragment_relations.py",
+      "exists": false,
+      "bytes": null,
+      "sha256": null,
+      "qualified_ref_definition_or_reexport": null
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/fragment_relations_codec.py",
+      "exists": false,
+      "bytes": null,
+      "sha256": null,
+      "qualified_ref_definition_or_reexport": null
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/store/fragment_relations.py",
+      "exists": false,
+      "bytes": null,
+      "sha256": null,
+      "qualified_ref_definition_or_reexport": null
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/fragment_relations.py",
+      "exists": false,
+      "bytes": null,
+      "sha256": null,
+      "qualified_ref_definition_or_reexport": null
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_native_composition.py",
+      "exists": true,
+      "bytes": 50795,
+      "sha256": "ec408aeaf1b005b10aabe5857d11db6bc8d935ee8d30b2305fe90f25e53697ad",
+      "qualified_ref_definition_or_reexport": [
+        "class QualifiedOccurrenceRef:"
+      ]
+    }
+  ]
+}

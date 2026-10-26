@@ -1,0 +1,398 @@
+{
+  "ancestor_candidates": {
+    "authority": "candidate ancestry only; no direct-call, invocation, Tensor/world ports, ordering or effects claim",
+    "mechanically_minimum_qualified_ids_by_status": {
+      "CANONICAL_NATIVE_ANCESTOR": {
+        "ancestry": {
+          "candidate": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20833",
+          "candidate_native_row_count": 1,
+          "depth": 1,
+          "path": [
+            {
+              "category": "cpu_op",
+              "instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20837",
+              "parent": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20833",
+              "process": 369749,
+              "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/17303",
+              "thread": 1
+            },
+            {
+              "category": "cpu_op",
+              "instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20833",
+              "parent": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20832",
+              "process": 369749,
+              "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/17304",
+              "thread": 1
+            }
+          ],
+          "status": "CANONICAL_NATIVE_ANCESTOR"
+        },
+        "selection": [
+          "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:kineto:385137",
+          "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:20837"
+        ]
+      }
+    },
+    "missing_work_count": 12541,
+    "parent_basis_required_proof": "index stores OperationInstance.parent; original per-node parent_basis/ctrl_deps not retained in this SQL schema and not replayed here",
+    "physical_categories": {
+      "gpu_memcpy": 543,
+      "gpu_memset": 1082,
+      "kernel": 22457
+    },
+    "physical_target_count": 24082,
+    "population": "derived original-index physical GPU targets with their direct provider_scope_association host; complete index count matches retained work denominator, not an independently replayed EEG",
+    "unique_host_status": {
+      "CANONICAL_NATIVE_ANCESTOR": 10823
+    },
+    "unique_missing_host_count": 10823,
+    "unique_scope_host_per_target": true,
+    "work_weighted_first_canonical_depth": {
+      "1": 10047,
+      "2": 2208,
+      "3": 256,
+      "5": 30
+    },
+    "work_weighted_status": {
+      "CANONICAL_NATIVE_ANCESTOR": 12541
+    }
+  },
+  "counts": {
+    "chunks_verified": 115,
+    "native_linked_work": 11541,
+    "native_missing_work": 12541,
+    "source_linked_work": 11541,
+    "work_records": 24082
+  },
+  "coverage": {
+    "all_work_chunks_eof_verified_across_two_runs": true,
+    "global_id_uniqueness_not_replayed": true,
+    "ordinal_overlap_or_omission": false,
+    "prefix_ordinal_1based": [
+      1,
+      16086
+    ],
+    "suffix_ordinal_1based": [
+      16087,
+      24082
+    ],
+    "suffix_rows": 7996
+  },
+  "distributions": {
+    "distinct_host_count": {
+      "2": 24082
+    },
+    "external_id_class": {
+      "INTEGER": 37623
+    },
+    "gaps": {
+      "NATIVE_OCCURRENCE_UNRESOLVED": 12541,
+      "SOURCE_CONTEXT_UNRESOLVED": 12541,
+      "STATE_CONTENT_READY_UNPROVED": 24082,
+      "STATIC_BODY_MEMBER_UNREVIEWED": 2391
+    },
+    "host_category_native_presence": {
+      "cpu_op|native=0": 25082,
+      "cuda_runtime|native=0": 12541
+    },
+    "host_index_classification": {
+      "('PROVIDER_SCOPE_CONTEXT', 'ETO', 'cpu_op', 0)": 25082,
+      "('SUBMITTED_BY_RUNTIME', 'KINETO', 'cuda_runtime', 0)": 12541
+    },
+    "host_kinds": {
+      "PROVIDER_SCOPE_CONTEXT": 48164,
+      "SUBMITTED_BY_RUNTIME": 24082
+    },
+    "host_relation_count": {
+      "3": 24082
+    },
+    "missing_combinations": {
+      "native=0,source=0,static=0": 12541,
+      "native=1,source=1,static=1": 11541
+    },
+    "missing_work_reason": {
+      "PROVIDER_CPU_SCOPE_ETO_INSTANCE_OUTSIDE_CANONICAL_NATIVE_SET": 12541
+    },
+    "pid_class": {
+      "INTEGER": 37623
+    },
+    "provider_scope_host_namespace": {
+      "ETO": 12541
+    },
+    "raw_reference_class": {
+      "ETO_NODE_REFERENCE": 25082,
+      "KINETO_EVENT_REFERENCE": 12541
+    },
+    "tid_class": {
+      "INTEGER": 37623
+    }
+  },
+  "elapsed_s": 93.52074383897707,
+  "error": null,
+  "examples": {
+    "PROVIDER_CPU_SCOPE_ETO_INSTANCE_OUTSIDE_CANONICAL_NATIVE_SET": {
+      "gaps": [
+        {
+          "candidates": 3,
+          "code": "NATIVE_OCCURRENCE_UNRESOLVED",
+          "detail": "Original host evidence has no exact canonical native INVOKE association",
+          "source": {
+            "artifact": {
+              "schema": "scar.native-activity-work.rows",
+              "sha256": "939a54f4f9a12dde8e6e945ed62fd91a3147784ffa9796db797c3ec04fda0108",
+              "size_bytes": 41229,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000000.work.jsonl.gz"
+            },
+            "locator": "#/lines/83/submission"
+          }
+        },
+        {
+          "candidates": 0,
+          "code": "SOURCE_CONTEXT_UNRESOLVED",
+          "detail": "No retained current source invocation is linked by this native host",
+          "source": {
+            "artifact": {
+              "schema": "scar.native-activity-work.rows",
+              "sha256": "939a54f4f9a12dde8e6e945ed62fd91a3147784ffa9796db797c3ec04fda0108",
+              "size_bytes": 41229,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000000.work.jsonl.gz"
+            },
+            "locator": "#/lines/83/submission"
+          }
+        },
+        {
+          "candidates": null,
+          "code": "STATE_CONTENT_READY_UNPROVED",
+          "detail": "These relationships do not establish actual/formal, world/state, logical contents, readiness or runtime child closure",
+          "source": {
+            "artifact": {
+              "schema": "scar.native-activity-work.rows",
+              "sha256": "939a54f4f9a12dde8e6e945ed62fd91a3147784ffa9796db797c3ec04fda0108",
+              "size_bytes": 41229,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000000.work.jsonl.gz"
+            },
+            "locator": "#/lines/83/submission"
+          }
+        }
+      ],
+      "hosts": [
+        {
+          "host": {
+            "instance": {
+              "kind": "opinst",
+              "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:21812",
+              "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:21812"
+            },
+            "locator": {
+              "artifact": {
+                "schema": "scar.original-eeg-instances.jsonl",
+                "sha256": "da35f4e501c04f09b436f6078916ce1a2a62bc892a0c9de48ad92529b91d66a1",
+                "size_bytes": 911857,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/evidence/instances/000003.jsonl.gz"
+              },
+              "declaration": {
+                "artifact": {
+                  "schema": "scar.partitioned-ir-bundle",
+                  "sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6",
+                  "size_bytes": 72965,
+                  "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json"
+                },
+                "locator": "#/graphs/evidence/tables/instances/chunks/3"
+              },
+              "decoded_bytes": 15995969,
+              "decoded_sha256": "24971a57fba14109386d6434415b4d3ebf13ee923a6382918ed765e7da650960",
+              "encoding": "GZIP_JSONL",
+              "line": 351,
+              "pointer": "#/record"
+            }
+          },
+          "index": {
+            "category": "cpu_op",
+            "correlation": null,
+            "external_id": 18128,
+            "instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:21812",
+            "native_exact_id_join_count": 0,
+            "ordinal": 18123,
+            "parent": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:21808",
+            "process": 369749,
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/18123",
+            "source_qualification": "DERIVED_OLD_INDEX_ROW; ORIGINAL_EEG_NOT_REPLAYED",
+            "thread": 1
+          },
+          "kind": "PROVIDER_SCOPE_CONTEXT",
+          "path_relations": [
+            "provider_scope_association"
+          ]
+        },
+        {
+          "host": {
+            "instance": {
+              "kind": "opinst",
+              "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:kineto:385811",
+              "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:kineto:385811"
+            },
+            "locator": {
+              "artifact": {
+                "schema": "scar.original-eeg-instances.jsonl",
+                "sha256": "23d1a4a119b7f71ee3e6749d91e6d511dc657ce043dd962ac6c450f1c50fa767",
+                "size_bytes": 952193,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/evidence/instances/000063.jsonl.gz"
+              },
+              "declaration": {
+                "artifact": {
+                  "schema": "scar.partitioned-ir-bundle",
+                  "sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6",
+                  "size_bytes": 72965,
+                  "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json"
+                },
+                "locator": "#/graphs/evidence/tables/instances/chunks/63"
+              },
+              "decoded_bytes": 15999754,
+              "decoded_sha256": "708be1f658323c366363713ccc87c5d9a763a3f78658f8392daa0fc98980b1c9",
+              "encoding": "GZIP_JSONL",
+              "line": 5452,
+              "pointer": "#/record"
+            }
+          },
+          "index": {
+            "category": "cuda_runtime",
+            "correlation": 1229,
+            "external_id": 18128,
+            "instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:kineto:385811",
+            "native_exact_id_join_count": 0,
+            "ordinal": 310800,
+            "parent": null,
+            "process": 369749,
+            "raw_reference": "sha256:256f688f0c767a6302fccaec088fab9b1232ca429c24de4254a984329c3be875#/traceEvents/385811",
+            "source_qualification": "DERIVED_OLD_INDEX_ROW; ORIGINAL_EEG_NOT_REPLAYED",
+            "thread": 369749
+          },
+          "kind": "SUBMITTED_BY_RUNTIME",
+          "path_relations": [
+            "submits_work"
+          ]
+        },
+        {
+          "host": {
+            "instance": {
+              "kind": "opinst",
+              "value": "native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:21812",
+              "wire": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:21812"
+            },
+            "locator": {
+              "artifact": {
+                "schema": "scar.original-eeg-instances.jsonl",
+                "sha256": "da35f4e501c04f09b436f6078916ce1a2a62bc892a0c9de48ad92529b91d66a1",
+                "size_bytes": 911857,
+                "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/evidence/instances/000003.jsonl.gz"
+              },
+              "declaration": {
+                "artifact": {
+                  "schema": "scar.partitioned-ir-bundle",
+                  "sha256": "a7b23bdb385b50522e6401433a8308343a593a4080288f3502d6e338e1e4b1b6",
+                  "size_bytes": 72965,
+                  "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_joined_physical_20261023/result/native/bundle-partitions/manifest.json"
+                },
+                "locator": "#/graphs/evidence/tables/instances/chunks/3"
+              },
+              "decoded_bytes": 15995969,
+              "decoded_sha256": "24971a57fba14109386d6434415b4d3ebf13ee923a6382918ed765e7da650960",
+              "encoding": "GZIP_JSONL",
+              "line": 351,
+              "pointer": "#/record"
+            }
+          },
+          "index": {
+            "category": "cpu_op",
+            "correlation": null,
+            "external_id": 18128,
+            "instance": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:21812",
+            "native_exact_id_join_count": 0,
+            "ordinal": 18123,
+            "parent": "opinst:native:2a622492625eb1b2a7a105036e0ac792b5a6249fc60cf111443bf7fe53140d88:eto:21808",
+            "process": 369749,
+            "raw_reference": "sha256:625558680ced281fc2b4789d9d742bc97dd4fed57106701e98adea3ebe0428b6#/nodes/18123",
+            "source_qualification": "DERIVED_OLD_INDEX_ROW; ORIGINAL_EEG_NOT_REPLAYED",
+            "thread": 1
+          },
+          "kind": "PROVIDER_SCOPE_CONTEXT",
+          "path_relations": [
+            "provider_scope_association",
+            "submits_work"
+          ]
+        }
+      ],
+      "record_id": "work_relation:000762a2ed16306daa6e1d73509526cecd9fe2bc420d984061de19270986ec94",
+      "scope": {
+        "coordinates": {
+          "schema": "scar.capture-coordinates",
+          "sha256": "4d266b9ea62ed0d4c25cb5606dae31dea5aeab453405f79608ab5c038f012a25",
+          "size_bytes": 674239,
+          "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_current_source_gate_20261023/result/capture-coordinates.json"
+        },
+        "process": {
+          "kind": "exec_process_instance",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642",
+          "wire": "exec_process_instance:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0:process:0e3cdb6b87615e6df5d503f9e778d0aaa2cf6ad3f212b6fe86407f177ee81642"
+        },
+        "run": {
+          "kind": "exec_run",
+          "value": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+          "wire": "exec_run:capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0"
+        }
+      },
+      "work": {
+        "locator": {
+          "artifact": {
+            "schema": "scar.native-activity-work.rows",
+            "sha256": "939a54f4f9a12dde8e6e945ed62fd91a3147784ffa9796db797c3ec04fda0108",
+            "size_bytes": 41229,
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/shards/000000.work.jsonl.gz"
+          },
+          "declaration": {
+            "artifact": {
+              "schema": "scar.native-activity-work-report",
+              "sha256": "32f1b2e705ca0ef63cddb985ce1ef17ee470c72dff2164ab0b751626d39b4dd2",
+              "size_bytes": 169344,
+              "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_activity_work_memset_main_20261026/result/manifest.json"
+            },
+            "locator": "#/shards/0/work_records"
+          },
+          "decoded_bytes": 2195124,
+          "decoded_sha256": "ff397cd29a1bb18668b5e1ac27d3e3bb05421e87bb5a94e16792dbc9db807506",
+          "encoding": "GZIP_JSONL",
+          "line": 83,
+          "pointer": "#/submission"
+        },
+        "ticket": {
+          "kind": "exec_work_ticket",
+          "value": "native-activity:e76a79ace7836652704c894e412f6f016d34388536ac206d4236aa12666cd6db",
+          "wire": "exec_work_ticket:native-activity:e76a79ace7836652704c894e412f6f016d34388536ac206d4236aa12666cd6db"
+        }
+      }
+    }
+  },
+  "io": {
+    "actual_input_bytes": 1026588983,
+    "decoded_bytes": 312746888,
+    "limit": 1500000000,
+    "stored_bytes": 713842095
+  },
+  "normal_producer_qualification_regranted": false,
+  "originals_or_main_modified": false,
+  "rollback": {
+    "basis": "saved traceback observed.append after all three host deltas; scope/reason delta not yet applied",
+    "interrupted_ordinal_1based": 16087,
+    "interrupted_record_id": "work_relation:6d66b4237c675bcfcc1862b7a27331cddf219c040d6d8517af259c874c9042ff",
+    "last_fully_classified_ordinal_1based": 16086,
+    "removed_and_recomputed_once": true
+  },
+  "rss_kib": 1401192,
+  "sqlite": {
+    "bytes": 697589760,
+    "final_stat_unchanged": true,
+    "same_as_first_audit_new_measurement": true,
+    "sha256": "9d2ab538685645abc61ab2805adc6677ced91f377bfe7c88fd640889171fc421"
+  },
+  "status": "COMPLETE_DECLARATION_AUDIT_WITH_DERIVED_ANCESTOR_CANDIDATES"
+}

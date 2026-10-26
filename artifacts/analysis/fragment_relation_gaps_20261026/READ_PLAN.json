@@ -1,0 +1,25 @@
+{
+  "scope": "DECLARATION_AND_OLD_DERIVED_INDEX_ONLY",
+  "manifest_sha256": "98faaa2fe721ccd1377dcfdea0ed28278f4577f4a244099d23fe077ec9df91d7",
+  "declared_work_count": 24082,
+  "declared_missing_native_source": 12541,
+  "planned_work": {
+    "chunks": 115,
+    "stored_bytes": 46250001,
+    "decoded_bytes": 911134322
+  },
+  "sqlite": {
+    "bytes": 697589760,
+    "sha256": "9d2ab538685645abc61ab2805adc6677ced91f377bfe7c88fd640889171fc421",
+    "sha_qualification": "NEW_MEASUREMENT; historical receipt explicitly NOT_REMEASURED",
+    "read_once": true,
+    "queries_on_readonly_in_memory_exact_byte_clone": true
+  },
+  "budget": {
+    "stored_plus_decoded_bytes": 2000000000,
+    "wall_seconds": 180
+  },
+  "planned_core_input_lower_bound": 1654974083,
+  "actual_result": "PARTIAL_BUDGET_STOP; NO_AUTOMATIC_RETRY",
+  "full_read_not_claimed": true
+}

@@ -1,0 +1,31 @@
+{
+  "exit_code": 0,
+  "status": "COMPLETE_DECLARATION_AUDIT_WITH_DERIVED_ANCESTOR_CANDIDATES",
+  "wall_seconds": 93.52074383897707,
+  "rss_kib": 1401192,
+  "input_bytes": 1026588983,
+  "window_input_budget_bytes": 1500000000,
+  "first_window_exit_code": 1,
+  "first_window_seconds": 180.00348399794893,
+  "combined_charged_input_bytes": 2360802405,
+  "combined_work_denominator": 24082,
+  "missing_native_source_denominator": 12541,
+  "normal_producer_guards_relaxed": false,
+  "original_sqlite_final_stat_unchanged": true,
+  "all_work_chunks_eof_validated_across_windows": true,
+  "coverage": {
+    "all_work_chunks_eof_verified_across_two_runs": true,
+    "global_id_uniqueness_not_replayed": true,
+    "ordinal_overlap_or_omission": false,
+    "prefix_ordinal_1based": [
+      1,
+      16086
+    ],
+    "suffix_ordinal_1based": [
+      16087,
+      24082
+    ],
+    "suffix_rows": 7996
+  },
+  "old_producer_or_dynamic_model_qualification_regranted": false
+}

@@ -18,7 +18,7 @@ import sqlite3
 import zlib
 
 from scar.ir.execution.fragment_relations import (
-    Encoding, EvidenceEdgeRef, EvidenceInstanceRef, FragmentLocator, HostRelationKind,
+    Encoding, EnclosingNativeRelation, EvidenceEdgeRef, EvidenceInstanceRef, FragmentLocator, HostRelationKind,
     InvocationRef, InvocationStaticBinding, NativeSourceContextRelation, QualifiedOccurrenceRef,
     RelationGap, RuntimeScope, StaticEntityRef, WorkActivityProjectionLink, WorkHostRelation,
     WorkRelations, WorkTicketRef, canonical, exact, need, stable_key,
@@ -37,6 +37,68 @@ from scar.ir.v2.evidence import OperationInstance
 from scar.ir.v2.ids import OperationInstanceID
 from scar.store.bundle_partitions import BundlePartitions
 from scar.store.fragment_relations import read_payload
+
+_ETO_PARENT_BASIS = "ETO ctrl_deps collector stack only"
+_ETO_PARENT_REVISION = "cf30153c4c131c8164ee7798e5022d810682e2cb"
+
+
+@dataclass(frozen=True, slots=True)
+class _ETOParentFields:
+    """Private projection of an actually decoded original row, not graph facts."""
+    reference: EvidenceInstanceRef
+    record_sha256: str
+    process: int | str | None
+    thread: int | str | None
+    parent: OperationInstanceID | None
+    provider: str | None
+    node_id: int | None
+    ctrl_deps: int | None
+    basis: str | None
+    raw_reference: str | None
+
+
+def _parent_fields(reference, instance):
+    exact(instance, OperationInstance, "original ETO parent instance")
+    meta = instance.metadata
+    need(instance.id == reference.instance, "parent original identity differs")
+    return _ETOParentFields(reference, hashlib.sha256(canonical(encode(instance))).hexdigest(),
+        instance.process_id, meta.get("eto_tid", meta.get("raw_tid")), instance.parent,
+        meta.get("provider"), meta.get("node_id"), meta.get("ctrl_deps"),
+        meta.get("parent_basis"), meta.get("raw_reference"))
+
+
+def _check_eto_chain(relation, records, pid, coordinate_document):
+    """Actual original fields from the owned pass or normal selected reader."""
+    exact(relation, EnclosingNativeRelation, "enclosing-native relation")
+    refs = (relation.host,) + relation.parents
+    need(len(records) == len(refs), "parent record path length differs")
+    source = relation.native.binding.source
+    need(type(source) is ProviderFactReference and source.artifact.schema == "pytorch.execution-trace.v1"
+         and any(m["artifact"] == encode(source.artifact) for m in coordinate_document["membership"]),
+         "parent path ETO artifact is outside capture coordinates")
+    fields = tuple(_parent_fields(ref, record) if type(record) is OperationInstance else record
+                   for ref, record in zip(refs, records))
+    tids = set()
+    for ref, item in zip(refs, fields):
+        exact(item, _ETOParentFields, "owned original ETO fields")
+        need(item.reference == ref and item.process == pid and item.provider == "ETO"
+             and type(item.node_id) is int and item.node_id > 1
+             and ref.instance.value.endswith(":eto:" + str(item.node_id)),
+             "ETO parent identity/process/provider differs or is sentinel")
+        need(type(item.thread) is int and item.thread > 0, "ETO parent collector thread missing")
+        tids.add(item.thread)
+        prefix = "sha256:" + source.artifact.sha256 + "#/nodes/"
+        need(type(item.raw_reference) is str and item.raw_reference.startswith(prefix)
+             and item.raw_reference[len(prefix):].isdigit() and type(item.ctrl_deps) is int
+             and item.basis == _ETO_PARENT_BASIS and item.parent is not None
+             and item.parent.value == ref.instance.value.rsplit(":eto:", 1)[0] + ":eto:" + str(item.ctrl_deps),
+             "ETO parent/ctrl_deps/source/basis differs")
+    need(len(tids) == 1, "ETO parent path crosses collector threads")
+    for child, parent in zip(fields, fields[1:]):
+        need(child.parent == parent.reference.instance and child.ctrl_deps == parent.node_id,
+             "original parent path is not consecutive")
+    need(fields[-1].raw_reference == "sha256:" + source.artifact.sha256 + source.locator,
+         "terminal canonical binding changes original ETO source")
 
 
 @dataclass(frozen=True, slots=True)
@@ -154,7 +216,8 @@ class _Index:
         PRAGMA temp_store=FILE;
         PRAGMA journal_mode=OFF;
         CREATE TABLE nodes(id TEXT PRIMARY KEY, ordinal INTEGER UNIQUE, digest TEXT,
-          process TEXT, thread TEXT, parent TEXT, rawref TEXT, category TEXT, correlation TEXT, external_id TEXT);
+          process TEXT, thread TEXT, parent TEXT, rawref TEXT, category TEXT, correlation TEXT, external_id TEXT,
+          provider TEXT, node_id TEXT, ctrl_deps TEXT, parent_basis TEXT);
         CREATE TABLE edges(id TEXT PRIMARY KEY, ordinal INTEGER UNIQUE, relation TEXT,
           source TEXT,target TEXT,digest TEXT);
         CREATE INDEX edge_target ON edges(target,relation);
@@ -169,12 +232,19 @@ class _Index:
 
 class FragmentRelationProducer:
     """One construction, exact catalog and frozen producer policy."""
-    def __init__(self, inputs):
+    def __init__(self, inputs, *, schema_version=1):
         exact(inputs, FragmentInputs, "fixed input catalog")
+        need(type(schema_version) is int and schema_version in (1, 2), "unsupported producer transport version")
+        self._schema_version = schema_version
         self.inputs, self._initial_code = inputs, _code_receipts()
         self._stats = {}
         self._finished = self._started = False
         self._cache = {}
+        self._parent_records, self._enclosing = {}, {}
+
+    @property
+    def schema_version(self):
+        return self._schema_version
 
     def catalog_document(self):
         return encode(self.inputs)
@@ -241,10 +311,11 @@ class FragmentRelationProducer:
         for item in bundle.iter_records("evidence", "instances"):
             row = item["record"]; instance = decode(OperationInstance, row)
             metadata = row["metadata"]
-            index.db.execute("INSERT INTO nodes VALUES(?,?,?,?,?,?,?,?,?,?)", (
+            index.db.execute("INSERT INTO nodes VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (
                 instance.id.wire, item["ordinal"], hashlib.sha256(canonical(row)).hexdigest(),
                 json.dumps(instance.process_id), json.dumps(metadata.get("eto_tid", metadata.get("raw_tid"))), None if instance.parent is None else instance.parent.wire,
-                metadata.get("raw_reference"), metadata.get("category"), json.dumps(metadata.get("correlation")), json.dumps(metadata.get("external_id"))))
+                metadata.get("raw_reference"), metadata.get("category"), json.dumps(metadata.get("correlation")), json.dumps(metadata.get("external_id")),
+                metadata.get("provider"), json.dumps(metadata.get("node_id")), json.dumps(metadata.get("ctrl_deps")), metadata.get("parent_basis")))
             counts["instances_visited"] += 1
         for item in bundle.iter_records("evidence", "edges"):
             row = item["record"]; counts["edges_visited"] += 1
@@ -282,6 +353,46 @@ class FragmentRelationProducer:
         identity, ordinal, relation, source, target, _ = row
         return EvidenceEdgeRef(self._original_locator("edges", ordinal), identity, relation,
             OperationInstanceID(source.removeprefix("opinst:")), OperationInstanceID(target.removeprefix("opinst:")))
+
+    def _parent_record(self, index, reference):
+        # Only this construction's fresh index owns these exact original fields.
+        # _bundle_index read/strict-decoded every source row and verified its
+        # chunk EOF/SHA before this phase. No old DB or success flag is accepted.
+        need(index is self._owned_index, "parent fields belong to another construction")
+        locator = reference.locator
+        if locator not in self._parent_records:
+            row = index.db.execute("""SELECT id,ordinal,digest,process,thread,parent,rawref,
+                provider,node_id,ctrl_deps,parent_basis FROM nodes WHERE id=?""", (reference.instance.wire,)).fetchone()
+            need(row is not None and self._original_locator("instances", row[1]) == locator,
+                 "parent original locator/namespace differs")
+            self._parent_records[locator] = _ETOParentFields(reference, row[2], json.loads(row[3]),
+                json.loads(row[4]), None if row[5] is None else OperationInstanceID(row[5].removeprefix("opinst:")),
+                row[7], json.loads(row[8]), json.loads(row[9]), row[10], row[6])
+        return self._parent_records[locator]
+
+    def _enclosing_relation(self, index, host, meter):
+        if host in self._enclosing:
+            return self._enclosing[host]
+        current = host.instance.wire
+        path, visited = [], {current}
+        while True:
+            meter.check()
+            row = index.db.execute("SELECT parent FROM nodes WHERE id=?", (current,)).fetchone()
+            if row is None or row[0] is None:
+                self._enclosing[host] = (); return ()
+            current = row[0]
+            need(current not in visited, "cycle in indexed parent path")
+            visited.add(current)
+            path.append(self._node(index, current))
+            native = index.db.execute("SELECT ref FROM native WHERE instance=? ORDER BY sequence", (current,)).fetchall()
+            if native:
+                rows = tuple(EnclosingNativeRelation(self.scope, host, tuple(path),
+                    decode(QualifiedOccurrenceRef, strict_loads(value[0]))) for value in native)
+                for relation in rows:
+                    records = tuple(self._parent_record(index, ref) for ref in (host,) + relation.parents)
+                    _check_eto_chain(relation, records, self.pid, self.roots["coordinates"])
+                self._enclosing[host] = rows
+                return rows
 
     def _native_index(self, index, meter):
         from scar.ir.execution.codec import loads as execution_loads
@@ -411,24 +522,23 @@ class FragmentRelationProducer:
         return InvocationStaticBinding(invocation, capture.code, definition,
             ProviderFactReference(self.bindings_artifact, fact.locator + "/code_capture"), link, (descriptor,), body)
 
-    def _contexts(self, index, hosts, gaps, source, meter):
+    def _contexts(self, index, natives, gaps, source, meter):
         contexts, static = {}, {}
-        for host in hosts:
-            if host.native is None:
-                continue
-            records = index.db.execute("SELECT sequence FROM native WHERE instance=? AND ref=?", (host.host.instance.wire, canonical(encode(host.native)).decode())).fetchall()
+        for native in natives:
+            instance = native.binding.legacy.instance.wire
+            records = index.db.execute("SELECT sequence FROM native WHERE instance=? AND ref=?", (instance, canonical(encode(native)).decode())).fetchall()
             need(len(records) == 1, "native host sequence ambiguous")
             found = index.db.execute("SELECT line,payload FROM source WHERE sequence=? ORDER BY phase", (records[0][0],)).fetchall()
             by_phase = {strict_loads(zlib.decompress(raw).decode())["phase"]: strict_loads(zlib.decompress(raw).decode())
                         for _, raw in found}
             span = by_phase.get("span")
-            native_parent = index.db.execute("SELECT parent FROM nodes WHERE id=?", (host.host.instance.wire,)).fetchone()
+            native_parent = index.db.execute("SELECT parent FROM nodes WHERE id=?", (instance,)).fetchone()
             if span is None or native_parent is None or native_parent[0] != span["marker_instance"]:
                 gaps.append(RelationGap("SOURCE_NATIVE_PARENT_UNRESOLVED", source,
                     "Current source span is not the exact original ETO parent of this native host", len(found)))
                 continue
             marker = index.db.execute("SELECT process,thread FROM nodes WHERE id=?", (span["marker_instance"],)).fetchone()
-            child = index.db.execute("SELECT process,thread FROM nodes WHERE id=?", (host.host.instance.wire,)).fetchone()
+            child = index.db.execute("SELECT process,thread FROM nodes WHERE id=?", (instance,)).fetchone()
             need(marker is not None and marker == child, "source span/native host original process/thread differs")
             for line, raw in found:
                 row = strict_loads(zlib.decompress(raw).decode())
@@ -440,7 +550,7 @@ class FragmentRelationProducer:
                 invocation = InvocationRef(self.scope, decode(InvocationKey, row["invocation"]), decode(ProviderFactReference, row["source_invocation_reference"]))
                 definition = None if row.get("definition") is None else decode(SourceDefinitionReference, row["definition"])
                 binding_fact = decode(ProviderFactReference, row["source_binding_reference"])
-                relation = NativeSourceContextRelation(host.native, invocation,
+                relation = NativeSourceContextRelation(native, invocation,
                     _locator(self.source_artifact, self.source_desc, self.source_declaration, line=line), binding_fact, definition)
                 contexts[stable_key(relation)] = relation
                 if definition is not None:
@@ -478,16 +588,31 @@ class FragmentRelationProducer:
             gaps.append(RelationGap("HOST_RELATION_UNRESOLVED", source, "No exact original provider submission/scope edge path", 0))
         if not any(h.native is not None for h in hosts.values()):
             gaps.append(RelationGap("NATIVE_OCCURRENCE_UNRESOLVED", source, "Original host evidence has no exact canonical native INVOKE association", len(hosts)))
-        contexts, static = self._contexts(index, tuple(hosts.values()), gaps, source, meter)
+        enclosing = {}
+        if self.schema_version == 2:
+            for host in hosts.values():
+                if host.native is None and host.kind is HostRelationKind.PROVIDER_SCOPE_CONTEXT:
+                    for relation in self._enclosing_relation(index, host.host, meter):
+                        enclosing[relation.id] = relation
+            if not enclosing and not any(h.native is not None for h in hosts.values()):
+                gaps.append(RelationGap("ENCLOSING_NATIVE_UNRESOLVED", source,
+                    "No original ETO parent path proves an enclosing canonical occurrence", 0))
+        natives = {stable_key(h.native): h.native for h in hosts.values() if h.native is not None}
+        natives.update((stable_key(r.native), r.native) for r in enclosing.values())
+        contexts, static = self._contexts(index, tuple(natives.values()), gaps, source, meter)
         gaps.append(RelationGap("STATE_CONTENT_READY_UNPROVED", source, "These relationships do not establish actual/formal, world/state, logical contents, readiness or runtime child closure", None))
-        return WorkRelations(projection, tuple(hosts.values()), contexts, static, tuple(gaps))
+        return WorkRelations(projection, tuple(hosts.values()), contexts, static, tuple(gaps), tuple(enclosing.values()))
 
     def produce(self, writer, meter):
         need(not self._started, "producer is single-use")
+        need(writer.schema_version == self.schema_version, "producer/writer transport differs")
         self._started = True; self._meter = meter; self.phase = "ROOTS"; self._roots(meter)
         index = _Index(writer.root / "locator.sqlite")
+        self._owned_index = index
         counts, gaps, kinds = Counter(), Counter(), Counter()
         representative = static_representative = None
+        enclosing_representatives, depths = {}, Counter()
+        enclosing_hosts = set()
         try:
             self.phase = "ORIGINAL_EEG_LOCATOR_INDEX"; original = self._bundle_index(index, meter)
             self.phase = "NATIVE_OCCURRENCE_INDEX"; native = self._native_index(index, meter)
@@ -529,6 +654,20 @@ class FragmentRelationProducer:
                     counts["work_with_multiple_native_occurrences"] += len(endpoints) > 1
                     counts["work_with_source_context"] += bool(relation.source_contexts)
                     counts["work_with_static_code_source"] += bool(relation.static_bindings)
+                    if self.schema_version == 2:
+                        enclosing_endpoints = {stable_key(r.native) for r in relation.enclosing_native}
+                        source_endpoints = {stable_key(c.native) for c in relation.source_contexts}
+                        counts["work_with_enclosing_native"] += bool(enclosing_endpoints)
+                        counts["work_with_exact_and_enclosing_native"] += bool(endpoints and enclosing_endpoints)
+                        counts["work_without_any_native_context"] += not (endpoints or enclosing_endpoints)
+                        counts["work_with_exact_source_context"] += bool(endpoints & source_endpoints)
+                        counts["work_with_enclosing_source_context"] += bool(enclosing_endpoints & source_endpoints)
+                        counts["work_with_exact_and_enclosing_source_context"] += bool(endpoints & source_endpoints and enclosing_endpoints & source_endpoints)
+                        for r in relation.enclosing_native:
+                            enclosing_hosts.add(r.host.instance)
+                        for depth in {len(r.parents) for r in relation.enclosing_native}:
+                            depths[str(depth)] += 1
+                            enclosing_representatives.setdefault(str(depth), {"scope": encode(self.scope), "work": encode(projection.work)})
                     gaps.update(g.code for g in relation.gaps)
                     kinds.update(h.kind.value for h in relation.hosts)
                     if representative is None and len(endpoints) == 1 and relation.source_contexts and relation.static_bindings:
@@ -538,7 +677,7 @@ class FragmentRelationProducer:
                         static_representative = {"scope": encode(self.scope), "work": encode(projection.work)}
             need(counts["visited_work_count"] == declared, "work enumeration incomplete")
             self._finished = True
-            return {**dict(counts), "declared_work_count": declared,
+            report = {**dict(counts), "declared_work_count": declared,
                 "all_gpu_candidates": work["all_gpu_candidates"], "provider_frontier_counts": work["frontier_counts"],
                 "missing_relations": dict(gaps), "original_eeg_index": original,
                 "host_relation_kinds": dict(kinds), "first_unique_connected_work": representative,
@@ -547,6 +686,15 @@ class FragmentRelationProducer:
                 "static_inventory": self.roots["source_report"]["inventory"],
                 "source_runtime_summary": self.roots["source_report"]["summary"],
                 "relationship_is_direct_call": False, "whole_program_complete": False}
+            if self.schema_version == 2:
+                report.update(enclosing_native_depth_work_counts=dict(depths),
+                    distinct_enclosed_hosts=len(enclosing_hosts),
+                    parent_record_replay={"owned_original_field_records": len(self._parent_records),
+                        "additional_original_chunk_reads": 0, "source": "fresh original strict-decode pass; no old-index reuse"},
+                    first_enclosing_work_by_depth=enclosing_representatives,
+                    enclosing_parent_contract={"basis": _ETO_PARENT_BASIS, "torch_revision": _ETO_PARENT_REVISION,
+                        "scope": "observer RecordFunction stack, not source direct call or CUDA timing/order"})
+            return report
         finally:
             index.close()
             size = index.path.stat().st_size
@@ -661,6 +809,7 @@ def validate_retained_relation(row, catalog_document, producer_receipts, *, mete
          and type(work.origin) is ExternalWorkSource and work.origin.point.run == projection.scope.run
          and work.origin.point.process == projection.scope.process, "work receipt/Run origin differs")
     native_cache = {}
+    native_sources = {}
     for host in row.hosts:
         _declared_locator(host.host.locator, inputs, roots)
         instance = _read_locator(host.host.locator, meter, cache)
@@ -672,36 +821,49 @@ def validate_retained_relation(row, catalog_document, producer_receipts, *, mete
                  and value["source"]["reference"] == encode(edge.source)
                  and value["target"]["reference"] == encode(edge.target), "provider relation/path direction differs")
         if host.native is not None:
-            from scar.ir.execution.codec import loads as execution_loads
-            ref = host.native
-            shards = [s for s in roots["native_batch_report"]["shards"] if s["execution"] == encode(ref.execution)]
-            need(len(shards) == 1, "native occurrence is outside catalog shard namespace")
-            if ref.execution not in native_cache:
-                native_cache[ref.execution] = execution_loads(read_payload(ref.execution, meter, maximum=meter.budget.max_input_chunk_bytes).decode())
-            execution = native_cache[ref.execution]
-            need(ref.binding in execution.evidence_bindings and any(o.id == ref.occurrence for o in execution.operations)
-                 and any(p.id == projection.scope.process and p.run == projection.scope.run for p in execution.processes), "native occurrence/binding/Run differs")
-            need(ref.binding.legacy.artifact == decode(ProviderArtifact, shards[0]["evidence_projection"])
-                 and execution.snapshot.artifact == decode(ProviderArtifact, roots["native_batch_report"]["shared_program"]), "native static/projection roots differ")
-            native_projection = _document(ref.binding.legacy.artifact, meter, cache)
-            matched = [r for r in native_projection["instances"] if r["id"] == encode(ref.binding.legacy.instance)]
-            need(matched == [instance], "native projected evidence changes original host record")
-            from scar.ir.program.codec import loads as program_loads
-            from scar.ir.program.model import TerminatorKind
-            shared = execution.snapshot.artifact
-            program_key = ("PROGRAM", shared)
-            if program_key not in cache:
-                cache[program_key] = program_loads(read_payload(shared, meter).decode())
-            program = cache[program_key]
-            occurrence = next(o for o in execution.operations if o.id == ref.occurrence)
-            op = next(o for o in program.operations if o.id == occurrence.operation)
-            visit = next(v for v in execution.visits if v.id == occurrence.visit)
-            segment = next(s for s in execution.segments if s.id == visit.segment)
-            activation = next(a for a in execution.activations if a.id == segment.activation)
-            region = next(r for r in program.regions if r.id == activation.region)
-            need(op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE
-                 and activation.process == projection.scope.process and visit.block == region.entry
-                 and any(b.id == visit.block and op.id in b.operations for b in region.blocks), "native occurrence/static CFG ownership differs")
+            native_sources[stable_key(host.native)] = (host.native, instance)
+    need(not row.enclosing_native or retention.manifest["schema_version"] == 2,
+         "enclosing-native relations require explicit v2 publication")
+    for enclosing in row.enclosing_native:
+        references = (enclosing.host,) + enclosing.parents
+        originals = []
+        for reference in references:
+            _declared_locator(reference.locator, inputs, roots)
+            originals.append(_read_locator(reference.locator, meter, cache))
+        records = tuple(decode(OperationInstance, value) for value in originals)
+        _check_eto_chain(enclosing, records, next(p["pid"] for p in roots["coordinates"]["processes"]
+             if p["id"] == encode(projection.scope.process)), roots["coordinates"])
+        native_sources[stable_key(enclosing.native)] = (enclosing.native, originals[-1])
+    for ref, instance in native_sources.values():
+        from scar.ir.execution.codec import loads as execution_loads
+        shards = [s for s in roots["native_batch_report"]["shards"] if s["execution"] == encode(ref.execution)]
+        need(len(shards) == 1, "native occurrence is outside catalog shard namespace")
+        if ref.execution not in native_cache:
+            native_cache[ref.execution] = execution_loads(read_payload(ref.execution, meter, maximum=meter.budget.max_input_chunk_bytes).decode())
+        execution = native_cache[ref.execution]
+        need(ref.binding in execution.evidence_bindings and any(o.id == ref.occurrence for o in execution.operations)
+             and any(p.id == projection.scope.process and p.run == projection.scope.run for p in execution.processes), "native occurrence/binding/Run differs")
+        need(ref.binding.legacy.artifact == decode(ProviderArtifact, shards[0]["evidence_projection"])
+             and execution.snapshot.artifact == decode(ProviderArtifact, roots["native_batch_report"]["shared_program"]), "native static/projection roots differ")
+        native_projection = _document(ref.binding.legacy.artifact, meter, cache)
+        matched = [r for r in native_projection["instances"] if r["id"] == encode(ref.binding.legacy.instance)]
+        need(matched == [instance], "native projected evidence changes original host record")
+        from scar.ir.program.codec import loads as program_loads
+        from scar.ir.program.model import TerminatorKind
+        shared = execution.snapshot.artifact
+        program_key = ("PROGRAM", shared)
+        if program_key not in cache:
+            cache[program_key] = program_loads(read_payload(shared, meter).decode())
+        program = cache[program_key]
+        occurrence = next(o for o in execution.operations if o.id == ref.occurrence)
+        op = next(o for o in program.operations if o.id == occurrence.operation)
+        visit = next(v for v in execution.visits if v.id == occurrence.visit)
+        segment = next(s for s in execution.segments if s.id == visit.segment)
+        activation = next(a for a in execution.activations if a.id == segment.activation)
+        region = next(r for r in program.regions if r.id == activation.region)
+        need(op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE
+             and activation.process == projection.scope.process and visit.block == region.entry
+             and any(b.id == visit.block and op.id in b.operations for b in region.blocks), "native occurrence/static CFG ownership differs")
     for context in row.source_contexts:
         _declared_locator(context.association, inputs, roots)
         source_row = retention.source_record(context.association, meter=meter)
@@ -725,7 +887,8 @@ def validate_retained_relation(row, catalog_document, producer_receipts, *, mete
              "current invocation captured another code version")
     return {"scope": "SELECTED_CURRENT_RETAINED_RELATIONS", "original_endpoint_checks": "PASSED",
             "direct_call_established": False, "state_content_ready_established": False,
-            "whole_program_complete": False, "gaps": encode(row.gaps)}
+            "whole_program_complete": False, "enclosing_native_checked": len(row.enclosing_native),
+            "enclosing_is_direct_call": False, "gaps": encode(row.gaps)}
 
 
 def static_member(reference, *, budgets=None, meter=None):

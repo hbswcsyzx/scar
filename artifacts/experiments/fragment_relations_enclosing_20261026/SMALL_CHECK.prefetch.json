@@ -1,0 +1,50 @@
+{
+  "status": "PASSED_TYPED_CODEC_AND_ORIGINAL_FIELD_CHECKS_ONLY",
+  "checks": [
+    "old_actual_chunk_stored_sha",
+    "old_actual_chunk_decoded_sha",
+    "actual_v1_default_bytes_unchanged",
+    "actual_v1_id_unchanged",
+    "v1_old_fourteen_types",
+    "original_eeg_root_sha",
+    "v2_actual_qualified_endpoints_roundtrip",
+    "v2_enclosing_aggregate_same_work_id",
+    "standalone_enclosing_v2_roundtrip",
+    "default_v1_rejects_nonempty_enclosing",
+    "v1_rejects_new_fifteenth_type",
+    "v1_closed_field_set",
+    "host_native_cannot_be_replaced_by_ancestor",
+    "parent_path_rejects_cycle",
+    "coordinate_sha",
+    "actual_two_record_parent_fields_pass",
+    "wrong_ctrl_deps_rejected",
+    "cross_collector_thread_rejected"
+  ],
+  "elapsed_s": 0.13485819404013455,
+  "old_work": "work_relation:cea313742e06617b7f376d5f95c868a6078e97db3e9a21759595dae5e5cac6a1",
+  "new_enclosing": "fragment_relation:55016b6418cf143232232494179d8b7edc464e34749dd0c845ee0950b7966e41",
+  "small_actual_chunk": {
+    "decoded_bytes": 7994293,
+    "decoded_sha256": "b628ca3a2f62db407222912e3c27dcb2ac506dbdf3055c49e6d83e1eae8a5869",
+    "rows": 337,
+    "stored_bytes": 140625,
+    "stored_sha256": "ac7b6eb9b7681beea8cbb36ff90d8c62d6c6a4e8a2c74e36f666c623201d0aa9",
+    "uri": "work/000000.jsonl.gz"
+  },
+  "sqlite": "readonly immutable selected locator declarations; old native model not requalified",
+  "source_runtime_whole_model_established": false,
+  "producer_or_target_executed": false,
+  "production_sha256": {
+    "scar/ir/execution/fragment_relations.py": "287d5a62f7ff72757311be4a14db24b69289e74c092d67bd7b80528642a5e4b1",
+    "scar/ir/execution/fragment_relations_codec.py": "24f23464756e0f3cce7cdecf7e06ce4d3de393ab2ddb8958ca3fa53a8f252556",
+    "scar/store/fragment_relations.py": "4d50e4149f993857b4a0a8961d2cf316d7d3130266d7a5d64ff774fa77263770",
+    "scar/analysis/fragment_relations.py": "a64505c60da4f8456026fa152772e5cb90351706bf8ff074a9bc422833522440"
+  },
+  "input": {
+    "stored_work_chunk_bytes": 140625,
+    "decoded_work_chunk_bytes": 7994293,
+    "eeg_manifest_bytes": 72965,
+    "coordinates_bytes": 674239,
+    "sqlite_selected_page_reads_not_independently_metered": true
+  }
+}

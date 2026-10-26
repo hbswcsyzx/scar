@@ -1,0 +1,8 @@
+{
+  "exit_code": 1,
+  "phase": "MANIFEST_RECEIPT_HEADER",
+  "error": "KeyError: sha256; actual BundlePartitions field physical_sha256",
+  "original_manifest_read_bytes": 72965,
+  "selected_chunks_or_records_read": 0,
+  "producer_or_original_inputs_changed": false
+}

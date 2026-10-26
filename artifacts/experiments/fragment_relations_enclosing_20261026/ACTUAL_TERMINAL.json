@@ -1,0 +1,40 @@
+{
+  "status": "ROOT_CONFIRMED_ACTUAL_EXIT0_SCOPED_RELATIONS_WITH_OPEN",
+  "root_tool_session": 82912,
+  "outer": {
+    "actual_worker_exit_code": 0,
+    "elapsed_s": 798.5961448419839,
+    "freeze_sha256": "a55268f01bbae8f69b90f6901d67ec848434560d0707f1583eeb967eb5fd35a7",
+    "outer_guard_bytes": 17499864,
+    "whole_program_complete": false
+  },
+  "worker_seconds": 797.271622350032,
+  "activity": {
+    "lower_attempts": 0,
+    "non_target_compile_events": 1199,
+    "source_prepare_attempts": 0,
+    "subprocess_attempts": 0,
+    "target_exec_attempts": 0,
+    "target_executable_compile_attempts": 0
+  },
+  "io": {
+    "actual_input_bytes": 8640110167,
+    "code_source_input_bytes": 31095464,
+    "core_input_bytes": 8609014703,
+    "decoded_bytes": 6179223827,
+    "elapsed_s": 795.4916952680214,
+    "scope": "returned stored plus decoded bytes, including repeats; source/runner guards separate",
+    "stored_bytes": 2460886340,
+    "stored_output_bytes": 814554885
+  },
+  "peak_rss_kib": 312440,
+  "root_verification": "candidate01/ROOT_VERIFICATION.json",
+  "normal_queries": 6,
+  "source_runtime_guard_bytes": [
+    17499864,
+    17499864
+  ],
+  "whole_program_complete": false,
+  "main_applied_at_isolated_terminal": false,
+  "subsequent_source_application": "MAIN_APPLICATION_REFERENCE.json"
+}
