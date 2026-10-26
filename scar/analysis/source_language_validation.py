@@ -20,6 +20,7 @@ from scar.ir.program.source_language import (
     SourceLanguageOverlay, SourceLanguageCapability as Capability, EXTENDED_PROTOCOLS,
 )
 from scar.ir.record_codec import encode
+from types import CodeType
 
 
 def _need(condition, detail):
@@ -61,9 +62,12 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     calls = {identity for identity, protocol in protocols.items() if protocol.kind in CALL_PROTOCOLS}
     from scar.analysis.source_function_try_validation import validate_function_try_protocols
     try_protocols = validate_function_try_protocols(model, graph, interface, metadata, semantic, language, source_tree=source_tree)
-    indexed = set(unpack) | set(slices) | set(constants) | calls | try_protocols
+    from scar.analysis.source_function_definition_validation import validate_function_definitions
+    functions = validate_function_definitions(model, graph, interface, metadata, semantic, language,
+        source_tree=source_tree, options=options, structural_only=structural_only)
+    indexed = set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions
     actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
-    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols),
+    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions),
           "new language operations must have one exact shape/provenance record")
 
     def source_node(reference, classes):
@@ -243,10 +247,11 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     for identity, constant in constants.items():
         atom = semantic.source_atoms.get(constant.source.atom_id)
         call_constant = atom is not None and atom.kind == "Call"
-        capability = Capability.CALL_KWARGS_314_V1 if call_constant else Capability.SLICE_KEYS
+        function_constant = atom is not None and atom.kind == 'FunctionDef'
+        capability = Capability.NESTED_FUNCTION_314_V1 if function_constant else Capability.CALL_KWARGS_314_V1 if call_constant else Capability.SLICE_KEYS
         _need(capability in language.capabilities and protocols[identity].kind.value == "READ_CODE_CONSTANT"
               and constant.source == protocols[identity].source, "code constant kind/capability differs")
-        node = source_node(constant.source, (ast.Call,) if call_constant else (ast.Slice, ast.Tuple))
+        node = source_node(constant.source, (ast.FunctionDef,) if function_constant else (ast.Call,) if call_constant else (ast.Slice, ast.Tuple))
         operation = operations[identity]
         _need(operation.terminator is None and not operation.effects_complete and len(operation.results) == 1
               and type(values[operation.results[0]]) is ReferenceValue
@@ -264,7 +269,7 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
             candidates = [row for row in dis.get_instructions(evidence.code)
                 if row.opname == "LOAD_CONST" and row.arg == constant.constant_path[0]
                 and tuple(row.positions) == (node.lineno, node.end_lineno, node.col_offset, node.end_col_offset)]
-            allowed = (str, tuple) if call_constant else (slice, tuple)
+            allowed = (CodeType, tuple) if function_constant else (str, tuple) if call_constant else (slice, tuple)
             _need(len(candidates) == 1 and type(candidates[0].argval) in allowed
                   and (not call_constant or type(candidates[0].argval) is str or candidates[0].argval == ()),
                   "source constant does not name its exact witnessed LOAD_CONST slot")

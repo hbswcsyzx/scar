@@ -202,6 +202,12 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
                      and row.coverage is AddressCoverage.PARTIAL and row.protocol is None
                      and row.effects == (effect,), "language index address differs from its exact receiver/key/world Uses")
                 expected_rows.add(operation.id)
+    if language is not None:
+        from scar.ir.program.source_language import SourceLanguageCapability
+        if SourceLanguageCapability.NESTED_FUNCTION_314_V1 in language.capabilities:
+            # Its original FunctionDef source/name/cell/address correspondence
+            # is checked by the dedicated ordinary language validator below.
+            expected_rows.update(p.operation for p in model.protocols if p.kind is Kind.STORE_NESTED_FUNCTION_CELL)
     need(set(rows) == expected_rows, "unexpected or missing source environment address refinement")
     for value in values.values():
         if type(value) is LocalBindingValue:

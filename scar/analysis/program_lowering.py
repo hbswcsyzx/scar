@@ -1314,12 +1314,14 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             from scar.ir.program.source_language import SourceLanguageCapability
             try_source = result.language is not None and SourceLanguageCapability.FUNCTION_TRY_314_V1 in result.language.capabilities
             call_source = result.language is not None and SourceLanguageCapability.CALL_EXPANSION_314_V1 in result.language.capabilities
-            if result.language is not None and (not structural_only or try_source or call_source):
+            function_source = result.language is not None and SourceLanguageCapability.NESTED_FUNCTION_314_V1 in result.language.capabilities
+            if result.language is not None and (not structural_only or try_source or call_source or function_source):
                 if not structural_only and language_options is None:
                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
                 if structural_only:
                     if source_texts is None or result.metadata.source.path not in source_texts:
                         raise ValueError("function Try STRUCTURE requires its exact retained source text" if try_source
+                                         else "function definition STRUCTURE requires its exact retained source text" if function_source
                                          else "expanded call STRUCTURE requires its exact retained source text")
                     source_text = source_texts[result.metadata.source.path]
                 else:

@@ -1,0 +1,224 @@
+"""Original nested function creation; child code is referenced, never executed."""
+from __future__ import annotations
+
+import ast
+import dis
+from dataclasses import replace
+from types import CodeType
+
+from scar.analysis.program_lowering import _Unsupported
+from scar.analysis.source_call_lowering import _constant, _invoke
+from scar.analysis.source_heap_lowering import expression_for_heap_target
+from scar.analysis.source_mapping_lowering import _transfer
+from scar.ir.program.environments import EnvironmentRole
+from scar.ir.program.ids import OperationID, ValueID
+from scar.ir.program.model import AccessMode, Behavior, ExitKind, Operation, OperationResult, StateAccess, StateVersionValue
+from scar.ir.program.source import GapKind, SourceRole
+from scar.ir.program.state_addresses import AddressEffect, CellContent, ReferenceOwner
+from scar.ir.program.structured import PythonProtocolKind as K
+
+
+def span(node):
+    return node.lineno, node.end_lineno, node.col_offset, node.end_col_offset
+
+
+def unsupported(node, detail):
+    raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, 'NESTED_FUNCTION_' + detail)
+
+
+def compiler_plan(node, code):
+    """Exact original creation window; no compilation, target import or eval."""
+    if not isinstance(node, ast.FunctionDef):
+        unsupported(node, 'ASYNC_DEFINITION_UNIMPLEMENTED')
+    if node.decorator_list:
+        unsupported(node, 'DECORATOR_APPLICATION_UNIMPLEMENTED')
+    if node.type_params:
+        unsupported(node, 'TYPE_PARAMETER_SCOPE_UNIMPLEMENTED')
+    if any(x is not None for x in node.args.kw_defaults):
+        unsupported(node, 'KEYWORD_DEFAULTS_UNIMPLEMENTED')
+    rows = tuple(dis.get_instructions(code))
+    own = [r for r in rows if tuple(r.positions) == span(node)]
+    children = [r for r in own if r.opname == 'LOAD_CONST' and type(r.argval) is CodeType
+                and r.argval.co_name == node.name and r.argval.co_firstlineno == node.lineno
+                and r.argval.co_qualname == code.co_qualname + '.<locals>.' + node.name]
+    if len(children) != 1:
+        unsupported(node, 'ORIGINAL_CHILD_CODE_OCCURRENCE_UNAVAILABLE')
+    child = children[0]
+    stores = [r for r in own if r.offset > child.offset and r.opname in ('STORE_FAST', 'STORE_DEREF', 'STORE_GLOBAL')
+              and r.argval == node.name]
+    if len(stores) != 1:
+        unsupported(node, 'ORIGINAL_NAME_STORE_OCCURRENCE_UNAVAILABLE')
+    stop = stores[0]
+    own = [r for r in own if r.offset <= stop.offset]
+    expected, stages = [], []
+    def constant(row, role):
+        expected.append(('LOAD_CONST', row.arg)); stages.append(('constant', role, row))
+    defaults = None
+    if node.args.defaults:
+        candidates = [r for r in own if r.opname == 'LOAD_CONST' and type(r.argval) is tuple
+                      and len(r.argval) == len(node.args.defaults)]
+        exact = [r for r in candidates if all(isinstance(n, ast.Constant) and type(n.value) is type(v) and n.value == v
+                                            for n, v in zip(node.args.defaults, r.argval))]
+        if exact:
+            if len(exact) != 1:
+                unsupported(node, 'DEFAULT_TUPLE_CONSTANT_AMBIGUOUS')
+            defaults = exact[0]; constant(defaults, 'defaults')
+        else:
+            expected.append(('BUILD_TUPLE', len(node.args.defaults)))
+            stages.append(('tuple', 'defaults', tuple(node.args.defaults)))
+    args = (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs)
+    annotated = (node.returns is not None or any(a.annotation is not None for a in args)
+                 or any(a is not None and a.annotation is not None for a in (node.args.vararg, node.args.kwarg)))
+    annotation = None
+    if annotated:
+        annotations = [r for r in own if r.opname == 'LOAD_CONST' and type(r.argval) is CodeType
+                       and r.argval.co_name == '__annotate__' and r.offset < child.offset
+                       and r.argval.co_firstlineno == node.lineno]
+        if len(annotations) != 1:
+            unsupported(node, 'DEFERRED_ANNOTATION_CODE_UNAVAILABLE')
+        annotation = annotations[0]
+    def function(load, role):
+        names = tuple(load.argval.co_freevars)
+        if names:
+            expected.extend(('LOAD_FAST_BORROW', name) for name in names)
+            expected.append(('BUILD_TUPLE', len(names)))
+            stages.append(('tuple', role + '-closure', names))
+        constant(load, role + '-code')
+        expected.append(('MAKE_FUNCTION', None)); stages.append(('make', role, None))
+        if names:
+            expected.append(('SET_FUNCTION_ATTRIBUTE', 8)); stages.append(('set', role + '-closure', None))
+    if annotation is not None:
+        function(annotation, 'annotation')
+    function(child, 'function')
+    if annotation is not None:
+        expected.append(('SET_FUNCTION_ATTRIBUTE', 16)); stages.append(('set', 'annotation', None))
+    if node.args.defaults:
+        expected.append(('SET_FUNCTION_ATTRIBUTE', 1)); stages.append(('set', 'defaults', None))
+    expected.append((stop.opname, node.name)); stages.append(('bind', stop.opname, None))
+    def matches(row, token):
+        name, arg = token
+        return row.opname == name and (row.argval == arg if name.startswith(('LOAD_FAST', 'STORE_')) else row.arg == arg)
+    if len(own) != len(expected) or not all(matches(r, t) for r, t in zip(own, expected)):
+        unsupported(node, 'EXACT_COMPILER_CREATION_SEQUENCE_UNAVAILABLE')
+    return tuple(stages), child, annotation
+
+
+def _hold(builder, cursor, node, reference, role):
+    builder.frame_transition(cursor, node, ((reference, node, 'function-held-' + role),), K.FRAME_HOLD_TEMPORARY)
+    builder.active_temporaries.append(reference)
+
+
+def _tuple(builder, cursor, node, children, role):
+    held, inputs = [], []
+    for index, child in enumerate(children):
+        if role.endswith('-closure'):
+            if child not in builder.cell_references:
+                unsupported(node, 'CAPTURE_HAS_NO_ACTUAL_PARENT_CELL')
+            value, source = builder.cell_references[child], node
+        else:
+            cursor, value = expression_for_heap_target(builder, child, cursor)
+            if cursor is None:
+                return None, None
+            source = child
+        _hold(builder, cursor, source, value, 'nested-function-' + role)
+        held.append((source, value)); inputs.append((value, source, 'nested-function-' + role, index, None))
+    cursor, value, _ = _invoke(builder, cursor, node, tuple(inputs), K.BUILD_NESTED_FUNCTION_TUPLE,
+                              tuple(held), raise_consumed=(), result=True)
+    _hold(builder, cursor, node, value, 'nested-function-' + role)
+    return cursor, value
+
+
+def _set(builder, cursor, node, attribute, function, kind):
+    if tuple(builder.active_temporaries[-2:]) != (attribute, function):
+        unsupported(node, 'ATTRIBUTE_OWNERSHIP_ORDER_DIFFERS')
+    inputs = ((attribute, node, 'function-attribute', 0, None),
+              (function, node, 'function-object', 0, None))
+    if kind is K.SET_NESTED_FUNCTION_ANNOTATE:
+        def failed(failure, exception):
+            saved = tuple(builder.active_temporaries)
+            try:
+                # The attr has already been attached when qualname allocation
+                # can fail. The same function remains held for exceptional exit.
+                del builder.active_temporaries[-2]
+                builder.finish_exit(failure, node, exception, ExitKind.RAISE)
+            finally:
+                builder.active_temporaries[:] = saved
+        cursor, _, identity = builder.invoke(cursor, node, inputs, result_type=None, failure_handler=failed)
+        builder.protocol(identity, kind, node)
+        old = builder.operation_records[identity]
+        marked = replace(old, behaviors=old.behaviors + (Behavior.MEMORY,))
+        builder.operations[builder.operations.index(old)] = marked; builder.operation_records[identity] = marked
+    else:
+        identity = builder.fresh(OperationID, 'function-attribute')
+        uses = tuple(builder.use(identity, value, source, role, index) for value, source, role, index, _ in inputs)
+        before = builder.use(identity, cursor.state, node, 'function-attribute-world', 0)
+        state = StateVersionValue(builder.fresh(ValueID, 'function-attribute-state'), builder.function_context,
+                                  OperationResult(identity, 0), builder.world)
+        builder.add_value(state); builder.link_value(state, node, SourceRole.STATE)
+        builder.emit(cursor, Operation(identity, 'set original function attribute',
+            (Behavior.READ, Behavior.WRITE, Behavior.MEMORY), uses + (before,), (state.id,),
+            (StateAccess(builder.world, before.id, AccessMode.READ_WRITE, state.id),), effects_complete=False),
+            node, SourceRole.FUNCTION_OBJECT)
+        builder.protocol(identity, kind, node); cursor.state = state.id
+    del builder.active_temporaries[-2]
+    return cursor
+
+
+def lower_function_definition(builder, node, cursor):
+    evidence = builder.language_options.code_evidence
+    if evidence is None or evidence.store.document['runtime']['version'][:3] != [3, 14, 7]:
+        unsupported(node, 'READONLY_CPYTHON_3147_CODE_REQUIRED')
+    evidence.require_definition(builder.snapshot, builder.function_definition.id, builder.source(builder.functions[builder.entry]))
+    stages, child, annotation = compiler_plan(node, evidence.code)
+    baseline = len(builder.active_temporaries)
+    refs = {}
+    try:
+        for action, role, argument in stages:
+            if action == 'constant':
+                refs[role] = _constant(builder, node, cursor, argument)
+                _hold(builder, cursor, node, refs[role], 'nested-function-' + role)
+            elif action == 'tuple':
+                cursor, refs[role] = _tuple(builder, cursor, node, argument, role)
+                if cursor is None:
+                    return None
+            elif action == 'make':
+                code = refs[role + '-code']
+                cursor, refs[role], identity = _invoke(builder, cursor, node,
+                    ((code, node, 'function-code', 0, None),
+                     (builder.environment_references[EnvironmentRole.GLOBALS_NAMESPACE], node, 'function-globals', 0, None)),
+                    K.MAKE_NESTED_FUNCTION, ((node, code),), result=True)
+                _hold(builder, cursor, node, refs[role], 'nested-function-' + role)
+                if role == 'function':
+                    declarations = [d for d in builder.by_atom.get(builder.source(node).atom_id.wire, ())
+                                    if d.metadata.get('phase') == 'definition_time']
+                    if len(declarations) != 1:
+                        unsupported(node, 'ORIGINAL_DEFINITION_TIME_DECLARATION_UNAVAILABLE')
+                    i = next(i for i, link in enumerate(builder.operation_links) if link.operation == identity)
+                    builder.operation_links[i] = replace(builder.operation_links[i], semantic_operation=declarations[0].id)
+            elif action == 'set':
+                target = refs['annotation'] if role == 'annotation-closure' else refs['function']
+                kind = (K.SET_NESTED_FUNCTION_CLOSURE if role.endswith('-closure') else
+                        K.SET_NESTED_FUNCTION_ANNOTATE if role == 'annotation' else K.SET_NESTED_FUNCTION_DEFAULTS)
+                cursor = _set(builder, cursor, node, refs[role], target, kind)
+            else:
+                function = refs['function']
+                if role == 'STORE_FAST' and node.name in builder.locals:
+                    previous = cursor.env[node.name]
+                    builder.frame_transition(cursor, node, ((previous, node, 'previous-binding'),
+                        (function, node, 'assigned-reference')), K.FRAME_BIND)
+                    builder.define_binding(node.name, cursor, node, function)
+                    _transfer(builder, ((node, function),), node)
+                elif role == 'STORE_DEREF' and node.name in builder.cell_references:
+                    cursor, _, identity = _invoke(builder, cursor, node,
+                        ((builder.cell_references[node.name], node, 'definition-cell', 0, None),
+                         (function, node, 'defined-function', 0, None)),
+                        K.STORE_NESTED_FUNCTION_CELL, ((node, function),), raise_consumed=())
+                    operation = builder.operation_records[identity]
+                    builder._addresses(identity, (AddressEffect(ReferenceOwner(operation.uses[0].id), (CellContent(),), AccessMode.WRITE),))
+                else:
+                    unsupported(node, 'NAME_BINDING_INTERFACE_UNIMPLEMENTED')
+        builder.gap(GapKind.CODE_VERSION, node, 'nested function creation references original code; runtime function/code instance identity remains unproved')
+        builder.gap(GapKind.EFFECT_SUMMARY, node, 'definition-time construction and ordered captures are connected; saved builtins resolution, finalizers and runtime annotation/call effects remain unproved')
+        return cursor
+    finally:
+        del builder.active_temporaries[baseline:]

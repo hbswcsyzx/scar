@@ -211,6 +211,9 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
                 continue
             if cursor is None:
                 cursor = super().statements((node,), cursor)
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and self.has_language('NESTED_FUNCTION_314_V1'):
+                from scar.analysis.source_function_definition_lowering import lower_function_definition
+                cursor = lower_function_definition(self, node, cursor)
             elif isinstance(node, ast.AnnAssign):
                 cursor = annotated_assignment(self, node, cursor)
             elif isinstance(node, ast.Assert):
@@ -375,7 +378,7 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         # raises; delaying them leaves its real failure continuation undefined.
         # self.locals excludes cell slots. Cell references are still introduced
         # only by MAKE_CELL's normal result, before any body Try sink is active.
-        early_bindings = self.has_language("FUNCTION_TRY_314_V1")
+        early_bindings = self.has_language("FUNCTION_TRY_314_V1") or self.has_language('NESTED_FUNCTION_314_V1')
         if early_bindings:
             initial_local_bindings()
         for name in layout.cellvars:
