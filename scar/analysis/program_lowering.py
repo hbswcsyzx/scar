@@ -24,7 +24,7 @@ from scar.ir.program.codec import dumps as dump_graph, _has_frame_root_capabilit
 from scar.ir.program.ids import BlockID, LocationID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.functions import BodyEntryInterface, BodyLoweringProfile, FormalPort
 from scar.ir.program.module_entries import (ModuleBodyOverlay, ModuleEntryProfile,
-    ModulePrefixOverlay, ModuleBodyExpansionProfile)
+    ModulePrefixOverlay, ModuleBodyExpansionProfile, StructuredFrameBodyOverlay, FrameBodyProfile)
 from scar.ir.program.frames import (
     FrameBind, FrameDiscard, FrameEnter, FrameExit, FrameFormal, FrameModel,
 )
@@ -73,15 +73,31 @@ class SourceProgram:
     semantic: object
     semantics: object
     control: object
-    profile: BodyLoweringProfile | ModuleEntryProfile | ModuleBodyExpansionProfile = BodyLoweringProfile.LEGACY
+    profile: BodyLoweringProfile | ModuleEntryProfile | ModuleBodyExpansionProfile | FrameBodyProfile = BodyLoweringProfile.LEGACY
     interface: BodyEntryInterface | None = None
     frame: FrameModel | None = None
     structured: StructuredBodyModel | None = None
     language: SourceLanguageOverlay | None = None
-    module: ModuleBodyOverlay | ModulePrefixOverlay | None = None
+    module: ModuleBodyOverlay | ModulePrefixOverlay | StructuredFrameBodyOverlay | None = None
 
     def summary(self):
         """Separate declaration/link counts from program and effect coverage."""
+        if type(self.module) is StructuredFrameBodyOverlay:
+            from scar.ir.record_codec import encode
+            return {'entry_kind':'MAPPING_FRAME','entry':self.metadata.entry,
+                'body_status':self.module.status.value,'graph_present':self.graph is not None,
+                'entry_regions':len(self.graph.regions) if self.graph else 0,
+                'construction_operations':self.module.operations_emitted,
+                'top_level_statement_interfaces_expanded':len(self.module.prefix.statements) if self.module.prefix else 0,
+                'expanded_statement_records':len(self.module.expansions),
+                'remaining_statement_count':len(self.module.remaining.subject.statements) if self.module.remaining else 0,
+                'required_body_expansion':'REQUIRED' if self.module.remaining else 'SOURCE_PROTOCOL_INTERNALS_REMAIN_OPEN',
+                'source_census':encode(self.module.census),'namespace_policy':self.module.namespace_policy.value,
+                'completion_profile':self.module.completion_profile.value,
+                'namespace_content_established':False,'namespace_alias_established':False,
+                'runtime_target_verified':False,'import_module_object_established':False,
+                'whole_program_coverage_established':False,'fine_grained_state_effects_established':False,
+                'transformation_authorized':False}
         if type(self.module) is ModulePrefixOverlay:
             from scar.ir.record_codec import encode
             return {"entry_kind": "MAPPING_FRAME", "entry": self.metadata.entry,
@@ -147,6 +163,18 @@ class SourceProgram:
         }
 
     def to_dict(self):
+        if type(self.module) is StructuredFrameBodyOverlay:
+            from scar.ir.program.module_entries import encode_frame_body
+            if (self.profile is not FrameBodyProfile.STRUCTURED_MAPPING_314_V1 or self.graph is None
+                    or any(value is not None for value in (self.interface,self.frame,self.structured,self.language))):
+                raise ValueError('SP8 requires its explicit core FrameRoot/source overlay only')
+            return {'schema':'scar.source-program','schema_version':8,'entry_kind':'MAPPING_FRAME',
+                'profile':self.profile.value,'status':self.module.status.value,
+                'scope':'structured source mapping frame; exact remaining source and runtime/effect debt retained',
+                'metadata':encode(self.metadata),'module':encode_frame_body(self.module),
+                'graph':json.loads(dump_graph(self.graph)),'semantic':self.semantic.to_dict(),
+                'semantics':self.semantics.to_dict(),'control':self.control.to_dict(),'summary':self.summary(),
+                'runtime_target_verified':False,'transformation_authorized':False}
         # Every implemented wrapper is historical source1-7. A future source8
         # must enter its explicit new branch rather than upgrade an old ABI.
         if self.graph is not None and _has_frame_root_capability(self.graph):
@@ -225,6 +253,25 @@ class SourceProgram:
             raise ValueError("source program verification mode must be explicit")
         _check_structure_source_texts(verification, source_texts)
         version = document.get("schema_version")
+        if type(version) is int and version == 8:
+            from scar.ir.program.module_entries import decode_frame_body
+            if (set(document) != expected_fields | {'entry_kind','profile','module'}
+                    or document['schema'] != 'scar.source-program' or document['entry_kind'] != 'MAPPING_FRAME'
+                    or document['profile'] != FrameBodyProfile.STRUCTURED_MAPPING_314_V1.value
+                    or language_options is not None or verification != 'STRUCTURE'
+                    or module_code_evidence is None or type(document['graph']) is not dict
+                    or document['graph'].get('schema_version') != 29):
+                raise ValueError('SP8 requires explicit source/core capability and readonly whole-root evidence')
+            result=cls(load_graph(_canonical(document['graph'])),decode(LoweringMetadata,document['metadata']),
+                semantic_from_dict(document['semantic']),None,SourceControlFlowGraph.from_dict(document['control']),
+                FrameBodyProfile.STRUCTURED_MAPPING_314_V1,module=decode_frame_body(document['module']))
+            result=replace(result,semantics=SourceSemanticsGraph.from_dict(document['semantics'],result.semantic))
+            if _canonical(result.to_dict()) != _canonical(document):
+                raise ValueError('SP8 canonical source capability/summary differs')
+            checked=validate_source_program(result,max_operations=max_operations,verification=verification,
+                source_texts=source_texts,module_code_evidence=module_code_evidence)
+            if not checked['valid']:raise ValueError('; '.join(checked['errors']))
+            return result
         if type(version) is int and 1 <= version <= 7:
             graph_wire = document.get("graph")
             if type(graph_wire) is dict:

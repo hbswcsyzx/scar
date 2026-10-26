@@ -50,6 +50,11 @@ exit1 保留，丢失测量未重建；主树同一 SP7、旧 SP6/SP5 正常读�
 ModuleUnitSource 及单一 entry ABI，旧 source1–7 显式拒新能力。原 SP5/6/7 普通读回
 兼容通过；这仅是类型/codec 基础，SP8 正文与实际 frame 对应仍未实现。见
 [A 报告](../artifacts/experiments/frame_root_contract_a_20261025/REPORT.md)。
+后继 B 已实现并验收同源码的 SP8 连续前缀：8顶层接口/118ops/2regions，包含循环体
+共9stmt records，准确保剩余Try/Assert/Expr三条切片。隔离与主树普通读回均通过，
+不展开循环次数、不制造函数环境或第二份frame ABI。上述“SP8尚未实现”是A交付时
+历史状态；当前传播traceback/C0/C1 source cleanup和实际namespace等仍OPEN，见
+[B实际报告](../artifacts/experiments/module_structured_prefix_b_applied_20261025/REPORT.md)。
 
 **当前可复核结果（2026-10-25）：** 完整runtime接线仍为843快照；正式静态源码已发布
 到858，后继新增body尚未接回原运行。12原图普通ADD的恢复消费实际exit0/651.143247s；

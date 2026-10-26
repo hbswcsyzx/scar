@@ -12,12 +12,13 @@ import re
 
 from scar.ir.program.call_edges import CapturedCode, CodeSourceLink
 from scar.ir.program.frames import FrameRules
-from scar.ir.program.ids import OperationID, RegionID, UseID, ValueID
+from scar.ir.program.ids import BlockID, ControlScopeID, OperationID, RegionID, UseID, ValueID
 from scar.ir.program.inventory import SourceContextDigest
 from scar.ir.program.providers import ProviderArtifact
 from scar.ir.program.source import SourceRole
 from scar.ir.program.source_subjects import ModuleUnitSource
 from scar.ir.program.structured import PythonProtocolKind, LoopInterface
+from scar.ir.program.source_language import CodeConstantSource
 from scar.ir.record_codec import decode, encode
 from scar.ir.semantics_v2 import Opcode
 from scar.ir.v2.common import SourceReference
@@ -364,3 +365,153 @@ def encode_module_prefix(value):
 
 def decode_module_prefix(value):
     return decode(ModulePrefixOverlay, value, record_tags=MODULE_RECORD_TAGS)
+
+
+class FrameBodyProfile(str, Enum):
+    STRUCTURED_MAPPING_314_V1 = 'STRUCTURED_MAPPING_314_V1'
+
+
+class NamespacePolicy(str, Enum):
+    MODULE_MAPPING_314_V1 = 'MODULE_MAPPING_314_V1'
+
+
+class FrameCompletionProfile(str, Enum):
+    RAW_EXCEPTION_REF_314_V1 = 'RAW_EXCEPTION_REF_314_V1'
+
+
+class StatementSequenceField(str, Enum):
+    BODY = 'BODY'
+    ORELSE = 'ORELSE'
+    HANDLER_BODY = 'HANDLER_BODY'
+    FINALBODY = 'FINALBODY'
+
+
+class SourceControlBoundary(str, Enum):
+    EXACT_OLD_ANCHOR = 'EXACT_OLD_ANCHOR'
+    NO_EXACT_OLD_ANCHOR = 'NO_EXACT_OLD_ANCHOR'
+
+
+class FrameBodyProtocolKind(str, Enum):
+    LOAD_NAME_314 = 'LOAD_NAME_314'
+    STORE_NAME_314 = 'STORE_NAME_314'
+    IMPORT_NAME_314 = 'IMPORT_NAME_314'
+    IMPORT_FROM_314 = 'IMPORT_FROM_314'
+    INVOKE_REMAINING = 'INVOKE_REMAINING'
+    UNEXPANDED_SLICE = 'UNEXPANDED_SLICE'
+
+
+class FrameBodyStatus(str, Enum):
+    PARTIAL = 'SOURCE_PREFIX_WITH_REQUIRED_SLICE'
+    TOPOLOGY_RECOVERED = 'SOURCE_TOPOLOGY_RECOVERED_WITH_OPEN'
+
+
+@dataclass(frozen=True, slots=True)
+class FrameStatementSlice:
+    """Exact source collection; anchors never invent coverage for old CFG gaps."""
+    unit: ModuleUnitSource
+    context: SourceContextDigest
+    owner: ModuleSource
+    field: StatementSequenceField
+    statements: tuple[SourceReference, ...]
+    boundary: SourceControlBoundary
+    suite: ControlFlowSuiteID | None = None
+    before: InsertionPointID | None = None
+
+    def __post_init__(self):
+        _need(type(self.unit) is ModuleUnitSource and type(self.context) is SourceContextDigest
+              and self.context.namespace_root == self.unit.namespace_root, 'frame slice requires exact unit/context')
+        _need(type(self.owner) in (ModuleUnitSource, SourceReference)
+              and type(self.field) is StatementSequenceField, 'frame slice requires a typed lexical sequence')
+        _need(type(self.statements) is tuple and bool(self.statements)
+              and all(type(ref) is SourceReference and ref.path == self.unit.snapshot.path
+                  and ref.fingerprint == self.unit.snapshot.fingerprint for ref in self.statements)
+              and len(set(self.statements)) == len(self.statements), 'frame slice needs distinct ordered original members')
+        _need(type(self.boundary) is SourceControlBoundary, 'frame slice boundary needs a closed status')
+        if self.boundary is SourceControlBoundary.EXACT_OLD_ANCHOR:
+            _need(type(self.suite) is ControlFlowSuiteID and type(self.before) is InsertionPointID,
+                  'exact old boundary requires its actual suite/insertion')
+        else:
+            _need(self.suite is None and self.before is None, 'missing old boundary cannot acquire invented anchors')
+
+
+@dataclass(frozen=True, slots=True)
+class FrameStatementExpansion:
+    source: SourceReference
+    region: RegionID
+    entry: BlockID
+    normal: BlockID | None
+    operations: tuple[OperationID, ...]
+    child_slices: tuple[FrameStatementSlice, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class UnexpandedFrameSlice:
+    subject: FrameStatementSlice
+    region: RegionID
+    operation: OperationID
+    required_expansion: RequiredModuleExpansion = RequiredModuleExpansion.REQUIRED
+
+    def __post_init__(self):
+        _need(type(self.subject) is FrameStatementSlice and type(self.region) is RegionID
+              and type(self.operation) is OperationID, 'frame debt requires exact collection and core interface')
+        _need(self.required_expansion is RequiredModuleExpansion.REQUIRED, 'unexpanded slice cannot discharge itself')
+
+
+@dataclass(frozen=True, slots=True)
+class FrameBodyProtocol:
+    operation: OperationID
+    kind: FrameBodyProtocolKind | PythonProtocolKind
+    source: ModuleSource
+
+
+@dataclass(frozen=True, slots=True)
+class StructuredFrameBodyOverlay:
+    """Source indices over core29's sole FrameRoot entry authority.
+
+    B's raw exception-reference boundary is not C0's exception packet and
+    supplies no traceback/pending/handled-context proof. Later capabilities
+    may connect those existing core relations without another body wire.
+    """
+    declaration: ModuleEntryDeclaration
+    census: ModuleSourceCensus
+    root_scope: ControlScopeID
+    prefix: FrameStatementSlice | None
+    expansions: tuple[FrameStatementExpansion, ...]
+    remaining: UnexpandedFrameSlice | None
+    frontiers: tuple[ModuleFrontier, ...]
+    operations_emitted: int
+    operation_links: tuple[ModuleOperationSource, ...]
+    value_links: tuple[ModuleValueSource, ...]
+    use_links: tuple[ModuleUseSource, ...]
+    protocols: tuple[FrameBodyProtocol, ...]
+    loops: tuple[LoopInterface, ...]
+    constants: tuple[CodeConstantSource, ...]
+    namespace_policy: NamespacePolicy = NamespacePolicy.MODULE_MAPPING_314_V1
+    completion_profile: FrameCompletionProfile = FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1
+    profile: FrameBodyProfile = FrameBodyProfile.STRUCTURED_MAPPING_314_V1
+    frame_rules: FrameRules = FrameRules()
+
+    @property
+    def status(self):
+        return FrameBodyStatus.PARTIAL if self.remaining is not None else FrameBodyStatus.TOPOLOGY_RECOVERED
+
+    def __post_init__(self):
+        _need(type(self.declaration) is ModuleEntryDeclaration and type(self.census) is ModuleSourceCensus
+              and type(self.root_scope) is ControlScopeID, 'structured frame needs original source and its sole core root')
+        _need(self.profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1
+              and self.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1
+              and self.completion_profile is FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1,
+              'unsupported explicit structured mapping/completion profile')
+        _need(type(self.operations_emitted) is int and self.operations_emitted > 0
+              and (self.prefix is None or type(self.prefix) is FrameStatementSlice)
+              and (self.remaining is None or type(self.remaining) is UnexpandedFrameSlice), 'invalid frame construction/partition')
+        _need(type(self.frame_rules) is FrameRules, 'frame must preserve conditional lifetime contract')
+        self.frame_rules.__post_init__()
+
+
+def encode_frame_body(value):
+    return encode(value, record_tags=MODULE_RECORD_TAGS)
+
+
+def decode_frame_body(value):
+    return decode(StructuredFrameBodyOverlay, value, record_tags=MODULE_RECORD_TAGS)

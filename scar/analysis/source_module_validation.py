@@ -7,7 +7,7 @@ from hashlib import sha256
 from scar.ir.program.module_entries import (ModuleBodyOverlay, ModuleBodyStatus, ModuleUnitSource,
     ModuleProtocolKind, ModuleEntryProfile, encode_module_overlay, decode_module_overlay)
 from scar.ir.program.model import (Behavior, BlockArgument, CompletionResult, ExitKind,
-    LiteralOrigin, ReferenceValue, StateVersionValue, TerminatorKind, ValueKind, ValueType)
+    LiteralOrigin, OperationResult, ReferenceValue, StateVersionValue, TerminatorKind, ValueKind, ValueType)
 from scar.ir.program.source import LoweringMetadata
 from scar.ir.program.call_edges import CallLinkStatus
 from scar.ir.program.structured import PythonProtocolKind
@@ -195,8 +195,9 @@ def require_valid_module_program(result, *, source_texts, code_evidence=None, ma
 
 def module_validation_report(result, *, source_texts, code_evidence=None, max_operations=10000):
     try:
-        from scar.ir.program.module_entries import ModulePrefixOverlay
-        checker = require_valid_module_prefix if type(result.module) is ModulePrefixOverlay else require_valid_module_program
+        from scar.ir.program.module_entries import ModulePrefixOverlay,StructuredFrameBodyOverlay
+        checker = (require_valid_structured_module_program if type(result.module) is StructuredFrameBodyOverlay
+                   else require_valid_module_prefix if type(result.module) is ModulePrefixOverlay else require_valid_module_program)
         checker(result, source_texts=source_texts, code_evidence=code_evidence,
                 max_operations=max_operations)
     except (ValueError,TypeError,KeyError,AttributeError,OSError,SyntaxError,RecursionError) as error:
@@ -402,3 +403,304 @@ def require_valid_module_prefix(result,*,source_texts,code_evidence=None,max_ope
     _need(any(f.kind=='REQUIRED_EXPANSION' for f in overlay.frontiers)
           and any(f.kind=='IMPORT_INTERNALS_REQUIRED_EXPANSION' and f.source==source for f in overlay.frontiers)
           and any(f.kind=='NAMESPACE_CONTENT_UNPROVEN' for f in overlay.frontiers), 'import/residual/content debt cannot be discharged by normal completion')
+
+
+def require_valid_structured_module_program(result,*,source_texts,code_evidence=None,max_operations=10000):
+    """SP8 B contract. No producer replay, packet inference or actual ABI proof."""
+    from pathlib import Path
+    import dis
+    from scar.analysis.program_lowering import PreparedSource
+    from scar.analysis.source_module_lowering import (module_unit,module_source_census,module_source_context,
+        require_root_evidence,mapping_prefix_selection,frame_statement_slice,_module_statement_ref)
+    from scar.analysis.source_semantics_v2 import validate_source_semantics
+    from scar.analysis.control_flow_v2 import validate_source_control_flow
+    from scar.ir.program.module_entries import (StructuredFrameBodyOverlay,FrameBodyProfile,
+        FrameBodyProtocolKind as K,StatementSequenceField as F,FrameCompletionProfile,
+        NamespacePolicy,encode_frame_body,decode_frame_body)
+    from scar.ir.program.source_subjects import MappingFramePorts,FrameKind
+    from scar.ir.program.control import ControlScopeKind
+    from scar.ir.program.state_addresses import (InvokeStateOperand,ReferenceOwner,NamespaceKey,AddressCoverage)
+    from scar.ir.program.validation import require_valid
+    overlay=result.module
+    _need(type(overlay) is StructuredFrameBodyOverlay and decode_frame_body(encode_frame_body(overlay))==overlay,'SP8 needs its closed typed overlay')
+    _need(result.profile is FrameBodyProfile.STRUCTURED_MAPPING_314_V1 and overlay.profile is result.profile
+          and overlay.namespace_policy is NamespacePolicy.MODULE_MAPPING_314_V1
+          and overlay.completion_profile is FrameCompletionProfile.RAW_EXCEPTION_REF_314_V1
+          and all(value is None for value in (result.interface,result.frame,result.structured,result.language)),
+          'SP8 mapping profile cannot acquire a function ABI or packet-completion claim')
+    unit=overlay.declaration.unit
+    _need(result.metadata==LoweringMetadata(unit.initializer.wire,unit.snapshot),'SP8 metadata invented function/source atoms')
+    _need(type(source_texts) is dict and unit.snapshot.path in source_texts,'SP8 needs explicit retained source text, no live fallback')
+    text=source_texts[unit.snapshot.path]
+    _need(type(text) is str and 'sha256:'+sha256(text.encode()).hexdigest()==unit.snapshot.fingerprint,'SP8 retained source fingerprint differs')
+    _need(set(result.semantics.sources)==set(result.control.sources)=={unit.snapshot.path},'SP8 source collection differs')
+    result.semantic.assert_valid()
+    for check in (validate_source_semantics(result.semantics,result.semantic,sources=source_texts),
+                  validate_source_control_flow(result.control,result.semantic,result.semantics,sources=source_texts)):
+        _need(check['valid'],'; '.join(check.get('errors',())))
+    context=PreparedSource(Path(unit.snapshot.path),Path(unit.namespace_root),text,result.semantic,result.semantics,result.control,
+        ast.parse(text,filename=unit.snapshot.path),{})
+    _need(module_unit(context)==unit and module_source_census(context)==overlay.census,'SP8 original MODULE census differs')
+    _need(code_evidence is not None and require_root_evidence(unit,code_evidence)==overlay.declaration.witness,
+          'SP8 requires exact readonly whole-root evidence, not a code-name or report boolean')
+    prefix,tail=mapping_prefix_selection(context,code_evidence)
+    _need(overlay.prefix==(frame_statement_slice(context,unit,F.BODY,prefix) if prefix else None),'SP8 prefix is not the mechanical maximal supported collection')
+    _need((overlay.remaining is not None)==bool(tail),'SP8 missing/extra remaining source collection')
+    if tail:
+        _need(overlay.remaining.subject==frame_statement_slice(context,unit,F.BODY,tail)
+              and overlay.remaining.required_expansion.value=='REQUIRED','SP8 residual membership/context/control range differs')
+    graph=result.graph;_need(graph is not None,'proved mapping root cannot silently disappear')
+    require_valid(graph)
+    _need(type(max_operations) is int and 1<=max_operations<=100000
+          and len(graph.operations)==overlay.operations_emitted<=max_operations,'SP8 operation budget/count differs')
+    _need(not any((graph.environments,graph.function_entries,graph.binding_definitions,graph.binding_reads,
+          graph.control_ports,graph.exception_packets,graph.pending_completions,graph.handled_context_domains,
+          graph.cleanup_interfaces,graph.cleanup_enters,graph.cleanup_resumes,graph.cleanup_replacements,
+          graph.handled_context_reads,graph.resumable_bodies,graph.stored_value_writes,graph.stored_value_reads,
+          graph.call_effect_expansions)), 'B raw-reference profile cannot claim function/pending/cleanup/stored-content effects')
+    _need(len(graph.frame_roots)==len(graph.control_scopes)==1,'SP8 B has exactly one actual frame authority')
+    root=graph.frame_roots[0];scope=graph.control_scopes[0]
+    _need(root.scope==scope.id==overlay.root_scope and root.kind is FrameKind.MODULE and root.code==code_evidence.captured
+          and scope.kind is ControlScopeKind.FRAME and scope.source==unit and scope.region==graph.root
+          and type(root.entry) is MappingFramePorts and not root.entry.closure_cells,
+          'SP8 root source/code/namespace ABI differs; empty closure is this source profile only')
+    regions={row.id:row for row in graph.regions};operations={row.id:row for row in graph.operations}
+    values={row.id:row for row in graph.values};blocks={row.id:row for region in graph.regions for row in region.blocks}
+    owners={op:region.id for region in graph.regions for block in region.blocks for op in block.operations}
+    region=regions[graph.root];entry=blocks[region.entry];abi=root.entry
+    refs=(abi.locals_namespace,abi.globals_namespace,abi.builtins_namespace)
+    world=values[abi.world].location;ref_type=ValueType(ValueKind.REFERENCE);state_type=ValueType(ValueKind.STATE,location=world)
+    links={row.operation:row for row in overlay.operation_links};protocols={row.operation:row for row in overlay.protocols}
+    def original(source):
+        if type(source) is ModuleUnitSource:return source==unit
+        atom=result.semantic.source_atoms.get(source.atom_id) if type(source) is SourceReference else None
+        return atom is not None and atom.reference==source and source.path==unit.snapshot.path
+    _need(len(links)==len(overlay.operation_links) and set(links)==set(operations)
+          and len(protocols)==len(overlay.protocols) and set(protocols)<=set(operations)
+          and {row.value for row in overlay.value_links}==set(values)
+          and {(row.operation,row.use) for row in overlay.use_links}=={(op.id,use.id) for op in graph.operations for use in op.uses},
+          'SP8 correspondence/core endpoints are incomplete')
+    _need(all(original(row.source) for rows in (overlay.operation_links,overlay.value_links,overlay.use_links,overlay.protocols,overlay.frontiers)
+          for row in rows),'SP8 invented a source reference')
+    for link in overlay.operation_links:
+        if link.semantic_operation is not None:
+            definition=result.semantic.definitions.get(link.semantic_operation)
+            _need(type(link.source) is SourceReference and definition is not None
+                  and definition.code_id==link.source.atom_id.wire and link.source.atom_id in definition.source_atoms,
+                  'SP8 SG/source identity join differs')
+    for protocol in overlay.protocols:_need(protocol.source==links[protocol.operation].source,'SP8 protocol/source endpoint differs')
+    def invoke(op,normal_types):
+        _need(op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE and not op.effects_complete
+              and set(op.behaviors)=={Behavior.CONTROL,Behavior.READ,Behavior.WRITE}
+              and op.invoke_arguments==tuple(use.id for use in op.uses)
+              and tuple((row.kind,row.types) for row in op.completions)==
+              ((ExitKind.NORMAL,normal_types),(ExitKind.RAISE,(ref_type,state_type)))
+              and tuple(edge.kind for edge in op.terminator.successors)==(ExitKind.NORMAL,ExitKind.RAISE)
+              and all(edge.arguments==tuple(CompletionResult(i) for i in range(len(signature.types)))
+                  for edge,signature in zip(op.terminator.successors,op.completions)), 'SP8 invocation raw completion/world signature differs')
+        return tuple(blocks[edge.block] for edge in op.terminator.successors)
+    def literal(use,expected):
+        origin=values[use.value].origin
+        _need(type(origin) is LiteralOrigin and type(origin.value) is type(expected) and origin.value==expected,
+              'SP8 namespace/import literal key differs')
+    refinements={row.site.operation:row for row in graph.state_address_refinements}
+    expected_addresses=set()
+    nodes={};expression_nodes={}
+    for node in ast.walk(context.tree):
+        if isinstance(node,(ast.expr,ast.stmt)):
+            try:reference=_module_statement_ref(context,node)
+            except ValueError:continue  # Unvisited source gaps do not acquire fabricated atoms.
+            (expression_nodes if isinstance(node,ast.expr) else nodes)[reference]=node
+    instructions=tuple(dis.get_instructions(code_evidence.code,adaptive=False,show_caches=False))
+    imports_by_source={}
+    for protocol in overlay.protocols:
+        op=operations[protocol.operation];kind=protocol.kind
+        if type(kind) is not K:continue
+        normal_types=(state_type,) if kind in (K.STORE_NAME_314,K.UNEXPANDED_SLICE) else (ref_type,state_type)
+        invoke(op,normal_types)
+        if kind is K.LOAD_NAME_314:
+            node=expression_nodes.get(protocol.source)
+            _need(isinstance(node,ast.Name) and len(op.uses)==5 and tuple(use.value for use in op.uses[:3])==refs,
+                  'LOAD_NAME must retain named L/G/savedB and exact Name source')
+            literal(op.uses[3],node.id);expected_addresses.add(op.id)
+            expected=[(i,3,'READ') for i in range(3)]
+        elif kind is K.STORE_NAME_314:
+            _need(len(op.uses)==4 and op.uses[0].value==abi.locals_namespace,'STORE_NAME must target declared L, not fast locals/G')
+            node=expression_nodes.get(protocol.source) or nodes.get(protocol.source)
+            if isinstance(node,ast.Name):literal(op.uses[1],node.id)
+            else:
+                _need(isinstance(node,(ast.Import,ast.ImportFrom)),'STORE_NAME source must be an original binding/import')
+                allowed=[alias.asname or alias.name for alias in node.names]
+                _need(type(values[op.uses[1].value].origin) is LiteralOrigin and values[op.uses[1].value].origin.value in allowed,'import alias STORE_NAME key differs')
+            expected_addresses.add(op.id);expected=[(0,1,'WRITE')]
+        elif kind is K.IMPORT_NAME_314:
+            node=nodes.get(protocol.source)
+            _need(isinstance(node,(ast.Import,ast.ImportFrom)) and len(op.uses)==8
+                  and tuple(use.value for use in op.uses[:3])==tuple(reversed(refs)) and op.callee is None,
+                  'IMPORT_NAME uses savedB/G/L, not a fixed callable/module object')
+            literal(op.uses[6],'__import__')
+            index=imports_by_source.get(protocol.source,0);imports_by_source[protocol.source]=index+1
+            requested=node.names[index].name if isinstance(node,ast.Import) else node.module or ''
+            literal(op.uses[3],requested);literal(op.uses[4],0 if isinstance(node,ast.Import) else node.level)
+            if isinstance(node,ast.Import):literal(op.uses[5],None)
+            else:
+                fromlist=values[op.uses[5].value]
+                _need(type(fromlist.origin) is OperationResult,'IMPORT_NAME fromlist must come from its typed code-constant read')
+                constants=[row for row in overlay.constants if fromlist.origin.operation==row.operation]
+                _need(len(constants)==1 and constants[0].source==protocol.source
+                      and len(constants[0].constant_path)==1
+                      and constants[0].constant_path[0]<len(code_evidence.code.co_consts)
+                      and code_evidence.code.co_consts[constants[0].constant_path[0]]==tuple(alias.name for alias in node.names),
+                      'IMPORT_NAME fromlist must be this exact whole-root typed code constant')
+            _need(any(row.opname=='IMPORT_NAME' and row.argval==requested and tuple(row.positions)==
+                  (node.lineno,node.end_lineno,node.col_offset,node.end_col_offset) for row in instructions),
+                  'import interface has no matching original root opcode/source span')
+            expected_addresses.add(op.id);expected=[(0,6,'READ')]
+        elif kind is K.IMPORT_FROM_314:
+            _need(isinstance(nodes.get(protocol.source),ast.ImportFrom) and len(op.uses)==3 and op.callee is None,
+                  'IMPORT_FROM must keep its original source and dynamic receiver/key')
+            expected=None
+        else:expected=None
+        if expected is not None:
+            row=refinements.get(op.id)
+            _need(row is not None and type(row.site) is InvokeStateOperand and row.site.state_use==op.uses[-1].id
+                  and row.coverage is AddressCoverage.PARTIAL and row.protocol is None and len(row.effects)==len(expected),
+                  'namespace access must remain partial attempted address on this exact invoke state')
+            for effect,(owner,key,mode) in zip(row.effects,expected):
+                _need(type(effect.owner) is ReferenceOwner and effect.owner.use==op.uses[owner].id
+                      and len(effect.path)==1 and type(effect.path[0]) is NamespaceKey
+                      and effect.path[0].key==op.uses[key].id and effect.mode.value==mode,'SP8 attempted namespace role/key differs')
+    _need(set(refinements)>=expected_addresses,'SP8 namespace attempted addresses missing')
+    # Exact original prefix/nested statement coverage, with actual owned operations.
+    expected_statements=[]
+    def descend(node):
+        expected_statements.append(node)
+        if isinstance(node,ast.For):
+            for child in (*node.body,*node.orelse):descend(child)
+    for node in prefix:descend(node)
+    expansions={row.source:row for row in overlay.expansions}
+    _need(len(expansions)==len(overlay.expansions) and set(expansions)=={_module_statement_ref(context,node) for node in expected_statements},
+          'SP8 expanded source members are missing/extra/duplicated')
+    for node in expected_statements:
+        expansion=expansions[_module_statement_ref(context,node)]
+        expected_children=tuple(frame_statement_slice(context,expansion.source,field,getattr(node,name))
+            for name,field in (('body',F.BODY),('orelse',F.ORELSE)) if isinstance(node,ast.For) and getattr(node,name))
+        _need(expansion.region==graph.root and expansion.child_slices==expected_children
+              and expansion.entry in blocks and expansion.normal in blocks
+              and expansion.entry in {block.id for block in region.blocks}
+              and expansion.normal in {block.id for block in region.blocks}
+              and len(set(expansion.operations))==len(expansion.operations)
+              and all(identity in operations and owners[identity]==graph.root for identity in expansion.operations),
+              'SP8 statement/recursive slice operations differ')
+        if not isinstance(node,ast.Pass):_need(bool(expansion.operations),'expanded non-Pass statement has no data/control operations')
+    def ordered_statements(nodes,initial=None):
+        previous=initial
+        for node in nodes:
+            expansion=expansions[_module_statement_ref(context,node)]
+            if previous is not None:_need(expansion.entry==previous,'source statement normal continuation is reordered/disconnected')
+            previous=expansion.normal
+        return previous
+    last_normal=ordered_statements(prefix,entry.id)
+    # Derive expression results only from actual producer ports/literals.
+    def expression_value(node):
+        source=_module_statement_ref(context,node)
+        if isinstance(node,ast.Constant):
+            candidates={row.value for row in overlay.value_links if row.source==source
+                and isinstance(values[row.value],ReferenceValue) and type(values[row.value].origin) is LiteralOrigin
+                and type(values[row.value].origin.value) is type(node.value) and values[row.value].origin.value==node.value}
+            _need(len(candidates)==1,'scalar source expression has no unique exact literal reference')
+            return next(iter(candidates))
+        constant=[row for row in overlay.constants if row.source==source]
+        if constant:
+            _need(len(constant)==1,'code-constant source expression is ambiguous')
+            return operations[constant[0].operation].results[0]
+        candidates=[op for op in graph.operations if owners[op.id]==graph.root and links[op.id].source==source
+            and op.terminator is not None and op.terminator.kind is TerminatorKind.INVOKE
+            and (links[op.id].semantic_operation is not None
+                 or op.id in protocols and protocols[op.id].kind is K.LOAD_NAME_314)]
+        _need(len(candidates)==1,'source expression needs its unique canonical invocation')
+        op=candidates[0];normal,_=invoke(op,(ref_type,state_type))
+        if isinstance(node,ast.Name):return normal.arguments[0]
+        children=([node.left,node.right] if isinstance(node,ast.BinOp) else [node.operand] if isinstance(node,ast.UnaryOp)
+            else [node.left,node.comparators[0]] if isinstance(node,ast.Compare) else [node.value] if isinstance(node,ast.Attribute)
+            else [node.value,node.slice] if isinstance(node,ast.Subscript) else list(node.elts) if isinstance(node,(ast.List,ast.Tuple))
+            else [node.func,*node.args,*(keyword.value for keyword in node.keywords)] if isinstance(node,ast.Call) else None)
+        _need(children is not None and tuple(use.value for use in op.uses[:-1])==tuple(expression_value(child) for child in children),
+              'source expression ordered operand graph differs')
+        return normal.arguments[0]
+    def store_at(source):
+        found=[operations[p.operation] for p in overlay.protocols if p.kind is K.STORE_NAME_314 and p.source==source]
+        _need(len(found)==1,'source binding has no unique mapping store attempt')
+        return found[0]
+    for node in expected_statements:
+        source=_module_statement_ref(context,node)
+        if isinstance(node,ast.Assign):
+            store=store_at(_module_statement_ref(context,node.targets[0]))
+            _need(store.uses[2].value==expression_value(node.value),'RHS must feed its exact namespace store')
+        elif isinstance(node,ast.Expr):
+            discard=[operations[p.operation] for p in overlay.protocols if p.kind is PythonProtocolKind.FRAME_DISCARD and p.source==source]
+            _need(len(discard)==1 and discard[0].uses[0].value==expression_value(node.value),'expression result must feed its exact discard')
+        elif isinstance(node,ast.For):
+            iterator_ops=[operations[p.operation] for p in overlay.protocols if p.kind is PythonProtocolKind.GET_ITERATOR
+                and p.source==_module_statement_ref(context,node.iter)]
+            _need(len(iterator_ops)==1 and iterator_ops[0].uses[0].value==expression_value(node.iter),'for iterable eager evaluation differs')
+            iterator=invoke(iterator_ops[0],(ref_type,state_type))[0].arguments[0]
+            advances=[operations[p.operation] for p in overlay.protocols if p.kind is PythonProtocolKind.ADVANCE_ITERATOR and p.source==source]
+            _need(len(advances)==1 and advances[0].uses[0].value==iterator,'for advance must drive this same iterator')
+            item=invoke(advances[0],(ref_type,state_type))[0].arguments[0]
+            target=store_at(_module_statement_ref(context,node.target));body_entry=invoke(target,(state_type,))[0]
+            _need(target.uses[2].value==item,'for item must feed its exact mapping target store')
+            ordered_statements(node.body,body_entry.id)
+        elif isinstance(node,(ast.Import,ast.ImportFrom)):
+            imported=[operations[p.operation] for p in overlay.protocols if p.kind is K.IMPORT_NAME_314 and p.source==source]
+            stores=[operations[p.operation] for p in overlay.protocols if p.kind is K.STORE_NAME_314 and p.source==source]
+            _need(len(imported)==(len(node.names) if isinstance(node,ast.Import) else 1) and len(stores)==len(node.names),
+                  'import alias/protocol inventory differs')
+            if isinstance(node,ast.Import):
+                for imp,store in zip(imported,stores):
+                    normal,_=invoke(imp,(ref_type,state_type))
+                    _need(store.uses[2].value==normal.arguments[0] and store.uses[-1].value==normal.arguments[-1],
+                          'import result/post-world must feed its own alias store')
+            else:
+                receiver=invoke(imported[0],(ref_type,state_type))[0].arguments[0]
+                froms=[operations[p.operation] for p in overlay.protocols if p.kind is K.IMPORT_FROM_314 and p.source==source]
+                _need(len(froms)==len(node.names),'IMPORT_FROM alias inventory differs')
+                for member,frm,store in zip(node.names,froms,stores):
+                    literal(frm.uses[1],member.name);normal,_=invoke(frm,(ref_type,state_type))
+                    _need(frm.uses[0].value==receiver and store.uses[2].value==normal.arguments[0]
+                          and store.uses[-1].value==normal.arguments[-1],'from receiver/result/store sequencing differs')
+    for protocol in overlay.protocols:
+        if protocol.kind is K.STORE_NAME_314:
+            store=operations[protocol.operation];consumed=store.uses[2].value
+            _need([(op.id,use.id) for op in graph.operations for use in op.uses if use.value==consumed]==[(store.id,store.uses[2].id)],
+                  'STORE_NAME consumed stack input must not remain pending on either completion')
+    # Constant references remain the original typed whole-root code-slot records.
+    instructions=tuple(dis.get_instructions(code_evidence.code,adaptive=False,show_caches=False))
+    for constant in overlay.constants:
+        _need(constant.code_key==root.code.key and len(constant.constant_path)==1 and constant.operation in operations
+              and protocols[constant.operation].kind is PythonProtocolKind.READ_CODE_CONSTANT,'SP8 code-constant record lost its original identity/primitive')
+        matches=[row for row in instructions if row.opname=='LOAD_CONST' and row.arg==constant.constant_path[0]
+            and tuple(row.positions)==(constant.source.start_line,constant.source.end_line,constant.source.start_column,constant.source.end_column)]
+        _need(len(matches)==1 and type(matches[0].argval) in (tuple,slice)
+              and code_evidence.code.co_consts[matches[0].arg] is matches[0].argval,'SP8 whole-root code constant slot/span differs')
+        _need(owners[constant.operation]==graph.root,'code constant must belong to this actual module frame')
+    _need({row.operation for row in overlay.constants}=={p.operation for p in overlay.protocols if p.kind is PythonProtocolKind.READ_CODE_CONSTANT},'SP8 typed code constant inventory incomplete')
+    for loop in overlay.loops:
+        _need(loop.region==graph.root and not loop.bindings and loop.source in expansions,
+              'module loop must use mapping stores, not function slot SSA')
+        for edge in loop.backedges:_need(edge.operation in operations,'loop backedge must refer to existing CFG')
+    if tail:
+        residual=overlay.remaining
+        _need(len(regions)==2 and residual.region!=graph.root and regions[residual.region].parent==graph.root,
+              'remaining slice is a computation Region, not another Python frame')
+        _need(residual.operation in protocols and protocols[residual.operation].kind is K.UNEXPANDED_SLICE,
+              'remaining exact source interface missing')
+        calls=[op for op in graph.operations if op.callee is not None]
+        _need(len(calls)==1 and calls[0].callee==residual.region and protocols[calls[0].id].kind is K.INVOKE_REMAINING,
+              'remaining source must run once after the actual prefix, not a duplicate whole body')
+        if last_normal is not None:_need(calls[0].id in blocks[last_normal].operations,'remaining source must begin at prefix normal continuation')
+    else:_need(len(regions)==1 and not any(op.callee is not None for op in graph.operations),'extra source computation Region')
+    _need(any(frontier.kind=='ENTRY_PROTOCOL_UNPROVEN' for frontier in overlay.frontiers)
+          and any(frontier.kind=='NAMESPACE_CONTENT_UNPROVEN' for frontier in overlay.frontiers)
+          and (not tail or any(frontier.kind=='REQUIRED_EXPANSION' for frontier in overlay.frontiers)),
+          'SP8 cannot silently discharge namespace/runtime/residual obligations')

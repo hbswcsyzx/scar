@@ -44,6 +44,45 @@ def captured_cell_slot(definition, name):
     return ValueSlotID(_key("captured-cell-interface", definition.wire, name))
 
 
+def dispatch_source_expression(builder, node, cursor):
+    if builder.has_language("GENEXPR_314_V1") and isinstance(node, ast.GeneratorExp):
+        from scar.analysis.source_generator_lowering import lower_generator
+        return lower_generator(builder, node, cursor)
+    if (builder.has_language("CALL_KWARGS_314_V1") and isinstance(node, ast.Call)
+            and any(keyword.arg is None for keyword in node.keywords)):
+        from scar.analysis.source_call_lowering import lower_kwargs_call
+        return lower_kwargs_call(builder, node, cursor)
+    if builder.has_language("LEXICAL_LOCALS") and isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
+        label = ("GENERATOR_EXPRESSION_CREATION_DRIVE_INTERFACE_UNIMPLEMENTED" if isinstance(node, ast.GeneratorExp)
+                 else "COMPREHENSION_SCOPE_INTERFACE_UNIMPLEMENTED")
+        raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, label)
+    if builder.has_language("SLICE_KEYS") and isinstance(node, (ast.Slice, ast.Subscript)):
+        from scar.analysis.source_slice_lowering import lower_slice, lower_subscript
+        return lower_slice(builder, node, cursor) if isinstance(node, ast.Slice) else lower_subscript(builder, node, cursor)
+    if isinstance(node, ast.Dict):
+        from scar.analysis.source_mapping_lowering import lower_dictionary
+        return lower_dictionary(builder, node, cursor)
+    if isinstance(node, ast.JoinedStr):
+        from scar.analysis.source_string_lowering import lower_joined_string
+        return lower_joined_string(builder, node, cursor)
+    if isinstance(node, ast.BoolOp):
+        from scar.analysis.source_conditional_lowering import lower_bool_expression
+        return lower_bool_expression(builder, node, cursor)
+    if isinstance(node, ast.IfExp):
+        from scar.analysis.source_conditional_lowering import lower_if_expression
+        return lower_if_expression(builder, node, cursor)
+    if isinstance(node, ast.Name):
+        return builder.read_source_name(node, cursor, builder.old_operation(node))
+    return NotImplemented
+
+
+def dispatch_source_condition(builder, node, cursor):
+    if isinstance(node, (ast.BoolOp, ast.IfExp)) or isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+        from scar.analysis.source_conditional_lowering import lower_condition_expression
+        return lower_condition_expression(builder, node, cursor)
+    return NotImplemented
+
+
 class StructuredEnvironmentBuilder(StructuredBuilder):
     """The structured body rules with canonical environment and address ports."""
 
@@ -110,41 +149,12 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
         return cursor, value
 
     def expr(self, node, cursor):
-        if self.has_language("GENEXPR_314_V1") and isinstance(node, ast.GeneratorExp):
-            from scar.analysis.source_generator_lowering import lower_generator
-            return lower_generator(self, node, cursor)
-        if (self.has_language("CALL_KWARGS_314_V1") and isinstance(node, ast.Call)
-                and any(keyword.arg is None for keyword in node.keywords)):
-            from scar.analysis.source_call_lowering import lower_kwargs_call
-            return lower_kwargs_call(self, node, cursor)
-        if self.has_language("LEXICAL_LOCALS") and isinstance(node, (ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp)):
-            label = ("GENERATOR_EXPRESSION_CREATION_DRIVE_INTERFACE_UNIMPLEMENTED" if isinstance(node, ast.GeneratorExp)
-                     else "COMPREHENSION_SCOPE_INTERFACE_UNIMPLEMENTED")
-            raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, label)
-        if self.has_language("SLICE_KEYS") and isinstance(node, (ast.Slice, ast.Subscript)):
-            from scar.analysis.source_slice_lowering import lower_slice, lower_subscript
-            return lower_slice(self, node, cursor) if isinstance(node, ast.Slice) else lower_subscript(self, node, cursor)
-        if isinstance(node, ast.Dict):
-            from scar.analysis.source_mapping_lowering import lower_dictionary
-            return lower_dictionary(self, node, cursor)
-        if isinstance(node, ast.JoinedStr):
-            from scar.analysis.source_string_lowering import lower_joined_string
-            return lower_joined_string(self, node, cursor)
-        if isinstance(node, ast.BoolOp):
-            from scar.analysis.source_conditional_lowering import lower_bool_expression
-            return lower_bool_expression(self, node, cursor)
-        if isinstance(node, ast.IfExp):
-            from scar.analysis.source_conditional_lowering import lower_if_expression
-            return lower_if_expression(self, node, cursor)
-        if isinstance(node, ast.Name):
-            return self.read_source_name(node, cursor, self.old_operation(node))
-        return super().expr(node, cursor)
+        result = dispatch_source_expression(self, node, cursor)
+        return super().expr(node, cursor) if result is NotImplemented else result
 
     def condition(self, node, cursor):
-        if isinstance(node, (ast.BoolOp, ast.IfExp)) or isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
-            from scar.analysis.source_conditional_lowering import lower_condition_expression
-            return lower_condition_expression(self, node, cursor)
-        return super().condition(node, cursor)
+        result = dispatch_source_condition(self, node, cursor)
+        return super().condition(node, cursor) if result is NotImplemented else result
 
     def read_source_name(self, node, cursor, old=None):
         """A target child may have SG provenance without a computational overlay."""

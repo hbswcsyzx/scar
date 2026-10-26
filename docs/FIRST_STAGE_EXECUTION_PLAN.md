@@ -8,7 +8,7 @@
 
 | 工作 | 当前边界与下一验收 |
 | --- | --- |
-| 通用 frame/control 根 | core29 的 typed FRAME/ModuleUnitSource/单一 ABI 权威及旧 source 守卫七处已通过 A 类型门；主树旧 SP5/6/7 正常读回。尚未生成 SP8/模块正文或绑定实际 frame。下一步接通用 namespace/source producer，再接 Try/异常清理，整体12文件方案见[设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
+| 通用 frame/control 根 | A 的 core29 FRAME/单一 ABI 权威已接 B 的实际 SP8 producer：机械展开8顶层接口/118ops，Try等3句精确suffix仍REQUIRED；主树同SP8及旧function SP5普通读回通过。实际frame/namespace、内容/effects仍OPEN。下一步同SP8接传播payload与Try/异常清理，见[B实际报告](../artifacts/experiments/module_structured_prefix_b_applied_20261025/REPORT.md)及[整体设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
 | callee-entry 参数边 | snapshot→原 formal port 的局部 projection 已通过真实隔离门及主树旧 SP5/typed consumer：271次入口/566个参数观测，260次入口/520 ports 对应，11次保留 frontier。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[实际接入报告](../artifacts/experiments/callee_entry_routing_applied_20261025/REPORT.md)。 |
 | project/dependency 统一出版 | 当前 CLI 对 project SP5 的 adapter 仍 BLOCKED；原 origin、父 body/CAS 和 namespace 设计已审，四源码正在实现 schema2 ADD/REVISE。保所有成功产物，不能只留下方便处理的 external case。随后用同一新 CPU capture 实际验证两类入口，不拼接旧样例。 |
 

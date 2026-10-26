@@ -6,6 +6,17 @@
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的
 实施记录；其中“进行中”仅指该条写入时状态，不作为当前进程存活证明。
 
+### 2026-10-26：通用模块 SP8 连续前缀建模通过
+
+保存的同586B源码，由原AST/SG/CodeWitness机械选择8顶层接口，生成118ops/2regions，
+包含For体共9stmt记录；Try/Assert/Expr三条准确剩余切片仍REQUIRED。原95atoms/
+92definitions/45CFGnodes/56edges分母保留，不按变量名或业务库选择。
+隔离63369 actual0/7.1263s，普通SP8完整读回与旧SP6/7消费通过；
+主树55827 actual0/4.8986s，原SP8及旧function SP5普通读回通过，无新lower/target。
+RAW_EXCEPTION_REF profile不捏造传播traceback/ExceptionPacket或pending；下一项C仍待实施。
+实际namespace、内容、完整effects/lifetime及LeWM自动全覆盖仍OPEN。见
+[准确接入报告](../artifacts/experiments/module_structured_prefix_b_applied_20261025/REPORT.md)。
+
 ### 2026-10-25：函数入口局部参数接线已接主树
 
 隔离门 actual93681 exit0/38.8904s；主树普通兼容 consumer actual66781
