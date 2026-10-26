@@ -584,11 +584,13 @@ class SourceEntryFrontendPlan:
 def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=(
         SourceLanguageCapability.FIXED_UNPACK, SourceLanguageCapability.SLICE_KEYS,
         SourceLanguageCapability.LEXICAL_LOCALS, SourceLanguageCapability.CALL_KWARGS_314_V1), out_dir=None,
-        dispatch_order='CALL_WEIGHT_DESC_V1'):
+        dispatch_order='CALL_WEIGHT_DESC_V1', eligible_entry_keys=None):
     """Select by call weight, optionally batch the selected entries by file.
 
     Batching changes only analysis scheduling. It preserves window membership,
     original entry identities and all ordinary source/compiler checks.
+    Optional explicit ready-entry keys narrow only dispatch; the complete
+    candidate/group catalogs and their denominators remain unchanged.
     """
     from scar.analysis.source_entry_catalog import SourceEntryCatalog
     _need(type(catalog) is SourceEntryCatalog and type(budget) is SourceFrontendBudget,
@@ -597,13 +599,27 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
           'unsupported source-entry analysis dispatch order')
     budget.__post_init__()
     SourceLanguageOptions(capabilities)
+    if eligible_entry_keys is not None:
+        _need(type(eligible_entry_keys) is tuple and bool(eligible_entry_keys)
+              and all(type(key) is str and bool(key) for key in eligible_entry_keys)
+              and len(set(eligible_entry_keys)) == len(eligible_entry_keys),
+              'eligible_entry_keys must be an explicit nonempty tuple of unique nonempty strings')
     metadata = catalog.metadata()
     entries, groups = tuple(metadata['candidates']), tuple(metadata['groups'])
     _need(len(entries) <= budget.max_catalog_bodies and len(groups) <= budget.max_catalog_groups,
           'full entry catalog exceeds budget')
+    eligible = None
+    if eligible_entry_keys is not None:
+        eligible = frozenset(eligible_entry_keys)
+        ready_keys = {entry['entry_key'] for entry in entries
+                      if entry['status'] == 'CANDIDATE_SOURCE_GRAPH_UNVERIFIED'}
+        _need(eligible.issubset(ready_keys),
+              'eligible_entry_keys contains an unknown or non-ready qualified entry key')
     dispatch, files = [], set()
     for entry in entries:
         if entry['status'] != 'CANDIDATE_SOURCE_GRAPH_UNVERIFIED':
+            continue
+        if eligible is not None and entry['entry_key'] not in eligible:
             continue
         if len(dispatch) >= budget.max_dispatch_bodies:
             break
@@ -625,6 +641,12 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
         'source_body_publication': 'NOT_RUN', 'runtime_binding': 'NOT_RUN', 'first_stage_complete': False}
     if dispatch_order == 'FILE_GROUPED_V1':
         document['dispatch_order'] = dispatch_order
+    if eligible_entry_keys is not None:
+        keys = sorted(eligible_entry_keys)
+        document['selection'] = {'kind': 'EXPLICIT_QUALIFIED_ENTRY_KEYS',
+            'eligible_entry_keys': keys, 'eligible_entry_keys_sha256': _hash(keys),
+            'eligible_ready_candidates': len(keys), 'dispatch_priority': 'CALL_WEIGHT_DESC_V1',
+            'dispatch_order': dispatch_order, 'full_catalog_and_call_denominators_preserved': True}
     digest = _hash({'document': document, 'entries': entries, 'groups': groups, 'dispatch': tuple(dispatch)})
     result = SourceEntryFrontendPlan(catalog, document, entries, groups, tuple(dispatch), digest)
     if out_dir is not None:

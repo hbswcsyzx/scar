@@ -1,0 +1,14 @@
+{
+  "graph_CodeType_decode": false,
+  "logical_original": {
+    "bytes": 2847642,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/external_entry_remaining_window_20261026/catalog.json",
+    "sha256": "2a19c88208b170ba5c27bf2cf4048c26719ece64435d5f3f85ad653d5d3ba73d"
+  },
+  "representation": "gzip of exact original normal catalog metadata bytes; original logical URI unchanged",
+  "stored_transport": {
+    "bytes": 272689,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/analysis/external_entry_remaining_window_20261026/catalog.json.gz",
+    "sha256": "74d88f4175a69afa076df5eaf10076da69643a0c04fb17bf9679ab00d66d1eb7"
+  }
+}

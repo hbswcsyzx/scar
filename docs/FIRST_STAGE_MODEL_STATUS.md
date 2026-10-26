@@ -36,6 +36,13 @@ main尚未应用，后继需要main producer版本的新验收。scope对应不�
 此前[metadata计划](../artifacts/experiments/lewm_remaining_compiler_witnesses_20261026/REPORT.md)
 保留为原准备范围。
 
+四份archive接入后的正常metadata枚举为243候选：242可尝试、1个resumable入口尚缺适配；
+原817 groups/100438历史calls不变。扣除原33 terminal后剩209入口/99文件，已按原数据
+机械排成13批，尚未执行。新增eligible_entry_keys仅限制dispatch，保完整候选及调用分母；
+209正例、重复/未知key拒绝均通过，未解图。见
+[范围与API](../artifacts/analysis/external_entry_remaining_window_20261026/ELIGIBLE_ENTRY_API.md)及
+[分批声明计划](../artifacts/analysis/external_entry_remaining_window_20261026/BATCH_READ_PLAN.md)。
+
 后继外部source-entry真实批次40479已actual exit0 / 958.56s：完整50入口中26成功、
 7不支持、17因worker时限未尝试；没有FAILED或无终态的STARTED。26原SP5均经普通
 source/code reader，压59,422,305B / 解516,098,986B留本地原URI及双SHA。
