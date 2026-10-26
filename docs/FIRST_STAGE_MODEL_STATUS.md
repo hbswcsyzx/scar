@@ -2,6 +2,13 @@
 
 日期：2026-10-26。**OPEN：完整 LeWM 自动建模未验收。**
 
+最新源码入口汇总为 **243 = 161 成功 + 81 不支持 + 1 resumable 缺适配**；
+函数 Try 的原20项已全部成功。完整选择集补回早期26个成功入口，161项普通接入
+正在执行，尚未提升正式858指针。普通CLI已支持显式Python调用目标/receiver采集，
+通用CPU样例的原成员、gzip归档和错误原manifest拒绝通过；完整LeWM v2尚未运行。
+真实native输入的原ETO元数据关联已完成，canonical端口分片处理仍在运行；
+这些局部结果不能替代整个值/状态/资源图闭合。
+
 本轮已接入通用图查询：work→native/source上下文→原源码body，以及原调用者Use→
 callee formal和OS文件资源引用；节点/边定义见[图模型说明](GRAPH_MODEL_GUIDE.md)。
 真实源端口consumer覆盖100,550 attempts，其中2,516 calls/6,805 argument ports；

@@ -41,7 +41,7 @@ OS/CUDA接口保输入输出、状态、效果、失败、资源、生命周期�
 | 节点 | 任务 | 必需验收依据 | 当前状态 |
 |---|---|---|---|
 | P1 类型与范围 | 核实体、协议、资源类型及其自动判定规则，固定软件/硬件深度。 | 每种构造/接口/资源有归属，角色/属性/事实不混型。 | 合同已有，本文固定最新边界；实际缺口继续补齐。 |
-| P2 软件恢复 | AST/symtable/dis、CFG/SSA/状态流；工作列表自动恢复模块、函数、依赖。 | 原source/code/规范端口一致，成功body正常准入，unsupported/未尝试不计成功。 | 正式858body不变；外部209入口已115成功/94不支持，未计正式publication；函数Try真实20入口验收中。 |
+| P2 软件恢复 | AST/symtable/dis、CFG/SSA/状态流；工作列表自动恢复模块、函数、依赖。 | 原source/code/规范端口一致，成功body正常准入，unsupported/未尝试不计成功。 | 正式858body指针不变；完整243候选已合并为161成功、81不支持、1 resumable入口缺适配。函数Try原20入口已20成功；完整161项正在普通接入，尚未计正式publication。 |
 | P3 数据与跨函数连接 | 实参Use→formal、return→调用结果、环境/状态；逻辑版本→对象/view/storage/materialization。 | 原端点和实际调用限定；不以来源/引用相同证明内容恒定，不要求保存全部Tensor值。 | 已产2516 calls/6805条件参数端口并接查询；全数据/状态连接未闭合，继续补方法/依赖入口与native输入端口。 |
 | P4 硬件及使用关系 | 自动采CPU/NUMA/DRAM、GPU/PCI、mount/fsdev、块设备/partition/mapper/controller/NVMe。 | 库存与使用分开；FD/mmap/allocation/work连接真实资源，有原来源；介质或隐藏层不能猜。 | 通用拓扑已实际采集；OS原操作可查询，当前目标文件IO到块设备已证精确绑定0，stat与共享FD缺口分别保留。 |
 | P5 同Run联合图 | 原LeWM完整episode收调用、Torch/native、OS、物理Tensor与资源身份/拓扑，正常归档连接。 | 实际调用/活动/资源全部入账；软件到runtime/kernel及内存/存储/队列依赖可连续查询。 | 新联合episode已完成、同份采集离线归档/普通binding通过；旧24082work上下文可查询。新图输入/状态/资源边仍未全部接通。 |
