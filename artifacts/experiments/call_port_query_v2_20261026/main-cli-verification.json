@@ -1,0 +1,17 @@
+{
+  "normal_cli_exit": 0,
+  "schema_version": 2,
+  "matched_bindings": 5,
+  "independent_receiver_ports": 2,
+  "selector": {
+    "invocation": null,
+    "direction": "caller",
+    "attempt_index": null,
+    "actual_index": 0,
+    "actual_index_role": "EXPLICIT_SOURCE_ARGUMENT_INDEX"
+  },
+  "query_scope": "all callers with explicit argument 0; differs from the agent caller-filtered query",
+  "verification_runner_initial_expected_count_corrected_from": 4,
+  "producer_model_modified": false,
+  "whole_program_complete": false
+}
