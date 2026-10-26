@@ -2,6 +2,10 @@
 
 日期：2026-10-26。**OPEN：完整 LeWM 自动建模未验收。**
 
+当前必需关系的逐项差距与实施顺序见
+[完整跨层图还缺什么](FIRST_STAGE_GAPS_20261026.md)。五类实体可表达、源结构已恢复、
+运行对应已接通、数据/资源依赖已闭合分别报告，不以某一层全覆盖代替整体完成。
+
 **当前正式指针：source858 / runtime858，92个body groups、6882次body-linked calls。**
 完整原100438 calls的fresh接线11969已actual exit0/GNU39:42.90；其余source-only88592、
 unresolved4964全部保留。静态仍151files/2217definitions/858active bodies，769unsupported、
