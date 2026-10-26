@@ -1,0 +1,138 @@
+{
+  "schema": "scar.source-call-port-retained-read-plan/1",
+  "status": "FROZEN_NOT_RUN_CANDIDATE02",
+  "run": "capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0",
+  "original_gate": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026",
+  "published_composition_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+  "scope": {
+    "source_files": 151,
+    "static_bodies": 2217,
+    "calls_frames": 100438,
+    "call_attempts": 100550,
+    "fresh_frame_scan": 1,
+    "fresh_operand_scan": 1,
+    "fresh_source_binder": 1,
+    "old_source_checkpoint_resume": false
+  },
+  "source_policy": {
+    "required_changed_sources": [
+      {
+        "path": "scar/ir/program/source_call_bindings.py",
+        "bytes": 10356,
+        "sha256": "5fe77147ea642e5faeedf0a5d4a244ff806274eefc74500e9a4516632a365fc3"
+      },
+      {
+        "path": "scar/analysis/source_call_bindings.py",
+        "bytes": 17875,
+        "sha256": "0063ffd225ac67c1efb6d8cc5701400b82ccc1304674f118ee1030b627fb25ae"
+      },
+      {
+        "path": "scar/analysis/call_operands.py",
+        "bytes": 16384,
+        "sha256": "b0f2bf9b234c3841f8f31d3427a493d0d07d411206d468adba456b049450cb8b"
+      },
+      {
+        "path": "scar/analysis/current_source_evidence.py",
+        "bytes": 29782,
+        "sha256": "6893a3c7d6d7ed22db1eb967e86747eb132f73d1a284c1178a008f797a750e65"
+      }
+    ],
+    "normal_owned_api": true,
+    "external_owner_reconstruction": false,
+    "new_consumer_same_fresh_session": true,
+    "legacy_report_wire_changed": false
+  },
+  "declared_input": {
+    "original_pins": 1313,
+    "original_unique_stored_bytes": 589209240,
+    "recipe_extra_pins": 7,
+    "recipe_extra_stored_bytes": 699106,
+    "all_pins": 2430,
+    "all_unique_stored_bytes": 843109058,
+    "unique_stored_ceiling_bytes": 8000000000,
+    "per_file_stored_ceiling_bytes": 2200000000,
+    "all_original_uri_stat_present": true,
+    "preparation_read": "small original metadata and actual source/runtime hashes only; no raw scan/graph payload decode",
+    "normal_reader_closure_uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate02/NEEDED_INPUT_CLOSURE.json",
+    "normal_reader_closure_missing_count": 0,
+    "actual_closure_successful_pass_metadata_decoded_bytes": 117830058,
+    "metadata_scope": "source inventory file headers/component references and retained source858 qualified body refs only; graph/raw payload not parsed; draft metadata collector budget-stop attempts are not gate runs",
+    "closure_extra_pin_count": 1110,
+    "closure_extra_stored_bytes": 253200712
+  },
+  "gate_input_cost": {
+    "start_fixed_input_guard_stored_bytes": 843109058,
+    "final_fixed_input_guard_stored_bytes": 843109058,
+    "two_guards_total_stored_bytes": 1686218116,
+    "normal_coordinate_reader_decoded_ceiling_bytes": 2000000000,
+    "normal_ancestry_reader_aggregate_decoded_ceiling_bytes": 1000000000,
+    "normal_composition_per_read_decoded_ceiling_bytes": 512000000,
+    "normal_source_body_per_record_decoded_ceiling_bytes": 128000000,
+    "frame_raw_decoded_ceiling_bytes": 256000000,
+    "operand_raw_decoded_ceiling_bytes": 128000000,
+    "readonly_code_archive_declared_ceiling_bytes": 256000000,
+    "retained_proof_source_archive_decoded_ceiling_bytes": 32000000,
+    "new_model_normal_reader_stored_ceiling_bytes": 128000000,
+    "new_model_normal_reader_decoded_ceiling_bytes": 512000000,
+    "new_consumer_raw_rescans": 0,
+    "new_consumer_extra_graph_reads": "none intended; access.bundle / _Core reuses this normal owned session caches, no extra CompositionIndex",
+    "cumulative_stored_plus_decoded_io": "OPEN: original 8GB input limit is unique declarations, not a cumulative IO ceiling; normal reader independent caps and finite exact scope remain enforced",
+    "normal_metadata_origin_check": "InventoryPartitions.code_source_origin passed all 5 inventory ancestors; no CompositionIndex, CodeWitness, graph/raw or consumer"
+  },
+  "output": {
+    "aggregate_stored_ceiling_bytes": 1000000000,
+    "legacy_individual_file_ceiling_bytes": 2200000000,
+    "new_model_stored_ceiling_bytes": 128000000,
+    "new_model_decoded_ceiling_bytes": 512000000,
+    "legacy_report_original_canonical_bytes": 106940322,
+    "new_model_record_max_attempts": 1000000,
+    "new_model_record_max_bindings": 100000,
+    "new_model_record_max_ports": 1000000,
+    "normal_export_shard_decoded_bytes": 16000000,
+    "normal_export_shard_rows": 1000
+  },
+  "execution": {
+    "worker_wall_seconds": 5400,
+    "cpu_seconds": 5400,
+    "outer_seconds": 5460,
+    "address_space_bytes": 12884901888,
+    "heartbeat_seconds": 20,
+    "GNU_time": true,
+    "SELF_RSS": true,
+    "previous_same_scope_offline_actual_seconds": 2378.4525777070085,
+    "previous_same_scope_offline_peak_rss_kib": 2228264,
+    "previous_actual_counts_not_reused_as_new_results": true
+  },
+  "qualification": {
+    "target_exec": false,
+    "source_lower": false,
+    "source_prepare": false,
+    "CodeWitness_compile_missing": false,
+    "required_same_session_selected_negatives": [
+      "call_source",
+      "formal_slot",
+      "caller",
+      "arity"
+    ],
+    "legacy_27_comparison": "argument/completion attempt union; intersection and exact missing reasons, zero shared fails",
+    "state_contents_ready_or_runtime_reference_identity": false,
+    "first_stage_complete": false
+  },
+  "freeze": {
+    "sha256": "cee2065e9e86c71ffce5ed52119c189e034d82eadd70e2ee6c88ec7cfbf06e30",
+    "modules": 385,
+    "runtime": 831,
+    "source_payload_bytes": 7496800,
+    "runtime_payload_bytes": 73751755
+  },
+  "previous_window": {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate01",
+    "actual_exit": 1,
+    "phase": "public-read-of-official-858-snapshot",
+    "CodeWitness_started": false,
+    "consumer_started": false,
+    "state_preserved": true,
+    "wrong_root_manual_precheck_qualification": "FAILED_NOT_APPROVAL_EVIDENCE; ROOT_LAUNCH_NOTE.json"
+  },
+  "launch_command": "bash /home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate02/run.sh"
+}

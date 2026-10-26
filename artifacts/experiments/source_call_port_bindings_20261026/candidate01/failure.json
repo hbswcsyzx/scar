@@ -1,0 +1,16 @@
+{
+  "automatic_retry_or_resume": false,
+  "code_witness_activity": null,
+  "detail": "archive input must be an existing regular file",
+  "elapsed_s": 5.682838588953018,
+  "first_stage_complete": false,
+  "last_api_stage": null,
+  "max_rss_kib": 448212,
+  "owned_ancestor_reader_counts": null,
+  "partial_outputs_retained": true,
+  "phase": "public-read-of-official-858-snapshot",
+  "reader_counts": null,
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate01/run.py\", line 149, in main\n    index = CompositionIndex(COMPOSITION, source_attachments=((str(ATTACHMENT), receipt(ATTACHMENT)['sha256']),),\n        attachment_budget=SourceAttachmentBudget(max_record_bytes=128_000_000, max_artifact_bytes=2_200_000_000))\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/program_composition.py\", line 737, in __init__\n    self._inventory.partitions.code_source_origin()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py\", line 321, in code_source_origin\n    current._read(current.manifest[\"components\"][\"call_sources\"])\n    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py\", line 293, in _read\n    document, receipt = _read_receipt(path, limit=self.max_shard_bytes)\n                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py\", line 44, in _read_receipt\n    _require(path.is_file() and not path.is_symlink(), \"archive input must be an existing regular file\")\n    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py\", line 30, in _require\n    raise ValueError(message)\nValueError: archive input must be an existing regular file\n",
+  "transformation_authorized": false,
+  "type": "ValueError"
+}

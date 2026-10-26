@@ -1,0 +1,47 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate03/run.py", line 287, in <module>
+    if __name__ == '__main__': main()
+                               ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_call_port_bindings_20261026/candidate03/run.py", line 202, in main
+    connected = connect_current_capture(index, coordinates, CAPTURE / 'trace', RESULT / 'connections',
+        previous_source_directory=OLD / 'result/source',
+    ...<6 lines>...
+        include_environments=True, progress=notify,
+        source_port_consumer=port_consumer, source_port_budget=SourceCallPortBudget(**SOURCE_PORT_BUDGET))
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/current_source_evidence.py", line 431, in connect_current_capture
+    source = _bind_source_invocations_owned(owner, composition, coordinates, trace_directory,
+        source_directory, call_budget=frame_budget, witness_mode="reused_code")
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_invocations.py", line 831, in _bind_source_invocations_owned
+    return _bind_source_invocations(composition, coordinates, trace_directory, out_dir, _owner=owner, **kwargs)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_invocations.py", line 916, in _bind_source_invocations
+    bindings, binding_indexes = _binding_rows(composition, seed_model, scope, sink, captures,
+                                ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                             members, witness_mode, source_guard)
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_invocations.py", line 433, in _binding_rows
+    definitions, bodies, snapshots = _source_tables(composition)
+                                     ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_invocations.py", line 401, in _source_tables
+    original = composition.inventory_body(file_index, body_index)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/program_composition.py", line 1525, in inventory_body
+    return self._inventory.body(file_index, body_index)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/program_composition.py", line 134, in body
+    return (self.partitions.body_record(file_index, body_index) if self.partitions is not None
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py", line 444, in body_record
+    _, row, checkpoint, fields = self._body_fields(file_index, body_index)
+                                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py", line 394, in _body_fields
+    checkpoint = self.checkpoint(row["checkpoint"])
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py", line 364, in checkpoint
+    document = self._read(ref)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py", line 293, in _read
+    document, receipt = _read_receipt(path, limit=self.max_shard_bytes)
+                        ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py", line 44, in _read_receipt
+    _require(path.is_file() and not path.is_symlink(), "archive input must be an existing regular file")
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/inventory_partitions.py", line 30, in _require
+    raise ValueError(message)
+ValueError: archive input must be an existing regular file

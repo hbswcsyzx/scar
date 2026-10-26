@@ -1,0 +1,44 @@
+"""Isolated consumer; all data/artifact identities remain at their original URIs."""
+from pathlib import Path
+HERE=Path(__file__).resolve().parent
+ROOT=HERE.parents[3]
+DATA_ROOT=Path('/home/zyf/AAA/scar-worktrees/structured-program-model')
+EXPS=DATA_ROOT/'artifacts/experiments'
+OLD=EXPS/'first_stage_current_source_gate_20261023'
+BASELINE=EXPS/'first_stage_source_publication_current_attempt04_20261023'
+REVISION=EXPS/'first_stage_source_body_revision_20261023'
+PRIOR_GATE=EXPS/'first_stage_source_revision_current_20261025'
+KWARGS=EXPS/'source_call_kwargs_publication_20261025'
+REMAINDER=EXPS/'source_frontend_remainder_publication_20261025'
+DELIVERY=EXPS/'source_frontend_remainder_composition_resume02_20261025'
+COMPOSITION=DELIVERY/'result/composition/index.json.gz'
+CAPTURE=EXPS/'first_stage_lewm_physical_20261023'
+ATTACHMENT=EXPS/'first_stage_dependency_continuation_20261023/result/continuation.json'
+BRIDGE=EXPS/'first_stage_joined_physical_20261023/result/native/dispatch-bridge.json.gz'
+PROFILE=OLD/'result/capture-coordinates.json'
+CACHE=EXPS/'first_stage_partitioned_operand_routes_20261023/result/code-witnesses'
+STALE_SOURCE=PRIOR_GATE/'result/connections/source'
+DESIGN=DATA_ROOT/'artifacts/analysis/source858_runtime_reconnection_20261026/RUNNER_INPUTS.json'
+EXPECTED_RUN='capture:1ddea1de4990462b59cf5dd24beb3f120156eb47bca68cfb3f1a63f9f73f2cf0'
+EXPECTED_COMPOSITION_SHA='45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b'
+EXPECTED_MANIFEST_SHA='4959e7a58abe42415ad2a066f96572a83c83f5b4aaebe9462778d5569439ef5d'
+BUDGETS=dict(wall_seconds=5400,cpu_seconds=5400,address_space_bytes=12*1024**3,
+ max_output_file_bytes=2_200_000_000,input_files=4096,input_file_bytes=2_200_000_000,
+ input_total_bytes=8_000_000_000,metadata_decoded_bytes=128_000_000,
+ producer_source_bytes=32_000_000,coordinate_bytes=2_000_000_000,
+ coordinate_lines=2_000_000,ancestry_depth=16,ancestry_decoded_bytes=1_000_000_000,
+ heartbeat_seconds=20,audit_stream_decoded_bytes=2_000_000_000,
+ audit_stream_rows=2_000_000,audit_line_bytes=16_000_000)
+FRAME_BUDGET=dict(max_raw_bytes=256_000_000,max_lines=300_000,max_events=250_000,
+ max_references=2_000_000,max_source_files=256,max_source_bytes=16_000_000)
+OPERAND_BUDGET=dict(max_raw_bytes=128_000_000,max_lines=1_000_000,max_line_bytes=2_000_000,
+ max_processes=128,max_events=1_000_000,max_loads=1_000_000,max_references=2_000_000,
+ max_metadata_bytes=2_000_000)
+ROUTE_BUDGET=dict(max_routes=100_000,max_template_values=100_000)
+
+ORIGINAL_GATE=Path('/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026')
+SOURCE_PORT_BUDGET=dict(max_attempts=1_000_000,max_bindings=100_000,max_ports=1_000_000)
+BUDGETS.update(output_total_bytes=1_000_000_000,source_port_decoded_bytes=512_000_000,
+ source_port_stored_bytes=128_000_000,outer_seconds=5460)
+EXPECTED_ATTEMPTS=100_550
+EXPECTED_FRAMES=100_438
