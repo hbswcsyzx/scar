@@ -1,0 +1,116 @@
+{
+  "main_head": "c23e6ae6975e35d9caa549a60698d7bc1eacd23e",
+  "method": "READ_ONLY_CODE_AND_SMALL_RETAINED_RESULTS; NO_BIG_GRAPH_RAW_CODEC_OR_TARGET",
+  "files": [
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/model.py",
+      "bytes": 7174,
+      "sha256": "2e0938dad916273c9320af407c86956a4a2091ccf7b148f021578fa862afa891"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/coordinates.py",
+      "bytes": 10753,
+      "sha256": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/calls.py",
+      "bytes": 2085,
+      "sha256": "a287446babd077c072f51182d12ecc5e670bd2e1700b6396e914e134d95a183f"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/validation.py",
+      "bytes": 30851,
+      "sha256": "ade5f14338eeca223eb57b77f228fe4d40b2d37db50d904a3935b2813a3fda30"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/call_validation.py",
+      "bytes": 21676,
+      "sha256": "9b9de07e1002e4f2c973dba2a48fac44e7ecfde546caf191a8b47c192adb09c2"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/work.py",
+      "bytes": 12864,
+      "sha256": "67faa8771822b3994fc7ad34a7527c2888c0fc5859bf99b4a887627094ec8f0f"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/work_validation.py",
+      "bytes": 30465,
+      "sha256": "7beb3ca5e1988c855ff5673a86af7401db7c1ea05905d7bc0c10bce533d4596b"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/codec.py",
+      "bytes": 16011,
+      "sha256": "f171cbabc251822b17014ad36fcce642b8d8e782fdb67ad23d92bc3dd4b70049"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/composition.py",
+      "bytes": 1377,
+      "sha256": "6190ab8faa17c4b2823a061ce5179fb850fa9dd32c77806f04bc478052171852"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/query.py",
+      "bytes": 28764,
+      "sha256": "91bc5106cf392225dd6b58dfb6935bef9b60ccb759465de324fb02adcfd1efc6"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_composition.py",
+      "bytes": 108876,
+      "sha256": "c0addde68217b558fde4c9ecdc1ed5036bc16cd7bcc70eb034db481b0aee3cb9"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_native_composition.py",
+      "bytes": 50795,
+      "sha256": "ec408aeaf1b005b10aabe5857d11db6bc8d935ee8d30b2305fe90f25e53697ad"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_references.py",
+      "bytes": 5912,
+      "sha256": "3b3f466571b83f298588e3bdb0329240c21371082e678b0df431af56b364d69e"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/store/graph_index.py",
+      "bytes": 56137,
+      "sha256": "e59746ae82fe4d3d397222521721d26646a634d48a17e88bc32a05752314c5b8"
+    },
+    {
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_invocations.py",
+      "bytes": 69653,
+      "sha256": "9f80874b0ec0346801bc5d12ff9d4842562ece8336e18adf4a408844648eeea1"
+    },
+    {
+      "kind": "RETAINED_SMALL_QUERY_EVIDENCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/RESULT.md",
+      "bytes": 6196,
+      "sha256": "8d58638eae2601e5f83ff7eb6b684223d362d3cd1cbc6bdb10810f857ed13c80"
+    },
+    {
+      "kind": "RETAINED_SMALL_QUERY_EVIDENCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/inputs.json",
+      "bytes": 2715,
+      "sha256": "d1a705813cdac0eb3c4067ff2e512d16fea668c8fab22ed1484d93dfeda3e1fe"
+    },
+    {
+      "kind": "RETAINED_SMALL_QUERY_EVIDENCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/query-1.json",
+      "bytes": 16025,
+      "sha256": "ba8a980a8864d8e0adec092de93fa127d4d6f975c033304cbc48af30b59cd876"
+    }
+  ],
+  "source_bytes_hashed": 453393,
+  "new_gpu_artifact_not_yet_located": true
+}

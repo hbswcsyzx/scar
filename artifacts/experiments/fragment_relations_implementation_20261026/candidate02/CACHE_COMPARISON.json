@@ -1,0 +1,68 @@
+{
+  "scope": "ONE_REAL_RETAINED_CODE_SOURCE_JSON_LOCATOR_ONLY; NOT_SOURCE_RUNTIME_OR_MODEL_COMPLETENESS",
+  "sample": {
+    "original_work_chunk": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/attempt01/result/work/000000.jsonl.gz",
+    "line": 328,
+    "work_relation_id": "work_relation:cb0270d7cea88e210cb4bf08bf4229768fd82ba2b6a924bf21b8c766cacd0c6a",
+    "locator": {
+      "artifact": {
+        "schema": "scar.inventory-component/1",
+        "sha256": "1e54903e94bf3e0c73d2da75e4c1c8392d24254d126a3429839f1a251866d185",
+        "size_bytes": 268682,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/components/call_sources.json.gz"
+      },
+      "declaration": {
+        "artifact": {
+          "schema": "scar.source-invocation-bindings",
+          "sha256": "7d2019bb08760406ad38d4c06612a592aaf3042738fa1cd865267019fc6366fa",
+          "size_bytes": 7634455,
+          "uri": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/result/connections/source/bindings.json"
+        },
+        "locator": "#/bindings/521/code_source_witness_locator"
+      },
+      "decoded_bytes": 1685522,
+      "decoded_sha256": "80d07551902c234544bfbdeeefa547881eddc1c4bce5b32fcc4defd640c67213",
+      "encoding": "GZIP_JSON",
+      "line": null,
+      "pointer": "#/value/model/code_links/521"
+    },
+    "selection": "FIRST_CLOSED_ACTUAL_WORK_ROW_WITH_FULL_JSON_FRAGMENT_CODE_SOURCE_LOCATOR"
+  },
+  "iterations": 20,
+  "return_values_identical": true,
+  "before": {
+    "strict_loads_calls": 20,
+    "elapsed_s": 0.42026614799397066,
+    "io": {
+      "stored_bytes": 268682,
+      "decoded_bytes": 1685522,
+      "actual_input_bytes": 1954204,
+      "stored_output_bytes": 0,
+      "core_input_bytes": 1954204,
+      "code_source_input_bytes": 0,
+      "elapsed_s": 0.42093250795733184,
+      "scope": "returned stored plus decoded bytes, including repeats; source/runner guards separate"
+    },
+    "profile_total_calls": 197574
+  },
+  "after": {
+    "strict_loads_calls": 1,
+    "elapsed_s": 0.03268778999336064,
+    "io": {
+      "stored_bytes": 268682,
+      "decoded_bytes": 1685522,
+      "actual_input_bytes": 1954204,
+      "stored_output_bytes": 0,
+      "core_input_bytes": 1954204,
+      "code_source_input_bytes": 0,
+      "elapsed_s": 0.033177201985381544,
+      "scope": "returned stored plus decoded bytes, including repeats; source/runner guards separate"
+    },
+    "profile_total_calls": 13586
+  },
+  "live_gate_unchanged": true,
+  "original_exit1_preserved": true,
+  "target_or_graph_execution": false,
+  "producer_or_index_runs": 0,
+  "candidate_sha256": "7e8378759d789ea75dbebd3e576b0d927dc35d13e6693f228cad91cd74297db8"
+}

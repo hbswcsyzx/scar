@@ -1,0 +1,36 @@
+{
+  "scope": "ORIGINAL_900S_GATE_EXACT_FIVE_PRODUCTION_BYTES",
+  "freeze_sha256": "4c764cd91f513096b102fc54493b4b752ae6781df361a57a90e0d64694eb5fdf",
+  "sources": [
+    {
+      "bytes": 14444,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations.py",
+      "sha256": "019386a04c316b64349c051fd72f067ab3742f1907b0118f045f23ceb8059595",
+      "snapshot": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/production_snapshot/scar/ir/execution/fragment_relations.py"
+    },
+    {
+      "bytes": 1662,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations_codec.py",
+      "sha256": "62b281d9128a0411fff46f6b7cacc0f9f7f2164ad02333ade440f9cfb67d0e11",
+      "snapshot": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/production_snapshot/scar/ir/execution/fragment_relations_codec.py"
+    },
+    {
+      "bytes": 14524,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/store/fragment_relations.py",
+      "sha256": "3dc3ab1ae64179047d242d8382311e5f7a147ed6a274c756abcbcdab9c111132",
+      "snapshot": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/production_snapshot/scar/store/fragment_relations.py"
+    },
+    {
+      "bytes": 54101,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/fragment_relations.py",
+      "sha256": "8ab5a73d37a14a76f7da300881fd61e69d676df8e8ba44bf7cecba84233d85e8",
+      "snapshot": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/production_snapshot/scar/analysis/fragment_relations.py"
+    },
+    {
+      "bytes": 50387,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_native_composition.py",
+      "sha256": "4ae4b980d0bdc65a44af1f44c8c92dd6191341f3348316d9782707e61dd73d21",
+      "snapshot": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/production_snapshot/scar/analysis/source_native_composition.py"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"stage":"SMALL_METADATA_ROOT_OPEN","failure":"FileNotFoundError: main V2 result/manifest.json was de-materialized by sparse checkout","gate_started":false,"large_inputs_read":false,"resolution":"restore only exact HEAD blob using original stage-receipts expected SHA; original URI; no index edit"}

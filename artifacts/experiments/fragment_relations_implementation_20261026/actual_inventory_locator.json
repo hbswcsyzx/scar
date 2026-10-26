@@ -1,0 +1,22 @@
+{
+  "locator": {
+    "artifact": {
+      "decoded_bytes": 1685522,
+      "decoded_sha256": "80d07551902c234544bfbdeeefa547881eddc1c4bce5b32fcc4defd640c67213",
+      "physical_bytes": 268682,
+      "physical_sha256": "1e54903e94bf3e0c73d2da75e4c1c8392d24254d126a3429839f1a251866d185",
+      "representation": "scar.inventory-component/1",
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_full_inventory_restored_20261023/result/components/call_sources.json.gz"
+    },
+    "pointer": "#/value/model/codes/458/code"
+  },
+  "declaration": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/first_stage_source858_current_20261026/result/connections/source/bindings.json",
+      "sha256": "7d2019bb08760406ad38d4c06612a592aaf3042738fa1cd865267019fc6366fa",
+      "size_bytes": 7634455,
+      "schema": "scar.source-invocation-bindings"
+    },
+    "locator": "#/bindings/0/descriptor_witness_locator"
+  }
+}

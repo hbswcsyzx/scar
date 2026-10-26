@@ -1,0 +1,39 @@
+{
+  "root_owned_session": 22743,
+  "actual_exit_code": 1,
+  "outer": {
+    "actual_worker_exit_code": 1,
+    "elapsed_s": 900.6275176570052,
+    "freeze_sha256": "4c764cd91f513096b102fc54493b4b752ae6781df361a57a90e0d64694eb5fdf",
+    "outer_guard_bytes": 17490717,
+    "whole_program_complete": false
+  },
+  "failure": {
+    "activity": {
+      "lower_attempts": 0,
+      "non_target_compile_events": 979,
+      "source_prepare_attempts": 0,
+      "subprocess_attempts": 0,
+      "target_exec_attempts": 0,
+      "target_executable_compile_attempts": 0
+    },
+    "detail": "worker900s",
+    "elapsed_s": 900.0041554530035,
+    "io": {
+      "actual_input_bytes": 7509434152,
+      "code_source_input_bytes": 6007140,
+      "core_input_bytes": 7503427012,
+      "decoded_bytes": 5272361076,
+      "elapsed_s": 898.1643493680167,
+      "scope": "returned stored plus decoded bytes, including repeats; source/runner guards separate",
+      "stored_bytes": 2237073076,
+      "stored_output_bytes": 727373007
+    },
+    "phase": "FULL_WORK_PRODUCER",
+    "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/run_gate.py\", line 94, in worker\n    publication=publish_fragment_relations(producer,attempt/'result',budgets=budget)\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/scar/store/fragment_relations.py\", line 177, in publish_fragment_relations\n    report = producer.produce(writer, meter)\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/fragment_relations.py\", line 515, in produce\n    relation = self._relations(index, projection, source, meter)\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/fragment_relations.py\", line 474, in _relations\n    contexts, static = self._contexts(index, tuple(hosts.values()), gaps, source, meter)\n                       ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/fragment_relations.py\", line 433, in _contexts\n    invocation = InvocationRef(self.scope, decode(InvocationKey, row[\"invocation\"]), decode(ProviderFactReference, row[\"source_invocation_reference\"]))\n  File \"<string>\", line 6, in __init__\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations.py\", line 206, in __post_init__\n    exact(self.scope, RuntimeScope, \"invocation scope\")\n    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations.py\", line 30, in exact\n    if hasattr(value, \"__post_init__\"):\n       ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/run_gate.py\", line 47, in <lambda>\n    signal.signal(signal.SIGALRM,lambda *x:(_ for _ in ()).throw(TimeoutError('worker900s')));signal.setitimer(signal.ITIMER_REAL,900)\n                                           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/run_gate.py\", line 47, in <genexpr>\n    signal.signal(signal.SIGALRM,lambda *x:(_ for _ in ()).throw(TimeoutError('worker900s')));signal.setitimer(signal.ITIMER_REAL,900)\nTimeoutError: worker900s\n",
+    "type": "TimeoutError"
+  },
+  "qualification": "ORIGINAL_FAILED_TIMEOUT_PARTIAL_NOT_COMPLETE; NO_RETROACTIVE_PASS",
+  "production_snapshot": "PRODUCTION_SNAPSHOT_RECEIPT.json",
+  "source_changed_during_original_run": false
+}

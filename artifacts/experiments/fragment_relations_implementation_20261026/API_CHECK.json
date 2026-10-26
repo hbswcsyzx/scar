@@ -1,0 +1,52 @@
+{
+  "status": "PASSED",
+  "qualification": "TYPE_CODEC_API_ONLY_NOT_GRAPH_SOURCE_OR_RUNTIME_PROOF",
+  "assertions": [
+    "five_file_syntax",
+    "same_class_reexport",
+    "real_metadata_reference_roundtrip",
+    "record_roundtrip",
+    "assessment_does_not_change_member_id",
+    "distinct_logical_namespace_not_sha_merge",
+    "missing_host_requires_debt",
+    "unknown_field",
+    "boolean_version",
+    "forged_relation_id",
+    "duplicate_json_key",
+    "line_encoding_mismatch",
+    "actual_inventory_locator_contract",
+    "inventory_descriptor_unknown_field"
+  ],
+  "assertion_count": 14,
+  "real_work_bodies_read": 0,
+  "real_eeg_chunks_read": 0,
+  "producer_index_runs": 0,
+  "target_executions": 0,
+  "sources": [
+    {
+      "path": "scar/ir/execution/fragment_relations.py",
+      "bytes": 14444,
+      "sha256": "019386a04c316b64349c051fd72f067ab3742f1907b0118f045f23ceb8059595"
+    },
+    {
+      "path": "scar/ir/execution/fragment_relations_codec.py",
+      "bytes": 1662,
+      "sha256": "62b281d9128a0411fff46f6b7cacc0f9f7f2164ad02333ade440f9cfb67d0e11"
+    },
+    {
+      "path": "scar/store/fragment_relations.py",
+      "bytes": 14524,
+      "sha256": "3dc3ab1ae64179047d242d8382311e5f7a147ed6a274c756abcbcdab9c111132"
+    },
+    {
+      "path": "scar/analysis/fragment_relations.py",
+      "bytes": 54101,
+      "sha256": "8ab5a73d37a14a76f7da300881fd61e69d676df8e8ba44bf7cecba84233d85e8"
+    },
+    {
+      "path": "scar/analysis/source_native_composition.py",
+      "bytes": 50387,
+      "sha256": "4ae4b980d0bdc65a44af1f44c8c92dd6191341f3348316d9782707e61dd73d21"
+    }
+  ]
+}

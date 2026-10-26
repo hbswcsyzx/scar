@@ -1,0 +1,145 @@
+{
+  "additional_v1_gpu_sources": [
+    {
+      "bytes": 29256,
+      "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/trace/native_work_bridge.py",
+      "sha256": "986a74bc6282deb7ab7a642874c2078850640088bc1077e5d4058ea5f03448d5"
+    },
+    {
+      "bytes": 11124,
+      "path": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/scar/ir/execution/native_work_protocol.py",
+      "sha256": "79979e0bdab0de1bd85c5c732ef40fa5f2c62ce20da2043c23cca77fed84ddd3"
+    },
+    {
+      "bytes": 32455,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_import.py",
+      "sha256": "b65c817daf876855912a811196a97d89845d6fd7ae92d9df176c758b58f5613f"
+    },
+    {
+      "bytes": 10997,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/content.py",
+      "sha256": "1eee1822056e59a0be9f4f3a1524f97948df91497ad57072c7c0ca53c670cf9e"
+    },
+    {
+      "bytes": 13751,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/call_edges.py",
+      "sha256": "b2a414942e7d236596e088bdf36396a86afaf247cc1cf3b069978d93f0499063"
+    }
+  ],
+  "files": [
+    {
+      "bytes": 7174,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/model.py",
+      "sha256": "2e0938dad916273c9320af407c86956a4a2091ccf7b148f021578fa862afa891"
+    },
+    {
+      "bytes": 10753,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/coordinates.py",
+      "sha256": "b19e45c8af710b93d7197ca91e7cbcdfa7a9ee239a7faf73903d2ff85003ce09"
+    },
+    {
+      "bytes": 2085,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/calls.py",
+      "sha256": "a287446babd077c072f51182d12ecc5e670bd2e1700b6396e914e134d95a183f"
+    },
+    {
+      "bytes": 30851,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/validation.py",
+      "sha256": "ade5f14338eeca223eb57b77f228fe4d40b2d37db50d904a3935b2813a3fda30"
+    },
+    {
+      "bytes": 21676,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/call_validation.py",
+      "sha256": "9b9de07e1002e4f2c973dba2a48fac44e7ecfde546caf191a8b47c192adb09c2"
+    },
+    {
+      "bytes": 12864,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/work.py",
+      "sha256": "67faa8771822b3994fc7ad34a7527c2888c0fc5859bf99b4a887627094ec8f0f"
+    },
+    {
+      "bytes": 30465,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/work_validation.py",
+      "sha256": "7beb3ca5e1988c855ff5673a86af7401db7c1ea05905d7bc0c10bce533d4596b"
+    },
+    {
+      "bytes": 16011,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/codec.py",
+      "sha256": "f171cbabc251822b17014ad36fcce642b8d8e782fdb67ad23d92bc3dd4b70049"
+    },
+    {
+      "bytes": 1377,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/composition.py",
+      "sha256": "6190ab8faa17c4b2823a061ce5179fb850fa9dd32c77806f04bc478052171852"
+    },
+    {
+      "bytes": 28764,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/execution/query.py",
+      "sha256": "91bc5106cf392225dd6b58dfb6935bef9b60ccb759465de324fb02adcfd1efc6"
+    },
+    {
+      "bytes": 108876,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/program_composition.py",
+      "sha256": "c0addde68217b558fde4c9ecdc1ed5036bc16cd7bcc70eb034db481b0aee3cb9"
+    },
+    {
+      "bytes": 50795,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_native_composition.py",
+      "sha256": "ec408aeaf1b005b10aabe5857d11db6bc8d935ee8d30b2305fe90f25e53697ad"
+    },
+    {
+      "bytes": 5912,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/program/source_references.py",
+      "sha256": "3b3f466571b83f298588e3bdb0329240c21371082e678b0df431af56b364d69e"
+    },
+    {
+      "bytes": 56137,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/store/graph_index.py",
+      "sha256": "e59746ae82fe4d3d397222521721d26646a634d48a17e88bc32a05752314c5b8"
+    },
+    {
+      "bytes": 69653,
+      "kind": "SOURCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_invocations.py",
+      "sha256": "9f80874b0ec0346801bc5d12ff9d4842562ece8336e18adf4a408844648eeea1"
+    },
+    {
+      "bytes": 6196,
+      "kind": "RETAINED_SMALL_QUERY_EVIDENCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/RESULT.md",
+      "sha256": "8d58638eae2601e5f83ff7eb6b684223d362d3cd1cbc6bdb10810f857ed13c80"
+    },
+    {
+      "bytes": 2715,
+      "kind": "RETAINED_SMALL_QUERY_EVIDENCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/inputs.json",
+      "sha256": "d1a705813cdac0eb3c4067ff2e512d16fea668c8fab22ed1484d93dfeda3e1fe"
+    },
+    {
+      "bytes": 16025,
+      "kind": "RETAINED_SMALL_QUERY_EVIDENCE",
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_native_context_gate_20261025/attempt01/query-1.json",
+      "sha256": "ba8a980a8864d8e0adec092de93fa127d4d6f975c033304cbc48af30b59cd876"
+    }
+  ],
+  "future_v2_not_consumed": true,
+  "gpu_metadata_receipt": "GPU_METADATA_RECEIPT.json",
+  "main_head": "c23e6ae6975e35d9caa549a60698d7bc1eacd23e",
+  "method": "READ_ONLY_CODE_SMALL_ROOTS_AND_FIRST_SOURCE_RECEIPT_PREFIX; NO_WORK_EEG_BIG_DECODE_RAW_OR_TARGET",
+  "new_gpu_artifact_not_yet_located": false,
+  "source_bytes_hashed": 453393
+}

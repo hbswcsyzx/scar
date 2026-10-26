@@ -1,0 +1,35 @@
+--- a/scar/analysis/fragment_relations.py
++++ b/scar/analysis/fragment_relations.py
+@@ -109,18 +109,25 @@
+ 
+ def _read_locator(locator, meter, cache, *, code_source=False):
+     exact(locator, FragmentLocator, "fragment locator")
+-    key = stable_key((locator.artifact, locator.decoded_sha256, locator.encoding))
++    artifact = locator.artifact
++    key = ("fragment_payload", artifact.uri, artifact.sha256, artifact.size_bytes,
++           artifact.schema, locator.decoded_sha256, locator.decoded_bytes, locator.encoding)
+     if key not in cache:
+-        cache[key] = read_payload(locator.artifact, meter, decoded_bytes=locator.decoded_bytes,
++        raw = read_payload(artifact, meter, decoded_bytes=locator.decoded_bytes,
+             decoded_sha256=locator.decoded_sha256,
+             compressed=locator.encoding in (Encoding.GZIP_JSON, Encoding.GZIP_JSONL),
+             maximum=max(meter.budget.max_metadata_bytes, meter.budget.max_input_chunk_bytes), code_source=code_source)
++        # Only this construction/query session owns the cache. Byte/EOF checks
++        # still run on its first exact artifact/representation. No proof is cached.
++        cache[key] = strict_loads(raw.decode()) if locator.line is None else raw
++    if locator.line is None:
++        from copy import deepcopy
++        return deepcopy(_pointer(cache[key], locator.pointer))
+     raw = cache[key]
+-    if locator.line is not None:
+-        lines = raw.splitlines(keepends=True)
+-        need(locator.line <= len(lines), "locator line absent")
+-        raw = lines[locator.line - 1]
+-        need(raw.endswith(b"\n") and len(raw) <= meter.budget.max_record_bytes, "locator record bound")
++    lines = raw.splitlines(keepends=True)
++    need(locator.line <= len(lines), "locator line absent")
++    raw = lines[locator.line - 1]
++    need(raw.endswith(b"\n") and len(raw) <= meter.budget.max_record_bytes, "locator record bound")
+     return _pointer(strict_loads(raw.decode()), locator.pointer)
+ 
+ 

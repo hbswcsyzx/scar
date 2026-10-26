@@ -1,0 +1,122 @@
+{
+  "qualification": "READ_ONLY_CLOSED_GZIP_LINE_COUNTS_NO_JSON_OR_GRAPH_PARSE; pending_chunk_not_counted",
+  "closed_chunks": 15,
+  "closed_work_rows_lower_bound": 3385,
+  "denominator": 24082,
+  "latest_progress_elapsed_s": 620.2305836330052,
+  "first_full_work_heartbeat_elapsed_s": 420.0693382360041,
+  "first_closed_elapsed_s": 406.1078963279724,
+  "last_closed_elapsed_s": 608.3242883682251,
+  "steady_closed_rows_per_s": 15.072962034617218,
+  "remaining_seconds_at_observed_steady_rate": 1373.1209534308102,
+  "observer_stored_bytes": 5659528,
+  "observer_decoded_bytes": 119757386,
+  "gate_unchanged": true,
+  "chunks": [
+    {
+      "file": "000000.jsonl.gz",
+      "rows": 337,
+      "decoded_bytes": 7994293,
+      "stored_bytes": 140625,
+      "mtime": 1792984579.9611702
+    },
+    {
+      "file": "000001.jsonl.gz",
+      "rows": 289,
+      "decoded_bytes": 7990379,
+      "stored_bytes": 267742,
+      "mtime": 1792984582.0689836
+    },
+    {
+      "file": "000002.jsonl.gz",
+      "rows": 250,
+      "decoded_bytes": 7950595,
+      "stored_bytes": 334424,
+      "mtime": 1792984590.7891135
+    },
+    {
+      "file": "000003.jsonl.gz",
+      "rows": 211,
+      "decoded_bytes": 7988189,
+      "stored_bytes": 406368,
+      "mtime": 1792984606.0823333
+    },
+    {
+      "file": "000004.jsonl.gz",
+      "rows": 207,
+      "decoded_bytes": 7958218,
+      "stored_bytes": 411733,
+      "mtime": 1792984622.1563213
+    },
+    {
+      "file": "000005.jsonl.gz",
+      "rows": 206,
+      "decoded_bytes": 7997778,
+      "stored_bytes": 416044,
+      "mtime": 1792984638.3593516
+    },
+    {
+      "file": "000006.jsonl.gz",
+      "rows": 213,
+      "decoded_bytes": 7988871,
+      "stored_bytes": 401806,
+      "mtime": 1792984653.849551
+    },
+    {
+      "file": "000007.jsonl.gz",
+      "rows": 210,
+      "decoded_bytes": 7996350,
+      "stored_bytes": 409371,
+      "mtime": 1792984669.8996074
+    },
+    {
+      "file": "000008.jsonl.gz",
+      "rows": 206,
+      "decoded_bytes": 7997986,
+      "stored_bytes": 416863,
+      "mtime": 1792984686.6668005
+    },
+    {
+      "file": "000009.jsonl.gz",
+      "rows": 211,
+      "decoded_bytes": 7998550,
+      "stored_bytes": 407813,
+      "mtime": 1792984702.6447644
+    },
+    {
+      "file": "000010.jsonl.gz",
+      "rows": 210,
+      "decoded_bytes": 7972302,
+      "stored_bytes": 405804,
+      "mtime": 1792984718.1647837
+    },
+    {
+      "file": "000011.jsonl.gz",
+      "rows": 207,
+      "decoded_bytes": 7959161,
+      "stored_bytes": 411911,
+      "mtime": 1792984734.2828481
+    },
+    {
+      "file": "000012.jsonl.gz",
+      "rows": 209,
+      "decoded_bytes": 7998855,
+      "stored_bytes": 412100,
+      "mtime": 1792984750.056165
+    },
+    {
+      "file": "000013.jsonl.gz",
+      "rows": 209,
+      "decoded_bytes": 7967526,
+      "stored_bytes": 407810,
+      "mtime": 1792984766.1358933
+    },
+    {
+      "file": "000014.jsonl.gz",
+      "rows": 210,
+      "decoded_bytes": 7998333,
+      "stored_bytes": 409114,
+      "mtime": 1792984782.1775622
+    }
+  ]
+}

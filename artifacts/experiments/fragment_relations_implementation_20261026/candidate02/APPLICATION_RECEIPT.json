@@ -1,0 +1,8 @@
+{
+  "old_sha256": "8ab5a73d37a14a76f7da300881fd61e69d676df8e8ba44bf7cecba84233d85e8",
+  "new_sha256": "7e8378759d789ea75dbebd3e576b0d927dc35d13e6693f228cad91cd74297db8",
+  "only_production_changed": "scar/analysis/fragment_relations.py",
+  "other_four_original_SHAs_unchanged": true,
+  "original_gate_snapshot": "../candidate01/PRODUCTION_SNAPSHOT_RECEIPT.json",
+  "budget_unchanged": true
+}

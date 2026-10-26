@@ -1,0 +1,24 @@
+Command exited with non-zero status 1
+	Command being timed: "/home/zyf/miniconda3/envs/lewm/bin/python -B /home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/fragment_relations_implementation_20261026/candidate01/run_gate.py --worker --approved-freeze-sha256 4c764cd91f513096b102fc54493b4b752ae6781df361a57a90e0d64694eb5fdf"
+	User time (seconds): 891.98
+	System time (seconds): 5.65
+	Percent of CPU this job got: 99%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 15:00.62
+	Average shared text size (kbytes): 0
+	Average unshared data size (kbytes): 0
+	Average stack size (kbytes): 0
+	Average total size (kbytes): 0
+	Maximum resident set size (kbytes): 150844
+	Average resident set size (kbytes): 0
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 816322
+	Voluntary context switches: 916
+	Involuntary context switches: 341409
+	Swaps: 0
+	File system inputs: 0
+	File system outputs: 1428784
+	Socket messages sent: 0
+	Socket messages received: 0
+	Signals delivered: 0
+	Page size (bytes): 4096
+	Exit status: 1

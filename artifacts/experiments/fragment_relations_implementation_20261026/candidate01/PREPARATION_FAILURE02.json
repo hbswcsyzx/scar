@@ -1,0 +1,1 @@
+{"stage":"SMALL_METADATA_ROOT_OPEN","failure":"FileNotFoundError: original EEG bundle manifest de-materialized by sparse checkout","large_inputs_read":false,"gate_started":false,"restored_prior_root":"main V2 manifest restored by exact HEAD stage receipt"}

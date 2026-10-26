@@ -1,0 +1,25 @@
+{
+  "all_small_closed_transport_included": true,
+  "decoded_relation_graphs_staged": false,
+  "local_only": [
+    {
+      "bytes": 697589760,
+      "path": "artifacts/experiments/fragment_relations_implementation_20261026/candidate02/attempt01/result/locator.sqlite",
+      "sha256": "NOT_REMEASURED"
+    },
+    {
+      "bytes": 697589760,
+      "path": "artifacts/experiments/fragment_relations_implementation_20261026/candidate01/attempt01/result/locator.sqlite",
+      "sha256": "NOT_REMEASURED"
+    }
+  ],
+  "old_failures_preserved": true,
+  "public_helper_failed_in_preserved_source": true,
+  "raw_eeg_or_static_graph_inputs_copied": false,
+  "scope": "FIVE_7E_SOURCES_NORMATIVE_RELATIONS_AND_SMALL_GATE_EVIDENCE",
+  "transport_receipts": "RELATION_ARTIFACTS.json",
+  "unrelated_paths_excluded": [
+    "artifacts/analysis/class_entry_design_20261025",
+    "artifacts/analysis/source_three_graph_add_plan_20261025/READ_PLAN.v2.json"
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "status": "ARTIFACT_ONLY_NOT_APPLIED_TO_FROZEN_SOURCE",
+  "original_source_sha256": "8ab5a73d37a14a76f7da300881fd61e69d676df8e8ba44bf7cecba84233d85e8",
+  "candidate_source_sha256": "7e8378759d789ea75dbebd3e576b0d927dc35d13e6693f228cad91cd74297db8",
+  "changes": "ONLY _read_locator parsed full-document session cache; old JSONL boundary and guards retained",
+  "live_sources_unchanged": true
+}

@@ -1,0 +1,47 @@
+{
+  "base_commit": "c641c6ee2e6e8794f924cc537ce10c873d401d87",
+  "four_new_modules": [
+    "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations.py",
+    "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations_codec.py",
+    "/home/zyf/AAA/scar-worktrees/source-call-model/scar/store/fragment_relations.py",
+    "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/fragment_relations.py"
+  ],
+  "main_changed": false,
+  "old_navigation_adapter_guard": "UNCHANGED; CLASS_MOVE_INVALIDATES_OLD_DERIVED_NAVIGATION_SHA",
+  "production_sources": [
+    {
+      "bytes": 14444,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations.py",
+      "sha256": "019386a04c316b64349c051fd72f067ab3742f1907b0118f045f23ceb8059595"
+    },
+    {
+      "bytes": 1662,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/ir/execution/fragment_relations_codec.py",
+      "sha256": "62b281d9128a0411fff46f6b7cacc0f9f7f2164ad02333ade440f9cfb67d0e11"
+    },
+    {
+      "bytes": 14524,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/store/fragment_relations.py",
+      "sha256": "3dc3ab1ae64179047d242d8382311e5f7a147ed6a274c756abcbcdab9c111132"
+    },
+    {
+      "bytes": 54532,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/fragment_relations.py",
+      "sha256": "7e8378759d789ea75dbebd3e576b0d927dc35d13e6693f228cad91cd74297db8"
+    },
+    {
+      "bytes": 50387,
+      "path": "/home/zyf/AAA/scar-worktrees/source-call-model/scar/analysis/source_native_composition.py",
+      "sha256": "4ae4b980d0bdc65a44af1f44c8c92dd6191341f3348316d9782707e61dd73d21"
+    }
+  ],
+  "public_static_member_helper": "UNFIXED_IN_THIS_FIRST_COMMIT; SEPARATE_TWO_LINE_READER_FIX_FOLLOWS",
+  "source_native_application": "APPLY_ONLY_SOURCE_NATIVE_MOVE.diff_TO_EXACT_MAIN_BASELINE; ORIGINAL_ISO_BASE_HAD_NO_SUCH_FILE",
+  "source_native_main_baseline": {
+    "application": "APPLY_ONLY_CLASS_MOVE_DIFF_TO_THIS_MAIN_BASELINE; DO_NOT_REPLACE_UNRELATED_MAIN_FILES",
+    "bytes": 50795,
+    "iso_file_absent_at_c641c6ee": true,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_native_composition.py",
+    "sha256": "ec408aeaf1b005b10aabe5857d11db6bc8d935ee8d30b2305fe90f25e53697ad"
+  }
+}
