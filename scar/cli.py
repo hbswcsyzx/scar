@@ -24,12 +24,14 @@ from scar.trace.reader import load
 
 def _trace(args) -> int:
     out = Path(args.out).resolve()
+    python_targets = getattr(args, 'python_call_targets', False)
+    operands = getattr(args, 'call_operands', False) or python_targets
     os_capture_root = getattr(args, 'os_capture_root', None)
     if os_capture_root is not None:
         os_capture_root = Path(os_capture_root).absolute()
         if os_capture_root.exists() or out != os_capture_root / 'trace':
             raise SystemExit('--os-capture-root requires a fresh root and explicit --out ROOT/trace')
-        if not (getattr(args, 'call_operands', False) and getattr(args, 'execution_evidence', False)):
+        if not (operands and getattr(args, 'execution_evidence', False)):
             raise SystemExit('--os-capture-root requires --call-operands --execution-evidence')
     out.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
@@ -39,6 +41,7 @@ def _trace(args) -> int:
     env.pop('SCAR_TRACE_CALL_EDGES',None)
     env.pop('SCAR_CALL_TRACE_OWNER_PID',None)
     env.pop('SCAR_CALL_OPERANDS',None)
+    env.pop('SCAR_PYTHON_CALL_TARGETS',None)
     env.pop('SCAR_OPERAND_CAPTURE',None)
     env.pop('SCAR_EXECUTION_EVIDENCE',None)
     env.pop('SCAR_TENSOR_PHYSICAL',None)
@@ -47,7 +50,6 @@ def _trace(args) -> int:
     env.pop('SCAR_TRACE_LINES',None)
     for key in ('SCAR_OS_CAPTURE_NONCE','SCAR_OS_CAPTURE_INTENT','SCAR_OS_CAPTURE_INTENT_SHA256'):
         env.pop(key,None)
-    operands = getattr(args, "call_operands", False)
     execution_evidence = getattr(args, "execution_evidence", False)
     physical = getattr(args, "tensor_physical", False)
     if physical and not execution_evidence:
@@ -61,6 +63,8 @@ def _trace(args) -> int:
                 or any(out.glob('call-operands.*.jsonl*')) or any(out.glob('call-operand-meta.*.json*'))
                 or any(out.glob('function-environments.*.jsonl*'))
                 or any(out.glob('function-environment-meta.*.json*'))
+                or any(out.glob('python-call-targets.*.jsonl*'))
+                or any(out.glob('python-call-target-meta.*.json*'))
                 or (execution_evidence and any(out.glob('execution-evidence.*.json')))):
             raise SystemExit("calls-only requires a fresh output directory")
         env['SCAR_TRACE_CALL_EDGES'] = '1'
@@ -76,6 +80,8 @@ def _trace(args) -> int:
             if capture not in ('windows', 'instructions'):
                 raise SystemExit("operand capture must be windows or instructions")
             env['SCAR_CALL_OPERANDS'] = '1'
+            if python_targets:
+                env['SCAR_PYTHON_CALL_TARGETS'] = 'PYTHON_CALL_TARGETS_V2'
             env['SCAR_OPERAND_CAPTURE'] = capture
             env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
             env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
@@ -401,6 +407,8 @@ def main(argv=None) -> int:
                        help="resource sampling interval in seconds (with --resources)")
     trace.add_argument('--calls-only',action='store_true',help='record bounded Python call sites and reference identities without Torch hooks or tensor values')
     trace.add_argument('--call-operands',action='store_true',help='record bounded instruction/load/call evidence; implies calls-only (CPython 3.14)')
+    trace.add_argument('--python-call-targets', action='store_true',
+                       help='record explicit v2 Python callee and receiver roles; implies call-operands (CPython 3.14.7)')
     trace.add_argument('--execution-evidence',action='store_true',
                        help='collect native ETO/Kineto evidence alongside the call recorder when the target imports Torch; requires calls-only or call-operands')
     trace.add_argument('--tensor-physical',action='store_true',

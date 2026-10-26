@@ -216,6 +216,63 @@ class _Files:
         return document, artifact
 
 
+def _python_target_members(files, trace_root, pid, members, project_root):
+    """Bind retained bytes and their issuer; call semantics use the v2 reader."""
+    events = trace_root / f"python-call-targets.{pid}.jsonl"
+    metadata = trace_root / f"python-call-target-meta.{pid}.json"
+    present = files.contains(events)
+    _need(present == files.contains(metadata), "Python target events and metadata must be retained together")
+    if not present:
+        return None, []
+    document, declaration = files.document(metadata, "scar.python-call-target-collection")
+    fields = {"schema", "schema_version", "capabilities", "process_id", "project_root", "scope_policy",
+              "budget", "counts", "stopped", "file", "legacy_inputs",
+              "receiver_is_separate_from_monitoring_arg0", "contents_state_ready_or_complete_program_established"}
+    _need(set(document) == fields and document["schema"] == "scar.python-call-target-collection"
+          and type(document["schema_version"]) is int and document["schema_version"] == 2
+          and type(document["process_id"]) is int and document["process_id"] == pid
+          and document["capabilities"] == ["PYTHON_CALL_TARGETS_V2", "OBSERVED_PYTHON_CALLEE_SCOPE_V1"]
+          and document["scope_policy"] == "OBSERVED_EXACT_PYTHON_CALLEES_V1"
+          and document["project_root"] == project_root
+          and type(document["stopped"]) is bool
+          and document["receiver_is_separate_from_monitoring_arg0"] is True
+          and document["contents_state_ready_or_complete_program_established"] is False,
+          "unsupported Python target collection/issuer")
+    counts, budget = document["counts"], document["budget"]
+    _need(type(counts) is dict and set(counts) == {"TARGET", "ENTRY", "GAP"}
+          and all(_integer(v) for v in counts.values()) and type(budget) is dict
+          and set(budget) == {"max_records", "max_bytes", "max_selected_codes"}
+          and all(_integer(v, 1) for v in budget.values()), "invalid Python target counts/budgets")
+    file = document["file"]
+    _need(type(file) is dict and set(file) == {"path", "bytes", "sha256", "rows"}
+          and file["path"] == str(events) and _integer(file["bytes"]) and _integer(file["rows"])
+          and file["rows"] == sum(counts.values()) and file["rows"] <= budget["max_records"]
+          and file["bytes"] <= budget["max_bytes"], "Python target event declaration differs")
+    artifact = files.verify(events, "scar.python-call-targets.v2")
+    _need((artifact.sha256, artifact.size_bytes) == (file["sha256"], file["bytes"]),
+          "Python target retained bytes differ")
+    expected = {family: trace_root / name for family, name in (
+        ("codes", f"call-codes.{pid}.jsonl"), ("events", f"call-events.{pid}.jsonl"),
+        ("meta", f"call-meta.{pid}.json"), ("operands", f"call-operands.{pid}.jsonl"),
+        ("operand-meta", f"call-operand-meta.{pid}.json"))}
+    legacy = document["legacy_inputs"]
+    _need(type(legacy) is list and len(legacy) == len(expected)
+          and all(type(row) is dict and set(row) == {"path", "family", "process_id", "raw_sha256", "raw_bytes", "lines"}
+                  for row in legacy)
+          and {row["family"] for row in legacy} == set(expected), "Python target legacy manifest differs")
+    for row in legacy:
+        name = str(expected[row["family"]])
+        original = members[name]
+        _need(row["path"] == name and type(row["process_id"]) is int and row["process_id"] == pid
+              and _integer(row["raw_bytes"]) and _integer(row["lines"])
+              and (row["raw_sha256"], row["raw_bytes"]) == (original.sha256, original.size_bytes),
+              "Python targets refer to different original frame/operand bytes")
+    members[str(events)], members[str(metadata)] = artifact, declaration
+    return {"capability": "SCAR_PYTHON_CALL_TARGET_MEMBERSHIP_V2", "manifest": encode(declaration),
+            "events": encode(artifact), "declared_counts": counts,
+            "collector_stopped": document["stopped"], "call_ports_established": False}, [str(events), str(metadata)]
+
+
 def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000, profile_uri=None,
                              publish_os_profile=False, allow_plain_owned_capture=False):
     """Validate this retained capture profile and reuse existing coordinate types.
@@ -296,6 +353,8 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     operand_name = trace_root / ("call-operands." + str(pid) + ".jsonl")
     members[str(operand_name)] = files.verify(operand_name, "scar.call-operands.events.v1")
     _need(members[str(operand_name)].size_bytes == operands["bytes"], "operand event byte count differs")
+    python_target_membership, python_target_names = _python_target_members(
+        files, trace_root, pid, members, operands["project_root"])
     environment_name = trace_root / ("function-environments." + str(pid) + ".jsonl")
     environment_meta_name = trace_root / ("function-environment-meta." + str(pid) + ".json")
     environment_present = files.contains(environment_name)
@@ -533,6 +592,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
                        for family in ("events", "codes")]
     exclusive_names += [str(operand_name), str(native_name),
                         str(trace_root / ("call-operand-meta." + str(pid) + ".json"))]
+    exclusive_names += python_target_names
     if environment_present:
         exclusive_names += [str(environment_name), str(environment_meta_name)]
     exclusive_names += dispatch_names
@@ -676,6 +736,10 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         report['native_tensor_input_membership'] = native_input_membership
         report['open'].append({'code': 'native_tensor_input_port_join_unverified',
                                'source': native_input_membership['manifest']})
+    if python_target_membership is not None:
+        report['python_call_target_membership'] = python_target_membership
+        report['open'].append({'code': 'python_target_event_to_canonical_call_ports_unverified',
+                               'source': python_target_membership['manifest']})
     if collector_membership is not None:
         report['collector_execution_membership']=collector_membership
         report['open'].append({'code':'collector_process_birth_requires_explicit_witness_binder',

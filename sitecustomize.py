@@ -11,7 +11,8 @@ if os.environ.get("SCAR_TRACE_DIR"):
                 _scar_recorder.collector_witness.register_loader(_scar_sys._getframe())
             if _scar_recorder is not None and os.environ.get('SCAR_CALL_OPERANDS') == '1':
                 from scar.trace.call_operands import install as _scar_install_operands
-                _scar_install_operands(_scar_recorder)
+                _scar_install_operands(_scar_recorder,
+                    python_targets=os.environ.get('SCAR_PYTHON_CALL_TARGETS') == 'PYTHON_CALL_TARGETS_V2')
             if _scar_recorder is not None and os.environ.get('SCAR_EXECUTION_EVIDENCE') == '1':
                 import atexit as _scar_atexit
                 from scar.trace.execution_evidence import install as _scar_install_evidence
