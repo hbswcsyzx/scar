@@ -790,42 +790,57 @@ class CompositionIndex:
                                       _depth=0, _shared_admissions=None):
         """Read a qualified overlay over an unchanged project composition.
 
-        Direct admissions are explicit in this new contract. The legacy
-        continuation constructor and partitioned namespace policy are unchanged.
+        Schema1/2 keep direct admissions; schema3 explicitly reopens the exact
+        original continuation owner.  No report or namespace is reinterpreted.
         """
         from scar.analysis.compiler_witness_archives import CompilerWitnessArchives
         from scar.analysis.source_entry_catalog import SourceEntryCatalog
-        from scar.analysis.source_program_publication import read_source_entry_publication
+        from scar.analysis.source_program_publication import read_source_entry_publication, _entry_attachment3
         if (cls is not CompositionIndex or type(archives) is not CompilerWitnessArchives
                 or type(max_parent_depth) is not int or not 1 <= max_parent_depth <= 16
                 or _depth >= max_parent_depth):
             raise TypeError("entry composition requires exact readonly archives")
         document, receipt = _read(Path(path), max_input_bytes)
         if (receipt["raw_sha256"] != expected_sha256
-                or document.get("schema") != "scar.source-entry-publication" or document.get("schema_version") not in (1, 2)):
+                or document.get("schema") != "scar.source-entry-publication" or document.get("schema_version") not in (1, 2, 3)):
             raise ValueError("entry publication root receipt/schema differs")
         original = document["parent_composition"]
         catalog_original = document.get("catalog_project_composition", original)
         catalog_project = cls(catalog_original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
         if catalog_project.index_receipt != catalog_original or archives.receipts() != document["catalog_inputs"]["archives"]:
             raise ValueError("entry publication original project/archive inputs differ")
-        admissions = []
+        admissions, attachment_parent_watches = [], []
         for declaration in document["catalog_inputs"]["admissions"]:
-            if (declaration.get("format") != "scar.source-admissions-input.v1"
-                    or declaration.get("parent") is not None):
+            if document["schema_version"] == 3:
+                _, parent_locator = _entry_attachment3(declaration)
+                if parent_locator is not None:
+                    p = Path(parent_locator.artifact.uri)
+                    stat = p.stat()
+                    if (p.is_symlink() or p.resolve(strict=True) != p
+                            or stat.st_size != parent_locator.artifact.size_bytes):
+                        raise ValueError("schema3 parent is not its exact immutable manifest")
+                    attachment_parent_watches.append(({
+                        "uri": parent_locator.artifact.uri,
+                        "physical_sha256": parent_locator.artifact.sha256,
+                        "physical_bytes": parent_locator.artifact.size_bytes},
+                        (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)))
+            elif (declaration.get("format") != "scar.source-admissions-input.v1"
+                  or declaration.get("parent") is not None):
                 raise ValueError("entry publication requires an explicit direct-admissions locator")
             report = declaration["report"]
             shared = [owner for owner in (_shared_admissions or ()) if owner.receipts() == declaration]
             if shared:
                 owner = shared[0]
             else:
-                owner = SourceAttachments.from_admissions(report["artifact"]["uri"],
+                constructor = (SourceAttachments if declaration["format"] == "scar.source-attachments-input.v1"
+                               else SourceAttachments.from_admissions)
+                owner = constructor(report["artifact"]["uri"],
                     expected_report_sha256=report["artifact"]["sha256"],
                     project_root=catalog_project.inventory_component("discovery")["project_root"], budget=attachment_budget)
             if owner.receipts() != declaration:
                 raise ValueError("entry publication admission receipt differs")
             admissions.append(owner)
-        previous = document.get("parent_entry_publication") if document["schema_version"] == 2 else None
+        previous = document.get("parent_entry_publication") if document["schema_version"] in (2, 3) else None
         if previous is None:
             parent = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
         else:
@@ -854,6 +869,16 @@ class CompositionIndex:
             p = Path(ref["uri"])
             stat = p.stat()
             watched.append((deepcopy(ref), (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns)))
+        # These stamps bracket the normal continuation constructor and complete
+        # publication reader (including full parent SHA checks).  Later queries
+        # use the existing immutable-local-artifact policy, not another JSON read.
+        for ref, before in attachment_parent_watches:
+            p = Path(ref["uri"])
+            stat = p.stat()
+            after = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
+            if p.is_symlink() or p.resolve(strict=True) != p or after != before:
+                raise ValueError("schema3 parent changed during complete ordinary admission")
+            watched.append((deepcopy(ref), before))
         active = {_canonical(encode(item["entry"].reference)): item for item in
                   (parent._require_entry_publication()["checked"] if parent.has_source_entry_publication else ())}
         active.update({_canonical(encode(item["entry"].reference)): item for item in checked})
@@ -949,7 +974,12 @@ class CompositionIndex:
         for ref, original in state["watched"]:
             path = Path(ref["uri"])
             stat = path.stat()
-            if (path.is_symlink() or (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns) != original
+            stamp = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns)
+            if len(original) == 5:
+                stamp += (stat.st_ctime_ns,)
+                if path.resolve(strict=True) != path:
+                    raise ValueError("bound schema3 parent path changed")
+            if (path.is_symlink() or stamp != original
                     or stat.st_size != ref["physical_bytes"]):
                 raise ValueError("bound entry publication/program/checkpoint changed")
         return state

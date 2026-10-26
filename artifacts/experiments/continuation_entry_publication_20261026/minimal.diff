@@ -1,0 +1,290 @@
+--- a/scar/analysis/source_program_publication.py
++++ b/scar/analysis/source_program_publication.py
+@@ -326,8 +326,8 @@
+           and set(request) == {"entry_key", "source_program"}, "exact entry/program request required")
+     entry = catalog.resolve(request["entry_key"])
+     owner = catalog.require_entry(entry)
+-    _need(publication_version in (1, 2) and (type(owner) is SourceAttachments
+-          or publication_version == 2 and type(owner) is CompositionIndex and owner in catalog.projects),
++    _need(publication_version in (1, 2, 3) and (type(owner) is SourceAttachments
++          or publication_version in (2, 3) and type(owner) is CompositionIndex and owner in catalog.projects),
+           "publication requires its exact admitted owner under this schema")
+     expected = request["source_program"]
+     _need(type(expected) is dict and set(expected) == {"uri", "external", "representation",
+@@ -462,7 +462,7 @@
+     _need(type(catalog.projects) is tuple and len(catalog.projects) == 1,
+           "publication reader needs one exact original project")
+     document, receipt = _read_receipt(path, limit=max_record_bytes)
+-    if document.get("schema_version") == 2:
++    if document.get("schema_version") in (2, 3):
+         return _read_source_entries2(document, receipt, expected_sha256=expected_sha256, catalog=catalog,
+             target=target_composition, max_programs=max_programs, max_operations=max_operations_per_body,
+             max_record_bytes=max_record_bytes)
+@@ -516,7 +516,51 @@
+               "qualified entry publication plan changed")
+ 
+ 
+-def _entry_parent2(target, catalog):
++def _entry_attachment3(declaration):
++    """Exact existing owner inputs, not a decoder that constructs authority."""
++    from scar.ir.program.source_references import SourceArtifactLocator
++    _need(type(declaration) is dict and set(declaration) == {
++        "report", "parent", "format", "source_root_count", "source_file_count"}
++        and all(type(declaration[key]) is int and declaration[key] >= 0
++                for key in ("source_root_count", "source_file_count")),
++          "schema3 requires complete original attachment receipts")
++    report = decode(SourceArtifactLocator, declaration["report"])
++    _need(report.pointer == "#" and report.declaration is None
++          and report.representation == "canonical-json", "schema3 report must name the whole original manifest")
++    if declaration["format"] == "scar.source-admissions-input.v1":
++        _need(declaration["parent"] is None and report.artifact.schema == "scar.dependency-source-admissions",
++              "schema3 direct input has a parent or different report schema")
++        return report, None
++    _need(declaration["format"] == "scar.source-attachments-input.v1"
++          and report.artifact.schema == "scar.dependency-source-continuation"
++          and declaration["parent"] is not None,
++          "schema3 continuation input requires its exact report and parent")
++    parent = decode(SourceArtifactLocator, declaration["parent"])
++    _need(parent.pointer == "#" and parent.declaration is None
++          and parent.representation == "canonical-json"
++          and parent.artifact.schema == "scar.dependency-source-admissions",
++          "schema3 continuation parent must name the whole original admissions manifest")
++    return report, parent
++
++
++def _entry_attachment_inputs3(catalog):
++    """Keep continuation parents immutable as well as the original reports."""
++    from scar.analysis.source_attachments import SourceAttachments, _plain
++    declarations = []
++    for owner in catalog.admissions:
++        _need(type(owner) is SourceAttachments, "schema3 requires an ordinary original attachment owner")
++        owner.require_unchanged()
++        declaration = owner.receipts()
++        _, parent = _entry_attachment3(declaration)
++        if parent is not None:
++            _, actual = _plain(parent.artifact.uri, parent.artifact.sha256,
++                               "scar.dependency-source-admissions", owner.budget.max_report_bytes)
++            _need(actual == parent, "schema3 continuation parent locator/bytes changed")
++        declarations.append(declaration)
++    return declarations
++
++
++def _entry_parent2(target, catalog, *, publication_version=2):
+     from scar.analysis.source_entry_catalog import SourceEntryCatalog
+     _need(type(target) is CompositionIndex and type(catalog) is SourceEntryCatalog and len(catalog.projects) == 1,
+           "qualified publication requires one original project/catalog")
+@@ -528,8 +572,13 @@
+           and _canonical(original.inventory_component("call_sources")) == _canonical(target.inventory_component("call_sources"))
+           and original.inventory_component("discovery")["project_root"] == target.inventory_component("discovery")["project_root"],
+           "planning and publication targets differ in original compiler/capture/project basis")
+-    _need(all(owner.receipts()["format"] == "scar.source-admissions-input.v1" for owner in catalog.admissions),
+-          "qualified publication requires exact direct-admissions inputs")
++    _need(type(publication_version) is int and publication_version in (2, 3),
++          "qualified publication requires explicit schema2 or schema3")
++    if publication_version == 3:
++        _entry_attachment_inputs3(catalog)
++    else:
++        _need(all(owner.receipts()["format"] == "scar.source-admissions-input.v1" for owner in catalog.admissions),
++              "qualified publication requires exact direct-admissions inputs")
+     if target.has_source_entry_publication:
+         _need(target.source_inputs()["attachments"] == [owner.receipts() for owner in catalog.admissions],
+               "target overlay and catalog admitted namespaces differ")
+@@ -544,11 +593,11 @@
+         "candidate_entries": len(metadata["candidates"])}
+ 
+ 
+-def plan_source_entry_publication(target, catalog, source_programs, *, max_programs=1):
++def plan_source_entry_publication(target, catalog, source_programs, *, max_programs=1, publication_version=2):
+     """Exact source-qualified ADD/REVISE expectations; never admit a graph."""
+     _need(type(max_programs) is int and max_programs > 0 and type(source_programs) is tuple
+           and 0 < len(source_programs) <= max_programs, "bounded complete program requests required")
+-    parent, expected, seen = _entry_parent2(target, catalog), [], set()
++    parent, expected, seen = _entry_parent2(target, catalog, publication_version=publication_version), [], set()
+     for request in source_programs:
+         _need(type(request) is dict and set(request) == {"entry_key", "source_program"}, "exact entry request required")
+         entry = catalog.resolve(request["entry_key"])
+@@ -563,7 +612,7 @@
+             "entry_navigation_origin": entry.origin, "owner_kind": entry.origin["kind"],
+             "operation": "REVISE_GRAPH" if state["body"] is not None else "ADD_GRAPH",
+             "expected_parent_body": state, "source_program": deepcopy(request["source_program"])})
+-    document = {"schema": "scar.source-entry-publication-plan", "schema_version": 2,
++    document = {"schema": "scar.source-entry-publication-plan", "schema_version": publication_version,
+                 **parent, "expectations": expected, "source_admission_authorized": False}
+     return SourceEntryPublicationPlan(document, sha256(_canonical(document)).hexdigest())
+ 
+@@ -590,9 +639,12 @@
+ 
+ def _publish_source_entries2(target, catalog, requests, out_dir, *, plan, max_programs,
+                               max_operations_per_body, max_record_bytes, progress):
+-    _need(type(plan) is SourceEntryPublicationPlan, "schema2 requires its explicit CAS plan")
++    _need(type(plan) is SourceEntryPublicationPlan, "qualified publication requires its explicit CAS plan")
+     plan.require_unchanged()
+-    fresh = plan_source_entry_publication(target, catalog, requests, max_programs=max_programs)
++    version = plan.document.get("schema_version")
++    _need(type(version) is int and version in (2, 3), "unsupported qualified publication plan schema")
++    fresh = plan_source_entry_publication(target, catalog, requests, max_programs=max_programs,
++                                          publication_version=version)
+     _need(fresh.document == plan.document and fresh.sha256 == plan.sha256, "stale target/body/root/artifact CAS plan")
+     _need(type(max_operations_per_body) is int and max_operations_per_body > 0
+           and type(max_record_bytes) is int and max_record_bytes > 0 and (progress is None or callable(progress)),
+@@ -603,7 +655,7 @@
+     rows = []
+     for serial, (request, expected) in enumerate(zip(requests, plan.document["expectations"])):
+         entry, program, body, signature = _entry_program(catalog, request, max_operations_per_body,
+-                                                        max_record_bytes, publication_version=2)
++                                                        max_record_bytes, publication_version=version)
+         _need(encode(entry.reference) == expected["definition"] and entry.origin == expected["entry_navigation_origin"],
+               "qualified definition/navigation changed")
+         _entry2_abi(expected, program)
+@@ -617,30 +669,36 @@
+         if progress is not None:
+             progress({"stage": "admit_qualified_entry", "entry_key": entry.key, "owner_kind": expected["owner_kind"],
+                       "operation": expected["operation"], "status": "VERIFIED"})
+-    _need(plan_source_entry_publication(target, catalog, requests, max_programs=max_programs).document == plan.document,
++    _need(plan_source_entry_publication(target, catalog, requests, max_programs=max_programs,
++                                      publication_version=version).document == plan.document,
+           "publication parent/body inputs changed during independent admission")
+-    document = {"schema": "scar.source-entry-publication", "schema_version": 2,
+-        **_entry_parent2(target, catalog), "plan": deepcopy(plan.document), "plan_sha256": plan.sha256,
++    document = {"schema": "scar.source-entry-publication", "schema_version": version,
++        **_entry_parent2(target, catalog, publication_version=version),
++        "plan": deepcopy(plan.document), "plan_sha256": plan.sha256,
+         "bodies": rows, "producer": _entry_module_receipts(), **_ENTRY_AUTHORITY}
+     payload = _canonical(document)
+     _need(len(payload) <= max_record_bytes, "qualified publication manifest byte ceiling exceeded")
+     with (out / "manifest.json").open("xb") as stream:
+         stream.write(payload)
+     return {"manifest": str(out / "manifest.json"), "sha256": sha256(payload).hexdigest(),
+-            "body_count": len(rows), "schema_version": 2, "construction_operations": None, **_ENTRY_AUTHORITY}
++            "body_count": len(rows), "schema_version": version, "construction_operations": None, **_ENTRY_AUTHORITY}
+ 
+ 
+ def _read_source_entries2(document, receipt, *, expected_sha256, catalog, target, max_programs,
+                            max_operations, max_record_bytes):
++    version = document.get("schema_version")
+     _need(type(target) is CompositionIndex and receipt["physical_sha256"] == expected_sha256
+           and _entry_canonical(document, receipt) and document.get("schema") == "scar.source-entry-publication"
++          and type(version) is int and version in (2, 3)
+           and all(document.get(key) is value for key, value in _ENTRY_AUTHORITY.items()),
+           "schema2 publication root/canonical receipt/authority differs")
+     rows = document["bodies"]
+     requests = tuple({"entry_key": row["entry_key"], "source_program": row["source_program"]} for row in rows)
+-    plan = plan_source_entry_publication(target, catalog, requests, max_programs=max_programs)
++    plan = plan_source_entry_publication(target, catalog, requests, max_programs=max_programs,
++                                        publication_version=version)
+     _need(plan.document == document["plan"] and plan.sha256 == document["plan_sha256"]
+-          and all(document.get(key) == value for key, value in _entry_parent2(target, catalog).items()),
++          and all(document.get(key) == value for key, value in
++                  _entry_parent2(target, catalog, publication_version=version).items()),
+           "schema2 parent/plan/source/CAS differs")
+     checked = []
+     for row, expected in zip(rows, plan.document["expectations"]):
+@@ -648,7 +706,7 @@
+               "schema2 qualified expectation differs")
+         entry, program, body, signature = _entry_program(catalog,
+             {"entry_key": row["entry_key"], "source_program": row["source_program"]},
+-            max_operations, max_record_bytes, publication_version=2)
++            max_operations, max_record_bytes, publication_version=version)
+         _entry2_abi(expected, program)
+         checkpoint, actual = _read_receipt(row["checkpoint"]["uri"], limit=max_record_bytes)
+         _need(all(actual[name] == row["checkpoint"][name] for name in actual)
+--- a/scar/analysis/program_composition.py
++++ b/scar/analysis/program_composition.py
+@@ -790,42 +790,57 @@
+                                       _depth=0, _shared_admissions=None):
+         """Read a qualified overlay over an unchanged project composition.
+ 
+-        Direct admissions are explicit in this new contract. The legacy
+-        continuation constructor and partitioned namespace policy are unchanged.
++        Schema1/2 keep direct admissions; schema3 explicitly reopens the exact
++        original continuation owner.  No report or namespace is reinterpreted.
+         """
+         from scar.analysis.compiler_witness_archives import CompilerWitnessArchives
+         from scar.analysis.source_entry_catalog import SourceEntryCatalog
+-        from scar.analysis.source_program_publication import read_source_entry_publication
++        from scar.analysis.source_program_publication import read_source_entry_publication, _entry_attachment3
+         if (cls is not CompositionIndex or type(archives) is not CompilerWitnessArchives
+                 or type(max_parent_depth) is not int or not 1 <= max_parent_depth <= 16
+                 or _depth >= max_parent_depth):
+             raise TypeError("entry composition requires exact readonly archives")
+         document, receipt = _read(Path(path), max_input_bytes)
+         if (receipt["raw_sha256"] != expected_sha256
+-                or document.get("schema") != "scar.source-entry-publication" or document.get("schema_version") not in (1, 2)):
++                or document.get("schema") != "scar.source-entry-publication" or document.get("schema_version") not in (1, 2, 3)):
+             raise ValueError("entry publication root receipt/schema differs")
+         original = document["parent_composition"]
+         catalog_original = document.get("catalog_project_composition", original)
+         catalog_project = cls(catalog_original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
+         if catalog_project.index_receipt != catalog_original or archives.receipts() != document["catalog_inputs"]["archives"]:
+             raise ValueError("entry publication original project/archive inputs differ")
+-        admissions = []
++        admissions, attachment_parent_watches = [], []
+         for declaration in document["catalog_inputs"]["admissions"]:
+-            if (declaration.get("format") != "scar.source-admissions-input.v1"
+-                    or declaration.get("parent") is not None):
++            if document["schema_version"] == 3:
++                _, parent_locator = _entry_attachment3(declaration)
++                if parent_locator is not None:
++                    p = Path(parent_locator.artifact.uri)
++                    stat = p.stat()
++                    if (p.is_symlink() or p.resolve(strict=True) != p
++                            or stat.st_size != parent_locator.artifact.size_bytes):
++                        raise ValueError("schema3 parent is not its exact immutable manifest")
++                    attachment_parent_watches.append(({
++                        "uri": parent_locator.artifact.uri,
++                        "physical_sha256": parent_locator.artifact.sha256,
++                        "physical_bytes": parent_locator.artifact.size_bytes},
++                        (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)))
++            elif (declaration.get("format") != "scar.source-admissions-input.v1"
++                  or declaration.get("parent") is not None):
+                 raise ValueError("entry publication requires an explicit direct-admissions locator")
+             report = declaration["report"]
+             shared = [owner for owner in (_shared_admissions or ()) if owner.receipts() == declaration]
+             if shared:
+                 owner = shared[0]
+             else:
+-                owner = SourceAttachments.from_admissions(report["artifact"]["uri"],
++                constructor = (SourceAttachments if declaration["format"] == "scar.source-attachments-input.v1"
++                               else SourceAttachments.from_admissions)
++                owner = constructor(report["artifact"]["uri"],
+                     expected_report_sha256=report["artifact"]["sha256"],
+                     project_root=catalog_project.inventory_component("discovery")["project_root"], budget=attachment_budget)
+             if owner.receipts() != declaration:
+                 raise ValueError("entry publication admission receipt differs")
+             admissions.append(owner)
+-        previous = document.get("parent_entry_publication") if document["schema_version"] == 2 else None
++        previous = document.get("parent_entry_publication") if document["schema_version"] in (2, 3) else None
+         if previous is None:
+             parent = cls(original["path"], max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes)
+         else:
+@@ -854,6 +869,16 @@
+             p = Path(ref["uri"])
+             stat = p.stat()
+             watched.append((deepcopy(ref), (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns)))
++        # These stamps bracket the normal continuation constructor and complete
++        # publication reader (including full parent SHA checks).  Later queries
++        # use the existing immutable-local-artifact policy, not another JSON read.
++        for ref, before in attachment_parent_watches:
++            p = Path(ref["uri"])
++            stat = p.stat()
++            after = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
++            if p.is_symlink() or p.resolve(strict=True) != p or after != before:
++                raise ValueError("schema3 parent changed during complete ordinary admission")
++            watched.append((deepcopy(ref), before))
+         active = {_canonical(encode(item["entry"].reference)): item for item in
+                   (parent._require_entry_publication()["checked"] if parent.has_source_entry_publication else ())}
+         active.update({_canonical(encode(item["entry"].reference)): item for item in checked})
+@@ -949,7 +974,12 @@
+         for ref, original in state["watched"]:
+             path = Path(ref["uri"])
+             stat = path.stat()
+-            if (path.is_symlink() or (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns) != original
++            stamp = (stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns)
++            if len(original) == 5:
++                stamp += (stat.st_ctime_ns,)
++                if path.resolve(strict=True) != path:
++                    raise ValueError("bound schema3 parent path changed")
++            if (path.is_symlink() or stamp != original
+                     or stat.st_size != ref["physical_bytes"]):
+                 raise ValueError("bound entry publication/program/checkpoint changed")
+         return state

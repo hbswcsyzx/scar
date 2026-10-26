@@ -583,11 +583,18 @@ class SourceEntryFrontendPlan:
 
 def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=(
         SourceLanguageCapability.FIXED_UNPACK, SourceLanguageCapability.SLICE_KEYS,
-        SourceLanguageCapability.LEXICAL_LOCALS, SourceLanguageCapability.CALL_KWARGS_314_V1), out_dir=None):
-    """Version2: metadata-only window over original qualified entry candidates."""
+        SourceLanguageCapability.LEXICAL_LOCALS, SourceLanguageCapability.CALL_KWARGS_314_V1), out_dir=None,
+        dispatch_order='CALL_WEIGHT_DESC_V1'):
+    """Select by call weight, optionally batch the selected entries by file.
+
+    Batching changes only analysis scheduling. It preserves window membership,
+    original entry identities and all ordinary source/compiler checks.
+    """
     from scar.analysis.source_entry_catalog import SourceEntryCatalog
     _need(type(catalog) is SourceEntryCatalog and type(budget) is SourceFrontendBudget,
           'original entry catalog and independent frontend budget required')
+    _need(type(dispatch_order) is str and dispatch_order in ('CALL_WEIGHT_DESC_V1', 'FILE_GROUPED_V1'),
+          'unsupported source-entry analysis dispatch order')
     budget.__post_init__()
     SourceLanguageOptions(capabilities)
     metadata = catalog.metadata()
@@ -604,6 +611,11 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
             continue
         dispatch.append(entry)
         files.add(entry['file_key'])
+    if dispatch_order == 'FILE_GROUPED_V1':
+        by_file = {}
+        for entry in dispatch:
+            by_file.setdefault(entry['file_key'], []).append(entry)
+        dispatch = [entry for group in by_file.values() for entry in group]
     document = {'schema': 'scar.source-frontend-plan', 'schema_version': 2,
         'catalog_inputs': catalog.inputs(), 'budget': asdict(budget), 'producer': _entry_producer(),
         'profile': BodyLoweringProfile.STRUCTURED_ENV.value, 'capabilities': [x.value for x in capabilities],
@@ -611,6 +623,8 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
         'summary': {'candidate_entries': len(entries), 'current_groups': len(groups),
                     'current_calls': metadata['entered_invocations'], 'dispatch_entries': len(dispatch)},
         'source_body_publication': 'NOT_RUN', 'runtime_binding': 'NOT_RUN', 'first_stage_complete': False}
+    if dispatch_order == 'FILE_GROUPED_V1':
+        document['dispatch_order'] = dispatch_order
     digest = _hash({'document': document, 'entries': entries, 'groups': groups, 'dispatch': tuple(dispatch)})
     result = SourceEntryFrontendPlan(catalog, document, entries, groups, tuple(dispatch), digest)
     if out_dir is not None:
