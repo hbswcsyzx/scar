@@ -30,7 +30,8 @@ def _need(condition, detail):
 
 def validate_language_body(model, graph, interface, metadata, semantic, language,
                            *, source_tree=None, options=None, structural_only=False):
-    if (language is not None and Capability.GENEXPR_314_V1 in language.capabilities
+    if (language is not None and any(c in language.capabilities for c in
+            (Capability.GENEXPR_314_V1, Capability.GENEXPR_CREATION_314_V1))
             and graph.resumable_creates):
         from scar.analysis.source_generator_validation import validate_generator_regions, root_projection
         delegated = validate_generator_regions(model, graph, interface, metadata, semantic, language,
@@ -68,9 +69,12 @@ def validate_language_body(model, graph, interface, metadata, semantic, language
     from scar.analysis.source_import_lowering import validate_imports
     imports = validate_imports(model, graph, interface, metadata, semantic, language,
         source_tree=source_tree, options=options, structural_only=structural_only)
-    indexed = set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports
+    from scar.analysis.source_with_validation import validate_with
+    withs = validate_with(model, graph, interface, metadata, semantic, language,
+        source_tree=source_tree, options=options, structural_only=structural_only)
+    indexed = set(unpack) | set(slices) | set(constants) | calls | try_protocols | functions | imports | withs
     actual = {key for key, row in protocols.items() if row.kind.value in EXTENDED_PROTOCOLS}
-    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports),
+    _need(indexed == actual and len(indexed) == len(unpack) + len(slices) + len(constants) + len(calls) + len(try_protocols) + len(functions) + len(imports) + len(withs),
           "new language operations must have one exact shape/provenance record")
 
     def source_node(reference, classes):

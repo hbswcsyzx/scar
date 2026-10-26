@@ -273,6 +273,39 @@ def _python_target_members(files, trace_root, pid, members, project_root):
             "collector_stopped": document["stopped"], "call_ports_established": False}, [str(events), str(metadata)]
 
 
+def _lean_plan_member(files, trace_root, pid, members, calls, operands):
+    """Bind the exact selector receipt, never upgrade its observation scope."""
+    from scar.ir.program.call_operands import LEAN_PORTS_RULE
+    from scar.ir.record_codec import decode
+    from scar.trace.lean_capture import LeanCapturePlan, PROFILE
+    if operands.get("rule") != LEAN_PORTS_RULE:
+        _need(calls.get("capture_profile") != PROFILE and "capture_plan" not in calls,
+              "lean frame plan requires the matching operand rule")
+        return None, []
+    scope = PROFILE + ": planned roots/direct thin boundaries; unplanned interiors/imports unexpanded"
+    _need(calls.get("capture_profile") == PROFILE and calls.get("unplanned_bodies_expanded") is False
+          and calls.get("scope") == scope and calls.get("project_root") == operands.get("project_root"),
+          "lean capture must preserve its explicit thin-boundary scope and namespace")
+    declaration = decode(ProviderArtifact, calls.get("capture_plan"))
+    expected = trace_root / f"lean-plan.{pid}.json"
+    _need(declaration.uri == str(expected) and declaration.schema == "scar.lean-capture-plan/1"
+          and 0 < declaration.size_bytes <= 16_000_000, "lean plan receipt path/schema/size differs")
+    local, entry = files.local(expected)
+    _need((entry["raw_bytes"] if entry is not None else local.stat().st_size) == declaration.size_bytes,
+          "lean plan retained byte declaration differs")
+    document, artifact = files.document(expected, declaration.schema, limit=16_000_000)
+    _need(artifact == declaration, "lean plan retained SHA/receipt differs")
+    maximum = calls.get("limits", {}).get("max_codes")
+    _need(_integer(maximum, 1), "lean frame code budget is not declared")
+    plan = LeanCapturePlan.from_dict(document, max_codes=maximum)
+    _need(plan.namespace_root == calls["project_root"], "lean plan namespace differs from its issuer")
+    members[str(expected)] = artifact
+    return {"capability": "SCAR_LEAN_CAPTURE_PLAN_MEMBERSHIP_V1", "profile": PROFILE,
+            "plan": encode(artifact), "planned_codes": len(plan.bodies), "scope": scope,
+            "unplanned_bodies_expanded": False,
+            "source_compiler_runtime_contents_proved": False}, [str(expected)]
+
+
 def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=2_000_000, profile_uri=None,
                              publish_os_profile=False, allow_plain_owned_capture=False):
     """Validate this retained capture profile and reuse existing coordinate types.
@@ -355,6 +388,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     _need(members[str(operand_name)].size_bytes == operands["bytes"], "operand event byte count differs")
     python_target_membership, python_target_names = _python_target_members(
         files, trace_root, pid, members, operands["project_root"])
+    lean_plan_membership, lean_plan_names = _lean_plan_member(files, trace_root, pid, members, calls, operands)
     environment_name = trace_root / ("function-environments." + str(pid) + ".jsonl")
     environment_meta_name = trace_root / ("function-environment-meta." + str(pid) + ".json")
     environment_present = files.contains(environment_name)
@@ -593,6 +627,7 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     exclusive_names += [str(operand_name), str(native_name),
                         str(trace_root / ("call-operand-meta." + str(pid) + ".json"))]
     exclusive_names += python_target_names
+    exclusive_names += lean_plan_names
     if environment_present:
         exclusive_names += [str(environment_name), str(environment_meta_name)]
     exclusive_names += dispatch_names
@@ -740,6 +775,10 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         report['python_call_target_membership'] = python_target_membership
         report['open'].append({'code': 'python_target_event_to_canonical_call_ports_unverified',
                                'source': python_target_membership['manifest']})
+    if lean_plan_membership is not None:
+        report['lean_capture_plan_membership'] = lean_plan_membership
+        report['open'].append({'code': 'lean_unplanned_bodies_and_interfaces_remain_unexpanded',
+                               'source': lean_plan_membership['plan']})
     if collector_membership is not None:
         report['collector_execution_membership']=collector_membership
         report['open'].append({'code':'collector_process_birth_requires_explicit_witness_binder',

@@ -24,7 +24,18 @@ from scar.trace.reader import load
 
 def _trace(args) -> int:
     out = Path(args.out).resolve()
-    python_targets = getattr(args, 'python_call_targets', False)
+    capture_plan_path = getattr(args, 'capture_plan', None)
+    capture_plan_sha256 = getattr(args, 'capture_plan_sha256', None)
+    if (capture_plan_path is None) != (capture_plan_sha256 is None):
+        raise SystemExit('--capture-plan and --capture-plan-sha256 are required together')
+    lean_plan = None
+    if capture_plan_path is not None:
+        from scar.trace.lean_capture import read_plan
+        capture_plan_path = Path(capture_plan_path).resolve()
+        lean_plan = read_plan(capture_plan_path, expected_sha256=capture_plan_sha256)
+        if args.project_root is not None and str(Path(args.project_root).resolve()) != lean_plan.namespace_root:
+            raise SystemExit('--project-root differs from the capture plan namespace')
+    python_targets = getattr(args, 'python_call_targets', False) or lean_plan is not None
     operands = getattr(args, 'call_operands', False) or python_targets
     os_capture_root = getattr(args, 'os_capture_root', None)
     if os_capture_root is not None:
@@ -43,6 +54,8 @@ def _trace(args) -> int:
     env.pop('SCAR_CALL_OPERANDS',None)
     env.pop('SCAR_PYTHON_CALL_TARGETS',None)
     env.pop('SCAR_OPERAND_CAPTURE',None)
+    env.pop('SCAR_CAPTURE_PLAN',None)
+    env.pop('SCAR_CAPTURE_PLAN_SHA256',None)
     env.pop('SCAR_EXECUTION_EVIDENCE',None)
     env.pop('SCAR_TENSOR_PHYSICAL',None)
     env.pop('SCAR_RESOURCE_SAMPLER',None)
@@ -65,10 +78,12 @@ def _trace(args) -> int:
                 or any(out.glob('function-environment-meta.*.json*'))
                 or any(out.glob('python-call-targets.*.jsonl*'))
                 or any(out.glob('python-call-target-meta.*.json*'))
+                or any(out.glob('lean-plan.*.json'))
                 or (execution_evidence and any(out.glob('execution-evidence.*.json')))):
             raise SystemExit("calls-only requires a fresh output directory")
         env['SCAR_TRACE_CALL_EDGES'] = '1'
-        env['SCAR_CALL_PROJECT_ROOT'] = str(Path(args.project_root or Path.cwd()).resolve())
+        env['SCAR_CALL_PROJECT_ROOT'] = str(Path(args.project_root or (
+            lean_plan.namespace_root if lean_plan is not None else Path.cwd())).resolve())
         env['SCAR_CALL_MAX_EVENTS'] = str(args.max_call_events)
         env['SCAR_CALL_MAX_BYTES'] = str(args.max_call_bytes)
         if args.max_call_events < 1 or args.max_call_bytes < 1:
@@ -76,8 +91,8 @@ def _trace(args) -> int:
         if operands:
             if args.max_operand_events < 1 or args.max_operand_bytes < 1:
                 raise SystemExit("operand budgets must be positive")
-            capture = getattr(args, 'operand_capture', 'windows')
-            if capture not in ('windows', 'instructions'):
+            capture = 'lean-ports' if lean_plan is not None else getattr(args, 'operand_capture', 'windows')
+            if capture not in ('windows', 'instructions', 'lean-ports'):
                 raise SystemExit("operand capture must be windows or instructions")
             env['SCAR_CALL_OPERANDS'] = '1'
             if python_targets:
@@ -85,6 +100,9 @@ def _trace(args) -> int:
             env['SCAR_OPERAND_CAPTURE'] = capture
             env['SCAR_OPERAND_MAX_EVENTS'] = str(args.max_operand_events)
             env['SCAR_OPERAND_MAX_BYTES'] = str(args.max_operand_bytes)
+            if lean_plan is not None:
+                env['SCAR_CAPTURE_PLAN'] = str(capture_plan_path)
+                env['SCAR_CAPTURE_PLAN_SHA256'] = capture_plan_sha256
         if execution_evidence:
             env['SCAR_EXECUTION_EVIDENCE'] = '1'
             if physical:
@@ -125,6 +143,29 @@ def _trace(args) -> int:
             'os_capture_provider': coordinates.report.get('os_capture_provider'),
             'whole_model_established': False}), flush=True)
     return result.returncode
+
+
+def _query_symbolic_output(args) -> int:
+    from scar.ir.execution.ids import ValueOccurrenceID
+    from scar.ir.execution.symbolic_native_output import query_symbolic_native_output
+    from scar.ir.record_codec import encode
+    prefix = ValueOccurrenceID.prefix + ':'
+    if not args.occurrence.startswith(prefix) or not args.occurrence[len(prefix):]:
+        raise ValueError('original output ValueOccurrenceID wire required')
+    occurrence = ValueOccurrenceID(args.occurrence[len(prefix):])
+    projection, delta = query_symbolic_native_output(args.projection, occurrence, expected_sha256=args.sha256)
+    result = {'schema': 'scar.symbolic-native-output-query', 'schema_version': 1,
+              'qualification': 'INFERRED_PAYLOAD_SYMBOL; reference identity unchanged',
+              'projection': encode(projection), 'value_graph_delta': delta.to_dict(),
+              'source_inputs_replayed': False, 'contents_or_alias_or_ready_proved': False,
+              'whole_model_established': False, 'transformation_authorized': False}
+    payload = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n'
+    if args.out:
+        with Path(args.out).open('x', encoding='utf-8') as stream:
+            stream.write(payload)
+    else:
+        print(payload, end='')
+    return 0
 
 
 def _optimize(args) -> int:
@@ -384,6 +425,7 @@ def main(argv=None) -> int:
     source_returns.add_argument("--model", required=True)
     source_returns.add_argument("--sha256", required=True, help="expected stored source-port model SHA256")
     source_returns.add_argument("--binding-index", required=True, type=int, help="original binding_index returned by query-call-ports")
+    source_returns.add_argument("--include-state", action="store_true", help="connect coarse state input and normal/exception post-state ports")
     source_returns.add_argument("--out", help="write a fresh result")
     from scar.analysis.source_return_bindings import query_source_returns_cli
     source_returns.set_defaults(func=query_source_returns_cli)
@@ -400,7 +442,10 @@ def main(argv=None) -> int:
     native_ports = sub.add_parser("query-native-ports", help="query native operation ports from one compressed source-range fragment")
     native_ports.add_argument("--index", required=True, help="native port publication index.json")
     native_ports.add_argument("--sha256", required=True, help="expected index SHA256")
-    native_ports.add_argument("--ordinal", type=int, help="original ETO source node ordinal; omit for index summary")
+    native_port_selector = native_ports.add_mutually_exclusive_group()
+    native_port_selector.add_argument("--ordinal", type=int, help="original ETO source node ordinal; omit selectors for index summary")
+    native_port_selector.add_argument("--provider-reference", help="find original port occurrences of this exact provider reference")
+    native_ports.add_argument("--descriptor-id", help="exact provider descriptor ID; required with provider-reference")
     native_ports.add_argument("--bundle", help="original bundle-partitions directory; required with ordinal")
     native_ports.add_argument("--out", help="write a fresh result")
     from scar.trace.native_ports_cli import query_native_ports_cli, build_native_ports_cli
@@ -413,6 +458,12 @@ def main(argv=None) -> int:
     native_port_build.add_argument("--out", required=True, help="fresh fragment publication directory")
     native_port_build.add_argument("--shard-size", type=int, default=4096)
     native_port_build.set_defaults(func=build_native_ports_cli)
+    symbolic_output = sub.add_parser("query-symbolic-output", help="read an inferred payload symbol beside an original output reference")
+    symbolic_output.add_argument("--projection", required=True)
+    symbolic_output.add_argument("--sha256", required=True)
+    symbolic_output.add_argument("--occurrence", required=True, help="original output ValueOccurrenceID wire within this projection's qualified execution artifact")
+    symbolic_output.add_argument("--out", help="write a fresh result")
+    symbolic_output.set_defaults(func=_query_symbolic_output)
     resource_query = sub.add_parser("query-os-file-topology", help="follow original OS file-use records and sourced resource connections")
     resource_query.add_argument("--manifest", required=True)
     resource_query.add_argument("--sha256", required=True)
@@ -466,6 +517,8 @@ def main(argv=None) -> int:
     trace.add_argument('--call-operands',action='store_true',help='record bounded instruction/load/call evidence; implies calls-only (CPython 3.14)')
     trace.add_argument('--python-call-targets', action='store_true',
                        help='record explicit v2 Python callee and receiver roles; implies call-operands (CPython 3.14.7)')
+    trace.add_argument('--capture-plan', help='use a source-derived lean interface capture plan; implies Python call targets')
+    trace.add_argument('--capture-plan-sha256', help='expected capture plan SHA256')
     trace.add_argument('--execution-evidence',action='store_true',
                        help='collect native ETO/Kineto evidence alongside the call recorder when the target imports Torch; requires calls-only or call-operands')
     trace.add_argument('--tensor-physical',action='store_true',
@@ -1622,6 +1675,7 @@ def _model_run(args) -> int:
             resume=args.resume, budget=SourceEntryBindingBudget(**options), budget_sources=sources)
     elif args.from_model_run is not None and args.stage == "source-entries":
         from scar.analysis.source_entry_run import SourceEntryRunBudget, run_source_entry_stage
+        from scar.analysis.source_frontend_worklist import LATEST_SOURCE_ENTRY_PROFILE
         if any(option.startswith(("--max-", "--dependency-", "--binding-")) for option in tokens):
             raise SystemExit("source-entries uses --entry-max-* budgets; bootstrap/dependency budgets cannot be mixed")
         defaults = SourceEntryRunBudget()
@@ -1632,7 +1686,7 @@ def _model_run(args) -> int:
             sources[name] = "SOURCE_ENTRY_PROFILE_DEFAULT" if value is None else "CLI:--entry-" + name.replace("_", "-")
         report = run_source_entry_stage(args.from_model_run, args.out, plan_only=args.plan_only,
             resume=args.resume, budget=SourceEntryRunBudget(**options), budget_sources=sources,
-            source_entry_profile=('PYTHON_SOURCE_ENTRY_314_CAPS_V2' if args.source_entry_profile == 'latest' else None))
+            source_entry_profile=(LATEST_SOURCE_ENTRY_PROFILE if args.source_entry_profile == 'latest' else None))
     elif args.from_model_run is not None:
         if args.stage != "dependency-sources" or any(option.startswith(("--max-", "--entry-", "--binding-")) for option in tokens):
             raise SystemExit("--from-model-run requires --stage dependency-sources; use --dependency-max-* budgets")

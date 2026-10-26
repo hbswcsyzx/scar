@@ -13,7 +13,8 @@ from scar.ir.program.call_edges import (
 )
 from scar.ir.program.call_operands import (
     CallOperandBudget, CallableKind, OperandCallAttempt, OperandCollectionMetadata,
-    OperandEntryHandshake, OperandEvent, OperandEventKind, OperandGap, OperandInstruction,
+    OperandEntryHandshake, OperandEvent, OperandEventKind, OperandGap, OperandScopedGap, OperandInstruction,
+    LEAN_PORTS_RULE,
     operand_references,
 )
 from scar.ir.record_codec import decode
@@ -26,6 +27,7 @@ _TYPES = {
     "CALL_ATTEMPT": OperandCallAttempt,
     "ENTRY_HANDSHAKE": OperandEntryHandshake,
     "GAP": OperandGap,
+    "SCOPED_GAP": OperandScopedGap,
 }
 
 
@@ -72,7 +74,7 @@ class CallOperandTrace:
 
     @property
     def gaps(self):
-        return tuple(event for event in self.events if type(event) is OperandGap)
+        return tuple(event for event in self.events if type(event) in (OperandGap, OperandScopedGap))
 
 
 def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=CallEdgeBudget()):
@@ -167,6 +169,26 @@ def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=
         expected = {family: base_files[process, family] for family in ("codes", "events", "meta")}
         _require({item.family: item for item in meta.base_manifest} == expected,
                  "operand metadata does not bind the original frame file manifest")
+        if meta.rule == LEAN_PORTS_RULE:
+            from scar.trace.lean_capture import LeanCapturePlan, PROFILE
+            from scar.ir.program.providers import ProviderArtifact
+            declaration = base_meta[process].get('capture_plan')
+            _require(base_meta[process].get('capture_profile') == PROFILE and
+                     base_meta[process].get('unplanned_bodies_expanded') is False,
+                     'lean capture must declare its explicit thin boundary scope')
+            artifact = decode(ProviderArtifact, declaration)
+            plan_path = Path(artifact.uri)
+            _require(plan_path == trace_path / f'lean-plan.{process}.json' and not plan_path.is_symlink()
+                     and plan_path.is_file() and plan_path.stat().st_size == artifact.size_bytes
+                     and artifact.size_bytes <= 16_000_000 and artifact.schema == 'scar.lean-capture-plan/1',
+                     'lean plan artifact/policy scope differs')
+            with plan_path.open('rb') as stream:
+                raw_plan = stream.read(16_000_001)
+            _require(len(raw_plan) == artifact.size_bytes and
+                     hashlib.sha256(raw_plan).hexdigest() == artifact.sha256, 'lean plan SHA/size differs')
+            plan = LeanCapturePlan.from_dict(_json_object(raw_plan, path=str(plan_path), line_number=1),
+                max_codes=min(frame_budget.max_codes,base_meta[process]['limits']['max_codes']))
+            _require(plan.namespace_root == str(root_path), 'lean plan namespace differs')
         metadata.append(meta)
         if meta.previous_profile:
             issues.append(OperandReadIssue("PREVIOUS_PROFILE", "a previous profile callback was chained", process))
@@ -188,6 +210,8 @@ def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=
             _require(type(kind) is str and kind in _TYPES, "unknown operand event kind")
             anchor = CallRecordAnchor(logical, line, hashlib.sha256(raw).hexdigest(), row.get("index"))
             _require("anchor" not in row, "raw operand events cannot supply their own anchors")
+            _require(kind != 'SCOPED_GAP' or meta.rule == LEAN_PORTS_RULE,
+                     'scoped gaps require the explicit lean profile')
             event = decode(_TYPES[kind], {**row, "anchor": {
                 "path": anchor.path, "line_number": anchor.line_number,
                 "line_sha256": anchor.line_sha256, "index": anchor.index,
@@ -222,7 +246,8 @@ def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=
                  "operand retained event/byte counts disagree with metadata")
         for field, kind in (("instructions", OperandEventKind.INSTRUCTION), ("call_attempts", OperandEventKind.CALL_ATTEMPT),
                             ("handshakes", OperandEventKind.ENTRY_HANDSHAKE), ("gaps", OperandEventKind.GAP)):
-            _require(getattr(meta, field) == counts[kind], "operand kind count differs from metadata: " + field)
+            actual = counts[kind] + (counts[OperandEventKind.SCOPED_GAP] if field == 'gaps' else 0)
+            _require(getattr(meta, field) == actual, "operand kind count differs from metadata: " + field)
         _require(meta.loads == count_loads and meta.references == count_references,
                  "operand load/reference counts differ from metadata")
         events.extend(process_events)
@@ -260,9 +285,11 @@ def _validate_relationships(events, entries, exits, frame_scan, issues):
             _require(entry is not None, "operand owner has no original frame entry")
             _require(entry.anchor.index <= event.frame_index, "operand precedes its original owner entry")
             exit = by_exit.get(owner)
-            if type(event) is not OperandGap:
+            if type(event) not in (OperandGap, OperandScopedGap):
                 _require(exit is None or event.frame_index < exit.anchor.index,
                          "operand belongs to an already completed original frame")
+        if type(event) is OperandScopedGap and owner is not None:
+            _require(event.code == entry.code, 'scoped gap code differs from actual activation')
         if type(event) in (OperandInstruction, OperandCallAttempt):
             _require(event.site.code == entry.code, "operand site code differs from its owner frame")
             if (event.process_id, event.site.code) not in captures:

@@ -45,6 +45,9 @@ def captured_cell_slot(definition, name):
 
 
 def dispatch_source_expression(builder, node, cursor):
+    if builder.has_language("GENEXPR_CREATION_314_V1") and isinstance(node, ast.GeneratorExp):
+        from scar.analysis.source_generator_creation_lowering import lower_creation
+        return lower_creation(builder, node, cursor)
     if builder.has_language("GENEXPR_314_V1") and isinstance(node, ast.GeneratorExp):
         from scar.analysis.source_generator_lowering import lower_generator
         return lower_generator(builder, node, cursor)

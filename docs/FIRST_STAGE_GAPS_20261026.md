@@ -20,7 +20,7 @@
 
 | 必需部分 | 当前已有的实际结果 | 尚缺与验收条件 |
 |---|---|---|
-| 源码与依赖内部 | 正式原快照151文件/2217定义/858规范body。外部243候选归并为190成功、52未支持、1 resumable入口缺适配；其中旧161项已普通发布，后续重复全量reader按范围审计中止。新profile自动选择已实现的语法能力。 | 剩余With等语法继续补实现；新增body须正常准入并接回相应运行。源恢复成功、普通发布、当前运行绑定分别计数。 |
+| 源码与依赖内部 | 正式原快照151文件/2217定义/858规范body。外部243候选归并为193成功、49未支持、1 resumable入口缺适配；其中旧161项已普通发布。新profile自动选择语法，flat With和独立generator创建已有真实body读回。 | 剩余语法及嵌套cleanup/驱动继续补实现；新增body须正常准入并接回相应运行。源恢复成功、普通发布、当前运行绑定分别计数。 |
 | 层层函数调用 | 原完整100438调用均入账，6882次对应92个body groups；另88592 source-only、4964 unresolved。已有2516调用/6805条件参数端口；新CLI已在一条真实LeWM调用上连接callee正常返回Use→caller结果。 | 返回查询当前保留可能返回点，不据此断定实际选边；跨调用world、捕获/全局状态及其余实际调用仍需连接。深层region不可用祖先上下文替代直接调用。 |
 | 值、对象与可变内容 | 有引用、storage/allocation及view的真实记录和类型接口。 | 逻辑来源/值版本→物理副本、原位写入后态、alias范围和失效须接通。不能以相同ObjectID/StorageID/shape/样本或来源证明内容未变；采样仅用于排除。 |
 | Python→Torch→GPU工作 | main新门72613实际exit0：24082物理work均有retained source context/code来源；11541 exact、12541 enclosing，6普通查询通过。 | enclosing仅为提交scope嵌套；内部host exact occurrence仍缺12541，static body member未核14932，state/content/ready均未证24082。不能当作每个kernel的完整源数据流。 |

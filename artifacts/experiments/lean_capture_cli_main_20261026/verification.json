@@ -1,0 +1,16 @@
+{
+  "status": "ACTUAL_PUBLIC_LEAN_TRACE_AND_NORMAL_READER_PASS",
+  "reader_s": 0.02158724603941664,
+  "profile": "SCAR_LEAN_PORTS_V1",
+  "entries": 7,
+  "exits": 7,
+  "instructions": 0,
+  "attempts": 7,
+  "handshakes": 4,
+  "scoped_gaps": 2,
+  "reader_issues": [],
+  "stored_trace_bytes": 34635,
+  "target_returned": true,
+  "whole_program_scope": false,
+  "tensor_contents_read": false
+}

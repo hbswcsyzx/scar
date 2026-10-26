@@ -145,6 +145,45 @@ def expression_for_heap_target(builder, node, cursor):
         builder.link_value(value, node, SourceRole.EXPRESSION)
         return cursor, value.id
     children = None
+    if (getattr(builder,'has_language',lambda _:False)('GENEXPR_CREATION_314_V1')
+            and isinstance(node,ast.List) and not any(isinstance(n,ast.Starred)for n in node.elts)):
+        # Ordinary BUILD_LIST already exists in the source language. The old
+        # generator overlay omitted its eager iterable subtree; recover only
+        # the original ordered SG-backed elements, without a fake old record.
+        from scar.analysis.source_slice_lowering import _invoke
+        baseline=len(builder.active_temporaries);held=[];inputs=[]
+        try:
+            for i,child in enumerate(node.elts):
+                cursor,value=expression_for_heap_target(builder,child,cursor)
+                if cursor is None:return None,None
+                _hold(builder,cursor,child,value);held.append((child,value));inputs.append((value,child,'element',i,None))
+            cursor,result,identity=_invoke(builder,cursor,node,tuple(inputs),tuple(held),raise_consumed=(),memory=True)
+            _associate(builder,identity,node,definition,Opcode.BUILD_LIST)
+            builder.link_value(builder.values_by_id[result],node,SourceRole.EXPRESSION)
+            return cursor,result
+        finally:del builder.active_temporaries[baseline:]
+    if (getattr(builder, 'has_language', lambda _: False)('GENEXPR_CREATION_314_V1')
+            and isinstance(node, ast.Compare) and len(node.ops)==len(node.comparators)==1
+            and isinstance(node.ops[0], (ast.In, ast.NotIn))):
+        # The old overlay omits the lazy elt. Its exact SG source still owns
+        # this one comparison. Contains/iteration fallback + truth + optional
+        # negation remain one incomplete stateful interface, never a pure op.
+        from scar.analysis.source_slice_lowering import _invoke
+        baseline=len(builder.active_temporaries);held=[];inputs=[]
+        try:
+            for index,(child,role)in enumerate(((node.left,'left'),(node.comparators[0],'right'))):
+                cursor,value=expression_for_heap_target(builder,child,cursor)
+                if cursor is None:return None,None
+                _hold(builder,cursor,child,value);held.append((child,value));inputs.append((value,child,role,index,None))
+            negative=builder.literal(node,isinstance(node.ops[0],ast.NotIn))
+            inputs.append((negative,node,'membership-negated',0,None))
+            cursor,result,identity=_invoke(builder,cursor,node,tuple(inputs),tuple(held),kind=PythonProtocolKind.GENEXPR_CONTAINS)
+            _associate(builder,identity,node,definition,None)
+            builder.link_value(builder.values_by_id[result],node,SourceRole.EXPRESSION)
+            builder.gap(GapKind.DYNAMIC_DISPATCH,node,
+                'membership retains ordered operands, contains/iteration fallback, truth, world and failures; runtime dispatch/identity/content remain unproved')
+            return cursor,result
+        finally:del builder.active_temporaries[baseline:]
     if isinstance(node, ast.Attribute):
         if node.attr.startswith("__") and not node.attr.endswith("__"):
             _unsupported(node, "private attribute lookup requires exact compiler-class name mangling")

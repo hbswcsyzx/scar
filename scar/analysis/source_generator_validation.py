@@ -34,11 +34,18 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                                *, source_tree=None, options=None, structural_only=False):
     from scar.analysis.source_generator_lowering import compiler_entry_slot, child_code, VERSION, driver_rule
     from scar.analysis.source_language import require_source_tree
-    enabled = language is not None and Capability.GENEXPR_314_V1 in language.capabilities
+    creation_only = language is not None and Capability.GENEXPR_CREATION_314_V1 in language.capabilities
+    enabled = language is not None and (Capability.GENEXPR_314_V1 in language.capabilities or creation_only)
+    _need(not creation_only or Capability.GENEXPR_314_V1 not in language.capabilities,
+          'creation-only and fixed-unpack policies are distinct versions')
     if not enabled:
         _need(not graph.resumable_creates and not graph.resumable_bodies and not graph.driver_interfaces,
               "nested generator records require the explicit nondefault capability")
         return set()
+    if creation_only:
+        _need(not any((graph.driver_interfaces,graph.body_drives,graph.raw_driver_requests,
+                       graph.final_body_gates,graph.driver_lifecycles,graph.body_outcome_commits)),
+              'creation-only source cannot introduce a driver, request, gate or published outcome')
     operations = {row.id: row for row in graph.operations}
     values = {row.id: row for row in graph.values}
     regions = {row.id: row for row in graph.regions}
@@ -134,13 +141,18 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
         _need(operations[identity].callee is None and not operations[identity].effects_complete,
               "generator creation cannot synchronously call B or claim purity")
         local_drivers = [row for row in drivers.values() if row.body == body.id]
-        _need(len(local_drivers) == 2, "NEXT start/resume need separate driver interfaces sharing one B")
-        local_drives = [row for row in graph.body_drives if owners[row.operation] in {row.region for row in local_drivers}]
-        starts = [row for row in local_drives if type(row.target) is BodyStart]
-        resumes = [row for row in local_drives if type(row.target) is BodyResume]
-        _need(len(starts) == len(resumes) == 1 and starts[0].target.body == body.id,
-              "driver start/resume target coverage differs")
-        suspend = operations[resumes[0].target.suspend]
+        if creation_only:
+            sites = [op for op in operations.values() if owners[op.id]==body.id and type(op.terminator) is SuspendTerminator]
+            _need(len(sites)==1,'creation-only lazy body must retain its unique original yield boundary')
+            suspend, = sites
+        else:
+            _need(len(local_drivers) == 2, "NEXT start/resume need separate driver interfaces sharing one B")
+            local_drives = [row for row in graph.body_drives if owners[row.operation] in {row.region for row in local_drivers}]
+            starts = [row for row in local_drives if type(row.target) is BodyStart]
+            resumes = [row for row in local_drives if type(row.target) is BodyResume]
+            _need(len(starts) == len(resumes) == 1 and starts[0].target.body == body.id,
+                  "driver start/resume target coverage differs")
+            suspend = operations[resumes[0].target.suspend]
         _need(owners[suspend.id] == body.id and type(suspend.terminator) is SuspendTerminator
               and len(suspend.terminator.successors) == 1
               and tuple(slot.kind for slot in suspend.terminator.successors[0].inputs)
@@ -184,6 +196,27 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
         for key in local_operations:
             operation, link = operations[key], links[key]
             protocol = protocols.get(key)
+            if protocol is not None and protocol.kind is Kind.GENEXPR_CONTAINS:
+                _need(creation_only and isinstance(source_tree,ast.Module),'membership requires new creation policy and original AST')
+                from scar.analysis.source_language import require_source_tree
+                nodes=[n for n in require_source_tree(source_tree,language.source,link.source)if isinstance(n,ast.Compare)]
+                _need(len(nodes)==1 and len(nodes[0].ops)==len(nodes[0].comparators)==1
+                      and isinstance(nodes[0].ops[0],(ast.In,ast.NotIn)),'membership lost original one-operator AST')
+                member=nodes[0];own={u.id:u for u in operation.uses};args=tuple(own[u]for u in operation.invoke_arguments)
+                _need(len(args)==4 and all(type(values[u.value])is ReferenceValue for u in args[:3])
+                      and type(values[args[-1].value])is StateVersionValue and not operation.effects_complete
+                      and operation.callee is None and operation.terminator.kind is TerminatorKind.INVOKE
+                      and operation.completions[0].types==(_REF,value_type(values[interface.world]))
+                      and operation.completions[1].types==(_REF,value_type(values[interface.world]))
+                      and link.opcode is None,'membership must keep incomplete reference/world NORMAL and RAISE')
+                negative=values[args[2].value].origin
+                _need(type(negative)is LiteralOrigin and type(negative.value)is bool
+                      and negative.value==isinstance(member.ops[0],ast.NotIn),'membership negation differs')
+                source_uses={(r.operation,r.use):r for r in metadata.use_links}
+                for i,(child,role)in enumerate(((member.left,'left'),(member.comparators[0],'right'))):
+                    src=source_uses[(key,args[i].id)]
+                    _need(src.role==role and src.index==i and (src.source.start_line,src.source.end_line,src.source.start_column,src.source.end_column)
+                          ==(child.lineno,child.end_lineno,child.col_offset,child.end_col_offset),'membership ordered original operands differ')
             if protocol is not None and protocol.kind in (Kind.READ_FREE_CELL, Kind.LOOKUP_GLOBAL):
                 original = semantic.definitions.get(link.semantic_operation)
                 slots = source_slots.get(link.semantic_operation, ())
@@ -241,56 +274,59 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                 _need(operation.terminator is not None and operation.terminator.kind in (TerminatorKind.RETURN, TerminatorKind.RAISE)
                       or protocol is not None and protocol.kind is Kind.FRAME_EXIT,
                       "unclassified primitive in NEXT driver")
-        unpack_calls = [row for row in language.unpackings if operations[row.operation].callee is not None
-                        and owners[row.operation] == graph.root
-                        and any(e.kind is ExitKind.NORMAL and captures_handle == blocks[e.block].arguments[0]
-                                for captures_handle in [next(iter(operations[row.operation].uses)).value]
-                                for e in operations[identity].terminator.successors)]
-        _need(len(unpack_calls) == 1, "fresh handle must have its exact fixed-unpack composite consumer")
-        unpack, = unpack_calls
-        consumer_id = operations[unpack.operation].callee
-        consumer = regions[consumer_id]
-        _need(consumer.parent == graph.root, "consumer must remain a separate synchronous Region")
-        local_calls = [operations[key] for block in consumer.blocks for key in block.operations
-                       if operations[key].callee in {row.region for row in local_drivers}]
-        start_region, resume_region = owners[starts[0].operation], owners[resumes[0].operation]
-        _need(len(local_calls) == len(unpack.child_targets) + 1
-              and [row.callee for row in local_calls] == [start_region, *([resume_region] * len(unpack.child_targets))],
-              "fixed unpack requires N results plus one excess probe, without restarting B")
-        requests = [row for row in graph.raw_driver_requests if values[row.value].region == consumer_id]
-        _need(len(requests) == 1 and requests[0].kind is RawRequestKind.NEXT and not requests[0].operands,
-              "fixed unpack drives only NEXT; close/throw cannot be invented")
-        consumer_calls = {row.id for row in local_calls}
-        raw_producer = values[requests[0].value].origin.operation
-        for block in consumer.blocks:
-            for key in block.operations:
-                if key in consumer_calls or key == raw_producer:
-                    continue
-                operation, protocol = operations[key], protocols.get(key)
-                _need(protocol is not None and protocol.kind in (
-                          Kind.FRAME_HOLD_TEMPORARY, Kind.FRAME_DISCARD, Kind.FRAME_EXIT, Kind.MAKE_UNPACK_ARITY_ERROR)
-                      or operation.terminator is not None and operation.terminator.kind in (
-                          TerminatorKind.BRANCH, TerminatorKind.RETURN, TerminatorKind.RAISE),
-                      "unclassified primitive in fixed-unpack consumer")
-        for ordinal, call in enumerate(local_calls):
-            landing = blocks[call.terminator.successors[0].block]
-            branch = operations[landing.operations[-1]]
-            _need(branch.terminator.kind is TerminatorKind.BRANCH
-                  and next(use.value for use in branch.uses if use.id == branch.terminator.condition) == landing.arguments[1],
-                  "unpack must branch on that drive's yielded/exhausted outcome")
-            bad = blocks[branch.terminator.successors[int(ordinal < len(unpack.child_targets))].block]
-            first = protocols.get(bad.operations[0])
-            _need(first is not None and first.kind is Kind.FRAME_DISCARD,
-                  "excess/exhausted drive payload must be consumed before constructing arity error")
-            error = operations[bad.operations[-1]]
-            _need(error.id in protocols and protocols[error.id].kind is Kind.MAKE_UNPACK_ARITY_ERROR
-                  and not error.effects_complete and error.callee is None,
-                  "arity failure requires its explicit incomplete error-construction primitive")
-            error_uses = {use.id: use for use in error.uses}
-            arity = [values[error_uses[key].value].origin for key in error.invoke_arguments[:-1]]
-            _need(all(type(origin) is LiteralOrigin and type(origin.value) is int for origin in arity)
-                  and [origin.value for origin in arity] == [len(unpack.child_targets), ordinal + int(ordinal == len(unpack.child_targets))],
-                  "unpack shortage/excess arity differs from its actual probe ordinal")
+        consumer_ids = set()
+        if not creation_only:
+            unpack_calls = [row for row in language.unpackings if operations[row.operation].callee is not None
+                            and owners[row.operation] == graph.root
+                            and any(e.kind is ExitKind.NORMAL and captures_handle == blocks[e.block].arguments[0]
+                                    for captures_handle in [next(iter(operations[row.operation].uses)).value]
+                                    for e in operations[identity].terminator.successors)]
+            _need(len(unpack_calls) == 1, "fresh handle must have its exact fixed-unpack composite consumer")
+            unpack, = unpack_calls
+            consumer_id = operations[unpack.operation].callee
+            consumer = regions[consumer_id]
+            _need(consumer.parent == graph.root, "consumer must remain a separate synchronous Region")
+            local_calls = [operations[key] for block in consumer.blocks for key in block.operations
+                           if operations[key].callee in {row.region for row in local_drivers}]
+            start_region, resume_region = owners[starts[0].operation], owners[resumes[0].operation]
+            _need(len(local_calls) == len(unpack.child_targets) + 1
+                  and [row.callee for row in local_calls] == [start_region, *([resume_region] * len(unpack.child_targets))],
+                  "fixed unpack requires N results plus one excess probe, without restarting B")
+            requests = [row for row in graph.raw_driver_requests if values[row.value].region == consumer_id]
+            _need(len(requests) == 1 and requests[0].kind is RawRequestKind.NEXT and not requests[0].operands,
+                  "fixed unpack drives only NEXT; close/throw cannot be invented")
+            consumer_calls = {row.id for row in local_calls}
+            raw_producer = values[requests[0].value].origin.operation
+            for block in consumer.blocks:
+                for key in block.operations:
+                    if key in consumer_calls or key == raw_producer:
+                        continue
+                    operation, protocol = operations[key], protocols.get(key)
+                    _need(protocol is not None and protocol.kind in (
+                              Kind.FRAME_HOLD_TEMPORARY, Kind.FRAME_DISCARD, Kind.FRAME_EXIT, Kind.MAKE_UNPACK_ARITY_ERROR)
+                          or operation.terminator is not None and operation.terminator.kind in (
+                              TerminatorKind.BRANCH, TerminatorKind.RETURN, TerminatorKind.RAISE),
+                          "unclassified primitive in fixed-unpack consumer")
+            for ordinal, call in enumerate(local_calls):
+                landing = blocks[call.terminator.successors[0].block]
+                branch = operations[landing.operations[-1]]
+                _need(branch.terminator.kind is TerminatorKind.BRANCH
+                      and next(use.value for use in branch.uses if use.id == branch.terminator.condition) == landing.arguments[1],
+                      "unpack must branch on that drive's yielded/exhausted outcome")
+                bad = blocks[branch.terminator.successors[int(ordinal < len(unpack.child_targets))].block]
+                first = protocols.get(bad.operations[0])
+                _need(first is not None and first.kind is Kind.FRAME_DISCARD,
+                      "excess/exhausted drive payload must be consumed before constructing arity error")
+                error = operations[bad.operations[-1]]
+                _need(error.id in protocols and protocols[error.id].kind is Kind.MAKE_UNPACK_ARITY_ERROR
+                      and not error.effects_complete and error.callee is None,
+                      "arity failure requires its explicit incomplete error-construction primitive")
+                error_uses = {use.id: use for use in error.uses}
+                arity = [values[error_uses[key].value].origin for key in error.invoke_arguments[:-1]]
+                _need(all(type(origin) is LiteralOrigin and type(origin.value) is int for origin in arity)
+                      and [origin.value for origin in arity] == [len(unpack.child_targets), ordinal + int(ordinal == len(unpack.child_targets))],
+                      "unpack shortage/excess arity differs from its actual probe ordinal")
+            consumer_ids.add(consumer_id)
         _need(not any(row.operation in local_operations for row in graph.resumable_creates), "lazy body cannot execute at creation")
         if not structural_only:
             _need(options is not None and options.code_evidence is not None,
@@ -298,7 +334,10 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
             nodes = [row for row in require_source_tree(source_tree, language.source, source) if isinstance(row, ast.GeneratorExp)]
             _need(len(nodes) == 1, "generator needs its exact source AST")
             node, = nodes
-            index, code = child_code(options.code_evidence.code, node)
+            if creation_only:
+                from scar.analysis.source_generator_creation_lowering import creation_code_sources
+                index, code, _sites = creation_code_sources(options.code_evidence.code, node)
+            else: index, code = child_code(options.code_evidence.code, node)
             _need(constant.code_key == options.code_evidence.captured.key and constant.constant_path == (index,),
                   "childCode does not match the exact original readonly parent witness")
             _need(len(node.generators) == 1 and not node.generators[0].ifs and not node.generators[0].is_async
@@ -307,7 +346,11 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
             _need(tuple(member.cell_slot for member in cell_members)
                   == tuple(captured_cell_slot(definition.id, name) for name in code.co_freevars),
                   "closure order/names differ from childCode")
-            _need(create.rule == driver_rule() and all(row.rule == create.rule for row in local_drivers),
+            if creation_only:
+                from scar.analysis.source_generator_creation_lowering import creation_rule
+                expected_rule = creation_rule()
+            else: expected_rule = driver_rule()
+            _need(create.rule == expected_rule and all(row.rule == create.rule for row in local_drivers),
                   "independently running source policy differs from the declared driver contract")
             target_slots = {row.slot_id for row in semantic.slots.values()
                             if row.owner == definition.id and row.name == node.generators[0].target.id}
@@ -317,6 +360,13 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
             elt_ops = [key for key in local_operations if links[key].source.start_line == node.elt.lineno
                        and links[key].source.start_column == node.elt.col_offset]
             _need(elt_ops, "lazy element source must be connected inside B")
+            for p in model.protocols:
+                if p.kind is not Kind.GENEXPR_CONTAINS or owners[p.operation]!=body.id:continue
+                source=p.source
+                rows=[r for r in __import__('dis').get_instructions(code)if r.opname=='CONTAINS_OP'
+                      and tuple(r.positions)==(source.start_line,source.end_line,source.start_column,source.end_column)]
+                _need(len(rows)==1 and rows[0].arg==int(values[operations[p.operation].uses[2].value].origin.value),
+                      'membership lost its original childCode opcode/source occurrence')
             lazy_sources = {semantic.source_atoms[ref.atom_id].reference for ref in
                             (link.source for link in links.values())
                             if any((ref.start_line, ref.end_line, ref.start_column, ref.end_column)
@@ -326,9 +376,10 @@ def validate_generator_regions(model, graph, interface, metadata, semantic, lang
                       if link.source in lazy_sources and link.semantic_operation is not None),
                   "element or attribute lookup executed eagerly outside B")
         else:
-            _need(create.rule.implementation.artifact.schema == VERSION,
+            from scar.analysis.source_generator_creation_lowering import VERSION as CREATION_VERSION
+            _need(create.rule.implementation.artifact.schema == (CREATION_VERSION if creation_only else VERSION),
                   "unsupported generator construction policy")
-        claimed |= {body.id, consumer_id, *(row.region for row in local_drivers)}
+        claimed |= {body.id, *consumer_ids, *(row.region for row in local_drivers)}
         root_primitives |= {identity, make, code_read}
         used_constants.add(code_read); used_makes.add(make)
     _need(set(regions) == {graph.root, *claimed}, "unclaimed nested Region")

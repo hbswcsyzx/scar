@@ -23,7 +23,8 @@ from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
 from scar.ir.program.python_call_targets import PythonSourcePortBinding, PythonSourcePortModel
 from scar.ir.program.queries import ProgramIndex
 from scar.ir.program.source_call_bindings import SourceBodyNamespace, SourceCallPortBinding, SourceCallPortModel
-from scar.ir.program.source_returns import SourceNormalReturnBinding, SourceReturnSite
+from scar.ir.program.source_returns import (SourceCallStateBinding, SourceNormalReturnBinding,
+    SourceReturnSite, SourceStateCompletion, SourceStateTerminal)
 from scar.ir.program.structured import ControlEdgeReference
 from scar.ir.record_codec import decode, encode, loads as strict_loads
 
@@ -291,11 +292,83 @@ class SourceReturnSession:
         _need(self.normal_return(view.binding_index) == view, 'return view differs from exact original binding/namespace/ports')
         return view
 
-    def query(self, binding_index):
+    def state_transfer(self, binding_index):
+        """Connect original world ports without equating caller/callee state.
+
+        Every completion remains a conditional alternative. In particular, an
+        exception still returns its post-state: effect dependencies cannot be
+        dropped just because no normal Python value is returned.
+        """
+        _need(type(binding_index) is int and 0 <= binding_index < len(self._model.bindings),
+              'exact original binding ordinal required')
+        binding = self._model.bindings[binding_index]
+        caller, callee = self._body(binding.caller_body), self._body(binding.callee_body)
+        ci, di = caller.index, callee.index
+        call = ci.operations[binding.call.core_operation]
+        _need(binding.call.execution_owner == caller.interface.definition
+              and binding.call.core_region == ci.graph.root
+              and call.terminator is not None and call.terminator.kind is TerminatorKind.INVOKE
+              and call.invoke_arguments and call.invoke_arguments[0] == binding.call.callee_use
+              and ci.use_site(binding.call.callee_use).use.value == binding.call.callee_value,
+              'original bound Python CALL interface differs')
+        use = ci.use_site(call.invoke_arguments[-1])
+        before, formal = ci.values[use.use.value], di.values[callee.interface.world]
+        _need(use.operation == call.id and use.use.role is UseRole.STATE_CONTENT
+              and type(before) is type(formal) is StateVersionValue
+              and before.location == ci.values[caller.interface.world].location,
+              'CALL final argument must be the original coarse world Use')
+        routes = []
+        root = di.regions[di.graph.root]
+        for number, edge in enumerate(call.terminator.successors):
+            signatures = [s for s in call.completions if s.kind is edge.kind]
+            _need(len(signatures) == 1, 'call completion has no unique original signature')
+            types = signatures[0].types
+            slots = [n for n, t in enumerate(types) if t == value_type(before)]
+            _need(len(slots) == 1, 'call completion must expose one separate world slot')
+            slot = slots[0]
+            positions = [n for n, operand in enumerate(edge.arguments)
+                         if type(operand) is CompletionResult and operand.index == slot]
+            _need(len(positions) == 1, 'completion world has no unique original landing argument')
+            position = positions[0]
+            block = ci._block_records[edge.block]
+            landing = ci.values[block.arguments[position]]
+            _need(type(landing) is StateVersionValue and landing.location == before.location,
+                  'completion world landing belongs to a different state domain')
+            sites = []
+            for exit_ in root.exits:
+                if exit_.kind is not edge.kind:
+                    continue
+                world_slots = [n for n, t in enumerate(exit_.types) if t == value_type(formal)]
+                _need(len(world_slots) == 1, 'callee exit must expose one separate world slot')
+                exit_slot = world_slots[0]
+                port = ExitPortRef(root.id, exit_.name, exit_slot)
+                for site in di.exit_port_uses(port):
+                    _need(len(sites) < self._budget.max_return_sites, 'state terminal site budget exhausted')
+                    op = di.operations[site.operation]
+                    terminal = op.terminator
+                    expected_kind = TerminatorKind.RETURN if edge.kind is ExitKind.NORMAL else TerminatorKind.RAISE
+                    value = di.values[site.use.value]
+                    _need(terminal is not None and terminal.kind is expected_kind
+                          and terminal.exit == exit_.name and terminal.values[exit_slot] == site.use.id
+                          and site.use.role is UseRole.STATE_CONTENT
+                          and type(value) is StateVersionValue and value.location == formal.location,
+                          'callee completion world is not its original terminal state Use')
+                    sites.append(SourceStateTerminal(port, di._operation_blocks[op.id], op.id,
+                                                      site.use.id, site.use.value, value.location))
+            routes.append(SourceStateCompletion(edge.kind, ControlEdgeReference(call.id, number),
+                          CompletionResult(slot), edge.block, position, landing.id, tuple(sites)))
+        result = SourceCallStateBinding(
+            ProviderFactReference(self._artifact, self._pointer_prefix + str(binding_index)), binding_index,
+            caller.namespace, callee.namespace, call.id, use.use.id, before.id, before.location,
+            formal.id, formal.location, tuple(routes))
+        self._check()
+        return result
+
+    def query(self, binding_index, *, include_state=False):
         route = self.normal_return(binding_index)
         binding = self._model.bindings[binding_index]
         ports = binding.ports if type(binding) is SourceCallPortBinding else binding.arguments
-        return {'schema': 'scar.source-normal-return-query', 'schema_version': 1,
+        result = {'schema': 'scar.source-normal-return-query', 'schema_version': 1,
             'qualification': 'CONDITIONAL_LANGUAGE_NORMAL_RETURN_PORTS', 'return': encode(route),
             'original_binding_conditions': encode(binding.conditions),
             'original_argument_ports': encode(ports),
@@ -305,6 +378,14 @@ class SourceReturnSession:
             'content_equivalence_established': False, 'effects_or_world_equivalence_established': False,
             'producer_inputs_replayed': False, 'transformation_authorized': False,
             'costs': dict(self._counts)}
+        if include_state:
+            result['state_transfer'] = encode(self.state_transfer(binding_index))
+            result['state_conditions'] = ['ORIGINAL_TARGET_AND_ENTRY_BINDING',
+                'CALLEE_EXIT_AND_CALL_COMPLETION_MATCH', 'TERMINAL_AND_COMPLETION_EDGE_SELECTED']
+            result['state_preservation_established'] = False
+            result['fine_state_footprints_established'] = False
+            result['costs'] = dict(self._counts)
+        return result
 
 
 def query_source_returns_cli(args):
@@ -312,7 +393,7 @@ def query_source_returns_cli(args):
     import time
     started = time.monotonic()
     session = SourceReturnSession(args.model, expected_sha256=args.sha256)
-    result = session.query(args.binding_index)
+    result = session.query(args.binding_index, include_state=args.include_state)
     result['elapsed_s'] = time.monotonic() - started
     payload = json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n'
     if args.out:

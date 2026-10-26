@@ -179,7 +179,13 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
     for record in graph.cleanup_interfaces:
         scope, protected = scopes[record.scope], scopes[record.protected]
         atom = semantic.source_atoms[scope.source.atom_id]
-        if atom.kind == 'Try':
+        if atom.kind == 'With':
+            need(C.FUNCTION_WITH_314_V1 in language.capabilities, 'With cleanup requires its explicit source capability')
+            node = node_for(scope.source, ast.With)
+            need(protected.source == scope.source, 'With cleanup/protected source differs')
+            suites = ((protected, [*node.body, *(i.optional_vars for i in node.items if i.optional_vars is not None)]),)
+            handlers = ()
+        elif atom.kind == 'Try':
             node = node_for(scope.source, ast.Try)
             need(protected.source == scope.source, 'cleanup/protected original Try differs')
             if node.finalbody:

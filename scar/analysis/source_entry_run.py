@@ -147,7 +147,8 @@ def run_source_entry_stage(model_run_path, out, *, plan_only=False, resume=False
     if type(budget) is not SourceEntryRunBudget or type(plan_only) is not bool or type(resume) is not bool:
         raise ValueError('source-entry stage requires exact budget and Boolean options')
     budget.__post_init__()
-    if source_entry_profile not in (None, 'PYTHON_SOURCE_ENTRY_314_CAPS_V2'):
+    from scar.analysis.source_frontend_worklist import SOURCE_ENTRY_PROFILES
+    if source_entry_profile is not None and source_entry_profile not in SOURCE_ENTRY_PROFILES:
         raise ValueError('unsupported automatic source-entry frontend profile')
     root, source = Path(out).absolute(), Path(model_run_path).absolute()
     if root != root.resolve() or source != source.resolve():
@@ -292,6 +293,20 @@ def _execute(inputs, attempt, result, budget, *, source_entry_profile=None):
         profile_options = ({'source_entry_profile': source_entry_profile}
                            if source_entry_profile is not None else {})
         plan = plan_source_entries(catalog, budget=worker_budget, out_dir=stage / 'plan', **profile_options)
+        if source_entry_profile is not None and plan.dispatch:
+            from scar.trace.lean_capture import LeanCapturePlan
+            try:
+                capture_plan = LeanCapturePlan.from_source_entry_plan(plan, namespace_root=inputs['project_root'])
+                capture_directory = stage / 'capture-plan'
+                capture_directory.mkdir()
+                capture_ref = capture_plan.publish(capture_directory, os.getpid())
+                result['products']['capture_plan'] = _receipt(Path(capture_ref.uri))
+                result['capture_plan_scope'] = {'planned_bodies': len(capture_plan.bodies),
+                    'selection': 'this source-entry dispatch window; not whole-program coverage'}
+            except (ValueError, OSError) as error:
+                # A future capture selector is optional to source recovery.
+                # Missing/stale code or source keeps an explicit local frontier.
+                result['capture_plan_frontier'] = {'type': type(error).__name__, 'detail': str(error)}
         worker = run_source_entries(plan, stage / 'worker', budget=worker_budget, progress=progress)
         worker.require_unchanged()
         after = [dict(archives.store_for(ref).counts) for ref in archives.receipts()]

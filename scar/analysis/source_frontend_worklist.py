@@ -582,6 +582,11 @@ class SourceEntryFrontendPlan:
 
 
 SOURCE_ENTRY_PROFILE_314_V2 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V2'
+SOURCE_ENTRY_PROFILE_314_V3 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V3'
+SOURCE_ENTRY_PROFILE_314_V4 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V4'
+SOURCE_ENTRY_PROFILE_314_V5 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V5'
+SOURCE_ENTRY_PROFILES = (SOURCE_ENTRY_PROFILE_314_V2, SOURCE_ENTRY_PROFILE_314_V3, SOURCE_ENTRY_PROFILE_314_V4, SOURCE_ENTRY_PROFILE_314_V5)
+LATEST_SOURCE_ENTRY_PROFILE = SOURCE_ENTRY_PROFILE_314_V5
 
 
 def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=(
@@ -600,6 +605,10 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
     AST during the worker, after normal entry/readonly CodeWitness resolution.
     It is a selection policy, not a source/runtime proof. None preserves the
     historical plan fields and capability-selection behavior.
+    V3 also selects synchronous With; V4 additionally selects the existing
+    generator-expression capability, whose consumer/propagation limits remain.
+    V5 selects independent generator creation instead of the fixed-unpack
+    drive policy; unknown consumers remain ordinary incomplete world calls.
     """
     from scar.analysis.source_entry_catalog import SourceEntryCatalog
     _need(type(catalog) is SourceEntryCatalog and type(budget) is SourceFrontendBudget,
@@ -611,7 +620,7 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
     _need(type(automatic_call_expansion) is bool, 'automatic_call_expansion must be an explicit bool')
     _need(type(automatic_nested_functions) is bool, 'automatic_nested_functions must be an explicit bool')
     _need(source_entry_profile is None or type(source_entry_profile) is str
-          and source_entry_profile == SOURCE_ENTRY_PROFILE_314_V2, 'unknown versioned source-entry profile')
+          and source_entry_profile in SOURCE_ENTRY_PROFILES, 'unknown versioned source-entry profile')
     SourceLanguageOptions(capabilities)
     if eligible_entry_keys is not None:
         _need(type(eligible_entry_keys) is tuple and bool(eligible_entry_keys)
@@ -686,9 +695,9 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
     call_policy=plan.document.get('call_expansion_policy')
     nested_policy=plan.document.get('nested_function_policy')
     profile=plan.document.get('source_entry_profile')
-    _need(profile is None or type(profile) is str and profile == SOURCE_ENTRY_PROFILE_314_V2,
+    _need(profile is None or type(profile) is str and profile in SOURCE_ENTRY_PROFILES,
           'unknown versioned source-entry profile')
-    automatic=profile == SOURCE_ENTRY_PROFILE_314_V2
+    automatic=profile in SOURCE_ENTRY_PROFILES
     if policy is None and call_policy is None and nested_policy is None and not automatic:
         return capabilities
     _need(policy in(None,'AUTOMATIC_ORIGINAL_FUNCTION_AST_314_V1')
@@ -712,7 +721,8 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
         yield node
         for child in ast.iter_child_nodes(node):yield from own_nodes(child)
     own=tuple(n for root in nodes[0].body for n in own_nodes(root))
-    if ((automatic or policy is not None) and any(isinstance(n,ast.Try)for n in own)
+    with_scope=profile in (SOURCE_ENTRY_PROFILE_314_V3,SOURCE_ENTRY_PROFILE_314_V4,SOURCE_ENTRY_PROFILE_314_V5) and any(isinstance(n,ast.With)for n in own)
+    if ((automatic or policy is not None) and (any(isinstance(n,ast.Try)for n in own)or with_scope)
             and SourceLanguageCapability.FUNCTION_TRY_314_V1 not in capabilities):
         capabilities+=(SourceLanguageCapability.FUNCTION_TRY_314_V1,)
     if ((automatic or call_policy is not None) and any(isinstance(n,ast.Call)and(
@@ -723,6 +733,12 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
         capabilities+=(SourceLanguageCapability.NESTED_FUNCTION_314_V1,)
     if automatic and any(isinstance(n,(ast.Import,ast.ImportFrom))for n in own) and SourceLanguageCapability.FUNCTION_IMPORT_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.FUNCTION_IMPORT_314_V1,)
+    if with_scope and SourceLanguageCapability.FUNCTION_WITH_314_V1 not in capabilities:
+        capabilities+=(SourceLanguageCapability.FUNCTION_WITH_314_V1,)
+    if profile == SOURCE_ENTRY_PROFILE_314_V4 and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_314_V1 not in capabilities:
+        capabilities+=(SourceLanguageCapability.GENEXPR_314_V1,)
+    if profile == SOURCE_ENTRY_PROFILE_314_V5 and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_CREATION_314_V1 not in capabilities:
+        capabilities+=(SourceLanguageCapability.GENEXPR_CREATION_314_V1,)
     return capabilities
 
 
@@ -921,7 +937,8 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
 
 __all__ = ['SourceFrontendBudget', 'SourceFrontendPlan', 'plan_source_frontend', 'run_source_frontend',
            'SourceEntryFrontendPlan', 'SourceEntryFrontendResult', 'plan_source_entries', 'run_source_entries',
-           'SOURCE_ENTRY_PROFILE_314_V2']
+           'SOURCE_ENTRY_PROFILE_314_V2', 'SOURCE_ENTRY_PROFILE_314_V3', 'SOURCE_ENTRY_PROFILE_314_V4',
+           'SOURCE_ENTRY_PROFILE_314_V5', 'SOURCE_ENTRY_PROFILES', 'LATEST_SOURCE_ENTRY_PROFILE']
 
 
 def module_entry_catalog(composition, *, max_files=4096):

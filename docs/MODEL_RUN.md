@@ -7,10 +7,14 @@ python -B -m scar.cli model-run --from-model-run DEPENDENCY_RUN/model-run.json \
   --stage source-entries --out fresh-entry-run
 ```
 
-CLI默认`--source-entry-profile latest`，对应`PYTHON_SOURCE_ENTRY_314_CAPS_V2`。
+CLI默认`--source-entry-profile latest`，从公共registry选择当前V5。
 原entry/catalog/readonly CodeWitness解析后，准确的own-function AST自动选择Try、
-expanded-call、nested-function、import能力。策略写入plan digest，每次实际选择记录
+expanded-call、nested-function、import、flat With和独立generator创建能力。创建和
+惰性body可以建模，不要求先证明未知C消费者的驱动次数。策略写入plan digest，每次实际选择记录
 active capabilities；缺依据保原frontier。`legacy`与API默认None保留旧能力选择。
+本阶段也自动导出`products.capture_plan`，可交给`trace --capture-plan URI
+--capture-plan-sha256 SHA`。它只选择该dispatch window中的body，不是全程序计划；
+只读CodeWitness派生，不导入workload/重新lower。导出缺口单独记录，不中止源恢复。
 这还没有迁移纯source-only inventory的默认能力，也没有完成所有语法或自动发布/绑定。
 一次真实import入口自动选择并普通读回148ops，12.086s、compile0，原SP5双SHA不变；
 记录见`artifacts/analysis/source_entry_auto_profile_20261026/`。

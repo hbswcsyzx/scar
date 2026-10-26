@@ -8,7 +8,7 @@ from scar.ir.record_codec import decode, encode
 from scar.ir.v2.evidence import OperationInstance
 from scar.store.bundle_partitions import BundlePartitions
 from scar.trace.native_port_sidecar import (
-    build_native_port_publication, query_native_ports, read_native_port_index,
+    build_native_port_publication, query_native_ports, query_native_port_edges, read_native_port_index,
 )
 
 
@@ -41,6 +41,20 @@ def query_native_ports_cli(args):
               'qualification': 'ORIGINAL_NATIVE_INSTANCE_AND_ORDERED_OBSERVED_PORTS',
               'logical_content_or_ready_proved': False, 'whole_model_established': False,
               'transformation_authorized': False}
+    if args.descriptor_id is not None and args.provider_reference is None:
+        raise ValueError('--descriptor-id requires --provider-reference')
+    if args.provider_reference is not None:
+        if args.descriptor_id is None or args.bundle is None:
+            raise ValueError('provider occurrence query needs --descriptor-id and --bundle')
+        matches = query_native_port_edges(args.provider_reference, args.descriptor_id,
+            path.parent, args.bundle, expected_index_sha256=args.sha256)
+        result['qualification'] = 'OBSERVED_PORT_OCCURRENCES_AND_ORIGINAL_EVIDENCE_EDGES'
+        result['provider_reference'] = args.provider_reference
+        result['descriptor_id'] = args.descriptor_id
+        result['occurrences'] = [{'instance': row.instance.wire, 'definition': row.definition.wire,
+                                  'source_ordinal': row.source_ordinal, 'port': encode(port),
+                                  'edge': edge.as_dict()} for row, port, edge in matches]
+        result['matched_occurrences'] = len(matches)
     if args.ordinal is not None:
         if not 0 <= args.ordinal < index.source_nodes:
             raise ValueError('ordinal must identify an original ETO node')

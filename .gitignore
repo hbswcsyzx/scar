@@ -16,6 +16,8 @@ dist/
 artifacts/traces/
 artifacts/reports/
 artifacts/experiments/
+# Rebuildable bulk graph fragments; keep small publication indexes/reports.
+artifacts/analysis/**/publication/shards/
 artifacts/baseline/*
 !artifacts/baseline/environment.md
 !artifacts/baseline/pip-freeze.txt

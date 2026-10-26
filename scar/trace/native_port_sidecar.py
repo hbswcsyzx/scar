@@ -10,7 +10,11 @@ import json
 from pathlib import Path
 
 from scar.ir.record_codec import decode, encode, loads
-from scar.ir.v2.evidence import OperationInstance
+from scar.ir.v2.common import EvidenceClaim, EvidenceKind
+from scar.ir.v2.evidence import (
+    EvidenceEdge, EvidenceEndpoint, EvidenceNodeKind, EvidenceRelation,
+    OperationInstance, ProviderReference,
+)
 from scar.ir.v2.ids import OperationDefinitionID, OperationInstanceID, ValueSlotID
 from scar.store.bundle_partitions import BundlePartitions
 
@@ -109,6 +113,8 @@ class NativePortFragment:
             raise ValueError("invalid source ordinal range")
         if type(self.rows) is not tuple or any(type(row) is not NativeInstancePorts for row in self.rows):
             raise TypeError("fragment rows must be NativeInstancePorts")
+        if len({row.instance for row in self.rows}) != len(self.rows):
+            raise ValueError("fragment repeats an existing operation instance")
         if any(not self.first_source_ordinal <= row.source_ordinal < self.stop_source_ordinal for row in self.rows):
             raise ValueError("fragment row is outside its source range")
 
@@ -674,7 +680,7 @@ def read_native_port_index(path: str | Path, *, expected_sha256: str | None = No
     return _decode_document(payload, _INDEX_SCHEMA, NativePortIndex, version=_INDEX_VERSION)
 
 
-def _read_shard(root: Path, reference: NativePortShardReference) -> NativePortShard:
+def _read_shard_value(root: Path, reference: NativePortShardReference) -> dict:
     path = root
     relative = Path(reference.path)
     if relative.is_absolute() or ".." in relative.parts:
@@ -691,19 +697,74 @@ def _read_shard(root: Path, reference: NativePortShardReference) -> NativePortSh
     if reference.decoded_bytes > _MAX_SHARD_BYTES:
         raise ValueError("published decoded port shard exceeds its bounded read budget")
     with gzip.GzipFile(fileobj=io.BytesIO(payload), mode="rb") as compressed:
-        decoded = compressed.read(_MAX_SHARD_BYTES + 1)
-        if len(decoded) > _MAX_SHARD_BYTES or compressed.read(1):
-            raise ValueError("published compressed port shard exceeds its decoded bound")
+        chunks, size = [], 0
+        while chunk := compressed.read(1_048_576):
+            size += len(chunk)
+            if size > _MAX_SHARD_BYTES:
+                raise ValueError("published compressed port shard exceeds its decoded bound")
+            chunks.append(chunk)
+        decoded = b"".join(chunks)
     if (len(decoded) != reference.decoded_bytes
             or sha256(decoded).hexdigest() != reference.decoded_sha256):
         raise ValueError("published decoded port shard receipt mismatch")
-    shard = _decode_document(decoded, _SHARD_SCHEMA, NativePortShard, version=_SHARD_VERSION)
+    document = loads(decoded.decode("utf-8"))
+    if (type(document) is not dict or set(document) != {"schema", "schema_version", "value"}
+            or document["schema"] != _SHARD_SCHEMA
+            or type(document["schema_version"]) is not int or document["schema_version"] != _SHARD_VERSION):
+        raise ValueError("unsupported native port shard codec envelope")
+    value = document["value"]
+    if type(value) is not dict or set(value) != {"first_source_ordinal", "stop_source_ordinal", "rows"}:
+        raise ValueError("native port shard header is malformed")
+    first, stop, rows = value["first_source_ordinal"], value["stop_source_ordinal"], value["rows"]
+    if (type(first) is not int or type(stop) is not int or type(rows) is not list
+            or (first, stop, len(rows)) != (reference.first_source_ordinal,
+                                            reference.stop_source_ordinal, reference.operation_rows)):
+        raise ValueError("published shard content differs from its shared index reference")
+    total_ports, previous_ordinal = 0, first - 1
+    row_fields = {"instance", "definition", "source_ordinal", "input_status", "output_status", "ports"}
+    for row in rows:
+        if type(row) is not dict or set(row) != row_fields:
+            raise ValueError("native port shard row has an invalid JSON object shape")
+        ordinal, ports = row["source_ordinal"], row["ports"]
+        if (type(ordinal) is not int or not first <= ordinal < stop or ordinal <= previous_ordinal
+                or type(ports) is not list):
+            raise ValueError("native port shard row ordinal/order/port count is malformed")
+        previous_ordinal, total_ports = ordinal, total_ports + len(ports)
+    if total_ports != reference.ports:
+        raise ValueError("published shard port count differs from its shared index reference")
+    return value
+
+
+def _read_shard(root: Path, reference: NativePortShardReference) -> NativePortShard:
+    shard = decode(NativePortShard, _read_shard_value(root, reference))
     if (shard.first_source_ordinal, shard.stop_source_ordinal, len(shard.rows)) != (
             reference.first_source_ordinal, reference.stop_source_ordinal, reference.operation_rows):
-        raise ValueError("published shard content differs from its shared index reference")
+        raise ValueError("published shard typed content differs from its shared index reference")
     if sum(len(row.ports) for row in shard.rows) != reference.ports:
-        raise ValueError("published shard port count differs from its shared index reference")
+        raise ValueError("published typed shard port count differs from its shared index reference")
     return shard
+
+
+def _read_shard_provider_matches(root: Path, reference: NativePortShardReference,
+                                 provider_reference: str, descriptor_id: str
+                                 ) -> tuple[tuple[NativeInstancePorts, NativeBoxedPort], ...]:
+    """Receipt-check a shard as strict JSON, then codec only rows that match."""
+    value = _read_shard_value(root, reference)
+    matches = []
+    for raw_row in value["rows"]:
+        matching = [port for port in raw_row["ports"]
+                    if type(port) is dict
+                    and port.get("provider_reference") == provider_reference
+                    and port.get("descriptor_id") == descriptor_id]
+        if not matching:
+            continue
+        row = decode(NativeInstancePorts, raw_row)
+        if row.source_ordinal != raw_row["source_ordinal"]:
+            raise ValueError("matched native port row changed source ordinal during typed decode")
+        for port in row.ports:
+            if port.provider_reference == provider_reference and port.descriptor_id == descriptor_id:
+                matches.append((row, port))
+    return tuple(matches)
 
 
 def query_native_ports(instance: OperationInstance, publication: str | Path,
@@ -738,6 +799,158 @@ def query_native_ports(instance: OperationInstance, publication: str | Path,
     if len(rows) != 1 or rows[0].definition != instance.definition:
         raise KeyError("existing operation has no port row in its source-range shard")
     return rows[0]
+
+
+def query_native_port_occurrences(provider_reference: str, descriptor_id: str,
+                                  publication: str | Path, bundle_partitions: str | Path, *,
+                                  expected_index_sha256: str | None = None
+                                  ) -> tuple[tuple[NativeInstancePorts, NativeBoxedPort, EvidenceRelation], ...]:
+    """Find observed ports by existing provider token and exact provider descriptor.
+
+    Returned triples retain the original instance row, matching port, and the
+    existing EvidenceRelation selected by observed input/output direction. A
+    match is only a repeated provider-reference/descriptor observation; it does
+    not establish one producer, logical version, write, alias, or shared storage.
+    """
+    if type(provider_reference) is not str or not provider_reference:
+        raise ValueError("provider reference must be a nonempty original catalog ID")
+    _digest(descriptor_id, "provider descriptor ID")
+    root = Path(publication).resolve()
+    index = read_native_port_index(root, expected_sha256=expected_index_sha256)
+    partitions = BundlePartitions(bundle_partitions)
+    if _manifest_identity(partitions) != _identity_from_values(index):
+        raise ValueError("query bundle manifest/schema versions differ from the port index")
+
+    provider = None
+    for envelope in partitions.iter_records("evidence", "provider_references"):
+        record = envelope["record"]
+        if record.get("reference_id") == provider_reference:
+            provider = decode(ProviderReference, record)
+            break
+    if provider is None:
+        raise KeyError("provider reference is absent from the original evidence catalog")
+    descriptors = [item for item in provider.metadata.get("descriptors", ())
+                   if type(item) is dict and item.get("descriptor_id") == descriptor_id]
+    if len(descriptors) != 1:
+        raise KeyError("descriptor ID is absent or ambiguous in the original provider reference")
+    provider_type = descriptors[0].get("type")
+    if type(provider_type) is not str:
+        raise ValueError("original provider descriptor has no exact type")
+
+    matches: list[tuple[NativeInstancePorts, NativeBoxedPort]] = []
+    for reference in index.shards:
+        for row, port in _read_shard_provider_matches(root, reference, provider_reference, descriptor_id):
+            if port.kind != "TENSOR" or port.provider_type != provider_type:
+                raise ValueError("port type/kind differs from its original provider descriptor")
+            matches.append((row, port))
+
+    if not matches:
+        return ()
+    ordinals = tuple(sorted({row.source_ordinal for row, _ in matches}))
+    original_rows = partitions.selected_records("evidence", "instances", ordinals)
+    originals = {}
+    for envelope in original_rows:
+        ordinal = envelope["ordinal"]
+        instance = decode(OperationInstance, envelope["record"])
+        if (instance.metadata.get("provider") != "ETO"
+                or instance.metadata.get("raw_reference")
+                != f"sha256:{index.source_sha256}#/nodes/{ordinal}"):
+            raise ValueError("matched port instance is not qualified by the original ETO ordinal")
+        originals[ordinal] = instance
+
+    for row, port in matches:
+        instance = originals.get(row.source_ordinal)
+        if (instance is None or instance.id != row.instance or instance.definition != row.definition):
+            raise ValueError("matched port does not resolve to its original operation instance/definition")
+        role = "inputs" if port.direction == "input" else "outputs"
+        slots = [slot for slot in instance.metadata.get("tensor_slots", ())
+                 if slot.get("role") == role and slot.get("ordered_path") == list(port.path)]
+        if len(slots) != 1 or (slots[0].get("provider_reference"), slots[0].get("descriptor_id")) != (
+                provider_reference, descriptor_id):
+            raise ValueError("matched port differs from the original instance's exact tensor slot")
+        if port.formal_slot is not None:
+            binding = slots[0].get("native_schema_binding")
+            if (type(binding) is not dict or type(binding.get("formal_slot")) is not dict
+                    or _typed_id(ValueSlotID, binding["formal_slot"]) != port.formal_slot):
+                raise ValueError("matched formal ValueSlot differs from the original Tensor slot")
+    return tuple((row, port, EvidenceRelation.INPUT_REFERENCE if port.direction == "input"
+                  else EvidenceRelation.OUTPUT_REFERENCE) for row, port in matches)
+
+
+def query_native_port_edges(provider_reference: str, descriptor_id: str,
+                            publication: str | Path, bundle_partitions: str | Path, *,
+                            expected_index_sha256: str | None = None
+                            ) -> tuple[tuple[NativeInstancePorts, NativeBoxedPort, EvidenceEdge], ...]:
+    """Resolve provider/descriptor occurrences to their existing EvidenceEdge rows.
+
+    The returned EvidenceEdge objects are typed views decoded from the original
+    immutable evidence table. This function never inserts or publishes edges.
+    """
+    occurrences = query_native_port_occurrences(provider_reference, descriptor_id,
+        publication, bundle_partitions, expected_index_sha256=expected_index_sha256)
+    if not occurrences:
+        return ()
+
+    root = Path(publication).resolve()
+    index = read_native_port_index(root, expected_sha256=expected_index_sha256)
+    partitions = BundlePartitions(bundle_partitions)
+    if _manifest_identity(partitions) != _identity_from_values(index):
+        raise ValueError("edge query bundle manifest/schema versions differ from the port index")
+    scope = provider_reference.rsplit(":tensor-token:", 1)[0]
+    pending = {}
+    for row, port, relation in occurrences:
+        pointer = (f"sha256:{index.source_sha256}#/nodes/"
+                   f"{row.source_ordinal}{port.source_locator}")
+        key = (row.instance.wire, relation.value, pointer)
+        if key in pending:
+            raise ValueError("multiple port occurrences share one instance/relation/source pointer")
+        pending[key] = (row, port, relation)
+
+    resolved = {}
+    for envelope in partitions.iter_records("evidence", "edges"):
+        record = envelope["record"]
+        if type(record) is not dict:
+            raise ValueError("original evidence edge row is not an object")
+        source, target = record.get("source"), record.get("target")
+        if type(source) is not dict or type(target) is not dict:
+            continue
+        source_ref = source.get("reference")
+        source_wire = source_ref.get("wire") if type(source_ref) is dict else None
+        if (source.get("kind") != EvidenceNodeKind.OPERATION_INSTANCE.value
+                or target.get("kind") != EvidenceNodeKind.PROVIDER_REFERENCE.value
+                or target.get("reference") != provider_reference):
+            continue
+        evidence = record.get("evidence")
+        references = evidence.get("references", ()) if type(evidence) is dict else ()
+        relation_text = record.get("relation")
+        matches = [(key, value) for key, value in pending.items()
+                   if key[0] == source_wire and key[1] == relation_text and key[2] in references]
+        for key, (row, port, relation) in matches:
+            if (set(record) != {"edge_id", "relation", "source", "target", "evidence"}
+                    or set(source) != {"kind", "reference"}
+                    or set(target) != {"kind", "reference"}
+                    or type(record.get("edge_id")) is not str
+                    or not record["edge_id"].startswith(scope + ":edge:")
+                    or decode(OperationInstanceID, source_ref) != row.instance):
+                raise ValueError("original EvidenceEdge endpoint differs from the matched port occurrence")
+            claim = decode(EvidenceClaim, evidence)
+            if (claim.kind is not EvidenceKind.OBSERVED or claim.scope != scope
+                    or key[2] not in claim.references or target["reference"] != provider_reference):
+                raise ValueError("original EvidenceEdge claim does not qualify the exact ETO port locator")
+            edge = EvidenceEdge(record["edge_id"], relation,
+                EvidenceEndpoint(EvidenceNodeKind.OPERATION_INSTANCE, row.instance),
+                EvidenceEndpoint(EvidenceNodeKind.PROVIDER_REFERENCE, provider_reference), claim)
+            if edge.as_dict() != record:
+                raise ValueError("typed EvidenceEdge view differs from its original evidence row")
+            resolved[key] = (row, port, edge)
+            del pending[key]
+        if not pending:
+            break
+    if pending:
+        raise KeyError("original evidence table lacks one or more exact provider-reference edges")
+    return tuple(resolved[(row.instance.wire, relation.value,
+                          f"sha256:{index.source_sha256}#/nodes/{row.source_ordinal}{port.source_locator}")]
+                 for row, port, relation in occurrences)
 
 
 # Arbitrary small range API retained for focused diagnostics. Full production
@@ -833,4 +1046,5 @@ def ports_for_instance(instance: OperationInstance, fragment: NativePortFragment
 __all__ = ["NativeBoxedPort", "NativeInstancePorts", "NativePortFragment", "NativePortShard",
            "NativePortShardReference", "NativePortIndex", "build_port_fragment",
            "build_native_port_publication", "read_native_port_index", "query_native_ports",
+           "query_native_port_occurrences", "query_native_port_edges",
            "decode_fragment", "encode_fragment", "ports_for_instance"]

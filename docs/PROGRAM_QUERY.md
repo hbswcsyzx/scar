@@ -92,6 +92,17 @@ CompletionResult(0)/landing Value；world 不混成返回对象。原状态端�
 会话内可复用，整份旧 binding/composition 读取仍较重，尚非轻量全局查询。
 记录见 `artifacts/experiments/source_normal_return_main_20261026/lewm-query.json`。
 
+同一命令增加`--include-state`，可同时查询调用的状态接口：caller最后一个world Use
+→callee入口world，以及callee正常/异常出口的world Uses→caller对应CompletionResult
+和landing value。它引用原状态位置/版本和原控制边，不把world当Python返回对象，
+也不推断callee无副作用、状态保持不变或细粒度footprint已经可知。
+
+真实同一LeWM调用已普通读回：一条状态入口、NORMAL的2个可能状态出口、RAISE的
+19个可能状态出口，均接回各自caller完成边。实际退出分支仍未选择；结果是静态
+条件依赖，不是声称该调用真的抛出了19次异常。CLI exit0/30.440s，两个body各解码/
+建索引一次，状态查询复用同会话，未另存一套状态图。结果为同目录
+`lewm-query-with-state.json`。
+
 ## 精简且可展开的源程序区域
 
 ```bash
@@ -160,7 +171,30 @@ thread/process根，保在原bundle中。76压缩片合计22030062B，包含inde
 构建与首次查询163.811s；压缩后主树public CLI局部查询exit0/1.551s。
 bulk分片在本机两工作树间硬链接，共享原不可变内容，没有复制额外22MB数据。
 
+用`--provider-reference REF --descriptor-id ID`替代ordinal可查同一原provider描述的
+所有端口出现及原EvidenceEdge。主树真实查询找到11项（6input/5output）及11条原边，
+11.845s；只对命中行做typed解码，其余行按原hash/JSON/range检查，未授整片类型证明。
+它连接引用观察；不将多次输出误当唯一producer，也不推断LogicalVersion相同。
+
 方向/path/type、既有formal slot及Tensor provider/descriptor引用来自原记录；
 非Tensor formal缺口仍明确保留。端口观察不证明normal完成、LogicalVersion相等、
 alias/写入或ready，不能拿这些计数当全程序图完成。实际记录位于
 `artifacts/analysis/native_port_sidecar_full_20261026/`。
+
+## 对象引用旁的符号数据结果
+
+```bash
+python -m scar.cli query-symbolic-output \
+  --projection PATH/lift_fresh_output_checked.json --sha256 EXPECTED_SHA256 \
+  --occurrence exec_value_occurrence:ORIGINAL_OUTPUT
+```
+
+原canonical Tensor端口是ReferenceValue；不能把对象引用直接解释成Tensor内容版本。
+新关联保原ObjectIdentity不变，单独为同一限定输出端点命名payload符号，并以现有
+ValueGraph存LV/version/UNKNOWN provenance/region=None Materialization。不同符号ID
+不证明数值不同，版本0也不是Tensor._version；输入内容版本、copy/alias和ready均未知。
+
+真实lift_fresh输出已自动完成一次构造/codec读回/合并视图验证；原program/execution/
+evidence/values不变，新增仅1组符号。factory在调用者预先限定的记录上检查关系，
+query核publication receipt/内部一致性，二者都不重放所有来源。尚未接全量producer。
+记录见`artifacts/analysis/symbolic_native_output_20261026/report.md`。

@@ -501,6 +501,11 @@ def _lower_prepared(context, entry, *, source, max_operations, expand_candidates
             if SourceLanguageCapability.FUNCTION_TRY_314_V1 in language_options.capabilities:
                 from scar.analysis.source_function_try_lowering import FunctionTryBuilder
                 builder = FunctionTryBuilder
+            if SourceLanguageCapability.FUNCTION_WITH_314_V1 in language_options.capabilities:
+                if SourceLanguageCapability.FUNCTION_TRY_314_V1 not in language_options.capabilities:
+                    raise ValueError('function With requires the existing paired propagation/C0/C1 capability')
+                from scar.analysis.source_with_lowering import FunctionWithBuilder
+                builder = FunctionWithBuilder
         return builder(context, entry, source=source, max_operations=max_operations,
                                              sealed_source=sealed_source, language_options=language_options).run()
     if profile is BodyLoweringProfile.STRUCTURED_BODY:
@@ -1374,7 +1379,8 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             call_source = result.language is not None and SourceLanguageCapability.CALL_EXPANSION_314_V1 in result.language.capabilities
             function_source = result.language is not None and SourceLanguageCapability.NESTED_FUNCTION_314_V1 in result.language.capabilities
             import_source = result.language is not None and SourceLanguageCapability.FUNCTION_IMPORT_314_V1 in result.language.capabilities
-            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source):
+            creation_source = result.language is not None and SourceLanguageCapability.GENEXPR_CREATION_314_V1 in result.language.capabilities
+            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source):
                 if not structural_only and language_options is None:
                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
                 if structural_only:
@@ -1382,6 +1388,7 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
                         raise ValueError("function Try STRUCTURE requires its exact retained source text" if try_source
                                          else "function definition STRUCTURE requires its exact retained source text" if function_source
                                          else "function import STRUCTURE requires its exact retained source text" if import_source
+                                         else "generator creation STRUCTURE requires its exact retained source text" if creation_source
                                          else "expanded call STRUCTURE requires its exact retained source text")
                     source_text = source_texts[result.metadata.source.path]
                 else:
