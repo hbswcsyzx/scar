@@ -42,7 +42,7 @@ def _consumed(operation, kind, values):
     return refs[:1] if type(spec) is LiteralOrigin and spec.value is None else refs
 
 
-def _check_consumed_releases(operation, consumed, operations, protocols, blocks, use_links):
+def _check_consumed_releases(operation, consumed, operations, protocols, blocks, use_links, language=None):
     """Inspect both actual CFG arms, not a producer-reported consumed set."""
     failure_exit = None
     for edge in operation.terminator.successors:
@@ -62,12 +62,38 @@ def _check_consumed_releases(operation, consumed, operations, protocols, blocks,
         _need(first is None or first.role != "fstring-consumed-reference",
               "string completion releases an extra input hold")
         if edge.kind is ExitKind.RAISE:
-            _need(protocols.get(following.id) is not None
-                  and protocols[following.id].kind is Kind.FRAME_EXIT,
-                  "string failure does not carry its post-world through FRAME_EXIT")
-            failure_exit = tuple(use.value for use in following.uses
-                if (link := use_links.get((following.id, use.id))) is not None
-                and link.role == "held-temporary")
+            from scar.ir.program.source_language import SourceLanguageCapability
+            paired=language is not None and SourceLanguageCapability.FUNCTION_TRY_314_V1 in language.capabilities
+            if not paired:
+                _need(protocols.get(following.id) is not None and protocols[following.id].kind is Kind.FRAME_EXIT,
+                      "string failure does not carry its post-world through FRAME_EXIT")
+                failure_exit=tuple(use.value for use in following.uses
+                    if(link:=use_links.get((following.id,use.id)))is not None and link.role=="held-temporary")
+            else:
+                # The original C0/C1 checker has validated this exception-only
+                # handoff. Inspect real releases until the first context Enter
+                # or frame close; never execute a handler or assume a bool.
+                cursor=(block.id,len(consumed));unwound=[];seen=set()
+                while cursor not in seen:
+                    seen.add(cursor);current=blocks[cursor[0]]
+                    _need(cursor[1]<len(current.operations),"string failure falls out of its cleanup")
+                    op=operations[current.operations[cursor[1]]];marker=protocols.get(op.id)
+                    kind=marker.kind if marker is not None else None
+                    first=use_links.get((op.id,op.uses[0].id))if op.uses else None
+                    if kind is Kind.FRAME_RELEASE_TEMPORARY and first is not None and first.role=='function-exception-unwind':
+                        unwound.append(op.uses[0].value)
+                    if kind in (Kind.FRAME_EXIT,Kind.FUNCTION_FRAME_EXIT_EXCEPTION_PACKET):
+                        retained=tuple(use.value for use in op.uses if(link:=use_links.get((op.id,use.id)))is not None and link.role=='held-temporary')
+                        failure_exit=retained+tuple(reversed(unwound));break
+                    if kind is Kind.FUNCTION_HANDLED_CONTEXT_ENTER:
+                        failure_exit=tuple(reversed(unwound));break
+                    term=op.terminator
+                    if term is None:cursor=(current.id,cursor[1]+1)
+                    else:
+                        _need(term.kind in (TerminatorKind.JUMP,TerminatorKind.PENDING_DISPATCH,TerminatorKind.CLEANUP_ROUTE)
+                              and len(term.successors)==1,'string failure did not preserve its canonical exception handoff')
+                        cursor=(term.successors[0].block,0)
+                _need(failure_exit is not None,'string exception handoff has no bounded cleanup endpoint')
     _need(failure_exit is not None, "string primitive has no exceptional cleanup")
     return failure_exit
 
@@ -194,7 +220,7 @@ def validate_string_source(model, graph, interface, metadata, semantic, *,
         _need(key not in by_source, "duplicate string stage at one original source atom")
         by_source[key] = identity
         failure_holds[identity] = _check_consumed_releases(operations[identity],
-            _consumed(operations[identity], row.kind, values), operations, protocols, blocks, uses)
+            _consumed(operations[identity], row.kind, values), operations, protocols, blocks, uses, language)
     if structural_only:
         return {"policy": POLICY, "protocol_operations": len(selected), "records": [],
                 "source_shape_verified": False, "compiler_verified": False,
