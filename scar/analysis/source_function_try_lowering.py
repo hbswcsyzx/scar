@@ -664,16 +664,17 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         return cursor
 
     def augmented_assignment(self, node, cursor):
-        """Read local target once, then RHS, in-place dispatch, then rebind.
+        """Read a local or saved heap target, RHS, in-place, then store back.
 
         The result may alias the old reference or be a new object; neither is
         presumed. __iop__/fallback and mutation stay inside the world INVOKE.
-        Heap targets need separately saved receiver/index ports, never a
+        Heap targets reuse separately saved receiver/index ports, never a
         second evaluation of their original target subtree.
         """
         from scar.analysis.source_heap_lowering import expression_for_heap_target
         from scar.analysis.source_call_lowering import _invoke
-        if (not isinstance(node.target, ast.Name) or node.target.id not in self.locals
+        heap = isinstance(node.target, (ast.Attribute, ast.Subscript)) and self.has_language('HEAP_AUGASSIGN_314_V1')
+        if not heap and (not isinstance(node.target, ast.Name) or node.target.id not in self.locals
                 or node.target.id in self.cell_references):
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node.target,
                 'FUNCTION_TRY_AUGMENTED_HEAP_TARGET_UNIMPLEMENTED')
@@ -682,7 +683,11 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             self.frame_transition(cursor, at, ((value, at, 'augassign-held-reference'),), K.FRAME_HOLD_TEMPORARY)
             self.active_temporaries.append(value)
         try:
-            cursor, left = expression_for_heap_target(self, node.target, cursor)
+            if heap:
+                from scar.analysis.source_heap_lowering import augmented_heap_target
+                cursor, receiver, key, left = augmented_heap_target(self, node.target, cursor)
+            else:
+                cursor, left = expression_for_heap_target(self, node.target, cursor)
             if cursor is None:
                 return None
             hold(node.target, left)
@@ -697,6 +702,17 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
                 ((node.target, left), (node.value, right)), result=True)
             self.gap(GapKind.EFFECT_SUMMARY, node,
                 'in-place/fallback dispatch and original assignment are connected; aliasing, mutation and finalizer effects remain unproved')
+            if heap:
+                from scar.analysis.source_heap_lowering import _hold, _release, store_prepared_heap_target
+                _hold(self, cursor, node.target, result)
+                cursor = store_prepared_heap_target(self, node.target, result, cursor, receiver, key)
+                _release(self, cursor, node.target, result)
+                if key is not None:
+                    _release(self, cursor, node.target.slice, key)
+                _release(self, cursor, node.target.value, receiver)
+                self.gap(GapKind.EFFECT_SUMMARY, node,
+                    'saved heap target/read/in-place/storeback and normal/raise worlds are connected; physical primitive cleanup and enclosing lifetime remain unproved')
+                return cursor
             return self.store(node.target, result, cursor)
         finally:
             del self.active_temporaries[baseline:]

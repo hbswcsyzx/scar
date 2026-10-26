@@ -50,6 +50,8 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
             raise ValueError('function Try: ' + detail)
     actual = {r.operation for r in model.protocols if r.kind.value in FUNCTION_TRY_PROTOCOLS}
     enabled = language is not None and C.FUNCTION_TRY_314_V1 in language.capabilities
+    need(language is None or C.HEAP_AUGASSIGN_314_V1 not in language.capabilities or enabled,
+         'heap AugAssign requires the existing function propagation capability')
     if not enabled:
         need(not actual, 'new control protocol requires its explicit capability')
         return set()
@@ -364,10 +366,12 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
         if kind is K.FUNCTION_INPLACE_BINARY:
             node = node_for(protocols[identity].source, ast.AugAssign)
             operation = operations[identity]
-            need(isinstance(node.target, ast.Name) and isinstance(node.op,
+            heap = isinstance(node.target, (ast.Attribute, ast.Subscript))
+            need((isinstance(node.target, ast.Name) or heap and C.HEAP_AUGASSIGN_314_V1 in language.capabilities)
+                 and isinstance(node.op,
                  (ast.Add, ast.Sub, ast.Mult, ast.MatMult, ast.Div, ast.FloorDiv,
                   ast.Mod, ast.Pow, ast.LShift, ast.RShift, ast.BitOr, ast.BitXor, ast.BitAnd)),
-                 'in-place operation needs an original supported Name AugAssign')
+                 'in-place operation needs an original supported AugAssign and target capability')
             need(operation.terminator is not None and operation.terminator.kind is TerminatorKind.INVOKE
                  and len(operation.uses) == 3 and operation.invoke_arguments == tuple(u.id for u in operation.uses)
                  and all(type(values[u.value]) is ReferenceValue for u in operation.uses[:-1])
@@ -382,11 +386,131 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
                 need(node_for(link.source, ast.expr) is original and (link.role, link.index) == (role, index),
                      'in-place operands do not use the original target-before-RHS AST')
             normal = blocks[operation.terminator.successors[0].block]
-            assigned = [r for r in graph.binding_definitions if r.payload is not None
-                        and uses[r.payload].value == normal.arguments[0]]
-            need(len(assigned) == 1 and semantic.slots[values[assigned[0].value].slot].name == node.target.id
-                 and semantic.slots[values[assigned[0].value].slot].owner == interface.definition,
-                 'in-place result must rebind the original local slot')
+            if not heap:
+                assigned = [r for r in graph.binding_definitions if r.payload is not None
+                            and uses[r.payload].value == normal.arguments[0]]
+                need(len(assigned) == 1 and semantic.slots[values[assigned[0].value].slot].name == node.target.id
+                     and semantic.slots[values[assigned[0].value].slot].owner == interface.definition,
+                     'in-place result must rebind the original local slot')
+            else:
+                from scar.ir.semantics_v2 import Opcode
+                from scar.ir.program.state_addresses import (AddressCoverage, AddressEffect, Element,
+                    InvokeStateOperand, ObjectField, ReferenceOwner)
+                target = node.target
+                attribute = isinstance(target, ast.Attribute)
+                need(not isinstance(target, ast.Subscript) or not any(isinstance(n, ast.Slice) for n in ast.walk(target.slice)),
+                     'slice AugAssign has no admitted cleanup contract')
+                target_source = sources[(identity, operation.uses[0].id)].source
+                opcode = Opcode.ATTRIBUTE if attribute else Opcode.INDEX
+                reads = [operations[r.operation] for r in metadata.operation_links
+                         if r.source == target_source and r.opcode is opcode]
+                stores = [operations[r.operation] for r in model.protocols
+                          if r.source == target_source and r.kind is (K.STORE_ATTRIBUTE if attribute else K.STORE_SUBSCRIPT)
+                          and operations[r.operation].uses[-2].value == normal.arguments[0]]
+                need(len(reads) == len(stores) == 1, 'heap AugAssign needs one original target load and result storeback')
+                load, store = reads[0], stores[0]
+                saved_count = 1 if attribute else 2
+                saved = tuple(u.value for u in load.uses[:-1])
+                need(len(saved) == saved_count and load.terminator is not None
+                     and load.terminator.kind is TerminatorKind.INVOKE and not load.effects_complete
+                     and load.invoke_arguments == tuple(u.id for u in load.uses)
+                     and tuple(s.types for s in load.completions) == ((ref,state),(ref,ref,state))
+                     and tuple(u.value for u in store.uses[:saved_count]) == saved
+                     and len(store.uses) == saved_count + 2,
+                     'heap AugAssign re-evaluated or changed its saved receiver/key')
+                declaration = semantic.definitions.get(links[load.id].semantic_operation)
+                need(declaration is not None and declaration.code_id == target_source.atom_id.wire
+                     and target_source.atom_id in declaration.source_atoms
+                     and declaration.metadata.get('role') != 'binding' and len(declaration.output_slots) == 1,
+                     'heap target load lost its exact original SG evaluation definition')
+                load_normal = blocks[load.terminator.successors[0].block]
+                need(load_normal.arguments[0] == operation.uses[0].value,
+                     'in-place left port is not the actual target load result')
+                for use, original, role, index in zip(load.uses, (target.value,target.slice) if not attribute else (target.value,),
+                        ('receiver','index'), (0,1)):
+                    row = sources[(load.id,use.id)]
+                    need(node_for(row.source,ast.expr) is original and (row.role,row.index) == (role,index),
+                         'heap load saved ports differ from original receiver/key AST roles')
+                # Core validation owns SSA dominance. This profile additionally
+                # orders source effects: LHS load normal -> RHS -> in-place ->
+                # storeback, including stateful frame-retention operations.
+                predecessors = {b:set() for b in blocks}
+                for op in operations.values():
+                    if op.terminator is not None:
+                        for edge in op.terminator.successors:
+                            predecessors[edge.block].add(operation_blocks[op.id])
+                region = next(r for r in graph.regions if r.id == graph.root)
+                dom = {b:({b} if b == region.entry else set(blocks)) for b in blocks}
+                changed = True
+                while changed:
+                    changed = False
+                    for block in blocks:
+                        if block == region.entry: continue
+                        parents = predecessors[block]
+                        result = {block} | (set.intersection(*(dom[p] for p in parents)) if parents else set())
+                        if result != dom[block]: dom[block]=result;changed=True
+                need(load_normal.id in dom[operation_blocks[identity]]
+                     and normal.id in dom[operation_blocks[store.id]],
+                     'heap target load/in-place/storeback order is not on the normal CFG')
+                def world_after(value, anchor, seen=frozenset()):
+                    if value == anchor: return True
+                    if value in seen or type(values[value]) is not StateVersionValue: return False
+                    origin = values[value].origin
+                    if type(origin) is OperationResult:
+                        before = [u.value for u in operations[origin.operation].uses
+                                  if type(values[u.value]) is StateVersionValue]
+                    elif type(origin) is BlockArgument:
+                        before = []
+                        for producer, edge in incoming[origin.block]:
+                            argument = edge.arguments[origin.index]
+                            if type(argument) is CompletionResult:
+                                before.extend(u.value for u in producer.uses if type(values[u.value]) is StateVersionValue)
+                            else:
+                                before.append(uses[argument].value)
+                    else: return False
+                    return bool(before) and all(world_after(v,anchor,seen|{value}) for v in before)
+                need(world_after(operation.uses[-1].value,load_normal.arguments[-1])
+                     and world_after(store.uses[-1].value,normal.arguments[-1]),
+                     'heap AugAssign bypassed the actual load/in-place normal post-world')
+                need(Behavior.MEMORY in operation.behaviors,
+                     'in-place mutation/fallback cannot omit memory effects')
+                for block, held in ((load_normal,operation.uses[0].value),(normal,normal.arguments[0])):
+                    first = operations[block.operations[0]]
+                    need(protocols.get(first.id) is not None and protocols[first.id].kind is K.FRAME_HOLD_TEMPORARY
+                         and len(first.uses) == 2 and first.uses[0].value == held,
+                         'heap AugAssign must retain each actual load/in-place result before further effects')
+                rhs_span = (node.value.lineno,node.value.col_offset),(node.value.end_lineno,node.value.end_col_offset)
+                for row in metadata.operation_links:
+                    span=(row.source.start_line,row.source.start_column),(row.source.end_line,row.source.end_column)
+                    if rhs_span[0] <= span[0] and span[1] <= rhs_span[1]:
+                        need(load_normal.id in dom[operation_blocks[row.operation]],
+                             'RHS effects precede the saved target load normal completion')
+                addresses = {r.site.operation:r for r in graph.state_address_refinements}
+                address = addresses.get(load.id)
+                selector = ObjectField(target.attr) if attribute else Element(load.uses[1].id)
+                need(address is not None and address.coverage is AddressCoverage.PARTIAL
+                     and address.site == InvokeStateOperand(load.id,load.uses[-1].id) and address.protocol is None
+                     and address.effects == (AddressEffect(ReferenceOwner(load.uses[0].id),(selector,),AccessMode.READ),),
+                     'heap target read address lost its exact receiver/key/world Uses')
+                # Holds are the existing frame-retention protocol, not a new
+                # pending graph or a claim about physical refcounts/finalizers.
+                load_pending = exception_handoff_holds(load.terminator.successors[1].block,
+                    operations,protocols,blocks,sources)
+                need(len(load_pending) >= saved_count and load_pending[-saved_count:] == saved,
+                     'heap load failure lost its saved target holds')
+                prefix = load_pending[:-saved_count]
+                for primitive, suffix in ((operation,saved),(store,saved+(normal.arguments[0],))):
+                    pending = exception_handoff_holds(primitive.terminator.successors[1].block,
+                        operations,protocols,blocks,sources)
+                    need(pending == prefix+suffix, 'heap AugAssign failure changed its ordered retained references')
+                release_values = (normal.arguments[0],)+tuple(reversed(saved))
+                store_normal = blocks[store.terminator.successors[0].block]
+                for key, value in zip(store_normal.operations, release_values):
+                    release = operations[key]
+                    need(protocols.get(key) is not None and protocols[key].kind is K.FRAME_RELEASE_TEMPORARY
+                         and len(release.uses) == 2 and release.uses[0].value == value,
+                         'heap AugAssign normal store lost its ordered retained-reference releases')
+                need(len(store_normal.operations) >= len(release_values), 'heap store omitted retained-reference releases')
             expected[identity] = kind
         elif kind is K.FUNCTION_START_PROPAGATION:
             node_for(protocols[identity].source, ast.Assert)
