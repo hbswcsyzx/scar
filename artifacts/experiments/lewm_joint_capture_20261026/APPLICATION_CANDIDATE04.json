@@ -1,0 +1,100 @@
+{
+  "schema": "scar.collector-main-source-application",
+  "schema_version": 1,
+  "status": "CANDIDATE04_APPLIED_NOT_RUN",
+  "created_utc": "2026-10-26T08:07:28.795712+00:00",
+  "main_head_at_apply": "858b9d14d73d5c8305ae56f735cbc3c24a7ebdf5",
+  "files": [
+    {
+      "path": "scar/trace/collector_execution_witness.py",
+      "before": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/collector_execution_witness.py",
+        "sha256": "cb74ddd7606a38e92d9179972afef3c30c8d2d2a1a70e5c2827e516f56c2bc7f",
+        "size_bytes": 28015
+      },
+      "candidate_uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/process_execution_identity_20261026/candidate04/scar/trace/collector_execution_witness.py",
+      "after": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/collector_execution_witness.py",
+        "sha256": "92a31e907c2ed6482e9501adc650fe3ad57b4359171fb053a7ec0b8300a137d9",
+        "size_bytes": 32023
+      }
+    },
+    {
+      "path": "scar/trace/resource_topology.py",
+      "before": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/resource_topology.py",
+        "state": "ABSENT"
+      },
+      "candidate_uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/process_execution_identity_20261026/candidate04/scar/trace/resource_topology.py",
+      "after": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/resource_topology.py",
+        "sha256": "16d0d1d375df582e1aab849180f2c97d3534dfa8a55376245872ee88fa2595d7",
+        "size_bytes": 30464
+      }
+    }
+  ],
+  "unchanged_candidate03_sources": [
+    {
+      "path": "scar/trace/execution_evidence.py",
+      "sha256": "334db776b16e722166b2b6f400376b86989bbfed9d08890014a49ea87ff89cb8",
+      "size_bytes": 24033
+    },
+    {
+      "path": "scar/trace/os_capture_launch.py",
+      "sha256": "85f047411b5f0317f34f04ee6be8a83c41c44de0cec3a7a48e76ca768c46ef3e",
+      "size_bytes": 23062
+    },
+    {
+      "path": "scar/trace/capture_coordinates.py",
+      "sha256": "7bc5d100d62cbf72cbee4a2b96ffcb121fb105ffa488fc82d5f5af30dfe32886",
+      "size_bytes": 44594
+    },
+    {
+      "path": "scar/trace/process_image_receipts.py",
+      "sha256": "ae33773b011bde55a6e1a4a6222b3dfd0cd84af353255e365dd61a00296fb12e",
+      "size_bytes": 22358
+    }
+  ],
+  "controls": [
+    {
+      "name": "gate.py",
+      "before_sha256": "15d25bb2427d3564a521cb734bdab96754442d90de205624adda53364c853680",
+      "after_sha256": "a1db5937d552a2b8d4ac8354ad4fc8b560ab460f16e201bc772c64d664782253",
+      "after_size_bytes": 15035,
+      "candidate_uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/process_execution_identity_20261026/candidate04/joint-plan/gate.py"
+    },
+    {
+      "name": "COMMAND.json",
+      "before_sha256": "538f598f6f36548aba48311f86be051a245229b2893685582683fe8b3fd43f89",
+      "after_sha256": "f1ce39b57b45941e5db80b8256671eea1af56687668dc2d66134756b79082b9e",
+      "after_size_bytes": 2890,
+      "candidate_uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/process_execution_identity_20261026/candidate04/joint-plan/COMMAND.json"
+    },
+    {
+      "name": "READ_PLAN.md",
+      "before_sha256": "a82130f7bd90e80dcfd9cf2ef1154423b7afb9740a31b71fd9bb30d0c24012b4",
+      "after_sha256": "8598a2450bfad9652be24cb7714dfeaa5182ee6c8340ac3c8fce36c5974b5e9e",
+      "after_size_bytes": 8280,
+      "candidate_uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/process_execution_identity_20261026/candidate04/joint-plan/READ_PLAN.md"
+    },
+    {
+      "name": "run.sh",
+      "before_sha256": "0e71996acfebb1500c3e0f5cab9f881affc235db5caf8bcba7f6c5e28abf8b7d",
+      "after_sha256": "0e71996acfebb1500c3e0f5cab9f881affc235db5caf8bcba7f6c5e28abf8b7d",
+      "after_size_bytes": 744,
+      "candidate_uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/experiments/process_execution_identity_20261026/candidate04/joint-plan/run.sh"
+    }
+  ],
+  "prior_freeze": {
+    "sha256": "433870203abf6e910758f16dc491677c3b67150bd9ecc6fa249d4cb7224fa1c6",
+    "snapshot_directory": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/history-433-unrun",
+    "source_count": 376,
+    "control_count": 8
+  },
+  "target_argv_exactly_unchanged": true,
+  "cli_argv_exactly_unchanged": true,
+  "target_episodes_requested": 1,
+  "eval_budget": 25,
+  "target_runs": 0,
+  "index_operations": 0
+}

@@ -117,7 +117,8 @@ def launch_os_capture(target_argv,*,env,capture_root,strace_executable='strace',
     version_text=(version.stdout+version.stderr).decode('utf-8','replace')
     _need(len(version_text)<=16_384 and 'strace -- version' in version_text,'unrecognized provider version')
     nonce=secrets.token_hex(16);(root/'os').mkdir(mode=0o700)
-    options=['-ff','-ttt','-T','-s','256','-e','trace=all','-e','raw='+','.join(RAW_DATA_CALLS),
+    string_limit='4096' if env.get('SCAR_PROCESS_IMAGE_RECEIPTS')=='1' else '256'
+    options=['-ff','-ttt','-T','-s',string_limit,'-e','trace=all','-e','raw='+','.join(RAW_DATA_CALLS),
              '-o',str(root/'os/syscalls')]
     argv=[str(binary),*options,*target_argv];boundary=1+len(options)
     intent={'schema':INTENT_SCHEMA,'schema_version':1,'nonce':nonce,'capture_root':str(root),
@@ -224,6 +225,33 @@ def _native_input_archive_paths(root, budget):
     return [declared.parent / chunk['path'] for chunk in doc['chunks']]
 
 
+def _collector_witness_archive_paths(root,budget):
+    """Only the explicit V2 owner declaration; keep plain CodeWitness readers working."""
+    from scar.trace.collector_execution_witness import PROCESS_PROFILE,collector_witness_members
+    declarations=[]
+    for path in sorted((root/'trace').glob('execution-evidence.*.json')):
+        native,_=_document(path,budget.max_metadata_bytes)
+        request=native.get('configuration',{}).get('collector_execution_witness')
+        if request is not None:declarations.append((path,native,request))
+    if not declarations:return []
+    _need(len(declarations)==1,'one explicit collector witness declaration required')
+    native_path,native,request=declarations[0];pid=native.get('pid');issuer=request.get('issuer',{})
+    token=issuer.get('uuid','');nonce=request.get('native_nonce')
+    _need(type(pid)is int and issuer.get('process_id')==pid and issuer.get('generation')==1
+          and type(token)is str and len(token)==32 and all(c in '0123456789abcdef' for c in token)
+          and request.get('profile')==PROCESS_PROFILE and request.get('requested') is True
+          and native.get('status')=='CLOSED' and native.get('failures')==[],
+          'collector witness owner/profile is not a closed V2 capture')
+    manifest=root/'trace'/('collector-witness.'+str(pid)+'.'+token)/'manifest.json'
+    _need(request.get('manifest')==str(manifest) and
+          native['artifacts']['kineto']['path']==str(root/'trace'/('kineto.'+str(pid)+'.'+str(nonce)+'.json')),
+          'collector witness exact namespace/native nonce differs')
+    _doc,r=_document(manifest,budget.max_metadata_bytes)
+    witness,members=collector_witness_members(manifest,expected_sha256=r['sha256'])
+    _need(witness['issuer']==issuer,'collector witness issuer differs from native declaration')
+    return [Path(x['uri']) for x in members]
+
+
 def archive_owned_capture(capture_root,*,budgets=None):
     """Existing lossless archive v1, bounded store sink, no new graph format."""
     budget=budgets or OSCaptureBudgets();root=Path(capture_root).absolute()
@@ -238,6 +266,8 @@ def archive_owned_capture(capture_root,*,budgets=None):
     paths+=sorted((root/'trace').glob('execution-trace.*.json'))
     paths+=sorted((root/'trace').glob('kineto.*.json'))
     paths+=_native_input_archive_paths(root,budget)
+    collector_paths=_collector_witness_archive_paths(root,budget)
+    paths+=collector_paths
     _need(len(set(paths))==len(paths),'duplicate declared archive member')
     _need(paths and len(paths)<=budget.max_files,'raw archive file budget exceeded')
     totals={'stored_bytes':0};raw_total=0;os_lines=0;rows=[]
@@ -265,9 +295,14 @@ def archive_owned_capture(capture_root,*,budgets=None):
         'io_accounting':{'raw_bytes_read':raw_total,'decoded_roundtrip_bytes_read':raw_total,
             'stored_bytes_written':totals['stored_bytes'],'os_lines':os_lines},
         'runtime_observation_completeness':'UNKNOWN'}
+    if collector_paths:
+        document['capabilities']=['COLLECTOR_WITNESS_MEMBERS_V2']
+        document['retained_plain_members']=[str(p) for p in collector_paths]
+        document['retained_plain_basis']='exact witness declarations; unchanged CodeWitnessStore needs original plain files'
     receipt=_publish(index,document,budget)
     # Only our generated duplicate originals, after all roundtrips + manifest.
-    for row in rows:Path(row['logical_path']).unlink()
+    for row in rows:
+        if Path(row['logical_path']) not in collector_paths:Path(row['logical_path']).unlink()
     return receipt
 
 

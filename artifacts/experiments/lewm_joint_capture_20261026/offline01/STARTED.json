@@ -1,0 +1,9 @@
+{
+  "declared_files": 1935,
+  "declared_raw_bytes": 1747584780,
+  "freeze_sha256": "414086ea4507926574a4785fc8de8bb00c41e9c5a50f4a7a9927190b7f502255",
+  "original_gate_exit": 1,
+  "phase": "PREFLIGHT",
+  "pid": 1597060,
+  "target_runs_added": 0
+}

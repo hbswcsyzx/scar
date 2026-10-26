@@ -1,0 +1,17 @@
+{
+  "schema": "scar.original-root-terminal-confirmation",
+  "schema_version": 1,
+  "authority": "Root explicit task confirmation; not a reconstructed live handle",
+  "root_pty": 30453,
+  "actual_exit": 1,
+  "target_returncode": 0,
+  "provider_returncode": 0,
+  "first_failure": "archive_owned_capture raw archive file budget exceeded (1024 vs1935declared,1585OS)",
+  "gate_whole_elapsed_seconds": 776.3873514049919,
+  "target_cli_wall_seconds": 752.3362380780163,
+  "provider_elapsed_seconds": 752.2890795060084,
+  "GNU_elapsed": "12:56.47",
+  "GNU_peak_RSS_KiB": 3626948,
+  "original_failure_files_unchanged": true,
+  "new_target_runs": 0
+}

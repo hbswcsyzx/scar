@@ -1,0 +1,17 @@
+{
+  "archive": {
+    "schema": "scar.lossless-capture-archive",
+    "sha256": "2bb588b34bdca5838f14d470b14830b15b5f344785c638df62cbb6c168df88c8",
+    "size_bytes": 1029011,
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/archive-index.json"
+  },
+  "elapsed_seconds": 48.49655400699703,
+  "entries": 1935,
+  "io_accounting": {
+    "decoded_roundtrip_bytes_read": 1747584780,
+    "os_lines": 3075182,
+    "raw_bytes_read": 1747584780,
+    "stored_bytes_written": 134875381
+  },
+  "phase": "ARCHIVE_COMPLETE"
+}

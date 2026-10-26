@@ -1,0 +1,27 @@
+{
+  "actual_provider_launch": {
+    "actual_string_limit": 4096,
+    "provider_pid": 1578958,
+    "sha256": "d97f67f0dbc2e0a10c016f434a91e26f43e798c558b2c255a3781ecb374aa19c",
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/os-capture-launch.eae9e1c7d84e537ed92dce4d19fd7e9f.json"
+  },
+  "capture_elapsed_seconds": 776.3848875080002,
+  "cli_returncode": 1,
+  "error": "ordinary capture CLI failed; saved target/provider/failure artifacts are retained",
+  "error_type": "ValueError",
+  "inherited_rlimit_as": [
+    -1,
+    -1
+  ],
+  "phase": "CAPTURE",
+  "preflight_hash_bytes": 119780329,
+  "provider_budget_stop": null,
+  "provider_returncode": 0,
+  "schema": "scar.lewm-joint-capture-gate-result",
+  "schema_version": 1,
+  "sets_target_rlimit_as": false,
+  "status": "FAILED",
+  "target_episodes_requested": 1,
+  "traceback": "Traceback (most recent call last):\n  File \"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/gate.py\", line 172, in main\n    need(cli_returncode == 0, 'ordinary capture CLI failed; saved target/provider/failure artifacts are retained')\n    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/gate.py\", line 30, in need\n    raise ValueError(message)\nValueError: ordinary capture CLI failed; saved target/provider/failure artifacts are retained\n",
+  "whole_model_established": false
+}

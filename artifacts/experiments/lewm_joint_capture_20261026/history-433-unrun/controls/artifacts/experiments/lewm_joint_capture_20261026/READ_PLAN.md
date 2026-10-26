@@ -1,0 +1,33 @@
+# One joint LeWM capture — prepared, not run
+
+This is the next single instrumented episode, using the ordinary main `scar.cli trace`. No CPU case, target patch, smaller evaluation, model import, optimization or restored owner is used. The original successful command is `/home/zyf/AAA/scar/artifacts/baseline/environment.md:51–62`; `COMMAND.json` preserves its task arguments and conda interpreter. Cwd is `/home/zyf/AAA/le-wm`. Existing `LEWM_OUTPUT_ROOT`/`LEWM_RUN_NAME` routes outputs to this fresh experiment; the unchanged launcher appends its ordinary Hydra run directory. Capture root and output root must both be absent at launch.
+
+## Applied source and paths
+
+`APPLICATION.json` records all four exact baseline preimages and the absent helper before any write. Only the approved candidate03 five files were copied. No index operation or other source edit occurred. Freeze is made **after** application, over the actual current main source inventory, root `sitecustomize.py`, gate/controls and explicit external inputs. A current byte receipt is a preparation witness, not historical execution evidence.
+
+Checkpoint `pusht/weights.pt` resolves through the actual loader to `/gpu4-share/data/byx/lewm_data/checkpoints/pusht/weights.pt` (72,290,721 B), with adjacent `config.json`. It is SHA-pinned without deserializing. `cache_dir` explicitly selects the local 46,300,921,856 B dataset under that root; the launcher's default NFS root and same named dataset are also present. Dataset files are **stat-only** prerequisites: no 46 GB pre-read, content identity or complete data-read provenance is claimed. No download/fallback is planned. GPU/driver/render usability remains runtime-unverified; no new target or GPU capability probe was executed.
+
+## Writer/provider limits and repeated reads
+
+| Boundary | Requested limit / meaning |
+|---|---|
+| Call frames and operands | Each 2,000,000 events and 1,200,000,000 B, regular writer bounds; actual dropped/error counts retained. Historical comparison only: 200,876 frame / 312,812 operand events. |
+| Owned OS | 1,500,000,000 raw OS B; 6,000,000 lines; 3,600 s provider wall. Historical 1.067 M lines informs the proposal, not a guarantee. `trace=all`, follow forks, `-s4096`; payload calls retain existing raw rendering. |
+| Capture/archive | 4,000,000,000 original archived B and 2,500,000,000 compressed B, 1,024 files; archive/line bounds occur during post-close retention. They are not live hard disk/RSS quotas. OS bytes/wall are polled soft stop checks. |
+| Resources | Existing sampler at 1.0 s, including its observer activity; no clean speed comparison. |
+| Native/physical | Existing dispatch defaults 400,000 rows / 256,000,000 B; legacy physical 1,000,000 rows / 512,000,000 B; companion 1,000,000 rows / 512,000,000 B, bounded chunks, no native output metadata. Provider buffers have no collector-enforced hard memory budget. |
+| Process images | Existing approved defaults: maps 4 MB / 16,384 rows per boundary; per file SHA 64 MB; cumulative actual backing reads 256 MB / 30 s / 512 records; payload 64 MB. No limits increased. |
+| Gate | Outer 4,500 s plus 60 s kill grace permits archive/binding after provider's 3,600 s. No CUDA target `RLIMIT_AS` or address-space limit is installed. Reports individually ≤8 MB. |
+
+These are separate writer/provider bounds, **not an aggregate IO reservation**. Input SHA bytes are recorded in `freeze.json`: source/control/binary/checkpoint hash once during preparation and once before launch; main source bytes again after consumption. The target's real dataset/checkpoint reads are runtime work, not capture-reader budget.
+
+At maximal archive size, archiving reads ≤4 GB originals, writes ≤2.5 GB compressed, and reads/decompresses the same archive for lossless roundtrip (≤2.5 GB stored + ≤4 GB decoded). CLI ordinary coordinates then verifies selected artifacts and parses retained OS facts. After CLI exit, the gate calls the **normal public binder once more** to obtain a genuine live coordinates object and independently bind the collector witness. Each normal binder may read the archive stored bytes, decoded selected files and compressed verification bytes, plus a second OS text pass (≤1.5 GB decoded). A conservative planning envelope for these three archive passes and two binders is 40 GB stored+decoded, plus repeated bounded witness/CodeWitness/image checks; this is explicitly repeated IO, not 4 GB total input. There is no claim that writer byte limits bound provider memory, total target IO or finalization wall. No 40k-native/EEG graph conversion is performed. Actual archive totals and reader outcomes will be reported; no upfront PASS.
+
+## Admission and remaining interfaces
+
+Child opts in to `SCAR_COLLECTOR_EXECUTION_WITNESS=1`, `SCAR_NATIVE_TENSOR_INPUTS=1`, and `SCAR_PROCESS_IMAGE_RECEIPTS=1`. Default V1 wire and Run seed are unchanged. Static inspection confirms V2 `-s4096` in actual launch/options, preserved intent, exact launch/native nonce binding and the existing ordinary option parser; parser consumes `-s`'s explicit value without treating it as syscall selection. CodeWitness final manifest requires exact same-thread final `.manifest.tmp` rename and its unique intervening `O_EXCL` creation. Other members require their exact target creation; archive follows explicit manifests/chunk lists and preserves exact plain CodeWitness inputs.
+
+The gate checks actual CLI/provider/target exits, exact ordinary coordinate bytes, ordinary companion and closed witness membership, shared issuer chain and public witness birth binder. It preserves all metadata counters/frontiers. `PROC_MAP_FILES` permission failure can use only the original mapped pathname plus opened regular-FD dev/inode match, SHA and unchanged pre/post stat. Cache hits explicitly say this boundary did not reread content. Unavailable/anonymous/deleted/escaped/oversize/unreadable backing rows remain raw observations with reason; BuildID is explicitly not collected. Boundary observations do not prove executed pages, source-to-binary builds, continuous no-mutation, global PID reuse exclusion or short-lived child images. Birth join is conditional on ordinary exact owned-artifact process membership. No Python object identity, logical version, native port geometry, content, complete resource lifetime/ready or whole model is granted by successful retention.
+
+Failure keeps the one episode, original argv, stdio, intent, launch, partial artifacts and result. No automatic retry or same-directory reuse. Target/source/driver permissions, actual capture volume, time and the newly combined publication chain are **NOT_MEASURED until Root runs this gate**.

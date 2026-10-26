@@ -420,6 +420,31 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
             "native_port_join_established": False, "Python_identity_established": False,
             "geometry_established": False, "logical_content_established": False,
             "resource_ready_established": False, "native_outputs": "UNAVAILABLE_IN_PINNED_API"}
+    collector_names,collector_publication_names=[],[]
+    collector_membership=None
+    collector_config=native.get('configuration',{}).get('collector_execution_witness')
+    if collector_config is not None:
+        from scar.trace.collector_execution_witness import PROCESS_PROFILE,collector_witness_members
+        issuer=collector_config.get('issuer',{});token=issuer.get('uuid','')
+        witness_name=trace_root/('collector-witness.'+str(pid)+'.'+str(token))/'manifest.json'
+        _need(type(token)is str and len(token)==32 and all(c in '0123456789abcdef' for c in token)
+              and issuer.get('generation')==1 and issuer.get('process_id')==pid
+              and collector_config.get('profile')==PROCESS_PROFILE and collector_config.get('requested') is True
+              and collector_config.get('manifest')==str(witness_name) and collector_config.get('native_nonce')==nonce,
+              'collector witness V2 declaration/namespace differs')
+        witness,witness_artifact=files.document(witness_name,'scar.collector-execution-witness')
+        checked,declared=collector_witness_members(witness_name,expected_sha256=witness_artifact.sha256)
+        _need(checked==witness and witness['issuer']==issuer,'closed collector witness differs')
+        for row in declared:
+            logical=Path(row['uri']);artifact=files.verify(logical,row['schema'])
+            _need(encode(artifact)==row,'declared collector witness member differs')
+            members[str(logical)]=artifact
+            if logical==witness_name.parent/'code-witnesses/manifest.json':collector_publication_names.append(str(logical))
+            else:collector_names.append(str(logical))
+        collector_membership={'capability':'SCAR_COLLECTOR_EXECUTION_MEMBERSHIP_V2','profile':PROCESS_PROFILE,
+            'manifest':encode(witness_artifact),'issuer':issuer,'member_count':len(declared),
+            'scope':'closed retained artifacts with exact target creation/publication; birth join requires witness binder',
+            'source_build_established':False,'executed_binary_pages_established':False}
     for name, schema, field in ((eto_name, "pytorch.execution-trace.v1", "execution_trace"),
                                 (kineto_name, "pytorch.kineto.chrome-trace.v1", "kineto")):
         artifact = files.verify(name, schema)
@@ -513,10 +538,24 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
     exclusive_names += dispatch_names
     exclusive_names += physical_names
     exclusive_names += native_input_names
+    exclusive_names += collector_names
     for name in exclusive_names:
         witnessed = [fact for fact, flags in creations.get(name, ()) if "O_CREAT" in flags and "O_EXCL" in flags]
         _need(len(witnessed) == 1, "artifact lacks one exact target-process O_EXCL creation: " + name)
         proofs.append({"kind": "EXCLUSIVE_ARTIFACT_CREATION", "logical_path": name, "source": encode(witnessed[0]["source"])})
+    for name in collector_publication_names:
+        target=Path(name);temporary=str(target.parent/'.manifest.tmp')
+        renames=[f for f in target_facts if f['name']=='rename' and f['result']==0
+                 and len(f['args'])==2 and _quoted(f['args'][0])==temporary and _quoted(f['args'][1])==name]
+        _need(renames and len({f['tid'] for f in renames})==1,'CodeWitness final manifest has no single-writer publication chain')
+        tid=renames[0]['tid'];ordered=sorted(renames,key=lambda f:f['line']);last=ordered[-1]
+        previous=ordered[-2]['line'] if len(ordered)>1 else 0
+        opened=[f for f,flags in creations.get(temporary,()) if f['tid']==tid and previous<f['line']<last['line']
+                and 'O_CREAT' in flags and 'O_EXCL' in flags]
+        _need(len(opened)==1,'CodeWitness final rename lacks its exact exclusive temporary creation')
+        proofs.append({'kind':'COLLECTOR_CODE_WITNESS_FINAL_PUBLICATION','logical_path':name,
+            'source':encode(last['source']),'exclusive_temporary_creation':encode(opened[0]['source']),
+            'basis':'last successful same-thread exact temp-to-manifest rename; original immutable final SHA checked'})
     _need(creations.get(str(eto_name)), "declared nonce ETO has no target-process open receipt")
     renamed = []
     for fact in target_facts:
@@ -637,6 +676,10 @@ def bind_capture_coordinates(capture_dir, *, max_bytes=1_000_000_000, max_lines=
         report['native_tensor_input_membership'] = native_input_membership
         report['open'].append({'code': 'native_tensor_input_port_join_unverified',
                                'source': native_input_membership['manifest']})
+    if collector_membership is not None:
+        report['collector_execution_membership']=collector_membership
+        report['open'].append({'code':'collector_process_birth_requires_explicit_witness_binder',
+                               'source':collector_membership['manifest']})
     payload = _canonical(report)
     artifact = ProviderArtifact(profile_uri or "memory:scar.capture-coordinates:" + sha256(payload).hexdigest(),
                                 sha256(payload).hexdigest(), len(payload), report["schema"])

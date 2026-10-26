@@ -1,0 +1,87 @@
+{
+  "status": "PATH_AND_READ_PERMISSION_PRESENT_NOT_RUNTIME_VERIFIED",
+  "observed_utc": "2026-10-26T07:15:53.511476+00:00",
+  "paths": [
+    {
+      "uri": "/home/zyf/AAA/le-wm",
+      "resolved_uri": "/home/zyf/AAA/le-wm",
+      "size_bytes": 4096,
+      "readable": true,
+      "is_directory": true
+    },
+    {
+      "uri": "/home/zyf/AAA/le-wm/run_inference.py",
+      "resolved_uri": "/home/zyf/AAA/le-wm/run_inference.py",
+      "size_bytes": 2748,
+      "readable": true,
+      "is_directory": false
+    },
+    {
+      "uri": "/gpu4-share/data/byx/lewm_data/checkpoints/pusht/weights.pt",
+      "resolved_uri": "/gpu4-share/data/byx/lewm_data/checkpoints/pusht/weights.pt",
+      "size_bytes": 72290721,
+      "readable": true,
+      "is_directory": false
+    },
+    {
+      "uri": "/gpu4-share/data/byx/lewm_data/checkpoints/pusht/config.json",
+      "resolved_uri": "/gpu4-share/data/byx/lewm_data/checkpoints/pusht/config.json",
+      "size_bytes": 1313,
+      "readable": true,
+      "is_directory": false
+    },
+    {
+      "uri": "/gpu4-share/data/byx/lewm_data/datasets/pusht_expert_train.h5",
+      "resolved_uri": "/gpu4-share/data/byx/lewm_data/datasets/pusht_expert_train.h5",
+      "size_bytes": 46300921856,
+      "readable": true,
+      "is_directory": false
+    },
+    {
+      "uri": "/gpu4-share/nfs/gpu4-share/lewm_data/datasets/pusht_expert_train.h5",
+      "resolved_uri": "/gpu4-share/nfs/gpu4-share/lewm_data/datasets/pusht_expert_train.h5",
+      "size_bytes": 46300921856,
+      "readable": true,
+      "is_directory": false
+    },
+    {
+      "uri": "/usr/bin/strace",
+      "resolved_uri": "/usr/bin/strace",
+      "size_bytes": 2087432,
+      "readable": true,
+      "is_directory": false
+    },
+    {
+      "uri": "/usr/bin/nvidia-smi",
+      "resolved_uri": "/usr/bin/nvidia-smi",
+      "size_bytes": 1259328,
+      "readable": true,
+      "is_directory": false
+    },
+    {
+      "uri": "/home/zyf/miniconda3/envs/lewm/bin/python",
+      "resolved_uri": "/home/zyf/miniconda3/envs/lewm/bin/python3.14",
+      "size_bytes": 36129912,
+      "readable": true,
+      "is_directory": false
+    }
+  ],
+  "capture_root_absent": true,
+  "output_root_absent": true,
+  "free_bytes_main": 127194025984,
+  "missing_required_paths": [],
+  "not_measured": [
+    "GPU/context/driver/render usability",
+    "current target execution and profiler closure",
+    "new integrated ordinary membership/publication chain",
+    "full mapped-image hash coverage",
+    "target IO/resource cost"
+  ],
+  "known_frontiers": [
+    "map_files open had EPERM in Root capability probe; approved fstat identity-matching pathname fallback has not been runtime tested here",
+    "BuildID intentionally UNAVAILABLE_NOT_COLLECTED",
+    "large mapped files above 64MB remain hash UNAVAILABLE",
+    "anonymous/JIT/deleted/unlocatable/short-lived child images remain UNAVAILABLE",
+    "source-build/executed-pages/continuous mutation/global PID reuse are not proved"
+  ]
+}

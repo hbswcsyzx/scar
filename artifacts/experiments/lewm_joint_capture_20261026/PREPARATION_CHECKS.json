@@ -1,0 +1,23 @@
+{
+  "status": "SYNTAX_AND_STATIC_CONTRACT_ONLY",
+  "checked_sources": [
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/collector_execution_witness.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/execution_evidence.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_capture_launch.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/capture_coordinates.py",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/process_image_receipts.py"
+  ],
+  "gate_syntax": true,
+  "run_shell_syntax": true,
+  "target_runs": 0,
+  "CPU_cases": 0,
+  "Torch_imports": 0,
+  "static_chain": {
+    "string_limit": "opt-in -s4096 in actual argv; same options enter intent; exact launch/intent equality in binder; _explicit_all consumes -s with value and retains trace=all",
+    "ordinary_selection_parser": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_capture_coverage.py:35-66",
+    "code_witness_publication": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/capture_coordinates.py:546-558; same-writer final rename + exclusive temporary creation",
+    "archive": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_capture_launch.py:228-306; declared exact members, nonce namespace, retained plain CodeWitness inputs",
+    "run_seed": "existing identity_seed algorithm unchanged; process-image receipts do not enter seed"
+  },
+  "runtime_chain_status": "NOT_RUN"
+}

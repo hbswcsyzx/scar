@@ -1,0 +1,13 @@
+{
+  "schema": "scar.joint-capture-actual-terminal",
+  "schema_version": 1,
+  "root_authority": "Root explicit handle confirmations",
+  "original_root_pty": 30453,
+  "original_exit": 1,
+  "target_provider_exit": 0,
+  "offline_root_pty": 76156,
+  "offline_exit": 0,
+  "offline_whole_seconds": 93.74376535502961,
+  "new_target_runs": 0,
+  "whole_model_established": false
+}

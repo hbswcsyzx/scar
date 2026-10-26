@@ -1,0 +1,87 @@
+{
+  "schema": "scar.resource-sampler-exec-prefix-audit",
+  "schema_version": 1,
+  "status": "BOUNDED_SAMPLE_NOT_FULL_PID_CLASSIFICATION",
+  "created_utc": "2026-10-26T08:45:32.698889+00:00",
+  "code": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/resources.py",
+    "gpu_snapshot_lines": "33-45",
+    "sampling_loop_lines": "90-115",
+    "meaning": "one subprocess.run attempt per _gpu_snapshot call, called once per emitted sample; interval_s is wait duration, not a strict periodic deadline"
+  },
+  "resource_summary": {
+    "enabled": true,
+    "status": "Observed",
+    "pid": 1578961,
+    "sample_count": 666,
+    "interval_s": 1.0,
+    "started_ns": 335333475721545,
+    "ended_ns": 336080610393792,
+    "cpu_utilization_percent": {
+      "average": 1.6551370159762924,
+      "peak": 13.09424893534455
+    },
+    "gpu_utilization_percent": {
+      "average": 1.6726726726726726,
+      "peak": 3.0
+    },
+    "gpu_memory_used_mib": {
+      "peak": 1966.0,
+      "average": 1851.6801801801803
+    },
+    "gpu_count_observed": 1,
+    "evidence": "Observed"
+  },
+  "new_prefix_bytes_read": 98304,
+  "earlier_probe_prefix_bytes": 238196,
+  "samples": [
+    {
+      "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/os/syscalls.1578968",
+      "prefix_offset": 0,
+      "prefix_bytes": 32768,
+      "prefix_sha256": "3e6e2d560d969de05c67bda163d39c94ee73f079a22b4b0feb9d9bb87efd3ffd",
+      "successful_exec_samples": [
+        {
+          "original_text_line": 108,
+          "text": "1793002596.168217 execve(\"/usr/bin/nvidia-smi\", [\"nvidia-smi\", \"--query-gpu=index,utilization.gpu,memory.used,memory.total\", \"--format=csv,noheader,nounits\"], 0x64612022df70 /* 108 vars */) = 0 <0.000398>"
+        }
+      ],
+      "whole_file_hashed": false
+    },
+    {
+      "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/os/syscalls.1586157",
+      "prefix_offset": 0,
+      "prefix_bytes": 32768,
+      "prefix_sha256": "d7737545dd1bb87b33266b59db0c6907e498f4601f1784b446433ef1d52c5349",
+      "successful_exec_samples": [
+        {
+          "original_text_line": 159,
+          "text": "1793003342.194655 execve(\"/usr/bin/nvidia-smi\", [\"nvidia-smi\", \"--query-gpu=index,utilization.gpu,memory.used,memory.total\", \"--format=csv,noheader,nounits\"], 0x64612cc1bd60 /* 117 vars */) = 0 <0.000402>"
+        }
+      ],
+      "whole_file_hashed": false
+    },
+    {
+      "original_uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/os/syscalls.1586154",
+      "prefix_offset": 0,
+      "prefix_bytes": 32768,
+      "prefix_sha256": "d17367f71219fd44a8639b226f0457710d3cbe86db525c12704947cfb0260f0c",
+      "successful_exec_samples": [
+        {
+          "original_text_line": 161,
+          "text": "1793003341.382759 execve(\"/usr/bin/nvidia-smi\", [\"nvidia-smi\", \"--query-gpu=index,utilization.gpu,memory.used,memory.total\", \"--format=csv,noheader,nounits\"], 0x64612cc1bd60 /* 117 vars */) = 0 <0.000358>"
+        }
+      ],
+      "whole_file_hashed": false
+    }
+  ],
+  "observed": "three distinct traced PIDs successfully exec /usr/bin/nvidia-smi with exact sampler --query-gpu arguments; original trace=all -ff launch places them in owned target subtree",
+  "inferred": "configured sampler contributes fresh subprocess/PID streams across 666 sampling iterations; this is not a census of which of all1585 per-TID files are sampler processes",
+  "not_proved": [
+    "all1585 files are sampler children",
+    "sampling observer dominates total runtime",
+    "read/backing proves physical block IO"
+  ],
+  "target_runs_added": 0,
+  "IO_scope": "logical prefix bytes returned by bounded reads, not physical storage IO"
+}

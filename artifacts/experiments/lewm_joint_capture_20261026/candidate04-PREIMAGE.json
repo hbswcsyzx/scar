@@ -1,0 +1,17 @@
+{
+  "status": "EXACT_CANDIDATE03_MAIN_MATCH",
+  "existing_owner": "scar/trace/collector_execution_witness.py",
+  "sha256": "cb74ddd7606a38e92d9179972afef3c30c8d2d2a1a70e5c2827e516f56c2bc7f",
+  "size_bytes": 28015,
+  "helper": "scar/trace/resource_topology.py",
+  "helper_is_absent_in_both_trees": true,
+  "main_edit": false,
+  "protected_dirty_files_not_touched": [
+    "scar/analysis/program_composition.py",
+    "scar/analysis/source_program_publication.py",
+    "scar/ir/execution/native_work_protocol.py",
+    "scar/trace/native_work_bridge.py"
+  ],
+  "original_joint_freeze": "433870203abf6e910758f16dc491677c3b67150bd9ecc6fa249d4cb7224fa1c6",
+  "original_joint_status": "NOT_RUN_PRESERVED"
+}

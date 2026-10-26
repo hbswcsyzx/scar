@@ -1,0 +1,99 @@
+{
+  "status": "CANDIDATE04_REQUIRED_PATHS_PRESENT_NOT_RUNTIME_VERIFIED",
+  "checked_utc": "2026-10-26T08:10:29.142632+00:00",
+  "paths": [
+    {
+      "uri": "/home/zyf/AAA/scar/artifacts/baseline/environment.md",
+      "size_bytes": 4815,
+      "readable": true
+    },
+    {
+      "uri": "/home/zyf/AAA/le-wm/run_inference.py",
+      "size_bytes": 2748,
+      "readable": true
+    },
+    {
+      "uri": "/home/zyf/AAA/le-wm/eval.py",
+      "size_bytes": 5822,
+      "readable": true
+    },
+    {
+      "uri": "/home/zyf/AAA/le-wm/config/eval/pusht.yaml",
+      "size_bytes": 837,
+      "readable": true
+    },
+    {
+      "uri": "/home/zyf/AAA/le-wm/config/eval/launcher/local.yaml",
+      "size_bytes": 164,
+      "readable": true
+    },
+    {
+      "uri": "/home/zyf/AAA/le-wm/config/eval/solver/cem.yaml",
+      "size_bytes": 152,
+      "readable": true
+    },
+    {
+      "uri": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/wm/utils.py",
+      "size_bytes": 5875,
+      "readable": true
+    },
+    {
+      "uri": "/home/zyf/AAA/le-wm/stable-worldmodel/stable_worldmodel/data/utils.py",
+      "size_bytes": 12321,
+      "readable": true
+    },
+    {
+      "uri": "/gpu4-share/data/byx/lewm_data/checkpoints/pusht/weights.pt",
+      "size_bytes": 72290721,
+      "readable": true
+    },
+    {
+      "uri": "/gpu4-share/data/byx/lewm_data/checkpoints/pusht/config.json",
+      "size_bytes": 1313,
+      "readable": true
+    },
+    {
+      "uri": "/home/zyf/miniconda3/envs/lewm/bin/python",
+      "size_bytes": 36129912,
+      "readable": true
+    },
+    {
+      "uri": "/usr/bin/strace",
+      "size_bytes": 2087432,
+      "readable": true
+    },
+    {
+      "uri": "/usr/bin/nvidia-smi",
+      "size_bytes": 1259328,
+      "readable": true
+    },
+    {
+      "uri": "/home/zyf/miniconda3/etc/profile.d/conda.sh",
+      "size_bytes": 2439,
+      "readable": true
+    },
+    {
+      "uri": "/gpu4-share/data/byx/lewm_data/datasets/pusht_expert_train.h5",
+      "size_bytes": 46300921856,
+      "readable": true
+    },
+    {
+      "uri": "/gpu4-share/nfs/gpu4-share/lewm_data/datasets/pusht_expert_train.h5",
+      "size_bytes": 46300921856,
+      "readable": true
+    }
+  ],
+  "missing_required_paths": [],
+  "free_bytes_main": 127022014464,
+  "capture_and_output_absent": true,
+  "current_analysis_namespace_topology": "availability only: ext4 252:13 at /gpu4-share/nfs; actual target registration not observed yet",
+  "not_measured": [
+    "target/provider/native lifecycle",
+    "GPU/render usability",
+    "topology registration and exact ordinary member publication at runtime"
+  ],
+  "device_media_verification": "no extra probe or episode required to collect exact identities; SSD media remains unavailable without trustworthy applicable explicit media source; no privileged tools; NVMe/rotational do not grant SSD",
+  "GPU_memory": "DEVICE_MEMORY; technology UNAVAILABLE, not HBM",
+  "target_runs": 0,
+  "CPU_cases": 0
+}

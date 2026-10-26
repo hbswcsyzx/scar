@@ -1,0 +1,7 @@
+# Prospective topology correction; joint gate has not run
+
+The original `433870203abf6e910758f16dc491677c3b67150bd9ecc6fa249d4cb7224fa1c6` source/control freeze is preserved as unrun history. Its `READ_PLAN.md` called the launcher's default pathname a “NFS root”. This is a pathname label, **not an observed NFS protocol**. The bounded 2026-10-26 availability review observes ext4 filesystem device `252:13` at `/gpu4-share/nfs`, mapper `dm-13`, slave `nvme0n1`; no remote-storage conclusion follows from `/nfs` in a name. `/home` is ext4 `252:5`→dm5→sda3→sda. The next same episode's registration-boundary mountinfo/sysfs facts, not these analysis-machine observations, will qualify its actual namespace.
+
+CPU/NUMA inventory and EDAC explicitly report Registered-DDR4. GPU memory is only `DEVICE_MEMORY` with technology unavailable; HBM is not inferred. NVMe is a protocol dimension, PCIe is a transport dimension, and `rotational=0` is its own reported queue attribute. SSD/flash media type remains unavailable without an explicit trustworthy media source. Present resources, actual software access, allocation/placement and readiness remain separate.
+
+Candidate04 is prepared in the isolated frame-entry-routing tree. Main's five previously applied source files and original controls have not been overwritten by candidate04. Root reviews the exact new helper/witness diff before applying and making the next-run freeze of this same capture directory. No target or CPU case has run.

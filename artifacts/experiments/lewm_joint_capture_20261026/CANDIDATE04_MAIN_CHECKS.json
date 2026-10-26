@@ -1,0 +1,36 @@
+{
+  "status": "MAIN_SYNTAX_IMPORT_API_ONLY_NOT_CAPTURE",
+  "modules": [
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/resource_topology.py",
+      "sha256": "16d0d1d375df582e1aab849180f2c97d3534dfa8a55376245872ee88fa2595d7"
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/collector_execution_witness.py",
+      "sha256": "92a31e907c2ed6482e9501adc650fe3ad57b4359171fb053a7ec0b8300a137d9"
+    }
+  ],
+  "api": {
+    "capture_resource_topology": "(root, issuer, incarnation)",
+    "read_resource_topology": "(path, *, expected_sha256)",
+    "resource_topology_members": "(path, *, expected_sha256)"
+  },
+  "source_limits": {
+    "source_bytes": 16000000,
+    "facts": 16384,
+    "output_bytes": 32000000,
+    "manifest_bytes": 1000000,
+    "seconds": 10,
+    "cpus": 512,
+    "blocks": 512,
+    "nodes": 128,
+    "controllers": 128,
+    "pci_entries": 4096
+  },
+  "Torch_imported": false,
+  "topology_capture_calls": 0,
+  "target_runs": 0,
+  "CPU_cases": 0,
+  "gate_syntax": true,
+  "run_shell_syntax": true
+}

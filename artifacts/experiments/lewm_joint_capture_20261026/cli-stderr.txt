@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/cli.py", line 1716, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/cli.py", line 699, in main
+    return args.func(args)
+           ~~~~~~~~~^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/cli.py", line 109, in _trace
+    archive_owned_capture(os_capture_root, budgets=os_budgets)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_capture_launch.py", line 272, in archive_owned_capture
+    _need(paths and len(paths)<=budget.max_files,'raw archive file budget exceeded')
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_capture_launch.py", line 49, in _need
+    if not value:raise ValueError('owned OS capture: '+message)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: owned OS capture: raw archive file budget exceeded
