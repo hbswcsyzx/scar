@@ -1407,7 +1407,8 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
                 source_tree = ast.parse(source_text, filename=result.metadata.source.path)
             require_valid_structured_body(result.structured, result.graph, result.interface, result.metadata,
                 semantic=result.semantic, control=result.control, language=result.language,
-                source_tree=source_tree, language_options=language_options, structural_only=structural_only)
+                source_tree=source_tree, language_options=language_options, structural_only=structural_only,
+                _context_session=_context_session, _context_reference=_context_reference)
         else:
             if result.structured is not None:
                 raise ValueError("historical frame bodies cannot contain structured protocols")

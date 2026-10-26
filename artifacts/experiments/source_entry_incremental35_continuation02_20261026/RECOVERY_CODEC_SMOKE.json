@@ -1,0 +1,24 @@
+{
+  "status": "PASS_RETAINED_8OP_RECOVERY_CODEC_AND_ROW_FIELDS",
+  "operations": 8,
+  "original_sp5": {
+    "decoded_bytes": 225027,
+    "decoded_sha256": "aa3fe82faed6f7a7469e078480cf97de4806727de81e9c602cf79e767bf040d1",
+    "external": true,
+    "physical_bytes": 19132,
+    "physical_sha256": "5d1ab5625ada21f6d4e79f9380b38b6d186bc0c1347a845b57ff4760c214d137",
+    "representation": "scar.source-program/5",
+    "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/python_call_targets_owned_20261026/case01/worker/attempt-00002/source-program5.json.gz"
+  },
+  "checkpoint": {
+    "decoded_bytes": 13117,
+    "decoded_sha256": "7bf21ec36a5c8e55b9a8b10fb9274500f12785295fbe51434c6da512cfb78e74",
+    "external": true,
+    "physical_bytes": 1627,
+    "physical_sha256": "5fb500b14251e948ebf91078f94b11f1423ba4729bf71675a84278823faa5c42",
+    "representation": "scar.body-construction-checkpoint/2",
+    "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_publication_shared_generic_20261026/publication/bodies/00000.json.gz"
+  },
+  "elapsed_seconds": 0.170940607029479,
+  "qualification": "codec/API projection only; no catalog/source/code/runtime admission or lowering performed"
+}

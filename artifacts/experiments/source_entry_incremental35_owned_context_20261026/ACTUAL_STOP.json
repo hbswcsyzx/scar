@@ -1,0 +1,219 @@
+{
+  "actual_exit_code": 130,
+  "owned_handle": 93217,
+  "pid": 1946140,
+  "elapsed_seconds": 1721.9345301909489,
+  "closed_checkpoint_count": 23,
+  "published": false,
+  "manifest_exists": false,
+  "reason": "Root-authorized SIGINT for journaled remaining continuation; private deep traversals perbody",
+  "partial_checkpoints": [
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00000.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "20ab8786c5c14b01bfe491de91e8dbac265c5bba7166c93c21e916173b8018d0",
+      "physical_bytes": 1725,
+      "decoded_sha256": "d8552dd51359c5a80c8a0efceaac3c141d241d940335da742eec52b2a9a33125",
+      "decoded_bytes": 12941
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00001.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "265f6cb827aa0843a172b1eab2f14353b2228505e808db2ea0f3ff1673d01834",
+      "physical_bytes": 1733,
+      "decoded_sha256": "dbfe78f4a93425b5c4abf10e968301ae36fcd729d17cc6f4cb4eabf50259155e",
+      "decoded_bytes": 12945
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00002.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "7b50e96008a68dd5d0746e1d755d995432e6c525e7a7985f19bda1a611113fa0",
+      "physical_bytes": 1724,
+      "decoded_sha256": "fa000d2166bf96af4042a7b4b3a7f1728bc2aef54622eccf6d0a9605133b9aed",
+      "decoded_bytes": 13048
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00003.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "925bba01b13bea34f0fa220e8916639bf5b678fbe18a055fee0b634ed8018442",
+      "physical_bytes": 1728,
+      "decoded_sha256": "5c4f493b1fc3224c4853f26eee790cd1e4784743f2e83bafd1b4c9540415d743",
+      "decoded_bytes": 13133
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00004.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "662504c898f19e8511b878ae09a74b85fbab39202969dfdf7597b40a0860bc66",
+      "physical_bytes": 1733,
+      "decoded_sha256": "ae7f317d311b05bff4b716e3b0528b7042c486fcdae471cd8d86fd77fb2f2521",
+      "decoded_bytes": 12991
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00005.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "6d1e45788bed317dae33311643d40af9ee4216c23846547e4c018ccb6b9d06d4",
+      "physical_bytes": 1729,
+      "decoded_sha256": "0fb44772a71e87044ffab24e86025331a0a0cf2c3f7a0e39cd9b0aafd88b5fe5",
+      "decoded_bytes": 12986
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00006.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "6d771233aee467fdae7132217c3b13b737fc9994f745757097bc9d1a945ae8d9",
+      "physical_bytes": 1707,
+      "decoded_sha256": "cbdfcae693c1daf4e7680ab6f3478bf7397d005e6634bc143a156906b1ee3e6c",
+      "decoded_bytes": 12804
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00007.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "cebe88830edfb766416b219210a8ae30f9b0d74752a37957d7906684c57e01ba",
+      "physical_bytes": 1735,
+      "decoded_sha256": "400f29483d05f353fc5e0a2c2a6fc8c5fea9c08438ff5c57d31e392c93614dea",
+      "decoded_bytes": 13087
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00008.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "6f3a26c3ad2178876ea096a2875034a4e9100b0faf18220d673324c8dd0e44fa",
+      "physical_bytes": 1748,
+      "decoded_sha256": "77cda5b5c06a375a1969d024e16d7ca6396f319b792827acba6aca0a11cafe72",
+      "decoded_bytes": 13087
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00009.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "770985b637e07e3ca1ec787c095313d0509457102548af93e467b67464e0d623",
+      "physical_bytes": 1742,
+      "decoded_sha256": "259ca7fc473140a7bc6b2455f2d398a300f3563d930a146f2738513959bf8f67",
+      "decoded_bytes": 13087
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00010.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "92267b5b363c0b6d2ea43f553502bef0fd79547db59c7d95d59736c9192f4164",
+      "physical_bytes": 1731,
+      "decoded_sha256": "34d41ec047e8bf33146a84f8bc9f6a45df9dc37009de2a63b1d0d76f3e9d146a",
+      "decoded_bytes": 13066
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00011.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "eb5731e5b1b4984547b6103a6d0528a3dede5b9959b2c801b43b7f0dcff67b21",
+      "physical_bytes": 1708,
+      "decoded_sha256": "218ab3a97f3a4478331875fde3b10e026101dfcd9527a72a292d3904047ba6b3",
+      "decoded_bytes": 12783
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00012.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "d3357e90cbab4adeed3d99b10721786e281673db9a9d508a46db1b520331f0a6",
+      "physical_bytes": 1726,
+      "decoded_sha256": "d71e1c3662602350a9b31aab3bc895fbd0106cbf4d0ae5433b9574eed2114e54",
+      "decoded_bytes": 13067
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00013.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "5b575b607b0e086a395f33334b99e1fded9e7443ff60f63b2c035bfa51e8d891",
+      "physical_bytes": 1706,
+      "decoded_sha256": "a5a8343fefea7ac228d49bf040d64fef86d646f4095b8f89ad8aeb7d9816c695",
+      "decoded_bytes": 12775
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00014.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "23984dddbeae73dae58f31531330e63dc6624ff875b89c2aa9cf94c66f2acee7",
+      "physical_bytes": 1735,
+      "decoded_sha256": "a5380520caf73601fc4f3e3f9a480958656add66de67aa7899729cd258888247",
+      "decoded_bytes": 13088
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00015.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "d0d92935d5925ab0b812653851b77ec2c5b6fb2ba85b2c22e83c50ea1a59a5fd",
+      "physical_bytes": 1715,
+      "decoded_sha256": "50b53bb60e8db7a0911c57d4f5863b3c838e91c0e1db9d798bc8cd37f35d56cb",
+      "decoded_bytes": 12905
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00016.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "ee64ce653fc34dbe97f71b6b6da38bd1edb8eed16b6875bff3dbdbc877f4dabf",
+      "physical_bytes": 1702,
+      "decoded_sha256": "ac64d07c482f6dc892d48fefdd8951dea107764be357e04461c52aaf59a3195c",
+      "decoded_bytes": 12748
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00017.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "42f4a160fa5e466259cf03c6844ac914259a4520f425eafce3da2045ddbc7718",
+      "physical_bytes": 1705,
+      "decoded_sha256": "dfb738d26994230c14df5e96ebe2bcf7fe8a9e153d0fdf804ca9317062d07914",
+      "decoded_bytes": 12760
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00018.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "29a433f7efd42557654ad31f36cb9b2fa94cc7ddf6c01d634325ccde43acc985",
+      "physical_bytes": 1722,
+      "decoded_sha256": "eeab08e889e1f1e1251213d4ce62a6dff21b7c631d4bc5a757e1d6dbe429d1a9",
+      "decoded_bytes": 12940
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00019.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "ced5be033b69e4b8686440003272b3658f7c32146e6f3b5d657cee738815cb2c",
+      "physical_bytes": 1718,
+      "decoded_sha256": "06565fe9f6b1128e4d6175ae053a814873cfebd23487aae59da8e31c6803d22c",
+      "decoded_bytes": 12927
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00020.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "13cfc1c531f4862bfd33f4a48df5abab396d6d7db97386aa664930a43af283ac",
+      "physical_bytes": 1721,
+      "decoded_sha256": "066e24b4d636877f98e9cdcba3b5025e0b77feb774496fda2f747feaf6a0de52",
+      "decoded_bytes": 12929
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00021.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "09f313b2fcffddf84737fe3ac7a6018927edbe55fdee446d1689ccd4585774b1",
+      "physical_bytes": 1744,
+      "decoded_sha256": "47db60b2f4699bfaaea8532259487199c5555b3e5e8d4dd4d7a03bc1e32b80bd",
+      "decoded_bytes": 13013
+    },
+    {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/result/delta/bodies/00022.json.gz",
+      "external": true,
+      "representation": "scar.body-construction-checkpoint/2",
+      "physical_sha256": "203c23f2dd4ecd4b43691af916b46bd39b2c840216ca9d3bdb98e372d9a670d9",
+      "physical_bytes": 1708,
+      "decoded_sha256": "8567560ceb4325d8e67ac41c6cf183be0ec5d08e1248d92052f6d7f5f4c8f798",
+      "decoded_bytes": 12809
+    }
+  ]
+}

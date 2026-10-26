@@ -45,7 +45,9 @@ class _EntryReadSession:
     queries are rebound to their still-checked original catalog, not restored
     lowering owners or JSON proof tokens.
     """
-    def __init__(self, catalog, target, controls):
+    def __init__(self, catalog, target, controls, share_source_context=False):
+        _need(type(share_source_context) is bool, 'context reuse selection must be an exact bool')
+        self.share_source_context, self.program_reader = share_source_context, None
         self.original, self.original_target = catalog, target
         self.controls, self.control_bytes = controls, _bytes(controls)
         self.catalog, self.target, self.base = catalog, target, None
@@ -103,6 +105,8 @@ class _EntryReadSession:
 
     def __exit__(self, kind, error, traceback):
         try:
+            if self.program_reader is not None:
+                self.program_reader.close()
             self.check()
             if self.catalog is not self.original:
                 for key, entry in self.catalog._resolved.items():
@@ -400,8 +404,22 @@ class SourceEntryCatalog:
                 session.contexts.popitem(last=False)
         return result
 
-    def _ordinary_read_session(self, target, *, controls=()):
-        return _EntryReadSession(self, target, controls)
+    def _ordinary_read_session(self, target, *, controls=(), share_source_context=False):
+        return _EntryReadSession(self, target, controls, share_source_context)
+
+    def _shared_program_reader(self, max_record_bytes, max_operations):
+        session = _PRIVATE_READ_SESSIONS.get(self)
+        if session is None or not session.share_source_context:
+            return None
+        if session.program_reader is None:
+            from scar.analysis.source_program_publication import _SharedEntryProgramReader
+            session.program_reader = _SharedEntryProgramReader(session.controls[0], max_record_bytes, max_operations)
+        return session.program_reader
+
+    def _finish_shared_programs(self):
+        session = _PRIVATE_READ_SESSIONS.get(self)
+        if session is not None and session.program_reader is not None:
+            session.program_reader.close()
 
     def _ordinary_read_active(self):
         return self in _PRIVATE_READ_SESSIONS

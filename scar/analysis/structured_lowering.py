@@ -637,17 +637,27 @@ class StructuredBuilder(_Builder):
 
 
 def require_valid_structured_body(model, graph, interface, metadata, *, semantic, control,
-                                  language=None, source_tree=None, language_options=None, structural_only=False):
+                                  language=None, source_tree=None, language_options=None, structural_only=False,
+                                  _context_session=None, _context_reference=None):
     """Validate typed overlay endpoints; exact source replay is a separate gate."""
-    # Public validation always checks caller-owned mutable source layers.
-    return _require_valid_structured_body(model, graph, interface, metadata,
-        semantic=semantic, control=control, language=language, source_tree=source_tree,
-        language_options=language_options, structural_only=structural_only)
+    # Public/default validation always checks caller-owned source layers.
+    # A real reader session may reuse only its own still-hash-checked tables.
+    try:
+        return _require_valid_structured_body(model, graph, interface, metadata,
+            semantic=semantic, control=control, language=language, source_tree=source_tree,
+            language_options=language_options, structural_only=structural_only,
+            _context_session=_context_session, _context_reference=_context_reference)
+    finally:
+        if _context_session is not None:
+            from scar.store.source_fragments import SourceContextSession
+            if type(_context_session) is not SourceContextSession:
+                raise TypeError('source reuse requires the actual reader session')
+            _context_session._require_layers(semantic, control, _context_reference)
 
 
 def _require_valid_structured_body(model, graph, interface, metadata, *, semantic, control,
                                    sealed_source=None, language=None, source_tree=None, language_options=None,
-                                   structural_only=False):
+                                   structural_only=False, _context_session=None, _context_reference=None):
     if language is None:
         from scar.ir.program.source_language import reject_extended_protocols
         reject_extended_protocols(model)
@@ -655,7 +665,12 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
     errors = record_errors(model, StructuredBodyModel, "structured")
     if errors:
         raise ValueError("; ".join(errors))
-    if sealed_source is None:
+    if _context_session is not None or _context_reference is not None:
+        from scar.store.source_fragments import SourceContextSession
+        if type(_context_session) is not SourceContextSession or sealed_source is not None:
+            raise TypeError('source reuse requires one actual reader owner')
+        _context_session._require_layers(semantic, control, _context_reference)
+    elif sealed_source is None:
         checked_control = control.validate(semantic=semantic)
         if not checked_control["valid"]:
             raise ValueError("structured loop source control must be independently well formed")

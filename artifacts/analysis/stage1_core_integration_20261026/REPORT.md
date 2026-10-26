@@ -85,3 +85,30 @@ body解码及索引各2次，同会话复用。当前旧查询仍偏重，不称
 
 本轮未增加detector/backend、未修改LeWM或重跑LeWM episode，未跑大套测试。
 完整资源/IO backing、跨调用全链与剩余source仍OPEN，第一阶段未完成。
+
+
+## Follow-up core integration: source publication and connections
+
+The incremental source publication completed in its frozen isolated producer: 196 bodies = 161 retained + 35 additions.
+Its actual continuation exited 0 in 1131.228356s, retained 23 original CP2 references, normally admitted the remaining 12,
+and passed one ordinary source/code/CP2 query for a 567-operation body. No old161 payloads, target or lowerer ran.
+The normative root SHA is a124d78bb5e50e4ff96d1af2858357651cb9eda13918c328fd753a3a4bd4650b.
+See source_entry_incremental35_continuation02_20261026/REPORT.md and the preserved terminal/journal records.
+
+Main integrates the six-file owned-context/read/publication implementation while retaining Lambda and CodeConstant
+capabilities. Incremental recovery uses the version-aware language decoder, preserving old V1 wire fields.
+A further compact-reader change reuses one private source context per file, groups internal validation by file_key,
+and restores the original manifest order. Its default complete-SourceProgram path keeps the original validation policy.
+Root review corrected the noncompact row/expectation tuple shape. Actual 196-row metadata scheduling retained all
+original row/expectation pairs and 94 unique contexts; public modules imported successfully. This was not a full196
+reader run and does not establish its time or memory cost. The original producer gate does not attest these later edits.
+
+The source/stream main-package check passed for all seven actual calls in 10.653196s (six normal, one exceptional).
+The Lambda source artifact has 187 operations, including a 17-operation deferred expression Region. Its old producer
+reported only 170 construction operations; the omitted child budget is corrected in main. A main ordinary structure
+read returned normally, after which an incorrect wrapper count assertion exited 1; that failure and explanation remain.
+No performance speedup or whole-program completion follows from these analysis results.
+
+Next core work is current invocation binding to these qualified bodies, remaining source structures, and the necessary
+value/state/resource links from loading to output. The original 100438-call source seed is PID272038. Coordinates
+from PID369749 or PID1578961 cannot be substituted for that seed. Full stage 1 remains OPEN.

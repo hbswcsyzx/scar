@@ -1,0 +1,6 @@
+{
+  "phase": "shell_redirection_before_python",
+  "actual_exit_code": 1,
+  "worker_started": false,
+  "detail": "new control initially created under main, moved own new directory to isolated scope before actual launch"
+}

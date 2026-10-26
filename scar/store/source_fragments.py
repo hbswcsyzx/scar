@@ -6,7 +6,7 @@ never shared mutable semantic/semantics/control objects or a trusted token.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, fields, is_dataclass
 import gzip
 import hashlib
 import json
@@ -265,12 +265,38 @@ class SourceFragmentWriter(_IO):
         return body_locator
 
 
+def _private_state(value):
+    """Mutation fingerprint only; never a graph wire or a validation flag."""
+    from enum import Enum
+    if isinstance(value, Enum):
+        return ['enum', type(value).__module__, type(value).__qualname__, value.value]
+    if is_dataclass(value):
+        return ['record', type(value).__module__, type(value).__qualname__,
+                [[f.name, _private_state(getattr(value, f.name))] for f in fields(value)]]
+    if isinstance(value, dict):
+        pairs = [[_private_state(k), _private_state(v)] for k, v in value.items()]
+        return ['mapping', sorted(pairs, key=lambda pair: _canonical(pair[0]))]
+    if isinstance(value, (tuple, list)):
+        return [type(value).__name__, [_private_state(v) for v in value]]
+    if isinstance(value, (set, frozenset)):
+        return [type(value).__name__, sorted((_private_state(v) for v in value), key=_canonical)]
+    return encode(value)
+
+
+def _layer_state(graph):
+    values = ({f.name: getattr(graph, f.name) for f in fields(graph)}
+              if is_dataclass(graph) else vars(graph))
+    return _sha(_canonical(_private_state(values)))
+
+
 @dataclass(slots=True)
 class _OwnedContext:
     reference: SourceContextReference
     semantic: object
     semantics: object
     control: object
+    canonical_context: dict
+    layer_states: tuple
 
 
 class SourceContextSession(_IO):
@@ -322,22 +348,45 @@ class SourceContextSession(_IO):
             _need(checked['valid'], '; '.join(checked['errors']))
             checked = validate_source_control_flow(control, semantic, semantics, sources=self._texts)
             _need(checked['valid'], '; '.join(checked['errors']))
-            self._contexts[key] = _OwnedContext(reference, semantic, semantics, control)
+            canonical_context = {name: _canonical(doc[name]) for name in _CONTEXT}
+            layers = (semantic, semantics, control)
+            # Bind the normal typed roundtrip to the exact original three
+            # canonical hashes once, before retaining a private owner.
+            for name, graph in zip(_CONTEXT, layers):
+                _need(_canonical(graph.to_dict()) == canonical_context[name],
+                      'typed source context differs from its original canonical record')
+            self._contexts[key] = _OwnedContext(reference, semantic, semantics, control,
+                canonical_context, tuple(_layer_state(graph) for graph in layers))
             self.counts['context_reads'] += 1;self.counts['context_validations'] += 1
         return self._contexts[key]
 
+    def _require_layers(self, semantic, control, reference):
+        """Require the live private tables, not equal caller-owned copies."""
+        owned = self._context(reference)
+        _need(semantic is owned.semantic and control is owned.control,
+              'source validator does not use this live owned context')
+        self.counts.setdefault('context_identity_guards', 0)
+        self.counts['context_identity_guards'] += 1
+        return owned
+
+    def finish(self):
+        # No caller receives these tables; all body checks use this live owner.
+        # Deep consistency is checked once at the owning file/session boundary,
+        # before publication commits. Public source validation is unchanged.
+        self._check()
+        for owned in self._contexts.values():
+            _need(tuple(_layer_state(getattr(owned, name)) for name in _CONTEXT) == owned.layer_states,
+                  'private source context changed during its owned batch')
+            self.counts['context_hash_guards'] += 1
+        return super().finish()
+
     def _claim(self, result, reference):
         """No cached validation of caller-owned IR: identities and hashes must match."""
-        owned = self._context(reference)
-        _need(result.semantic is owned.semantic and result.semantics is owned.semantics
-              and result.control is owned.control, 'source body does not use this live owned context')
+        owned = self._require_layers(result.semantic, result.control, reference)
+        _need(result.semantics is owned.semantics, 'source body semantics are not this live owned context')
         _need(result.metadata.source == reference.source and result.language is not None
               and result.language.namespace_root == reference.context.namespace_root,
               'source body snapshot/namespace differs from owned context')
-        for name in _CONTEXT:
-            _need(_sha(_canonical(getattr(owned, name).to_dict())) == getattr(reference.context, name + '_sha256'),
-                  'private source context changed after validation')
-        self.counts['context_hash_guards'] += 1
         return owned
 
     def read(self, artifact, *, namespace_root):
@@ -355,8 +404,9 @@ class SourceContextSession(_IO):
         # Reconstructed canonical identity is measured from the same private
         # original tables, without exposing them or making a second graph.
         owned = self._context(context)
-        full = dict(doc['program'], **{name: getattr(owned, name).to_dict() for name in _CONTEXT})
-        canonical = _canonical(full)
+        parts = {name: _canonical(value) for name, value in doc['program'].items()}
+        parts.update(owned.canonical_context)
+        canonical = b'{' + b','.join(_canonical(name) + b':' + parts[name] for name in sorted(parts)) + b'}'
         _need(_sha(canonical) == doc['canonical_program_sha256'],
               'source fragment reconstructed original canonical identity differs')
         _matches_original(canonical, original)
