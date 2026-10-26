@@ -33,6 +33,10 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         self.exception_matches, self.failure_sinks = [], []
         self.try_depth = 0
         self.handler_expression_depth = 0
+        self.completion_sinks = []
+        self.return_shims = {}
+        self.completion_sources = {}
+        self.loop_scopes = {}
         node = self.functions[self.entry]
         args = node.args
         self.formal_names = {x.arg for x in (*args.posonlyargs, *args.args, *args.kwonlyargs)}
@@ -201,7 +205,40 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         self.control_ports.append(port)
         return port
 
-    def dispatch(self, cursor, node, token, ports):
+    def completion_port(self, node, kind, handler=None):
+        parent = self.scope_specs[self.current_owner][1] if self.scope_specs[self.current_owner][0] is S.CLEANUP else self.root_scope
+        if kind is L.RETURN:
+            with self.in_owner(self.root_scope):
+                landing = self.control_block(node, extra_types=(_REF,))
+            payload = self.block_arguments[landing.block][-2]
+            if handler is not None and handler.name:
+                self.clear_exception_name(handler, landing)
+            super().finish_exit(landing,node,payload,ExitKind.NORMAL)
+        else:
+            if not self.loop_stack:
+                raise _Unsupported(GapKind.CONTROL_FLOW,node,'loop completion has no original active loop')
+            loop = self.loop_stack[-1]
+            scope,parent = self.loop_scopes[id(loop.node)]
+            with self.in_owner(scope):
+                landing = self.control_block(node)
+            if handler is not None and handler.name:
+                self.clear_exception_name(handler,landing)
+            if kind is L.BREAK:
+                if loop.iterator is not None:
+                    self.frame_transition(landing,node,((loop.iterator,node,'broken-iterator'),),K.FRAME_RELEASE_TEMPORARY)
+                loop.breaks.append(self.jump(landing,self.loop_after(loop),loop.names,node))
+            else:
+                edge=self.jump(landing,loop.header,loop.names,node)
+                loop.backedges.append(edge);loop.continues.append(edge)
+        # This is an internal post-cleanup continuation. The source Return or
+        # loop transfer is the actual ordinary terminator at its landing.
+        port=ControlPort(self.fresh(ControlPortID,'function-completion-continuation'),
+            self.root_scope if kind is L.RETURN else scope,L.FALLTHROUGH,block=landing.block)
+        self.control_ports.append(port);self.completion_sources[port.id]=node
+        if kind is L.RETURN:self.return_shims[port.id]=landing
+        return port
+
+    def dispatch(self, cursor, node, token, ports, *, payload=None):
         identity = self.fresh(OperationID, 'function-pending-dispatch')
         selector = self.use(identity, token, node, 'pending-selector', 0)
         uses, edges = [selector], []
@@ -212,11 +249,41 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             state = self.use(identity, cursor.state, node, 'dispatch-world', index)
             uses.extend(carried); uses.append(state)
             arguments = tuple(x.id for x in carried)
-            if port.kind in (L.RETURN, L.RAISE):
+            if port.id in self.return_shims:
+                need_payload=self.use(identity,payload,node,'retained-return-reference',0)
+                uses.append(need_payload);arguments+=(need_payload.id,)
+            elif port.kind in (L.RETURN, L.RAISE):
                 arguments += (PendingPayload(),)
-            edges.append(PendingSuccessor(port.id, port.block, arguments + (state.id,)))
+            edges.append(PendingSuccessor(port.id, target.block, arguments + (state.id,)))
         self.emit(cursor, Operation(identity, 'function-pending-dispatch', (Behavior.CONTROL,), tuple(uses),
             terminator=PendingDispatchTerminator(selector.id, tuple(edges))), node, SourceRole.CONTROL)
+        return identity
+
+    def frame_transition(self,cursor,node,references,kind):
+        if kind in (K.FRAME_DISCARD,K.FRAME_RELEASE_TEMPORARY) and len(references)>1:
+            for reference in references:
+                super().frame_transition(cursor,node,(reference,),kind)
+            return
+        return super().frame_transition(cursor,node,references,kind)
+
+    def for_statement(self,node,cursor):
+        parent=self.current_owner;scope=self.new_scope(S.LOOP,node,parent)
+        self.loop_scopes[id(node)]=(scope,parent)
+        with self.in_owner(scope):
+            return super().for_statement(node,cursor)
+
+    def while_statement(self,node,cursor):
+        parent=self.current_owner;scope=self.new_scope(S.LOOP,node,parent)
+        self.loop_scopes[id(node)]=(scope,parent)
+        with self.in_owner(scope):
+            return super().while_statement(node,cursor)
+
+    def loop_after(self,loop):
+        if loop.after is None:
+            scope,parent=self.loop_scopes[id(loop.node)]
+            with self.in_owner(parent):
+                return super().loop_after(loop)
+        return loop.after
 
     def _cursor_for(self, block):
         from scar.analysis.program_lowering import _Cursor
@@ -225,6 +292,8 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
 
     def finish_exit(self, cursor, node, value, kind, *, binding=None):
         if kind is ExitKind.NORMAL:
+            if self.completion_sinks:
+                return self.completion_sinks[-1][0](cursor,node,L.RETURN,value)
             return super().finish_exit(cursor, node, value, kind, binding=binding)
         if binding is not None:
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, 'FUNCTION_TRY_UNBOUND_LOCAL_EXIT_UNIMPLEMENTED')
@@ -263,14 +332,15 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         self.cleanup_enters.append(CleanupEnter(identity, cleanup, use.id, saved.id)); entry.state = after.id
         return token, saved.id
 
-    def cleanup_exit(self, cursor, node, cleanup, original, selected, context, ports, *, resume=False):
+    def cleanup_exit(self, cursor, node, cleanup, original, selected, context, ports, *, resume=False, payload=None):
         parent = self.scope_specs[cleanup][1]
         with self.in_owner(cleanup):
             action = self.control_block(node)
         self.jump_values(cursor, action, (), node)
         with self.in_owner(parent):
-            corridor = self.control_block(node, extra_types=(ProtocolValueType(P.PENDING_COMPLETION),))
-            final = self.control_block(node, extra_types=(ProtocolValueType(P.PENDING_COMPLETION),))
+            types=(ProtocolValueType(P.PENDING_COMPLETION),)+((_REF,)if payload is not None else())
+            corridor = self.control_block(node, extra_types=types)
+            finals = {port.id:self.control_block(node,extra_types=types) for port in ports}
         identity = self.fresh(OperationID, 'function-context-restore')
         pending = self.use(identity, original, node, 'entry-pending', 0)
         replacement = None if resume else self.use(identity, selected, node, 'replacement-pending', 0)
@@ -282,30 +352,36 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         self.emit(action, Operation(identity, 'cleanup-resume' if resume else 'cleanup-replace',
             (Behavior.CONTROL, Behavior.READ, Behavior.WRITE), uses, (after.id,),
             (StateAccess(self.world, before.id, AccessMode.READ_WRITE, after.id, Footprint(FootprintKind.WHOLE)),), effects_complete=False), node, SourceRole.CONTROL)
-        action.state = after.id; jump = self.jump_values(action, corridor, (selected,), node)
+        action.state = after.id; jump = self.jump_values(action, corridor, (selected,)+((payload,)if payload is not None else()), node)
         record = (CleanupResume(identity, cleanup, pending.id, context_use.id, ControlEdgeReference(jump, 0)) if resume
             else CleanupReplace(identity, cleanup, pending.id, replacement.id, context_use.id, ControlEdgeReference(jump, 0)))
         (self.cleanup_resumes if resume else self.cleanup_replacements).append(record)
-        token = self.block_arguments[corridor.block][-2]
+        token = self.block_arguments[corridor.block][-3 if payload is not None else -2]
+        carried_payload=self.block_arguments[corridor.block][-2]if payload is not None else None
         route = self.fresh(OperationID, 'function-post-pop-route')
         selector = self.use(route, token, node, 'pending-selector', 0); self._transfer_id = route
         successors, route_uses = [], [selector]
         for i, port in enumerate(ports):
+            final=finals[port.id]
             carried = self.carry(corridor, final, node)
             forward = self.use(route, token, node, 'forwarded-pending', i)
             state = self.use(route, corridor.state, node, 'post-pop-world', i)
-            route_uses.extend((*carried, forward, state))
-            successors.append(CleanupRouteSuccessor(port.id, final.block, tuple(x.id for x in carried) + (forward.id, state.id)))
+            extra=()if carried_payload is None else(self.use(route,carried_payload,node,'retained-completion-reference',i),)
+            route_uses.extend((*carried, forward,*extra,state))
+            successors.append(CleanupRouteSuccessor(port.id, final.block, tuple(x.id for x in carried) + (forward.id,)+tuple(u.id for u in extra)+(state.id,)))
         self.emit(corridor, Operation(route, 'function-post-pop-route', (Behavior.CONTROL,), tuple(route_uses),
             terminator=CleanupRouteTerminator(selector.id, tuple(successors))), node, SourceRole.CONTROL)
-        self.dispatch(final, node, self.block_arguments[final.block][-2], ports)
+        for port in ports:
+            final=finals[port.id]
+            token=self.block_arguments[final.block][-3 if payload is not None else -2]
+            ref=self.block_arguments[final.block][-2]if payload is not None else None
+            self.dispatch(final,node,token,(port,),payload=ref)
 
     def _try_shape(self, node):
         if self.try_depth or (node.handlers and node.finalbody):
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, 'FUNCTION_TRY_NESTED_OR_COMBINED_UNIMPLEMENTED')
         for child in ast.walk(node):
-            if child is not node and isinstance(child, (ast.Try, ast.TryStar, ast.Return, ast.Break, ast.Continue,
-                                                        ast.Yield, ast.YieldFrom, ast.Await)):
+            if child is not node and isinstance(child, (ast.Try, ast.TryStar, ast.Yield, ast.YieldFrom, ast.Await)):
                 raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, child, 'FUNCTION_TRY_NONLOCAL_TRANSFER_OR_NESTED_UNIMPLEMENTED')
         if not node.finalbody and not node.handlers:
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, 'FUNCTION_TRY_WITHOUT_CLEANUP_UNIMPLEMENTED')
@@ -442,11 +518,16 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
                                 replaced(failed, payload)
                             finally:
                                 self.active_temporaries.extend(held)
+                        def body_completed(completed,source,kind,value):
+                            port=self.completion_port(source,kind,handler)
+                            token=self.pending(completed,source,port)
+                            self.cleanup_exit(completed,handler,cleanup,original,token,saved,(port,),payload=value if kind is L.RETURN else None)
                         self.failure_sinks.append(body_failed)
+                        self.completion_sinks.append((body_completed,len(self.loop_stack)))
                         try:
                             completed = self.statements(handler.body, handler_body)
                         finally:
-                            self.failure_sinks.pop()
+                            self.completion_sinks.pop();self.failure_sinks.pop()
                         if completed is not None:
                             if after is None:
                                 with self.in_owner(parent):
@@ -477,21 +558,26 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         with self.in_owner(protected):
             body = self.control_block(node)
         with self.in_owner(cleanup):
-            entry = self.control_block(node, extra_types=(ProtocolValueType(P.PENDING_COMPLETION),))
-        self.cleanup_interfaces.append(CleanupInterface(cleanup, protected, entry.block, self.block_arguments[entry.block][-2]))
+            entry = self.control_block(node, extra_types=(ProtocolValueType(P.PENDING_COMPLETION),_REF))
+        self.cleanup_interfaces.append(CleanupInterface(cleanup, protected, entry.block, self.block_arguments[entry.block][-3]))
         self.jump_values(cursor, body, (), node)
         ports = []
         def failed(failure, payload):
             port = self.raise_landing(node); ports.append(port)
             token = self.pending(failure, node, port, self.packet(failure, node, payload))
-            self.route_to_cleanup(failure, node, token, port, entry)
+            self.route_to_cleanup(failure, node, token, port, entry,(payload.exception,))
+        def protected_completed(completed,source,kind,value):
+            port=self.completion_port(source,kind);ports.append(port)
+            token=self.pending(completed,source,port)
+            anchor=value if kind is L.RETURN else next(iter(self.environment_references.values()))
+            self.route_to_cleanup(completed,node,token,port,entry,(anchor,))
         self.try_depth += 1
         with self.in_owner(protected):
-            self.failure_sinks.append(failed)
+            self.failure_sinks.append(failed);self.completion_sinks.append((protected_completed,len(self.loop_stack)))
             try:
                 normal = self.statements(node.body, body)
             finally:
-                self.failure_sinks.pop()
+                self.completion_sinks.pop();self.failure_sinks.pop()
         after = None
         if normal is not None:
             with self.in_owner(parent):
@@ -500,25 +586,34 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             self.control_ports.append(port); ports.append(port)
             with self.in_owner(protected):
                 token = self.pending(normal, node, port)
-                self.route_to_cleanup(normal, node, token, port, entry)
+                self.route_to_cleanup(normal, node, token, port, entry,(next(iter(self.environment_references.values())),))
         with self.in_owner(cleanup):
-            original, saved = self.enter_cleanup(entry, node, cleanup)
+            original, saved = self.enter_cleanup(entry, node, cleanup,trailing_references=1)
+            original_carrier=self.block_arguments[entry.block][-2]
             def replaced(failure, payload):
                 port = self.raise_landing(node)
                 token = self.pending(failure, node, port, self.packet(failure, node, payload))
                 self.cleanup_exit(failure, node, cleanup, original, token, saved, (port,))
-            self.failure_sinks.append(replaced)
+            def cleanup_completed(completed,source,kind,value):
+                port=self.completion_port(source,kind)
+                token=self.pending(completed,source,port)
+                self.cleanup_exit(completed,node,cleanup,original,token,saved,(port,),payload=value if kind is L.RETURN else None)
+            self.failure_sinks.append(replaced);self.completion_sinks.append((cleanup_completed,len(self.loop_stack)))
             try:
                 completed = self.statements(node.finalbody, entry)
             finally:
-                self.failure_sinks.pop(); self.try_depth -= 1
+                self.completion_sinks.pop();self.failure_sinks.pop();self.try_depth -= 1
             if completed is not None:
-                self.cleanup_exit(completed, node, cleanup, original, original, saved, tuple(ports), resume=True)
+                self.cleanup_exit(completed, node, cleanup, original, original, saved, tuple(ports), resume=True,payload=original_carrier)
         return after
 
     def statements(self, nodes, cursor):
         for node in nodes:
-            if cursor is not None and isinstance(node, ast.Try):
+            if (cursor is not None and isinstance(node,(ast.Break,ast.Continue)) and self.completion_sinks
+                    and len(self.loop_stack)<=self.completion_sinks[-1][1]):
+                kind=L.BREAK if isinstance(node,ast.Break)else L.CONTINUE
+                self.completion_sinks[-1][0](cursor,node,kind,None);cursor=None
+            elif cursor is not None and isinstance(node, ast.Try):
                 cursor = (self.try_except(node, cursor) if node.handlers else self.try_finally(node, cursor))
             else:
                 cursor = super().statements((node,), cursor)
