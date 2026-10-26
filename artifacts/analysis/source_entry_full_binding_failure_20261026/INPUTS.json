@@ -1,0 +1,118 @@
+{
+  "archive_declarations": [
+    {
+      "bytes": 42283,
+      "module_count": 20,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/manifest.json",
+      "sha256": "56355f7ef10d16d8ab4fb02a84988cf2f0070b75e4cd5fccbf1c86c1ea34170d",
+      "source_count": 20
+    },
+    {
+      "bytes": 9689,
+      "module_count": 4,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_dependency_gate_20261025/model/attempts/1792957279902353768-1410025/02-dependency-witness/archive/manifest.json",
+      "sha256": "8c16a942e037c6a3a5357043e291df521ba67a809ed5d3770c98d663b5057c71",
+      "source_count": 4
+    },
+    {
+      "bytes": 39492,
+      "module_count": 8,
+      "path": "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/lewm_archived_compiler_gate_20261026/result/archive/manifest.json",
+      "sha256": "d3c67c93ff2da74c3fd51bcbe235382dc09a7ca2f363b56edc158fc1004791b1",
+      "source_count": 8
+    },
+    {
+      "bytes": 438185,
+      "module_count": 94,
+      "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json",
+      "sha256": "33f6fdbc0765ec8787159ced5b1d4acda031e85aba16f77fe0eaab041bb26179",
+      "source_count": 94
+    }
+  ],
+  "archive_paths_from_manifest_catalog_inputs": [
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_partitioned_operand_routes_20261023/result/code-witnesses/manifest.json",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/model_run_dependency_gate_20261025/model/attempts/1792957279902353768-1410025/02-dependency-witness/archive/manifest.json",
+    "/home/zyf/AAA/scar-worktrees/source858-runtime/artifacts/experiments/lewm_archived_compiler_gate_20261026/result/archive/manifest.json",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_remaining_compiler_gate_20261026/result/archive/manifest.json"
+  ],
+  "binder_output": {
+    "binder_called": false,
+    "created": false,
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/analysis/source_entry_full_binding_20261026/actual"
+  },
+  "capture_scope_requested": {
+    "expected_entered_invocations": 100438,
+    "process_id": 272038,
+    "root": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023",
+    "same_capture": true,
+    "trace": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_lewm_dispatch_20261023/trace",
+    "trace_access_by_binder": false
+  },
+  "catalog_admissions": [
+    {
+      "format": "scar.source-attachments-input.v1",
+      "parent": {
+        "schema": "scar.dependency-source-admissions",
+        "sha256": "fc97075aa66a92758938ad8416347d895e6b18ef0e454053fc7f9c1a7d2f0424",
+        "size_bytes": 1520506,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_sources_20261023/result/admissions.json"
+      },
+      "report": {
+        "schema": "scar.dependency-source-continuation",
+        "sha256": "c9ff2f87a0e90ee42297501d256d9d24aeeab60273c6172fe692c0323207173e",
+        "size_bytes": 2026468,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/first_stage_dependency_continuation_20261023/result/continuation.json"
+      },
+      "source_file_count": 106,
+      "source_root_count": 3
+    }
+  ],
+  "catalog_project_composition": {
+    "decoded_bytes": 77635618,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+    "raw_bytes": 17109069,
+    "raw_sha256": "45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b"
+  },
+  "declared_source_program_payloads": {
+    "count": 196,
+    "decoded_bytes_sum": 4657917831,
+    "max_decoded_bytes": 114979987,
+    "note": "manifest declarations; the failed reader did not establish complete consumption",
+    "selected_decode_ceiling_bytes": 8000000000
+  },
+  "main_source_snapshot": {
+    "file_count": 414,
+    "full_source_copy_committed": false,
+    "git_head": "9d32b8d0ea7e74f571f1d894b742e307e32838fa",
+    "receipts_file": "SOURCE_SNAPSHOT_RECEIPTS.json",
+    "total_bytes": 8469996,
+    "tree_sha256": "d81c68a9cfd43d974711691eaa040aee91758a8f6667cc69b3580b7adf7c9d25"
+  },
+  "parent_composition": {
+    "decoded_bytes": 77635618,
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/result/composition/index.json.gz",
+    "raw_bytes": 17109069,
+    "raw_sha256": "45569e930c3fe03a6d2cf4c26a93491c7ce9b496d25aab5fae09767deb91fe9b"
+  },
+  "publication": {
+    "declared_body_rows": 196,
+    "physical_bytes": 5505173,
+    "sha256": "a124d78bb5e50e4ff96d1af2858357651cb9eda13918c328fd753a3a4bd4650b",
+    "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/manifest.json"
+  },
+  "reader": {
+    "body_count_ceiling": 196,
+    "entrypoint": "CompositionIndex.from_source_entry_publication",
+    "expected_sha256": "a124d78bb5e50e4ff96d1af2858357651cb9eda13918c328fd753a3a4bd4650b",
+    "max_catalog_entries": 100000,
+    "max_catalog_groups": 100000,
+    "max_input_bytes": 256000000,
+    "max_operations_per_body": 100000,
+    "max_programs": 196,
+    "max_record_bytes": 128000000,
+    "max_selected_decode_bytes": 8000000000,
+    "ordinary_reader": "read_source_entry_publication",
+    "shared_source_fragment_batch_wall_seconds": 1800
+  },
+  "schema": "scar.source-entry-full-binding-attempt-inputs.v1"
+}
