@@ -1,0 +1,14 @@
+[
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/program_lowering.py",
+    "bytes": 87780,
+    "sha256": "9bf6d2391c5e94086586bd845ccf8d3cf0125f9b7f8b692a511663e7ffe49d35",
+    "baseline_sha256": "a07cccd468bf64e80c8e504af1a96cd556c26445244fe25daf0e0b8dc62178b2"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/store/source_fragments.py",
+    "bytes": 18029,
+    "sha256": "1a970ebf8e6e762e9a8884078da52b1c3c2d7b4dc3c449319c6bce60903fd5bb",
+    "baseline_sha256": null
+  }
+]

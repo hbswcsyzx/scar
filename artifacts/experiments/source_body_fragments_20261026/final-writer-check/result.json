@@ -1,0 +1,60 @@
+{
+  "status": "PASSED_CURRENT_WRITER_IDEMPOTENT_RECEIPT_CHECK",
+  "inputs": [
+    {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-01-source-program5.json.gz",
+        "sha256": "6d13b95d22473d1712ebcf2852f512f5fcef2b56902dd0de4369e244027bbcfc",
+        "size_bytes": 1602195,
+        "schema": "scar.source-program/5"
+      },
+      "decoded_sha256": "afc1809be2642fca9116e90b33178db23e7c75a6b7529485f54dd3fa406920d8",
+      "decoded_bytes": 14769551,
+      "representation": "gzip-canonical-json",
+      "pointer": "#",
+      "declaration": null
+    },
+    {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/source-call-model/artifacts/experiments/source_call_kwargs_bodies_20261025/candidate04/attempt04/body-02-source-program5.json.gz",
+        "sha256": "9487b7b432b9ab23cdb761e800125e5e3bdd704c9fd085f6565810841e6a5cab",
+        "size_bytes": 1701646,
+        "schema": "scar.source-program/5"
+      },
+      "decoded_sha256": "2473a003bc0bae268a282712ad2b4920916c0610dd02012631601d297c014be6",
+      "decoded_bytes": 15974502,
+      "representation": "gzip-canonical-json",
+      "pointer": "#",
+      "declaration": null
+    }
+  ],
+  "same_fragments": true,
+  "old_output_stats_unchanged": true,
+  "measurement": {
+    "stored_input_bytes": 6609139,
+    "decoded_input_bytes": 30744053,
+    "stored_output_bytes": 0,
+    "decoded_output_bytes": 0,
+    "existing_output_guard_bytes": 3305298,
+    "context_reads": 0,
+    "context_validations": 0,
+    "context_hash_guards": 0,
+    "body_reads": 0,
+    "elapsed_seconds": 3.5812282750266604
+  },
+  "elapsed_seconds": 3.5820534660015255,
+  "peak_self_rss_KiB": 162100,
+  "scope": "two original SP5 archive checks, no typed source/body replay or graph production; all existing outputs byte/stat stable",
+  "sources": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/store/source_fragments.py",
+      "bytes": 18029,
+      "sha256": "1a970ebf8e6e762e9a8884078da52b1c3c2d7b4dc3c449319c6bce60903fd5bb"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/program_lowering.py",
+      "bytes": 87780,
+      "sha256": "9bf6d2391c5e94086586bd845ccf8d3cf0125f9b7f8b692a511663e7ffe49d35"
+    }
+  ]
+}

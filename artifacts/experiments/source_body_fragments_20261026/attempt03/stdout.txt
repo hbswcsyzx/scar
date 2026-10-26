@@ -1,0 +1,11 @@
+{
+  "status": "PASSED_SOURCE_TRANSPORT_AND_STRUCTURE_ONLY",
+  "output_contexts": 1,
+  "output_bodies": 2,
+  "original_stored_bytes": 3303841,
+  "original_decoded_bytes": 30744053,
+  "output_stored_bytes": 1764916,
+  "output_decoded_bytes": 16639005,
+  "peak_self_rss_KiB": 306116,
+  "elapsed_seconds": 76.28894358203979
+}

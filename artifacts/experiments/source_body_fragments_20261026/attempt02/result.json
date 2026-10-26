@@ -1,0 +1,7 @@
+{
+  "status": "FAILED",
+  "target_exec": 0,
+  "source_lower": 0,
+  "error": "('private-context-mutation', 'structured loop source control must be independently well formed')",
+  "elapsed_seconds": 57.49698770703981
+}

@@ -1,0 +1,169 @@
+diff --git a/scar/analysis/program_lowering.py b/scar/analysis/program_lowering.py
+index 84768bd9..51adbe1a 100644
+--- a/scar/analysis/program_lowering.py
++++ b/scar/analysis/program_lowering.py
+@@ -208,6 +208,9 @@ class SourceProgram:
+                 "semantic": self.semantic.to_dict(), "semantics": self.semantics.to_dict(),
+                 "control": self.control.to_dict(), "summary": self.summary(),
+                 "runtime_target_verified": False, "transformation_authorized": False}
++        return self._function_document(include_context=True)
++
++    def _function_document(self, *, include_context):
+         if self.language is None:
+             reject_extended_protocols(self.structured)
+         elif self.profile is not BodyLoweringProfile.STRUCTURED_ENV:
+@@ -222,8 +225,9 @@ class SourceProgram:
+             "scope": "selected synchronous function bodies, conservative completion/effect model",
+             "metadata": encode(self.metadata),
+             "graph": json.loads(dump_graph(self.graph)) if self.graph is not None else None,
+-            "semantic": self.semantic.to_dict(), "semantics": self.semantics.to_dict(),
+-            "control": self.control.to_dict(),
++            "semantic": self.semantic.to_dict() if include_context else None,
++            "semantics": self.semantics.to_dict() if include_context else None,
++            "control": self.control.to_dict() if include_context else None,
+             "summary": self.summary(),
+             "runtime_target_verified": False, "transformation_authorized": False,
+         }
+@@ -234,11 +238,15 @@ class SourceProgram:
+             document["structured"] = encode(self.structured)
+         if self.language is not None:
+             document["language"] = encode(self.language)
++        if not include_context:
++            for name in ("semantic", "semantics", "control"):
++                del document[name]
+         return document
+ 
+     @classmethod
+     def from_dict(cls, document, *, max_operations=10000, language_options=None, verification="SOURCE_REPLAY",
+-                  source_texts: dict[str, str] | None = None, module_code_evidence=None):
++                  source_texts: dict[str, str] | None = None, module_code_evidence=None,
++                  _context_session=None, _context_reference=None):
+         from scar.ir.program.codec import loads as load_graph
+         from scar.ir.record_codec import decode
+         from scar.ir.semantics_v2 import SourceSemanticsGraph
+@@ -254,6 +262,14 @@ class SourceProgram:
+             raise ValueError("source program verification mode must be explicit")
+         _check_structure_source_texts(verification, source_texts)
+         version = document.get("schema_version")
++        if _context_session is not None or _context_reference is not None:
++            from scar.store.source_fragments import SourceContextSession, SourceContextReference
++            if (type(_context_session) is not SourceContextSession
++                    or type(_context_reference) is not SourceContextReference
++                    or type(version) is not int or version != 5 or verification != "STRUCTURE"
++                    or source_texts is not None or language_options is not None or module_code_evidence is not None):
++                raise ValueError("source fragments require a live typed context session and explicit SP5 STRUCTURE")
++            expected_fields -= {"semantic", "semantics", "control"}
+         if type(version) is int and version == 8:
+             from scar.ir.program.module_entries import decode_frame_body
+             if (set(document) != expected_fields | {'entry_kind','profile','module'}
+@@ -363,19 +379,49 @@ class SourceProgram:
+             if language_options is not None:
+                 raise ValueError("historical source wrapper cannot accept extended language inputs")
+         metadata = decode(LoweringMetadata, document["metadata"])
+-        semantic = semantic_from_dict(document["semantic"])
+-        semantics = SourceSemanticsGraph.from_dict(document["semantics"], semantic)
+-        control = SourceControlFlowGraph.from_dict(document["control"])
++        if _context_session is None:
++            semantic = semantic_from_dict(document["semantic"])
++            semantics = SourceSemanticsGraph.from_dict(document["semantics"], semantic)
++            control = SourceControlFlowGraph.from_dict(document["control"])
++        else:
++            owned = _context_session._context(_context_reference)
++            semantic, semantics, control = owned.semantic, owned.semantics, owned.control
+         graph = load_graph(_canonical(document["graph"])) if document["graph"] is not None else None
+         result = cls(graph, metadata, semantic, semantics, control, profile, interface, frame, structured, language)
+-        if _canonical(result.to_dict()) != _canonical(document):
++        actual = (result.to_dict() if _context_session is None else
++                  result._function_document(include_context=False))
++        if _canonical(actual) != _canonical(document):
+             raise ValueError("source program scope/status/authority or canonical fields differ")
+         checked = validate_source_program(result, max_operations=max_operations, language_options=language_options,
+-                                          verification=verification, source_texts=source_texts)
++            verification=verification, source_texts=source_texts,
++            _context_session=_context_session, _context_reference=_context_reference)
+         if not checked["valid"]:
+             raise ValueError("; ".join(checked["errors"]))
++        if _context_session is not None:
++            _context_session._claim(result, _context_reference)
++            # Never export the private mutable context through SourceProgram.
++            return LoweredSourceBody(result.graph, result.metadata,
++                len(result.graph.operations) if result.graph is not None else 0,
++                result.interface, result.frame, result.structured, result.language)
+         return result
+ 
++    @classmethod
++    def read_structure_fragment(cls, body_document, *, context_session, context, max_operations=10000):
++        """Read an SP5 body through a live private context; return body only.
++
++        Context source/CFG checks are session-local. Ordinary core, language,
++        structured and source correspondence checks remain on each body.
++        No shared mutable context, runtime or compiler proof is returned.
++        """
++        if type(max_operations) is not int or max_operations < 1:
++            raise ValueError("source fragment operation budget must be positive")
++        graph = body_document.get("graph") if type(body_document) is dict else None
++        if type(graph) is dict and (type(graph.get("operations")) is not list
++                                   or len(graph["operations"]) > max_operations):
++            raise ValueError("source fragment operation budget exceeded")
++        return cls.from_dict(body_document, max_operations=max_operations, verification="STRUCTURE",
++                             _context_session=context_session, _context_reference=context)
++
+     @classmethod
+     def read_structure(cls, document, *, max_operations=10000, source_texts: dict[str, str] | None = None,
+                        module_code_evidence=None):
+@@ -1266,7 +1312,7 @@ def _check_structure_source_texts(verification, source_texts):
+ 
+ def validate_source_program(result: SourceProgram, *, max_operations: int = 10000, language_options=None,
+                             verification="SOURCE_REPLAY", source_texts: dict[str, str] | None = None,
+-                            module_code_evidence=None):
++                            module_code_evidence=None, _context_session=None, _context_reference=None):
+     """Rebuild from current source; reported provenance cannot raise this budget."""
+     try:
+         if type(result) is not SourceProgram:
+@@ -1275,6 +1321,8 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
+             raise ValueError("source verification mode differs")
+         _check_structure_source_texts(verification, source_texts)
+         if result.module is not None:
++            if _context_session is not None or _context_reference is not None:
++                raise ValueError("module source context sharing is unsupported")
+             if verification != "STRUCTURE" or language_options is not None:
+                 raise ValueError("v6 mapping verification requires explicit retained STRUCTURE inputs")
+             from scar.analysis.source_module_validation import module_validation_report
+@@ -1283,6 +1331,13 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
+         if module_code_evidence is not None:
+             raise ValueError("module evidence cannot alter function validation")
+         structural_only = verification == "STRUCTURE"
++        if _context_session is not None or _context_reference is not None:
++            from scar.store.source_fragments import SourceContextSession, SourceContextReference
++            if (not structural_only or type(_context_session) is not SourceContextSession
++                    or type(_context_reference) is not SourceContextReference):
++                raise ValueError("source context reuse requires a live exact STRUCTURE session")
++            # Reject stale private IR before any body checker consumes it.
++            _context_session._claim(result, _context_reference)
+         if structural_only and result.language is None:
+             raise ValueError("historical source replay policy is unchanged")
+         if result.language is not None:
+@@ -1327,14 +1382,15 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
+         errors = record_errors(result.metadata, LoweringMetadata, "metadata")
+         if errors:
+             return {"valid": False, "errors": errors}
+-        result.semantic.assert_valid()
+-        source_check = validate_source_semantics(result.semantics, result.semantic, sources=source_texts)
+-        if not source_check["valid"]:
+-            return source_check
+-        control_check = validate_source_control_flow(result.control, result.semantic, result.semantics,
+-                                                      sources=source_texts)
+-        if not control_check["valid"]:
+-            return control_check
++        if _context_session is None and _context_reference is None:
++            result.semantic.assert_valid()
++            source_check = validate_source_semantics(result.semantics, result.semantic, sources=source_texts)
++            if not source_check["valid"]:
++                return source_check
++            control_check = validate_source_control_flow(result.control, result.semantic, result.semantics,
++                                                          sources=source_texts)
++            if not control_check["valid"]:
++                return control_check
+         if result.graph is not None:
+             require_valid(result.graph)
+             ops = {op.id: op for op in result.graph.operations}

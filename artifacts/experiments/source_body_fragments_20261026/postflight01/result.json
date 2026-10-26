@@ -1,0 +1,48 @@
+{
+  "status": "PASSED_ORIGINAL_RECEIPT_AND_NORMAL_READER",
+  "artifact": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_body_fragments_20261026/attempt03/store/bodies/167c30e230e9775975ce4b97095b7e7b671d33b8ae21c5701e57cae4463c2ebf.json.gz",
+      "sha256": "4f3ee42171a1a6c45cb5eb8faa0442851f613433ee67e87cc144ed00458c2a99",
+      "size_bytes": 162209,
+      "schema": "scar.source-body-fragment/1"
+    },
+    "decoded_sha256": "167c30e230e9775975ce4b97095b7e7b671d33b8ae21c5701e57cae4463c2ebf",
+    "decoded_bytes": 1867126,
+    "representation": "gzip-canonical-json",
+    "pointer": "#",
+    "declaration": null
+  },
+  "operations": 217,
+  "negative_original_receipt": "source fragment original decoded receipt differs",
+  "session": {
+    "stored_input_bytes": 1864767,
+    "decoded_input_bytes": 17843956,
+    "stored_output_bytes": 0,
+    "decoded_output_bytes": 0,
+    "existing_output_guard_bytes": 0,
+    "context_reads": 1,
+    "context_validations": 1,
+    "context_hash_guards": 4,
+    "body_reads": 1,
+    "elapsed_seconds": 23.697916620993055
+  },
+  "original_SP5_payloads_read": 0,
+  "source_lower": 0,
+  "target_exec": 0,
+  "peak_self_rss_KiB": 203052,
+  "elapsed_seconds": 23.71005385799799,
+  "sources": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/store/source_fragments.py",
+      "bytes": 18029,
+      "sha256": "1a970ebf8e6e762e9a8884078da52b1c3c2d7b4dc3c449319c6bce60903fd5bb"
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/program_lowering.py",
+      "bytes": 87780,
+      "sha256": "9bf6d2391c5e94086586bd845ccf8d3cf0125f9b7f8b692a511663e7ffe49d35"
+    }
+  ],
+  "scope": "original canonical UTF8 or exact same bytes plus LF checked by decoded size/SHA; prior source/runtime limits remain"
+}

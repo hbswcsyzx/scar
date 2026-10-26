@@ -1,0 +1,28 @@
+[
+  {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_body_fragments_20261026/attempt02/store/bodies/8a587904290bab642e23f9a93dd2741c2c03d2b7da54c671367fb36bacc6d6aa.json.gz",
+      "sha256": "d45f228ac8feded30d4b6d65243464836eb39d9fa2aea0b3501835485a452f1c",
+      "size_bytes": 62325,
+      "schema": "scar.source-body-fragment/1"
+    },
+    "decoded_sha256": "8a587904290bab642e23f9a93dd2741c2c03d2b7da54c671367fb36bacc6d6aa",
+    "decoded_bytes": 662175,
+    "representation": "gzip-canonical-json",
+    "pointer": "#",
+    "declaration": null
+  },
+  {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_body_fragments_20261026/attempt02/store/bodies/9127e45bb75f388f065f20b1469917d275d5b2c161dacd44573d713e9c430821.json.gz",
+      "sha256": "cff92e07858a66d206b4dbfbacb206b0706ab9398dbd854dc76189be5c7e77d0",
+      "size_bytes": 162209,
+      "schema": "scar.source-body-fragment/1"
+    },
+    "decoded_sha256": "9127e45bb75f388f065f20b1469917d275d5b2c161dacd44573d713e9c430821",
+    "decoded_bytes": 1867126,
+    "representation": "gzip-canonical-json",
+    "pointer": "#",
+    "declaration": null
+  }
+]
