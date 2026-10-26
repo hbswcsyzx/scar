@@ -32,7 +32,7 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
     roots = [r for r in graph.control_scopes if r.parent is None]
     need(len(roots) == 1 and roots[0].kind is S.FUNCTION and roots[0].source == model.source,
          'exact original function control root required')
-    need(all(r.region == graph.root and r.kind in (S.FUNCTION, S.BLOCK, S.CLEANUP) for r in scopes.values()),
+    need(all(r.region == graph.root and r.kind in (S.FUNCTION, S.BLOCK, S.CLEANUP, S.LOOP) for r in scopes.values()),
          'only this function local control scopes are implemented')
     state = ValueType(ValueKind.STATE, location=values[interface.world].location)
     ref = ValueType(ValueKind.REFERENCE)
@@ -234,6 +234,50 @@ def validate_function_try_protocols(model, graph, interface, metadata, semantic,
                          and any((a, c) <= (source.start_line, source.start_column)
                              and (source.end_line, source.end_column) <= (b, d) for a, b, c, d in spans),
                          'protected/cleanup operation came from another source suite')
+    # Source Return may use an internal FALLTHROUGH continuation so canonical
+    # C1 route/dispatch-only blocks remain unchanged. Its real reference must
+    # reach the frame-closing ordinary RETURN landing through actual SSA Uses.
+    incoming = {block:[] for block in blocks}
+    for op in graph.operations:
+        for edge in getattr(op.terminator,'successors',()):
+            incoming[edge.block].append((op,edge))
+    value_sources = {}
+    for row in metadata.value_links:value_sources.setdefault(row.value,[]).append(row.source)
+    for pending in graph.pending_completions:
+        constructor=operations[values[pending.value].origin.operation]
+        source=links[constructor.id].source
+        if semantic.source_atoms[source.atom_id].kind!='Return':continue
+        node=node_for(source,ast.Return)
+        port=next(p for p in graph.control_ports if p.id==pending.port)
+        from scar.ir.program.control import LanguageCompletionKind
+        need(port.kind is LanguageCompletionKind.FALLTHROUGH and port.scope==roots[0].id
+             and port.block is not None and pending.payload is None,
+             'source Return needs its exact internal post-cleanup continuation')
+        target=blocks[port.block];last=operations[target.operations[-1]]
+        need(last.terminator.kind is TerminatorKind.RETURN and links[last.id].source==source,
+             'source Return continuation does not actually close/return')
+        returned=uses[last.terminator.values[0]].value
+        expected_node=node.value if node.value is not None else node
+        expected_span=(expected_node.lineno,expected_node.end_lineno,expected_node.col_offset,expected_node.end_col_offset)
+        todo=[returned];seen=set();leaves=0
+        while todo:
+            value=todo.pop()
+            if value in seen:continue
+            seen.add(value);record=values[value]
+            exact=[r for r in value_sources.get(value,())if (r.start_line,r.end_line,r.start_column,r.end_column)==expected_span]
+            if exact:
+                if node.value is None:
+                    from scar.ir.program.model import LiteralOrigin
+                    need(type(record.origin)is LiteralOrigin and record.origin.value is None,'empty return changed None')
+                leaves+=1;continue
+            need(type(record.origin)is BlockArgument,'return carrier did not originate at its exact source expression')
+            for operation,edge in incoming[record.origin.block]:
+                if hasattr(edge,'port') and edge.port!=port.id:continue
+                operand=edge.arguments[record.origin.index]
+                own={u.id:u for u in operation.uses}
+                need(operand in own,'return carrier cannot be reconstructed from a guessed completion payload')
+                todo.append(own[operand].value)
+        need(leaves>0,'return carrier has no original expression leaf')
     for block in blocks.values():
         if not block.operations:
             continue

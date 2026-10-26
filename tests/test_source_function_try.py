@@ -59,9 +59,8 @@ class FunctionTryChecks(unittest.TestCase):
         with TemporaryDirectory() as directory:
             crossing, _ = self.lower(directory,
                 'def f(x):\n    try:\n        return x\n    finally:\n        x.closed = False\n')
-            self.assertIsNone(crossing.graph)
-            self.assertIn('FUNCTION_TRY_NONLOCAL_TRANSFER_OR_NESTED_UNIMPLEMENTED',
-                          '\n'.join(g.detail for g in crossing.metadata.gaps))
+            self.assertIsNotNone(crossing.graph)
+            SourceProgram.read_structure(crossing.to_dict(), source_texts={str(Path(directory) / "ordinary.py"): 'def f(x):\n    try:\n        return x\n    finally:\n        x.closed = False\n'})
             missing_expression, _ = self.lower(directory,
                 'def f(x, action):\n    try:\n        action(x)\n    except Exception:\n        action(x)\n    return x\n')
             self.assertIsNotNone(missing_expression.graph)
