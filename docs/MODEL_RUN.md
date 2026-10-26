@@ -214,3 +214,33 @@ python -B -m scar.cli bind-source-invocations \
 继续约束原始调用/采集读取。`--max-source-context-seconds`是单file的共享source IO/
 body验证上限，不能当作整个模型或前置catalog的总wall期限。超限报告失败，不截断函数或调用后报告完整。
 该CLI接线已实现；完整LeWM实际读取/绑定结果须以相应运行报告为准。
+
+
+## 按原 Tensor 观察查询物理存储
+
+```bash
+python -B -m scar.cli index-tensor-storage \
+  --selection artifacts-selection.json --sha256 SELECTION_SHA256 \
+  --out fresh-storage-index
+
+python -B -m scar.cli query-tensor-storage \
+  --index fresh-storage-index/manifest.json --sha256 INDEX_SHA256 \
+  --source-fact original-object-storage-reference.json --out fresh-query.json
+```
+
+selection 只有 `bundle`、`capture_model`、`eto_source` 三份原始 artifact 收据，
+每份含 `uri`、`sha256`、`size_bytes`、`schema`。ETO 收据指定原始命名空间，
+此索引不重新读取 EO 原件。SourceFact 请求含 `artifact` 收据和原 `locator`，
+必须指向同 bundle 的 OBJECT→USES_STORAGE→StorageRegion 边。
+可以改用 `--region` 原 region ID；两个 selector 都省略时，机械选首个 CUDA
+观察提示，再校验原始记录。请求仅是查询条件，不产生对象或内容同一性的证明。
+
+索引只存原 ID、行号与 chunk 位置；查询按需读取并核对原对象、marker、descriptor、
+view 和 allocation，不复制图记录、不保存 Tensor 内容。实际 LeWM CLI 查询通过，
+局部查询约 1.00s、包含 Python 启动的命令约 2.56s。原引用索引一次构建约 73.73s，
+压缩分片 7,363,611B + manifest 499,687B；构建 API 已实跑，新增构建 CLI 接线未另做
+重复整批构建。见 [CLI 实际结果](../artifacts/analysis/tensor_storage_cli_20261026/RESULT.json)
+和 [原索引报告](../artifacts/experiments/tensor_gpu_reference_query_20261026/REPORT.md)。
+
+这些是原观察点的物理关系，不证明不同操作点之间内容未变、logical version、
+持久驻留、Materialization 或 ready；source context 也不提升为 direct-call 关系。

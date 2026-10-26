@@ -1,0 +1,45 @@
+{
+  "status": "PASS_ORIGINAL_LEWM_CUDA_STORAGE_QUERY",
+  "index": {
+    "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/tensor_gpu_reference_query_20261026/locator-index/manifest.json",
+    "sha256": "d127c95a2ff1b1d848288c83ef3cb3785f55f0f2c68d0918f3ef7d280b1de7c2",
+    "size_bytes": 499687,
+    "schema": "scar.tensor-storage-locator-index"
+  },
+  "query_measurements": {
+    "stored_bytes": 15424194,
+    "decoded_bytes": 142017818,
+    "total_bytes": 157442012,
+    "elapsed_seconds": 1.0575752170407213
+  },
+  "device": "cuda:0",
+  "shape": [
+    192,
+    3,
+    14,
+    14
+  ],
+  "allocation_bytes": 451584,
+  "run": {
+    "id": {
+      "kind": "exec_run",
+      "value": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3",
+      "wire": "exec_run:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3"
+    },
+    "source": {
+      "artifact": {
+        "schema": "strace.syscalls.text.v1",
+        "sha256": "22b921069ae83ca3600bae64931112c55c0c0ca5c55d44135de9b4d04d81f788",
+        "size_bytes": 179220927,
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/lewm_joint_capture_20261026/capture/os/syscalls.1578961"
+      },
+      "locator": "#/lines/1"
+    }
+  },
+  "materialization": null,
+  "new_value_nodes": 0,
+  "new_capture_target_or_EO_import": 0,
+  "elapsed_seconds": 1.0705012810067274,
+  "self_maxrss_kib": 139300
+}
+

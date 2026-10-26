@@ -1,0 +1,3 @@
+{"phase": "reference-index", "elapsed_s": 20.00553739303723}
+{"phase": "reference-index", "elapsed_s": 40.03516792599112}
+{"phase": "reference-index", "elapsed_s": 60.04551036201883}

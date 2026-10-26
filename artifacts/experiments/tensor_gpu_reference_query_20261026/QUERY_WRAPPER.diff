@@ -1,0 +1,47 @@
+--- a/scar/analysis/tensor_storage_query.py
++++ b/scar/analysis/tensor_storage_query.py
+@@ -142,7 +142,7 @@
+                 return record,ProviderFactReference(artifact,f"#/lines/{row['locator']['line']}/record")
+     raise KeyError('original '+table+' record is absent: '+wire)
+ 
+-def query_tensor_storage_observation(value_fragment: ProviderArtifact, capture_model: ProviderArtifact, *,
++def _query_tensor_storage_observation_legacy(value_fragment: ProviderArtifact, capture_model: ProviderArtifact, *,
+                                      candidate_index=0,max_input_bytes=512_000_000,max_seconds=180):
+     """Resolve one original physical candidate at its exact marker endpoint.
+ 
+@@ -240,3 +240,35 @@
+         'evidence_kind':'INFERRED_FIXED_COLLECTOR_SAME_HELD_TENSOR',
+         'open':['actual-op storage binding at a different point','logical content/version identity','actual mutation and foreign writes','allocation bounds when no birth receipt','ready/completion and persistent object lifetime'],
+         'measurements':meter.finish()}
++
++
++def query_tensor_storage_observation(value_fragment: ProviderArtifact, capture_model: ProviderArtifact, *,
++                                     candidate_index=0,max_input_bytes=512_000_000,max_seconds=180,reference_index=None):
++    """Legacy query, or normal indexed original-edge query when explicitly selected."""
++    if reference_index is None:
++        return _query_tensor_storage_observation_legacy(value_fragment,capture_model,candidate_index=candidate_index,
++            max_input_bytes=max_input_bytes,max_seconds=max_seconds)
++    started=time.monotonic()
++    _need(type(value_fragment) is ProviderArtifact and Path(value_fragment.uri).is_absolute()
++          and Path(value_fragment.uri).stat().st_size==value_fragment.size_bytes,'exact original value fragment required')
++    fragment,_=read_native_operator_value_fragment(value_fragment.uri,expected_sha256=value_fragment.sha256)
++    _need(type(candidate_index) is int and 0<=candidate_index<len(fragment.physical_candidates),'original physical candidate absent')
++    candidate=fragment.physical_candidates[candidate_index]
++    from scar.analysis.tensor_storage_index import query_tensor_storage_source
++    result=query_tensor_storage_source(reference_index,region_id=candidate.storage_region_id,
++        max_input_bytes=max_input_bytes-2*value_fragment.size_bytes,max_seconds=max_seconds)
++    _need(result['capture_model']==encode(capture_model) and result['bundle']==encode(fragment.bundle_manifest)
++          and result['object']['id']['wire']==candidate.object_reference
++          and result['allocation']['id']['wire']==candidate.allocation_id
++          and result['marker']['id']['wire']==candidate.marker_instance_id
++          and result['marker_slot']['provider_reference']==candidate.provider_reference,
++          'original candidate identifiers differ from the normal evidence association')
++    _need(time.monotonic()-started<=max_seconds,'whole indexed wrapper wall budget exceeded')
++    result['origin_candidate']=encode(ProviderFactReference(value_fragment,f'#/fragment/physical_candidates/{candidate_index}'))
++    result['candidate_report_source_not_redecoded']=encode(candidate.association)
++    result['actual_operator_candidates']=[{'value_fragment':encode(value_fragment),'bundle':encode(fragment.bundle_manifest),
++        'interface':encode(i.instance),'port':encode(port),'qualification':'PROVIDER_REFERENCE_CANDIDATE_ONLY'}
++        for i in fragment.interfaces for port in i.inputs+i.outputs if port.provider_reference==candidate.provider_reference]
++    counts=result['measurements'];counts['stored_bytes']+=value_fragment.size_bytes;counts['decoded_bytes']+=value_fragment.size_bytes
++    counts['total_bytes']+=2*value_fragment.size_bytes;counts['elapsed_seconds']=time.monotonic()-started
++    return result

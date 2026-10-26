@@ -1,5 +1,9 @@
 # 程序图的核心节点、连接与化简目标
 
+2026-10-26：本页的四类核心是早期控制/数据投影。当前完整结构实体为
+Operation、Value、StateLocation、Region、Resource 五类，类型与关系以
+[PROGRAM_TYPES.md](PROGRAM_TYPES.md)和[WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)为准。
+
 2026-10-16 修订：完整模型的当前规范为
 [WHOLE_PROGRAM_MODEL.md](WHOLE_PROGRAM_MODEL.md)。**Resource 是完整模型的独立
 实体**，含静态 requirement/definition 与动态 instance；下文四类是现有有限

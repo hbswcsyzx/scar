@@ -1,0 +1,40 @@
+{
+  "original_handle": 45260,
+  "original_exit_code": 1,
+  "original_elapsed_seconds": 74.10826191602973,
+  "original_reason": "index complete; generic record codec cannot decode EvidenceEndpoint Identifier union",
+  "index_input_measurements": {
+    "decoded_bytes": 1866709412,
+    "elapsed_seconds": 73.73478971101576,
+    "stored_bytes": 72596816,
+    "total_bytes": 1939306228
+  },
+  "final_handle": 31987,
+  "final_exit_code": 0,
+  "final_elapsed_seconds": 1.0705012810067274,
+  "query_measurements": {
+    "stored_bytes": 15424194,
+    "decoded_bytes": 142017818,
+    "total_bytes": 157442012,
+    "elapsed_seconds": 1.0575752170407213
+  },
+  "index": {
+    "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/tensor_gpu_reference_query_20261026/locator-index/manifest.json",
+    "sha256": "d127c95a2ff1b1d848288c83ef3cb3785f55f0f2c68d0918f3ef7d280b1de7c2",
+    "size_bytes": 499687,
+    "schema": "scar.tensor-storage-locator-index"
+  },
+  "source_fact": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/edges/000061.jsonl.gz",
+      "sha256": "a5ef78feb630e7bc5729bb025503284fefc19d6cfadb9bce36cab4444badc3a3",
+      "size_bytes": 466221,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/7158/record"
+  },
+  "new_value_nodes": 0,
+  "new_materializations": 0,
+  "new_capture_or_target": 0,
+  "EO_raw_read": false
+}
