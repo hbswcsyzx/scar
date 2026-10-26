@@ -16,7 +16,7 @@ from scar.trace.code_snapshot import describe_code, site
 
 class CallEdgeRecorder:
     def __init__(self, out, project_root, *, max_events=100000, max_bytes=64000000,
-                 max_codes=4096, max_values=64, max_path=16, max_references=8192):
+                 max_codes=4096, max_values=64, max_path=16, max_references=8192, lean_plan=None):
         limits = dict(max_events=max_events,max_bytes=max_bytes,max_codes=max_codes,
                       max_values=max_values,max_path=max_path,max_references=max_references)
         if any(type(v) is not int or v < 1 for v in limits.values()):
@@ -27,6 +27,14 @@ class CallEdgeRecorder:
         self.root_prefix = self.root.rstrip(os.sep)+os.sep
         self.observer_files = {CallEdgeRecorder.profile.__code__.co_filename,describe_code.__code__.co_filename}
         self.pid = os.getpid()
+        self.lean_plan = lean_plan
+        self.lean_plan_artifact = None
+        if lean_plan is not None:
+            from scar.trace.lean_capture import LeanCapturePlan
+            if (type(lean_plan) is not LeanCapturePlan or lean_plan.namespace_root != self.root
+                    or len(lean_plan.bodies)>max_codes):
+                raise ValueError('lean capture needs its exact typed namespace plan')
+            self.lean_plan_artifact = lean_plan.publish(self.out, self.pid)
         self.limits = limits
         self.lock = threading.RLock()
         self.active, self.codes, self.references = {}, set(), {}
@@ -59,6 +67,13 @@ class CallEdgeRecorder:
         return os.path.isabs(filename) and (filename == self.root or filename.startswith(self.root_prefix))
 
     def _observe_entry(self, frame):
+        if self.lean_plan is not None:
+            # Rooted planned activations keep thin real ancestry. Seen target
+            # code alone never expands its implementation or monitoring mask.
+            parent = frame.f_back
+            return (self.lean_plan.candidate(frame.f_code) is not None or
+                    parent is not None and (threading.get_ident(), id(parent)) in self.active
+                    and self.lean_plan.match(parent.f_code) is not None)
         if self._inside(frame) or self._inside(frame.f_back):
             return True
         observer = self.operand_observer
@@ -224,9 +239,13 @@ class CallEdgeRecorder:
                     invocation = self.invocation
                     thread = threading.get_ident()
                     code = self._code(frame.f_code)
-                    names = describe_code(frame.f_code)['parameters']
                     seen = {}
-                    parameters, complete = self._bindings(frame.f_locals,seen,names)
+                    targets = getattr(self.operand_observer, 'python_targets', None)
+                    detailed = (self.lean_plan is None or self.lean_plan.match(frame.f_code) is not None
+                                or targets is not None and targets.accepts_frame(frame))
+                    names = describe_code(frame.f_code)['parameters'] if detailed else ()
+                    parameters, complete = (self._bindings(frame.f_locals,seen,names)
+                                            if detailed else ([],False))
                     direct = self.active.get((thread,id(caller))) if caller is not None else None
                     path, ancestor, walker, path_failed = [], None, caller, False
                     while walker is not None and len(path) < self.limits['max_path']:
@@ -242,7 +261,8 @@ class CallEdgeRecorder:
                             break
                         walker = walker.f_back
                     path_complete = not path_failed and (walker is None or ancestor is not None)
-                    caller_locals, locals_complete = self._bindings(caller.f_locals,seen) if caller is not None else ([],True)
+                    caller_locals, locals_complete = (([],False) if self.lean_plan is not None else
+                        self._bindings(caller.f_locals,seen) if caller is not None else ([],True))
                     suspended = bool(frame.f_code.co_flags & (0x20|0x80|0x200))
                     row = dict(index=self.index,kind='call_enter',process_id=self.pid,thread_id=thread,
                         invocation_id=invocation,code=code,parameters=parameters,parameters_complete=complete,
@@ -271,7 +291,7 @@ class CallEdgeRecorder:
                                   if position['opname'] in ('RETURN_VALUE','RETURN_CONST') else 'UNKNOWN')
                     seen = {}
                     returned = self._reference(arg,seen)
-                    values,complete = self._bindings(frame.f_locals,seen)
+                    values,complete = (([],False) if self.lean_plan is not None else self._bindings(frame.f_locals,seen))
                     row = dict(index=self.index,kind='call_exit',process_id=self.pid,thread_id=thread,
                         invocation_id=invocation,code=code,return_site=position,completion=completion,
                         return_ref=returned,locals=values,locals_complete=complete)
@@ -305,16 +325,24 @@ class CallEdgeRecorder:
                 wall_ns=time.perf_counter_ns()-self.started,
                 scope='initial process and newly profiled threads; native calls/child processes/existing threads not complete',
                 reference_contents_observed=False,callable_environment_established=False)
+            if self.lean_plan is not None:
+                from scar.ir.record_codec import encode
+                from scar.trace.lean_capture import PROFILE
+                metadata.update(capture_profile=PROFILE, capture_plan=encode(self.lean_plan_artifact),
+                    unplanned_bodies_expanded=False,
+                    scope=PROFILE + ': planned roots/direct thin boundaries; unplanned interiors/imports unexpanded')
             (self.out/f"call-meta.{self.pid}.json").write_text(json.dumps(metadata,indent=2)+'\n')
+            if self.lean_plan is not None:
+                self.lean_plan.clear_runtime_cache()
 
 
-def install(out, project_root):
+def install(out, project_root, *, lean_plan=None):
     owner = os.environ.get('SCAR_CALL_TRACE_OWNER_PID')
     if owner is not None and owner != str(os.getpid()):
         return None
     recorder = CallEdgeRecorder(out,project_root,
         max_events=int(os.environ.get('SCAR_CALL_MAX_EVENTS',100000)),
-        max_bytes=int(os.environ.get('SCAR_CALL_MAX_BYTES',64000000)))
+        max_bytes=int(os.environ.get('SCAR_CALL_MAX_BYTES',64000000)), lean_plan=lean_plan)
     os.environ['SCAR_CALL_TRACE_OWNER_PID'] = str(os.getpid())
     recorder.collector_witness = None
     if os.environ.get('SCAR_COLLECTOR_EXECUTION_WITNESS') == '1':

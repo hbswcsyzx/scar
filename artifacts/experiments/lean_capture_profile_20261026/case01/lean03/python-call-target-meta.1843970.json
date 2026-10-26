@@ -1,0 +1,72 @@
+{
+  "schema": "scar.python-call-target-collection",
+  "schema_version": 2,
+  "capabilities": [
+    "PYTHON_CALL_TARGETS_V2",
+    "OBSERVED_PYTHON_CALLEE_SCOPE_V1"
+  ],
+  "process_id": 1843970,
+  "project_root": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/project",
+  "scope_policy": "OBSERVED_EXACT_PYTHON_CALLEES_V1",
+  "budget": {
+    "max_records": 10000,
+    "max_bytes": 8000000,
+    "max_selected_codes": 4096
+  },
+  "counts": {
+    "TARGET": 7,
+    "ENTRY": 1,
+    "GAP": 0
+  },
+  "stopped": false,
+  "file": {
+    "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/python-call-targets.1843970.jsonl",
+    "bytes": 3560,
+    "sha256": "5c0dabe8f0a768628c17b430d89b98b06ad17dd4cfe98b30de20407b76858152",
+    "rows": 8
+  },
+  "legacy_inputs": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/call-codes.1843970.jsonl",
+      "family": "codes",
+      "process_id": 1843970,
+      "raw_sha256": "99d1be7d15e83d389007b6691365e79f810cc4cbacedbc2f413d84b21abe17f9",
+      "raw_bytes": 2097,
+      "lines": 7
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/call-events.1843970.jsonl",
+      "family": "events",
+      "process_id": 1843970,
+      "raw_sha256": "b922067f5b424f9f253e2372977609181f57c86319974f1231e395f7a50a3527",
+      "raw_bytes": 11433,
+      "lines": 20
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/call-meta.1843970.json",
+      "family": "meta",
+      "process_id": 1843970,
+      "raw_sha256": "bbd48c4c946fe6df8a1719e81c6f2acf73a1d55ed4378455ed69b3e57f222f44",
+      "raw_bytes": 1424,
+      "lines": 42
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/call-operands.1843970.jsonl",
+      "family": "operands",
+      "process_id": 1843970,
+      "raw_sha256": "6eae402d463c695b391714e82ec54ae1e96ec7682c2c8a40ddbe83fee9242bbc",
+      "raw_bytes": 4731,
+      "lines": 13
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/call-operand-meta.1843970.json",
+      "family": "operand-meta",
+      "process_id": 1843970,
+      "raw_sha256": "71538871f0eb366e26a3aadb9e0ad5c46a526f48858c678a6f9f119547fd949c",
+      "raw_bytes": 2007,
+      "lines": 58
+    }
+  ],
+  "receiver_is_separate_from_monitoring_arg0": true,
+  "contents_state_ready_or_complete_program_established": false
+}

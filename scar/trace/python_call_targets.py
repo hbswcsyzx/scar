@@ -101,7 +101,12 @@ class PythonTargetObserver:
     def accepts_frame(self,frame):return self.pending_for(frame) is not None
     def on_frame_enter(self,frame):
         pending=self.pending_for(frame)
-        if pending is None:return False
+        if pending is None:
+            if self.operand.lean_plan is not None and frame.f_back is not None:
+                parent=self.operand._base_state(frame.f_back)
+                lost=self.pending.pop((threading.get_ident(),parent[0]),None) if parent is not None else None
+                if lost is not None:self.gap(lost['attempt'],'PYTHON_TARGET_NON_IMMEDIATE_ENTRY')
+            return False
         state=self.operand._base_state(frame)
         if state is None:
             self.gap(pending['attempt'],'PYTHON_ENTRY_NOT_RETAINED_BY_FRAME_RECORDER');return False

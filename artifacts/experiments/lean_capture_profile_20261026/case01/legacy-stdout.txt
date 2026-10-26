@@ -1,0 +1,1 @@
+{"status": "GENERIC_PYTHON_TORCH_RETURNED", "mode": "legacy", "tensor_contents_read": false, "scope": "sample.run activation and declared plan; imports/input construction outside scope"}

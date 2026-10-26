@@ -15,7 +15,7 @@ from scar.analysis.call_operand_reader import CallOperandTrace
 from scar.analysis.call_operand_routes import _Core, _Boundary as _CoreBoundary, _has_index, _layout_matches, _span
 from scar.analysis.function_binding import bind_call
 from scar.ir.program.call_edges import CallEdgeModel, CallLinkStatus, CapturedSite
-from scar.ir.program.call_operands import CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, CallableKind
+from scar.ir.program.call_operands import CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, LEAN_PORTS_RULE, OperandScopedGap, CallableKind
 from scar.ir.program.functions import ArgumentKind, BindingOrigin, CallArgument, CallBindingStatus, ParameterKind
 from scar.ir.program.model import ReferenceValue, StateVersionValue, TerminatorKind, UseRole
 from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
@@ -66,8 +66,16 @@ class _Session:
             self.rules[meta.process_id] = meta.rule
         self.local_gaps, self.global_gaps, self.read_issues = defaultdict(list), defaultdict(list), defaultdict(list)
         for gap in operand_model.gaps:
-            target = self.global_gaps[gap.process_id] if gap.invocation is None else self.local_gaps[gap.invocation]
-            target.append(gap.index)
+            if type(gap) is OperandScopedGap and gap.invocation is None:
+                # The code is observed, but no invocation ID was issued. Mark
+                # only that code's activations; do not fabricate an owner or
+                # turn the missing local region into a process-wide gap.
+                for invocation, edge in self.edges.items():
+                    if invocation.process_id == gap.process_id and edge.entry.code == gap.code:
+                        self.local_gaps[invocation].append(gap.index)
+            else:
+                target = self.global_gaps[gap.process_id] if gap.invocation is None else self.local_gaps[gap.invocation]
+                target.append(gap.index)
         for item in operand_model.issues:
             if item.invocation is None:
                 self.bad_processes.add(item.process_id)
@@ -119,7 +127,7 @@ class _Session:
 
     def bind(self, attempt):
         sources = self.sources
-        _need(self.rules.get(attempt.process_id) in (LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE)
+        _need(self.rules.get(attempt.process_id) in (LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE, LEAN_PORTS_RULE)
               and attempt.process_id not in self.bad_processes, Issue.CAPTURE_GAP,
               "unsupported/lost/failed/interposed operand capture process")
         matches = self.handshakes[attempt.process_id, attempt.index]

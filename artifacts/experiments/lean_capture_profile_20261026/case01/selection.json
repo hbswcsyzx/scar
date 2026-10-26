@@ -1,0 +1,12 @@
+{
+  "planned": [
+    "leaf",
+    "blocked",
+    "run",
+    "Box.step"
+  ],
+  "unplanned": [
+    "bridge"
+  ],
+  "policy": "explicit demo AST callback boundary; selected code/sites only; not whole program"
+}

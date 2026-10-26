@@ -1,0 +1,132 @@
+{
+  "elapsed_seconds": 1.8206896600313485,
+  "results": {
+    "legacy": {
+      "source_ports": {
+        "targets": 9,
+        "bound_calls": 4,
+        "receiver_ports": 1,
+        "explicit_argument_ports": 5,
+        "open_targets": 5,
+        "reference_identity_established": false,
+        "effects_state_ready_established": false,
+        "whole_program_complete": false
+      },
+      "capture_stored_bytes": 61182,
+      "instructions": 28,
+      "gaps": [],
+      "planned_port_correspondences": [
+        {
+          "caller": "run",
+          "call_offset": 24,
+          "callee": "bridge",
+          "arguments": [
+            {
+              "index": 0,
+              "formal_name": "callback"
+            },
+            {
+              "index": 1,
+              "formal_name": "value"
+            }
+          ],
+          "receiver": null
+        },
+        {
+          "caller": "run",
+          "call_offset": 80,
+          "callee": "Box.step",
+          "arguments": [
+            {
+              "index": 0,
+              "formal_name": "value"
+            }
+          ],
+          "receiver": "IMPLICIT_CALL_RECEIVER"
+        },
+        {
+          "caller": "Box.step",
+          "call_offset": 14,
+          "callee": "leaf",
+          "arguments": [
+            {
+              "index": 0,
+              "formal_name": "value"
+            }
+          ],
+          "receiver": null
+        }
+      ]
+    },
+    "lean02": {
+      "source_ports": {
+        "targets": 7,
+        "bound_calls": 3,
+        "receiver_ports": 1,
+        "explicit_argument_ports": 4,
+        "open_targets": 4,
+        "reference_identity_established": false,
+        "effects_state_ready_established": false,
+        "whole_program_complete": false
+      },
+      "capture_stored_bytes": 45236,
+      "instructions": 0,
+      "gaps": [
+        {
+          "kind": "SCOPED_GAP",
+          "reason": "LEAN_UNEXPANDED_STATIC_CALL_SITES:16",
+          "owner": 5,
+          "code": "pycode-v2:bdaf102118fbf53f91f792e90b989de46bf3267635dbe19ed7ff59bd16ff5e21"
+        },
+        {
+          "kind": "SCOPED_GAP",
+          "reason": "LEAN_UNSUPPORTED_CALL_SITE",
+          "owner": 5,
+          "code": "pycode-v2:bdaf102118fbf53f91f792e90b989de46bf3267635dbe19ed7ff59bd16ff5e21"
+        }
+      ],
+      "planned_port_correspondences": [
+        {
+          "caller": "run",
+          "call_offset": 24,
+          "callee": "bridge",
+          "arguments": [
+            {
+              "index": 0,
+              "formal_name": "callback"
+            },
+            {
+              "index": 1,
+              "formal_name": "value"
+            }
+          ],
+          "receiver": null
+        },
+        {
+          "caller": "run",
+          "call_offset": 80,
+          "callee": "Box.step",
+          "arguments": [
+            {
+              "index": 0,
+              "formal_name": "value"
+            }
+          ],
+          "receiver": "IMPLICIT_CALL_RECEIVER"
+        },
+        {
+          "caller": "Box.step",
+          "call_offset": 14,
+          "callee": "leaf",
+          "arguments": [
+            {
+              "index": 0,
+              "formal_name": "value"
+            }
+          ],
+          "receiver": null
+        }
+      ]
+    }
+  }
+}

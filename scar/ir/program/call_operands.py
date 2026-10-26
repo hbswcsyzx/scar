@@ -10,7 +10,8 @@ from scar.ir.program.call_edges import CallRecordAnchor, CallTraceFile, Captured
 
 LOAD_OCCURRENCES_RULE = "CPYTHON_LOAD_OCCURRENCES_V1"
 CALL_WINDOWS_RULE = "CPYTHON_CALL_WINDOWS_V1"
-OPERAND_CAPTURE_RULES = frozenset((LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE))
+LEAN_PORTS_RULE = "SCAR_LEAN_PORTS_V1"
+OPERAND_CAPTURE_RULES = frozenset((LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE, LEAN_PORTS_RULE))
 
 
 def _require(condition, detail):
@@ -85,6 +86,7 @@ class OperandEventKind(str, Enum):
     CALL_ATTEMPT = "CALL_ATTEMPT"
     ENTRY_HANDSHAKE = "ENTRY_HANDSHAKE"
     GAP = "GAP"
+    SCOPED_GAP = "SCOPED_GAP"
 
 
 @dataclass(frozen=True, slots=True)
@@ -173,7 +175,7 @@ class _OperandEvent:
                               ("frame_index", 0), ("hook_epoch", 1)):
             _integer(getattr(self, name), name, minimum)
         if self.invocation_id is None:
-            _require(expected is OperandEventKind.GAP, "only gaps may have no invocation")
+            _require(expected in (OperandEventKind.GAP, OperandEventKind.SCOPED_GAP), "only gaps may have no invocation")
         else:
             _integer(self.invocation_id, "invocation_id", 1)
         _require(type(self.anchor) is CallRecordAnchor, "operand event needs its own raw anchor")
@@ -272,7 +274,26 @@ class OperandGap(_OperandEvent):
         _text(self.reason, "operand gap reason")
 
 
-OperandEvent = OperandInstruction | OperandCallAttempt | OperandEntryHandshake | OperandGap
+@dataclass(frozen=True, slots=True)
+class OperandScopedGap(_OperandEvent):
+    anchor: CallRecordAnchor
+    index: int
+    kind: OperandEventKind
+    process_id: int
+    thread_id: int
+    invocation_id: int | None
+    frame_index: int
+    hook_epoch: int
+    reason: str
+    code: str
+
+    def __post_init__(self):
+        self._common(OperandEventKind.SCOPED_GAP)
+        _text(self.reason, "scoped operand gap reason")
+        _code(self.code)
+
+
+OperandEvent = OperandInstruction | OperandCallAttempt | OperandEntryHandshake | OperandGap | OperandScopedGap
 
 
 @dataclass(frozen=True, slots=True)

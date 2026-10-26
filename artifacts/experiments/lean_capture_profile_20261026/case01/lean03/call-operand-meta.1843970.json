@@ -1,0 +1,58 @@
+{
+  "schema": "scar.call-operands-trace",
+  "schema_version": 1,
+  "process_id": 1843970,
+  "project_root": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/project",
+  "python": "3.14.7 | packaged by conda-forge | (main, Sep  2 2026, 21:08:32) [GCC 15.3.0]",
+  "implementation": "cpython",
+  "rule": "SCAR_LEAN_PORTS_V1",
+  "limits": {
+    "max_events": 10000,
+    "max_bytes": 8000000,
+    "max_loads": 64,
+    "max_namespace_items": 4096,
+    "max_references": 8192
+  },
+  "events": 13,
+  "event_attempts": 13,
+  "instructions": 0,
+  "call_attempts": 7,
+  "handshakes": 4,
+  "gaps": 2,
+  "loads": 0,
+  "references": 14,
+  "bytes": 4731,
+  "dropped_events": 0,
+  "errors": [],
+  "io_failed": false,
+  "previous_profile": false,
+  "base_manifest": [
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/call-codes.1843970.jsonl",
+      "family": "codes",
+      "process_id": 1843970,
+      "raw_sha256": "99d1be7d15e83d389007b6691365e79f810cc4cbacedbc2f413d84b21abe17f9",
+      "raw_bytes": 2097,
+      "lines": 7
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/call-events.1843970.jsonl",
+      "family": "events",
+      "process_id": 1843970,
+      "raw_sha256": "b922067f5b424f9f253e2372977609181f57c86319974f1231e395f7a50a3527",
+      "raw_bytes": 11433,
+      "lines": 20
+    },
+    {
+      "path": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/lean_capture_profile_20261026/case01/lean03/call-meta.1843970.json",
+      "family": "meta",
+      "process_id": 1843970,
+      "raw_sha256": "bbd48c4c946fe6df8a1719e81c6f2acf73a1d55ed4378455ed69b3e57f222f44",
+      "raw_bytes": 1424,
+      "lines": 42
+    }
+  ],
+  "reference_contents_observed": false,
+  "callable_environment_established": false,
+  "transformation_authorized": false
+}

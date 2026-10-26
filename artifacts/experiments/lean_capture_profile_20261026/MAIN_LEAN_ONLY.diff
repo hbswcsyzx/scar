@@ -1,0 +1,568 @@
+--- a/scar/trace/call_edges.py
++++ b/scar/trace/call_edges.py
+@@ -16,7 +16,7 @@
+ 
+ class CallEdgeRecorder:
+     def __init__(self, out, project_root, *, max_events=100000, max_bytes=64000000,
+-                 max_codes=4096, max_values=64, max_path=16, max_references=8192):
++                 max_codes=4096, max_values=64, max_path=16, max_references=8192, lean_plan=None):
+         limits = dict(max_events=max_events,max_bytes=max_bytes,max_codes=max_codes,
+                       max_values=max_values,max_path=max_path,max_references=max_references)
+         if any(type(v) is not int or v < 1 for v in limits.values()):
+@@ -27,6 +27,14 @@
+         self.root_prefix = self.root.rstrip(os.sep)+os.sep
+         self.observer_files = {CallEdgeRecorder.profile.__code__.co_filename,describe_code.__code__.co_filename}
+         self.pid = os.getpid()
++        self.lean_plan = lean_plan
++        self.lean_plan_artifact = None
++        if lean_plan is not None:
++            from scar.trace.lean_capture import LeanCapturePlan
++            if (type(lean_plan) is not LeanCapturePlan or lean_plan.namespace_root != self.root
++                    or len(lean_plan.bodies)>max_codes):
++                raise ValueError('lean capture needs its exact typed namespace plan')
++            self.lean_plan_artifact = lean_plan.publish(self.out, self.pid)
+         self.limits = limits
+         self.lock = threading.RLock()
+         self.active, self.codes, self.references = {}, set(), {}
+@@ -63,6 +71,13 @@
+         return os.path.isabs(filename) and (filename == self.root or filename.startswith(self.root_prefix))
+ 
+     def _observe_entry(self, frame):
++        if self.lean_plan is not None:
++            # Rooted planned activations keep thin real ancestry. Seen target
++            # code alone never expands its implementation or monitoring mask.
++            parent = frame.f_back
++            return (self.lean_plan.candidate(frame.f_code) is not None or
++                    parent is not None and (threading.get_ident(), id(parent)) in self.active
++                    and self.lean_plan.match(parent.f_code) is not None)
+         if self._inside(frame) or self._inside(frame.f_back):
+             return True
+         observer = self.operand_observer
+@@ -245,9 +260,13 @@
+                     invocation = self.invocation
+                     thread = threading.get_ident()
+                     code = self._code(frame.f_code)
+-                    names = describe_code(frame.f_code)['parameters']
+                     seen = {}
+-                    parameters, complete = self._bindings(frame.f_locals,seen,names)
++                    targets = getattr(self.operand_observer, 'python_targets', None)
++                    detailed = (self.lean_plan is None or self.lean_plan.match(frame.f_code) is not None
++                                or targets is not None and targets.accepts_frame(frame))
++                    names = describe_code(frame.f_code)['parameters'] if detailed else ()
++                    parameters, complete = (self._bindings(frame.f_locals,seen,names)
++                                            if detailed else ([],False))
+                     direct = self.active.get((thread,id(caller))) if caller is not None else None
+                     path, ancestor, walker, path_failed = [], None, caller, False
+                     while walker is not None and len(path) < self.limits['max_path']:
+@@ -263,7 +282,8 @@
+                             break
+                         walker = walker.f_back
+                     path_complete = not path_failed and (walker is None or ancestor is not None)
+-                    caller_locals, locals_complete = self._bindings(caller.f_locals,seen) if caller is not None else ([],True)
++                    caller_locals, locals_complete = (([],False) if self.lean_plan is not None else
++                        self._bindings(caller.f_locals,seen) if caller is not None else ([],True))
+                     suspended = bool(frame.f_code.co_flags & (0x20|0x80|0x200))
+                     row = dict(index=self.index,kind='call_enter',process_id=self.pid,thread_id=thread,
+                         invocation_id=invocation,code=code,parameters=parameters,parameters_complete=complete,
+@@ -292,7 +312,7 @@
+                                   if position['opname'] in ('RETURN_VALUE','RETURN_CONST') else 'UNKNOWN')
+                     seen = {}
+                     returned = self._reference(arg,seen)
+-                    values,complete = self._bindings(frame.f_locals,seen)
++                    values,complete = (([],False) if self.lean_plan is not None else self._bindings(frame.f_locals,seen))
+                     row = dict(index=self.index,kind='call_exit',process_id=self.pid,thread_id=thread,
+                         invocation_id=invocation,code=code,return_site=position,completion=completion,
+                         return_ref=returned,locals=values,locals_complete=complete)
+@@ -335,16 +355,24 @@
+                 wall_ns=time.perf_counter_ns()-self.started,
+                 scope='initial process and newly profiled threads; native calls/child processes/existing threads not complete',
+                 reference_contents_observed=False,callable_environment_established=False)
++            if self.lean_plan is not None:
++                from scar.ir.record_codec import encode
++                from scar.trace.lean_capture import PROFILE
++                metadata.update(capture_profile=PROFILE, capture_plan=encode(self.lean_plan_artifact),
++                    unplanned_bodies_expanded=False,
++                    scope=PROFILE + ': planned roots/direct thin boundaries; unplanned interiors/imports unexpanded')
+             (self.out/f"call-meta.{self.pid}.json").write_text(json.dumps(metadata,indent=2)+'\n')
+-
+-
+-def install(out, project_root):
++            if self.lean_plan is not None:
++                self.lean_plan.clear_runtime_cache()
++
++
++def install(out, project_root, *, lean_plan=None):
+     owner = os.environ.get('SCAR_CALL_TRACE_OWNER_PID')
+     if owner is not None and owner != str(os.getpid()):
+         return None
+     recorder = CallEdgeRecorder(out,project_root,
+         max_events=int(os.environ.get('SCAR_CALL_MAX_EVENTS',100000)),
+-        max_bytes=int(os.environ.get('SCAR_CALL_MAX_BYTES',64000000)))
++        max_bytes=int(os.environ.get('SCAR_CALL_MAX_BYTES',64000000)), lean_plan=lean_plan)
+     os.environ['SCAR_CALL_TRACE_OWNER_PID'] = str(os.getpid())
+     recorder.collector_witness = None
+     if os.environ.get('SCAR_COLLECTOR_EXECUTION_WITNESS') == '1':
+--- a/scar/trace/call_operands.py
++++ b/scar/trace/call_operands.py
+@@ -18,7 +18,7 @@
+ 
+ from scar.ir.program.call_edges import CallTraceFile
+ from scar.ir.program.call_operands import (
+-    CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, CallableKind, FunctionLayout,
++    CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, LEAN_PORTS_RULE, CallableKind, FunctionLayout,
+     OperandCollectionLimits, OperandCollectionMetadata,
+ )
+ from scar.ir.record_codec import encode
+@@ -32,9 +32,11 @@
+ _RULE = LOAD_OCCURRENCES_RULE
+ _CAPTURE_INSTRUCTIONS = "instructions"
+ _CAPTURE_WINDOWS = "windows"
++_CAPTURE_LEAN = "lean-ports"
+ _CAPTURE_RULES = {
+     _CAPTURE_INSTRUCTIONS: LOAD_OCCURRENCES_RULE,
+     _CAPTURE_WINDOWS: CALL_WINDOWS_RULE,
++    _CAPTURE_LEAN: LEAN_PORTS_RULE,
+ }
+ _MONITOR_NAME = "scar-call-operands"
+ _LOCAL_MASK = sys.monitoring.events.INSTRUCTION | sys.monitoring.events.CALL
+@@ -98,6 +100,12 @@
+         self.root = recorder.root
+         self.root_prefix = recorder.root_prefix
+         self.capture = capture
++        self.lean_plan = getattr(recorder, 'lean_plan', None)
++        if (capture == _CAPTURE_LEAN) != (self.lean_plan is not None):
++            raise ValueError('lean capture requires its explicit typed frame plan and lean-ports mode')
++        if capture == _CAPTURE_LEAN and python_targets is not True:
++            raise ValueError('lean capture requires explicit Python target interfaces')
++        self._local_mask = sys.monitoring.events.CALL if capture == _CAPTURE_LEAN else _LOCAL_MASK
+         self.rule = _CAPTURE_RULES[capture]
+         self.limits = OperandCollectionLimits(max_events, max_bytes, max_loads,
+                                                max_namespace_items, max_references)
+@@ -242,7 +250,7 @@
+                 self._attempt_count += 1
+             elif kind == "ENTRY_HANDSHAKE":
+                 self._handshake_count += 1
+-            elif kind == "GAP":
++            elif kind in ("GAP", "SCOPED_GAP"):
+                 self._gap_count += 1
+             self._references += self._row_reference_count(kind, fields)
+             return index
+@@ -270,10 +278,21 @@
+     def _gap(self, reason, owner=None, frame_index=None, *, advance=True):
+         if frame_index is None:
+             frame_index = self.recorder.index
++        if self.lean_plan is not None and owner is not None:
++            key = next((state[1] for state in (*self._frames.values(), *self.recorder.active.values())
++                        if state[0] == owner), None)
++            if key is not None:
++                return self._emit("SCOPED_GAP", owner, frame_index, {"reason":reason,"code":key})
+         result = self._emit("GAP", owner, frame_index, {"reason": reason})
+         if advance:
+             self._hook_epoch += 1
+         return result
++
++    def _scoped_gap(self, reason, code, owner=None):
++        # Actual code is retained even when no invocation was successfully
++        # issued. This is not a fabricated activation or a global epoch gap.
++        key = describe_code(code)['key']
++        return self._emit("SCOPED_GAP", owner, self.recorder.index, {"reason":reason,"code":key})
+ 
+     def _base_state(self, frame):
+         thread_id = threading.get_ident()
+@@ -289,7 +308,7 @@
+         try:
+             return (sys.monitoring.get_tool(self.tool_id) == self.tool_name
+                     and sys.monitoring.get_events(self.tool_id) == 0
+-                    and sys.monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK)
++                    and sys.monitoring.get_local_events(self.tool_id, code) == self._local_mask)
+         except BaseException:
+             return False
+ 
+@@ -319,7 +338,7 @@
+ 
+     def _mark_interference(self, frame, reason, *, monitoring=False):
+         state = self._base_state(frame) if frame is not None else None
+-        self._gap(reason, state[0] if state is not None else None)
++        self._gap(reason, None if self.lean_plan is not None else state[0] if state is not None else None)
+         self._interfered = True
+         self._monitoring_interfered = self._monitoring_interfered or monitoring
+         self._stopped = True
+@@ -337,7 +356,9 @@
+                 if setter_kind is None:
+                     return
+             elif event == "call":
+-                if not (self._code_inside(frame.f_code) or (self.python_targets is not None
++                if self.lean_plan is not None:
++                    if self._base_state(frame) is None:return
++                elif not (self._code_inside(frame.f_code) or (self.python_targets is not None
+                         and ((self.python_targets.observed_code(frame.f_code) and self._base_state(frame) is not None)
+                              or self.python_targets.accepts_frame(frame)))):
+                     return
+@@ -372,6 +393,11 @@
+         except BaseException as error:
+             if os.getpid() != self.pid:
+                 return
++            if self.lean_plan is not None:
++                state = self._base_state(frame)
++                self._scoped_gap("OBSERVER_CALLBACK_FAILURE_" + type(error).__name__, frame.f_code,
++                                 state[0] if state is not None else None)
++                return
+             self._remember_error(error)
+             try:
+                 with self.recorder.lock:
+@@ -383,7 +409,7 @@
+     def _on_frame_enter(self, frame):
+         code = frame.f_code
+         target_entry = self.python_targets.on_frame_enter(frame) if self.python_targets is not None else False
+-        if not (self._code_inside(code) or target_entry or (self.python_targets is not None and self.python_targets.observed_code(code))):
++        if self.lean_plan is None and not (self._code_inside(code) or target_entry or (self.python_targets is not None and self.python_targets.observed_code(code))):
+             return
+         if self._event_attempts >= self.limits.max_events:
+             self._dropped += 1
+@@ -424,6 +450,14 @@
+                     self.environment_observer.discard(attempt_index)
+                 self._pending.pop(pending_key, None)
+ 
++        if self.lean_plan is not None:
++            body = self.lean_plan.match(code)
++            if body is None:
++                if self.lean_plan.candidate(code) is not None:
++                    self._scoped_gap("LEAN_PLANNED_CODE_VERSION_MISMATCH", code, invocation)
++                return  # An interface observation never opts in the callee body.
++            if body.unsupported_offsets:
++                self._scoped_gap("LEAN_UNEXPANDED_STATIC_CALL_SITES:" + ','.join(map(str,body.unsupported_offsets)), code, invocation)
+         if self.capture == _CAPTURE_WINDOWS:
+             try:
+                 window_plan = self._window_plan(code, code_key)
+@@ -443,8 +477,11 @@
+         record = self._code_state(code, code_reference)
+         if record is None:
+             self._frames.pop(identity, None)
+-            self._gap("CALL_WINDOW_CODE_OBJECT_BUDGET_EXCEEDED", invocation)
+-            self._stopped = True
++            if self.lean_plan is not None:
++                self._scoped_gap("CALL_WINDOW_CODE_OBJECT_BUDGET_EXCEEDED", code, invocation)
++            else:
++                self._gap("CALL_WINDOW_CODE_OBJECT_BUDGET_EXCEEDED", invocation)
++                self._stopped = True
+             return
+         record["active"] += 1
+         try:
+@@ -454,15 +491,15 @@
+                 self._monitoring_interfered = True
+                 return
+             if self.capture == _CAPTURE_WINDOWS and record["installed"]:
+-                if sys.monitoring.get_local_events(self.tool_id, code) != _LOCAL_MASK:
++                if sys.monitoring.get_local_events(self.tool_id, code) != self._local_mask:
+                     self._gap("MONITORING_MASK_CHANGED_AT_CODE_REENTRY", invocation)
+                     self._interfered = self._stopped = True
+                     self._monitoring_interfered = True
+             else:
+-                sys.monitoring.set_local_events(self.tool_id, code, _LOCAL_MASK)
++                sys.monitoring.set_local_events(self.tool_id, code, self._local_mask)
+                 record["installed"] = True
+         except BaseException as error:
+-            self._gap("MONITORING_LOCAL_MASK_INSTALL_FAILED_" + type(error).__name__, invocation)
++            self._gap("MONITORINGself._local_mask_INSTALL_FAILED_" + type(error).__name__, invocation)
+             self._stopped = True
+ 
+     def _on_frame_exit(self, frame):
+@@ -473,7 +510,8 @@
+         invocation, _code_key, code_reference = state
+         pending = self._pending.pop((threading.get_ident(), invocation), None)
+         if pending is not None:
+-            self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", invocation)
++            if self.lean_plan is not None:self._scoped_gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", frame.f_code, invocation)
++            else:self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", invocation)
+             self.environment_observer.discard(pending[-1])
+         code = code_reference()
+         entry = self._code_states.get(id(code)) if code is not None else None
+@@ -484,7 +522,7 @@
+             try:
+                 intact = (sys.monitoring.get_tool(self.tool_id) == self.tool_name
+                           and sys.monitoring.get_events(self.tool_id) == 0
+-                          and sys.monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK)
++                          and sys.monitoring.get_local_events(self.tool_id, code) == self._local_mask)
+                 if not intact:
+                     self._gap("MONITORING_MASK_OR_TOOL_CHANGED_AT_FRAME_EXIT", invocation)
+                     self._interfered = self._stopped = True
+@@ -497,7 +535,7 @@
+             try:
+                 intact = (sys.monitoring.get_tool(self.tool_id) == self.tool_name
+                           and sys.monitoring.get_events(self.tool_id) == 0
+-                          and sys.monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK)
++                          and sys.monitoring.get_local_events(self.tool_id, code) == self._local_mask)
+                 if intact:
+                     sys.monitoring.set_local_events(self.tool_id, code, 0)
+                 else:
+@@ -771,7 +809,7 @@
+             if (sys.monitoring.get_tool(self.tool_id) != self.tool_name
+                     or sys.monitoring.get_events(self.tool_id) != 0):
+                 return None
+-            if code is not None and sys.monitoring.get_local_events(self.tool_id, code) != _LOCAL_MASK:
++            if code is not None and sys.monitoring.get_local_events(self.tool_id, code) != self._local_mask:
+                 return None
+         except BaseException:
+             return None
+@@ -798,10 +836,21 @@
+                         return self._disabled_callback_result(code)
+                     owner_info = self._event_owner(frame, code)
+                     if owner_info is None:
++                        if self.lean_plan is not None:
++                            self._scoped_gap("CALL_FRAME_UNAVAILABLE", code)
++                            return None
+                         self._gap("CALL_FRAME_UNAVAILABLE")
+                         self._stopped = self.capture == _CAPTURE_WINDOWS
+                         return self._disabled_callback_result(code)
+                     owner, _code_key = owner_info
++                    if self.lean_plan is not None:
++                        body = self.lean_plan.match(code)
++                        if body is None or offset not in body.call_offsets:
++                            self._scoped_gap("LEAN_CALL_NOT_IN_STATIC_PLAN", code, owner)
++                            return None
++                        if offset in body.unsupported_offsets:
++                            self._scoped_gap("LEAN_UNSUPPORTED_CALL_SITE", code, owner)
++                            return None
+                     if not self._monitor_is_intact(code):
+                         self._mark_interference(frame, "MONITORING_MASK_OR_TOOL_CHANGED", monitoring=True)
+                         return self._disabled_callback_result(code)
+@@ -854,6 +903,11 @@
+                         else:
+                             self.environment_observer.discard(attempt_index)
+                 except BaseException as error:
++                    if self.lean_plan is not None:
++                        state = self._base_state(frame)
++                        self._scoped_gap("CALL_CALLBACK_FAILURE_" + type(error).__name__, code,
++                                         state[0] if state is not None else None)
++                        return None
+                     self._remember_error(error)
+                     self._gap("CALL_CALLBACK_FAILURE_" + type(error).__name__)
+                     if self.capture == _CAPTURE_WINDOWS:
+@@ -868,6 +922,11 @@
+             with self._lock:
+                 if self._stopped and self._fd is None:
+                     return
++                if self.lean_plan is not None:
++                    try:self.lean_plan.verify_sources()
++                    except (OSError, ValueError, UnicodeError):
++                        self._gap("LEAN_SOURCE_VERSION_GUARD_FAILED")
++                        self._remember_error(ValueError('lean source changed'))
+                 for (_, owner), _pending in tuple(self._pending.items()):
+                     self._gap("PROJECT_FUNCTION_CALL_DID_NOT_ENTER", owner)
+                     self.environment_observer.discard(_pending[-1])
+@@ -883,7 +942,7 @@
+                             if code is not None and state["installed"]:
+                                 installed_codes.append(code)
+                         owns_local_masks = all(
+-                            sys.monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK
++                            sys.monitoring.get_local_events(self.tool_id, code) == self._local_mask
+                             for code in installed_codes
+                         )
+                         if owns_tool and owns_global_mask and owns_local_masks:
+@@ -935,7 +994,7 @@
+                     if code is not None and state["installed"]:
+                         installed_codes.append(code)
+                 owns_local_masks = all(
+-                    monitoring.get_local_events(self.tool_id, code) == _LOCAL_MASK
++                    monitoring.get_local_events(self.tool_id, code) == self._local_mask
+                     for code in installed_codes
+                 )
+                 if owns_tool and owns_global_mask and owns_local_masks:
+--- a/scar/trace/python_call_targets.py
++++ b/scar/trace/python_call_targets.py
+@@ -114,7 +114,12 @@
+     def accepts_frame(self,frame):return self.pending_for(frame) is not None
+     def on_frame_enter(self,frame):
+         pending=self.pending_for(frame)
+-        if pending is None:return False
++        if pending is None:
++            if self.operand.lean_plan is not None and frame.f_back is not None:
++                parent=self.operand._base_state(frame.f_back)
++                lost=self.pending.pop((threading.get_ident(),parent[0]),None) if parent is not None else None
++                if lost is not None:self.gap(lost['attempt'],'PYTHON_TARGET_NON_IMMEDIATE_ENTRY')
++            return False
+         state=self.operand._base_state(frame)
+         if state is None:
+             self.gap(pending['attempt'],'PYTHON_ENTRY_NOT_RETAINED_BY_FRAME_RECORDER');return False
+--- a/scar/ir/program/call_operands.py
++++ b/scar/ir/program/call_operands.py
+@@ -10,7 +10,8 @@
+ 
+ LOAD_OCCURRENCES_RULE = "CPYTHON_LOAD_OCCURRENCES_V1"
+ CALL_WINDOWS_RULE = "CPYTHON_CALL_WINDOWS_V1"
+-OPERAND_CAPTURE_RULES = frozenset((LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE))
++LEAN_PORTS_RULE = "SCAR_LEAN_PORTS_V1"
++OPERAND_CAPTURE_RULES = frozenset((LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE, LEAN_PORTS_RULE))
+ 
+ 
+ def _require(condition, detail):
+@@ -85,6 +86,7 @@
+     CALL_ATTEMPT = "CALL_ATTEMPT"
+     ENTRY_HANDSHAKE = "ENTRY_HANDSHAKE"
+     GAP = "GAP"
++    SCOPED_GAP = "SCOPED_GAP"
+ 
+ 
+ @dataclass(frozen=True, slots=True)
+@@ -173,7 +175,7 @@
+                               ("frame_index", 0), ("hook_epoch", 1)):
+             _integer(getattr(self, name), name, minimum)
+         if self.invocation_id is None:
+-            _require(expected is OperandEventKind.GAP, "only gaps may have no invocation")
++            _require(expected in (OperandEventKind.GAP, OperandEventKind.SCOPED_GAP), "only gaps may have no invocation")
+         else:
+             _integer(self.invocation_id, "invocation_id", 1)
+         _require(type(self.anchor) is CallRecordAnchor, "operand event needs its own raw anchor")
+@@ -272,7 +274,26 @@
+         _text(self.reason, "operand gap reason")
+ 
+ 
+-OperandEvent = OperandInstruction | OperandCallAttempt | OperandEntryHandshake | OperandGap
++@dataclass(frozen=True, slots=True)
++class OperandScopedGap(_OperandEvent):
++    anchor: CallRecordAnchor
++    index: int
++    kind: OperandEventKind
++    process_id: int
++    thread_id: int
++    invocation_id: int | None
++    frame_index: int
++    hook_epoch: int
++    reason: str
++    code: str
++
++    def __post_init__(self):
++        self._common(OperandEventKind.SCOPED_GAP)
++        _text(self.reason, "scoped operand gap reason")
++        _code(self.code)
++
++
++OperandEvent = OperandInstruction | OperandCallAttempt | OperandEntryHandshake | OperandGap | OperandScopedGap
+ 
+ 
+ @dataclass(frozen=True, slots=True)
+--- a/scar/analysis/call_operand_reader.py
++++ b/scar/analysis/call_operand_reader.py
+@@ -13,7 +13,8 @@
+ )
+ from scar.ir.program.call_operands import (
+     CallOperandBudget, CallableKind, OperandCallAttempt, OperandCollectionMetadata,
+-    OperandEntryHandshake, OperandEvent, OperandEventKind, OperandGap, OperandInstruction,
++    OperandEntryHandshake, OperandEvent, OperandEventKind, OperandGap, OperandScopedGap, OperandInstruction,
++    LEAN_PORTS_RULE,
+     operand_references,
+ )
+ from scar.ir.record_codec import decode
+@@ -26,6 +27,7 @@
+     "CALL_ATTEMPT": OperandCallAttempt,
+     "ENTRY_HANDSHAKE": OperandEntryHandshake,
+     "GAP": OperandGap,
++    "SCOPED_GAP": OperandScopedGap,
+ }
+ 
+ 
+@@ -72,7 +74,7 @@
+ 
+     @property
+     def gaps(self):
+-        return tuple(event for event in self.events if type(event) is OperandGap)
++        return tuple(event for event in self.events if type(event) in (OperandGap, OperandScopedGap))
+ 
+ 
+ def read_call_operands(trace, root, *, budget=CallOperandBudget(), frame_budget=CallEdgeBudget()):
+@@ -167,6 +169,24 @@
+         expected = {family: base_files[process, family] for family in ("codes", "events", "meta")}
+         _require({item.family: item for item in meta.base_manifest} == expected,
+                  "operand metadata does not bind the original frame file manifest")
++        if meta.rule == LEAN_PORTS_RULE:
++            from scar.trace.lean_capture import LeanCapturePlan, PROFILE
++            from scar.ir.program.providers import ProviderArtifact
++            declaration = base_meta[process].get('capture_plan')
++            _require(base_meta[process].get('capture_profile') == PROFILE and
++                     base_meta[process].get('unplanned_bodies_expanded') is False,
++                     'lean capture must declare its explicit thin boundary scope')
++            artifact = decode(ProviderArtifact, declaration)
++            plan_path = Path(artifact.uri)
++            _require(plan_path == trace_path / f'lean-plan.{process}.json' and not plan_path.is_symlink()
++                     and plan_path.is_file() and plan_path.stat().st_size == artifact.size_bytes
++                     and artifact.size_bytes <= 2_000_000 and artifact.schema == 'scar.lean-capture-plan/1',
++                     'lean plan artifact/policy scope differs')
++            raw_plan = plan_path.read_bytes()
++            _require(hashlib.sha256(raw_plan).hexdigest() == artifact.sha256, 'lean plan SHA differs')
++            plan = LeanCapturePlan.from_dict(_json_object(raw_plan, path=str(plan_path), line_number=1),
++                max_codes=min(frame_budget.max_codes,base_meta[process]['limits']['max_codes']))
++            _require(plan.namespace_root == str(root_path), 'lean plan namespace differs')
+         metadata.append(meta)
+         if meta.previous_profile:
+             issues.append(OperandReadIssue("PREVIOUS_PROFILE", "a previous profile callback was chained", process))
+@@ -188,6 +208,8 @@
+             _require(type(kind) is str and kind in _TYPES, "unknown operand event kind")
+             anchor = CallRecordAnchor(logical, line, hashlib.sha256(raw).hexdigest(), row.get("index"))
+             _require("anchor" not in row, "raw operand events cannot supply their own anchors")
++            _require(kind != 'SCOPED_GAP' or meta.rule == LEAN_PORTS_RULE,
++                     'scoped gaps require the explicit lean profile')
+             event = decode(_TYPES[kind], {**row, "anchor": {
+                 "path": anchor.path, "line_number": anchor.line_number,
+                 "line_sha256": anchor.line_sha256, "index": anchor.index,
+@@ -222,7 +244,8 @@
+                  "operand retained event/byte counts disagree with metadata")
+         for field, kind in (("instructions", OperandEventKind.INSTRUCTION), ("call_attempts", OperandEventKind.CALL_ATTEMPT),
+                             ("handshakes", OperandEventKind.ENTRY_HANDSHAKE), ("gaps", OperandEventKind.GAP)):
+-            _require(getattr(meta, field) == counts[kind], "operand kind count differs from metadata: " + field)
++            actual = counts[kind] + (counts[OperandEventKind.SCOPED_GAP] if field == 'gaps' else 0)
++            _require(getattr(meta, field) == actual, "operand kind count differs from metadata: " + field)
+         _require(meta.loads == count_loads and meta.references == count_references,
+                  "operand load/reference counts differ from metadata")
+         events.extend(process_events)
+@@ -260,9 +283,11 @@
+             _require(entry is not None, "operand owner has no original frame entry")
+             _require(entry.anchor.index <= event.frame_index, "operand precedes its original owner entry")
+             exit = by_exit.get(owner)
+-            if type(event) is not OperandGap:
++            if type(event) not in (OperandGap, OperandScopedGap):
+                 _require(exit is None or event.frame_index < exit.anchor.index,
+                          "operand belongs to an already completed original frame")
++        if type(event) is OperandScopedGap and owner is not None:
++            _require(event.code == entry.code, 'scoped gap code differs from actual activation')
+         if type(event) in (OperandInstruction, OperandCallAttempt):
+             _require(event.site.code == entry.code, "operand site code differs from its owner frame")
+             if (event.process_id, event.site.code) not in captures:
+--- a/scar/analysis/source_call_bindings.py
++++ b/scar/analysis/source_call_bindings.py
+@@ -15,7 +15,7 @@
+ from scar.analysis.call_operand_routes import _Core, _Boundary as _CoreBoundary, _has_index, _layout_matches, _span
+ from scar.analysis.function_binding import bind_call
+ from scar.ir.program.call_edges import CallEdgeModel, CallLinkStatus, CapturedSite
+-from scar.ir.program.call_operands import CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, CallableKind
++from scar.ir.program.call_operands import CALL_WINDOWS_RULE, LOAD_OCCURRENCES_RULE, LEAN_PORTS_RULE, OperandScopedGap, CallableKind
+ from scar.ir.program.functions import ArgumentKind, BindingOrigin, CallArgument, CallBindingStatus, ParameterKind
+ from scar.ir.program.model import ReferenceValue, StateVersionValue, TerminatorKind, UseRole
+ from scar.ir.program.providers import ProviderArtifact, ProviderFactReference
+@@ -66,8 +66,16 @@
+             self.rules[meta.process_id] = meta.rule
+         self.local_gaps, self.global_gaps, self.read_issues = defaultdict(list), defaultdict(list), defaultdict(list)
+         for gap in operand_model.gaps:
+-            target = self.global_gaps[gap.process_id] if gap.invocation is None else self.local_gaps[gap.invocation]
+-            target.append(gap.index)
++            if type(gap) is OperandScopedGap and gap.invocation is None:
++                # The code is observed, but no invocation ID was issued. Mark
++                # only that code's activations; do not fabricate an owner or
++                # turn the missing local region into a process-wide gap.
++                for invocation, edge in self.edges.items():
++                    if invocation.process_id == gap.process_id and edge.entry.code == gap.code:
++                        self.local_gaps[invocation].append(gap.index)
++            else:
++                target = self.global_gaps[gap.process_id] if gap.invocation is None else self.local_gaps[gap.invocation]
++                target.append(gap.index)
+         for item in operand_model.issues:
+             if item.invocation is None:
+                 self.bad_processes.add(item.process_id)
+@@ -119,7 +127,7 @@
+ 
+     def bind(self, attempt):
+         sources = self.sources
+-        _need(self.rules.get(attempt.process_id) in (LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE)
++        _need(self.rules.get(attempt.process_id) in (LOAD_OCCURRENCES_RULE, CALL_WINDOWS_RULE, LEAN_PORTS_RULE)
+               and attempt.process_id not in self.bad_processes, Issue.CAPTURE_GAP,
+               "unsupported/lost/failed/interposed operand capture process")
+         matches = self.handshakes[attempt.process_id, attempt.index]
