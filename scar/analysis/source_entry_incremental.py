@@ -85,9 +85,11 @@ def publish_source_entry_deltas(parent_publication,delta_inputs,target,catalog,o
     project/catalog parent and is consumable by the existing full reader; a
     selected reader below independently checks only the requested body.
     """
-    from scar.analysis.source_program_publication import plan_source_entry_publication,publish_source_entries
+    from scar.analysis.source_program_publication import (
+        plan_source_entry_publication, publish_source_entries, _check_entry_artifact_files)
     root=Path(out).resolve();_need(not root.exists(),'output must be fresh');root.mkdir(parents=True)
     parent=_publication(parent_publication,max_metadata_bytes)
+    _check_entry_artifact_files(parent, len(parent['bodies']))
     requests,origins=collect_source_entry_deltas(parent_publication,delta_inputs,max_metadata_bytes=max_metadata_bytes)
     _need(0<len(requests)<=max_programs,'new body denominator exceeds bound or is empty')
     by_key={r['entry_key']:r for r in catalog.metadata()['candidates']}
@@ -118,17 +120,19 @@ def publish_source_entry_deltas(parent_publication,delta_inputs,target,catalog,o
     combined['plan_sha256']=sha256(_canonical(combined['plan'])).hexdigest()
     raw=_canonical(combined);_need(len(raw)<=max_metadata_bytes,'combined publication metadata exceeds bound')
     path=root/'manifest.json'
-    with path.open('xb') as stream:stream.write(raw)
     result={'publication':encode(ProviderArtifact(str(path),sha256(raw).hexdigest(),len(raw),'scar.source-entry-publication')),
         'parent_publication':encode(parent_publication),'delta_publication':encode(delta_artifact),
         'retained_parent_bodies':len(parent['bodies']),'normally_admitted_new_bodies':len(delta['bodies']),
         'total_bodies':len(combined['bodies']),'resumed_checkpoint_rows':published.get('resumed_checkpoint_rows',0),'fresh_admissions':published.get('fresh_admissions',len(delta['bodies'])),'source_context_costs':source_context_costs,'parent_bodies_replayed':False,'new_bodies_relowered':False,
         'full_independent_reader_completed':False,'whole_program_complete':False,
         'qualification':'normal new-body admission plus exact immutable parent publication references; selected-body qualification remains queryable'}
-    (root/'increment.json').write_bytes(_canonical(result)+b'\n')
-    # Recheck all small immutable declarations, not prior body payloads.
+    # Check retained inputs before making the combined root visible. Journals
+    # and the independently admitted delta remain available on failure.
     _publication(parent_publication,max_metadata_bytes)
     for artifact in delta_inputs:_read(artifact,max_metadata_bytes)
+    _check_entry_artifact_files(combined, len(combined['bodies']))
+    (root/'increment.json').write_bytes(_canonical(result)+b'\n')
+    with path.open('xb') as stream:stream.write(raw)
     return result
 
 

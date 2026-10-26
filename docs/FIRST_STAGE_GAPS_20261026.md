@@ -20,7 +20,7 @@
 
 | 必需部分 | 当前已有的实际结果 | 尚缺与验收条件 |
 |---|---|---|
-| 源码与依赖内部 | 正式原快照151文件/2217定义/858规范body。外部243候选归并为201成功、41未支持、1 resumable入口缺适配；其中196项已普通发布（原161+35增量），后补解包/Lambda/推导式/generator/starred display五项尚未发布。V7补通heap/cell解包；V8随后完整恢复另一Lambda入口（187 ops、子Region17 ops），结构与独立source/CodeWitness读回通过。 | 剩余语法及嵌套cleanup/驱动继续补实现；新增body须正常准入并接回相应运行。源恢复成功、普通发布、当前运行绑定分别计数。 |
+| 源码与依赖内部 | 正式原快照151文件/2217定义/858规范body。外部243候选归并为201成功、41未支持、1 resumable入口缺适配；已保留201项发布根（原196+新增五项）；新五项正常准入、单新body独立查询通过，但原writer末检查失败仍保留，完整201 reader尚在执行。V7补通heap/cell解包；V8随后完整恢复另一Lambda入口（187 ops、子Region17 ops），结构与独立source/CodeWitness读回通过。 | 剩余语法及嵌套cleanup/驱动继续补实现；新增body须正常准入并接回相应运行。源恢复成功、普通发布、当前运行绑定分别计数。 |
 | 层层函数调用 | 原完整100438调用均入账，6882次对应92个body groups；另88592 source-only、4964 unresolved。已有2516调用/6805条件参数端口；新CLI已在一条真实LeWM调用上连接callee正常返回Use→caller结果，并接入入口world和正常/异常post-world。 | 这些是原端点上的条件源关系，不据此断定实际选边、状态保持或细粒度写范围；捕获/全局状态及其余实际调用仍需连接。深层region不可用祖先上下文替代直接调用。 |
 | 值、对象与可变内容 | 有引用、storage/allocation及view的真实记录和类型接口。 | 逻辑来源/值版本→物理副本、原位写入后态、alias范围和失效须接通。不能以相同ObjectID/StorageID/shape/样本或来源证明内容未变；采样仅用于排除。 |
 | Python→Torch→GPU工作 | main新门72613实际exit0：24082物理work均有retained source context/code来源；11541 exact、12541 enclosing，6普通查询通过。 | enclosing仅为提交scope嵌套；内部host exact occurrence仍缺12541，static body member未核14932，state/content/ready均未证24082。不能当作每个kernel的完整源数据流。 |
@@ -42,8 +42,7 @@
 
 按[FIRST_STAGE_IMPLEMENTATION_PLAN.md](FIRST_STAGE_IMPLEMENTATION_PLAN.md)四项功能推进：
 
-1. 补剩余通用source结构；243项现为201成功、41未支持、1resumable缺口，196已
-   正常发布，后补五项继续接回原命名空间。历史调用权重不计新运行绑定。
+1. 补剩余通用source结构；243项现为201成功、41未支持、1resumable缺口，201项发布根已保留，新五项已正常准入；完整reader与原运行绑定仍须完成。历史调用权重不计新运行绑定。
 2. 接有序数据/状态依赖；已有条件参数、正常返回及粗world传递，接着补native端口
    引用流、逻辑来源/版本、必要资源与IO接口，不用引用相同代替内容不变。
 3. 收敛存取及采集；共享source context、独立片段和局部索引接正常入口，复用已存
