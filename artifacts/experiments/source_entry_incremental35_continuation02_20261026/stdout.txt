@@ -1,0 +1,208 @@
+{"phase": "normal-owners", "elapsed_s": 20.005578497017268, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-owners", "elapsed_s": 40.016521141980775, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-owners", "elapsed_s": 60.01977395598078, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-owners", "elapsed_s": 80.3498958760174, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-owners", "elapsed_s": 100.36108006199356, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-owners", "elapsed_s": 120.38188956998056, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 140.71809544798452, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 160.78311863198178, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 180.7989251340041, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 200.820145501988, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 220.8408565960126, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 240.86151608999353, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 260.88224505999824, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 280.8979071339709, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 301.4984077399713, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 321.58461516699754, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 341.60532782401424, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 361.626230379974, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 381.64194027899066, "closed_admission_rows": 0, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 0, "entry_key": "8e387588894572494ea6b3531e35bb6f83b5aaaffbf4f3c4ecde9ce4162fef3e", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 402.9079601870035, "closed_admission_rows": 1, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 1, "entry_key": "f31c349686df3187d98fd758363cc1c06041a4c61ceee8a3bd77f98d2fce9a5d", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 2, "entry_key": "5912b9f4bda29ddb188b71c389d558959c99eee1928b8050b6f85d39471ee7a0", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 423.5699320959975, "closed_admission_rows": 3, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 3, "entry_key": "853d42ce2bfc3bd873eeda434f3550b0be36eac64a688317c522e3dd34b41c1d", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 4, "entry_key": "c2fc7ca6d0fefdddac080fce4e6253a2a75409e5acb9127b2648752db0beadc1", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 5, "entry_key": "cf295f5b66bb531694d768dbb2af6c00ecaa03e20ff97715d26e6fd5637c5df1", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 443.6061064120149, "closed_admission_rows": 6, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 6, "entry_key": "d968833b366080cef715d69ed23c3c1007d62e2e967ab8f6689e2fed80e1cf77", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 7, "entry_key": "d8b535365fceb276a4fde502ee75ef0c988bca9c54e8db975edaee671b415d57", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 464.38493977399776, "closed_admission_rows": 8, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 484.42035816196585, "closed_admission_rows": 8, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 8, "entry_key": "6ebcb77567de55f8e2375a25b01a1ab1943bd828dcbb0fc36641db3ea3973b60", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 9, "entry_key": "84e6dc922321b0ca4c33f3c0f620909ba1f014968ef3b4a26a123efe04642565", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 504.51687449699966, "closed_admission_rows": 10, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 10, "entry_key": "aeecef00f24a6ff3bf39a9743f9c4d7365e27b6e5317735c3ea0e271173609be", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 524.5268814640003, "closed_admission_rows": 11, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 11, "entry_key": "01553a48d1f97c332276702710d31746867f65223ac2cbe2d40e4399f8280a4b", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 12, "entry_key": "91d26a2850126e77fbe5a1d1f94c9bfb3f2a38fed52b305b8efbb8108799f151", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 544.5625773500069, "closed_admission_rows": 13, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 13, "entry_key": "87d89e95a4089f493c74c0beb4b7d34192354c6f032bf739858b62c9dfac5677", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 14, "entry_key": "f9c716609c3290394f6b7d8c462a25f3902502d89d9e7df39075373e54412d8c", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 15, "entry_key": "5c58e69a86db83ada43f58cb5211cd8b0322776dcd966073d8738aee658e1d5b", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 564.5682937490055, "closed_admission_rows": 16, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 16, "entry_key": "05479e85d82ae30c342dcfbe0e60505a7f8f9a59c68ff6fd723638d526bec0a3", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 17, "entry_key": "9f256de8375362f8a676b3a0fa693b11bf26a29cbda4cf8a2e3d05e88d72f6be", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 584.8018996029859, "closed_admission_rows": 18, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 18, "entry_key": "7489a22d11b9a9a72dcbbc823f17a30d15076ca72620c9950ae5e66f94585bba", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 19, "entry_key": "9f79402aaad2aeb245af9cfa9e941fc69b0073c5ecaf06d5b9c4376370c537a8", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"stage": "incremental_admission_journal", "serial": 20, "entry_key": "b425c7831d5987844713e8d277c3cb9d26b381cdca742087dde2babdc9811923", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 604.8375180289731, "closed_admission_rows": 21, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 21, "entry_key": "7a2e1da495a4843f3ea217798a694f917e90aaef763abee0d6fb99e9fac8e9cd", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 625.4016839410178, "closed_admission_rows": 22, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 22, "entry_key": "17f972bbdb8c6c1fe43803198db91a97b2de089d4360d0899461920ccc0f62ce", "method": "RETAINED_NORMAL_CP2_MISSING_ROW_RECOVERY"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 645.4423933679936, "closed_admission_rows": 23, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 665.4836557509843, "closed_admission_rows": 23, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 685.5100011290051, "closed_admission_rows": 23, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 705.5157264280133, "closed_admission_rows": 23, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 725.5521623640088, "closed_admission_rows": 23, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 745.5936349830008, "closed_admission_rows": 23, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 765.6475058710203, "closed_admission_rows": 23, "fresh_checkpoint_files": 0}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 785.6942804959835, "closed_admission_rows": 23, "fresh_checkpoint_files": 0}
+{"stage": "incremental_admission_journal", "serial": 23, "entry_key": "1bedea5fd0784d9338b1a84c35c7a9f3488aaae5f16b358c39cdaf8171ed44a6", "method": "NORMAL_FRESH_ADMISSION"}
+{"stage": "incremental_admission_journal", "serial": 24, "entry_key": "ad8548ebaaef31b4c21ee3a0b859d0a4d0c8fb53a327d6b1d0e8a2c983937473", "method": "NORMAL_FRESH_ADMISSION"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 805.824359730992, "closed_admission_rows": 25, "fresh_checkpoint_files": 2}
+{"stage": "incremental_admission_journal", "serial": 25, "entry_key": "d3e1c998bcbcfc36aa3b93eda8947a4f539a8b67e63a062df27a9c8459b6b49e", "method": "NORMAL_FRESH_ADMISSION"}
+{"stage": "incremental_admission_journal", "serial": 26, "entry_key": "db110d96af43af6912087d091ce7212ddcecb28b2459d303982ccb4ecbd35ca3", "method": "NORMAL_FRESH_ADMISSION"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 825.8925025669741, "closed_admission_rows": 27, "fresh_checkpoint_files": 4}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 845.994024456013, "closed_admission_rows": 27, "fresh_checkpoint_files": 4}
+{"stage": "incremental_admission_journal", "serial": 27, "entry_key": "6e9adeeacd351e7aa812d801e39bb3cee41059b113530f78b235cce371f16dd6", "method": "NORMAL_FRESH_ADMISSION"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 866.0011849009898, "closed_admission_rows": 28, "fresh_checkpoint_files": 5}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 886.0534668829641, "closed_admission_rows": 28, "fresh_checkpoint_files": 5}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 906.110010475968, "closed_admission_rows": 28, "fresh_checkpoint_files": 5}
+{"stage": "incremental_admission_journal", "serial": 28, "entry_key": "66e06ddd27b0e83d4c956b17561f095b371ead39266bc8080888253ccb6594e8", "method": "NORMAL_FRESH_ADMISSION"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 926.1665446910192, "closed_admission_rows": 29, "fresh_checkpoint_files": 6}
+{"stage": "incremental_admission_journal", "serial": 29, "entry_key": "dbd49537b70fccf0573e684e709da7e8cbaf67929d494186afa1a1bb2577ddf3", "method": "NORMAL_FRESH_ADMISSION"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 946.2186686620116, "closed_admission_rows": 30, "fresh_checkpoint_files": 7}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 966.2751497699646, "closed_admission_rows": 30, "fresh_checkpoint_files": 7}
+{"stage": "incremental_admission_journal", "serial": 30, "entry_key": "ea1e57c4f92586c68dd63def283bc965b9362e2d3baec6536ad7aa5a015bee19", "method": "NORMAL_FRESH_ADMISSION"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 986.3335457670037, "closed_admission_rows": 31, "fresh_checkpoint_files": 8}
+{"stage": "incremental_admission_journal", "serial": 31, "entry_key": "6e909f1e97a28268585eb6a6779e8250ce3bc07a034b78f331198af18e19398c", "method": "NORMAL_FRESH_ADMISSION"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 1006.3926748359809, "closed_admission_rows": 32, "fresh_checkpoint_files": 9}
+{"stage": "incremental_admission_journal", "serial": 32, "entry_key": "9cf6041280138b81a13ea3b5a86a5d8c0752ba2153ead60425ae4e3e33ac56a0", "method": "NORMAL_FRESH_ADMISSION"}
+{"stage": "incremental_admission_journal", "serial": 33, "entry_key": "3b9196216cfd6d43168d7d305b5ce8aba34faae19e4a97ba6b5782bc3b26f06f", "method": "NORMAL_FRESH_ADMISSION"}
+{"stage": "incremental_admission_journal", "serial": 34, "entry_key": "c94a76d68c8eba27965c328b8e122b8e478648a975b8060af510cad18f9768a3", "method": "NORMAL_FRESH_ADMISSION"}
+{"phase": "normal-remaining12-and-recover23-missing-rows", "elapsed_s": 1026.488552580995, "closed_admission_rows": 35, "fresh_checkpoint_files": 12}
+{"phase": "normal-selected-query1", "elapsed_s": 1046.5537002530182, "closed_admission_rows": 35, "fresh_checkpoint_files": 12}
+{"phase": "normal-selected-query1", "elapsed_s": 1067.2287035179907, "closed_admission_rows": 35, "fresh_checkpoint_files": 12}
+{"phase": "normal-selected-query1", "elapsed_s": 1087.2910160400206, "closed_admission_rows": 35, "fresh_checkpoint_files": 12}
+{"phase": "normal-selected-query1", "elapsed_s": 1107.3734965269687, "closed_admission_rows": 35, "fresh_checkpoint_files": 12}
+{"phase": "normal-selected-query1", "elapsed_s": 1128.1087781779934, "closed_admission_rows": 35, "fresh_checkpoint_files": 12}
+{
+  "status": "PASS_INCREMENTAL35_PUBLICATION196_AND_SELECTED_NORMAL_QUERY",
+  "publication": {
+    "publication": {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/manifest.json",
+      "sha256": "a124d78bb5e50e4ff96d1af2858357651cb9eda13918c328fd753a3a4bd4650b",
+      "size_bytes": 5505173,
+      "schema": "scar.source-entry-publication"
+    },
+    "parent_publication": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/source_entry_integration_20261026/attempt03/result/publication/manifest.json",
+      "sha256": "e61120885b52e48810d4033975d82bece570b80c8251606df2ae7ae9634a734b",
+      "size_bytes": 4514287,
+      "schema": "scar.source-entry-publication"
+    },
+    "delta_publication": {
+      "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/delta/manifest.json",
+      "sha256": "9fbca500fc5a2893f61f31300221d7b70acd30e5a6bda366c54d0baa64cd5342",
+      "size_bytes": 1005443,
+      "schema": "scar.source-entry-publication"
+    },
+    "retained_parent_bodies": 161,
+    "normally_admitted_new_bodies": 35,
+    "total_bodies": 196,
+    "resumed_checkpoint_rows": 23,
+    "fresh_admissions": 12,
+    "source_context_costs": {
+      "contexts": {
+        "stored_input_bytes": 20828365,
+        "decoded_input_bytes": 183638955,
+        "stored_output_bytes": 0,
+        "decoded_output_bytes": 0,
+        "existing_output_guard_bytes": 0,
+        "context_reads": 9,
+        "context_validations": 9,
+        "context_hash_guards": 9,
+        "body_reads": 12,
+        "context_identity_guards": 72
+      },
+      "original_sp5_reader": {
+        "stored_input_bytes": 77653969,
+        "decoded_input_bytes": 418001807,
+        "stored_output_bytes": 20828365,
+        "decoded_output_bytes": 183638955,
+        "existing_output_guard_bytes": 28416747,
+        "context_reads": 0,
+        "context_validations": 0,
+        "context_hash_guards": 0,
+        "body_reads": 0
+      }
+    },
+    "parent_bodies_replayed": false,
+    "new_bodies_relowered": false,
+    "full_independent_reader_completed": false,
+    "whole_program_complete": false,
+    "qualification": "normal new-body admission plus exact immutable parent publication references; selected-body qualification remains queryable"
+  },
+  "resumed_checkpoint_rows": 23,
+  "fresh_admissions": 12,
+  "normal_selected_query": "8e387588894572494ea6b3531e35bb6f83b5aaaffbf4f3c4ecde9ce4162fef3e",
+  "selected_graph_operations": 567,
+  "catalog_measurements": {
+    "source_prepare_attempts": 0,
+    "ast_parses": 26,
+    "symtable_parses": 26,
+    "decoded_source_bytes": 1105219,
+    "owners": [
+      {
+        "auxiliary_artifacts_read": 144,
+        "physical_artifact_bytes_read": 133275973,
+        "unique_artifact_canonical_bytes": 554561848,
+        "resolved_code_definitions": 79,
+        "cached_original_definition_records": 79,
+        "cached_source_files": 0,
+        "source_reprepared": false,
+        "source_recompiled": false
+      }
+    ],
+    "resolved_entries": 35,
+    "raw_read": false,
+    "target_executed": false
+  },
+  "readonly_activity": [
+    {
+      "compile_attempts": 0,
+      "module_loads": 0,
+      "complete_descriptor_matches": 0,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 1,
+      "complete_descriptor_matches": 3,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 3,
+      "complete_descriptor_matches": 5,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 21,
+      "complete_descriptor_matches": 28,
+      "source_bytes_read": 0
+    }
+  ],
+  "old161_full_reader_replayed": false,
+  "old161_original_exit1_preserved": true,
+  "new_source_lower": 0,
+  "target_exec": 0,
+  "runtime_binding": false,
+  "elapsed_seconds": 1131.2283563329838,
+  "self_maxrss_kib": 1952640
+}
+

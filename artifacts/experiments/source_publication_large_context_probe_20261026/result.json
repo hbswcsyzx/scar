@@ -1,0 +1,104 @@
+{
+  "status": "PASS_REAL_LARGE_CONTEXT_SHARED_NORMAL_PUBLISHER",
+  "published_bodies": 2,
+  "publication": {
+    "manifest": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_publication_large_context_probe_20261026/publication/manifest.json",
+    "sha256": "1fb029f151ea307c7b8b1bcf730a4d4f7acfd6e3a6cffbfab60c45eeff1b9800",
+    "body_count": 2,
+    "schema_version": 3,
+    "construction_operations": null,
+    "target_executed": false,
+    "source_relowered": false,
+    "construction_cost_known": false,
+    "runtime_code_instance_established": false,
+    "actual_formal_routing_established": false,
+    "function_environment_established": false,
+    "state_versions_established": false,
+    "effects_established": false,
+    "whole_program_established": false,
+    "first_stage_complete": false,
+    "transformation_authorized": false
+  },
+  "source_context_costs": {
+    "contexts": {
+      "stored_input_bytes": 6666296,
+      "decoded_input_bytes": 58263496,
+      "stored_output_bytes": 0,
+      "decoded_output_bytes": 0,
+      "existing_output_guard_bytes": 0,
+      "context_reads": 1,
+      "context_validations": 1,
+      "context_hash_guards": 12,
+      "body_reads": 2
+    },
+    "original_sp5_reader": {
+      "stored_input_bytes": 19206900,
+      "decoded_input_bytes": 111975413,
+      "stored_output_bytes": 6666296,
+      "decoded_output_bytes": 58263496,
+      "existing_output_guard_bytes": 6271270,
+      "context_reads": 0,
+      "context_validations": 0,
+      "context_hash_guards": 0,
+      "body_reads": 0
+    }
+  },
+  "owned_cfg_validate": {
+    "calls": 4,
+    "elapsed_seconds": 5.95893298095325,
+    "callers": {
+      "assert_valid": 4
+    }
+  },
+  "all_cfg_validate": {
+    "128782273936160": {
+      "calls": 4,
+      "elapsed_seconds": 5.95893298095325,
+      "callers": {
+        "assert_valid": 4
+      }
+    },
+    "128782263473184": {
+      "calls": 2,
+      "elapsed_seconds": 4.023932671989314,
+      "callers": {
+        "assert_valid": 2
+      }
+    }
+  },
+  "original_sp5_stored_bytes": 12935630,
+  "original_sp5_decoded_bytes": 111975413,
+  "normal_publisher_including_plan_elapsed_seconds": 213.04448747402057,
+  "elapsed_seconds": 345.7869677320123,
+  "maxrss_kib": 1336644,
+  "readonly_activity": [
+    {
+      "compile_attempts": 0,
+      "module_loads": 0,
+      "complete_descriptor_matches": 0,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 0,
+      "complete_descriptor_matches": 0,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 1,
+      "complete_descriptor_matches": 2,
+      "source_bytes_read": 0
+    },
+    {
+      "compile_attempts": 0,
+      "module_loads": 0,
+      "complete_descriptor_matches": 0,
+      "source_bytes_read": 0
+    }
+  ],
+  "new_lower": 0,
+  "new_target": 0,
+  "instrumentation": "analysis-only wrapper calls original CFG.validate and preserves return/exception; restored in finally",
+  "whole_program_complete": false
+}

@@ -27,6 +27,7 @@ from scar.ir.program.structured import (
     PythonProtocol, PythonProtocolKind, StructuredBodyModel,
 )
 from scar.ir.program.validation import require_valid
+from scar.ir.program.source_language import FUNCTION_TRY_PROTOCOLS, NESTED_FUNCTION_PROTOCOLS, FUNCTION_IMPORT_PROTOCOLS, FUNCTION_WITH_PROTOCOLS, FUNCTION_SET_PROTOCOLS
 from scar.ir.v2.common import EvidenceKind
 
 
@@ -634,17 +635,27 @@ class StructuredBuilder(_Builder):
 
 
 def require_valid_structured_body(model, graph, interface, metadata, *, semantic, control,
-                                  language=None, source_tree=None, language_options=None, structural_only=False):
+                                  language=None, source_tree=None, language_options=None, structural_only=False,
+                                  _context_session=None, _context_reference=None):
     """Validate typed overlay endpoints; exact source replay is a separate gate."""
-    # Public validation always checks caller-owned mutable source layers.
-    return _require_valid_structured_body(model, graph, interface, metadata,
-        semantic=semantic, control=control, language=language, source_tree=source_tree,
-        language_options=language_options, structural_only=structural_only)
+    # Public/default validation always checks caller-owned source layers.
+    # A real reader session may reuse only its own still-hash-checked tables.
+    try:
+        return _require_valid_structured_body(model, graph, interface, metadata,
+            semantic=semantic, control=control, language=language, source_tree=source_tree,
+            language_options=language_options, structural_only=structural_only,
+            _context_session=_context_session, _context_reference=_context_reference)
+    finally:
+        if _context_session is not None:
+            from scar.store.source_fragments import SourceContextSession
+            if type(_context_session) is not SourceContextSession:
+                raise TypeError('source reuse requires the actual reader session')
+            _context_session._require_layers(semantic, control, _context_reference)
 
 
 def _require_valid_structured_body(model, graph, interface, metadata, *, semantic, control,
                                    sealed_source=None, language=None, source_tree=None, language_options=None,
-                                   structural_only=False):
+                                   structural_only=False, _context_session=None, _context_reference=None):
     if language is None:
         from scar.ir.program.source_language import reject_extended_protocols
         reject_extended_protocols(model)
@@ -652,7 +663,12 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
     errors = record_errors(model, StructuredBodyModel, "structured")
     if errors:
         raise ValueError("; ".join(errors))
-    if sealed_source is None:
+    if _context_session is not None or _context_reference is not None:
+        from scar.store.source_fragments import SourceContextSession
+        if type(_context_session) is not SourceContextSession or sealed_source is not None:
+            raise TypeError('source reuse requires one actual reader owner')
+        _context_session._require_layers(semantic, control, _context_reference)
+    elif sealed_source is None:
         checked_control = control.validate(semantic=semantic)
         if not checked_control["valid"]:
             raise ValueError("structured loop source control must be independently well formed")
@@ -667,7 +683,8 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
     delegated = set()
     if language is not None:
         from scar.ir.program.source_language import SourceLanguageCapability
-        if SourceLanguageCapability.GENEXPR_314_V1 in language.capabilities:
+        if any(c in language.capabilities for c in (SourceLanguageCapability.GENEXPR_314_V1,
+                SourceLanguageCapability.GENEXPR_CREATION_314_V1)):
             from scar.analysis.source_generator_validation import validate_generator_regions, root_projection
             delegated = validate_generator_regions(model, graph, interface, metadata, semantic, language,
                 source_tree=source_tree, options=language_options, structural_only=structural_only)
@@ -777,17 +794,21 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
         elif language is not None and protocol.kind in (
                 PythonProtocolKind.UNPACK_FIXED, PythonProtocolKind.BUILD_SLICE,
                 PythonProtocolKind.READ_CODE_CONSTANT, PythonProtocolKind.BUILD_CALL_POSITIONALS,
-                PythonProtocolKind.DICT_MERGE, PythonProtocolKind.CALL_FUNCTION_EX):
+                PythonProtocolKind.DICT_MERGE, PythonProtocolKind.CALL_FUNCTION_EX,
+                PythonProtocolKind.BUILD_CALL_POSITIONAL_LIST, PythonProtocolKind.EXTEND_CALL_POSITIONALS,
+                PythonProtocolKind.APPEND_CALL_POSITIONAL, PythonProtocolKind.CALL_POSITIONALS_TO_TUPLE):
             pass  # Exact shapes, source, payloads and lifetime are checked below.
+        elif language is not None and protocol.kind.value in FUNCTION_TRY_PROTOCOLS | NESTED_FUNCTION_PROTOCOLS | FUNCTION_IMPORT_PROTOCOLS | FUNCTION_WITH_PROTOCOLS | FUNCTION_SET_PROTOCOLS:
+            pass  # Exact canonical C0/C1/source checks belong to the opt-in Try adapter.
         else:
             raise ValueError("opaque protocol has no implemented structured control interface")
     if environment_profile:
         from scar.analysis.source_environment_validation import validate_environment_body
         validate_environment_body(model, graph, interface, metadata, semantic, language=language)
         from scar.analysis.source_statement_lowering import validate_statement_protocols
-        validate_statement_protocols(model, graph, interface, metadata, semantic)
+        validate_statement_protocols(model, graph, interface, metadata, semantic, language=language)
         from scar.analysis.source_string_lowering import validate_string_protocols
-        validate_string_protocols(model, graph, interface, metadata, semantic)
+        validate_string_protocols(model, graph, interface, metadata, semantic, language=language)
         from scar.analysis.source_mapping_lowering import validate_mapping_protocols
         validate_mapping_protocols(model, graph, interface, metadata, semantic, language=language)
     if language is not None:
@@ -873,6 +894,34 @@ def _require_valid_structured_body(model, graph, interface, metadata, *, semanti
             owners = {control.nodes[edge.target].source for edge in control.edges.values()
                 if edge.kind is kind and control.nodes[edge.source].source == reference
                 and control.nodes[edge.source].scope == model.definition}
+            if not owners and language is not None and source_tree is not None:
+                from scar.ir.program.source_language import SourceLanguageCapability
+                if SourceLanguageCapability.FUNCTION_TRY_314_V1 in language.capabilities:
+                    # Old control-flow artifacts explicitly retain Try as a
+                    # gap, so nested handler Break/Continue has no old edge.
+                    # Resolve its exact lexical AST owner, never invent a CFG
+                    # edge or ignore a contradictory existing owner.
+                    expected="Break" if kind is EdgeKind.BREAK else "Continue"
+                    span=lambda n:(n.lineno,n.end_lineno,n.col_offset,n.end_col_offset)
+                    subject=(model.source.start_line,model.source.end_line,model.source.start_column,model.source.end_column)
+                    roots=[n for n in ast.walk(source_tree)if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))and span(n)==subject]
+                    found=[]
+                    def descend(node,stack):
+                        if type(node).__name__==expected and span(node)==(reference.start_line,reference.end_line,reference.start_column,reference.end_column):
+                            if stack:found.append(stack[-1])
+                            return
+                        if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.Lambda,ast.ClassDef)):return
+                        if isinstance(node,(ast.For,ast.While,ast.AsyncFor)):
+                            for child in node.body:descend(child,stack+(node,))
+                            for child in node.orelse:descend(child,stack)
+                        else:
+                            for child in ast.iter_child_nodes(node):descend(child,stack)
+                    if len(roots)==1:
+                        for child in roots[0].body:descend(child,())
+                    if len(found)==1:
+                        refs=[a.reference for a in semantic.source_atoms.values()if a.kind==type(found[0]).__name__
+                            and (a.reference.start_line,a.reference.end_line,a.reference.start_column,a.reference.end_column)==span(found[0])]
+                        if len(refs)==1:return refs[0]
             if len(owners) != 1:
                 raise ValueError("source loop transfer has no unique lexical owner")
             return next(iter(owners))

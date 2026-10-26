@@ -495,7 +495,18 @@ def _lower_prepared(context, entry, *, source, max_operations, expand_candidates
         if expand_candidates:
             raise ValueError("environment source bodies require root-only expansion")
         from scar.analysis.environment_lowering import StructuredEnvironmentBuilder
-        return StructuredEnvironmentBuilder(context, entry, source=source, max_operations=max_operations,
+        builder = StructuredEnvironmentBuilder
+        if language_options is not None:
+            from scar.ir.program.source_language import SourceLanguageCapability
+            if SourceLanguageCapability.FUNCTION_TRY_314_V1 in language_options.capabilities:
+                from scar.analysis.source_function_try_lowering import FunctionTryBuilder
+                builder = FunctionTryBuilder
+            if SourceLanguageCapability.FUNCTION_WITH_314_V1 in language_options.capabilities:
+                if SourceLanguageCapability.FUNCTION_TRY_314_V1 not in language_options.capabilities:
+                    raise ValueError('function With requires the existing paired propagation/C0/C1 capability')
+                from scar.analysis.source_with_lowering import FunctionWithBuilder
+                builder = FunctionWithBuilder
+        return builder(context, entry, source=source, max_operations=max_operations,
                                              sealed_source=sealed_source, language_options=language_options).run()
     if profile is BodyLoweringProfile.STRUCTURED_BODY:
         if expand_candidates:
@@ -1338,6 +1349,9 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
                 raise ValueError("source context reuse requires a live exact STRUCTURE session")
             # Reject stale private IR before any body checker consumes it.
             _context_session._claim(result, _context_reference)
+            # Main's Try/call-expansion/function-creation checkers retain
+            # their exact-source STRUCTURE policy under the private owner.
+            source_texts = _context_session._texts
         if structural_only and result.language is None:
             raise ValueError("historical source replay policy is unchanged")
         if result.language is not None:
@@ -1360,17 +1374,37 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             if result.frame is not None or result.interface is None:
                 raise ValueError("structured bodies require a structured interface, not a legacy frame overlay")
             source_tree = None
-            if result.language is not None and not structural_only:
-                if language_options is None:
+            from scar.ir.program.source_language import SourceLanguageCapability
+            try_source = result.language is not None and SourceLanguageCapability.FUNCTION_TRY_314_V1 in result.language.capabilities
+            call_source = result.language is not None and SourceLanguageCapability.CALL_EXPANSION_314_V1 in result.language.capabilities
+            function_source = result.language is not None and SourceLanguageCapability.NESTED_FUNCTION_314_V1 in result.language.capabilities
+            import_source = result.language is not None and SourceLanguageCapability.FUNCTION_IMPORT_314_V1 in result.language.capabilities
+            creation_source = result.language is not None and SourceLanguageCapability.GENEXPR_CREATION_314_V1 in result.language.capabilities
+            set_source = result.language is not None and SourceLanguageCapability.SET_DISPLAY_314_V1 in result.language.capabilities
+            unpack_source = result.language is not None and SourceLanguageCapability.UNPACK_TARGETS_314_V1 in result.language.capabilities
+            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source):
+                if not structural_only and language_options is None:
                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
-                with tokenize.open(result.metadata.source.path) as stream:
-                    source_text = stream.read()
+                if structural_only:
+                    if source_texts is None or result.metadata.source.path not in source_texts:
+                        raise ValueError("function Try STRUCTURE requires its exact retained source text" if try_source
+                                         else "function definition STRUCTURE requires its exact retained source text" if function_source
+                                         else "function import STRUCTURE requires its exact retained source text" if import_source
+                                         else "generator creation STRUCTURE requires its exact retained source text" if creation_source
+                                         else "set display STRUCTURE requires its exact retained source text" if set_source
+                                         else "unpack target STRUCTURE requires its exact retained source text" if unpack_source
+                                         else "expanded call STRUCTURE requires its exact retained source text")
+                    source_text = source_texts[result.metadata.source.path]
+                else:
+                    with tokenize.open(result.metadata.source.path) as stream:
+                        source_text = stream.read()
                 if "sha256:" + hashlib.sha256(source_text.encode()).hexdigest() != result.metadata.source.fingerprint:
                     raise ValueError("v5 source text changed")
                 source_tree = ast.parse(source_text, filename=result.metadata.source.path)
             require_valid_structured_body(result.structured, result.graph, result.interface, result.metadata,
                 semantic=result.semantic, control=result.control, language=result.language,
-                source_tree=source_tree, language_options=language_options, structural_only=structural_only)
+                source_tree=source_tree, language_options=language_options, structural_only=structural_only,
+                _context_session=_context_session, _context_reference=_context_reference)
         else:
             if result.structured is not None:
                 raise ValueError("historical frame bodies cannot contain structured protocols")

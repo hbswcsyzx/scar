@@ -1,0 +1,61 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_owned_context_20261026/run.py", line 70, in <module>
+    result=publish_source_entry_deltas(parent,inputs,target,catalog,ROOT/'result',max_programs=35)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_entry_incremental.py", line 104, in publish_source_entry_deltas
+    published=publish_source_entries(session.target,session.catalog,private_requests,root/'delta',plan=plan,
+        max_programs=max_programs,max_operations_per_body=max_operations_per_body,max_record_bytes=max_record_bytes)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_program_publication.py", line 521, in publish_source_entries
+    return _publish_source_entries(base_composition, catalog, source_programs, out_dir,
+        max_programs=max_programs, max_operations_per_body=max_operations_per_body,
+        max_record_bytes=max_record_bytes, progress=progress, plan=plan)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_program_publication.py", line 541, in _publish_source_entries
+    return _publish_source_entries2(base_composition, catalog, source_programs, out_dir, plan=plan,
+        max_programs=max_programs, max_operations_per_body=max_operations_per_body,
+        max_record_bytes=max_record_bytes, progress=progress)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_program_publication.py", line 826, in _publish_source_entries2
+    entry, program, body, signature = _entry_program(catalog, request, max_operations_per_body,
+                                      ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                    max_record_bytes, publication_version=version)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_program_publication.py", line 452, in _entry_program
+    context, program = shared.read(catalog, entry, expected)
+                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_program_publication.py", line 385, in read
+    context = catalog.prepare(entry)
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/source_entry_catalog.py", line 386, in prepare
+    view = owner.source_view(entry.reference)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_attachments.py", line 799, in source_view
+    return deepcopy(self._verify_reference(reference))
+                    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_attachments.py", line 754, in _verify_reference
+    view = self._view(filename)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_attachments.py", line 692, in _view
+    view, locator = load_source_graph_artifact(path, schema=artifact["schema"],
+                    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        canonical_sha256=artifact["canonical_sha256"], canonical_bytes=artifact["canonical_bytes"],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        declaration=self._declaration(filename, "source_graph_artifact"),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        max_record_bytes=self.budget.max_record_bytes)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_layers.py", line 850, in load_source_graph_artifact
+    view = _decoded_source_layer_view(snapshot, context,
+        {name: document[name] for name in ("semantic", "semantics", "control")}, metadata, locator)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_layers.py", line 770, in _decoded_source_layer_view
+    semantics = SourceSemanticsGraph.from_dict(payload["semantics"], semantic)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/semantics_v2.py", line 572, in from_dict
+    record = decode(record_type, entry)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/record_codec.py", line 81, in decode
+    return _decode(expected, value, _record_tags(record_tags))
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/record_codec.py", line 142, in _decode
+    errors = record_errors(result, expected, expected.__name__)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/_validation.py", line 75, in record_errors
+    return _record_errors(value, _type_plan(expected), path)
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/_validation.py", line 138, in _record_errors
+    errors.extend(_record_errors(getattr(value, name), field_plan, f"{path}.{name}"))
+                  ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/v2/_validation.py", line 138, in _record_errors
+    errors.extend(_record_errors(getattr(value, name), field_plan, f"{path}.{name}"))
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

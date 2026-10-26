@@ -1,0 +1,22 @@
+{
+  "owned_handle": 91976,
+  "actual_exit_code": 0,
+  "elapsed_seconds": 1131.2283563329838,
+  "self_maxrss_kib": 1952640,
+  "result": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation02_20261026/RESULT.json",
+  "publication": {
+    "uri": "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/source_entry_incremental35_continuation02_20261026/result/manifest.json",
+    "sha256": "a124d78bb5e50e4ff96d1af2858357651cb9eda13918c328fd753a3a4bd4650b",
+    "size_bytes": 5505173,
+    "schema": "scar.source-entry-publication"
+  },
+  "total_bodies": 196,
+  "resumed_cp2_rows": 23,
+  "fresh_admissions": 12,
+  "selected_entry": "8e387588894572494ea6b3531e35bb6f83b5aaaffbf4f3c4ecde9ce4162fef3e",
+  "selected_operations": 567,
+  "old161_full_reader_completed": false,
+  "new_lower": 0,
+  "target_exec": 0,
+  "runtime_binding": false
+}
