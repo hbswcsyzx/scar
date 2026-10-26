@@ -163,12 +163,18 @@ class CallOperandReport:
 def link_call_operands(trace, project_root, inventory=None, *, frame_budget=CallEdgeBudget(),
                        operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
                        include_environments=False, composition=None, source_bindings=None,
-                       coordinates=None, code_witnesses=None, progress=None):
-    """Independent public replay always owns its raw reader."""
+                       coordinates=None, code_witnesses=None, progress=None,
+                       source_port_consumer=None, source_port_budget=None):
+    """Own one raw replay; optional consumer(model, check) gets a separate sidecar.
+
+    ``check`` verifies a selected typed source-port record against this same
+    fresh session. The historical CallOperandReport/wire is unchanged.
+    """
     return _link_call_operands(trace, project_root, inventory, frame_budget=frame_budget,
         operand_budget=operand_budget, route_budget=route_budget, include_environments=include_environments,
         composition=composition, source_bindings=source_bindings, coordinates=coordinates,
-        code_witnesses=code_witnesses, progress=progress)
+        code_witnesses=code_witnesses, progress=progress,
+        source_port_consumer=source_port_consumer, source_port_budget=source_port_budget)
 
 
 def _link_call_operands_owned(owner, trace, project_root, **kwargs):
@@ -180,13 +186,23 @@ def _link_call_operands_owned(owner, trace, project_root, **kwargs):
 def _link_call_operands(trace, project_root, inventory=None, *, frame_budget=CallEdgeBudget(),
                         operand_budget=CallOperandBudget(), route_budget=OperandRouteBudget(),
                         include_environments=False, composition=None, source_bindings=None,
-                        coordinates=None, code_witnesses=None, progress=None, _owner=None):
+                        coordinates=None, code_witnesses=None, progress=None, _owner=None,
+                        source_port_consumer=None, source_port_budget=None):
     """Automatically reconstruct original call operands and typed core routes."""
     from scar.analysis.call_operand_reader import read_call_operands
     from scar.analysis.call_operand_routes import build_operand_routes
 
     from scar.analysis.source_body_access import SourceBodyAccess
     _require(progress is None or callable(progress), "progress must be callable or None")
+    _require(source_port_consumer is None or callable(source_port_consumer),
+             "source-port consumer must be callable or None")
+    _require(source_port_consumer is not None or source_port_budget is None,
+             "source-port budget requires its explicit consumer")
+    if source_port_consumer is not None:
+        from scar.ir.program.source_call_bindings import SourceCallPortBudget
+        source_port_budget = SourceCallPortBudget() if source_port_budget is None else source_port_budget
+        _require(type(source_port_budget) is SourceCallPortBudget, "source-port budget must be typed")
+        source_port_budget.__post_init__()
     def notify(stage, **fields):
         if progress is not None:
             progress({"stage": stage, **fields})
@@ -254,6 +270,11 @@ def _link_call_operands(trace, project_root, inventory=None, *, frame_budget=Cal
                     entry_parameters.append(ReferenceOccurrence(edge.entry.anchor, edge.entry.invocation,
                         edge.entry.invocation, ReferenceRole.PARAMETER, parameter.name, parameter.ref,
                         source_reference=source, core_value=value))
+    if source_port_consumer is not None:
+        from scar.analysis.source_call_bindings import build_source_call_port_bindings
+        source_ports = build_source_call_port_bindings(call_model=model, operand_model=operands,
+            inventory=inventory, sources=sources, budget=source_port_budget, consumer=source_port_consumer)
+        notify("SOURCE_CALL_PORTS_BUILT", summary=source_ports.summary())
     return CallOperandReport(model, operands, routing, environments,
                              access.receipt() if access is not None else None, tuple(entry_parameters))
 
