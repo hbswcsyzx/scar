@@ -19,6 +19,7 @@ from scar.ir.program.state_modes import AccessMode
 from scar.ir.program.structured import PythonProtocolKind as Kind
 from scar.ir.semantics_v2 import Opcode
 from scar.ir.v2.semantic import OperationKind, SemanticRelation
+from scar.ir.program.source_language import STARRED_DISPLAY_PROTOCOLS, SourceLanguageCapability as DisplayCapability
 
 
 _KINDS = frozenset((Kind.LOOKUP_GLOBAL, Kind.READ_FREE_CELL, Kind.READ_LOCAL_CELL,
@@ -85,6 +86,11 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
     for protocol in model.protocols:
         operation, kind = operations[protocol.operation], protocol.kind
         link = links[operation.id]
+        if kind.value in STARRED_DISPLAY_PROTOCOLS:
+            need(language is not None and DisplayCapability.STARRED_DISPLAY_314_V1 in language.capabilities
+                 and semantic.source_atoms[link.source.atom_id].kind in ('Tuple','List'),
+                 'display primitive has no original container source/capability')
+            continue  # Complete original AST/SG/ordered port checks belong to its display validator.
         if kind is Kind.COMPREHENSION_BUILD:
             from scar.ir.program.source_language import SourceLanguageCapability
             declaration=semantic.definitions.get(link.semantic_operation)

@@ -7,14 +7,15 @@ python -B -m scar.cli model-run --from-model-run DEPENDENCY_RUN/model-run.json \
   --stage source-entries --out fresh-entry-run
 ```
 
-CLI默认`--source-entry-profile latest`，从公共registry选择当前V9。
+CLI默认`--source-entry-profile latest`，从公共registry选择当前V10。
 原entry/catalog/readonly CodeWitness解析后，准确的own-function AST自动选择Try、
 expanded-call、nested-function、import、flat With、独立generator创建及Set能力。
 AugAssign自动启用已有FunctionTry/in-place协议；V7将固定解包结果接回既有heap/cell
 store，不重复实现赋值协议。
 V8选择原Lambda表达式Region与CodeWitness常量槽；Lambda defaults只在创建时求值，
 body和captured cell读取在独立Region内表达。V9继续按AST选择单同步子句的eager推导式，
-复用当前函数的CFG/SSA、原作用域slot及迭代/容器状态，不创建伪函数frame。创建和
+复用当前函数的CFG/SSA、原作用域slot及迭代/容器状态，不创建伪函数frame。V10继续
+识别Tuple/List的starred display，复用有序构造/扩展与生命周期，和call参数展开分开。创建和
 惰性body可以建模，不要求先证明未知C消费者的驱动次数。策略写入plan digest，每次实际选择记录
 active capabilities；缺依据保原frontier。`legacy`与API默认None保留旧能力选择。
 本阶段也自动导出`products.capture_plan`，可交给`trace --capture-plan URI

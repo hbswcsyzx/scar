@@ -1386,7 +1386,8 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
             unpack_source = result.language is not None and SourceLanguageCapability.UNPACK_TARGETS_314_V1 in result.language.capabilities
             lambda_source = result.language is not None and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 in result.language.capabilities
             comprehension_source = result.language is not None and SourceLanguageCapability.COMPREHENSION_314_V1 in result.language.capabilities
-            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source or lambda_source or comprehension_source):
+            display_source = result.language is not None and SourceLanguageCapability.STARRED_DISPLAY_314_V1 in result.language.capabilities
+            if result.language is not None and (not structural_only or try_source or call_source or function_source or import_source or creation_source or set_source or unpack_source or lambda_source or comprehension_source or display_source):
                 if not structural_only and language_options is None:
                     raise ValueError("v5 source replay requires explicit independently supplied language inputs")
                 if structural_only:
@@ -1397,6 +1398,7 @@ def validate_source_program(result: SourceProgram, *, max_operations: int = 1000
                                          else "generator creation STRUCTURE requires its exact retained source text" if creation_source
                                          else "set display STRUCTURE requires its exact retained source text" if set_source
                                          else "unpack target STRUCTURE requires its exact retained source text" if unpack_source
+                                         else "starred display STRUCTURE requires its exact retained source text" if display_source
                                          else "comprehension STRUCTURE requires its exact retained source text" if comprehension_source
                                          else "Lambda expression STRUCTURE requires its exact retained source text" if lambda_source
                                          else "expanded call STRUCTURE requires its exact retained source text")

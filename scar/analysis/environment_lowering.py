@@ -45,6 +45,10 @@ def captured_cell_slot(definition, name):
 
 
 def dispatch_source_expression(builder, node, cursor):
+    if (builder.has_language("STARRED_DISPLAY_314_V1") and isinstance(node,(ast.Tuple,ast.List))
+            and isinstance(node.ctx,ast.Load) and any(isinstance(n,ast.Starred)for n in node.elts)):
+        from scar.analysis.source_display_lowering import lower_starred_display
+        return lower_starred_display(builder,node,cursor)
     if builder.has_language("COMPREHENSION_314_V1") and isinstance(node,(ast.ListComp,ast.SetComp,ast.DictComp)):
         from scar.analysis.source_comprehension_lowering import lower_comprehension
         return lower_comprehension(builder,node,cursor)
