@@ -11,7 +11,7 @@
 | 通用 frame/control 根 | 同SP8已接C传播pair与Try/except-as清理：354ops/9顶层接口，剩余Assert/Expr两句REQUIRED；主树同C-SP8与旧function SP5普通读回通过。原producer因UUID freeze漏项exit1保留，独立normal-reader postflight0。实际frame/namespace、内容/effects仍OPEN。见[C准确接入](../artifacts/experiments/module_try_propagation_c_applied_20261026/REPORT.md)与[整体设计](../artifacts/analysis/module_structured_frame_plan_20261025/PLAN.md)。 |
 | callee-entry 参数边 | snapshot→原 formal port 的局部 projection 已通过真实隔离门及主树旧 SP5/typed consumer：271次入口/566个参数观测，260次入口/520 ports 对应，11次保留 frontier。caller 实参表达式、对象/内容身份与完整 ExecutionModel 不能据此宣布完成；见[实际接入报告](../artifacts/experiments/callee_entry_routing_applied_20261025/REPORT.md)。 |
 | project/dependency 统一出版 | 同一次新CPU capture的正常CLI已实际通过：3成功SP5全部消费，project REVISE2、dependency ADD1，5groups/12calls保全，body-linked10/source-only1/unresolved1。五类动态接口仍各12 OPEN；project ADD、父overlay继承和v5新路径未实测。见[真实门报告](../artifacts/experiments/project_dependency_publication_gate_20261025/REPORT.md)。 |
-| 真实 LeWM source858 运行接线 | 已在独立source858-runtime树实际启动root11969，完整100438 calls、原scope/所有frontier保留；先核准确15 CP2/ancestor，再执行一次fresh source→dispatch→SBA。尚无终态或新动态计数，见[批准与实际启动](../artifacts/analysis/source858_runtime_reconnection_20261026/ROOT_DECISION.md)。 |
+| 真实 LeWM source858 运行接线 | root11969已actual0/GNU39:42.90，完整100438 calls保留；当前92bodygroups/6882calls、source-only88592/unresolved4964。15图实测4+179次，旧6699在本门重新统计；原source guards/collector/runtime/state等欠账保留。见[真实终态](../artifacts/experiments/first_stage_source858_current_20261026/REPORT.md)。 |
 
 这些是模型连接与类型修正，不是优化候选或 backend。下一版本仍必须保完整源码、
 调用和资源分母，并分别报告 source topology、运行对应、效果与完成状态。
@@ -22,7 +22,7 @@
 | --- | --- | --- |
 | S1 模型与来源 | 审计真实类/字段/codec/producer、身份与关系；固定声明/归档/索引职责 | 每个必需部分有明确表达及获取来源；缺失 producer 和重复权威逐条列明；审计通过不代表自动建模已完成 |
 | S2 自动分母 | 复用已保存 source/call/native/OS 清单，保留定义、实际调用和资源的独立分母 | 入口自动发现，不手选业务函数；原缺采、未尝试和不支持项始终可查 |
-| S3 自动连接 | 843快照已接回原真实运行；后继858静态快照已组合消费，继续汇总runtime增量与原生端口、内容/状态及资源关系 | 正规来源和有序端口接回唯一规范模型；source、引用、内容、state、ready 分别验收；不能以局部 PASS 关闭 S3 |
+| S3 自动连接 | 858快照已接回原完整运行，6882次接body；继续外部源码、native work、内容/状态与资源关系 | 正规来源和有序端口接回唯一规范模型；source、引用、内容、state、ready 分别验收；不能以局部 PASS 关闭 S3 |
 | S4 全流程 | 在所需新采集字段共同确定后跑未修改 LeWM 原完整入口，自动产生统一模型 | 从启动/import/加载，经推理/环境到视频写入和退出，全部必需关系无未解释断点；固定范围、版本和分母 |
 | S5 汇报停止 | 给出实体、关系、自动流程、真实模型与覆盖说明 | 原合同 S1—S4 全部满足后停止讲解，不提前进入化简 |
 
@@ -63,10 +63,11 @@ resume02 actual exit0/651.143247s、12 ordinary-reader通过。原publisher消�
 [准确结果](../artifacts/experiments/source_frontend_remainder_composition_resume02_20261025/RESULT.md)
 与[模型边界](SOURCE_CALL_MODEL.md)区分旧producer/新consumer及全部历史失败。
 
-最新完整runtime接线仍绑定843快照：该fresh联合门已exit0，source binder1次、
-不resume旧842；原100438调用中6699接其body，
-其余source-only/unresolved全保留。source-membership ancestor API及private factory/
-安装/公共消费均在此门实际执行。不能合并新旧snapshot数字。两项分别见
+最新完整runtime现已绑定858：root11969实际exit0，fresh binder1次、resume0，
+原100438调用中6882接其body；其余88592 source-only、4964 unresolved保留。
+ancestor depth4/309251028 decoded bytes、private factory安装/消费与新namespace逐项核过，
+无lower/compile/新episode。此前843/6699门作为历史保留，不能混合新旧数字。见
+[858实际结果](../artifacts/experiments/first_stage_source858_current_20261026/REPORT.md)及
 [revision](SOURCE_BODY_REVISION.md) 和
 [ancestor](SOURCE_REVISION_RUNTIME_ANCESTRY.md)。
 

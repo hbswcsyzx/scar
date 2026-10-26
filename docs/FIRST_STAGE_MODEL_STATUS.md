@@ -1,6 +1,12 @@
 # 第一阶段建模：实际状态与下一项
 
-日期：2026-10-25。**OPEN：完整 LeWM 自动建模未验收。**
+日期：2026-10-26。**OPEN：完整 LeWM 自动建模未验收。**
+
+**当前正式指针：source858 / runtime858，92个body groups、6882次body-linked calls。**
+完整原100438 calls的fresh接线11969已actual exit0/GNU39:42.90；其余source-only88592、
+unresolved4964全部保留。静态仍151files/2217definitions/858active bodies，769unsupported、
+590not attempted。下文按日期保留的runtime843/6699是历史结果，不再是最新运行指针。
+见[完整真实门报告](../artifacts/experiments/first_stage_source858_current_20261026/REPORT.md)。
 
 当前交付与下一项统一见 [FIRST_STAGE_DELIVERY.md](FIRST_STAGE_DELIVERY.md)，
 实体和完整性定义见 [合同](FIRST_STAGE_MODEL_CONTRACT.md)。以下是按日期保留的

@@ -1,7 +1,10 @@
 # 通用 kwargs 调用建模
 
 2026-10-25。Implemented，三kwargs原图发布到846后，后继12原图的普通ADD及组合消费
-已完成，当前静态source858/runtime843。历史失败均保留，完整程序仍 OPEN。
+已完成，后继完整接线当前静态source858/runtime858，92组/6882次body-linked calls。
+原100438调用均保留；15图实际4+179次，见
+[真实858门](../artifacts/experiments/first_stage_source858_current_20261026/REPORT.md)。
+下文旧runtime843/6699为按日期保留的历史状态。历史失败均保留，完整程序仍 OPEN。
 规则依据 Python AST、原 SG、编译见证和有序端口，不含 workload/function 名称判断。
 
 `f(a, **m, k=v)` 分解为 callee、位置参数及tuple、完整named-keyword runs、dict、

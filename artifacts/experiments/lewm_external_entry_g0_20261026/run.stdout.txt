@@ -1,0 +1,1 @@
+{"status": "METADATA_CATALOG_WITH_OPEN", "candidate_entries": 243, "metadata_bytes": 91942045, "wall_seconds": 3.59755981300259}

@@ -4,6 +4,14 @@
 [FIRST_STAGE_MODEL_CONTRACT.md](FIRST_STAGE_MODEL_CONTRACT.md) 为准。
 本文件统一当前执行顺序；历史 F 系列组件编号不构成串行开发队列。
 
+**真实 LeWM 最新完整运行接线：source858 / runtime858。** Root11969实际exit0，
+39:42.90/峰2228264KiB；原100438 calls中6882次接92个body，88592 source-only、4964 unresolved。
+全部15个post843原图本门实测参加183次（4+179），不从历史权重相加；
+20个只读模块/242完整CodeWitness matches、compile0，原raw/frame/operand/env/binder各一次。
+旧runtime843/6699在下文作为历史记录保留。原current source guards未刷新live目标文本，
+collector/runtime适用性、state/content/ready和第一阶段均OPEN。详见
+[真实终态与完整范围](../artifacts/experiments/first_stage_source858_current_20261026/REPORT.md)。
+
 **当前模块C的有限结果：** 同SP8已表达Try传播pair与except-as正常/异常两条清理路径，
 原C0/C1 validator及normal reader通过；主树同图与旧function SP5读回通过。
 当前354ops/9顶层接口，精确余2句REQUIRED；实际namespace/传播/runtime/状态仍OPEN。
