@@ -158,7 +158,10 @@ workload adapter.
 
 Resource sampling is an optional trace-side measurement stream. A background
 sampler records process CPU utilization from `/proc` and GPU utilization/memory
-from `nvidia-smi` into `resources.jsonl` plus a summary. It is disabled by
+from one persistent `nvidia-smi` query process into `resources.jsonl` plus a summary.
+Bounded nonblocking reads retain the provider timestamp; missing updates do not
+reuse stale observations. The sampler stops and reaps only its own query process.
+It is disabled by
 default; sampling is evidence about the run and is never used as a purity or
 legality proof.
 
