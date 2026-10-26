@@ -1,0 +1,486 @@
+{
+  "schema": "scar.tensor-storage-observation-query",
+  "schema_version": 1,
+  "binding": {
+    "run": {
+      "kind": "exec_run",
+      "value": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3",
+      "wire": "exec_run:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3"
+    },
+    "process": {
+      "kind": "exec_process_instance",
+      "value": "capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036",
+      "wire": "exec_process_instance:capture:ca66b69a8cfc3c1b88e0c22e8ec00d58d735fd016d16edf85e8cf0ac51eb5fc3:process:77d2388db95219723de606b529484e14f8b1912e51b6e58930344d911e863036"
+    },
+    "object": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+        "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+        "size_bytes": 73304,
+        "schema": "scar.partitioned-ir-bundle"
+      },
+      "object": {
+        "kind": "object",
+        "value": "dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a:weak:1578961:38943",
+        "wire": "object:dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a:weak:1578961:38943"
+      }
+    },
+    "marker": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/instances/000000.jsonl.gz",
+        "sha256": "1127cf1444c192096dcaaeb6d5005770499ce5920346d02d55e8748a1d3a9770",
+        "size_bytes": 930500,
+        "schema": "scar.bundle-record-chunk"
+      },
+      "locator": "#/lines/4576/record"
+    },
+    "marker_input": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/instances/000000.jsonl.gz",
+        "sha256": "1127cf1444c192096dcaaeb6d5005770499ce5920346d02d55e8748a1d3a9770",
+        "size_bytes": 930500,
+        "schema": "scar.bundle-record-chunk"
+      },
+      "locator": "#/lines/4576/record/metadata/tensor_slots/0"
+    },
+    "physical_association": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/tensor-physical.json.gz",
+        "sha256": "38f7d757e9d334d05bea06cfc7cd0d96bd9d4fa43bd144ce396b0aa6d23801e8",
+        "size_bytes": 5565923,
+        "schema": "scar.tensor-physical-import"
+      },
+      "locator": "#/associations/874"
+    },
+    "source_context": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/dispatch-bridge.json.gz",
+        "sha256": "6839cdf8f2849fd30283fb713d2b9b4912252a0b83a13438c59d66ace54e60f4",
+        "size_bytes": 5690003,
+        "schema": "scar.dispatch-observation-import"
+      },
+      "locator": "#/observations/1738"
+    },
+    "storage_region": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/values/regions/000000.jsonl.gz",
+        "sha256": "b512b231531332fd08747cb1ed0c6ca7fbefe922373038f413a550def95527e8",
+        "size_bytes": 846797,
+        "schema": "scar.bundle-record-chunk"
+      },
+      "locator": "#/lines/875/record"
+    },
+    "allocation": {
+      "artifact": {
+        "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/values/allocations/000003.jsonl.gz",
+        "sha256": "cdab755272ca43ebc6a4992865f121a807f3b18cfdb27522000abfe58aac8192",
+        "size_bytes": 1202111,
+        "schema": "scar.bundle-record-chunk"
+      },
+      "locator": "#/lines/500/record"
+    },
+    "scope": "EXACT_HELD_TENSOR_MARKER_OBSERVATION"
+  },
+  "marker_instance": {
+    "id": {
+      "kind": "opinst",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5470",
+      "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5470"
+    },
+    "definition": {
+      "kind": "opdef",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:54a6d6b2de31f5b07556b27f4c3b0a7d1ed4665eca77d8f848244805ce77f8ba",
+      "wire": "opdef:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:54a6d6b2de31f5b07556b27f4c3b0a7d1ed4665eca77d8f848244805ce77f8ba"
+    },
+    "process_id": 1578961,
+    "thread_id": 1578961,
+    "parent": {
+      "kind": "opinst",
+      "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5469",
+      "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5469"
+    },
+    "control_scope": null,
+    "iteration": {},
+    "start_ns": 2145693579651670,
+    "end_ns": 2145693580750490,
+    "status": "Observed",
+    "metadata": {
+      "category": "user_annotation",
+      "clock_domain": "kineto",
+      "correlation": null,
+      "cpu_join_assumptions": [
+        "artifacts belong to the same supplied capture"
+      ],
+      "cpu_join_basis": "unique positive RF ID and exact name in supplied capture",
+      "cpu_join_status": "Inferred",
+      "ctrl_deps": 5469,
+      "eto_tid": 1,
+      "external_id": 4575,
+      "kineto_reference": "sha256:f2ba7bda8a41b385361373ea5efcbcfcc487a095eaf23cb48ebd4a898d74cebd#/traceEvents/4633",
+      "node_id": 5470,
+      "parent_basis": "ETO ctrl_deps collector stack only",
+      "provider": "ETO",
+      "raw_pid": 1578961,
+      "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/4575",
+      "raw_resource": {},
+      "raw_tid": 1578961,
+      "rf_id": 4575,
+      "tensor_slots": [
+        {
+          "descriptor_id": "c14879a584f9e60c80e64d4fba159d77784dc447aaba89f642f9e5288aa51c8d",
+          "native_schema_binding": {
+            "formal_slot": null,
+            "gap": "actual_tensor_slots_have_no_qualified_schema",
+            "schema_sha256": null,
+            "status": "UNQUALIFIED"
+          },
+          "ordered_path": [
+            0
+          ],
+          "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:5462",
+          "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/4575/inputs/values/0",
+          "role": "inputs"
+        }
+      ],
+      "thread_namespace": "Kineto host thread"
+    }
+  },
+  "marker_port": {
+    "descriptor_id": "c14879a584f9e60c80e64d4fba159d77784dc447aaba89f642f9e5288aa51c8d",
+    "native_schema_binding": {
+      "formal_slot": null,
+      "gap": "actual_tensor_slots_have_no_qualified_schema",
+      "schema_sha256": null,
+      "status": "UNQUALIFIED"
+    },
+    "ordered_path": [
+      0
+    ],
+    "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:5462",
+    "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/4575/inputs/values/0",
+    "role": "inputs"
+  },
+  "provider_reference": {
+    "reference_id": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:5462",
+    "provider": "torch.eto",
+    "scope": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612",
+    "domain": "tensor_reference_token",
+    "token": 5462,
+    "evidence": [
+      {
+        "kind": "Observed",
+        "references": [
+          "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/4567/outputs/values/0"
+        ],
+        "scope": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612",
+        "confidence": null,
+        "assumptions": []
+      }
+    ],
+    "metadata": {
+      "allocation_generation": null,
+      "descriptors": [
+        {
+          "descriptor_id": "c14879a584f9e60c80e64d4fba159d77784dc447aaba89f642f9e5288aa51c8d",
+          "shape": [
+            192
+          ],
+          "strides": [
+            1
+          ],
+          "tensor_tuple": [
+            5462,
+            5458,
+            0,
+            192,
+            4,
+            "cpu"
+          ],
+          "type": "Tensor(float)"
+        },
+        {
+          "descriptor_id": "fa316ed6500b0bf01fc6d50691412c973d793f5c3607377de9794f93813835f2",
+          "shape": [
+            192
+          ],
+          "strides": [
+            1
+          ],
+          "tensor_tuple": [
+            5462,
+            20830,
+            0,
+            192,
+            4,
+            "cuda:0"
+          ],
+          "type": "Tensor(float)"
+        }
+      ],
+      "lifetime": "UNKNOWN",
+      "logical_version": null,
+      "observations": 42
+    }
+  },
+  "provider_reference_source": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/evidence/provider_references/000000.jsonl.gz",
+      "sha256": "ced210d25446e0bcf10e7d8eaed9085fb5456ac9a21754e67eb9a99b73c51a7f",
+      "size_bytes": 1619202,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/509/record"
+  },
+  "object_record": {
+    "id": {
+      "kind": "object",
+      "value": "dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a:weak:1578961:38943",
+      "wire": "object:dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a:weak:1578961:38943"
+    },
+    "scope": "dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a",
+    "evidence": [
+      {
+        "kind": "Inferred",
+        "references": [
+          "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/4575/inputs/values/0",
+          "sha256:2d0eb6e6aea7b7d3d284c3be55fa2fa11d75cda9ab29284567ca4d8b5d2a8970#",
+          "sha256:2d721c4b1ad93c5fde4f3d42aba17706c0e564cfa5d8ed09c0ce4ba777725216#line/2608",
+          "sha256:8384d6582115721b19ed5c5405c79205fd7dd458a7ff1c68fd39a518b88f1d8a#"
+        ],
+        "scope": "dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a",
+        "confidence": null,
+        "assumptions": [
+          "association is local to this observation; no persistent content/storage identity",
+          "capture membership verified",
+          "fixed production collector passed the same held Tensor to this exact marker argument",
+          "retained ancestor is not a direct caller"
+        ]
+      }
+    ],
+    "metadata": {
+      "identity_basis": "existing call recorder weak-reference epoch",
+      "lifetime": "UNKNOWN",
+      "process_id": 1578961,
+      "weak_token": "weak:1578961:38943"
+    }
+  },
+  "object_record_source": {
+    "artifact": {
+      "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/values/objects/000000.jsonl.gz",
+      "sha256": "d57e2e4fcb767c72d97f6ef0ae73c1a965df8542c90056489a64e08934a0e864",
+      "size_bytes": 398807,
+      "schema": "scar.bundle-record-chunk"
+    },
+    "locator": "#/lines/504/record"
+  },
+  "storage_region": {
+    "id": {
+      "kind": "region",
+      "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:region:2205:0",
+      "wire": "region:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:region:2205:0"
+    },
+    "allocation": {
+      "kind": "alloc",
+      "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:9d0c8f1de529dbf357c25a7ae05c04683e6e2b32053f0e0ce01c841d7688fbb6",
+      "wire": "alloc:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:9d0c8f1de529dbf357c25a7ae05c04683e6e2b32053f0e0ce01c841d7688fbb6"
+    },
+    "offset": 0,
+    "shape": [
+      192
+    ],
+    "strides": [
+      1
+    ],
+    "dtype": "torch.float32",
+    "device": "cpu",
+    "layout": "strided",
+    "metadata": {
+      "argument_ordinal": 0,
+      "association_persistent": false,
+      "eto_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/4575/inputs/values/0",
+      "impl_ptr": 110368586262784,
+      "layout_normalization_rule": "PINNED_TORCH_LAYOUT_V1",
+      "logical_version": null,
+      "marker_instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5470",
+      "offset_basis": "same held Tensor, exact ETO marker argument storage_offset",
+      "physical_observation": "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/2205/arguments/0",
+      "provider_layout": "torch.strided",
+      "provider_tensor_id": 87
+    }
+  },
+  "allocation": {
+    "id": {
+      "kind": "alloc",
+      "value": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:9d0c8f1de529dbf357c25a7ae05c04683e6e2b32053f0e0ce01c841d7688fbb6",
+      "wire": "alloc:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:9d0c8f1de529dbf357c25a7ae05c04683e6e2b32053f0e0ce01c841d7688fbb6"
+    },
+    "device": "cpu",
+    "nbytes": 768,
+    "allocator_token": "provider-allocation-id:397",
+    "lifetime_scope": "tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd",
+    "metadata": {
+      "address": 110368590668160,
+      "allocation_receipts": [
+        "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/2201",
+        "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/8433"
+      ],
+      "birth_reference": "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/2201",
+      "free_reference": "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/8433",
+      "identity_basis": "same profiler result calculateUniqueTensorIDs allocation_id",
+      "legacy_kineto_allocation_correspondence_established": false,
+      "lifetime_status": "OBSERVED_BIRTH_AND_FREE",
+      "physical_cuda_allocation_established": false,
+      "provider_allocation_id": 397,
+      "resource_ready_established": false
+    }
+  },
+  "physical_association": {
+    "allocation": "alloc:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:epoch:9d0c8f1de529dbf357c25a7ae05c04683e6e2b32053f0e0ce01c841d7688fbb6",
+    "argument_ordinal": 0,
+    "marker_instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5470",
+    "object": "object:dispatch-reference:6c23a3c4086ad54095a7a5a54b15804c33f7bb6decc7e6fd2e8886468c3b1d9a:weak:1578961:38943",
+    "physical_reference": "sha256:852de7a088781f2c721dc8e06633fecf9f1c9f6034c54bfde6798f45c31c13c7#line/2205/arguments/0",
+    "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:5462",
+    "storage_region": "region:tensor-physical:44b8f0b49dea1154bdc6896197ecb18e706f6b6f71ce9bc3975f5db7da0508dd:region:2205:0"
+  },
+  "python_context": {
+    "actual_provider_ancestry": [
+      {
+        "ctrl_deps": 5469,
+        "instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5470",
+        "node_id": 5470,
+        "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/4575",
+        "rf_id": 4575
+      },
+      {
+        "ctrl_deps": 5468,
+        "instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5469",
+        "node_id": 5469,
+        "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/4576",
+        "rf_id": 4574
+      },
+      {
+        "ctrl_deps": 2,
+        "instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5468",
+        "node_id": 5468,
+        "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/4577",
+        "rf_id": 4573
+      },
+      {
+        "ctrl_deps": 1,
+        "instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:2",
+        "node_id": 2,
+        "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/0",
+        "rf_id": 0
+      },
+      {
+        "ctrl_deps": 1,
+        "instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:1",
+        "node_id": 1,
+        "raw_reference": "sha256:11960422233619b68d4a42d5b699a34cb57349df04df0bc90b6fd5ef3d8e4684#/nodes/310411",
+        "rf_id": 0
+      }
+    ],
+    "marker_instance": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:5470",
+    "native_tid": 1578961,
+    "native_tid_verified": true,
+    "phase": "span",
+    "python_ident": 133490304255808,
+    "retained_ancestor": {
+      "bytecode_offset": 60,
+      "code": "pycode-v2:2c23482e544d94f4e687529c9731faf8a65280c97c2aa6c22b6e272e75f4b440",
+      "invocation": 1707,
+      "kind": "retained ancestor context, not a proven direct caller",
+      "site": {
+        "code": "pycode-v2:2c23482e544d94f4e687529c9731faf8a65280c97c2aa6c22b6e272e75f4b440",
+        "offset": 60,
+        "opname": "CALL_KW",
+        "position": [
+          431,
+          431,
+          26,
+          78
+        ]
+      },
+      "source_file": "/home/zyf/miniconda3/envs/lewm/lib/python3.14/site-packages/transformers/models/vit/modeling_vit.py"
+    },
+    "sequence": 870,
+    "source_line": 2608
+  },
+  "python_payload_path": [
+    0,
+    0
+  ],
+  "actual_operator_candidates": [
+    {
+      "interface": {
+        "kind": "opinst",
+        "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26099",
+        "wire": "opinst:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:eto:26099"
+      },
+      "port": {
+        "port_id": "eto:21684:input:0",
+        "direction": "input",
+        "path": [
+          0
+        ],
+        "source_locator": "/inputs/values/0",
+        "kind": "TENSOR",
+        "provider_type": "Tensor(float)",
+        "formal_slot": {
+          "kind": "slot",
+          "value": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:f84edf0e2aec52a578de495a53f5103d408ee4a70c90feb0780075eaca8f7d98:schema:input_slots:0",
+          "wire": "slot:native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:symbol:f84edf0e2aec52a578de495a53f5103d408ee4a70c90feb0780075eaca8f7d98:schema:input_slots:0"
+        },
+        "formal_status": "QUALIFIED",
+        "provider_reference": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:tensor-token:5462",
+        "descriptor_id": "fa316ed6500b0bf01fc6d50691412c973d793f5c3607377de9794f93813835f2",
+        "original_edge": {
+          "artifact": {
+            "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/native/bundle-partitions/manifest.json",
+            "sha256": "3a2a80d64ff7e67d72545aefe0154b0f48fa18a855847005675221c86954c29b",
+            "size_bytes": 73304,
+            "schema": "scar.partitioned-ir-bundle"
+          },
+          "edge": "native:636fde61a45803f11712767bc1cbf0b0ea3de13b14e0b27edc2d6071daea1612:edge:31151"
+        },
+        "logical_value": {
+          "kind": "lv",
+          "value": "native-port-payload:d7e34f17dc72f42ab27151aed78787112189dd2bbab75fb421f0ba9f090b3e60",
+          "wire": "lv:native-port-payload:d7e34f17dc72f42ab27151aed78787112189dd2bbab75fb421f0ba9f090b3e60"
+        },
+        "value_version": {
+          "logical_value": {
+            "kind": "lv",
+            "value": "native-port-payload:d7e34f17dc72f42ab27151aed78787112189dd2bbab75fb421f0ba9f090b3e60",
+            "wire": "lv:native-port-payload:d7e34f17dc72f42ab27151aed78787112189dd2bbab75fb421f0ba9f090b3e60"
+          },
+          "version": 0,
+          "wire": "lv:native-port-payload:d7e34f17dc72f42ab27151aed78787112189dd2bbab75fb421f0ba9f090b3e60@v0"
+        },
+        "materialization": {
+          "kind": "mat",
+          "value": "native-port-payload:d7e34f17dc72f42ab27151aed78787112189dd2bbab75fb421f0ba9f090b3e60",
+          "wire": "mat:native-port-payload:d7e34f17dc72f42ab27151aed78787112189dd2bbab75fb421f0ba9f090b3e60"
+        }
+      },
+      "qualification": "PROVIDER_REFERENCE_CANDIDATE_ONLY"
+    }
+  ],
+  "marker_materialization": null,
+  "scope": "existing marker object/port/storage observation only; retained same-capture provenance, no raw replay",
+  "evidence_kind": "INFERRED_FIXED_COLLECTOR_SAME_HELD_TENSOR",
+  "open": [
+    "actual-op storage binding at a different point",
+    "logical content/version identity",
+    "actual mutation and foreign writes",
+    "allocation bounds when no birth receipt",
+    "ready/completion and persistent object lifetime"
+  ],
+  "measurements": {
+    "stored_bytes": 27017499,
+    "decoded_bytes": 457068086,
+    "total_bytes": 484085585,
+    "elapsed_seconds": 7.341810357989743
+  }
+}

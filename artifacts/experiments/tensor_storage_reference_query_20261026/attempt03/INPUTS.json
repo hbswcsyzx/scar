@@ -1,0 +1,28 @@
+{
+  "fragment": {
+    "uri": "/home/zyf/AAA/scar-worktrees/frame-entry-routing/artifacts/analysis/native_operator_value_interface_20261026/publication-v3/operator-values.json",
+    "sha256": "b42eeb7d26901c81f1f9c14330f76d67aea6b7c48f51204ba978a39fbe00132c",
+    "size_bytes": 74854,
+    "schema": "scar.native-operator-value-interface"
+  },
+  "capture_model": {
+    "uri": "/home/zyf/AAA/scar-worktrees/structured-program-model/artifacts/experiments/native_inputs_full_20261026/native-import/capture-model.json",
+    "sha256": "4d370e7cb6e1d53e1bb45040d85d2fcd0f96f4b47a2010fded67ba8130222eff",
+    "size_bytes": 2409935,
+    "schema": "scar.capture-model"
+  },
+  "candidate_index": 0,
+  "max_stored_plus_decoded_bytes": 512000000,
+  "max_seconds": 180,
+  "source_shas": {
+    "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/tensor_storage_query.py": "c4b54c502e757dc59101461dbe6a4cc937fee6a284fc2cdda19b90a1e114a6a0",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_operator_value_interface.py": "0719561288a7aa8da021f9337d92a661d902894a937d816e59c7cee2e25dd901",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_port_sidecar.py": "143551643f2747e010cf7e023f65e4a07e1c3a2545b7ce49363de7ba92df3413",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_reference_flow.py": "2740f6d08be3271f90e8cd5ee4b691d1c6bca2d567c8c224f938ce1469879e4a",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/native_capture_batch.py": "37867549289f01fbd8a56959050c25d582643404be5d4198d9073a1c602fd106",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/store/bundle_partitions.py": "655c87445ab30e07ca1371362901e7bef53bf6aaca085d2c3ba8a0a330c389e3",
+    "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/ir/record_codec.py": "0954c05e53a6dcb31f449461db71c63fdcdd9f95a9c053424d86bf5217a89ef3"
+  },
+  "no_new_graphs": true,
+  "no_raw_EO_or_target": true
+}
