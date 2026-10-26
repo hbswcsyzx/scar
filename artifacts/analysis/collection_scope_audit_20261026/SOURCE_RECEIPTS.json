@@ -1,0 +1,57 @@
+[
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/call_edges.py",
+    "bytes": 20075,
+    "sha256": "44b14b3a7794a9e39342a3e32454c969b745bab890a214dbc1fbe890831f0c11"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/call_operands.py",
+    "bytes": 53683,
+    "sha256": "318bc00d5b872e6717b666ddc904df7bf35b88d940cf81c2370d3c2ad535369f"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/python_call_targets.py",
+    "bytes": 10935,
+    "sha256": "7bba5d2c6e65ab2f14c7fa0b798c783880a251b8076ae46c2511e73fb60ae205"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_operand_reader.py",
+    "bytes": 18120,
+    "sha256": "5dc26ce1e4e3fb2eed5fcaf4cda9fd0650f3c794d49c61d171f0dd933f08bf3d"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/call_operands.py",
+    "bytes": 19167,
+    "sha256": "857acbf3d6d70b97befb1b6f8d8ddef5ac832473ae1cb64a83bb1fa707de3189"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/source_call_bindings.py",
+    "bytes": 17875,
+    "sha256": "0063ffd225ac67c1efb6d8cc5701400b82ccc1304674f118ee1030b627fb25ae"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/analysis/python_call_targets.py",
+    "bytes": 27429,
+    "sha256": "f90bb153b8fbe5641731a8cee5b16d227873e0bcbe22aa09e7656ee6b901f9ad"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/os_capture_launch.py",
+    "bytes": 23384,
+    "sha256": "042aad4d49664ea99aecf757ff313b9e8d6394e303a11ade3b0c9f4653a7c449"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/collector_execution_witness.py",
+    "bytes": 32023,
+    "sha256": "92a31e907c2ed6482e9501adc650fe3ad57b4359171fb053a7ec0b8300a137d9"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/process_image_receipts.py",
+    "bytes": 22358,
+    "sha256": "ae33773b011bde55a6e1a4a6222b3dfd0cd84af353255e365dd61a00296fb12e"
+  },
+  {
+    "path": "/home/zyf/AAA/scar-worktrees/structured-program-model/scar/trace/resource_topology.py",
+    "bytes": 30464,
+    "sha256": "16d0d1d375df582e1aab849180f2c97d3534dfa8a55376245872ee88fa2595d7"
+  }
+]
