@@ -403,6 +403,16 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         if not node.finalbody and not node.handlers:
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node, 'FUNCTION_TRY_WITHOUT_CLEANUP_UNIMPLEMENTED')
 
+    @contextmanager
+    def unwind_temporaries(self,cursor,node,base):
+        held=tuple(self.active_temporaries[base:]);del self.active_temporaries[base:]
+        try:
+            for reference in reversed(held):
+                self.frame_transition(cursor,node,((reference,node,'function-exception-unwind'),),K.FRAME_RELEASE_TEMPORARY)
+            yield
+        finally:
+            self.active_temporaries.extend(held)
+
     def bind_exception_name(self, handler, reference, cursor):
         name = handler.name
         if name not in self.locals or name in self.cell_references:
@@ -474,10 +484,11 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             entry = self.control_block(node, extra_types=(ProtocolValueType(P.PENDING_COMPLETION), _REF))
         self.cleanup_interfaces.append(CleanupInterface(cleanup, gate_scope, entry.block, self.block_arguments[entry.block][-3]))
         self.jump_values(cursor, body, (), node)
-        caught_edges = []
+        caught_edges = [];protected_holds=len(self.active_temporaries)
         def caught(failed, payload):
             caught_edges.append(failed.block)
-            self.jump_values(failed, gate, (payload.exception, payload.traceback), node)
+            with self.unwind_temporaries(failed,node,protected_holds):
+                self.jump_values(failed, gate, (payload.exception, payload.traceback), node)
         self.try_depth += 1
         with self.in_owner(body_scope):
             self.failure_sinks.append(caught)
@@ -505,10 +516,12 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
         with self.in_owner(cleanup):
             original, saved = self.enter_cleanup(entry, node, cleanup, trailing_references=1)
             caught_ref = self.block_arguments[entry.block][-2]
+            selection_holds=len(self.active_temporaries)
             def replaced(failed, payload):
-                port = self.raise_landing(node)
-                fresh = self.pending(failed, node, port, self.packet(failed, node, payload))
-                self.cleanup_exit(failed, node, cleanup, original, fresh, saved, (port,))
+                with self.unwind_temporaries(failed,node,selection_holds):
+                    port = self.raise_landing(node)
+                    fresh = self.pending(failed, node, port, self.packet(failed, node, payload))
+                    self.cleanup_exit(failed, node, cleanup, original, fresh, saved, (port,))
             self.failure_sinks.append(replaced)
             current = entry
             try:
@@ -529,7 +542,7 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
                             del self.active_temporaries[hold_base:]
                             try:
                                 for reference in reversed(held):
-                                    self.frame_transition(failed, handler, ((reference, handler, 'handler-unwind-temporary'),), K.FRAME_RELEASE_TEMPORARY)
+                                    self.frame_transition(failed, handler, ((reference, handler, 'function-exception-unwind'),), K.FRAME_RELEASE_TEMPORARY)
                                 if handler.name:
                                     self.clear_exception_name(handler, failed)
                                 replaced(failed, payload)
@@ -578,11 +591,12 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             entry = self.control_block(node, extra_types=(ProtocolValueType(P.PENDING_COMPLETION),_REF))
         self.cleanup_interfaces.append(CleanupInterface(cleanup, protected, entry.block, self.block_arguments[entry.block][-3]))
         self.jump_values(cursor, body, (), node)
-        ports = []
+        ports = [];protected_holds=len(self.active_temporaries)
         def failed(failure, payload):
-            port = self.raise_landing(node); ports.append(port)
-            token = self.pending(failure, node, port, self.packet(failure, node, payload))
-            self.route_to_cleanup(failure, node, token, port, entry,(payload.exception,))
+            with self.unwind_temporaries(failure,node,protected_holds):
+                port = self.raise_landing(node); ports.append(port)
+                token = self.pending(failure, node, port, self.packet(failure, node, payload))
+                self.route_to_cleanup(failure, node, token, port, entry,(payload.exception,))
         def protected_completed(completed,source,kind,value):
             port=self.completion_port(source,kind);ports.append(port)
             token=self.pending(completed,source,port)
