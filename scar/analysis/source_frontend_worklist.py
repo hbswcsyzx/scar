@@ -584,7 +584,7 @@ class SourceEntryFrontendPlan:
 def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=(
         SourceLanguageCapability.FIXED_UNPACK, SourceLanguageCapability.SLICE_KEYS,
         SourceLanguageCapability.LEXICAL_LOCALS, SourceLanguageCapability.CALL_KWARGS_314_V1), out_dir=None,
-        dispatch_order='CALL_WEIGHT_DESC_V1', eligible_entry_keys=None):
+        dispatch_order='CALL_WEIGHT_DESC_V1', eligible_entry_keys=None, automatic_function_try=False):
     """Select by call weight, optionally batch the selected entries by file.
 
     Batching changes only analysis scheduling. It preserves window membership,
@@ -598,6 +598,7 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
     _need(type(dispatch_order) is str and dispatch_order in ('CALL_WEIGHT_DESC_V1', 'FILE_GROUPED_V1'),
           'unsupported source-entry analysis dispatch order')
     budget.__post_init__()
+    _need(type(automatic_function_try) is bool, 'automatic_function_try must be an explicit bool')
     SourceLanguageOptions(capabilities)
     if eligible_entry_keys is not None:
         _need(type(eligible_entry_keys) is tuple and bool(eligible_entry_keys)
@@ -639,6 +640,8 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
         'summary': {'candidate_entries': len(entries), 'current_groups': len(groups),
                     'current_calls': metadata['entered_invocations'], 'dispatch_entries': len(dispatch)},
         'source_body_publication': 'NOT_RUN', 'runtime_binding': 'NOT_RUN', 'first_stage_complete': False}
+    if automatic_function_try:
+        document['function_try_policy'] = 'AUTOMATIC_ORIGINAL_FUNCTION_AST_314_V1'
     if dispatch_order == 'FILE_GROUPED_V1':
         document['dispatch_order'] = dispatch_order
     if eligible_entry_keys is not None:
@@ -657,6 +660,26 @@ def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=
             _write_rows(root, name + '.json.gz', rows, budget.max_record_bytes)
         (root / 'plan.json').write_bytes(_bytes({**document, 'plan_sha256': digest}) + b'\n')
     return result
+
+
+def _entry_language_capabilities(plan, entry, context, capabilities):
+    policy=plan.document.get('function_try_policy')
+    if policy is None:
+        return capabilities
+    _need(policy=='AUTOMATIC_ORIGINAL_FUNCTION_AST_314_V1','unknown automatic function source policy')
+    import ast
+    source=entry.reference.source
+    span=(source.start_line,source.end_line,source.start_column,source.end_column)
+    nodes=[n for n in ast.walk(context.tree)if isinstance(n,(ast.FunctionDef,ast.AsyncFunctionDef))
+        and(n.lineno,n.end_lineno,n.col_offset,n.end_col_offset)==span]
+    _need(len(nodes)==1,'automatic function policy needs the exact original function AST')
+    def contains_try(node):
+        if isinstance(node,ast.Try):return True
+        if isinstance(node,(ast.FunctionDef,ast.AsyncFunctionDef,ast.Lambda,ast.ClassDef)):return False
+        return any(contains_try(child)for child in ast.iter_child_nodes(node))
+    if any(contains_try(n)for n in nodes[0].body)and SourceLanguageCapability.FUNCTION_TRY_314_V1 not in capabilities:
+        return capabilities+(SourceLanguageCapability.FUNCTION_TRY_314_V1,)
+    return capabilities
 
 
 _OWNED_ENTRY_RETURN = object()
@@ -779,8 +802,11 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
                     active_file = entry.file_key
                     file_stats[active_file] = {'context_builds': 1, 'sealed_sessions': 1,
                         'source_prepare_attempts': 0, 'decoded_source_bytes': len(context.text.encode())}
+                active_capabilities=_entry_language_capabilities(plan,entry,context,capabilities)
+                if plan.document.get('function_try_policy') is not None:
+                    row['active_capabilities']=[c.value for c in active_capabilities]
                 lower_started = True
-                owned = _lower_and_capture_entry(session, entry, context, evidence, capabilities, allocation, row['work_key'])
+                owned = _lower_and_capture_entry(session, entry, context, evidence, active_capabilities, allocation, row['work_key'])
                 owned_returns.append(owned)
                 row.update(operations_emitted=owned.result.operations_emitted, budget_charge=owned.result.operations_emitted,
                            construction_cost_known=True, entry_reference=encode(entry.reference))
@@ -808,7 +834,7 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
                     independent = SourceCodeEvidence.from_entry(plan.catalog, entry)
                     require_valid_structured_body(checked.structured, checked.graph, checked.interface, checked.metadata,
                         semantic=checked.semantic, control=checked.control, language=checked.language,
-                        source_tree=context.tree, language_options=SourceLanguageOptions(capabilities, independent))
+                        source_tree=context.tree, language_options=SourceLanguageOptions(active_capabilities, independent))
                     owned.require_unchanged()
                     row.update(status='SUCCEEDED', public_structure_reader=True, independent_code_reader=True)
             except CodeWitnessUnavailable as error:
