@@ -677,7 +677,16 @@ def main(argv=None) -> int:
     composition.add_argument("--max-output-bytes", type=int, default=256000000)
     composition.set_defaults(func=_compose_program)
     source_invocations = sub.add_parser("bind-source-invocations", help="bind every original Python frame entry to exact source and body references")
-    source_invocations.add_argument("--composition", required=True, help="bound composition index JSON.gz")
+    source_binding_input = source_invocations.add_mutually_exclusive_group(required=True)
+    source_binding_input.add_argument("--composition", help="bound composition index JSON.gz")
+    source_binding_input.add_argument("--source-publication", help="qualified source-entry publication; archives come from its pinned receipts")
+    source_invocations.add_argument("--source-publication-sha256", help="required SHA256 for --source-publication")
+    source_invocations.add_argument("--max-source-programs", type=int, default=256)
+    source_invocations.add_argument("--max-source-operations", type=int, default=10000)
+    source_invocations.add_argument("--max-source-record-bytes", type=int, default=128000000)
+    source_invocations.add_argument("--max-source-decoded-bytes", type=int, default=8000000000)
+    source_invocations.add_argument("--max-source-context-seconds", type=int, default=1800,
+                                    help="per-file source IO/body-validation ceiling; not a total model wall deadline")
     source_invocations.add_argument("--capture", required=True, help="original successful collector capture")
     source_invocations.add_argument("--trace", help="call trace directory; defaults to capture/trace")
     source_invocations.add_argument("--witness-mode", choices=("same_capture", "reused_code"), default="same_capture")
@@ -1118,12 +1127,26 @@ def _bind_source_invocations(args) -> int:
     from scar.trace.capture_coordinates import bind_capture_coordinates
     try:
         output = Path(args.out).resolve()
+        if (args.source_publication is None) != (args.source_publication_sha256 is None):
+            raise ValueError('--source-publication and --source-publication-sha256 are required together')
+        budget = _call_budget(args)
+        if args.source_publication is not None:
+            from scar.analysis.source_publication_access import open_source_publication
+            composition = open_source_publication(args.source_publication,
+                expected_sha256=args.source_publication_sha256, call_budget=budget,
+                max_input_bytes=args.max_input_bytes,
+                max_record_bytes=args.max_source_record_bytes,
+                max_programs=args.max_source_programs,
+                max_operations_per_body=args.max_source_operations,
+                max_selected_decode_bytes=args.max_source_decoded_bytes,
+                max_context_seconds=args.max_source_context_seconds)
+        else:
+            composition = CompositionIndex(args.composition, max_input_bytes=args.max_input_bytes)
         coordinates = bind_capture_coordinates(args.capture, max_bytes=args.max_bytes, max_lines=args.max_lines,
             profile_uri=str(output / 'capture-coordinates.json'))
-        composition = CompositionIndex(args.composition, max_input_bytes=args.max_input_bytes)
         report = bind_source_invocations(composition, coordinates,
             args.trace or str(Path(args.capture) / 'trace'), output,
-            call_budget=_call_budget(args), witness_mode=args.witness_mode)
+            call_budget=budget, witness_mode=args.witness_mode)
     except (OSError, ValueError, TypeError, KeyError, SyntaxError, RecursionError) as error:
         print(json.dumps({"status": "INVALID", "errors": [str(error)],
                           "transformation_authorized": False}))

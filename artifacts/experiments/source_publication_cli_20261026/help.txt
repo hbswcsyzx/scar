@@ -1,0 +1,59 @@
+usage: scar bind-source-invocations [-h] (--composition COMPOSITION |
+                                    --source-publication SOURCE_PUBLICATION)
+                                    [--source-publication-sha256 SOURCE_PUBLICATION_SHA256]
+                                    [--max-source-programs MAX_SOURCE_PROGRAMS]
+                                    [--max-source-operations MAX_SOURCE_OPERATIONS]
+                                    [--max-source-record-bytes MAX_SOURCE_RECORD_BYTES]
+                                    [--max-source-decoded-bytes MAX_SOURCE_DECODED_BYTES]
+                                    --capture CAPTURE [--trace TRACE]
+                                    [--witness-mode {same_capture,reused_code}]
+                                    [--max-bytes MAX_BYTES]
+                                    [--max-lines MAX_LINES]
+                                    [--max-input-bytes MAX_INPUT_BYTES]
+                                    --out OUT
+                                    [--max-call-report-bytes MAX_CALL_REPORT_BYTES]
+                                    [--max-call-trace-bytes MAX_CALL_TRACE_BYTES]
+                                    [--max-call-trace-lines MAX_CALL_TRACE_LINES]
+                                    [--max-call-line-bytes MAX_CALL_LINE_BYTES]
+                                    [--max-call-processes MAX_CALL_PROCESSES]
+                                    [--max-call-trace-events MAX_CALL_TRACE_EVENTS]
+                                    [--max-call-trace-codes MAX_CALL_TRACE_CODES]
+                                    [--max-call-references MAX_CALL_REFERENCES]
+                                    [--max-call-path MAX_CALL_PATH]
+                                    [--max-call-source-files MAX_CALL_SOURCE_FILES]
+                                    [--max-call-source-bytes MAX_CALL_SOURCE_BYTES]
+
+options:
+  -h, --help            show this help message and exit
+  --composition COMPOSITION
+                        bound composition index JSON.gz
+  --source-publication SOURCE_PUBLICATION
+                        qualified source-entry publication; archives come from
+                        its pinned receipts
+  --source-publication-sha256 SOURCE_PUBLICATION_SHA256
+                        required SHA256 for --source-publication
+  --max-source-programs MAX_SOURCE_PROGRAMS
+  --max-source-operations MAX_SOURCE_OPERATIONS
+  --max-source-record-bytes MAX_SOURCE_RECORD_BYTES
+  --max-source-decoded-bytes MAX_SOURCE_DECODED_BYTES
+  --capture CAPTURE     original successful collector capture
+  --trace TRACE         call trace directory; defaults to capture/trace
+  --witness-mode {same_capture,reused_code}
+  --max-bytes MAX_BYTES
+  --max-lines MAX_LINES
+  --max-input-bytes MAX_INPUT_BYTES
+                        independent decompressed composition/inventory input
+                        ceiling
+  --out OUT             fresh source/invocation binding directory
+  --max-call-report-bytes MAX_CALL_REPORT_BYTES
+                        independent decompressed input/output report ceiling
+  --max-call-trace-bytes MAX_CALL_TRACE_BYTES
+  --max-call-trace-lines MAX_CALL_TRACE_LINES
+  --max-call-line-bytes MAX_CALL_LINE_BYTES
+  --max-call-processes MAX_CALL_PROCESSES
+  --max-call-trace-events MAX_CALL_TRACE_EVENTS
+  --max-call-trace-codes MAX_CALL_TRACE_CODES
+  --max-call-references MAX_CALL_REFERENCES
+  --max-call-path MAX_CALL_PATH
+  --max-call-source-files MAX_CALL_SOURCE_FILES
+  --max-call-source-bytes MAX_CALL_SOURCE_BYTES

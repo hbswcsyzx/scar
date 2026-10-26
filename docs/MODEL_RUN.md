@@ -7,11 +7,14 @@ python -B -m scar.cli model-run --from-model-run DEPENDENCY_RUN/model-run.json \
   --stage source-entries --out fresh-entry-run
 ```
 
-CLI默认`--source-entry-profile latest`，从公共registry选择当前V7。
+CLI默认`--source-entry-profile latest`，从公共registry选择当前V9。
 原entry/catalog/readonly CodeWitness解析后，准确的own-function AST自动选择Try、
 expanded-call、nested-function、import、flat With、独立generator创建及Set能力。
 AugAssign自动启用已有FunctionTry/in-place协议；V7将固定解包结果接回既有heap/cell
-store，不重复实现赋值协议。创建和
+store，不重复实现赋值协议。
+V8选择原Lambda表达式Region与CodeWitness常量槽；Lambda defaults只在创建时求值，
+body和captured cell读取在独立Region内表达。V9继续按AST选择单同步子句的eager推导式，
+复用当前函数的CFG/SSA、原作用域slot及迭代/容器状态，不创建伪函数frame。创建和
 惰性body可以建模，不要求先证明未知C消费者的驱动次数。策略写入plan digest，每次实际选择记录
 active capabilities；缺依据保原frontier。`legacy`与API默认None保留旧能力选择。
 本阶段也自动导出`products.capture_plan`，可交给`trace --capture-plan URI
@@ -188,3 +191,25 @@ readonly依赖1load/2matches、project0；原9/271守恒，260body+5source+6unre
 schema2 的新资格。新 mixed 门实际覆盖 project REVISE 与 dependency ADD，尚未覆盖
 project ADD、父 overlay 继承查询或 v5 参数路由。
 详见[CLI实测与留存](../artifacts/experiments/model_run_source_entry_bindings_gate_20261025/RESULT.md)。
+
+## 从已有发布图直接关联实际调用
+
+多个增量已经合成一份source-entry publication时，可直接使用普通绑定入口：
+
+```bash
+python -B -m scar.cli bind-source-invocations \
+  --source-publication PUBLICATION/manifest.json \
+  --source-publication-sha256 MANIFEST_SHA256 \
+  --capture ORIGINAL_CAPTURE --out fresh-bindings
+```
+
+入口从固定SHA的root取出原compiler archive receipts，只读打开archives，再调用既有
+完整qualified reader与binder；没有业务函数名单、重新lower或新图格式。
+`--composition INDEX`旧入口保留，两者互斥。`same_capture`仍要求原source seed和原采集
+严格相符，不能把不同Run的同名函数或PID拼成一次执行。
+
+`--max-source-programs`、`--max-source-operations`、`--max-source-record-bytes`及
+`--max-source-decoded-bytes`控制已发布源码读取；原`--max-call-*`和capture坐标预算
+继续约束原始调用/采集读取。`--max-source-context-seconds`是单file的共享source IO/
+body验证上限，不能当作整个模型或前置catalog的总wall期限。超限报告失败，不截断函数或调用后报告完整。
+该CLI接线已实现；完整LeWM实际读取/绑定结果须以相应运行报告为准。

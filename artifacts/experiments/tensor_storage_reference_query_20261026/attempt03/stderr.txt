@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/artifacts/experiments/tensor_storage_reference_query_20261026/attempt03/run.py", line 20, in <module>
+    result=module.query_tensor_storage_observation(artifact(fragment,'scar.native-operator-value-interface'),artifact(capture,'scar.capture-model'))
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/tensor_storage_query.py", line 214, in query_tensor_storage_observation
+    _need(allocation.id==region.allocation and allocation.device==region.device
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          and allocation.metadata['provider_allocation_id']==epoch['provider_allocation_id'],'original physical allocation differs')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/zyf/AAA/scar-worktrees/source-entry-project/scar/analysis/tensor_storage_query.py", line 28, in _need
+    if not value: raise ValueError('Tensor storage query: '+message)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: Tensor storage query: original physical allocation differs

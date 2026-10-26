@@ -45,8 +45,10 @@ class _EntryReadSession:
     queries are rebound to their still-checked original catalog, not restored
     lowering owners or JSON proof tokens.
     """
-    def __init__(self, catalog, target, controls, share_source_context=False):
+    def __init__(self, catalog, target, controls, share_source_context=False, max_context_seconds=None):
         _need(type(share_source_context) is bool, 'context reuse selection must be an exact bool')
+        _need(max_context_seconds is None or type(max_context_seconds) is int and max_context_seconds > 0, 'positive explicit context budget required')
+        self.max_context_seconds = max_context_seconds
         self.share_source_context, self.program_reader = share_source_context, None
         self.original, self.original_target = catalog, target
         self.controls, self.control_bytes = controls, _bytes(controls)
@@ -404,8 +406,8 @@ class SourceEntryCatalog:
                 session.contexts.popitem(last=False)
         return result
 
-    def _ordinary_read_session(self, target, *, controls=(), share_source_context=False):
-        return _EntryReadSession(self, target, controls, share_source_context)
+    def _ordinary_read_session(self, target, *, controls=(), share_source_context=False, max_context_seconds=None):
+        return _EntryReadSession(self, target, controls, share_source_context, max_context_seconds)
 
     def _shared_program_reader(self, max_record_bytes, max_operations):
         session = _PRIVATE_READ_SESSIONS.get(self)
@@ -413,8 +415,13 @@ class SourceEntryCatalog:
             return None
         if session.program_reader is None:
             from scar.analysis.source_program_publication import _SharedEntryProgramReader
-            session.program_reader = _SharedEntryProgramReader(session.controls[0], max_record_bytes, max_operations)
+            session.program_reader = _SharedEntryProgramReader(session.controls[0], max_record_bytes, max_operations, session.max_context_seconds)
         return session.program_reader
+
+    def _finish_shared_group(self):
+        session = _PRIVATE_READ_SESSIONS.get(self)
+        if session is not None and session.program_reader is not None:
+            session.program_reader.finish_group()
 
     def _finish_shared_programs(self):
         session = _PRIVATE_READ_SESSIONS.get(self)

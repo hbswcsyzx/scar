@@ -85,6 +85,15 @@ def validate_environment_body(model, graph, interface, metadata, semantic, *, la
     for protocol in model.protocols:
         operation, kind = operations[protocol.operation], protocol.kind
         link = links[operation.id]
+        if kind is Kind.COMPREHENSION_BUILD:
+            from scar.ir.program.source_language import SourceLanguageCapability
+            declaration=semantic.definitions.get(link.semantic_operation)
+            need(language is not None and SourceLanguageCapability.COMPREHENSION_314_V1 in language.capabilities
+                 and declaration is not None and declaration.kind is OperationKind.OPAQUE
+                 and declaration.metadata.get("ast_type") in ("ListComp","SetComp","DictComp")
+                 and declaration.code_id==link.source.atom_id.wire and link.opcode is Opcode.OPAQUE,
+                 "comprehension build lost its original opaque source scope")
+            continue
         if kind is Kind.CALL_FUNCTION_EX:
             from scar.analysis.source_call_validation import is_original_call_definition
             from scar.ir.program.source_language import SourceLanguageCapability

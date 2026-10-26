@@ -792,7 +792,7 @@ class CompositionIndex:
                                       max_catalog_groups=16, max_catalog_entries=16,
                                       max_selected_decode_bytes=128_000_000,
                                       attachment_budget=SourceAttachmentBudget(), max_parent_depth=4,
-                                      _depth=0, _shared_admissions=None):
+                                      max_context_seconds=1800, _depth=0, _shared_admissions=None):
         """Read a qualified overlay over an unchanged project composition.
 
         Schema1/2 keep direct admissions; schema3 explicitly reopens the exact
@@ -854,7 +854,7 @@ class CompositionIndex:
                 max_input_bytes=max_input_bytes, max_record_bytes=max_record_bytes, max_programs=max_programs,
                 max_operations_per_body=max_operations_per_body, max_catalog_groups=max_catalog_groups,
                 max_catalog_entries=max_catalog_entries, max_selected_decode_bytes=max_selected_decode_bytes,
-                attachment_budget=attachment_budget, max_parent_depth=max_parent_depth, _depth=_depth + 1,
+                attachment_budget=attachment_budget, max_parent_depth=max_parent_depth, max_context_seconds=max_context_seconds, _depth=_depth + 1,
                 _shared_admissions=tuple(admissions))
         if parent.index_receipt != original or parent.source_inputs() != document["parent_inputs"]:
             raise ValueError("entry publication current parent view/CAS differs")
@@ -863,7 +863,7 @@ class CompositionIndex:
             max_selected_decode_bytes=max_selected_decode_bytes)
         verified, actual, checked = read_source_entry_publication(path, expected_sha256=expected_sha256,
             catalog=catalog, max_programs=max_programs, max_operations_per_body=max_operations_per_body,
-            max_record_bytes=max_record_bytes, target_composition=parent, _compact_body_cache=True)
+            max_record_bytes=max_record_bytes, target_composition=parent, _compact_body_cache=True, max_context_seconds=max_context_seconds)
         # Keep catalog's original parent separate: its source_inputs must never
         # be changed recursively by installation of this publication overlay.
         result = parent._copy_bound_base()

@@ -65,9 +65,9 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
 - 源前端新增 expanded call、函数 Try、nested function 能力已合入主分支；归并后的
   函数内import、flat With及独立generator creation已分别补通4、2、1个真实body；
   新增Set显示式、既有AugAssign接线及通用heap/cell解包后，243个外部入口现在
-  198个可恢复、44个未支持、1个resumable adapter缺口。
+  200个可恢复、42个未支持、1个resumable adapter缺口。
   这是源恢复结果，不是全部已接回动态调用。
-- 196个入口已正常发布（原161+35增量）；后补的解包、Lambda两个body仍待接入。
+- 196个入口已正常发布（原161+35增量）；后补的解包、Lambda、推导式、generator/With四个body仍待接入。
   不重跑已完成的整批普通发布/读取。
 - 精简 Region 视图已实现并对真实函数验证：239 操作→134 展示节点；714 Use、
   76 状态访问、121 控制边保留。折叠语言管理编码不等于删除运行工作。
@@ -86,6 +86,11 @@ OS、driver、allocator 的内部算法、完整 FD 表、SASS/机器指令和�
   结构和独立source/readonly CodeWitness正常读回通过；创建只产一个函数引用，
   捕获cell引用，未来调用读取内容。V8也按原AST自动选择CodeConstant能力。
   这是新增1个源body，尚未计入正式发布或当前运行绑定。
+  V9随后恢复一个含三处List/Set/List推导式的原248-op body；eager迭代、容器更新、
+  scope清理与异常world在同一函数CFG内表达。原SP5经普通结构/独立CodeWitness读回，
+  未重lower或增加runtime覆盖。多clause/filter/嵌套等仍有明确前沿。
+  同V9还连通既有generator creation和FunctionTry/With的异常ABI：真实新body520操作，
+  parent保实际exception/traceback/world，lazy child保独立异常和PEP479；未加入新driver。
   model-run source-entries默认选择latest，API旧None/CLI legacy保留。
   它仍要求正常entry及readonly CodeWitness，不把选择策略当作运行对应证明。
 - native端口全源流式生成已实际完成：310412原节点、230818算子实例、1256501端口，

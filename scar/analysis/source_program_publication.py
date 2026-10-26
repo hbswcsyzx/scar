@@ -357,14 +357,18 @@ class _SharedEntryProgramReader:
     No mutable source context is returned, no serialized qualification accepted.
     Original publication endpoints remain their SP5 archives, not these temps.
     """
-    def __init__(self, requests, max_record_bytes, max_operations):
+    def __init__(self, requests, max_record_bytes, max_operations, max_context_seconds=None):
         from scar.store.source_fragments import SourceFragmentBudget, SourceFragmentWriter
+        _need(max_context_seconds is None or type(max_context_seconds) is int and max_context_seconds > 0, 'positive explicit per-file context seconds required')
+        self._per_file_seconds = max_context_seconds
+        self._new_writer = False
         self._temporary = tempfile.TemporaryDirectory(prefix='scar-entry-context-')
         stored = sum(row['source_program']['physical_bytes'] for row in requests)
         decoded = sum(row['source_program']['decoded_bytes'] for row in requests)
         self._budget = SourceFragmentBudget(max_stored_input_bytes=max(1, 2 * stored),
             max_decoded_input_bytes=max(1, 2 * decoded), max_record_bytes=max_record_bytes,
-            max_output_bytes=max(1, 2 * stored), max_contexts=1, max_operations=max_operations, seconds=1800)
+            max_output_bytes=max(1, 2 * stored), max_contexts=1, max_operations=max_operations,
+            seconds=1800 if max_context_seconds is None else max_context_seconds)
         self.writer = SourceFragmentWriter(Path(self._temporary.name), budget=self._budget)
         self.reader = None
         self.file_key = None
@@ -379,14 +383,33 @@ class _SharedEntryProgramReader:
             finally:
                 self.counts.update(reader.counts)
 
+    def finish_group(self):
+        """End one file's timed scope without forgetting batch byte/input guards."""
+        if self._per_file_seconds is not None:
+            self._close_reader()
+            self.writer.finish()
+            self._new_writer = True
+
     def read(self, catalog, entry, expected):
         from scar.store.source_fragments import SourceContextSession
         from scar.ir.program.source_references import SourceArtifactLocator
         from scar.ir.program.providers import ProviderArtifact
         _need(not self.closed, 'shared publication context is closed')
+        if self.reader is not None and self.file_key != entry.file_key:
+            if self._per_file_seconds is not None:
+                self.finish_group()
+            else:
+                self._close_reader()
+        if self._new_writer:
+            from scar.store.source_fragments import SourceFragmentWriter
+            previous = self.writer
+            self.writer = SourceFragmentWriter(Path(self._temporary.name), budget=self._budget)
+            # These are private IO accounting/stamps, never cached legality.
+            # Keep whole-batch byte ceilings and final checks of every input.
+            self.writer.counts, self.writer.inputs = previous.counts, previous.inputs
+            self._new_writer = False
         context = catalog.prepare(entry)
-        if self.reader is None or self.file_key != entry.file_key:
-            self._close_reader()
+        if self.reader is None:
             self.reader = SourceContextSession(source_texts={entry.reference.snapshot.path: context.text}, budget=self._budget)
             self.reader.__enter__()
             self.file_key = entry.file_key
@@ -589,8 +612,14 @@ def _publish_source_entries(base_composition, catalog, source_programs, out_dir,
 
 def read_source_entry_publication(path, *, expected_sha256, catalog, max_programs=1,
                                   max_operations_per_body=4000, max_record_bytes=64_000_000,
-                                  target_composition=None, _compact_body_cache=False):
-    """Normal source/code read; private caches do not survive as proof flags."""
+                                  target_composition=None, _compact_body_cache=False, max_context_seconds=1800):
+    """Normal source/code read; private caches do not survive as proof flags.
+
+    In compact mode max_context_seconds bounds each source-file context IO and
+    body-validation scope. It is not the wall budget for composition/catalog
+    construction or the whole model; callers retain their outer wall deadline.
+    Existing already-active private sessions retain their caller-owned budget.
+    """
     from scar.analysis.source_entry_catalog import SourceEntryCatalog
     _need(type(catalog) is SourceEntryCatalog, "exact ordinary source-entry catalog required")
     if catalog._ordinary_read_active():
@@ -598,6 +627,7 @@ def read_source_entry_publication(path, *, expected_sha256, catalog, max_program
             max_programs=max_programs, max_operations_per_body=max_operations_per_body,
             max_record_bytes=max_record_bytes, target_composition=target_composition,
             _compact_body_cache=_compact_body_cache)
+    _need(type(max_context_seconds) is int and max_context_seconds > 0, 'positive reader context seconds required')
     target = target_composition or catalog.projects[0]
     controls = ()
     if _compact_body_cache:
@@ -614,7 +644,8 @@ def read_source_entry_publication(path, *, expected_sha256, catalog, max_program
                          for row in preview["bodies"])
         controls = (requests,)
     with catalog._ordinary_read_session(target, controls=controls,
-                                         share_source_context=_compact_body_cache) as session:
+                                         share_source_context=_compact_body_cache,
+                                         max_context_seconds=max_context_seconds if _compact_body_cache else None) as session:
         document, receipt, checked = _read_source_entry_publication(path,
             expected_sha256=expected_sha256, catalog=session.catalog, max_programs=max_programs,
             max_operations_per_body=max_operations_per_body, max_record_bytes=max_record_bytes,
@@ -649,9 +680,13 @@ def _read_source_entry_publication(path, *, expected_sha256, catalog, max_progra
     _need(type(rows) is list and 0 < len(rows) <= max_programs, "entry publication body ceiling exceeded")
     row_order = list(enumerate(rows))
     if _compact_body_cache:
+        candidates = catalog.metadata()["candidates"]
+        file_keys = {row["entry_key"]: row["file_key"] for row in candidates}
+        _need(len(file_keys) == len(candidates), "duplicate catalog entry metadata")
         by_file = {}
         for index, row in row_order:
-            file_key = catalog.resolve(row["entry_key"]).file_key
+            _need(row["entry_key"] in file_keys, "publication entry absent from original catalog metadata")
+            file_key = file_keys[row["entry_key"]]
             by_file.setdefault(file_key, []).append((index, row))
         row_order = [item for file_key in sorted(by_file) for item in by_file[file_key]]
     checked = [None] * len(rows)
@@ -895,20 +930,53 @@ def _read_source_entries2(document, receipt, *, expected_sha256, catalog, target
           "schema2 publication root/canonical receipt/authority differs")
     rows = document["bodies"]
     requests = tuple({"entry_key": row["entry_key"], "source_program": row["source_program"]} for row in rows)
-    plan = plan_source_entry_publication(target, catalog, requests, max_programs=max_programs,
-                                        publication_version=version)
-    _need(plan.document == document["plan"] and plan.sha256 == document["plan_sha256"]
-          and all(document.get(key) == value for key, value in
-                  _entry_parent2(target, catalog, publication_version=version).items()),
-          "schema2 parent/plan/source/CAS differs")
-    expected_rows = list(zip(rows, plan.document["expectations"]))
-    row_order = list(enumerate(expected_rows))
-    if compact_body_cache:
-        by_file = {}
-        for index, (row, expected) in row_order:
-            file_key = catalog.resolve(row["entry_key"]).file_key
-            by_file.setdefault(file_key, []).append((index, (row, expected)))
-        row_order = [item for file_key in sorted(by_file) for item in by_file[file_key]]
+    _need(type(rows) is list and 0 < len(rows) <= max_programs,
+          "qualified publication body denominator exceeds bound")
+    if not compact_body_cache:
+        # Preserve the ordinary full-SourceProgram path and its global plan.
+        plan = plan_source_entry_publication(target, catalog, requests, max_programs=max_programs,
+                                            publication_version=version)
+        _need(plan.document == document["plan"] and plan.sha256 == document["plan_sha256"]
+              and all(document.get(key) == value for key, value in
+                      _entry_parent2(target, catalog, publication_version=version).items()),
+              "schema2 parent/plan/source/CAS differs")
+        row_order = enumerate(zip(rows, plan.document["expectations"]))
+    else:
+        # Authenticate the complete saved plan, without resolving its bodies.
+        saved_plan = document["plan"]
+        _need(type(saved_plan) is dict and sha256(_canonical(saved_plan)).hexdigest() == document["plan_sha256"]
+              and type(saved_plan.get("expectations")) is list and len(saved_plan["expectations"]) == len(rows),
+              "compact complete plan SHA/denominator differs")
+        parent = _entry_parent2(target, catalog, publication_version=version)
+        _need(all(document.get(key) == value for key, value in parent.items()),
+              "compact original parent/source/catalog/CAS differs")
+        common = {key: value for key, value in saved_plan.items() if key != "expectations"}
+        candidates = catalog.metadata()["candidates"]
+        file_keys = {row["entry_key"]: row["file_key"] for row in candidates}
+        _need(len(file_keys) == len(candidates), "duplicate catalog entry metadata")
+        groups, entry_keys, definitions = {}, set(), set()
+        for index, (row, expected) in enumerate(zip(rows, saved_plan["expectations"])):
+            key = row["entry_key"]
+            _need(key in file_keys and key not in entry_keys, "unknown/duplicate publication entry")
+            identity = _canonical(row["definition"])
+            _need(identity not in definitions, "duplicate qualified publication definition")
+            entry_keys.add(key);definitions.add(identity)
+            groups.setdefault(file_keys[key], []).append((index, (row, expected)))
+
+        def grouped_rows():
+            for file_key in sorted(groups):
+                group = groups[file_key]
+                group_requests = tuple(requests[index] for index, _ in group)
+                # The original planner performs every source/CAS check, but
+                # only for the group whose bodies will immediately be read.
+                fresh = plan_source_entry_publication(target, catalog, group_requests,
+                    max_programs=max_programs, publication_version=version)
+                _need({key: value for key, value in fresh.document.items() if key != "expectations"} == common
+                      and fresh.document["expectations"] == [expected for _, (_, expected) in group],
+                      "compact group plan differs from original indexed expectations")
+                yield from group
+                catalog._finish_shared_group()
+        row_order = grouped_rows()
     checked = [None] * len(rows)
     for index, (row, expected) in row_order:
         _need(all(row.get(key) == value for key, value in expected.items()) and row["construction_operations"] is None,

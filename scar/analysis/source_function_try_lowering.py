@@ -191,6 +191,9 @@ class FunctionTryBuilder(StructuredEnvironmentBuilder):
             from scar.analysis.source_heap_lowering import expression_for_heap_target
             return expression_for_heap_target(self, node, cursor)
         if isinstance(node, ast.GeneratorExp):
+            if self.has_language('GENEXPR_CREATION_314_V1'):
+                from scar.analysis.source_generator_try_lowering import lower_paired_creation
+                return lower_paired_creation(self,node,cursor)
             raise _Unsupported(GapKind.UNSUPPORTED_SYNTAX, node,
                 'FUNCTION_TRY_RESUMABLE_PROPAGATION_ABI_UNIMPLEMENTED')
         if isinstance(node, ast.Call) and (any(isinstance(arg, ast.Starred) for arg in node.args)

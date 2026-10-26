@@ -591,8 +591,9 @@ SOURCE_ENTRY_PROFILE_314_V5 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V5'
 SOURCE_ENTRY_PROFILE_314_V6 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V6'
 SOURCE_ENTRY_PROFILE_314_V7 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V7'
 SOURCE_ENTRY_PROFILE_314_V8 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V8'
-SOURCE_ENTRY_PROFILES = (SOURCE_ENTRY_PROFILE_314_V2, SOURCE_ENTRY_PROFILE_314_V3, SOURCE_ENTRY_PROFILE_314_V4, SOURCE_ENTRY_PROFILE_314_V5, SOURCE_ENTRY_PROFILE_314_V6, SOURCE_ENTRY_PROFILE_314_V7, SOURCE_ENTRY_PROFILE_314_V8)
-LATEST_SOURCE_ENTRY_PROFILE = SOURCE_ENTRY_PROFILE_314_V8
+SOURCE_ENTRY_PROFILE_314_V9 = 'PYTHON_SOURCE_ENTRY_314_CAPS_V9'
+SOURCE_ENTRY_PROFILES = (SOURCE_ENTRY_PROFILE_314_V2, SOURCE_ENTRY_PROFILE_314_V3, SOURCE_ENTRY_PROFILE_314_V4, SOURCE_ENTRY_PROFILE_314_V5, SOURCE_ENTRY_PROFILE_314_V6, SOURCE_ENTRY_PROFILE_314_V7, SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9)
+LATEST_SOURCE_ENTRY_PROFILE = SOURCE_ENTRY_PROFILE_314_V9
 
 
 def plan_source_entries(catalog, *, budget=SourceFrontendBudget(), capabilities=(
@@ -729,7 +730,7 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
                 yield from own_nodes(child)
             return
         if isinstance(node,ast.Lambda):
-            if profile == SOURCE_ENTRY_PROFILE_314_V8:
+            if profile in (SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9):
                 yield node
                 for value in (*node.args.defaults,*(v for v in node.args.kw_defaults if v is not None)):
                     yield from own_nodes(value)
@@ -738,8 +739,8 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
         yield node
         for child in ast.iter_child_nodes(node):yield from own_nodes(child)
     own=tuple(n for root in nodes[0].body for n in own_nodes(root))
-    with_scope=profile in (SOURCE_ENTRY_PROFILE_314_V3,SOURCE_ENTRY_PROFILE_314_V4,SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,ast.With)for n in own)
-    augmented_scope=profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,ast.AugAssign)for n in own)
+    with_scope=profile in (SOURCE_ENTRY_PROFILE_314_V3,SOURCE_ENTRY_PROFILE_314_V4,SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.With)for n in own)
+    augmented_scope=profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.AugAssign)for n in own)
     if ((automatic or policy is not None) and (any(isinstance(n,ast.Try)for n in own)or with_scope or augmented_scope)
             and SourceLanguageCapability.FUNCTION_TRY_314_V1 not in capabilities):
         capabilities+=(SourceLanguageCapability.FUNCTION_TRY_314_V1,)
@@ -755,19 +756,22 @@ def _entry_language_capabilities(plan, entry, context, capabilities):
         capabilities+=(SourceLanguageCapability.FUNCTION_WITH_314_V1,)
     if profile == SOURCE_ENTRY_PROFILE_314_V4 and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.GENEXPR_314_V1,)
-    if profile in (SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_CREATION_314_V1 not in capabilities:
+    if profile in (SOURCE_ENTRY_PROFILE_314_V5,SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.GeneratorExp)for n in own) and SourceLanguageCapability.GENEXPR_CREATION_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.GENEXPR_CREATION_314_V1,)
-    if profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,ast.Set)for n in own) and SourceLanguageCapability.SET_DISPLAY_314_V1 not in capabilities:
+    if profile in (SOURCE_ENTRY_PROFILE_314_V6,SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.Set)for n in own) and SourceLanguageCapability.SET_DISPLAY_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.SET_DISPLAY_314_V1,)
-    if profile in (SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8) and any(isinstance(n,(ast.Tuple,ast.List))and isinstance(n.ctx,ast.Store)for n in own) and SourceLanguageCapability.UNPACK_TARGETS_314_V1 not in capabilities:
+    if profile in (SOURCE_ENTRY_PROFILE_314_V7,SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,(ast.Tuple,ast.List))and isinstance(n.ctx,ast.Store)for n in own) and SourceLanguageCapability.UNPACK_TARGETS_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.UNPACK_TARGETS_314_V1,)
-    if profile == SOURCE_ENTRY_PROFILE_314_V8 and any(isinstance(n,ast.Lambda)for n in own) and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 not in capabilities:
+    if profile in (SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9) and any(isinstance(n,ast.Lambda)for n in own) and SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1 not in capabilities:
         capabilities+=(SourceLanguageCapability.LAMBDA_EXPRESSION_314_V1,)
-    if profile == SOURCE_ENTRY_PROFILE_314_V8:
+    if profile in (SOURCE_ENTRY_PROFILE_314_V8,SOURCE_ENTRY_PROFILE_314_V9):
         from scar.analysis.source_constant_lowering import needs_code_constant
         if (any(needs_code_constant(node) for node in own)
                 and SourceLanguageCapability.CODE_CONSTANTS_314_V1 not in capabilities):
             capabilities += (SourceLanguageCapability.CODE_CONSTANTS_314_V1,)
+    if (profile == SOURCE_ENTRY_PROFILE_314_V9 and any(isinstance(n,(ast.ListComp,ast.SetComp,ast.DictComp))for n in own)
+            and SourceLanguageCapability.COMPREHENSION_314_V1 not in capabilities):
+        capabilities += (SourceLanguageCapability.COMPREHENSION_314_V1,)
     return capabilities
 
 
@@ -1029,7 +1033,7 @@ def run_source_entries(plan, out_dir, *, budget=SourceFrontendBudget(), progress
 __all__ = ['SourceFrontendBudget', 'SourceFrontendPlan', 'plan_source_frontend', 'run_source_frontend',
            'SourceEntryFrontendPlan', 'SourceEntryFrontendResult', 'plan_source_entries', 'run_source_entries',
            'SOURCE_ENTRY_PROFILE_314_V2', 'SOURCE_ENTRY_PROFILE_314_V3', 'SOURCE_ENTRY_PROFILE_314_V4',
-           'SOURCE_ENTRY_PROFILE_314_V5', 'SOURCE_ENTRY_PROFILE_314_V6', 'SOURCE_ENTRY_PROFILE_314_V7', 'SOURCE_ENTRY_PROFILE_314_V8', 'SOURCE_ENTRY_PROFILES', 'LATEST_SOURCE_ENTRY_PROFILE']
+           'SOURCE_ENTRY_PROFILE_314_V5', 'SOURCE_ENTRY_PROFILE_314_V6', 'SOURCE_ENTRY_PROFILE_314_V7', 'SOURCE_ENTRY_PROFILE_314_V8', 'SOURCE_ENTRY_PROFILE_314_V9', 'SOURCE_ENTRY_PROFILES', 'LATEST_SOURCE_ENTRY_PROFILE']
 
 
 def module_entry_catalog(composition, *, max_files=4096):

@@ -45,6 +45,9 @@ def captured_cell_slot(definition, name):
 
 
 def dispatch_source_expression(builder, node, cursor):
+    if builder.has_language("COMPREHENSION_314_V1") and isinstance(node,(ast.ListComp,ast.SetComp,ast.DictComp)):
+        from scar.analysis.source_comprehension_lowering import lower_comprehension
+        return lower_comprehension(builder,node,cursor)
     if builder.has_language("CODE_CONSTANTS_314_V1") and isinstance(node, ast.Constant):
         from scar.analysis.source_constant_lowering import needs_code_constant, lower_code_constant
         if needs_code_constant(node):
@@ -175,6 +178,10 @@ class StructuredEnvironmentBuilder(StructuredBuilder):
 
     def read_source_name(self, node, cursor, old=None):
         """A target child may have SG provenance without a computational overlay."""
+        if getattr(self,"comprehension_scope",None) is not None:
+            from scar.analysis.source_comprehension_lowering import _target_read
+            scoped = _target_read(self,node,cursor,old)
+            if scoped is not NotImplemented:return scoped
         if node.id in self.cell_references:
             return self._cell_read(node, cursor, old)
         if node.id in cursor.env:
