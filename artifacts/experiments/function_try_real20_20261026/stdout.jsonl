@@ -1,0 +1,21 @@
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "82acd335d3a5138b60353a1634a1c4aa91d11f96b7f9f16d11d6f0cc421bc55f", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "b89dd526ef5dd7875f8f0a0e9c9efc63816358c906a5790e90ca77770ecdc099", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "9e1745b07528482a10be30a538957b2dfabc8d4ddb04557bb558287b8ca442cb", "status": "UNSUPPORTED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "e4c3bc337428ffe3a4bee6402ea331ab4b8218dd47054f9fe2b8d210fb8c5685", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "e3df179b3780d77b3c43cca414246e7f4b47550a5926f1ce496da095c75604a7", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "df356710346cebcea1d1ab20382b6978eb6afb8fa0629dcfd9342f5b4c4c7d4a", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "28f10231292c4b910ab6487f352d0cf6bba896351fa284bb6cfbe466856dc687", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "1ee916c976c96053223c24f701487007688b112aeee9634ff6c41426c0fae96a", "status": "SUCCEEDED"}
+{"batch": 1, "stage": "source_entry_attempt", "entry_key": "7f079f674607f02ae55efbb8e5e88652b70ab395de9e1b0fa4d1191248ea74c0", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "19189f43c35fade10d337711181c2f05e7c5fc951e94c6cc78b490b837e4a0a5", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "086e042df73bbe9b8d96e732dfc9c52cf95310942f9b99b5d8073cf91aa980d2", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "29c178837dac1b240df0990a4463fe61deb81882eef6615d30a3285f6e29e3bf", "status": "FAILED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "6cfa088cc3eddc95027d7c0d59b80ae17a96de8d32207f4c3b420d3c1a80bc42", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "bc2a9cb85b9366107c78ecf738e89f3a91c6f210564d05a8fe4fdbbe59a87162", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "e2524b4c6e4005a756ba8d90238a36eaa1dc4968be82d91cad4c08becbbb8af9", "status": "SUCCEEDED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "85a9fe01833f5cd3ebe1cb4f0d9b0cfd1212306efeedcc050ac8089c8dc1e0fa", "status": "UNSUPPORTED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "7510f3ec13cd9593f9a2a1d2edf456a3d36d91bfe83bc789c123215f1c3e70fd", "status": "FAILED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "94787b7e23cd796d5464f5dc99d165e7a727de8f7aef09cc3847d01180dcfc4e", "status": "FAILED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "cceb9f840881bb9155db2d1cc6f27b76b0d466ee1c12794f218272f7f38c6346", "status": "FAILED"}
+{"batch": 2, "stage": "source_entry_attempt", "entry_key": "bbf85621f7eb59485e2d11e36e7cb91bd3d425823bfc2ad2ab27f7b881e2bf31", "status": "SUCCEEDED"}
+{"status": "FAILED_RETAINED", "counts": {"UNSUPPORTED": 4, "SUCCEEDED": 12, "FAILED": 4}, "failure": null, "elapsed_s": 936.3814069149666, "IO": {"stored_read_bytes": 1141959156, "decoded_payload_bytes": 1566914131, "stored_plus_decoded_bytes": 2708873287, "pending_reserved_not_actual": 0, "read_calls": {"frozen_control_SHA": 3512, "owner_manifest": 160, "source_provider_aux": 144, "archive_manifest": 3140, "normal_output_or_readback_hash": 30, "source_graph": 12, "archive_text_marshal": 24, "ordinary_SP5_gzip_readback": 12}, "refusals": [], "ceiling": 8000000000, "scope": "normal owner/aux/graphs/archive payloads; SP5 gzip and separate normal hash passes; explicit controls/source/runtime SHA and ledger reads", "runtime_import_IO": "OPEN, not a full interpreter/syscall I/O meter", "code_payload_logical_bytes": "text/marshal payload size is also charged as decoded, not CodeType heap size", "partial_reads": "OPEN if a delegated reader raised with reservation pending"}}
